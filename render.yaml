@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: aadi-api
+    env: python
+    plan: free
+    buildCommand: pip install fastapi uvicorn[standard] sqlalchemy asyncpg pydantic
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+    rootDir: apps/api

@@ -1,0 +1,14 @@
+name: API - Deploy to Fly.io
+on:
+  push: { branches: [main], paths: ['apps/api/**', '.github/workflows/api-fly.yml'] }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy
+        run: |
+          cd apps/api
+          flyctl deploy --remote-only --config fly.toml
+        env: { FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} }

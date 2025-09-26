@@ -1,0 +1,10 @@
+[project]
+name = "aadi-api"
+version = "0.1.0"
+dependencies = [
+  "fastapi>=0.111",
+  "uvicorn[standard]>=0.30",
+  "sqlalchemy>=2.0",
+  "asyncpg>=0.29",
+  "pydantic>=2.8"
+]
