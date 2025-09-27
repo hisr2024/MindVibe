@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from datetime import datetime, timezone
+
 from models.user import User
 from models.session import Session
 from security.password_policy import policy
@@ -14,6 +15,15 @@ from services.session_service import (
     revoke_session,
     session_is_active,
     touch_session,
+)
+from services.refresh_service import (
+    create_refresh_token,
+    get_refresh_token_by_raw,
+    rotate_refresh_token,
+    mark_revoked,
+    revoke_all_for_session,
+    is_expired,
+    handle_reuse_attack,
 )
 from core.settings import settings
 from main import SessionLocal
@@ -75,6 +85,17 @@ class RevokeSessionOut(BaseModel):
     already_revoked: bool
     reason: str | None = None
 
+# Refresh token schemas
+class RefreshIn(BaseModel):
+    refresh_token: str | None = None  # fallback if cookie not supplied
+
+class RefreshOut(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+    session_id: str
+    refresh_token: str | None  # only present if REFRESH_TOKEN_ENABLE_BODY_RETURN is True
+
 # ----------------------
 # DB dependency
 # ----------------------
@@ -130,10 +151,10 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     return SignupOut(user_id=user.id, email=user.email, policy_passed=True)
 
 # ----------------------
-# Login
+# Login (issues refresh cookie)
 # ----------------------
 @router.post("/login", response_model=LoginOut)
-async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
+async def login(payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)):
     email_norm = payload.email.lower()
     stmt = select(User).where(User.email == email_norm)
     user = (await db.execute(stmt)).scalars().first()
@@ -141,11 +162,23 @@ async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
-    token = create_access_token(user_id=user.id, session_id=session.id)
+    access_token = create_access_token(user_id=user.id, session_id=session.id)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
+    # Create refresh token + set cookie
+    _, raw_refresh = await create_refresh_token(db, user_id=user.id, session_id=session.id)
+    response.set_cookie(
+        key="refresh_token",
+        value=raw_refresh,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="strict",
+        path="/api/auth",
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
     return LoginOut(
-        access_token=token,
+        access_token=access_token,
         token_type="bearer",
         session_id=str(session.id),
         expires_in=expires_in_seconds,
@@ -185,10 +218,10 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
     )
 
 # ----------------------
-# Logout
+# Logout (revokes session & refresh tokens)
 # ----------------------
 @router.post("/logout", response_model=LogoutOut)
-async def logout(request: Request, db: AsyncSession = Depends(get_db)):
+async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.lower().startswith("bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
@@ -197,20 +230,26 @@ async def logout(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         payload = decode_access_token(token)
     except Exception:
+        response.delete_cookie("refresh_token", path="/api/auth")
         return LogoutOut(revoked=False, session_id=None)
 
     session_id = payload.get("sid")
     if not session_id:
+        response.delete_cookie("refresh_token", path="/api/auth")
         return LogoutOut(revoked=False, session_id=None)
 
     session_row = await get_session(db, session_id)
     if not session_row:
+        response.delete_cookie("refresh_token", path="/api/auth")
         return LogoutOut(revoked=False, session_id=session_id)
 
     if session_row.revoked_at is None:
         await revoke_session(db, session_row)
+        await revoke_all_for_session(db, session_id)
+        response.delete_cookie("refresh_token", path="/api/auth")
         return LogoutOut(revoked=True, session_id=session_id)
 
+    response.delete_cookie("refresh_token", path="/api/auth")
     return LogoutOut(revoked=False, session_id=session_id)
 
 # ----------------------
@@ -268,4 +307,56 @@ async def revoke_specific_session(session_id: str, request: Request, db: AsyncSe
         revoked=True,
         already_revoked=False,
         reason=None,
+    )
+
+# ----------------------
+# Refresh (rotate refresh token & issue new access token)
+# ----------------------
+@router.post("/refresh", response_model=RefreshOut)
+async def refresh_tokens(payload: RefreshIn, request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+    raw_refresh = request.cookies.get("refresh_token") or payload.refresh_token
+    if not raw_refresh:
+        raise HTTPException(status_code=400, detail="Missing refresh token")
+
+    token_row = await get_refresh_token_by_raw(db, raw_refresh)
+    if not token_row:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    # Reuse detection
+    if token_row.rotated_at is not None or token_row.revoked_at is not None:
+        await handle_reuse_attack(db, token_row)
+        raise HTTPException(status_code=401, detail="Refresh token reuse detected")
+
+    if is_expired(token_row):
+        await mark_revoked(db, token_row)
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+
+    session_row = await get_session(db, token_row.session_id)
+    if not session_row or not session_is_active(session_row):
+        await mark_revoked(db, token_row)
+        raise HTTPException(status_code=401, detail="Session inactive")
+
+    # Rotate
+    new_rt, new_raw = await rotate_refresh_token(db, token_row)
+
+    # New access token
+    access_token = create_access_token(user_id=token_row.user_id, session_id=token_row.session_id)
+    expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+
+    response.set_cookie(
+        key="refresh_token",
+        value=new_raw,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="strict",
+        path="/api/auth",
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
+    return RefreshOut(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=expires_in_seconds,
+        session_id=str(session_row.id),
+        refresh_token=new_raw if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None,
     )
