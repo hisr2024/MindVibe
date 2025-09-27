@@ -2,19 +2,25 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import datetime, timezone
 from models.user import User
 from security.password_policy import policy
 from security.password_hash import hash_password, verify_password
 from security.jwt import create_access_token, decode_access_token
-from services.session_service import create_session, get_session, session_is_active, touch_session
+from services.session_service import (
+    create_session,
+    get_session,
+    revoke_session,
+    session_is_active,
+    touch_session,
+)
 from core.settings import settings
 from main import SessionLocal
-from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 # ----------------------
-# Input / Output Schemas
+# Schemas
 # ----------------------
 class SignupIn(BaseModel):
     email: EmailStr
@@ -33,7 +39,7 @@ class LoginOut(BaseModel):
     access_token: str
     token_type: str
     session_id: str
-    expires_in: int  # seconds until access token expiry
+    expires_in: int
     user_id: str
     email: EmailStr
 
@@ -46,15 +52,19 @@ class MeOut(BaseModel):
     session_last_used_at: datetime | None
     access_token_expires_in: int | None
 
+class LogoutOut(BaseModel):
+    revoked: bool
+    session_id: str | None
+
 # ----------------------
-# DB Dependency
+# DB dependency
 # ----------------------
 async def get_db():
     async with SessionLocal() as session:
         yield session
 
 # ----------------------
-# Signup Endpoint
+# Signup
 # ----------------------
 @router.post("/signup", response_model=SignupOut, status_code=201)
 async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
@@ -75,18 +85,14 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     return SignupOut(user_id=user.id, email=user.email, policy_passed=True)
 
 # ----------------------
-# Login Endpoint
+# Login
 # ----------------------
 @router.post("/login", response_model=LoginOut)
 async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
     email_norm = payload.email.lower()
-
     stmt = select(User).where(User.email == email_norm)
     user = (await db.execute(stmt)).scalars().first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    if not verify_password(payload.password, user.hashed_password):
+    if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
@@ -103,7 +109,7 @@ async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
     )
 
 # ----------------------
-# Me Endpoint
+# Me
 # ----------------------
 @router.get("/me", response_model=MeOut)
 async def me(request: Request, db: AsyncSession = Depends(get_db)):
@@ -120,32 +126,23 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
     user_id = payload.get("sub")
     session_id = payload.get("sid")
     exp = payload.get("exp")
-
     if not user_id or not session_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token structure")
 
-    # Fetch user
     stmt = select(User).where(User.id == user_id)
     user = (await db.execute(stmt)).scalars().first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
-    # Fetch session
     session_row = await get_session(db, session_id)
-    if not session_row:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session not found")
-
-    active = session_is_active(session_row)
-    if not active:
+    if not session_row or not session_is_active(session_row):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session inactive")
 
-    # Optionally touch session last_used_at
     await touch_session(db, session_row)
 
     access_token_expires_in = None
     if exp:
         try:
-            # exp is typically seconds since epoch
             now_ts = datetime.now(timezone.utc).timestamp()
             access_token_expires_in = max(0, int(exp - now_ts))
         except Exception:
@@ -155,8 +152,37 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         user_id=user.id,
         email=user.email,
         session_id=str(session_row.id),
-        session_active=active,
+        session_active=True,
         session_expires_at=session_row.expires_at,
         session_last_used_at=session_row.last_used_at,
         access_token_expires_in=access_token_expires_in,
     )
+
+# ----------------------
+# Logout (NEW)
+# ----------------------
+@router.post("/logout", response_model=LogoutOut)
+async def logout(request: Request, db: AsyncSession = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
+    token = auth_header.split(" ", 1)[1].strip()
+    try:
+        payload = decode_access_token(token)
+    except Exception:
+        return LogoutOut(revoked=False, session_id=None)
+
+    session_id = payload.get("sid")
+    if not session_id:
+        return LogoutOut(revoked=False, session_id=None)
+
+    session_row = await get_session(db, session_id)
+    if not session_row:
+        return LogoutOut(revoked=False, session_id=session_id)
+
+    if session_row.revoked_at is None:
+        await revoke_session(db, session_row)
+        return LogoutOut(revoked=True, session_id=session_id)
+
+    return LogoutOut(revoked=False, session_id=session_id)
