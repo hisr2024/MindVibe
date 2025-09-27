@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from models.user import User
 from security.password_policy import policy
 from security.password_hash import hash_password, verify_password
-from security.jwt import create_access_token
-from services.session_service import create_session
+from security.jwt import create_access_token, decode_access_token
+from services.session_service import create_session, get_session, session_is_active, touch_session
 from core.settings import settings
 from main import SessionLocal
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -35,6 +36,15 @@ class LoginOut(BaseModel):
     expires_in: int  # seconds until access token expiry
     user_id: str
     email: EmailStr
+
+class MeOut(BaseModel):
+    user_id: str
+    email: EmailStr
+    session_id: str | None
+    session_active: bool
+    session_expires_at: datetime | None
+    session_last_used_at: datetime | None
+    access_token_expires_in: int | None
 
 # ----------------------
 # DB Dependency
@@ -69,25 +79,18 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
 # ----------------------
 @router.post("/login", response_model=LoginOut)
 async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
-    # Normalize email
     email_norm = payload.email.lower()
 
     stmt = select(User).where(User.email == email_norm)
     user = (await db.execute(stmt)).scalars().first()
     if not user:
-        # Intentionally generic to avoid user enumeration detail
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     if not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Create a session row
-    # (IP / UA capture left for future middleware; placeholders None for now)
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
-
-    # Create access token bound to session
     token = create_access_token(user_id=user.id, session_id=session.id)
-
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     return LoginOut(
@@ -97,4 +100,63 @@ async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
         expires_in=expires_in_seconds,
         user_id=user.id,
         email=user.email,
+    )
+
+# ----------------------
+# Me Endpoint
+# ----------------------
+@router.get("/me", response_model=MeOut)
+async def me(request: Request, db: AsyncSession = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
+    token = auth_header.split(" ", 1)[1].strip()
+    try:
+        payload = decode_access_token(token)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
+
+    user_id = payload.get("sub")
+    session_id = payload.get("sid")
+    exp = payload.get("exp")
+
+    if not user_id or not session_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token structure")
+
+    # Fetch user
+    stmt = select(User).where(User.id == user_id)
+    user = (await db.execute(stmt)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
+    # Fetch session
+    session_row = await get_session(db, session_id)
+    if not session_row:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session not found")
+
+    active = session_is_active(session_row)
+    if not active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session inactive")
+
+    # Optionally touch session last_used_at
+    await touch_session(db, session_row)
+
+    access_token_expires_in = None
+    if exp:
+        try:
+            # exp is typically seconds since epoch
+            now_ts = datetime.now(timezone.utc).timestamp()
+            access_token_expires_in = max(0, int(exp - now_ts))
+        except Exception:
+            access_token_expires_in = None
+
+    return MeOut(
+        user_id=user.id,
+        email=user.email,
+        session_id=str(session_row.id),
+        session_active=active,
+        session_expires_at=session_row.expires_at,
+        session_last_used_at=session_row.last_used_at,
+        access_token_expires_in=access_token_expires_in,
     )
