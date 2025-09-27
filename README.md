@@ -1,43 +1,42 @@
-# Aadi – Gen‑Z Wellness (Prototype)
-Values‑based guidance without direct scripture references. 
-Web: Next.js + Tailwind (SOS, Mood, Encrypted Journal). API: FastAPI + Postgres. 
-Includes Docker, CI for Vercel (web) & Fly.io (api).
+# MindVibe
 
-## Local
-cd infra && docker compose up -d
-cd ../apps/api && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-python seed_content.py
-cd ../web && cp .env.example .env && npm i && npm run dev
-# open http://localhost:3000
+MindVibe is a privacy-first, real-time social audio platform for short-form voice conversations, moderated rooms, and ephemeral public channels.
 
+Quickstart (local)
+1. Clone the repo:
+   git clone https://github.com/hisr2024/MindVibe.git
+   cd MindVibe
 
-## Requirements
-- Node 20+, Python 3.11+, Docker (optional for local infra)
+2. Checkout the dev branch:
+   git checkout -b dev
 
-## Local Dev (step-by-step)
-```bash
-# 1) Start Postgres
-cd infra && docker compose up -d
+3. Create and activate a Python virtual environment:
+   python -m venv .venv
+   .venv\Scripts\Activate.ps1    # Windows PowerShell
+   source .venv/bin/activate     # macOS / Linux
 
-# 2) API
-cd ../apps/api
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+4. Install dev dependencies:
+   python -m pip install -r requirements-dev.txt
 
-# 3) Seed content
-python seed_content.py
+5. Generate a dev Ed25519 key (keeps private key local):
+   python scripts/generate_eddsa_key.py --dir keyset_eddsa
 
-# 4) Web
-cd ../web
-cp .env.example .env
-npm i
-npm run dev
-# Open http://localhost:3000
-```
+6. Create a public-only key JSON (commit only the `*-pub.json` file). See docs/KEYS.md.
 
-## Deploy (GitHub Actions included)
-- Web → Vercel: set secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, plus `NEXT_PUBLIC_*` envs.
-- API → Fly.io: set secret `FLY_API_TOKEN` and app secret `DATABASE_URL`.
+7. Run the focused JWT tests:
+   $env:EDDSA_KEYSET_DIR = (Resolve-Path ./keyset_eddsa).Path
+   $env:EDDSA_ENABLED = "true"
+   $env:EDDSA_DUAL_SIGN = "true"
+   $env:JWT_SECRET = "dev-jwt-secret-please-change"
+   python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
 
-## Notes
-- Journal uses client-side AES‑GCM. Passphrase is **never** sent to the server.
-- Guidance is values-based; **no direct scripture references**.
+Repository layout (high-level)
+- scripts/                - helper scripts (key generation, setup)
+- keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
+- security/               - JWT and EdDSA logic
+- tests/                  - unit tests (pytest)
+- docs/                   - documentation and technical notes
+- .github/workflows/ci.yml - CI for tests on PRs
+
+Need help?
+If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.
