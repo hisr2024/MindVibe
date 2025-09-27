@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from datetime import datetime, timezone
 from models.user import User
+from models.session import Session
 from security.password_policy import policy
 from security.password_hash import hash_password, verify_password
 from security.jwt import create_access_token, decode_access_token
@@ -56,12 +57,56 @@ class LogoutOut(BaseModel):
     revoked: bool
     session_id: str | None
 
+class SessionItem(BaseModel):
+    session_id: str
+    active: bool
+    created_at: datetime
+    last_used_at: datetime | None
+    expires_at: datetime | None
+    revoked_at: datetime | None
+    current: bool
+
+class SessionListOut(BaseModel):
+    sessions: list[SessionItem]
+
+class RevokeSessionOut(BaseModel):
+    session_id: str
+    revoked: bool
+    already_revoked: bool
+    reason: str | None = None
+
 # ----------------------
 # DB dependency
 # ----------------------
 async def get_db():
     async with SessionLocal() as session:
         yield session
+
+# ----------------------
+# Internal helpers
+# ----------------------
+async def _extract_auth_context(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    token = auth_header.split(" ", 1)[1].strip()
+    try:
+        payload = decode_access_token(token)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
+    user_id = payload.get("sub")
+    session_id = payload.get("sid")
+    exp = payload.get("exp")
+    if not user_id or not session_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token structure")
+    return payload, user_id, session_id, exp
+
+async def _get_user_or_401(db: AsyncSession, user_id: str) -> User:
+    stmt = select(User).where(User.id == user_id)
+    user = (await db.execute(stmt)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user
 
 # ----------------------
 # Signup
@@ -113,27 +158,8 @@ async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
 # ----------------------
 @router.get("/me", response_model=MeOut)
 async def me(request: Request, db: AsyncSession = Depends(get_db)):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.lower().startswith("bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    token = auth_header.split(" ", 1)[1].strip()
-    try:
-        payload = decode_access_token(token)
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
-
-    user_id = payload.get("sub")
-    session_id = payload.get("sid")
-    exp = payload.get("exp")
-    if not user_id or not session_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token structure")
-
-    stmt = select(User).where(User.id == user_id)
-    user = (await db.execute(stmt)).scalars().first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-
+    payload, user_id, session_id, exp = await _extract_auth_context(request)
+    user = await _get_user_or_401(db, user_id)
     session_row = await get_session(db, session_id)
     if not session_row or not session_is_active(session_row):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session inactive")
@@ -159,7 +185,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
     )
 
 # ----------------------
-# Logout (NEW)
+# Logout
 # ----------------------
 @router.post("/logout", response_model=LogoutOut)
 async def logout(request: Request, db: AsyncSession = Depends(get_db)):
@@ -186,3 +212,60 @@ async def logout(request: Request, db: AsyncSession = Depends(get_db)):
         return LogoutOut(revoked=True, session_id=session_id)
 
     return LogoutOut(revoked=False, session_id=session_id)
+
+# ----------------------
+# List Sessions
+# ----------------------
+@router.get("/sessions", response_model=SessionListOut)
+async def list_sessions(request: Request, db: AsyncSession = Depends(get_db)):
+    _, user_id, current_session_id, _ = await _extract_auth_context(request)
+    stmt = select(Session).where(Session.user_id == user_id).order_by(Session.created_at.desc())
+    rows = (await db.execute(stmt)).scalars().all()
+
+    items: list[SessionItem] = []
+    for s in rows:
+        active = session_is_active(s)
+        items.append(
+            SessionItem(
+                session_id=str(s.id),
+                active=active,
+                created_at=s.created_at,
+                last_used_at=s.last_used_at,
+                expires_at=s.expires_at,
+                revoked_at=s.revoked_at,
+                current=str(s.id) == str(current_session_id),
+            )
+        )
+    return SessionListOut(sessions=items)
+
+# ----------------------
+# Revoke Specific Session
+# ----------------------
+@router.post("/sessions/{session_id}/revoke", response_model=RevokeSessionOut)
+async def revoke_specific_session(session_id: str, request: Request, db: AsyncSession = Depends(get_db)):
+    _, user_id, _, _ = await _extract_auth_context(request)
+    stmt = select(Session).where(Session.id == session_id, Session.user_id == user_id)
+    target = (await db.execute(stmt)).scalars().first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    if target.revoked_at is not None:
+        return RevokeSessionOut(
+            session_id=session_id,
+            revoked=False,
+            already_revoked=True,
+            reason="already_revoked",
+        )
+
+    now = datetime.now(timezone.utc)
+    await db.execute(
+        update(Session).where(Session.id == session_id).values(revoked_at=now)
+    )
+    await db.commit()
+
+    return RevokeSessionOut(
+        session_id=session_id,
+        revoked=True,
+        already_revoked=False,
+        reason=None,
+    )
