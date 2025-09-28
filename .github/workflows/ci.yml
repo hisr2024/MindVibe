@@ -33,6 +33,14 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+      - name: Generate EdDSA keyset
+        run: |
+          python scripts/generate_eddsa_key.py --dir keyset_eddsa
+
+      - name: Set EDDSA_KEYSET_DIR for tests
+        run: |
+          echo "EDDSA_KEYSET_DIR=${{ github.workspace }}/keyset_eddsa" >> $GITHUB_ENV
+
       - name: Run tests
         env:
           EDDSA_ENABLED: ${{ secrets.EDDSA_ENABLED || 'true' }}
