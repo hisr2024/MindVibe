@@ -1,0 +1,26 @@
+  - name: Set up Python
+    uses: actions/setup-python@v4
+    with:
+      python-version: ${{ matrix.python-version }}
+      check-latest: true
+
+  - name: Cache pip
+    uses: actions/cache@v4
+    with:
+      path: ~/.cache/pip
+      key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
+      restore-keys: |
+        ${{ runner.os }}-pip-
+
+  - name: Install dependencies
+    run: |
+      python -m pip install --upgrade pip
+      if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+  - name: Run tests
+    env:
+      EDDSA_ENABLED: ${{ secrets.EDDSA_ENABLED || 'true' }}
+      EDDSA_DUAL_SIGN: ${{ secrets.EDDSA_DUAL_SIGN || 'true' }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'dev-jwt-secret-please-change' }}
+    run: |
+      pytest -q
