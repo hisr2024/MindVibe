@@ -43,10 +43,8 @@ jobs:
           except Exception as e:
               raise SystemExit("cryptography not available: " + str(e))
           os.makedirs("keyset_eddsa", exist_ok=True)
-          # generate keypair
           priv = ed25519.Ed25519PrivateKey.generate()
           pub = priv.public_key()
-          # write private key (PEM)
           priv_pem = priv.private_bytes(
               encoding=serialization.Encoding.PEM,
               format=serialization.PrivateFormat.PKCS8,
@@ -54,7 +52,6 @@ jobs:
           )
           with open("keyset_eddsa/private_key.pem", "wb") as f:
               f.write(priv_pem)
-          # write public key as a minimal JWK-style JSON (Ed25519 raw -> base64url)
           pub_raw = pub.public_bytes(
               encoding=serialization.Encoding.Raw,
               format=serialization.PublicFormat.Raw
