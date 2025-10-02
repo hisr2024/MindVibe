@@ -1,76 +1,46 @@
-name: "CI — tests"
+name: CI — tests
+
 on:
   push:
-    branches:
-      - main
   pull_request:
 
 jobs:
-  test:
+  tests:
+    name: CI — tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11"]
-    steps:
-      - uses: actions/checkout@v4
+        python-version: [3.10, 3.11]
 
-      - name: Set up Python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          check-latest: true
 
       - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          key: Linux-pip-${{ hashFiles('**/requirements*.txt') }}-${{ matrix.python-version }}
+          restore-keys: Linux-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          if [ -f requirements-dev.txt ]; then python -m pip install -r requirements-dev.txt; fi
+          # Ensure cryptography is available for key generation
+          python -m pip install cryptography
 
-      - name: Generate EdDSA keyset (inline)
+      - name: Generate EDDSA keyset (script)
+        env:
+          EDDSA_KEYSET_DIR: ${{ github.workspace }}/keyset_eddsa
         run: |
-          python - <<'PY'
-          import os, json, base64
-          try:
-              from cryptography.hazmat.primitives.asymmetric import ed25519
-              from cryptography.hazmat.primitives import serialization
-          except Exception as e:
-              raise SystemExit("cryptography not available: " + str(e))
-          os.makedirs("keyset_eddsa", exist_ok=True)
-          priv = ed25519.Ed25519PrivateKey.generate()
-          pub = priv.public_key()
-          priv_pem = priv.private_bytes(
-              encoding=serialization.Encoding.PEM,
-              format=serialization.PrivateFormat.PKCS8,
-              encryption_algorithm=serialization.NoEncryption()
-          )
-          with open("keyset_eddsa/private_key.pem", "wb") as f:
-              f.write(priv_pem)
-          pub_raw = pub.public_bytes(
-              encoding=serialization.Encoding.Raw,
-              format=serialization.PublicFormat.Raw
-          )
-          x = base64.urlsafe_b64encode(pub_raw).rstrip(b"=").decode("ascii")
-          jwk = {"kty":"OKP","crv":"Ed25519","x": x}
-          with open("keyset_eddsa/public_key-pub.json", "w") as f:
-              json.dump(jwk, f)
-          print("Generated keyset_eddsa/ with private_key.pem and public_key-pub.json")
-          PY
-
-      - name: Set EDDSA_KEYSET_DIR for tests
-        run: |
-          echo "EDDSA_KEYSET_DIR=${{ github.workspace }}/keyset_eddsa" >> $GITHUB_ENV
+          python scripts/generate_eddsa_key.py --dir "$EDDSA_KEYSET_DIR"
 
       - name: Run tests
-        env:
-          EDDSA_ENABLED: ${{ secrets.EDDSA_ENABLED || 'true' }}
-          EDDSA_DUAL_SIGN: ${{ secrets.EDDSA_DUAL_SIGN || 'true' }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'dev-jwt-secret-please-change' }}
         run: |
           pytest -q
