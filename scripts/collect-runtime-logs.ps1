@@ -8,11 +8,9 @@ if (-not $githubWorkspace) { $githubWorkspace = (Get-Location).Path }
 $runnerTemp = $Env:RUNNER_TEMP
 if (-not $runnerTemp) { $runnerTemp = [IO.Path]::GetTempPath() }
 
-targetDir = Join-Path -Path $runnerTemp -ChildPath "runtime-logs"
-# ensure directory exists (use -Force to avoid errors if already exists)
-if (-not (Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null } else { # still ensure permissions
-    New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-}
+$targetDir = Join-Path -Path $runnerTemp -ChildPath "runtime-logs"
+# ensure directory exists (use -Force)
+New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
 
 Write-Host "Collecting runtime logs into $targetDir"
 $pathsToCheck = @(
