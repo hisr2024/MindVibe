@@ -1,26 +1,26 @@
 # MindVibe
 
-MindVibe is a privacy-first mental health app that also supports real-time social audio features such as short-form voice conversations, moderated rooms, and ephemeral public channels. (Note: the repository description reads "Mental Health App" — consider aligning this sentence with your official project description.)
+MindVibe is a privacy-first mental health app that supports real-time social audio features such as short-form voice conversations, moderated rooms, and ephemeral public channels. This repository contains the server-side and tooling for local development, testing, and cryptographic key management.
 
 ## Quickstart (local)
 
 1. Clone the repository:
-
 ```bash
 git clone https://github.com/hisr2024/MindVibe.git
 cd MindVibe
 ```
 
-2. Check out the dev branch (if it exists on the remote):
-
+2. Checkout the branch you use for development:
+- If you work directly on `main`:
 ```bash
 git fetch origin
-git checkout dev
+git checkout main
 ```
-If the `dev` branch does not exist locally and you want to create a local dev branch:
-
+- If you prefer a dedicated development branch, create and use `dev`:
 ```bash
-git switch -c dev
+git fetch origin
+git checkout -b dev
+git push -u origin dev
 ```
 
 3. Create and activate a Python virtual environment:
@@ -48,15 +48,13 @@ python -m venv .venv
 python -m pip install -r requirements-dev.txt
 ```
 
-5. Generate a dev Ed25519 key (keep the private key local):
+5. Generate a development Ed25519 key (keep the private key local):
 ```bash
 python scripts/generate_eddsa_key.py --dir keyset_eddsa
 ```
-Commit only the public key JSON file (the `*-pub.json`) and never commit private key files. See `docs/KEYS.md` for details.
+Important: commit only the public key JSON file (the `*-pub.json`) and never commit private key files. See docs/KEYS.md for exact guidance and example .gitignore entries.
 
-6. Create a public-only key JSON (commit only the `*-pub.json` file). See `docs/KEYS.md`.
-
-7. Run focused JWT tests.
+6. Run focused JWT tests (example):
 
 - PowerShell:
 ```powershell
@@ -84,8 +82,11 @@ python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failu
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
 
-## Notes and recommendations
-- Align the README opening description with the repo description (currently "Mental Health App") so visitors don't get conflicting messaging.
-- Use consistent cross-platform instructions (I standardized activation and env-var examples above).
-- Avoid suggesting users commit private keys; emphasize committing only public JSONs and show an example .gitignore entry if necessary.
-- Consider adding a short "Contributing" blurb linking to CONTRIBUTING.md and a "License" section if not already present in the docs.
+## Contributions
+See CONTRIBUTING.md for contribution guidelines and PR expectations.
+
+## Keys and secrets
+Never commit private key files or secrets into the repository. See docs/KEYS.md for guidance about which key files may be committed (public-only files) and suggested .gitignore patterns.
+
+## License
+This project is licensed under the MIT License. See LICENSE for details.

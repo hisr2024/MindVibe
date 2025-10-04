@@ -1,18 +1,28 @@
-# Contribution Guide
+# Contributing to MindVibe
 
-Thank you for considering contributing to MindVibe! We appreciate your help in making this project better.
+Thanks for your interest in contributing!
 
-## Code of Conduct
+Getting started
+- Pick or create an issue to work on.
+- Create a feature branch named using this pattern: `feature/<short-descriptor>` or `fix/<short-descriptor>`.
+- Keep changes focused to a single concern per PR.
 
-Before contributing, please read our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a positive experience for everyone.
+Branching & PR workflow
+- Create a branch from `dev` (if you maintain one) or `main`:
+  - git checkout -b feature/my-feature
+- Open a PR targeting `dev` or `main` depending on project policy.
+- Include tests for behavior changes and ensure CI passes.
+- At least one approving review is required before merge.
 
-## How to Contribute
+Testing
+- Run unit tests locally:
+  - python -m pytest -q
 
-1. **Create a Branch**: Start by creating a new branch for your contribution. It's a good practice to name your branch based on the feature or issue you're addressing.
-2. **Write Tests**: Ensure your code is well-tested. If you're adding a feature, please include tests that cover your changes.
-3. **Format Your Code**: Make sure your code follows our formatting guidelines. You can run the formatter before committing your changes.
-4. **Submit a Pull Request**: When you're ready, submit a Pull Request. We prefer small, focused PRs that are easier to review. Please use conventional commit messages to describe your changes.
+Documentation
+- Add or update docs under `docs/` for any public API or behavior changes.
 
-### Key Policy
+Security & keys
+- Never commit private keys or secrets. See docs/KEYS.md for details.
 
-- **Never commit private key files**. Only commit files from the `keyset_eddsa/*-pub.json` directory.
+License
+- By contributing you agree your contributions are under the project's MIT License.

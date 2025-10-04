@@ -1,28 +1,26 @@
-# Key handling and policy
+# Keys and Key Management (EdDSA)
 
-Important: Do not commit private key material into the repository.
+This document explains the repository policy for key files and what may safely be committed.
 
-Key files
-- Private key JSONs (dev only) are written to `keyset_eddsa/<kid>.json` by the generator script.
-  - These files contain the private seed and must never be committed.
-- Public-only JSONs should be named `keyset_eddsa/<kid>-pub.json` and contain:
-  - kid
-  - public_b64
-  - created_at
+Principles
+- Private key material must never be committed to the repository.
+- Only public/public-only JSON files (for example `*-pub.json`) may be committed.
+- Local developer key material belongs in a directory excluded by `.gitignore`.
 
-Git policy
-- Ensure `.gitignore` contains:
-  keyset_eddsa/*.json
-- Commit only `*-pub.json` public key files.
+Recommended workflow (developer)
+1. Generate a local keypair for development:
+   - python scripts/generate_eddsa_key.py --dir keyset_eddsa
+2. The script will create a public and private JSON. Only the public file (e.g., `dev-key-pub.json`) can be committed.
+3. Ensure your local `.gitignore` includes the private key patterns:
+   - keyset_eddsa/*-priv.json
+   - keyset_eddsa/*-private*.json
 
-Developer workflow
-1. Generate a key locally:
-   python scripts/generate_eddsa_key.py --dir keyset_eddsa
+Committing public-only keys
+- If you must commit a public key for tests or CI, name it clearly with `-pub` suffix and confirm it contains no private material.
+- Example commit: `keyset_eddsa/dev-key-pub.json`
 
-2. Create the public-only JSON:
-   See scripts/setup-windows.ps1 for an automated helper, or create a JSON with `kid`, `public_b64`, `created_at`.
+Secrets and CI
+- Never put secrets or private keys into CI environment variables in plaintext. Use the provider's secret store.
+- Rotate keys used by CI and production when needed.
 
-3. Commit only the `*-pub.json` file. Keep private JSONs local.
-
-CI / Production
-- Use a secret manager (KMS, GitHub Secrets) to store private keys for CI/deploy. Never store private keys in the repository.
+If you are unsure whether a file contains private key material, do not commit it — ask a reviewer or open an issue.
