@@ -3,23 +3,14 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import insert, select
 from app.models import Base, ContentPack
 
-DATA_EN = {"version":1,"locale":"en","packs":[{"principle":"stable_center","cards":[{"title":"Anchor in Breath","copy":"Feel one full inhale and exhale. Let attention rest where breath touches the nose.","cta":"Try 5 cycles","exercise_ref":"focus_breath_60"},{"title":"Name the Weather","copy":"Say: 'Anxious is here.' You’re the sky, not the cloud.","cta":"Say it softly","exercise_ref":"witness_label_45"},{"title":"One Point","copy":"Choose a single point in your visual field. Hold attention there for 20 seconds.","cta":"Hold gently","exercise_ref":"single_point_20"}]}]}
+DATA_EN = {"version":1,"locale":"en","packs":[{"principle":"stable_center","cards":[
+    {"title":"Act Without Attachment","copy":"Focus on doing your part with care; release fixation on the result. Let the outcome be separate from the effort — this reduces anxiety and steadies practice.","cta":"Try one small task","exercise_ref":"action_focus_5"},
+    {"title":"Even Mind","copy":"Notice successes and setbacks with equal attention. Practice observing your reactions without judgment to build resilience and calm.","cta":"Reflect for 1 minute","exercise_ref":"even_mind_60"},
+    {"title":"Steady Effort","copy":"Make a small, consistent commitment each day. Growth comes from steady practice rather than immediate outcomes.","cta":"Do for 5 days","exercise_ref":"micro_habit_5"
+}]}]}
+
+# Localized packs remain for DE/HI and others; keep originals for now.
 DATA_DE = {"version":1,"locale":"de","packs":[{"principle":"stable_center","cards":[{"title":"Anker im Atem","copy":"Spüre eine volle Ein‑ und Ausatmung. Ruhe dort, wo die Luft die Nase berührt.","cta":"5 Zyklen","exercise_ref":"focus_breath_60"}]}]}
 DATA_HI = {"version":1,"locale":"hi","packs":[{"principle":"stable_center","cards":[{"title":"सांस में टिकना","copy":"एक पूरा श्वास‑प्रश्वास महसूस करो। ध्यान नाक के पास ठहराओ।","cta":"5 चक्र","exercise_ref":"focus_breath_60"}]}]}
 
 DATABASE_URL = os.getenv("DATABASE_URL","postgresql+asyncpg://navi:navi@db:5432/navi")
-engine = create_async_engine(DATABASE_URL, echo=False)
-Session = async_sessionmaker(engine, expire_on_commit=False)
-
-async def main():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    async with Session() as s:
-        for locale, data in (("en",DATA_EN),("de",DATA_DE),("hi",DATA_HI)):
-            res = await s.execute(select(ContentPack).where(ContentPack.locale==locale))
-            if not res.scalar_one_or_none():
-                await s.execute(insert(ContentPack).values(locale=locale, data=data))
-        await s.commit()
-
-if __name__ == "__main__":
-    asyncio.run(main())
