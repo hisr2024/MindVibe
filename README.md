@@ -1,6 +1,6 @@
 # MindVibe
 
-MindVibe is a privacy-first mental health app that also supports real-time social audio features such as short-form voice conversations, moderated rooms, and ephemeral public channels. (Note: the repository description reads "Mental Health App" — consider aligning this sentence with your official project description.)
+MindVibe is a privacy-first mental health app that also supports real-time social audio features such as short-form voice conversations, moderated rooms, and ephemeral public channels.
 
 ## Quickstart (local)
 
@@ -84,8 +84,10 @@ python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failu
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
 
-## Notes and recommendations
-- Align the README opening description with the repo description (currently "Mental Health App") so visitors don't get conflicting messaging.
-- Use consistent cross-platform instructions (I standardized activation and env-var examples above).
-- Avoid suggesting users commit private keys; emphasize committing only public JSONs and show an example .gitignore entry if necessary.
-- Consider adding a short "Contributing" blurb linking to CONTRIBUTING.md and a "License" section if not already present in the docs.
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project, including our key policy and code standards.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
