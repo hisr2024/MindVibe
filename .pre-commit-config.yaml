@@ -1,9 +1,1 @@
-repos:
-- repo: https://github.com/psf/black
-  rev: 24.1.0
-  hooks:
-    - id: black
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.23.2
-  hooks:
-    - id: ruff
+(replace with the .pre-commit-config.yaml content from the block above)
