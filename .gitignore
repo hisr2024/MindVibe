@@ -22,3 +22,10 @@ keyset_eddsa/*.json
 *.swp
 # Logs
 *.log
+# Node.js dependencies and build
+node_modules/
+.next/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
