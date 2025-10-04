@@ -22,3 +22,6 @@ keyset_eddsa/*.json
 *.swp
 # Logs
 *.log
+# Reports directory (keep structure but ignore contents)
+reports/*
+!reports/.gitkeep
