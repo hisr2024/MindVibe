@@ -1,24 +1,33 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.pyd
+*.sqlite3
+
 # Virtual environments
 .venv/
 env/
 venv/
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
+
 # Pytest cache
 .pytest_cache/
-# Keys and secrets
-keyset_eddsa/*.json
-.env
-.env.*
-# Editor directories and files
+
+# Editor/OS files
+.DS_Store
 .vscode/
 .idea/
 *.swp
-# Logs
-*.log
+
+# Environment files
+.env
+.env.*.local
+
+# Local EdDSA key private files (do not commit private keys)
+# Keep only public JSON files in the repo (e.g., *-pub.json)
+keyset_eddsa/*-priv.json
+keyset_eddsa/*-private*.json
+keyset_eddsa/*.key
+keyset_eddsa/*.pem
+
+# If you follow a different naming scheme for private keys, add patterns here.
