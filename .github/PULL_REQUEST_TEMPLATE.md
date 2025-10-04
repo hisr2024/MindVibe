@@ -1,16 +1,17 @@
-<!-- Describe the change and why it matters -->
 ## Summary
 
-<!-- One-sentence summary of the change -->
+<!-- Short description of the change. -->
 
-## Checklist
-- [ ] CI passes (tests run successfully)
-- [ ] No private keys are committed (only *-pub.json allowed)
-- [ ] README and docs updated as needed
-- [ ] License and Code of Conduct included
+## Changes
+- 
 
 ## Testing
-Describe how this change was tested locally (commands run).
+- Steps to run locally:
+  - create venv, install requirements-dev.txt
+  - run pytest -q
 
-## Reviewers
-Tag any maintainers or teams that should review.
+## Checklist
+- [ ] CI passes
+- [ ] No private keys or secrets committed
+- [ ] Docs updated
+- [ ] Adds/updates tests (if applicable)
