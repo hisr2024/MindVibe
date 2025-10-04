@@ -35,22 +35,14 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           set -euo pipefail
-          if [ -f ./scripts/collect-runtime-logs.sh ]; then
-            chmod +x ./scripts/collect-runtime-logs.sh || true
-            ./scripts/collect-runtime-logs.sh
-          else
-            echo "No Linux log collector script found — skipping collect step"
-          fi
+          chmod +x ./scripts/collect-runtime-logs.sh || true
+          ./scripts/collect-runtime-logs.sh
 
       - name: Collect runtime logs (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          if (Test-Path -Path "./scripts/collect-runtime-logs.ps1") {
-            ./scripts/collect-runtime-logs.ps1
-          } else {
-            Write-Host "No Windows log collector script found — skipping collect step"
-          }
+          ./scripts/collect-runtime-logs.ps1
 
       - name: Upload runtime-logs artifact (warn if nothing found)
         uses: actions/upload-artifact@v4
