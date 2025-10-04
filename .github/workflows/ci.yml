@@ -1,60 +1,29 @@
-name: Upload runtime diagnostics
+name: CI
 
 on:
-  workflow_dispatch:
+  pull_request:
   push:
     branches:
       - main
-      - fix/upload-artifacts
 
 jobs:
-  collect-and-upload:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-
+  test:
+    runs-on: ubuntu-24.04
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug: show workspace & runner temp (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          echo "RUNNER_TEMP: $RUNNER_TEMP"
-
-      - name: Debug: show workspace & runner temp (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          Write-Host "GITHUB_WORKSPACE: $Env:GITHUB_WORKSPACE"
-          Write-Host "RUNNER_TEMP: $Env:RUNNER_TEMP"
-
-      - name: Collect runtime logs (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          set -euo pipefail
-          if [ -f ./scripts/collect-runtime-logs.sh ]; then
-            chmod +x ./scripts/collect-runtime-logs.sh || true
-            ./scripts/collect-runtime-logs.sh
-          else
-            echo "No Linux log collector script found — skipping collect step"
-          fi
-
-      - name: Collect runtime logs (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          if (Test-Path -Path "./scripts/collect-runtime-logs.ps1") {
-            ./scripts/collect-runtime-logs.ps1
-          } else {
-            Write-Host "No Windows log collector script found — skipping collect step"
-          }
-
-      - name: Upload runtime-logs artifact (warn if nothing found)
-        uses: actions/upload-artifact@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          name: runtime-logs
-          path: ${{ runner.temp }}/runtime-logs/**
-          if-no-files-found: 'warn'
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/
