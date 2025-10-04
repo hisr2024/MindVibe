@@ -1,0 +1,26 @@
+name: Mark PR as Ready for Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to mark as ready'
+        required: true
+        type: number
+        default: 28
+
+jobs:
+  mark-ready:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    
+    steps:
+      - name: Mark PR as ready for review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Marking PR #${{ inputs.pr_number }} as ready for review..."
+          gh pr ready ${{ inputs.pr_number }} --repo ${{ github.repository }}
+          echo "✓ PR #${{ inputs.pr_number }} is now ready for review"
