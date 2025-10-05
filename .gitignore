@@ -22,3 +22,5 @@ keyset_eddsa/*.json
 *.swp
 # Logs
 *.log
+keyset_eddsa/*-priv.json
+keyset_eddsa/*-priv.json
