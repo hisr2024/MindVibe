@@ -1,7 +1,7 @@
 import json
 import base64
 from pathlib import Path
-from scripts.generate_jwks import load_public_keys, write_jwks
+from MindVibe.scripts.generate_jwks import load_public_keys, write_jwks
 
 def test_generate_jwks_tmp(tmp_path):
     keydir = tmp_path / "keyset_eddsa"
