@@ -1,0 +1,23 @@
+workspace:
+  include:
+    - "."
+  exclude:
+    - "node_modules"
+    - ".git"
+    - ".venv"
+cli:
+  suggestions:
+    max_tokens: 512
+    # Change model if you want a different one or remove to use the default.
+    model: gpt-4o-mini
+prompts:
+  code-review: |
+    You are a careful code reviewer for the MindVibe repository.
+    Focus on correctness, tests, security, accessibility, and CI.
+    For each issue produce:
+    - Short summary
+    - Why it's an issue
+    - A minimal example fix (code patch) or recommended edits
+    - Test or verification steps
+  fixer: |
+    When asked to produce a fix, only output a patch (unified diff) or the exact file content to replace.

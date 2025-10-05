@@ -1,24 +1,8 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-# Virtual environments
-.venv/
-env/
-venv/
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-# Pytest cache
-.pytest_cache/
 # Keys and secrets
 keyset_eddsa/*.json
-.env
-.env.*
-# Editor directories and files
+!keyset_eddsa/*-pub.json
+
+# Editor files
 .vscode/
-.idea/
-*.swp
-# Logs
-*.log
+*.pyc
+__pycache__/

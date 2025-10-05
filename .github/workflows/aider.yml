@@ -1,0 +1,47 @@
+name: Aider suggestions (PR)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - integration/merge-all
+      - main
+
+jobs:
+  run-aider:
+    name: Run Aider suggestions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies & Aider CLI
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt || true; fi
+          pip install --upgrade git+https://github.com/get-aider/aider.git || true
+
+      - name: Create reports dir
+        run: mkdir -p reports
+
+      - name: Run Aider suggestion (generate report)
+        id: run_aider
+        run: |
+          # run the aider suggestion command and write output
+          if command -v aider >/dev/null 2>&1; then
+            set -o pipefail
+            aider suggestion --prompt code-review > reports/aider-suggestions.txt || true
+            echo "Aider finished, report at reports/aider-suggestions.txt"
+          else
+            echo "aider CLI not available; skipping"
+          fi
+
+      - name: Upload Aider report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aider-report
+          path: reports/aider-suggestions.txt

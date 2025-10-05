@@ -1,36 +1,83 @@
 # MindVibe
 
-MindVibe is a privacy-first, real-time social audio platform for short-form voice conversations, moderated rooms, and ephemeral public channels.
+MindVibe is a privacy-first mental health app that supports real-time social audio features such as short-form voice conversations, moderated rooms, and ephemeral public channels. This repository contains the code and supporting assets for the MindVibe project (backend, frontend, and developer tooling).
 
-Quickstart (local)
-1. Clone the repo:
-   git clone https://github.com/hisr2024/MindVibe.git
-   cd MindVibe
+## Quickstart (local)
 
-2. Checkout the dev branch:
-   git checkout -b dev
+1. Clone the repository:
+\`\`\`bash
+git clone https://github.com/hisr2024/MindVibe.git
+cd MindVibe
+\`\`\`
+
+2. Checkout the branch you use for development:
+- If you work directly on \`main\`:
+\`\`\`bash
+git fetch origin
+git checkout main
+git pull origin main
+\`\`\`
+- If you prefer a dedicated development branch, create and use \`dev\`:
+\`\`\`bash
+git fetch origin
+git checkout -b dev
+git push -u origin dev
+\`\`\`
 
 3. Create and activate a Python virtual environment:
-   python -m venv .venv
-   .venv\Scripts\Activate.ps1    # Windows PowerShell
-   source .venv/bin/activate     # macOS / Linux
 
-4. Install dev dependencies:
-   python -m pip install -r requirements-dev.txt
+- macOS / Linux:
+\`\`\`bash
+python -m venv .venv
+source .venv/bin/activate
+\`\`\`
 
-5. Generate a dev Ed25519 key (keeps private key local):
-   python scripts/generate_eddsa_key.py --dir keyset_eddsa
+- Windows (PowerShell):
+\`\`\`powershell
+python -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+\`\`\`
 
-6. Create a public-only key JSON (commit only the `*-pub.json` file). See docs/KEYS.md.
+- Windows (cmd.exe):
+\`\`\`cmd
+python -m venv .venv
+.\\.venv\\Scripts\\activate
+\`\`\`
 
-7. Run the focused JWT tests:
-   $env:EDDSA_KEYSET_DIR = (Resolve-Path ./keyset_eddsa).Path
-   $env:EDDSA_ENABLED = "true"
-   $env:EDDSA_DUAL_SIGN = "true"
-   $env:JWT_SECRET = "dev-jwt-secret-please-change"
-   python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
+4. Install development dependencies:
+\`\`\`bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+\`\`\`
 
-Repository layout (high-level)
+5. Generate a development Ed25519 key (keep the private key local):
+\`\`\`bash
+python scripts/generate_eddsa_key.py --dir keyset_eddsa
+\`\`\`
+Important: commit only the public key JSON file (the \`*-pub.json\`) and never commit private key files. See docs/KEYS.md for exact guidance and example .gitignore entries.
+
+6. Run focused JWT tests (example):
+
+- PowerShell:
+\`\`\`powershell
+$env:EDDSA_KEYSET_DIR = (Resolve-Path ./keyset_eddsa).Path
+$env:EDDSA_ENABLED = "true"
+$env:EDDSA_DUAL_SIGN = "true"
+$env:JWT_SECRET = "dev-jwt-secret-please-change"
+python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
+\`\`\`
+
+- macOS / Linux:
+\`\`\`bash
+export EDDSA_KEYSET_DIR="$(pwd)/keyset_eddsa"
+export EDDSA_ENABLED=true
+export EDDSA_DUAL_SIGN=true
+export JWT_SECRET="dev-jwt-secret-please-change"
+python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
+\`\`\`
+
+## Repository layout (high level)
+
 - scripts/                - helper scripts (key generation, setup)
 - keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
 - security/               - JWT and EdDSA logic
@@ -38,5 +85,11 @@ Repository layout (high-level)
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
 
-Need help?
-If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.
+## Contributions
+See docs/CONTRIBUTING.md for contribution guidelines and PR expectations.
+
+## Keys and secrets
+Never commit private key files or secrets into the repository. See docs/KEYS.md for guidance about which key files may be committed (public-only files) and suggested .gitignore patterns.
+
+## License
+This project is licensed under the MIT License. See LICENSE for details.
