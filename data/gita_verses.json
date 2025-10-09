@@ -1,0 +1,112 @@
+{
+  "verses": [
+    {
+      "chapter": 2,
+      "verse": 47,
+      "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥",
+      "english": "You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results of your activities, nor be attached to inaction.",
+      "hindi": "तुम्हारा अधिकार केवल कर्म करने में है, फल में कभी नहीं। इसलिए तुम कर्म के फल के हेतु मत बनो और न ही तुम्हारी कर्म न करने में आसक्ति हो।",
+      "principle": "detachment_action",
+      "theme": "duty, action, detachment"
+    },
+    {
+      "chapter": 2,
+      "verse": 48,
+      "sanskrit": "योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय। सिद्ध्यसिद्ध्योः समो भूत्वा समत्वं योग उच्यते॥",
+      "english": "Be steadfast in the performance of your duty, O student, abandoning attachment to success and failure. Such equanimity is called wisdom.",
+      "hindi": "हे धनंजय! तू आसक्ति को त्यागकर तथा सिद्धि और असिद्धि में समान बुद्धि वाला होकर योग में स्थित हुआ कर्तव्य कर्मों को कर; यह समत्व ही योग कहलाता है।",
+      "principle": "equanimity",
+      "theme": "balance, wisdom, detachment"
+    },
+    {
+      "chapter": 6,
+      "verse": 5,
+      "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
+      "english": "One must elevate oneself by one's own mind, not degrade oneself. The mind is the friend of the self, and also its enemy.",
+      "hindi": "अपने द्वारा अपना उद्धार करे और अपने को अधोगति में न डाले; क्योंकि यह मनुष्य आप ही अपना मित्र है और आप ही अपना शत्रु है।",
+      "principle": "self_mastery",
+      "theme": "self-improvement, mind, discipline"
+    },
+    {
+      "chapter": 6,
+      "verse": 35,
+      "sanskrit": "असंशयं महाबाहो मनो दुर्निग्रहं चलम्। अभ्यासेन तु कौन्तेय वैराग्येण च गृह्यते॥",
+      "english": "The mind is restless, turbulent, strong and obstinate. But it can be controlled through regular practice and detachment.",
+      "hindi": "निस्संदेह महाबाहु! मन चंचल और कठिनता से वश में होने वाला है, परन्तु हे कुन्तीपुत्र! यह अभ्यास और वैराग्य से वश में होता है।",
+      "principle": "mind_control",
+      "theme": "practice, detachment, mental_discipline"
+    },
+    {
+      "chapter": 2,
+      "verse": 14,
+      "sanskrit": "मात्रास्पर्शास्तु कौन्तेय शीतोष्णसुखदुःखदाः। आगमापायिनोऽनित्यास्तांस्तितिक्षस्व भारत॥",
+      "english": "The contact between the senses and sense objects gives rise to fleeting sensations of pleasure and pain. These are temporary and ever-changing; endure them patiently.",
+      "hindi": "हे कुन्तीपुत्र! सर्दी-गर्मी और सुख-दुःख देने वाले इन्द्रिय और विषयों के संयोग तो उत्पत्ति-विनाश वाले अर्थात् अनित्य हैं, इसलिए हे भारत! उनको तू सहन कर।",
+      "principle": "endurance",
+      "theme": "patience, impermanence, resilience"
+    },
+    {
+      "chapter": 2,
+      "verse": 62,
+      "sanskrit": "ध्यायतो विषयान्पुंसः सङ्गस्तेषूपजायते। सङ्गात्संजायते कामः कामात्क्रोधोऽभिजायते॥",
+      "english": "When a person dwells on sense objects, attachment to them develops. From attachment, desire arises, and from desire, anger is born.",
+      "hindi": "विषयों का चिन्तन करने वाले मनुष्य की उन विषयों में आसक्ति हो जाती है, आसक्ति से उन विषयों की कामना उत्पन्न होती है और कामना में विघ्न पड़ने से क्रोध उत्पन्न होता है।",
+      "principle": "thought_discipline",
+      "theme": "desire, anger, mindfulness"
+    },
+    {
+      "chapter": 2,
+      "verse": 63,
+      "sanskrit": "क्रोधाद्भवति सम्मोहः सम्मोहात्स्मृतिविभ्रमः। स्मृतिभ्रंशाद् बुद्धिनाशो बुद्धिनाशात्प्रणश्यति॥",
+      "english": "From anger comes delusion, from delusion comes confusion of memory. From confusion of memory comes loss of reason, and from loss of reason, one is ruined.",
+      "hindi": "क्रोध से मूढ़भाव उत्पन्न होता है, मूढ़भाव से स्मृति में भ्रम हो जाता है, स्मृति भ्रम हो जाने से बुद्धि अर्थात् ज्ञानशक्ति का नाश हो जाता है और बुद्धि का नाश हो जाने से यह मनुष्य अपनी स्थिति से गिर जाता है।",
+      "principle": "anger_management",
+      "theme": "anger, clarity, reason"
+    },
+    {
+      "chapter": 3,
+      "verse": 35,
+      "sanskrit": "श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्। स्वधर्मे निधनं श्रेयः परधर्मो भयावहः॥",
+      "english": "It is better to perform one's own duties imperfectly than to master the duties of another. By fulfilling one's own purpose, one never comes to harm.",
+      "hindi": "अच्छी तरह आचरण किए गए दूसरे के धर्म से गुणरहित भी अपना धर्म अति उत्तम है। अपने धर्म में मरना भी कल्याणकारक है, परन्तु दूसरे का धर्म भय देने वाला है।",
+      "principle": "authenticity",
+      "theme": "purpose, authenticity, duty"
+    },
+    {
+      "chapter": 5,
+      "verse": 21,
+      "sanskrit": "बाह्यस्पर्शेष्वसक्तात्मा विन्दत्यात्मनि यत्सुखम्। स ब्रह्मयोगयुक्तात्मा सुखमक्षयमश्नुते॥",
+      "english": "One who is not attached to external sense pleasures realizes happiness within. Such a person, engaged in inner contemplation, experiences boundless joy.",
+      "hindi": "बाहरी विषयों के संपर्क में आसक्तिरहित तथा अंतर्मुख पुरुष अपने स्वरूप में जो सुख है उसे प्राप्त होता है। इस प्रकार आत्मा को ब्रह्म के साथ योग में लगाने वाला योगी अक्षय सुख को प्राप्त होता है।",
+      "principle": "inner_peace",
+      "theme": "contentment, inner_joy, meditation"
+    },
+    {
+      "chapter": 6,
+      "verse": 17,
+      "sanskrit": "युक्ताहारविहारस्य युक्तचेष्टस्य कर्मसु। युक्तस्वप्नावबोधस्य योगो भवति दुःखहा॥",
+      "english": "For one who is moderate in eating and recreation, balanced in work, and regulated in sleep and wakefulness, practice brings relief from all sorrows.",
+      "hindi": "जो मनुष्य योग में युक्त अर्थात् मध्यम आहार और विहार करने वाला तथा कर्मों में युक्त चेष्टा करने वाला एवं युक्त सोने और जागने वाला है, उसका योग दुःखों का नाश करने वाला होता है।",
+      "principle": "balance",
+      "theme": "moderation, routine, wellbeing"
+    },
+    {
+      "chapter": 12,
+      "verse": 13,
+      "sanskrit": "अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च। निर्ममो निरहंकारः समदुःखसुखः क्षमी॥",
+      "english": "One who harbors no ill will toward any being, who is friendly and compassionate, free from possessiveness and false ego, equal in happiness and distress, and forgiving.",
+      "hindi": "जो सब प्राणियों के लिए द्वेष रहित है, मित्र भाव और दया से युक्त है, ममता और अहंकार से रहित है, सुख-दुःख में समान भाव वाला है और क्षमाशील है।",
+      "principle": "compassion",
+      "theme": "kindness, forgiveness, equality"
+    },
+    {
+      "chapter": 18,
+      "verse": 78,
+      "sanskrit": "यत्र योगेश्वरः कृष्णो यत्र पार्थो धनुर्धरः। तत्र श्रीर्विजयो भूतिर्ध्रुवा नीतिर्मतिर्मम॥",
+      "english": "Where there is the master of wisdom, and where there is the devoted student, there will surely be prosperity, victory, abundance and righteousness.",
+      "hindi": "जहाँ योग के ईश्वर श्रीकृष्ण हैं और जहाँ धनुष धारण करने वाले पार्थ हैं, वहीं श्री, विजय, विभूति और अचल नीति है, ऐसा मेरा मत है।",
+      "principle": "devotion_learning",
+      "theme": "wisdom, guidance, success"
+    }
+  ]
+}
