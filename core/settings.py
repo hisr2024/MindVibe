@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_PEPPER: str = "DEV_REFRESH_PEPPER_CHANGE_ME"  # Override in env
     REFRESH_TOKEN_PEPPER_NEXT: str | None = None  # Optional staged rotation pepper
 
+    # OpenAI API Configuration for Wisdom Guide
+    OPENAI_API_KEY: str | None = None  # Set in environment for AI-powered responses
+
     class Config:
         env_file = ".env"
 

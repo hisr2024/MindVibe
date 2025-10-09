@@ -87,3 +87,23 @@ class ContentPack(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True),
         server_default=func.now(),
     )
+
+
+class WisdomVerse(SoftDeleteMixin, Base):
+    __tablename__ = "wisdom_verses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    verse_id: Mapped[str] = mapped_column(String(16), unique=True, index=True)
+    chapter: Mapped[int] = mapped_column(Integer)
+    verse_number: Mapped[int] = mapped_column(Integer)
+    theme: Mapped[str] = mapped_column(String(128))
+    english: Mapped[str] = mapped_column(Text)
+    hindi: Mapped[str] = mapped_column(Text)
+    sanskrit: Mapped[str] = mapped_column(Text)
+    context: Mapped[str] = mapped_column(Text)
+    mental_health_applications: Mapped[dict] = mapped_column(JSON)
+    embedding: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+    )
