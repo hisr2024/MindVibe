@@ -2,6 +2,37 @@
 
 MindVibe is a privacy-first, real-time social audio platform for short-form voice conversations, moderated rooms, and ephemeral public channels.
 
+## Features
+
+### 🧘 AI Chatbot for Mental Health
+An AI-powered chatbot that provides mental health guidance based on Bhagavad Gita wisdom:
+- Multi-language support (English, Hindi, Sanskrit)
+- Semantic search for relevant verses
+- Practical guidance for modern challenges
+- Respects cultural sensitivity and universal principles
+
+See [docs/CHATBOT.md](docs/CHATBOT.md) for detailed documentation.
+
+### Quick Setup for Chatbot
+
+```bash
+# 1. Set up environment variables
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Seed the database with Bhagavad Gita verses
+python seed_gita.py
+
+# 4. Start the server
+uvicorn main:app --reload
+
+# 5. Test the chatbot
+python example_chatbot_usage.py
+```
+
 Quickstart (local)
 1. Clone the repo:
    git clone https://github.com/hisr2024/MindVibe.git

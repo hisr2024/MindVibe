@@ -7,7 +7,6 @@ import os
 from typing import List, Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
-import openai
 
 from ..models import GitaVerse
 
@@ -17,8 +16,6 @@ class GitaKnowledgeBase:
     
     def __init__(self):
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
-        if self.openai_api_key:
-            openai.api_key = self.openai_api_key
     
     async def load_verses_from_json(self, db: AsyncSession, json_path: str) -> int:
         """Load verses from JSON file into database"""
@@ -59,11 +56,14 @@ class GitaKnowledgeBase:
             return None
         
         try:
-            response = await openai.Embedding.acreate(
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=self.openai_api_key)
+            
+            response = await client.embeddings.create(
                 model="text-embedding-ada-002",
                 input=text
             )
-            return response['data'][0]['embedding']
+            return response.data[0].embedding
         except Exception as e:
             print(f"Error generating embedding: {e}")
             return None

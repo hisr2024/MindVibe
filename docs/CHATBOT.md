@@ -195,6 +195,60 @@ In `services/gita_kb.py`, adjust:
 
 ## Testing
 
+### 1. Run Basic Tests
+
+Run the test suite to verify the implementation:
+
+```bash
+python test_chatbot.py
+```
+
+This tests:
+- Verse data loading from JSON
+- Cosine similarity calculations
+- Fallback response generation
+- Schema definitions
+
+### 2. Start the Server
+
+```bash
+# Make sure you're in the project root
+cd /home/runner/work/MindVibe/MindVibe
+
+# Start the FastAPI server
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The server will be available at `http://localhost:8000`
+
+### 3. Interactive Testing
+
+Use the example script for interactive testing:
+
+```bash
+python example_chatbot_usage.py
+```
+
+This provides an interactive interface to test the chatbot with various queries.
+
+### 4. API Testing with curl
+
+Test the API directly:
+
+```bash
+# Test with English
+curl -X POST http://localhost:8000/chat/message \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-UID: dev-user" \
+  -d '{"query": "How do I deal with anxiety?", "language": "en"}'
+
+# Test with Hindi
+curl -X POST http://localhost:8000/chat/message \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-UID: dev-user" \
+  -d '{"query": "मैं चिंता से कैसे निपटूं?", "language": "hi"}'
+```
+
 The chatbot can be tested without OpenAI API key:
 1. It will use keyword-based search instead of semantic search
 2. It will provide fallback responses with verse summaries

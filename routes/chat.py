@@ -4,7 +4,6 @@ Chat API endpoint for Bhagavad Gita based mental health chatbot
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
-import openai
 
 from ..schemas import ChatMessage, ChatResponse, VerseReference
 from ..deps import get_db, get_user_id
@@ -87,8 +86,6 @@ async def generate_ai_response(
         # Fallback response when OpenAI is not available
         return generate_fallback_response(verses, language)
     
-    openai.api_key = openai_api_key
-    
     # Prepare context from verses
     verse_context = "\n\n".join([
         f"Verse {v['chapter']}.{v['verse']} (Theme: {v['theme']}):\n"
@@ -121,7 +118,10 @@ Base your response on these relevant teachings:
 Provide a thoughtful, practical response that applies these principles to the user's situation."""
 
     try:
-        response = await openai.ChatCompletion.acreate(
+        from openai import AsyncOpenAI
+        client = AsyncOpenAI(api_key=openai_api_key)
+        
+        response = await client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-4"),
             messages=[
                 {"role": "system", "content": system_prompt},
