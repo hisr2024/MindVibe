@@ -7,3 +7,5 @@ python-multipart>=0.0.5,<0.0.6
 uvicorn>=0.22.0,<0.23.0
 python-dotenv>=1.0.0,<2.0.0
 pytest>=7.3.1,<7.4.0
+asyncpg>=0.29.0
+openai>=1.0.0

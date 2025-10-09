@@ -87,3 +87,21 @@ class ContentPack(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True),
         server_default=func.now(),
     )
+
+
+class GitaVerse(SoftDeleteMixin, Base):
+    __tablename__ = "gita_verses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter: Mapped[int] = mapped_column(Integer, index=True)
+    verse: Mapped[int] = mapped_column(Integer, index=True)
+    sanskrit: Mapped[str] = mapped_column(Text)
+    english: Mapped[str] = mapped_column(Text)
+    hindi: Mapped[str] = mapped_column(Text)
+    principle: Mapped[str] = mapped_column(String(64), index=True)
+    theme: Mapped[str] = mapped_column(String(256))
+    embedding: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+    )

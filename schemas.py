@@ -17,3 +17,22 @@ class BlobOut(BaseModel):
     id: int
     created_at: str
     blob_json: str
+
+class ChatMessage(BaseModel):
+    query: str
+    language: Optional[str] = "en"  # "en", "hi", or "sa"
+
+class VerseReference(BaseModel):
+    chapter: int
+    verse: int
+    sanskrit: str
+    english: str
+    hindi: str
+    principle: str
+    theme: str
+    relevance_score: float
+
+class ChatResponse(BaseModel):
+    response: str
+    verses: List[VerseReference]
+    language: str
