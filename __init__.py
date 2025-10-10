@@ -1,0 +1,1 @@
+# MindVibe package initialization
