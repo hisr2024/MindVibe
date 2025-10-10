@@ -17,6 +17,8 @@ async def startup():
 from .routes.moods import router as moods_router
 from .routes.content import router as content_router
 from .routes.journal import router as journal_router
+from .routes.wisdom_guide import router as wisdom_router
 app.include_router(moods_router)
 app.include_router(content_router)
 app.include_router(journal_router)
+app.include_router(wisdom_router)
