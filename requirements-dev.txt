@@ -1,3 +1,13 @@
-pynacl
-pytest
-prometheus-client
+# Development dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+mypy>=1.0.0
+black>=22.0.0
+flake8>=5.0.0
+isort>=5.0.0
+
+# Core dependencies (add your app's requirements here)
+flask>=2.0.0
+sqlalchemy>=1.4.0
+python-dotenv>=0.19.0
+bcrypt>=3.2.0
