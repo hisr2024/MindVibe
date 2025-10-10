@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "aider": "bash scripts/run-aider.sh",
+    "aider:ps": "pwsh -File scripts/run-aider.ps1"
   },
   "dependencies": {
     "next": "^13.4.19",
