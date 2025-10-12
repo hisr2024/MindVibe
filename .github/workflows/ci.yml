@@ -29,9 +29,9 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Run mypy with explicit package bases
+      - name: Run mypy
         run: |
-          mypy --explicit-package-bases --ignore-missing-imports MindVibe/
+          mypy --ignore-missing-imports .
         env:
           MYPYPATH: ${{ github.workspace }}
 
