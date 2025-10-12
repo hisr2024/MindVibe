@@ -8,7 +8,6 @@ from sqlalchemy import String, Integer, Text, JSON, TIMESTAMP, func, ForeignKey
 
 
 # ---- Soft Delete Mixin -------------------------------------------------------
-
 class SoftDeleteMixin:
     """Adds soft-delete support via a nullable deleted_at timestamp."""
     deleted_at: Mapped[Optional[datetime.datetime]] = mapped_column(
@@ -32,13 +31,11 @@ class SoftDeleteMixin:
 
 
 # ---- Base --------------------------------------------------------------------
-
 class Base(DeclarativeBase):
     pass
 
 
 # ---- Models ------------------------------------------------------------------
-
 class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
 
@@ -103,6 +100,24 @@ class WisdomVerse(SoftDeleteMixin, Base):
     context: Mapped[str] = mapped_column(Text)
     mental_health_applications: Mapped[dict] = mapped_column(JSON)
     embedding: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+    )
+
+
+class GitaVerse(Base):
+    __tablename__ = "gita_verses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter: Mapped[int] = mapped_column(Integer)
+    verse: Mapped[int] = mapped_column(Integer)
+    sanskrit: Mapped[str] = mapped_column(Text)
+    hindi: Mapped[str] = mapped_column(Text)
+    english: Mapped[str] = mapped_column(Text)
+    principle: Mapped[str] = mapped_column(String(64))
+    theme: Mapped[str] = mapped_column(String(256))
+    embedding: Mapped[list[float] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=func.now(),
