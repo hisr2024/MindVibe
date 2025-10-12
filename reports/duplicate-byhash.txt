@@ -1,0 +1,4 @@
+---- Hash: 2E678B660A963AD429FC4CC575E4E17005B033229B7100C435B2D402678962AF ----
+scripts/#.txt
+scripts/check-aider-cli.ps1
+
