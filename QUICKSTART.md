@@ -1,4 +1,4 @@
-# Quick Start Guide: Universal Wisdom Chatbot
+# Quick Start Guide: AI Vibe Bot
 
 ## Prerequisites
 
@@ -286,7 +286,7 @@ export function WisdomChatbot() {
 
   return (
     <div className="wisdom-chatbot">
-      <h2>Universal Wisdom Guide</h2>
+      <h2>AI Vibe Bot</h2>
       <textarea
         value={query}
         onChange={(e) => setQuery(e.target.value)}

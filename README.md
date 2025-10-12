@@ -38,18 +38,18 @@ Repository layout (high-level)
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
 
-## AI Chatbot Feature
+## AI Vibe Bot
 
-MindVibe now includes an AI-powered chatbot that provides mental health guidance based on timeless teachings from the Bhagavad Gita.
+MindVibe now includes the AI Vibe Bot that provides mental health guidance based on timeless teachings from the Bhagavad Gita.
 
-To use the chatbot:
+To use the AI Vibe Bot:
 
 1. Set up your OpenAI API key in .env
 2. Seed the database with Gita verses: python seed_gita.py
 3. Start the server: uvicorn main:app --reload
-4. Access the chatbot at POST /chat/message
+4. Access the AI Vibe Bot at POST /chat/message
 
-For more details, see docs/CHATBOT.md
+For more details, see docs/wisdom_guide.md
 
 Need help?
 If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.

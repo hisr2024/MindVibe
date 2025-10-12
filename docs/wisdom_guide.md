@@ -1,8 +1,8 @@
-# Universal Wisdom Guide
+# AI Vibe Bot
 
 ## Overview
 
-The Universal Wisdom Guide provides AI-powered mental health guidance based on timeless wisdom teachings from the Bhagavad Gita, presented in a universally applicable, non-religious way.
+The AI Vibe Bot provides AI-powered mental health guidance based on timeless wisdom teachings from the Bhagavad Gita, presented in a universally applicable, non-religious way.
 
 ## Features
 
