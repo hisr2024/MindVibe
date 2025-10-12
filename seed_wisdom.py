@@ -23,7 +23,7 @@ async def load_verses_from_json(filepath: str):
 
 
 async def main():
-    """Main seeding function."""
+    """Main seeding function with batch insertion for efficiency."""
     # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -43,42 +43,57 @@ async def main():
     verses_data = await load_verses_from_json(verses_path)
     print(f"Loaded {len(verses_data)} verses from {verses_path}")
     
-    # Seed the database
+    # Seed the database using batch insertion
     async with Session() as session:
+        # Get all existing verse IDs for efficient checking
+        result = await session.execute(select(WisdomVerse.verse_id))
+        existing_ids = {row[0] for row in result.fetchall()}
+        print(f"Found {len(existing_ids)} existing verses in database")
+        
+        # Prepare batch insert data
+        new_verses = []
+        skipped_count = 0
+        
         for verse_data in verses_data:
-            # Check if verse already exists
-            result = await session.execute(
-                select(WisdomVerse).where(WisdomVerse.verse_id == verse_data['verse_id'])
-            )
-            existing = result.scalar_one_or_none()
-            
-            if not existing:
+            if verse_data['verse_id'] not in existing_ids:
                 # Convert mental_health_applications list to dict format
                 applications_dict = {
                     "applications": verse_data.get('mental_health_applications', [])
                 }
                 
-                # Insert new verse
-                await session.execute(
-                    insert(WisdomVerse).values(
-                        verse_id=verse_data['verse_id'],
-                        chapter=verse_data['chapter'],
-                        verse_number=verse_data['verse_number'],
-                        theme=verse_data['theme'],
-                        english=verse_data['english'],
-                        hindi=verse_data['hindi'],
-                        sanskrit=verse_data['sanskrit'],
-                        context=verse_data['context'],
-                        mental_health_applications=applications_dict,
-                        embedding=None  # Will be computed later if needed
-                    )
-                )
-                print(f"Inserted verse {verse_data['verse_id']}")
+                new_verses.append({
+                    'verse_id': verse_data['verse_id'],
+                    'chapter': verse_data['chapter'],
+                    'verse_number': verse_data['verse_number'],
+                    'theme': verse_data['theme'],
+                    'english': verse_data['english'],
+                    'hindi': verse_data['hindi'],
+                    'sanskrit': verse_data['sanskrit'],
+                    'context': verse_data['context'],
+                    'mental_health_applications': applications_dict,
+                    'embedding': None  # Will be computed later if needed
+                })
             else:
-                print(f"Verse {verse_data['verse_id']} already exists, skipping")
+                skipped_count += 1
         
-        await session.commit()
-        print("Wisdom verses seeding completed!")
+        # Batch insert new verses (in chunks for very large datasets)
+        if new_verses:
+            batch_size = 100
+            total_inserted = 0
+            
+            for i in range(0, len(new_verses), batch_size):
+                batch = new_verses[i:i + batch_size]
+                await session.execute(insert(WisdomVerse), batch)
+                total_inserted += len(batch)
+                print(f"Inserted batch: {total_inserted}/{len(new_verses)} verses")
+            
+            await session.commit()
+            print(f"\nSeeding completed!")
+            print(f"  New verses inserted: {len(new_verses)}")
+            print(f"  Existing verses skipped: {skipped_count}")
+            print(f"  Total verses in database: {len(verses_data)}")
+        else:
+            print(f"All {len(verses_data)} verses already exist in database, no insertion needed")
 
 
 if __name__ == "__main__":

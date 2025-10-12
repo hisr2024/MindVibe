@@ -39,12 +39,20 @@ python seed_wisdom.py
 
 Expected output:
 ```
-Loaded 10 verses from data/wisdom/verses.json
-Inserted verse 2.47
-Inserted verse 2.56
+Loaded 701 verses from data/wisdom/verses.json
+Found 0 existing verses in database
+Inserted batch: 100/701 verses
+Inserted batch: 200/701 verses
 ...
-Wisdom verses seeding completed!
+Inserted batch: 701/701 verses
+
+Seeding completed!
+  New verses inserted: 701
+  Existing verses skipped: 0
+  Total verses in database: 701
 ```
+
+The seeding script uses efficient batch insertion to handle the complete dataset of all 700+ verses from the Bhagavad Gita.
 
 ### 4. Start the API Server
 

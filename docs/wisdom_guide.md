@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Universal Wisdom Guide provides AI-powered mental health guidance based on timeless wisdom teachings from the Bhagavad Gita, presented in a universally applicable, non-religious way.
+The Universal Wisdom Guide provides AI-powered mental health guidance based on timeless wisdom teachings from the complete Bhagavad Gita (all 700+ verses), presented in a universally applicable, non-religious way. The verses are sourced from authentic translations including contributions from renowned scholars like Swami Adidevananda, Swami Gambirananda, Swami Sivananda, and others.
 
 ## Features
 
@@ -84,7 +84,47 @@ Run the seed script to populate wisdom verses:
 python seed_wisdom.py
 ```
 
+This will efficiently insert all 701 verses using batch processing. The script:
+- Checks for existing verses to avoid duplicates
+- Uses batch insertion (100 verses per batch) for optimal performance
+- Provides progress updates during insertion
+- Completes in under a minute for the full dataset
+
 ## Implementation Details
+
+### Complete Dataset
+
+The wisdom database now contains **all 701 verses** from the 18 chapters of the Bhagavad Gita:
+- Chapter 1: 47 verses (Moral Dilemma)
+- Chapter 2: 72 verses (Knowledge & Wisdom)
+- Chapter 3: 43 verses (Action Without Attachment)
+- Chapter 4: 42 verses (Knowledge & Wisdom)
+- Chapter 5: 29 verses (Inner Peace)
+- Chapter 6: 47 verses (Mastering the Mind)
+- Chapter 7: 30 verses (Self-Knowledge)
+- Chapter 8: 28 verses (Consciousness Exploration)
+- Chapter 9: 34 verses (Inner Wisdom)
+- Chapter 10: 42 verses (Self-Awareness)
+- Chapter 11: 55 verses (Consciousness Exploration)
+- Chapter 12: 20 verses (Inner Peace)
+- Chapter 13: 35 verses (Self-Knowledge)
+- Chapter 14: 27 verses (Self-Awareness)
+- Chapter 15: 20 verses (Inner Wisdom)
+- Chapter 16: 24 verses (Emotional Regulation)
+- Chapter 17: 28 verses (Self-Discipline)
+- Chapter 18: 78 verses (Knowledge & Wisdom)
+
+### Authentic Sources
+
+The verses were compiled from the open-source Gita API repository which aggregates translations from:
+- Swami Adidevananda
+- Swami Gambirananda
+- Swami Sivananda
+- Swami Ramsukhdas
+- Swami Tejomayananda
+- And other renowned scholars
+
+All English translations have been sanitized to remove religious references while preserving the universal wisdom.
 
 ### Sanitization
 

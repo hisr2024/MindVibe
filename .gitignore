@@ -22,3 +22,5 @@ keyset_eddsa/*.json
 *.swp
 # Logs
 *.log
+# Backup files
+*_backup*.json

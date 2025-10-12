@@ -38,18 +38,56 @@ Repository layout (high-level)
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
 
-## AI Chatbot Feature
+## Universal Wisdom Guide (AI Chatbot)
 
-MindVibe now includes an AI-powered chatbot that provides mental health guidance based on timeless teachings from the Bhagavad Gita.
+MindVibe includes a comprehensive AI-powered wisdom guide that provides mental health guidance based on **all 701 verses** from the Bhagavad Gita, presented in a secular, universally applicable format.
 
-To use the chatbot:
+### Features
+- **Complete Dataset**: All 700+ verses from 18 chapters
+- **Multilingual**: Sanskrit, English, and Hindi translations
+- **Mental Health Focus**: 56 applications mapped across 18 themes
+- **Sanitized Content**: Religious references removed from English for universal applicability
+- **Authentic Sources**: Translations from renowned scholars (Swami Sivananda, Swami Gambirananda, etc.)
 
-1. Set up your OpenAI API key in .env
-2. Seed the database with Gita verses: python seed_gita.py
-3. Start the server: uvicorn main:app --reload
-4. Access the chatbot at POST /chat/message
+### Quick Start
 
-For more details, see docs/CHATBOT.md
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Set up your OpenAI API key in .env (optional - for AI-powered responses):
+   ```bash
+   OPENAI_API_KEY=sk-your-api-key-here
+   ```
+
+3. Seed the database with all 701 verses:
+   ```bash
+   python seed_wisdom.py
+   ```
+   
+   Expected output:
+   ```
+   Loaded 701 verses from data/wisdom/verses.json
+   Inserted batch: 100/701 verses
+   ...
+   Seeding completed!
+   ```
+
+4. Start the server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+5. Use the API endpoints:
+   - `POST /api/wisdom/query` - Get guidance for a mental health question
+   - `GET /api/wisdom/themes` - List all available themes
+   - `GET /api/wisdom/verses/{verse_id}` - Get specific verse
+
+### Documentation
+- **Quick Start**: See [QUICKSTART.md](QUICKSTART.md)
+- **Wisdom Guide**: See [docs/wisdom_guide.md](docs/wisdom_guide.md)
+- **Dataset Summary**: See [BHAGAVAD_GITA_DATASET_SUMMARY.md](BHAGAVAD_GITA_DATASET_SUMMARY.md)
 
 Need help?
 If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.
