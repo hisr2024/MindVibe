@@ -1,5 +1,5 @@
 # Modern FastAPI-based requirements for MindVibe
-fastapi>=0.99.0,<0.100.0
+fastapi>=0.100.0,<1.0.0
 pydantic>=2.0.0,<3.0.0
 sqlalchemy>=2.0.0,<3.0.0
 python-jose[cryptography]>=3.3.0,<4.0.0
