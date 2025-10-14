@@ -7,8 +7,9 @@ This script validates that all components can be imported and basic functionalit
 import sys
 import os
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add parent directory to path for imports to ensure compatibility across execution contexts
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, script_dir)
 
 print("=" * 60)
 print("Wisdom Guide Implementation Verification")
