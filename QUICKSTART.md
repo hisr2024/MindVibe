@@ -20,7 +20,7 @@ Create or update your `.env` file:
 
 ```bash
 # Required
-DATABASE_URL=postgresql+asyncpg://navi:navi@db:5432/navi
+DATABASE_URL=postgresql+asyncpg://mindvibe:password@db:5432/mindvibe
 
 # Optional - for AI-powered responses
 OPENAI_API_KEY=sk-your-api-key-here
