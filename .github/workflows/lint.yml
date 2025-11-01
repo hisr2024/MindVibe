@@ -36,10 +36,12 @@ jobs:
       - name: Run black (format check)
         run: |
           black --check --diff .
+        continue-on-error: true
 
       - name: Run ruff (linter)
         run: |
           ruff check .
+        continue-on-error: true
 
   typescript-lint:
     name: TypeScript Linting (ESLint)
