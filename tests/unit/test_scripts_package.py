@@ -74,9 +74,10 @@ def test_scripts_have_docstrings():
 
 
 def test_scripts_have_main_guard():
-    """Test that all scripts have proper __main__ guard or run directly."""
+    """Test that all scripts have proper __main__ guard or are designed to run directly."""
     scripts_dir = project_root / 'scripts'
     
+    # These scripts should have __main__ guards
     scripts_to_check = [
         'generate_eddsa_key.py',
         'seed_wisdom.py',
@@ -91,8 +92,8 @@ def test_scripts_have_main_guard():
         assert 'if __name__ == "__main__":' in content, \
             f"Script {script_name} missing __main__ guard"
     
-    # verify_wisdom.py is a verification script that runs top-to-bottom
-    # This is acceptable for verification/diagnostic scripts
+    # verify_wisdom.py is a verification/diagnostic script that runs immediately
+    # when executed - this is an acceptable pattern for verification scripts
 
 
 def test_scripts_have_proper_imports():
