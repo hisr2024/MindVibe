@@ -1,0 +1,27 @@
+---
+name: 📚 Documentation
+about: Report missing or incorrect documentation
+title: '[DOCS] '
+labels: ['documentation', 'needs-triage']
+assignees: ''
+---
+
+## Documentation Issue
+A clear description of what documentation is missing or incorrect.
+
+## Location
+Where in the documentation did you find this issue?
+- [ ] README.md
+- [ ] API Documentation
+- [ ] Code comments
+- [ ] Developer guides
+- [ ] Other: [specify]
+
+## Current State
+What does the documentation currently say (if anything)?
+
+## Proposed Change
+What should the documentation say instead?
+
+## Additional Context
+Add any other context or screenshots about the documentation issue here.
