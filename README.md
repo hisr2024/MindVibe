@@ -54,6 +54,39 @@ Quickstart (local)
    $env:JWT_SECRET = "dev-jwt-secret-please-change"
    python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
 
+## Running Tests
+
+MindVibe uses pytest for automated testing. The test suite includes unit tests and integration tests for all core functionality.
+
+### Run all tests:
+```bash
+python -m pytest tests/
+```
+
+### Run tests with coverage report:
+```bash
+python -m pytest tests/ --cov=. --cov-report=html
+```
+
+### Run specific test categories:
+```bash
+# Unit tests only
+python -m pytest tests/unit/
+
+# Integration tests only
+python -m pytest tests/integration/
+
+# Specific test file
+python -m pytest tests/unit/test_wisdom_kb.py
+```
+
+### Run tests in verbose mode:
+```bash
+python -m pytest tests/ -v
+```
+
+For more detailed testing information, see QUICKSTART.md.
+
 Repository layout (high-level)
 - scripts/                - helper scripts (key generation, setup)
 - keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
@@ -62,18 +95,56 @@ Repository layout (high-level)
 - docs/                   - documentation and technical notes
 - .github/workflows/      - CI/CD workflows (ci.yml for tests, lint.yml for linting)
 
-## AI Vibe Bot
+## AI-Powered Mental Health Chatbot
 
-MindVibe now includes the AI Vibe Bot that provides mental health guidance based on timeless teachings from the Bhagavad Gita.
+MindVibe includes an AI-powered chatbot that provides compassionate mental health guidance based on timeless wisdom from the Bhagavad Gita, presented in a completely secular, universally applicable way.
 
-To use the AI Vibe Bot:
+### Features
 
-1. Set up your OpenAI API key in .env
-2. Seed the database with Gita verses: python seed_gita.py
-3. Start the server: uvicorn main:app --reload
-4. Access the AI Vibe Bot at POST /chat/message
+- **Conversational AI**: Multi-turn conversations with context awareness
+- **Universal Wisdom**: Ancient teachings without religious terminology
+- **Multi-Language Support**: English, Hindi, and Sanskrit
+- **Smart Search**: Semantic search finds relevant verses for your concerns
+- **Offline Mode**: Works with or without OpenAI API (fallback to templates)
+- **Session Management**: Maintains conversation history across messages
 
-For more details, see docs/wisdom_guide.md
+### Quick Start
+
+1. **Seed the database** with wisdom verses:
+   ```bash
+   python seed_wisdom.py
+   ```
+
+2. **(Optional) Configure OpenAI** for AI-powered responses:
+   ```bash
+   echo "OPENAI_API_KEY=sk-your-key-here" >> .env
+   ```
+
+3. **Start the server**:
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+4. **Start chatting** at `POST /api/chat/message`:
+   ```bash
+   curl -X POST http://localhost:8000/api/chat/message \
+     -H "Content-Type: application/json" \
+     -d '{"message": "I am feeling anxious about work"}'
+   ```
+
+### API Endpoints
+
+- `POST /api/chat/message` - Send a message and get guidance
+- `GET /api/chat/history/{session_id}` - View conversation history
+- `DELETE /api/chat/history/{session_id}` - Clear conversation
+- `POST /api/chat/start` - Start a new session
+- `GET /api/chat/health` - Check chatbot status
+
+### Documentation
+
+- **Chatbot Guide**: [docs/chatbot.md](docs/chatbot.md) - Complete chatbot documentation
+- **Wisdom API**: [docs/wisdom_guide.md](docs/wisdom_guide.md) - Wisdom verse API reference
+- **Interactive Docs**: Visit `http://localhost:8000/docs` after starting the server
 
 Need help?
 If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.
