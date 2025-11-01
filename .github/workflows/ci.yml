@@ -70,6 +70,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         if: always()
+        continue-on-error: true
         with:
           file: ./coverage.xml
           flags: python
@@ -78,6 +79,7 @@ jobs:
       - name: Comment coverage on PR
         uses: py-cov-action/python-coverage-comment-action@v3
         if: github.event_name == 'pull_request'
+        continue-on-error: true
         with:
           GITHUB_TOKEN: ${{ github.token }}
           MINIMUM_GREEN: 70
@@ -119,6 +121,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         if: always()
+        continue-on-error: true
         with:
           file: ./coverage/coverage-final.json
           flags: javascript
