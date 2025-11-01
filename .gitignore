@@ -37,3 +37,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+# Example output files
+examples/pipeline/transformed_wisdom.json
+examples/pipeline/example_output.json

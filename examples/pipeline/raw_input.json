@@ -1,0 +1,25 @@
+{
+  "description": "Example raw verse data before transformation",
+  "verses": [
+    {
+      "chapter": 2,
+      "verse_number": 47,
+      "theme": "action_without_attachment",
+      "english": "You have the right to perform your duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, nor be attached to not doing your duty.",
+      "hindi": "तुम्हारा अधिकार केवल कर्म करने में है, फल में कभी नहीं। न तो तुम कर्मों के फल का कारण बनो और न ही कर्म न करने में आसक्त होओ।",
+      "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥",
+      "context": "Lord Krishna teaches Arjuna about performing duty without attachment to outcomes, a key concept for reducing anxiety.",
+      "mental_health_applications": ["anxiety_management", "stress_reduction", "letting_go", "present_moment_focus"]
+    },
+    {
+      "chapter": 6,
+      "verse_number": 5,
+      "theme": "self_empowerment",
+      "english": "Elevate yourself through the power of your mind, and not degrade yourself, for the mind can be the friend and also the enemy of the self.",
+      "hindi": "अपने मन की शक्ति से अपना उद्धार करो, अपने आप को नीचा मत गिराओ। क्योंकि मन ही आत्मा का मित्र है और मन ही शत्रु भी है।",
+      "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
+      "context": "Krishna emphasizes personal responsibility for one's mental state and the importance of self-mastery.",
+      "mental_health_applications": ["self_empowerment", "depression_recovery", "self_compassion", "personal_growth"]
+    }
+  ]
+}
