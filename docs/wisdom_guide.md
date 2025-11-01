@@ -179,10 +179,17 @@ for verse in data["verses"]:
 
 ## Adding New Verses
 
-1. Edit `data/wisdom/verses.json`
-2. Add new verse entries following the existing structure
-3. Ensure religious references are already sanitized in the English text
-4. Run `python seed_wisdom.py` to update the database
+**Important**: Before adding any new verses, please review the [Bhagavad Gita Verse Validation Guide](gita_verse_validation_guide.md) for comprehensive guidelines on sourcing, validating, and ensuring mental health alignment.
+
+### Quick Process
+
+1. **Source & Validate**: Follow the validation guide to ensure authenticity
+2. **Edit**: Add entry to `data/wisdom/verses.json` following existing structure
+3. **Sanitize**: Ensure religious references are sanitized using universal language
+4. **Verify**: Use the validation checklist to confirm quality
+5. **Seed**: Run `python seed_wisdom.py` to update the database
+
+For detailed instructions on identifying reliable sources, verifying translations, and ensuring mental health alignment, see [docs/gita_verse_validation_guide.md](gita_verse_validation_guide.md).
 
 ## Future Enhancements
 
