@@ -376,7 +376,7 @@ Use this checklist for each verse before adding to the database:
       "Mitchell (2000), Chapter 2, Verse 47",
       "Sargeant (1994), Chapter 2, Verse 47"
     ],
-    "verification_date": "2024-01-15",
+    "verification_date": "2025-11-01",
     "reviewed_by": "Team member initials"
   }
 }
