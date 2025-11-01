@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   python-lint:
-    name: Python Linting (flake8)
+    name: Python Linting (black + ruff)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,14 +28,18 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install flake8
+      - name: Install linters
         run: |
           python -m pip install --upgrade pip
-          pip install flake8
+          pip install black ruff
 
-      - name: Run flake8
+      - name: Run black (format check)
         run: |
-          flake8 . --exclude=node_modules,.venv,venv,migrations,__pycache__,.git --max-line-length=120 --count --statistics --show-source
+          black --check --diff .
+
+      - name: Run ruff (linter)
+        run: |
+          ruff check .
 
   typescript-lint:
     name: TypeScript Linting (ESLint)
