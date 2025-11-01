@@ -1,1 +1,28 @@
-startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+services:
+  # Backend API Service
+  - type: web
+    name: mindvibe-api
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mindvibe-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: EDDSA_ENABLED
+        value: false
+    healthCheckPath: /
+
+databases:
+  # PostgreSQL Database
+  - name: mindvibe-db
+    plan: free
+    databaseName: mindvibe
+    user: navi
