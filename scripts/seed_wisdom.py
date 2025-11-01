@@ -41,6 +41,7 @@ async def main():
             await conn.run_sync(Base.metadata.create_all)
         
         # Load verses from JSON (data directory is at repo root)
+        # Calculate paths relative to this script file
         script_dir = Path(__file__).parent
         repo_root = script_dir.parent
         verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'

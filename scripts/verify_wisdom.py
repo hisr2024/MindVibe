@@ -80,7 +80,6 @@ print("\n[5/6] Testing verse data loading...")
 try:
     import json
     
-    # Reuse script_dir and repo_root from top of file
     verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'
     
     if not os.path.exists(verses_path):
