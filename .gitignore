@@ -33,3 +33,5 @@ package-lock.json
 .next/
 out/
 tsconfig.tsbuildinfo
+examples/pipeline/transformed_wisdom.json
+examples/pipeline/example_output.json
