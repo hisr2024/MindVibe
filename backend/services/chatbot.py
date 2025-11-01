@@ -30,6 +30,9 @@ class EnhancedChatbot(Chatbot):
         chatbot_response = super().respond(message)
         return f"{chatbot_response} | Wisdom says: {wisdom_response}"
 
+# Alias for backward compatibility
+ChatbotService = EnhancedChatbot
+
 # Example usage
 if __name__ == '__main__':
     chatbot = EnhancedChatbot()
