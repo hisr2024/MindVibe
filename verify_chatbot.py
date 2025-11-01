@@ -217,7 +217,7 @@ def main():
         print("\n✅ All verification checks passed!")
         print("\nNext Steps:")
         print("1. Install dependencies: pip install -r requirements.txt")
-        print("2. Seed the database: python seed_wisdom.py")
+        print("2. Seed the database: python scripts/seed_wisdom.py")
         print("3. Start the server: uvicorn main:app --reload")
         print("4. Test the chatbot: python examples/chatbot_example.py")
         return 0

@@ -197,7 +197,7 @@ DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/mindvibe
 Seed the database with wisdom verses:
 
 ```bash
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 ```
 
 This populates the database with Bhagavad Gita verses in Sanskrit, Hindi, and English.
@@ -447,7 +447,7 @@ The chatbot follows strict guidelines to ensure universal applicability:
 ### Issue: "No relevant wisdom verses found"
 
 **Solution**: 
-- Ensure database is seeded: `python seed_wisdom.py`
+- Ensure database is seeded: `python scripts/seed_wisdom.py`
 - Check database connection
 - Verify DATABASE_URL environment variable
 
@@ -475,7 +475,7 @@ The chatbot follows strict guidelines to ensure universal applicability:
 **Solution**:
 1. Check `data/wisdom/verses.json` for religious terms in English text
 2. Update the verse entry with sanitized language
-3. Re-run `python seed_wisdom.py`
+3. Re-run `python scripts/seed_wisdom.py`
 4. Or rely on the `WisdomKnowledgeBase.sanitize_text()` method
 
 ## Future Enhancements

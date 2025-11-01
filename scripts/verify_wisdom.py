@@ -2,21 +2,28 @@
 """
 Simple verification script to test the wisdom guide implementation.
 This script validates that all components can be imported and basic functionality works.
+
+Can be run as:
+    python scripts/verify_wisdom.py
+    OR
+    python -m scripts.verify_wisdom
 """
 
 import sys
 import os
+from pathlib import Path
 
 # Add parent directory to path for imports to ensure compatibility across execution contexts
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, script_dir)
+script_dir = Path(__file__).parent
+repo_root = script_dir.parent
+sys.path.insert(0, str(repo_root))
 
 print("=" * 60)
 print("Wisdom Guide Implementation Verification")
 print("=" * 60)
 
 # Test 1: Import models
-print("\n[1/5] Testing model imports...")
+print("\n[1/6] Testing model imports...")
 try:
     from models import WisdomVerse
     print("✓ WisdomVerse model imported successfully")
@@ -25,7 +32,7 @@ except Exception as e:
     sys.exit(1)
 
 # Test 2: Import wisdom knowledge base service
-print("\n[2/5] Testing service imports...")
+print("\n[2/6] Testing service imports...")
 try:
     from services.wisdom_kb import WisdomKnowledgeBase
     print("✓ WisdomKnowledgeBase service imported successfully")
@@ -34,7 +41,7 @@ except Exception as e:
     sys.exit(1)
 
 # Test 3: Test sanitization function
-print("\n[3/5] Testing text sanitization...")
+print("\n[3/6] Testing text sanitization...")
 try:
     test_text = "Krishna told Arjuna that the Lord is divine"
     sanitized = WisdomKnowledgeBase.sanitize_text(test_text)
@@ -52,7 +59,7 @@ except Exception as e:
     sys.exit(1)
 
 # Test 4: Test text similarity
-print("\n[4/5] Testing text similarity...")
+print("\n[4/6] Testing text similarity...")
 try:
     text1 = "I am feeling anxious and stressed"
     text2 = "anxiety management and stress reduction"
@@ -69,16 +76,11 @@ except Exception as e:
     sys.exit(1)
 
 # Test 5: Load and validate verse data
-print("\n[5/5] Testing verse data loading...")
+print("\n[5/6] Testing verse data loading...")
 try:
     import json
     
-    verses_path = os.path.join(
-        os.path.dirname(__file__),
-        'data',
-        'wisdom',
-        'verses.json'
-    )
+    verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'
     
     if not os.path.exists(verses_path):
         print(f"✗ Verse data file not found: {verses_path}")
@@ -125,7 +127,7 @@ print("All verification tests passed! ✓")
 print("=" * 60)
 print("\nNext steps:")
 print("1. Set OPENAI_API_KEY in your .env file for AI responses")
-print("2. Run: python seed_wisdom.py (to populate database)")
+print("2. Run: python scripts/seed_wisdom.py (to populate database)")
 print("3. Start the API server and test the endpoints")
 print("\nAPI Endpoints:")
 print("  POST /api/wisdom/query")

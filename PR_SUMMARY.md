@@ -152,7 +152,7 @@ pytest tests/ -v --cov=. --cov-report=html
 
 ```bash
 # 1. Seed database with wisdom verses
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 
 # 2. (Optional) Configure OpenAI API
 echo "OPENAI_API_KEY=sk-your-key-here" >> .env
@@ -333,7 +333,7 @@ No new dependencies required.
 ## Deployment Notes
 
 ### Before Deployment
-1. Seed database: `python seed_wisdom.py`
+1. Seed database: `python scripts/seed_wisdom.py`
 2. (Optional) Set `OPENAI_API_KEY` in environment
 3. Run verification: `python verify_chatbot.py`
 

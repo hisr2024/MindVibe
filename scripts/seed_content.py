@@ -1,6 +1,24 @@
-import asyncio, os
+"""
+Seed script for content packs.
+
+Loads content packs for different locales and populates the database.
+
+Can be run as:
+    python -m scripts.seed_content
+    OR
+    python scripts/seed_content.py
+"""
+
+import asyncio
+import os
+import sys
+from pathlib import Path
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import insert, select
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from models import Base, ContentPack
 
 DATA_EN = {"version":1,"locale":"en","packs":[{"principle":"stable_center","cards":[{"title":"Anchor in Breath","copy":"Feel one full inhale and exhale. Let attention rest where breath touches the nose.","cta":"Try 5 cycles","exercise_ref":"focus_breath_60"},{"title":"Name the Weather","copy":"Say: 'Anxious is here.' You’re the sky, not the cloud.","cta":"Say it softly","exercise_ref":"witness_label_45"},{"title":"One Point","copy":"Choose a single point in your visual field. Hold attention there for 20 seconds.","cta":"Hold gently","exercise_ref":"single_point_20"}]}]}

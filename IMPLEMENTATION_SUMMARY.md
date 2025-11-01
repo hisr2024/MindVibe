@@ -73,9 +73,9 @@ Successfully implemented the AI Vibe Bot for MindVibe that presents Bhagavad Git
   - asyncpg>=0.27.0,<0.28.0
 
 ### 7. Seeding Script
-- **File**: `seed_wisdom.py`
+- **File**: `scripts/seed_wisdom.py`
 - **Purpose**: Populate database with wisdom verses from JSON
-- **Usage**: `python seed_wisdom.py`
+- **Usage**: `python scripts/seed_wisdom.py`
 - **Features**: 
   - Checks for existing verses to avoid duplicates
   - Loads from `data/wisdom/verses.json`
@@ -127,7 +127,7 @@ Each verse is tagged with specific applications:
 
 ## Testing & Verification
 
-Created `verify_wisdom.py` script that tests:
+Created `scripts/verify_wisdom.py` script that tests:
 - Model imports
 - Service functionality
 - Text sanitization
@@ -159,8 +159,9 @@ All syntax checks passed ✓
 ├── core/settings.py             # Added OPENAI_API_KEY
 ├── requirements.txt             # Added dependencies
 ├── .env.example                 # Added OPENAI_API_KEY
-├── seed_wisdom.py               # Database seeding script
-└── verify_wisdom.py             # Verification script
+└── scripts/                     # Scripts package
+    ├── seed_wisdom.py           # Database seeding script
+    └── verify_wisdom.py         # Verification script
 ```
 
 ## Usage Example
@@ -192,7 +193,7 @@ response = requests.post(
 
 2. **Seed the database**:
    ```bash
-   python seed_wisdom.py
+   python scripts/seed_wisdom.py
    ```
 
 3. **Start the server**:

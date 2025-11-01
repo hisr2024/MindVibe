@@ -64,12 +64,37 @@ python -m pytest tests/ -v
 For more detailed testing information, see QUICKSTART.md.
 
 Repository layout (high-level)
-- scripts/                - helper scripts (key generation, setup)
+- scripts/                - Python package containing utility scripts:
+  - generate_eddsa_key.py - Generate Ed25519 keypairs for JWT signing
+  - seed_wisdom.py        - Seed database with wisdom verses
+  - seed_content.py       - Seed database with content packs
+  - verify_wisdom.py      - Verify wisdom guide implementation
 - keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
 - security/               - JWT and EdDSA logic
 - tests/                  - unit tests (pytest)
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
+
+## Scripts Usage
+
+The `scripts/` directory is now a Python package containing all utility scripts. Scripts can be run in two ways:
+
+**Method 1: Direct execution**
+```bash
+python scripts/generate_eddsa_key.py
+python scripts/seed_wisdom.py
+python scripts/seed_content.py
+python scripts/verify_wisdom.py
+```
+
+**Method 2: As a module**
+```bash
+python -m scripts.generate_eddsa_key
+python -m scripts.seed_wisdom
+python -m scripts.seed_content
+python -m scripts.verify_wisdom
+```
+
 
 ## Context Transformation Pipeline
 
@@ -99,7 +124,7 @@ MindVibe includes an AI-powered chatbot that provides compassionate mental healt
 
 1. **Seed the database** with wisdom verses:
    ```bash
-   python seed_wisdom.py
+   python scripts/seed_wisdom.py
    ```
 
 2. **(Optional) Configure OpenAI** for AI-powered responses:

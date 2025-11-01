@@ -2,13 +2,24 @@
 Seed script for wisdom verses.
 
 Loads wisdom verses from data/wisdom/verses.json and populates the database.
+
+Can be run as:
+    python -m scripts.seed_wisdom
+    OR
+    python scripts/seed_wisdom.py
 """
 
 import asyncio
 import os
+import sys
 import json
+from pathlib import Path
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import insert, select
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from models import Base, WisdomVerse
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://mindvibe:password@db:5432/mindvibe")
@@ -29,13 +40,11 @@ async def main():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         
-        # Load verses from JSON
-        verses_path = os.path.join(
-            os.path.dirname(__file__),
-            'data',
-            'wisdom',
-            'verses.json'
-        )
+        # Load verses from JSON (data directory is at repo root)
+        # Calculate paths relative to this script file
+        script_dir = Path(__file__).parent
+        repo_root = script_dir.parent
+        verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'
         
         if not os.path.exists(verses_path):
             print(f"Error: Verses file not found at {verses_path}")

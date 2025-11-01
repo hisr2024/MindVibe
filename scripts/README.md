@@ -1,6 +1,19 @@
-# Scripts Directory
+# Scripts Package
 
-This directory contains utility scripts for the MindVibe project.
+This directory is a Python package containing utility scripts for the MindVibe project.
+
+## Package Structure
+
+The `scripts/` directory is now a Python package and can be imported or run as modules:
+
+```python
+# Import the package
+from scripts import seed_wisdom, seed_content, verify_wisdom
+
+# Or run as modules
+python -m scripts.seed_wisdom
+python -m scripts.generate_eddsa_key
+```
 
 ## Available Scripts
 
@@ -12,9 +25,56 @@ Generates EdDSA (Edwards-curve Digital Signature Algorithm) cryptographic keys f
 **Usage:**
 ```bash
 python scripts/generate_eddsa_key.py
+# OR
+python -m scripts.generate_eddsa_key
 ```
 
 This will create keys in the `keyset_eddsa/` directory (which is excluded from git).
+
+#### `seed_wisdom.py`
+Seeds the database with wisdom verses from the Bhagavad Gita for the AI Vibe Bot feature.
+
+**Usage:**
+```bash
+python scripts/seed_wisdom.py
+# OR
+python -m scripts.seed_wisdom
+```
+
+**Requirements:**
+- Database must be running
+- `data/wisdom/verses.json` must exist
+
+#### `seed_content.py`
+Seeds the database with content packs for different locales (en, de, hi).
+
+**Usage:**
+```bash
+python scripts/seed_content.py
+# OR
+python -m scripts.seed_content
+```
+
+**Requirements:**
+- Database must be running
+
+#### `verify_wisdom.py`
+Verification script to test the wisdom guide implementation. Validates that all components can be imported and basic functionality works.
+
+**Usage:**
+```bash
+python scripts/verify_wisdom.py
+# OR
+python -m scripts.verify_wisdom
+```
+
+**Tests:**
+- Model imports
+- Service imports
+- Text sanitization
+- Text similarity computation
+- Verse data loading
+- Route imports
 
 ### Shell Scripts
 

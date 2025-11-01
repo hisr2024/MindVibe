@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
 Generate an Ed25519 keypair and write a minimal keyset in keyset_eddsa/.
+
 Produces:
  - keyset_eddsa/private_key.pem   (PEM PKCS8 unencrypted)
  - keyset_eddsa/public_key-pub.json (JWK-lite: {"kty":"OKP","crv":"Ed25519","x": "<base64url>"})
+
 This is safe for CI (no secrets are committed).
+
+Can be run as:
+    python scripts/generate_eddsa_key.py
+    OR
+    python -m scripts.generate_eddsa_key
 """
 import os
 import json

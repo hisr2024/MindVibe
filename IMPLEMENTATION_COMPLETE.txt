@@ -104,7 +104,7 @@ CORE COMPONENTS
    - Error handling
 
 5. Seeding Script
-   📄 seed_wisdom.py
+   📄 scripts/seed_wisdom.py
    - Database population from JSON
    - Duplicate detection
    - Data transformation
@@ -146,7 +146,7 @@ DOCUMENTATION
    - Testing approach
    - Compliance verification
 
-4. 📄 verify_wisdom.py
+4. 📄 scripts/verify_wisdom.py
    - Automated validation script
    - Import testing
    - Sanitization testing
@@ -226,7 +226,7 @@ Step 2: Configure Environment (Optional)
   $ echo "OPENAI_API_KEY=sk-..." >> .env
 
 Step 3: Seed Database
-  $ python seed_wisdom.py
+  $ python scripts/seed_wisdom.py
 
 Step 4: Start Server
   $ uvicorn main:app --reload
@@ -358,13 +358,13 @@ To add new verses:
   1. Edit data/wisdom/verses.json
   2. Follow existing verse structure
   3. Ensure English text is pre-sanitized
-  4. Run: python seed_wisdom.py
+  4. Run: python scripts/seed_wisdom.py
   5. Restart API server
 
 To update sanitization rules:
   1. Edit services/wisdom_kb.py
   2. Update RELIGIOUS_TERMS and replacements
-  3. Test with verify_wisdom.py
+  3. Test with scripts/verify_wisdom.py
   4. Restart API server
 
 SUPPORT & DOCUMENTATION
@@ -374,7 +374,7 @@ For detailed information, consult:
   📖 QUICKSTART.md              - Quick start guide
   📖 docs/wisdom_guide.md       - Complete API documentation
   📖 IMPLEMENTATION_SUMMARY.md  - Technical details
-  📄 verify_wisdom.py           - Validation testing
+  📄 scripts/verify_wisdom.py           - Validation testing
 
 CONCLUSION
 ═══════════════════════════════════════════════════════════════════════════

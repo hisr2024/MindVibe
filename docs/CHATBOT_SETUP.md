@@ -80,7 +80,7 @@ DATABASE_URL=sqlite+aiosqlite:///./mindvibe.db
 
 ```bash
 # Populate database with Bhagavad Gita wisdom verses
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 ```
 
 Expected output:
@@ -147,7 +147,7 @@ pip install fastapi uvicorn sqlalchemy aiosqlite pydantic
 export DATABASE_URL="sqlite+aiosqlite:///./test.db"
 
 # 3. Seed database
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 
 # 4. Start server
 uvicorn main:app --reload
@@ -229,7 +229,7 @@ pytest -m asyncio -v
 docker-compose up -d
 
 # Seed database in container
-docker-compose exec api python seed_wisdom.py
+docker-compose exec api python scripts/seed_wisdom.py
 
 # Check logs
 docker-compose logs -f api
@@ -251,7 +251,7 @@ pip install -r requirements.txt
 
 **Solution**: Seed the database
 ```bash
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 ```
 
 ### Issue: "Connection refused" or "Database error"
