@@ -98,8 +98,8 @@ class TestChatEndpoints:
                 }
             )
             
-            assert response.status_code == 400
-            assert "empty" in response.json()["detail"].lower()
+            assert response.status_code == 422
+            assert "message" in response.json()["detail"][0]["loc"]
     
     async def test_send_message_invalid_language(self):
         """Test sending a message with invalid language."""

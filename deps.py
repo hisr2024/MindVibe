@@ -1,6 +1,7 @@
 from fastapi import Header, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
+from typing import AsyncGenerator
 
 # Support both package and direct imports
 try:
@@ -10,7 +11,7 @@ except ImportError:
     from models import User
     from main import SessionLocal
 
-async def get_db():
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as s:
         yield s
 

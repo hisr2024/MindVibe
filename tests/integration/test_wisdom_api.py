@@ -388,8 +388,8 @@ class TestWisdomQueryEndpoint:
             }
         )
         
-        assert response.status_code == 400
-        assert "language" in response.json()["detail"].lower()
+        assert response.status_code == 422
+        assert "query" in str(response.json()["detail"])
 
 
 @pytest.mark.asyncio

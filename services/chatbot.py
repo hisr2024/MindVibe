@@ -80,6 +80,12 @@ class ChatbotService:
             "timestamp": datetime.utcnow().isoformat()
         })
         
+        # Trim history to keep only last 19 messages (to stay within limits)
+        # This allows up to 9 complete exchanges (18 messages) plus current message
+        max_history = 19
+        if len(self.conversation_histories[session_id]) > max_history:
+            self.conversation_histories[session_id] = self.conversation_histories[session_id][-max_history:]
+        
         # Format verses for response
         verse_references = []
         for item in relevant_verses:
