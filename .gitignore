@@ -12,6 +12,10 @@ dist/
 *.egg-info/
 # Pytest cache
 .pytest_cache/
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
 # Keys and secrets
 keyset_eddsa/*.json
 .env

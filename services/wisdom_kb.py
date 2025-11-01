@@ -9,9 +9,12 @@ import re
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-import numpy as np
 
-from ..models import WisdomVerse
+# Support both package and direct imports
+try:
+    from ..models import WisdomVerse
+except ImportError:
+    from models import WisdomVerse
 
 
 class WisdomKnowledgeBase:

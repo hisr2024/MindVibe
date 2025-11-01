@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from .models import Base
 import os
+
+# Support both package and direct imports
+try:
+    from .models import Base
+except ImportError:
+    from models import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL","postgresql+asyncpg://navi:navi@db:5432/navi")
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -14,14 +19,28 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-from .routes.moods import router as moods_router
-from .routes.content import router as content_router
-from .routes.journal import router as journal_router
-from .routes.wisdom_guide import router as wisdom_router
-from .routes.chat import router as chat_router
+try:
+    from .routes.moods import router as moods_router
+    from .routes.content import router as content_router
+    from .routes.journal import router as journal_router
+    from .routes.wisdom_guide import router as wisdom_router
+except ImportError:
+    from routes.moods import router as moods_router
+    from routes.content import router as content_router
+    from routes.journal import router as journal_router
+    from routes.wisdom_guide import router as wisdom_router
 
 app.include_router(moods_router)
 app.include_router(content_router)
 app.include_router(journal_router)
 app.include_router(wisdom_router)
-app.include_router(chat_router)
+
+# Try to include chat router if it exists
+try:
+    try:
+        from .routes.chat import router as chat_router
+    except ImportError:
+        from routes.chat import router as chat_router
+    app.include_router(chat_router)
+except (ImportError, ModuleNotFoundError):
+    pass  # Chat router doesn't exist
