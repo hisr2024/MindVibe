@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/wisdom", tags=["wisdom"])
 # Request/Response Models
 class WisdomQuery(BaseModel):
     """Request model for wisdom queries."""
-    query: str = Field(..., description="The user's question or concern")
+    query: str = Field(..., description="The user's question or concern", min_length=3)
     language: str = Field(default="english", description="Preferred language: english, hindi, or sanskrit")
     include_sanskrit: bool = Field(default=False, description="Include Sanskrit text in response")
 
@@ -76,10 +76,7 @@ async def query_wisdom(
     
     **Response:** AI-generated guidance with 3 most relevant verses.
     """
-    if not query.query or len(query.query.strip()) < 3:
-        raise HTTPException(status_code=400, detail="Query must be at least 3 characters long")
-    
-    # Validate language
+    # Validate language (Pydantic validates min_length)
     valid_languages = ["english", "hindi", "sanskrit"]
     if query.language not in valid_languages:
         raise HTTPException(
@@ -214,27 +211,55 @@ async def list_verses(
     
     **Returns:** List of verses with pagination metadata.
     """
+    from sqlalchemy import select, func
+    try:
+        from ..models import WisdomVerse
+    except ImportError:
+        from models import WisdomVerse
+    
     kb = WisdomKnowledgeBase()
     
-    # Filter by theme if specified
+    # Build query based on filters
     if theme:
-        verses = await kb.get_verses_by_theme(db, theme)
-    # Filter by application if specified
+        # Filter by theme with SQL-level pagination
+        query = select(WisdomVerse).where(WisdomVerse.theme == theme)
+        count_query = select(func.count()).select_from(WisdomVerse).where(WisdomVerse.theme == theme)
     elif application:
+        # For application filter, we still need to load and filter in Python
+        # because mental_health_applications is a JSON field
         verses = await kb.search_verses_by_application(db, application)
-    # Otherwise get all verses
+        total = len(verses)
+        paginated_verses = verses[offset:offset + limit]
+        
+        formatted_verses = [
+            kb.format_verse_response(
+                verse=verse,
+                language=language,
+                include_sanskrit=include_sanskrit
+            )
+            for verse in paginated_verses
+        ]
+        
+        return {
+            "verses": formatted_verses,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + limit) < total
+        }
     else:
-        from sqlalchemy import select
-        try:
-            from ..models import WisdomVerse
-        except ImportError:
-            from models import WisdomVerse
-        result = await db.execute(select(WisdomVerse))
-        verses = list(result.scalars().all())
+        # No filters - get all verses
+        query = select(WisdomVerse)
+        count_query = select(func.count()).select_from(WisdomVerse)
     
-    # Apply pagination
-    total = len(verses)
-    paginated_verses = verses[offset:offset + limit]
+    # Get total count
+    total_result = await db.execute(count_query)
+    total = total_result.scalar()
+    
+    # Apply pagination at SQL level
+    query = query.offset(offset).limit(limit)
+    result = await db.execute(query)
+    verses = list(result.scalars().all())
     
     # Format responses
     formatted_verses = [
@@ -243,7 +268,7 @@ async def list_verses(
             language=language,
             include_sanskrit=include_sanskrit
         )
-        for verse in paginated_verses
+        for verse in verses
     ]
     
     return {
@@ -292,34 +317,20 @@ async def semantic_search(
     **Returns:** List of relevant verses sorted by relevance score.
     """
     query = search_query.query
-    
-    if not query or len(query.strip()) < 3:
-        raise HTTPException(status_code=400, detail="Query must be at least 3 characters long")
+    # Pydantic validates min_length=3, but adding extra check for stripped query
+    if not query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
     
     kb = WisdomKnowledgeBase()
     
-    # Get all verses for filtering if needed
-    if theme or application:
-        if theme:
-            all_verses = await kb.get_verses_by_theme(db, theme)
-        else:
-            all_verses = await kb.search_verses_by_application(db, application)
-        
-        # Calculate similarity scores for filtered verses
-        verse_scores = []
-        query_lower = query.lower()
-        for verse in all_verses:
-            theme_score = 1.0 if verse.theme.replace('_', ' ') in query_lower else 0.0
-            english_score = kb.compute_text_similarity(query, verse.english)
-            context_score = kb.compute_text_similarity(query, verse.context)
-            total_score = (theme_score * 0.4) + (english_score * 0.4) + (context_score * 0.2)
-            verse_scores.append({"verse": verse, "score": total_score})
-        
-        verse_scores.sort(key=lambda x: x["score"], reverse=True)
-        relevant_verses = verse_scores[:limit]
-    else:
-        # Use existing search method
-        relevant_verses = await kb.search_relevant_verses(db=db, query=query, limit=limit)
+    # Use refactored search method that handles filters
+    relevant_verses = await kb.search_relevant_verses(
+        db=db,
+        query=query,
+        limit=limit,
+        theme=theme,
+        application=application
+    )
     
     if not relevant_verses:
         raise HTTPException(

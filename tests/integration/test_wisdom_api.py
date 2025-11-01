@@ -373,8 +373,10 @@ class TestWisdomQueryEndpoint:
             }
         )
         
-        assert response.status_code == 400
-        assert "at least 3 characters" in response.json()["detail"].lower()
+        # Pydantic validation returns 422 for min_length constraint
+        assert response.status_code == 422
+        detail = str(response.json()["detail"])
+        assert "at least 3 characters" in detail.lower() or "string_too_short" in detail.lower()
     
     async def test_query_wisdom_invalid_language(self, test_client: AsyncClient, sample_verses):
         """Test query with invalid language."""
