@@ -20,8 +20,8 @@ sys.path.insert(0, str(project_root))
 # Set environment variable to use SQLite for testing
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-import models
-import main as app_module
+from backend import models
+from backend import main as app_module
 
 
 @pytest.fixture(scope="session")
@@ -67,7 +67,7 @@ async def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None
     Create a test client for integration testing.
     Overrides the get_db dependency to use the test database.
     """
-    import deps
+    from backend import deps
     
     async def override_get_db():
         yield test_db
