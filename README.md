@@ -95,6 +95,17 @@ python -m scripts.seed_content
 python -m scripts.verify_wisdom
 ```
 
+## Context Transformation Pipeline
+
+MindVibe includes a modern **Context Transformation Pipeline** for processing Bhagavad Gita verses into structured, searchable content for universal mental health applications. The pipeline:
+
+- **Validates** verse data for completeness and correctness
+- **Sanitizes** religious references for universal appeal (e.g., "Krishna" → "the teacher")
+- **Enriches** content with metadata, keywords, and search optimization
+- **Structures** data for semantic search and context-aware applications
+
+See [docs/pipeline.md](docs/pipeline.md) for complete documentation and [examples/pipeline/](examples/pipeline/) for usage examples.
+
 ## AI-Powered Mental Health Chatbot
 
 MindVibe includes an AI-powered chatbot that provides compassionate mental health guidance based on timeless wisdom from the Bhagavad Gita, presented in a completely secular, universally applicable way.
@@ -134,16 +145,40 @@ MindVibe includes an AI-powered chatbot that provides compassionate mental healt
 
 ### API Endpoints
 
+#### Chatbot Endpoints
 - `POST /api/chat/message` - Send a message and get guidance
 - `GET /api/chat/history/{session_id}` - View conversation history
 - `DELETE /api/chat/history/{session_id}` - Clear conversation
 - `POST /api/chat/start` - Start a new session
 - `GET /api/chat/health` - Check chatbot status
 
+#### Wisdom API Endpoints
+- `GET /api/wisdom/verses` - List wisdom verses with filtering and pagination
+- `GET /api/wisdom/verses/{verse_id}` - Get a specific verse by ID
+- `POST /api/wisdom/search` - Perform semantic search over wisdom content
+- `POST /api/wisdom/query` - Get AI-powered guidance with relevant verses
+- `GET /api/wisdom/themes` - List all available themes
+- `GET /api/wisdom/applications` - List all mental health applications
+
+**Example Wisdom API Usage:**
+```bash
+# Search for verses about anxiety
+curl -X POST http://localhost:8000/api/wisdom/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "managing anxiety and stress"}'
+
+# Get verses filtered by theme
+curl http://localhost:8000/api/wisdom/verses?theme=equanimity_in_adversity&limit=5
+
+# Get a specific verse in Hindi with Sanskrit
+curl "http://localhost:8000/api/wisdom/verses/2.47?language=hindi&include_sanskrit=true"
+```
+
 ### Documentation
 
 - **Chatbot Guide**: [docs/chatbot.md](docs/chatbot.md) - Complete chatbot documentation
-- **Wisdom API**: [docs/wisdom_guide.md](docs/wisdom_guide.md) - Wisdom verse API reference
+- **Wisdom API**: [docs/wisdom_api.md](docs/wisdom_api.md) - Comprehensive Wisdom API reference
+- **Wisdom Guide**: [docs/wisdom_guide.md](docs/wisdom_guide.md) - Background on wisdom verses
 - **Interactive Docs**: Visit `http://localhost:8000/docs` after starting the server
 
 Need help?
