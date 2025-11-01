@@ -6,7 +6,7 @@ and conversation history.
 """
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from unittest.mock import patch, AsyncMock
 from main import app
 from models import WisdomVerse
@@ -35,7 +35,7 @@ class TestChatEndpoints:
     
     async def test_start_new_session(self):
         """Test starting a new chat session."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/api/chat/start")
             
             assert response.status_code == 200
@@ -46,7 +46,7 @@ class TestChatEndpoints:
     
     async def test_send_message_new_session(self, sample_verse_data):
         """Test sending a message without a session ID (creates new session)."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Mock the database query and OpenAI
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="I understand your concern about anxiety..."):
@@ -71,7 +71,7 @@ class TestChatEndpoints:
         """Test sending a message with an existing session ID."""
         session_id = "test-session-123"
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
@@ -90,7 +90,7 @@ class TestChatEndpoints:
     
     async def test_send_message_empty(self):
         """Test sending an empty message (should fail)."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/chat/message",
                 json={
@@ -103,7 +103,7 @@ class TestChatEndpoints:
     
     async def test_send_message_invalid_language(self):
         """Test sending a message with invalid language."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/chat/message",
                 json={
@@ -117,7 +117,7 @@ class TestChatEndpoints:
     
     async def test_send_message_hindi(self):
         """Test sending a message with Hindi language preference."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
@@ -136,7 +136,7 @@ class TestChatEndpoints:
     
     async def test_send_message_with_sanskrit(self):
         """Test sending a message with Sanskrit included."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
@@ -155,7 +155,7 @@ class TestChatEndpoints:
         """Test retrieving conversation history."""
         session_id = "test-session-history"
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # First, send a message to create history
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
@@ -182,7 +182,7 @@ class TestChatEndpoints:
     
     async def test_get_conversation_history_not_found(self):
         """Test retrieving non-existent conversation history."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/chat/history/non-existent-session")
             
             assert response.status_code == 404
@@ -191,7 +191,7 @@ class TestChatEndpoints:
         """Test clearing conversation history."""
         session_id = "test-session-clear"
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Create a conversation
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
@@ -218,14 +218,14 @@ class TestChatEndpoints:
     
     async def test_clear_conversation_not_found(self):
         """Test clearing non-existent conversation."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.delete("/api/chat/history/non-existent-session")
             
             assert response.status_code == 404
     
     async def test_list_active_sessions(self):
         """Test listing active sessions."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Create a few sessions
             session_ids = ["session-1", "session-2"]
             
@@ -255,7 +255,7 @@ class TestChatEndpoints:
     
     async def test_health_check(self):
         """Test chatbot health check endpoint."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/chat/health")
             
             assert response.status_code == 200
@@ -277,7 +277,7 @@ class TestChatEndpoints:
             "How do I stay calm?"
         ]
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
@@ -302,7 +302,7 @@ class TestChatEndpoints:
         session1 = "concurrent-session-1"
         session2 = "concurrent-session-2"
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
@@ -341,7 +341,7 @@ class TestChatErrorHandling:
     
     async def test_invalid_json(self):
         """Test sending invalid JSON."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/chat/message",
                 content="invalid json",
@@ -352,7 +352,7 @@ class TestChatErrorHandling:
     
     async def test_missing_required_field(self):
         """Test sending request without required message field."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/chat/message",
                 json={
@@ -364,7 +364,7 @@ class TestChatErrorHandling:
     
     async def test_database_error(self):
         """Test handling database errors gracefully."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
                       side_effect=Exception("Database error")):
                 response = await client.post(
@@ -386,7 +386,7 @@ class TestChatValidation:
     @pytest.mark.parametrize("language", ["english", "hindi", "sanskrit"])
     async def test_valid_languages(self, language):
         """Test that all valid languages are accepted."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
@@ -404,7 +404,7 @@ class TestChatValidation:
     @pytest.mark.parametrize("include_sanskrit", [True, False])
     async def test_include_sanskrit_options(self, include_sanskrit):
         """Test both options for include_sanskrit parameter."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             with patch('services.chatbot.ChatbotService._generate_chat_response',
                       return_value="Response"):
                 with patch('services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses',
