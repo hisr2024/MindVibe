@@ -45,11 +45,13 @@ MindVibe now includes the AI Vibe Bot that provides mental health guidance based
 To use the AI Vibe Bot:
 
 1. Set up your OpenAI API key in .env
-2. Seed the database with Gita verses: python seed_gita.py
+2. Seed the database with Gita verses: python seed_wisdom.py
 3. Start the server: uvicorn main:app --reload
-4. Access the AI Vibe Bot at POST /chat/message
+4. Access the AI Vibe Bot at POST /api/wisdom/query
 
-For more details, see docs/wisdom_guide.md
+**Documentation:**
+- **User Guide**: [docs/wisdom_guide.md](docs/wisdom_guide.md) - API usage and features
+- **Validation Guide**: [docs/gita_verse_validation_guide.md](docs/gita_verse_validation_guide.md) - Guidelines for sourcing and validating verses
 
 Need help?
 If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.
