@@ -5,15 +5,14 @@ Tests all components: Sanitizer, Validator, Enricher, and Core Pipeline.
 """
 
 import pytest
-from services.pipeline import (
+rom backend.services.pipeline import (
     ContextTransformationPipeline,
     TextSanitizer,
     VerseValidator,
     MetadataEnricher,
 )
-from services.pipeline.validator import ValidationError
-from services.pipeline.core import PipelineError
-
+from backend.services.pipeline.validator import ValidationError
+from backend.services.pipeline.core import PipelineError
 
 class TestTextSanitizer:
     """Test the TextSanitizer component."""
