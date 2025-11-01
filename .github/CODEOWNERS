@@ -1,0 +1,51 @@
+# CODEOWNERS file for MindVibe
+# This file defines who owns different parts of the codebase
+# and will automatically request reviews from the owners when PRs are opened
+
+# Default owners for everything in the repo
+* @hisr2024
+
+# Backend (Python/FastAPI)
+*.py @hisr2024
+/backend/ @hisr2024
+/routes/ @hisr2024
+/models/ @hisr2024
+/services/ @hisr2024
+/core/ @hisr2024
+requirements*.txt @hisr2024
+pyproject.toml @hisr2024
+Dockerfile @hisr2024
+
+# Frontend (Next.js/React/TypeScript)
+*.ts @hisr2024
+*.tsx @hisr2024
+*.js @hisr2024
+*.jsx @hisr2024
+package.json @hisr2024
+tsconfig.json @hisr2024
+next.config.js @hisr2024
+tailwind.config.ts @hisr2024
+
+# Tests
+/tests/ @hisr2024
+*.test.* @hisr2024
+*.spec.* @hisr2024
+
+# Documentation
+*.md @hisr2024
+/docs/ @hisr2024
+
+# CI/CD and DevOps
+/.github/ @hisr2024
+docker-compose.yml @hisr2024
+*.yml @hisr2024
+*.yaml @hisr2024
+
+# Security
+SECURITY.md @hisr2024
+/security/ @hisr2024
+/.github/dependabot.yml @hisr2024
+
+# Configuration
+.gitignore @hisr2024
+.env.example @hisr2024

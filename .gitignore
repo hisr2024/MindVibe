@@ -26,3 +26,10 @@ keyset_eddsa/*.json
 *.swp
 # Logs
 *.log
+# Node modules
+node_modules/
+package-lock.json
+# Next.js
+.next/
+out/
+tsconfig.tsbuildinfo
