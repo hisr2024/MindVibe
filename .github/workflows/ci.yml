@@ -76,15 +76,6 @@ jobs:
           flags: python
           name: python-coverage
 
-      - name: Comment coverage on PR
-        uses: py-cov-action/python-coverage-comment-action@v3
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          GITHUB_TOKEN: ${{ github.token }}
-          MINIMUM_GREEN: 70
-          MINIMUM_ORANGE: 50
-
   typescript-check:
     name: TypeScript Check
     runs-on: ubuntu-latest
