@@ -15,7 +15,7 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 app = FastAPI(title="MindVibe API", version="1.0.0")
 
 @app.on_event("startup")
-async def startup():
+async def startup() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

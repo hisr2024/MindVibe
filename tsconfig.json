@@ -21,7 +21,8 @@
       "node",
       "react",
       "react-dom"
-    ]
+    ],
+    "skipLibCheck": true
   },
   "include": [
     "next-env.d.ts",

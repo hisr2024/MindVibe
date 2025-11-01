@@ -80,6 +80,12 @@ class ChatbotService:
             "timestamp": datetime.utcnow().isoformat()
         })
         
+        # Trim history to keep only last 19 messages (to stay within limits)
+        # This allows up to 9 complete exchanges (18 messages) plus current message
+        max_history = 19
+        if len(self.conversation_histories[session_id]) > max_history:
+            self.conversation_histories[session_id] = self.conversation_histories[session_id][-max_history:]
+        
         # Format verses for response
         verse_references = []
         for item in relevant_verses:
@@ -175,7 +181,7 @@ Response:"""
                 # Try newer OpenAI API (>= 1.0.0)
                 from openai import OpenAI
                 client = OpenAI(api_key=openai_key)
-                response = client.chat.completions.create(
+                response: Any = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": system_prompt},
@@ -184,10 +190,12 @@ Response:"""
                     temperature=0.7,
                     max_tokens=400
                 )
-                return response.choices[0].message.content.strip()
+                # Safely extract content
+                content = self._extract_content_from_response(response)
+                return content
             except ImportError:
                 # Fallback to older OpenAI API (< 1.0.0)
-                response = openai.ChatCompletion.create(
+                response: Any = openai.ChatCompletion.create(  # type: ignore[attr-defined]
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": system_prompt},
@@ -196,12 +204,36 @@ Response:"""
                     temperature=0.7,
                     max_tokens=400
                 )
-                return response.choices[0].message.content.strip()
+                # Safely extract content
+                content = self._extract_content_from_response(response)
+                return content
             
         except Exception as e:
             # Log the error and fall back to template response
             print(f"OpenAI API error in chatbot: {str(e)}")
             return self._generate_template_chat_response(message, verses, language)
+    
+    def _extract_content_from_response(self, response: Any) -> str:
+        """
+        Safely extract content from OpenAI response, handling both real API responses and mocks.
+        """
+        try:
+            choices = getattr(response, "choices", None) or (response.get("choices") if isinstance(response, dict) else None)
+            if not choices or len(choices) == 0:
+                return ""
+            
+            first_choice = choices[0]
+            # Support both object and dict styles for compatibility with mocks
+            message = getattr(first_choice, "message", None) or (first_choice.get("message") if isinstance(first_choice, dict) else {})
+            content = getattr(message, "content", None) or (message.get("content") if isinstance(message, dict) else None)
+            
+            # Also try .text for older API versions
+            if content is None:
+                content = getattr(first_choice, "text", None) or (first_choice.get("text") if isinstance(first_choice, dict) else None)
+            
+            return "" if content is None else str(content).strip()
+        except Exception:
+            return ""
     
     def _generate_template_chat_response(
         self,

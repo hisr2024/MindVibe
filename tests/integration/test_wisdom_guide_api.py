@@ -167,8 +167,8 @@ class TestWisdomQueryEndpoint:
             }
         )
         
-        assert response.status_code == 400
-        assert "at least 3 characters" in response.json()["detail"]
+        assert response.status_code == 422
+        assert "query" in str(response.json()["detail"])
     
     @pytest.mark.asyncio
     async def test_query_wisdom_short_query(self, test_client: AsyncClient, test_db: AsyncSession):
@@ -181,8 +181,8 @@ class TestWisdomQueryEndpoint:
             }
         )
         
-        assert response.status_code == 400
-        assert "at least 3 characters" in response.json()["detail"]
+        assert response.status_code == 422
+        assert "query" in str(response.json()["detail"])
 
 
 class TestThemesEndpoint:

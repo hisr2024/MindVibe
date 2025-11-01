@@ -8,7 +8,7 @@ based on ancient teachings presented in a non-religious, universally applicable 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import os
 
 # Support both package and direct imports
@@ -58,7 +58,7 @@ class SearchQuery(BaseModel):
 async def query_wisdom(
     query: WisdomQuery,
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     Query the universal wisdom guide with a question or concern.
     
@@ -124,7 +124,7 @@ async def query_wisdom(
 
 
 @router.get("/themes")
-async def list_themes(db: AsyncSession = Depends(get_db)):
+async def list_themes(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     """
     List all available wisdom themes.
     
@@ -159,7 +159,7 @@ async def get_verse(
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     include_sanskrit: bool = Query(default=False),
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     Get a specific wisdom verse by ID.
     
@@ -191,7 +191,7 @@ async def list_verses(
     limit: int = Query(default=10, ge=1, le=100, description="Number of verses to return"),
     offset: int = Query(default=0, ge=0, description="Number of verses to skip"),
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     List wisdom verses with optional filtering.
     
@@ -289,7 +289,7 @@ async def semantic_search(
     include_sanskrit: bool = Query(default=False),
     limit: int = Query(default=5, ge=1, le=20, description="Number of results to return"),
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     Perform semantic search over wisdom content.
     
@@ -358,7 +358,7 @@ async def semantic_search(
 
 
 @router.get("/applications")
-async def list_applications(db: AsyncSession = Depends(get_db)):
+async def list_applications(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     """
     List all available mental health applications.
     
