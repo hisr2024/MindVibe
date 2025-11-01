@@ -1,1 +1,8 @@
-{\n  "rewrites": [\n    {\n      "source": "/api/:path*",\n      "destination": "https://mindvibe-api.onrender.com/api/:path*"\n    }\n  ],\n  "headers": [\n    {\n      "source": "/api/:path*",\n      "headers": [\n        {\n          "key": "Cache-Control",\n          "value": "no-store, must-revalidate"\n        }\n      ]\n    }\n  ]\n}
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://mindvibe-api.onrender.com/api/:path*"
+    }
+  ]
+}
