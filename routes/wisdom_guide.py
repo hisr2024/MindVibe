@@ -49,6 +49,11 @@ class WisdomResponse(BaseModel):
     language: str
 
 
+class SearchQuery(BaseModel):
+    """Request model for semantic search."""
+    query: str = Field(..., description="Search query or question", min_length=3)
+
+
 @router.post("/query", response_model=WisdomResponse)
 async def query_wisdom(
     query: WisdomQuery,
@@ -59,6 +64,17 @@ async def query_wisdom(
     
     Returns AI-generated guidance along with relevant wisdom verses
     presented in a universally applicable, non-religious way.
+    
+    **Request Body Example:**
+    ```json
+    {
+      "query": "I'm feeling anxious about my future",
+      "language": "english",
+      "include_sanskrit": false
+    }
+    ```
+    
+    **Response:** AI-generated guidance with 3 most relevant verses.
     """
     if not query.query or len(query.query.strip()) < 3:
         raise HTTPException(status_code=400, detail="Query must be at least 3 characters long")
@@ -114,6 +130,11 @@ async def query_wisdom(
 async def list_themes(db: AsyncSession = Depends(get_db)):
     """
     List all available wisdom themes.
+    
+    **Returns:** List of all unique themes available in the wisdom database,
+    useful for filtering and discovery.
+    
+    **Example:** `/api/wisdom/themes`
     """
     from sqlalchemy import select, distinct
     try:
@@ -138,12 +159,16 @@ async def list_themes(db: AsyncSession = Depends(get_db)):
 @router.get("/verses/{verse_id}")
 async def get_verse(
     verse_id: str,
-    language: str = Query(default="english", regex="^(english|hindi|sanskrit)$"),
+    language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     include_sanskrit: bool = Query(default=False),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get a specific wisdom verse by ID.
+    
+    **Example:** `/api/wisdom/verses/2.47?language=english&include_sanskrit=true`
+    
+    **Returns:** A single verse with text, theme, context, and mental health applications.
     """
     kb = WisdomKnowledgeBase()
     verse = await kb.get_verse_by_id(db, verse_id)
@@ -158,6 +183,198 @@ async def get_verse(
     )
     
     return formatted
+
+
+@router.get("/verses")
+async def list_verses(
+    language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
+    theme: Optional[str] = Query(default=None, description="Filter by theme (e.g., 'action_without_attachment')"),
+    application: Optional[str] = Query(default=None, description="Filter by mental health application (e.g., 'anxiety_management')"),
+    include_sanskrit: bool = Query(default=False),
+    limit: int = Query(default=10, ge=1, le=100, description="Number of verses to return"),
+    offset: int = Query(default=0, ge=0, description="Number of verses to skip"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    List wisdom verses with optional filtering.
+    
+    **Query Parameters:**
+    - `language`: Preferred language (english, hindi, or sanskrit)
+    - `theme`: Filter by specific theme
+    - `application`: Filter by mental health application
+    - `include_sanskrit`: Include Sanskrit text in response
+    - `limit`: Maximum number of results (1-100, default 10)
+    - `offset`: Number of results to skip for pagination
+    
+    **Examples:**
+    - `/api/wisdom/verses?limit=5` - Get first 5 verses
+    - `/api/wisdom/verses?theme=equanimity_in_adversity` - Get verses on equanimity
+    - `/api/wisdom/verses?application=anxiety_management` - Get verses for anxiety
+    - `/api/wisdom/verses?language=hindi&include_sanskrit=true` - Get Hindi verses with Sanskrit
+    
+    **Returns:** List of verses with pagination metadata.
+    """
+    kb = WisdomKnowledgeBase()
+    
+    # Filter by theme if specified
+    if theme:
+        verses = await kb.get_verses_by_theme(db, theme)
+    # Filter by application if specified
+    elif application:
+        verses = await kb.search_verses_by_application(db, application)
+    # Otherwise get all verses
+    else:
+        from sqlalchemy import select
+        try:
+            from ..models import WisdomVerse
+        except ImportError:
+            from models import WisdomVerse
+        result = await db.execute(select(WisdomVerse))
+        verses = list(result.scalars().all())
+    
+    # Apply pagination
+    total = len(verses)
+    paginated_verses = verses[offset:offset + limit]
+    
+    # Format responses
+    formatted_verses = [
+        kb.format_verse_response(
+            verse=verse,
+            language=language,
+            include_sanskrit=include_sanskrit
+        )
+        for verse in paginated_verses
+    ]
+    
+    return {
+        "verses": formatted_verses,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "has_more": (offset + limit) < total
+    }
+
+
+@router.post("/search")
+async def semantic_search(
+    search_query: SearchQuery,
+    language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
+    theme: Optional[str] = Query(default=None, description="Filter results by theme"),
+    application: Optional[str] = Query(default=None, description="Filter results by mental health application"),
+    include_sanskrit: bool = Query(default=False),
+    limit: int = Query(default=5, ge=1, le=20, description="Number of results to return"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Perform semantic search over wisdom content.
+    
+    Uses text similarity and relevance scoring to find the most relevant verses
+    for a given query. Optionally filter results by theme or application.
+    
+    **Request Body:**
+    - `query`: Your question or search terms
+    
+    **Query Parameters:**
+    - `language`: Preferred language for results
+    - `theme`: Filter results by specific theme
+    - `application`: Filter results by mental health application
+    - `include_sanskrit`: Include Sanskrit text in results
+    - `limit`: Maximum number of results (1-20, default 5)
+    
+    **Examples:**
+    ```
+    POST /api/wisdom/search?limit=3
+    {
+      "query": "how to deal with anxiety"
+    }
+    ```
+    
+    **Returns:** List of relevant verses sorted by relevance score.
+    """
+    query = search_query.query
+    
+    if not query or len(query.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Query must be at least 3 characters long")
+    
+    kb = WisdomKnowledgeBase()
+    
+    # Get all verses for filtering if needed
+    if theme or application:
+        if theme:
+            all_verses = await kb.get_verses_by_theme(db, theme)
+        else:
+            all_verses = await kb.search_verses_by_application(db, application)
+        
+        # Calculate similarity scores for filtered verses
+        verse_scores = []
+        query_lower = query.lower()
+        for verse in all_verses:
+            theme_score = 1.0 if verse.theme.replace('_', ' ') in query_lower else 0.0
+            english_score = kb.compute_text_similarity(query, verse.english)
+            context_score = kb.compute_text_similarity(query, verse.context)
+            total_score = (theme_score * 0.4) + (english_score * 0.4) + (context_score * 0.2)
+            verse_scores.append({"verse": verse, "score": total_score})
+        
+        verse_scores.sort(key=lambda x: x["score"], reverse=True)
+        relevant_verses = verse_scores[:limit]
+    else:
+        # Use existing search method
+        relevant_verses = await kb.search_relevant_verses(db=db, query=query, limit=limit)
+    
+    if not relevant_verses:
+        raise HTTPException(
+            status_code=404,
+            detail="No relevant wisdom verses found. Please try a different query."
+        )
+    
+    # Format responses
+    results = []
+    for item in relevant_verses:
+        formatted = kb.format_verse_response(
+            verse=item["verse"],
+            language=language,
+            include_sanskrit=include_sanskrit
+        )
+        formatted["relevance_score"] = round(item["score"], 3)
+        results.append(formatted)
+    
+    return {
+        "query": query,
+        "results": results,
+        "total_results": len(results),
+        "language": language
+    }
+
+
+@router.get("/applications")
+async def list_applications(db: AsyncSession = Depends(get_db)):
+    """
+    List all available mental health applications.
+    
+    **Returns:** List of unique mental health applications across all verses,
+    useful for filtering and discovery.
+    
+    **Example:** `/api/wisdom/applications`
+    """
+    try:
+        from ..models import WisdomVerse
+    except ImportError:
+        from models import WisdomVerse
+    
+    from sqlalchemy import select
+    result = await db.execute(select(WisdomVerse))
+    verses = result.scalars().all()
+    
+    # Collect all unique applications
+    applications_set = set()
+    for verse in verses:
+        apps = verse.mental_health_applications.get("applications", [])
+        applications_set.update(apps)
+    
+    return {
+        "applications": sorted(list(applications_set)),
+        "total": len(applications_set)
+    }
 
 
 async def generate_wisdom_response(
