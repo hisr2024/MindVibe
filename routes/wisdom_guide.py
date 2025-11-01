@@ -5,10 +5,10 @@ Provides endpoints for accessing universal wisdom and AI-powered guidance
 based on ancient teachings presented in a non-religious, universally applicable way.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Dict, Any
 import os
 
 # Support both package and direct imports
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/wisdom", tags=["wisdom"])
 # Request/Response Models
 class WisdomQuery(BaseModel):
     """Request model for wisdom queries."""
-    query: str = Field(..., description="The user's question or concern")
+    query: str = Field(..., description="The user's question or concern", min_length=3)
     language: str = Field(default="english", description="Preferred language: english, hindi, or sanskrit")
     include_sanskrit: bool = Field(default=False, description="Include Sanskrit text in response")
 
@@ -51,7 +51,7 @@ class WisdomResponse(BaseModel):
 
 class SearchQuery(BaseModel):
     """Request model for semantic search."""
-    query: str = Field(..., description="Search query or question")
+    query: str = Field(..., description="Search query or question", min_length=3)
 
 
 @router.post("/query", response_model=WisdomResponse)
@@ -76,12 +76,6 @@ async def query_wisdom(
     
     **Response:** AI-generated guidance with 3 most relevant verses.
     """
-    # Validate query manually to return 400 as tests expect
-    if not query.query or not query.query.strip():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="query must not be empty")
-    if len(query.query.strip()) < 3:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="query too short")
-    
     # Validate language (Pydantic validates min_length)
     valid_languages = ["english", "hindi", "sanskrit"]
     if query.language not in valid_languages:
@@ -130,7 +124,7 @@ async def query_wisdom(
 
 
 @router.get("/themes")
-async def list_themes(db: AsyncSession = Depends(get_db)):
+async def list_themes(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     """
     List all available wisdom themes.
     
@@ -165,7 +159,7 @@ async def get_verse(
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     include_sanskrit: bool = Query(default=False),
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     Get a specific wisdom verse by ID.
     
@@ -197,7 +191,7 @@ async def list_verses(
     limit: int = Query(default=10, ge=1, le=100, description="Number of verses to return"),
     offset: int = Query(default=0, ge=0, description="Number of verses to skip"),
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     List wisdom verses with optional filtering.
     
@@ -323,11 +317,9 @@ async def semantic_search(
     **Returns:** List of relevant verses sorted by relevance score.
     """
     query = search_query.query
-    # Manual validation to return 400 as tests expect
-    if not query or not query.strip():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Query cannot be empty")
-    if len(query.strip()) < 3:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Query too short")
+    # Pydantic validates min_length=3, but adding extra check for stripped query
+    if not query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
     
     kb = WisdomKnowledgeBase()
     
@@ -366,7 +358,7 @@ async def semantic_search(
 
 
 @router.get("/applications")
-async def list_applications(db: AsyncSession = Depends(get_db)):
+async def list_applications(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     """
     List all available mental health applications.
     

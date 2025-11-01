@@ -72,7 +72,7 @@ class SessionInfo(BaseModel):
 async def send_message(
     chat_msg: ChatMessage,
     db: AsyncSession = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
     Send a message to the AI chatbot and receive guidance.
     
@@ -124,7 +124,7 @@ async def send_message(
 
 
 @router.get("/history/{session_id}", response_model=ConversationHistory)
-async def get_conversation_history(session_id: str):
+async def get_conversation_history(session_id: str) -> Dict[str, Any]:
     """
     Retrieve the conversation history for a specific session.
     """
@@ -144,7 +144,7 @@ async def get_conversation_history(session_id: str):
 
 
 @router.delete("/history/{session_id}")
-async def clear_conversation(session_id: str):
+async def clear_conversation(session_id: str) -> Dict[str, Any]:
     """
     Clear the conversation history for a specific session.
     """
@@ -163,7 +163,7 @@ async def clear_conversation(session_id: str):
 
 
 @router.get("/sessions", response_model=List[SessionInfo])
-async def list_active_sessions():
+async def list_active_sessions() -> List[SessionInfo]:
     """
     List all active chat sessions.
     
@@ -181,7 +181,7 @@ async def list_active_sessions():
 
 
 @router.post("/start")
-async def start_new_session():
+async def start_new_session() -> Dict[str, Any]:
     """
     Start a new chat session and get a session ID.
     """
@@ -195,7 +195,7 @@ async def start_new_session():
 
 
 @router.get("/health")
-async def chatbot_health():
+async def chatbot_health() -> Dict[str, Any]:
     """
     Check chatbot service health and configuration.
     """
