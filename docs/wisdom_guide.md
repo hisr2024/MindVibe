@@ -81,7 +81,7 @@ Get a specific verse by ID.
 Run the seed script to populate wisdom verses:
 
 ```bash
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 ```
 
 ## Implementation Details
@@ -182,7 +182,7 @@ for verse in data["verses"]:
 1. Edit `data/wisdom/verses.json`
 2. Add new verse entries following the existing structure
 3. Ensure religious references are already sanitized in the English text
-4. Run `python seed_wisdom.py` to update the database
+4. Run `python scripts/seed_wisdom.py` to update the database
 
 ## Future Enhancements
 

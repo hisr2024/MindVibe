@@ -31,12 +31,36 @@ Quickstart (local)
    python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
 
 Repository layout (high-level)
-- scripts/                - helper scripts (key generation, setup)
+- scripts/                - Python package containing utility scripts:
+  - generate_eddsa_key.py - Generate Ed25519 keypairs for JWT signing
+  - seed_wisdom.py        - Seed database with wisdom verses
+  - seed_content.py       - Seed database with content packs
+  - verify_wisdom.py      - Verify wisdom guide implementation
 - keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
 - security/               - JWT and EdDSA logic
 - tests/                  - unit tests (pytest)
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
+
+## Scripts Usage
+
+The `scripts/` directory is now a Python package containing all utility scripts. Scripts can be run in two ways:
+
+**Method 1: Direct execution**
+```bash
+python scripts/generate_eddsa_key.py
+python scripts/seed_wisdom.py
+python scripts/seed_content.py
+python scripts/verify_wisdom.py
+```
+
+**Method 2: As a module**
+```bash
+python -m scripts.generate_eddsa_key
+python -m scripts.seed_wisdom
+python -m scripts.seed_content
+python -m scripts.verify_wisdom
+```
 
 ## AI Vibe Bot
 
@@ -45,7 +69,7 @@ MindVibe now includes the AI Vibe Bot that provides mental health guidance based
 To use the AI Vibe Bot:
 
 1. Set up your OpenAI API key in .env
-2. Seed the database with Gita verses: python seed_gita.py
+2. Seed the database with Gita verses: python scripts/seed_wisdom.py
 3. Start the server: uvicorn main:app --reload
 4. Access the AI Vibe Bot at POST /chat/message
 

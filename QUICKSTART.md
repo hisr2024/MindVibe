@@ -34,7 +34,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 Load the wisdom verses into your database:
 
 ```bash
-python seed_wisdom.py
+python scripts/seed_wisdom.py
 ```
 
 Expected output:
@@ -325,7 +325,7 @@ export function WisdomChatbot() {
 Run the verification script to ensure everything is set up correctly:
 
 ```bash
-python verify_wisdom.py
+python scripts/verify_wisdom.py
 ```
 
 Expected output:
@@ -366,7 +366,7 @@ ERROR: Connection to database failed
 ```
 404: No relevant wisdom verses found
 ```
-**Solution**: Run `python seed_wisdom.py` to populate the database
+**Solution**: Run `python scripts/seed_wisdom.py` to populate the database
 
 ### OpenAI API Error
 ```
@@ -407,7 +407,7 @@ To add new wisdom verses:
 
 1. Edit `data/wisdom/verses.json`
 2. Add new verse entry following the existing structure
-3. Run `python seed_wisdom.py` to update database
+3. Run `python scripts/seed_wisdom.py` to update database
 4. Restart the API server
 
 Example verse structure:

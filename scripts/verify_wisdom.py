@@ -2,14 +2,21 @@
 """
 Simple verification script to test the wisdom guide implementation.
 This script validates that all components can be imported and basic functionality works.
+
+Can be run as:
+    python scripts/verify_wisdom.py
+    OR
+    python -m scripts.verify_wisdom
 """
 
 import sys
 import os
+from pathlib import Path
 
 # Add parent directory to path for imports to ensure compatibility across execution contexts
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, script_dir)
+script_dir = Path(__file__).parent
+repo_root = script_dir.parent
+sys.path.insert(0, str(repo_root))
 
 print("=" * 60)
 print("Wisdom Guide Implementation Verification")
@@ -73,12 +80,9 @@ print("\n[5/5] Testing verse data loading...")
 try:
     import json
     
-    verses_path = os.path.join(
-        os.path.dirname(__file__),
-        'data',
-        'wisdom',
-        'verses.json'
-    )
+    script_dir = Path(__file__).parent
+    repo_root = script_dir.parent
+    verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'
     
     if not os.path.exists(verses_path):
         print(f"✗ Verse data file not found: {verses_path}")
@@ -125,7 +129,7 @@ print("All verification tests passed! ✓")
 print("=" * 60)
 print("\nNext steps:")
 print("1. Set OPENAI_API_KEY in your .env file for AI responses")
-print("2. Run: python seed_wisdom.py (to populate database)")
+print("2. Run: python scripts/seed_wisdom.py (to populate database)")
 print("3. Start the API server and test the endpoints")
 print("\nAPI Endpoints:")
 print("  POST /api/wisdom/query")
