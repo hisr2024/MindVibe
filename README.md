@@ -95,6 +95,7 @@ python -m scripts.seed_content
 python -m scripts.verify_wisdom
 ```
 
+
 ## Context Transformation Pipeline
 
 MindVibe includes a modern **Context Transformation Pipeline** for processing Bhagavad Gita verses into structured, searchable content for universal mental health applications. The pipeline:
