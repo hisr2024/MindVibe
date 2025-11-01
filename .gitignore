@@ -26,3 +26,11 @@ keyset_eddsa/*.json
 *.swp
 # Logs
 *.log
+# Node.js
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

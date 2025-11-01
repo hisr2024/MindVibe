@@ -1,6 +1,30 @@
 # MindVibe
 
+[![CI](https://github.com/hisr2024/MindVibe/actions/workflows/ci.yml/badge.svg)](https://github.com/hisr2024/MindVibe/actions/workflows/ci.yml)
+[![Linting](https://github.com/hisr2024/MindVibe/actions/workflows/lint.yml/badge.svg)](https://github.com/hisr2024/MindVibe/actions/workflows/lint.yml)
+
 MindVibe is a privacy-first, real-time social audio platform for short-form voice conversations, moderated rooms, and ephemeral public channels.
+
+## CI/CD Pipeline
+
+This repository uses automated CI/CD workflows to ensure code quality and reliability:
+
+### Workflows
+- **CI Workflow** (`.github/workflows/ci.yml`): Runs automated tests on push and pull requests
+  - Python: Type checking with mypy, unit and integration tests with pytest, coverage reporting
+  - TypeScript: ESLint linting for code quality
+  
+- **Linting Workflow** (`.github/workflows/lint.yml`): Enforces code style standards
+  - Python: flake8 linting (max line length: 120)
+  - TypeScript: ESLint with Next.js configuration
+
+### Test Coverage
+- Test results and coverage reports are automatically uploaded as artifacts
+- Coverage reports are posted as comments on pull requests
+- View detailed coverage reports in the workflow run artifacts
+
+### Status Checks
+All workflows must pass before merging pull requests to the main branch.
 
 Quickstart (local)
 1. Clone the repo:
@@ -36,7 +60,7 @@ Repository layout (high-level)
 - security/               - JWT and EdDSA logic
 - tests/                  - unit tests (pytest)
 - docs/                   - documentation and technical notes
-- .github/workflows/ci.yml - CI for tests on PRs
+- .github/workflows/      - CI/CD workflows (ci.yml for tests, lint.yml for linting)
 
 ## AI Vibe Bot
 

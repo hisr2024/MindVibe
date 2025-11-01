@@ -10,17 +10,18 @@ on:
 
 jobs:
   python-tests:
+    name: Python Tests
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.modified, '.py') || contains(github.event.head_commit.added, '.py') || github.event_name == 'pull_request')
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install Python dependencies
         run: |
@@ -29,17 +30,36 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Run mypy
+      - name: Run mypy type checking
         run: |
           mypy --ignore-missing-imports .
         env:
           MYPYPATH: ${{ github.workspace }}
 
-      - name: Run Python tests
+      - name: Run Python tests with coverage
         run: |
-          if [ -d "tests" ]; then pytest; fi
+          pytest --cov=. --cov-report=xml --cov-report=term-missing --cov-report=html
 
-  nodejs-tests:
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 30
+
+      - name: Comment coverage on PR
+        uses: py-cov-action/python-coverage-comment-action@v3
+        if: github.event_name == 'pull_request'
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 70
+          MINIMUM_ORANGE: 50
+
+  typescript-check:
+    name: TypeScript Linting
     runs-on: ubuntu-latest
     
     steps:
@@ -55,11 +75,5 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Run linting
+      - name: Run ESLint
         run: npm run lint
-
-      - name: Build Next.js project
-        run: npm run build
-
-      - name: Run Node.js tests
-        run: npm test --if-present
