@@ -354,6 +354,36 @@ All verification tests passed! ✓
 ============================================================
 ```
 
+### Running the Full Test Suite
+
+MindVibe includes comprehensive unit and integration tests. To run all tests:
+
+```bash
+# Run all tests
+python -m pytest tests/
+
+# Run with coverage report
+python -m pytest tests/ --cov=. --cov-report=html
+
+# Run specific test categories
+python -m pytest tests/unit/              # Unit tests only
+python -m pytest tests/integration/       # Integration tests only
+
+# Run specific test files
+python -m pytest tests/unit/test_wisdom_kb.py
+python -m pytest tests/integration/test_wisdom_guide_api.py
+
+# Verbose mode
+python -m pytest tests/ -v
+```
+
+The test suite covers:
+- **Unit tests**: Models, services (wisdom_kb.py), and utilities
+- **Integration tests**: API endpoints (wisdom_guide, journal, moods, content)
+- **Coverage**: Overall test coverage is tracked and reported
+
+All tests use an in-memory SQLite database, so no external database setup is required for testing.
+
 ## Troubleshooting
 
 ### Database Connection Error

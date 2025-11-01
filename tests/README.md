@@ -14,6 +14,7 @@ The MindVibe testing framework uses `pytest` as the primary test runner with sup
 
 ```
 tests/
+├── README.md            # This documentation file
 ├── __init__.py
 ├── conftest.py          # Shared test fixtures and configuration
 ├── unit/                # Unit tests
@@ -22,9 +23,10 @@ tests/
 │   └── test_wisdom_kb.py # Tests for wisdom knowledge base service
 └── integration/         # Integration tests
     ├── __init__.py
-    ├── test_moods_api.py    # Tests for moods API endpoints
-    ├── test_journal_api.py  # Tests for journal API endpoints
-    └── test_content_api.py  # Tests for content API endpoints
+    ├── test_content_api.py      # Tests for content API endpoints
+    ├── test_journal_api.py      # Tests for journal API endpoints
+    ├── test_moods_api.py        # Tests for moods API endpoints
+    └── test_wisdom_guide_api.py # Tests for wisdom guide API endpoints
 ```
 
 ## Running Tests
@@ -163,6 +165,26 @@ After running tests with coverage, you can view:
 - Terminal report: Displays immediately after test run
 - HTML report: Open `htmlcov/index.html` in a browser
 - XML report: `coverage.xml` for CI/CD integration
+
+### Test Coverage Areas
+
+Current test coverage includes:
+- **Models**: User, Mood, EncryptedBlob, ContentPack, WisdomVerse, and SoftDeleteMixin
+- **Services**: WisdomKnowledgeBase (sanitization, queries, search, formatting)
+- **API Routes**: 
+  - Wisdom Guide endpoints (query, themes, get verse)
+  - Moods endpoints (create mood, validation)
+  - Journal endpoints (upload/retrieve encrypted blobs)
+  - Content endpoints (get content packs)
+
+The test suite includes comprehensive tests for:
+- **WisdomGuide API** (`test_wisdom_guide_api.py`):
+  - Query wisdom with various languages (English, Hindi, Sanskrit)
+  - Retrieve wisdom verses by ID
+  - List available themes
+  - Input validation and error handling
+  - Sanskrit text inclusion
+  - Multi-language support
 
 ## Continuous Integration
 

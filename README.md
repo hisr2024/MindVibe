@@ -30,6 +30,39 @@ Quickstart (local)
    $env:JWT_SECRET = "dev-jwt-secret-please-change"
    python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
 
+## Running Tests
+
+MindVibe uses pytest for automated testing. The test suite includes unit tests and integration tests for all core functionality.
+
+### Run all tests:
+```bash
+python -m pytest tests/
+```
+
+### Run tests with coverage report:
+```bash
+python -m pytest tests/ --cov=. --cov-report=html
+```
+
+### Run specific test categories:
+```bash
+# Unit tests only
+python -m pytest tests/unit/
+
+# Integration tests only
+python -m pytest tests/integration/
+
+# Specific test file
+python -m pytest tests/unit/test_wisdom_kb.py
+```
+
+### Run tests in verbose mode:
+```bash
+python -m pytest tests/ -v
+```
+
+For more detailed testing information, see QUICKSTART.md.
+
 Repository layout (high-level)
 - scripts/                - helper scripts (key generation, setup)
 - keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
