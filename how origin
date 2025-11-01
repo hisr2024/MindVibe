@@ -1,0 +1,25 @@
+* [33m505181f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m chore: add Aider Windows runner + diagnostics; make CI install PyPI-first; update README/package.json
+*   [33m440706a[m[33m ([m[1;31morigin/fix/proofread-and-ci[m[33m, [m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m, [m[1;32mcopilot/add-aider-windows-support[m[33m)[m Merge pull request #7 from hisr2024/proofread-docs
+[32m|[m[33m\[m  
+[32m|[m * [33m965efed[m chore(docs): add .gitignore, CODE_OF_CONDUCT, full LICENSE, and PR template
+[32m|[m * [33mb16d9d3[m chore(docs): add README, key docs, ENV docs, CI, and dev requirements
+* [33m|[m   [33m8142855[m Merge pull request #6 from hisr2024/copilot/fix-97568302-6359-42ba-8ac2-e8cb8730c84f
+[33m|[m[35m\[m [33m\[m  
+[33m|[m [35m|[m[33m/[m  
+[33m|[m[33m/[m[35m|[m   
+[33m|[m * [33mdc5098b[m[33m ([m[1;31morigin/copilot/fix-97568302-6359-42ba-8ac2-e8cb8730c84f[m[33m)[m Initial plan
+[33m|[m[33m/[m  
+* [33m9dc433f[m[33m ([m[1;31morigin/phase2-docs[m[33m)[m Add foundational error handling file
+* [33mf3fe9bb[m Add deterministic refresh token lookup (lookup_hash) with HMAC-SHA256
+* [33mea6ef9c[m Add refresh_tokens table migration
+* [33m9669719[m Integrate refresh token functionality in routes/auth.py
+* [33mbb6bb68[m Implement refresh token service
+* [33m3a324a7[m Add RefreshToken model
+* [33m3d33bf3[m Add refresh token configuration to settings
+* [33m4379353[m Update auth.py with new content
+* [33md8d5603[m Update auth.py with new authentication routes
+* [33m9f42d80[m Update routes/auth.py
+* [33m0e30719[m Update routes/auth.py with new authentication logic
+* [33mde39cc4[m Update core/settings.py with new settings class
+* [33m66fcbfd[m Update password policy implementation
+* [33m7ea995c[m[33m ([m[1;31morigin/feat/auth-audit[m[33m)[m Add files via upload
