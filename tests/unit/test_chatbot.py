@@ -6,8 +6,8 @@ Tests conversation management, response generation, and fallback mechanisms.
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from services.chatbot import ChatbotService
-from models import WisdomVerse
+from backend.services.chatbot import ChatbotService
+from backend.models import WisdomVerse
 
 
 @pytest.fixture
