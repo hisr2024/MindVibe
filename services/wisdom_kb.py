@@ -114,15 +114,36 @@ class WisdomKnowledgeBase:
     async def search_relevant_verses(
         db: AsyncSession,
         query: str,
-        limit: int = 3
+        limit: int = 3,
+        theme: Optional[str] = None,
+        application: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Search for verses relevant to the query using semantic similarity.
         Returns verses with their relevance scores.
+        
+        Args:
+            db: Database session
+            query: Search query text
+            limit: Maximum number of results to return
+            theme: Optional theme filter
+            application: Optional mental health application filter
         """
-        # Get all verses
-        result = await db.execute(select(WisdomVerse))
-        all_verses = result.scalars().all()
+        # Get verses based on filters
+        if theme:
+            result = await db.execute(select(WisdomVerse).where(WisdomVerse.theme == theme))
+            all_verses = result.scalars().all()
+        elif application:
+            # For application filter, get all and filter
+            result = await db.execute(select(WisdomVerse))
+            all_verses = [
+                verse for verse in result.scalars().all()
+                if application in verse.mental_health_applications.get("applications", [])
+            ]
+        else:
+            # Get all verses
+            result = await db.execute(select(WisdomVerse))
+            all_verses = result.scalars().all()
         
         # Calculate similarity scores
         verse_scores = []
