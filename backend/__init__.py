@@ -1,0 +1,1 @@
+"""MindVibe Backend - FastAPI Application"""
