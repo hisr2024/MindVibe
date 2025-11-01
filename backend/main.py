@@ -31,12 +31,12 @@ from backend.routes.content import router as content_router
 from backend.routes.journal import router as journal_router
 from backend.routes.jwk import router as jwk_router
 from backend.routes.chat import router as chat_router
-from backend.routes.auth import router as auth_router
+# from backend.routes.auth import router as auth_router  # ← COMMENT THIS OUT (MISSING DEPENDENCIES)
 from backend.routes.wisdom_guide import router as wisdom_router
 from backend.routes.gita_api import router as gita_router
 
 # Register all routers
-app.include_router(auth_router)      # Authentication & sessions
+# app.include_router(auth_router)      # ← COMMENT THIS OUT
 app.include_router(jwk_router)       # JWK public key endpoint
 app.include_router(moods_router)     # Mood tracking API
 app.include_router(content_router)   # Content packs API
