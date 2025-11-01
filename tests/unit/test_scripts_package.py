@@ -93,7 +93,11 @@ def test_scripts_have_main_guard():
             f"Script {script_name} missing __main__ guard"
     
     # verify_wisdom.py is a verification/diagnostic script that runs immediately
-    # when executed - this is an acceptable pattern for verification scripts
+    # Verify it does NOT have a __main__ guard (intentional design)
+    verify_script_path = scripts_dir / 'verify_wisdom.py'
+    verify_content = verify_script_path.read_text()
+    assert 'if __name__ == "__main__":' not in verify_content, \
+        "verify_wisdom.py should not have __main__ guard (runs immediately by design)"
 
 
 def test_scripts_have_proper_imports():

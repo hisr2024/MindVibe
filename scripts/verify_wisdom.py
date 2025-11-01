@@ -23,7 +23,7 @@ print("Wisdom Guide Implementation Verification")
 print("=" * 60)
 
 # Test 1: Import models
-print("\n[1/5] Testing model imports...")
+print("\n[1/6] Testing model imports...")
 try:
     from models import WisdomVerse
     print("✓ WisdomVerse model imported successfully")
@@ -32,7 +32,7 @@ except Exception as e:
     sys.exit(1)
 
 # Test 2: Import wisdom knowledge base service
-print("\n[2/5] Testing service imports...")
+print("\n[2/6] Testing service imports...")
 try:
     from services.wisdom_kb import WisdomKnowledgeBase
     print("✓ WisdomKnowledgeBase service imported successfully")
@@ -41,7 +41,7 @@ except Exception as e:
     sys.exit(1)
 
 # Test 3: Test sanitization function
-print("\n[3/5] Testing text sanitization...")
+print("\n[3/6] Testing text sanitization...")
 try:
     test_text = "Krishna told Arjuna that the Lord is divine"
     sanitized = WisdomKnowledgeBase.sanitize_text(test_text)
@@ -59,7 +59,7 @@ except Exception as e:
     sys.exit(1)
 
 # Test 4: Test text similarity
-print("\n[4/5] Testing text similarity...")
+print("\n[4/6] Testing text similarity...")
 try:
     text1 = "I am feeling anxious and stressed"
     text2 = "anxiety management and stress reduction"
@@ -76,12 +76,11 @@ except Exception as e:
     sys.exit(1)
 
 # Test 5: Load and validate verse data
-print("\n[5/5] Testing verse data loading...")
+print("\n[5/6] Testing verse data loading...")
 try:
     import json
     
-    script_dir = Path(__file__).parent
-    repo_root = script_dir.parent
+    # Reuse script_dir and repo_root from top of file
     verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'
     
     if not os.path.exists(verses_path):
