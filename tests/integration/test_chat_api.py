@@ -8,8 +8,8 @@ and conversation history.
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch, AsyncMock
-from main import app
-from models import WisdomVerse
+from backend.main import app
+from backend.models import WisdomVerse
 
 
 @pytest.fixture
