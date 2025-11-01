@@ -1,23 +1,73 @@
 version: "3.9"
+
 services:
+  # PostgreSQL Database
   db:
-    image: postgres:16
+    image: postgres:16-alpine
+    container_name: mindvibe-db
     environment:
       POSTGRES_USER: navi
       POSTGRES_PASSWORD: navi
       POSTGRES_DB: navi
-    volumes: [db_data:/var/lib/postgresql/data]
-    ports: ["5432:5432"]
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U navi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mindvibe-network
+
+  # Backend API (FastAPI)
   api:
-    build: ../apps/api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend-base
+    container_name: mindvibe-api
     environment:
       - DATABASE_URL=postgresql+asyncpg://navi:navi@db:5432/navi
-    depends_on: [db]
-    ports: ["8000:8000"]
+      - PORT=8000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./migrations:/app/migrations
+      - ./data:/app/data
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mindvibe-network
+
+  # Frontend Web (Next.js)
   web:
-    build: ../apps/web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-runner
+    container_name: mindvibe-web
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
-    depends_on: [api]
-    ports: ["3000:3000"]
-volumes: { db_data: {} }
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    networks:
+      - mindvibe-network
+
+volumes:
+  db_data:
+
+networks:
+  mindvibe-network:
+    driver: bridge
