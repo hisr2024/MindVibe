@@ -1,1 +1,14 @@
-{\n  "builds": [\n    {\n      "src": "next.config.js",\n      "use": "@vercel/next"\n    }\n  ],\n  "routes": [\n    {\n      "src": "/api/(.*)",\n      "dest": "https://mindvibe-api.onrender.com/api/$1"\n    }\n  ]\n}
+{
+  "builds": [
+    {
+      "src": "next.config.js",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://mindvibe-api.onrender.com/$1"
+    }
+  ]
+}
