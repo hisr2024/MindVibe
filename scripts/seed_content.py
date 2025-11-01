@@ -19,7 +19,7 @@ from sqlalchemy import insert, select
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from models import Base, ContentPack
+from backend.models import Base, ContentPack
 
 DATA_EN = {"version":1,"locale":"en","packs":[{"principle":"stable_center","cards":[{"title":"Anchor in Breath","copy":"Feel one full inhale and exhale. Let attention rest where breath touches the nose.","cta":"Try 5 cycles","exercise_ref":"focus_breath_60"},{"title":"Name the Weather","copy":"Say: 'Anxious is here.' You’re the sky, not the cloud.","cta":"Say it softly","exercise_ref":"witness_label_45"},{"title":"One Point","copy":"Choose a single point in your visual field. Hold attention there for 20 seconds.","cta":"Hold gently","exercise_ref":"single_point_20"}]}]}
 DATA_DE = {"version":1,"locale":"de","packs":[{"principle":"stable_center","cards":[{"title":"Anker im Atem","copy":"Spüre eine volle Ein‑ und Ausatmung. Ruhe dort, wo die Luft die Nase berührt.","cta":"5 Zyklen","exercise_ref":"focus_breath_60"}]}]}
