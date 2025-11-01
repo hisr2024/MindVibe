@@ -34,3 +34,7 @@ class WisdomKnowledgeBase:
         pass
 
     # Other methods as per the original service code
+
+
+# Alias for backward compatibility
+WisdomKB = WisdomKnowledgeBase
