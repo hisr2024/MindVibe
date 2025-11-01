@@ -9,7 +9,7 @@ import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User, Mood, EncryptedBlob, ContentPack, WisdomVerse, SoftDeleteMixin
+from backend.models import User, Mood, EncryptedBlob, ContentPack, WisdomVerse, SoftDeleteMixin
 
 
 class TestSoftDeleteMixin:
