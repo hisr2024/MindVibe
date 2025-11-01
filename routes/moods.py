@@ -1,9 +1,16 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert
-from ..schemas import MoodIn, MoodOut
-from ..models import Mood
-from ..deps import get_db, get_user_id
+
+# Support both package and direct imports
+try:
+    from ..schemas import MoodIn, MoodOut
+    from ..models import Mood
+    from ..deps import get_db, get_user_id
+except ImportError:
+    from schemas import MoodIn, MoodOut
+    from models import Mood
+    from deps import get_db, get_user_id
 
 router = APIRouter(prefix="/moods", tags=["moods"])
 

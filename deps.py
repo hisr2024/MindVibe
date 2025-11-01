@@ -1,8 +1,14 @@
 from fastapi import Header, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
-from .models import User
-from .main import SessionLocal
+
+# Support both package and direct imports
+try:
+    from .models import User
+    from .main import SessionLocal
+except ImportError:
+    from models import User
+    from main import SessionLocal
 
 async def get_db():
     async with SessionLocal() as s:

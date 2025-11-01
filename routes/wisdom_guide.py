@@ -11,8 +11,13 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
 
-from ..deps import get_db
-from ..services.wisdom_kb import WisdomKnowledgeBase
+# Support both package and direct imports
+try:
+    from ..deps import get_db
+    from ..services.wisdom_kb import WisdomKnowledgeBase
+except ImportError:
+    from deps import get_db
+    from services.wisdom_kb import WisdomKnowledgeBase
 
 
 router = APIRouter(prefix="/api/wisdom", tags=["wisdom"])
@@ -111,7 +116,10 @@ async def list_themes(db: AsyncSession = Depends(get_db)):
     List all available wisdom themes.
     """
     from sqlalchemy import select, distinct
-    from ..models import WisdomVerse
+    try:
+        from ..models import WisdomVerse
+    except ImportError:
+        from models import WisdomVerse
     
     result = await db.execute(select(distinct(WisdomVerse.theme)))
     themes = [row[0] for row in result.all()]

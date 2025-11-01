@@ -1,8 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from ..models import ContentPack
-from ..deps import get_db
+
+# Support both package and direct imports
+try:
+    from ..models import ContentPack
+    from ..deps import get_db
+except ImportError:
+    from models import ContentPack
+    from deps import get_db
 
 router = APIRouter(prefix="/content", tags=["content"])
 
