@@ -71,6 +71,17 @@ Repository layout (high-level)
 - docs/                   - documentation and technical notes
 - .github/workflows/ci.yml - CI for tests on PRs
 
+## Context Transformation Pipeline
+
+MindVibe includes a modern **Context Transformation Pipeline** for processing Bhagavad Gita verses into structured, searchable content for universal mental health applications. The pipeline:
+
+- **Validates** verse data for completeness and correctness
+- **Sanitizes** religious references for universal appeal (e.g., "Krishna" → "the teacher")
+- **Enriches** content with metadata, keywords, and search optimization
+- **Structures** data for semantic search and context-aware applications
+
+See [docs/pipeline.md](docs/pipeline.md) for complete documentation and [examples/pipeline/](examples/pipeline/) for usage examples.
+
 ## AI-Powered Mental Health Chatbot
 
 MindVibe includes an AI-powered chatbot that provides compassionate mental health guidance based on timeless wisdom from the Bhagavad Gita, presented in a completely secular, universally applicable way.
