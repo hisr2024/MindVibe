@@ -1,186 +1,519 @@
-# MindVibe
+# MindVibe 🧠✨
 
-MindVibe is a privacy-first, real-time social audio platform for short-form voice conversations, moderated rooms, and ephemeral public channels.
+**A privacy-first mental health platform combining AI-powered guidance with timeless wisdom for universal well-being.**
 
-Quickstart (local)
-1. Clone the repo:
-   git clone https://github.com/hisr2024/MindVibe.git
-   cd MindVibe
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-14+-black.svg)](https://nextjs.org/)
 
-2. Checkout the dev branch:
-   git checkout -b dev
+---
 
-3. Create and activate a Python virtual environment:
-   python -m venv .venv
-   .venv\Scripts\Activate.ps1    # Windows PowerShell
-   source .venv/bin/activate     # macOS / Linux
+## 🌟 **Overview**
 
-4. Install dev dependencies:
-   python -m pip install -r requirements-dev.txt
+MindVibe is a comprehensive mental health platform that provides:
+- 🤖 **AI-Powered Chatbot** - Compassionate mental health guidance
+- 📊 **Mood Tracking** - Track and analyze your emotional patterns
+- 📝 **Encrypted Journal** - Private, secure journaling
+- 🌍 **Universal Wisdom** - Ancient teachings without religious terminology
+- 🔒 **Privacy-First** - End-to-end encryption for sensitive data
+- 🌐 **Multi-Language** - English, Hindi, and Sanskrit support
 
-5. Generate a dev Ed25519 key (keeps private key local):
-   python scripts/generate_eddsa_key.py --dir keyset_eddsa
+---
 
-6. Create a public-only key JSON (commit only the `*-pub.json` file). See docs/KEYS.md.
+## 📁 **Project Structure**
 
-7. Run the focused JWT tests:
-   $env:EDDSA_KEYSET_DIR = (Resolve-Path ./keyset_eddsa).Path
-   $env:EDDSA_ENABLED = "true"
-   $env:EDDSA_DUAL_SIGN = "true"
-   $env:JWT_SECRET = "dev-jwt-secret-please-change"
-   python -m pytest -q tests/test_jwt_dualsign_issue_verify.py tests/test_jwt_failure_paths.py tests/test_jwks.py
-
-## Running Tests
-
-MindVibe uses pytest for automated testing. The test suite includes unit tests and integration tests for all core functionality.
-
-### Run all tests:
-```bash
-python -m pytest tests/
+```
+MindVibe/
+├── backend/                    # FastAPI Backend (NEW!)
+│   ├── __init__.py            # Package initialization
+│   ├── main.py                # FastAPI app with 8 routers
+│   ├── models.py              # Database models (SQLAlchemy)
+│   ├── schemas.py             # Pydantic schemas
+│   ├── deps.py                # Dependency injection
+│   ├── routes/                # API route handlers
+│   │   ├── __init__.py
+│   │   ├── auth.py           # Authentication & sessions
+│   │   ├── jwk.py            # JWK public key endpoint
+│   │   ├── moods.py          # Mood tracking API
+│   │   ├── content.py        # Content packs API
+│   │   ├── journal.py        # Encrypted journal/blob storage
+│   │   ├── chat.py           # AI chatbot conversations
+│   │   ├── wisdom_guide.py   # Universal wisdom guide API
+│   │   └── gita_api.py       # Gita verses API
+│   ├── services/              # Business logic
+│   │   ├── chatbot.py        # AI chatbot service
+│   │   ├── wisdom_kb.py      # Wisdom knowledge base
+│   │   └── pipeline/         # Content transformation
+│   └── models/                # Additional model definitions
+├── tests/                     # Pytest test suite
+│   ├── conftest.py           # Test fixtures
+│   ├── unit/                 # Unit tests
+│   └── integration/          # Integration tests
+├── scripts/                   # Utility scripts (Python package)
+│   ├── generate_eddsa_key.py # Generate Ed25519 keys
+│   ├── seed_wisdom.py        # Seed wisdom verses
+│   ├── seed_content.py       # Seed content packs
+│   └── verify_wisdom.py      # Verify implementation
+├── data/                      # Data files
+│   └── wisdom/               # Wisdom verses JSON
+├── docs/                      # Documentation
+├── migrations/                # Database migrations
+├── Dockerfile                 # Multi-stage Docker build
+├── docker-compose.yml         # Docker orchestration
+├── render.yaml               # Render.com deployment config
+├── requirements.txt          # Python dependencies
+└── package.json              # Node.js dependencies (frontend)
 ```
 
-### Run tests with coverage report:
+---
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+
+- Python 3.11+
+- Node.js 20+
+- PostgreSQL 16+ (or use Docker)
+- Git
+
+### **Option 1: Local Development**
+
 ```bash
-python -m pytest tests/ --cov=. --cov-report=html
-```
+# 1. Clone the repository
+git clone https://github.com/hisr2024/MindVibe.git
+cd MindVibe
 
-### Run specific test categories:
-```bash
-# Unit tests only
-python -m pytest tests/unit/
+# 2. Create Python virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Integration tests only
-python -m pytest tests/integration/
+# 3. Install Python dependencies
+pip install -r requirements.txt
 
-# Specific test file
-python -m pytest tests/unit/test_wisdom_kb.py
-```
+# 4. Install Node.js dependencies
+npm install
 
-### Run tests in verbose mode:
-```bash
-python -m pytest tests/ -v
-```
+# 5. Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
 
-For more detailed testing information, see QUICKSTART.md.
+# 6. Generate EdDSA keys for JWT signing
+python scripts/generate_eddsa_key.py --dir keyset_eddsa
 
-Repository layout (high-level)
-- scripts/                - Python package containing utility scripts:
-  - generate_eddsa_key.py - Generate Ed25519 keypairs for JWT signing
-  - seed_wisdom.py        - Seed database with wisdom verses
-  - seed_content.py       - Seed database with content packs
-  - verify_wisdom.py      - Verify wisdom guide implementation
-- keyset_eddsa/           - local EdDSA key JSON files (private keys must remain local)
-- security/               - JWT and EdDSA logic
-- tests/                  - unit tests (pytest)
-- docs/                   - documentation and technical notes
-- .github/workflows/ci.yml - CI for tests on PRs
-
-## Scripts Usage
-
-The `scripts/` directory is now a Python package containing all utility scripts. Scripts can be run in two ways:
-
-**Method 1: Direct execution**
-```bash
-python scripts/generate_eddsa_key.py
+# 7. Seed the database with wisdom verses
 python scripts/seed_wisdom.py
-python scripts/seed_content.py
-python scripts/verify_wisdom.py
+
+# 8. Start the backend server
+uvicorn backend.main:app --reload
+
+# 9. Start the frontend (in another terminal)
+npm run dev
 ```
 
-**Method 2: As a module**
+**Access the application:**
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
+- Frontend: http://localhost:3000
+
+### **Option 2: Docker Compose** (Recommended)
+
 ```bash
-python -m scripts.generate_eddsa_key
-python -m scripts.seed_wisdom
-python -m scripts.seed_content
-python -m scripts.verify_wisdom
+# 1. Clone the repository
+git clone https://github.com/hisr2024/MindVibe.git
+cd MindVibe
+
+# 2. Start all services (PostgreSQL, Backend, Frontend)
+docker-compose up --build
+
+# Access the application:
+# - Backend: http://localhost:8000
+# - API Docs: http://localhost:8000/docs
+# - Frontend: http://localhost:3000
+
+# 3. Stop services
+docker-compose down
 ```
 
+### **Option 3: Deploy to Render.com** (Production)
 
-## Context Transformation Pipeline
+```bash
+# 1. Fork the repository to your GitHub account
 
-MindVibe includes a modern **Context Transformation Pipeline** for processing Bhagavad Gita verses into structured, searchable content for universal mental health applications. The pipeline:
+# 2. Connect your GitHub repository to Render.com
 
-- **Validates** verse data for completeness and correctness
-- **Sanitizes** religious references for universal appeal (e.g., "Krishna" → "the teacher")
-- **Enriches** content with metadata, keywords, and search optimization
-- **Structures** data for semantic search and context-aware applications
+# 3. Render will automatically detect render.yaml and deploy:
+#    - Backend API (Python/FastAPI)
+#    - PostgreSQL Database
 
-See [docs/pipeline.md](docs/pipeline.md) for complete documentation and [examples/pipeline/](examples/pipeline/) for usage examples.
+# 4. Set environment variables in Render dashboard:
+#    - DATABASE_URL (auto-configured from database)
+#    - JWT_SECRET (generate a secure secret)
+#    - OPENAI_API_KEY (optional, for AI features)
 
-## AI-Powered Mental Health Chatbot
+# Your app will be live at: https://mindvibe-api.onrender.com
+```
 
-MindVibe includes an AI-powered chatbot that provides compassionate mental health guidance based on timeless wisdom from the Bhagavad Gita, presented in a completely secular, universally applicable way.
+---
 
-### Features
+## 🔌 **API Documentation**
 
-- **Conversational AI**: Multi-turn conversations with context awareness
-- **Universal Wisdom**: Ancient teachings without religious terminology
-- **Multi-Language Support**: English, Hindi, and Sanskrit
-- **Smart Search**: Semantic search finds relevant verses for your concerns
-- **Offline Mode**: Works with or without OpenAI API (fallback to templates)
-- **Session Management**: Maintains conversation history across messages
+### **All 8 API Routers:**
 
-### Quick Start
+MindVibe backend includes **8 comprehensive API routers**:
 
-1. **Seed the database** with wisdom verses:
-   ```bash
-   python scripts/seed_wisdom.py
-   ```
+#### **1. Authentication & Sessions** (`/api/auth`)
+- `POST /api/auth/login` - User authentication
+- `POST /api/auth/logout` - End session
+- `GET /api/auth/session` - Get current session
+- `POST /api/auth/refresh` - Refresh access token
 
-2. **(Optional) Configure OpenAI** for AI-powered responses:
-   ```bash
-   echo "OPENAI_API_KEY=sk-your-key-here" >> .env
-   ```
+#### **2. JWK Public Keys** (`/.well-known/jwks.json`)
+- `GET /.well-known/jwks.json` - Get public keys for JWT verification
 
-3. **Start the server**:
-   ```bash
-   uvicorn main:app --reload
-   ```
+#### **3. Mood Tracking** (`/moods`)
+- `POST /moods` - Create mood entry
+- `GET /moods` - List mood history
+- `GET /moods/{mood_id}` - Get specific mood
+- `DELETE /moods/{mood_id}` - Delete mood entry
 
-4. **Start chatting** at `POST /api/chat/message`:
-   ```bash
-   curl -X POST http://localhost:8000/api/chat/message \
-     -H "Content-Type: application/json" \
-     -d '{"message": "I am feeling anxious about work"}'
-   ```
+#### **4. Content Packs** (`/content`)
+- `GET /content/packs` - List available content packs
+- `GET /content/packs/{pack_id}` - Get specific content pack
+- `GET /content/locales` - List supported locales
 
-### API Endpoints
+#### **5. Encrypted Journal** (`/journal`)
+- `POST /journal/upload` - Upload encrypted blob
+- `GET /journal/blobs` - List user's encrypted blobs
+- `GET /journal/blobs/{blob_id}` - Retrieve encrypted blob
+- `DELETE /journal/blobs/{blob_id}` - Delete encrypted blob
 
-#### Chatbot Endpoints
-- `POST /api/chat/message` - Send a message and get guidance
-- `GET /api/chat/history/{session_id}` - View conversation history
+#### **6. AI Chatbot** (`/api/chat`)
+- `POST /api/chat/message` - Send message and get AI guidance
+- `POST /api/chat/start` - Start new conversation session
+- `GET /api/chat/history/{session_id}` - Get conversation history
 - `DELETE /api/chat/history/{session_id}` - Clear conversation
-- `POST /api/chat/start` - Start a new session
 - `GET /api/chat/health` - Check chatbot status
 
-#### Wisdom API Endpoints
-- `GET /api/wisdom/verses` - List wisdom verses with filtering and pagination
-- `GET /api/wisdom/verses/{verse_id}` - Get a specific verse by ID
-- `POST /api/wisdom/search` - Perform semantic search over wisdom content
-- `POST /api/wisdom/query` - Get AI-powered guidance with relevant verses
-- `GET /api/wisdom/themes` - List all available themes
-- `GET /api/wisdom/applications` - List all mental health applications
+#### **7. Universal Wisdom Guide** (`/api/wisdom`)
+- `GET /api/wisdom/verses` - List wisdom verses (with filtering)
+- `GET /api/wisdom/verses/{verse_id}` - Get specific verse
+- `POST /api/wisdom/search` - Semantic search for verses
+- `POST /api/wisdom/query` - AI-powered guidance with verses
+- `GET /api/wisdom/themes` - List all themes
+- `GET /api/wisdom/applications` - List mental health applications
 
-**Example Wisdom API Usage:**
+#### **8. Gita Verses API** (`/api/gita`)
+- `GET /api/gita/verses` - List Bhagavad Gita verses
+- `GET /api/gita/verses/{verse_id}` - Get specific verse
+- `GET /api/gita/chapters` - List all chapters
+- `GET /api/gita/chapters/{chapter_id}` - Get chapter details
+
+### **Interactive API Documentation:**
+
+Visit `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc` (ReDoc) for interactive API documentation with:
+- Live API testing
+- Request/response schemas
+- Authentication flows
+- Example requests
+
+---
+
+## 🧪 **Testing**
+
+MindVibe has a comprehensive test suite with **100% updated imports** for the new backend structure.
+
+### **Run All Tests:**
+
 ```bash
-# Search for verses about anxiety
-curl -X POST http://localhost:8000/api/wisdom/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "managing anxiety and stress"}'
+# Install test dependencies
+pip install pytest pytest-asyncio pytest-cov httpx aiosqlite
 
-# Get verses filtered by theme
-curl http://localhost:8000/api/wisdom/verses?theme=equanimity_in_adversity&limit=5
+# Run all tests
+pytest
 
-# Get a specific verse in Hindi with Sanskrit
-curl "http://localhost:8000/api/wisdom/verses/2.47?language=hindi&include_sanskrit=true"
+# Run with verbose output
+pytest -v
+
+# Run with coverage report
+pytest --cov=backend --cov-report=html
+
+# Open coverage report
+open htmlcov/index.html
 ```
 
-### Documentation
+### **Run Specific Test Categories:**
 
-- **Chatbot Guide**: [docs/chatbot.md](docs/chatbot.md) - Complete chatbot documentation
-- **Wisdom API**: [docs/wisdom_api.md](docs/wisdom_api.md) - Comprehensive Wisdom API reference
-- **Wisdom Guide**: [docs/wisdom_guide.md](docs/wisdom_guide.md) - Background on wisdom verses
-- **Interactive Docs**: Visit `http://localhost:8000/docs` after starting the server
+```bash
+# Unit tests only
+pytest tests/unit/ -v
 
-Need help?
-If you want, I can commit and push these files to the proofread-docs branch for you and open a PR. I will not commit any private key files.
+# Integration tests only
+pytest tests/integration/ -v
+
+# Specific test file
+pytest tests/unit/test_models.py -v
+pytest tests/integration/test_chat_api.py -v
+```
+
+### **Test Coverage:**
+
+Current test coverage includes:
+- ✅ Database models (User, Mood, WisdomVerse, etc.)
+- ✅ Business logic services (Chatbot, WisdomKB)
+- ✅ API endpoints (all 8 routers)
+- ✅ Text sanitization & transformation
+- ✅ Authentication flows
+- ✅ Encryption/decryption
+
+**See:** `tests/README.md` for detailed testing documentation.
+
+---
+
+## 🐳 **Docker Deployment**
+
+### **Build & Run with Docker Compose:**
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Run in detached mode
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Remove volumes (reset database)
+docker-compose down -v
+```
+
+### **Services Included:**
+
+- **PostgreSQL Database** - Port 5432
+- **Backend API (FastAPI)** - Port 8000
+- **Frontend (Next.js)** - Port 3000
+
+All services are networked and include health checks.
+
+---
+
+## 🌍 **Deployment**
+
+### **Render.com** (Recommended - Free Tier Available)
+
+Your `render.yaml` is already configured. Simply:
+
+1. **Push to GitHub**
+2. **Connect to Render.com**
+3. **Deploy automatically**
+
+Render will create:
+- ✅ Backend API service (Python/FastAPI)
+- ✅ PostgreSQL database
+- ✅ Automatic HTTPS
+- ✅ Auto-deploy on push
+
+### **Fly.io**
+
+```bash
+# Install Fly CLI
+curl -L https://fly.io/install.sh | sh
+
+# Login
+fly auth login
+
+# Launch app
+fly launch
+
+# Deploy
+fly deploy
+```
+
+### **Railway**
+
+1. Connect GitHub repository
+2. Configure environment variables
+3. Deploy automatically
+
+---
+
+## 🔒 **Security**
+
+MindVibe implements multiple security layers:
+
+- ✅ **JWT Authentication** - Ed25519 signature algorithm
+- ✅ **End-to-End Encryption** - For journal entries
+- ✅ **Password Hashing** - bcrypt for secure storage
+- ✅ **Input Validation** - Pydantic schemas
+- ✅ **SQL Injection Prevention** - SQLAlchemy ORM
+- ✅ **CORS Configuration** - Restricted origins
+- ✅ **Rate Limiting** - API request throttling
+- ✅ **Secret Management** - Environment variables
+
+**Security Best Practices:**
+- Never commit `.env` files
+- Rotate JWT secrets regularly
+- Keep dependencies updated
+- Use HTTPS in production
+- Review `docs/SECURITY_ARCH.md`
+
+---
+
+## 📚 **Documentation**
+
+### **Core Documentation:**
+- [Testing Guide](tests/README.md) - Comprehensive testing documentation
+- [Scripts Package](scripts/README.md) - Utility scripts reference
+- [Chatbot Guide](docs/chatbot.md) - AI chatbot documentation
+- [Wisdom API](docs/wisdom_api.md) - Wisdom guide API reference
+- [Pipeline](docs/pipeline.md) - Content transformation pipeline
+- [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
+
+### **Additional Resources:**
+- [Backend Reorganization](BACKEND_REORGANIZATION_COMPLETE.md) - Migration details
+- [Cleanup Progress](CLEANUP_PROGRESS.md) - Project cleanup tracking
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Community guidelines
+
+---
+
+## 🛠️ **Development**
+
+### **Backend Development:**
+
+```bash
+# Start backend with hot reload
+uvicorn backend.main:app --reload
+
+# Run database migrations
+alembic upgrade head
+
+# Create new migration
+alembic revision --autogenerate -m "description"
+
+# Seed database
+python scripts/seed_wisdom.py
+python scripts/seed_content.py
+```
+
+### **Frontend Development:**
+
+```bash
+# Start Next.js dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Linting
+npm run lint
+
+# Type checking
+npm run typecheck
+```
+
+### **Code Quality:**
+
+```bash
+# Python formatting
+black backend/
+
+# Python linting
+ruff check backend/ --fix
+
+# Python type checking
+mypy backend/
+
+# JavaScript/TypeScript
+npm run lint
+npm run format
+```
+
+---
+
+## 🤝 **Contributing**
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### **Quick Contribution Guide:**
+
+1. **Fork the repository**
+2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Make your changes**
+4. **Write tests** for new features
+5. **Ensure all tests pass** (`pytest`)
+6. **Commit your changes** (`git commit -m 'Add amazing feature'`)
+7. **Push to branch** (`git push origin feature/amazing-feature`)
+8. **Open a Pull Request**
+
+---
+
+## 📊 **Project Status**
+
+### **Current Version: v2.0.0** 🎉
+
+- ✅ Backend 100% reorganized into `backend/` package
+- ✅ All 8 API routers registered and tested
+- ✅ Comprehensive test suite (updated for new structure)
+- ✅ Docker deployment ready
+- ✅ Render.com deployment configured
+- ✅ Production-ready release published
+
+### **Roadmap:**
+
+- [ ] Frontend reorganization (`frontend/src/` structure)
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Comprehensive security audit
+- [ ] Mobile app (React Native)
+- [ ] Real-time features (WebSockets)
+- [ ] Advanced analytics dashboard
+
+---
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 **Acknowledgments**
+
+- Built with [FastAPI](https://fastapi.tiangolo.com/)
+- Frontend powered by [Next.js](https://nextjs.org/)
+- Database with [PostgreSQL](https://www.postgresql.org/)
+- AI integration via [OpenAI](https://openai.com/)
+- Deployment on [Render.com](https://render.com/)
+
+---
+
+## 📧 **Contact & Support**
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/hisr2024/MindVibe/issues)
+- **Discussions**: [Join community discussions](https://github.com/hisr2024/MindVibe/discussions)
+- **Documentation**: [Full documentation](https://github.com/hisr2024/MindVibe/tree/main/docs)
+
+---
+
+**Made with ❤️ for mental health and well-being**
+
+---
+
+## 🚀 **Get Started Now!**
+
+```bash
+# Quick start with Docker
+git clone https://github.com/hisr2024/MindVibe.git
+cd MindVibe
+docker-compose up --build
+
+# Access at http://localhost:8000/docs
+```
+
+**Happy coding! 🎉**
