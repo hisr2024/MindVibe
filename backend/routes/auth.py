@@ -4,8 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from datetime import datetime, timezone
 
-from backend.models.user import User
-from backend.models.session import Session
+from backend.models import User, Session
 from backend.security.password_policy import policy
 from backend.security.password_hash import hash_password, verify_password
 from backend.security.jwt import create_access_token, decode_access_token
