@@ -3,9 +3,13 @@ services:
   - type: web
     name: mindvibe-api
     env: python
+    runtime: python
     plan: free
     region: oregon
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      pip install -e .
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
@@ -13,11 +17,13 @@ services:
           name: mindvibe-db
           property: connectionString
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: "3.11"
       - key: JWT_SECRET
         generateValue: true
       - key: EDDSA_ENABLED
-        value: false
+        value: "false"
+      - key: PYTHONPATH
+        value: "."
     healthCheckPath: /
 
 databases:
