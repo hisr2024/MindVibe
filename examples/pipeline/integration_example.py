@@ -15,6 +15,7 @@ It shows:
 import json
 import sys
 import os
+import traceback
 from pathlib import Path
 
 # Add parent directory to path
@@ -250,7 +251,6 @@ def main():
         
     except Exception as e:
         print(f"\nError: {e}", file=sys.stderr)
-        import traceback
         traceback.print_exc()
         sys.exit(1)
 

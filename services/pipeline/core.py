@@ -6,9 +6,13 @@ to transform raw Bhagavad Gita verse data into structured, searchable content.
 """
 
 from typing import Dict, List, Optional, Any, Callable
+import logging
 from .validator import VerseValidator, ValidationError
 from .sanitizer import TextSanitizer
 from .enricher import MetadataEnricher
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 class PipelineError(Exception):
@@ -155,7 +159,7 @@ class ContextTransformationPipeline:
                 if not continue_on_error:
                     raise
                 # Log error and skip this verse
-                print(f"Warning: Failed to transform verse {i}: {str(e)}")
+                logger.warning(f"Failed to transform verse {i}: {str(e)}")
                 self.stats['errors'] += 1
         
         return results
@@ -270,7 +274,7 @@ class ContextTransformationPipeline:
                         raise PipelineError(
                             f"Custom stage '{stage['name']}' failed: {str(e)}"
                         ) from e
-                    print(f"Warning: Custom stage '{stage['name']}' failed: {str(e)}")
+                    logger.warning(f"Custom stage '{stage['name']}' failed: {str(e)}")
         
         return result
     

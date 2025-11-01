@@ -52,18 +52,6 @@ class TextSanitizer:
         r'\bsanskrit\b': 'classical',
     }
     
-    # Terms to preserve (don't sanitize these universal concepts)
-    PRESERVE_TERMS: List[str] = [
-        'dharma',  # Often used in universal context
-        'karma',   # Widely understood concept
-        'yoga',    # Universal practice term
-        'meditation',
-        'mindfulness',
-        'wisdom',
-        'peace',
-        'truth',
-    ]
-    
     @classmethod
     def sanitize(cls, text: str, preserve_sanskrit: bool = False) -> str:
         """

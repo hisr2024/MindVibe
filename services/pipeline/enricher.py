@@ -107,6 +107,7 @@ class MetadataEnricher:
     def extract_keywords(cls, verse_data: Dict[str, Any]) -> List[str]:
         """
         Extract important keywords from verse for search optimization.
+        Uses frequency-based filtering for better relevance.
         
         Args:
             verse_data: Dictionary containing verse information
@@ -114,8 +115,6 @@ class MetadataEnricher:
         Returns:
             List of keywords
         """
-        keywords = set()
-        
         # Get text from English translation and context
         text = ' '.join([
             verse_data.get('english', ''),
@@ -131,16 +130,17 @@ class MetadataEnricher:
             'that', 'these', 'those', 'it', 'its', 'they', 'them', 'their',
         }
         
-        # Extract words
+        # Extract words and count frequencies
         words = re.findall(r'\b[a-z]+\b', text.lower())
+        word_freq = {}
         
-        # Filter and collect keywords
         for word in words:
             if len(word) > 3 and word not in stop_words:
-                keywords.add(word)
+                word_freq[word] = word_freq.get(word, 0) + 1
         
-        # Limit to most relevant keywords (by frequency)
-        return sorted(list(keywords))[:20]
+        # Sort by frequency and return top keywords
+        sorted_keywords = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
+        return [word for word, freq in sorted_keywords[:20]]
     
     @classmethod
     def suggest_applications(cls, verse_data: Dict[str, Any]) -> List[str]:

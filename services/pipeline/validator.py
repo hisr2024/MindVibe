@@ -127,10 +127,14 @@ class VerseValidator:
             theme = verse_data['theme']
             if not isinstance(theme, str):
                 errors.append("Theme must be a string")
-            elif not re.match(r'^[a-z_]+$', theme.lower().replace(' ', '_')):
-                errors.append(
-                    f"Theme should contain only letters and underscores: {theme}"
-                )
+            else:
+                # Normalize theme for validation (convert spaces to underscores)
+                normalized_theme = theme.lower().replace(' ', '_')
+                if not re.match(r'^[a-z_]+$', normalized_theme):
+                    errors.append(
+                        f"Theme should contain only letters and underscores. Got: '{theme}' "
+                        f"(normalized: '{normalized_theme}')"
+                    )
         
         # Validate text fields are strings
         text_fields = ['english', 'hindi', 'sanskrit', 'context']
