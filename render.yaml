@@ -17,7 +17,7 @@ services:
           name: mindvibe-db
           property: connectionString
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.11.9"
       - key: JWT_SECRET
         generateValue: true
       - key: EDDSA_ENABLED
