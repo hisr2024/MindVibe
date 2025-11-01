@@ -7,8 +7,8 @@ Tests the wisdom verse management, sanitization, and search functionality.
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import WisdomVerse
-from services.wisdom_kb import WisdomKnowledgeBase
+from backend.models import WisdomVerse
+from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 
 class TestWisdomKnowledgeBaseSanitization:
