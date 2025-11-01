@@ -20,7 +20,7 @@ from sqlalchemy import insert, select
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from models import Base, WisdomVerse
+from backend.models import Base, WisdomVerse
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://mindvibe:password@db:5432/mindvibe")
 engine = create_async_engine(DATABASE_URL, echo=False)
