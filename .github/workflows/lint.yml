@@ -8,10 +8,15 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   python-lint:
     name: Python Linting (flake8)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -35,6 +40,8 @@ jobs:
   typescript-lint:
     name: TypeScript Linting (ESLint)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code

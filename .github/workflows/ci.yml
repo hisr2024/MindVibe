@@ -8,10 +8,16 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   python-tests:
     name: Python Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     
     steps:
       - name: Checkout code
@@ -61,6 +67,8 @@ jobs:
   typescript-check:
     name: TypeScript Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
