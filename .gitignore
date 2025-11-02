@@ -1,37 +1,19 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-# Virtual environments
-.venv/
-env/
-venv/
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-# Pytest cache
-.pytest_cache/
-# Coverage reports
-.coverage
-coverage.xml
-htmlcov/
-# Keys and secrets
-keyset_eddsa/*.json
-.env
-.env.*
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-# Logs
-*.log
-# Node modules
-node_modules/
-package-lock.json
-# Next.js
-.next/
-out/
-tsconfig.tsbuildinfo
-examples/pipeline/transformed_wisdom.json
-examples/pipeline/example_output.json
+# Malformed/junk files prevention
+# Files with spaces and special characters in names
+*\ *\)*
+*\ --*
+how\ *
+e\ --*
+
+# Git command output files
+*.log.txt
+git-*.out
+
+# Temporary shell outputs
+*.tmp.out
+shell-output-*
+
+# macOS and Windows junk
+.DS_Store
+Thumbs.db
+*.~*
