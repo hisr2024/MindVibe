@@ -13,7 +13,7 @@ setup(
         "python-multipart>=0.0.5,<0.0.6",
         "uvicorn>=0.22.0,<0.23.0",
         "python-dotenv>=1.0.0,<2.0.0",
-        "openai>=0.27.0,<2.0.0",
+        "openai>=0.27.0,<3.0.0",
         "numpy>=1.24.0,<2.0.0",
         "asyncpg>=0.27.0,<0.28.0",
         "psycopg2-binary>=2.9.0,<3.0.0",
