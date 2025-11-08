@@ -9,8 +9,8 @@ Usage:
     python verify_chatbot.py
 """
 
-import sys
 import os
+import sys
 
 
 def check_file_exists(filepath: str) -> bool:
@@ -28,7 +28,7 @@ def check_imports(module_path: str) -> bool:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
         # Try to compile the file
-        with open(module_path, "r") as f:
+        with open(module_path) as f:
             compile(f.read(), module_path, "exec")
         print(f"✓ {module_path} - syntax valid")
         return True
@@ -84,7 +84,7 @@ def main():
     print("\n3. Checking API Endpoints Implementation...\n")
 
     # Check that chat.py defines the expected endpoints
-    with open("routes/chat.py", "r") as f:
+    with open("routes/chat.py") as f:
         chat_content = f.read()
 
     endpoints = [
@@ -105,7 +105,7 @@ def main():
 
     print("\n4. Checking ChatbotService Implementation...\n")
 
-    with open("services/chatbot.py", "r") as f:
+    with open("services/chatbot.py") as f:
         service_content = f.read()
 
     methods = [
@@ -130,7 +130,7 @@ def main():
 
     print("\n5. Checking Documentation...\n")
 
-    with open("docs/chatbot.md", "r") as f:
+    with open("docs/chatbot.md") as f:
         doc_content = f.read()
 
     doc_sections = [
@@ -152,7 +152,7 @@ def main():
 
     print("\n6. Checking Test Coverage...\n")
 
-    with open("tests/unit/test_chatbot.py", "r") as f:
+    with open("tests/unit/test_chatbot.py") as f:
         test_content = f.read()
 
     test_classes = [
@@ -175,7 +175,7 @@ def main():
     import json
 
     try:
-        with open("data/wisdom/verses.json", "r") as f:
+        with open("data/wisdom/verses.json") as f:
             verses = json.load(f)
 
         print(f"✓ Found {len(verses)} wisdom verses")

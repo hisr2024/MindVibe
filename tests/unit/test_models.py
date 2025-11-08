@@ -4,18 +4,18 @@ Unit tests for MindVibe models.
 Tests the ORM models including User, Mood, EncryptedBlob, ContentPack, and WisdomVerse.
 """
 
-import pytest
 import datetime
-from sqlalchemy import select
+
+import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (
-    User,
-    Mood,
-    EncryptedBlob,
     ContentPack,
+    EncryptedBlob,
+    Mood,
+    User,
     WisdomVerse,
-    SoftDeleteMixin,
 )
 
 
@@ -68,7 +68,7 @@ class TestUserModel:
         user2 = User(auth_uid="unique-123", locale="es")
         test_db.add(user2)
 
-        with pytest.raises(Exception):  # Should raise integrity error
+        with pytest.raises(IntegrityError):  # Should raise integrity error
             await test_db.commit()
 
 
@@ -223,5 +223,5 @@ class TestWisdomVerseModel:
         )
         test_db.add(verse2)
 
-        with pytest.raises(Exception):  # Should raise integrity error
+        with pytest.raises(IntegrityError):  # Should raise integrity error
             await test_db.commit()

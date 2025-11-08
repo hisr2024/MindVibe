@@ -7,9 +7,8 @@ to retrieve verses, perform searches, and get AI-powered guidance.
 """
 
 import asyncio
-import httpx
-import json
 
+import httpx
 
 BASE_URL = "http://localhost:8000"
 
@@ -138,8 +137,8 @@ async def example_search_with_filter():
         if response.status_code == 200:
             data = response.json()
             print(f"\nSearch query: '{data['query']}'")
-            print(f"Filter: control_of_mind theme")
-            print(f"Results:\n")
+            print("Filter: control_of_mind theme")
+            print("Results:\n")
 
             for result in data["results"]:
                 print(f"  {result['verse_id']}: {result['theme']}")
@@ -165,7 +164,7 @@ async def example_wisdom_query():
 
         if response.status_code == 200:
             data = response.json()
-            print(f"\nQuestion: I'm feeling overwhelmed by work stress")
+            print("\nQuestion: I'm feeling overwhelmed by work stress")
             print(f"\nGuidance:\n{data['response'][:200]}...")
             print(f"\nBased on {len(data['verses'])} wisdom verses")
         else:

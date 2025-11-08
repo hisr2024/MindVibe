@@ -4,10 +4,12 @@ Unit tests for AI Chatbot Service
 Tests conversation management, response generation, and fallback mechanisms.
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from backend.services.chatbot import ChatbotService
+
+import pytest
+
 from backend.models import WisdomVerse
+from backend.services.chatbot import ChatbotService
 
 
 @pytest.fixture
@@ -61,18 +63,17 @@ class TestChatbotService:
             chatbot_service.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse, "score": 0.9}],
+        ), patch.object(
+            chatbot_service,
+            "_generate_chat_response",
+            return_value="I hear that you're feeling anxious...",
         ):
-            with patch.object(
-                chatbot_service,
-                "_generate_chat_response",
-                return_value="I hear that you're feeling anxious...",
-            ):
-                result = await chatbot_service.chat(
-                    message=message,
-                    session_id=session_id,
-                    db=mock_db,
-                    language="english",
-                )
+            result = await chatbot_service.chat(
+                message=message,
+                session_id=session_id,
+                db=mock_db,
+                language="english",
+            )
 
         # Verify response structure
         assert result["session_id"] == session_id
@@ -97,19 +98,18 @@ class TestChatbotService:
             chatbot_service.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse, "score": 0.9}],
+        ), patch.object(
+            chatbot_service, "_generate_chat_response", return_value="Response"
         ):
-            with patch.object(
-                chatbot_service, "_generate_chat_response", return_value="Response"
-            ):
-                # First message
-                await chatbot_service.chat(
-                    message="First message", session_id=session_id, db=mock_db
-                )
+            # First message
+            await chatbot_service.chat(
+                message="First message", session_id=session_id, db=mock_db
+            )
 
-                # Second message
-                result = await chatbot_service.chat(
-                    message="Second message", session_id=session_id, db=mock_db
-                )
+            # Second message
+            result = await chatbot_service.chat(
+                message="Second message", session_id=session_id, db=mock_db
+            )
 
         # Verify conversation length increased
         assert result["conversation_length"] == 4  # 2 user + 2 assistant messages
@@ -196,18 +196,17 @@ class TestChatbotService:
             chatbot_service.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse, "score": 0.9}],
+        ), patch.object(
+            chatbot_service,
+            "_generate_chat_response",
+            return_value="Response in Hindi",
         ):
-            with patch.object(
-                chatbot_service,
-                "_generate_chat_response",
-                return_value="Response in Hindi",
-            ):
-                result = await chatbot_service.chat(
-                    message="मुझे चिंता हो रही है",
-                    session_id=session_id,
-                    db=mock_db,
-                    language="hindi",
-                )
+            result = await chatbot_service.chat(
+                message="मुझे चिंता हो रही है",
+                session_id=session_id,
+                db=mock_db,
+                language="hindi",
+            )
 
         assert result["language"] == "hindi"
 
@@ -220,16 +219,15 @@ class TestChatbotService:
             chatbot_service.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse, "score": 0.9}],
+        ), patch.object(
+            chatbot_service, "_generate_chat_response", return_value="Response"
         ):
-            with patch.object(
-                chatbot_service, "_generate_chat_response", return_value="Response"
-            ):
-                result = await chatbot_service.chat(
-                    message="Test",
-                    session_id=session_id,
-                    db=mock_db,
-                    include_sanskrit=True,
-                )
+            result = await chatbot_service.chat(
+                message="Test",
+                session_id=session_id,
+                db=mock_db,
+                include_sanskrit=True,
+            )
 
         # Verify verses have Sanskrit when requested
         # (The formatting is done by WisdomKnowledgeBase)
@@ -255,13 +253,12 @@ class TestChatbotService:
 
         with patch.object(
             chatbot_service.kb, "search_relevant_verses", return_value=verses
+        ), patch.object(
+            chatbot_service, "_generate_chat_response", return_value="Response"
         ):
-            with patch.object(
-                chatbot_service, "_generate_chat_response", return_value="Response"
-            ):
-                result = await chatbot_service.chat(
-                    message="Test", session_id=session_id, db=mock_db
-                )
+            result = await chatbot_service.chat(
+                message="Test", session_id=session_id, db=mock_db
+            )
 
         assert len(result["verses"]) == 2
 
@@ -314,21 +311,20 @@ class TestConversationContext:
             chatbot_service.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse, "score": 0.9}],
-        ):
-            with patch.object(
-                chatbot_service, "_generate_chat_response", return_value="Response"
-            ) as mock_generate:
-                # Send 10 messages
-                for i in range(10):
-                    await chatbot_service.chat(
-                        message=f"Message {i}", session_id=session_id, db=mock_db
-                    )
+        ), patch.object(
+            chatbot_service, "_generate_chat_response", return_value="Response"
+        ) as mock_generate:
+            # Send 10 messages
+            for i in range(10):
+                await chatbot_service.chat(
+                    message=f"Message {i}", session_id=session_id, db=mock_db
+                )
 
-                # Check that the last call used limited history
-                # The _generate_chat_response receives conversation_history
-                last_call_history = mock_generate.call_args[1]["conversation_history"]
-                # Should be last 6 messages (3 user + 3 assistant before the current one)
-                assert len(last_call_history) <= 19  # Up to 9 exchanges + current
+            # Check that the last call used limited history
+            # The _generate_chat_response receives conversation_history
+            last_call_history = mock_generate.call_args[1]["conversation_history"]
+            # Should be last 6 messages (3 user + 3 assistant before the current one)
+            assert len(last_call_history) <= 19  # Up to 9 exchanges + current
 
     @pytest.mark.asyncio
     async def test_timestamp_in_history(self, chatbot_service, mock_db, sample_verse):
@@ -339,13 +335,12 @@ class TestConversationContext:
             chatbot_service.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse, "score": 0.9}],
+        ), patch.object(
+            chatbot_service, "_generate_chat_response", return_value="Response"
         ):
-            with patch.object(
-                chatbot_service, "_generate_chat_response", return_value="Response"
-            ):
-                await chatbot_service.chat(
-                    message="Test", session_id=session_id, db=mock_db
-                )
+            await chatbot_service.chat(
+                message="Test", session_id=session_id, db=mock_db
+            )
 
         history = chatbot_service.get_conversation_history(session_id)
         for message in history:

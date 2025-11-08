@@ -13,9 +13,8 @@ Requirements:
     - Database seeded with wisdom verses (python seed_wisdom.py)
 """
 
+
 import requests
-import json
-from typing import Optional
 
 
 class ChatbotClient:
@@ -23,7 +22,7 @@ class ChatbotClient:
 
     def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url
-        self.session_id: Optional[str] = None
+        self.session_id: str | None = None
 
     def start_session(self) -> str:
         """Start a new chat session."""

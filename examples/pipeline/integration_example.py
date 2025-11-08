@@ -13,8 +13,8 @@ It shows:
 """
 
 import json
-import sys
 import os
+import sys
 import traceback
 from pathlib import Path
 
@@ -36,7 +36,7 @@ def load_wisdom_verses(filepath: str = None):
         print(f"Warning: Verses file not found at {filepath}")
         return []
 
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         verses = json.load(f)
 
     return verses
@@ -57,7 +57,7 @@ def transform_wisdom_database():
     print("\n2. Creating transformation pipeline...")
     pipeline = ContextTransformationPipeline.create_full_pipeline(strict=False)
     config = pipeline.export_configuration()
-    print(f"   Pipeline configuration:")
+    print("   Pipeline configuration:")
     for key, value in config.items():
         print(f"     - {key}: {value}")
 
@@ -67,7 +67,7 @@ def transform_wisdom_database():
 
     # Get statistics
     stats = pipeline.get_statistics()
-    print(f"\n4. Transformation Statistics:")
+    print("\n4. Transformation Statistics:")
     print(f"   - Total processed: {stats['processed']}")
     print(f"   - Validated: {stats['validated']}")
     print(f"   - Sanitized: {stats['sanitized']}")
@@ -125,9 +125,9 @@ def assess_quality(verses):
 
 def show_sample_transformations(original, transformed):
     """Show sample transformations."""
-    for i, (orig, trans) in enumerate(zip(original, transformed), 1):
+    for i, (orig, trans) in enumerate(zip(original, transformed, strict=False), 1):
         print(f"\n   Sample {i}: Verse {trans.get('verse_id', 'unknown')}")
-        print(f"   ------------")
+        print("   ------------")
 
         # Show sanitization
         orig_context = orig.get("context", "")[:80]
@@ -196,7 +196,7 @@ def compare_before_after():
     print(f"  Context: {transformed['context']}")
     print(f"  Theme: {transformed['theme']}")
     print(f"  Applications: {transformed['mental_health_applications']}")
-    print(f"\nENRICHED DATA:")
+    print("\nENRICHED DATA:")
     print(f"  Verse ID: {transformed['verse_id']}")
     print(f"  Principles: {transformed.get('principles', [])}")
     print(f"  Keywords: {transformed.get('keywords', [])[:10]}")

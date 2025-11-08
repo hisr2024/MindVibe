@@ -4,10 +4,9 @@ Provides endpoints for Bhagavad Gita verse lookup and browsing.
 This is a legacy/placeholder module for future Gita-specific features.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
 
@@ -48,7 +47,7 @@ class ChapterInfo(BaseModel):
     summary: str
 
 
-@router.get("/chapters", response_model=List[ChapterInfo])
+@router.get("/chapters", response_model=list[ChapterInfo])
 async def browse_chapters(db: AsyncSession = Depends(get_db)):
     """
     Get list of all Bhagavad Gita chapters.

@@ -1,10 +1,13 @@
 import asyncio
+import json
 import os
 import sys
-import json
 from pathlib import Path
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 from backend.models import Base, GitaVerse
 
 # Add parent directory to sys.path for imports
@@ -23,7 +26,7 @@ AsyncSessionLocal = sessionmaker(
 async def load_verses_from_json(filepath: Path) -> list:
     """Load verse data from JSON file."""
     try:
-        with open(filepath, "r", encoding="utf-8") as file:
+        with open(filepath, encoding="utf-8") as file:
             return json.load(file)
     except Exception as e:
         print(f"Error loading JSON file {filepath}: {e}")

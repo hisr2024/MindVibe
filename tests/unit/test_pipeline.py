@@ -7,12 +7,12 @@ Tests all components: Sanitizer, Validator, Enricher, and Core Pipeline.
 import pytest
 from backend.services.pipeline import (
     ContextTransformationPipeline,
+    MetadataEnricher,
     TextSanitizer,
     VerseValidator,
-    MetadataEnricher,
 )
-from backend.services.pipeline.validator import ValidationError
 from backend.services.pipeline.core import PipelineError
+from backend.services.pipeline.validator import ValidationError
 
 
 class TestTextSanitizer:

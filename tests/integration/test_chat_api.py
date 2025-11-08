@@ -5,11 +5,12 @@ Tests the full chatbot API including message handling, session management,
 and conversation history.
 """
 
+from unittest.mock import patch
+
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch, AsyncMock
+
 from backend.main import app
-from backend.models import WisdomVerse
 
 
 @pytest.fixture
@@ -53,15 +54,14 @@ class TestChatEndpoints:
             with patch(
                 "services.chatbot.ChatbotService._generate_chat_response",
                 return_value="I understand your concern about anxiety...",
+            ), patch(
+                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    response = await client.post(
-                        "/api/chat/message",
-                        json={"message": "I'm feeling anxious about work"},
-                    )
+                response = await client.post(
+                    "/api/chat/message",
+                    json={"message": "I'm feeling anxious about work"},
+                )
 
             assert response.status_code == 200
             data = response.json()
@@ -118,15 +118,14 @@ class TestChatEndpoints:
             with patch(
                 "services.chatbot.ChatbotService._generate_chat_response",
                 return_value="Response",
+            ), patch(
+                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    response = await client.post(
-                        "/api/chat/message",
-                        json={"message": "मुझे चिंता हो रही है", "language": "hindi"},
-                    )
+                response = await client.post(
+                    "/api/chat/message",
+                    json={"message": "मुझे चिंता हो रही है", "language": "hindi"},
+                )
 
             assert response.status_code == 200
             data = response.json()
@@ -138,15 +137,14 @@ class TestChatEndpoints:
             with patch(
                 "services.chatbot.ChatbotService._generate_chat_response",
                 return_value="Response",
+            ), patch(
+                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    response = await client.post(
-                        "/api/chat/message",
-                        json={"message": "Test", "include_sanskrit": True},
-                    )
+                response = await client.post(
+                    "/api/chat/message",
+                    json={"message": "Test", "include_sanskrit": True},
+                )
 
             assert response.status_code == 200
 
@@ -159,15 +157,14 @@ class TestChatEndpoints:
             with patch(
                 "services.chatbot.ChatbotService._generate_chat_response",
                 return_value="Response",
+            ), patch(
+                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    await client.post(
-                        "/api/chat/message",
-                        json={"message": "Hello", "session_id": session_id},
-                    )
+                await client.post(
+                    "/api/chat/message",
+                    json={"message": "Hello", "session_id": session_id},
+                )
 
             # Then retrieve history
             response = await client.get(f"/api/chat/history/{session_id}")
@@ -196,15 +193,14 @@ class TestChatEndpoints:
             with patch(
                 "services.chatbot.ChatbotService._generate_chat_response",
                 return_value="Response",
+            ), patch(
+                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    await client.post(
-                        "/api/chat/message",
-                        json={"message": "Test", "session_id": session_id},
-                    )
+                await client.post(
+                    "/api/chat/message",
+                    json={"message": "Test", "session_id": session_id},
+                )
 
             # Clear the conversation
             response = await client.delete(f"/api/chat/history/{session_id}")
@@ -233,16 +229,15 @@ class TestChatEndpoints:
             with patch(
                 "services.chatbot.ChatbotService._generate_chat_response",
                 return_value="Response",
+            ), patch(
+                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    for sid in session_ids:
-                        await client.post(
-                            "/api/chat/message",
-                            json={"message": "Test", "session_id": sid},
-                        )
+                for sid in session_ids:
+                    await client.post(
+                        "/api/chat/message",
+                        json={"message": "Test", "session_id": sid},
+                    )
 
             # List sessions
             response = await client.get("/api/chat/sessions")

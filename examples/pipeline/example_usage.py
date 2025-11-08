@@ -7,8 +7,8 @@ Bhagavad Gita verses from raw data to structured, searchable content.
 """
 
 import json
-import sys
 import os
+import sys
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -205,7 +205,7 @@ def example_from_json_file():
         return
 
     # Load verses from JSON
-    with open(input_file, "r", encoding="utf-8") as f:
+    with open(input_file, encoding="utf-8") as f:
         data = json.load(f)
 
     print(f"Loaded {len(data['verses'])} verses from {input_file}")
@@ -230,7 +230,7 @@ def example_from_json_file():
     # Show first verse summary
     if transformed_verses:
         first = transformed_verses[0]
-        print(f"\n--- First Verse Summary ---")
+        print("\n--- First Verse Summary ---")
         print(f"Verse ID: {first['verse_id']}")
         print(f"Theme: {first['theme']}")
         print(f"Principles: {', '.join(first['principles'])}")

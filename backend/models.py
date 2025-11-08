@@ -1,19 +1,18 @@
 from __future__ import annotations
 
 import datetime
-from typing import Optional
 
+from sqlalchemy import JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Integer, Text, JSON, TIMESTAMP, func, ForeignKey
 
 
 class SoftDeleteMixin:
-    deleted_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, default=None
     )
 
     def soft_delete(self) -> None:
-        self.deleted_at = datetime.datetime.now(datetime.timezone.utc)
+        self.deleted_at = datetime.datetime.now(datetime.UTC)
 
     def restore(self) -> None:
         self.deleted_at = None
@@ -121,17 +120,17 @@ class Session(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-    last_used_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    last_used_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
-    expires_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    expires_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
-    revoked_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    revoked_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
-    ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
-    user_agent: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
 
 class RefreshToken(Base):
@@ -151,10 +150,10 @@ class RefreshToken(Base):
         TIMESTAMP(timezone=True), server_default=func.now()
     )
     expires_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True))
-    rotated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    rotated_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
-    revoked_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+    revoked_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
-    rotated_to_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    rotated_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)

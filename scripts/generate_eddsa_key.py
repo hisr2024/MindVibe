@@ -13,15 +13,15 @@ Can be run as:
     OR
     python -m scripts.generate_eddsa_key
 """
-import os
-import json
 import base64
+import json
+import os
 
 try:
-    from cryptography.hazmat.primitives.asymmetric import ed25519
     from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ed25519
 except Exception as e:
-    raise SystemExit("cryptography not available: " + str(e))
+    raise SystemExit("cryptography not available: " + str(e)) from e
 
 
 def main():

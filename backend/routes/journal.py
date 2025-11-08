@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import desc, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, select, desc
 
-from backend.schemas import BlobIn, BlobOut
-from backend.models import EncryptedBlob
 from backend.deps import get_db, get_user_id
+from backend.models import EncryptedBlob
+from backend.schemas import BlobIn, BlobOut
 
 router = APIRouter(prefix="/journal", tags=["journal"])
 

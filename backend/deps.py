@@ -1,9 +1,9 @@
-from fastapi import Header, Depends
+from fastapi import Depends, Header
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert
 
-from backend.models import User
 from backend.main import SessionLocal
+from backend.models import User
 
 
 async def get_db():

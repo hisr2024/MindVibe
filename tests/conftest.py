@@ -4,14 +4,15 @@ Test fixtures for MindVibe application.
 This module provides common fixtures used across unit and integration tests.
 """
 
-import pytest
 import asyncio
-import sys
 import os
+import sys
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from httpx import AsyncClient, ASGITransport
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
@@ -20,8 +21,8 @@ sys.path.insert(0, str(project_root))
 # Set environment variable to use SQLite for testing
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from backend import models
 from backend import main as app_module
+from backend import models
 
 
 @pytest.fixture(scope="session")

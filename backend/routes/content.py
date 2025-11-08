@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models import ContentPack
 from backend.deps import get_db
+from backend.models import ContentPack
 
 router = APIRouter(prefix="/content", tags=["content"])
 

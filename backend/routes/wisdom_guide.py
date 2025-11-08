@@ -3,15 +3,15 @@
 Provides endpoints for accessing universal wisdom and AI-powered guidance
 based on ancient teachings presented in a non-religious, universally applicable way."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
-from typing import List, Optional
 import os
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.deps import get_db
-from backend.services.wisdom_kb import WisdomKnowledgeBase
 from backend.models import WisdomVerse
+from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 router = APIRouter(prefix="/api/wisdom", tags=["wisdom"])
 
@@ -37,8 +37,8 @@ class VerseReference(BaseModel):
     text: str
     context: str
     language: str
-    sanskrit: Optional[str] = None
-    applications: List[str]
+    sanskrit: str | None = None
+    applications: list[str]
 
 
 class WisdomResponse(BaseModel):
@@ -47,7 +47,7 @@ class WisdomResponse(BaseModel):
     response: str = Field(
         ..., description="AI-generated guidance based on universal wisdom"
     )
-    verses: List[VerseReference] = Field(..., description="Referenced wisdom verses")
+    verses: list[VerseReference] = Field(..., description="Referenced wisdom verses")
     language: str
 
 
@@ -98,7 +98,7 @@ async def query_wisdom(query: WisdomQuery, db: AsyncSession = Depends(get_db)):
 @router.get("/themes")
 async def list_themes(db: AsyncSession = Depends(get_db)):
     """List all available wisdom themes."""
-    from sqlalchemy import select, distinct
+    from sqlalchemy import distinct, select
 
     result = await db.execute(select(distinct(WisdomVerse.theme)))
     themes = [row[0] for row in result.all()]
@@ -130,15 +130,15 @@ async def get_verse(
 @router.get("/verses")
 async def list_verses(
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
-    theme: Optional[str] = Query(default=None),
-    application: Optional[str] = Query(default=None),
+    theme: str | None = Query(default=None),
+    application: str | None = Query(default=None),
     include_sanskrit: bool = Query(default=False),
     limit: int = Query(default=10, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """List wisdom verses with optional filtering."""
-    from sqlalchemy import select, func
+    from sqlalchemy import func, select
 
     kb = WisdomKnowledgeBase()
 
@@ -195,8 +195,8 @@ async def list_verses(
 async def semantic_search(
     search_query: SearchQuery,
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
-    theme: Optional[str] = Query(default=None),
-    application: Optional[str] = Query(default=None),
+    theme: str | None = Query(default=None),
+    application: str | None = Query(default=None),
     include_sanskrit: bool = Query(default=False),
     limit: int = Query(default=5, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
@@ -245,13 +245,13 @@ async def list_applications(db: AsyncSession = Depends(get_db)):
         apps = verse.mental_health_applications.get("applications", [])
         applications_set.update(apps)
     return {
-        "applications": sorted(list(applications_set)),
+        "applications": sorted(applications_set),
         "total": len(applications_set),
     }
 
 
 async def generate_wisdom_response(
-    query: str, verses: List[dict], language: str
+    query: str, verses: list[dict], language: str
 ) -> str:
     """Generate AI-powered response using OpenAI GPT-4."""
     openai_key = os.getenv("OPENAI_API_KEY")
@@ -268,7 +268,7 @@ async def generate_wisdom_response(
                 for i, item in enumerate(verses)
             ]
         )
-        system_prompt = """You are a universal wisdom guide that helps people with mental health and personal growth challenges. 
+        system_prompt = """You are a universal wisdom guide that helps people with mental health and personal growth challenges.
 You draw from timeless wisdom teachings but present them in a completely secular, universally applicable way.
 
 CRITICAL RULES:
@@ -297,7 +297,7 @@ Response:"""
         return generate_template_response(query, verses, language)
 
 
-def generate_template_response(query: str, verses: List[dict], language: str) -> str:
+def generate_template_response(query: str, verses: list[dict], language: str) -> str:
     """Generate a template-based response when OpenAI is not available."""
     if not verses:
         return "I understand your concern. While I don't have specific guidance at this moment, remember that inner peace comes from within. Practice mindfulness, be patient with yourself, and take things one step at a time."

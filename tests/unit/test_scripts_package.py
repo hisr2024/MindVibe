@@ -6,6 +6,7 @@ Tests that the scripts package is properly structured and can be imported.
 
 import sys
 from pathlib import Path
+
 import pytest
 
 # Add project root to path

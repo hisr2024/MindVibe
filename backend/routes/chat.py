@@ -4,11 +4,12 @@ Provides endpoints for conversational mental health guidance
 based on Bhagavad Gita teachings presented universally.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 import uuid
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
 from backend.services.chatbot import ChatbotService
@@ -24,7 +25,7 @@ class ChatMessage(BaseModel):
     """Request model for chat messages."""
 
     message: str = Field(..., min_length=1, description="User's message or question")
-    session_id: Optional[str] = Field(
+    session_id: str | None = Field(
         None, description="Session ID for conversation tracking"
     )
     language: str = Field(
@@ -43,15 +44,15 @@ class VerseReference(BaseModel):
     text: str
     context: str
     language: str
-    sanskrit: Optional[str] = None
-    applications: List[str]
+    sanskrit: str | None = None
+    applications: list[str]
 
 
 class ChatResponse(BaseModel):
     """Response model for chat messages."""
 
     response: str = Field(..., description="AI-generated conversational response")
-    verses: List[VerseReference] = Field(..., description="Referenced wisdom verses")
+    verses: list[VerseReference] = Field(..., description="Referenced wisdom verses")
     session_id: str = Field(..., description="Session ID for this conversation")
     language: str
     conversation_length: int = Field(
@@ -63,7 +64,7 @@ class ConversationHistory(BaseModel):
     """Conversation history for a session."""
 
     session_id: str
-    messages: List[Dict[str, Any]]
+    messages: list[dict[str, Any]]
     total_messages: int
 
 
@@ -122,7 +123,7 @@ async def send_message(chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error processing chat message: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/history/{session_id}", response_model=ConversationHistory)
@@ -162,7 +163,7 @@ async def clear_conversation(session_id: str):
     }
 
 
-@router.get("/sessions", response_model=List[SessionInfo])
+@router.get("/sessions", response_model=list[SessionInfo])
 async def list_active_sessions():
     """
     List all active chat sessions.

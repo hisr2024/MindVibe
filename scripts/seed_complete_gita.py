@@ -19,12 +19,11 @@ Requirements:
 import asyncio
 import os
 import sys
-import json
 from pathlib import Path
-from typing import Dict, List, Optional
+
 import httpx
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import insert, select, text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -76,7 +75,7 @@ CHAPTER_INFO = {
 }
 
 
-async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> Optional[Dict]:
+async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> dict | None:
     """Fetch verse from RapidAPI Bhagavad Gita API."""
     if not RAPID_API_KEY:
         return None
@@ -94,7 +93,7 @@ async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> Optional[Dict]
             return None
 
 
-async def fetch_from_github_dataset() -> Optional[List[Dict]]:
+async def fetch_from_github_dataset() -> list[dict] | None:
     """Fetch complete Gita dataset from GitHub as fallback."""
     print("\n📥 Fetching Gita dataset from GitHub...")
 
@@ -123,7 +122,7 @@ async def fetch_from_github_dataset() -> Optional[List[Dict]]:
             return None
 
 
-def create_verse_from_data(data: Dict, chapter: int, verse: int) -> Dict:
+def create_verse_from_data(data: dict, chapter: int, verse: int) -> dict:
     """Transform API data into our database format."""
     # Handle different API response formats
 
@@ -276,8 +275,8 @@ async def main():
         print("🕉️  COMPLETE BHAGAVAD GITA DATABASE SEEDING")
         print("=" * 70)
         print(f"📍 Database: {DATABASE_URL[:60]}...")
-        print(f"📖 Total chapters: 18")
-        print(f"📝 Total verses: 700")
+        print("📖 Total chapters: 18")
+        print("📝 Total verses: 700")
         print("=" * 70 + "\n")
 
         # Create tables

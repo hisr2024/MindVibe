@@ -1,6 +1,7 @@
-from fastapi import APIRouter
-import os
 import json
+import os
+
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 router = APIRouter()
@@ -15,7 +16,7 @@ async def get_jwk():
     if os.path.exists(keyset_dir):
         for filename in os.listdir(keyset_dir):
             if filename.endswith("-pub.json"):
-                with open(os.path.join(keyset_dir, filename), "r") as f:
+                with open(os.path.join(keyset_dir, filename)) as f:
                     key_data = json.load(f)
                     if (
                         key_data.get("kty") == "OKP"

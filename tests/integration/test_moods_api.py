@@ -8,7 +8,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models import User, Mood
+from backend.models import User
 
 
 class TestMoodsEndpoints:

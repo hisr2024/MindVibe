@@ -10,12 +10,13 @@ Can be run as:
 """
 
 import asyncio
+import json
 import os
 import sys
-import json
 from pathlib import Path
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+
 from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -31,7 +32,7 @@ Session = async_sessionmaker(engine, expire_on_commit=False)
 
 async def load_verses_from_json(filepath: str):
     """Load verses from JSON file."""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         return json.load(f)
 
 

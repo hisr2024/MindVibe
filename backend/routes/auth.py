@@ -1,13 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status, Response
-from pydantic import BaseModel, EmailStr
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from backend.models import User, Session
-from backend.security.password_policy import policy
-from backend.security.password_hash import hash_password, verify_password
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from pydantic import BaseModel, EmailStr
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.core.settings import settings
+from backend.deps import get_db
+from backend.models import Session, User
 from backend.security.jwt import create_access_token, decode_access_token
+from backend.security.password_hash import hash_password, verify_password
+from backend.security.password_policy import policy
+from backend.services.refresh_service import (
+    create_refresh_token,
+    get_refresh_token_by_raw,
+    handle_reuse_attack,
+    is_expired,
+    mark_revoked,
+    revoke_all_for_session,
+    rotate_refresh_token,
+)
 from backend.services.session_service import (
     create_session,
     get_session,
@@ -15,17 +27,6 @@ from backend.services.session_service import (
     session_is_active,
     touch_session,
 )
-from backend.services.refresh_service import (
-    create_refresh_token,
-    get_refresh_token_by_raw,
-    rotate_refresh_token,
-    mark_revoked,
-    revoke_all_for_session,
-    is_expired,
-    handle_reuse_attack,
-)
-from backend.core.settings import settings
-from backend.deps import get_db
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -121,10 +122,10 @@ async def _extract_auth_context(request: Request):
     token = auth_header.split(" ", 1)[1].strip()
     try:
         payload = decode_access_token(token)
-    except Exception:
+    except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token"
-        )
+        ) from err
     user_id = payload.get("sub")
     session_id = payload.get("sid")
     exp = payload.get("exp")
@@ -228,7 +229,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
     access_token_expires_in = None
     if exp:
         try:
-            now_ts = datetime.now(timezone.utc).timestamp()
+            now_ts = datetime.now(UTC).timestamp()
             access_token_expires_in = max(0, int(exp - now_ts))
         except Exception:
             access_token_expires_in = None
@@ -335,7 +336,7 @@ async def revoke_specific_session(
             reason="already_revoked",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     await db.execute(
         update(Session).where(Session.id == session_id).values(revoked_at=now)
     )

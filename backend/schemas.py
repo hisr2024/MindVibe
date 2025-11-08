@@ -1,11 +1,10 @@
 from pydantic import BaseModel, conint
-from typing import Optional, List
 
 
 class MoodIn(BaseModel):
     score: conint(ge=-2, le=2)
-    tags: Optional[List[str]] = None
-    note: Optional[str] = None
+    tags: list[str] | None = None
+    note: str | None = None
 
 
 class MoodOut(MoodIn):

@@ -9,8 +9,8 @@ Can be run as:
     python -m scripts.verify_wisdom
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add parent directory to path for imports to ensure compatibility across execution contexts
@@ -25,7 +25,6 @@ print("=" * 60)
 # Test 1: Import models
 print("\n[1/6] Testing model imports...")
 try:
-    from models import WisdomVerse
 
     print("✓ WisdomVerse model imported successfully")
 except Exception as e:
@@ -57,7 +56,7 @@ try:
         print(f"✗ Sanitization failed: '{sanitized}'")
         sys.exit(1)
 
-    print(f"✓ Text sanitization works correctly")
+    print("✓ Text sanitization works correctly")
     print(f"  Original:  {test_text}")
     print(f"  Sanitized: {sanitized}")
 except Exception as e:
@@ -75,7 +74,7 @@ try:
         print(f"✗ Similarity score out of range: {score}")
         sys.exit(1)
 
-    print(f"✓ Text similarity computation works")
+    print("✓ Text similarity computation works")
     print(f"  Similarity between texts: {score:.3f}")
 except Exception as e:
     print(f"✗ Text similarity test failed: {e}")
@@ -92,7 +91,7 @@ try:
         print(f"✗ Verse data file not found: {verses_path}")
         sys.exit(1)
 
-    with open(verses_path, "r", encoding="utf-8") as f:
+    with open(verses_path, encoding="utf-8") as f:
         verses = json.load(f)
 
     if not isinstance(verses, list) or len(verses) == 0:
@@ -119,7 +118,7 @@ try:
         print(f"✗ Verse data missing required fields: {missing_fields}")
         sys.exit(1)
 
-    print(f"✓ Verse data loaded and validated")
+    print("✓ Verse data loaded and validated")
     print(f"  Total verses: {len(verses)}")
     print(f"  Sample verse: {first_verse['verse_id']} - {first_verse['theme']}")
 
@@ -130,7 +129,6 @@ except Exception as e:
 # Test 6: Import routes
 print("\n[6/6] Testing route imports...")
 try:
-    from routes import wisdom_guide
 
     print("✓ Wisdom guide route imported successfully")
 except Exception as e:
