@@ -11,7 +11,7 @@ on:
 jobs:
   python-tests:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.modified, '.py') || contains(github.event.head_commit.added, '.py') || github.event_name == 'pull_request')
+    if: contains(github.event.head_commit.modified, '.py') || contains(github.event.head_commit.added, '.py') || github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
