@@ -17,3 +17,34 @@ shell-output-*
 .DS_Store
 Thumbs.db
 *.~*
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+build
+dist
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Vercel
+.vercel
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

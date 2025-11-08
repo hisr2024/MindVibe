@@ -9,8 +9,8 @@ Can be run as:
     python -m scripts.verify_wisdom
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add parent directory to path for imports to ensure compatibility across execution contexts
@@ -25,7 +25,7 @@ print("=" * 60)
 # Test 1: Import models
 print("\n[1/6] Testing model imports...")
 try:
-    from models import WisdomVerse
+
     print("✓ WisdomVerse model imported successfully")
 except Exception as e:
     print(f"✗ Failed to import WisdomVerse model: {e}")
@@ -35,6 +35,7 @@ except Exception as e:
 print("\n[2/6] Testing service imports...")
 try:
     from services.wisdom_kb import WisdomKnowledgeBase
+
     print("✓ WisdomKnowledgeBase service imported successfully")
 except Exception as e:
     print(f"✗ Failed to import WisdomKnowledgeBase service: {e}")
@@ -45,13 +46,17 @@ print("\n[3/6] Testing text sanitization...")
 try:
     test_text = "Krishna told Arjuna that the Lord is divine"
     sanitized = WisdomKnowledgeBase.sanitize_text(test_text)
-    
+
     # Check that religious terms were replaced
-    if "krishna" in sanitized.lower() or "arjuna" in sanitized.lower() or "lord" in sanitized.lower():
+    if (
+        "krishna" in sanitized.lower()
+        or "arjuna" in sanitized.lower()
+        or "lord" in sanitized.lower()
+    ):
         print(f"✗ Sanitization failed: '{sanitized}'")
         sys.exit(1)
-    
-    print(f"✓ Text sanitization works correctly")
+
+    print("✓ Text sanitization works correctly")
     print(f"  Original:  {test_text}")
     print(f"  Sanitized: {sanitized}")
 except Exception as e:
@@ -64,12 +69,12 @@ try:
     text1 = "I am feeling anxious and stressed"
     text2 = "anxiety management and stress reduction"
     score = WisdomKnowledgeBase.compute_text_similarity(text1, text2)
-    
+
     if score < 0 or score > 1:
         print(f"✗ Similarity score out of range: {score}")
         sys.exit(1)
-    
-    print(f"✓ Text similarity computation works")
+
+    print("✓ Text similarity computation works")
     print(f"  Similarity between texts: {score:.3f}")
 except Exception as e:
     print(f"✗ Text similarity test failed: {e}")
@@ -79,36 +84,44 @@ except Exception as e:
 print("\n[5/6] Testing verse data loading...")
 try:
     import json
-    
-    verses_path = repo_root / 'data' / 'wisdom' / 'verses.json'
-    
+
+    verses_path = repo_root / "data" / "wisdom" / "verses.json"
+
     if not os.path.exists(verses_path):
         print(f"✗ Verse data file not found: {verses_path}")
         sys.exit(1)
-    
-    with open(verses_path, 'r', encoding='utf-8') as f:
+
+    with open(verses_path, encoding="utf-8") as f:
         verses = json.load(f)
-    
+
     if not isinstance(verses, list) or len(verses) == 0:
         print("✗ Verse data is not a valid list or is empty")
         sys.exit(1)
-    
+
     # Validate structure of first verse
-    required_fields = ['verse_id', 'chapter', 'verse_number', 'theme', 
-                      'english', 'hindi', 'sanskrit', 'context', 
-                      'mental_health_applications']
-    
+    required_fields = [
+        "verse_id",
+        "chapter",
+        "verse_number",
+        "theme",
+        "english",
+        "hindi",
+        "sanskrit",
+        "context",
+        "mental_health_applications",
+    ]
+
     first_verse = verses[0]
     missing_fields = [field for field in required_fields if field not in first_verse]
-    
+
     if missing_fields:
         print(f"✗ Verse data missing required fields: {missing_fields}")
         sys.exit(1)
-    
-    print(f"✓ Verse data loaded and validated")
+
+    print("✓ Verse data loaded and validated")
     print(f"  Total verses: {len(verses)}")
     print(f"  Sample verse: {first_verse['verse_id']} - {first_verse['theme']}")
-    
+
 except Exception as e:
     print(f"✗ Verse data validation failed: {e}")
     sys.exit(1)
@@ -116,7 +129,7 @@ except Exception as e:
 # Test 6: Import routes
 print("\n[6/6] Testing route imports...")
 try:
-    from routes import wisdom_guide
+
     print("✓ Wisdom guide route imported successfully")
 except Exception as e:
     print(f"✗ Failed to import wisdom guide route: {e}")

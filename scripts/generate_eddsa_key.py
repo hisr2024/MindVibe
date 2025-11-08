@@ -13,14 +13,16 @@ Can be run as:
     OR
     python -m scripts.generate_eddsa_key
 """
-import os
-import json
 import base64
+import json
+import os
+
 try:
-    from cryptography.hazmat.primitives.asymmetric import ed25519
     from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ed25519
 except Exception as e:
-    raise SystemExit("cryptography not available: " + str(e))
+    raise SystemExit("cryptography not available: " + str(e)) from e
+
 
 def main():
     os.makedirs("keyset_eddsa", exist_ok=True)
@@ -31,14 +33,13 @@ def main():
     priv_pem = priv.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
+        encryption_algorithm=serialization.NoEncryption(),
     )
     with open("keyset_eddsa/private_key.pem", "wb") as f:
         f.write(priv_pem)
 
     pub_raw = pub.public_bytes(
-        encoding=serialization.Encoding.Raw,
-        format=serialization.PublicFormat.Raw
+        encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
     )
     x = base64.urlsafe_b64encode(pub_raw).rstrip(b"=").decode("ascii")
     jwk = {"kty": "OKP", "crv": "Ed25519", "x": x}
@@ -46,6 +47,7 @@ def main():
         json.dump(jwk, f)
 
     print("Generated keyset_eddsa/ with private_key.pem and public_key-pub.json")
+
 
 if __name__ == "__main__":
     main()

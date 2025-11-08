@@ -4,14 +4,15 @@ Test fixtures for MindVibe application.
 This module provides common fixtures used across unit and integration tests.
 """
 
-import pytest
 import asyncio
-import sys
 import os
+import sys
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from httpx import AsyncClient, ASGITransport
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
@@ -20,8 +21,8 @@ sys.path.insert(0, str(project_root))
 # Set environment variable to use SQLite for testing
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from backend import models
 from backend import main as app_module
+from backend import models
 
 
 @pytest.fixture(scope="session")
@@ -43,20 +44,20 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
-    
+
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
-    
+
     # Create a session maker
     async_session = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
-    
+
     # Provide the session
     async with async_session() as session:
         yield session
-    
+
     # Cleanup
     await engine.dispose()
 
@@ -68,18 +69,17 @@ async def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None
     Overrides the get_db dependency to use the test database.
     """
     from backend import deps
-    
+
     async def override_get_db():
         yield test_db
-    
+
     app_module.app.dependency_overrides[deps.get_db] = override_get_db
-    
+
     async with AsyncClient(
-        transport=ASGITransport(app=app_module.app),
-        base_url="http://test"
+        transport=ASGITransport(app=app_module.app), base_url="http://test"
     ) as client:
         yield client
-    
+
     app_module.app.dependency_overrides.clear()
 
 
