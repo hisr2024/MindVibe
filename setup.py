@@ -17,7 +17,7 @@ setup(
         "numpy>=1.24.0,<2.0.0",
         "asyncpg>=0.27.0,<0.31.0",
         "psycopg2-binary>=2.9.0,<3.0.0",
-        "aiofiles>=23.0.0,<24.0.0",
+        "aiofiles>=23.0.0,<26.0.0",
     ],
     python_requires=">=3.11",
 )
