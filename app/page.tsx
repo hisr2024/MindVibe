@@ -415,7 +415,7 @@ function AIChat() {
           content: '❌ Unable to connect to AI backend. Please check your backend deployment.' 
         }])
       }
-    } catch (error) {
+    } catch {
       setMessages([...messages, userMessage, { 
         role: 'assistant', 
         content: '💡 AI backend not connected. This feature requires the backend API to be running.' 

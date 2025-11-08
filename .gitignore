@@ -18,11 +18,18 @@ shell-output-*
 Thumbs.db
 *.~*
 
+# Dependencies
+node_modules/
+package-lock.json
+
 # Next.js
 .next/
 out/
 build
 dist
+
+# TypeScript
+*.tsbuildinfo
 
 # Testing
 coverage/
