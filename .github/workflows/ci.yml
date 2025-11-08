@@ -68,7 +68,7 @@ jobs:
           node-version: '18'
 
       - name: Install Node.js dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Run ESLint
         run: npm run lint
