@@ -65,10 +65,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install Node.js dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         run: npm run lint
@@ -80,12 +81,13 @@ jobs:
         run: npm run build
 
       - name: Run tests with coverage
-        run: npm run test:coverage --if-present
+        run: npm run test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         if: always()
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
           flags: javascript
           name: javascript-coverage

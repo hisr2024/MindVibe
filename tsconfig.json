@@ -17,6 +17,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./app/components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/types/*": ["./types/*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "types": [
       "node",
       "react",
@@ -26,9 +38,13 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next",
+    "out",
+    "dist"
   ]
 }
