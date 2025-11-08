@@ -21,12 +21,19 @@
       "node",
       "react",
       "react-dom"
+    ],
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
     ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
