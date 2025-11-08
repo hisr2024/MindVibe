@@ -7,7 +7,7 @@ Uses authentic sources with Sanskrit, transliteration, Hindi, and English.
 Usage:
     # Seed to production database (Render.com)
     DATABASE_URL=<your-render-db-url> python scripts/seed_complete_gita.py
-    
+
     # Or with environment variable already set
     python scripts/seed_complete_gita.py
 
@@ -37,7 +37,9 @@ RAPID_API_KEY = os.getenv("RAPID_API_KEY", "")
 RAPID_API_HOST = "bhagavad-gita3.p.rapidapi.com"
 
 # Alternative: Use public GitHub dataset as fallback
-GITHUB_GITA_DATA = "https://raw.githubusercontent.com/gita/gita/master/data/gita_verses.json"
+GITHUB_GITA_DATA = (
+    "https://raw.githubusercontent.com/gita/gita/master/data/gita_verses.json"
+)
 
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
@@ -70,7 +72,7 @@ CHAPTER_INFO = {
     15: {"verses": 20, "theme": "supreme_person"},
     16: {"verses": 24, "theme": "divine_demoniac_natures"},
     17: {"verses": 28, "theme": "three_divisions_faith"},
-    18: {"verses": 78, "theme": "liberation_renunciation"}
+    18: {"verses": 78, "theme": "liberation_renunciation"},
 }
 
 
@@ -78,13 +80,10 @@ async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> Optional[Dict]
     """Fetch verse from RapidAPI Bhagavad Gita API."""
     if not RAPID_API_KEY:
         return None
-    
+
     url = f"https://{RAPID_API_HOST}/v2/chapters/{chapter}/verses/{verse}/"
-    headers = {
-        "X-RapidAPI-Key": RAPID_API_KEY,
-        "X-RapidAPI-Host": RAPID_API_HOST
-    }
-    
+    headers = {"X-RapidAPI-Key": RAPID_API_KEY, "X-RapidAPI-Host": RAPID_API_HOST}
+
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, headers=headers, timeout=10.0)
@@ -98,15 +97,15 @@ async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> Optional[Dict]
 async def fetch_from_github_dataset() -> Optional[List[Dict]]:
     """Fetch complete Gita dataset from GitHub as fallback."""
     print("\n📥 Fetching Gita dataset from GitHub...")
-    
+
     async with httpx.AsyncClient() as client:
         try:
             # Try multiple GitHub sources
             sources = [
                 "https://raw.githubusercontent.com/gita/bhagavad-gita-api/master/src/gita-verses.json",
-                "https://raw.githubusercontent.com/bhagavadgita/bhagavad-gita-api/master/verses.json"
+                "https://raw.githubusercontent.com/bhagavadgita/bhagavad-gita-api/master/verses.json",
             ]
-            
+
             for source_url in sources:
                 try:
                     response = await client.get(source_url, timeout=30.0)
@@ -117,7 +116,7 @@ async def fetch_from_github_dataset() -> Optional[List[Dict]]:
                 except Exception as e:
                     print(f"  ⚠️  Failed to fetch from {source_url}: {e}")
                     continue
-            
+
             return None
         except Exception as e:
             print(f"❌ Error fetching from GitHub: {e}")
@@ -127,16 +126,18 @@ async def fetch_from_github_dataset() -> Optional[List[Dict]]:
 def create_verse_from_data(data: Dict, chapter: int, verse: int) -> Dict:
     """Transform API data into our database format."""
     # Handle different API response formats
-    
+
     # Extract text fields with fallbacks
     sanskrit = data.get("text") or data.get("sanskrit") or data.get("verse_text") or ""
     transliteration = data.get("transliteration") or ""
-    english = data.get("translation") or data.get("english") or data.get("meaning") or ""
+    english = (
+        data.get("translation") or data.get("english") or data.get("meaning") or ""
+    )
     hindi = data.get("hindi") or data.get("hindi_meaning") or ""
-    
+
     # Get word meanings if available
     word_meanings = data.get("word_meanings") or {}
-    
+
     return {
         "chapter": chapter,
         "verse": verse,
@@ -147,7 +148,7 @@ def create_verse_from_data(data: Dict, chapter: int, verse: int) -> Dict:
         "chapter_name": data.get("chapter_name") or f"Chapter {chapter}",
         "theme": CHAPTER_INFO[chapter]["theme"],
         "word_meanings": word_meanings,
-        "embedding": None
+        "embedding": None,
     }
 
 
@@ -155,60 +156,67 @@ async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
     """Seed all verses from a single chapter."""
     chapter_info = CHAPTER_INFO[chapter_num]
     total_verses = chapter_info["verses"]
-    
+
     print(f"\n{'='*70}")
     print(f"📖 Seeding Chapter {chapter_num}")
     print(f"   Theme: {chapter_info['theme']}")
     print(f"   Total verses: {total_verses}")
     print(f"{'='*70}\n")
-    
+
     seeded_count = 0
     skipped_count = 0
     failed_count = 0
-    
+
     async with Session() as session:
         for verse_num in range(1, total_verses + 1):
             try:
                 # Check if verse already exists
                 result = await session.execute(
                     select(GitaVerse).where(
-                        GitaVerse.chapter == chapter_num,
-                        GitaVerse.verse == verse_num
+                        GitaVerse.chapter == chapter_num, GitaVerse.verse == verse_num
                     )
                 )
                 existing = result.scalar_one_or_none()
-                
+
                 if existing:
-                    print(f"  ⏭️  Verse {chapter_num}.{verse_num} already exists, skipping")
+                    print(
+                        f"  ⏭️  Verse {chapter_num}.{verse_num} already exists, skipping"
+                    )
                     skipped_count += 1
                     continue
-                
+
                 # Fetch verse data
                 verse_data = None
                 if use_rapid_api:
-                    verse_data = await fetch_verse_from_rapid_api(chapter_num, verse_num)
-                
+                    verse_data = await fetch_verse_from_rapid_api(
+                        chapter_num, verse_num
+                    )
+
                 if not verse_data:
-                    print(f"  ⚠️  Could not fetch verse {chapter_num}.{verse_num}, will retry in batch")
+                    print(
+                        f"  ⚠️  Could not fetch verse {chapter_num}.{verse_num}, will retry in batch"
+                    )
                     failed_count += 1
                     continue
-                
+
                 # Create and insert verse
-                verse_record = create_verse_from_data(verse_data, chapter_num, verse_num)
+                verse_record = create_verse_from_data(
+                    verse_data, chapter_num, verse_num
+                )
                 await session.execute(insert(GitaVerse).values(**verse_record))
-                
+
                 print(f"  ✅ Inserted verse {chapter_num}.{verse_num}")
                 seeded_count += 1
-                
+
                 # Rate limiting - be nice to the API
                 await asyncio.sleep(0.1)
-                
+
             except Exception as e:
                 print(f"  ❌ Error seeding verse {chapter_num}.{verse_num}: {e}")
                 failed_count += 1
-        
+
         await session.commit()
-    
+
     print(f"\n📊 Chapter {chapter_num} Summary:")
     print(f"   ✅ Seeded: {seeded_count}")
     print(f"   ⏭️  Skipped: {skipped_count}")
@@ -218,10 +226,10 @@ async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
 
 async def seed_from_github_dataset():
     """Seed complete Gita from GitHub dataset."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📥 FETCHING COMPLETE GITA FROM GITHUB DATASET")
-    print("="*70)
-    
+    print("=" * 70)
+
     # This is a simplified implementation
     # You would need to adapt based on actual GitHub dataset format
     print("⚠️  GitHub dataset seeding not yet implemented")
@@ -231,26 +239,30 @@ async def seed_from_github_dataset():
 
 async def verify_seeding():
     """Verify that all verses were seeded correctly."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🔍 VERIFYING SEEDED DATA")
-    print("="*70 + "\n")
-    
+    print("=" * 70 + "\n")
+
     async with Session() as session:
         for chapter in range(1, 19):
             expected_count = CHAPTER_INFO[chapter]["verses"]
             result = await session.execute(
-                select(text("COUNT(*)")).select_from(GitaVerse).where(GitaVerse.chapter == chapter)
+                select(text("COUNT(*)"))
+                .select_from(GitaVerse)
+                .where(GitaVerse.chapter == chapter)
             )
             actual_count = result.scalar()
-            
+
             status = "✅" if actual_count == expected_count else "⚠️"
-            print(f"{status} Chapter {chapter:2d}: {actual_count:3d}/{expected_count:3d} verses")
-        
+            print(
+                f"{status} Chapter {chapter:2d}: {actual_count:3d}/{expected_count:3d} verses"
+            )
+
         # Total count
         result = await session.execute(select(text("COUNT(*)")).select_from(GitaVerse))
         total = result.scalar()
         print(f"\n📊 Total verses in database: {total}/700")
-        
+
         if total == 700:
             print("✅ ALL 700 VERSES SUCCESSFULLY SEEDED! 🎉")
         else:
@@ -260,30 +272,32 @@ async def verify_seeding():
 async def main():
     """Main seeding function."""
     try:
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("🕉️  COMPLETE BHAGAVAD GITA DATABASE SEEDING")
-        print("="*70)
+        print("=" * 70)
         print(f"📍 Database: {DATABASE_URL[:60]}...")
         print(f"📖 Total chapters: 18")
         print(f"📝 Total verses: 700")
-        print("="*70 + "\n")
-        
+        print("=" * 70 + "\n")
+
         # Create tables
         print("🔧 Creating database tables...")
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         print("✅ Tables created/verified\n")
-        
+
         # Check if RapidAPI key is available
         use_rapid_api = bool(RAPID_API_KEY)
-        
+
         if use_rapid_api:
             print("✅ RapidAPI key detected - using Bhagavad Gita API")
-            print("   Get your free key: https://rapidapi.com/bhagavad-gita-bhagavad-gita-default/api/bhagavad-gita3\n")
+            print(
+                "   Get your free key: https://rapidapi.com/bhagavad-gita-bhagavad-gita-default/api/bhagavad-gita3\n"
+            )
         else:
             print("⚠️  No RapidAPI key found (set RAPID_API_KEY env var)")
             print("   Attempting to use GitHub dataset as fallback...\n")
-            
+
             # Try GitHub dataset
             success = await seed_from_github_dataset()
             if not success:
@@ -292,26 +306,27 @@ async def main():
                 print("   1. Set RAPID_API_KEY environment variable")
                 print("   2. Or manually download Gita dataset to data/gita/")
                 return
-        
+
         # Seed all 18 chapters
         if use_rapid_api:
             for chapter in range(1, 19):
                 await seed_chapter(chapter, use_rapid_api=True)
                 await asyncio.sleep(1)  # Rate limiting between chapters
-        
+
         # Verify seeding
         await verify_seeding()
-        
-        print("\n" + "="*70)
+
+        print("\n" + "=" * 70)
         print("✅ BHAGAVAD GITA DATABASE SEEDING COMPLETED!")
-        print("="*70)
+        print("=" * 70)
         print("\n🎉 You now have the complete Bhagavad Gita in your database!")
         print("   All 700 verses across 18 chapters are ready for AI-powered")
         print("   modern mental health applications.\n")
-        
+
     except Exception as e:
         print(f"\n❌ CRITICAL ERROR during seeding: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 

@@ -1,5 +1,6 @@
 # Complete wisdom knowledge base service code
 
+
 class WisdomKnowledgeBase:
     def __init__(self):
         # Initialization code here

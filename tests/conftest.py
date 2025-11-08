@@ -43,20 +43,20 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
-    
+
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
-    
+
     # Create a session maker
     async_session = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
-    
+
     # Provide the session
     async with async_session() as session:
         yield session
-    
+
     # Cleanup
     await engine.dispose()
 
@@ -68,18 +68,17 @@ async def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None
     Overrides the get_db dependency to use the test database.
     """
     from backend import deps
-    
+
     async def override_get_db():
         yield test_db
-    
+
     app_module.app.dependency_overrides[deps.get_db] = override_get_db
-    
+
     async with AsyncClient(
-        transport=ASGITransport(app=app_module.app),
-        base_url="http://test"
+        transport=ASGITransport(app=app_module.app), base_url="http://test"
     ) as client:
         yield client
-    
+
     app_module.app.dependency_overrides.clear()
 
 

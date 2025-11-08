@@ -1,5 +1,6 @@
 # AI Chatbot Service
 
+
 class Chatbot:
     def __init__(self):
         pass
@@ -16,8 +17,10 @@ class Chatbot:
         # Method to get a response from the chatbot
         return self.respond(message)
 
+
 # Importing from the wisdom knowledge base service
 from backend.services.wisdom_kb import WisdomKB
+
 
 class EnhancedChatbot(Chatbot):
     def __init__(self):
@@ -30,10 +33,11 @@ class EnhancedChatbot(Chatbot):
         chatbot_response = super().respond(message)
         return f"{chatbot_response} | Wisdom says: {wisdom_response}"
 
+
 # Alias for backward compatibility
 ChatbotService = EnhancedChatbot
 
 # Example usage
-if __name__ == '__main__':
+if __name__ == "__main__":
     chatbot = EnhancedChatbot()
     print(chatbot.get_response("Hello!"))

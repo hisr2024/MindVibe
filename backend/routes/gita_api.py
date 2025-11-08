@@ -17,6 +17,7 @@ router = APIRouter(prefix="/api/gita", tags=["gita"])
 # Request/Response Models
 class VerseQuery(BaseModel):
     """Request model for verse lookup."""
+
     chapter: int = Field(..., ge=1, le=18, description="Chapter number (1-18)")
     verse: int = Field(..., ge=1, description="Verse number")
     language: str = Field(default="english", description="Preferred language")
@@ -24,11 +25,13 @@ class VerseQuery(BaseModel):
 
 class WisdomRequest(BaseModel):
     """Request model for wisdom queries."""
+
     query: str = Field(..., min_length=1, description="User's question or query")
 
 
 class VerseResponse(BaseModel):
     """Response model for verse data."""
+
     chapter: int
     verse: int
     text: str
@@ -38,6 +41,7 @@ class VerseResponse(BaseModel):
 
 class ChapterInfo(BaseModel):
     """Chapter information."""
+
     number: int
     name: str
     verse_count: int
@@ -48,7 +52,7 @@ class ChapterInfo(BaseModel):
 async def browse_chapters(db: AsyncSession = Depends(get_db)):
     """
     Get list of all Bhagavad Gita chapters.
-    
+
     Returns basic information about all 18 chapters.
     """
     # Placeholder implementation
@@ -65,11 +69,11 @@ async def lookup_verse(
     chapter: int = Query(..., ge=1, le=18, description="Chapter number (1-18)"),
     verse: int = Query(..., ge=1, description="Verse number"),
     language: str = Query(default="english", description="Preferred language"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Look up a specific verse from the Bhagavad Gita.
-    
+
     **Example:** `/api/gita/verse?chapter=2&verse=47&language=english`
     """
     # Placeholder implementation
@@ -79,18 +83,15 @@ async def lookup_verse(
         "verse": verse,
         "text": "Verse text placeholder",
         "translation": "Translation placeholder",
-        "language": language
+        "language": language,
     }
 
 
 @router.post("/search")
-async def semantic_search(
-    query: WisdomRequest,
-    db: AsyncSession = Depends(get_db)
-):
+async def semantic_search(query: WisdomRequest, db: AsyncSession = Depends(get_db)):
     """
     Perform semantic search over Gita verses.
-    
+
     **Note:** This endpoint is a placeholder. Use `/api/wisdom/search` for
     actual semantic search functionality.
     """
@@ -99,7 +100,7 @@ async def semantic_search(
     return {
         "query": query.query,
         "results": [],
-        "message": "Use /api/wisdom/search for semantic search functionality"
+        "message": "Use /api/wisdom/search for semantic search functionality",
     }
 
 
@@ -107,26 +108,23 @@ async def semantic_search(
 async def get_languages():
     """
     Get list of supported languages for Gita content.
-    
+
     Returns available language options for verse translations.
     """
     return {
         "languages": [
             {"code": "english", "name": "English"},
             {"code": "hindi", "name": "Hindi"},
-            {"code": "sanskrit", "name": "Sanskrit"}
+            {"code": "sanskrit", "name": "Sanskrit"},
         ]
     }
 
 
 @router.post("/wisdom")
-async def wisdom_consultation(
-    query: WisdomRequest,
-    db: AsyncSession = Depends(get_db)
-):
+async def wisdom_consultation(query: WisdomRequest, db: AsyncSession = Depends(get_db)):
     """
     AI-powered Gita wisdom consultation.
-    
+
     **Note:** This endpoint is a placeholder. Use `/api/wisdom/query` for
     actual AI-powered wisdom guidance.
     """
@@ -135,5 +133,5 @@ async def wisdom_consultation(
     return {
         "query": query.query,
         "response": "Use /api/wisdom/query for AI-powered guidance",
-        "verses": []
+        "verses": [],
     }

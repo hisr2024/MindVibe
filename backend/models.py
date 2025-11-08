@@ -8,17 +8,24 @@ from sqlalchemy import String, Integer, Text, JSON, TIMESTAMP, func, ForeignKey
 
 
 class SoftDeleteMixin:
-    deleted_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True, default=None)
+    deleted_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, default=None
+    )
+
     def soft_delete(self) -> None:
         self.deleted_at = datetime.datetime.now(datetime.timezone.utc)
+
     def restore(self) -> None:
         self.deleted_at = None
+
     @classmethod
     def not_deleted(cls, query):
         return query.filter(cls.deleted_at.is_(None))
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
@@ -27,30 +34,46 @@ class User(SoftDeleteMixin, Base):
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(256))
     locale: Mapped[str] = mapped_column(String(8), default="en")
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
 
 class Mood(SoftDeleteMixin, Base):
     __tablename__ = "moods"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
     score: Mapped[int] = mapped_column(Integer)
     tags: Mapped[dict | None] = mapped_column(JSON)
     note: Mapped[str | None] = mapped_column(Text)
-    at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
 
 class EncryptedBlob(SoftDeleteMixin, Base):
     __tablename__ = "journal_blobs"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
     blob_json: Mapped[str] = mapped_column(Text)
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
 
 class ContentPack(SoftDeleteMixin, Base):
     __tablename__ = "content_packs"
     id: Mapped[int] = mapped_column(primary_key=True)
     locale: Mapped[str] = mapped_column(String(8), index=True)
     data: Mapped[dict] = mapped_column(JSON)
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
 
 class WisdomVerse(SoftDeleteMixin, Base):
     __tablename__ = "wisdom_verses"
@@ -65,7 +88,10 @@ class WisdomVerse(SoftDeleteMixin, Base):
     context: Mapped[str] = mapped_column(Text)
     mental_health_applications: Mapped[dict] = mapped_column(JSON)
     embedding: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
 
 class GitaVerse(Base):
     __tablename__ = "gita_verses"
@@ -78,31 +104,57 @@ class GitaVerse(Base):
     principle: Mapped[str] = mapped_column(String(64))
     theme: Mapped[str] = mapped_column(String(256))
     embedding: Mapped[list[float] | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
 
 class Session(Base):
     """User session model for authentication."""
+
     __tablename__ = "sessions"
-    
+
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
-    last_used_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    expires_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    revoked_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    last_used_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    expires_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    revoked_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
     ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
 
+
 class RefreshToken(Base):
     """Refresh token model for token rotation."""
+
     __tablename__ = "refresh_tokens"
-    
+
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    session_id: Mapped[str] = mapped_column(String(64), ForeignKey("sessions.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    session_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("sessions.id", ondelete="CASCADE"), index=True
+    )
     token_hash: Mapped[str] = mapped_column(String(256), unique=True, index=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
     expires_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True))
-    rotated_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    revoked_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    rotated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    revoked_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
     rotated_to_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
