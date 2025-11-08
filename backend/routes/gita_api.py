@@ -48,7 +48,7 @@ class ChapterInfo(BaseModel):
 
 
 @router.get("/chapters", response_model=list[ChapterInfo])
-async def browse_chapters(db: AsyncSession = Depends(get_db)):
+async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[dict]:
     """
     Get list of all Bhagavad Gita chapters.
 
@@ -69,7 +69,7 @@ async def lookup_verse(
     verse: int = Query(..., ge=1, description="Verse number"),
     language: str = Query(default="english", description="Preferred language"),
     db: AsyncSession = Depends(get_db),
-):
+) -> dict:
     """
     Look up a specific verse from the Bhagavad Gita.
 
@@ -87,7 +87,7 @@ async def lookup_verse(
 
 
 @router.post("/search")
-async def semantic_search(query: WisdomRequest, db: AsyncSession = Depends(get_db)):
+async def semantic_search(query: WisdomRequest, db: AsyncSession = Depends(get_db)) -> dict:
     """
     Perform semantic search over Gita verses.
 
@@ -104,7 +104,7 @@ async def semantic_search(query: WisdomRequest, db: AsyncSession = Depends(get_d
 
 
 @router.get("/languages")
-async def get_languages():
+async def get_languages() -> dict:
     """
     Get list of supported languages for Gita content.
 
@@ -120,7 +120,7 @@ async def get_languages():
 
 
 @router.post("/wisdom")
-async def wisdom_consultation(query: WisdomRequest, db: AsyncSession = Depends(get_db)):
+async def wisdom_consultation(query: WisdomRequest, db: AsyncSession = Depends(get_db)) -> dict:
     """
     AI-powered Gita wisdom consultation.
 

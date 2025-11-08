@@ -58,7 +58,7 @@ class SearchQuery(BaseModel):
 
 
 @router.post("/query", response_model=WisdomResponse)
-async def query_wisdom(query: WisdomQuery, db: AsyncSession = Depends(get_db)):
+async def query_wisdom(query: WisdomQuery, db: AsyncSession = Depends(get_db)) -> WisdomResponse:
     """Query the universal wisdom guide with a question or concern."""
     valid_languages = ["english", "hindi", "sanskrit"]
     if query.language not in valid_languages:
@@ -96,7 +96,7 @@ async def query_wisdom(query: WisdomQuery, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/themes")
-async def list_themes(db: AsyncSession = Depends(get_db)):
+async def list_themes(db: AsyncSession = Depends(get_db)) -> dict:
     """List all available wisdom themes."""
     from sqlalchemy import distinct, select
 
@@ -116,7 +116,7 @@ async def get_verse(
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     include_sanskrit: bool = Query(default=False),
     db: AsyncSession = Depends(get_db),
-):
+) -> dict:
     """Get a specific wisdom verse by ID."""
     kb = WisdomKnowledgeBase()
     verse = await kb.get_verse_by_id(db, verse_id)
@@ -136,7 +136,7 @@ async def list_verses(
     limit: int = Query(default=10, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
-):
+) -> dict:
     """List wisdom verses with optional filtering."""
     from sqlalchemy import func, select
 
@@ -171,7 +171,8 @@ async def list_verses(
         count_query = select(func.count()).select_from(WisdomVerse)
 
     total_result = await db.execute(count_query)
-    total = total_result.scalar()
+    total_count = total_result.scalar()
+    total = total_count if total_count is not None else 0
     query = query.offset(offset).limit(limit)
     result = await db.execute(query)
     verses = list(result.scalars().all())
@@ -200,7 +201,7 @@ async def semantic_search(
     include_sanskrit: bool = Query(default=False),
     limit: int = Query(default=5, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
-):
+) -> dict:
     """Perform semantic search over wisdom content."""
     query = search_query.query
     if not query.strip():
@@ -234,7 +235,7 @@ async def semantic_search(
 
 
 @router.get("/applications")
-async def list_applications(db: AsyncSession = Depends(get_db)):
+async def list_applications(db: AsyncSession = Depends(get_db)) -> dict:
     """List all available mental health applications."""
     from sqlalchemy import select
 

@@ -22,7 +22,7 @@ app = FastAPI(title="MindVibe API", version="1.0.0")
 
 
 @app.on_event("startup")
-async def startup():
+async def startup() -> None:
     """Initialize database tables on startup."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -51,7 +51,7 @@ app.include_router(gita_router)  # Gita verses API
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """Root endpoint - API health check."""
     return {
         "message": "MindVibe API is running",

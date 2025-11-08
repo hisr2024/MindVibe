@@ -9,7 +9,7 @@ router = APIRouter(prefix="/content", tags=["content"])
 
 
 @router.get("/{locale}")
-async def get_pack(locale: str, db: AsyncSession = Depends(get_db)):
+async def get_pack(locale: str, db: AsyncSession = Depends(get_db)) -> dict:
     res = await db.execute(select(ContentPack).where(ContentPack.locale == locale))
     row = res.scalar_one_or_none()
     if row:
