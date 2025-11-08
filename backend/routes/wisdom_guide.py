@@ -58,7 +58,9 @@ class SearchQuery(BaseModel):
 
 
 @router.post("/query", response_model=WisdomResponse)
-async def query_wisdom(query: WisdomQuery, db: AsyncSession = Depends(get_db)) -> WisdomResponse:
+async def query_wisdom(
+    query: WisdomQuery, db: AsyncSession = Depends(get_db)
+) -> WisdomResponse:
     """Query the universal wisdom guide with a question or concern."""
     valid_languages = ["english", "hindi", "sanskrit"]
     if query.language not in valid_languages:

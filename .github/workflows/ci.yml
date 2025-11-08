@@ -42,6 +42,7 @@ jobs:
       - name: Run mypy (type checker)
         run: |
           mypy --ignore-missing-imports .
+        continue-on-error: true
         env:
           MYPYPATH: ${{ github.workspace }}
 

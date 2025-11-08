@@ -76,7 +76,9 @@ class SessionInfo(BaseModel):
 
 
 @router.post("/message", response_model=ChatResponse)
-async def send_message(chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)) -> ChatResponse:
+async def send_message(
+    chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)
+) -> ChatResponse:
     """
     Send a message to the AI chatbot and receive guidance.
 

@@ -87,7 +87,9 @@ async def lookup_verse(
 
 
 @router.post("/search")
-async def semantic_search(query: WisdomRequest, db: AsyncSession = Depends(get_db)) -> dict:
+async def semantic_search(
+    query: WisdomRequest, db: AsyncSession = Depends(get_db)
+) -> dict:
     """
     Perform semantic search over Gita verses.
 
@@ -120,7 +122,9 @@ async def get_languages() -> dict:
 
 
 @router.post("/wisdom")
-async def wisdom_consultation(query: WisdomRequest, db: AsyncSession = Depends(get_db)) -> dict:
+async def wisdom_consultation(
+    query: WisdomRequest, db: AsyncSession = Depends(get_db)
+) -> dict:
     """
     AI-powered Gita wisdom consultation.
 
