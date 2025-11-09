@@ -1,30 +1,30 @@
-from collections.abc import AsyncIterator
+"""Dependency injection for FastAPI routes"""
 
-from fastapi import Depends, Header
-from sqlalchemy import insert, select
-from sqlalchemy.ext.asyncio import AsyncSession
+import os
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from fastapi import Depends, HTTPException, status
 
-from backend.main import SessionLocal
-from backend.models import User
+# Database setup
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-async def get_db() -> AsyncIterator[AsyncSession]:
-    async with SessionLocal() as s:
-        yield s
+engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Get database session"""
+    async with SessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
 
-async def get_user_id(
-    x_auth_uid: str | None = Header(default=None), db: AsyncSession = Depends(get_db)
-) -> str:
-    if not x_auth_uid:
-        x_auth_uid = "dev-anon"
-    res = await db.execute(select(User).where(User.auth_uid == x_auth_uid))
-    row = res.scalar_one_or_none()
-    if row:
-        return str(row.id)
-    ins = await db.execute(
-        insert(User).values(auth_uid=x_auth_uid, locale="en").returning(User.id)
-    )
-    await db.commit()
-    user_id = ins.scalar_one()
-    return str(user_id)
+def get_user_id() -> str:
+    """Get user ID - returns test user for now"""
+    # For development/testing, return a test user ID
+    return "dev-anon"
