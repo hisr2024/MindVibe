@@ -13,8 +13,8 @@ router = APIRouter(prefix="/journal", tags=["journal"])
 async def upload_blob(
     payload: BlobIn,
     db: AsyncSession = Depends(get_db),
-    user_id: int = Depends(get_user_id),
-):
+    user_id: str = Depends(get_user_id),
+) -> dict:
     res = await db.execute(
         insert(EncryptedBlob)
         .values(user_id=user_id, blob_json=payload.blob_json)
@@ -22,6 +22,8 @@ async def upload_blob(
     )
     row = res.first()
     await db.commit()
+    if not row:
+        raise Exception("Failed to create blob")
     return {
         "id": row.id,
         "created_at": row.created_at.isoformat(),
@@ -31,8 +33,8 @@ async def upload_blob(
 
 @router.get("/blob/latest", response_model=BlobOut | dict)
 async def latest_blob(
-    db: AsyncSession = Depends(get_db), user_id: int = Depends(get_user_id)
-):
+    db: AsyncSession = Depends(get_db), user_id: str = Depends(get_user_id)
+) -> dict:
     res = await db.execute(
         select(EncryptedBlob)
         .where(EncryptedBlob.user_id == user_id)

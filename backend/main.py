@@ -47,13 +47,13 @@ from backend.routes.wisdom_guide import (
 
 # Register all routers
 # app.include_router(auth_router)      # ← COMMENT THIS OUT
-app.include_router(jwk_router)  # JWK public key endpoint
-app.include_router(moods_router)  # Mood tracking API
-app.include_router(content_router)  # Content packs API
-app.include_router(journal_router)  # Encrypted journal/blob storage
-app.include_router(chat_router)  # AI chatbot conversations
-app.include_router(wisdom_router)  # Universal wisdom guide API
-app.include_router(gita_router)  # Gita verses API
+app.include_router(jwk_router)  # type: ignore[has-type]  # JWK public key endpoint
+app.include_router(moods_router)  # type: ignore[has-type]  # Mood tracking API
+app.include_router(content_router)  # type: ignore[has-type]  # Content packs API
+app.include_router(journal_router)  # type: ignore[has-type]  # Encrypted journal/blob storage
+app.include_router(chat_router)  # type: ignore[has-type]  # AI chatbot conversations
+app.include_router(wisdom_router)  # type: ignore[has-type]  # Universal wisdom guide API
+app.include_router(gita_router)  # type: ignore[has-type]  # Gita verses API
 
 
 @app.get("/")
