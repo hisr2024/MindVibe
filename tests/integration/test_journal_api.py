@@ -19,7 +19,12 @@ class TestJournalEndpoints:
         self, test_client: AsyncClient, test_db: AsyncSession
     ):
         """Test successfully uploading an encrypted journal blob."""
-        user = User(auth_uid="test-journal-user", locale="en")
+        user = User(
+            auth_uid="test-journal-user",
+            email="journal@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
 
@@ -40,7 +45,12 @@ class TestJournalEndpoints:
         self, test_client: AsyncClient, test_db: AsyncSession
     ):
         """Test retrieving the latest journal blob."""
-        user = User(auth_uid="test-journal-user-2", locale="en")
+        user = User(
+            auth_uid="test-journal-user-2",
+            email="journal2@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
 
@@ -78,7 +88,12 @@ class TestJournalEndpoints:
         self, test_client: AsyncClient, test_db: AsyncSession
     ):
         """Test retrieving latest blob when none exists."""
-        user = User(auth_uid="test-journal-user-3", locale="en")
+        user = User(
+            auth_uid="test-journal-user-3",
+            email="journal3@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
 
@@ -111,8 +126,18 @@ class TestJournalEndpoints:
     ):
         """Test that users can only access their own journal blobs."""
         # Create two users
-        user1 = User(auth_uid="user1", locale="en")
-        user2 = User(auth_uid="user2", locale="en")
+        user1 = User(
+            auth_uid="user1",
+            email="user1@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
+        user2 = User(
+            auth_uid="user2",
+            email="user2@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add_all([user1, user2])
         await test_db.commit()
 

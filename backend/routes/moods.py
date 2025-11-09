@@ -13,8 +13,8 @@ router = APIRouter(prefix="/moods", tags=["moods"])
 async def create_mood(
     payload: MoodIn,
     db: AsyncSession = Depends(get_db),
-    user_id: int = Depends(get_user_id),
-):
+    user_id: str = Depends(get_user_id),
+) -> dict:
     res = await db.execute(
         insert(Mood)
         .values(
@@ -27,6 +27,8 @@ async def create_mood(
     )
     row = res.first()
     await db.commit()
+    if not row:
+        raise Exception("Failed to create mood")
     return {
         "id": row.id,
         "score": row.score,
