@@ -1,5 +1,6 @@
 """Analytics routes for MindVibe API"""
 
+from typing import Dict, Any
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
@@ -10,11 +11,11 @@ from backend.deps import get_db, get_user_id
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
-@router.get("/dashboard")
+@router.get("/dashboard", response_model=None)
 async def get_analytics_dashboard(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get analytics dashboard with key metrics"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -30,11 +31,11 @@ async def get_analytics_dashboard(
     }
 
 
-@router.get("/users")
+@router.get("/users", response_model=None)
 async def get_user_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get user engagement analytics"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -48,11 +49,11 @@ async def get_user_analytics(
     }
 
 
-@router.get("/domains")
+@router.get("/domains", response_model=None)
 async def get_domain_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get psychology domain usage analytics"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -71,11 +72,11 @@ async def get_domain_analytics(
     }
 
 
-@router.get("/crisis")
+@router.get("/crisis", response_model=None)
 async def get_crisis_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get crisis incident analytics"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -91,11 +92,11 @@ async def get_crisis_analytics(
     }
 
 
-@router.get("/performance")
+@router.get("/performance", response_model=None)
 async def get_performance_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get API and system performance metrics"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -110,11 +111,11 @@ async def get_performance_analytics(
     }
 
 
-@router.get("/retention")
+@router.get("/retention", response_model=None)
 async def get_retention_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get user retention analytics"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -129,11 +130,11 @@ async def get_retention_analytics(
     }
 
 
-@router.post("/export")
+@router.post("/export", response_model=None)
 async def export_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Export analytics data"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
@@ -147,11 +148,11 @@ async def export_analytics(
     }
 
 
-@router.get("/trends")
+@router.get("/trends", response_model=None)
 async def get_trends_analytics(
     user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db)
-) -> dict:
+) -> Dict[str, Any]:
     """Get trends over time"""
     return {
         "timestamp": datetime.utcnow().isoformat(),
