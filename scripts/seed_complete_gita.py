@@ -20,6 +20,7 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import httpx
 from sqlalchemy import insert, select, text
@@ -75,7 +76,7 @@ CHAPTER_INFO = {
 }
 
 
-async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> dict | None:
+async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> dict[str, Any] | None:
     """Fetch verse from RapidAPI Bhagavad Gita API."""
     if not RAPID_API_KEY:
         return None
@@ -87,13 +88,13 @@ async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> dict | None:
         try:
             response = await client.get(url, headers=headers, timeout=10.0)
             response.raise_for_status()
-            return response.json()
+            return response.json()  # type: ignore[no-any-return]
         except Exception as e:
             print(f"  ⚠️  RapidAPI error for {chapter}.{verse}: {e}")
             return None
 
 
-async def fetch_from_github_dataset() -> list[dict] | None:
+async def fetch_from_github_dataset() -> list[dict[str, Any]] | None:
     """Fetch complete Gita dataset from GitHub as fallback."""
     print("\n📥 Fetching Gita dataset from GitHub...")
 
@@ -109,7 +110,7 @@ async def fetch_from_github_dataset() -> list[dict] | None:
                 try:
                     response = await client.get(source_url, timeout=30.0)
                     response.raise_for_status()
-                    data = response.json()
+                    data: list[dict[str, Any]] = response.json()
                     print(f"✅ Successfully fetched {len(data)} verses from GitHub")
                     return data
                 except Exception as e:
@@ -122,7 +123,7 @@ async def fetch_from_github_dataset() -> list[dict] | None:
             return None
 
 
-def create_verse_from_data(data: dict, chapter: int, verse: int) -> dict:
+def create_verse_from_data(data: dict[str, Any], chapter: int, verse: int) -> dict[str, Any]:
     """Transform API data into our database format."""
     # Handle different API response formats
 
@@ -151,10 +152,10 @@ def create_verse_from_data(data: dict, chapter: int, verse: int) -> dict:
     }
 
 
-async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
+async def seed_chapter(chapter_num: int, use_rapid_api: bool = True) -> None:
     """Seed all verses from a single chapter."""
     chapter_info = CHAPTER_INFO[chapter_num]
-    total_verses = chapter_info["verses"]
+    total_verses: int = chapter_info["verses"]  # type: ignore[assignment]
 
     print(f"\n{'='*70}")
     print(f"📖 Seeding Chapter {chapter_num}")
@@ -223,7 +224,7 @@ async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
     print(f"{'='*70}\n")
 
 
-async def seed_from_github_dataset():
+async def seed_from_github_dataset() -> bool:
     """Seed complete Gita from GitHub dataset."""
     print("\n" + "=" * 70)
     print("📥 FETCHING COMPLETE GITA FROM GITHUB DATASET")
@@ -236,7 +237,7 @@ async def seed_from_github_dataset():
     return False
 
 
-async def verify_seeding():
+async def verify_seeding() -> None:
     """Verify that all verses were seeded correctly."""
     print("\n" + "=" * 70)
     print("🔍 VERIFYING SEEDED DATA")
@@ -264,11 +265,13 @@ async def verify_seeding():
 
         if total == 700:
             print("✅ ALL 700 VERSES SUCCESSFULLY SEEDED! 🎉")
-        else:
+        elif total is not None:
             print(f"⚠️  Missing {700 - total} verses")
+        else:
+            print("⚠️  Could not determine verse count")
 
 
-async def main():
+async def main() -> None:
     """Main seeding function."""
     try:
         print("\n" + "=" * 70)
