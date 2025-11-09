@@ -67,7 +67,25 @@ class MetadataEnricher:
             text = verse["english"].lower()
             # Simple word extraction (remove common words)
             words = re.findall(r"\b\w+\b", text)
-            common_words = {"the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "is", "are", "was", "were"}
+            common_words = {
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "is",
+                "are",
+                "was",
+                "were",
+            }
             keywords = [w for w in words if w not in common_words and len(w) > 3]
 
         return keywords[:10]  # Limit to top 10
@@ -156,7 +174,9 @@ class MetadataEnricher:
         # Check enriched fields
         if verse.get("mental_health_applications"):
             apps = verse["mental_health_applications"]
-            app_list = apps.get("applications", []) if isinstance(apps, dict) else apps
+            app_list = (
+                apps.get("applications", []) if isinstance(apps, dict) else apps
+            )
             score += min(len(app_list) * 0.5, 2.0)
 
         if verse.get("principles"):
