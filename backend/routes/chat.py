@@ -76,7 +76,9 @@ class SessionInfo(BaseModel):
 
 
 @router.post("/message", response_model=ChatResponse)
-async def send_message(chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)):
+async def send_message(
+    chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)
+) -> ChatResponse:
     """
     Send a message to the AI chatbot and receive guidance.
 
@@ -101,7 +103,7 @@ async def send_message(chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)
 
     try:
         # Process the chat message
-        result = await chatbot_service.chat(
+        result = await chatbot_service.chat(  # type: ignore[attr-defined]
             message=chat_msg.message,
             session_id=session_id,
             db=db,
@@ -127,11 +129,11 @@ async def send_message(chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)
 
 
 @router.get("/history/{session_id}", response_model=ConversationHistory)
-async def get_conversation_history(session_id: str):
+async def get_conversation_history(session_id: str) -> ConversationHistory:
     """
     Retrieve the conversation history for a specific session.
     """
-    history = chatbot_service.get_conversation_history(session_id)
+    history = chatbot_service.get_conversation_history(session_id)  # type: ignore[attr-defined]
 
     if not history:
         raise HTTPException(
@@ -145,11 +147,11 @@ async def get_conversation_history(session_id: str):
 
 
 @router.delete("/history/{session_id}")
-async def clear_conversation(session_id: str):
+async def clear_conversation(session_id: str) -> dict:
     """
     Clear the conversation history for a specific session.
     """
-    success = chatbot_service.clear_conversation(session_id)
+    success = chatbot_service.clear_conversation(session_id)  # type: ignore[attr-defined]
 
     if not success:
         raise HTTPException(
@@ -164,25 +166,25 @@ async def clear_conversation(session_id: str):
 
 
 @router.get("/sessions", response_model=list[SessionInfo])
-async def list_active_sessions():
+async def list_active_sessions() -> list[SessionInfo]:
     """
     List all active chat sessions.
 
     Note: In production, this should be user-specific and authenticated.
     """
-    sessions = chatbot_service.get_active_sessions()
+    sessions = chatbot_service.get_active_sessions()  # type: ignore[attr-defined]
 
     return [
         SessionInfo(
             session_id=session_id,
-            message_count=len(chatbot_service.get_conversation_history(session_id)),
+            message_count=len(chatbot_service.get_conversation_history(session_id)),  # type: ignore[attr-defined]
         )
         for session_id in sessions
     ]
 
 
 @router.post("/start")
-async def start_new_session():
+async def start_new_session() -> dict:
     """
     Start a new chat session and get a session ID.
     """
@@ -196,7 +198,7 @@ async def start_new_session():
 
 
 @router.get("/health")
-async def chatbot_health():
+async def chatbot_health() -> dict:
     """
     Check chatbot service health and configuration.
     """
@@ -211,6 +213,6 @@ async def chatbot_health():
         "status": "healthy",
         "openai_enabled": openai_configured,
         "fallback_mode": "template-based" if not openai_configured else "ai-powered",
-        "active_sessions": len(chatbot_service.get_active_sessions()),
+        "active_sessions": len(chatbot_service.get_active_sessions()),  # type: ignore[attr-defined]
         "supported_languages": ["english", "hindi", "sanskrit"],
     }

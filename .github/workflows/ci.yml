@@ -28,8 +28,8 @@ jobs:
           # Install project dependencies first to avoid version conflicts
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-          # Install dev tools with pinned pytest to satisfy pytest-asyncio
-          pip install black ruff mypy "pytest>=8.2,<9" pytest-cov pytest-asyncio
+          # Install dev tools and type stubs
+          pip install black ruff mypy pytest-cov pytest-asyncio types-requests
 
       - name: Run black (format check)
         run: |
@@ -43,6 +43,7 @@ jobs:
         continue-on-error: true
         run: |
           mypy --ignore-missing-imports .
+        continue-on-error: true
         env:
           MYPYPATH: ${{ github.workspace }}
 
@@ -52,7 +53,8 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
-        if: always()
+        if: always() && hashFiles('coverage.xml') != ''
+        continue-on-error: true
         with:
           files: ./coverage.xml
           flags: python
@@ -89,9 +91,11 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
-        if: always()
+        if: always() && hashFiles('coverage/coverage-final.json') != ''
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
           flags: javascript
           name: javascript-coverage
+          fail_ci_if_error: false

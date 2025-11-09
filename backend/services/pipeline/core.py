@@ -1,4 +1,4 @@
-"""Core pipeline orchestration for Context Transformation Pipeline."""
+"""Core pipeline orchestration module."""
 
 from backend.services.pipeline.enricher import MetadataEnricher
 from backend.services.pipeline.sanitizer import TextSanitizer
@@ -7,143 +7,134 @@ from backend.services.pipeline.validator import ValidationError, VerseValidator
 
 class PipelineError(Exception):
     """Raised when pipeline processing fails."""
-
     pass
 
 
 class ContextTransformationPipeline:
-    """Orchestrates the full verse transformation pipeline."""
+    """
+    Main pipeline for transforming raw verse data into processed, searchable content.
+    
+    Pipeline stages:
+    1. Sanitization - Clean and normalize text
+    2. Validation - Ensure data meets requirements
+    3. Enrichment - Add metadata and searchable content
+    """
 
     def __init__(
         self,
-        enable_validation: bool = True,
-        enable_sanitization: bool = True,
-        enable_enrichment: bool = True,
-        strict_mode: bool = False,
+        sanitize: bool = True,
+        validate: bool = True,
+        enrich: bool = True,
     ):
-        """Initialize the pipeline with configuration."""
-        self.enable_validation = enable_validation
-        self.enable_sanitization = enable_sanitization
-        self.enable_enrichment = enable_enrichment
-        self.strict_mode = strict_mode
-
-        # Statistics
-        self._stats = {
-            "processed": 0,
-            "validated": 0,
-            "sanitized": 0,
-            "enriched": 0,
-            "errors": 0,
-        }
-
-        # Custom stages
-        self._custom_stages = {}
+        """
+        Initialize pipeline with configuration.
+        
+        Args:
+            sanitize: Whether to run sanitization stage
+            validate: Whether to run validation stage
+            enrich: Whether to run enrichment stage
+        """
+        self.sanitize = sanitize
+        self.validate = validate
+        self.enrich = enrich
 
     @classmethod
-    def create_full_pipeline(
-        cls, strict: bool = False
-    ) -> "ContextTransformationPipeline":
-        """Create a pipeline with all stages enabled."""
-        return cls(
-            enable_validation=True,
-            enable_sanitization=True,
-            enable_enrichment=True,
-            strict_mode=strict,
-        )
+    def create_full_pipeline(cls) -> "ContextTransformationPipeline":
+        """
+        Create a pipeline with all stages enabled.
+        
+        Returns:
+            ContextTransformationPipeline instance
+        """
+        return cls(sanitize=True, validate=True, enrich=True)
 
     @classmethod
-    def create_minimal_pipeline(cls) -> "ContextTransformationPipeline":
-        """Create a minimal pipeline with only validation."""
-        return cls(
-            enable_validation=True,
-            enable_sanitization=False,
-            enable_enrichment=False,
-            strict_mode=False,
-        )
+    def create_validation_only(cls) -> "ContextTransformationPipeline":
+        """
+        Create a pipeline with only validation enabled.
+        
+        Returns:
+            ContextTransformationPipeline instance
+        """
+        return cls(sanitize=False, validate=True, enrich=False)
 
-    def transform(self, verse_data: dict) -> dict:
-        """Transform a single verse through the pipeline."""
+    def transform(self, verse: dict) -> dict:
+        """
+        Transform a verse through the pipeline.
+        
+        Args:
+            verse: Raw verse dictionary
+            
+        Returns:
+            Transformed verse dictionary
+            
+        Raises:
+            PipelineError: If transformation fails
+        """
         try:
-            result = verse_data.copy()
+            result = verse.copy()
 
-            # Validation stage
-            if self.enable_validation:
-                result = VerseValidator.validate_and_normalize(result)
-                self._stats["validated"] += 1
-
-            # Sanitization stage
-            if self.enable_sanitization:
+            # Stage 1: Sanitization
+            if self.sanitize:
                 result = TextSanitizer.sanitize_verse_data(result)
-                self._stats["sanitized"] += 1
 
-            # Enrichment stage
-            if self.enable_enrichment:
+            # Stage 2: Validation
+            if self.validate:
+                result = VerseValidator.validate_and_normalize(result)
+
+            # Stage 3: Enrichment
+            if self.enrich:
                 result = MetadataEnricher.enrich(result)
-                self._stats["enriched"] += 1
 
-            self._stats["processed"] += 1
             return result
 
         except ValidationError as e:
-            self._stats["errors"] += 1
-            if self.strict_mode:
-                raise PipelineError(f"Pipeline validation failed: {e}") from e
-            return verse_data  # Return original on error in non-strict mode
-
+            raise PipelineError(f"Validation failed: {e}") from e
         except Exception as e:
-            self._stats["errors"] += 1
-            if self.strict_mode:
-                raise PipelineError(f"Pipeline processing failed: {e}") from e
-            return verse_data  # Return original on error
+            raise PipelineError(f"Pipeline transformation failed: {e}") from e
 
     def transform_batch(self, verses: list[dict]) -> list[dict]:
-        """Transform a batch of verses."""
-        return [self.transform(verse) for verse in verses]
+        """
+        Transform multiple verses through the pipeline.
+        
+        Args:
+            verses: List of raw verse dictionaries
+            
+        Returns:
+            List of transformed verse dictionaries
+            
+        Raises:
+            PipelineError: If transformation of any verse fails
+        """
+        results = []
+        for i, verse in enumerate(verses):
+            try:
+                transformed = self.transform(verse)
+                results.append(transformed)
+            except PipelineError as e:
+                raise PipelineError(f"Failed to transform verse at index {i}: {e}") from e
 
-    def validate_only(self, verse_data: dict) -> dict:
-        """Run validation only and return report."""
-        errors = VerseValidator.check_errors(verse_data)
-        completeness = VerseValidator.check_completeness(verse_data)
+        return results
 
-        return {
-            "is_valid": len(errors) == 0,
-            "errors": errors,
-            "completeness": completeness,
-        }
+    def validate_batch(self, verses: list[dict]) -> tuple[list[dict], list[tuple[int, str]]]:
+        """
+        Validate a batch of verses and return valid ones plus errors.
+        
+        Args:
+            verses: List of verse dictionaries to validate
+            
+        Returns:
+            Tuple of (valid_verses, errors) where errors is list of (index, error_msg)
+        """
+        valid_verses = []
+        errors = []
 
-    def get_statistics(self) -> dict:
-        """Get pipeline processing statistics."""
-        return self._stats.copy()
+        for i, verse in enumerate(verses):
+            try:
+                if self.validate:
+                    VerseValidator.validate(verse)
+                valid_verses.append(verse)
+            except ValidationError as e:
+                errors.append((i, str(e)))
 
-    def reset_statistics(self) -> None:
-        """Reset pipeline statistics."""
-        self._stats = {
-            "processed": 0,
-            "validated": 0,
-            "sanitized": 0,
-            "enriched": 0,
-            "errors": 0,
-        }
-
-    def export_configuration(self) -> dict:
-        """Export current pipeline configuration."""
-        return {
-            "enable_validation": self.enable_validation,
-            "enable_sanitization": self.enable_sanitization,
-            "enable_enrichment": self.enable_enrichment,
-            "strict_mode": self.strict_mode,
-        }
-
-    def add_custom_stage(self, name: str, stage_func) -> None:
-        """Add a custom transformation stage."""
-        self._custom_stages[name] = stage_func
-
-    def transform_with_custom_stages(self, verse_data: dict) -> dict:
-        """Transform verse with custom stages included."""
-        result = self.transform(verse_data)
-
-        # Apply custom stages
-        for _name, stage_func in self._custom_stages.items():
-            result = stage_func(result)
-
-        return result
+        return valid_verses, errors

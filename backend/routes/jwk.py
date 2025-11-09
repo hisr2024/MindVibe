@@ -8,9 +8,9 @@ router = APIRouter()
 
 
 @router.get("/.well-known/jwks.json")
-async def get_jwk():
+async def get_jwk() -> JSONResponse:
     """Returns JWK Set containing public EdDSA keys"""
-    jwks = {"keys": []}
+    jwks: dict[str, list] = {"keys": []}
     keyset_dir = os.getenv("EDDSA_KEYSET_DIR", "./keyset_eddsa")
 
     if os.path.exists(keyset_dir):

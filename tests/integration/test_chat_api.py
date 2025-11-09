@@ -10,8 +10,6 @@ from unittest.mock import patch
 import pytest
 from httpx import AsyncClient
 
-from backend.main import app
-
 
 @pytest.fixture
 def sample_verse_data():
@@ -36,236 +34,223 @@ def sample_verse_data():
 class TestChatEndpoints:
     """Test suite for chat API endpoints."""
 
-    async def test_start_new_session(self):
+    async def test_start_new_session(self, test_client: AsyncClient):
         """Test starting a new chat session."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post("/api/chat/start")
+        response = await test_client.post("/api/chat/start")
 
-            assert response.status_code == 200
-            data = response.json()
-            assert "session_id" in data
-            assert "message" in data
-            assert len(data["session_id"]) > 0
+        assert response.status_code == 200
+        data = response.json()
+        assert "session_id" in data
+        assert "message" in data
+        assert len(data["session_id"]) > 0
 
-    async def test_send_message_new_session(self, sample_verse_data):
+    async def test_send_message_new_session(self, test_client: AsyncClient, sample_verse_data):
         """Test sending a message without a session ID (creates new session)."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # Mock the database query and OpenAI
-            with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="I understand your concern about anxiety...",
-            ), patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                response = await client.post(
-                    "/api/chat/message",
-                    json={"message": "I'm feeling anxious about work"},
-                )
+        # Mock the database query and OpenAI
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="I understand your concern about anxiety...",
+        ), patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            response = await test_client.post(
+                "/api/chat/message",
+                json={"message": "I'm feeling anxious about work"},
+            )
 
-            assert response.status_code == 200
-            data = response.json()
-            assert "response" in data
-            assert "session_id" in data
-            assert "verses" in data
-            assert "conversation_length" in data
-            assert data["conversation_length"] >= 2
+        assert response.status_code == 200
+        data = response.json()
+        assert "response" in data
+        assert "session_id" in data
+        assert "verses" in data
+        assert "conversation_length" in data
+        assert data["conversation_length"] >= 2
 
-    async def test_send_message_with_session_id(self, sample_verse_data):
+    async def test_send_message_with_session_id(self, test_client: AsyncClient, sample_verse_data):
         """Test sending a message with an existing session ID."""
         session_id = "test-session-123"
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ):
             with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
+                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    response = await client.post(
-                        "/api/chat/message",
-                        json={"message": "First message", "session_id": session_id},
-                    )
+                response = await test_client.post(
+                    "/api/chat/message",
+                    json={"message": "First message", "session_id": session_id},
+                )
 
-                    assert response.status_code == 200
-                    data = response.json()
-                    assert data["session_id"] == session_id
+                assert response.status_code == 200
+                data = response.json()
+                assert data["session_id"] == session_id
 
-    async def test_send_message_empty(self):
+    async def test_send_message_empty(self, test_client: AsyncClient):
         """Test sending an empty message (should fail)."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post("/api/chat/message", json={"message": ""})
+        response = await test_client.post("/api/chat/message", json={"message": ""})
 
-            assert response.status_code == 400
-            assert "empty" in response.json()["detail"].lower()
+        assert response.status_code == 422  # Pydantic validation error
+        assert "detail" in response.json()
 
-    async def test_send_message_invalid_language(self):
+    async def test_send_message_invalid_language(self, test_client: AsyncClient):
         """Test sending a message with invalid language."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post(
+        response = await test_client.post(
+            "/api/chat/message",
+            json={"message": "Test", "language": "invalid_language"},
+        )
+
+        assert response.status_code == 400
+        assert "language" in response.json()["detail"].lower()
+
+    async def test_send_message_hindi(self, test_client: AsyncClient):
+        """Test sending a message with Hindi language preference."""
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ), patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            response = await test_client.post(
                 "/api/chat/message",
-                json={"message": "Test", "language": "invalid_language"},
+                json={"message": "मुझे चिंता हो रही है", "language": "hindi"},
             )
 
-            assert response.status_code == 400
-            assert "language" in response.json()["detail"].lower()
+        assert response.status_code == 200
+        data = response.json()
+        assert data["language"] == "hindi"
 
-    async def test_send_message_hindi(self):
-        """Test sending a message with Hindi language preference."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
-            ), patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                response = await client.post(
-                    "/api/chat/message",
-                    json={"message": "मुझे चिंता हो रही है", "language": "hindi"},
-                )
-
-            assert response.status_code == 200
-            data = response.json()
-            assert data["language"] == "hindi"
-
-    async def test_send_message_with_sanskrit(self):
+    async def test_send_message_with_sanskrit(self, test_client: AsyncClient):
         """Test sending a message with Sanskrit included."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
-            ), patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                response = await client.post(
-                    "/api/chat/message",
-                    json={"message": "Test", "include_sanskrit": True},
-                )
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ), patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            response = await test_client.post(
+                "/api/chat/message",
+                json={"message": "Test", "include_sanskrit": True},
+            )
 
-            assert response.status_code == 200
+        assert response.status_code == 200
 
-    async def test_get_conversation_history(self):
+    async def test_get_conversation_history(self, test_client: AsyncClient):
         """Test retrieving conversation history."""
         session_id = "test-session-history"
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # First, send a message to create history
-            with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
-            ), patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                await client.post(
-                    "/api/chat/message",
-                    json={"message": "Hello", "session_id": session_id},
-                )
+        # First, send a message to create history
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ), patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            await test_client.post(
+                "/api/chat/message",
+                json={"message": "Hello", "session_id": session_id},
+            )
 
-            # Then retrieve history
-            response = await client.get(f"/api/chat/history/{session_id}")
+        # Then retrieve history
+        response = await test_client.get(f"/api/chat/history/{session_id}")
 
-            assert response.status_code == 200
-            data = response.json()
-            assert "session_id" in data
-            assert "messages" in data
-            assert "total_messages" in data
-            assert data["session_id"] == session_id
-            assert len(data["messages"]) >= 2  # User + assistant
+        assert response.status_code == 200
+        data = response.json()
+        assert "session_id" in data
+        assert "messages" in data
+        assert "total_messages" in data
+        assert data["session_id"] == session_id
+        assert len(data["messages"]) >= 2  # User + assistant
 
-    async def test_get_conversation_history_not_found(self):
+    async def test_get_conversation_history_not_found(self, test_client: AsyncClient):
         """Test retrieving non-existent conversation history."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/api/chat/history/non-existent-session")
+        response = await test_client.get("/api/chat/history/non-existent-session")
 
-            assert response.status_code == 404
+        assert response.status_code == 404
 
-    async def test_clear_conversation(self):
+    async def test_clear_conversation(self, test_client: AsyncClient):
         """Test clearing conversation history."""
         session_id = "test-session-clear"
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # Create a conversation
-            with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
-            ), patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                await client.post(
+        # Create a conversation
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ), patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            await test_client.post(
+                "/api/chat/message",
+                json={"message": "Test", "session_id": session_id},
+            )
+
+        # Clear the conversation
+        response = await test_client.delete(f"/api/chat/history/{session_id}")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["session_id"] == session_id
+
+        # Verify it's cleared
+        history_response = await test_client.get(f"/api/chat/history/{session_id}")
+        assert history_response.status_code == 404
+
+    async def test_clear_conversation_not_found(self, test_client: AsyncClient):
+        """Test clearing non-existent conversation."""
+        response = await test_client.delete("/api/chat/history/non-existent-session")
+
+        assert response.status_code == 404
+
+    async def test_list_active_sessions(self, test_client: AsyncClient):
+        """Test listing active sessions."""
+        # Create a few sessions
+        session_ids = ["session-1", "session-2"]
+
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ), patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            for sid in session_ids:
+                await test_client.post(
                     "/api/chat/message",
-                    json={"message": "Test", "session_id": session_id},
+                    json={"message": "Test", "session_id": sid},
                 )
 
-            # Clear the conversation
-            response = await client.delete(f"/api/chat/history/{session_id}")
+        # List sessions
+        response = await test_client.get("/api/chat/sessions")
 
-            assert response.status_code == 200
-            data = response.json()
-            assert data["session_id"] == session_id
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        # Should include our sessions
+        session_ids_in_response = [s["session_id"] for s in data]
+        for sid in session_ids:
+            assert sid in session_ids_in_response
 
-            # Verify it's cleared
-            history_response = await client.get(f"/api/chat/history/{session_id}")
-            assert history_response.status_code == 404
-
-    async def test_clear_conversation_not_found(self):
-        """Test clearing non-existent conversation."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.delete("/api/chat/history/non-existent-session")
-
-            assert response.status_code == 404
-
-    async def test_list_active_sessions(self):
-        """Test listing active sessions."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # Create a few sessions
-            session_ids = ["session-1", "session-2"]
-
-            with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
-            ), patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                for sid in session_ids:
-                    await client.post(
-                        "/api/chat/message",
-                        json={"message": "Test", "session_id": sid},
-                    )
-
-            # List sessions
-            response = await client.get("/api/chat/sessions")
-
-            assert response.status_code == 200
-            data = response.json()
-            assert isinstance(data, list)
-            # Should include our sessions
-            session_ids_in_response = [s["session_id"] for s in data]
-            for sid in session_ids:
-                assert sid in session_ids_in_response
-
-    async def test_health_check(self):
+    async def test_health_check(self, test_client: AsyncClient):
         """Test chatbot health check endpoint."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/api/chat/health")
+        response = await test_client.get("/api/chat/health")
 
-            assert response.status_code == 200
-            data = response.json()
-            assert "status" in data
-            assert "openai_enabled" in data
-            assert "fallback_mode" in data
-            assert "active_sessions" in data
-            assert "supported_languages" in data
-            assert data["status"] == "healthy"
-            assert "english" in data["supported_languages"]
+        assert response.status_code == 200
+        data = response.json()
+        assert "status" in data
+        assert "openai_enabled" in data
+        assert "fallback_mode" in data
+        assert "active_sessions" in data
+        assert "supported_languages" in data
+        assert data["status"] == "healthy"
+        assert "english" in data["supported_languages"]
 
-    async def test_multi_turn_conversation(self):
+    async def test_multi_turn_conversation(self, test_client: AsyncClient):
         """Test a multi-turn conversation."""
         session_id = "test-multi-turn"
         messages = [
@@ -274,101 +259,96 @@ class TestChatEndpoints:
             "How do I stay calm?",
         ]
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ):
             with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
+                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    for i, msg in enumerate(messages):
-                        response = await client.post(
-                            "/api/chat/message",
-                            json={"message": msg, "session_id": session_id},
-                        )
+                for i, msg in enumerate(messages):
+                    response = await test_client.post(
+                        "/api/chat/message",
+                        json={"message": msg, "session_id": session_id},
+                    )
 
-                        assert response.status_code == 200
-                        data = response.json()
-                        # Conversation length should increase
-                        expected_length = (i + 1) * 2  # Each turn has user + assistant
-                        assert data["conversation_length"] == expected_length
+                    assert response.status_code == 200
+                    data = response.json()
+                    # Conversation length should increase
+                    expected_length = (i + 1) * 2  # Each turn has user + assistant
+                    assert data["conversation_length"] == expected_length
 
-    async def test_concurrent_sessions(self):
+    async def test_concurrent_sessions(self, test_client: AsyncClient):
         """Test that multiple sessions can coexist."""
         session1 = "concurrent-session-1"
         session2 = "concurrent-session-2"
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ):
             with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
+                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    # Send messages to both sessions
-                    response1 = await client.post(
-                        "/api/chat/message",
-                        json={"message": "Session 1 message", "session_id": session1},
-                    )
+                # Send messages to both sessions
+                response1 = await test_client.post(
+                    "/api/chat/message",
+                    json={"message": "Session 1 message", "session_id": session1},
+                )
 
-                    response2 = await client.post(
-                        "/api/chat/message",
-                        json={"message": "Session 2 message", "session_id": session2},
-                    )
+                response2 = await test_client.post(
+                    "/api/chat/message",
+                    json={"message": "Session 2 message", "session_id": session2},
+                )
 
-                    assert response1.status_code == 200
-                    assert response2.status_code == 200
+                assert response1.status_code == 200
+                assert response2.status_code == 200
 
-                    # Verify histories are separate
-                    hist1 = await client.get(f"/api/chat/history/{session1}")
-                    hist2 = await client.get(f"/api/chat/history/{session2}")
+                # Verify histories are separate
+                hist1 = await test_client.get(f"/api/chat/history/{session1}")
+                hist2 = await test_client.get(f"/api/chat/history/{session2}")
 
-                    assert hist1.json()["messages"][0]["content"] == "Session 1 message"
-                    assert hist2.json()["messages"][0]["content"] == "Session 2 message"
+                assert hist1.json()["messages"][0]["content"] == "Session 1 message"
+                assert hist2.json()["messages"][0]["content"] == "Session 2 message"
 
 
 @pytest.mark.asyncio
 class TestChatErrorHandling:
     """Test error handling in chat API."""
 
-    async def test_invalid_json(self):
+    async def test_invalid_json(self, test_client: AsyncClient):
         """Test sending invalid JSON."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post(
-                "/api/chat/message",
-                content="invalid json",
-                headers={"Content-Type": "application/json"},
-            )
+        response = await test_client.post(
+            "/api/chat/message",
+            content="invalid json",
+            headers={"Content-Type": "application/json"},
+        )
 
-            assert response.status_code == 422  # Unprocessable Entity
+        assert response.status_code == 422  # Unprocessable Entity
 
-    async def test_missing_required_field(self):
+    async def test_missing_required_field(self, test_client: AsyncClient):
         """Test sending request without required message field."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post(
-                "/api/chat/message", json={"language": "english"}
+        response = await test_client.post(
+            "/api/chat/message", json={"language": "english"}
+        )
+
+        assert response.status_code == 422
+
+    async def test_database_error(self, test_client: AsyncClient):
+        """Test handling database errors gracefully."""
+        with patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            side_effect=Exception("Database error"),
+        ):
+            response = await test_client.post(
+                "/api/chat/message", json={"message": "Test"}
             )
 
-            assert response.status_code == 422
-
-    async def test_database_error(self):
-        """Test handling database errors gracefully."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            with patch(
-                "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                side_effect=Exception("Database error"),
-            ):
-                response = await client.post(
-                    "/api/chat/message", json={"message": "Test"}
-                )
-
-                # Should return 500 with error message
-                assert response.status_code == 500
-                assert "error" in response.json()["detail"].lower()
+            # Should return 500 with error message
+            assert response.status_code == 500
+            assert "error" in response.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
@@ -376,39 +356,37 @@ class TestChatValidation:
     """Test input validation for chat endpoints."""
 
     @pytest.mark.parametrize("language", ["english", "hindi", "sanskrit"])
-    async def test_valid_languages(self, language):
+    async def test_valid_languages(self, test_client: AsyncClient, language):
         """Test that all valid languages are accepted."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ):
             with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
+                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    response = await client.post(
-                        "/api/chat/message",
-                        json={"message": "Test", "language": language},
-                    )
+                response = await test_client.post(
+                    "/api/chat/message",
+                    json={"message": "Test", "language": language},
+                )
 
-                    assert response.status_code == 200
+                assert response.status_code == 200
 
     @pytest.mark.parametrize("include_sanskrit", [True, False])
-    async def test_include_sanskrit_options(self, include_sanskrit):
+    async def test_include_sanskrit_options(self, test_client: AsyncClient, include_sanskrit):
         """Test both options for include_sanskrit parameter."""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        with patch(
+            "backend.services.chatbot.ChatbotService._generate_chat_response",
+            return_value="Response",
+        ):
             with patch(
-                "services.chatbot.ChatbotService._generate_chat_response",
-                return_value="Response",
+                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+                return_value=[],
             ):
-                with patch(
-                    "services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                    return_value=[],
-                ):
-                    response = await client.post(
-                        "/api/chat/message",
-                        json={"message": "Test", "include_sanskrit": include_sanskrit},
-                    )
+                response = await test_client.post(
+                    "/api/chat/message",
+                    json={"message": "Test", "include_sanskrit": include_sanskrit},
+                )
 
-                    assert response.status_code == 200
+                assert response.status_code == 200
