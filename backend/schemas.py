@@ -1,5 +1,4 @@
-from pydantic import BaseModel, constr, validator
-
+from pydantic import BaseModel, constr, conint, validator
 
 class UserAuth(BaseModel):
     username: constr(max_length=150)
@@ -27,7 +26,6 @@ class WisdomVerse(BaseModel):
     text: str
     theme: constr(max_length=50) # e.g. "inspiration", "motivation"
 
-# Journal/Blob schemas
 class BlobIn(BaseModel):
     blob_json: str
 
@@ -36,15 +34,14 @@ class BlobOut(BaseModel):
     created_at: str
     blob_json: str
 
-# Mood schemas
 class MoodIn(BaseModel):
-    score: int
+    score: conint(ge=1, le=10)
     tags: list[str] | None = None
     note: str | None = None
 
 class MoodOut(BaseModel):
     id: int
     score: int
-    tags: dict | None = None
-    note: str | None = None
+    tags: list[str] | None
+    note: str | None
     at: str
