@@ -20,6 +20,7 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+from typing import cast
 
 import httpx
 from sqlalchemy import insert, select, text
@@ -53,7 +54,7 @@ engine = create_async_engine(DATABASE_URL, echo=False)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 # Chapter metadata (18 chapters with verse counts)
-CHAPTER_INFO = {
+CHAPTER_INFO: dict[int, dict[str, int | str]] = {
     1: {"verses": 47, "theme": "emotional_crisis_moral_conflict"},
     2: {"verses": 72, "theme": "transcendental_knowledge"},
     3: {"verses": 43, "theme": "selfless_action"},
@@ -87,7 +88,7 @@ async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> dict | None:
         try:
             response = await client.get(url, headers=headers, timeout=10.0)
             response.raise_for_status()
-            return response.json()
+            return cast(dict, response.json())
         except Exception as e:
             print(f"  ⚠️  RapidAPI error for {chapter}.{verse}: {e}")
             return None
@@ -109,7 +110,7 @@ async def fetch_from_github_dataset() -> list[dict] | None:
                 try:
                     response = await client.get(source_url, timeout=30.0)
                     response.raise_for_status()
-                    data = response.json()
+                    data = cast(list[dict], response.json())
                     print(f"✅ Successfully fetched {len(data)} verses from GitHub")
                     return data
                 except Exception as e:
@@ -151,10 +152,10 @@ def create_verse_from_data(data: dict, chapter: int, verse: int) -> dict:
     }
 
 
-async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
+async def seed_chapter(chapter_num: int, use_rapid_api: bool = True) -> None:
     """Seed all verses from a single chapter."""
     chapter_info = CHAPTER_INFO[chapter_num]
-    total_verses = chapter_info["verses"]
+    total_verses = int(chapter_info["verses"])
 
     print(f"\n{'='*70}")
     print(f"📖 Seeding Chapter {chapter_num}")
@@ -223,7 +224,7 @@ async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
     print(f"{'='*70}\n")
 
 
-async def seed_from_github_dataset():
+async def seed_from_github_dataset() -> bool:
     """Seed complete Gita from GitHub dataset."""
     print("\n" + "=" * 70)
     print("📥 FETCHING COMPLETE GITA FROM GITHUB DATASET")
@@ -236,7 +237,7 @@ async def seed_from_github_dataset():
     return False
 
 
-async def verify_seeding():
+async def verify_seeding() -> None:
     """Verify that all verses were seeded correctly."""
     print("\n" + "=" * 70)
     print("🔍 VERIFYING SEEDED DATA")
@@ -259,7 +260,7 @@ async def verify_seeding():
 
         # Total count
         result = await session.execute(select(text("COUNT(*)")).select_from(GitaVerse))
-        total = result.scalar()
+        total = result.scalar() or 0
         print(f"\n📊 Total verses in database: {total}/700")
 
         if total == 700:
@@ -268,7 +269,7 @@ async def verify_seeding():
             print(f"⚠️  Missing {700 - total} verses")
 
 
-async def main():
+async def main() -> None:
     """Main seeding function."""
     try:
         print("\n" + "=" * 70)

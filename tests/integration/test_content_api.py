@@ -8,7 +8,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import ContentPack
+from backend.models import ContentPack
 
 
 class TestContentEndpoints:

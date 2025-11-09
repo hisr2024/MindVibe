@@ -142,7 +142,7 @@ def test_seed_scripts_have_database_imports():
 
         # Check for model imports
         assert (
-            "from models import" in content
+            "from backend.models import" in content
         ), f"Script {script_name} missing model imports"
 
         # Check for async support
@@ -164,7 +164,7 @@ def test_verify_script_has_verification_logic():
 
     # Check for imports of modules being verified
     assert (
-        "from models import" in content
+        "from backend.models import" in content
     ), "verify_wisdom.py should import models for verification"
 
 

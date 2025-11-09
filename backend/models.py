@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from typing import Any
 
 from sqlalchemy import JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -18,7 +19,7 @@ class SoftDeleteMixin:
         self.deleted_at = None
 
     @classmethod
-    def not_deleted(cls, query):
+    def not_deleted(cls, query: Any) -> Any:
         return query.filter(cls.deleted_at.is_(None))
 
 
