@@ -147,8 +147,17 @@ class MetadataEnricher:
         # Add searchable text
         result["searchable_text"] = cls.create_searchable_text(verse)
         
-        # Suggest applications if not present or empty
-        if "mental_health_applications" not in result or not result["mental_health_applications"]:
+        # Only suggest applications if not present or empty
+        apps = result.get("mental_health_applications", {})
+        if isinstance(apps, dict):
+            app_list = apps.get("applications", [])
+        elif isinstance(apps, list):
+            app_list = apps
+        else:
+            app_list = []
+        
+        # Only add suggestions if no applications exist
+        if not app_list:
             suggestions = cls.suggest_applications(verse)
             result["suggested_applications"] = suggestions
         

@@ -171,7 +171,7 @@ class TestWisdomQueryEndpoint:
             "/api/wisdom/query", json={"query": "", "language": "english"}
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 422
         assert "at least 3 characters" in response.json()["detail"]
 
     @pytest.mark.asyncio
@@ -183,7 +183,7 @@ class TestWisdomQueryEndpoint:
             "/api/wisdom/query", json={"query": "ab", "language": "english"}
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 422
         assert "at least 3 characters" in response.json()["detail"]
 
 

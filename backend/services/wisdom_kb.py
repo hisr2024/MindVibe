@@ -137,6 +137,7 @@ class WisdomKnowledgeBase:
         db: AsyncSession,
         query: str,
         theme: str | None = None,
+        limit: int | None = None,
     ) -> list[dict]:
         """
         Search for verses relevant to a query.
@@ -145,6 +146,7 @@ class WisdomKnowledgeBase:
             db: Database session
             query: Search query text
             theme: Optional theme to filter by
+            limit: Optional maximum number of results
             
         Returns:
             List of dicts with 'verse' and 'score' keys
@@ -174,6 +176,10 @@ class WisdomKnowledgeBase:
         # Sort by score descending
         verse_scores.sort(key=lambda x: x["score"], reverse=True)
         
+        # Apply limit if specified
+        if limit is not None:
+            verse_scores = verse_scores[:limit]
+        
         return verse_scores
 
     @staticmethod
@@ -193,13 +199,25 @@ class WisdomKnowledgeBase:
         Returns:
             Formatted verse dictionary
         """
+        # Format theme from snake_case to Title Case
+        formatted_theme = verse.theme.replace("_", " ").title()
+        
+        # Extract applications list from mental_health_applications
+        applications = []
+        if verse.mental_health_applications:
+            if isinstance(verse.mental_health_applications, dict):
+                applications = verse.mental_health_applications.get("applications", [])
+            elif isinstance(verse.mental_health_applications, list):
+                applications = verse.mental_health_applications
+        
         response = {
             "verse_id": verse.verse_id,
             "chapter": verse.chapter,
             "verse_number": verse.verse_number,
-            "theme": verse.theme,
+            "theme": formatted_theme,
             "context": verse.context,
-            "mental_health_applications": verse.mental_health_applications,
+            "applications": applications,
+            "language": language,
         }
         
         # Add language-specific text

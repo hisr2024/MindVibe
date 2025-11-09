@@ -20,7 +20,12 @@ class TestMoodsEndpoints:
     ):
         """Test successfully creating a mood entry."""
         # Create a user first
-        user = User(auth_uid="test-mood-user", locale="en")
+        user = User(
+            auth_uid="test-mood-user",
+            email="mood@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
 
@@ -48,7 +53,12 @@ class TestMoodsEndpoints:
         self, test_client: AsyncClient, test_db: AsyncSession
     ):
         """Test creating a mood with only required fields."""
-        user = User(auth_uid="test-mood-user-2", locale="en")
+        user = User(
+            auth_uid="test-mood-user-2",
+            email="mood2@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
 
@@ -67,7 +77,12 @@ class TestMoodsEndpoints:
         self, test_client: AsyncClient, test_db: AsyncSession
     ):
         """Test creating a mood with an invalid score."""
-        user = User(auth_uid="test-mood-user-3", locale="en")
+        user = User(
+            auth_uid="test-mood-user-3",
+            email="mood3@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
 
