@@ -1,216 +1,163 @@
-"""Metadata enrichment component for verse data."""
+"""Metadata enrichment module for the pipeline."""
 
 import re
-from typing import Any
 
 
 class MetadataEnricher:
-    """Enriches verse data with additional metadata and searchable content."""
+    """Enriches verse data with metadata and additional information."""
 
-    CHAPTER_THEMES = {
-        1: "emotional_crisis_moral_conflict",
-        2: "wisdom_and_knowledge",
-        3: "selfless_action",
-        4: "knowledge_wisdom",
-        5: "action_renunciation",
-        6: "meditation_mindfulness",
-        7: "self_knowledge",
-        8: "attaining_supreme",
-        9: "sovereign_knowledge",
-        10: "divine_manifestations",
-        11: "universal_form",
-        12: "devotion",
-        13: "matter_spirit",
-        14: "three_modes",
-        15: "supreme_person",
-        16: "divine_demoniac_natures",
-        17: "three_divisions_faith",
-        18: "liberation_renunciation",
-    }
-
-    MENTAL_HEALTH_KEYWORDS = {
-        "anxiety_management": ["anxiety", "worry", "fear", "anxious"],
-        "stress_reduction": ["stress", "tension", "pressure", "overwhelm"],
-        "stress_management": ["stress", "calm", "peace", "relaxation"],
-        "emotional_resilience": ["resilience", "strength", "endurance"],
-        "mindfulness": ["mindfulness", "awareness", "present", "attention"],
-        "meditation": ["meditation", "contemplation", "reflection"],
+    # Mental health application keywords
+    APPLICATION_KEYWORDS = {
+        "anxiety_management": ["anxiety", "worry", "fear", "nervous"],
+        "stress_reduction": ["stress", "calm", "relax", "peace"],
+        "emotional_regulation": ["emotion", "feeling", "mood", "balance"],
+        "depression_support": ["depression", "sadness", "despair", "hopeless"],
+        "anger_management": ["anger", "rage", "fury", "frustration"],
+        "self_esteem": ["confidence", "self", "worth", "value"],
     }
 
     @classmethod
-    def extract_principles(cls, verse: dict[str, Any]) -> list[str]:
-        """Extract key principles from verse content."""
-        principles = []
+    def extract_principles(cls, verse: dict) -> list[str]:
+        """
+        Extract key principles from verse content.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            List of principle keywords
+        """
+        text = " ".join([
+            verse.get("english", ""),
+            verse.get("context", ""),
+            verse.get("theme", ""),
+        ]).lower()
 
-        # Extract from theme
-        if "theme" in verse:
-            theme = verse["theme"].lower()
-            principles.extend(theme.split("_"))
+        # Common principle keywords
+        principle_keywords = [
+            "action", "duty", "detachment", "peace", "wisdom",
+            "knowledge", "meditation", "discipline", "devotion",
+            "equanimity", "compassion", "selflessness", "mindfulness"
+        ]
 
-        # Extract from context
-        if "context" in verse:
-            context = verse["context"].lower()
-            # Simple keyword extraction
-            for word in ["action", "knowledge", "detachment", "wisdom", "peace"]:
-                if word in context:
-                    principles.append(word)
-
-        return list(set(principles))[:5]  # Limit to top 5 unique
-
-    @classmethod
-    def extract_keywords(cls, verse: dict[str, Any]) -> list[str]:
-        """Extract keywords from verse text."""
-        keywords = []
-
-        # Extract from english text
-        if "english" in verse:
-            text = verse["english"].lower()
-            # Simple word extraction (remove common words)
-            words = re.findall(r"\b\w+\b", text)
-            common_words = {
-                "the",
-                "a",
-                "an",
-                "and",
-                "or",
-                "but",
-                "in",
-                "on",
-                "at",
-                "to",
-                "for",
-                "of",
-                "with",
-                "is",
-                "are",
-                "was",
-                "were",
-            }
-            keywords = [w for w in words if w not in common_words and len(w) > 3]
-
-        return keywords[:10]  # Limit to top 10
+        found_principles = [kw for kw in principle_keywords if kw in text]
+        return found_principles
 
     @classmethod
-    def suggest_applications(cls, verse: dict[str, Any]) -> list[str]:
-        """Suggest mental health applications based on content."""
+    def extract_keywords(cls, verse: dict) -> list[str]:
+        """
+        Extract important keywords from verse text.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            List of keywords
+        """
+        text = " ".join([
+            verse.get("english", ""),
+            verse.get("context", ""),
+        ]).lower()
+
+        # Remove punctuation and split into words
+        words = re.findall(r'\b\w+\b', text)
+
+        # Filter out common words and keep meaningful ones (> 4 chars)
+        stop_words = {"the", "and", "that", "this", "with", "from", "your", "about", "through"}
+        keywords = [w for w in words if len(w) > 4 and w not in stop_words]
+
+        # Return unique keywords
+        return list(set(keywords))[:10]  # Limit to top 10
+
+    @classmethod
+    def suggest_applications(cls, verse: dict) -> list[str]:
+        """
+        Suggest mental health applications based on content.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            List of suggested application names
+        """
+        text = " ".join([
+            verse.get("english", ""),
+            verse.get("context", ""),
+        ]).lower()
+
         suggestions = []
-
-        # Check existing applications
-        existing_apps = set()
-        if "mental_health_applications" in verse:
-            apps = verse["mental_health_applications"]
-            if isinstance(apps, dict) and "applications" in apps:
-                existing_apps = set(apps["applications"])
-            elif isinstance(apps, list):
-                existing_apps = set(apps)
-
-        # Search for keywords in text
-        text = ""
-        if "english" in verse:
-            text += verse["english"].lower() + " "
-        if "context" in verse:
-            text += verse["context"].lower() + " "
-
-        for app_name, keywords in cls.MENTAL_HEALTH_KEYWORDS.items():
-            if app_name not in existing_apps:
-                if any(keyword in text for keyword in keywords):
-                    suggestions.append(app_name)
+        for app_name, keywords in cls.APPLICATION_KEYWORDS.items():
+            if any(kw in text for kw in keywords):
+                suggestions.append(app_name)
 
         return suggestions
 
     @classmethod
-    def create_searchable_text(cls, verse: dict[str, Any]) -> str:
-        """Create searchable text combining all relevant fields."""
+    def create_searchable_text(cls, verse: dict) -> str:
+        """
+        Create combined searchable text from all verse fields.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            Combined searchable text
+        """
         parts = []
 
+        # Add text fields
         for field in ["english", "hindi", "context"]:
             if field in verse and verse[field]:
-                parts.append(str(verse[field]))
+                parts.append(verse[field])
 
         # Add theme
         if "theme" in verse:
-            parts.append(verse["theme"])
+            parts.append(verse["theme"].replace("_", " "))
 
         # Add applications
         if "mental_health_applications" in verse:
             apps = verse["mental_health_applications"]
-            if isinstance(apps, dict) and "applications" in apps:
-                parts.extend(apps["applications"])
+            if isinstance(apps, dict):
+                parts.extend(apps.get("applications", []))
             elif isinstance(apps, list):
                 parts.extend(apps)
 
         return " ".join(parts)
 
     @classmethod
-    def add_chapter_context(cls, verse: dict[str, Any]) -> dict[str, Any]:
-        """Add chapter-level context."""
+    def enrich(cls, verse: dict) -> dict:
+        """
+        Enrich verse with additional metadata.
+        
+        Args:
+            verse: Verse dictionary to enrich
+            
+        Returns:
+            Enriched verse dictionary
+        """
         result = verse.copy()
 
-        if "chapter" in verse:
-            chapter_num = verse["chapter"]
-            if chapter_num in cls.CHAPTER_THEMES:
-                result["chapter_theme"] = cls.CHAPTER_THEMES[chapter_num]
+        # Add principles
+        result["principles"] = cls.extract_principles(verse)
 
-        return result
+        # Add keywords
+        result["keywords"] = cls.extract_keywords(verse)
 
-    @classmethod
-    def calculate_metadata_score(cls, verse: dict[str, Any]) -> float:
-        """Calculate metadata completeness score."""
-        score = 0.0
-        max_score = 10.0
+        # Add searchable text
+        result["searchable_text"] = cls.create_searchable_text(verse)
 
-        # Check for various fields
-        if verse.get("english"):
-            score += 1.0
-        if verse.get("hindi"):
-            score += 1.0
-        if verse.get("sanskrit"):
-            score += 1.0
-        if verse.get("context"):
-            score += 1.0
-        if verse.get("theme"):
-            score += 1.0
+        # Only suggest applications if not present or empty
+        apps = result.get("mental_health_applications", {})
+        if isinstance(apps, dict):
+            app_list = apps.get("applications", [])
+        elif isinstance(apps, list):
+            app_list = apps
+        else:
+            app_list = []
 
-        # Check enriched fields
-        if verse.get("mental_health_applications"):
-            apps = verse["mental_health_applications"]
-            app_list = (
-                apps.get("applications", []) if isinstance(apps, dict) else apps
-            )
-            score += min(len(app_list) * 0.5, 2.0)
-
-        if verse.get("principles"):
-            score += min(len(verse["principles"]) * 0.2, 1.0)
-
-        if verse.get("keywords"):
-            score += min(len(verse["keywords"]) * 0.1, 1.0)
-
-        if verse.get("chapter_theme"):
-            score += 1.0
-
-        return min(score / max_score, 1.0)
-
-    @classmethod
-    def enrich(cls, verse: dict[str, Any]) -> dict[str, Any]:
-        """Enrich verse with additional metadata."""
-        result = verse.copy()
-
-        # Extract principles
-        result["principles"] = cls.extract_principles(result)
-
-        # Extract keywords
-        result["keywords"] = cls.extract_keywords(result)
-
-        # Suggest applications
-        result["suggested_applications"] = cls.suggest_applications(result)
-
-        # Create searchable text
-        result["searchable_text"] = cls.create_searchable_text(result)
-
-        # Add chapter context
-        result = cls.add_chapter_context(result)
-
-        # Calculate metadata score
-        result["metadata_score"] = cls.calculate_metadata_score(result)
+        # Only add suggestions if no applications exist
+        if not app_list:
+            suggestions = cls.suggest_applications(verse)
+            result["suggested_applications"] = suggestions
 
         return result
