@@ -32,6 +32,10 @@ dist
 
 # Testing
 coverage/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
 *.lcov
 .nyc_output
 
