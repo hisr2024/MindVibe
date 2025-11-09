@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.services.chatbot import ChatbotService
+from backend.services.chatbot import ChatbotService  # type: ignore[import-untyped]
 
 router = APIRouter(prefix="/api/chat", tags=["chatbot"])
 

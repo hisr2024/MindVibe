@@ -35,7 +35,6 @@ coverage/
 *.lcov
 .nyc_output
 .coverage
-htmlcov/
 coverage.xml
 
 # Vercel

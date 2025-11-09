@@ -5,8 +5,7 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from backend.models import Base, GitaVerse
 
@@ -14,11 +13,15 @@ from backend.models import Base, GitaVerse
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 # Configure DATABASE_URL from environment variable with Render.com compatibility
-DATABASE_URL = os.getenv("DATABASE_URL").replace("postgres://", "postgresql+asyncpg://")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://")
+else:
+    DATABASE_URL = "postgresql+asyncpg://navi:navi@db:5432/navi"
 
 # Create async engine and session maker
 engine = create_async_engine(DATABASE_URL)
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False
 )
 
@@ -33,7 +36,7 @@ async def load_verses_from_json(filepath: Path) -> list:
         return []
 
 
-async def seed_verses(verses_data: list):
+async def seed_verses(verses_data: list) -> None:
     """Seed verses into the database."""
     seeded_count = 0
     skipped_count = 0
@@ -67,7 +70,7 @@ async def seed_verses(verses_data: list):
             await session.rollback()
 
 
-async def verify_seeding():
+async def verify_seeding() -> None:
     """Count and display verses by chapter."""
     async with AsyncSessionLocal() as session:
         result = await session.execute(
@@ -79,7 +82,7 @@ async def verify_seeding():
             print(f"Chapter {chapter}: {count} verses")
 
 
-async def main():
+async def main() -> None:
     """Main async function to seed verses."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

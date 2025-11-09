@@ -102,7 +102,7 @@ def print_response(response: dict) -> None:
     print("=" * 80 + "\n")
 
 
-def example_single_message():
+def example_single_message() -> None:
     """Example 1: Send a single message."""
     print("\n📝 EXAMPLE 1: Single Message\n")
 
@@ -119,7 +119,7 @@ def example_single_message():
     print_response(response)
 
 
-def example_conversation():
+def example_conversation() -> None:
     """Example 2: Multi-turn conversation."""
     print("\n💬 EXAMPLE 2: Multi-Turn Conversation\n")
 
@@ -146,7 +146,7 @@ def example_conversation():
         print(f"\n{i}. {role}: {msg['content'][:100]}...")
 
 
-def example_multilingual():
+def example_multilingual() -> None:
     """Example 3: Multi-language support."""
     print("\n🌍 EXAMPLE 3: Multi-Language Support\n")
 
@@ -168,7 +168,7 @@ def example_multilingual():
         print(f"Sanskrit verse: {response['verses'][0]['sanskrit'][:100]}...")
 
 
-def example_mental_health_scenarios():
+def example_mental_health_scenarios() -> None:
     """Example 4: Various mental health scenarios."""
     print("\n🧠 EXAMPLE 4: Mental Health Scenarios\n")
 
@@ -197,7 +197,7 @@ def example_mental_health_scenarios():
         client.clear_history()
 
 
-def check_system_status():
+def check_system_status() -> None:
     """Check chatbot system status."""
     print("\n🏥 SYSTEM HEALTH CHECK\n")
 
@@ -215,7 +215,7 @@ def check_system_status():
         print("   To enable AI responses, set OPENAI_API_KEY in .env")
 
 
-def main():
+def main() -> None:
     """Run all examples."""
     print(
         """
