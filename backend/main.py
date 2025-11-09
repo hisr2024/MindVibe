@@ -1,4 +1,5 @@
 import os
+from typing import Dict, Any
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -154,9 +155,9 @@ for router in routers:
     if router is not None:
         app.include_router(router)
 
-# ✅ Root endpoints
-@app.get("/")
-async def root() -> dict:
+# ✅ Root endpoints - WITH PROPER TYPE HINTS
+@app.get("/", response_model=None)
+async def root() -> Dict[str, Any]:
     """Root endpoint."""
     return {
         "message": "MindVibe API is running",
@@ -164,8 +165,8 @@ async def root() -> dict:
         "status": "healthy",
     }
 
-@app.get("/health")
-async def health_check() -> dict:
+@app.get("/health", response_model=None)
+async def health_check() -> Dict[str, Any]:
     """Health check endpoint."""
     return {
         "status": "healthy",
@@ -173,8 +174,8 @@ async def health_check() -> dict:
         "version": "1.0.0",
     }
 
-@app.get("/api/health")
-async def api_health() -> dict:
+@app.get("/api/health", response_model=None)
+async def api_health() -> Dict[str, Any]:
     """API health status endpoint."""
     return {
         "status": "operational",
