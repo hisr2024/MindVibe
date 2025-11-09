@@ -30,13 +30,14 @@ engine = create_async_engine(DATABASE_URL, echo=False)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 
-async def load_verses_from_json(filepath: str):
+async def load_verses_from_json(filepath: str | Path) -> list:
     """Load verses from JSON file."""
     with open(filepath, encoding="utf-8") as f:
-        return json.load(f)
+        data: list = json.load(f)
+        return data
 
 
-async def main():
+async def main() -> None:
     """Main seeding function."""
     try:
         # Create tables
