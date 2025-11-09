@@ -2,12 +2,22 @@
 AI Chatbot Service with wisdom verse integration.
 
 Provides conversational AI capabilities with mental health support.
+Implements complete MindVibe AI Mental-Wellness Coach with 4-phase framework:
+- Phase 1: Core Response Engine (6-step framework)
+- Phase 2: Knowledge Domain Integration (9 psychological domains)
+- Phase 3: Safety & Quality Control
+- Phase 4: Evidence-Based Psychology Integration
 """
 
 import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.services.action_plan_generator import ActionPlanGenerator
+from backend.services.domain_mapper import DomainMapper
+from backend.services.psychology_patterns import PsychologyPatterns
+from backend.services.response_engine import ResponseEngine
+from backend.services.safety_validator import SafetyValidator
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 
@@ -18,6 +28,15 @@ class ChatbotService:
         """Initialize the chatbot service."""
         self.kb = WisdomKnowledgeBase()
         self.conversation_histories: dict[str, list[dict]] = {}
+        # Phase 1: Core Response Engine
+        self.response_engine = ResponseEngine()
+        self.action_generator = ActionPlanGenerator()
+        # Phase 2: Domain Integration
+        self.domain_mapper = DomainMapper()
+        # Phase 3: Safety & Quality
+        self.safety_validator = SafetyValidator()
+        # Phase 4: Evidence-Based Psychology
+        self.psychology_patterns = PsychologyPatterns()
 
     def get_conversation_history(self, session_id: str) -> list[dict]:
         """
@@ -129,9 +148,12 @@ class ChatbotService:
         language: str = "english",
     ) -> str:
         """
-        Generate a chat response (can be template or AI-based).
+        Generate a chat response using the complete 4-phase framework.
 
-        For now, uses template responses. Can be extended with OpenAI integration.
+        Phase 1: Core Response Engine (6-step framework)
+        Phase 2: Domain-aware response
+        Phase 3: Safety validation
+        Phase 4: Evidence-based psychology patterns
 
         Args:
             message: User's message
@@ -142,8 +164,42 @@ class ChatbotService:
         Returns:
             Generated response text
         """
-        # Use template response for now
-        return self._generate_template_chat_response(message, verses, language)
+        # PHASE 3: Check for crisis first
+        crisis_info = self.safety_validator.detect_crisis(message)
+        if crisis_info["crisis_detected"]:
+            # Return crisis response immediately
+            crisis_response = self.safety_validator.generate_crisis_response(crisis_info)
+            return crisis_response
+
+        # PHASE 2: Determine psychological domain from query
+        domain = self.domain_mapper.route_query_to_domain(message)
+
+        # If verses available, use verse domain
+        if verses and len(verses) > 0:
+            verse = verses[0]["verse"]
+            if hasattr(verse, "primary_domain") and verse.primary_domain:
+                domain = verse.primary_domain
+
+        # PHASE 1: Generate response using 6-step framework
+        response_data = self.response_engine.generate_response(
+            user_message=message,
+            domain=domain,
+            verses=verses,
+        )
+
+        response_text = response_data["response"]
+
+        # PHASE 3: Sanitize religious terms
+        response_text = self.safety_validator.sanitize_religious_terms(response_text)
+
+        # PHASE 3: Validate response quality
+        validation = self.safety_validator.validate_response_quality(response_text)
+
+        # If validation fails, use template fallback
+        if not validation["valid"]:
+            return self._generate_template_chat_response(message, verses, language)
+
+        return response_text
 
     async def chat(
         self,
