@@ -59,6 +59,6 @@ class TextSanitizer:
         """Ensure text ends with proper punctuation."""
         if not text:
             return text
-        if not text[-1] in ".!?":
+        if text[-1] not in ".!?":
             return text + "."
         return text
