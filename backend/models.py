@@ -96,7 +96,7 @@ class GitaChapter(Base):
     """Bhagavad Gita chapter metadata with Sanskrit and English names."""
 
     __tablename__ = "gita_chapters"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     chapter_number: Mapped[int] = mapped_column(Integer, unique=True, index=True)
     sanskrit_name: Mapped[str] = mapped_column(String(256))
@@ -116,7 +116,7 @@ class GitaSource(Base):
     """Authentic sources for Gita verses (Gita Press, ISKCON, etc.)."""
 
     __tablename__ = "gita_sources"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(256), unique=True, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -131,7 +131,7 @@ class GitaVerse(Base):
     """Bhagavad Gita verses with comprehensive translations and metadata."""
 
     __tablename__ = "gita_verses"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     chapter: Mapped[int] = mapped_column(
         Integer, ForeignKey("gita_chapters.chapter_number", ondelete="CASCADE"), index=True
@@ -160,7 +160,7 @@ class GitaModernContext(Base):
     """Modern applications and contemporary relevance of Gita verses."""
 
     __tablename__ = "gita_modern_contexts"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     verse_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("gita_verses.id", ondelete="CASCADE"), index=True
@@ -181,7 +181,7 @@ class GitaKeyword(Base):
     """Keywords and themes for Gita verse categorization and search."""
 
     __tablename__ = "gita_keywords"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     keyword: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     category: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
@@ -195,7 +195,7 @@ class GitaVerseKeyword(Base):
     """Many-to-many relationship between verses and keywords."""
 
     __tablename__ = "gita_verse_keywords"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     verse_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("gita_verses.id", ondelete="CASCADE"), index=True

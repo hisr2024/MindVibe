@@ -7,7 +7,7 @@ including search by keywords, themes, chapters, and modern context applications.
 
 from typing import Any
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (

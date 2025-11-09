@@ -12,7 +12,6 @@ from backend.models import (
     GitaChapter,
     GitaKeyword,
     GitaModernContext,
-    GitaSource,
     GitaVerse,
     GitaVerseKeyword,
 )
