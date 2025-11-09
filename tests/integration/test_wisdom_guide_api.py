@@ -172,7 +172,12 @@ class TestWisdomQueryEndpoint:
         )
 
         assert response.status_code == 422
-        assert "at least 3 characters" in response.json()["detail"]
+        detail = response.json()["detail"]
+        # FastAPI returns validation errors as a list
+        if isinstance(detail, list):
+            assert any("at least 3 characters" in str(err.get("msg", "")).lower() for err in detail)
+        else:
+            assert "at least 3 characters" in detail.lower()
 
     @pytest.mark.asyncio
     async def test_query_wisdom_short_query(
@@ -184,7 +189,12 @@ class TestWisdomQueryEndpoint:
         )
 
         assert response.status_code == 422
-        assert "at least 3 characters" in response.json()["detail"]
+        detail = response.json()["detail"]
+        # FastAPI returns validation errors as a list
+        if isinstance(detail, list):
+            assert any("at least 3 characters" in str(err.get("msg", "")).lower() for err in detail)
+        else:
+            assert "at least 3 characters" in detail.lower()
 
 
 class TestThemesEndpoint:
