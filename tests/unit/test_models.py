@@ -24,7 +24,12 @@ class TestSoftDeleteMixin:
 
     def test_soft_delete(self):
         """Test that soft_delete sets deleted_at timestamp."""
-        user = User(auth_uid="test-123", locale="en")
+        user = User(
+            auth_uid="test-123",
+            email="test@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         assert user.deleted_at is None
 
         user.soft_delete()
@@ -33,7 +38,12 @@ class TestSoftDeleteMixin:
 
     def test_restore(self):
         """Test that restore clears the deleted_at timestamp."""
-        user = User(auth_uid="test-123", locale="en")
+        user = User(
+            auth_uid="test-123",
+            email="test@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         user.soft_delete()
         assert user.deleted_at is not None
 
@@ -47,13 +57,19 @@ class TestUserModel:
     @pytest.mark.asyncio
     async def test_create_user(self, test_db: AsyncSession):
         """Test creating a new user."""
-        user = User(auth_uid="test-user-456", locale="en")
+        user = User(
+            auth_uid="test-user-456",
+            email="test@example.com",
+            hashed_password="hashed_password_123",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
 
         assert user.id is not None
         assert user.auth_uid == "test-user-456"
+        assert user.email == "test@example.com"
         assert user.locale == "en"
         assert user.created_at is not None
         assert user.deleted_at is None
@@ -61,11 +77,21 @@ class TestUserModel:
     @pytest.mark.asyncio
     async def test_user_unique_auth_uid(self, test_db: AsyncSession):
         """Test that auth_uid is unique."""
-        user1 = User(auth_uid="unique-123", locale="en")
+        user1 = User(
+            auth_uid="unique-123",
+            email="user1@example.com",
+            hashed_password="hashed_password_1",
+            locale="en"
+        )
         test_db.add(user1)
         await test_db.commit()
 
-        user2 = User(auth_uid="unique-123", locale="es")
+        user2 = User(
+            auth_uid="unique-123",
+            email="user2@example.com",
+            hashed_password="hashed_password_2",
+            locale="es"
+        )
         test_db.add(user2)
 
         with pytest.raises(IntegrityError):  # Should raise integrity error
@@ -79,7 +105,12 @@ class TestMoodModel:
     async def test_create_mood(self, test_db: AsyncSession):
         """Test creating a mood entry."""
         # Create a user first
-        user = User(auth_uid="mood-test-user", locale="en")
+        user = User(
+            auth_uid="mood-test-user",
+            email="mood@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
@@ -105,7 +136,12 @@ class TestMoodModel:
     @pytest.mark.asyncio
     async def test_mood_without_tags_and_note(self, test_db: AsyncSession):
         """Test creating a mood without optional fields."""
-        user = User(auth_uid="mood-test-user-2", locale="en")
+        user = User(
+            auth_uid="mood-test-user-2",
+            email="mood2@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
@@ -127,7 +163,12 @@ class TestEncryptedBlobModel:
     @pytest.mark.asyncio
     async def test_create_encrypted_blob(self, test_db: AsyncSession):
         """Test creating an encrypted blob."""
-        user = User(auth_uid="blob-test-user", locale="en")
+        user = User(
+            auth_uid="blob-test-user",
+            email="blob@example.com",
+            hashed_password="hashed_password",
+            locale="en"
+        )
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
