@@ -1,11 +1,13 @@
-from pydantic import BaseModel, constr, conint, validator
+from pydantic import BaseModel, Field, field_validator
+from typing import Annotated
 
 class UserAuth(BaseModel):
-    username: constr(max_length=150)
-    password: constr(min_length=8)
+    username: Annotated[str, Field(max_length=150)]
+    password: Annotated[str, Field(min_length=8)]
 
-    @validator('password')
-    def password_strength(cls, value):
+    @field_validator('password')
+    @classmethod
+    def password_strength(cls, value: str) -> str:
         if not any(char.isdigit() for char in value):
             raise ValueError('Password must contain at least one digit.')
         if not any(char.isalpha() for char in value):
@@ -13,18 +15,18 @@ class UserAuth(BaseModel):
         return value
 
 class JournalEntry(BaseModel):
-    title: constr(max_length=200)
+    title: Annotated[str, Field(max_length=200)]
     content: str
     created_at: str
 
 class ContentPack(BaseModel):
-    name: constr(max_length=100)
+    name: Annotated[str, Field(max_length=100)]
     entries: list[JournalEntry]
 
 class WisdomVerse(BaseModel):
-    reference: constr(max_length=100)
+    reference: Annotated[str, Field(max_length=100)]
     text: str
-    theme: constr(max_length=50) # e.g. "inspiration", "motivation"
+    theme: Annotated[str, Field(max_length=50)]  # e.g. "inspiration", "motivation"
 
 class BlobIn(BaseModel):
     blob_json: str
@@ -35,7 +37,7 @@ class BlobOut(BaseModel):
     blob_json: str
 
 class MoodIn(BaseModel):
-    score: conint(ge=1, le=10)
+    score: Annotated[int, Field(ge=1, le=10)]
     tags: list[str] | None = None
     note: str | None = None
 
