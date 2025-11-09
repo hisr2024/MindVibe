@@ -56,11 +56,30 @@ app.include_router(wisdom_router)  # type: ignore[has-type]  # Universal wisdom 
 app.include_router(gita_router)  # type: ignore[has-type]  # Gita verses API
 
 
-@app.get("/")
-async def root() -> dict[str, str]:
-    """Root endpoint - API health check."""
+
+
+@app.get("/health")
+async def health_check() -> dict[str, str]:
+    """Health check endpoint for Render deployment."""
     return {
-        "message": "MindVibe API is running",
-        "version": "1.0.0",
         "status": "healthy",
+        "service": "mindvibe-api",
+        "version": "1.0.0",
+    }
+
+
+@app.get("/api/health")
+async def api_health() -> dict[str, str]:
+    """API health status endpoint."""
+    return {
+        "status": "operational",
+        "service": "MindVibe AI",
+        "version": "1.0.0",
+        "phases": {
+            "phase_1": "response_engine ✅",
+            "phase_2": "domain_mapper ✅",
+            "phase_3": "safety_validator ✅",
+            "phase_4": "psychology_patterns ✅",
+            "integration": "chatbot_enhanced ✅"
+        }
     }
