@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from typing import Any
 
 from sqlalchemy import JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
