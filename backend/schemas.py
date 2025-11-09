@@ -25,3 +25,23 @@ class WisdomVerse(BaseModel):
     reference: constr(max_length=100)
     text: str
     theme: constr(max_length=50) # e.g. "inspiration", "motivation"
+
+class BlobIn(BaseModel):
+    blob_json: str
+
+class BlobOut(BaseModel):
+    id: int
+    created_at: str
+    blob_json: str
+
+class MoodIn(BaseModel):
+    score: conint(ge=1, le=10)
+    tags: list[str] | None = None
+    note: str | None = None
+
+class MoodOut(BaseModel):
+    id: int
+    score: int
+    tags: list[str] | None
+    note: str | None
+    at: str

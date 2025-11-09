@@ -92,17 +92,117 @@ class WisdomVerse(SoftDeleteMixin, Base):
     )
 
 
-class GitaVerse(Base):
-    __tablename__ = "gita_verses"
+class GitaChapter(Base):
+    """Bhagavad Gita chapter metadata with Sanskrit and English names."""
+
+    __tablename__ = "gita_chapters"
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    chapter: Mapped[int] = mapped_column(Integer)
-    verse: Mapped[int] = mapped_column(Integer)
+    chapter_number: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    sanskrit_name: Mapped[str] = mapped_column(String(256))
+    english_name: Mapped[str] = mapped_column(String(256))
+    verse_count: Mapped[int] = mapped_column(Integer)
+    themes: Mapped[list[str]] = mapped_column(JSON)
+    mental_health_relevance: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
+class GitaSource(Base):
+    """Authentic sources for Gita verses (Gita Press, ISKCON, etc.)."""
+
+    __tablename__ = "gita_sources"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), unique=True, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    credibility_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
+
+class GitaVerse(Base):
+    """Bhagavad Gita verses with comprehensive translations and metadata."""
+
+    __tablename__ = "gita_verses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter: Mapped[int] = mapped_column(
+        Integer, ForeignKey("gita_chapters.chapter_number", ondelete="CASCADE"), index=True
+    )
+    verse: Mapped[int] = mapped_column(Integer, index=True)
     sanskrit: Mapped[str] = mapped_column(Text)
+    transliteration: Mapped[str | None] = mapped_column(Text, nullable=True)
     hindi: Mapped[str] = mapped_column(Text)
     english: Mapped[str] = mapped_column(Text)
-    principle: Mapped[str] = mapped_column(String(64))
-    theme: Mapped[str] = mapped_column(String(256))
+    word_meanings: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    principle: Mapped[str] = mapped_column(String(256))
+    theme: Mapped[str] = mapped_column(String(256), index=True)
+    source_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("gita_sources.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     embedding: Mapped[list[float] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
+class GitaModernContext(Base):
+    """Modern applications and contemporary relevance of Gita verses."""
+
+    __tablename__ = "gita_modern_contexts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    verse_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("gita_verses.id", ondelete="CASCADE"), index=True
+    )
+    application_area: Mapped[str] = mapped_column(String(256), index=True)
+    description: Mapped[str] = mapped_column(Text)
+    examples: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    mental_health_benefits: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
+class GitaKeyword(Base):
+    """Keywords and themes for Gita verse categorization and search."""
+
+    __tablename__ = "gita_keywords"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    keyword: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    category: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
+
+class GitaVerseKeyword(Base):
+    """Many-to-many relationship between verses and keywords."""
+
+    __tablename__ = "gita_verse_keywords"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    verse_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("gita_verses.id", ondelete="CASCADE"), index=True
+    )
+    keyword_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("gita_keywords.id", ondelete="CASCADE"), index=True
+    )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
