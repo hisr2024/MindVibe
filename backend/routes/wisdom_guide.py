@@ -261,7 +261,7 @@ async def generate_wisdom_response(
     try:
         import openai
 
-        openai.api_key = openai_key
+        client = openai.OpenAI(api_key=openai_key)  # type: ignore[attr-defined]
         verse_context = "\n\n".join(
             [
                 f"Wisdom Teaching {i+1}:\n{item['verse'].english}\n\nContext: {item['verse'].context}"
@@ -282,7 +282,7 @@ CRITICAL RULES:
 Your role is to help people find inner peace, emotional balance, and personal growth through universal wisdom principles."""
         user_prompt = f"""User's Question: {query}\n\nRelevant Universal Wisdom Teachings:\n{verse_context}\n\nPlease provide a compassionate, practical response that:\n1. Addresses the user's concern directly\n2. Explains how the wisdom principles apply to their situation\n3. Offers concrete steps they can take\n4. Uses only universal, non-religious language\n5. Is warm and encouraging\n
 Response:"""
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(  # type: ignore[attr-defined]
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -291,7 +291,7 @@ Response:"""
             temperature=0.7,
             max_tokens=500,
         )
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip()  # type: ignore[union-attr]
     except Exception as e:
         print(f"OpenAI API error: {str(e)}")
         return generate_template_response(query, verses, language)

@@ -13,7 +13,7 @@ import httpx
 BASE_URL = "http://localhost:8000"
 
 
-async def example_list_verses():
+async def example_list_verses() -> None:
     """Example: List wisdom verses with filtering."""
     print("\n" + "=" * 60)
     print("Example 1: List wisdom verses")
@@ -32,7 +32,7 @@ async def example_list_verses():
             print(f"    Applications: {', '.join(verse['applications'][:2])}...")
 
 
-async def example_filter_by_theme():
+async def example_filter_by_theme() -> None:
     """Example: Filter verses by theme."""
     print("\n" + "=" * 60)
     print("Example 2: Filter verses by theme")
@@ -50,7 +50,7 @@ async def example_filter_by_theme():
             print(f"\n  {verse['verse_id']}: {verse['text'][:100]}...")
 
 
-async def example_filter_by_application():
+async def example_filter_by_application() -> None:
     """Example: Filter verses by mental health application."""
     print("\n" + "=" * 60)
     print("Example 3: Filter verses by mental health application")
@@ -69,7 +69,7 @@ async def example_filter_by_application():
             print(f"    {verse['text'][:80]}...")
 
 
-async def example_get_specific_verse():
+async def example_get_specific_verse() -> None:
     """Example: Get a specific verse by ID."""
     print("\n" + "=" * 60)
     print("Example 4: Get a specific verse")
@@ -92,7 +92,7 @@ async def example_get_specific_verse():
             print(f"Error: {response.status_code}")
 
 
-async def example_semantic_search():
+async def example_semantic_search() -> None:
     """Example: Perform semantic search."""
     print("\n" + "=" * 60)
     print("Example 5: Semantic search")
@@ -121,7 +121,7 @@ async def example_semantic_search():
             print(f"Error: {response.status_code}")
 
 
-async def example_search_with_filter():
+async def example_search_with_filter() -> None:
     """Example: Search with theme filter."""
     print("\n" + "=" * 60)
     print("Example 6: Search with theme filter")
@@ -146,7 +146,7 @@ async def example_search_with_filter():
                 print(f"  {result['text'][:100]}...\n")
 
 
-async def example_wisdom_query():
+async def example_wisdom_query() -> None:
     """Example: Get AI-powered wisdom guidance."""
     print("\n" + "=" * 60)
     print("Example 7: AI-powered wisdom query")
@@ -171,7 +171,7 @@ async def example_wisdom_query():
             print(f"Error: {response.status_code}")
 
 
-async def example_list_themes():
+async def example_list_themes() -> None:
     """Example: List all available themes."""
     print("\n" + "=" * 60)
     print("Example 8: List all themes")
@@ -186,7 +186,7 @@ async def example_list_themes():
             print(f"  - {theme['id']}: {theme['name']}")
 
 
-async def example_list_applications():
+async def example_list_applications() -> None:
     """Example: List all mental health applications."""
     print("\n" + "=" * 60)
     print("Example 9: List all mental health applications")
@@ -201,7 +201,7 @@ async def example_list_applications():
             print(f"  - {app}")
 
 
-async def example_multilingual():
+async def example_multilingual() -> None:
     """Example: Get verse in different languages."""
     print("\n" + "=" * 60)
     print("Example 10: Multi-language support")
@@ -232,7 +232,7 @@ async def example_multilingual():
             print(f"\nSanskrit: {response_sa.json()['text'][:100]}...")
 
 
-async def main():
+async def main() -> None:
     """Run all examples."""
     print("\n" + "=" * 60)
     print("MindVibe Wisdom API - Usage Examples")

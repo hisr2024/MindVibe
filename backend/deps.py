@@ -24,4 +24,4 @@ async def get_user_id(
         insert(User).values(auth_uid=x_auth_uid, locale="en").returning(User.id)
     )
     await db.commit()
-    return ins.scalar_one()
+    return int(ins.scalar_one())

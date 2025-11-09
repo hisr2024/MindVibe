@@ -30,7 +30,10 @@ class TextSanitizer:
         for term, replacement in cls.REPLACEMENTS.items():
             # Case-insensitive replacement
             result = re.sub(
-                r"\b" + re.escape(term) + r"\b", replacement, result, flags=re.IGNORECASE
+                r"\b" + re.escape(term) + r"\b",
+                replacement,
+                result,
+                flags=re.IGNORECASE,
             )
 
         return result
@@ -49,7 +52,9 @@ class TextSanitizer:
         # Normalize theme (capitalize words)
         if "theme" in sanitized:
             theme = sanitized["theme"]
-            sanitized["theme"] = " ".join(word.capitalize() for word in theme.split("_"))
+            sanitized["theme"] = " ".join(
+                word.capitalize() for word in theme.split("_")
+            )
 
         return sanitized
 
@@ -65,6 +70,6 @@ class TextSanitizer:
     def standardize_punctuation(cls, text: str) -> str:
         """Standardize punctuation in text."""
         # Add period at end if not present
-        if text and not text[-1] in ".!?":
+        if text and text[-1] not in ".!?":
             text = text + "."
         return text

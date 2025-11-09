@@ -87,7 +87,8 @@ async def fetch_verse_from_rapid_api(chapter: int, verse: int) -> dict | None:
         try:
             response = await client.get(url, headers=headers, timeout=10.0)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            return dict(data) if isinstance(data, dict) else None
         except Exception as e:
             print(f"  ⚠️  RapidAPI error for {chapter}.{verse}: {e}")
             return None
@@ -110,8 +111,11 @@ async def fetch_from_github_dataset() -> list[dict] | None:
                     response = await client.get(source_url, timeout=30.0)
                     response.raise_for_status()
                     data = response.json()
-                    print(f"✅ Successfully fetched {len(data)} verses from GitHub")
-                    return data
+                    data_list = list(data) if isinstance(data, list) else []
+                    print(
+                        f"✅ Successfully fetched {len(data_list)} verses from GitHub"
+                    )
+                    return data_list
                 except Exception as e:
                     print(f"  ⚠️  Failed to fetch from {source_url}: {e}")
                     continue
@@ -151,7 +155,7 @@ def create_verse_from_data(data: dict, chapter: int, verse: int) -> dict:
     }
 
 
-async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
+async def seed_chapter(chapter_num: int, use_rapid_api: bool = True) -> None:
     """Seed all verses from a single chapter."""
     chapter_info = CHAPTER_INFO[chapter_num]
     total_verses = chapter_info["verses"]
@@ -223,7 +227,7 @@ async def seed_chapter(chapter_num: int, use_rapid_api: bool = True):
     print(f"{'='*70}\n")
 
 
-async def seed_from_github_dataset():
+async def seed_from_github_dataset() -> None:
     """Seed complete Gita from GitHub dataset."""
     print("\n" + "=" * 70)
     print("📥 FETCHING COMPLETE GITA FROM GITHUB DATASET")
@@ -236,7 +240,7 @@ async def seed_from_github_dataset():
     return False
 
 
-async def verify_seeding():
+async def verify_seeding() -> None:
     """Verify that all verses were seeded correctly."""
     print("\n" + "=" * 70)
     print("🔍 VERIFYING SEEDED DATA")
@@ -268,7 +272,7 @@ async def verify_seeding():
             print(f"⚠️  Missing {700 - total} verses")
 
 
-async def main():
+async def main() -> None:
     """Main seeding function."""
     try:
         print("\n" + "=" * 70)

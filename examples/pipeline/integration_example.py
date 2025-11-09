@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from services.pipeline import ContextTransformationPipeline
 
 
-def load_wisdom_verses(filepath: str = None):
+def load_wisdom_verses(filepath: str | None = None):
     """Load wisdom verses from JSON file."""
     if filepath is None:
         # Default to the actual wisdom verses file

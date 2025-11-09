@@ -40,7 +40,9 @@ class ContextTransformationPipeline:
         self._custom_stages = {}
 
     @classmethod
-    def create_full_pipeline(cls, strict: bool = False) -> "ContextTransformationPipeline":
+    def create_full_pipeline(
+        cls, strict: bool = False
+    ) -> "ContextTransformationPipeline":
         """Create a pipeline with all stages enabled."""
         return cls(
             enable_validation=True,
@@ -141,7 +143,7 @@ class ContextTransformationPipeline:
         result = self.transform(verse_data)
 
         # Apply custom stages
-        for name, stage_func in self._custom_stages.items():
+        for _name, stage_func in self._custom_stages.items():
             result = stage_func(result)
 
         return result
