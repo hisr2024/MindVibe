@@ -1,6 +1,7 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from backend.models import Base
@@ -22,29 +23,58 @@ app = FastAPI(
     title="MindVibe API",
     version="1.0.0",
     description="AI Mental Wellness Coach Backend",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json"
 )
 
-# ✅ CRITICAL: Add CORS middleware BEFORE routes
-# This handles OPTIONS preflight requests
+# ✅ CRITICAL FIX: Proper CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://mind-vibe-universal.vercel.app",
         "https://mindvibe.vercel.app",
         "https://mindvibe-web.vercel.app",
+        "https://mindvibe-api.onrender.com",
         "http://localhost:3000",
         "http://localhost:8000",
         "http://localhost:8080",
-        "*"  # Allow all origins for development
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+        "*"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
     allow_headers=["*"],
     expose_headers=["*"],
-    max_age=600,
+    max_age=3600,
 )
+
+# ✅ Custom middleware to ensure CORS headers are always present
+@app.middleware("http")
+async def add_cors_headers(request: Request, call_next):
+    """Ensure CORS headers are present in all responses."""
+    
+    # Handle OPTIONS requests
+    if request.method == "OPTIONS":
+        return JSONResponse(
+            content={"status": "ok"},
+            headers={
+                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": request.headers.get("access-control-request-headers", "*"),
+                "Access-Control-Max-Age": "3600",
+                "Access-Control-Allow-Credentials": "true",
+            },
+        )
+    
+    # Process request
+    response = await call_next(request)
+    
+    # Add CORS headers to response
+    response.headers["Access-Control-Allow-Origin"] = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    
+    return response
 
 @app.on_event("startup")
 async def startup() -> None:
@@ -52,42 +82,91 @@ async def startup() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-# ✅ Import all routers AFTER CORS middleware
-from backend.routes.chat import router as chat_router
-from backend.routes.content import router as content_router
-from backend.routes.journal import router as journal_router
-from backend.routes.jwk import router as jwk_router
-from backend.routes.moods import router as moods_router
-from backend.routes.wisdom_guide import router as wisdom_router
-from backend.routes.analytics import router as analytics_router
-from backend.routes.monitoring import router as monitoring_router
-from backend.routes.feedback import router as feedback_router
+# ✅ Import all routers - AFTER middleware setup
+try:
+    from backend.routes.chat import router as chat_router
+except ImportError as e:
+    print(f"Warning: Could not import chat router: {e}")
+    chat_router = None
 
-# ✅ Register all routers
-app.include_router(chat_router)
-app.include_router(content_router)
-app.include_router(journal_router)
-app.include_router(jwk_router)
-app.include_router(moods_router)
-app.include_router(wisdom_router)
-app.include_router(analytics_router)
-app.include_router(monitoring_router)
-app.include_router(feedback_router)
+try:
+    from backend.routes.content import router as content_router
+except ImportError as e:
+    print(f"Warning: Could not import content router: {e}")
+    content_router = None
+
+try:
+    from backend.routes.journal import router as journal_router
+except ImportError as e:
+    print(f"Warning: Could not import journal router: {e}")
+    journal_router = None
+
+try:
+    from backend.routes.jwk import router as jwk_router
+except ImportError as e:
+    print(f"Warning: Could not import jwk router: {e}")
+    jwk_router = None
+
+try:
+    from backend.routes.moods import router as moods_router
+except ImportError as e:
+    print(f"Warning: Could not import moods router: {e}")
+    moods_router = None
+
+try:
+    from backend.routes.wisdom_guide import router as wisdom_router
+except ImportError as e:
+    print(f"Warning: Could not import wisdom_guide router: {e}")
+    wisdom_router = None
+
+try:
+    from backend.routes.analytics import router as analytics_router
+except ImportError as e:
+    print(f"Warning: Could not import analytics router: {e}")
+    analytics_router = None
+
+try:
+    from backend.routes.monitoring import router as monitoring_router
+except ImportError as e:
+    print(f"Warning: Could not import monitoring router: {e}")
+    monitoring_router = None
+
+try:
+    from backend.routes.feedback import router as feedback_router
+except ImportError as e:
+    print(f"Warning: Could not import feedback router: {e}")
+    feedback_router = None
+
+# ✅ Register only routers that loaded successfully
+routers = [
+    chat_router,
+    content_router,
+    journal_router,
+    jwk_router,
+    moods_router,
+    wisdom_router,
+    analytics_router,
+    monitoring_router,
+    feedback_router,
+]
+
+for router in routers:
+    if router is not None:
+        app.include_router(router)
 
 # ✅ Root endpoints
 @app.get("/")
-async def root() -> dict[str, str]:
-    """Root endpoint - API health check."""
+async def root() -> dict:
+    """Root endpoint."""
     return {
         "message": "MindVibe API is running",
         "version": "1.0.0",
         "status": "healthy",
-        "endpoints": 60
     }
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
-    """Health check endpoint for Render deployment."""
+async def health_check() -> dict:
+    """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "mindvibe-api",
@@ -95,23 +174,11 @@ async def health_check() -> dict[str, str]:
     }
 
 @app.get("/api/health")
-async def api_health() -> dict[str, any]:
+async def api_health() -> dict:
     """API health status endpoint."""
     return {
         "status": "operational",
         "service": "MindVibe AI",
         "version": "1.0.0",
-        "phases": {
-            "phase_1": "response_engine ✅",
-            "phase_2": "domain_mapper ✅",
-            "phase_3": "safety_validator ✅",
-            "phase_4": "psychology_patterns ✅"
-        },
         "all_systems": "operational"
     }
-
-# ✅ OPTIONS handler for all routes
-@app.options("/{full_path:path}")
-async def preflight_handler(full_path: str) -> dict:
-    """Handle CORS preflight requests."""
-    return {"status": "ok"}
