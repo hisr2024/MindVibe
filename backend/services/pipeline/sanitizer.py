@@ -5,7 +5,7 @@ import re
 
 class TextSanitizer:
     """Sanitizes religious and cultural references in text."""
-    
+
     # Replacement mappings
     REPLACEMENTS = {
         "Krishna": "the teacher",
@@ -21,7 +21,7 @@ class TextSanitizer:
         "soul": "essence",
         "Soul": "Essence",
     }
-    
+
     @classmethod
     def sanitize(cls, text: str | None) -> str | None:
         """
@@ -35,16 +35,16 @@ class TextSanitizer:
         """
         if text is None:
             return None
-        
+
         if text == "":
             return ""
-        
+
         result = text
         for old, new in cls.REPLACEMENTS.items():
             result = result.replace(old, new)
-        
+
         return result
-    
+
     @classmethod
     def sanitize_verse_data(cls, verse: dict) -> dict:
         """
@@ -57,18 +57,18 @@ class TextSanitizer:
             New dictionary with sanitized text fields
         """
         result = verse.copy()
-        
+
         # Sanitize text fields
         for field in ["english", "hindi", "context"]:
             if field in result:
                 result[field] = cls.sanitize(result[field])
-        
+
         # Title-case the theme
         if "theme" in result:
             result["theme"] = result["theme"].replace("_", " ").title()
-        
+
         return result
-    
+
     @classmethod
     def normalize_whitespace(cls, text: str) -> str:
         """
@@ -82,7 +82,7 @@ class TextSanitizer:
         """
         # Replace multiple spaces with single space and strip
         return re.sub(r'\s+', ' ', text).strip()
-    
+
     @classmethod
     def standardize_punctuation(cls, text: str) -> str:
         """
@@ -96,9 +96,9 @@ class TextSanitizer:
         """
         if not text:
             return text
-        
+
         # If text doesn't end with punctuation, add a period
-        if not text.rstrip()[-1] in '.!?':
+        if text.rstrip()[-1] not in '.!?':
             return text.rstrip() + '.'
-        
+
         return text

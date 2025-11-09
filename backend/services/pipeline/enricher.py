@@ -1,12 +1,11 @@
 """Metadata enrichment module for the pipeline."""
 
 import re
-from typing import Any
 
 
 class MetadataEnricher:
     """Enriches verse data with metadata and additional information."""
-    
+
     # Mental health application keywords
     APPLICATION_KEYWORDS = {
         "anxiety_management": ["anxiety", "worry", "fear", "nervous"],
@@ -16,7 +15,7 @@ class MetadataEnricher:
         "anger_management": ["anger", "rage", "fury", "frustration"],
         "self_esteem": ["confidence", "self", "worth", "value"],
     }
-    
+
     @classmethod
     def extract_principles(cls, verse: dict) -> list[str]:
         """
@@ -33,17 +32,17 @@ class MetadataEnricher:
             verse.get("context", ""),
             verse.get("theme", ""),
         ]).lower()
-        
+
         # Common principle keywords
         principle_keywords = [
             "action", "duty", "detachment", "peace", "wisdom",
             "knowledge", "meditation", "discipline", "devotion",
             "equanimity", "compassion", "selflessness", "mindfulness"
         ]
-        
+
         found_principles = [kw for kw in principle_keywords if kw in text]
         return found_principles
-    
+
     @classmethod
     def extract_keywords(cls, verse: dict) -> list[str]:
         """
@@ -59,17 +58,17 @@ class MetadataEnricher:
             verse.get("english", ""),
             verse.get("context", ""),
         ]).lower()
-        
+
         # Remove punctuation and split into words
         words = re.findall(r'\b\w+\b', text)
-        
+
         # Filter out common words and keep meaningful ones (> 4 chars)
         stop_words = {"the", "and", "that", "this", "with", "from", "your", "about", "through"}
         keywords = [w for w in words if len(w) > 4 and w not in stop_words]
-        
+
         # Return unique keywords
         return list(set(keywords))[:10]  # Limit to top 10
-    
+
     @classmethod
     def suggest_applications(cls, verse: dict) -> list[str]:
         """
@@ -85,14 +84,14 @@ class MetadataEnricher:
             verse.get("english", ""),
             verse.get("context", ""),
         ]).lower()
-        
+
         suggestions = []
         for app_name, keywords in cls.APPLICATION_KEYWORDS.items():
             if any(kw in text for kw in keywords):
                 suggestions.append(app_name)
-        
+
         return suggestions
-    
+
     @classmethod
     def create_searchable_text(cls, verse: dict) -> str:
         """
@@ -105,16 +104,16 @@ class MetadataEnricher:
             Combined searchable text
         """
         parts = []
-        
+
         # Add text fields
         for field in ["english", "hindi", "context"]:
             if field in verse and verse[field]:
                 parts.append(verse[field])
-        
+
         # Add theme
         if "theme" in verse:
             parts.append(verse["theme"].replace("_", " "))
-        
+
         # Add applications
         if "mental_health_applications" in verse:
             apps = verse["mental_health_applications"]
@@ -122,9 +121,9 @@ class MetadataEnricher:
                 parts.extend(apps.get("applications", []))
             elif isinstance(apps, list):
                 parts.extend(apps)
-        
+
         return " ".join(parts)
-    
+
     @classmethod
     def enrich(cls, verse: dict) -> dict:
         """
@@ -137,16 +136,16 @@ class MetadataEnricher:
             Enriched verse dictionary
         """
         result = verse.copy()
-        
+
         # Add principles
         result["principles"] = cls.extract_principles(verse)
-        
+
         # Add keywords
         result["keywords"] = cls.extract_keywords(verse)
-        
+
         # Add searchable text
         result["searchable_text"] = cls.create_searchable_text(verse)
-        
+
         # Only suggest applications if not present or empty
         apps = result.get("mental_health_applications", {})
         if isinstance(apps, dict):
@@ -155,10 +154,10 @@ class MetadataEnricher:
             app_list = apps
         else:
             app_list = []
-        
+
         # Only add suggestions if no applications exist
         if not app_list:
             suggestions = cls.suggest_applications(verse)
             result["suggested_applications"] = suggestions
-        
+
         return result

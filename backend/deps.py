@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+
 from fastapi import Depends, Header
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +8,7 @@ from backend.main import SessionLocal
 from backend.models import User
 
 
-async def get_db():
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as s:
         yield s
 

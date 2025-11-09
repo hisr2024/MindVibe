@@ -19,7 +19,7 @@ class ContextTransformationPipeline:
     2. Validation - Ensure data meets requirements
     3. Enrichment - Add metadata and searchable content
     """
-    
+
     def __init__(
         self,
         sanitize: bool = True,
@@ -37,7 +37,7 @@ class ContextTransformationPipeline:
         self.sanitize = sanitize
         self.validate = validate
         self.enrich = enrich
-    
+
     @classmethod
     def create_full_pipeline(cls) -> "ContextTransformationPipeline":
         """
@@ -47,7 +47,7 @@ class ContextTransformationPipeline:
             ContextTransformationPipeline instance
         """
         return cls(sanitize=True, validate=True, enrich=True)
-    
+
     @classmethod
     def create_validation_only(cls) -> "ContextTransformationPipeline":
         """
@@ -57,7 +57,7 @@ class ContextTransformationPipeline:
             ContextTransformationPipeline instance
         """
         return cls(sanitize=False, validate=True, enrich=False)
-    
+
     def transform(self, verse: dict) -> dict:
         """
         Transform a verse through the pipeline.
@@ -73,26 +73,26 @@ class ContextTransformationPipeline:
         """
         try:
             result = verse.copy()
-            
+
             # Stage 1: Sanitization
             if self.sanitize:
                 result = TextSanitizer.sanitize_verse_data(result)
-            
+
             # Stage 2: Validation
             if self.validate:
                 result = VerseValidator.validate_and_normalize(result)
-            
+
             # Stage 3: Enrichment
             if self.enrich:
                 result = MetadataEnricher.enrich(result)
-            
+
             return result
-            
+
         except ValidationError as e:
             raise PipelineError(f"Validation failed: {e}") from e
         except Exception as e:
             raise PipelineError(f"Pipeline transformation failed: {e}") from e
-    
+
     def transform_batch(self, verses: list[dict]) -> list[dict]:
         """
         Transform multiple verses through the pipeline.
@@ -113,9 +113,9 @@ class ContextTransformationPipeline:
                 results.append(transformed)
             except PipelineError as e:
                 raise PipelineError(f"Failed to transform verse at index {i}: {e}") from e
-        
+
         return results
-    
+
     def validate_batch(self, verses: list[dict]) -> tuple[list[dict], list[tuple[int, str]]]:
         """
         Validate a batch of verses and return valid ones plus errors.
@@ -128,7 +128,7 @@ class ContextTransformationPipeline:
         """
         valid_verses = []
         errors = []
-        
+
         for i, verse in enumerate(verses):
             try:
                 if self.validate:
@@ -136,5 +136,5 @@ class ContextTransformationPipeline:
                 valid_verses.append(verse)
             except ValidationError as e:
                 errors.append((i, str(e)))
-        
+
         return valid_verses, errors

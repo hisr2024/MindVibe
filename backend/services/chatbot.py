@@ -5,6 +5,7 @@ Provides conversational AI capabilities with mental health support.
 """
 
 import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.services.wisdom_kb import WisdomKnowledgeBase
@@ -13,7 +14,7 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 class ChatbotService:
     """Enhanced chatbot service with wisdom knowledge base integration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the chatbot service."""
         self.kb = WisdomKnowledgeBase()
         self.conversation_histories: dict[str, list[dict]] = {}
@@ -21,10 +22,10 @@ class ChatbotService:
     def get_conversation_history(self, session_id: str) -> list[dict]:
         """
         Get conversation history for a session.
-        
+
         Args:
             session_id: Session identifier
-            
+
         Returns:
             List of conversation messages or empty list if session doesn't exist
         """
@@ -33,10 +34,10 @@ class ChatbotService:
     def clear_conversation(self, session_id: str) -> bool:
         """
         Clear conversation history for a session.
-        
+
         Args:
             session_id: Session identifier
-            
+
         Returns:
             True if session existed and was cleared, False otherwise
         """
@@ -48,7 +49,7 @@ class ChatbotService:
     def get_active_sessions(self) -> list[str]:
         """
         Get list of active session IDs.
-        
+
         Returns:
             List of session IDs
         """
@@ -62,12 +63,12 @@ class ChatbotService:
     ) -> str:
         """
         Generate a template-based chat response.
-        
+
         Args:
             message: User's message
             verses: List of verse dictionaries with 'verse' and 'score' keys
             language: Response language
-            
+
         Returns:
             Generated response text
         """
@@ -99,20 +100,25 @@ class ChatbotService:
                 "Regular practice and persistence lead to greater mental clarity.",
             ],
         }
-        
+
         # If we have verses, use theme-specific response
         if verses and len(verses) > 0:
             verse = verses[0]["verse"]
             theme = verse.theme
-            templates = theme_templates.get(theme, [
-                "I hear what you're sharing. Let me offer some wisdom that might help.",
-                "Thank you for sharing. Here's some guidance that may resonate with you.",
-            ])
-            base_response = templates[0] if templates else "Let me share some wisdom with you."
+            templates = theme_templates.get(
+                theme,
+                [
+                    "I hear what you're sharing. Let me offer some wisdom that might help.",
+                    "Thank you for sharing. Here's some guidance that may resonate with you.",
+                ],
+            )
+            base_response = (
+                templates[0] if templates else "Let me share some wisdom with you."
+            )
         else:
             # Generic supportive response when no verses found
             base_response = "I understand what you're going through. While I don't have specific guidance at this moment, know that seeking inner peace and clarity is a valuable journey."
-        
+
         return base_response
 
     def _generate_chat_response(
@@ -124,15 +130,15 @@ class ChatbotService:
     ) -> str:
         """
         Generate a chat response (can be template or AI-based).
-        
+
         For now, uses template responses. Can be extended with OpenAI integration.
-        
+
         Args:
             message: User's message
             conversation_history: Previous conversation messages
             verses: Relevant verses found
             language: Response language
-            
+
         Returns:
             Generated response text
         """
@@ -150,7 +156,7 @@ class ChatbotService:
     ) -> dict:
         """
         Process a chat message and generate a response.
-        
+
         Args:
             message: User's message
             session_id: Session identifier
@@ -158,32 +164,34 @@ class ChatbotService:
             language: Response language preference
             theme: Optional theme filter
             include_sanskrit: Whether to include Sanskrit in verses
-            
+
         Returns:
             Dictionary with response, verses, and metadata
         """
         # Initialize session if it doesn't exist
         if session_id not in self.conversation_histories:
             self.conversation_histories[session_id] = []
-        
+
         # Add user message to history
         timestamp = datetime.datetime.now(datetime.UTC).isoformat()
-        self.conversation_histories[session_id].append({
-            "role": "user",
-            "content": message,
-            "timestamp": timestamp,
-        })
-        
+        self.conversation_histories[session_id].append(
+            {
+                "role": "user",
+                "content": message,
+                "timestamp": timestamp,
+            }
+        )
+
         # Search for relevant verses
         verse_results = await self.kb.search_relevant_verses(
             db=db,
             query=message,
             theme=theme,
         )
-        
+
         # Get conversation history (limit to last 6 messages for context)
         history = self.conversation_histories[session_id][-6:]
-        
+
         # Generate response
         response_text = self._generate_chat_response(
             message=message,
@@ -191,14 +199,16 @@ class ChatbotService:
             verses=verse_results,
             language=language,
         )
-        
+
         # Add assistant response to history
-        self.conversation_histories[session_id].append({
-            "role": "assistant",
-            "content": response_text,
-            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
-        })
-        
+        self.conversation_histories[session_id].append(
+            {
+                "role": "assistant",
+                "content": response_text,
+                "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
+            }
+        )
+
         # Format verses for response
         formatted_verses = []
         for verse_result in verse_results[:3]:  # Return top 3 verses
@@ -210,7 +220,7 @@ class ChatbotService:
             )
             formatted_verse["relevance_score"] = verse_result["score"]
             formatted_verses.append(formatted_verse)
-        
+
         return {
             "session_id": session_id,
             "response": response_text,
@@ -223,4 +233,3 @@ class ChatbotService:
 # Backward compatibility aliases
 Chatbot = ChatbotService
 EnhancedChatbot = ChatbotService
-
