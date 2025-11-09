@@ -1,0 +1,32 @@
+name: Monitor Production Deployment
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check Fly.io Analytics Endpoint
+      run: curl -f https://mindvibe.fly.dev/analytics/dashboard || exit 1
+    
+    - name: Check Fly.io Monitoring Endpoint
+      run: curl -f https://mindvibe.fly.dev/monitoring/health || exit 1
+    
+    - name: Check Render Analytics Endpoint
+      run: curl -f https://mindvibe-api.onrender.com/analytics/dashboard || exit 1
+    
+    - name: Check Render Monitoring Endpoint
+      run: curl -f https://mindvibe-api.onrender.com/monitoring/health || exit 1
+    
+    - name: Check Vercel Endpoint
+      run: curl -f https://mindvibe.vercel.app/health || exit 1
+    
+    - name: All Systems Operational
+      run: |
+        echo "✅ All production endpoints operational"
+        echo "✅ Monitoring status: ACTIVE"
+        echo "✅ System health: HEALTHY"
