@@ -5,6 +5,7 @@ Provides functionality for sanitizing text, searching verses, and formatting res
 """
 
 import difflib
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +15,7 @@ from backend.models import WisdomVerse
 class WisdomKnowledgeBase:
     """Knowledge base for managing wisdom verses."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the wisdom knowledge base."""
         pass
 
@@ -22,19 +23,19 @@ class WisdomKnowledgeBase:
     def sanitize_text(text: str | None) -> str | None:
         """
         Sanitize religious terms by replacing them with universal alternatives.
-        
+
         Args:
             text: Text to sanitize (can be None)
-            
+
         Returns:
             Sanitized text or None if input was None
         """
         if text is None:
             return None
-        
+
         if text == "":
             return ""
-        
+
         # Define replacements for religious terms
         replacements = {
             "Krishna": "the teacher",
@@ -50,22 +51,22 @@ class WisdomKnowledgeBase:
             "soul": "essence",
             "Soul": "Essence",
         }
-        
+
         result = text
         for old, new in replacements.items():
             result = result.replace(old, new)
-        
+
         return result
 
     @staticmethod
     async def get_verse_by_id(db: AsyncSession, verse_id: str) -> WisdomVerse | None:
         """
         Get a verse by its verse_id.
-        
+
         Args:
             db: Database session
             verse_id: The verse identifier (e.g., "1.1")
-            
+
         Returns:
             WisdomVerse object or None if not found
         """
@@ -78,17 +79,15 @@ class WisdomKnowledgeBase:
     async def get_verses_by_theme(db: AsyncSession, theme: str) -> list[WisdomVerse]:
         """
         Get all verses matching a specific theme.
-        
+
         Args:
             db: Database session
             theme: Theme to filter by
-            
+
         Returns:
             List of WisdomVerse objects
         """
-        result = await db.execute(
-            select(WisdomVerse).where(WisdomVerse.theme == theme)
-        )
+        result = await db.execute(select(WisdomVerse).where(WisdomVerse.theme == theme))
         return list(result.scalars().all())
 
     @staticmethod
@@ -97,17 +96,17 @@ class WisdomKnowledgeBase:
     ) -> list[WisdomVerse]:
         """
         Search verses by mental health application.
-        
+
         Args:
             db: Database session
             application: Application to search for
-            
+
         Returns:
             List of WisdomVerse objects containing the application
         """
         result = await db.execute(select(WisdomVerse))
         all_verses = result.scalars().all()
-        
+
         # Filter verses that have the application in their mental_health_applications
         matching_verses = []
         for verse in all_verses:
@@ -115,18 +114,18 @@ class WisdomKnowledgeBase:
                 apps = verse.mental_health_applications.get("applications", [])
                 if application in apps:
                     matching_verses.append(verse)
-        
+
         return matching_verses
 
     @staticmethod
     def compute_text_similarity(text1: str, text2: str) -> float:
         """
         Compute similarity between two text strings using SequenceMatcher.
-        
+
         Args:
             text1: First text string
             text2: Second text string
-            
+
         Returns:
             Similarity score between 0.0 and 1.0
         """
@@ -142,19 +141,19 @@ class WisdomKnowledgeBase:
     ) -> list[dict]:
         """
         Search for verses relevant to a query.
-        
+
         Args:
             db: Database session
             query: Search query text
             theme: Optional theme to filter by
             application: Optional mental health application to filter by
             limit: Optional maximum number of results
-            
+
         Returns:
             List of dicts with 'verse' and 'score' keys
         """
         kb = WisdomKnowledgeBase()
-        
+
         # Get verses, optionally filtered by theme or application
         if theme:
             verses = await kb.get_verses_by_theme(db, theme)
@@ -163,29 +162,26 @@ class WisdomKnowledgeBase:
         else:
             result = await db.execute(select(WisdomVerse))
             verses = list(result.scalars().all())
-        
+
         # Compute similarity scores for each verse
         verse_scores = []
         for verse in verses:
             # Compare query against english text and context
             english_score = kb.compute_text_similarity(query, verse.english)
             context_score = kb.compute_text_similarity(query, verse.context)
-            
+
             # Use the max score
             max_score = max(english_score, context_score)
-            
-            verse_scores.append({
-                "verse": verse,
-                "score": max_score
-            })
-        
+
+            verse_scores.append({"verse": verse, "score": max_score})
+
         # Sort by score descending
-        verse_scores.sort(key=lambda x: x["score"], reverse=True)
-        
+        verse_scores.sort(key=lambda x: float(x["score"]), reverse=True)  # type: ignore[arg-type]
+
         # Apply limit if specified
         if limit is not None:
             verse_scores = verse_scores[:limit]
-        
+
         return verse_scores
 
     @staticmethod
@@ -196,18 +192,18 @@ class WisdomKnowledgeBase:
     ) -> dict:
         """
         Format a verse for API response.
-        
+
         Args:
             verse: WisdomVerse object to format
             language: Language preference ("english", "hindi")
             include_sanskrit: Whether to include Sanskrit text
-            
+
         Returns:
             Formatted verse dictionary
         """
         # Format theme from snake_case to Title Case
         formatted_theme = verse.theme.replace("_", " ").title()
-        
+
         # Extract applications list from mental_health_applications
         applications = []
         if verse.mental_health_applications:
@@ -215,10 +211,10 @@ class WisdomKnowledgeBase:
                 applications = verse.mental_health_applications.get("applications", [])
             elif isinstance(verse.mental_health_applications, list):
                 applications = verse.mental_health_applications
-        
+
         # Sanitize context
         sanitized_context = WisdomKnowledgeBase.sanitize_text(verse.context)
-        
+
         response = {
             "verse_id": verse.verse_id,
             "chapter": verse.chapter,
@@ -228,20 +224,19 @@ class WisdomKnowledgeBase:
             "applications": applications,
             "language": language,
         }
-        
+
         # Add language-specific text (sanitized)
         if language.lower() == "hindi":
             response["text"] = WisdomKnowledgeBase.sanitize_text(verse.hindi)
         else:
             response["text"] = WisdomKnowledgeBase.sanitize_text(verse.english)
-        
+
         # Add Sanskrit if requested (no sanitization for Sanskrit)
         if include_sanskrit:
             response["sanskrit"] = verse.sanskrit
-        
+
         return response
 
 
 # Alias for backward compatibility
 WisdomKB = WisdomKnowledgeBase
-

@@ -18,7 +18,7 @@ class SoftDeleteMixin:
         self.deleted_at = None
 
     @classmethod
-    def not_deleted(cls, query):
+    def not_deleted(cls, query):  # type: ignore[no-untyped-def]
         return query.filter(cls.deleted_at.is_(None))
 
 
@@ -134,7 +134,9 @@ class GitaVerse(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     chapter: Mapped[int] = mapped_column(
-        Integer, ForeignKey("gita_chapters.chapter_number", ondelete="CASCADE"), index=True
+        Integer,
+        ForeignKey("gita_chapters.chapter_number", ondelete="CASCADE"),
+        index=True,
     )
     verse: Mapped[int] = mapped_column(Integer, index=True)
     sanskrit: Mapped[str] = mapped_column(Text)
@@ -145,7 +147,10 @@ class GitaVerse(Base):
     principle: Mapped[str] = mapped_column(String(256))
     theme: Mapped[str] = mapped_column(String(256), index=True)
     source_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("gita_sources.id", ondelete="SET NULL"), nullable=True, index=True
+        Integer,
+        ForeignKey("gita_sources.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     embedding: Mapped[list[float] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -168,7 +173,9 @@ class GitaModernContext(Base):
     application_area: Mapped[str] = mapped_column(String(256), index=True)
     description: Mapped[str] = mapped_column(Text)
     examples: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    mental_health_benefits: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    mental_health_benefits: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )

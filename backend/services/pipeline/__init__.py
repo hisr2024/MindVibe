@@ -43,15 +43,15 @@ def orchestrate_pipeline(
     """Orchestrate the full data processing pipeline."""
     # Sanitize
     sanitized = sanitizer(data)
-    
+
     # Validate
     is_valid, errors = validator(sanitized, schema)
     if not is_valid:
         return False, {}, errors
-    
+
     # Enrich
     enriched = enricher(sanitized, enrichments)
-    
+
     return True, enriched, []
 
 
