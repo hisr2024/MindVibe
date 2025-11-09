@@ -69,7 +69,7 @@ async def get_refresh_token_by_raw(db: AsyncSession, raw: str) -> RefreshToken |
 
 
 def is_expired(token: RefreshToken) -> bool:
-    return token.expires_at < datetime.now(UTC)
+    return bool(token.expires_at < datetime.now(UTC))
 
 
 async def mark_rotated(db: AsyncSession, token: RefreshToken) -> None:

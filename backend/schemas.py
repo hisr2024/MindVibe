@@ -1,8 +1,10 @@
-from pydantic import BaseModel, conint
+from typing import Annotated
+
+from pydantic import BaseModel, Field
 
 
 class MoodIn(BaseModel):
-    score: conint(ge=-2, le=2)
+    score: Annotated[int, Field(ge=-2, le=2)]
     tags: list[str] | None = None
     note: str | None = None
 

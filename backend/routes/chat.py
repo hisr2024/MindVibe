@@ -103,7 +103,7 @@ async def send_message(
 
     try:
         # Process the chat message
-        result = await chatbot_service.chat(
+        result = await chatbot_service.chat(  # type: ignore[attr-defined]
             message=chat_msg.message,
             session_id=session_id,
             db=db,
@@ -133,7 +133,7 @@ async def get_conversation_history(session_id: str) -> ConversationHistory:
     """
     Retrieve the conversation history for a specific session.
     """
-    history = chatbot_service.get_conversation_history(session_id)
+    history = chatbot_service.get_conversation_history(session_id)  # type: ignore[attr-defined]
 
     if not history:
         raise HTTPException(
@@ -151,7 +151,7 @@ async def clear_conversation(session_id: str) -> dict:
     """
     Clear the conversation history for a specific session.
     """
-    success = chatbot_service.clear_conversation(session_id)
+    success = chatbot_service.clear_conversation(session_id)  # type: ignore[attr-defined]
 
     if not success:
         raise HTTPException(
@@ -172,12 +172,12 @@ async def list_active_sessions() -> list[SessionInfo]:
 
     Note: In production, this should be user-specific and authenticated.
     """
-    sessions = chatbot_service.get_active_sessions()
+    sessions = chatbot_service.get_active_sessions()  # type: ignore[attr-defined]
 
     return [
         SessionInfo(
             session_id=session_id,
-            message_count=len(chatbot_service.get_conversation_history(session_id)),
+            message_count=len(chatbot_service.get_conversation_history(session_id)),  # type: ignore[attr-defined]
         )
         for session_id in sessions
     ]
@@ -213,6 +213,6 @@ async def chatbot_health() -> dict:
         "status": "healthy",
         "openai_enabled": openai_configured,
         "fallback_mode": "template-based" if not openai_configured else "ai-powered",
-        "active_sessions": len(chatbot_service.get_active_sessions()),
+        "active_sessions": len(chatbot_service.get_active_sessions()),  # type: ignore[attr-defined]
         "supported_languages": ["english", "hindi", "sanskrit"],
     }

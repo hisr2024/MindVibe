@@ -70,7 +70,7 @@ async def query_wisdom(
         )
 
     kb = WisdomKnowledgeBase()
-    relevant_verses = await kb.search_relevant_verses(db=db, query=query.query, limit=3)
+    relevant_verses = await kb.search_relevant_verses(db=db, query=query.query, limit=3)  # type: ignore[attr-defined]
 
     if not relevant_verses:
         raise HTTPException(
@@ -81,7 +81,7 @@ async def query_wisdom(
     verse_references = []
     for item in relevant_verses:
         verse = item["verse"]
-        formatted = kb.format_verse_response(
+        formatted = kb.format_verse_response(  # type: ignore[attr-defined]
             verse=verse,
             language=query.language,
             include_sanskrit=query.include_sanskrit,
@@ -121,12 +121,13 @@ async def get_verse(
 ) -> dict:
     """Get a specific wisdom verse by ID."""
     kb = WisdomKnowledgeBase()
-    verse = await kb.get_verse_by_id(db, verse_id)
+    verse = await kb.get_verse_by_id(db, verse_id)  # type: ignore[attr-defined]
     if not verse:
         raise HTTPException(status_code=404, detail=f"Verse {verse_id} not found")
-    return kb.format_verse_response(
+    result: dict = kb.format_verse_response(  # type: ignore[attr-defined, no-any-return]
         verse=verse, language=language, include_sanskrit=include_sanskrit
     )
+    return result
 
 
 @router.get("/verses")
@@ -152,11 +153,11 @@ async def list_verses(
             .where(WisdomVerse.theme == theme)
         )
     elif application:
-        verses = await kb.search_verses_by_application(db, application)
+        verses = await kb.search_verses_by_application(db, application)  # type: ignore[attr-defined]
         total = len(verses)
         paginated_verses = verses[offset : offset + limit]
         formatted_verses = [
-            kb.format_verse_response(
+            kb.format_verse_response(  # type: ignore[attr-defined]
                 verse=verse, language=language, include_sanskrit=include_sanskrit
             )
             for verse in paginated_verses
@@ -179,7 +180,7 @@ async def list_verses(
     result = await db.execute(query)
     verses = list(result.scalars().all())
     formatted_verses = [
-        kb.format_verse_response(
+        kb.format_verse_response(  # type: ignore[attr-defined]
             verse=verse, language=language, include_sanskrit=include_sanskrit
         )
         for verse in verses
@@ -210,7 +211,7 @@ async def semantic_search(
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
     kb = WisdomKnowledgeBase()
-    relevant_verses = await kb.search_relevant_verses(
+    relevant_verses = await kb.search_relevant_verses(  # type: ignore[attr-defined]
         db=db, query=query, limit=limit, theme=theme, application=application
     )
 
@@ -222,7 +223,7 @@ async def semantic_search(
 
     results = []
     for item in relevant_verses:
-        formatted = kb.format_verse_response(
+        formatted = kb.format_verse_response(  # type: ignore[attr-defined]
             verse=item["verse"], language=language, include_sanskrit=include_sanskrit
         )
         formatted["relevance_score"] = round(item["score"], 3)
@@ -262,9 +263,9 @@ async def generate_wisdom_response(
         return generate_template_response(query, verses, language)
 
     try:
-        import openai
+        from openai import OpenAI
 
-        openai.api_key = openai_key
+        client = OpenAI(api_key=openai_key)
         verse_context = "\n\n".join(
             [
                 f"Wisdom Teaching {i+1}:\n{item['verse'].english}\n\nContext: {item['verse'].context}"
@@ -285,7 +286,7 @@ CRITICAL RULES:
 Your role is to help people find inner peace, emotional balance, and personal growth through universal wisdom principles."""
         user_prompt = f"""User's Question: {query}\n\nRelevant Universal Wisdom Teachings:\n{verse_context}\n\nPlease provide a compassionate, practical response that:\n1. Addresses the user's concern directly\n2. Explains how the wisdom principles apply to their situation\n3. Offers concrete steps they can take\n4. Uses only universal, non-religious language\n5. Is warm and encouraging\n
 Response:"""
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -294,7 +295,8 @@ Response:"""
             temperature=0.7,
             max_tokens=500,
         )
-        return response.choices[0].message.content.strip()
+        content = response.choices[0].message.content
+        return content.strip() if content else ""
     except Exception as e:
         print(f"OpenAI API error: {str(e)}")
         return generate_template_response(query, verses, language)

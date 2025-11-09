@@ -21,7 +21,7 @@ async def get_user_id(
     res = await db.execute(select(User).where(User.auth_uid == x_auth_uid))
     row = res.scalar_one_or_none()
     if row:
-        return row.id
+        return str(row.id)
     ins = await db.execute(
         insert(User).values(auth_uid=x_auth_uid, locale="en").returning(User.id)
     )
