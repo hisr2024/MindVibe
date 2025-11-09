@@ -132,11 +132,12 @@ class WisdomKnowledgeBase:
         """
         return difflib.SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
+    @staticmethod
     async def search_relevant_verses(
-        self,
         db: AsyncSession,
         query: str,
         theme: str | None = None,
+        application: str | None = None,
         limit: int | None = None,
     ) -> list[dict]:
         """
@@ -146,14 +147,19 @@ class WisdomKnowledgeBase:
             db: Database session
             query: Search query text
             theme: Optional theme to filter by
+            application: Optional mental health application to filter by
             limit: Optional maximum number of results
             
         Returns:
             List of dicts with 'verse' and 'score' keys
         """
-        # Get verses, optionally filtered by theme
+        kb = WisdomKnowledgeBase()
+        
+        # Get verses, optionally filtered by theme or application
         if theme:
-            verses = await self.get_verses_by_theme(db, theme)
+            verses = await kb.get_verses_by_theme(db, theme)
+        elif application:
+            verses = await kb.search_verses_by_application(db, application)
         else:
             result = await db.execute(select(WisdomVerse))
             verses = list(result.scalars().all())
@@ -162,8 +168,8 @@ class WisdomKnowledgeBase:
         verse_scores = []
         for verse in verses:
             # Compare query against english text and context
-            english_score = self.compute_text_similarity(query, verse.english)
-            context_score = self.compute_text_similarity(query, verse.context)
+            english_score = kb.compute_text_similarity(query, verse.english)
+            context_score = kb.compute_text_similarity(query, verse.context)
             
             # Use the max score
             max_score = max(english_score, context_score)
@@ -210,23 +216,26 @@ class WisdomKnowledgeBase:
             elif isinstance(verse.mental_health_applications, list):
                 applications = verse.mental_health_applications
         
+        # Sanitize context
+        sanitized_context = WisdomKnowledgeBase.sanitize_text(verse.context)
+        
         response = {
             "verse_id": verse.verse_id,
             "chapter": verse.chapter,
             "verse_number": verse.verse_number,
             "theme": formatted_theme,
-            "context": verse.context,
+            "context": sanitized_context,
             "applications": applications,
             "language": language,
         }
         
-        # Add language-specific text
+        # Add language-specific text (sanitized)
         if language.lower() == "hindi":
-            response["text"] = verse.hindi
+            response["text"] = WisdomKnowledgeBase.sanitize_text(verse.hindi)
         else:
-            response["text"] = verse.english
+            response["text"] = WisdomKnowledgeBase.sanitize_text(verse.english)
         
-        # Add Sanskrit if requested
+        # Add Sanskrit if requested (no sanitization for Sanskrit)
         if include_sanskrit:
             response["sanskrit"] = verse.sanskrit
         
