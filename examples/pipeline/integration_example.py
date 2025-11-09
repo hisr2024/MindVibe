@@ -17,6 +17,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
+from typing import Any
 
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -24,25 +25,26 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from services.pipeline import ContextTransformationPipeline
 
 
-def load_wisdom_verses(filepath: str = None):
+def load_wisdom_verses(filepath: str | None = None) -> list[dict[str, Any]]:
     """Load wisdom verses from JSON file."""
     if filepath is None:
         # Default to the actual wisdom verses file
-        filepath = (
+        default_path = (
             Path(__file__).parent.parent.parent / "data" / "wisdom" / "verses.json"
         )
+        filepath = str(default_path)
 
     if not os.path.exists(filepath):
         print(f"Warning: Verses file not found at {filepath}")
         return []
 
     with open(filepath, encoding="utf-8") as f:
-        verses = json.load(f)
+        verses: list[dict[str, Any]] = json.load(f)
 
     return verses
 
 
-def transform_wisdom_database():
+def transform_wisdom_database() -> list[dict[str, Any]]:
     """Transform all wisdom verses through the pipeline."""
     print("=" * 80)
     print("Context Transformation Pipeline - Wisdom Database Integration")
@@ -85,7 +87,7 @@ def transform_wisdom_database():
     return transformed_verses
 
 
-def assess_quality(verses):
+def assess_quality(verses: list[dict[str, Any]]) -> None:
     """Assess the quality of transformed verses."""
     if not verses:
         print("   No verses to assess")
@@ -123,7 +125,7 @@ def assess_quality(verses):
         )
 
 
-def show_sample_transformations(original, transformed):
+def show_sample_transformations(original: list[dict[str, Any]], transformed: list[dict[str, Any]]) -> None:
     """Show sample transformations."""
     for i, (orig, trans) in enumerate(zip(original, transformed, strict=False), 1):
         print(f"\n   Sample {i}: Verse {trans.get('verse_id', 'unknown')}")
@@ -146,7 +148,7 @@ def show_sample_transformations(original, transformed):
         print(f"   Metadata score: {trans.get('metadata_score', 0):.2f}")
 
 
-def save_transformed_verses(verses, output_path):
+def save_transformed_verses(verses: list[dict[str, Any]], output_path: Path | str) -> None:
     """Save transformed verses to JSON file."""
     output = {
         "version": "1.0.0",
@@ -161,7 +163,7 @@ def save_transformed_verses(verses, output_path):
     print(f"\n   Saved {len(verses)} transformed verses to {output_path}")
 
 
-def compare_before_after():
+def compare_before_after() -> None:
     """Compare specific verses before and after transformation."""
     print("\n" + "=" * 80)
     print("Before/After Comparison")
@@ -205,7 +207,7 @@ def compare_before_after():
     print(f"  Suggested Applications: {transformed.get('suggested_applications', [])}")
 
 
-def demonstrate_validation():
+def demonstrate_validation() -> None:
     """Demonstrate validation capabilities."""
     print("\n" + "=" * 80)
     print("Validation Demonstration")
@@ -246,7 +248,7 @@ def demonstrate_validation():
         print(f"     - {error}")
 
 
-def main():
+def main() -> None:
     """Run all integration examples."""
     try:
         # Main transformation
