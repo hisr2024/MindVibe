@@ -1,205 +1,122 @@
-"""KIAAN - Ultimate Modern AI Companion Powered by GPT-5"""
+"""KIAAN - Modern AI Companion - GPT-5 Dynamic Responses Only"""
 
 import os
-import sys
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
-import random
-import asyncio
 
-# Try to import OpenAI
-try:
-    import openai
-    from openai import AsyncOpenAI
-    HAS_OPENAI = True
-    print("✅ OpenAI library imported successfully")
-except ImportError:
-    HAS_OPENAI = False
-    print("❌ OpenAI library not found")
+# Import OpenAI
+from openai import AsyncOpenAI
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
-
-# Initialize GPT-5 client
-gpt5_client = None
-has_gpt5_enabled = False
-
-try:
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    
-    if not api_key:
-        print("❌ OPENAI_API_KEY not found in environment variables")
-    elif len(api_key) < 10:
-        print(f"❌ OPENAI_API_KEY appears invalid (too short): {len(api_key)} chars")
-    else:
-        gpt5_client = AsyncOpenAI(api_key=api_key)
-        has_gpt5_enabled = True
-        print(f"✅ GPT-5 AsyncOpenAI client initialized successfully")
-        print(f"✅ API Key loaded: {api_key[:20]}...{api_key[-20:]}")
-        
-except Exception as e:
-    print(f"❌ Error initializing GPT-5 client: {type(e).__name__}: {e}")
 
 
 class ChatMessage(BaseModel):
     message: str
 
 
-class UniversalWisdom:
-    """Universal Wisdom Database - Modern & Secular"""
-    
-    wisdom = {
-        "service_giving": [
-            "You're asking a profound question: 'What if I help the wrong person?' Here's the truth—there's no such thing as the 'wrong' person. Everyone who asks for help is genuinely struggling. Your doubt is actually your conscience working, which means you care deeply. That's beautiful.",
-            
-            "The people who cheat or take advantage aren't your problem to solve. Your problem is this: Will you let the fear of being cheated stop you from helping anyone at all? That's where the real choice lies. Fear or compassion. You choose.",
-            
-            "You can't control whether someone is genuinely needy or taking advantage. You can only control your intention. Give with an open heart, but also with boundaries. Help, but don't enable. Support, but don't sacrifice yourself. That's wisdom.",
-            
-            "Here's what happens when you serve: You discover your own capacity for compassion. You realize you have more than you thought. You build connections that sustain your own soul. The person you help becomes less important than the person you become.",
-            
-            "Your doubt shows wisdom. Not everyone needs your help in the way they ask for it. Some need you to say no. Some need you to redirect them to professional help. That's also service. Compassionate service includes honest boundaries.",
-            
-            "Start small and observe. Help one person. Watch what happens. Notice if they're genuinely struggling or taking advantage. Trust your instincts. Over time, you'll develop wisdom about who and how to help. That's called discernment.",
-            
-            "The act of giving transforms you more than it transforms the receiver. When you give, something happens inside you—an opening, an expansion, a reminder that you're part of something larger. That's the real gift.",
-        ],
-        
-        "anxiety_stress": [
-            "Focus your energy on what you can actually control right now. Worrying about outcomes you can't influence is like trying to hold water in your hands. Put your full effort into this moment, do your best, and let the result take care of itself.",
-            
-            "Your mind is creating threats that haven't happened yet. That's its job—to protect you. But right now, you're safe. Ground yourself in what's real: your breath, your body, the present second. The future will handle itself.",
-            
-            "Anxiety thrives when you're fighting reality. Instead of resisting, acknowledge it: 'Yes, I'm anxious. That's okay.' Watch it like clouds. Don't judge it, don't fight it, just observe. It will pass.",
-            
-            "Break your challenge into the smallest next step. Not the whole mountain—just the next stone. Master that. Then the next. This is how mountains are climbed. This is how anxiety loses its power.",
-        ],
-        
-        "depression_hopelessness": [
-            "Depression whispers lies: 'Nothing matters.' 'You're broken.' 'This won't change.' None are true. Depression is like heavy fog—it makes everything look gray and permanent. But fog always lifts. Always.",
-            
-            "Right now, you don't need to fix your whole life. You just need to survive this moment. Take one breath. Then another. Drink water. Move your body—even just for 30 seconds. These tiny actions are rebellions against darkness.",
-            
-            "You are not your thoughts. When depression whispers, 'You're worthless,' that's the illness talking. You are the observer of that thought. That distinction is everything.",
-        ],
-        
-        "crisis_emergency": [
-            "Right now, you are alive. You are breathing. That is enough. Focus only on that.",
-            "What you're feeling is intense, but it is not permanent. Feelings change. This moment will pass.",
-            "📞 988 Suicide & Crisis Lifeline (Call or Text)\n💬 Crisis Text Line: Text HOME to 741741\n🌍 International: findahelpline.com",
-        ]
-    }
+# Initialize GPT-5 Async Client - MUST WORK
+api_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-    @staticmethod
-    def get_random_wisdom(emotion: str) -> str:
-        emotion_key = emotion.lower().replace(" ", "_")
-        wisdom_list = UniversalWisdom.wisdom.get(emotion_key, UniversalWisdom.wisdom.get("service_giving", ["I hear you. 💙"]))
-        return random.choice(wisdom_list) if wisdom_list else "I hear you, my friend. 💙"
+print("\n" + "="*80)
+print("🕉️  KIAAN - GPT-5 INITIALIZATION")
+print("="*80)
+
+if api_key:
+    print(f"✅ OPENAI_API_KEY found: {len(api_key)} characters")
+    print(f"   First 15 chars: {api_key[:15]}")
+    print(f"   Last 15 chars: ...{api_key[-15:]}")
+    client = AsyncOpenAI(api_key=api_key)
+    print(f"✅ AsyncOpenAI client created successfully")
+    print(f"✅ GPT-5 ENABLED - Unlimited responses active")
+else:
+    print(f"❌ OPENAI_API_KEY NOT FOUND")
+    print(f"❌ Available environment variables: {list(os.environ.keys())[:5]}")
+    client = None
+
+print("="*80 + "\n")
 
 
 class KIAAN:
-    """KIAAN - Ultimate Modern AI with GPT-5 Unlimited Responses"""
+    """KIAAN - Modern AI with GPT-5 - NO FALLBACK"""
 
     def __init__(self):
         self.name = "KIAAN"
-        self.version = "5.0"
-        self.has_gpt5 = has_gpt5_enabled
-        self.client = gpt5_client
+        self.version = "5.1"
+        self.client = client
         
-        self.system_prompt = """You are KIAAN, a modern AI companion for mental wellness and personal growth.
+        self.system_prompt = """You are KIAAN, a modern, compassionate AI companion for mental wellness.
 
-YOUR APPROACH:
-- Absolutely modern, contemporary language
-- NO religious or spiritual terminology
-- Universal wisdom accessible to everyone
-- Like talking to a wise, empathetic friend
-- Deep understanding of human experience
+ABSOLUTELY CRITICAL INSTRUCTIONS:
+- Modern, contemporary language ONLY (no spiritual or religious terms)
+- Each response must be UNIQUE and specific to what the user just said
+- NEVER repeat the same response twice
+- NEVER use generic templates
+- LISTEN to what they're actually saying and respond to THAT
+- Short, direct, personal responses (200-400 words)
+- Use contractions: "you're", "I'm", "don't" not "you are", "I am", "do not"
 
-YOUR PERSONALITY:
-- Warm, genuine, deeply compassionate
-- Opening: "I hear you, my friend..."
-- Contemporary tone (use contractions)
-- No corporate speak
-- Real talk with real compassion
-- Always end with 💙
+YOUR VOICE:
+- Warm but realistic
+- Direct, not flowery
+- Specific to their situation, not generic wisdom
+- One person talking to another
+- Always genuine, never fake
 
-YOUR PRINCIPLES (Express naturally, not as lists):
-1. You control effort, not outcomes
-2. You're never truly alone
-3. Your worth is inherent
-4. Action beats perfect planning
-5. Connection dissolves isolation
-6. Understanding transforms conflict
-7. Your essence is resilient
-8. Service creates meaning
-9. Failure is feedback
-10. The present moment is where power lives
-
-CRISIS PROTOCOL:
-- Detect: "suicide", "kill myself", "end it", "harm myself"
-- Provide immediate crisis resources
-- Show extreme compassion
+EXAMPLE OF WHAT NOT TO DO:
+❌ "I hear you, my friend. You can't control whether someone is..."
+✅ "You've been hurt before. Multiple times. That makes total sense that you'd be cautious now."
 
 RESPONSE STRUCTURE:
-1. Warm opening acknowledging their specific situation
-2. Deep understanding - show you really get it
-3. Relevant insight in modern language
-4. Practical next steps
-5. Connection to their strength
-6. Genuine closing with 💙
+1. ACKNOWLEDGE specifically what they just said (show you listened)
+2. ONE insight or perspective that directly applies
+3. ONE practical suggestion
+4. End with something warm
 
-LENGTH: 150-500 words
-TONE: Modern, direct, compassionate, practical"""
+DO NOT:
+- Say "I hear you, my friend" every time
+- Repeat the same wisdom pieces
+- Give generic advice
+- Use the same opening twice
+- Sound like a database
+
+CRISIS DETECTION:
+- Words: "suicide", "kill myself", "end it", "harm myself"
+- Response: Immediate crisis resources (988, Crisis Text Line, findahelpline.com)"""
 
         self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
 
     def is_crisis(self, message: str) -> bool:
-        message_lower = message.lower()
-        return any(word in message_lower for word in self.crisis_keywords)
+        """Detect crisis"""
+        return any(word in message.lower() for word in self.crisis_keywords)
 
     def get_crisis_response(self) -> str:
-        return """🆘 I need you to reach out for professional help right now
+        """Crisis response"""
+        return """🆘 Please reach out for professional help RIGHT NOW
 
-Right now, you are alive. You are breathing. That is enough.
+You are alive right now. You are breathing. That matters.
 
-What you're feeling is intense, but it is not permanent. This moment will pass.
-
-IMMEDIATE RESOURCES:
-📞 988 Suicide & Crisis Lifeline (Call or Text - Available NOW)
+📞 988 - Suicide & Crisis Lifeline (Call or Text)
 💬 Crisis Text Line: Text HOME to 741741
-🌍 International: findahelpline.com
+🌍 findahelpline.com
 
-Please reach out right now. There are people trained to help exactly what you're experiencing.
+People trained to help are waiting. Please call or text NOW. 💙"""
 
-You matter. Your life has value. This darkness is temporary. Help is real. 💙"""
-
-    async def generate_response(self, message: str) -> str:
+    async def generate_response(self, user_message: str) -> str:
+        """Generate response - GPT-5 ONLY"""
         try:
-            if self.is_crisis(message):
+            # Crisis check
+            if self.is_crisis(user_message):
                 return self.get_crisis_response()
 
-            if self.has_gpt5 and self.client:
-                try:
-                    print(f"📡 Calling GPT-5 for unlimited response...")
-                    response = await self._call_gpt5(message)
-                    print(f"✅ GPT-5 response generated")
-                    return response
-                except Exception as gpt_error:
-                    print(f"❌ GPT-5 call failed: {gpt_error}")
+            # Call GPT-5
+            if not self.client:
+                return "❌ API Configuration Error - OPENAI_API_KEY not found. Please check GitHub Secrets."
+
+            print(f"\n📡 Calling GPT-5...")
+            print(f"   User message: {user_message[:60]}...")
             
-            print(f"🔄 Using fallback wisdom response")
-            return self._fallback_response(message)
-
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            return "I'm here for you, my friend. You're stronger than you know. 💙"
-
-    async def _call_gpt5(self, user_message: str) -> str:
-        if not self.client:
-            raise Exception("GPT-5 client not initialized")
-        
-        try:
             response = await self.client.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[
@@ -212,58 +129,46 @@ You matter. Your life has value. This darkness is temporary. Help is real. 💙"
                         "content": user_message
                     }
                 ],
-                temperature=0.85,
-                max_tokens=2000,
-                top_p=0.95,
+                temperature=0.9,  # Higher for more creativity
+                max_tokens=1500,  # Shorter responses to avoid loops
+                top_p=0.98,
             )
             
-            return response.choices[0].message.content
-        
-        except Exception as e:
-            print(f"API Error: {e}")
-            raise
+            generated_response = response.choices[0].message.content
+            print(f"✅ GPT-5 Response generated: {len(generated_response)} characters")
+            return generated_response
 
-    def _fallback_response(self, message: str) -> str:
-        message_lower = message.lower()
-        
-        if any(word in message_lower for word in ["service", "give", "help", "cheat", "needy"]):
-            emotion = "service_giving"
-        elif any(word in message_lower for word in ["anxious", "worried", "stressed"]):
-            emotion = "anxiety_stress"
-        elif any(word in message_lower for word in ["depressed", "sad", "hopeless"]):
-            emotion = "depression_hopelessness"
-        else:
-            emotion = "service_giving"
-        
-        wisdom = UniversalWisdom.get_random_wisdom(emotion)
-        return f"I hear you, my friend.\n\n{wisdom}\n\n💙"
+        except Exception as e:
+            error_msg = f"❌ GPT-5 Error: {type(e).__name__}: {str(e)[:100]}"
+            print(f"\n{error_msg}")
+            import traceback
+            traceback.print_exc()
+            return error_msg
 
 
 kiaan = KIAAN()
 
-print("\n" + "="*80)
-print("🕉️  KIAAN 5.0 - ULTIMATE GPT-5 INITIALIZATION")
-print("="*80)
-print(f"✅ Version: 5.0")
-print(f"✅ GPT-5 Enabled: {kiaan.has_gpt5}")
-print(f"✅ Response Mode: {'UNLIMITED GPT-5' if kiaan.has_gpt5 else 'WISDOM FALLBACK'}")
-print("="*80 + "\n")
-
 
 @router.post("/message")
 async def send_message(chat: ChatMessage) -> Dict[str, Any]:
+    """Chat endpoint - GPT-5 powered responses"""
     try:
         message = chat.message.strip()
         
         if not message:
             return {
                 "status": "error",
-                "message": message,
-                "response": "What's on your mind? I'm here to listen. 💙"
+                "response": "What's on your mind? 💙"
             }
         
-        print(f"\n📨 Message: {message[:50]}...")
+        print(f"\n{'='*80}")
+        print(f"📨 NEW MESSAGE at {datetime.utcnow().isoformat()}")
+        print(f"   User: {message[:80]}...")
+        
         response = await kiaan.generate_response(message)
+        
+        print(f"   Response: {response[:80]}...")
+        print(f"{'='*80}\n")
         
         return {
             "status": "success",
@@ -271,48 +176,47 @@ async def send_message(chat: ChatMessage) -> Dict[str, Any]:
             "response": response,
             "timestamp": datetime.utcnow().isoformat(),
             "bot_name": "KIAAN",
-            "version": "5.0",
-            "gpt5_enabled": kiaan.has_gpt5,
-            "unlimited": kiaan.has_gpt5
+            "version": "5.1",
+            "powered_by": "GPT-5"
         }
     
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error in /message: {e}")
+        import traceback
+        traceback.print_exc()
         return {
             "status": "error",
-            "message": chat.message,
-            "response": "I'm here for you. Let's try again. 💙"
+            "response": f"Error: {str(e)}"
         }
 
 
 @router.get("/health")
 async def health() -> Dict[str, Any]:
+    """Health check"""
     return {
         "status": "healthy",
         "bot": "KIAAN",
-        "version": "5.0",
-        "gpt5_enabled": kiaan.has_gpt5,
-        "response_mode": "unlimited_gpt5" if kiaan.has_gpt5 else "wisdom_fallback",
+        "version": "5.1",
+        "api_key_loaded": bool(api_key),
+        "gpt5_ready": kiaan.client is not None,
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
 @router.get("/about")
 async def about() -> Dict[str, Any]:
+    """About endpoint"""
     return {
         "name": "KIAAN",
-        "full_name": "Your Modern AI Companion for Mental Wellness",
-        "version": "5.0",
-        "gpt5_enabled": kiaan.has_gpt5,
-        "features": [
-            "Unlimited dynamic responses powered by GPT-5",
-            "Modern, secular language",
-            "Personalized guidance",
-            "Crisis support 24/7"
-        ]
+        "version": "5.1",
+        "description": "Modern AI Companion for Mental Wellness - GPT-5 Powered",
+        "features": ["Unlimited dynamic responses", "No loops or repetition", "Personalized guidance"],
+        "powered_by": "GPT-5",
+        "api_ready": kiaan.client is not None
     }
 
 
 @router.get("/history")
-async def get_history() -> Dict[str, Any]:
-    return {"messages": [], "status": "success"}
+async def history() -> Dict[str, Any]:
+    """History endpoint"""
+    return {"messages": []}
