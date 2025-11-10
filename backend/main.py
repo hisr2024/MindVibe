@@ -1,7 +1,27 @@
-"""MindVibe FastAPI backend"""
+"""MindVibe FastAPI backend - KIAAN Integration"""
 
 import os
+import sys
+import traceback
 from typing import Dict, Any
+
+# CRITICAL: Load environment variables BEFORE anything else
+from dotenv import load_dotenv
+load_dotenv()
+
+print("\n" + "="*80)
+print("🕉️  MINDVIBE - STARTUP SEQUENCE")
+print("="*80)
+
+# Set API key explicitly for this module
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+print(f"✅ OPENAI_API_KEY found: {bool(OPENAI_API_KEY)}")
+print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
+
+# Pass to OpenAI before import
+if OPENAI_API_KEY:
+    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -9,7 +29,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.models import Base
 
-# Database setup
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 
 if DATABASE_URL.startswith("postgres://"):
@@ -20,14 +39,12 @@ elif DATABASE_URL.startswith("postgresql://"):
 engine = create_async_engine(DATABASE_URL, echo=False)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
-# FastAPI app
 app = FastAPI(
     title="MindVibe API",
     version="1.0.0",
     description="AI Mental Wellness Coach Backend",
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -38,7 +55,6 @@ app.add_middleware(
     max_age=3600,
 )
 
-# CORS middleware
 @app.middleware("http")
 async def add_cors(request: Request, call_next):
     if request.method == "OPTIONS":
@@ -56,26 +72,51 @@ async def add_cors(request: Request, call_next):
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
-# Startup
 @app.on_event("startup")
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-# Import and register routes
+print("\n[1/3] Attempting to import KIAAN chat router...")
+kiaan_router_loaded = False
+
 try:
     from backend.routes.chat import router as chat_router
+    print("✅ [SUCCESS] Chat router imported successfully")
+    
+    print("[2/3] Attempting to include router in FastAPI app...")
     app.include_router(chat_router)
+    print("✅ [SUCCESS] Chat router included in FastAPI app")
+    
+    kiaan_router_loaded = True
+    print("[3/3] KIAAN Router Status: ✅ OPERATIONAL")
+    print("✅ Endpoints now available:")
+    print("   • POST   /api/chat/message - KIAAN chat endpoint")
+    print("   • GET    /api/chat/health - Health check")
+    print("   • GET    /api/chat/about - KIAAN information")
+    
+except ImportError as e:
+    print(f"❌ [IMPORT ERROR] Failed to import chat router:")
+    print(f"   Error: {e}")
+    traceback.print_exc(file=sys.stdout)
+    
 except Exception as e:
-    print(f"Warning: chat router failed: {e}")
+    print(f"❌ [ERROR] Unexpected error loading chat router:")
+    print(f"   Error Type: {type(e).__name__}")
+    print(f"   Error Message: {e}")
+    traceback.print_exc(file=sys.stdout)
 
-# Health endpoints
+print("="*80)
+print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
+print("="*80 + "\n")
+
 @app.get("/")
 async def root() -> Dict[str, Any]:
     return {
         "message": "MindVibe API is running",
         "version": "1.0.0",
-        "status": "healthy"
+        "status": "healthy",
+        "kiaan_loaded": kiaan_router_loaded
     }
 
 @app.get("/health")
@@ -83,16 +124,18 @@ async def health() -> Dict[str, Any]:
     return {
         "status": "healthy",
         "service": "mindvibe-api",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "kiaan_ready": kiaan_router_loaded
     }
 
 @app.get("/api/health")
 async def api_health() -> Dict[str, Any]:
     return {
-        "status": "operational",
-        "service": "MindVibe AI",
+        "status": "operational" if kiaan_router_loaded else "degraded",
+        "service": "MindVibe AI - KIAAN",
         "version": "1.0.0",
-        "all_systems": "operational"
+        "chat_ready": kiaan_router_loaded,
+        "openai_key_present": bool(OPENAI_API_KEY)
     }
 
 @app.options("/{full_path:path}")
