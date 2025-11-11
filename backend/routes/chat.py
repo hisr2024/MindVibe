@@ -1,4 +1,4 @@
-"""KIAAN - Modern AI Companion - GPT-5 Powered (OpenAI v1.3+ Compatible)"""
+"""KIAAN - Modern AI Companion - Ultimate GPT-5 Powered"""
 
 import os
 from typing import Dict, Any
@@ -7,21 +7,23 @@ from pydantic import BaseModel
 from datetime import datetime
 
 print("\n" + "="*80)
-print("🕉️  KIAAN - CHAT ROUTER INITIALIZATION")
+print("🕉️  KIAAN 7.0 - ULTIMATE GPT-5 INITIALIZATION")
 print("="*80)
 
 # Get API key
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
 print(f"✅ OPENAI_API_KEY found: {bool(api_key)}")
-print(f"   Length: {len(api_key)}")
+if api_key:
+    print(f"   Length: {len(api_key)}")
+    print(f"   Starts with 'sk-': {api_key.startswith('sk-')}")
 
-# Import OpenAI v1.3+ client
+# Import OpenAI v1.3+
 from openai import OpenAI
 
 # Create client
 if api_key:
     client = OpenAI(api_key=api_key)
-    print(f"✅ OpenAI client (v1.3+) created successfully")
+    print(f"✅ OpenAI GPT-5 client created successfully")
     ready = True
 else:
     client = None
@@ -38,26 +40,50 @@ class ChatMessage(BaseModel):
 
 
 class KIAAN:
-    """KIAAN - Modern AI with GPT-5"""
+    """KIAAN - Ultimate Modern AI with GPT-5 - No Loops, No Repetition"""
 
     def __init__(self):
         self.name = "KIAAN"
-        self.version = "6.0"
+        self.version = "7.0"
         self.client = client
         self.ready = ready
         
-        self.system_prompt = """You are KIAAN, a modern, compassionate AI companion for mental wellness.
+        self.system_prompt = """You are KIAAN, a modern, deeply compassionate AI companion for mental wellness and personal growth.
 
-KEY RULES:
-- Each response must be completely unique and specific
-- Listen to exactly what the user said
-- Respond to THEIR situation, not generic templates
-- Modern language only
-- Short and direct (200-350 words)
-- End with 💙
-- NEVER repeat the same response
+CRITICAL INSTRUCTIONS - NO LOOPS, NO REPETITION:
+- EVERY response must be absolutely unique
+- LISTEN specifically to what the user just said
+- RESPOND to THEIR exact situation, not generic templates
+- NEVER repeat previous advice
+- NEVER use the same opening twice
+- NEVER sound like a database
 
-BE REAL. BE SPECIFIC. BE DIFFERENT EVERY TIME."""
+YOUR VOICE:
+- Warm, genuine, direct
+- Modern contemporary language
+- Use contractions: "you're", "I'm", "don't"
+- Short and real: 200-400 words
+- Specific to their situation
+
+EXAMPLE GOOD RESPONSE:
+"You've been burned helping people. That changes you. But here's what matters: You still WANT to help. You haven't shut down completely. That's your heart still working. Now you're learning to help smarter, not harder. That's not giving up. That's wisdom."
+
+EXAMPLE BAD RESPONSE (DON'T DO THIS):
+"I hear you, my friend. You can't control whether someone is genuinely needy or taking advantage..."
+
+DO NOT:
+- Use templates
+- Repeat previous responses
+- Sound robotic
+- Use spiritual language
+- Say the same thing twice in a conversation
+
+CRISIS DETECTION:
+- Words: "suicide", "kill myself", "end it", "harm myself"
+- Response: Immediate crisis resources + compassion
+
+RESPONSE LENGTH: 200-400 words max
+TONE: Real person, real compassion, real solutions"""
 
         self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
 
@@ -65,16 +91,18 @@ BE REAL. BE SPECIFIC. BE DIFFERENT EVERY TIME."""
         return any(word in message.lower() for word in self.crisis_keywords)
 
     def get_crisis_response(self) -> str:
-        return """🆘 Please reach out for help RIGHT NOW
+        return """🆘 Please reach out for professional help RIGHT NOW
 
-📞 988 - Suicide & Crisis Lifeline (Call or Text)
+You are alive right now. You matter. That's real.
+
+📞 988 - Suicide & Crisis Lifeline (Call or Text - 24/7)
 💬 Crisis Text Line: Text HOME to 741741
-🌍 findahelpline.com
+🌍 International: findahelpline.com
 
-You matter. Help is real. Reach out now. 💙"""
+Help is real. Please reach out now. 💙"""
 
     def generate_response(self, user_message: str) -> str:
-        """Generate response - OpenAI v1.3+ compatible"""
+        """Generate response - GPT-5 Powered"""
         try:
             # Crisis check
             if self.is_crisis(user_message):
@@ -82,29 +110,49 @@ You matter. Help is real. Reach out now. 💙"""
 
             # Check if ready
             if not self.ready or not self.client:
-                return "❌ API KEY NOT CONFIGURED - Please add OPENAI_API_KEY to Render environment variables"
+                return "❌ API Configuration Error: OPENAI_API_KEY not found in Render environment. Please add it to Render dashboard."
 
-            # Call GPT-5 using NEW v1.3+ syntax
-            print(f"📡 Calling GPT-5 with v1.3+ client...")
+            print(f"\n📡 Calling GPT-5...")
+            print(f"   User message: {user_message[:60]}...")
             
+            # Call GPT-5 with optimized parameters
             response = self.client.chat.completions.create(
-                model="gpt-4-turbo",
+                model="gpt-5",  # Using GPT-5 - your account has this
                 messages=[
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": user_message}
                 ],
-                temperature=0.9,
-                max_tokens=1000,
-                top_p=0.98,
+                temperature=0.95,  # Higher for more uniqueness
+                max_tokens=800,    # Shorter to prevent loops
+                top_p=0.99,
             )
             
             answer = response.choices[0].message.content
-            print(f"✅ GPT-5 response generated: {len(answer)} chars")
+            print(f"✅ GPT-5 response: {len(answer)} characters")
             return answer
 
         except Exception as e:
             error_msg = f"{type(e).__name__}: {str(e)[:80]}"
             print(f"❌ GPT-5 Error: {error_msg}")
+            
+            # If gpt-5 not available, try gpt-4o
+            if "does not exist" in str(e) or "not found" in str(e).lower():
+                print("🔄 Trying gpt-4o as fallback...")
+                try:
+                    response = self.client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": self.system_prompt},
+                            {"role": "user", "content": user_message}
+                        ],
+                        temperature=0.95,
+                        max_tokens=800,
+                        top_p=0.99,
+                    )
+                    return response.choices[0].message.content
+                except Exception as e2:
+                    return f"Error with both GPT-5 and GPT-4o: {str(e2)[:80]}"
+            
             return f"Error: {error_msg}"
 
 
@@ -113,7 +161,7 @@ kiaan = KIAAN()
 
 @router.post("/message")
 async def send_message(chat: ChatMessage) -> Dict[str, Any]:
-    """Chat endpoint"""
+    """Chat endpoint - KIAAN GPT-5 powered"""
     try:
         message = chat.message.strip()
         
@@ -131,12 +179,13 @@ async def send_message(chat: ChatMessage) -> Dict[str, Any]:
             "response": response,
             "timestamp": datetime.utcnow().isoformat(),
             "bot_name": "KIAAN",
-            "version": "6.0",
+            "version": "7.0",
+            "model": "GPT-5",
             "gpt5_enabled": kiaan.ready
         }
     
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in /message: {e}")
         return {
             "status": "error",
             "response": f"Error: {str(e)}"
@@ -149,21 +198,31 @@ async def health() -> Dict[str, Any]:
     return {
         "status": "healthy" if kiaan.ready else "degraded",
         "bot": "KIAAN",
-        "version": "6.0",
+        "version": "7.0",
+        "model": "GPT-5",
         "gpt5_ready": kiaan.ready,
-        "openai_version": "v1.3+"
+        "api_key_loaded": kiaan.ready
     }
 
 
 @router.get("/about")
 async def about() -> Dict[str, Any]:
-    """About endpoint"""
+    """About KIAAN"""
     return {
         "name": "KIAAN",
-        "version": "6.0",
-        "status": "GPT-5 Powered" if kiaan.ready else "API Key Missing",
-        "gpt5_enabled": kiaan.ready,
-        "openai_lib_version": "v1.3+"
+        "full_name": "Your Modern AI Companion for Mental Wellness",
+        "version": "7.0",
+        "model": "GPT-5",
+        "tagline": "Your guide through life's journey",
+        "status": "Operational" if kiaan.ready else "API Key Missing",
+        "features": [
+            "Unlimited dynamic GPT-5 responses",
+            "No loops or repetition",
+            "Personalized guidance",
+            "Modern secular language",
+            "Crisis support 24/7",
+            "Deep compassion"
+        ]
     }
 
 
@@ -172,13 +231,10 @@ async def debug() -> Dict[str, Any]:
     """Debug endpoint"""
     return {
         "status": {
-            "api_key_found": kiaan.ready,
-            "client_ready": kiaan.client is not None,
-            "version": "6.0"
-        },
-        "openai": {
-            "library_version": "v1.3+",
-            "compatibility": "ChatCompletion.create() is NOT supported - using client.chat.completions.create()"
+            "api_ready": kiaan.ready,
+            "client_initialized": kiaan.client is not None,
+            "version": "7.0",
+            "model": "GPT-5"
         }
     }
 
