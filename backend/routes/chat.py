@@ -20,7 +20,6 @@ def load_geeta_verses():
 
 # Emotion Detection Logic
 # Assuming we have a predefined function for emotion analysis
-from emotion_analysis import analyze_emotion
 
 # GPT-5 Integration
 def query_gpt5(prompt):
