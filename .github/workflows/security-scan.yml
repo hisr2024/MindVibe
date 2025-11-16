@@ -12,6 +12,8 @@ jobs:
   dependency-check:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       
@@ -37,6 +39,8 @@ jobs:
   code-security-scan:
     name: Code Security Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       
@@ -61,6 +65,8 @@ jobs:
   secrets-scan:
     name: Secrets Detection
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,6 +82,9 @@ jobs:
   docker-security:
     name: Docker Image Security
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       
@@ -98,6 +107,7 @@ jobs:
     name: CodeQL Security Analysis
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v4
