@@ -50,12 +50,6 @@ class BlobOut(BaseModel):
     blob_json: str
 
 
-class MoodIn(BaseModel):
-    score: Annotated[int, Field(ge=1, le=10)]
-    tags: list[str] | None = None
-    note: str | None = None
-
-
 class MoodOut(BaseModel):
     id: int
     score: int

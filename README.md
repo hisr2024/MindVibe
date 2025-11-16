@@ -223,34 +223,60 @@ Visit `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc`
 
 MindVibe has a comprehensive test suite with **100% updated imports** for the new backend structure.
 
-## Testing Standards
+## Testing Standards & CI Enforcement
 
-### Code Coverage
-- Minimum coverage: **80%**
+### Code Coverage Requirements
+- **Minimum coverage enforced by CI: 49%** (current baseline)
+- **Target coverage goal: 60%** (to be achieved incrementally)
+- CI builds will **fail** if coverage drops below the minimum threshold
 - Run tests: `pytest --cov=backend --cov-report=html`
 - View report: `open htmlcov/index.html`
-- CI/CD enforces coverage threshold
 
-### Type Checking
-- Uses mypy in **strict mode**
+### Type Checking with MyPy
+- **MyPy strict mode enabled** with pragmatic relaxations for gradual adoption
+- CI builds will **fail** if mypy type checking finds errors
 - Run: `mypy backend/`
-- All functions must have type annotations
-- CI/CD enforces type checking
+- Configuration: See `mypy.ini` for current settings
+- Core type safety features enabled:
+  - No implicit optional types
+  - Warn on missing return types
+  - Strict equality checks
+  - Type checking for all definitions
+- Gradually increasing strictness as codebase improves
 
-### Running Quality Checks
+### CI/CD Quality Gates
+The following checks are **blocking** in CI (builds will fail if they don't pass):
+- ✅ Type checking (mypy) - must pass with 0 errors
+- ✅ Coverage threshold - must meet minimum 49% coverage
+- ⚠️  Linting (ruff) - currently non-blocking (warnings only)
+- ⚠️  Formatting (black) - currently non-blocking (warnings only)
+
+### Running Quality Checks Locally
 ```bash
-# Run all tests with coverage
-pytest --cov=backend --cov-report=html
+# Run all tests with coverage (must pass for CI)
+pytest --cov=backend --cov-report=html --cov-fail-under=49
 
-# Type checking
+# Type checking (must pass for CI)
 mypy backend/
 
-# Linting
+# Linting (recommended but not blocking)
 ruff check backend/ --fix
 
-# Formatting
+# Formatting (recommended but not blocking)
 black backend/
 ```
+
+### Improving Code Quality
+To help reach our 60% coverage target:
+1. Add tests for new features
+2. Improve test coverage for existing code
+3. Focus on critical paths and business logic
+4. See `tests/README.md` for testing best practices
+
+To help improve type safety:
+1. Add type annotations to new functions
+2. Fix type errors in files currently excluded from checking
+3. See `mypy.ini` for files with `ignore_errors = True` that need improvement
 
 ### **Run All Tests:**
 

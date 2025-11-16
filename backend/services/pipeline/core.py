@@ -1,5 +1,7 @@
 """Core pipeline orchestration module."""
 
+from typing import Any, Callable
+
 from backend.services.pipeline.enricher import MetadataEnricher
 from backend.services.pipeline.sanitizer import TextSanitizer
 from backend.services.pipeline.validator import ValidationError, VerseValidator
@@ -25,9 +27,9 @@ class ContextTransformationPipeline:
         sanitize: bool = True,
         validate: bool = True,
         enrich: bool = True,
-        enable_validation: bool = None,
-        enable_sanitization: bool = None,
-        enable_enrichment: bool = None,
+        enable_validation: bool | None = None,
+        enable_sanitization: bool | None = None,
+        enable_enrichment: bool | None = None,
         strict_mode: bool = False,
     ):
         """
@@ -63,7 +65,7 @@ class ContextTransformationPipeline:
         }
         
         # Custom stages
-        self._custom_stages = []
+        self._custom_stages: list[tuple[str, Callable[[dict[str, Any]], dict[str, Any]]]] = []
 
     @classmethod
     def create_full_pipeline(cls, strict: bool = False) -> "ContextTransformationPipeline":
@@ -188,7 +190,7 @@ class ContextTransformationPipeline:
 
         return valid_verses, errors
 
-    def validate_only(self, verse: dict) -> dict:
+    def validate_only(self, verse: dict[str, Any]) -> dict[str, Any]:
         """
         Validate a verse and return a validation report.
         
@@ -198,7 +200,7 @@ class ContextTransformationPipeline:
         Returns:
             Validation report with is_valid, errors, and completeness fields
         """
-        report = {
+        report: dict[str, Any] = {
             "is_valid": True,
             "errors": [],
             "completeness": 0.0,
@@ -208,7 +210,7 @@ class ContextTransformationPipeline:
             VerseValidator.validate(verse)
         except ValidationError as e:
             report["is_valid"] = False
-            report["errors"].append(str(e))
+            report["errors"].append(str(e))  # type: ignore
         
         # Calculate completeness
         required_fields = ["chapter", "verse_number", "theme", "english"]
@@ -236,7 +238,7 @@ class ContextTransformationPipeline:
             "errors": 0,
         }
 
-    def add_custom_stage(self, name: str, func):
+    def add_custom_stage(self, name: str, func: Callable[[dict[str, Any]], dict[str, Any]]) -> None:
         """
         Add a custom transformation stage.
         
