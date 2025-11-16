@@ -6,7 +6,7 @@ AI-powered guidance, verse lookup, semantic search, and theme browsing.
 
 import os
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import distinct, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -531,7 +531,7 @@ def generate_template_gita_response(
     query: str, verses: list[GitaVerse], language: str
 ) -> str:
     """Generate template-based Gita response when OpenAI is unavailable.
-    
+
     All responses are 100% derived from Bhagavad Gita principles with structured format.
     """
     if not verses:
@@ -550,7 +550,7 @@ def generate_template_gita_response(
     top_verse = verses[0]
     verse_ref = f"{top_verse.chapter}.{top_verse.verse}"
     verse_preview = top_verse.english[:150] if len(top_verse.english) > 150 else top_verse.english
-    
+
     # 100% Gita-derived structured responses
     theme_responses = {
         "action_without_attachment": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches Nishkama Karma - action without attachment to fruits. The verse states: "{verse_preview}..."

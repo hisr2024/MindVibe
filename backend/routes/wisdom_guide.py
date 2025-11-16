@@ -331,7 +331,7 @@ Response (following the structure above):"""
 
 def generate_template_response(query: str, verses: list[dict], language: str) -> str:
     """Generate a template-based response when OpenAI is not available.
-    
+
     All responses follow the mandatory Gita-based structure and are 100% derived from Bhagavad Gita principles.
     """
     if not verses:
@@ -348,7 +348,7 @@ def generate_template_response(query: str, verses: list[dict], language: str) ->
 
     top_verse = verses[0]["verse"]
     verse_text = top_verse.english[:100] if hasattr(top_verse, 'english') else "the teaching"
-    
+
     # Gita-based structured responses for each theme
     responses = {
         "action_without_attachment": f"""**Ancient Wisdom Principle:** The Bhagavad Gita (Chapter 2, Verse 47) teaches Karma Yoga - performing your duties without attachment to outcomes: "{verse_text}..."

@@ -8,17 +8,16 @@ All responses follow the mandatory structure:
 - Deeper Understanding (Gita philosophy)
 """
 
-from typing import Dict, Any
 
 
 def validate_gita_response(response: str) -> bool:
     """Validate that response follows Gita-based structure.
-    
+
     Checks for:
     - Reference to Gita principles
     - Structured format with required sections
     - No generic advice without Gita foundation
-    
+
     Returns:
         bool: True if response is valid Gita-based response
     """
@@ -28,27 +27,27 @@ def validate_gita_response(response: str) -> bool:
         "**Practical Steps:**",
         "**Deeper Understanding:**"
     ]
-    
+
     # Check all required sections are present
     if not all(marker in response for marker in required_markers):
         return False
-    
+
     # Check for Gita references (should mention Gita, Bhagavad, or specific concepts)
     gita_indicators = [
-        "Gita", "Bhagavad", "Karma Yoga", "Dharma", "Atman", 
+        "Gita", "Bhagavad", "Karma Yoga", "Dharma", "Atman",
         "Samatvam", "Abhyasa", "Vairagya", "Nishkama", "Krishna",
         "Chapter", "Verse"
     ]
-    
+
     if not any(indicator in response for indicator in gita_indicators):
         return False
-    
+
     return True
 
 
 class WisdomEngine:
     """Generate intelligent responses using Bhagavad Gita principles"""
-    
+
     def __init__(self):
         """Initialize wisdom mappings based on Bhagavad Gita principles"""
         self.wisdom_principles = {
@@ -63,7 +62,7 @@ class WisdomEngine:
             "discipline": "Gita teaches Abhyasa (disciplined practice) creates inner strength and steadiness (Sthita-prajna)",
             "compassion": "Gita teaches Daya (compassion) to yourself and others as expression of seeing the Self in all",
         }
-        
+
         self.coping_strategies = {
             "breathing": "Practice Pranayama (breath control) as taught in Gita Chapter 4: breathe with awareness",
             "grounding": "Practice Sthiti (steadiness) - ground yourself in the present moment as the witness (Sakshi)",
@@ -71,12 +70,12 @@ class WisdomEngine:
             "mindfulness": "Practice Sakshi Bhava - observe thoughts without judgment as the eternal witness",
             "journaling": "Practice Svadhyaya (self-study) - reflect on Gita teachings and your experiences",
             "connection": "Gita teaches we are all manifestations of the same Self - connect with this understanding",
-            "rest": "Honor your body-mind complex (Kshetra) with proper rest while knowing you are the eternal Self",
+            "rest": "Honor your body-mind complex (Kshetra) with proper rest as taught in Gita, while knowing you are the eternal Self (Atman)",
             "nature": "Gita teaches seeing the Divine in all of nature - spend time in natural contemplation",
             "creativity": "Express the Self through creativity, offering it as Karma Yoga (selfless action)",
             "meditation": "Practice Dhyana (meditation) as taught extensively in Gita Chapter 6 - sit in stillness",
         }
-        
+
         self.wisdom_themes = {
             "anxiety": {
                 "principle": "detachment",
@@ -129,19 +128,19 @@ class WisdomEngine:
                 "strategies": ["meditation", "breathing", "grounding"],
             },
         }
-    
+
     def analyze_concern(self, user_message: str) -> str:
         """Detect user's primary concern"""
         message_lower = user_message.lower()
-        
+
         # Crisis detection (highest priority)
         crisis_keywords = [
-            "suicide", "kill myself", "end it", "harm myself", 
+            "suicide", "kill myself", "end it", "harm myself",
             "cut myself", "overdose", "better off dead", "no reason to live"
         ]
         if any(keyword in message_lower for keyword in crisis_keywords):
             return "crisis"
-        
+
         # Map concerns to themes
         concern_map = {
             "anxiety": ["anxious", "anxiety", "worried", "nervous", "panic", "afraid", "scared"],
@@ -155,13 +154,13 @@ class WisdomEngine:
             "purpose": ["purpose", "meaning", "direction", "lost", "what's the point"],
             "uncertainty": ["uncertain", "unsure", "don't know", "confused", "lost"],
         }
-        
+
         for concern, keywords in concern_map.items():
             if any(keyword in message_lower for keyword in keywords):
                 return concern
-        
+
         return "general"
-    
+
     def get_crisis_response(self) -> str:
         """Generate crisis response"""
         return """🆘 YOUR SAFETY IS MY PRIORITY
@@ -170,7 +169,7 @@ I can see you're in significant pain right now. Professional help is available i
 
 **CALL NOW:**
 🚨 National Suicide Prevention Lifeline: 988 (US)
-🚨 Crisis Text Line: Text HOME to 741741  
+🚨 Crisis Text Line: Text HOME to 741741
 🚨 International Crisis Lines: findahelpline.com
 
 **YOU ARE NOT ALONE:**
@@ -184,24 +183,24 @@ I can see you're in significant pain right now. Professional help is available i
 3. Go to nearest emergency room if in immediate danger
 
 Your life has value. Please reach out for professional support right now. 💙"""
-    
+
     def generate_response(self, user_message: str) -> str:
         """Generate intelligent, personalized response based on Bhagavad Gita principles
-        
+
         All responses follow the mandatory structure:
         - Ancient Wisdom Principle (from Gita)
         - Modern Application
         - Practical Steps (Gita-based)
         - Deeper Understanding (Gita philosophy)
         """
-        
+
         # Detect concern
         concern = self.analyze_concern(user_message)
-        
+
         # Crisis handling
         if concern == "crisis":
             return self.get_crisis_response()
-        
+
         # Get wisdom framework for concern
         theme = self.wisdom_themes.get(concern, self.wisdom_themes.get("general", {}))
         if concern not in self.wisdom_themes:
@@ -210,18 +209,18 @@ Your life has value. Please reach out for professional support right now. 💙""
                 "message": "The Gita teaches Atma-Jnana (self-knowledge). Let's explore what's happening through the lens of Gita wisdom.",
                 "strategies": ["journaling", "meditation", "breathing"],
             }
-        
+
         principle_key = theme.get("principle")
         if principle_key and isinstance(principle_key, str):
             principle_wisdom = self.wisdom_principles.get(principle_key, "")
         else:
             principle_wisdom = ""
-        
+
         # Get strategies
         strategy_keys_raw = theme.get("strategies", ["breathing", "meditation"])
         strategy_keys = list(strategy_keys_raw) if strategy_keys_raw else []
         strategies_text = self._format_strategies(strategy_keys)
-        
+
         # Build Gita-based structured response
         response = f"""**Ancient Wisdom Principle:** {principle_wisdom}
 
@@ -239,9 +238,9 @@ Your life has value. Please reach out for professional support right now. 💙""
 • Reaching out for guidance is wise (Viveka) and shows spiritual readiness
 
 What feels most important to focus on first? 💙"""
-        
+
         return response
-    
+
     def _format_strategies(self, strategy_keys: list) -> str:
         """Format coping strategies"""
         strategies_text = ""
@@ -249,23 +248,23 @@ What feels most important to focus on first? 💙"""
             strategy = self.coping_strategies.get(key, "Take time for yourself")
             strategies_text += f"{i}. {strategy}\n"
         return strategies_text
-    
+
     def get_follow_up_guidance(self, user_concern: str, follow_up_message: str) -> str:
         """Generate follow-up responses for deeper conversations"""
         message_lower = follow_up_message.lower()
-        
+
         # Check for specific requests
         if any(w in message_lower for w in ["help", "what should", "how can", "can you"]):
             return self._provide_specific_guidance(user_concern)
-        
+
         if any(w in message_lower for w in ["tried", "already", "doesn't work"]):
             return self._validate_and_deepen(user_concern)
-        
+
         if any(w in message_lower for w in ["better", "good", "working"]):
             return self._reinforce_progress(user_concern)
-        
+
         return self.generate_response(follow_up_message)
-    
+
     def _provide_specific_guidance(self, concern: str) -> str:
         """Provide specific Gita-based guidance for the concern"""
         guidance = {
@@ -291,7 +290,7 @@ What feels most important to focus on first? 💙"""
 • Seva (selfless service) to shift focus from ego-concerns
 
 **Deeper Understanding:** Gita 2.48 teaches that Yoga is equanimity (Samatvam). Anxiety dissolves when you perform duties without attachment to outcomes. What's one duty you can focus on today? 💙""",
-            
+
             "depression": """**Ancient Wisdom Principle:** The Gita (Chapter 3) teaches that action (Karma Yoga) is the cure for inertia and darkness (Tamas). Even small righteous actions (Dharma) create light and momentum.
 
 **Modern Application:** Depression often involves Tamas (inertia). The Gita prescribes action as medicine - start small with your Svadharma (natural duty).
@@ -314,7 +313,7 @@ What feels most important to focus on first? 💙"""
 • Professional help is Dharmic - honoring the body-mind complex
 
 **Deeper Understanding:** Gita 3.4 teaches you cannot achieve freedom through inaction. Even the smallest Dharmic action moves you toward light. The Self (Atman) within you is eternally joyful - depression is a cloud, not your nature. What's one tiny Dharmic action for the next 10 minutes? 💙""",
-            
+
             "loneliness": """**Ancient Wisdom Principle:** The Gita (Chapter 6, Verse 29-30) teaches that the yogi sees the Self in all beings and all beings in the Self. True connection comes from this vision of unity.
 
 **Modern Application:** Loneliness dissolves when you recognize the same Atman (Self) in yourself and all beings. This is not philosophy but direct experience through practice.
@@ -338,7 +337,7 @@ What feels most important to focus on first? 💙"""
 
 **Deeper Understanding:** Gita 6.30 promises: "One who sees Me everywhere and sees everything in Me, I am never lost to them, nor are they ever lost to Me." You are never truly alone - the Divine Self dwells within. Cultivate this connection first. Who could you reach out to or serve today? 💙""",
         }
-        
+
         return guidance.get(concern, """**Ancient Wisdom Principle:** The Bhagavad Gita offers complete guidance for every life challenge through understanding the Self, performing Dharma, and cultivating wisdom.
 
 **Modern Application:** Your specific concern can be addressed through Gita wisdom - let's apply the appropriate teaching.
@@ -350,8 +349,8 @@ What feels most important to focus on first? 💙"""
 4. Seek guidance from those learned in Gita wisdom
 
 **Deeper Understanding:** Every challenge is an opportunity for spiritual growth (Sadhana). The Gita provides the complete map. I'm here to help you apply it. What specific help do you need? 💙""")
-    
-    def _validate_and_deepen(self, concern: str) -> str:
+
+    def _validate_and_deepen(self, _concern: str) -> str:
         """Validate struggle and deepen understanding through Gita wisdom"""
         return """**Ancient Wisdom Principle:** The Gita (Chapter 6, Verse 24) teaches to practice without despondency (Asanshayam). Even great yogis face challenges in practice.
 
@@ -371,7 +370,7 @@ What feels most important to focus on first? 💙"""
 
 **Deeper Understanding:** Gita 6.40 promises: "Neither in this world nor in the next is there destruction for one who does good." Your sincere efforts are never wasted - they're building spiritual strength. Professional support combined with Gita wisdom is ideal. Would you like to explore what that might look like? 💙"""
 
-    def _reinforce_progress(self, concern: str) -> str:
+    def _reinforce_progress(self, _concern: str) -> str:
         """Reinforce and build on progress using Gita wisdom"""
         return """**Ancient Wisdom Principle:** The Gita (Chapter 2, Verse 40) teaches that even small progress in spiritual practice protects from great fear. Your progress is significant.
 
@@ -389,7 +388,7 @@ What feels most important to focus on first? 💙"""
 • Keep your practices (Sadhana) consistent
 • You've proven you can apply Gita wisdom successfully
 
-**Deeper Understanding:** Gita 6.45 teaches that the yogi, striving with effort, becomes perfected through many lifetimes of practice. Your progress continues building, even beyond this life. 
+**Deeper Understanding:** Gita 6.45 teaches that the yogi, striving with effort, becomes perfected through many lifetimes of practice. Your progress continues building, even beyond this life.
 
 **Next level:**
 • How can you deepen your Gita study and practice?
