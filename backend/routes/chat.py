@@ -1,218 +1,97 @@
-"""AI Chatbot API Routes
+"""KIAAN - Ultimate GPT-5 + Mental Wellness Companion (v12.0)"""
 
-Provides endpoints for conversational mental health guidance
-based on Bhagavad Gita teachings presented universally.
-"""
+import os
+from typing import Dict, Any
+from fastapi import APIRouter
+from pydantic import BaseModel
+from datetime import datetime
+from openai import OpenAI
 
-import uuid
-from typing import Any
+api_key = os.getenv("OPENAI_API_KEY", "").strip()
+client = OpenAI(api_key=api_key) if api_key else None
+ready = bool(api_key)
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.deps import get_db
-from backend.services.chatbot import ChatbotService  # type: ignore[import-untyped]
-
-router = APIRouter(prefix="/api/chat", tags=["chatbot"])
-
-# Global chatbot service instance (in production, this could be redis-backed)
-chatbot_service = ChatbotService()
+router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
-# Request/Response Models
 class ChatMessage(BaseModel):
-    """Request model for chat messages."""
-
-    message: str = Field(..., min_length=1, description="User's message or question")
-    session_id: str | None = Field(
-        None, description="Session ID for conversation tracking"
-    )
-    language: str = Field(
-        default="english", description="Preferred language: english, hindi, or sanskrit"
-    )
-    include_sanskrit: bool = Field(
-        default=False, description="Include Sanskrit verses in response"
-    )
+    message: str
 
 
-class VerseReference(BaseModel):
-    """A referenced wisdom verse."""
+class KIAAN:
+    def __init__(self):
+        self.name = "KIAAN"
+        self.version = "12.0"
+        self.client = client
+        self.ready = ready
+        self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
 
-    verse_id: str
-    theme: str
-    text: str
-    context: str
-    language: str
-    sanskrit: str | None = None
-    applications: list[str]
+    def is_crisis(self, message: str) -> bool:
+        return any(word in message.lower() for word in self.crisis_keywords)
 
+    def get_crisis_response(self) -> str:
+        return "🆘 Please reach out for help RIGHT NOW\n\n📞 988 - Suicide & Crisis Lifeline (24/7)\n💬 Crisis Text: Text HOME to 741741\n🌍 findahelpline.com\n\nYou matter. Help is real. 💙"
 
-class ChatResponse(BaseModel):
-    """Response model for chat messages."""
+    def generate_response(self, user_message: str) -> str:
+        try:
+            if self.is_crisis(user_message):
+                return self.get_crisis_response()
 
-    response: str = Field(..., description="AI-generated conversational response")
-    verses: list[VerseReference] = Field(..., description="Referenced wisdom verses")
-    session_id: str = Field(..., description="Session ID for this conversation")
-    language: str
-    conversation_length: int = Field(
-        ..., description="Number of messages in this conversation"
-    )
+            if not self.ready or not self.client:
+                return "❌ API Key not configured"
 
-
-class ConversationHistory(BaseModel):
-    """Conversation history for a session."""
-
-    session_id: str
-    messages: list[dict[str, Any]]
-    total_messages: int
-
-
-class SessionInfo(BaseModel):
-    """Information about a chat session."""
-
-    session_id: str
-    message_count: int
+            response = self.client.chat.completions.create(
+                model="gpt-5",
+                messages=[
+                    {"role": "system", "content": "You are KIAAN, a modern AI companion for mental wellness. Be warm, direct, contemporary. 200-400 words. Respond to their specific situation. End with 💙"},
+                    {"role": "user", "content": user_message}
+                ],
+                temperature=0.9,
+                top_p=0.98,
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return "I'm here for you. Let's try again. 💙"
 
 
-@router.post("/message", response_model=ChatResponse)
-async def send_message(
-    chat_msg: ChatMessage, db: AsyncSession = Depends(get_db)
-) -> ChatResponse:
-    """
-    Send a message to the AI chatbot and receive guidance.
+kiaan = KIAAN()
 
-    The chatbot maintains conversation context and provides mental health
-    guidance based on universal wisdom principles from the Bhagavad Gita.
 
-    If no session_id is provided, a new conversation session is created.
-    """
-    # Validate inputs
-    if not chat_msg.message or len(chat_msg.message.strip()) < 1:
-        raise HTTPException(status_code=400, detail="Message cannot be empty")
-
-    valid_languages = ["english", "hindi", "sanskrit"]
-    if chat_msg.language not in valid_languages:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Language must be one of: {', '.join(valid_languages)}",
-        )
-
-    # Generate session ID if not provided
-    session_id = chat_msg.session_id or str(uuid.uuid4())
-
+@router.post("/message")
+async def send_message(chat: ChatMessage) -> Dict[str, Any]:
     try:
-        # Process the chat message
-        result = await chatbot_service.chat(  # type: ignore[attr-defined]
-            message=chat_msg.message,
-            session_id=session_id,
-            db=db,
-            language=chat_msg.language,
-            include_sanskrit=chat_msg.include_sanskrit,
-        )
-
-        # Convert verses to response models
-        verse_refs = [VerseReference(**v) for v in result["verses"]]
-
-        return ChatResponse(
-            response=result["response"],
-            verses=verse_refs,
-            session_id=result["session_id"],
-            language=result["language"],
-            conversation_length=result["conversation_length"],
-        )
-
+        message = chat.message.strip()
+        if not message:
+            return {"status": "error", "response": "What's on your mind? 💙"}
+        
+        response = kiaan.generate_response(message)
+        return {
+            "status": "success",
+            "response": response,
+            "bot": "KIAAN",
+            "version": "12.0",
+            "model": "GPT-5",
+        }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error processing chat message: {str(e)}"
-        ) from e
-
-
-@router.get("/history/{session_id}", response_model=ConversationHistory)
-async def get_conversation_history(session_id: str) -> ConversationHistory:
-    """
-    Retrieve the conversation history for a specific session.
-    """
-    history = chatbot_service.get_conversation_history(session_id)  # type: ignore[attr-defined]
-
-    if not history:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No conversation history found for session {session_id}",
-        )
-
-    return ConversationHistory(
-        session_id=session_id, messages=history, total_messages=len(history)
-    )
-
-
-@router.delete("/history/{session_id}")
-async def clear_conversation(session_id: str) -> dict:
-    """
-    Clear the conversation history for a specific session.
-    """
-    success = chatbot_service.clear_conversation(session_id)  # type: ignore[attr-defined]
-
-    if not success:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No conversation history found for session {session_id}",
-        )
-
-    return {
-        "message": f"Conversation history cleared for session {session_id}",
-        "session_id": session_id,
-    }
-
-
-@router.get("/sessions", response_model=list[SessionInfo])
-async def list_active_sessions() -> list[SessionInfo]:
-    """
-    List all active chat sessions.
-
-    Note: In production, this should be user-specific and authenticated.
-    """
-    sessions = chatbot_service.get_active_sessions()  # type: ignore[attr-defined]
-
-    return [
-        SessionInfo(
-            session_id=session_id,
-            message_count=len(chatbot_service.get_conversation_history(session_id)),  # type: ignore[attr-defined]
-        )
-        for session_id in sessions
-    ]
-
-
-@router.post("/start")
-async def start_new_session() -> dict:
-    """
-    Start a new chat session and get a session ID.
-    """
-    session_id = str(uuid.uuid4())
-
-    return {
-        "session_id": session_id,
-        "message": "New chat session started. Use this session_id in your /message requests.",
-        "expires": "Session will persist until cleared or server restart",
-    }
+        return {"status": "error", "response": str(e)}
 
 
 @router.get("/health")
-async def chatbot_health() -> dict:
-    """
-    Check chatbot service health and configuration.
-    """
-    import os
+async def health() -> Dict[str, Any]:
+    return {"status": "healthy" if ready else "error", "bot": "KIAAN", "version": "12.0"}
 
-    openai_configured = bool(
-        os.getenv("OPENAI_API_KEY")
-        and os.getenv("OPENAI_API_KEY") != "your-api-key-here"
-    )
 
-    return {
-        "status": "healthy",
-        "openai_enabled": openai_configured,
-        "fallback_mode": "template-based" if not openai_configured else "ai-powered",
-        "active_sessions": len(chatbot_service.get_active_sessions()),  # type: ignore[attr-defined]
-        "supported_languages": ["english", "hindi", "sanskrit"],
-    }
+@router.get("/about")
+async def about() -> Dict[str, Any]:
+    return {"name": "KIAAN", "version": "12.0", "model": "gpt-5", "status": "Operational" if ready else "Error"}
+
+
+@router.get("/debug")
+async def debug() -> Dict[str, Any]:
+    return {"api_ready": ready, "version": "12.0", "model": "gpt-5"}
+
+
+@router.get("/history")
+async def history() -> Dict[str, Any]:
+    return {"messages": []}

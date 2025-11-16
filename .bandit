@@ -1,0 +1,20 @@
+exclude_dirs:
+  - /tests/
+  - /migrations/
+  - /venv/
+  - /.venv/
+
+tests:
+  - B201  # Flask debug mode
+  - B601  # Paramiko exec
+  - B602  # Shell injection
+  - B603  # Subprocess without shell=True
+  - B604  # Shell=True usage
+  - B605  # Start process with shell
+  - B606  # Start process without shell
+  - B607  # Start process with partial path
+  - B608  # SQL injection
+  - B609  # Wildcard injection
+
+skips:
+  - B101  # Assert usage (OK in tests)

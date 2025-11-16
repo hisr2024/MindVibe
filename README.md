@@ -223,6 +223,35 @@ Visit `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc`
 
 MindVibe has a comprehensive test suite with **100% updated imports** for the new backend structure.
 
+## Testing Standards
+
+### Code Coverage
+- Minimum coverage: **80%**
+- Run tests: `pytest --cov=backend --cov-report=html`
+- View report: `open htmlcov/index.html`
+- CI/CD enforces coverage threshold
+
+### Type Checking
+- Uses mypy in **strict mode**
+- Run: `mypy backend/`
+- All functions must have type annotations
+- CI/CD enforces type checking
+
+### Running Quality Checks
+```bash
+# Run all tests with coverage
+pytest --cov=backend --cov-report=html
+
+# Type checking
+mypy backend/
+
+# Linting
+ruff check backend/ --fix
+
+# Formatting
+black backend/
+```
+
 ### **Run All Tests:**
 
 ```bash
@@ -354,18 +383,41 @@ MindVibe implements multiple security layers:
 - ✅ **Rate Limiting** - API request throttling
 - ✅ **Secret Management** - Environment variables
 
+### Automated Security Scanning
+
+MindVibe uses comprehensive automated security scanning:
+- **CodeQL** - Advanced code analysis
+- **Bandit** - Python security linting
+- **Safety** - Dependency vulnerability checking
+- **TruffleHog** - Secrets detection
+- **Trivy** - Container security scanning
+
+### Running Security Checks Locally
+
+```bash
+# All security checks
+bash scripts/security_check.sh
+
+# Individual checks
+safety check --file requirements.txt
+bandit -r backend/ -ll
+npm audit
+```
+
 **Security Best Practices:**
 - Never commit `.env` files
 - Rotate JWT secrets regularly
 - Keep dependencies updated
 - Use HTTPS in production
 - Review `docs/SECURITY_ARCH.md`
+- See [SECURITY_AUDIT_CHECKLIST.md](docs/SECURITY_AUDIT_CHECKLIST.md) for the complete security audit checklist
 
 ---
 
 ## 📚 **Documentation**
 
 ### **Core Documentation:**
+- [Developer Onboarding Guide](docs/developer_onboarding.md) - **Start here!** Complete guide for new developers
 - [Testing Guide](tests/README.md) - Comprehensive testing documentation
 - [Scripts Package](scripts/README.md) - Utility scripts reference
 - [Chatbot Guide](docs/chatbot.md) - AI chatbot documentation

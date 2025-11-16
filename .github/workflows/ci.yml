@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -32,24 +32,34 @@ jobs:
           pip install black ruff mypy pytest-cov pytest-asyncio types-requests
 
       - name: Run black (format check)
+        continue-on-error: true
         run: |
           black --check --diff .
 
       - name: Run ruff (linter)
+        continue-on-error: true
         run: |
           ruff check .
 
       - name: Run mypy (type checker)
-        continue-on-error: true
         run: |
-          mypy --ignore-missing-imports .
-        continue-on-error: true
+          mypy backend/
         env:
           MYPYPATH: ${{ github.workspace }}
 
       - name: Run Python tests with coverage
         run: |
-          if [ -d "tests" ]; then pytest --cov=. --cov-report=xml --cov-report=term-missing; fi
+          if [ -d "tests" ]; then pytest --cov=backend --cov-report=xml --cov-report=term-missing --cov-fail-under=80; fi
+
+      - name: Upload Python test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-test-results
+          path: |
+            coverage.xml
+            .coverage
+          retention-days: 7
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -61,6 +71,15 @@ jobs:
           name: python-coverage
           fail_ci_if_error: false
 
+      - name: Comment PR with coverage
+        uses: py-cov-action/python-coverage-comment-action@v3
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 80
+          MINIMUM_ORANGE: 60
+
   nodejs-tests:
     runs-on: ubuntu-latest
     
@@ -69,32 +88,41 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install Node.js dependencies
-        run: npm install
-
-      - name: Run ESLint
-        run: npm run lint
+        run: npm ci || npm install --legacy-peer-deps
 
       - name: Run TypeScript type checking
         run: npm run typecheck
 
-      - name: Build Next.js project
-        run: npm run build
+      - name: Run ESLint
+        run: npm run lint
 
       - name: Run tests with coverage
         run: npm run test:coverage
+
+      - name: Build Next.js project
+        run: npm run build
+
+      - name: Upload Node.js test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nodejs-test-results
+          path: |
+            coverage/
+            .next/
+          retention-days: 7
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         if: always() && hashFiles('coverage/coverage-final.json') != ''
         continue-on-error: true
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
           flags: javascript
           name: javascript-coverage

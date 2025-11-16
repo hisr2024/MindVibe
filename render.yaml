@@ -4,7 +4,7 @@ services:
     name: mindvibe-api
     env: python
     runtime: python
-    plan: free
+    plan: standard
     region: oregon
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
@@ -22,10 +22,13 @@ services:
       - key: PYTHONPATH
         value: "."
     healthCheckPath: /
+    healthCheckProtocol: http
+    healthCheckTimeout: 30
+    maxConnections: 20
 
 databases:
   # PostgreSQL Database
   - name: mindvibe-db
-    plan: free
+    plan: standard
     databaseName: mindvibe
     user: navi

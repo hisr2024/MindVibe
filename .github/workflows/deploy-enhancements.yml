@@ -1,0 +1,45 @@
+name: Deploy Enhancement Features
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v5
+    
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run tests before deploy
+      run: python -m pytest tests/unit/ -v
+    
+    - name: Deploy to Fly.io
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      run: |
+        curl -L https://fly.io/install.sh | sh
+        /root/.fly/bin/flyctl deploy
+    
+    - name: Health check Fly.io
+      run: |
+        sleep 10
+        curl -f https://mindvibe.fly.dev/monitoring/health || exit 1
+    
+    - name: Deploy to Render
+      env:
+        RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      run: curl $RENDER_DEPLOY_HOOK
+    
+    - name: Deployment Success
+      run: echo "✅ Enhancement services deployed successfully!"
