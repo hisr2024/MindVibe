@@ -18,27 +18,27 @@ python_functions = ["test_*"]
 addopts = [
     "-v",
     "--strict-markers",
-    "--cov=.",
+    "--cov=backend",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
+    "--cov-fail-under=80",
 ]
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["."]
+source = ["backend"]
 omit = [
-    "tests/*",
+    "*/tests/*",
     "*/migrations/*",
-    "*/scripts/*",
-    "*/data/*",
-    "*/__pycache__/*",
-    "*/node_modules/*",
-    ".venv/*",
-    "venv/*",
+    "*/__init__.py",
 ]
 
 [tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 80.0
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

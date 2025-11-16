@@ -159,6 +159,52 @@ Current test coverage focuses on:
 - **Services**: WisdomKnowledgeBase (sanitization, queries, search, formatting)
 - **API Routes**: Moods, Journal, Content endpoints
 
+### Coverage Requirements
+
+**Minimum coverage threshold: 80%**
+
+The project enforces a minimum code coverage of 80% for the `backend/` directory. This is configured in `pyproject.toml`:
+
+```toml
+[tool.coverage.report]
+fail_under = 80.0
+```
+
+To check coverage locally:
+```bash
+# Run tests with coverage report
+pytest --cov=backend --cov-report=html --cov-report=term-missing
+
+# View HTML report
+open htmlcov/index.html
+```
+
+The CI/CD pipeline will automatically fail if coverage drops below 80%.
+
+### Type Checking with mypy
+
+**Strict mode enforcement**
+
+The project uses mypy in strict mode for type checking. All Python code in the `backend/` directory must have type annotations.
+
+Configuration in `mypy.ini`:
+```ini
+[mypy]
+strict = True
+disallow_untyped_defs = True
+# ... other strict settings
+
+[mypy-tests.*]
+disallow_untyped_defs = False  # Tests are exempt from strict typing
+```
+
+To run type checking locally:
+```bash
+mypy backend/
+```
+
+The CI/CD pipeline will fail if mypy type checks don't pass.
+
 ### Coverage Reports
 
 After running tests with coverage, you can view:
@@ -194,8 +240,21 @@ The GitHub Actions CI workflow automatically runs tests on:
 
 The workflow is defined in `.github/workflows/ci.yml` and includes:
 - Python dependency installation
-- Running mypy for type checking
+- Running mypy in **strict mode** for type checking (mandatory, builds fail on errors)
 - Running pytest for unit and integration tests
+- **Code coverage enforcement** (minimum 80% required)
+- Coverage reporting to PR comments
+- Upload coverage reports to Codecov
+
+### CI/CD Quality Gates
+
+The following quality gates are enforced:
+
+1. **Type Checking**: All code must pass mypy strict mode checks
+2. **Code Coverage**: Minimum 80% coverage for `backend/` directory
+3. **Test Passing**: All tests must pass
+
+If any of these gates fail, the CI/CD pipeline will fail and the PR cannot be merged.
 
 ## Best Practices
 

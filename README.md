@@ -223,6 +223,35 @@ Visit `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc`
 
 MindVibe has a comprehensive test suite with **100% updated imports** for the new backend structure.
 
+## Testing Standards
+
+### Code Coverage
+- Minimum coverage: **80%**
+- Run tests: `pytest --cov=backend --cov-report=html`
+- View report: `open htmlcov/index.html`
+- CI/CD enforces coverage threshold
+
+### Type Checking
+- Uses mypy in **strict mode**
+- Run: `mypy backend/`
+- All functions must have type annotations
+- CI/CD enforces type checking
+
+### Running Quality Checks
+```bash
+# Run all tests with coverage
+pytest --cov=backend --cov-report=html
+
+# Type checking
+mypy backend/
+
+# Linting
+ruff check backend/ --fix
+
+# Formatting
+black backend/
+```
+
 ### **Run All Tests:**
 
 ```bash
