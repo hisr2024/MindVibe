@@ -470,28 +470,47 @@ async def wisdom_consultation(
             ]
         )
 
-        system_prompt = """You are a Gita wisdom guide helping people with life challenges.
-Provide practical, compassionate guidance based on Gita teachings in accessible modern language.
+        system_prompt = """You are a Bhagavad Gita wisdom guide helping people with life challenges.
+You MUST base ALL responses ONLY on the Bhagavad Gita verses provided to you.
 
-IMPORTANT:
-- Be respectful and inclusive
-- Focus on universal principles
-- Provide actionable advice
-- Keep responses concise (2-3 paragraphs)
+CRITICAL REQUIREMENTS:
+- ONLY provide guidance based on the specific Gita verses provided
+- EVERY response MUST explicitly reference which Gita principle/verse it uses
+- FORBID any advice not grounded in the provided Gita wisdom
+- MANDATORY structured response format (see below)
+- Quote or paraphrase the Gita verses provided
+- Draw ONLY from provided verses - no generic advice
+
+MANDATORY RESPONSE STRUCTURE:
+**Ancient Wisdom Principle:** [Specific Gita concept from the verses provided - cite chapter.verse]
+**Modern Application:** [How this Gita teaching applies to the user's situation]
+**Practical Steps:** [Action items based ONLY on Gita guidance from the verses]
+**Deeper Understanding:** [Philosophical insight from the Gita verses provided]
+
+ABSOLUTE RULES:
+- Every piece of advice must trace back to a provided verse
+- No generic advice without clear Gita foundation
+- Reference specific verses (chapter.verse format)
+- Be compassionate while staying true to Gita principles
 """
 
         user_prompt = f"""User's Question: {query}
 
-Relevant Gita Verses:
+Bhagavad Gita Verses Provided:
 {verse_context}
 
-Provide guidance that:
-1. Addresses their concern directly
-2. Explains relevant Gita principles
-3. Offers practical steps
-4. Is encouraging and supportive
+MANDATORY REQUIREMENTS:
+1. Use ONLY the Gita verses provided above - no other sources
+2. Follow the MANDATORY RESPONSE STRUCTURE exactly:
+   **Ancient Wisdom Principle:** [Extract specific concept from verses with chapter.verse]
+   **Modern Application:** [Apply to user's situation]
+   **Practical Steps:** [Based on Gita guidance only]
+   **Deeper Understanding:** [Philosophical insight from verses]
+3. Quote or reference the specific verses provided
+4. Every suggestion must trace to a provided verse
+5. Be compassionate while staying true to Gita wisdom
 
-Response:"""
+Response (following the structure above):"""
 
         response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -511,18 +530,125 @@ Response:"""
 def generate_template_gita_response(
     query: str, verses: list[GitaVerse], language: str
 ) -> str:
-    """Generate template-based response when OpenAI is unavailable."""
+    """Generate template-based Gita response when OpenAI is unavailable.
+    
+    All responses are 100% derived from Bhagavad Gita principles with structured format.
+    """
     if not verses:
-        return "The Gita teaches us to remain steady in the face of challenges. Focus on your duty, act with wisdom, and trust in the process of growth."
+        return """**Ancient Wisdom Principle:** The Bhagavad Gita teaches in Chapter 2, Verse 47 that we have the right to perform our duties, but not to the fruits of our actions.
+
+**Modern Application:** When facing challenges without specific guidance, the Gita's fundamental teaching applies: focus on right action with detachment from outcomes.
+
+**Practical Steps:**
+1. Identify your immediate duty (Svadharma) in this situation
+2. Perform it with full dedication without worrying about results
+3. Practice daily meditation to cultivate inner steadiness (Sthita-prajna)
+4. Study Gita teachings regularly for deeper understanding
+
+**Deeper Understanding:** The Gita reveals that suffering comes from attachment to outcomes. By focusing on righteous action (Dharma) and releasing attachment to fruits, you find both peace and effectiveness."""
 
     top_verse = verses[0]
+    verse_ref = f"{top_verse.chapter}.{top_verse.verse}"
+    verse_preview = top_verse.english[:150] if len(top_verse.english) > 150 else top_verse.english
+    
+    # 100% Gita-derived structured responses
     theme_responses = {
-        "action_without_attachment": "The Gita teaches the principle of performing your duties without attachment to outcomes. Focus on giving your best effort while releasing anxiety about results. This mental freedom allows you to work with clarity and peace.",
-        "equanimity": "Maintaining mental balance is key to inner peace. The Gita guides us to remain steady through life's ups and downs, treating success and failure equally. This equanimity comes from inner strength, not external circumstances.",
-        "self_knowledge": "Understanding your true nature is essential for peace. The Gita teaches that you are more than your circumstances, thoughts, or emotions. Connect with this deeper awareness through reflection and mindfulness.",
+        "action_without_attachment": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches Nishkama Karma - action without attachment to fruits. The verse states: "{verse_preview}..."
+
+**Modern Application:** Your concern relates directly to this cornerstone Gita teaching. Anxiety and dissatisfaction arise from attachment to outcomes rather than dedication to duty itself.
+
+**Practical Steps:**
+1. Perform your responsibilities (Karma) with excellence as an offering
+2. Release mental attachment to specific results - they are not in your control
+3. Find fulfillment in the quality and righteousness of your action, not in outcomes
+4. Practice viewing both success and failure as teachers on your spiritual path
+
+**Deeper Understanding:** The Gita teaches (2.47) that attachment to fruits of action is the root cause of anxiety. By performing duty without desire for reward, you achieve Karma Yoga - action that purifies the mind and leads to liberation.""",
+
+        "equanimity": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches Samatvam (equanimity) - mental equilibrium in all circumstances. The verse teaches: "{verse_preview}..."
+
+**Modern Application:** The Gita's teaching of Samatvam addresses your situation directly. True stability comes from inner balance, not controlling external circumstances.
+
+**Practical Steps:**
+1. Practice Samatvam: witness success and failure with equal mind (Gita 2.48)
+2. Recognize the temporary nature of all external conditions (Anitya)
+3. Cultivate the observer perspective - you are the witness, not the circumstances
+4. Daily meditation to establish yourself in your unchanging true nature (Atman)
+
+**Deeper Understanding:** Gita 2.48 defines Yoga itself as Samatvam - equanimity. This balanced mind is not indifference but wisdom that sees beyond dualities to the unchanging Self within all change.""",
+
+        "self_knowledge": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches Atma-Jnana (Self-knowledge) as the path to liberation. The verse reveals: "{verse_preview}..."
+
+**Modern Application:** The Gita's teaching on knowing your true Self applies to your situation. You are experiencing life through identification with what changes; the Gita points to what never changes.
+
+**Practical Steps:**
+1. Practice self-inquiry (Atma-Vichara): distinguish between the Self and non-Self
+2. Study Gita Chapter 13 on the Field and Knower of the Field
+3. Meditate daily to experience yourself as the witness of thoughts/emotions
+4. Recognize: "I am not this body, mind, or circumstances - I am the eternal Atman"
+
+**Deeper Understanding:** Gita 13.1-2 teaches discrimination between Kshetra (field of body-mind) and Kshetrajna (the knower/Self). This Self-knowledge is the supreme wisdom that liberates from all suffering.""",
+
+        "mind_control": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches that the mind is restless (Chanchal) but can be controlled through Abhyasa (practice) and Vairagya (detachment). The verse states: "{verse_preview}..."
+
+**Modern Application:** The Gita acknowledges your experience - mind control is difficult but achievable through the specific methods taught by Krishna.
+
+**Practical Steps:**
+1. Abhyasa: Practice regular meditation daily, even if briefly at first
+2. Vairagya: Cultivate detachment by observing thoughts without following them
+3. Use the breath or a mantra as an anchor when mind wanders (Gita 6.26)
+4. Be patient - Gita 6.35 promises mastery through persistent practice
+
+**Deeper Understanding:** Gita 6.5-6 teaches the mind can be your best friend or worst enemy. Through Abhyasa and Vairagya, you transform the mind from obstacle to ally on the path to Self-realization.""",
+
+        "duty": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches Svadharma - performing one's own duty, even imperfectly, is better than another's duty well performed. The verse teaches: "{verse_preview}..."
+
+**Modern Application:** The Gita's teaching on duty (Dharma) addresses your situation. Confusion about responsibilities is resolved by understanding and performing your Svadharma.
+
+**Practical Steps:**
+1. Identify your Svadharma based on your nature, abilities, and life situation
+2. Perform it wholeheartedly, even if imperfectly (Gita 18.47-48)
+3. Don't abandon your duty out of fear or difficulty
+4. Offer your actions as service, transforming duty into spiritual practice
+
+**Deeper Understanding:** Gita 3.35 and 18.47 teach that one's own duty, though lesser, is preferable to another's. Performing Svadharma without attachment purifies the mind and leads to liberation.""",
+
+        "perseverance": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches about persistent practice (Abhyasa) and not giving up on the spiritual path. The verse reveals: "{verse_preview}..."
+
+**Modern Application:** The Gita directly addresses challenges in sustaining effort. Progress requires Abhyasa - dedicated, continuous practice over time.
+
+**Practical Steps:**
+1. Commit to daily practice, however small (consistency matters more than intensity)
+2. When you fall, rise immediately without self-condemnation (Gita 6.24)
+3. Remember Gita 2.40: no effort on this path is ever wasted
+4. Trust the process - results come through sustained practice, not perfection
+
+**Deeper Understanding:** Gita 6.23-24 teaches perseverance (Asanshayam) in yoga practice. Chapter 2.40 promises that no sincere effort toward Self-realization is lost - it protects you from the greatest fear.""",
+
+        "detachment": f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} teaches Vairagya (detachment) - freedom from compulsive desire and aversion. The verse states: "{verse_preview}..."
+
+**Modern Application:** The Gita's teaching on detachment applies to your situation. True freedom comes not from having what you want but from releasing compulsive grasping.
+
+**Practical Steps:**
+1. Practice discrimination (Viveka) between what is eternal and temporary
+2. Observe your desires and aversions without acting on them compulsively
+3. Enjoy experiences that come naturally without chasing or clinging (Gita 3.34)
+4. Cultivate contentment (Santosha) with what you have while performing duty
+
+**Deeper Understanding:** Gita 2.62-63 describes how attachment leads to desire, then anger, delusion, and destruction. Vairagya breaks this chain, establishing you in wisdom and peace.""",
     }
 
     return theme_responses.get(
         top_verse.theme,
-        f"The Gita's wisdom on {top_verse.theme.replace('_', ' ')} offers guidance for your situation. Focus on steady practice, self-awareness, and balanced action. Remember that growth is a gradual process - be patient with yourself.",
+        f"""**Ancient Wisdom Principle:** Bhagavad Gita {verse_ref} offers timeless wisdom: "{verse_preview}..."
+
+**Modern Application:** This Gita teaching applies to your situation by revealing eternal principles that transcend time and circumstance.
+
+**Practical Steps:**
+1. Study the Gita verse relevant to your concern in depth
+2. Practice meditation (Dhyana) to internalize the teaching
+3. Apply the principle in your daily life consistently
+4. Seek guidance from those learned in Gita wisdom for deeper understanding
+
+**Deeper Understanding:** The Bhagavad Gita addresses all human challenges through eternal wisdom about the Self, duty, devotion, and knowledge. Your situation is an opportunity to apply these sacred teachings and discover your true nature.""",
     )
