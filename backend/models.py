@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 import datetime
-
 from sqlalchemy import JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
 
 class SoftDeleteMixin:
     deleted_at: Mapped[datetime.datetime | None] = mapped_column(
@@ -21,24 +18,19 @@ class SoftDeleteMixin:
     def not_deleted(cls, query):
         return query.filter(cls.deleted_at.is_(None))
 
-
 class Base(DeclarativeBase):
     pass
-
 
 class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     auth_uid: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    email: Mapped[str] = mapped_column(
-        String(256), unique=True, index=True, nullable=True
-    )
+    email: Mapped[str] = mapped_column(String(256), unique=True, index=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="en")
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
 
 class Mood(SoftDeleteMixin, Base):
     __tablename__ = "moods"
@@ -53,7 +45,6 @@ class Mood(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True), server_default=func.now()
     )
 
-
 class EncryptedBlob(SoftDeleteMixin, Base):
     __tablename__ = "journal_blobs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -65,7 +56,6 @@ class EncryptedBlob(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True), server_default=func.now()
     )
 
-
 class ContentPack(SoftDeleteMixin, Base):
     __tablename__ = "content_packs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -74,7 +64,6 @@ class ContentPack(SoftDeleteMixin, Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
 
 class WisdomVerse(SoftDeleteMixin, Base):
     __tablename__ = "wisdom_verses"
@@ -89,10 +78,12 @@ class WisdomVerse(SoftDeleteMixin, Base):
     context: Mapped[str] = mapped_column(Text)
     mental_health_applications: Mapped[dict] = mapped_column(JSON)
     embedding: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Domain tagging for psychological categorization
+    primary_domain: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    secondary_domains: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
 
 class GitaChapter(Base):
     __tablename__ = "gita_chapters"
@@ -110,7 +101,6 @@ class GitaChapter(Base):
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
-
 class GitaSource(Base):
     __tablename__ = "gita_sources"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -121,7 +111,6 @@ class GitaSource(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
 
 class GitaVerse(Base):
     __tablename__ = "gita_verses"
@@ -153,7 +142,6 @@ class GitaVerse(Base):
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
-
 class GitaModernContext(Base):
     __tablename__ = "gita_modern_contexts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -163,16 +151,13 @@ class GitaModernContext(Base):
     application_area: Mapped[str] = mapped_column(String(256), index=True)
     description: Mapped[str] = mapped_column(Text)
     examples: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    mental_health_benefits: Mapped[list[str] | None] = mapped_column(
-        JSON, nullable=True
-    )
+    mental_health_benefits: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
-
 
 class GitaKeyword(Base):
     __tablename__ = "gita_keywords"
@@ -183,7 +168,6 @@ class GitaKeyword(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
 
 class GitaVerseKeyword(Base):
     __tablename__ = "gita_verse_keywords"
@@ -197,7 +181,6 @@ class GitaVerseKeyword(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
 
 class Session(Base):
     __tablename__ = "sessions"
@@ -219,7 +202,6 @@ class Session(Base):
     )
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
-
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
