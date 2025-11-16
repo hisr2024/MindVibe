@@ -6,7 +6,7 @@ AI-powered guidance, verse lookup, semantic search, and theme browsing.
 
 import os
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import distinct, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,9 +27,7 @@ class WisdomQueryRequest(BaseModel):
         pattern="^(english|hindi|sanskrit)$",
         description="Preferred language",
     )
-    context_type: str | None = Field(
-        default=None, description="Optional context type"
-    )
+    context_type: str | None = Field(default=None, description="Optional context type")
 
 
 class VerseReference(BaseModel):
@@ -128,6 +126,7 @@ class ThemeInfo(BaseModel):
 class ThemeResponse(BaseModel):
     """Response model for theme browsing."""
 
+
 @router.get("/chapters", response_model=list[ChapterInfo])
 async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[dict]:
     """
@@ -144,7 +143,11 @@ async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[dict]:
     metadata = CHAPTER_METADATA[chapter_id]
 
     # Get verses for this chapter
-    query = select(GitaVerse).where(GitaVerse.chapter == chapter_id).order_by(GitaVerse.verse)
+    query = (
+        select(GitaVerse)
+        .where(GitaVerse.chapter == chapter_id)
+        .order_by(GitaVerse.verse)
+    )
     result = await db.execute(query)
     verses = list(result.scalars().all())
 
@@ -161,7 +164,9 @@ async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[dict]:
     ]
 
     # Get unique themes in this chapter
-    themes_query = select(distinct(GitaVerse.theme)).where(GitaVerse.chapter == chapter_id)
+    themes_query = select(distinct(GitaVerse.theme)).where(
+        GitaVerse.chapter == chapter_id
+    )
     themes_result = await db.execute(themes_query)
     themes = [row[0] for row in themes_result.all()]
 
@@ -246,6 +251,7 @@ async def get_verse(
 
     return VerseResponse(verse=verse_detail, related_verses=related_refs)
 
+
 @router.post("/search")
 async def semantic_search(
     query: WisdomRequest, db: AsyncSession = Depends(get_db)
@@ -273,10 +279,7 @@ async def semantic_search(
     # Get paginated results
     offset = (page - 1) * page_size
     search_query = (
-        select(GitaVerse)
-        .where(*search_conditions)
-        .offset(offset)
-        .limit(page_size)
+        select(GitaVerse).where(*search_conditions).offset(offset).limit(page_size)
     )
     result = await db.execute(search_query)
     verses = list(result.scalars().all())
@@ -339,11 +342,7 @@ async def browse_themes(
     themes_info = []
     for theme_id, count in theme_rows:
         # Get example verses for this theme
-        example_query = (
-            select(GitaVerse)
-            .where(GitaVerse.theme == theme_id)
-            .limit(3)
-        )
+        example_query = select(GitaVerse).where(GitaVerse.theme == theme_id).limit(3)
         example_result = await db.execute(example_query)
         examples = list(example_result.scalars().all())
 

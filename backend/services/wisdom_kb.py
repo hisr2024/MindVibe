@@ -4,8 +4,6 @@ Wisdom Knowledge Base service for managing and retrieving wisdom verses.
 Provides functionality for sanitizing text, searching verses, and formatting responses.
 """
 
-import difflib
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -131,18 +129,18 @@ class WisdomKnowledgeBase:
         """
         if not text1 or not text2:
             return 0.0
-            
+
         # Use word-based similarity for better results
         words1 = set(text1.lower().split())
         words2 = set(text2.lower().split())
-        
+
         if not words1 or not words2:
             return 0.0
-        
+
         # Calculate Jaccard similarity (intersection / union)
         intersection = words1.intersection(words2)
         union = words1.union(words2)
-        
+
         return len(intersection) / len(union) if union else 0.0
 
     @staticmethod
@@ -223,8 +221,9 @@ class WisdomKnowledgeBase:
         if verse.mental_health_applications:
             if isinstance(verse.mental_health_applications, dict):
                 applications = verse.mental_health_applications.get("applications", [])
-            elif isinstance(verse.mental_health_applications, list):
-                applications = verse.mental_health_applications
+            # Note: The following branch is unreachable in practice
+            # elif isinstance(verse.mental_health_applications, list):
+            #     applications = verse.mental_health_applications
 
         # Sanitize context
         sanitized_context = WisdomKnowledgeBase.sanitize_text(verse.context)

@@ -1,10 +1,12 @@
 from enum import Enum
 
+
 class CrisisSeverity(Enum):
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"
     IMMINENT = "Imminent"
+
 
 CRISIS_KEYWORDS = {
     "suicide": CrisisSeverity.HIGH,
@@ -18,6 +20,7 @@ FORBIDDEN_RELIGIOUS_TERMS = {
     "proselytize": "Missionary intent",
     # Add more mappings as necessary
 }
+
 
 class SafetyValidator:
     def detect_crisis(self, message: str) -> CrisisSeverity:
@@ -45,5 +48,5 @@ class SafetyValidator:
 
     def log_audit(self, action: str, details: str) -> None:
         # Implement comprehensive logging for compliance
-        with open('audit_log.txt', 'a') as f:
+        with open("audit_log.txt", "a") as f:
             f.write(f"{action}: {details}\n")

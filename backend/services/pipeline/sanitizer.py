@@ -26,10 +26,10 @@ class TextSanitizer:
     def sanitize(cls, text: str | None) -> str | None:
         """
         Sanitize text by replacing religious terms with universal alternatives.
-        
+
         Args:
             text: Text to sanitize (can be None)
-            
+
         Returns:
             Sanitized text or None if input was None
         """
@@ -49,10 +49,10 @@ class TextSanitizer:
     def sanitize_verse_data(cls, verse: dict) -> dict:
         """
         Sanitize all text fields in a verse dictionary.
-        
+
         Args:
             verse: Verse dictionary with text fields
-            
+
         Returns:
             New dictionary with sanitized text fields
         """
@@ -73,24 +73,24 @@ class TextSanitizer:
     def normalize_whitespace(cls, text: str) -> str:
         """
         Normalize whitespace in text.
-        
+
         Args:
             text: Text to normalize
-            
+
         Returns:
             Text with normalized whitespace
         """
         # Replace multiple spaces with single space and strip
-        return re.sub(r'\s+', ' ', text).strip()
+        return re.sub(r"\s+", " ", text).strip()
 
     @classmethod
     def standardize_punctuation(cls, text: str) -> str:
         """
         Ensure text ends with proper punctuation.
-        
+
         Args:
             text: Text to standardize
-            
+
         Returns:
             Text with standardized punctuation
         """
@@ -98,7 +98,7 @@ class TextSanitizer:
             return text
 
         # If text doesn't end with punctuation, add a period
-        if text.rstrip()[-1] not in '.!?':
-            return text.rstrip() + '.'
+        if text.rstrip()[-1] not in ".!?":
+            return text.rstrip() + "."
 
         return text

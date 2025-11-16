@@ -29,6 +29,6 @@ class MonitoringService:
             "performance_metrics": self.performance_metrics,
             "api_status": self.api_status,
             "error_log": self.error_log,
-            "health_status": self.health_status
+            "health_status": self.health_status,
         }
         return report_data

@@ -10,7 +10,7 @@ class ActionPlanGenerator:
             "Step 1: Identify a specific behavior to activate.",
             "Step 2: Set a realistic goal related to the behavior.",
             "Step 3: Plan when and how to engage in the behavior.",
-            "Step 4: Reflect on progress after the activity."
+            "Step 4: Reflect on progress after the activity.",
         ]
 
     def habit_structuring(self, habit):

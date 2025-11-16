@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-11-16T19:54:26Z",
+  "generated_at": "2025-11-16T20:00:30Z",
   "metrics": {
     "_totals": {
       "CONFIDENCE.HIGH": 0,
@@ -11,7 +11,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3768,
+      "loc": 3946,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -50,7 +50,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 22,
+      "loc": 21,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -63,7 +63,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 115,
+      "loc": 117,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -76,7 +76,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 205,
+      "loc": 209,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -141,7 +141,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 71,
+      "loc": 88,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -180,7 +180,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 413,
+      "loc": 410,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -219,7 +219,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 20,
+      "loc": 16,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -258,7 +258,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 45,
+      "loc": 44,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -336,7 +336,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 70,
+      "loc": 90,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -349,7 +349,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 481,
+      "loc": 477,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -362,7 +362,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 53,
+      "loc": 81,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -401,7 +401,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 246,
+      "loc": 262,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -414,7 +414,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 180,
+      "loc": 206,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -440,7 +440,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 103,
+      "loc": 109,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -479,7 +479,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 256,
+      "loc": 331,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -492,64 +492,10 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 187,
+      "loc": 184,
       "nosec": 0,
       "skipped_tests": 0
     }
   },
-  "results": [
-    {
-      "code": "203 \n204     return LoginOut(\n205         access_token=access_token,\n206         token_type=\"bearer\",\n207         session_id=str(session.id),\n208         expires_in=expires_in_seconds,\n209         user_id=user.id,\n210         email=user.email,\n211     )\n212 \n",
-      "col_offset": 11,
-      "end_col_offset": 5,
-      "filename": "backend/routes/auth.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 259,
-        "link": "https://cwe.mitre.org/data/definitions/259.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Possible hardcoded password: 'bearer'",
-      "line_number": 204,
-      "line_range": [
-        204,
-        205,
-        206,
-        207,
-        208,
-        209,
-        210,
-        211
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
-      "test_id": "B106",
-      "test_name": "hardcoded_password_funcarg"
-    },
-    {
-      "code": "403 \n404     return RefreshOut(\n405         access_token=access_token,\n406         token_type=\"bearer\",\n407         expires_in=expires_in_seconds,\n408         session_id=str(session_row.id),\n409         refresh_token=new_raw if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None,\n410     )\n",
-      "col_offset": 11,
-      "end_col_offset": 5,
-      "filename": "backend/routes/auth.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 259,
-        "link": "https://cwe.mitre.org/data/definitions/259.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Possible hardcoded password: 'bearer'",
-      "line_number": 404,
-      "line_range": [
-        404,
-        405,
-        406,
-        407,
-        408,
-        409,
-        410
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
-      "test_id": "B106",
-      "test_name": "hardcoded_password_funcarg"
-    }
-  ]
+  "results": []
 }
