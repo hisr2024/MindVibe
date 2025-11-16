@@ -1,4 +1,4 @@
-# Stage 1: backend-base
+# Backend-only Docker configuration for AI Mental-Wellness Coach services
 FROM python:3.11-slim AS backend-base
 
 # Install system dependencies
@@ -22,55 +22,3 @@ HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
 
 # Run the FastAPI application
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# Stage 2: frontend-deps
-FROM node:20-alpine AS frontend-deps
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json from root
-COPY package.json package-lock.json* ./
-
-# Install all dependencies (including dev for build)
-RUN npm ci || npm install
-
-# Stage 3: frontend-builder
-FROM node:20-alpine AS frontend-builder
-
-# Set the working directory
-WORKDIR /app
-
-# Copy node_modules from deps stage
-COPY --from=frontend-deps /app/node_modules ./node_modules
-
-# Copy all frontend application code from root
-COPY package.json next.config.js tsconfig.json tailwind.config.ts postcss.config.js ./
-COPY app/ ./app/
-COPY lib/ ./lib/
-COPY public/ ./public/
-
-# Disable Next.js telemetry
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Build the Next.js application
-RUN npm run build
-
-# Stage 4: frontend-runner
-FROM node:20-alpine AS frontend-runner
-
-# Set the working directory
-WORKDIR /app
-
-# Copy built .next, package.json, public and node_modules from builder
-COPY --from=frontend-builder /app/.next ./.next
-COPY --from=frontend-builder /app/package.json ./package.json
-COPY --from=frontend-builder /app/public ./public
-COPY --from=frontend-builder /app/node_modules ./node_modules
-
-# Expose port and add health check
-EXPOSE 3000
-HEALTHCHECK CMD curl --fail http://localhost:3000/health || exit 1
-
-# Run the Next.js application
-CMD ["npm", "start"]
