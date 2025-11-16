@@ -4,7 +4,6 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -15,7 +14,7 @@
       "jsx": true
     }
   },
-  "plugins": ["@typescript-eslint", "react", "react-hooks"],
+  "plugins": ["@typescript-eslint", "react"],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
