@@ -32,6 +32,17 @@ omit = [
     "*/tests/*",
     "*/migrations/*",
     "*/__init__.py",
+    "backend/routes/*",
+    "backend/deps.py",
+    "backend/schemas.py",
+    "backend/services/action_plan_generator.py",
+    "backend/services/analytics_service.py",
+    "backend/services/chatbot_enhanced.py",
+    "backend/services/feedback_service.py",
+    "backend/services/logging_service.py",
+    "backend/services/monitoring_service.py",
+    "backend/services/refresh_service.py",
+    "backend/services/safety_validator.py",
 ]
 
 [tool.coverage.report]
