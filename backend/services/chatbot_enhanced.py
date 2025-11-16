@@ -5,7 +5,7 @@ class EnhancedChatbotService:
         self.conversation_history = []
         self.session_data = {}
 
-    async def chat(self, user_input: str):
+    async def chat(self, user_input: str) -> None:
         # Session management
         # Crisis detection
         # Domain routing

@@ -161,10 +161,14 @@ Your life has value. Please reach out for professional support right now. 💙""
             }
         
         principle_key = theme.get("principle")
-        principle_wisdom = self.wisdom_principles.get(principle_key, "")
+        if principle_key and isinstance(principle_key, str):
+            principle_wisdom = self.wisdom_principles.get(principle_key, "")
+        else:
+            principle_wisdom = ""
         
         # Get strategies
-        strategy_keys = theme.get("strategies", ["breathing", "meditation"])
+        strategy_keys_raw = theme.get("strategies", ["breathing", "meditation"])
+        strategy_keys = list(strategy_keys_raw) if strategy_keys_raw else []
         strategies_text = self._format_strategies(strategy_keys)
         
         # Build response

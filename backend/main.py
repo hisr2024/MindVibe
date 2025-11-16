@@ -3,7 +3,7 @@
 import os
 import sys
 import traceback
-from typing import Dict, Any
+from typing import Dict, Any, Callable, Awaitable
 
 # CRITICAL: Load environment variables BEFORE anything else
 from dotenv import load_dotenv
