@@ -150,5 +150,5 @@ async def api_health() -> dict[str, Any]:
 
 
 @app.options("/{full_path:path}")
-async def preflight(full_path: str):
+async def preflight(full_path: str):  # noqa: ARG001
     return {"status": "ok"}

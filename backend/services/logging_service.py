@@ -79,7 +79,7 @@ class LoggingService:
         )
 
     def get_audit_trail(
-        self, user_id: str | None = None, days: int = 30
+        self, user_id: str | None = None, days: int = 30  # noqa: ARG002
     ) -> list[dict[str, Any]]:
         """Get audit trail"""
         trail = self.audit_trail

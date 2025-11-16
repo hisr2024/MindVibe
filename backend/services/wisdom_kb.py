@@ -218,9 +218,10 @@ class WisdomKnowledgeBase:
 
         # Extract applications list from mental_health_applications
         applications = []
-        if verse.mental_health_applications:
-            if isinstance(verse.mental_health_applications, dict):
-                applications = verse.mental_health_applications.get("applications", [])
+        if verse.mental_health_applications and isinstance(
+            verse.mental_health_applications, dict
+        ):
+            applications = verse.mental_health_applications.get("applications", [])
             # Note: The following branch is unreachable in practice
             # elif isinstance(verse.mental_health_applications, list):
             #     applications = verse.mental_health_applications

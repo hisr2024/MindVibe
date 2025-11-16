@@ -1,6 +1,7 @@
 """Core pipeline orchestration module."""
 
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
 from backend.services.pipeline.enricher import MetadataEnricher
 from backend.services.pipeline.sanitizer import TextSanitizer

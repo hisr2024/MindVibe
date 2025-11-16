@@ -189,7 +189,7 @@ I can see you're in significant pain right now. Professional help is available i
 
 **CALL NOW:**
 🚨 National Suicide Prevention Lifeline: 988 (US)
-🚨 Crisis Text Line: Text HOME to 741741  
+🚨 Crisis Text Line: Text HOME to 741741
 🚨 International Crisis Lines: findahelpline.com
 
 **YOU ARE NOT ALONE:**
@@ -353,7 +353,7 @@ Who's one person you could reach out to today? 💙""",
             concern, "I'm here to support you. What specific help would you like?"
         )
 
-    def _validate_and_deepen(self, concern: str) -> str:
+    def _validate_and_deepen(self, concern: str) -> str:  # noqa: ARG002
         """Validate struggle and deepen understanding"""
         return """I hear that you've been trying. That itself shows strength.
 
@@ -374,7 +374,7 @@ Focus not on fixing everything, but on surviving this moment with compassion tow
 
 You're doing better than you think. Would you like to explore what professional support might look like? 💙"""
 
-    def _reinforce_progress(self, concern: str) -> str:
+    def _reinforce_progress(self, concern: str) -> str:  # noqa: ARG002
         """Reinforce and build on progress"""
         return """I'm genuinely glad to hear that. Progress is happening.
 
