@@ -25,6 +25,7 @@ print("=" * 60)
 # Test 1: Import models
 print("\n[1/6] Testing model imports...")
 try:
+    from backend.models import WisdomVerse
 
     print("✓ WisdomVerse model imported successfully")
 except Exception as e:

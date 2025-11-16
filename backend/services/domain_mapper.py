@@ -273,15 +273,35 @@ class DomainMapper:
         query_lower = query.lower()
         scores = {}
 
+        # Additional query-specific patterns
+        query_patterns = {
+            "self_understanding": ["understand myself", "understand my", "know myself", "thoughts better", "self-awareness", "self awareness"],
+            "action_discipline": ["discipline", "motivation", "take action", "need to act", "get things done", "be productive"],
+            "equanimity": ["anxious", "anxiety", "balance", "stability", "emotional", "calm down", "manage emotions", "worried", "fear"],
+            "knowledge_insight": ["knowledge", "wisdom", "learn", "understand", "insight", "teach me"],
+            "values_service": ["help others", "live my values", "values", "service", "giving back", "contribute"],
+            "meditation_attention": ["meditation", "meditate", "focus", "concentration", "attention", "mindfulness", "be present"],
+            "resilience": ["persevere", "keep going", "strength", "difficulty", "challenge", "tough times", "resilience"],
+            "interconnectedness": ["connected", "connection", "empathy", "empathetic", "relationships", "unity", "wholeness", "feel alone"],
+            "cognitive_flexibility": ["let go", "letting go", "stuck", "rigid", "flexible", "adapt", "change perspective"],
+        }
+
         # Score each domain based on keyword matches
         for domain_key, domain_info in self.DOMAINS.items():
             score = 0
             keywords = domain_info.get("keywords", [])
 
+            # Check domain keywords
             for keyword in keywords:
                 if keyword.lower() in query_lower:
                     # Weight longer keywords more heavily
-                    score += len(keyword.split())
+                    score += len(keyword.split()) * 2
+
+            # Check query-specific patterns (higher weight)
+            if domain_key in query_patterns:
+                for pattern in query_patterns[domain_key]:
+                    if pattern.lower() in query_lower:
+                        score += len(pattern.split()) * 3
 
             scores[domain_key] = score
 

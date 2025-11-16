@@ -2,7 +2,7 @@
 Integration tests for complete ChatbotService with all 4 phases integrated
 """
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -58,7 +58,7 @@ class TestChatbotServiceIntegration:
         crisis_message = "I want to kill myself"
 
         # Mock the KB search to return empty (crisis takes priority)
-        with pytest.mock.patch.object(
+        with patch.object(
             chatbot.kb,
             "search_relevant_verses",
             return_value=[],
@@ -84,11 +84,11 @@ class TestChatbotServiceIntegration:
         session_id = "normal-test"
         message = "I feel anxious about my work"
 
-        with pytest.mock.patch.object(
+        with patch.object(
             chatbot.kb,
             "search_relevant_verses",
             return_value=[{"verse": sample_verse_with_domain, "score": 0.9}],
-        ), pytest.mock.patch.object(
+        ), patch.object(
             chatbot.kb,
             "format_verse_response",
             return_value={
@@ -131,11 +131,11 @@ class TestChatbotServiceIntegration:
         ]
 
         for i, message in enumerate(messages):
-            with pytest.mock.patch.object(
+            with patch.object(
                 chatbot.kb,
                 "search_relevant_verses",
                 return_value=[{"verse": sample_verse_with_domain, "score": 0.8}],
-            ), pytest.mock.patch.object(
+            ), patch.object(
                 chatbot.kb,
                 "format_verse_response",
                 return_value={"verse_id": "2.47", "text": "Test verse"},
@@ -162,7 +162,7 @@ class TestChatbotServiceIntegration:
         messages = ["Hello", "I need help", "Thank you"]
 
         for message in messages:
-            with pytest.mock.patch.object(
+            with patch.object(
                 chatbot.kb,
                 "search_relevant_verses",
                 return_value=[],
@@ -199,11 +199,11 @@ class TestChatbotServiceIntegration:
         verse_with_religious_terms.primary_domain = "knowledge_insight"
         verse_with_religious_terms.secondary_domains = []
 
-        with pytest.mock.patch.object(
+        with patch.object(
             chatbot.kb,
             "search_relevant_verses",
             return_value=[{"verse": verse_with_religious_terms, "score": 0.9}],
-        ), pytest.mock.patch.object(
+        ), patch.object(
             chatbot.kb,
             "format_verse_response",
             return_value={
@@ -252,11 +252,11 @@ class TestChatbotServiceIntegration:
             verse.context = "Test context"
             verse.mental_health_applications = {"applications": []}
 
-            with pytest.mock.patch.object(
+            with patch.object(
                 chatbot.kb,
                 "search_relevant_verses",
                 return_value=[{"verse": verse, "score": 0.9}],
-            ), pytest.mock.patch.object(
+            ), patch.object(
                 chatbot.kb,
                 "format_verse_response",
                 return_value={"verse_id": "1.1", "text": "Test"},
@@ -278,7 +278,7 @@ class TestChatbotServiceIntegration:
         session_id = "evidence-test"
         message = "I'm feeling anxious and worried"
 
-        with pytest.mock.patch.object(
+        with patch.object(
             chatbot.kb,
             "search_relevant_verses",
             return_value=[],

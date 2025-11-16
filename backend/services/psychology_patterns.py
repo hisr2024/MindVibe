@@ -171,7 +171,7 @@ class PsychologyPatterns:
             },
             "body_scan": {
                 "name": "Quick Body Scan",
-                "instruction": "Starting at your head, notice sensations moving down to your toes. Just observe without changing anything.",
+                "instruction": "Starting at your head, notice body sensations moving down to your toes. Just observe without changing anything.",
                 "purpose": "Reconnects you with physical presence, reduces rumination",
             },
             "physical_grounding": {
@@ -252,11 +252,11 @@ class PsychologyPatterns:
             List of values identification prompts
         """
         return [
-            "If you knew you couldn't fail, what would you do with your life?",
-            "What qualities do you admire most in others?",
-            "When have you felt most fulfilled? What were you doing?",
-            "What do you want people to remember about you?",
-            "What causes or issues do you care deeply about?",
+            "If you knew you couldn't fail, what would you do with your life? What values does that reveal?",
+            "What qualities do you admire most in others? These often reflect your values.",
+            "When have you felt most fulfilled? What values were you expressing?",
+            "What do you want people to remember about you? What values matter most?",
+            "What causes or issues do you care deeply about? What values drive that care?",
         ]
 
     def connect_action_to_values(self, action: str, value: str) -> str:
