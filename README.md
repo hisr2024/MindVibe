@@ -59,8 +59,8 @@ MindVibe/
 │   └── wisdom/               # Wisdom verses JSON
 ├── docs/                      # Documentation
 ├── migrations/                # Database migrations
-├── Dockerfile                 # Multi-stage Docker build
-├── docker-compose.yml         # Docker orchestration
+├── Dockerfile                 # Backend Docker build
+├── docker-compose.yml         # Docker orchestration (PostgreSQL + API)
 ├── render.yaml               # Render.com deployment config
 ├── requirements.txt          # Python dependencies
 └── package.json              # Node.js dependencies (frontend)
@@ -123,13 +123,13 @@ npm run dev
 git clone https://github.com/hisr2024/MindVibe.git
 cd MindVibe
 
-# 2. Start all services (PostgreSQL, Backend, Frontend)
+# 2. Start all services (PostgreSQL, Backend API)
 docker-compose up --build
 
 # Access the application:
-# - Backend: http://localhost:8000
+# - Backend API: http://localhost:8000
 # - API Docs: http://localhost:8000/docs
-# - Frontend: http://localhost:3000
+# - Health Check: http://localhost:8000/health
 
 # 3. Stop services
 docker-compose down
