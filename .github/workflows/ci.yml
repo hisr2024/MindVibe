@@ -42,15 +42,14 @@ jobs:
           ruff check .
 
       - name: Run mypy (type checker)
-        continue-on-error: true
         run: |
-          mypy --ignore-missing-imports .
+          mypy backend/
         env:
           MYPYPATH: ${{ github.workspace }}
 
       - name: Run Python tests with coverage
         run: |
-          if [ -d "tests" ]; then pytest --cov=. --cov-report=xml --cov-report=term-missing; fi
+          if [ -d "tests" ]; then pytest --cov=backend --cov-report=xml --cov-report=term-missing --cov-fail-under=80; fi
 
       - name: Upload Python test artifacts
         uses: actions/upload-artifact@v4
@@ -71,6 +70,15 @@ jobs:
           flags: python
           name: python-coverage
           fail_ci_if_error: false
+
+      - name: Comment PR with coverage
+        uses: py-cov-action/python-coverage-comment-action@v3
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 80
+          MINIMUM_ORANGE: 60
 
   nodejs-tests:
     runs-on: ubuntu-latest
