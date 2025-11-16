@@ -156,7 +156,7 @@ class TestSafetyValidator:
 
     def test_validate_response_good(self, validator):
         """Test validation of good response."""
-        # Create a response with 150 words (within range)
+        # Create a response with ~160 words (within 120-250 range)
         good_response = " ".join(
             [
                 "I understand what you're experiencing.",
@@ -168,8 +168,8 @@ class TestSafetyValidator:
                 "Small steps lead to progress.",
                 "Trust the process.",
             ]
-            * 18
-        )  # Roughly 150 words
+            * 4
+        )  # 40 words * 4 = 160 words
 
         result = validator.validate_response_quality(good_response)
 
