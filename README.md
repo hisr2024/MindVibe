@@ -77,6 +77,29 @@ MindVibe/
 - PostgreSQL 16+ (or use Docker)
 - Git
 
+### **Dependency Compatibility**
+
+**Important:** This project uses **Next.js 13** which requires **React 18**. The dependencies are pinned to ensure compatibility:
+
+- `react`: ^18.2.0
+- `react-dom`: ^18.2.0
+- `@types/react`: ^18.2.79
+- `@types/react-dom`: ^18.2.25
+- `next`: ^13.4.19
+
+**Upgrading to React 19:** If you want to use React 19, you must first upgrade Next.js to version 15 or later. To upgrade:
+
+```bash
+# Upgrade Next.js first
+npm install next@latest
+
+# Then upgrade React
+npm install react@latest react-dom@latest
+npm install --save-dev @types/react@latest @types/react-dom@latest
+```
+
+For more information, see the [Next.js upgrade guide](https://nextjs.org/docs/upgrading).
+
 ### **Option 1: Local Development**
 
 ```bash
