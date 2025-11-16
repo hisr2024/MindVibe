@@ -21,7 +21,7 @@ services:
     networks:
       - mindvibe-network
 
-  # Backend API (FastAPI)
+  # Backend API (FastAPI) - AI Mental-Wellness Coach Services
   api:
     build:
       context: .
@@ -46,22 +46,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    networks:
-      - mindvibe-network
-
-  # Frontend Web (Next.js)
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: frontend-runner
-    container_name: mindvibe-web
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-    depends_on:
-      - api
-    ports:
-      - "3000:3000"
     networks:
       - mindvibe-network
 
