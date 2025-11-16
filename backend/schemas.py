@@ -3,12 +3,6 @@ from typing import Annotated
 from pydantic import BaseModel, Field, field_validator
 
 
-class MoodIn(BaseModel):
-    score: Annotated[int, Field(ge=-2, le=2)]
-    tags: list[str] | None = None
-    note: str | None = None
-
-
 class UserAuth(BaseModel):
     username: Annotated[str, Field(max_length=150)]
     password: Annotated[str, Field(min_length=8)]

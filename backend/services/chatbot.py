@@ -57,9 +57,9 @@ class ChatbotService:
 
     def _generate_template_chat_response(
         self,
-        message: str,
+        message: str,  # noqa: ARG002
         verses: list[dict],
-        language: str = "english",
+        language: str = "english",  # noqa: ARG002
     ) -> str:
         """
         Generate a template-based chat response.
@@ -124,7 +124,7 @@ class ChatbotService:
     def _generate_chat_response(
         self,
         message: str,
-        conversation_history: list[dict],
+        conversation_history: list[dict],  # noqa: ARG002
         verses: list[dict],
         language: str = "english",
     ) -> str:
