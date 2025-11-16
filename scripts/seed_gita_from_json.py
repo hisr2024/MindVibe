@@ -3,6 +3,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -26,7 +27,7 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def load_verses_from_json(filepath: Path) -> list:
+async def load_verses_from_json(filepath: Path) -> Any:
     """Load verse data from JSON file."""
     try:
         with open(filepath, encoding="utf-8") as file:

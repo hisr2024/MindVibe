@@ -13,6 +13,7 @@ Requirements:
     - Database seeded with wisdom verses (python seed_wisdom.py)
 """
 
+from typing import Any
 
 import requests
 
@@ -35,7 +36,7 @@ class ChatbotClient:
 
     def send_message(
         self, message: str, language: str = "english", include_sanskrit: bool = False
-    ) -> dict:
+    ) -> Any:
         """Send a message to the chatbot."""
         payload = {
             "message": message,
@@ -50,7 +51,7 @@ class ChatbotClient:
         response.raise_for_status()
         return response.json()
 
-    def get_history(self) -> dict:
+    def get_history(self) -> Any:
         """Get conversation history for current session."""
         if not self.session_id:
             raise ValueError("No active session")
@@ -70,7 +71,7 @@ class ChatbotClient:
         response.raise_for_status()
         print("✓ Conversation history cleared")
 
-    def check_health(self) -> dict:
+    def check_health(self) -> Any:
         """Check chatbot health status."""
         response = requests.get(f"{self.base_url}/api/chat/health")
         response.raise_for_status()

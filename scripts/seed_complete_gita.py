@@ -20,6 +20,7 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import httpx
 from sqlalchemy import insert, select, text
@@ -53,7 +54,7 @@ engine = create_async_engine(DATABASE_URL, echo=False)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 # Chapter metadata (18 chapters with verse counts)
-CHAPTER_INFO = {
+CHAPTER_INFO: dict[int, dict[str, Any]] = {
     1: {"verses": 47, "theme": "emotional_crisis_moral_conflict"},
     2: {"verses": 72, "theme": "transcendental_knowledge"},
     3: {"verses": 43, "theme": "selfless_action"},
@@ -158,7 +159,7 @@ def create_verse_from_data(data: dict, chapter: int, verse: int) -> dict:
 async def seed_chapter(chapter_num: int, use_rapid_api: bool = True) -> None:
     """Seed all verses from a single chapter."""
     chapter_info = CHAPTER_INFO[chapter_num]
-    total_verses = chapter_info["verses"]
+    total_verses = int(chapter_info["verses"])
 
     print(f"\n{'='*70}")
     print(f"📖 Seeding Chapter {chapter_num}")
@@ -237,7 +238,6 @@ async def seed_from_github_dataset() -> None:
     # You would need to adapt based on actual GitHub dataset format
     print("⚠️  GitHub dataset seeding not yet implemented")
     print("   Please use RapidAPI method or provide dataset URL")
-    return False
 
 
 async def verify_seeding() -> None:
@@ -263,13 +263,13 @@ async def verify_seeding() -> None:
 
         # Total count
         result = await session.execute(select(text("COUNT(*)")).select_from(GitaVerse))
-        total = result.scalar()
+        total = result.scalar() or 0
         print(f"\n📊 Total verses in database: {total}/700")
 
         if total == 700:
             print("✅ ALL 700 VERSES SUCCESSFULLY SEEDED! 🎉")
         else:
-            print(f"⚠️  Missing {700 - total} verses")
+            print(f"⚠️  Missing {700 - int(total)} verses")
 
 
 async def main() -> None:
@@ -302,13 +302,12 @@ async def main() -> None:
             print("   Attempting to use GitHub dataset as fallback...\n")
 
             # Try GitHub dataset
-            success = await seed_from_github_dataset()
-            if not success:
-                print("\n❌ ERROR: No data source available!")
-                print("   Please either:")
-                print("   1. Set RAPID_API_KEY environment variable")
-                print("   2. Or manually download Gita dataset to data/gita/")
-                return
+            await seed_from_github_dataset()
+            print("\n❌ ERROR: No data source available!")
+            print("   Please either:")
+            print("   1. Set RAPID_API_KEY environment variable")
+            print("   2. Or manually download Gita dataset to data/gita/")
+            return
 
         # Seed all 18 chapters
         if use_rapid_api:
