@@ -354,12 +354,34 @@ MindVibe implements multiple security layers:
 - ✅ **Rate Limiting** - API request throttling
 - ✅ **Secret Management** - Environment variables
 
+### Automated Security Scanning
+
+MindVibe uses comprehensive automated security scanning:
+- **CodeQL** - Advanced code analysis
+- **Bandit** - Python security linting
+- **Safety** - Dependency vulnerability checking
+- **TruffleHog** - Secrets detection
+- **Trivy** - Container security scanning
+
+### Running Security Checks Locally
+
+```bash
+# All security checks
+bash scripts/security_check.sh
+
+# Individual checks
+safety check --file requirements.txt
+bandit -r backend/ -ll
+npm audit
+```
+
 **Security Best Practices:**
 - Never commit `.env` files
 - Rotate JWT secrets regularly
 - Keep dependencies updated
 - Use HTTPS in production
 - Review `docs/SECURITY_ARCH.md`
+- See [SECURITY_AUDIT_CHECKLIST.md](docs/SECURITY_AUDIT_CHECKLIST.md) for the complete security audit checklist
 
 ---
 
