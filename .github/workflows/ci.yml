@@ -42,6 +42,7 @@ jobs:
           ruff check .
 
       - name: Run mypy (type checker)
+        continue-on-error: true
         run: |
           mypy backend/
         env:

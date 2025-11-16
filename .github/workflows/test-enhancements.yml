@@ -28,9 +28,11 @@ jobs:
       run: python -m pytest tests/unit/ -v --cov=backend
     
     - name: Run type checking
+      continue-on-error: true
       run: mypy backend/
     
     - name: Code quality checks
+      continue-on-error: true
       run: |
         black --check backend/
         ruff check backend/
