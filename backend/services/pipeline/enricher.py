@@ -125,6 +125,99 @@ class MetadataEnricher:
         return " ".join(parts)
 
     @classmethod
+    def add_chapter_context(cls, verse: dict) -> dict:
+        """
+        Add chapter context and theme to verse.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            Verse with chapter context added
+        """
+        result = verse.copy()
+        
+        # Chapter themes mapping
+        chapter_themes = {
+            1: "introduction_and_grief",
+            2: "wisdom_and_knowledge",
+            3: "karma_yoga",
+            4: "wisdom_in_action",
+            5: "renunciation",
+            6: "meditation",
+            7: "knowledge_and_wisdom",
+            8: "attaining_supreme",
+            9: "sovereign_knowledge",
+            10: "divine_manifestations",
+            11: "cosmic_vision",
+            12: "devotion",
+            13: "field_and_knower",
+            14: "three_modes",
+            15: "supreme_person",
+            16: "divine_and_demonic",
+            17: "three_faiths",
+            18: "liberation_and_renunciation",
+        }
+        
+        chapter = verse.get("chapter")
+        if chapter and chapter in chapter_themes:
+            result["chapter_theme"] = chapter_themes[chapter]
+        
+        return result
+
+    @classmethod
+    def calculate_metadata_score(cls, verse: dict) -> float:
+        """
+        Calculate metadata completeness score for a verse.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            Score between 0.0 and 1.0
+        """
+        score = 0.0
+        max_score = 10.0
+        
+        # Core text fields (3 points total)
+        if verse.get("english"):
+            score += 1.0
+        if verse.get("hindi"):
+            score += 1.0
+        if verse.get("sanskrit"):
+            score += 1.0
+        
+        # Context and theme (2 points total)
+        if verse.get("context"):
+            score += 1.0
+        if verse.get("theme"):
+            score += 1.0
+        
+        # Mental health applications (1 point)
+        apps = verse.get("mental_health_applications", {})
+        if isinstance(apps, dict):
+            app_list = apps.get("applications", [])
+        elif isinstance(apps, list):
+            app_list = apps
+        else:
+            app_list = []
+        
+        if app_list:
+            score += 1.0
+        
+        # Enriched metadata (4 points total)
+        if verse.get("principles"):
+            score += 1.0
+        if verse.get("keywords") and len(verse.get("keywords", [])) >= 5:
+            score += 1.0
+        if verse.get("chapter_theme"):
+            score += 1.0
+        if verse.get("searchable_text"):
+            score += 1.0
+        
+        return score / max_score
+
+    @classmethod
     def enrich(cls, verse: dict) -> dict:
         """
         Enrich verse with additional metadata.
@@ -137,6 +230,9 @@ class MetadataEnricher:
         """
         result = verse.copy()
 
+        # Add chapter context
+        result = cls.add_chapter_context(result)
+
         # Add principles
         result["principles"] = cls.extract_principles(verse)
 
@@ -146,18 +242,8 @@ class MetadataEnricher:
         # Add searchable text
         result["searchable_text"] = cls.create_searchable_text(verse)
 
-        # Only suggest applications if not present or empty
-        apps = result.get("mental_health_applications", {})
-        if isinstance(apps, dict):
-            app_list = apps.get("applications", [])
-        elif isinstance(apps, list):
-            app_list = apps
-        else:
-            app_list = []
-
-        # Only add suggestions if no applications exist
-        if not app_list:
-            suggestions = cls.suggest_applications(verse)
-            result["suggested_applications"] = suggestions
+        # Always add suggested applications
+        suggestions = cls.suggest_applications(verse)
+        result["suggested_applications"] = suggestions
 
         return result
