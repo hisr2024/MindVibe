@@ -56,7 +56,7 @@ app.add_middleware(
 )
 
 @app.middleware("http")
-async def add_cors(request: Request, call_next):
+async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
     if request.method == "OPTIONS":
         return JSONResponse(
             content={"status": "ok"},
@@ -139,5 +139,5 @@ async def api_health() -> Dict[str, Any]:
     }
 
 @app.options("/{full_path:path}")
-async def preflight(full_path: str):
+async def preflight(full_path: str) -> dict[str, str]:
     return {"status": "ok"}

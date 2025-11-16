@@ -18,13 +18,13 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 logger = logging.getLogger(__name__)
 
 # Import comprehensive chatbot as fallback
+fallback_chatbot: "ChatbotService | None" = None
+fallback_available = False
 try:
     from backend.services.chatbot import ChatbotService
     fallback_chatbot = ChatbotService()
     fallback_available = True
 except ImportError:
-    fallback_chatbot = None
-    fallback_available = False
     logger.warning("Comprehensive chatbot fallback not available")
 
 
@@ -64,7 +64,8 @@ class KIAAN:
                 top_p=0.98,
             )
             
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+            return content if content is not None else "I'm here for you. Let's try again. 💙"
         except AuthenticationError as e:
             logger.error(f"OpenAI authentication error: {e}")
             return "❌ API authentication failed. Please check configuration."
@@ -92,6 +93,19 @@ class KIAAN:
 
 
 kiaan = KIAAN()
+
+
+@router.post("/start")
+async def start_session() -> Dict[str, Any]:
+    """Start a new chat session."""
+    import uuid
+    session_id = str(uuid.uuid4())
+    return {
+        "session_id": session_id,
+        "message": "New chat session started. How can I help you today? 💙",
+        "bot": "KIAAN",
+        "version": "12.0"
+    }
 
 
 @router.post("/message")
