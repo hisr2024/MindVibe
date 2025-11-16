@@ -3,6 +3,7 @@
 
 class ValidationError(Exception):
     """Raised when verse validation fails."""
+
     pass
 
 
@@ -16,30 +17,36 @@ class VerseValidator:
     def validate(cls, verse: dict) -> dict:
         """
         Validate a verse dictionary.
-        
+
         Args:
             verse: Verse dictionary to validate
-            
+
         Returns:
             The verse if valid
-            
+
         Raises:
             ValidationError: If validation fails
         """
         # Check required fields
         missing_fields = [f for f in cls.REQUIRED_FIELDS if f not in verse]
         if missing_fields:
-            raise ValidationError(f"Missing required fields: {', '.join(missing_fields)}")
+            raise ValidationError(
+                f"Missing required fields: {', '.join(missing_fields)}"
+            )
 
         # Validate chapter number
         chapter = verse.get("chapter")
         if not isinstance(chapter, int) or chapter < 1 or chapter > cls.MAX_CHAPTER:
-            raise ValidationError(f"Invalid chapter number: {chapter}. Must be between 1 and {cls.MAX_CHAPTER}")
+            raise ValidationError(
+                f"Invalid chapter number: {chapter}. Must be between 1 and {cls.MAX_CHAPTER}"
+            )
 
         # Validate verse number
         verse_number = verse.get("verse_number")
         if not isinstance(verse_number, int) or verse_number < 1:
-            raise ValidationError(f"Invalid verse number: {verse_number}. Must be positive integer")
+            raise ValidationError(
+                f"Invalid verse number: {verse_number}. Must be positive integer"
+            )
 
         return verse
 
@@ -47,10 +54,10 @@ class VerseValidator:
     def check_errors(cls, verse: dict) -> list[str]:
         """
         Check for validation errors without raising exceptions.
-        
+
         Args:
             verse: Verse dictionary to check
-            
+
         Returns:
             List of error messages (empty if valid)
         """
@@ -79,10 +86,10 @@ class VerseValidator:
     def check_completeness(cls, verse: dict) -> dict:
         """
         Check completeness of verse data.
-        
+
         Args:
             verse: Verse dictionary to check
-            
+
         Returns:
             Dictionary with completeness report
         """
@@ -103,11 +110,11 @@ class VerseValidator:
     def normalize_verse_id(cls, chapter: int, verse_number: int) -> str:
         """
         Create normalized verse ID.
-        
+
         Args:
             chapter: Chapter number
             verse_number: Verse number
-            
+
         Returns:
             Verse ID string (e.g., "2.47")
         """
@@ -117,10 +124,10 @@ class VerseValidator:
     def validate_and_normalize(cls, verse: dict) -> dict:
         """
         Validate and normalize verse data.
-        
+
         Args:
             verse: Verse dictionary to validate and normalize
-            
+
         Returns:
             Normalized verse dictionary
         """

@@ -1,11 +1,11 @@
 """KIAAN - Ultimate GPT-5 + Mental Wellness Companion (v12.0)"""
 
 import os
-from typing import Dict, Any
+from typing import Any
+
 from fastapi import APIRouter
-from pydantic import BaseModel
-from datetime import datetime
 from openai import OpenAI
+from pydantic import BaseModel
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
 client = OpenAI(api_key=api_key) if api_key else None
@@ -24,7 +24,13 @@ class KIAAN:
         self.version = "12.0"
         self.client = client
         self.ready = ready
-        self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
+        self.crisis_keywords = [
+            "suicide",
+            "kill myself",
+            "end it",
+            "harm myself",
+            "want to die",
+        ]
 
     def is_crisis(self, message: str) -> bool:
         return any(word in message.lower() for word in self.crisis_keywords)
@@ -43,15 +49,21 @@ class KIAAN:
             response = self.client.chat.completions.create(
                 model="gpt-5",
                 messages=[
-                    {"role": "system", "content": "You are KIAAN, a modern AI companion for mental wellness. Be warm, direct, contemporary. 200-400 words. Respond to their specific situation. End with 💙"},
-                    {"role": "user", "content": user_message}
+                    {
+                        "role": "system",
+                        "content": "You are KIAAN, a modern AI companion for mental wellness. Be warm, direct, contemporary. 200-400 words. Respond to their specific situation. End with 💙",
+                    },
+                    {"role": "user", "content": user_message},
                 ],
                 temperature=0.9,
                 top_p=0.98,
             )
-            
-            return response.choices[0].message.content
-        except Exception as e:
+
+            return (
+                response.choices[0].message.content
+                or "I'm here for you. Let's try again. 💙"
+            )
+        except Exception:
             return "I'm here for you. Let's try again. 💙"
 
 
@@ -59,12 +71,12 @@ kiaan = KIAAN()
 
 
 @router.post("/message")
-async def send_message(chat: ChatMessage) -> Dict[str, Any]:
+async def send_message(chat: ChatMessage) -> dict[str, Any]:
     try:
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
-        
+
         response = kiaan.generate_response(message)
         return {
             "status": "success",
@@ -78,20 +90,29 @@ async def send_message(chat: ChatMessage) -> Dict[str, Any]:
 
 
 @router.get("/health")
-async def health() -> Dict[str, Any]:
-    return {"status": "healthy" if ready else "error", "bot": "KIAAN", "version": "12.0"}
+async def health() -> dict[str, Any]:
+    return {
+        "status": "healthy" if ready else "error",
+        "bot": "KIAAN",
+        "version": "12.0",
+    }
 
 
 @router.get("/about")
-async def about() -> Dict[str, Any]:
-    return {"name": "KIAAN", "version": "12.0", "model": "gpt-5", "status": "Operational" if ready else "Error"}
+async def about() -> dict[str, Any]:
+    return {
+        "name": "KIAAN",
+        "version": "12.0",
+        "model": "gpt-5",
+        "status": "Operational" if ready else "Error",
+    }
 
 
 @router.get("/debug")
-async def debug() -> Dict[str, Any]:
+async def debug() -> dict[str, Any]:
     return {"api_ready": ready, "version": "12.0", "model": "gpt-5"}
 
 
 @router.get("/history")
-async def history() -> Dict[str, Any]:
+async def history() -> dict[str, Any]:
     return {"messages": []}

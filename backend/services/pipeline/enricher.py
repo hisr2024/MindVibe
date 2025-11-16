@@ -20,24 +20,36 @@ class MetadataEnricher:
     def extract_principles(cls, verse: dict) -> list[str]:
         """
         Extract key principles from verse content.
-        
+
         Args:
             verse: Verse dictionary
-            
+
         Returns:
             List of principle keywords
         """
-        text = " ".join([
-            verse.get("english", ""),
-            verse.get("context", ""),
-            verse.get("theme", ""),
-        ]).lower()
+        text = " ".join(
+            [
+                verse.get("english", ""),
+                verse.get("context", ""),
+                verse.get("theme", ""),
+            ]
+        ).lower()
 
         # Common principle keywords
         principle_keywords = [
-            "action", "duty", "detachment", "peace", "wisdom",
-            "knowledge", "meditation", "discipline", "devotion",
-            "equanimity", "compassion", "selflessness", "mindfulness"
+            "action",
+            "duty",
+            "detachment",
+            "peace",
+            "wisdom",
+            "knowledge",
+            "meditation",
+            "discipline",
+            "devotion",
+            "equanimity",
+            "compassion",
+            "selflessness",
+            "mindfulness",
         ]
 
         found_principles = [kw for kw in principle_keywords if kw in text]
@@ -47,23 +59,35 @@ class MetadataEnricher:
     def extract_keywords(cls, verse: dict) -> list[str]:
         """
         Extract important keywords from verse text.
-        
+
         Args:
             verse: Verse dictionary
-            
+
         Returns:
             List of keywords
         """
-        text = " ".join([
-            verse.get("english", ""),
-            verse.get("context", ""),
-        ]).lower()
+        text = " ".join(
+            [
+                verse.get("english", ""),
+                verse.get("context", ""),
+            ]
+        ).lower()
 
         # Remove punctuation and split into words
-        words = re.findall(r'\b\w+\b', text)
+        words = re.findall(r"\b\w+\b", text)
 
         # Filter out common words and keep meaningful ones (> 4 chars)
-        stop_words = {"the", "and", "that", "this", "with", "from", "your", "about", "through"}
+        stop_words = {
+            "the",
+            "and",
+            "that",
+            "this",
+            "with",
+            "from",
+            "your",
+            "about",
+            "through",
+        }
         keywords = [w for w in words if len(w) > 4 and w not in stop_words]
 
         # Return unique keywords
@@ -73,17 +97,19 @@ class MetadataEnricher:
     def suggest_applications(cls, verse: dict) -> list[str]:
         """
         Suggest mental health applications based on content.
-        
+
         Args:
             verse: Verse dictionary
-            
+
         Returns:
             List of suggested application names
         """
-        text = " ".join([
-            verse.get("english", ""),
-            verse.get("context", ""),
-        ]).lower()
+        text = " ".join(
+            [
+                verse.get("english", ""),
+                verse.get("context", ""),
+            ]
+        ).lower()
 
         suggestions = []
         for app_name, keywords in cls.APPLICATION_KEYWORDS.items():
@@ -96,10 +122,10 @@ class MetadataEnricher:
     def create_searchable_text(cls, verse: dict) -> str:
         """
         Create combined searchable text from all verse fields.
-        
+
         Args:
             verse: Verse dictionary
-            
+
         Returns:
             Combined searchable text
         """
@@ -128,15 +154,15 @@ class MetadataEnricher:
     def add_chapter_context(cls, verse: dict) -> dict:
         """
         Add chapter context and theme to verse.
-        
+
         Args:
             verse: Verse dictionary
-            
+
         Returns:
             Verse with chapter context added
         """
         result = verse.copy()
-        
+
         # Chapter themes mapping
         chapter_themes = {
             1: "introduction_and_grief",
@@ -158,27 +184,27 @@ class MetadataEnricher:
             17: "three_faiths",
             18: "liberation_and_renunciation",
         }
-        
+
         chapter = verse.get("chapter")
         if chapter and chapter in chapter_themes:
             result["chapter_theme"] = chapter_themes[chapter]
-        
+
         return result
 
     @classmethod
     def calculate_metadata_score(cls, verse: dict) -> float:
         """
         Calculate metadata completeness score for a verse.
-        
+
         Args:
             verse: Verse dictionary
-            
+
         Returns:
             Score between 0.0 and 1.0
         """
         score = 0.0
         max_score = 10.0
-        
+
         # Core text fields (3 points total)
         if verse.get("english"):
             score += 1.0
@@ -186,13 +212,13 @@ class MetadataEnricher:
             score += 1.0
         if verse.get("sanskrit"):
             score += 1.0
-        
+
         # Context and theme (2 points total)
         if verse.get("context"):
             score += 1.0
         if verse.get("theme"):
             score += 1.0
-        
+
         # Mental health applications (1 point)
         apps = verse.get("mental_health_applications", {})
         if isinstance(apps, dict):
@@ -201,10 +227,10 @@ class MetadataEnricher:
             app_list = apps
         else:
             app_list = []
-        
+
         if app_list:
             score += 1.0
-        
+
         # Enriched metadata (4 points total)
         if verse.get("principles"):
             score += 1.0
@@ -214,17 +240,17 @@ class MetadataEnricher:
             score += 1.0
         if verse.get("searchable_text"):
             score += 1.0
-        
+
         return score / max_score
 
     @classmethod
     def enrich(cls, verse: dict) -> dict:
         """
         Enrich verse with additional metadata.
-        
+
         Args:
             verse: Verse dictionary to enrich
-            
+
         Returns:
             Enriched verse dictionary
         """

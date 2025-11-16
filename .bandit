@@ -18,3 +18,4 @@ tests:
 
 skips:
   - B101  # Assert usage (OK in tests)
+  - B106  # Hardcoded password false positives (token_type="bearer")
