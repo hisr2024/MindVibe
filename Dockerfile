@@ -29,11 +29,11 @@ FROM node:20-alpine AS frontend-deps
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY frontend/package.json frontend/package-lock.json ./
+# Copy package.json and package-lock.json from root
+COPY package.json package-lock.json* ./
 
 # Install production dependencies
-RUN npm ci --only=production
+RUN npm ci --only=production || npm install --production
 
 # Stage 3: frontend-builder
 FROM node:20-alpine AS frontend-builder
@@ -44,8 +44,11 @@ WORKDIR /app
 # Copy node_modules from deps stage
 COPY --from=frontend-deps /app/node_modules ./node_modules
 
-# Copy all application code
-COPY frontend/ ./
+# Copy all frontend application code from root
+COPY package.json next.config.js tsconfig.json tailwind.config.ts postcss.config.js ./
+COPY app/ ./app/
+COPY lib/ ./lib/
+COPY public/ ./public/
 
 # Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED 1

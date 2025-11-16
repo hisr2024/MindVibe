@@ -120,7 +120,7 @@ class WisdomKnowledgeBase:
     @staticmethod
     def compute_text_similarity(text1: str, text2: str) -> float:
         """
-        Compute similarity between two text strings using SequenceMatcher.
+        Compute similarity between two text strings using word overlap.
 
         Args:
             text1: First text string
@@ -129,7 +129,21 @@ class WisdomKnowledgeBase:
         Returns:
             Similarity score between 0.0 and 1.0
         """
-        return difflib.SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
+        if not text1 or not text2:
+            return 0.0
+            
+        # Use word-based similarity for better results
+        words1 = set(text1.lower().split())
+        words2 = set(text2.lower().split())
+        
+        if not words1 or not words2:
+            return 0.0
+        
+        # Calculate Jaccard similarity (intersection / union)
+        intersection = words1.intersection(words2)
+        union = words1.union(words2)
+        
+        return len(intersection) / len(union) if union else 0.0
 
     @staticmethod
     async def search_relevant_verses(
