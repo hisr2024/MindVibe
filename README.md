@@ -366,6 +366,7 @@ MindVibe implements multiple security layers:
 ## 📚 **Documentation**
 
 ### **Core Documentation:**
+- [Developer Onboarding Guide](docs/developer_onboarding.md) - **Start here!** Complete guide for new developers
 - [Testing Guide](tests/README.md) - Comprehensive testing documentation
 - [Scripts Package](scripts/README.md) - Utility scripts reference
 - [Chatbot Guide](docs/chatbot.md) - AI chatbot documentation
