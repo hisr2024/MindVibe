@@ -63,3 +63,31 @@ Security updates will be announced through:
 - GitHub Security Advisories
 - Release notes in CHANGELOG.md
 - Email notification to users (for critical vulnerabilities)
+
+## Automated Security Scanning
+
+This repository uses multiple automated security tools:
+
+- **Dependabot**: Automatic dependency updates
+- **CodeQL**: Static code analysis for vulnerabilities
+- **Bandit**: Python security linter
+- **Safety**: Python dependency vulnerability checker
+- **npm audit**: JavaScript dependency security
+- **TruffleHog**: Secrets detection
+- **Trivy**: Docker container scanning
+
+Security scans run:
+- On every push to main/develop
+- On every pull request
+- Weekly (scheduled scans)
+
+## Security Scan Results
+
+View security scan results:
+- [Security Advisories](https://github.com/hisr2024/MindVibe/security/advisories)
+- [Dependabot Alerts](https://github.com/hisr2024/MindVibe/security/dependabot)
+- [Code Scanning Alerts](https://github.com/hisr2024/MindVibe/security/code-scanning)
+
+## Security Audit Checklist
+
+See [SECURITY_AUDIT_CHECKLIST.md](docs/SECURITY_AUDIT_CHECKLIST.md) for our comprehensive security audit checklist.
