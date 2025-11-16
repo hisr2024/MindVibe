@@ -29,8 +29,8 @@ FROM node:20-alpine AS frontend-deps
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY frontend/package.json frontend/package-lock.json ./
+# Copy package.json and package-lock.json from root
+COPY package.json package-lock.json ./
 
 # Install production dependencies
 RUN npm ci --only=production
@@ -44,11 +44,13 @@ WORKDIR /app
 # Copy node_modules from deps stage
 COPY --from=frontend-deps /app/node_modules ./node_modules
 
-# Copy all application code
-COPY frontend/ ./
+# Copy Next.js configuration and frontend files
+COPY package.json next.config.js tsconfig.json postcss.config.js tailwind.config.ts ./
+COPY app/ ./app/
+COPY lib/ ./lib/
 
 # Disable Next.js telemetry
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the Next.js application
 RUN npm run build
@@ -59,10 +61,9 @@ FROM node:20-alpine AS frontend-runner
 # Set the working directory
 WORKDIR /app
 
-# Copy built .next, package.json, public and node_modules from builder
+# Copy built .next, package.json and node_modules from builder
 COPY --from=frontend-builder /app/.next ./.next
 COPY --from=frontend-builder /app/package.json ./package.json
-COPY --from=frontend-builder /app/public ./public
 COPY --from=frontend-builder /app/node_modules ./node_modules
 
 # Expose port and add health check

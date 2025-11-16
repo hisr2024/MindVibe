@@ -203,7 +203,7 @@ async def login(
 
     return LoginOut(
         access_token=access_token,
-        token_type="bearer",
+        token_type="bearer",  # nosec B106
         session_id=str(session.id),
         expires_in=expires_in_seconds,
         user_id=user.id,
@@ -403,7 +403,7 @@ async def refresh_tokens(
 
     return RefreshOut(
         access_token=access_token,
-        token_type="bearer",
+        token_type="bearer",  # nosec B106
         expires_in=expires_in_seconds,
         session_id=str(session_row.id),
         refresh_token=new_raw if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None,
