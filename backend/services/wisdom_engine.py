@@ -160,11 +160,13 @@ Your life has value. Please reach out for professional support right now. 💙""
                 "strategies": ["journaling", "meditation", "breathing"],
             }
         
-        principle_key = theme.get("principle")
+        principle_key_raw = theme.get("principle")
+        principle_key = str(principle_key_raw) if principle_key_raw else ""
         principle_wisdom = self.wisdom_principles.get(principle_key, "")
         
         # Get strategies
-        strategy_keys = theme.get("strategies", ["breathing", "meditation"])
+        strategy_keys_raw = theme.get("strategies", ["breathing", "meditation"])
+        strategy_keys = list(strategy_keys_raw) if strategy_keys_raw else ["breathing", "meditation"]
         strategies_text = self._format_strategies(strategy_keys)
         
         # Build response
@@ -186,7 +188,7 @@ What feels most important to focus on first? 💙"""
         
         return response
     
-    def _format_strategies(self, strategy_keys: list) -> str:
+    def _format_strategies(self, strategy_keys: list[str]) -> str:
         """Format coping strategies"""
         strategies_text = ""
         for i, key in enumerate(strategy_keys[:3], 1):

@@ -1,11 +1,12 @@
 # backend/services/chatbot_enhanced.py
+from typing import Any
 
 class EnhancedChatbotService:
-    def __init__(self):
-        self.conversation_history = []
-        self.session_data = {}
+    def __init__(self) -> None:
+        self.conversation_history: list[Any] = []
+        self.session_data: dict[str, Any] = {}
 
-    async def chat(self, user_input: str):
+    async def chat(self, user_input: str) -> None:
         # Session management
         # Crisis detection
         # Domain routing

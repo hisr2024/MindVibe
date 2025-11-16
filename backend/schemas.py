@@ -1,4 +1,5 @@
-from typing import Annotated
+from typing import Annotated, Any
+from collections.abc import Callable, Awaitable
 
 from pydantic import BaseModel, Field
 
@@ -48,12 +49,6 @@ class BlobOut(BaseModel):
     id: int
     created_at: str
     blob_json: str
-
-
-class MoodIn(BaseModel):
-    score: Annotated[int, Field(ge=1, le=10)]
-    tags: list[str] | None = None
-    note: str | None = None
 
 
 class MoodOut(BaseModel):

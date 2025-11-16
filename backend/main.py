@@ -4,6 +4,7 @@ import os
 import sys
 import traceback
 from typing import Dict, Any
+from collections.abc import Callable, Awaitable
 
 # CRITICAL: Load environment variables BEFORE anything else
 from dotenv import load_dotenv
@@ -56,7 +57,7 @@ app.add_middleware(
 )
 
 @app.middleware("http")
-async def add_cors(request: Request, call_next):
+async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[Any]]) -> Any:
     if request.method == "OPTIONS":
         return JSONResponse(
             content={"status": "ok"},
@@ -139,5 +140,5 @@ async def api_health() -> Dict[str, Any]:
     }
 
 @app.options("/{full_path:path}")
-async def preflight(full_path: str):
+async def preflight(full_path: str) -> dict[str, str]:
     return {"status": "ok"}

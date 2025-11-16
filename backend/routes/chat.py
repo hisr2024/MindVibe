@@ -50,7 +50,8 @@ class KIAAN:
                 top_p=0.98,
             )
             
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+            return content if content is not None else "I'm here for you. Let's try again. 💙"
         except Exception as e:
             return "I'm here for you. Let's try again. 💙"
 
