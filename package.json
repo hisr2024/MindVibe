@@ -21,11 +21,11 @@
     "node": ">=20"
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "firebase": "^12.6.0",
-    "next": "^16.0.3",
+    "next": "^13.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "axios": "^1.7.9",
+    "firebase": "^10.14.1",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
@@ -41,10 +41,10 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "jest": "^25.0.0",
+    "jest": "^30.2.0",
     "postcss": "^8.4.49",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "tailwindcss": "^3.4.15"
   }
-}
+ }
