@@ -16,6 +16,28 @@ class MetadataEnricher:
         "self_esteem": ["confidence", "self", "worth", "value"],
     }
 
+    # Chapter themes mapping
+    CHAPTER_THEMES = {
+        1: "introduction_and_grief",
+        2: "wisdom_and_knowledge",
+        3: "action_and_karma",
+        4: "knowledge_and_renunciation",
+        5: "renunciation_of_action",
+        6: "meditation_and_self_control",
+        7: "knowledge_and_wisdom",
+        8: "eternal_spirit",
+        9: "royal_knowledge",
+        10: "divine_manifestations",
+        11: "universal_form",
+        12: "devotion_and_faith",
+        13: "nature_and_consciousness",
+        14: "three_qualities",
+        15: "supreme_person",
+        16: "divine_and_demonic",
+        17: "faith_and_discipline",
+        18: "liberation_and_renunciation",
+    }
+
     @classmethod
     def extract_principles(cls, verse: dict) -> list[str]:
         """
@@ -125,6 +147,77 @@ class MetadataEnricher:
         return " ".join(parts)
 
     @classmethod
+    def add_chapter_context(cls, verse: dict) -> dict:
+        """
+        Add chapter context theme to verse.
+        
+        Args:
+            verse: Verse dictionary with chapter number
+            
+        Returns:
+            Verse with chapter_theme added
+        """
+        result = verse.copy()
+        chapter = verse.get("chapter")
+        if chapter and chapter in cls.CHAPTER_THEMES:
+            result["chapter_theme"] = cls.CHAPTER_THEMES[chapter]
+        return result
+
+    @classmethod
+    def calculate_metadata_score(cls, verse: dict) -> float:
+        """
+        Calculate a completeness/quality score for verse metadata.
+        
+        Args:
+            verse: Verse dictionary
+            
+        Returns:
+            Score between 0.0 and 1.0
+        """
+        score = 0.0
+        total_weight = 0.0
+        
+        # Core fields (0.4 total)
+        core_fields = ["english", "hindi", "sanskrit", "context", "theme"]
+        for field in core_fields:
+            total_weight += 0.08
+            if field in verse and verse[field]:
+                score += 0.08
+        
+        # Mental health applications (0.2)
+        total_weight += 0.2
+        apps = verse.get("mental_health_applications", {})
+        if isinstance(apps, dict):
+            app_list = apps.get("applications", [])
+        elif isinstance(apps, list):
+            app_list = apps
+        else:
+            app_list = []
+        if app_list and len(app_list) >= 2:
+            score += 0.2
+        elif app_list:
+            score += 0.1
+        
+        # Enrichment fields (0.4 total)
+        if verse.get("principles"):
+            total_weight += 0.1
+            score += 0.1
+        if verse.get("keywords") and len(verse.get("keywords", [])) >= 5:
+            total_weight += 0.1
+            score += 0.1
+        if verse.get("chapter_theme"):
+            total_weight += 0.1
+            score += 0.1
+        if verse.get("searchable_text"):
+            total_weight += 0.1
+            score += 0.1
+        
+        # Normalize to 0-1 range
+        if total_weight > 0:
+            return min(score / total_weight, 1.0)
+        return 0.0
+
+    @classmethod
     def enrich(cls, verse: dict) -> dict:
         """
         Enrich verse with additional metadata.
@@ -146,18 +239,11 @@ class MetadataEnricher:
         # Add searchable text
         result["searchable_text"] = cls.create_searchable_text(verse)
 
-        # Only suggest applications if not present or empty
-        apps = result.get("mental_health_applications", {})
-        if isinstance(apps, dict):
-            app_list = apps.get("applications", [])
-        elif isinstance(apps, list):
-            app_list = apps
-        else:
-            app_list = []
-
-        # Only add suggestions if no applications exist
-        if not app_list:
-            suggestions = cls.suggest_applications(verse)
-            result["suggested_applications"] = suggestions
+        # Always add suggestions field
+        suggestions = cls.suggest_applications(verse)
+        result["suggested_applications"] = suggestions
+        
+        # Add metadata score
+        result["metadata_score"] = cls.calculate_metadata_score(result)
 
         return result
