@@ -26,8 +26,7 @@ jobs:
         run: pip install safety
       
       - name: Check Python Dependencies
-        continue-on-error: true
-        run: safety scan || safety check --file requirements.txt || echo "No critical vulnerabilities found"
+        run: safety check --file requirements.txt --json
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -35,8 +34,7 @@ jobs:
           node-version: '20'
       
       - name: Audit npm packages
-        continue-on-error: true
-        run: npm audit --production || echo "No critical vulnerabilities found"
+        run: npm audit --production
 
   code-security-scan:
     name: Code Security Analysis
@@ -55,7 +53,7 @@ jobs:
         run: pip install bandit[toml]
       
       - name: Run Bandit Security Scan
-        run: bandit -r backend/ -ll -f json -o bandit-report.json
+        run: bandit -r backend/ -f json -o bandit-report.json
       
       - name: Upload Bandit Report
         uses: actions/upload-artifact@v4
@@ -91,7 +89,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Build Docker Image
-        run: docker build --target backend-base -t mindvibe:test .
+        run: docker build -t mindvibe:test .
       
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master

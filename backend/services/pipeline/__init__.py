@@ -18,9 +18,7 @@ def sanitizer(data: dict) -> dict:
     return data
 
 
-def validator(
-    data: dict, schema: dict | None = None  # noqa: ARG001
-) -> tuple[bool, list[str]]:
+def validator(data: dict, schema: dict | None = None) -> tuple[bool, list[str]]:
     """Validate data (backward compatibility wrapper)."""
     try:
         VerseValidator.validate(data)

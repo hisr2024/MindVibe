@@ -24,7 +24,9 @@ class GitaService:
     """Service layer for Bhagavad Gita wisdom database operations."""
 
     @staticmethod
-    async def get_chapter(db: AsyncSession, chapter_number: int) -> GitaChapter | None:
+    async def get_chapter(
+        db: AsyncSession, chapter_number: int
+    ) -> GitaChapter | None:
         """
         Get chapter metadata by chapter number.
 
@@ -156,7 +158,9 @@ class GitaService:
             List of GitaVerse objects matching the theme
         """
         result = await db.execute(
-            select(GitaVerse).where(GitaVerse.theme.ilike(f"%{theme}%")).limit(limit)
+            select(GitaVerse)
+            .where(GitaVerse.theme.ilike(f"%{theme}%"))
+            .limit(limit)
         )
         return list(result.scalars().all())
 

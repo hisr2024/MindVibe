@@ -6,9 +6,9 @@ AI-powered guidance, verse lookup, semantic search, and theme browsing.
 
 import os
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import func, or_, select
+from sqlalchemy import distinct, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
@@ -27,7 +27,9 @@ class WisdomQueryRequest(BaseModel):
         pattern="^(english|hindi|sanskrit)$",
         description="Preferred language",
     )
-    context_type: str | None = Field(default=None, description="Optional context type")
+    context_type: str | None = Field(
+        default=None, description="Optional context type"
+    )
 
 
 class VerseReference(BaseModel):
@@ -126,76 +128,51 @@ class ThemeInfo(BaseModel):
 class ThemeResponse(BaseModel):
     """Response model for theme browsing."""
 
-    themes: list[ThemeInfo] = Field(default_factory=list)
-    total_themes: int
-
-
-class ChapterInfo(BaseModel):
-    """Summary information for a chapter."""
-
-    chapter: int
-    name: str
-    verse_count: int
-
-
-class TranslationSet(BaseModel):
-    """All translations for a specific verse."""
-
-    verse_id: str
-    chapter: int
-    verse: int
-    translations: dict[str, str]
-    theme: str
-    principle: str | None = None
-
-
-class SearchRequest(BaseModel):
-    """Request model for semantic search."""
-
-    keyword: str = Field(
-        ..., min_length=1, max_length=200, description="Search keyword"
-    )
-    language: str = Field(
-        default="english",
-        pattern="^(english|hindi|sanskrit)$",
-        description="Language to search in",
-    )
-    theme: str | None = Field(default=None, description="Optional theme filter")
-    page: int = Field(default=1, ge=1, description="Page number")
-    page_size: int = Field(default=10, ge=1, le=50, description="Results per page")
-
-
 @router.get("/chapters", response_model=list[ChapterInfo])
 async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[dict]:
     """
-    Get list of all chapters with basic information.
+    Get chapter information with verse listing.
 
-    Returns summary information for all chapters in the Bhagavad Gita.
+    Returns detailed information about a specific chapter including its
+    verses, themes, and summary.
 
-    **Example:** `/api/gita/chapters`
+    **Example:** `/api/gita/chapters/2`
     """
-    # Get distinct chapters from database
-    query = select(GitaVerse.chapter).distinct().order_by(GitaVerse.chapter)
+    if chapter_id not in CHAPTER_METADATA:
+        raise HTTPException(status_code=404, detail=f"Chapter {chapter_id} not found")
+
+    metadata = CHAPTER_METADATA[chapter_id]
+
+    # Get verses for this chapter
+    query = select(GitaVerse).where(GitaVerse.chapter == chapter_id).order_by(GitaVerse.verse)
     result = await db.execute(query)
-    chapters = result.scalars().all()
+    verses = list(result.scalars().all())
 
-    # Build chapter info list
-    chapter_list = []
-    for chapter_num in chapters:
-        # Count verses in this chapter
-        count_query = select(func.count()).where(GitaVerse.chapter == chapter_num)
-        count_result = await db.execute(count_query)
-        verse_count = count_result.scalar() or 0
-
-        chapter_list.append(
-            {
-                "chapter": chapter_num,
-                "name": f"Chapter {chapter_num}",  # Can be enhanced with actual chapter names
-                "verse_count": verse_count,
-            }
+    # Format verse summaries
+    verse_summaries = [
+        VerseSummary(
+            chapter=v.chapter,
+            verse=v.verse,
+            verse_id=f"{v.chapter}.{v.verse}",
+            theme=v.theme,
+            preview=v.english[:100] + "..." if len(v.english) > 100 else v.english,
         )
+        for v in verses
+    ]
 
-    return chapter_list
+    # Get unique themes in this chapter
+    themes_query = select(distinct(GitaVerse.theme)).where(GitaVerse.chapter == chapter_id)
+    themes_result = await db.execute(themes_query)
+    themes = [row[0] for row in themes_result.all()]
+
+    return ChapterResponse(
+        chapter=chapter_id,
+        name=metadata["name"],
+        summary=metadata["summary"],
+        verse_count=len(verses) if verses else metadata["verse_count"],
+        verses=verse_summaries,
+        themes=themes,
+    )
 
 
 @router.get("/verses/{chapter}/{verse}", response_model=VerseResponse)
@@ -269,10 +246,9 @@ async def get_verse(
 
     return VerseResponse(verse=verse_detail, related_verses=related_refs)
 
-
 @router.post("/search")
 async def semantic_search(
-    search_req: SearchRequest, db: AsyncSession = Depends(get_db)
+    query: WisdomRequest, db: AsyncSession = Depends(get_db)
 ) -> dict:
     """
     Semantic search across all verses.
@@ -280,14 +256,14 @@ async def semantic_search(
     Search Gita verses by keywords with optional theme filtering.
     Supports pagination and multi-language search.
 
-    **Example:** POST `/api/gita/search` with body `{"keyword": "peace", "theme": "inner_peace", "page": 1}`
+    **Example:** `/api/gita/search?keyword=peace&theme=inner_peace&page=1`
     """
     # Build search query
-    lang_field = getattr(GitaVerse, search_req.language)
-    search_conditions = [lang_field.ilike(f"%{search_req.keyword}%")]
+    lang_field = getattr(GitaVerse, language)
+    search_conditions = [lang_field.ilike(f"%{keyword}%")]
 
-    if search_req.theme:
-        search_conditions.append(GitaVerse.theme == search_req.theme)
+    if theme:
+        search_conditions.append(GitaVerse.theme == theme)
 
     # Count total results
     count_query = select(func.count()).select_from(GitaVerse).where(*search_conditions)
@@ -295,12 +271,12 @@ async def semantic_search(
     total_results = count_result.scalar() or 0
 
     # Get paginated results
-    offset = (search_req.page - 1) * search_req.page_size
+    offset = (page - 1) * page_size
     search_query = (
         select(GitaVerse)
         .where(*search_conditions)
         .offset(offset)
-        .limit(search_req.page_size)
+        .limit(page_size)
     )
     result = await db.execute(search_query)
     verses = list(result.scalars().all())
@@ -319,22 +295,22 @@ async def semantic_search(
                 principle=v.principle,
             ),
             relevance_score=0.8,  # Placeholder score (semantic search would calculate this)
-            match_context=f"Matched keyword '{search_req.keyword}' in {search_req.language} text",
+            match_context=f"Matched keyword '{keyword}' in {language} text",
         )
         for v in verses
     ]
 
-    filters_applied = {"language": search_req.language}
-    if search_req.theme:
-        filters_applied["theme"] = search_req.theme
+    filters_applied = {"language": language}
+    if theme:
+        filters_applied["theme"] = theme
 
     return SearchResponse(
-        query=search_req.keyword,
+        query=keyword,
         results=search_results,
         total_results=total_results,
-        page=search_req.page,
-        page_size=search_req.page_size,
-        has_more=(offset + search_req.page_size) < total_results,
+        page=page,
+        page_size=page_size,
+        has_more=(offset + page_size) < total_results,
         filters_applied=filters_applied,
     )
 
@@ -363,7 +339,11 @@ async def browse_themes(
     themes_info = []
     for theme_id, count in theme_rows:
         # Get example verses for this theme
-        example_query = select(GitaVerse).where(GitaVerse.theme == theme_id).limit(3)
+        example_query = (
+            select(GitaVerse)
+            .where(GitaVerse.theme == theme_id)
+            .limit(3)
+        )
         example_result = await db.execute(example_query)
         examples = list(example_result.scalars().all())
 
@@ -462,34 +442,22 @@ async def get_languages() -> dict:
 
 @router.post("/wisdom")
 async def wisdom_consultation(
-    query_req: WisdomQueryRequest, db: AsyncSession = Depends(get_db)
+    query: WisdomRequest, db: AsyncSession = Depends(get_db)
 ) -> dict:
     """
     AI-powered Gita wisdom consultation.
 
-    Accepts a user query and returns AI-generated guidance based on relevant
-    Gita verses.
-
     Args:
-        query_req: User's question and preferences
-        db: Database session
+        query: User's question
+        verses: Relevant Gita verses
+        language: Response language
 
     Returns:
-        AI-generated guidance text with verse references
+        AI-generated guidance text
     """
-    # Search for relevant verses based on query keywords
-    # Simple keyword search - could be enhanced with semantic search
-    search_query = select(GitaVerse).limit(3)  # Get top 3 verses as context
-    result = await db.execute(search_query)
-    verses = list(result.scalars().all())
-
     openai_key = os.getenv("OPENAI_API_KEY")
     if not openai_key or openai_key == "your-api-key-here":
-        return {
-            "guidance": generate_template_gita_response(
-                query_req.query, verses, query_req.language
-            )
-        }
+        return generate_template_gita_response(query, verses, language)
 
     try:
         import openai
@@ -512,7 +480,7 @@ IMPORTANT:
 - Keep responses concise (2-3 paragraphs)
 """
 
-        user_prompt = f"""User's Question: {query_req.query}
+        user_prompt = f"""User's Question: {query}
 
 Relevant Gita Verses:
 {verse_context}
@@ -534,14 +502,10 @@ Response:"""
             temperature=0.7,
             max_tokens=400,
         )
-        return {"guidance": response.choices[0].message.content.strip()}
+        return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"OpenAI API error: {str(e)}")
-        return {
-            "guidance": generate_template_gita_response(
-                query_req.query, verses, query_req.language
-            )
-        }
+        return generate_template_gita_response(query, verses, language)
 
 
 def generate_template_gita_response(
