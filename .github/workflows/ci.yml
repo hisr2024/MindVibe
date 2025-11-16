@@ -42,16 +42,14 @@ jobs:
           ruff check .
 
       - name: Run mypy (type checker)
-        continue-on-error: true
         run: |
           mypy backend/
         env:
           MYPYPATH: ${{ github.workspace }}
 
       - name: Run Python tests with coverage
-        continue-on-error: true
         run: |
-          if [ -d "tests" ]; then pytest --cov=backend --cov-report=xml --cov-report=term-missing --cov-fail-under=20; fi
+          if [ -d "tests" ]; then pytest --cov=backend --cov-report=xml --cov-report=term-missing --cov-fail-under=49; fi
 
       - name: Upload Python test artifacts
         uses: actions/upload-artifact@v4

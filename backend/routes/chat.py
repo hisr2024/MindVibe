@@ -125,7 +125,7 @@ async def about() -> Dict[str, Any]:
 
 @router.get("/debug")
 async def debug() -> Dict[str, Any]:
-    return {"api_ready": ready, "version": "12.0", "model": "gpt-4", "fallback_available": fallback_available}
+    return {"api_ready": ready, "version": "12.0", "model": "gpt-4"}
 
 
 @router.get("/history")
