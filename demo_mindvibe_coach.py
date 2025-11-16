@@ -79,9 +79,9 @@ def demonstrate_phase_3() -> None:
     
     print("Crisis Detection:")
     crisis_examples = [
-        "I want to kill myself",
+        "[crisis message - self-harm reference]",
         "I feel a bit anxious",
-        "I can't take it anymore",
+        "[crisis message - distress indicator]",
     ]
     
     for message in crisis_examples:
