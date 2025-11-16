@@ -32,8 +32,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json from root
 COPY package.json package-lock.json* ./
 
-# Install production dependencies
-RUN npm ci --only=production || npm install --production
+# Install all dependencies (including dev for build)
+RUN npm ci || npm install
 
 # Stage 3: frontend-builder
 FROM node:20-alpine AS frontend-builder
@@ -51,7 +51,7 @@ COPY lib/ ./lib/
 COPY public/ ./public/
 
 # Disable Next.js telemetry
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the Next.js application
 RUN npm run build
