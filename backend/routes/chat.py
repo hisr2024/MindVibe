@@ -2,6 +2,7 @@
 
 import os
 import logging
+import uuid
 from typing import Dict, Any
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -98,7 +99,6 @@ kiaan = KIAAN()
 @router.post("/start")
 async def start_session() -> Dict[str, Any]:
     """Start a new chat session."""
-    import uuid
     session_id = str(uuid.uuid4())
     return {
         "session_id": session_id,
@@ -139,7 +139,12 @@ async def about() -> Dict[str, Any]:
 
 @router.get("/debug")
 async def debug() -> Dict[str, Any]:
-    return {"api_ready": ready, "version": "12.0", "model": "gpt-4"}
+    return {
+        "api_ready": ready,
+        "version": "12.0",
+        "model": "gpt-4",
+        "fallback_available": fallback_available
+    }
 
 
 @router.get("/history")
