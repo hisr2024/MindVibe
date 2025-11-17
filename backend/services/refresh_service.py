@@ -6,7 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.settings import settings
-from backend.models.refresh_token import RefreshToken
+from backend.models import RefreshToken
 from backend.services.session_service import (
     get_session,
     revoke_session,
