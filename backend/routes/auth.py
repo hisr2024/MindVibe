@@ -113,7 +113,7 @@ class RefreshOut(BaseModel):
 # ----------------------
 # Internal helpers
 # ----------------------
-async def _extract_auth_context(request: Request):
+async def _extract_auth_context(request: Request) -> tuple[dict[str, str | int], str, str, int | None]:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.lower().startswith("bearer "):
         raise HTTPException(
@@ -150,7 +150,7 @@ async def _get_user_or_401(db: AsyncSession, user_id: str) -> User:
 # Signup
 # ----------------------
 @router.post("/signup", response_model=SignupOut, status_code=201)
-async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
+async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)) -> SignupOut:
     result = policy.validate(payload.password)
     if not result.ok:
         raise HTTPException(status_code=422, detail=result.errors)
@@ -167,7 +167,7 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(user)
 
-    return SignupOut(user_id=user.id, email=user.email, policy_passed=True)
+    return SignupOut(user_id=str(user.id), email=user.email, policy_passed=True)
 
 
 # ----------------------
@@ -176,7 +176,7 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
 @router.post("/login", response_model=LoginOut)
 async def login(
     payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)
-):
+) -> LoginOut:
     email_norm = payload.email.lower()
     stmt = select(User).where(User.email == email_norm)
     user = (await db.execute(stmt)).scalars().first()
@@ -189,7 +189,7 @@ async def login(
 
     # Create refresh token + set cookie
     _, raw_refresh = await create_refresh_token(
-        db, user_id=user.id, session_id=session.id
+        db, user_id=str(user.id), session_id=session.id
     )
     response.set_cookie(
         key="refresh_token",
@@ -206,7 +206,7 @@ async def login(
         token_type="bearer",  # nosec B106
         session_id=str(session.id),
         expires_in=expires_in_seconds,
-        user_id=user.id,
+        user_id=str(user.id),
         email=user.email,
     )
 
@@ -215,7 +215,7 @@ async def login(
 # Me
 # ----------------------
 @router.get("/me", response_model=MeOut)
-async def me(request: Request, db: AsyncSession = Depends(get_db)):
+async def me(request: Request, db: AsyncSession = Depends(get_db)) -> MeOut:
     payload, user_id, session_id, exp = await _extract_auth_context(request)
     user = await _get_user_or_401(db, user_id)
     session_row = await get_session(db, session_id)
@@ -235,7 +235,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
             access_token_expires_in = None
 
     return MeOut(
-        user_id=user.id,
+        user_id=str(user.id),
         email=user.email,
         session_id=str(session_row.id),
         session_active=True,
@@ -251,7 +251,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
 @router.post("/logout", response_model=LogoutOut)
 async def logout(
     request: Request, response: Response, db: AsyncSession = Depends(get_db)
-):
+) -> LogoutOut:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.lower().startswith("bearer "):
         raise HTTPException(
@@ -289,7 +289,7 @@ async def logout(
 # List Sessions
 # ----------------------
 @router.get("/sessions", response_model=SessionListOut)
-async def list_sessions(request: Request, db: AsyncSession = Depends(get_db)):
+async def list_sessions(request: Request, db: AsyncSession = Depends(get_db)) -> SessionListOut:
     _, user_id, current_session_id, _ = await _extract_auth_context(request)
     stmt = (
         select(Session)
@@ -321,7 +321,7 @@ async def list_sessions(request: Request, db: AsyncSession = Depends(get_db)):
 @router.post("/sessions/{session_id}/revoke", response_model=RevokeSessionOut)
 async def revoke_specific_session(
     session_id: str, request: Request, db: AsyncSession = Depends(get_db)
-):
+) -> RevokeSessionOut:
     _, user_id, _, _ = await _extract_auth_context(request)
     stmt = select(Session).where(Session.id == session_id, Session.user_id == user_id)
     target = (await db.execute(stmt)).scalars().first()
@@ -359,7 +359,7 @@ async def refresh_tokens(
     request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
-):
+) -> RefreshOut:
     raw_refresh = request.cookies.get("refresh_token") or payload.refresh_token
     if not raw_refresh:
         raise HTTPException(status_code=400, detail="Missing refresh token")

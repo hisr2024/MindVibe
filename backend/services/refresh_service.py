@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.settings import settings
 from backend.models.refresh_token import RefreshToken
+from backend.models import Session
 from backend.services.session_service import (
     get_session,
     revoke_session,
@@ -130,7 +131,7 @@ async def handle_reuse_attack(db: AsyncSession, token: RefreshToken) -> None:
         await revoke_session(db, session_row)
 
 
-async def validate_and_prepare_rotation(db: AsyncSession, raw_refresh: str):
+async def validate_and_prepare_rotation(db: AsyncSession, raw_refresh: str) -> tuple[RefreshToken, Session]:
     """Validate a raw refresh token before rotation."""
     token_row = await get_refresh_token_by_raw(db, raw_refresh)
     if not token_row:
