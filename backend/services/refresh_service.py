@@ -6,7 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.settings import settings
-from backend.models.refresh_token import RefreshToken
+from backend.models import RefreshToken
 from backend.services.session_service import (
     get_session,
     revoke_session,
@@ -41,16 +41,18 @@ async def create_refresh_token(
     parent: RefreshToken | None = None,
 ) -> tuple[RefreshToken, str]:
     """Create a new refresh token row and return (row, raw_token)."""
+    import secrets as sec
     raw = generate_refresh_token_value()
     hashed = _hash_token(raw)
     expires_at = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    token_id = sec.token_urlsafe(32)
 
     row = RefreshToken(
+        id=token_id,
         user_id=user_id,
         session_id=session_id,
         token_hash=hashed,
         expires_at=expires_at,
-        parent_id=parent.id if parent else None,
     )
     db.add(row)
     await db.commit()

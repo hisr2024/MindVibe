@@ -106,6 +106,24 @@ except Exception as e:
     print(f"   Error Message: {e}")
     traceback.print_exc(file=sys.stdout)
 
+# Load Gita API router
+print("\n[Gita API] Attempting to import Gita API router...")
+try:
+    from backend.routes.gita_api import router as gita_router
+    app.include_router(gita_router)
+    print("✅ [SUCCESS] Gita API router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Gita API router: {e}")
+
+# Load Auth router
+print("\n[Auth] Attempting to import Auth router...")
+try:
+    from backend.routes.auth import router as auth_router
+    app.include_router(auth_router)
+    print("✅ [SUCCESS] Auth router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Auth router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")

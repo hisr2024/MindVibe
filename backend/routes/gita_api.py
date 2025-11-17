@@ -128,8 +128,87 @@ class ThemeInfo(BaseModel):
 class ThemeResponse(BaseModel):
     """Response model for theme browsing."""
 
+    themes: list[ThemeInfo] = Field(default_factory=list)
+    total_themes: int
+
+
+class ChapterInfo(BaseModel):
+    """Brief information about a chapter."""
+
+    chapter: int
+    name: str
+    summary: str
+    verse_count: int
+
+
+class TranslationSet(BaseModel):
+    """All translations for a verse."""
+
+    verse_id: str
+    chapter: int
+    verse: int
+    translations: dict[str, str]
+    theme: str
+    principle: str | None = None
+
+
+class WisdomRequest(BaseModel):
+    """Request model for wisdom search."""
+
+    keyword: str = Field(..., min_length=3, max_length=200)
+    theme: str | None = None
+    language: str = "english"
+    page: int = 1
+    page_size: int = 10
+
+
+# Chapter metadata
+CHAPTER_METADATA = {
+    1: {"name": "Arjuna Vishada Yoga", "summary": "The Yoga of Arjuna's Dejection", "verse_count": 47},
+    2: {"name": "Sankhya Yoga", "summary": "The Yoga of Knowledge", "verse_count": 72},
+    3: {"name": "Karma Yoga", "summary": "The Yoga of Action", "verse_count": 43},
+    4: {"name": "Jnana Karma Sanyasa Yoga", "summary": "The Yoga of Knowledge and the Disciplines of Action", "verse_count": 42},
+    5: {"name": "Karma Sanyasa Yoga", "summary": "The Yoga of Renunciation", "verse_count": 29},
+    6: {"name": "Dhyana Yoga", "summary": "The Yoga of Meditation", "verse_count": 47},
+    7: {"name": "Jnana Vijnana Yoga", "summary": "The Yoga of Knowledge and Wisdom", "verse_count": 30},
+    8: {"name": "Aksara Brahma Yoga", "summary": "The Yoga of the Imperishable Brahman", "verse_count": 28},
+    9: {"name": "Raja Vidya Raja Guhya Yoga", "summary": "The Yoga of Royal Knowledge and Royal Secret", "verse_count": 34},
+    10: {"name": "Vibhuti Yoga", "summary": "The Yoga of Divine Glories", "verse_count": 42},
+    11: {"name": "Visvarupa Darsana Yoga", "summary": "The Yoga of the Vision of the Universal Form", "verse_count": 55},
+    12: {"name": "Bhakti Yoga", "summary": "The Yoga of Devotion", "verse_count": 20},
+    13: {"name": "Ksetra Ksetrajna Vibhaga Yoga", "summary": "The Yoga of Distinction between the Field and the Knower of the Field", "verse_count": 35},
+    14: {"name": "Gunatraya Vibhaga Yoga", "summary": "The Yoga of the Division of the Three Gunas", "verse_count": 27},
+    15: {"name": "Purusottama Yoga", "summary": "The Yoga of the Supreme Person", "verse_count": 20},
+    16: {"name": "Daivasura Sampad Vibhaga Yoga", "summary": "The Yoga of the Division between the Divine and Demoniacal", "verse_count": 24},
+    17: {"name": "Sraddhatraya Vibhaga Yoga", "summary": "The Yoga of the Division of the Three Kinds of Faith", "verse_count": 28},
+    18: {"name": "Moksa Sanyasa Yoga", "summary": "The Yoga of Liberation and Renunciation", "verse_count": 78},
+}
+
+
 @router.get("/chapters", response_model=list[ChapterInfo])
-async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[dict]:
+async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[ChapterInfo]:
+    """
+    Get list of all chapters.
+
+    Returns brief information about all chapters.
+
+    **Example:** `/api/gita/chapters`
+    """
+    chapters = []
+    for chapter_id, metadata in CHAPTER_METADATA.items():
+        chapters.append(
+            ChapterInfo(
+                chapter=chapter_id,
+                name=metadata["name"],
+                summary=metadata["summary"],
+                verse_count=metadata["verse_count"],
+            )
+        )
+    return sorted(chapters, key=lambda x: x.chapter)
+
+
+@router.get("/chapters/{chapter_id}", response_model=ChapterResponse)
+async def get_chapter(chapter_id: int, db: AsyncSession = Depends(get_db)) -> ChapterResponse:
     """
     Get chapter information with verse listing.
 
@@ -246,10 +325,15 @@ async def get_verse(
 
     return VerseResponse(verse=verse_detail, related_verses=related_refs)
 
-@router.post("/search")
+@router.get("/search", response_model=SearchResponse)
 async def semantic_search(
-    query: WisdomRequest, db: AsyncSession = Depends(get_db)
-) -> dict:
+    keyword: str,
+    theme: str | None = None,
+    language: str = "english",
+    page: int = 1,
+    page_size: int = 10,
+    db: AsyncSession = Depends(get_db),
+) -> SearchResponse:
     """
     Semantic search across all verses.
 
@@ -258,6 +342,14 @@ async def semantic_search(
 
     **Example:** `/api/gita/search?keyword=peace&theme=inner_peace&page=1`
     """
+    # Validate keyword length
+    if len(keyword) < 3:
+        raise HTTPException(status_code=422, detail="Keyword must be at least 3 characters")
+    
+    # Validate page_size
+    if page_size > 50:
+        raise HTTPException(status_code=422, detail="Page size cannot exceed 50")
+    
     # Build search query
     lang_field = getattr(GitaVerse, language)
     search_conditions = [lang_field.ilike(f"%{keyword}%")]
@@ -440,37 +532,57 @@ async def get_languages() -> dict:
     }
 
 
-@router.post("/wisdom")
+@router.post("/wisdom", response_model=WisdomQueryResponse)
 async def wisdom_consultation(
-    query: WisdomRequest, db: AsyncSession = Depends(get_db)
-) -> dict:
+    request: WisdomQueryRequest, db: AsyncSession = Depends(get_db)
+) -> WisdomQueryResponse:
     """
     AI-powered Gita wisdom consultation.
 
     Args:
-        query: User's question
-        verses: Relevant Gita verses
-        language: Response language
+        request: Wisdom query with user's question and language preference
 
     Returns:
-        AI-generated guidance text
+        AI-generated guidance with relevant verses
     """
+    # Find relevant verses based on query keywords (simple keyword matching)
+    # In a real implementation, this would use semantic search
+    query_lower = request.query.lower()
+    keywords = query_lower.split()[:5]  # Use first 5 words as keywords
+    
+    # Search for verses containing keywords
+    search_conditions = []
+    lang_field = getattr(GitaVerse, request.language)
+    for keyword in keywords:
+        if len(keyword) > 3:  # Only use words longer than 3 chars
+            search_conditions.append(lang_field.ilike(f"%{keyword}%"))
+    
+    if search_conditions:
+        verse_query = select(GitaVerse).where(or_(*search_conditions)).limit(3)
+    else:
+        # Fallback: get some verses from chapter 2 (foundational teachings)
+        verse_query = select(GitaVerse).where(GitaVerse.chapter == 2).limit(3)
+    
+    result = await db.execute(verse_query)
+    verses = list(result.scalars().all())
+    
+    # Generate wisdom response
     openai_key = os.getenv("OPENAI_API_KEY")
     if not openai_key or openai_key == "your-api-key-here":
-        return generate_template_gita_response(query, verses, language)
+        guidance = generate_template_gita_response(request.query, verses, request.language)
+    else:
+        try:
+            import openai
+            
+            openai.api_key = openai_key
+            verse_context = "\n\n".join(
+                [
+                    f"Verse {v.chapter}.{v.verse}:\n{v.english}\n\nTheme: {v.theme}"
+                    for v in verses
+                ]
+            )
 
-    try:
-        import openai
-
-        openai.api_key = openai_key
-        verse_context = "\n\n".join(
-            [
-                f"Verse {v.chapter}.{v.verse}:\n{v.english}\n\nTheme: {v.theme}"
-                for v in verses
-            ]
-        )
-
-        system_prompt = """You are a Bhagavad Gita wisdom guide helping people with life challenges.
+            system_prompt = """You are a Bhagavad Gita wisdom guide helping people with life challenges.
 You MUST base ALL responses ONLY on the Bhagavad Gita verses provided to you.
 
 CRITICAL REQUIREMENTS:
@@ -494,7 +606,7 @@ ABSOLUTE RULES:
 - Be compassionate while staying true to Gita principles
 """
 
-        user_prompt = f"""User's Question: {query}
+            user_prompt = f"""User's Question: {request.query}
 
 Bhagavad Gita Verses Provided:
 {verse_context}
@@ -512,19 +624,41 @@ MANDATORY REQUIREMENTS:
 
 Response (following the structure above):"""
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.7,
-            max_tokens=400,
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.7,
+                max_tokens=400,
+            )
+            guidance = response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"OpenAI API error: {str(e)}")
+            guidance = generate_template_gita_response(request.query, verses, request.language)
+    
+    # Format verse references
+    verse_references = [
+        VerseReference(
+            chapter=v.chapter,
+            verse=v.verse,
+            verse_id=f"{v.chapter}.{v.verse}",
+            text=getattr(v, request.language),
+            translation=v.english if request.language != "english" else None,
+            sanskrit=v.sanskrit if request.language != "sanskrit" else None,
+            theme=v.theme,
         )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        print(f"OpenAI API error: {str(e)}")
-        return generate_template_gita_response(query, verses, language)
+        for v in verses
+    ]
+    
+    return WisdomQueryResponse(
+        query=request.query,
+        guidance=guidance,
+        verses=verse_references,
+        modern_context=None,
+        language=request.language,
+    )
 
 
 def generate_template_gita_response(
