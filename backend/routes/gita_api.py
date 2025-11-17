@@ -198,28 +198,54 @@ CHAPTER_METADATA: dict[int, dict[str, str | int]] = {
 }
 
 
-@router.get("/chapters", response_model=list[ChapterInfo])
-async def browse_chapters(db: AsyncSession = Depends(get_db)) -> list[ChapterInfo]:
+@router.get("/chapters/{chapter_id}", response_model=ChapterResponse)
+async def get_chapter(
+    chapter_id: int,
+    db: AsyncSession = Depends(get_db)
+) -> ChapterResponse:
     """
-    Get list of all chapters with basic information.
+    Get chapter information with verse listing.
 
-    Returns basic information about all chapters in the Bhagavad Gita.
+    Returns detailed information about a specific chapter including its
+    verses, themes, and summary.
 
-    **Example:** `/api/gita/chapters`
+    **Example:** `/api/gita/chapters/2`
     """
-    chapters: list[ChapterInfo] = []
-    
-    for chapter_num, metadata in CHAPTER_METADATA.items():
-        chapters.append(
-            ChapterInfo(
-                chapter=chapter_num,
-                name=str(metadata["name"]),
-                summary=str(metadata["summary"]),
-                verse_count=int(metadata["verse_count"]),
-            )
+    if chapter_id not in CHAPTER_METADATA:
+        raise HTTPException(status_code=404, detail=f"Chapter {chapter_id} not found")
+
+    metadata = CHAPTER_METADATA[chapter_id]
+
+    # Get verses for this chapter
+    query = select(GitaVerse).where(GitaVerse.chapter == chapter_id).order_by(GitaVerse.verse)
+    result = await db.execute(query)
+    verses = list(result.scalars().all())
+
+    # Format verse summaries
+    verse_summaries = [
+        VerseSummary(
+            chapter=v.chapter,
+            verse=v.verse,
+            verse_id=f"{v.chapter}.{v.verse}",
+            theme=v.theme,
+            preview=v.english[:100] + "..." if len(v.english) > 100 else v.english,
         )
-    
-    return sorted(chapters, key=lambda x: x.chapter)
+        for v in verses
+    ]
+
+    # Get unique themes in this chapter
+    themes_query = select(distinct(GitaVerse.theme)).where(GitaVerse.chapter == chapter_id)
+    themes_result = await db.execute(themes_query)
+    themes = [row[0] for row in themes_result.all()]
+
+    return ChapterResponse(
+        chapter=chapter_id,
+        name=str(metadata["name"]),
+        summary=str(metadata["summary"]),
+        verse_count=len(verses) if verses else int(metadata["verse_count"]),
+        verses=verse_summaries,
+        themes=themes,
+    )
 
 
 @router.get("/verses/{chapter}/{verse}", response_model=VerseResponse)
@@ -293,9 +319,13 @@ async def get_verse(
 
     return VerseResponse(verse=verse_detail, related_verses=related_refs)
 
-@router.post("/search", response_model=SearchResponse)
+@router.get("/search", response_model=SearchResponse)
 async def semantic_search(
-    search_request: SearchRequest, 
+    keyword: str,
+    language: str = "english",
+    theme: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
     db: AsyncSession = Depends(get_db)
 ) -> SearchResponse:
     """
@@ -304,13 +334,20 @@ async def semantic_search(
     Search Gita verses by keywords with optional theme filtering.
     Supports pagination and multi-language search.
 
-    **Example:** POST `/api/gita/search` with body: `{"keyword": "peace", "theme": "inner_peace", "page": 1}`
+    **Example:** `/api/gita/search?keyword=peace&theme=inner_peace&page=1`
     """
-    keyword = search_request.keyword
-    language = search_request.language
-    theme = search_request.theme
-    page = search_request.page
-    page_size = search_request.page_size
+    # Validate parameters
+    if len(keyword) < 1:
+        raise HTTPException(status_code=422, detail="Keyword must be at least 1 character")
+    
+    if language not in ["english", "hindi", "sanskrit"]:
+        raise HTTPException(status_code=422, detail="Invalid language")
+    
+    if page < 1:
+        raise HTTPException(status_code=422, detail="Page must be >= 1")
+    
+    if page_size < 1 or page_size > 100:
+        raise HTTPException(status_code=422, detail="Page size must be between 1 and 100")
     
     # Build search query
     lang_field = getattr(GitaVerse, language)
@@ -494,67 +531,64 @@ async def get_languages() -> dict[str, list[dict[str, str]]]:
     }
 
 
-@router.post("/wisdom")
+@router.post("/wisdom", response_model=WisdomQueryResponse)
 async def wisdom_consultation(
-    wisdom_request: WisdomRequest, db: AsyncSession = Depends(get_db)
-) -> dict[str, str]:
+    wisdom_request: WisdomQueryRequest, db: AsyncSession = Depends(get_db)
+) -> WisdomQueryResponse:
     """
     AI-powered Gita wisdom consultation.
 
     Args:
-        wisdom_request: Request containing user's question, optional theme filter, and language preference
+        wisdom_request: Request containing user's question and language preference
 
     Returns:
-        AI-generated guidance text based on relevant Gita verses
+        Wisdom guidance with relevant verses
     """
     query_text = wisdom_request.query
-    theme_filter = wisdom_request.theme
     language = wisdom_request.language
-    max_verses = wisdom_request.max_verses
+    max_verses = 3
     
-    # Find relevant verses based on theme or general search
-    if theme_filter:
+    # Find relevant verses based on general search
+    # Simple keyword search in the requested language
+    lang_field = getattr(GitaVerse, language)
+    # Extract keywords from query (simple approach)
+    keywords = query_text.lower().split()[:3]  # Use first 3 words
+    conditions = [lang_field.ilike(f"%{kw}%") for kw in keywords if len(kw) > 3]
+    
+    if conditions:
         verse_query = (
             select(GitaVerse)
-            .where(GitaVerse.theme == theme_filter)
+            .where(or_(*conditions))
             .limit(max_verses)
         )
     else:
-        # Simple keyword search in the requested language
-        lang_field = getattr(GitaVerse, language)
-        # Extract keywords from query (simple approach)
-        keywords = query_text.lower().split()[:3]  # Use first 3 words
-        conditions = [lang_field.ilike(f"%{kw}%") for kw in keywords if len(kw) > 3]
-        
-        if conditions:
-            verse_query = (
-                select(GitaVerse)
-                .where(or_(*conditions))
-                .limit(max_verses)
-            )
-        else:
-            # Fallback to random verses
-            verse_query = select(GitaVerse).limit(max_verses)
+        # Fallback to verses on common themes
+        verse_query = (
+            select(GitaVerse)
+            .where(GitaVerse.theme.in_(["action_without_attachment", "equanimity", "self_knowledge"]))
+            .limit(max_verses)
+        )
     
     result = await db.execute(verse_query)
     verses = list(result.scalars().all())
     
+    # Generate guidance
     openai_key = os.getenv("OPENAI_API_KEY")
     if not openai_key or openai_key == "your-api-key-here":
-        return {"guidance": generate_template_gita_response(query_text, verses, language)}
+        guidance = generate_template_gita_response(query_text, verses, language)
+    else:
+        try:
+            import openai
 
-    try:
-        import openai
+            client = openai.OpenAI(api_key=openai_key)
+            verse_context = "\n\n".join(
+                [
+                    f"Verse {v.chapter}.{v.verse}:\n{v.english}\n\nTheme: {v.theme}"
+                    for v in verses
+                ]
+            )
 
-        openai.api_key = openai_key
-        verse_context = "\n\n".join(
-            [
-                f"Verse {v.chapter}.{v.verse}:\n{v.english}\n\nTheme: {v.theme}"
-                for v in verses
-            ]
-        )
-
-        system_prompt = """You are a Bhagavad Gita wisdom guide helping people with life challenges.
+            system_prompt = """You are a Bhagavad Gita wisdom guide helping people with life challenges.
 You MUST base ALL responses ONLY on the Bhagavad Gita verses provided to you.
 
 CRITICAL REQUIREMENTS:
@@ -578,7 +612,7 @@ ABSOLUTE RULES:
 - Be compassionate while staying true to Gita principles
 """
 
-        user_prompt = f"""User's Question: {query_text}
+            user_prompt = f"""User's Question: {query_text}
 
 Bhagavad Gita Verses Provided:
 {verse_context}
@@ -596,21 +630,42 @@ MANDATORY REQUIREMENTS:
 
 Response (following the structure above):"""
 
-        client = openai.OpenAI(api_key=openai_key)
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.7,
-            max_tokens=400,
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.7,
+                max_tokens=400,
+            )
+            content = response.choices[0].message.content
+            guidance = content.strip() if content else generate_template_gita_response(query_text, verses, language)
+        except Exception as e:
+            print(f"OpenAI API error: {str(e)}")
+            guidance = generate_template_gita_response(query_text, verses, language)
+    
+    # Format verse references
+    verse_refs = [
+        VerseReference(
+            chapter=v.chapter,
+            verse=v.verse,
+            verse_id=f"{v.chapter}.{v.verse}",
+            text=getattr(v, language),
+            translation=v.english if language != "english" else None,
+            sanskrit=v.sanskrit if language != "sanskrit" else None,
+            theme=v.theme,
         )
-        content = response.choices[0].message.content
-        return {"guidance": content.strip() if content else ""}
-    except Exception as e:
-        print(f"OpenAI API error: {str(e)}")
-        return {"guidance": generate_template_gita_response(query_text, verses, language)}
+        for v in verses
+    ]
+    
+    return WisdomQueryResponse(
+        query=query_text,
+        guidance=guidance,
+        verses=verse_refs,
+        modern_context=None,
+        language=language,
+    )
 
 
 def generate_template_gita_response(
