@@ -23,77 +23,45 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white p-8">
-      <div className="max-w-6xl mx-auto space-y-12">
-        <header className="text-center space-y-4 py-12">
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            🕉️ MindVibe
+    <main className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white p-4 md:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <header className="text-center space-y-3 py-8">
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            🕉️ KIAAN
           </h1>
-          <p className="text-2xl text-zinc-400">AI-Powered Mental Wellness & Ancient Wisdom</p>
-          <p className="text-zinc-500">Your journey to peace begins here</p>
+          <p className="text-xl md:text-2xl text-zinc-300 font-light">Your AI Guide to Inner Peace</p>
+          <p className="text-sm text-zinc-500">Ancient Wisdom for Modern Life • Powered by 700+ Timeless Teachings</p>
         </header>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <FeatureCard
-            icon="🧘‍♂️"
-            title="Daily Meditation"
-            description="Guided meditation sessions tailored to your mental state"
-          />
-          <FeatureCard
-            icon="📊"
-            title="Mood Tracking"
-            description="Track your emotional wellness journey with AI insights"
-          />
-          <FeatureCard
-            icon="🎯"
-            title="Goal Setting"
-            description="Set and achieve your mental wellness goals"
-          />
-          <FeatureCard
-            icon="📚"
-            title="Gita Wisdom"
-            description="Ancient wisdom from Bhagavad Gita for modern life"
-          />
+        <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-800/50 rounded-2xl p-4 text-center">
+          <p className="text-sm text-blue-200">🔒 All conversations are private and confidential • Your journey, your space</p>
         </div>
 
-        <AIChat />
-        <GitaWisdom />
+        <KIAANChat />
+        <QuickHelp />
+        <DailyWisdom />
+        <MoodTracker />
       </div>
     </main>
   )
 }
 
-function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
-  return (
-    <div className="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-8 hover:border-zinc-700 transition-all">
-      <div className="text-5xl mb-4">{icon}</div>
-      <h3 className="text-2xl font-semibold mb-3">{title}</h3>
-      <p className="text-zinc-400">{description}</p>
-    </div>
-  )
-}
-
-function AIChat() {
-  const [messages, setMessages] = useLocalState<{role: 'user' | 'assistant', content: string}[]>('mindvibe_chat', [])
+function KIAANChat() {
+  const [messages, setMessages] = useLocalState<{role: 'user' | 'assistant', content: string}[]>('kiaan_chat', [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
-  
   useEffect(() => {
-    scrollToBottom()
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   async function sendMessage() {
     if (!input.trim()) return
     
     const userMessage = { role: 'user' as const, content: input }
-    setMessages([...messages, userMessage])
+    const newMessages = [...messages, userMessage]
+    setMessages(newMessages)
     setInput('')
     setLoading(true)
 
@@ -107,44 +75,44 @@ function AIChat() {
 
       if (response.ok) {
         const data = await response.json()
-        setMessages([...messages, userMessage, { role: 'assistant', content: data.response }])
+        setMessages([...newMessages, { role: 'assistant', content: data.response }])
       } else {
-        setMessages([...messages, userMessage, { 
-          role: 'assistant', 
-          content: '❌ Unable to connect to AI backend. Please check your backend deployment.' 
-        }])
+        setMessages([...newMessages, { role: 'assistant', content: 'I\'m having trouble connecting. Please try again. 💙' }])
       }
     } catch {
-      setMessages([...messages, userMessage, { 
-        role: 'assistant', 
-        content: '💡 AI backend not connected. This feature requires the backend API to be running.' 
-      }])
+      setMessages([...newMessages, { role: 'assistant', content: 'Connection issue. I\'m here when you\'re ready. 💙' }])
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <section className="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-8 space-y-6">
-      <h2 className="text-2xl font-semibold">🤖 AI Mental Health Guide</h2>
-      <p className="text-zinc-400">Get compassionate AI-powered guidance for your mental health journey</p>
+    <section className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border border-zinc-700 rounded-3xl p-6 md:p-8 space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="text-4xl">💬</div>
+        <div>
+          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Talk to KIAAN</h2>
+          <p className="text-sm text-zinc-400">Powered by ancient wisdom and modern AI</p>
+        </div>
+      </div>
 
-      <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 h-96 overflow-y-auto space-y-4">
+      <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-zinc-500 py-20">
-            <p className="text-4xl mb-4">💭</p>
-            <p>Start a conversation with your AI guide</p>
+          <div className="text-center text-zinc-500 py-20 md:py-32">
+            <p className="text-6xl mb-4">🕉️</p>
+            <p className="text-xl mb-2">How can I guide you today?</p>
+            <p className="text-sm text-zinc-600">Share what\'s on your mind</p>
           </div>
         )}
         
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}> 
+            <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
               msg.role === 'user' 
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
-                : 'bg-zinc-700 text-zinc-100'
-            }`}>
-              {msg.content}
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                : 'bg-gradient-to-r from-zinc-700 to-zinc-600 text-zinc-100 shadow-md' 
+            }`}> 
+              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
             </div>
           </div>
         ))}
@@ -152,7 +120,7 @@ function AIChat() {
         {loading && (
           <div className="flex justify-start">
             <div className="bg-zinc-700 px-4 py-3 rounded-2xl">
-              <span className="animate-pulse">Thinking...</span>
+              <span className="animate-pulse">KIAAN is reflecting...</span>
             </div>
           </div>
         )}
@@ -166,13 +134,13 @@ function AIChat() {
           placeholder="Type your message..."
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyPress={e => e.key === 'Enter' && sendMessage()}
-          className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+          className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-zinc-700 disabled:to-zinc-700 disabled:cursor-not-allowed rounded-xl font-semibold transition-all"
+          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-zinc-700 disabled:to-zinc-700 rounded-xl font-semibold transition-all"
         >
           Send
         </button>
@@ -181,86 +149,102 @@ function AIChat() {
   )
 }
 
-function GitaWisdom() {
-  const [query, setQuery] = useState('')
-  const [response, setResponse] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+function QuickHelp() {
+  const scenarios = [
+    { emoji: '😰', label: 'Feeling anxious', query: "I'm feeling anxious and worried" },
+    { emoji: '😔', label: 'Feeling sad', query: "I'm feeling down and sad" },
+    { emoji: '😠', label: 'Dealing with anger', query: "I'm struggling with anger" },
+    { emoji: '🤔', label: 'Making a decision', query: "I need help making a decision" },
+    { emoji: '💼', label: 'Work stress', query: "I'm stressed about work" },
+    { emoji: '💔', label: 'Relationship issues', query: "I'm having relationship problems" },
+    { emoji: '🎯', label: 'Finding purpose', query: "I'm searching for my purpose" },
+    { emoji: '🙏', label: 'Need peace', query: "I need inner peace" },
+  ]
 
-  async function searchWisdom() {
-    if (!query.trim()) return
-    
-    setLoading(true)
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const res = await fetch(`${apiUrl}/api/gita/wisdom`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, language: 'english' })
-      })
+  return (
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold text-zinc-300">🎯 Quick Help</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {scenarios.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              const input = document.querySelector('input[placeholder*="Type"]') as HTMLInputElement
+              if (input) { input.value = s.query; input.focus() }
+            }}
+            className="bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-2xl p-4 transition-all text-left group"
+          >
+            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
+            <div className="text-sm text-zinc-300">{s.label}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
 
-      if (res.ok) {
-        const data = await res.json()
-        setResponse(data)
-      } else {
-        setResponse({ error: 'Unable to fetch wisdom. Backend may not be running.' })
-      }
-    } catch {
-      setResponse({ error: 'Connection failed. Please ensure backend is running.' })
-    } finally {
-      setLoading(false)
-    }
+function DailyWisdom() {
+  const [saved, setSaved] = useState(false)
+  const wisdom = {
+    text: "The key to peace lies not in controlling outcomes, but in mastering your response. Focus your energy on doing your best without attachment to results, and discover true freedom.",
+    principle: "Action without Attachment"
   }
 
   return (
-    <section className="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-8 space-y-6">
-      <h2 className="text-2xl font-semibold">📿 Bhagavad Gita Wisdom</h2>
-      <p className="text-zinc-400">Get ancient wisdom for your modern life challenges</p>
-
-      <div className="flex gap-3">
-        <input
-          type="text"
-          placeholder="Ask for wisdom... (e.g., How to deal with stress?)"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyPress={e => e.key === 'Enter' && searchWisdom()}
-          className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-        />
-        <button
-          onClick={searchWisdom}
-          disabled={!query.trim() || loading}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-zinc-700 disabled:to-zinc-700 disabled:cursor-not-allowed rounded-xl font-semibold transition-all"
-        >
-          {loading ? 'Searching...' : 'Search'}
-        </button>
-      </div>
-
-      {response && (
-        <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 space-y-4">
-          {response.error ? (
-            <p className="text-red-400">{response.error}</p>
-          ) : (
-            <>
-              <div className="prose prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-zinc-200">{response.guidance}</div>
-              </div>
-              
-              {response.verses && response.verses.length > 0 && (
-                <div className="border-t border-zinc-700 pt-4 space-y-3">
-                  <h3 className="text-lg font-semibold text-purple-400">📚 Referenced Verses:</h3>
-                  {response.verses.map((verse: any, i: number) => (
-                    <div key={i} className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-700">
-                      <p className="text-sm text-purple-400 font-semibold mb-2">
-                        Bhagavad Gita {verse.verse_id} - {verse.theme}
-                      </p>
-                      <p className="text-zinc-300 italic">{verse.text}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+    <section className="bg-gradient-to-r from-orange-900/30 to-yellow-900/20 border border-orange-800/50 rounded-3xl p-6 md:p-8">
+      <div className="flex justify-between mb-4">
+        <div className="flex gap-2">
+          <span className="text-3xl">💎</span>
+          <h2 className="text-xl font-semibold text-orange-200">Today's Wisdom</h2>
         </div>
-      )}
+        <div className="text-sm text-orange-400">{new Date().toLocaleDateString()}</div>
+      </div>
+      
+      <blockquote className="text-lg text-zinc-100 mb-4 italic leading-relaxed">
+        "{wisdom.text}"
+      </blockquote>
+      
+      <p className="text-sm text-orange-300 mb-4">✨ Principle: {wisdom.principle}</p>
+      
+      <div className="flex gap-3">
+        <button className="px-4 py-2 bg-orange-600/50 hover:bg-orange-600 rounded-lg text-sm">💬 Chat about this</button>
+        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">
+          {saved ? '⭐ Saved' : '☆ Save'}
+        </button>
+        <button className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">📤 Share</button>
+      </div>
+    </section>
+  )
+}
+
+function MoodTracker() {
+  const [selectedMood, setSelectedMood] = useState<string | null>(null)
+  const moods = [
+    { emoji: '😊', label: 'Great', color: 'from-green-600 to-emerald-600' },
+    { emoji: '😐', label: 'Okay', color: 'from-blue-600 to-cyan-600' },
+    { emoji: '😔', label: 'Low', color: 'from-gray-600 to-slate-600' },
+    { emoji: '😰', label: 'Anxious', color: 'from-orange-600 to-red-600' },
+    { emoji: '🙏', label: 'Peaceful', color: 'from-purple-600 to-pink-600' },
+  ]
+
+  return (
+    <section className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6">
+      <h2 className="text-xl font-semibold mb-4 text-zinc-300">📊 How are you feeling?</h2>
+      <div className="flex flex-wrap justify-center gap-3">
+        {moods.map((m) => (
+          <button
+            key={m.label}
+            onClick={() => setSelectedMood(m.label)}
+            className={`flex flex-col items-center p-4 rounded-xl transition-all ${
+              selectedMood === m.label ? `bg-gradient-to-br ${m.color} scale-105` : 'bg-zinc-800 hover:bg-zinc-700'
+            }`}
+          >
+            <span className="text-4xl mb-2">{m.emoji}</span>
+            <span className="text-sm">{m.label}</span>
+          </button>
+        ))}
+      </div>
+      {selectedMood && <p className="mt-4 text-center text-sm text-green-400">✓ Mood logged</p>}
     </section>
   )
 }
