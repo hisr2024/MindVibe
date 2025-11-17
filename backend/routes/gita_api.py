@@ -325,9 +325,14 @@ async def get_verse(
 
     return VerseResponse(verse=verse_detail, related_verses=related_refs)
 
-@router.post("/search", response_model=SearchResponse)
+@router.get("/search", response_model=SearchResponse)
 async def semantic_search(
-    request: WisdomRequest, db: AsyncSession = Depends(get_db)
+    keyword: str,
+    theme: str | None = None,
+    language: str = "english",
+    page: int = 1,
+    page_size: int = 10,
+    db: AsyncSession = Depends(get_db),
 ) -> SearchResponse:
     """
     Semantic search across all verses.
@@ -335,13 +340,15 @@ async def semantic_search(
     Search Gita verses by keywords with optional theme filtering.
     Supports pagination and multi-language search.
 
-    **Example:** `/api/gita/search` with body `{"keyword": "peace", "theme": "inner_peace", "page": 1}`
+    **Example:** `/api/gita/search?keyword=peace&theme=inner_peace&page=1`
     """
-    keyword = request.keyword
-    theme = request.theme
-    language = request.language
-    page = request.page
-    page_size = min(request.page_size, 50)  # Cap at 50
+    # Validate keyword length
+    if len(keyword) < 3:
+        raise HTTPException(status_code=422, detail="Keyword must be at least 3 characters")
+    
+    # Validate page_size
+    if page_size > 50:
+        raise HTTPException(status_code=422, detail="Page size cannot exceed 50")
     
     # Build search query
     lang_field = getattr(GitaVerse, language)

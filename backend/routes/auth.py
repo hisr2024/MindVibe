@@ -40,7 +40,7 @@ class SignupIn(BaseModel):
 
 
 class SignupOut(BaseModel):
-    user_id: str
+    user_id: int
     email: EmailStr
     policy_passed: bool
 
@@ -160,8 +160,14 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
 
+    # Generate a unique auth_uid
+    import secrets
+    auth_uid = secrets.token_urlsafe(16)
+    
     user = User(
-        email=payload.email.lower(), hashed_password=hash_password(payload.password)
+        auth_uid=auth_uid,
+        email=payload.email.lower(),
+        hashed_password=hash_password(payload.password),
     )
     db.add(user)
     await db.commit()

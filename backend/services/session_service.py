@@ -1,5 +1,6 @@
 """Session management service."""
 
+import secrets
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select, update
@@ -17,7 +18,9 @@ async def create_session(
 ) -> Session:
     """Create a new session."""
     expires_at = datetime.now(UTC) + timedelta(days=settings.SESSION_EXPIRE_DAYS)
+    session_id = secrets.token_urlsafe(32)
     session = Session(
+        id=session_id,
         user_id=user_id,
         ip_address=ip,
         user_agent=ua,
