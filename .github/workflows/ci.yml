@@ -52,7 +52,7 @@ jobs:
           if [ -d "tests" ]; then pytest --cov=backend --cov-report=xml --cov-report=term-missing --cov-fail-under=49; fi
 
       - name: Upload Python test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: python-test-results
@@ -109,7 +109,7 @@ jobs:
         run: npm run build
 
       - name: Upload Node.js test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: nodejs-test-results
