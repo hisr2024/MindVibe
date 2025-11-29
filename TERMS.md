@@ -17,6 +17,12 @@ By accessing or using MindVibe ("the Service"), you agree to be bound by these T
 - **ALWAYS** consult with qualified healthcare professionals for medical advice
 - **NEVER** disregard or delay seeking professional medical advice based on anything in this application
 
+### Compliance Alignment
+- MindVibe is not a regulated medical device and does not claim to diagnose, treat, cure, or prevent any disease
+- Do not enter protected health information (PHI) that requires HIPAA-level safeguards; only provide wellness context necessary for the experience
+- Always consult licensed clinicians for any diagnosis, treatment decisions, or medication guidance
+- Crisis hotlines and emergency services remain the primary resources for urgent mental health needs
+
 ### No Doctor-Patient Relationship
 Use of this Service does not create a doctor-patient relationship between you and MindVibe, its creators, or any third parties.
 

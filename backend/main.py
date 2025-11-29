@@ -134,6 +134,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Privacy router: {e}")
 
+# Load Monitoring router
+print("\n[Monitoring] Attempting to import Monitoring router...")
+try:
+    from backend.routes.monitoring import router as monitoring_router
+    app.include_router(monitoring_router)
+    print("✅ [SUCCESS] Monitoring router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Monitoring router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")

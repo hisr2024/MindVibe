@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
+const resolvedApiUrl = process.env.NEXT_PUBLIC_API_URL
+  || (process.env.NODE_ENV !== 'production' ? 'http://localhost:8000' : null);
+
+if (!resolvedApiUrl && process.env.NODE_ENV === 'production') {
+  throw new Error('NEXT_PUBLIC_API_URL must be set in production to avoid leaking local defaults.');
+}
+
 const nextConfig = {
   reactStrictMode: true,
-  
+
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
@@ -14,7 +21,7 @@ const nextConfig = {
   },
 
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com',
+    NEXT_PUBLIC_API_URL: resolvedApiUrl || '',
   },
 
   async headers() {
@@ -49,12 +56,12 @@ const nextConfig = {
 
   async rewrites() {
     return {
-      beforeFiles: [
+      beforeFiles: resolvedApiUrl ? [
         {
           source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+          destination: `${resolvedApiUrl}/:path*`,
         },
-      ],
+      ] : [],
     };
   },
 };
