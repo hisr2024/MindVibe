@@ -124,63 +124,172 @@ export default function Chat() {
             ...(application ? { application } : {}),
           }),
         },
-        sessionId || undefined,
-      )
+    ];
 
-      if (!response.ok) {
-        throw new Error('KIAAN is taking a moment to respond.')
-      }
+    const statusLabel = useMemo(() => {
+        if (isLoadingSession) return 'Syncing neon space...';
+        if (isSending) return 'KIAAN is responding with glow';
+        return 'Live & empowering';
+    }, [isLoadingSession, isSending]);
 
-      const data = await response.json()
-      setMessages(prev =>
-        prev.map(message =>
-          message.id === pendingAssistantMessage.id ? { ...message, content: data.response, status: undefined } : message,
-        ),
-      )
-    } catch (err) {
-      setError('KIAAN is taking a moment... please try again.')
-      setMessages(prev =>
-        prev.map(message =>
-          message.id === pendingAssistantMessage.id ? { ...message, content: 'Something went wrong. 💙', status: 'error' } : message,
-        ),
-      )
-    } finally {
-      setIsSending(false)
-    }
-  }
+    useEffect(() => {
+        startSession();
+    }, []);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!input.trim()) return
-    void sendMessage({ content: input })
-  }
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
-  const handleQuickPrompt = (prompt: QuickPrompt) => {
-    void sendMessage({
-      content: prompt.message,
-      theme: prompt.theme,
-      application: prompt.application,
-    })
-  }
+    const scrollToBottom = () => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
-  return (
-    <div className="glass-aurora relative overflow-hidden rounded-3xl bg-black/60 p-6 text-white">
-      <ParticleBackground />
-      <div className="relative space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-100/80">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 shadow-soft ring-1 ring-white/10">
-              <Sparkles className="h-4 w-4" aria-hidden />
-              Neon-fast replies
-            </span>
-            <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 shadow-soft ring-1 ring-white/10">
-              <Sparkles className="h-4 w-4" aria-hidden />
-              Gen Z glow
-            </span>
-            {isSending && (
-              <span className="rounded-full bg-vibrant-blue/20 px-3 py-1 text-white shadow-soft ring-1 ring-vibrant-blue/50">
-                Crafting a glow reply…
-              </span>
+    const startSession = async () => {
+        setIsLoadingSession(true);
+        setError(null);
+        try {
+            const response = await apiFetch('/api/chat/start', { method: 'POST' });
+            if (!response.ok) {
+                throw new Error('Failed to start session');
+            }
+            const data = await response.json();
+            setSessionId(data.session_id);
+            setMessages([
+                {
+                    id: data.session_id,
+                    role: 'assistant',
+                    content: data.message,
+                },
+            ]);
+        } catch (err) {
+            setError('Unable to connect to KIAAN. Please try again.');
+        } finally {
+            setIsLoadingSession(false);
+        }
+    };
+
+    const sendMessage = async ({ content, theme, application }: { content: string; theme?: string; application?: string }) => {
+        if (!content.trim()) return;
+
+        const userMessage: ChatMessage = {
+            id: `user-${Date.now()}`,
+            role: 'user',
+            content: content.trim(),
+        };
+
+        const pendingAssistantMessage: ChatMessage = {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: 'KIAAN is thinking... 💭',
+            status: 'pending',
+        };
+
+        setMessages(prev => [...prev, userMessage, pendingAssistantMessage]);
+        setInput('');
+        setIsSending(true);
+        setError(null);
+
+        try {
+            const response = await apiFetch(
+                '/api/chat/message',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage.content,
+                        ...(theme ? { theme } : {}),
+                        ...(application ? { application } : {}),
+                    }),
+                },
+                sessionId || undefined,
+            );
+
+            if (!response.ok) {
+                throw new Error('KIAAN is taking a moment to respond.');
+            }
+
+            const data = await response.json();
+            setMessages(prev =>
+                prev.map(message =>
+                    message.id === pendingAssistantMessage.id
+                        ? { ...message, content: data.response, status: undefined }
+                        : message,
+                ),
+            );
+        } catch (err) {
+            setError('KIAAN is taking a moment... please try again.');
+            setMessages(prev =>
+                prev.map(message =>
+                    message.id === pendingAssistantMessage.id
+                        ? { ...message, content: 'Something went wrong. 💙', status: 'error' }
+                        : message,
+                ),
+            );
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!input.trim()) return;
+        void sendMessage({ content: input });
+    };
+
+    const handleQuickPrompt = (prompt: QuickPrompt) => {
+        void sendMessage({
+            content: prompt.message,
+            theme: prompt.theme,
+            application: prompt.application,
+        });
+    };
+
+    return (
+        <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {quickPrompts.map(prompt => (
+                    <button
+                        key={prompt.label}
+                        type="button"
+                        onClick={() => handleQuickPrompt(prompt)}
+                        className="rounded-md border border-indigo-100 bg-white px-3 py-2 text-xs font-medium text-indigo-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 disabled:cursor-not-allowed"
+                        disabled={isSending || isLoadingSession}
+                    >
+                        {prompt.label}
+                    </button>
+                ))}
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-vibrant-blue">
+                {statusLabel}
+            </p>
+            <div className="h-96 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                {isLoadingSession ? (
+                    <div className="flex h-full items-center justify-center gap-2 text-slate-600">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Connecting to KIAAN...</span>
+                    </div>
+                  ) : (
+                    <div className="flex h-80 flex-col gap-3 overflow-y-auto pr-2">
+                      <AnimatePresence initial={false}>
+                        {messages.map(message => (
+                          <ChatBubble key={message.id} text={message.content} sender={message.role} />
+                        ))}
+                      </AnimatePresence>
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <div className="rounded-xl border border-red-400/40 bg-red-500/20 px-4 py-2 text-sm text-red-100 shadow-neon-strong">
+                {error}
+              </div>
             )}
           </div>
           <div className="text-right">
