@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   BarChart3,
   Bot,
@@ -15,6 +15,7 @@ import {
   PhoneCall,
   ShieldCheck,
   Sparkles,
+  Star,
 } from 'lucide-react'
 
 import { ThemeToggle } from './components/theme-toggle'
@@ -107,12 +108,12 @@ export default function HomePage() {
   const createGroundedResponse = (text: string) => {
     const lower = text.toLowerCase()
     if (lower.includes('sleep') || lower.includes('bed')) {
-      return 'Let’s slow down together. Dim your lights, take three deep breaths, and imagine a gentle wave of calm moving from your forehead to your toes.'
+      return 'Sleepy vibes 💤 dim lights, 3 slow breaths, shoulders melting.'
     }
     if (lower.includes('tense') || lower.includes('anxious')) {
-      return 'I hear the tension. Let’s unclench your shoulders, place a hand on your heart, and name one thing that feels safe right now.'
+      return 'I feel you 🤝 hand to heart, soften the jaw, name one safe thing.'
     }
-    return 'I’m here with you. Let’s take a slow inhale for four, hold for two, exhale for six. What would feel nourishing in the next ten minutes?'
+    return 'Vibes are key! ✨ Inhale 4, hold 2, exhale 6—what feels cozy next?'
   }
 
   const handleSend = (value = draftMessage) => {
@@ -133,16 +134,26 @@ export default function HomePage() {
     'Can you remind me I’m safe right now?',
   ]
 
+  const MotionButton = motion(Button)
+
   return (
     <main className="relative min-h-screen overflow-hidden pb-24">
       <div className="aurora-sheen" aria-hidden />
       <div className="aurora-pearl" aria-hidden />
+      <div className="starfield" aria-hidden />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pt-8 md:px-8 md:pt-10">
         <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-calm-200 via-white to-calm-100 text-ink-100 shadow-soft">
-              <Sparkles aria-hidden className="h-6 w-6" />
-            </div>
+            <motion.div
+              className="glow relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-amber-50 via-white to-calm-100 text-ink-100 shadow-soft"
+              animate={{ scale: [1, 1.08, 1], rotate: [0, 2, -2, 0] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+              role="img"
+              aria-label="Soft star avatar"
+            >
+              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-100/50 via-white/40 to-calm-100/40" aria-hidden />
+              <Star aria-hidden className="h-6 w-6 text-ink-500" />
+            </motion.div>
             <div>
               <p className="text-sm font-semibold text-ink-100/70 dark:text-calm-100/80">Meet KIAAN • MindVibe</p>
               <h1 className="text-3xl font-bold text-ink-100 dark:text-calm-50">A calm, soothing guide for bedtime ease</h1>
@@ -395,7 +406,7 @@ export default function HomePage() {
                   {isResponding && <span className="rounded-full bg-calm-100 px-3 py-1 text-ink-100 shadow-soft">Crafting a calm reply…</span>}
                 </div>
 
-                <div className="relative mt-4 space-y-3" role="log" aria-live="polite">
+                <div className="relative mt-4 space-y-3" role="log" aria-live="polite" aria-busy={isResponding}>
                   {isLoadingChat ? (
                     <div className="space-y-2" aria-label="Loading chat">
                       <Skeleton className="h-5 w-2/3" />
@@ -403,27 +414,44 @@ export default function HomePage() {
                       <Skeleton className="h-5 w-3/4" />
                     </div>
                   ) : (
-                    messages.map((message, index) => (
-                      <div
-                        key={`${message.role}-${index}`}
-                        className={`max-w-2xl rounded-2xl px-4 py-3 shadow-soft ${
-                          message.role === 'assistant'
-                            ? 'bg-gradient-to-r from-calm-100 to-white text-ink-100'
-                            : 'ml-auto bg-ink-500 text-white'
-                        }`}
-                      >
-                        <p className="text-[13px] font-semibold uppercase tracking-wide text-ink-100/70 dark:text-calm-100/80">
-                          {message.role === 'assistant' ? 'KIAAN' : 'You'}
-                        </p>
-                        <p className="text-sm leading-relaxed">{message.content}</p>
-                      </div>
-                    ))
+                    <AnimatePresence initial={false}>
+                      {messages.map((message, index) => (
+                        <motion.div
+                          key={`${message.role}-${index}-${message.content.slice(0, 12)}`}
+                          layout
+                          initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                          transition={{ duration: 0.35, ease: 'easeOut' }}
+                          className={`max-w-2xl rounded-2xl px-4 py-3 shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-calm-400 focus-visible:ring-offset-2 ${
+                            message.role === 'assistant'
+                              ? 'bg-gradient-to-r from-calm-100 to-white text-ink-100'
+                              : 'ml-auto bg-ink-500 text-white'
+                          }`}
+                          role="article"
+                          tabIndex={0}
+                          aria-label={`${message.role === 'assistant' ? 'KIAAN' : 'You'} message`}
+                        >
+                          <p className="text-[13px] font-semibold uppercase tracking-wide text-ink-100/70 dark:text-calm-100/80">
+                            {message.role === 'assistant' ? 'KIAAN' : 'You'}
+                          </p>
+                          <p className="text-sm leading-relaxed">{message.content}</p>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   )}
                 </div>
 
-                <div className="relative mt-4 flex flex-wrap gap-2">
+                <div className="relative mt-4 flex flex-wrap gap-2" role="group" aria-label="Quick prompts">
                   {quickPrompts.map(prompt => (
-                    <Button key={prompt} variant="outline" size="sm" className="bg-white/90 text-ink-100 shadow-soft dark:bg-ink-200/70" onClick={() => handleSend(prompt)}>
+                    <Button
+                      key={prompt}
+                      variant="outline"
+                      size="sm"
+                      className="bg-white/90 text-ink-100 shadow-soft transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-calm-400 focus-visible:ring-offset-2 dark:bg-ink-200/70"
+                      onClick={() => handleSend(prompt)}
+                      aria-label={`Send prompt: ${prompt}`}
+                    >
                       <Sparkles className="h-4 w-4" aria-hidden /> {prompt}
                     </Button>
                   ))}
@@ -435,14 +463,21 @@ export default function HomePage() {
                 <div className="mt-3 flex flex-col gap-2 md:flex-row">
                   <Input
                     id="chat-input"
+                    aria-label="Message KIAAN"
                     value={draftMessage}
                     onChange={e => setDraftMessage(e.target.value)}
                     placeholder="Tell KIAAN what you need right now"
                     aria-describedby="chat-actions"
                   />
-                  <Button onClick={() => handleSend()} disabled={!draftMessage.trim() || isResponding} className="md:w-36">
+                  <MotionButton
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleSend()}
+                    disabled={!draftMessage.trim() || isResponding}
+                    className="md:w-36"
+                    aria-label={isResponding ? 'KIAAN is responding' : 'Send message to KIAAN'}
+                  >
                     {isResponding ? 'Calming…' : 'Send to KIAAN'}
-                  </Button>
+                  </MotionButton>
                 </div>
                 <div id="chat-actions" className="mt-2 flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
                   <Button variant="outline" size="sm" className="gap-2">
