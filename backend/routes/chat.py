@@ -3,16 +3,18 @@
 import os
 import logging
 import uuid
-from typing import Dict, Any
+import asyncio
+from typing import Dict, Any, List
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
+preferred_model = os.getenv("OPENAI_MODEL", "gpt-4").strip() or "gpt-4"
+fallback_model = os.getenv("OPENAI_FALLBACK_MODEL", "gpt-3.5-turbo").strip() or "gpt-3.5-turbo"
 client = OpenAI(api_key=api_key) if api_key else None
 ready = bool(api_key)
 
@@ -40,6 +42,10 @@ class KIAAN:
         self.client = client
         self.ready = ready
         self.gita_kb = gita_kb
+        self.model_name = preferred_model
+        self.fallback_model = fallback_model
+        self.last_model_used = None
+        self.max_retries = 3
         self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
 
     def is_crisis(self, message: str) -> bool:
@@ -54,6 +60,7 @@ class KIAAN:
                 return self.get_crisis_response()
 
             if not self.ready or not self.client:
+                logger.warning("OPENAI_API_KEY not configured; chat unavailable")
                 return "❌ API Key not configured"
 
             gita_context = ""
@@ -88,19 +95,38 @@ DO: "The key to peace is focusing on your actions, not outcomes. When you pour e
 
 Remember: You are KIAAN, a compassionate friend who understands ancient wisdom and modern struggles. Make wisdom feel natural, relevant, immediately helpful."""
 
-            response = self.client.chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message}
-                ],
-                temperature=0.7,
-                max_tokens=500,
-            )
-            
-            content = response.choices[0].message.content
-            return content if content else "I'm here for you. Let's try again. 💙"
-            
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ]
+
+            models_to_try: List[str] = []
+            if self.model_name:
+                models_to_try.append(self.model_name)
+            if self.fallback_model and self.fallback_model not in models_to_try:
+                models_to_try.append(self.fallback_model)
+
+            for model in models_to_try:
+                try:
+                    content = await self._create_completion_with_retries(model, messages)
+                    self.last_model_used = model
+                    logger.info("KIAAN response generated")
+                    return content if content else "I'm here for you. Let's try again. 💙"
+                except BadRequestError as e:
+                    logger.warning(f"Model {model} not available, trying fallback. Details: {e}")
+                    continue
+                except AuthenticationError as e:
+                    logger.error(f"Authentication error for model {model}: {e}")
+                    return "❌ API Key authentication failed"
+                except RateLimitError as e:
+                    logger.error(f"Rate limit reached for model {model}: {e}")
+                    continue
+                except APIError as e:
+                    logger.error(f"OpenAI API error for model {model}: {e}")
+                    continue
+
+            return "I'm here for you. Let's try again. 💙"
+
         except Exception as e:
             logger.error(f"Error: {type(e).__name__}: {e}")
             return "I'm here for you. Let's try again. 💙"
@@ -120,6 +146,37 @@ Remember: You are KIAAN, a compassionate friend who understands ancient wisdom a
                 context_parts.append("---")
         
         return "\n".join(context_parts) if context_parts else "Focus on duty, detachment, inner peace."
+
+    async def _create_completion_with_retries(self, model: str, messages: list) -> str:
+        attempt = 0
+        last_error = None
+
+        while attempt < self.max_retries:
+            try:
+                response = self.client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=500,
+                )
+                return response.choices[0].message.content
+            except RateLimitError as e:
+                last_error = e
+                attempt += 1
+                wait_time = min(2 ** attempt, 8)
+                logger.warning(f"Rate limit hit on attempt {attempt}/{self.max_retries} for {model}. Retrying in {wait_time}s")
+                await asyncio.sleep(wait_time)
+            except (BadRequestError, AuthenticationError, APIError):
+                raise
+            except Exception as e:  # noqa: BLE001
+                last_error = e
+                attempt += 1
+                logger.error(f"Unexpected error on attempt {attempt}/{self.max_retries} for {model}: {e}")
+                await asyncio.sleep(1)
+
+        if last_error:
+            raise last_error
+        raise RateLimitError("Max retries exceeded")
 
 
 kiaan = KIAAN()
@@ -144,13 +201,13 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
             return {"status": "error", "response": "What's on your mind? 💙"}
         
         response = await kiaan.generate_response_with_gita(message, db)
-        
+
         return {
             "status": "success",
             "response": response,
             "bot": "KIAAN",
             "version": "13.0",
-            "model": "GPT-4",
+            "model": kiaan.last_model_used or kiaan.model_name,
             "gita_powered": True
         }
     except Exception as e:
@@ -173,7 +230,7 @@ async def about() -> Dict[str, Any]:
     return {
         "name": "KIAAN",
         "version": "13.0",
-        "model": "gpt-4",
+        "model": kiaan.last_model_used or kiaan.model_name,
         "status": "Operational" if ready else "Error",
         "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness",
         "gita_verses": "700+",
