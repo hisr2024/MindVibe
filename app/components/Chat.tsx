@@ -2,14 +2,13 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2, Send, Sparkles } from 'lucide-react'
+import { Loader2, Send, Sparkles, Zap } from 'lucide-react'
 
 import { apiFetch } from '@/lib/api'
 
 import { ChatBubble } from './ChatBubble'
 import { KiaanAvatar } from './KiaanAvatar'
 import { ParticleBackground } from './ParticleBackground'
-import { Skeleton } from './ui/skeleton'
 
 type Role = 'user' | 'assistant'
 
@@ -33,6 +32,11 @@ const quickStats = [
   { label: 'Avg latency', value: '<1s micro-delight' },
   { label: 'Trust', value: 'Safety filters on' },
 ]
+
+const heroCopy = {
+  title: 'Late-night clarity & calm',
+  subtitle: 'KIAAN keeps you steady with neon-smooth micro-support.',
+}
 
 type QuickPrompt = {
   label: string
@@ -69,62 +73,6 @@ const Navbar = () => (
       ))}
     </ul>
   </motion.nav>
-)
-
-const ParticleBackground = () => (
-  <motion.div
-    className="absolute inset-0 overflow-hidden rounded-3xl"
-    initial={{ opacity: 0.6 }}
-    animate={{ opacity: [0.6, 0.9, 0.6] }}
-    transition={{ duration: 12, repeat: Infinity, repeatType: 'mirror' }}
-  >
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#00d4ff40,transparent_40%),radial-gradient(circle_at_80%_30%,#ff4dff3d,transparent_35%),radial-gradient(circle_at_30%_80%,#39ff142e,transparent_35%)]" />
-    <motion.div
-      className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#00d4ff15,transparent_45%)]"
-      animate={{ x: ['-5%', '5%', '-5%'], y: ['-3%', '3%', '-3%'], scale: [1, 1.05, 1] }}
-      transition={{ duration: 10, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
-    />
-  </motion.div>
-)
-
-const KiaanAvatar = () => (
-  <motion.div
-    className="flex items-center justify-start gap-4"
-    animate={{ scale: [1, 1.08, 1], rotate: [0, 6, -6, 0] }}
-    transition={{ repeat: Infinity, repeatType: 'mirror', duration: 6 }}
-  >
-    <motion.div
-      animate={{ opacity: [0.8, 1, 0.8], scale: [1, 1.12, 1] }}
-      transition={{ repeat: Infinity, duration: 3.6 }}
-      className="p-4"
-    >
-      <div className="relative grid place-items-center rounded-full bg-gradient-two p-4 shadow-glow">
-        <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-one opacity-40 blur-xl" aria-hidden />
-        <Star className="h-12 w-12 text-white" />
-      </div>
-    </motion.div>
-    <div className="max-w-xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-vibrant-blue">KIAAN</p>
-      <p className="text-lg font-semibold text-white">Hello, I’m KIAAN 🌟 Let’s chat for clarity!</p>
-      <p className="text-sm text-slate-200/80">Fast, empowering, and tuned for late-night vibes.</p>
-    </div>
-  </motion.div>
-)
-
-const ChatBubble = ({ text, sender }: { text: string; sender: Role }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9, y: 8 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    transition={{ duration: 0.28 }}
-    className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-neon-strong backdrop-blur-lg ${
-      sender === 'assistant'
-        ? 'bg-vibrant-blue/20 text-white ring-1 ring-vibrant-blue/40'
-        : 'ml-auto bg-white/10 text-slate-100 ring-1 ring-vibrant-pink/30'
-    }`}
-    style={{ alignSelf: sender === 'user' ? 'flex-end' : 'flex-start' }}
-  >
-    {text}
-  </motion.div>
 )
 
 const Chat = () => {
@@ -464,3 +412,5 @@ const Chat = () => {
     </div>
   )
 }
+
+export default Chat
