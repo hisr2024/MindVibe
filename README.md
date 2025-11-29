@@ -40,6 +40,7 @@ MindVibe/
 │   │   ├── journal.py        # Encrypted journal/blob storage
 │   │   ├── chat.py           # AI chatbot conversations
 │   │   ├── wisdom_guide.py   # Universal wisdom guide API
+│   │   ├── privacy.py        # Compliance, consent, and export APIs
 │   │   └── gita_api.py       # Gita verses API
 │   ├── services/              # Business logic
 │   │   ├── chatbot.py        # AI chatbot service
@@ -242,6 +243,12 @@ MindVibe has a comprehensive test suite with **100% updated imports** for the ne
   - Warn on missing return types
   - Strict equality checks
   - Type checking for all definitions
+
+## 🔒 Privacy, Compliance, and Security
+
+- **End-to-End Encryption:** Configure `DATA_ENCRYPTION_KEY` (32 bytes or a Fernet key) to encrypt mood notes and journal blobs at rest while decrypting transparently on retrieval.
+- **User Rights:** Use `/privacy/consent`, `/privacy/export`, `/privacy/data`, and `/privacy/audit` endpoints for consent capture, GDPR-style export, deletion scheduling, and audit visibility.
+- **Pipeline Hardening:** Security scans now include CodeQL v4 and optional Snyk dependency scanning (`SNYK_TOKEN` secret required to enable the Snyk job).
 - Gradually increasing strictness as codebase improves
 
 ### CI/CD Quality Gates

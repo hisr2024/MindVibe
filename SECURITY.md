@@ -69,10 +69,11 @@ Security updates will be announced through:
 This repository uses multiple automated security tools:
 
 - **Dependabot**: Automatic dependency updates
-- **CodeQL**: Static code analysis for vulnerabilities
+- **CodeQL (v4)**: Static code analysis for vulnerabilities
 - **Bandit**: Python security linter
 - **Safety**: Python dependency vulnerability checker
 - **npm audit**: JavaScript dependency security
+- **Snyk (optional)**: Dependency scanning when `SNYK_TOKEN` is provided
 - **TruffleHog**: Secrets detection
 - **Trivy**: Docker container scanning
 

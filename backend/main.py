@@ -124,6 +124,16 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
 
+# Load Privacy router
+print("\n[Privacy] Attempting to import Privacy router...")
+try:
+    from backend.routes.privacy import router as privacy_router
+
+    app.include_router(privacy_router)
+    print("✅ [SUCCESS] Privacy router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Privacy router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
