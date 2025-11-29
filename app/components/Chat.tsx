@@ -2,9 +2,14 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2, Send, Sparkles, Star, Zap } from 'lucide-react'
+import { Loader2, Send, Sparkles } from 'lucide-react'
 
 import { apiFetch } from '@/lib/api'
+
+import { ChatBubble } from './ChatBubble'
+import { KiaanAvatar } from './KiaanAvatar'
+import { ParticleBackground } from './ParticleBackground'
+import { Skeleton } from './ui/skeleton'
 
 type Role = 'user' | 'assistant'
 
@@ -364,6 +369,11 @@ const Chat = () => {
               </form>
             </div>
           </div>
+          <div className="text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-vibrant-blue">{heroCopy.title}</p>
+            <p className="text-xs text-slate-200/80">{heroCopy.subtitle}</p>
+          </div>
+        </div>
 
           <div className="space-y-4 rounded-3xl bg-white/5 p-6 ring-1 ring-vibrant-blue/25 backdrop-blur-xl">
             <div className="flex items-start justify-between">
@@ -413,20 +423,44 @@ const Chat = () => {
                 </div>
               </div>
             </div>
-
-            <div className="rounded-2xl bg-gradient-two p-4 text-slate-900 shadow-glow">
-              <p className="text-xs uppercase tracking-[0.2em] text-black/70">CTA</p>
-              <h4 className="text-xl font-bold">Spark a session with KIAAN</h4>
-              <p className="text-sm text-black/70">Snappy responses, luminous UI, and safe-space vibes.</p>
-              <button className="mt-3 rounded-xl bg-black/70 px-4 py-2 text-sm font-semibold text-white shadow-neon-strong transition hover:scale-[1.02]">
-                Start Chat 🚀
-              </button>
+          ) : (
+            <div className="flex h-72 flex-col gap-3 overflow-y-auto pr-2">
+              <AnimatePresence initial={false}>
+                {messages.map(message => (
+                  <ChatBubble key={message.id} text={message.content} sender={message.role} />
+                ))}
+              </AnimatePresence>
+              <div ref={messagesEndRef} />
             </div>
-          </div>
+          )}
         </div>
+
+        {error && (
+          <div className="rounded-xl border border-red-400/40 bg-red-500/20 px-4 py-2 text-sm text-red-100 shadow-neon-strong">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Drop your thought and watch KIAAN spark"
+            className="flex-1 rounded-xl border border-vibrant-blue/40 bg-white/5 px-4 py-3 text-sm text-white shadow-neon-strong outline-none transition focus:border-vibrant-pink/70 focus:ring-2 focus:ring-vibrant-pink/40"
+            disabled={isSending || isLoadingSession}
+          />
+          <button
+            type="submit"
+            disabled={isSending || isLoadingSession}
+            className="neon-button disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label="Send message"
+          >
+            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            <span>{isSending ? 'Sending...' : 'Start Chat 🚀'}</span>
+          </button>
+        </form>
       </div>
     </div>
   )
 }
-
-export default Chat
