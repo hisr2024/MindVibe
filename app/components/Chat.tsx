@@ -131,6 +131,13 @@ const quickStats = [
   { label: 'Trust', value: 'Safety filters on' },
 ]
 
+type QuickPrompt = {
+    label: string;
+    message: string;
+    theme?: string;
+    application?: string;
+};
+
 const Chat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
