@@ -49,7 +49,7 @@ const onboardingSteps = [
 const bottomNav = [
   { icon: Home, label: 'Home' },
   { icon: NotebookPen, label: 'Journal' },
-  { icon: Bot, label: 'Chat' },
+  { icon: Bot, label: 'KIAAN' },
   { icon: BarChart3, label: 'Insights' },
 ]
 
@@ -70,10 +70,15 @@ export default function HomePage() {
   const [journal, setJournal] = useState('')
   const [noteSaved, setNoteSaved] = useState(false)
   const [messages, setMessages] = useState<Conversation[]>([
-    { role: 'assistant', content: 'Welcome back. What feels most pressing today?' },
+    { role: 'assistant', content: 'Hi, I’m KIAAN. I’m here to offer gentle support whenever you need it.' },
     { role: 'user', content: 'I feel tense before bedtime and want a gentle plan.' },
+    {
+      role: 'assistant',
+      content: 'Thank you for sharing. Let’s create a soft wind-down plan together and bring some ease to your evening.',
+    },
   ])
   const [draftMessage, setDraftMessage] = useState('')
+  const [isResponding, setIsResponding] = useState(false)
   const isLoadingChat = useTimedLoader()
 
   useEffect(() => {
@@ -99,41 +104,94 @@ export default function HomePage() {
     return 'Light'
   }, [mood])
 
-  const handleSend = () => {
-    if (!draftMessage.trim()) return
-    setMessages(prev => [...prev, { role: 'user', content: draftMessage }])
-    setDraftMessage('')
-    setTimeout(
-      () =>
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: 'I hear you. Let’s breathe together and try a grounding prompt.' },
-        ]),
-      900,
-    )
+  const createGroundedResponse = (text: string) => {
+    const lower = text.toLowerCase()
+    if (lower.includes('sleep') || lower.includes('bed')) {
+      return 'Let’s slow down together. Dim your lights, take three deep breaths, and imagine a gentle wave of calm moving from your forehead to your toes.'
+    }
+    if (lower.includes('tense') || lower.includes('anxious')) {
+      return 'I hear the tension. Let’s unclench your shoulders, place a hand on your heart, and name one thing that feels safe right now.'
+    }
+    return 'I’m here with you. Let’s take a slow inhale for four, hold for two, exhale for six. What would feel nourishing in the next ten minutes?'
   }
 
+  const handleSend = (value = draftMessage) => {
+    if (!value.trim() || isResponding) return
+    setMessages(prev => [...prev, { role: 'user', content: value }])
+    setDraftMessage('')
+    setIsResponding(true)
+    setTimeout(() => {
+      setMessages(prev => [...prev, { role: 'assistant', content: createGroundedResponse(value) }])
+      setIsResponding(false)
+    }, 950)
+  }
+
+  const quickPrompts = [
+    'Guide me through a 2-minute breath',
+    'I need a gentle bedtime plan',
+    'How do I calm racing thoughts?',
+    'Can you remind me I’m safe right now?',
+  ]
+
   return (
-    <main className="min-h-screen pb-20">
+    <main className="relative min-h-screen overflow-hidden pb-24">
+      <div className="aurora-sheen" aria-hidden />
+      <div className="aurora-pearl" aria-hidden />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pt-8 md:px-8 md:pt-10">
         <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-calm-100 text-ink-100 shadow-soft">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-calm-200 via-white to-calm-100 text-ink-100 shadow-soft">
               <Sparkles aria-hidden className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">MindVibe Companion</p>
-              <h1 className="text-3xl font-bold text-ink-100 dark:text-calm-50">Be heard, supported, and safe</h1>
+              <p className="text-sm font-semibold text-ink-100/70 dark:text-calm-100/80">Meet KIAAN • MindVibe</p>
+              <h1 className="text-3xl font-bold text-ink-100 dark:text-calm-50">A calm, soothing guide for bedtime ease</h1>
+              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">
+                Gentle UX, privacy-first, and intentionally comforting micro-interactions.
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-calm-200 px-3 py-2 text-sm text-ink-100/80 shadow-soft md:flex dark:border-ink-300/70">
+            <div className="hidden items-center gap-2 rounded-full border border-calm-200 bg-white/70 px-3 py-2 text-sm text-ink-100/80 shadow-soft md:flex dark:border-ink-300/70 dark:bg-ink-200/50">
               <ShieldCheck className="h-4 w-4" aria-hidden />
               <span>End-to-end encrypted</span>
             </div>
             <ThemeToggle />
           </div>
         </header>
+
+        <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="card-surface relative overflow-hidden p-6">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-calm-100/60 via-white/30 to-calm-200/40 dark:from-ink-200/40 dark:via-ink-200/10 dark:to-ink-200/40" aria-hidden />
+            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <Badge className="bg-ink-500 text-white shadow-soft">KIAAN status</Badge>
+                <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Bedtime comfort lane</h2>
+                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">
+                  Crafted to lower tension with soft visuals and predictable, safe responses.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 text-sm text-ink-100/80 dark:text-calm-100">
+                <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-soft dark:bg-ink-200/60">
+                  <Sparkles className="h-4 w-4" aria-hidden />
+                  <span>KIAAN is tuned for soothing tone</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-soft dark:bg-ink-200/60">
+                  <ShieldCheck className="h-4 w-4" aria-hidden />
+                  <span>Safety filters & pause ready</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {[{ label: 'Grounding speed', value: 'Under 1s' }, { label: 'Tone', value: 'Warm & calm' }, { label: 'Uptime', value: '99.9%' }].map(item => (
+                <div key={item.label} className="rounded-2xl border border-calm-200/70 bg-white/70 p-4 text-sm shadow-soft dark:border-ink-300/60 dark:bg-ink-200/50">
+                  <p className="text-ink-100/70 dark:text-calm-100/80">{item.label}</p>
+                  <p className="text-xl font-semibold text-ink-100 dark:text-calm-50">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
           <motion.div
@@ -318,15 +376,29 @@ export default function HomePage() {
 
           <Card className="p-6">
             <CardHeader>
-              <Badge className="bg-calm-200 text-ink-100">Chatbot</Badge>
-              <CardTitle>AI companion</CardTitle>
-              <CardDescription>Safe responses with pause + get-help buttons.</CardDescription>
+              <Badge className="bg-ink-500 text-white">KIAAN</Badge>
+              <CardTitle>Calm chat companion</CardTitle>
+              <CardDescription>Soft gradients, grounded replies, and instant breathing prompts.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 rounded-2xl border border-calm-200 bg-white/70 p-4 shadow-soft dark:border-ink-300/70 dark:bg-ink-200/40">
-                <div className="space-y-2" role="log" aria-live="polite">
+              <div className="relative overflow-hidden rounded-3xl border border-calm-200 bg-white/80 p-5 shadow-soft dark:border-ink-300/70 dark:bg-ink-200/50">
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-calm-100/80 via-white/50 to-calm-200/70 dark:from-ink-200/50 dark:via-ink-200/30 dark:to-ink-200/60" aria-hidden />
+                <div className="relative flex flex-wrap items-center gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
+                  <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft dark:bg-ink-200/60">
+                    <Sparkles className="h-4 w-4" aria-hidden />
+                    KIAAN listening softly
+                  </span>
+                  <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft dark:bg-ink-200/60">
+                    <Lock className="h-4 w-4" aria-hidden />
+                    Encrypted & gentle
+                  </span>
+                  {isResponding && <span className="rounded-full bg-calm-100 px-3 py-1 text-ink-100 shadow-soft">Crafting a calm reply…</span>}
+                </div>
+
+                <div className="relative mt-4 space-y-3" role="log" aria-live="polite">
                   {isLoadingChat ? (
                     <div className="space-y-2" aria-label="Loading chat">
+                      <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-5 w-1/2" />
                       <Skeleton className="h-5 w-3/4" />
                     </div>
@@ -334,33 +406,45 @@ export default function HomePage() {
                     messages.map((message, index) => (
                       <div
                         key={`${message.role}-${index}`}
-                        className={`rounded-2xl px-4 py-3 ${
+                        className={`max-w-2xl rounded-2xl px-4 py-3 shadow-soft ${
                           message.role === 'assistant'
-                            ? 'bg-calm-100 text-ink-100 shadow-soft'
-                            : 'bg-ink-500 text-white shadow-soft'
+                            ? 'bg-gradient-to-r from-calm-100 to-white text-ink-100'
+                            : 'ml-auto bg-ink-500 text-white'
                         }`}
                       >
+                        <p className="text-[13px] font-semibold uppercase tracking-wide text-ink-100/70 dark:text-calm-100/80">
+                          {message.role === 'assistant' ? 'KIAAN' : 'You'}
+                        </p>
                         <p className="text-sm leading-relaxed">{message.content}</p>
                       </div>
                     ))
                   )}
                 </div>
+
+                <div className="relative mt-4 flex flex-wrap gap-2">
+                  {quickPrompts.map(prompt => (
+                    <Button key={prompt} variant="outline" size="sm" className="bg-white/90 text-ink-100 shadow-soft dark:bg-ink-200/70" onClick={() => handleSend(prompt)}>
+                      <Sparkles className="h-4 w-4" aria-hidden /> {prompt}
+                    </Button>
+                  ))}
+                </div>
+
                 <label className="sr-only" htmlFor="chat-input">
-                  Message the companion
+                  Message KIAAN
                 </label>
-                <div className="flex flex-col gap-2 md:flex-row">
+                <div className="mt-3 flex flex-col gap-2 md:flex-row">
                   <Input
                     id="chat-input"
                     value={draftMessage}
                     onChange={e => setDraftMessage(e.target.value)}
-                    placeholder="Ask a question or share how you feel"
+                    placeholder="Tell KIAAN what you need right now"
                     aria-describedby="chat-actions"
                   />
-                  <Button onClick={handleSend} disabled={!draftMessage.trim()} className="md:w-32">
-                    Send
+                  <Button onClick={() => handleSend()} disabled={!draftMessage.trim() || isResponding} className="md:w-36">
+                    {isResponding ? 'Calming…' : 'Send to KIAAN'}
                   </Button>
                 </div>
-                <div id="chat-actions" className="flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
+                <div id="chat-actions" className="mt-2 flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
                   <Button variant="outline" size="sm" className="gap-2">
                     <PauseCircle className="h-4 w-4" aria-hidden /> Pause chat
                   </Button>
