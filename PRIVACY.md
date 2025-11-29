@@ -55,6 +55,13 @@ We take data security seriously and implement industry-standard measures:
 - **Encrypted storage** for sensitive data at rest
 - **EdDSA cryptographic signatures** for enhanced security
 
+#### Encryption Practices Verification
+- TLS 1.2+ enforced for all HTTPS traffic; HSTS is enabled in the frontend to prevent downgrade attacks
+- AES-256 encryption is applied to database volumes and backups where supported by the hosting provider
+- Secrets (API keys, database credentials, signing keys) are stored only in environment variables or managed secret stores—not in source control
+- Passwords are hashed using strong, salted algorithms (e.g., bcrypt) before storage
+- Backup exports are encrypted prior to transfer and retained only for the minimum retention period
+
 ### Access Controls
 - Strong password requirements
 - JWT-based authentication

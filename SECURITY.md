@@ -37,6 +37,11 @@ Please report (suspected) security vulnerabilities to **hisr2024@gmail.com**. Yo
 - Input validation and sanitization
 - API versioning for backward compatibility
 
+### Dependency Management
+- Dependabot updates are reviewed with full test runs (unit, integration, and security linters like Bandit) before merge
+- npm/yarn audits accompany frontend dependency bumps to catch regressions early
+- Lockfiles are committed to ensure deterministic builds across environments
+
 ## Best Practices for Contributors
 
 1. Never commit secrets, API keys, or credentials
