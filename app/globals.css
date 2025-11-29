@@ -73,4 +73,27 @@ body {
   .section-grid {
     @apply grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6;
   }
+
+  .aurora-sheen {
+    position: absolute;
+    inset: -12rem -8rem auto;
+    background: radial-gradient(circle at 20% 10%, rgba(168, 218, 220, 0.38), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(36, 80, 111, 0.32), transparent 45%),
+      radial-gradient(circle at 40% 60%, rgba(124, 184, 193, 0.26), transparent 55%);
+    filter: blur(72px);
+    opacity: 0.75;
+    z-index: -1;
+  }
+
+  .aurora-pearl {
+    position: absolute;
+    inset: auto -6rem -10rem 10%;
+    height: 360px;
+    width: 520px;
+    background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.65), transparent 45%),
+      radial-gradient(circle at 70% 60%, rgba(168, 218, 220, 0.32), transparent 40%);
+    filter: blur(72px);
+    opacity: 0.7;
+    z-index: -1;
+  }
 }
