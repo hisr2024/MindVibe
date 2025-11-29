@@ -156,6 +156,12 @@ const Chat = () => {
         },
     ];
 
+    const statusLabel = useMemo(() => {
+        if (isLoadingSession) return 'Syncing neon space...';
+        if (isSending) return 'KIAAN is responding with glow';
+        return 'Live & empowering';
+    }, [isLoadingSession, isSending]);
+
     useEffect(() => {
         startSession();
     }, []);
@@ -287,6 +293,9 @@ const Chat = () => {
                     </button>
                 ))}
             </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-vibrant-blue">
+                {statusLabel}
+            </p>
             <div className="h-96 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 {isLoadingSession ? (
                     <div className="flex h-full items-center justify-center gap-2 text-slate-600">
