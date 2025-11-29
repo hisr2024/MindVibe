@@ -19,6 +19,10 @@ import {
 } from 'lucide-react'
 
 import { ThemeToggle } from './components/theme-toggle'
+import { ChatBubble } from './components/ChatBubble'
+import { GenZNavbar } from './components/GenZNavbar'
+import { KiaanAvatar } from './components/KiaanAvatar'
+import { ParticleBackground } from './components/ParticleBackground'
 import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
@@ -142,6 +146,7 @@ export default function HomePage() {
       <div className="aurora-pearl" aria-hidden />
       <div className="starfield" aria-hidden />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pt-8 md:px-8 md:pt-10">
+        <GenZNavbar />
         <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <motion.div
@@ -392,103 +397,114 @@ export default function HomePage() {
               <CardDescription>Soft gradients, grounded replies, and instant breathing prompts.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="relative overflow-hidden rounded-3xl border border-calm-200 bg-white/80 p-5 shadow-soft dark:border-ink-300/70 dark:bg-ink-200/50">
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-calm-100/80 via-white/50 to-calm-200/70 dark:from-ink-200/50 dark:via-ink-200/30 dark:to-ink-200/60" aria-hidden />
-                <div className="relative flex flex-wrap items-center gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
-                  <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft dark:bg-ink-200/60">
-                    <Sparkles className="h-4 w-4" aria-hidden />
-                    KIAAN listening softly
-                  </span>
-                  <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft dark:bg-ink-200/60">
-                    <Lock className="h-4 w-4" aria-hidden />
-                    Encrypted & gentle
-                  </span>
-                  {isResponding && <span className="rounded-full bg-calm-100 px-3 py-1 text-ink-100 shadow-soft">Crafting a calm reply…</span>}
-                </div>
-
-                <div className="relative mt-4 space-y-3" role="log" aria-live="polite" aria-busy={isResponding}>
-                  {isLoadingChat ? (
-                    <div className="space-y-2" aria-label="Loading chat">
-                      <Skeleton className="h-5 w-2/3" />
-                      <Skeleton className="h-5 w-1/2" />
-                      <Skeleton className="h-5 w-3/4" />
+              <div className="glass-aurora relative overflow-hidden rounded-3xl border border-vibrant-blue/30 bg-black/40 p-6 text-white">
+                <ParticleBackground />
+                <div className="relative flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-100/80">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 shadow-soft ring-1 ring-white/10">
+                        <Sparkles className="h-4 w-4" aria-hidden />
+                        Neon-fast replies
+                      </span>
+                      <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 shadow-soft ring-1 ring-white/10">
+                        <Lock className="h-4 w-4" aria-hidden />
+                        Encrypted & gentle
+                      </span>
+                      {isResponding && (
+                        <span className="rounded-full bg-vibrant-blue/20 px-3 py-1 text-white shadow-soft ring-1 ring-vibrant-blue/50">
+                          Crafting a glow reply…
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <AnimatePresence initial={false}>
-                      {messages.map((message, index) => (
-                        <motion.div
-                          key={`${message.role}-${index}-${message.content.slice(0, 12)}`}
-                          layout
-                          initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                          transition={{ duration: 0.35, ease: 'easeOut' }}
-                          className={`max-w-2xl rounded-2xl px-4 py-3 shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-calm-400 focus-visible:ring-offset-2 ${
-                            message.role === 'assistant'
-                              ? 'bg-gradient-to-r from-calm-100 to-white text-ink-100'
-                              : 'ml-auto bg-ink-500 text-white'
-                          }`}
-                          role="article"
-                          tabIndex={0}
-                          aria-label={`${message.role === 'assistant' ? 'KIAAN' : 'You'} message`}
-                        >
-                          <p className="text-[13px] font-semibold uppercase tracking-wide text-ink-100/70 dark:text-calm-100/80">
-                            {message.role === 'assistant' ? 'KIAAN' : 'You'}
-                          </p>
-                          <p className="text-sm leading-relaxed">{message.content}</p>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  )}
-                </div>
+                    <button className="neon-button" type="button">
+                      Start Chat 🚀
+                    </button>
+                  </div>
 
-                <div className="relative mt-4 flex flex-wrap gap-2" role="group" aria-label="Quick prompts">
-                  {quickPrompts.map(prompt => (
-                    <Button
-                      key={prompt}
-                      variant="outline"
-                      size="sm"
-                      className="bg-white/90 text-ink-100 shadow-soft transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-calm-400 focus-visible:ring-offset-2 dark:bg-ink-200/70"
-                      onClick={() => handleSend(prompt)}
-                      aria-label={`Send prompt: ${prompt}`}
+                  <KiaanAvatar />
+
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-200/80">
+                    {['Fast interactions', 'Empowering tone', 'Snappy animations'].map(item => (
+                      <span
+                        key={item}
+                        className="rounded-full bg-vibrant-blue/20 px-3 py-1 text-white shadow-soft ring-1 ring-vibrant-blue/40"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="relative mt-2 flex min-h-[180px] flex-col gap-3" role="log" aria-live="polite" aria-busy={isResponding}>
+                    {isLoadingChat ? (
+                      <div className="space-y-2" aria-label="Loading chat">
+                        <Skeleton className="h-5 w-2/3" />
+                        <Skeleton className="h-5 w-1/2" />
+                        <Skeleton className="h-5 w-3/4" />
+                      </div>
+                    ) : (
+                      <AnimatePresence initial={false}>
+                        {messages.map((message, index) => (
+                          <ChatBubble
+                            key={`${message.role}-${index}-${message.content.slice(0, 12)}`}
+                            text={message.content}
+                            sender={message.role}
+                          />
+                        ))}
+                      </AnimatePresence>
+                    )}
+                  </div>
+
+                  <div className="relative mt-2 flex flex-wrap gap-2" role="group" aria-label="Quick prompts">
+                    {quickPrompts.map(prompt => (
+                      <motion.button
+                        key={prompt}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="rounded-full bg-white/10 px-3 py-2 text-xs font-semibold text-white shadow-soft ring-1 ring-vibrant-blue/35"
+                        onClick={() => handleSend(prompt)}
+                        aria-label={`Send prompt: ${prompt}`}
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" aria-hidden /> {prompt}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
+
+                  <label className="sr-only" htmlFor="chat-input">
+                    Message KIAAN
+                  </label>
+                  <div className="mt-2 flex flex-col gap-2 md:flex-row">
+                    <Input
+                      id="chat-input"
+                      aria-label="Message KIAAN"
+                      value={draftMessage}
+                      onChange={e => setDraftMessage(e.target.value)}
+                      placeholder="Tell KIAAN what you need right now"
+                      aria-describedby="chat-actions"
+                      className="border-vibrant-blue/40 bg-white/10 text-white placeholder:text-white/60 focus:border-vibrant-pink/50 focus:ring-vibrant-pink/40"
+                    />
+                    <MotionButton
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleSend()}
+                      disabled={!draftMessage.trim() || isResponding}
+                      className="neon-button md:w-40"
+                      aria-label={isResponding ? 'KIAAN is responding' : 'Send message to KIAAN'}
                     >
-                      <Sparkles className="h-4 w-4" aria-hidden /> {prompt}
+                      {isResponding ? 'Calming…' : 'Send to KIAAN'}
+                    </MotionButton>
+                  </div>
+                  <div id="chat-actions" className="flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
+                    <Button variant="outline" size="sm" className="gap-2 border-white/20 bg-white/10 text-white">
+                      <PauseCircle className="h-4 w-4" aria-hidden /> Pause chat
                     </Button>
-                  ))}
-                </div>
-
-                <label className="sr-only" htmlFor="chat-input">
-                  Message KIAAN
-                </label>
-                <div className="mt-3 flex flex-col gap-2 md:flex-row">
-                  <Input
-                    id="chat-input"
-                    aria-label="Message KIAAN"
-                    value={draftMessage}
-                    onChange={e => setDraftMessage(e.target.value)}
-                    placeholder="Tell KIAAN what you need right now"
-                    aria-describedby="chat-actions"
-                  />
-                  <MotionButton
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSend()}
-                    disabled={!draftMessage.trim() || isResponding}
-                    className="md:w-36"
-                    aria-label={isResponding ? 'KIAAN is responding' : 'Send message to KIAAN'}
-                  >
-                    {isResponding ? 'Calming…' : 'Send to KIAAN'}
-                  </MotionButton>
-                </div>
-                <div id="chat-actions" className="mt-2 flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <PauseCircle className="h-4 w-4" aria-hidden /> Pause chat
-                  </Button>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <PhoneCall className="h-4 w-4" aria-hidden /> Get help
-                  </Button>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <ShieldCheck className="h-4 w-4" aria-hidden /> Safety filters on
-                  </Button>
+                    <Button variant="ghost" size="sm" className="gap-2 text-white">
+                      <PhoneCall className="h-4 w-4" aria-hidden /> Get help
+                    </Button>
+                    <Button variant="ghost" size="sm" className="gap-2 text-white">
+                      <ShieldCheck className="h-4 w-4" aria-hidden /> Safety filters on
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>

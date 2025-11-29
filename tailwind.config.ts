@@ -67,11 +67,34 @@ const config = {
         'gradient-two': 'linear-gradient(270deg, #ff4dff -10%, #00d4ff 110%)',
         'aurora-grid':
           'radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.15), transparent 30%), radial-gradient(circle at 80% 10%, rgba(255, 77, 255, 0.14), transparent 35%), radial-gradient(circle at 60% 70%, rgba(57, 255, 20, 0.16), transparent 32%)',
+        'cyber-dust':
+          'radial-gradient(circle at 15% 20%, rgba(0, 212, 255, 0.18), transparent 32%), radial-gradient(circle at 80% 8%, rgba(255, 77, 255, 0.16), transparent 30%), radial-gradient(circle at 40% 72%, rgba(57, 255, 20, 0.2), transparent 36%)',
       },
       borderRadius: {
         xl: '1rem',
         '2xl': '1.25rem',
         '3xl': '1.75rem',
+      },
+      keyframes: {
+        glow: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(0, 212, 255, 0.35)' },
+          '50%': { boxShadow: '0 0 0 18px rgba(0, 212, 255, 0)' },
+        },
+        float: {
+          '0%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+          '100%': { transform: 'translateY(0px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+      },
+      animation: {
+        glow: 'glow 2.8s infinite',
+        float: 'float 6s ease-in-out infinite',
+        shimmer: 'shimmer 3s ease-in-out infinite',
       },
     },
   },
