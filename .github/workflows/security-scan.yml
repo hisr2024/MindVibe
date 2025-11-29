@@ -109,6 +109,31 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
+  snyk-scan:
+    name: Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    if: ${{ secrets.SNYK_TOKEN != '' }}
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=medium
+
   codeql-analysis:
     name: CodeQL Security Analysis
     runs-on: ubuntu-latest
@@ -118,10 +143,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+      - name: Initialize CodeQL (v4)
+        uses: github/codeql-action/init@v4
         with:
           languages: python, javascript
-      
+
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
