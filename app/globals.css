@@ -27,9 +27,11 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at 10% 20%, rgba(168, 218, 220, 0.25), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(124, 184, 193, 0.25), transparent 30%),
-    var(--background);
+  background:
+    radial-gradient(circle at 10% 20%, rgba(168, 218, 220, 0.25), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(255, 206, 236, 0.2), transparent 32%),
+    radial-gradient(circle at 45% 70%, rgba(152, 216, 193, 0.2), transparent 40%),
+    linear-gradient(135deg, #f7f9fc 0%, #f2f7ff 25%, #f9f3ff 60%, #f7f9fc 100%);
   color: var(--foreground);
   font-size: 16px;
   min-height: 100vh;
@@ -95,5 +97,22 @@ body {
     filter: blur(72px);
     opacity: 0.7;
     z-index: -1;
+  }
+
+  .glow {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+
+  .starfield {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 20% 25%, rgba(255, 215, 0, 0.5), transparent 60%),
+      radial-gradient(2px 2px at 70% 35%, rgba(255, 182, 193, 0.4), transparent 55%),
+      radial-gradient(2px 2px at 45% 70%, rgba(124, 184, 193, 0.35), transparent 60%);
+    opacity: 0.6;
+    mix-blend-mode: screen;
+    z-index: 0;
   }
 }
