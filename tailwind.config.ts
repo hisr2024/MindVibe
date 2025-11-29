@@ -8,10 +8,10 @@ const config = {
       colors: {
         dark: '#1A1A2E',
         vibrant: {
-          blue: '#00d4ff',
-          pink: '#ff4dff',
-          green: '#39ff14',
-          yellow: '#ffd700',
+          blue: '#6bb8c7',
+          pink: '#f3b3c2',
+          green: '#9ad5c0',
+          yellow: '#f2d8a7',
         },
         gradient: {
           one: 'linear-gradient(90deg, #00d4ff 0%, #39ff14 100%)',
@@ -59,16 +59,16 @@ const config = {
       },
       boxShadow: {
         soft: '0 10px 35px -15px rgba(36, 80, 111, 0.25)',
-        glow: '0 0 0 4px rgba(168, 218, 220, 0.35)',
-        'neon-strong': '0 10px 45px rgba(0, 212, 255, 0.35), 0 12px 60px rgba(255, 77, 255, 0.28)',
+        glow: '0 0 0 4px rgba(107, 184, 199, 0.25)',
+        'neon-strong': '0 12px 40px rgba(16, 37, 54, 0.14), 0 16px 70px rgba(96, 135, 150, 0.18)',
       },
       backgroundImage: {
-        'gradient-one': 'linear-gradient(90deg, #00d4ff 0%, #39ff14 100%)',
-        'gradient-two': 'linear-gradient(270deg, #ff4dff -10%, #00d4ff 110%)',
+        'gradient-one': 'linear-gradient(90deg, #6bb8c7 0%, #9ad5c0 100%)',
+        'gradient-two': 'linear-gradient(270deg, #f3b3c2 -10%, #6bb8c7 110%)',
         'aurora-grid':
-          'radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.15), transparent 30%), radial-gradient(circle at 80% 10%, rgba(255, 77, 255, 0.14), transparent 35%), radial-gradient(circle at 60% 70%, rgba(57, 255, 20, 0.16), transparent 32%)',
+          'radial-gradient(circle at 20% 20%, rgba(107, 184, 199, 0.2), transparent 30%), radial-gradient(circle at 80% 10%, rgba(243, 179, 194, 0.18), transparent 35%), radial-gradient(circle at 60% 70%, rgba(154, 213, 192, 0.22), transparent 32%)',
         'cyber-dust':
-          'radial-gradient(circle at 15% 20%, rgba(0, 212, 255, 0.18), transparent 32%), radial-gradient(circle at 80% 8%, rgba(255, 77, 255, 0.16), transparent 30%), radial-gradient(circle at 40% 72%, rgba(57, 255, 20, 0.2), transparent 36%)',
+          'radial-gradient(circle at 15% 20%, rgba(107, 184, 199, 0.2), transparent 32%), radial-gradient(circle at 80% 8%, rgba(243, 179, 194, 0.2), transparent 30%), radial-gradient(circle at 40% 72%, rgba(154, 213, 192, 0.24), transparent 36%)',
       },
       borderRadius: {
         xl: '1rem',

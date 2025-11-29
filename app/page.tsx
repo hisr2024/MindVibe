@@ -39,15 +39,15 @@ interface Conversation {
 const onboardingSteps = [
   {
     title: 'Welcome',
-    description: 'We will gently guide you through goals and preferences.',
+    description: 'Quick hello and setup.',
   },
   {
     title: 'Set goals',
-    description: 'Choose what you want to nurture: calm, sleep, or focus.',
+    description: 'Choose calm, sleep, or focus.',
   },
   {
     title: 'Privacy consent',
-    description: 'Your data is encrypted and under your control.',
+    description: 'Confirm private storage.',
   },
 ]
 
@@ -161,10 +161,8 @@ export default function HomePage() {
             </motion.div>
             <div>
               <p className="text-sm font-semibold text-ink-100/70 dark:text-calm-100/80">Meet KIAAN • MindVibe</p>
-              <h1 className="text-3xl font-bold text-ink-100 dark:text-calm-50">A calm, soothing guide for bedtime ease</h1>
-              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">
-                Gentle UX, privacy-first, and intentionally comforting micro-interactions.
-              </p>
+              <h1 className="text-3xl font-bold text-ink-100 dark:text-calm-50">Steady support for night and day</h1>
+              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Simple, private, soothing.</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -182,19 +180,17 @@ export default function HomePage() {
             <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <Badge className="bg-ink-500 text-white shadow-soft">KIAAN status</Badge>
-                <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Bedtime comfort lane</h2>
-                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">
-                  Crafted to lower tension with soft visuals and predictable, safe responses.
-                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Calm lane</h2>
+                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Soft visuals, predictable replies.</p>
               </div>
               <div className="flex flex-col gap-2 text-sm text-ink-100/80 dark:text-calm-100">
                 <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-soft dark:bg-ink-200/60">
                   <Sparkles className="h-4 w-4" aria-hidden />
-                  <span>KIAAN is tuned for soothing tone</span>
+                  <span>Steady, soothing tone</span>
                 </div>
                 <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-soft dark:bg-ink-200/60">
                   <ShieldCheck className="h-4 w-4" aria-hidden />
-                  <span>Safety filters & pause ready</span>
+                  <span>Safety filters on</span>
                 </div>
               </div>
             </div>
@@ -220,9 +216,7 @@ export default function HomePage() {
               <div>
                 <Badge>Onboarding</Badge>
                 <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Progressive welcome</h2>
-                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">
-                  Gentle, three-step flow with clear privacy consent.
-                </p>
+                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Three quick steps.</p>
               </div>
               <Modal>
                 <ModalTrigger asChild>
@@ -230,17 +224,12 @@ export default function HomePage() {
                 </ModalTrigger>
                 <ModalContent>
                   <ModalTitle>Privacy at MindVibe</ModalTitle>
-                  <ModalDescription>
-                    Your entries stay on your device until you choose to sync. We avoid red/orange alerts and keep contrast at
-                    least 4.5:1 for comfortable reading.
-                  </ModalDescription>
+                  <ModalDescription>Entries stay private until you choose to sync.</ModalDescription>
                   <div className="mt-4 space-y-2 text-sm text-ink-100/80 dark:text-calm-100/80">
-                    <p>
-                      • Sessions are encrypted in transit and at rest. <br />• You can pause data collection at any time.
-                    </p>
+                    <p>Encrypted end to end. Pause anytime.</p>
                     <p className="flex items-center gap-2 text-ink-100">
                       <Lock className="h-4 w-4" aria-hidden />
-                      Your choices are reversible.
+                      Your choices stay reversible.
                     </p>
                   </div>
                 </ModalContent>
@@ -321,10 +310,10 @@ export default function HomePage() {
           >
             <div className="flex items-start justify-between">
               <div>
-                <Badge className="bg-calm-200 text-ink-100">Mood</Badge>
-                <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Mood tracker</h2>
-                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Emoji scale with text + icon feedback.</p>
-              </div>
+              <Badge className="bg-calm-200 text-ink-100">Mood</Badge>
+              <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Mood tracker</h2>
+              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Emoji scale with quick feedback.</p>
+            </div>
               <Heart className="h-6 w-6 text-ink-500" aria-hidden />
             </div>
             <div className="mt-6 space-y-4">
@@ -362,7 +351,7 @@ export default function HomePage() {
             <CardHeader>
               <Badge className="bg-calm-200 text-ink-100">Journal</Badge>
               <CardTitle>Encrypted journal with auto-save</CardTitle>
-              <CardDescription>Include voice-to-text and privacy badges for reassurance.</CardDescription>
+              <CardDescription>Auto-saves with voice-to-text and privacy badges.</CardDescription>
             </CardHeader>
             <CardContent>
               <label className="flex flex-col gap-2">
@@ -394,25 +383,25 @@ export default function HomePage() {
             <CardHeader>
               <Badge className="bg-ink-500 text-white">KIAAN</Badge>
               <CardTitle>Calm chat companion</CardTitle>
-              <CardDescription>Soft gradients, grounded replies, and instant breathing prompts.</CardDescription>
+              <CardDescription>Grounded replies with gentle breathing prompts.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="glass-aurora relative overflow-hidden rounded-3xl border border-vibrant-blue/30 bg-black/40 p-6 text-white">
+              <div className="glass-aurora relative overflow-hidden rounded-3xl border border-vibrant-blue/30 bg-white/80 p-6 text-ink-100">
                 <ParticleBackground />
                 <div className="relative flex flex-col gap-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-100/80">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-ink-300">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 shadow-soft ring-1 ring-white/10">
+                      <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft ring-1 ring-vibrant-blue/25">
                         <Sparkles className="h-4 w-4" aria-hidden />
-                        Neon-fast replies
+                        Quick replies
                       </span>
-                      <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 shadow-soft ring-1 ring-white/10">
+                      <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft ring-1 ring-vibrant-blue/25">
                         <Lock className="h-4 w-4" aria-hidden />
                         Encrypted & gentle
                       </span>
                       {isResponding && (
-                        <span className="rounded-full bg-vibrant-blue/20 px-3 py-1 text-white shadow-soft ring-1 ring-vibrant-blue/50">
-                          Crafting a glow reply…
+                        <span className="rounded-full bg-vibrant-blue/15 px-3 py-1 text-ink-100 shadow-soft ring-1 ring-vibrant-blue/30">
+                          Preparing a calm reply…
                         </span>
                       )}
                     </div>
@@ -423,11 +412,11 @@ export default function HomePage() {
 
                   <KiaanAvatar />
 
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-200/80">
-                    {['Fast interactions', 'Empowering tone', 'Snappy animations'].map(item => (
+                  <div className="flex flex-wrap gap-2 text-xs text-ink-300">
+                    {['Quick interactions', 'Gentle tone', 'Soft animations'].map(item => (
                       <span
                         key={item}
-                        className="rounded-full bg-vibrant-blue/20 px-3 py-1 text-white shadow-soft ring-1 ring-vibrant-blue/40"
+                        className="rounded-full bg-vibrant-blue/15 px-3 py-1 text-ink-100 shadow-soft ring-1 ring-vibrant-blue/30"
                       >
                         {item}
                       </span>
@@ -460,7 +449,7 @@ export default function HomePage() {
                         key={prompt}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.97 }}
-                        className="rounded-full bg-white/10 px-3 py-2 text-xs font-semibold text-white shadow-soft ring-1 ring-vibrant-blue/35"
+                        className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold text-ink-100 shadow-soft ring-1 ring-vibrant-blue/30"
                         onClick={() => handleSend(prompt)}
                         aria-label={`Send prompt: ${prompt}`}
                       >
@@ -482,7 +471,7 @@ export default function HomePage() {
                       onChange={e => setDraftMessage(e.target.value)}
                       placeholder="Tell KIAAN what you need right now"
                       aria-describedby="chat-actions"
-                      className="border-vibrant-blue/40 bg-white/10 text-white placeholder:text-white/60 focus:border-vibrant-pink/50 focus:ring-vibrant-pink/40"
+                      className="border-calm-200 bg-white text-ink-100 placeholder:text-ink-300 focus:border-vibrant-blue/50 focus:ring-vibrant-blue/40"
                     />
                     <MotionButton
                       whileTap={{ scale: 0.95 }}
@@ -495,13 +484,13 @@ export default function HomePage() {
                     </MotionButton>
                   </div>
                   <div id="chat-actions" className="flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
-                    <Button variant="outline" size="sm" className="gap-2 border-white/20 bg-white/10 text-white">
+                    <Button variant="outline" size="sm" className="gap-2 border-calm-200 bg-white text-ink-100">
                       <PauseCircle className="h-4 w-4" aria-hidden /> Pause chat
                     </Button>
-                    <Button variant="ghost" size="sm" className="gap-2 text-white">
+                    <Button variant="ghost" size="sm" className="gap-2 text-ink-100">
                       <PhoneCall className="h-4 w-4" aria-hidden /> Get help
                     </Button>
-                    <Button variant="ghost" size="sm" className="gap-2 text-white">
+                    <Button variant="ghost" size="sm" className="gap-2 text-ink-100">
                       <ShieldCheck className="h-4 w-4" aria-hidden /> Safety filters on
                     </Button>
                   </div>
@@ -516,7 +505,7 @@ export default function HomePage() {
             <CardHeader>
               <Badge className="bg-calm-200 text-ink-100">Insights</Badge>
               <CardTitle>Privacy-aware analytics</CardTitle>
-              <CardDescription>Summaries without exposing raw entries.</CardDescription>
+              <CardDescription>Summaries without raw entry exposure.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -537,7 +526,7 @@ export default function HomePage() {
             <CardHeader>
               <Badge className="bg-calm-200 text-ink-100">Feedback</Badge>
               <CardTitle>Listening loop</CardTitle>
-              <CardDescription>Lightweight, privacy-friendly feedback form.</CardDescription>
+              <CardDescription>Quick, privacy-friendly feedback.</CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-3" aria-label="Feedback form">

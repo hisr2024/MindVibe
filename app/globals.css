@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --background: #050814;
-  --foreground: #f7fbff;
-  --muted: #0f1a2d;
-  --accent: #00d4ff;
-  --card: #0f132a;
+  --background: #eef4f6;
+  --foreground: #0f1f2c;
+  --muted: #d7e7eb;
+  --accent: #6bb8c7;
+  --card: #f6fbfb;
 }
 
 :root.dark {
-  --background: #000000;
-  --foreground: #f7fbff;
-  --muted: #0c1224;
-  --accent: #39ff14;
-  --card: #0b1021;
+  --background: #0b1220;
+  --foreground: #e7f2f6;
+  --muted: #0f1f2c;
+  --accent: #9ad5c0;
+  --card: #0f1928;
 }
 
 * {
@@ -28,18 +28,18 @@ html {
 
 body {
   background:
-    radial-gradient(circle at 14% 18%, rgba(0, 212, 255, 0.24), transparent 35%),
-    radial-gradient(circle at 82% 8%, rgba(255, 77, 255, 0.18), transparent 32%),
-    radial-gradient(circle at 52% 70%, rgba(57, 255, 20, 0.16), transparent 42%),
-    linear-gradient(145deg, #050814 0%, #0b1024 45%, #02040b 100%);
+    radial-gradient(circle at 16% 14%, rgba(107, 184, 199, 0.16), transparent 32%),
+    radial-gradient(circle at 78% 10%, rgba(243, 179, 194, 0.14), transparent 34%),
+    radial-gradient(circle at 50% 68%, rgba(154, 213, 192, 0.15), transparent 44%),
+    linear-gradient(145deg, #eef4f6 0%, #e5f0f3 45%, #e8f2f4 100%);
   color: var(--foreground);
   font-size: 16px;
   min-height: 100vh;
 }
 
 ::selection {
-  background: rgba(255, 77, 255, 0.25);
-  color: #ffffff;
+  background: rgba(107, 184, 199, 0.25);
+  color: #0f1f2c;
 }
 
 .focus-ring {
@@ -63,11 +63,11 @@ body {
 
 @layer components {
   .card-surface {
-    @apply rounded-3xl border border-vibrant-blue/30 bg-white/10 shadow-neon-strong backdrop-blur;
+    @apply rounded-3xl border border-vibrant-blue/20 bg-white/70 shadow-neon-strong backdrop-blur;
   }
 
   .glass-aurora {
-    @apply relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-neon-strong backdrop-blur-xl;
+    @apply relative overflow-hidden rounded-3xl border border-white/40 bg-white/70 shadow-neon-strong backdrop-blur-xl;
   }
 
   .glass-aurora::before {
@@ -75,14 +75,14 @@ body {
     position: absolute;
     inset: -30% 10% auto;
     height: 60%;
-    background: linear-gradient(120deg, rgba(0, 212, 255, 0.25), rgba(255, 77, 255, 0.22));
+    background: linear-gradient(120deg, rgba(107, 184, 199, 0.28), rgba(243, 179, 194, 0.24));
     filter: blur(55px);
-    opacity: 0.75;
+    opacity: 0.6;
     pointer-events: none;
   }
 
   .gradient-border {
-    background: linear-gradient(145deg, rgba(0, 212, 255, 0.5), rgba(255, 77, 255, 0.35));
+    background: linear-gradient(145deg, rgba(107, 184, 199, 0.4), rgba(243, 179, 194, 0.35));
     padding: 1px;
     border-radius: 1.75rem;
   }
@@ -94,11 +94,11 @@ body {
   .aurora-sheen {
     position: absolute;
     inset: -12rem -8rem auto;
-    background: radial-gradient(circle at 20% 10%, rgba(0, 212, 255, 0.35), transparent 40%),
-      radial-gradient(circle at 80% 0%, rgba(255, 77, 255, 0.3), transparent 45%),
-      radial-gradient(circle at 40% 60%, rgba(57, 255, 20, 0.26), transparent 55%);
+    background: radial-gradient(circle at 20% 10%, rgba(107, 184, 199, 0.32), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(243, 179, 194, 0.26), transparent 45%),
+      radial-gradient(circle at 40% 60%, rgba(154, 213, 192, 0.24), transparent 55%);
     filter: blur(82px);
-    opacity: 0.9;
+    opacity: 0.8;
     z-index: -1;
   }
 
@@ -107,23 +107,23 @@ body {
     inset: auto -6rem -10rem 10%;
     height: 360px;
     width: 520px;
-    background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.55), transparent 45%),
-      radial-gradient(circle at 70% 60%, rgba(0, 212, 255, 0.28), transparent 40%);
+    background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.58), transparent 45%),
+      radial-gradient(circle at 70% 60%, rgba(107, 184, 199, 0.28), transparent 40%);
     filter: blur(82px);
-    opacity: 0.65;
+    opacity: 0.62;
     z-index: -1;
   }
 
   .glow {
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 30px rgba(107, 184, 199, 0.45);
   }
 
   .shadow-glow {
-    box-shadow: 0 8px 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(255, 77, 255, 0.45);
+    box-shadow: 0 8px 28px rgba(16, 37, 54, 0.18), 0 0 50px rgba(107, 184, 199, 0.3);
   }
 
   .neon-button {
-    @apply relative inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-two px-5 py-3 text-sm font-semibold text-white shadow-glow transition duration-200;
+    @apply relative inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-two px-5 py-3 text-sm font-semibold text-ink-100 shadow-glow transition duration-200;
   }
 
   .neon-button::after {
@@ -131,7 +131,7 @@ body {
     position: absolute;
     inset: 2px;
     border-radius: inherit;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.2));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
     opacity: 0;
     transition: opacity 0.2s ease;
   }
@@ -149,18 +149,18 @@ body {
     inset: 0;
     pointer-events: none;
     background-image:
-      radial-gradient(2px 2px at 20% 25%, rgba(0, 212, 255, 0.55), transparent 60%),
-      radial-gradient(2px 2px at 70% 35%, rgba(255, 77, 255, 0.45), transparent 55%),
-      radial-gradient(2px 2px at 45% 70%, rgba(57, 255, 20, 0.4), transparent 60%);
-    opacity: 0.75;
+      radial-gradient(2px 2px at 20% 25%, rgba(107, 184, 199, 0.5), transparent 60%),
+      radial-gradient(2px 2px at 70% 35%, rgba(243, 179, 194, 0.35), transparent 55%),
+      radial-gradient(2px 2px at 45% 70%, rgba(154, 213, 192, 0.32), transparent 60%);
+    opacity: 0.55;
     mix-blend-mode: screen;
     z-index: 0;
   }
 
   .neon-panel {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 77, 255, 0.08));
-    border: 1px solid rgba(0, 212, 255, 0.35);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, rgba(107, 184, 199, 0.12), rgba(243, 179, 194, 0.1));
+    border: 1px solid rgba(107, 184, 199, 0.3);
+    box-shadow: 0 20px 60px rgba(16, 37, 54, 0.35);
   }
 
   .floating-blob {

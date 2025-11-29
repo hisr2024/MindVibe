@@ -20,22 +20,16 @@ type ChatMessage = {
 }
 
 const navItems = ['Home', 'Journal', 'KIAAN Chat', 'Insights']
-const quickPromptLabels = [
-  'Guide me through a neon breath reset',
-  'I need a hype-yet-calm bedtime plan',
-  'How do I calm racing thoughts fast?',
-  'Remind me I’m safe and capable',
-]
 
 const quickStats = [
-  { label: 'Response vibe', value: 'Empowering + calm' },
-  { label: 'Avg latency', value: '<1s micro-delight' },
-  { label: 'Trust', value: 'Safety filters on' },
+  { label: 'Tone', value: 'Steady & kind' },
+  { label: 'Model', value: 'GPT-4o core' },
+  { label: 'Grounding', value: 'Gita-inspired' },
 ]
 
 const heroCopy = {
-  title: 'Late-night clarity & calm',
-  subtitle: 'KIAAN keeps you steady with neon-smooth micro-support.',
+  title: 'Steady, soothing support',
+  subtitle: 'KIAAN stays calm and concise.',
 }
 
 type QuickPrompt = {
@@ -47,18 +41,18 @@ type QuickPrompt = {
 
 const Navbar = () => (
   <motion.nav
-    className="relative z-10 flex items-center justify-between rounded-2xl bg-black/40 px-6 py-4 shadow-neon-strong ring-1 ring-vibrant-blue/40 backdrop-blur-lg"
-    animate={{ boxShadow: '0 8px 24px rgba(0,255,255,.35)' }}
+    className="relative z-10 flex items-center justify-between rounded-2xl bg-white/80 px-6 py-4 shadow-soft ring-1 ring-vibrant-blue/30 backdrop-blur-lg"
+    animate={{ boxShadow: '0 8px 28px rgba(16,37,54,.14)' }}
   >
-    <div className="flex items-center gap-2 text-white">
+    <div className="flex items-center gap-2 text-ink-100">
       <Sparkles className="h-5 w-5 text-vibrant-pink" aria-hidden />
-      <h1 className="text-2xl font-bold tracking-tight text-vibrant-blue">MindVibe</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-ink-100">MindVibe</h1>
     </div>
-    <ul className="flex items-center space-x-4 text-sm font-semibold text-slate-100/80">
+    <ul className="flex items-center space-x-4 text-sm font-semibold text-ink-300">
       {navItems.map(item => (
         <motion.li
           key={item}
-          whileHover={{ scale: 1.1, color: '#39ff14' }}
+          whileHover={{ scale: 1.05, color: '#6bb8c7' }}
           className="relative cursor-pointer px-2 py-1 transition"
         >
           <span className="relative z-10">{item}</span>
@@ -109,9 +103,9 @@ const Chat = () => {
   ]
 
   const statusLabel = useMemo(() => {
-    if (isLoadingSession) return 'Syncing neon space...'
-    if (isSending) return 'KIAAN is responding with glow'
-    return 'Live & empowering'
+    if (isLoadingSession) return 'Connecting softly...'
+    if (isSending) return 'KIAAN is replying'
+    return 'Ready to listen'
   }, [isLoadingSession, isSending])
 
   useEffect(() => {
@@ -233,20 +227,20 @@ const Chat = () => {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#050510] pb-12 text-white">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#eef4f6] to-[#dfe9ef] pb-12 text-ink-100">
       <ParticleBackground />
       <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10">
         <Navbar />
 
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <div className="space-y-6 rounded-3xl bg-black/40 p-6 shadow-neon-strong ring-1 ring-vibrant-blue/40 backdrop-blur-xl">
+          <div className="space-y-6 rounded-3xl bg-white/85 p-6 shadow-neon-strong ring-1 ring-vibrant-blue/20 backdrop-blur-xl">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <KiaanAvatar />
               <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
                 {quickStats.map(stat => (
-                  <div key={stat.label} className="rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10">
+                  <div key={stat.label} className="rounded-2xl bg-white p-3 text-sm ring-1 ring-vibrant-blue/20">
                     <p className="text-xs uppercase tracking-[0.2em] text-vibrant-blue">{stat.label}</p>
-                    <p className="flex items-center gap-2 text-base font-semibold text-white">
+                    <p className="flex items-center gap-2 text-base font-semibold text-ink-100">
                       <Zap className="h-4 w-4 text-vibrant-green" aria-hidden />
                       {stat.value}
                     </p>
@@ -255,14 +249,14 @@ const Chat = () => {
               </div>
             </div>
 
-            <div className="space-y-3 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+            <div className="space-y-3 rounded-2xl bg-white/90 p-4 ring-1 ring-vibrant-blue/20">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {quickPromptOptions.map(prompt => (
                   <button
                     key={prompt.label}
                     type="button"
                     onClick={() => handleQuickPrompt(prompt)}
-                    className="rounded-md border border-indigo-100 bg-white px-3 py-2 text-xs font-medium text-indigo-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 disabled:cursor-not-allowed"
+                    className="rounded-md border border-calm-200 bg-white px-3 py-2 text-xs font-medium text-ink-100 shadow-sm transition hover:border-vibrant-blue/40 hover:bg-calm-100 disabled:cursor-not-allowed"
                     disabled={isSending || isLoadingSession}
                   >
                     {prompt.label}
@@ -270,9 +264,9 @@ const Chat = () => {
                 ))}
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-vibrant-blue">{statusLabel}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-300">{statusLabel}</p>
 
-              <div className="h-96 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="h-96 overflow-y-auto rounded-lg border border-calm-200 bg-white p-4 shadow-sm">
                 {isLoadingSession ? (
                   <div className="flex h-full items-center justify-center gap-2 text-slate-600">
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -291,7 +285,7 @@ const Chat = () => {
               </div>
 
               {error && (
-                <div className="rounded-xl border border-red-400/40 bg-red-500/20 px-4 py-2 text-sm text-red-100 shadow-neon-strong">
+                <div className="rounded-xl border border-vibrant-pink/30 bg-vibrant-pink/10 px-4 py-2 text-sm text-ink-100 shadow-soft">
                   {error}
                 </div>
               )}
@@ -301,14 +295,14 @@ const Chat = () => {
                   type="text"
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  placeholder="Drop your thought and watch KIAAN spark"
-                  className="flex-1 rounded-xl border border-vibrant-blue/40 bg-white/5 px-4 py-3 text-sm text-white shadow-neon-strong outline-none transition focus:border-vibrant-pink/70 focus:ring-2 focus:ring-vibrant-pink/40"
+                  placeholder="Share a quick thought for KIAAN"
+                  className="flex-1 rounded-xl border border-calm-200 bg-white px-4 py-3 text-sm text-ink-100 shadow-soft outline-none transition focus:border-vibrant-blue/50 focus:ring-2 focus:ring-vibrant-blue/30"
                   disabled={isSending || isLoadingSession}
                 />
                 <button
                   type="submit"
                   disabled={isSending || isLoadingSession}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-two px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-vibrant-green/60 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-two px-6 py-3 text-sm font-semibold text-ink-100 shadow-glow transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-vibrant-green/40 disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send message"
                 >
                   {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -317,9 +311,9 @@ const Chat = () => {
               </form>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right text-ink-300">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-vibrant-blue">{heroCopy.title}</p>
-            <p className="text-xs text-slate-200/80">{heroCopy.subtitle}</p>
+            <p className="text-xs text-ink-300/80">{heroCopy.subtitle}</p>
           </div>
         </div>
       </div>

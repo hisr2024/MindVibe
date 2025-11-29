@@ -15,8 +15,8 @@ from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError,
 from backend.deps import get_db
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
-preferred_model = os.getenv("OPENAI_MODEL", "gpt-4").strip() or "gpt-4"
-fallback_model = os.getenv("OPENAI_FALLBACK_MODEL", "gpt-3.5-turbo").strip() or "gpt-3.5-turbo"
+preferred_model = os.getenv("OPENAI_MODEL", "gpt-4o").strip() or "gpt-4o"
+fallback_model = os.getenv("OPENAI_FALLBACK_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
 client = OpenAI(api_key=api_key) if api_key else None
 ready = bool(api_key)
 
@@ -395,7 +395,7 @@ async def about() -> Dict[str, Any]:
         "version": "13.0",
         "model": kiaan.last_model_used or kiaan.model_name,
         "status": "Operational" if ready else "Error",
-        "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness",
+        "description": "GPT-4o guided coach grounded in the Bhagavad Gita's 700 verses",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations"
     }
