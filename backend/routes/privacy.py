@@ -27,7 +27,9 @@ async def _record_audit(
     db: AsyncSession, user_id: str | None, action: str, metadata: dict | None = None
 ) -> None:
     await db.execute(
-        insert(AuditEvent).values(user_id=user_id, action=action, metadata=metadata)
+        insert(AuditEvent).values(
+            user_id=user_id, action=action, event_metadata=metadata
+        )
     )
 
 
@@ -154,7 +156,7 @@ async def audit_history(
         AuditEventOut(
             action=record.action,
             created_at=record.created_at.isoformat(),
-            metadata=record.metadata,
+            metadata=record.event_metadata,
         )
         for record in records
     ]
