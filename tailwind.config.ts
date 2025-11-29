@@ -6,6 +6,17 @@ const config = {
   theme: {
     extend: {
       colors: {
+        dark: '#1A1A2E',
+        vibrant: {
+          blue: '#00d4ff',
+          pink: '#ff4dff',
+          green: '#39ff14',
+          yellow: '#ffd700',
+        },
+        gradient: {
+          one: 'linear-gradient(90deg, #00d4ff 0%, #39ff14 100%)',
+          two: 'linear-gradient(270deg, #ff4dff -10%, #00d4ff 110%)',
+        },
         calm: {
           50: '#F7F9FC',
           100: '#E9F5F2',
@@ -49,6 +60,13 @@ const config = {
       boxShadow: {
         soft: '0 10px 35px -15px rgba(36, 80, 111, 0.25)',
         glow: '0 0 0 4px rgba(168, 218, 220, 0.35)',
+        'neon-strong': '0 10px 45px rgba(0, 212, 255, 0.35), 0 12px 60px rgba(255, 77, 255, 0.28)',
+      },
+      backgroundImage: {
+        'gradient-one': 'linear-gradient(90deg, #00d4ff 0%, #39ff14 100%)',
+        'gradient-two': 'linear-gradient(270deg, #ff4dff -10%, #00d4ff 110%)',
+        'aurora-grid':
+          'radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.15), transparent 30%), radial-gradient(circle at 80% 10%, rgba(255, 77, 255, 0.14), transparent 35%), radial-gradient(circle at 60% 70%, rgba(57, 255, 20, 0.16), transparent 32%)',
       },
       borderRadius: {
         xl: '1rem',
