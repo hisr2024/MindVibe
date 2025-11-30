@@ -1,0 +1,7 @@
+{
+  "name": "bcryptjs",
+  "version": "2.4.3",
+  "main": "index.js",
+  "description": "Local bcryptjs-compatible shim using Node's scrypt for offline hashing",
+  "license": "MIT"
+}
