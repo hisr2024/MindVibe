@@ -1216,11 +1216,51 @@ function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) 
     { title: 'Move with intention', detail: 'Return to your values; act in a way future-you will respect.' }
   ]
 
+  const actions = [
+    { label: 'Apology', helper: 'Offer a sincere apology that stays brief and grounded.' },
+    { label: 'Clarification', helper: 'Gently clarify what you meant and invite understanding.' },
+    { label: 'Calm follow-up', helper: 'Return with a warm note that re-centers the conversation.' }
+  ]
+
   const prompts = [
     "Help me reset after a misstep so I stay aligned with Kiaan's calm guidance.",
     'I want to repair a small mistake—walk me through a kind response.',
     'Give me a short reflection to release guilt and act with clarity.'
   ]
+
+  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({})
+  const [breathActive, setBreathActive] = useState(false)
+  const [breathTick, setBreathTick] = useState(0)
+  const [misstep, setMisstep] = useState('')
+  const [impact, setImpact] = useState('')
+  const [repairAction, setRepairAction] = useState(actions[0].label)
+  const [intention, setIntention] = useState('')
+  const [plan, setPlan] = useState('')
+
+  useEffect(() => {
+    if (!breathActive) return
+    setBreathTick(0)
+    let current = 0
+    const id = setInterval(() => {
+      current += 1
+      setBreathTick(current)
+      if (current >= 16) {
+        setBreathActive(false)
+        clearInterval(id)
+      }
+    }, 900)
+
+    return () => clearInterval(id)
+  }, [breathActive])
+
+  const breathPhase = ['Inhale gently', 'Hold softly', 'Exhale slowly', 'Rest in calm'][breathTick % 4] ?? 'Inhale gently'
+  const breathsDone = Math.min(4, Math.floor(breathTick / 4))
+
+  function buildPlan() {
+    const summary = `Gentle course correction\n\n- Pause: ${breathActive ? 'in progress' : breathsDone >= 4 ? 'completed 4 slow breaths' : 'begin with 4 slow breaths'}\n- What happened: ${misstep || 'a brief misstep'}\n- Who felt it: ${impact || 'I noticed the tone shifted'}\n- Repair choice: ${repairAction}\n- Intention: ${intention || 'stay kind, steady, and clear'}`
+    const prompt = `${summary}\n\nGuide me through a calm message that keeps Kiaan's supportive tone and helps me repair with care.`
+    setPlan(prompt)
+  }
 
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0c10] via-[#120d0c] to-[#0b0b0f] border border-orange-500/15 p-6 md:p-7 space-y-5 shadow-[0_20px_80px_rgba(255,115,39,0.14)]">
@@ -1238,19 +1278,140 @@ function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) 
         <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/25 rounded-full px-3 py-1">Keeps conversations kind and respectful</div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="space-y-3">
-          {resetSteps.map(step => (
-            <div key={step.title} className="rounded-2xl border border-orange-500/20 bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-              <p className="text-sm font-semibold text-orange-50">{step.title}</p>
-              <p className="text-xs text-orange-100/75 leading-relaxed">{step.detail}</p>
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="space-y-3 md:col-span-2">
+          <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-orange-50">4-breath reset</p>
+                <p className="text-xs text-orange-100/75">Let the guided breathing animation lead you.</p>
+              </div>
+              <button
+                className="px-3 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-orange-500 to-[#ffb347] text-slate-950 shadow-md shadow-orange-500/25 hover:scale-105 transition"
+                onClick={() => setBreathActive(true)}
+              >
+                {breathActive ? 'Reset in motion' : breathsDone >= 4 ? 'Replay reset' : 'Begin reset'}
+              </button>
             </div>
-          ))}
+            <div className="mt-4 flex items-center gap-4">
+              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/20 via-[#ffb347]/20 to-transparent flex items-center justify-center">
+                <div
+                  className={`h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ff9933]/20 to-orange-200/10 shadow-inner shadow-orange-500/30 ${breathActive ? 'animate-ping' : 'animate-pulse'}`}
+                />
+                <div className="absolute inset-2 rounded-full border border-orange-400/30" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-semibold text-orange-50">{breathPhase}</div>
+                <div className="text-xs text-orange-100/75">{Math.min(4, breathsDone + 1)} / 4 breaths</div>
+                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-orange-400 to-[#ffb347] transition-all" style={{ width: `${(Math.min(breathTick, 16) / 16) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {resetSteps.map(step => (
+              <button
+                key={step.title}
+                onClick={() => setCompletedSteps(prev => ({ ...prev, [step.title]: !prev[step.title] }))}
+                className={`text-left rounded-2xl border bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)] transition ${
+                  completedSteps[step.title]
+                    ? 'border-green-300/50 bg-green-500/10 shadow-green-500/20'
+                    : 'border-orange-500/20 hover:border-orange-300/60'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-5 w-5 rounded-full border flex items-center justify-center text-[11px] ${
+                      completedSteps[step.title]
+                        ? 'border-green-300 bg-green-500/30 text-green-50'
+                        : 'border-orange-400/60 text-orange-100'
+                    }`}
+                  >
+                    {completedSteps[step.title] ? '✓' : '○'}
+                  </span>
+                  <p className="text-sm font-semibold text-orange-50">{step.title}</p>
+                </div>
+                <p className="text-xs text-orange-100/75 leading-relaxed mt-2">{step.detail}</p>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-4 space-y-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)]">
-          <h3 className="text-sm font-semibold text-orange-50">Talk it through with KIAAN</h3>
-          <p className="text-xs text-orange-100/80">Pick a prompt and we’ll pre-fill the chat, keeping Kiaan’s supportive flow.</p>
+        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-4 space-y-4 shadow-[0_10px_40px_rgba(255,115,39,0.12)]">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-orange-50">Talk it through with KIAAN</h3>
+            <span className="text-[11px] text-orange-100/70 bg-white/5 border border-orange-500/20 rounded-full px-2 py-1">Quick fill</span>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs text-orange-100/80">What happened?</label>
+            <textarea
+              value={misstep}
+              onChange={e => setMisstep(e.target.value)}
+              placeholder="A brief slip or tone that felt off..."
+              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs text-orange-100/80">Who felt the ripple?</label>
+            <input
+              value={impact}
+              onChange={e => setImpact(e.target.value)}
+              placeholder="A teammate, friend, or even myself"
+              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs text-orange-100/80">Choose the repair</label>
+            <div className="grid grid-cols-1 gap-2">
+              {actions.map(action => (
+                <button
+                  key={action.label}
+                  onClick={() => setRepairAction(action.label)}
+                  className={`rounded-xl border px-3 py-2 text-left transition ${
+                    repairAction === action.label
+                      ? 'border-green-300/60 bg-green-500/10 text-green-50 shadow-[0_8px_24px_rgba(52,211,153,0.18)]'
+                      : 'border-orange-400/25 bg-white/5 text-orange-50 hover:border-orange-300/60'
+                  }`}
+                >
+                  <div className="text-sm font-semibold">{action.label}</div>
+                  <div className="text-[11px] text-orange-100/75">{action.helper}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs text-orange-100/80">Move with intention</label>
+            <textarea
+              value={intention}
+              onChange={e => setIntention(e.target.value)}
+              placeholder="How do you want to show up next?"
+              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
+              rows={2}
+            />
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={buildPlan}
+              className="flex-1 min-w-[140px] px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition"
+            >
+              Build reset plan
+            </button>
+            <button
+              onClick={() => {
+                const chosen = plan || prompts[0]
+                onSelectPrompt(chosen)
+                document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+              className="px-4 py-2 rounded-xl border border-orange-400/25 bg-white/5 text-sm text-orange-50 hover:border-orange-300/60 transition"
+            >
+              Send to KIAAN
+            </button>
+          </div>
+
           <div className="flex flex-col gap-2">
             {prompts.map(prompt => (
               <button
@@ -1265,9 +1426,12 @@ function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) 
               </button>
             ))}
           </div>
-          <div className="text-[11px] text-orange-100/70 bg-white/5 border border-orange-500/20 rounded-lg p-3">
-            This guide never overrides KIAAN— it simply sets a steady path so Kiaan can respond with clarity and care.
-          </div>
+
+          {plan && (
+            <div className="text-[11px] text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-lg p-3 whitespace-pre-line">
+              {plan}
+            </div>
+          )}
         </div>
       </div>
     </section>
