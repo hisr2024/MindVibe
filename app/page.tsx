@@ -87,10 +87,10 @@ export default function Home() {
                 <p className="text-base sm:text-lg md:text-xl text-orange-100/90">Calm Wisdom.</p>
               </div>
             </div>
-            <div className="flex gap-3 flex-wrap justify-center">
-              <TokenCard label="Inner Peace" note="Gentle breath and soft focus" gradient="from-orange-500/70 via-[#ffb347]/60 to-orange-300/50" icon={<SunriseIcon />} />
-              <TokenCard label="Mind Control" note="Steady steps, one thought at a time" gradient="from-slate-900 via-slate-800 to-orange-500/30" icon={<MindWaveIcon />} />
-              <TokenCard label="Self Kindness" note="You are welcome here" gradient="from-orange-700/70 via-[#ff9933]/60 to-rose-400/40" icon={<HeartBreezeIcon />} />
+            <div className="flex gap-2 flex-wrap justify-center">
+              <TokenCard label="Inner Peace" note="Gentle breath and soft focus" gradient="from-[#3b6f6b]/60 via-[#4f9088]/50 to-[#d6f3ec]/50" icon={<SunriseIcon />} />
+              <TokenCard label="Mind Control" note="Steady steps, one thought at a time" gradient="from-[#20324a]/60 via-[#405b75]/50 to-[#dbe7f6]/40" icon={<MindWaveIcon />} />
+              <TokenCard label="Self Kindness" note="You are welcome here" gradient="from-[#5a3f52]/60 via-[#7c5d73]/50 to-[#f3e6f0]/45" icon={<HeartBreezeIcon />} />
             </div>
           </div>
           <div className="mt-6 grid gap-3 md:grid-cols-3 text-sm text-orange-100/80">
@@ -163,15 +163,15 @@ function PeaceLogo() {
 
 function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: ReactElement }) {
   return (
-    <div className={`relative min-w-[150px] sm:min-w-[180px] rounded-2xl border border-orange-400/25 bg-gradient-to-br ${gradient} p-3 shadow-[0_10px_45px_rgba(255,115,39,0.22)] overflow-hidden`}>
-      <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-orange-400/30 blur-2xl" />
-      <div className="flex items-center gap-3">
-        <div className="h-12 w-12 rounded-xl bg-black/40 border border-orange-200/30 flex items-center justify-center text-2xl text-orange-100">
+    <div className={`relative min-w-[135px] sm:min-w-[150px] rounded-xl border border-white/10 bg-gradient-to-br ${gradient} p-2.5 shadow-[0_8px_26px_rgba(64,98,104,0.28)] overflow-hidden cursor-default select-none`}> 
+      <div className="absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/20 blur-2xl" />
+      <div className="flex items-center gap-2.5">
+        <div className="h-10 w-10 rounded-lg bg-black/40 border border-white/20 flex items-center justify-center text-xl text-emerald-50">
           {icon}
         </div>
         <div>
-          <p className="text-sm font-semibold text-orange-50">{label}</p>
-          <p className="text-xs text-orange-100/80 leading-snug">{note}</p>
+          <p className="text-[13px] font-semibold text-emerald-50 drop-shadow-sm">{label}</p>
+          <p className="text-[11px] text-emerald-50/80 leading-snug">{note}</p>
         </div>
       </div>
     </div>
@@ -426,10 +426,10 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
     { emoji: '🙏', label: 'Quiet peace', query: 'Lead me in a brief mindful moment so I can feel peaceful again.' },
   ]
   return (
-    <section className="bg-[#0d0d10]/80 backdrop-blur border border-orange-500/15 rounded-3xl p-5 md:p-6 space-y-4 shadow-[0_10px_50px_rgba(255,115,39,0.16)]">
+    <section className="bg-[#0c1012]/80 backdrop-blur border border-emerald-200/15 rounded-3xl p-5 md:p-6 space-y-4 shadow-[0_10px_40px_rgba(92,150,146,0.2)]">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-300 to-[#ffb347] bg-clip-text text-transparent">🎯 Quick Responses</h2>
-        <p className="text-xs text-orange-100/80">Polished prompts that auto-fill KIAAN for you</p>
+        <h2 className="text-xl font-semibold bg-gradient-to-r from-emerald-200 via-[#b7d8d2] to-sky-200 bg-clip-text text-transparent">🎯 Quick Responses</h2>
+        <p className="text-xs text-emerald-50/80">Polished prompts that auto-fill KIAAN for you</p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {scenarios.map((s, i) => (
@@ -438,12 +438,12 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
             onClick={() => {
               onSelectPrompt(s.query)
             }}
-            className="group relative overflow-hidden bg-gradient-to-br from-[#0f0f12]/85 via-[#19181c]/80 to-[#1f1f24]/80 border border-orange-400/25 hover:border-[#ffb347]/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(255,115,39,0.14)] hover:-translate-y-1">
-            <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/8 to-transparent opacity-0 group-hover:opacity-100 transition" />
-            <div className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full bg-[#ff9933]/20 blur-2xl" />
-            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
-            <div className="text-sm text-orange-50 font-semibold">{s.label}</div>
-            <div className="text-[11px] text-orange-100/70 mt-1">{s.query}</div>
+            className="group relative overflow-hidden bg-gradient-to-br from-[#0e1618]/85 via-[#122022]/80 to-[#0f1b21]/80 border border-emerald-200/20 hover:border-emerald-200/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_26px_rgba(84,141,138,0.2)] hover:-translate-y-1">
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-emerald-300/10 via-sky-200/8 to-transparent opacity-0 group-hover:opacity-100 transition" />
+            <div className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full bg-emerald-200/20 blur-2xl" />
+            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform text-emerald-50">{s.emoji}</div>
+            <div className="text-sm text-emerald-50 font-semibold">{s.label}</div>
+            <div className="text-[11px] text-emerald-50/70 mt-1 leading-snug">{s.query}</div>
           </button>
         ))}
       </div>
