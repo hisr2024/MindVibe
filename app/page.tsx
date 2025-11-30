@@ -202,8 +202,12 @@ type ClaritySession = {
 export default function Home() {
   const [chatPrefill, setChatPrefill] = useState<string | null>(null)
 
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8 pb-28">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/30 via-[#ff9933]/14 to-transparent blur-3xl" />
         <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/20 via-orange-500/12 to-transparent blur-[120px]" />
@@ -251,6 +255,24 @@ export default function Home() {
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <FeatureCard
+            title="Thumb-friendly layout"
+            description="Large tap targets, single-column flows, and mobile spacing keep KIAAN effortless on any screen size."
+            badge="Mobile optimized"
+          />
+          <FeatureCard
+            title="Offline-trusting journal"
+            description="Encrypted entries stay on your device with clear status cues so you always know your reflections are safe."
+            badge="Secure by default"
+          />
+          <FeatureCard
+            title="Instant access bar"
+            description="Jump to chat, clarity pause, or your journal with a single tap—no matter where you are on the page."
+            badge="Quick actions"
+          />
+        </section>
+
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <PrecisionArrowEngine />
@@ -270,6 +292,12 @@ export default function Home() {
             KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country’s emergency medical services or a licensed professional right away.
           </p>
         </section>
+
+        <MobileActionDock
+          onChat={() => scrollToSection('kiaan-chat')}
+          onClarity={() => scrollToSection('clarity-suite')}
+          onJournal={() => scrollToSection('journal-section')}
+        />
       </div>
     </main>
   )
@@ -634,6 +662,21 @@ function BadgePill({ children }: { children: string }) {
     <div className="flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-2 backdrop-blur text-xs font-semibold shadow-[0_0_30px_rgba(255,115,39,0.18)]">
       <span className="inline-block h-2 w-2 rounded-full bg-orange-400 animate-pulse" />
       <span className="text-orange-50/90">{children}</span>
+    </div>
+  )
+}
+
+function FeatureCard({ title, description, badge }: { title: string, description: string, badge: string }) {
+  return (
+    <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 shadow-[0_12px_40px_rgba(255,115,39,0.18)] flex gap-3">
+      <div className="mt-1 h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500/70 via-[#ffb347]/70 to-orange-200/80 flex items-center justify-center text-lg">📱</div>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-base font-semibold text-orange-50">{title}</h3>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-orange-100/80 border border-orange-500/25">{badge}</span>
+        </div>
+        <p className="text-sm text-orange-100/75 leading-relaxed">{description}</p>
+      </div>
     </div>
   )
 }
@@ -1300,7 +1343,7 @@ function ClarityPauseSuite() {
   }
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
+    <section id="clarity-suite" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
       <div className="absolute -left-10 top-0 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/16 to-transparent blur-3xl" />
       <div className="absolute -right-12 bottom-0 h-40 w-40 rounded-full bg-gradient-to-tr from-[#1b1f29]/60 via-orange-500/14 to-transparent blur-3xl" />
 
@@ -2125,7 +2168,7 @@ function Journal() {
   })()
 
   return (
-    <section className="space-y-4">
+    <section id="journal-section" className="space-y-4">
       <div className="bg-[#0d0d10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
@@ -2262,6 +2305,33 @@ function Journal() {
         )}
       </div>
     </section>
+  )
+}
+
+function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void, onClarity: () => void, onJournal: () => void }) {
+  return (
+    <div className="fixed inset-x-4 bottom-4 z-30 md:hidden">
+      <div className="flex items-center gap-2 rounded-2xl border border-orange-500/30 bg-[#0b0b0f]/95 p-3 shadow-[0_18px_70px_rgba(255,115,39,0.3)] backdrop-blur">
+        <button
+          onClick={onChat}
+          className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-200 px-3 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/30"
+        >
+          Chat
+        </button>
+        <button
+          onClick={onClarity}
+          className="flex-1 rounded-xl border border-orange-400/50 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-50"
+        >
+          Pause
+        </button>
+        <button
+          onClick={onJournal}
+          className="flex-1 rounded-xl border border-orange-400/40 bg-black/40 px-3 py-2 text-sm font-semibold text-orange-100"
+        >
+          Journal
+        </button>
+      </div>
+    </div>
   )
 }
 
