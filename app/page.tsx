@@ -40,6 +40,7 @@ export default function Home() {
         <KIAANChat />
         <QuickHelp />
         <DailyWisdom />
+        <Journal />
         <MoodTracker />
       </div>
     </main>
@@ -212,6 +213,205 @@ function DailyWisdom() {
           {saved ? '⭐ Saved' : '☆ Save'}
         </button>
         <button className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">📤 Share</button>
+      </div>
+    </section>
+  )
+}
+
+type JournalEntry = {
+  id: string
+  title: string
+  body: string
+  mood: string
+  at: string
+}
+
+function Journal() {
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
+  const [mood, setMood] = useState('Peaceful')
+  const [entries, setEntries] = useLocalState<JournalEntry[]>('kiaan_journal_entries', [])
+
+  const moods = [
+    { label: 'Peaceful', emoji: '🙏', tone: 'positive' },
+    { label: 'Grateful', emoji: '🌿', tone: 'positive' },
+    { label: 'Reflective', emoji: '🪞', tone: 'neutral' },
+    { label: 'Determined', emoji: '🔥', tone: 'positive' },
+    { label: 'Tender', emoji: '💙', tone: 'neutral' },
+    { label: 'Tired', emoji: '😴', tone: 'neutral' },
+    { label: 'Anxious', emoji: '😰', tone: 'challenging' },
+    { label: 'Heavy', emoji: '🌧️', tone: 'challenging' },
+  ]
+
+  function addEntry() {
+    if (!body.trim()) return
+    const entry: JournalEntry = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      body: body.trim(),
+      mood,
+      at: new Date().toISOString()
+    }
+    setEntries([entry, ...entries])
+    setTitle('')
+    setBody('')
+  }
+
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+  const weeklyEntries = entries.filter(e => new Date(e.at) >= sevenDaysAgo)
+
+  const moodCounts = weeklyEntries.reduce<Record<string, number>>((acc, curr) => {
+    acc[curr.mood] = (acc[curr.mood] || 0) + 1
+    return acc
+  }, {})
+
+  const mostCommonMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Peaceful'
+
+  const positiveMoods = new Set(moods.filter(m => m.tone === 'positive').map(m => m.label))
+  const challengingMoods = new Set(moods.filter(m => m.tone === 'challenging').map(m => m.label))
+  const positiveDays = weeklyEntries.filter(e => positiveMoods.has(e.mood)).length
+  const challengingDays = weeklyEntries.filter(e => challengingMoods.has(e.mood)).length
+
+  const assessment = (() => {
+    if (weeklyEntries.length === 0) {
+      return {
+        headline: 'KIAAN gently invites you to begin your journal practice this week.',
+        guidance: [
+          'Start with two or three lines on what felt peaceful or challenging today.',
+          'Return here each evening; KIAAN will keep the space steady and private.',
+          'Let your words flow without judgment—this is your sacred reflection.'
+        ]
+      }
+    }
+
+    if (challengingDays > positiveDays) {
+      return {
+        headline: 'KIAAN notices some heavier moments this week and offers steady companionship.',
+        guidance: [
+          'Pair each entry with one small act of self-kindness to honor your effort.',
+          'Revisit a peaceful entry and let its lesson guide today’s choices, as the Gita teaches equanimity in action.',
+          'Share one concern with KIAAN in the chat to receive a tailored practice for the coming days.'
+        ]
+      }
+    }
+
+    return {
+      headline: 'KIAAN celebrates your steady reflections and balanced moods this week.',
+      guidance: [
+        'Keep honoring what works—note the habits that nurture your peace and repeat them intentionally.',
+        'Extend the calm to service: plan one mindful act for someone else this week.',
+        'Before each entry, pause for three breaths to deepen the insight you are cultivating.'
+      ]
+    }
+  })()
+
+  return (
+    <section className="space-y-4">
+      <div className="bg-gradient-to-r from-emerald-900/30 to-cyan-900/20 border border-emerald-800/40 rounded-3xl p-6">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="text-sm text-emerald-200">Private Journal</p>
+            <h2 className="text-2xl font-semibold text-emerald-100">Sacred Reflections</h2>
+            <p className="text-sm text-emerald-200/80">Entries stay on your device and refresh the weekly guidance automatically.</p>
+          </div>
+          <div className="bg-emerald-950/60 border border-emerald-800 text-emerald-100 px-4 py-2 rounded-2xl text-sm">
+            Weekly entries: {weeklyEntries.length}
+          </div>
+        </div>
+
+        <div className="mt-4 grid md:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm text-emerald-200">Today’s tone</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {moods.map(option => (
+                  <button
+                    key={option.label}
+                    onClick={() => setMood(option.label)}
+                    className={`px-3 py-2 rounded-2xl border text-sm transition-all ${
+                      mood === option.label
+                        ? 'bg-emerald-700/70 border-emerald-400 text-white shadow'
+                        : 'bg-emerald-950/40 border-emerald-800 text-emerald-100 hover:border-emerald-600'
+                    }`}
+                  >
+                    <span className="mr-1">{option.emoji}</span>{option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Title (optional)"
+              className="w-full bg-emerald-950/60 border border-emerald-800 rounded-2xl px-3 py-2 text-emerald-50"
+            />
+            <textarea
+              value={body}
+              onChange={e => setBody(e.target.value)}
+              placeholder="Write freely. Only you can see this."
+              className="w-full h-32 bg-emerald-950/60 border border-emerald-800 rounded-2xl p-3 text-emerald-50"
+            />
+            <button
+              onClick={addEntry}
+              disabled={!body.trim()}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Journal Entry
+            </button>
+          </div>
+
+          <div className="bg-emerald-950/60 border border-emerald-800 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-emerald-100">Weekly Assessment</h3>
+              <div className="text-xs text-emerald-200">Updated automatically</div>
+            </div>
+            <p className="text-sm text-emerald-200/90">Most present mood: <span className="font-semibold text-emerald-100">{mostCommonMood}</span></p>
+            <div className="grid grid-cols-2 gap-2 text-sm text-emerald-200/90">
+              <div className="bg-emerald-900/70 rounded-xl p-3 border border-emerald-800">
+                <div className="text-xs text-emerald-300/80">Positive moments logged</div>
+                <div className="text-xl font-semibold text-emerald-100">{positiveDays}</div>
+              </div>
+              <div className="bg-emerald-900/70 rounded-xl p-3 border border-emerald-800">
+                <div className="text-xs text-emerald-300/80">Tender/Challenging days</div>
+                <div className="text-xl font-semibold text-emerald-100">{challengingDays}</div>
+              </div>
+            </div>
+            <div className="bg-emerald-900/50 rounded-xl p-3 border border-emerald-800/80">
+              <p className="text-sm text-emerald-100 font-semibold">KIAAN’s gentle guidance</p>
+              <p className="text-sm text-emerald-200/80 leading-relaxed">{assessment.headline}</p>
+              <ul className="mt-2 space-y-1 text-sm text-emerald-200/80 list-disc list-inside">
+                {assessment.guidance.map((tip, i) => (
+                  <li key={i}>{tip}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-5 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-lg font-semibold text-zinc-100">Recent entries</h3>
+          <p className="text-xs text-zinc-400">Newest first • stored locally</p>
+        </div>
+        {entries.length === 0 ? (
+          <p className="text-sm text-zinc-400">No entries yet. Your reflections will appear here.</p>
+        ) : (
+          <ul className="space-y-3">
+            {entries.map(entry => (
+              <li key={entry.id} className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800">
+                <div className="flex items-center justify-between text-xs text-zinc-400">
+                  <span>{new Date(entry.at).toLocaleString()}</span>
+                  <span className="px-2 py-1 rounded-lg bg-emerald-900/60 text-emerald-100 border border-emerald-800 text-[11px]">{entry.mood}</span>
+                </div>
+                {entry.title && <div className="mt-1 font-semibold text-zinc-100">{entry.title}</div>}
+                <div className="mt-1 text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">{entry.body}</div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   )
