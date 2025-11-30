@@ -2492,11 +2492,12 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
 function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const moods = [
-    { label: 'Steady', gradient: 'from-orange-400 via-[#ffb347] to-amber-200', beam: 'bg-orange-200/70', halo: 'shadow-[0_0_50px_rgba(255,186,140,0.35)]', delay: '0s' },
-    { label: 'Open', gradient: 'from-emerald-300 via-teal-200 to-cyan-200', beam: 'bg-emerald-100/70', halo: 'shadow-[0_0_50px_rgba(134,239,172,0.35)]', delay: '0.08s' },
-    { label: 'Reflective', gradient: 'from-indigo-300 via-violet-400 to-purple-500', beam: 'bg-indigo-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.35)]', delay: '0.16s' },
-    { label: 'Charged', gradient: 'from-rose-400 via-orange-400 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.3)]', delay: '0.24s' },
-    { label: 'Calm', gradient: 'from-amber-200 via-rose-200 to-white', beam: 'bg-amber-50/80', halo: 'shadow-[0_0_45px_rgba(255,237,213,0.32)]', delay: '0.32s' },
+    { label: 'Anger', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0s' },
+    { label: 'Sad', gradient: 'from-sky-300 via-blue-400 to-indigo-500', beam: 'bg-sky-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.35)]', delay: '0.08s' },
+    { label: 'Anxious', gradient: 'from-amber-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_45px_rgba(253,230,138,0.35)]', delay: '0.16s' },
+    { label: 'Worried', gradient: 'from-violet-300 via-purple-400 to-fuchsia-500', beam: 'bg-violet-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.32)]', delay: '0.24s' },
+    { label: 'Loneliness', gradient: 'from-cyan-200 via-blue-200 to-indigo-300', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(165,243,252,0.32)]', delay: '0.32s' },
+    { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.4s' },
   ]
 
   return (
