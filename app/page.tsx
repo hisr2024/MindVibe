@@ -232,11 +232,6 @@ export default function Home() {
               <TokenCard label="Self Kindness" note="You are welcome here" gradient="from-[#5a3f52]/60 via-[#7c5d73]/50 to-[#f3e6f0]/45" icon={<HeartBreezeIcon />} />
             </div>
           </div>
-          <div className="mt-6 grid gap-3 md:grid-cols-3 text-sm text-orange-100/80">
-            <BadgePill>Private by default • no sign-up needed</BadgePill>
-            <BadgePill>Responsive, mobile-first, and joyfully simple</BadgePill>
-          </div>
-
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               onClick={() => document.getElementById('wisdom-chat-rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
