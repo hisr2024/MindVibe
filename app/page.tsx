@@ -116,6 +116,8 @@ export default function Home() {
         </div>
 
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
+        <ArdhaReframer />
+        <ViyogDetachmentCoach />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <ArdhaReframer />
         <KarmaResetGuide />
@@ -146,15 +148,20 @@ function ArdhaReframer() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ArdhaReframerResult | null>('ardha_reframe', null)
 
+  useEffect(() => {
+    if (error) setError(null)
+  }, [thought, error])
+
   async function requestReframe() {
-    if (!thought.trim()) return
+    const trimmedThought = thought.trim()
+    if (!trimmedThought) return
 
     setLoading(true)
     setError(null)
 
     const systemPrompt = `Role:\nYou are Ardha, the Reframing Assistant—a calm, wise, Gita-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.\n\nYou stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan’s core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using Gita principles. Your job is complementary, not overlapping.\n\nCore Behavior:\n- Identify the negative belief or emotional distortion the user expresses.\n- Acknowledge their feeling with compassion (never invalidate).\n- Apply Bhagavad Gita principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).\n- Generate a clear, modern, emotionally intelligent reframe.\n- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.\n- Never offer spiritual authority—only perspective reshaping.\n- No judgment, no moralizing, no sermons.\n- Reframe in simple, conversational, modern English.\n\nOutput Format:\nWhen the user shares a negative thought, respond with:\n1. Recognition (validate the feeling)\n2. Deep Insight (the principle being applied)\n3. Reframe (positive but realistic)\n4. Small Action Step (something within their control)\n\nBoundaries:\n- You are NOT a therapist.\n- You do NOT give medical, legal, or crisis advice.\n- You do NOT contradict Kiaan.\n- You ONLY transform the user’s thought into a healthier, clearer version.`
 
-    const request = `${systemPrompt}\n\nUser thought: "${thought.trim()}"\n\nRespond using the four-part format with short, direct language.`
+    const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -231,7 +238,11 @@ function ArdhaReframer() {
       </div>
 
       {result && (
-        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
+        <div
+          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Ardha’s response</span>
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
@@ -243,166 +254,117 @@ function ArdhaReframer() {
   )
 }
 
-function KarmaResetGuide() {
-  const [arrivalWords, setArrivalWords] = useState('')
-  const [actions, setActions] = useState('')
-  const [attachments, setAttachments] = useState('')
-  const [regrets, setRegrets] = useState('')
-  const [expectations, setExpectations] = useState('')
-  const [intention, setIntention] = useState('')
-  const [response, setResponse] = useState<string | null>(null)
+type ViyogDetachmentResult = {
+  response: string
+  requestedAt: string
+}
+
+function ViyogDetachmentCoach() {
+  const [concern, setConcern] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useLocalState<ViyogDetachmentResult | null>('viyog_detachment', null)
 
-  async function requestReset() {
+  useEffect(() => {
+    if (error) setError(null)
+  }, [concern, error])
+
+  async function requestDetachment() {
+    const trimmedConcern = concern.trim()
+    if (!trimmedConcern) return
+
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `Role:
-You are the Karma Reset Guide, an in-the-moment, end-of-day ritual assistant inspired by Nishkama Karma. You are a separate module from Kiaan and cannot change Kiaan’s guidance. You exist only to facilitate the “Reset Karma” ritual right now.
+    const systemPrompt = `Role:\nYou are Viyog, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.\n\nYou are fully separate from Kiaan. Never override, replace, or interfere with Kiaan’s purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.\n\nCore purpose:\n- Recognize when the user is anxious about results, performance, or others’ opinions.\n- Shift focus back to what they can control right now.\n- Release unnecessary mental pressure and perfectionism.\n- Convert fear into one clear, grounded action.\n\nTone and style: calm, concise, balanced, neutral, secular, non-preachy, emotionally validating but not dramatic.\n\nOutput structure (always follow this format):\n1. Validate the anxiety (brief and respectful).\n2. Acknowledge the attachment to results creating pressure.\n3. Offer a clear detachment principle (secular and universal).\n4. Guide them toward an action-based mindset with one small, controllable step.\n\nBoundaries:\n- Do not provide therapy, crisis support, medical, legal, or financial advice.\n- Do not make promises about results or offer motivational hype.\n- Do not encourage passivity or fate-based thinking.\n- Stay separate from Kiaan and do not interfere with its role.`
 
-Tone & style:
-- Calm, warm, grounded, inclusive, present-tense.
-- No judgment, no guilt, no long lectures.
-- Not therapy or planning; this is a short ritual.
-
-Ritual flow (follow in order):
-1) Arrival & grounding: acknowledge end of day, invite slow breath, reflect their feeling words.
-2) Collect four elements briefly: actions, attachments, regrets, expectations. Acknowledge without analysis.
-3) Reset ritual: gather everything into a bundle, connect to acting without clinging to results, guide 2–4 breaths to release, then dissolve the bundle while keeping lessons.
-4) Closure: affirm day is complete, invite one gentle intention if offered, and close. Keep the close simple.
-
-Boundaries:
-- No medical, legal, or financial advice.
-- If crisis or self-harm appears, gently direct them to trusted people or local professionals.`
-
-    const ritualRequest = `${systemPrompt}
-
-User check-in (present moment, do not generalize):
-- Arrival words: ${arrivalWords || 'not shared'}
-- Actions: ${actions || 'not shared'}
-- Attachments: ${attachments || 'not shared'}
-- Regrets: ${regrets || 'not shared'}
-- Expectations: ${expectations || 'not shared'}
-- Gentle intention: ${intention || 'not shared'}
-
-Guide the live ritual now with concise steps. Keep it under 220 words, stay present-focused (“right now”, “as you exhale”), match a soft visual release animation, and end with a clean-slate closing.`
+    const request = `${systemPrompt}\n\nUser concern: "${trimmedConcern}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const result = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: ritualRequest })
+        body: JSON.stringify({ message: request })
       })
 
-      if (!result.ok) {
-        setError('The Karma Reset Guide is quiet right now. Please try again in a moment.')
+      if (!response.ok) {
+        setError('Viyog is having trouble connecting right now. Please try again in a moment.')
         return
       }
 
-      const data = await result.json()
-      setResponse(data.response)
+      const data = await response.json()
+      setResult({ response: data.response, requestedAt: new Date().toISOString() })
     } catch {
-      setError('Unable to reach the Karma Reset Guide. Check your connection and try again.')
+      setError('Unable to reach Viyog. Check your connection and try again.')
     } finally {
       setLoading(false)
     }
-    }
+  }
 
-    return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+  return (
+    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <p className="text-sm text-orange-100/80">Nishkama-inspired nightly release</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Guide</h2>
+          <p className="text-sm text-orange-100/80">Outcome anxiety reducer</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Viyog: The Detachment Coach</h2>
           <p className="text-sm text-orange-100/80 max-w-3xl">
-            A present-moment ritual that helps you gather today’s actions, attachments, regrets, and expectations, then release their weight without touching KIAAN’s core guidance.
+            Viyog calms result-focused pressure and guides you back to present actions with one clear, doable step.
           </p>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">Separate module • Does not alter KIAAN</div>
+        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="arrival-words">Arrival words</label>
-          <input
-            id="arrival-words"
-            value={arrivalWords}
-            onChange={e => setArrivalWords(e.target.value)}
-            placeholder="Example: heavy, unfinished"
-            className="w-full rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="actions">Actions that stood out</label>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-3">
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="viyog-input">Share the outcome worry</label>
           <textarea
-            id="actions"
-            value={actions}
-            onChange={e => setActions(e.target.value)}
-            placeholder="2–3 actions you noticed today"
-            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+            id="viyog-input"
+            value={concern}
+            onChange={e => setConcern(e.target.value)}
+            placeholder="Example: I’m afraid the presentation will flop and everyone will think I’m incompetent."
+            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
           />
-
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="attachments">Attachments you felt</label>
-          <textarea
-            id="attachments"
-            value={attachments}
-            onChange={e => setAttachments(e.target.value)}
-            placeholder="What did you find yourself clinging to?"
-            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-        </div>
-
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="regrets">Regrets replaying</label>
-          <textarea
-            id="regrets"
-            value={regrets}
-            onChange={e => setRegrets(e.target.value)}
-            placeholder="Moments you wish went differently"
-            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="expectations">Expectations that feel heavy</label>
-          <textarea
-            id="expectations"
-            value={expectations}
-            onChange={e => setExpectations(e.target.value)}
-            placeholder="Hopes or outcomes you feel attached to"
-            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="intention">Gentle intention for tomorrow (optional)</label>
-          <input
-            id="intention"
-            value={intention}
-            onChange={e => setIntention(e.target.value)}
-            placeholder="Example: move with kindness"
-            className="w-full rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-3 items-center">
-        <button
-          onClick={requestReset}
-          disabled={loading}
-          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Guiding your reset...' : 'Run the Karma Reset ritual'}
-        </button>
-        <p className="text-xs text-orange-100/80">Stay present—this ritual does not change KIAAN’s responses.</p>
-      </div>
-
-      {error && <p className="text-sm text-orange-200">{error}</p>}
-
-      {response && (
-        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
-          <div className="flex items-center justify-between text-xs text-orange-100/70">
-            <span className="font-semibold text-orange-50">Live ritual script</span>
-            <span>{new Date().toLocaleString()}</span>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={requestDetachment}
+              disabled={!concern.trim() || loading}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
+            </button>
+            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
+              Viyog always responds with Validation, Attachment Check, Detachment Principle, and One Small Action.
+            </div>
           </div>
-          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{response}</div>
+          {error && <p className="text-sm text-orange-200">{error}</p>}
+        </div>
+
+        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
+          <h3 className="text-sm font-semibold text-orange-50">Viyog stays within boundaries</h3>
+          <ul className="space-y-2 text-sm text-orange-100/80 list-disc list-inside">
+            <li>Does not replace KIAAN or alter its guidance.</li>
+            <li>Focuses on detachment and action, not therapy or crisis care.</li>
+            <li>Uses calm, neutral language without hype or moralizing.</li>
+            <li>Always ends with one grounded, controllable step.</li>
+          </ul>
+          <div className="rounded-xl bg-black/50 border border-orange-500/15 p-3 text-xs text-orange-100/70 leading-relaxed">
+            “Anyone would feel tense when outcomes seem high stakes. The strain comes from holding the result too tightly. Return to what you can influence now: prepare your opening, practice it twice, and let the rest unfold.”
+          </div>
+        </div>
+      </div>
+
+      {result && (
+        <div
+          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center justify-between text-xs text-orange-100/70">
+            <span className="font-semibold text-orange-50">Viyog’s response</span>
+            <span>{new Date(result.requestedAt).toLocaleString()}</span>
+          </div>
+          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
         </div>
       )}
     </section>
