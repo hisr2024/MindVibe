@@ -65,18 +65,27 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <header className="text-center space-y-3 py-8">
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#0f1b2c] to-[#0c1424] text-white p-4 md:p-8">
+      <div className="pointer-events-none absolute inset-0 opacity-70 mix-blend-screen">
+        <div className="absolute -left-10 top-10 h-64 w-64 rounded-full bg-gradient-to-br from-[#7de2d1] via-[#c3f8ff] to-[#9d7efc] blur-3xl" />
+        <div className="absolute right-0 bottom-10 h-72 w-72 rounded-full bg-gradient-to-br from-[#ffb6c1] via-[#94b3fd] to-[#7edce2] blur-3xl" />
+        <div className="absolute left-1/3 top-1/4 h-40 w-40 rounded-full bg-gradient-to-br from-[#6dd5fa] via-[#c8b5ff] to-[#7cf4ff] blur-2xl opacity-70 animate-pulse" />
+      </div>
+
+      <div className="relative max-w-5xl mx-auto space-y-8">
+        <header className="text-center space-y-4 py-8">
+          <div className="mx-auto w-max rounded-full bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-cyan-100 border border-white/10 shadow-[0_0_30px_rgba(125,226,209,0.35)]">
+            Calm • Kind • Creative
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold bg-[radial-gradient(circle_at_30%_30%,#7de2d1,transparent_40%),radial-gradient(circle_at_70%_40%,#a299ff,transparent_35%),linear-gradient(90deg,#7de2d1,#a5b4fc,#ffb6c1)] bg-clip-text text-transparent drop-shadow-[0_10px_35px_rgba(162,153,255,0.25)]">
             🕉️ KIAAN
           </h1>
-          <p className="text-xl md:text-2xl text-zinc-300 font-light">Your AI Guide to Inner Peace</p>
-          <p className="text-sm text-zinc-500">Ancient Wisdom for Modern Life • Powered by 700+ Timeless Teachings</p>
+          <p className="text-xl md:text-2xl text-cyan-100/90 font-light">Your inner peace, your friend indeed.</p>
+          <p className="text-sm text-cyan-100/70">Ancient wisdom, Gen Z glow • 700+ timeless teachings tuned to you</p>
         </header>
 
-        <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-800/50 rounded-2xl p-4 text-center">
-          <p className="text-sm text-blue-200">🔒 All conversations are private and confidential • Your journey, your space</p>
+        <div className="bg-white/5 backdrop-blur border border-cyan-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(125,226,209,0.15)]">
+          <p className="text-sm text-cyan-100/80">🔒 All conversations stay yours • a serene, confidential sanctuary</p>
         </div>
 
         <KIAANChat />
@@ -131,60 +140,61 @@ function KIAANChat() {
   }
 
   return (
-    <section className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border border-zinc-700 rounded-3xl p-6 md:p-8 space-y-6">
-      <div className="flex items-center gap-3">
+    <section className="relative overflow-hidden bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(125,226,209,0.15)]">
+      <div className="absolute right-10 top-10 h-24 w-24 rounded-full bg-gradient-to-br from-[#7de2d1]/40 via-[#c3f8ff]/30 to-[#9d7efc]/30 blur-2xl" />
+      <div className="flex items-center gap-3 relative">
         <div className="text-4xl">💬</div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Talk to KIAAN</h2>
-          <p className="text-sm text-zinc-400">Powered by ancient wisdom and modern AI</p>
+          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-cyan-300 via-indigo-200 to-pink-200 bg-clip-text text-transparent">Talk to KIAAN</h2>
+          <p className="text-sm text-cyan-100/70">Gentle guidance with a soft neon glow</p>
         </div>
       </div>
 
-      <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
+      <div className="bg-[#0d1627]/70 border border-white/10 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-zinc-500 py-20 md:py-32">
-            <p className="text-6xl mb-4">🕉️</p>
+          <div className="text-center text-cyan-100/60 py-20 md:py-32">
+            <p className="text-6xl mb-4">✨</p>
             <p className="text-xl mb-2">How can I guide you today?</p>
-            <p className="text-sm text-zinc-600">Share what\'s on your mind</p>
+            <p className="text-sm text-cyan-100/60">Share what's on your mind</p>
           </div>
         )}
-        
+
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}> 
-            <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
-              msg.role === 'user' 
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                : 'bg-gradient-to-r from-zinc-700 to-zinc-600 text-zinc-100 shadow-md' 
-            }`}> 
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-cyan-500/10 ${
+              msg.role === 'user'
+                ? 'bg-gradient-to-r from-cyan-500/80 via-blue-500/80 to-indigo-500/80 text-white'
+                : 'bg-white/5 border border-white/10 text-cyan-50 backdrop-blur'
+            }`}>
               <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
             </div>
           </div>
         ))}
-        
+
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-zinc-700 px-4 py-3 rounded-2xl">
+            <div className="bg-white/10 border border-white/10 px-4 py-3 rounded-2xl text-cyan-100/80">
               <span className="animate-pulse">KIAAN is reflecting...</span>
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 relative">
         <input
           type="text"
           placeholder="Type your message..."
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-          className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          className="flex-1 px-4 py-3 bg-white/5 border border-cyan-500/30 rounded-xl focus:ring-2 focus:ring-cyan-400/70 outline-none placeholder:text-cyan-100/60 text-cyan-50"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-zinc-700 disabled:to-zinc-700 rounded-xl font-semibold transition-all"
+          className="px-6 py-3 bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-400 hover:scale-105 disabled:from-slate-700 disabled:via-slate-700 disabled:to-slate-700 rounded-xl font-semibold transition-all text-slate-950 shadow-lg shadow-cyan-500/20"
         >
           Send
         </button>
@@ -205,26 +215,29 @@ function QuickHelp() {
     { emoji: '🙏', label: 'Need peace', query: "I need inner peace" },
   ]
 
-  return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-semibold text-zinc-300">🎯 Quick Help</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {scenarios.map((s, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              const input = document.querySelector('input[placeholder*="Type"]') as HTMLInputElement
-              if (input) { input.value = s.query; input.focus() }
-            }}
-            className="bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-2xl p-4 transition-all text-left group"
-          >
-            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
-            <div className="text-sm text-zinc-300">{s.label}</div>
-          </button>
-        ))}
-      </div>
-    </section>
-  )
+    return (
+      <section className="bg-white/5 backdrop-blur border border-cyan-500/10 rounded-3xl p-5 md:p-6 space-y-3 shadow-[0_10px_50px_rgba(148,179,253,0.12)]">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-cyan-300 to-purple-200 bg-clip-text text-transparent">🎯 Quick Help</h2>
+          <p className="text-xs text-cyan-100/70">Tap a vibe to auto-fill the chat</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {scenarios.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                const input = document.querySelector('input[placeholder*\"Type\"]') as HTMLInputElement
+                if (input) { input.value = s.query; input.focus() }
+              }}
+              className="group bg-gradient-to-br from-[#0f172a]/70 via-[#111827]/60 to-[#1f2937]/60 border border-white/5 hover:border-cyan-400/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(125,226,209,0.08)] hover:-translate-y-1">
+            >
+              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
+              <div className="text-sm text-cyan-50">{s.label}</div>
+            </button>
+          ))}
+        </div>
+      </section>
+    )
 }
 
 function DailyWisdom() {
@@ -235,27 +248,29 @@ function DailyWisdom() {
   }
 
   return (
-    <section className="bg-gradient-to-r from-orange-900/30 to-yellow-900/20 border border-orange-800/50 rounded-3xl p-6 md:p-8">
-      <div className="flex justify-between mb-4">
-        <div className="flex gap-2">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1528] via-[#0d1c30] to-[#0a1224] border border-purple-300/10 p-6 md:p-8 shadow-[0_20px_80px_rgba(162,153,255,0.12)]">
+      <div className="absolute -right-6 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-[#a299ff]/30 via-[#7de2d1]/20 to-transparent blur-3xl" />
+      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#94b3fd]/25 via-[#ffb6c1]/20 to-transparent blur-3xl" />
+      <div className="relative flex justify-between mb-4 items-start gap-3">
+        <div className="flex gap-2 items-center">
           <span className="text-3xl">💎</span>
-          <h2 className="text-xl font-semibold text-orange-200">Today's Wisdom</h2>
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-cyan-200 to-pink-200 bg-clip-text text-transparent">Today's Wisdom</h2>
         </div>
-        <div className="text-sm text-orange-400">{new Date().toLocaleDateString()}</div>
+        <div className="text-sm text-cyan-100/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
       </div>
-      
-      <blockquote className="text-lg text-zinc-100 mb-4 italic leading-relaxed">
-        "{wisdom.text}"
+
+      <blockquote className="relative text-lg text-cyan-50 mb-4 italic leading-relaxed bg-white/5 border border-white/10 rounded-2xl p-4 shadow-[0_10px_40px_rgba(148,179,253,0.15)]">
+        “{wisdom.text}”
       </blockquote>
-      
-      <p className="text-sm text-orange-300 mb-4">✨ Principle: {wisdom.principle}</p>
-      
-      <div className="flex gap-3">
-        <button className="px-4 py-2 bg-orange-600/50 hover:bg-orange-600 rounded-lg text-sm">💬 Chat about this</button>
-        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">
+
+      <p className="text-sm text-cyan-100/80 mb-4">✨ Principle: {wisdom.principle}</p>
+
+      <div className="flex gap-3 flex-wrap">
+        <button className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-indigo-400 text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-cyan-500/20 hover:scale-105 transition">💬 Chat about this</button>
+        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-white/10 border border-white/20 hover:border-cyan-200/60 rounded-lg text-sm text-cyan-50 transition">
           {saved ? '⭐ Saved' : '☆ Save'}
         </button>
-        <button className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">📤 Share</button>
+        <button className="px-4 py-2 bg-white/10 border border-white/20 hover:border-pink-200/60 rounded-lg text-sm text-cyan-50 transition">📤 Share</button>
       </div>
     </section>
   )
@@ -328,14 +343,14 @@ function PublicChatRooms() {
   }
 
   return (
-    <section className="bg-gradient-to-r from-indigo-900/30 to-purple-900/20 border border-indigo-800/50 rounded-3xl p-6 md:p-8 space-y-4">
+    <section className="bg-white/5 backdrop-blur border border-cyan-500/15 rounded-3xl p-6 md:p-8 space-y-4 shadow-[0_15px_60px_rgba(125,226,209,0.12)]">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-sm text-indigo-200">Community Rooms</p>
-          <h2 className="text-2xl font-semibold text-indigo-100">Respectful Public Chats</h2>
-          <p className="text-sm text-indigo-200/80">Positive, helpful exchanges only. Foul language in any language is blocked.</p>
+          <p className="text-sm text-cyan-100/70">Community Rooms</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-cyan-200 to-pink-200 bg-clip-text text-transparent">Respectful Public Chats</h2>
+          <p className="text-sm text-cyan-100/60">Positive, helpful exchanges only. Foul language in any language is blocked.</p>
         </div>
-        <div className="text-xs text-indigo-200 bg-indigo-950/60 border border-indigo-800 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
+        <div className="text-xs text-cyan-100/80 bg-white/10 border border-white/10 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -345,8 +360,8 @@ function PublicChatRooms() {
             onClick={() => { setActiveRoom(room.id); setAlert(null); }}
             className={`px-4 py-2 rounded-2xl border text-sm transition-all ${
               activeRoom === room.id
-                ? 'bg-indigo-700/70 border-indigo-300 text-white shadow'
-                : 'bg-indigo-950/40 border-indigo-800 text-indigo-100 hover:border-indigo-600'
+                ? 'bg-gradient-to-r from-cyan-400/70 via-indigo-400/70 to-pink-400/70 text-slate-950 font-semibold shadow shadow-cyan-500/20'
+                : 'bg-white/5 border-white/10 text-cyan-50 hover:border-cyan-300/40'
             }`}
           >
             {room.name}
@@ -354,17 +369,17 @@ function PublicChatRooms() {
         ))}
       </div>
 
-      <div className="bg-indigo-950/50 border border-indigo-800 rounded-2xl p-4 space-y-3 h-[320px] overflow-y-auto">
+      <div className="bg-[#0d1627]/70 border border-white/10 rounded-2xl p-4 space-y-3 h-[320px] overflow-y-auto shadow-inner shadow-cyan-500/5">
         {activeMessages.map((msg, index) => (
           <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-cyan-500/10 ${
               msg.author === 'You'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
-                : 'bg-indigo-900/80 border border-indigo-700 text-indigo-100'
+                ? 'bg-gradient-to-r from-cyan-500/80 via-indigo-500/80 to-pink-500/80 text-white'
+                : 'bg-white/5 border border-white/10 text-cyan-50 backdrop-blur'
             }`}>
               <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
               <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className="text-[11px] text-indigo-200/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
+              <p className="text-[11px] text-cyan-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
             </div>
           </div>
         ))}
@@ -379,12 +394,12 @@ function PublicChatRooms() {
           onChange={e => setMessage(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
           placeholder="Share something helpful for the room..."
-          className="flex-1 px-4 py-3 bg-indigo-950/70 border border-indigo-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+          className="flex-1 px-4 py-3 bg-white/5 border border-cyan-500/30 rounded-xl focus:ring-2 focus:ring-cyan-400/70 outline-none placeholder:text-cyan-100/60 text-cyan-50"
         />
         <button
           onClick={sendRoomMessage}
           disabled={!message.trim()}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-400 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-cyan-500/20"
         >
           Share warmly
         </button>
@@ -555,24 +570,24 @@ function Journal() {
 
   return (
     <section className="space-y-4">
-      <div className="bg-gradient-to-r from-emerald-900/30 to-cyan-900/20 border border-emerald-800/40 rounded-3xl p-6">
+      <div className="bg-white/5 backdrop-blur border border-cyan-500/15 rounded-3xl p-6 shadow-[0_15px_60px_rgba(125,226,209,0.12)]">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="text-sm text-emerald-200">Private Journal</p>
-            <h2 className="text-2xl font-semibold text-emerald-100">Sacred Reflections</h2>
-            <p className="text-sm text-emerald-200/80">Entries stay on your device and refresh the weekly guidance automatically.</p>
+            <p className="text-sm text-cyan-100/80">Private Journal</p>
+            <h2 className="text-2xl font-semibold bg-gradient-to-r from-cyan-200 to-pink-200 bg-clip-text text-transparent">Sacred Reflections</h2>
+            <p className="text-sm text-cyan-100/70">Entries stay on your device and refresh the weekly guidance automatically.</p>
           </div>
-          <div className="bg-emerald-950/60 border border-emerald-800 text-emerald-100 px-4 py-2 rounded-2xl text-sm">
+          <div className="bg-white/10 border border-white/10 text-cyan-50 px-4 py-2 rounded-2xl text-sm">
             Weekly entries: {weeklyEntries.length}
           </div>
         </div>
 
         <div className="mt-4 space-y-2">
-          <div className="bg-emerald-950/60 border border-emerald-800 text-emerald-100 px-4 py-3 rounded-2xl text-sm flex items-start gap-2">
+          <div className="bg-[#0d1627]/70 border border-white/10 text-cyan-50 px-4 py-3 rounded-2xl text-sm flex items-start gap-2">
             <span>🔒</span>
             <div>
               <p className="font-semibold">Fully encrypted on your device</p>
-              <p className="text-emerald-100/80">Entries are sealed locally with AES-GCM before saving. Only this browser can decrypt them.</p>
+              <p className="text-cyan-100/70">Entries are sealed locally with AES-GCM before saving. Only this browser can decrypt them.</p>
             </div>
           </div>
           {!encryptionReady && (
@@ -625,23 +640,23 @@ function Journal() {
             </button>
           </div>
 
-          <div className="bg-emerald-950/60 border border-emerald-800 rounded-2xl p-4 space-y-2">
+          <div className="bg-[#0d1627]/70 border border-white/10 rounded-2xl p-4 space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-emerald-100">Weekly Assessment</h3>
               <div className="text-xs text-emerald-200">Updated automatically</div>
             </div>
             <p className="text-sm text-emerald-200/90">Most present mood: <span className="font-semibold text-emerald-100">{mostCommonMood}</span></p>
             <div className="grid grid-cols-2 gap-2 text-sm text-emerald-200/90">
-              <div className="bg-emerald-900/70 rounded-xl p-3 border border-emerald-800">
+              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
                 <div className="text-xs text-emerald-300/80">Positive moments logged</div>
                 <div className="text-xl font-semibold text-emerald-100">{positiveDays}</div>
               </div>
-              <div className="bg-emerald-900/70 rounded-xl p-3 border border-emerald-800">
+              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
                 <div className="text-xs text-emerald-300/80">Tender/Challenging days</div>
                 <div className="text-xl font-semibold text-emerald-100">{challengingDays}</div>
               </div>
             </div>
-            <div className="bg-emerald-900/50 rounded-xl p-3 border border-emerald-800/80">
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
               <p className="text-sm text-emerald-100 font-semibold">KIAAN’s gentle guidance</p>
               <p className="text-sm text-emerald-200/80 leading-relaxed">{assessment.headline}</p>
               <ul className="mt-2 space-y-1 text-sm text-emerald-200/80 list-disc list-inside">
