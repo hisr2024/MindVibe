@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { codex } from '@/lib/codex'
 import { PRECISION_ARROW_SYSTEM_PROMPT } from '@/lib/models/precisionArrow'
+import { buildPrecisionArrow } from '@/lib/services/precisionArrowEngine'
 
 export type PrecisionArrowInput = {
   goal: string
@@ -20,6 +21,11 @@ type ArrowAlignment = {
 
 function getPrecisionArrowModel() {
   return process.env.PRECISION_ARROW_MODEL || process.env.CODEX_MODEL || 'gpt-4o-mini'
+}
+
+function shouldUseLLM() {
+  const hasApiKey = Boolean(process.env.OPENAI_API_KEY || process.env.CODEX_API_KEY)
+  return Boolean(process.env.PRECISION_ARROW_USE_LLM === 'true' && hasApiKey)
 }
 
 function normalizeJsonText(text: string) {
@@ -64,12 +70,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing or invalid 'goal'" }, { status: 400 })
   }
 
+  const payload = {
+    goal,
+    time_frame: time_frame ?? null,
+    context: context ?? null,
+    emotional_state: emotional_state ?? null
+  }
+
   try {
-    const payload = {
-      goal,
-      time_frame: time_frame ?? null,
-      context: context ?? null,
-      emotional_state: emotional_state ?? null
+    
+    if (!shouldUseLLM()) {
+      const arrow = buildPrecisionArrow(payload)
+      return NextResponse.json(arrow)
     }
 
     const messages = [
@@ -102,10 +114,17 @@ export async function POST(request: Request) {
     return NextResponse.json(arrow)
   } catch (error) {
     console.error('Precision Arrow error:', error)
-    const message = error instanceof Error ? error.message : 'Precision Arrow Engine failed'
-    return NextResponse.json(
-      { error: message, kiaan_hint: 'KIAAN chat remains available while we steady the Precision Arrow Engine.' },
-      { status: 500 }
-    )
+
+    try {
+      const fallbackArrow = buildPrecisionArrow(payload)
+      return NextResponse.json(fallbackArrow)
+    } catch (fallbackError) {
+      console.error('Precision Arrow fallback failed:', fallbackError)
+      const message = error instanceof Error ? error.message : 'Precision Arrow Engine failed'
+      return NextResponse.json(
+        { error: message, kiaan_hint: 'KIAAN chat remains available while we steady the Precision Arrow Engine.' },
+        { status: 500 }
+      )
+    }
   }
 }
