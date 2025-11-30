@@ -754,8 +754,11 @@ function AnimatedKiaanLogo() {
           </div>
         </div>
         <div className="text-[10px] font-semibold uppercase tracking-[0.42em] text-orange-100/80">K I A A N</div>
-        <div className="text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-orange-50 via-amber-100 to-white drop-shadow-[0_6px_26px_rgba(255,180,122,0.4)]">
-          Mental Vibe
+        <div className="relative flex items-center justify-center">
+          <div className="absolute inset-x-0 -top-2 h-10 bg-gradient-to-r from-orange-400/22 via-amber-200/16 to-white/12 blur-2xl" />
+          <div className="logo-wordmark relative inline-flex items-center justify-center px-3 text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-[#fff3e3] via-[#ffd2a6] to-[#ff9c6b] drop-shadow-[0_10px_34px_rgba(255,163,94,0.55)]">
+            Mental Vibe
+          </div>
         </div>
         <div className="relative flex items-center gap-1 text-[10px] text-orange-50/85">
           {virtues.map(word => (
@@ -771,6 +774,41 @@ function AnimatedKiaanLogo() {
       </div>
 
       <style jsx>{`
+        .logo-wordmark {
+          position: relative;
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          -webkit-text-stroke: 0.55px rgba(255, 235, 217, 0.8);
+          text-shadow:
+            0 1px 0 rgba(17, 10, 6, 0.45),
+            0 12px 28px rgba(255, 153, 90, 0.45),
+            0 4px 18px rgba(255, 234, 210, 0.45);
+        }
+        .logo-wordmark::before {
+          content: '';
+          position: absolute;
+          inset: -6px -10px;
+          background: radial-gradient(circle at 50% 45%, rgba(255, 206, 150, 0.18), transparent 58%);
+          filter: blur(12px);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: -1;
+        }
+        .logo-wordmark::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 9999px;
+          border: 1px solid rgba(255, 210, 170, 0.35);
+          box-shadow: 0 0 18px rgba(255, 171, 110, 0.28), inset 0 0 8px rgba(255, 255, 255, 0.12);
+          pointer-events: none;
+          z-index: -2;
+        }
+        @media (min-width: 768px) {
+          .logo-wordmark {
+            letter-spacing: 0.24em;
+          }
+        }
         @keyframes floaty {
           0%, 100% { transform: translateY(0px) scale(1); opacity: 0.92; }
           50% { transform: translateY(-5px) scale(1.02); opacity: 1; }
