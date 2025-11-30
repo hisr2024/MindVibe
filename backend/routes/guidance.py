@@ -163,8 +163,7 @@ Return JSON appropriate to the scenario requested and keep tone clear, calm, and
 """
 
 
-class EngineResult(Dict[str, Any]):
-    """Helper type alias for engine responses."""
+EngineResult = Dict[str, Any]
 
 
 async def _generate_response(
