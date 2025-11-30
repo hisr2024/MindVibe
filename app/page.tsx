@@ -255,24 +255,6 @@ export default function Home() {
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <FeatureCard
-            title="Thumb-friendly layout"
-            badge="Mobile optimized"
-            points={['Single-column flows', '44px+ tap targets', 'Generous mobile spacing']}
-          />
-          <FeatureCard
-            title="Offline-trusting journal"
-            badge="Secure by default"
-            points={['Encrypted on-device', 'Offline-safe autosave', 'Clear status cues']}
-          />
-          <FeatureCard
-            title="Instant access bar"
-            badge="Quick actions"
-            points={['Docked on every screen', 'One-tap chat/pause/journal', 'Thumb reach zone']}
-          />
-        </section>
-
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <PrecisionArrowEngine />
@@ -677,53 +659,87 @@ function StatusPill({ label, tone = 'ok' }: { label: string, tone?: 'ok' | 'warn
   )
 }
 
-function FeatureCard({ title, badge, points }: { title: string, badge: string, points: string[] }) {
+function AnimatedKiaanLogo() {
+  const orbitals = [
+    { delay: '0s', duration: 13, className: 'h-2.5 w-2.5 bg-orange-200 shadow-[0_0_16px_rgba(255,176,124,0.8)]' },
+    { delay: '0.8s', duration: 9.5, className: 'h-2 w-2 bg-white/90 shadow-[0_0_14px_rgba(255,255,255,0.55)]' },
+    { delay: '0.4s', duration: 15, reverse: true, className: 'h-2 w-2 bg-emerald-200/90 shadow-[0_0_16px_rgba(132,225,188,0.75)]' }
+  ]
+
+  const virtues = ['Still Mind', 'Steady Heart', 'Focused Action']
+
   return (
-    <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 shadow-[0_12px_40px_rgba(255,115,39,0.18)] flex gap-3">
-      <div className="mt-1 h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500/70 via-[#ffb347]/70 to-orange-200/80 flex items-center justify-center text-lg">📱</div>
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="text-base font-semibold text-orange-50">{title}</h3>
-          <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-orange-100/80 border border-orange-500/25">{badge}</span>
+    <div className="group relative h-20 w-20 md:h-24 md:w-24 rounded-[28px] overflow-hidden border border-orange-400/40 bg-[#060606] shadow-[0_26px_95px_rgba(255,140,64,0.28)] transition-transform duration-500 hover:scale-105">
+      <div className="absolute -left-8 -top-10 h-32 w-32 bg-gradient-to-br from-orange-500/25 via-amber-300/18 to-transparent blur-3xl" />
+      <div className="absolute -right-4 bottom-0 h-28 w-28 bg-gradient-to-tr from-white/10 via-orange-400/12 to-transparent blur-2xl" />
+
+      <div className="absolute inset-[3px] rounded-[24px] bg-[radial-gradient(circle_at_32%_30%,rgba(255,173,94,0.3),transparent_50%),radial-gradient(circle_at_75%_25%,rgba(255,255,255,0.16),transparent_38%)] opacity-90" />
+      <div className="absolute inset-[2px] rounded-[24px] border border-orange-400/35" />
+
+      <div className="absolute inset-3 overflow-hidden rounded-[22px]">
+        <div className="absolute inset-0 bg-[conic-gradient(from_45deg_at_50%_50%,rgba(255,170,105,0.58),rgba(255,255,255,0.06),rgba(255,170,105,0.58))] opacity-60 animate-[beamSweep_14s_linear_infinite]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_55%)] mix-blend-screen" />
+        <div className="absolute inset-2 rounded-[18px] border border-orange-500/20" />
+      </div>
+
+      <div className="absolute inset-4 rounded-[20px] bg-gradient-to-br from-[#0f0f11]/95 via-[#120a07]/90 to-[#0b0b0f]/90 backdrop-blur-xl shadow-inner shadow-orange-500/20" />
+      <div className="absolute inset-5 rounded-[18px] border border-orange-400/25" />
+
+      <div className="absolute inset-5">
+        <div className="absolute inset-0 rounded-full border border-orange-400/20" style={{ animation: 'orbitalSpin 16s linear infinite' }}>
+          <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-orange-300/80 blur-[1px]" />
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {points.map(point => (
-            <span key={point} className="rounded-full bg-orange-500/10 border border-orange-400/30 px-3 py-1 text-[11px] text-orange-50/90">
-              {point}
-            </span>
-          ))}
+        <div className="absolute inset-1 rounded-full border border-orange-400/30" style={{ animation: 'orbitalSpin 11s linear infinite reverse' }}>
+          <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-white/90 blur-[1px]" />
+        </div>
+        <div className="absolute inset-2 rounded-full border border-orange-300/30" style={{ animation: 'orbitalSpin 19s linear infinite' }}>
+          <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 h-2 w-2 rounded-full bg-emerald-200/80 blur-[1px]" />
         </div>
       </div>
-    </div>
-  )
-}
 
-function AnimatedKiaanLogo() {
-  const virtues = ['Self Growth', 'Karmic Journey', 'Inner Peace']
-
-  return (
-    <div className="group relative h-20 w-20 md:h-24 md:w-24 rounded-3xl bg-gradient-to-br from-[#141414] via-[#1a120f] to-[#0c0c0e] border border-orange-500/40 shadow-[0_20px_60px_rgba(255,115,39,0.25)] overflow-hidden transition-transform duration-500 hover:scale-105">
-      <div className="absolute inset-[3px] rounded-[22px] bg-[radial-gradient(circle_at_30%_20%,rgba(255,153,51,0.3),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.18),transparent_45%)] opacity-80" />
-      <div className="absolute inset-0 rounded-[22px] border border-orange-400/40" />
-
-      <div className="absolute inset-0 animate-[spin_16s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,rgba(255,140,64,0.38),rgba(255,255,255,0.08),rgba(255,140,64,0.38))] opacity-60" />
-      <div className="absolute inset-3 rounded-2xl bg-[#050505]/80 backdrop-blur-md" />
-
-      <div className="absolute inset-4 rounded-2xl border border-orange-400/30 animate-[pulse_3.6s_ease-in-out_infinite]" />
-      <div className="absolute left-2 top-2 h-3 w-3 rounded-full bg-orange-300 blur-[2px] animate-[bounce_3.5s_ease-in-out_infinite]" />
-      <div className="absolute right-2 bottom-3 h-2.5 w-2.5 rounded-full bg-emerald-200/90 blur-[1px] animate-[bounce_4s_ease-in-out_infinite]" />
+      {orbitals.map(orb => (
+        <div
+          key={orb.delay}
+          className="absolute inset-0"
+          style={{ animation: `orbitalSpin ${orb.duration}s linear infinite`, animationDelay: orb.delay, animationDirection: orb.reverse ? 'reverse' : 'normal' }}
+        >
+          <div className={`absolute left-1/2 top-[15%] -translate-x-1/2 rounded-full ${orb.className}`} />
+        </div>
+      ))}
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center text-center gap-1">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.38em] text-orange-100/80">K I A A N</div>
-        <div className="text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-200 to-orange-50 drop-shadow-[0_6px_24px_rgba(255,163,94,0.45)]">
-          KIAAN
+        <div className="relative flex items-center justify-center">
+          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-[#1b1b1e] via-[#24110c] to-[#0f0f0f] border border-orange-400/40 shadow-[0_10px_35px_rgba(255,140,64,0.32)]">
+            <div className="absolute inset-[3px] rounded-[15px] bg-[radial-gradient(circle_at_40%_35%,rgba(255,200,150,0.18),transparent_55%),radial-gradient(circle_at_70%_65%,rgba(255,255,255,0.12),transparent_48%)]" />
+            <svg viewBox="0 0 64 64" className="absolute inset-0 m-auto h-10 w-10 text-orange-50 drop-shadow-[0_0_18px_rgba(255,163,94,0.55)]">
+              <defs>
+                <linearGradient id="kiaan-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(255,200,150,0.95)" />
+                  <stop offset="50%" stopColor="rgba(255,166,94,1)" />
+                  <stop offset="100%" stopColor="rgba(255,235,200,0.95)" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M20 48V16h6l8.5 11.5L43 16h6v32h-6V32.5l-8.5 10.5H29V21.5l-3 4.2V48h-6Z"
+                fill="url(#kiaan-gradient)"
+                stroke="rgba(255,205,158,0.9)"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+                className="animate-[glowPulse_4s_ease-in-out_infinite]"
+              />
+            </svg>
+          </div>
+        </div>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.42em] text-orange-100/80">K I A A N</div>
+        <div className="text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-orange-200 via-amber-100 to-white drop-shadow-[0_6px_26px_rgba(255,180,122,0.4)]">
+          Living Mark
         </div>
         <div className="relative flex items-center gap-1 text-[10px] text-orange-50/85">
           {virtues.map(word => (
             <span
               key={word}
-              className="rounded-full border border-orange-300/30 bg-white/5 px-2 py-0.5 shadow-[0_0_18px_rgba(255,140,64,0.25)] animate-[floaty_6s_ease-in-out_infinite] [animation-delay:var(--delay)]"
-              style={{ ['--delay' as string]: `${virtues.indexOf(word) * 0.45}s` }}
+              className="rounded-full border border-orange-300/35 bg-white/5 px-2 py-0.5 shadow-[0_0_18px_rgba(255,140,64,0.28)] animate-[floaty_7s_ease-in-out_infinite] [animation-delay:var(--delay)]"
+              style={{ ['--delay' as string]: `${virtues.indexOf(word) * 0.65}s` }}
             >
               {word}
             </span>
@@ -734,7 +750,20 @@ function AnimatedKiaanLogo() {
       <style jsx>{`
         @keyframes floaty {
           0%, 100% { transform: translateY(0px) scale(1); opacity: 0.92; }
-          50% { transform: translateY(-6px) scale(1.03); opacity: 1; }
+          50% { transform: translateY(-5px) scale(1.02); opacity: 1; }
+        }
+        @keyframes orbitalSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes beamSweep {
+          0% { transform: rotate(0deg); opacity: 0.8; }
+          50% { opacity: 0.4; }
+          100% { transform: rotate(360deg); opacity: 0.8; }
+        }
+        @keyframes glowPulse {
+          0%, 100% { filter: drop-shadow(0 0 14px rgba(255,167,110,0.35)); }
+          50% { filter: drop-shadow(0 0 24px rgba(255,210,158,0.7)); }
         }
       `}</style>
     </div>
