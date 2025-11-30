@@ -15,22 +15,30 @@ export type WeeklyEvaluationPayload = {
   entries: WeeklyJournalEntry[]
 }
 
-export type WeeklyGuidancePayload = {
-  profile: unknown
-  evaluation: unknown
+export type WeeklyEvaluationResult = WeeklyEvaluationPayload & {
+  summary: string
+  entry_count: number
 }
 
-export async function sendToJournalWeeklyEvaluationEngine(payload: WeeklyEvaluationPayload): Promise<unknown> {
+export type WeeklyGuidancePayload = {
+  profile: unknown
+  evaluation: WeeklyEvaluationResult
+}
+
+export async function sendToJournalWeeklyEvaluationEngine(
+  payload: WeeklyEvaluationPayload
+): Promise<WeeklyEvaluationResult> {
   return {
     summary: 'Weekly evaluation placeholder',
     week_start: payload.week_start,
     week_end: payload.week_end,
-    entry_count: payload.entries.length
+    entry_count: payload.entries.length,
+    entries: payload.entries
   }
 }
 
 export async function sendToKiaanWeeklyGuidanceEngine(payload: WeeklyGuidancePayload): Promise<string> {
-  return `Guidance generated for week ${payload?.['evaluation']?.['week_start'] ?? ''}`
+  return `Guidance generated for week ${payload.evaluation?.week_start ?? ''}`
 }
 
 export async function getKiaanWeeklyGuidanceHandler(
