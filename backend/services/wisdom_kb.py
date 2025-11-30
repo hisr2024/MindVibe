@@ -119,7 +119,7 @@ class WisdomKnowledgeBase:
         return matching_verses
 
     @staticmethod
-    def compute_text_similarity(text1: str, text2: str) -> float:
+    def compute_text_similarity(text1: str | None, text2: str | None) -> float:
         """
         Compute similarity between two text strings using SequenceMatcher.
 
@@ -130,6 +130,9 @@ class WisdomKnowledgeBase:
         Returns:
             Similarity score between 0.0 and 1.0
         """
+        if not text1 or not text2:
+            return 0.0
+
         return difflib.SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
     @staticmethod
