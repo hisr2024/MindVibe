@@ -40,9 +40,19 @@
   100% { transform: translate3d(-8%, 4%, 0) scale(1); }
 }
 
+@keyframes calmBreath {
+  0%, 100% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.breathing-orb {
+  animation: calmBreath 10s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-chat-wobble,
-  .aurora-pane::after {
+  .aurora-pane::after,
+  .breathing-orb {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }

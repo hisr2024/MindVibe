@@ -63,6 +63,126 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   return [state, setState]
 }
 
+type ClarityEvaluation = {
+  decision: 'pass_through' | 'pause'
+  confidence: 'high' | 'medium' | 'low'
+  flags: string[]
+  impulseScore: number
+  reason: string
+}
+
+function evaluateClarityPause(userMessage: string): ClarityEvaluation {
+  const text = userMessage.toLowerCase()
+  const flags: string[] = []
+  let score = 0
+
+  const pushFlag = (label: string, weight = 1) => {
+    flags.push(label)
+    score += weight
+  }
+
+  const hasFirstPerson = /\b(i|i'm|im|me|my|mine|i’ll|i'll)\b/.test(text)
+  const hasUrgency = /(right now|immediately|at once|need to .* now|do it now|can't wait|send this now)/.test(text)
+  const hasEmotion = /(angry|furious|rage|so mad|upset|can't stand|fed up|about to quit)/.test(text)
+
+  const urgencyEmotionCombos = [
+    /about to quit/,
+    /so angry right now/,
+    /need to send this now/
+  ]
+  urgencyEmotionCombos.forEach(pattern => {
+    if (pattern.test(text)) pushFlag('Urgency + emotion signal', 2)
+  })
+
+  const highIntentPhrases = [
+    /\bi'?m going to\b/,
+    /\bi should just\b/,
+    /\bi'?ll do it now\b/,
+    /\bi'?m done with this\b/
+  ]
+  highIntentPhrases.forEach(pattern => {
+    if (pattern.test(text)) pushFlag('High intent verb detected')
+  })
+
+  const impulsiveRisk = [
+    /sell all/, /bet it all/, /burn it down/, /don't care anymore/, /risk it all/, /walk out/,
+  ]
+  impulsiveRisk.forEach(pattern => {
+    if (pattern.test(text)) pushFlag('Impulsive risk phrase', 2)
+  })
+
+  if (hasUrgency && hasEmotion) pushFlag('Urgency + emotion cluster', 2)
+  if (hasUrgency && hasFirstPerson) pushFlag('First-person urgency')
+
+  // Exclude neutral mentions when no first-person ownership or urgency is present
+  if (!hasFirstPerson && !hasUrgency && score === 0) {
+    return {
+      decision: 'pass_through',
+      confidence: 'low',
+      flags: [],
+      impulseScore: 0,
+      reason: 'No first-person or urgent intent detected'
+    }
+  }
+
+  const impulseScore = Math.min(5, score + (hasUrgency ? 1 : 0) + (hasEmotion ? 1 : 0))
+  const confidence = impulseScore >= 4 ? 'high' : impulseScore >= 2 ? 'medium' : 'low'
+  const decision = confidence === 'low' ? 'pass_through' : 'pause'
+
+  return {
+    decision,
+    confidence,
+    flags: Array.from(new Set(flags)),
+    impulseScore,
+    reason: confidence === 'low' ? 'Signal logged only (low confidence)' : 'Clarity pause recommended'
+  }
+}
+
+const CLARITY_UI_MICROCOPY = [
+  { label: 'Header', value: 'Clarity Pause' },
+  { label: 'Subhead', value: 'Create space before you act.' },
+  { label: 'Interrupt CTA', value: 'Pause for 60 seconds' },
+  { label: 'Safety note', value: 'No advice. Just space to decide from clarity.' }
+]
+
+const CLARITY_REASONING_PROMPTS = [
+  'If this action still feels right after calm returns, it will still be right in an hour.',
+  'You can decide from clarity, not pressure.',
+  'Separate facts from feelings before you act.'
+]
+
+const CLARITY_GROUNDING_SEQUENCE = [
+  { time: '0–10s', prompt: 'Let’s pause. Slow inhale… gentle exhale.' },
+  { time: '10–20s', prompt: 'Drop your shoulders. Unclench your jaw.' },
+  { time: '20–30s', prompt: 'Notice your feet on the ground. Let intensity lower by 5%.' },
+  { time: '30–40s', prompt: 'One more slow breath in… and out.' },
+  { time: '40–50s', prompt: 'Ask: Are you acting from clarity or from emotion?' },
+  { time: '50–60s', prompt: 'If it still feels right in calm, it will still be right in an hour.' }
+]
+
+const CLARITY_CLOSING_CHOICES = [
+  'Pause a little longer and re-check your clarity.',
+  'Act now with full awareness of your intent.',
+  'Wait 10 minutes, then revisit with a calmer baseline.'
+]
+
+const CLARITY_TRIGGER_SIGNALS = [
+  'Urgency + emotion: “about to quit”, “so angry right now”, “need to send this now”.',
+  'High intent verbs: “I’m going to…”, “I should just…”, “I’ll do it now”.',
+  'Impulsive risk phrases: “sell all”, “bet it all”, “burn it down”, “don’t care anymore”.',
+  'Exclude neutral mentions (e.g., discussing anger academically) to avoid over-triggering.'
+]
+
+type ClaritySession = {
+  active: boolean
+  started: boolean
+  countdown: number
+  completed: boolean
+  pendingMessage: string | null
+  evaluation: ClarityEvaluation | null
+  motionReduced: boolean
+}
+
 export default function Home() {
   const [chatPrefill, setChatPrefill] = useState<string | null>(null)
 
@@ -464,6 +584,17 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const clarityInitialState: ClaritySession = {
+    active: false,
+    started: false,
+    countdown: 60,
+    completed: false,
+    pendingMessage: null,
+    evaluation: null,
+    motionReduced: false
+  }
+  const [claritySession, setClaritySession] = useState<ClaritySession>(clarityInitialState)
+  const [clarityLog, setClarityLog] = useState<ClarityEvaluation | null>(null)
 
   useEffect(() => {
     const container = messageListRef.current
@@ -486,12 +617,31 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     onPrefillHandled()
   }, [prefill, onPrefillHandled])
 
-  async function sendMessage() {
-    if (!input.trim()) return
+  useEffect(() => {
+    if (!claritySession.active || !claritySession.started || claritySession.countdown <= 0) return
 
-    setPromptMotion(true)
+    const tick = setInterval(() => {
+      setClaritySession(prev => {
+        if (!prev.active || !prev.started) return prev
+        const nextCount = Math.max(0, prev.countdown - 1)
+        return { ...prev, countdown: nextCount }
+      })
+    }, 1000)
 
-    const userMessage = { role: 'user' as const, content: input }
+    return () => clearInterval(tick)
+  }, [claritySession.active, claritySession.started, claritySession.countdown])
+
+  useEffect(() => {
+    if (!claritySession.active || !claritySession.started || claritySession.countdown !== 0 || claritySession.completed) return
+
+    if (claritySession.pendingMessage) {
+      deliverMessage(claritySession.pendingMessage)
+    }
+    setClaritySession(prev => ({ ...prev, active: false, completed: true, pendingMessage: null }))
+  }, [claritySession])
+
+  async function deliverMessage(content: string) {
+    const userMessage = { role: 'user' as const, content }
     const newMessages = [...messages, userMessage]
     setMessages(newMessages)
     setInput('')
@@ -502,7 +652,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
       const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ message: content })
       })
 
       if (response.ok) {
@@ -516,6 +666,54 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     } finally {
       setLoading(false)
     }
+  }
+
+  function startClaritySession(evaluation: ClarityEvaluation, pendingMessage: string) {
+    setPromptMotion(true)
+    setInput('')
+    setClaritySession({
+      ...clarityInitialState,
+      active: true,
+      started: evaluation.confidence === 'high',
+      evaluation,
+      pendingMessage
+    })
+  }
+
+  async function sendMessage() {
+    if (!input.trim()) return
+
+    const trimmed = input.trim()
+    const evaluation = evaluateClarityPause(trimmed)
+    setClarityLog(evaluation)
+
+    if (evaluation.decision === 'pause' && evaluation.confidence !== 'low') {
+      startClaritySession(evaluation, trimmed)
+      return
+    }
+
+    setPromptMotion(true)
+    await deliverMessage(trimmed)
+  }
+
+  function startGuidedPause() {
+    setClaritySession(prev => ({ ...prev, active: true, started: true, countdown: 60, completed: false }))
+  }
+
+  async function sendPendingNow() {
+    if (!claritySession.pendingMessage) return
+    setPromptMotion(true)
+    await deliverMessage(claritySession.pendingMessage)
+    setClaritySession(clarityInitialState)
+  }
+
+  function abandonClarityPause() {
+    if (claritySession.pendingMessage) setInput(claritySession.pendingMessage)
+    setClaritySession(clarityInitialState)
+  }
+
+  function toggleMotionReduction() {
+    setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
   }
 
   function summarizeContent(content: string) {
@@ -582,11 +780,164 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     )
   }
 
+  const activeClarityEvaluation = claritySession.active && claritySession.evaluation ? claritySession.evaluation : clarityLog
+  const clarityProgress = claritySession.started ? Math.min(100, ((60 - claritySession.countdown) / 60) * 100) : 0
+  const activeGroundingStep = claritySession.started
+    ? Math.min(CLARITY_GROUNDING_SEQUENCE.length - 1, Math.floor((60 - claritySession.countdown) / 10))
+    : 0
+
   return (
     <section
       id="kiaan-chat"
       className={`relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)] transition-all duration-500 ${promptMotion ? 'animate-chat-wobble ring-1 ring-orange-200/35 shadow-[0_25px_90px_rgba(255,156,89,0.32)]' : ''}`}
     >
+      {claritySession.active && claritySession.evaluation && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative z-10 w-full max-w-4xl space-y-5 rounded-3xl border border-orange-500/30 bg-[#0b0b0f]/95 p-6 md:p-8 shadow-[0_30px_120px_rgba(255,115,39,0.35)]">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-[0.18em] text-orange-100/80">Instant overlay</p>
+                <h3 className="text-3xl font-semibold bg-gradient-to-r from-orange-300 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Clarity Pause</h3>
+                <p className="text-sm text-orange-100/80">Create space before you act.</p>
+                <p className="text-xs text-orange-100/70">No advice. Just space to decide from clarity.</p>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-end">
+                <button
+                  onClick={abandonClarityPause}
+                  className="rounded-xl border border-orange-500/30 px-3 py-2 text-xs text-orange-100/80 hover:border-orange-300/60"
+                >
+                  Close overlay
+                </button>
+                <button
+                  onClick={sendPendingNow}
+                  className="rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/30"
+                >
+                  Send now (bypass pause)
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-3 rounded-2xl bg-[#0d0d10]/90 border border-orange-500/25 p-4 shadow-[0_12px_40px_rgba(255,115,39,0.2)]">
+                <div className="flex items-center justify-between text-xs text-orange-100/80">
+                  <span className="font-semibold text-orange-50">Calming animation</span>
+                  <button
+                    onClick={toggleMotionReduction}
+                    className="rounded-full border border-orange-400/30 px-3 py-1 text-[11px] text-orange-100/80"
+                  >
+                    {claritySession.motionReduced ? 'Motion reduction on' : 'Motion reduction off'}
+                  </button>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className={`relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-orange-500/25 via-[#ff9933]/25 to-rose-300/30 shadow-[0_20px_60px_rgba(255,153,51,0.25)] ${claritySession.motionReduced ? '' : 'breathing-orb'}`}
+                  >
+                    {!claritySession.motionReduced && <div className="absolute inset-2 rounded-full bg-orange-400/35 blur-2xl" />}
+                    <span className="text-xs font-semibold text-orange-50">
+                      {claritySession.motionReduced ? 'Inhale / Exhale' : 'Breathe'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-orange-100/80">{claritySession.started ? `${claritySession.countdown}s remaining` : 'Ready when you are'}</p>
+                  <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-orange-300 to-orange-500 transition-[width] duration-500"
+                      style={{ width: `${clarityProgress}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={startGuidedPause}
+                    className="flex-1 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-orange-50 border border-orange-400/25"
+                  >
+                    {claritySession.started ? 'Restart 60s pause' : 'Pause for 60 seconds'}
+                  </button>
+                  <button
+                    onClick={sendPendingNow}
+                    className="flex-1 rounded-xl bg-gradient-to-r from-emerald-400/80 via-orange-300/80 to-orange-500/80 px-3 py-2 text-xs font-semibold text-slate-950"
+                  >
+                    Send after calm
+                  </button>
+                </div>
+              </div>
+
+              <div className="md:col-span-2 grid gap-4 md:grid-cols-2">
+                <div className="space-y-3 rounded-2xl bg-black/50 border border-orange-500/25 p-4 shadow-[0_12px_40px_rgba(255,115,39,0.2)]">
+                  <div className="flex items-center justify-between text-xs text-orange-100/80">
+                    <span className="font-semibold text-orange-50">Clarity question</span>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">Live cues</span>
+                  </div>
+                  <p className="text-sm text-orange-100/90 font-semibold">“Are you acting from clarity or from emotion right now?”</p>
+                  <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 text-xs text-orange-100/85 space-y-2">
+                    <p className="font-semibold text-orange-50">Neutral reasoning</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      {CLARITY_REASONING_PROMPTS.map(line => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="space-y-2 text-xs text-orange-100/85">
+                    <p className="font-semibold text-orange-50">60-second guided script</p>
+                    <ul className="space-y-1">
+                      {CLARITY_GROUNDING_SEQUENCE.map((step, idx) => (
+                        <li
+                          key={step.time}
+                          className={`flex gap-2 rounded-lg px-2 py-1 ${claritySession.started && idx === activeGroundingStep ? 'bg-orange-500/20 border border-orange-400/40 text-orange-50' : 'text-orange-100/85'}`}
+                        >
+                          <span className="min-w-[54px] text-[11px] font-semibold text-orange-300">{step.time}</span>
+                          <span className="leading-relaxed">{step.prompt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 text-xs text-orange-100/85 space-y-1">
+                    <p className="font-semibold text-orange-50">Close with grounded choice</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      {CLARITY_CLOSING_CHOICES.map(choice => (
+                        <li key={choice}>{choice}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="space-y-3 rounded-2xl bg-[#0c0f12]/90 border border-emerald-200/25 p-4 shadow-[0_12px_40px_rgba(92,150,146,0.2)]">
+                  <div className="flex items-center justify-between text-xs text-emerald-50/80">
+                    <span className="font-semibold text-emerald-50">Trigger detection system</span>
+                    <span className="rounded-full bg-emerald-200/10 px-3 py-1 text-[11px]">{claritySession.evaluation.confidence === 'high' ? 'Auto interrupt' : 'Offer pause'}</span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-emerald-50/85">
+                    {CLARITY_TRIGGER_SIGNALS.map(signal => (
+                      <li key={signal}>{signal}</li>
+                    ))}
+                  </ul>
+                  <div className="rounded-lg border border-emerald-200/25 bg-black/30 p-3 text-[11px] text-emerald-50/80 leading-relaxed">
+                    Confidence tiers: High (auto interrupt), Medium (offer pause), Low (log only). Designed to flag impulse while letting Kiaan continue normally.
+                  </div>
+                  <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 text-[11px] text-orange-100/85 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-orange-50">API payload</span>
+                      <span className="rounded-full bg-orange-500/20 px-2 py-1 text-[10px] text-orange-50">{claritySession.evaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'}</span>
+                    </div>
+                    <pre className="overflow-auto rounded-lg bg-black/60 p-3 text-[11px] text-orange-100/80">
+{JSON.stringify({
+  user_message: claritySession.pendingMessage,
+  context_intent_score: claritySession.evaluation.impulseScore,
+  impulse_trigger_flags: claritySession.evaluation.flags,
+  action: claritySession.evaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'
+}, null, 2)}
+                    </pre>
+                    <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
+                      <span className="rounded-full bg-white/10 px-3 py-1">Grounded check-ins stay separate from Kiaan responses.</span>
+                      <span className="rounded-full bg-white/10 px-3 py-1">Dismiss anytime to continue instantly.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="absolute right-10 top-10 h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/30 via-[#ffb347]/25 to-orange-200/10 blur-2xl" />
       <div className="absolute -left-16 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-[#1c1c20]/70 via-orange-500/10 to-transparent blur-3xl" />
       <div className="flex items-center gap-3 relative">
@@ -658,46 +1009,60 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           Send
         </button>
       </div>
+
+      <div className="rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)] text-xs text-orange-100/80 space-y-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 text-orange-50 font-semibold text-sm">
+            <span className="text-lg">🧘</span>
+            <span>Clarity pause watch</span>
+          </div>
+          <span
+            className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+              activeClarityEvaluation?.decision === 'pause'
+                ? 'bg-orange-500/20 text-orange-50 border border-orange-400/40'
+                : 'bg-emerald-500/15 text-emerald-50 border border-emerald-200/30'
+            }`}
+          >
+            {activeClarityEvaluation?.decision === 'pause'
+              ? `Pause suggested (${activeClarityEvaluation.confidence})`
+              : 'Pass-through mode'}
+          </span>
+        </div>
+        <p className="leading-relaxed">KIAAN quietly scores urgency and emotion. High = instant pause overlay, medium = offer to pause, low = logged only.</p>
+        {activeClarityEvaluation && (
+          <div className="flex flex-wrap gap-2">
+            {(activeClarityEvaluation.flags.length ? activeClarityEvaluation.flags : ['No triggers detected']).map(flag => (
+              <span key={flag} className="rounded-full bg-white/10 px-3 py-1 text-[11px] border border-orange-500/20">
+                {flag}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => {
+              const manualEvaluation: ClarityEvaluation = { decision: 'pause', confidence: 'medium', flags: ['Manual clarity pause'], impulseScore: 2, reason: 'User initiated clarity pause' }
+              setClarityLog(manualEvaluation)
+              startClaritySession(manualEvaluation, input || 'Taking a 60-second clarity pause with KIAAN.')
+            }}
+            className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-[11px] font-semibold text-orange-50"
+          >
+            Open clarity pause now
+          </button>
+          <button
+            onClick={() => setClarityLog(null)}
+            className="rounded-xl border border-white/15 px-3 py-2 text-[11px] text-orange-100/80"
+          >
+            Reset watch
+          </button>
+          <span className="text-[11px] text-orange-100/70">KIAAN never blocks your message—decline the overlay anytime.</span>
+        </div>
+      </div>
     </section>
   )
 }
 
 function ClarityPauseSuite() {
-  const uiMicrocopy = [
-    { label: 'Header', value: 'Clarity Pause' },
-    { label: 'Subhead', value: 'Create space before you act.' },
-    { label: 'Interrupt CTA', value: 'Pause for 60 seconds' },
-    { label: 'Safety note', value: 'No advice. Just space to decide from clarity.' }
-  ]
-
-  const groundingSequence = [
-    { time: '0–10s', prompt: 'Let’s pause. Slow inhale… gentle exhale.' },
-    { time: '10–20s', prompt: 'Drop your shoulders. Unclench your jaw.' },
-    { time: '20–30s', prompt: 'Notice your feet on the ground. Let intensity lower by 5%.' },
-    { time: '30–40s', prompt: 'One more slow breath in… and out.' },
-    { time: '40–50s', prompt: 'Ask: Are you acting from clarity or from emotion?' },
-    { time: '50–60s', prompt: 'If it still feels right in calm, it will still be right in an hour.' }
-  ]
-
-  const triggerSignals = [
-    'Urgency + emotion: “about to quit”, “so angry right now”, “need to send this now”.',
-    'High intent verbs: “I’m going to…”, “I should just…”, “I’ll do it now”.',
-    'Impulsive risk phrases: “sell all”, “bet it all”, “burn it down”, “don’t care anymore”.',
-    'Exclude neutral mentions (e.g., discussing anger academically) to avoid over-triggering.'
-  ]
-
-  const reasoningPrompts = [
-    'If this action still feels right after calm returns, it will still be right in an hour.',
-    'You can decide from clarity, not pressure.',
-    'Separate facts from feelings before you act.'
-  ]
-
-  const closingChoices = [
-    'Pause a little longer and re-check your clarity.',
-    'Act now with full awareness of your intent.',
-    'Wait 10 minutes, then revisit with a calmer baseline.'
-  ]
-
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
       <div className="absolute -left-10 top-0 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/16 to-transparent blur-3xl" />
@@ -726,7 +1091,7 @@ function ClarityPauseSuite() {
             <span className="rounded-full bg-white/10 px-3 py-1">Instant overlay</span>
           </div>
           <ul className="space-y-2 text-sm text-orange-50/90">
-            {uiMicrocopy.map(item => (
+            {CLARITY_UI_MICROCOPY.map(item => (
               <li key={item.label} className="flex items-start gap-2">
                 <span className="mt-[5px] h-2 w-2 rounded-full bg-orange-300" />
                 <div>
@@ -741,7 +1106,7 @@ function ClarityPauseSuite() {
             <p>“Are you acting from clarity or from emotion right now?”</p>
             <p className="font-semibold text-orange-50 pt-2">Neutral reasoning</p>
             <ul className="list-disc list-inside space-y-1 text-orange-100/85">
-              {reasoningPrompts.map(line => (
+              {CLARITY_REASONING_PROMPTS.map(line => (
                 <li key={line}>{line}</li>
               ))}
             </ul>
@@ -754,7 +1119,7 @@ function ClarityPauseSuite() {
             <span className="rounded-full bg-white/10 px-3 py-1">Live cues</span>
           </div>
           <ul className="space-y-2 text-sm text-orange-50/90">
-            {groundingSequence.map(step => (
+            {CLARITY_GROUNDING_SEQUENCE.map(step => (
               <li key={step.time} className="flex gap-2">
                 <div className="min-w-[64px] text-xs font-semibold text-orange-300">{step.time}</div>
                 <div className="text-orange-100/85 leading-relaxed">{step.prompt}</div>
@@ -764,7 +1129,7 @@ function ClarityPauseSuite() {
           <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 space-y-1 text-xs text-orange-100/85">
             <p className="font-semibold text-orange-50">Close with grounded choice</p>
             <ul className="list-disc list-inside space-y-1">
-              {closingChoices.map(choice => (
+              {CLARITY_CLOSING_CHOICES.map(choice => (
                 <li key={choice}>{choice}</li>
               ))}
             </ul>
@@ -778,7 +1143,7 @@ function ClarityPauseSuite() {
               <span className="rounded-full bg-emerald-200/10 px-3 py-1 text-[11px]">Non-blocking</span>
             </div>
             <ul className="list-disc list-inside space-y-1 text-sm text-emerald-50/85">
-              {triggerSignals.map(signal => (
+              {CLARITY_TRIGGER_SIGNALS.map(signal => (
                 <li key={signal}>{signal}</li>
               ))}
             </ul>
