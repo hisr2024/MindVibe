@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type ReactElement } from 'react'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -148,7 +148,7 @@ function PeaceLogo() {
   )
 }
 
-function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: JSX.Element }) {
+function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: ReactElement }) {
   return (
     <div className={`relative min-w-[180px] rounded-2xl border border-orange-400/25 bg-gradient-to-br ${gradient} p-3 shadow-[0_10px_45px_rgba(255,115,39,0.22)] overflow-hidden`}>
       <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-orange-400/30 blur-2xl" />
