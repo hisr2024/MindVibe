@@ -138,13 +138,6 @@ function evaluateClarityPause(userMessage: string): ClarityEvaluation {
   }
 }
 
-const CLARITY_UI_MICROCOPY = [
-  { label: 'Header', value: 'Clarity Pause' },
-  { label: 'Subhead', value: 'Create space before you act.' },
-  { label: 'Interrupt CTA', value: 'Pause for 60 seconds' },
-  { label: 'Safety note', value: 'No advice. Just space to decide from clarity.' }
-]
-
 const CLARITY_REASONING_PROMPTS = [
   'If this action still feels right after calm returns, it will still be right in an hour.',
   'You can decide from clarity, not pressure.',
@@ -1127,107 +1120,313 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 }
 
 function ClarityPauseSuite() {
+  const [labMessage, setLabMessage] = useState("I'm about to quit and need to send this now.")
+  const [labEvaluation, setLabEvaluation] = useState<ClarityEvaluation | null>(null)
+  const [labOverlayOpen, setLabOverlayOpen] = useState(false)
+  const [labStarted, setLabStarted] = useState(false)
+  const [labCountdown, setLabCountdown] = useState(60)
+  const [labMotionReduced, setLabMotionReduced] = useState(false)
+  const [labAction, setLabAction] = useState<'pass_through' | 'pause_payload'>('pass_through')
+  const [labLog, setLabLog] = useState<string[]>([])
+
+  const labTriggers = [
+    'I am about to quit and fire this off right now.',
+    'So angry right now I want to send this message immediately.',
+    'I should just walk out and be done with this.',
+    'Talking through urgency without acting yet.',
+  ]
+
+  useEffect(() => {
+    if (!labOverlayOpen || !labStarted || labCountdown <= 0) return
+
+    const timer = setInterval(() => {
+      setLabCountdown(prev => Math.max(0, prev - 1))
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [labOverlayOpen, labStarted, labCountdown])
+
+  useEffect(() => {
+    if (labCountdown === 0 && labOverlayOpen) {
+      setLabStarted(false)
+      setLabLog(prev => [`60-second calm cycle complete`, ...prev].slice(0, 4))
+    }
+  }, [labCountdown, labOverlayOpen])
+
+  const activeCue = labOverlayOpen
+    ? Math.min(CLARITY_GROUNDING_SEQUENCE.length - 1, Math.floor((60 - labCountdown) / 10))
+    : 0
+
+  function runEvaluation() {
+    const clean = labMessage.trim()
+    if (!clean) return null
+
+    const evaluation = evaluateClarityPause(clean)
+    setLabEvaluation(evaluation)
+    setLabAction(evaluation.decision === 'pause' ? 'pause_payload' : 'pass_through')
+    setLabLog(prev => [`${evaluation.confidence.toUpperCase()} • ${evaluation.reason}`, ...prev].slice(0, 4))
+    return evaluation
+  }
+
+  function launchOverlay() {
+    const evaluation = runEvaluation()
+    if (!evaluation) return
+
+    const autoStart = evaluation.confidence === 'high' && evaluation.decision === 'pause'
+    setLabCountdown(60)
+    setLabStarted(autoStart)
+    setLabOverlayOpen(true)
+  }
+
+  function resetLab() {
+    setLabOverlayOpen(false)
+    setLabStarted(false)
+    setLabCountdown(60)
+    setLabLog([])
+  }
+
+  const payloadPreview = {
+    user_message: labMessage,
+    context_intent_score: labEvaluation?.impulseScore ?? 0,
+    impulse_trigger_flags: labEvaluation?.flags ?? [],
+    action: labAction,
+  }
+
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
       <div className="absolute -left-10 top-0 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/16 to-transparent blur-3xl" />
       <div className="absolute -right-12 bottom-0 h-40 w-40 rounded-full bg-gradient-to-tr from-[#1b1f29]/60 via-orange-500/14 to-transparent blur-3xl" />
 
-      <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div className="space-y-2">
+      <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
           <p className="text-xs text-orange-100/80">High-Stress Decision Timer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause (secular, non-interfering)</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">
-            A calm interrupt layer that slows impulsive decisions with a 60-second grounding, a single clarity question, and neutral reflection—always separate from Kiaan.
-          </p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause live model</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">Interact with the exact overlay Kiaan uses—detect a trigger, launch a pause payload, and watch the 60-second guide animate in real time.</p>
         </div>
-        <div className="relative rounded-2xl border border-orange-400/25 bg-white/5 px-4 py-3 text-xs text-orange-50 max-w-sm">
-          <p className="font-semibold text-orange-50">Compatibility Guard</p>
-          <p className="text-orange-100/80 leading-relaxed">
-            Runs as an optional overlay. It never edits, delays, or replaces Kiaan’s responses. If declined, control returns instantly to Kiaan unchanged.
-          </p>
+        <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
+          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Separate from Kiaan</span>
+          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Never edits responses</span>
+          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Decline anytime</span>
         </div>
       </div>
 
-      <div className="relative grid gap-4 md:grid-cols-3">
+      <div className="relative grid gap-4 md:grid-cols-2">
         <div className="space-y-3 rounded-2xl bg-black/50 border border-orange-500/20 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
           <div className="flex items-center justify-between text-xs text-orange-100/80">
-            <span className="font-semibold text-orange-50">UI microcopy</span>
-            <span className="rounded-full bg-white/10 px-3 py-1">Instant overlay</span>
+            <span className="font-semibold text-orange-50">Trigger detection system</span>
+            <span className="rounded-full bg-white/10 px-3 py-1">Non-blocking</span>
           </div>
-          <ul className="space-y-2 text-sm text-orange-50/90">
-            {CLARITY_UI_MICROCOPY.map(item => (
-              <li key={item.label} className="flex items-start gap-2">
-                <span className="mt-[5px] h-2 w-2 rounded-full bg-orange-300" />
-                <div>
-                  <p className="font-semibold text-orange-50">{item.label}</p>
-                  <p className="text-orange-100/80 text-sm leading-relaxed">{item.value}</p>
-                </div>
-              </li>
+          <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
+            {labTriggers.map(trigger => (
+              <button
+                key={trigger}
+                onClick={() => setLabMessage(trigger)}
+                className="rounded-full border border-orange-400/30 px-3 py-1 hover:border-orange-300/60 transition"
+              >
+                {trigger}
+              </button>
             ))}
-          </ul>
-          <div className="rounded-xl border border-orange-400/30 bg-white/5 p-3 text-xs text-orange-100/85 space-y-2">
-            <p className="font-semibold text-orange-50">Clarity question</p>
-            <p>“Are you acting from clarity or from emotion right now?”</p>
-            <p className="font-semibold text-orange-50 pt-2">Neutral reasoning</p>
-            <ul className="list-disc list-inside space-y-1 text-orange-100/85">
-              {CLARITY_REASONING_PROMPTS.map(line => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
           </div>
+          <textarea
+            value={labMessage}
+            onChange={e => setLabMessage(e.target.value)}
+            className="w-full rounded-xl border border-orange-500/30 bg-black/40 p-3 text-sm text-orange-50 focus:border-orange-300/70 focus:outline-none"
+            rows={3}
+            placeholder="Type a high-intent, urgent, or calm message"
+          />
+          <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
+            <button
+              onClick={runEvaluation}
+              className="rounded-lg bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-4 py-2 font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+            >
+              Evaluate triggers
+            </button>
+            <button
+              onClick={launchOverlay}
+              className="rounded-lg border border-orange-500/40 bg-white/5 px-4 py-2 font-semibold text-orange-50"
+            >
+              Launch clarity overlay
+            </button>
+            <button
+              onClick={resetLab}
+              className="rounded-lg border border-white/10 px-4 py-2 text-orange-100/80"
+            >
+              Reset model
+            </button>
+          </div>
+
+          {labEvaluation && (
+            <div className="space-y-2 rounded-xl border border-orange-400/30 bg-white/5 p-3 text-sm text-orange-100/85">
+              <div className="flex flex-wrap gap-2 text-[11px]">
+                <span className="rounded-full bg-orange-500/20 px-3 py-1 text-orange-50">{labEvaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'}</span>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-orange-50">Confidence: {labEvaluation.confidence}</span>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-orange-50">Intent score: {labEvaluation.impulseScore}/5</span>
+              </div>
+              <p className="font-semibold text-orange-50">Flags</p>
+              <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
+                {(labEvaluation.flags.length ? labEvaluation.flags : ['No explicit triggers']).map(flag => (
+                  <span key={flag} className="rounded-full border border-orange-400/30 bg-black/40 px-3 py-1">{flag}</span>
+                ))}
+              </div>
+              <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-orange-300 to-orange-500 transition-[width] duration-700"
+                  style={{ width: `${((labEvaluation.impulseScore ?? 0) / 5) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-orange-100/70">Confidence tiers: High auto-starts, Medium offers pause, Low logs only—Kiaan still responds.</p>
+            </div>
+          )}
+
+          {labLog.length > 0 && (
+            <div className="rounded-xl border border-orange-400/20 bg-black/30 p-3 text-[11px] text-orange-100/80 space-y-1">
+              <p className="font-semibold text-orange-50">Recent actions</p>
+              {labLog.map(entry => (
+                <div key={entry} className="rounded-lg bg-white/5 px-3 py-2">{entry}</div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/80 border border-orange-500/20 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
+        <div className="space-y-3 rounded-2xl bg-[#0b0b10]/85 border border-orange-500/25 p-4 shadow-[0_12px_48px_rgba(255,115,39,0.18)]">
           <div className="flex items-center justify-between text-xs text-orange-100/80">
-            <span className="font-semibold text-orange-50">60-second guided script</span>
-            <span className="rounded-full bg-white/10 px-3 py-1">Live cues</span>
-          </div>
-          <ul className="space-y-2 text-sm text-orange-50/90">
-            {CLARITY_GROUNDING_SEQUENCE.map(step => (
-              <li key={step.time} className="flex gap-2">
-                <div className="min-w-[64px] text-xs font-semibold text-orange-300">{step.time}</div>
-                <div className="text-orange-100/85 leading-relaxed">{step.prompt}</div>
-              </li>
-            ))}
-          </ul>
-          <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 space-y-1 text-xs text-orange-100/85">
-            <p className="font-semibold text-orange-50">Close with grounded choice</p>
-            <ul className="list-disc list-inside space-y-1">
-              {CLARITY_CLOSING_CHOICES.map(choice => (
-                <li key={choice}>{choice}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="rounded-2xl bg-[#0c1012]/85 border border-emerald-200/20 p-4 shadow-[0_10px_36px_rgba(92,150,146,0.18)] space-y-2">
-            <div className="flex items-center justify-between text-xs text-emerald-50/80">
-              <span className="font-semibold text-emerald-50">Trigger detection system</span>
-              <span className="rounded-full bg-emerald-200/10 px-3 py-1 text-[11px]">Non-blocking</span>
-            </div>
-            <ul className="list-disc list-inside space-y-1 text-sm text-emerald-50/85">
-              {CLARITY_TRIGGER_SIGNALS.map(signal => (
-                <li key={signal}>{signal}</li>
-              ))}
-            </ul>
-            <div className="rounded-lg border border-emerald-200/25 bg-black/40 p-3 text-[11px] text-emerald-50/80 leading-relaxed">
-              Confidence tiers: High (auto interrupt), Medium (offer pause), Low (log only). Designed to flag impulse while letting Kiaan continue normally.
+            <span className="font-semibold text-orange-50">Clarity overlay</span>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setLabMotionReduced(prev => !prev)}
+                className="rounded-full border border-orange-400/30 px-3 py-1 text-[11px] text-orange-100/80"
+              >
+                {labMotionReduced ? 'Motion reduction on' : 'Motion reduction off'}
+              </button>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{labOverlayOpen ? 'Overlay active' : 'Inactive'}</span>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#0b0b10]/85 border border-orange-500/20 p-4 shadow-[0_10px_36px_rgba(255,115,39,0.14)] space-y-2">
-            <div className="flex items-center justify-between text-xs text-orange-100/80">
-              <span className="font-semibold text-orange-50">Calming animation + compatibility</span>
-              <span className="rounded-full bg-white/10 px-3 py-1">Builder notes</span>
+          <div className={`relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#0c0c0f]/90 via-[#0f0d10]/90 to-[#140d0a]/90 p-4 space-y-3 ${labOverlayOpen ? 'shadow-[0_20px_60px_rgba(255,115,39,0.25)] ring-1 ring-orange-400/40' : ''}`}>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Instant overlay</p>
+              <h3 className="text-xl font-semibold text-orange-50">Clarity Pause</h3>
+              <p className="text-sm text-orange-100/80">Create space before you act. No advice. Just the 60-second neutral pause.</p>
+              <p className="text-[11px] text-orange-100/70">Kiaan stays untouched—decline to pass through instantly.</p>
             </div>
-            <ul className="list-disc list-inside space-y-1 text-sm text-orange-100/85">
-              <li>Breathing orb: smooth expand/contract at ~6 breaths/min (5s inhale, 5s exhale).</li>
-              <li>Soft, low-contrast palette with ease-in/ease-out motion; no flashing.</li>
-              <li>Motion-reduction toggle with static “inhale/exhale” cues; optional haptic pulse on inhale.</li>
-              <li>API contract: input `user_message`, `context_intent_score`, `impulse_trigger_flags`; output `pass_through` or `pause_payload`.</li>
-              <li>Pause payload renders as overlay while Kiaan’s responses remain untouched.</li>
-            </ul>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-xl border border-emerald-200/25 bg-black/40 p-3 text-xs text-emerald-50/85 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-emerald-50">Compatibility Guard</span>
+                  <span className="rounded-full bg-emerald-200/15 px-2 py-1 text-[10px]">{labEvaluation?.confidence === 'high' ? 'Auto interrupt' : 'Offer pause'}</span>
+                </div>
+                <p>Overlay never rewrites Kiaan. Closing sends the message unchanged.</p>
+                <div className="flex flex-wrap gap-2 text-[11px]">
+                  <button
+                    onClick={() => setLabAction('pass_through')}
+                    className={`rounded-lg px-3 py-2 ${labAction === 'pass_through' ? 'bg-gradient-to-r from-emerald-300 to-orange-400 text-slate-950' : 'border border-emerald-200/30 text-emerald-50'}`}
+                  >
+                    Pass through now
+                  </button>
+                  <button
+                    onClick={() => setLabAction('pause_payload')}
+                    className={`rounded-lg px-3 py-2 ${labAction === 'pause_payload' ? 'bg-gradient-to-r from-orange-400 to-rose-300 text-slate-950' : 'border border-orange-400/40 text-orange-50'}`}
+                  >
+                    Hold for pause
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-orange-500/30 bg-black/30 p-3 text-xs text-orange-100/85 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-orange-50">What Kiaan receives</span>
+                  <span className="rounded-full bg-orange-500/20 px-2 py-1 text-[10px]">Snapshot only</span>
+                </div>
+                <p>Stored exactly as typed: {labMessage ? summarizeContent(labMessage) : 'Waiting for a message'}.</p>
+                <div className="flex flex-wrap gap-2 text-[11px]">
+                  <span className="rounded-full bg-white/10 px-3 py-1">Never altered</span>
+                  <span className="rounded-full bg-white/10 px-3 py-1">Close to continue instantly</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3 items-center">
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className={`relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-orange-500/25 via-[#ff9933]/25 to-rose-300/30 shadow-[0_16px_50px_rgba(255,153,51,0.25)] ${labMotionReduced ? '' : 'breathing-orb'}`}
+                >
+                  {!labMotionReduced && <div className="absolute inset-2 rounded-full bg-orange-400/35 blur-2xl" />}
+                  <span className="text-[11px] font-semibold text-orange-50">{labMotionReduced ? 'Inhale / Exhale' : 'Breathe'}</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-orange-300 to-orange-500 transition-[width] duration-500"
+                    style={{ width: `${((60 - labCountdown) / 60) * 100}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-orange-100/70">{labOverlayOpen ? `${labCountdown}s remaining` : 'Ready when you are'}</p>
+              </div>
+
+              <div className="md:col-span-2 space-y-2 rounded-xl border border-orange-500/30 bg-white/5 p-3 text-xs text-orange-100/85">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-orange-50">Live cues</span>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => { setLabStarted(true); setLabOverlayOpen(true) }}
+                      className="rounded-lg border border-orange-400/30 px-3 py-1"
+                    >
+                      {labStarted ? 'Restart 60s' : 'Start 60s pause'}
+                    </button>
+                    <button
+                      onClick={() => { setLabStarted(false); setLabCountdown(60) }}
+                      className="rounded-lg border border-orange-400/20 px-3 py-1"
+                    >
+                      Reset timer
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm font-semibold text-orange-50">“Are you acting from clarity or from emotion right now?”</p>
+                <ul className="space-y-1">
+                  {CLARITY_GROUNDING_SEQUENCE.map((step, idx) => (
+                    <li
+                      key={step.time}
+                      className={`flex gap-2 rounded-lg px-2 py-1 ${labOverlayOpen && idx === activeCue ? 'bg-orange-500/20 border border-orange-400/40 text-orange-50' : 'text-orange-100/85'}`}
+                    >
+                      <span className="min-w-[54px] text-[11px] font-semibold text-orange-300">{step.time}</span>
+                      <span className="leading-relaxed">{step.prompt}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="rounded-lg border border-orange-400/25 bg-black/30 p-3 space-y-1">
+                  <p className="font-semibold text-orange-50">Close with grounded choice</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {CLARITY_CLOSING_CHOICES.map(choice => (
+                      <li key={choice}>{choice}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-orange-500/30 bg-white/5 p-3 text-xs text-orange-100/85 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-orange-50">API payload</span>
+                <span className="rounded-full bg-orange-500/20 px-2 py-1 text-[10px]">{labAction}</span>
+              </div>
+              <pre className="overflow-auto rounded-lg bg-black/60 p-3 text-[11px] text-orange-100/80">{JSON.stringify(payloadPreview, null, 2)}</pre>
+              <p className="text-[11px] text-orange-100/70">Overlay keeps Kiaan’s stream untouched. Decline to pass-through instantly.</p>
+            </div>
+
+            <div className="rounded-xl border border-emerald-200/20 bg-black/40 p-3 text-xs text-emerald-50/85 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-emerald-50">Neutral reasoning</span>
+                <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Guided reflection</span>
+              </div>
+              <ul className="list-disc list-inside space-y-1">
+                {CLARITY_REASONING_PROMPTS.map(line => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-emerald-50/70">Decide from clarity, not pressure. Kiaan keeps replying normally while you pause.</p>
+            </div>
           </div>
         </div>
       </div>
