@@ -9,6 +9,38 @@ export type PrecisionArrowInput = {
   emotional_state?: string | null
 }
 
+type ArrowAlignment = {
+  goal_clarity: unknown
+  purpose: unknown
+  effort: unknown
+  detachment: unknown
+  consistency: unknown
+  arrow_alignment: unknown
+}
+
+function getPrecisionArrowModel() {
+  return process.env.PRECISION_ARROW_MODEL || process.env.CODEX_MODEL || 'gpt-4o-mini'
+}
+
+function validateArrowPayload(payload: ArrowAlignment) {
+  const requiredKeys: (keyof ArrowAlignment)[] = [
+    'goal_clarity',
+    'purpose',
+    'effort',
+    'detachment',
+    'consistency',
+    'arrow_alignment'
+  ]
+
+  for (const key of requiredKeys) {
+    if (!(key in payload)) {
+      throw new Error(`Precision Arrow response missing '${key}'`)
+    }
+  }
+
+  return payload
+}
+
 export async function POST(request: Request) {
   if (request.method !== 'POST') {
     return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
@@ -35,13 +67,18 @@ export async function POST(request: Request) {
     ]
 
     const completion = await codex({
-      model: 'precision-arrow',
+      model: getPrecisionArrowModel(),
       messages,
       temperature: 0.3
     })
 
-    const text = completion.content
-    const arrow = JSON.parse(text)
+    const text = completion.content.trim()
+    if (!text) {
+      throw new Error('Precision Arrow Engine returned an empty response')
+    }
+
+    const parsed = JSON.parse(text) as ArrowAlignment
+    const arrow = validateArrowPayload(parsed)
 
     return NextResponse.json(arrow)
   } catch (error) {
