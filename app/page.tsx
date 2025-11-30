@@ -181,6 +181,7 @@ type ClaritySession = {
   pendingMessage: string | null
   evaluation: ClarityEvaluation | null
   motionReduced: boolean
+  source: 'auto' | 'manual'
 }
 
 export default function Home() {
@@ -591,7 +592,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     completed: false,
     pendingMessage: null,
     evaluation: null,
-    motionReduced: false
+    motionReduced: false,
+    source: 'auto'
   }
   const [claritySession, setClaritySession] = useState<ClaritySession>(clarityInitialState)
   const [clarityLog, setClarityLog] = useState<ClarityEvaluation | null>(null)
@@ -668,7 +670,11 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
   }
 
-  function startClaritySession(evaluation: ClarityEvaluation, pendingMessage: string) {
+  function startClaritySession(
+    evaluation: ClarityEvaluation,
+    pendingMessage: string,
+    source: ClaritySession['source'] = 'auto'
+  ) {
     setPromptMotion(true)
     setInput('')
     setClaritySession({
@@ -676,7 +682,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
       active: true,
       started: evaluation.confidence === 'high',
       evaluation,
-      pendingMessage
+      pendingMessage,
+      source
     })
   }
 
@@ -688,7 +695,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setClarityLog(evaluation)
 
     if (evaluation.decision === 'pause' && evaluation.confidence !== 'low') {
-      startClaritySession(evaluation, trimmed)
+      startClaritySession(evaluation, trimmed, 'auto')
       return
     }
 
@@ -707,8 +714,15 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setClaritySession(clarityInitialState)
   }
 
-  function abandonClarityPause() {
-    if (claritySession.pendingMessage) setInput(claritySession.pendingMessage)
+  async function abandonClarityPause() {
+    if (claritySession.pendingMessage) {
+      if (claritySession.source === 'auto') {
+        setPromptMotion(true)
+        await deliverMessage(claritySession.pendingMessage)
+      } else {
+        setInput(claritySession.pendingMessage)
+      }
+    }
     setClaritySession(clarityInitialState)
   }
 
@@ -795,17 +809,18 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative z-10 w-full max-w-4xl space-y-5 rounded-3xl border border-orange-500/30 bg-[#0b0b0f]/95 p-6 md:p-8 shadow-[0_30px_120px_rgba(255,115,39,0.35)]">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-[0.18em] text-orange-100/80">Instant overlay</p>
-                <h3 className="text-3xl font-semibold bg-gradient-to-r from-orange-300 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Clarity Pause</h3>
-                <p className="text-sm text-orange-100/80">Create space before you act.</p>
-                <p className="text-xs text-orange-100/70">No advice. Just space to decide from clarity.</p>
-              </div>
-              <div className="flex flex-wrap gap-2 justify-end">
-                <button
-                  onClick={abandonClarityPause}
-                  className="rounded-xl border border-orange-500/30 px-3 py-2 text-xs text-orange-100/80 hover:border-orange-300/60"
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/80">Instant overlay</p>
+              <h3 className="text-3xl font-semibold bg-gradient-to-r from-orange-300 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Clarity Pause</h3>
+              <p className="text-sm text-orange-100/80">Create space before you act.</p>
+              <p className="text-xs text-orange-100/70">No advice. Just space to decide from clarity.</p>
+              <p className="text-xs text-orange-100/70">KIAAN stays untouched—decline to pass through instantly.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button
+                onClick={abandonClarityPause}
+                className="rounded-xl border border-orange-500/30 px-3 py-2 text-xs text-orange-100/80 hover:border-orange-300/60"
                 >
                   Close overlay
                 </button>
@@ -815,6 +830,55 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                 >
                   Send now (bypass pause)
                 </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-2xl bg-[#0c0f12]/90 border border-emerald-200/20 p-4 shadow-[0_12px_40px_rgba(92,150,146,0.2)] space-y-2">
+                <div className="flex items-center justify-between text-xs text-emerald-50/80">
+                  <span className="font-semibold text-emerald-50">Compatibility Guard</span>
+                  <span className="rounded-full bg-emerald-200/15 px-3 py-1 text-[11px]">{claritySession.source === 'auto' ? 'Triggered from message' : 'Manually opened'}</span>
+                </div>
+                <p className="text-sm text-emerald-50/85 leading-relaxed">Overlay never rewrites Kiaan. Closing sends your message unchanged.</p>
+                <div className="flex flex-wrap gap-2 text-[11px] text-emerald-50/80">
+                  <span className="rounded-full bg-white/5 px-3 py-1 border border-emerald-200/30">{claritySession.evaluation.confidence === 'high' ? 'High confidence interrupt' : 'Offer to pause'}</span>
+                  <span className="rounded-full bg-white/5 px-3 py-1 border border-emerald-200/30">{claritySession.evaluation.flags.join(', ') || 'No explicit triggers'}</span>
+                </div>
+                <div className="rounded-xl bg-black/40 border border-emerald-200/25 p-3 text-xs text-emerald-50/80 space-y-2">
+                  <p className="font-semibold text-emerald-50">Keep Kiaan live</p>
+                  <p>Send now to Kiaan while you breathe, or stay with the 60s guide.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={sendPendingNow}
+                      className="rounded-lg bg-gradient-to-r from-emerald-400/80 via-orange-300/80 to-orange-500/80 px-3 py-2 text-[11px] font-semibold text-slate-950 shadow-sm shadow-emerald-300/20"
+                    >
+                      Deliver to Kiaan now
+                    </button>
+                    <button
+                      onClick={() => startGuidedPause()}
+                      className="rounded-lg border border-emerald-200/30 px-3 py-2 text-[11px] text-emerald-50/80"
+                    >
+                      Keep 60s grounding
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[#0b0b10]/90 border border-orange-500/25 p-4 shadow-[0_12px_40px_rgba(255,115,39,0.2)] space-y-2">
+                <div className="flex items-center justify-between text-xs text-orange-100/80">
+                  <span className="font-semibold text-orange-50">What Kiaan will receive</span>
+                  <span className="rounded-full bg-orange-500/20 px-3 py-1 text-[11px]">{claritySession.pendingMessage ? 'Snapshot saved' : 'No message held'}</span>
+                </div>
+                <p className="text-xs text-orange-100/75">Stored exactly as you wrote it. No edits, no delays if you close.</p>
+                {claritySession.pendingMessage && (
+                  <div className="rounded-xl bg-black/40 border border-orange-400/25 p-3 text-sm text-orange-50/90 leading-relaxed">
+                    {summarizeContent(claritySession.pendingMessage)}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
+                  <span className="rounded-full bg-white/10 px-3 py-1">Pass-through ready</span>
+                  <span className="rounded-full bg-white/10 px-3 py-1">Kiaan answers stay untouched</span>
+                </div>
               </div>
             </div>
 
@@ -1043,7 +1107,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
             onClick={() => {
               const manualEvaluation: ClarityEvaluation = { decision: 'pause', confidence: 'medium', flags: ['Manual clarity pause'], impulseScore: 2, reason: 'User initiated clarity pause' }
               setClarityLog(manualEvaluation)
-              startClaritySession(manualEvaluation, input || 'Taking a 60-second clarity pause with KIAAN.')
+              startClaritySession(manualEvaluation, input || 'Taking a 60-second clarity pause with KIAAN.', 'manual')
             }}
             className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-[11px] font-semibold text-orange-50"
           >
