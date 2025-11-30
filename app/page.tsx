@@ -120,7 +120,7 @@ export default function Home() {
         <ViyogDetachmentCoach />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <ArdhaReframer />
-        <KarmaResetGuide />
+        <KarmaResetGuide onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
         <Journal />
@@ -693,6 +693,72 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
             <div className="text-[11px] text-emerald-50/70 mt-1 leading-snug">{s.query}</div>
           </button>
         ))}
+      </div>
+    </section>
+  )
+}
+
+function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
+  const resetSteps = [
+    { title: 'Pause and breathe', detail: 'Take 4 slow breaths to let the nervous system settle before reacting.' },
+    { title: 'Name the ripple', detail: 'What happened? Who was impacted? Acknowledge it without self-blame.' },
+    { title: 'Choose the repair', detail: 'Pick one caring action: apology, clarification, or a calm follow-up.' },
+    { title: 'Move with intention', detail: 'Return to your values; act in a way future-you will respect.' }
+  ]
+
+  const prompts = [
+    "Help me reset after a misstep so I stay aligned with Kiaan's calm guidance.",
+    'I want to repair a small mistake—walk me through a kind response.',
+    'Give me a short reflection to release guilt and act with clarity.'
+  ]
+
+  return (
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0c10] via-[#120d0c] to-[#0b0b0f] border border-orange-500/15 p-6 md:p-7 space-y-5 shadow-[0_20px_80px_rgba(255,115,39,0.14)]">
+      <div className="absolute -right-6 -top-8 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/18 to-transparent blur-3xl" />
+      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#1f1720]/60 via-orange-500/14 to-transparent blur-3xl" />
+
+      <div className="relative flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <p className="text-xs text-orange-100/80">Gentle course correction</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Guide</h2>
+          <p className="text-sm text-orange-100/80 max-w-2xl">
+            A calm checklist to reset after small missteps while keeping KIAAN’s warm, non-judgmental tone intact.
+          </p>
+        </div>
+        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/25 rounded-full px-3 py-1">Keeps conversations kind and respectful</div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-3">
+          {resetSteps.map(step => (
+            <div key={step.title} className="rounded-2xl border border-orange-500/20 bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
+              <p className="text-sm font-semibold text-orange-50">{step.title}</p>
+              <p className="text-xs text-orange-100/75 leading-relaxed">{step.detail}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-4 space-y-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)]">
+          <h3 className="text-sm font-semibold text-orange-50">Talk it through with KIAAN</h3>
+          <p className="text-xs text-orange-100/80">Pick a prompt and we’ll pre-fill the chat, keeping Kiaan’s supportive flow.</p>
+          <div className="flex flex-col gap-2">
+            {prompts.map(prompt => (
+              <button
+                key={prompt}
+                onClick={() => {
+                  onSelectPrompt(prompt)
+                  document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                className="text-left rounded-xl border border-orange-400/25 bg-white/5 px-3 py-3 text-sm text-orange-50 hover:border-orange-300/60 transition"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+          <div className="text-[11px] text-orange-100/70 bg-white/5 border border-orange-500/20 rounded-lg p-3">
+            This guide never overrides KIAAN— it simply sets a steady path so Kiaan can respond with clarity and care.
+          </div>
+        </div>
       </div>
     </section>
   )
