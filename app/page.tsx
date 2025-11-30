@@ -353,16 +353,8 @@ function ArdhaReframer() {
         </div>
 
         <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
-          <h3 className="text-sm font-semibold text-orange-50">Ardha stays within boundaries</h3>
-          <ul className="space-y-2 text-sm text-orange-100/80 list-disc list-inside">
-            <li>Does not replace KIAAN or contradict its guidance.</li>
-            <li>Transforms thoughts; never offers medical, legal, or crisis advice.</li>
-            <li>Uses calm, modern language without preaching.</li>
-            <li>Applies detachment, clarity, and duty from Gita principles.</li>
-          </ul>
-          <div className="rounded-xl bg-black/50 border border-orange-500/15 p-3 text-xs text-orange-100/70 leading-relaxed">
-            “It’s understandable to feel discouraged when plans slip. In the Gita, clarity comes from focusing on effort, not the outcome. You’re still learning—each try refines your path. One small step now: choose the next action you can complete in 10 minutes.”
-          </div>
+          <h3 className="text-sm font-semibold text-orange-50">Ardha</h3>
+          <p className="text-sm text-orange-100/80">Offers balanced reframes while leaving Kiaan’s guidance untouched.</p>
         </div>
       </div>
 
@@ -470,16 +462,8 @@ function ViyogDetachmentCoach() {
         </div>
 
         <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
-          <h3 className="text-sm font-semibold text-orange-50">Viyog stays within boundaries</h3>
-          <ul className="space-y-2 text-sm text-orange-100/80 list-disc list-inside">
-            <li>Does not replace KIAAN or alter its guidance.</li>
-            <li>Focuses on detachment and action, not therapy or crisis care.</li>
-            <li>Uses calm, neutral language without hype or moralizing.</li>
-            <li>Always ends with one grounded, controllable step.</li>
-          </ul>
-          <div className="rounded-xl bg-black/50 border border-orange-500/15 p-3 text-xs text-orange-100/70 leading-relaxed">
-            “Anyone would feel tense when outcomes seem high stakes. The strain comes from holding the result too tightly. Return to what you can influence now: prepare your opening, practice it twice, and let the rest unfold.”
-          </div>
+          <h3 className="text-sm font-semibold text-orange-50">Viyog</h3>
+          <p className="text-sm text-orange-100/80">Guide outcome worries back toward steady, actionable steps.</p>
         </div>
       </div>
 
@@ -971,24 +955,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                   <div className="rounded-lg border border-emerald-200/25 bg-black/30 p-3 text-[11px] text-emerald-50/80 leading-relaxed">
                     Confidence tiers: High (auto interrupt), Medium (offer pause), Low (log only). Designed to flag impulse while letting Kiaan continue normally.
                   </div>
-                  <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 text-[11px] text-orange-100/85 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-orange-50">API payload</span>
-                      <span className="rounded-full bg-orange-500/20 px-2 py-1 text-[10px] text-orange-50">{claritySession.evaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'}</span>
-                    </div>
-                    <pre className="overflow-auto rounded-lg bg-black/60 p-3 text-[11px] text-orange-100/80">
-{JSON.stringify({
-  user_message: claritySession.pendingMessage,
-  context_intent_score: claritySession.evaluation.impulseScore,
-  impulse_trigger_flags: claritySession.evaluation.flags,
-  action: claritySession.evaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'
-}, null, 2)}
-                    </pre>
-                    <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-                      <span className="rounded-full bg-white/10 px-3 py-1">Grounded check-ins stay separate from Kiaan responses.</span>
-                      <span className="rounded-full bg-white/10 px-3 py-1">Dismiss anytime to continue instantly.</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1200,8 +1166,8 @@ function ClarityPauseSuite() {
       <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="space-y-1">
           <p className="text-xs text-orange-100/80">High-Stress Decision Timer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause live model</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Interact with the exact overlay Kiaan uses—detect a trigger, launch a pause payload, and watch the 60-second guide animate in real time.</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">Interact with the pause overlay Kiaan uses—detect a trigger, launch a pause prompt, and watch the 60-second guide animate in real time.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
           <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Separate from Kiaan</span>
@@ -1333,17 +1299,6 @@ function ClarityPauseSuite() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-orange-500/30 bg-black/30 p-3 text-xs text-orange-100/85 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-orange-50">What Kiaan receives</span>
-                  <span className="rounded-full bg-orange-500/20 px-2 py-1 text-[10px]">Snapshot only</span>
-                </div>
-                <p>Stored exactly as typed: {labMessage ? summarizeContent(labMessage) : 'Waiting for a message'}.</p>
-                <div className="flex flex-wrap gap-2 text-[11px]">
-                  <span className="rounded-full bg-white/10 px-3 py-1">Never altered</span>
-                  <span className="rounded-full bg-white/10 px-3 py-1">Close to continue instantly</span>
-                </div>
-              </div>
             </div>
 
             <div className="grid gap-3 md:grid-cols-3 items-center">
@@ -1406,15 +1361,6 @@ function ClarityPauseSuite() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-xl border border-orange-500/30 bg-white/5 p-3 text-xs text-orange-100/85 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-orange-50">API payload</span>
-                <span className="rounded-full bg-orange-500/20 px-2 py-1 text-[10px]">{labAction}</span>
-              </div>
-              <pre className="overflow-auto rounded-lg bg-black/60 p-3 text-[11px] text-orange-100/80">{JSON.stringify(payloadPreview, null, 2)}</pre>
-              <p className="text-[11px] text-orange-100/70">Overlay keeps Kiaan’s stream untouched. Decline to pass-through instantly.</p>
-            </div>
-
             <div className="rounded-xl border border-emerald-200/20 bg-black/40 p-3 text-xs text-emerald-50/85 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-emerald-50">Neutral reasoning</span>
