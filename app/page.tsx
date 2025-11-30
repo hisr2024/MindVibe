@@ -180,6 +180,41 @@ const CLARITY_TRIGGER_SIGNALS = [
   'Exclude neutral mentions (e.g., discussing anger academically) to avoid over-triggering.'
 ]
 
+const RELATIONAL_TRIGGER_PATTERNS = [
+  'Mentions of fights, arguments, or tense conversations with partners, friends, family, or coworkers.',
+  'Requests for how to respond before replying to a heated text, email, or call.',
+  'Statements about wanting to “win” or “prove a point” in a relationship conflict.',
+  'Admissions of feeling defensive, judged, or misunderstood with someone specific.'
+]
+
+const RELATIONAL_UI_COPY = [
+  { label: 'Screen title', text: 'Dharma Compass for Relationships' },
+  { label: 'Tagline', text: 'Grounded guidance for calm, fair responses.' },
+  { label: 'CTA', text: 'Return to clarity before you reply.' },
+  { label: 'Subtext', text: 'Route heated conflicts here while KIAAN keeps uplifting support unchanged.' }
+]
+
+const RELATIONAL_VISUAL_METAPHORS = [
+  'Compass ring glowing softly = finding a heading without force.',
+  'Balance scale steadying = fairness and mutual respect.',
+  'Calm center pulse = breath-led pause before speaking.',
+  'Bridge line between two dots = safe channel to reconnect.'
+]
+
+const RELATIONAL_GROUNDING_STEPS = [
+  '0–5s: Compass ring brightens as you inhale slowly.',
+  '5–10s: Balance scale tilts then steadies while you exhale.',
+  '10–20s: Center pulse expands and contracts with two calm breaths.',
+  '20–30s: Bridge line draws between two points; rehearse your calm opener.'
+]
+
+const RELATIONAL_INTEGRATION_BLUEPRINT = [
+  'Auto-route conflict-heavy inputs to Relational Compass while KIAAN stays the default for general support.',
+  'Keep Kiaan’s replies untouched; Relational Compass only offers a companion plan beside the main chat.',
+  'Offer a one-click handoff prompt so users can ask KIAAN to help phrase the calm message.',
+  'Log trigger signals separately so impulse detection and Kiaan’s flow remain independent.'
+]
+
 type ClaritySession = {
   active: boolean
   started: boolean
@@ -247,6 +282,7 @@ export default function Home() {
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <ArdhaReframer />
         <ViyogDetachmentCoach />
+        <RelationalCompass onSelectPrompt={setChatPrefill} />
         <ClarityPauseSuite />
         <ArdhaReframer />
         <KarmaResetGuide onSelectPrompt={setChatPrefill} />
@@ -267,6 +303,11 @@ export default function Home() {
 }
 
 type ArdhaReframerResult = {
+  response: string
+  requestedAt: string
+}
+
+type RelationalCompassResult = {
   response: string
   requestedAt: string
 }
@@ -480,6 +521,188 @@ function ViyogDetachmentCoach() {
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
         </div>
       )}
+    </section>
+  )
+}
+
+function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
+  const [conflict, setConflict] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useLocalState<RelationalCompassResult | null>('relational_compass', null)
+
+  useEffect(() => {
+    if (error) setError(null)
+  }, [conflict, error])
+
+  const handoffPrompt = conflict
+    ? `Kiaan, help me speak calmly about this relationship conflict while keeping your supportive tone: ${summarizeContent(conflict)}`
+    : result
+      ? `Kiaan, keep your warmth while helping me phrase this relational compass plan: ${summarizeContent(result.response)}`
+      : ''
+
+  async function requestCompass() {
+    const trimmedConflict = conflict.trim()
+    if (!trimmedConflict) return
+
+    setLoading(true)
+    setError(null)
+
+    const systemPrompt = `You are Relational Compass, a neutral, calm assistant that guides users through relationship conflicts with clarity, fairness, composure, and compassion. You are not Kiaan and never interfere with Kiaan. You reduce reactivity and ego-driven responses while keeping tone secular, modern, concise, and non-judgmental. Boundaries: do not provide therapy, legal, medical, or financial advice; do not take sides; do not tell someone to leave or stay; do not spiritualize; if safety is a concern, suggest reaching out to a trusted person or professional.\n\nFlow to follow for every reply:\n1) Acknowledge the conflict and its emotional weight.\n2) Separate emotions from ego impulses.\n3) Identify the user’s values or desired outcome (respect, honesty, understanding, peace).\n4) Offer right-action guidance rooted in fairness, accountability, calm honesty, boundaries, and listening before reacting.\n5) Provide ego-detachment suggestions (no need to win, pause before replying, focus on conduct over outcomes).\n6) Offer one compassion-based perspective without excusing harm.\n7) Share a non-reactive communication pattern with “I” language and one clarifying question.\n8) End with one simple next step the user can control.\nTone: short, clear sentences; calm; secular; never shaming.`
+
+    const request = `${systemPrompt}\n\nUser conflict: "${trimmedConflict}"\n\nReturn the structured eight-part response in numbered sections with concise guidance only.`
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: request })
+      })
+
+      if (!response.ok) {
+        setError('Relational Compass is unavailable right now. Please try again shortly.')
+        return
+      }
+
+      const data = await response.json()
+      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+    } catch {
+      setError('Unable to reach Relational Compass. Check your connection and retry.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#0d0d10] via-[#0c0f14] to-[#0b0b0f] border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_18px_70px_rgba(255,115,39,0.14)] space-y-6">
+      <div className="absolute -right-12 top-0 h-44 w-44 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ffb347]/18 to-transparent blur-3xl" />
+      <div className="absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-gradient-to-tr from-[#132022]/60 via-orange-500/12 to-transparent blur-3xl" />
+
+      <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.12em] text-orange-100/80">Dharma Compass for Relationships</p>
+          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Relational Compass</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">
+            Calm, secular guidance for conflicts while KIAAN stays untouched—focus on right action, ego-detachment, and respectful communication.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs text-orange-100/80">
+          <span className="rounded-full bg-white/10 border border-orange-500/20 px-3 py-1">Neutral and grounded</span>
+          <span className="rounded-full bg-white/10 border border-orange-500/20 px-3 py-1">Keeps Kiaan intact</span>
+        </div>
+      </div>
+
+      <div className="relative grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-orange-100" htmlFor="relational-conflict">Describe the conflict</label>
+            <textarea
+              id="relational-conflict"
+              value={conflict}
+              onChange={e => setConflict(e.target.value)}
+              placeholder="Example: My partner feels I don’t listen, and I keep getting defensive when they bring it up."
+              className="w-full min-h-[140px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-3 items-start">
+            <button
+              onClick={requestCompass}
+              disabled={!conflict.trim() || loading}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Balancing guidance...' : 'Guide me with Relational Compass'}
+            </button>
+            <button
+              onClick={() => handoffPrompt && onSelectPrompt(handoffPrompt)}
+              disabled={!handoffPrompt}
+              className="px-5 py-3 rounded-2xl bg-white/5 border border-orange-500/30 text-orange-50 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur"
+            >
+              Send context to KIAAN
+            </button>
+            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-xl">
+              Output format: 1) Acknowledge 2) Emotion vs ego 3) Values 4) Right Action 5) Ego-detachment 6) Compassion lens 7) Non-reactive phrasing 8) Next step.
+            </div>
+          </div>
+          {error && <p className="text-sm text-orange-200">{error}</p>}
+
+          {result && (
+            <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
+              <div className="flex items-center justify-between text-xs text-orange-100/70">
+                <span className="font-semibold text-orange-50">Relational Compass response</span>
+                <span>{new Date(result.requestedAt).toLocaleString()}</span>
+              </div>
+              <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-[#0b0c0f]/90 border border-orange-500/25 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)] space-y-2">
+            <div className="flex items-center justify-between text-xs text-orange-100/80">
+              <span className="font-semibold text-orange-50">Trigger detection</span>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Route to Compass</span>
+            </div>
+            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
+              {RELATIONAL_TRIGGER_PATTERNS.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl bg-[#0c0c10]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
+            <div className="flex items-center justify-between text-xs text-orange-100/80">
+              <span className="font-semibold text-orange-50">UI copy</span>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Screen text</span>
+            </div>
+            <ul className="space-y-1 text-sm text-orange-100/85">
+              {RELATIONAL_UI_COPY.map(copy => (
+                <li key={copy.label} className="flex items-start gap-2">
+                  <span className="font-semibold text-orange-50 min-w-[90px]">{copy.label}:</span>
+                  <span className="text-orange-100/80">{copy.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl bg-[#0b0b0f]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
+            <div className="flex items-center justify-between text-xs text-orange-100/80">
+              <span className="font-semibold text-orange-50">Metaphor system</span>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Visual anchors</span>
+            </div>
+            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
+              {RELATIONAL_VISUAL_METAPHORS.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl bg-[#0c0c10]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
+            <div className="flex items-center justify-between text-xs text-orange-100/80">
+              <span className="font-semibold text-orange-50">Grounding animation</span>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">4 steps</span>
+            </div>
+            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
+              {RELATIONAL_GROUNDING_STEPS.map(step => (
+                <li key={step}>{step}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl bg-[#0c0c10]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
+            <div className="flex items-center justify-between text-xs text-orange-100/80">
+              <span className="font-semibold text-orange-50">Integration blueprint</span>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">With KIAAN</span>
+            </div>
+            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
+              {RELATIONAL_INTEGRATION_BLUEPRINT.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
     </section>
   )
 }
