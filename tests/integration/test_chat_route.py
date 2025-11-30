@@ -18,14 +18,14 @@ async def test_chat_message_enforces_gita_structure(monkeypatch, test_client):
     responses = [
         "This is missing structure and should fail validation.",
         (
-            "**Ancient Wisdom Principle:** The Bhagavad Gita teaches steady action with a calm mind, like the teacher guiding the student toward duty without clinging.\n"
-            "**Modern Application:** For your situation, approach the challenge as your dharma—take mindful action while staying balanced and compassionate toward yourself.\n"
+            "**Ancient Wisdom Principle:** Karma-yoga with equanimity—steady action without clinging to results.\n"
+            "**Modern Application:** For your situation, treat this as your dharma: take the next clear step while staying kind to yourself.\n"
             "**Practical Steps:**\n"
-            "- Take one focused action today as an offering, letting go of immediate results.\n"
-            "- Pause for three mindful breaths before decisions to return to equanimity.\n"
+            "- Take one focused action as an offering, letting go of immediate results.\n"
+            "- Pause for three mindful breaths before decisions to return to balance.\n"
             "- Keep a short journal noting when you acted without attachment to outcomes.\n"
-            "- Treat yourself and others with the kindness the Gita calls the inner witness to embody.\n"
-            "**Deeper Understanding:** Each step is karma-yoga—acting with dedication while resting in the inner steadiness the Gita describes, so your mind stays resilient and clear."
+            "- Treat yourself and others with compassion as you practice.\n"
+            "**Deeper Understanding:** Each step of selfless effort trains the mind toward steadiness and clarity, building resilience without needing to cite any scripture."
         ),
     ]
 

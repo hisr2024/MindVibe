@@ -5,6 +5,7 @@ import logging
 import uuid
 import asyncio
 import time
+import re
 from importlib import util as importlib_util
 from pathlib import Path
 from typing import Dict, Any, List
@@ -70,6 +71,30 @@ class KIAAN:
         )
         self._last_crisis_response_at: float | None = None
         self.repo_wisdom = self._load_repo_wisdom()
+
+    def _sanitize_text(self, text: str) -> str:
+        """Remove explicit scripture or character references from context."""
+
+        blocked_terms = [
+            "bhagavad gita",
+            "gita",
+            "krishna",
+            "arjuna",
+            "mahabharata",
+            "kurukshetra",
+            "pandava",
+            "pandavas",
+            "vyasa",
+            "chapter",
+            "verse",
+        ]
+
+        cleaned = text
+        for term in blocked_terms:
+            cleaned = re.sub(rf"\b{re.escape(term)}\b", "ancient teaching", cleaned, flags=re.IGNORECASE)
+
+        cleaned = re.sub(r"\s+ancient teaching\s+ancient teaching", " ancient teaching ", cleaned)
+        return cleaned.strip()
 
     def is_crisis(self, message: str) -> bool:
         return any(word in message.lower() for word in self.crisis_keywords)
@@ -179,27 +204,27 @@ class KIAAN:
             if not gita_context:
                 gita_context = "Anchor on balance, mindful action, and calm focus."
 
-            system_prompt = f"""You are KIAAN, an advanced AI mental health conversational guide rooted in the Bhagavad Gita's wisdom.
+            system_prompt = f"""You are KIAAN, an advanced AI mental health conversational guide grounded in Bhagavad Gita wisdom while speaking in modern, universal language.
 
 RESPONSE STRUCTURE (MANDATORY):
-1) **Ancient Wisdom Principle:** Name the Bhagavad Gita principle in plain language (no verse numbers) and phrase it as timeless guidance from the Gita.
-2) **Modern Application:** Translate that principle to the user's situation using clear Gita-themed language (teacher, student, dharma, karma-yoga, equanimity, self-mastery, inner witness, etc.) without quoting verses.
-3) **Practical Steps:** Provide 3-5 bullet points of immediately usable actions inspired by the Gita (detached action, disciplined practice, mindful breath, compassionate perspective) without citing verse numbers.
-4) **Deeper Understanding:** Offer a concise reflection tying the advice back to the Gita's view of steady mind, duty without attachment, and inner resilience.
+1) **Ancient Wisdom Principle:** Name the timeless yogic principle (dharma, karma-yoga, equanimity, self-mastery, inner witness) without mentioning scripture titles, chapters, or characters.
+2) **Modern Application:** Translate that principle to the user's situation using clear, contemporary language that reflects yogic ideas without citing any text or names.
+3) **Practical Steps:** Provide 3-5 bullet points of immediately usable actions (detached action, disciplined practice, mindful breath, compassionate perspective) with no scripture references.
+4) **Deeper Understanding:** Offer a concise reflection tying the advice back to steady mind, duty without attachment, and inner resilience—again without naming the Bhagavad Gita, Krishna, Arjuna, or verse numbers.
 
 GUIDANCE AMBIT (DO NOT BREAK):
-- Always ground advice in Bhagavad Gita principles like balanced action, detachment from outcomes, disciplined practice, compassion, or inner steadiness.
-- NEVER include verse numbers or citations, but make the Gita inspiration explicit.
+- Always ground advice in Gita-inspired principles like balanced action, detachment from outcomes, disciplined practice, compassion, or inner steadiness.
+- NEVER include scripture titles, verse numbers, or character names; keep the wisdom implicit and universal.
 - Keep the tone warm, compassionate, and empowering—speak as a supportive friend.
-- Address modern struggles (stress, social media, academics, relationships, overthinking) with clearly Gita-themed framing.
+- Address modern struggles (stress, social media, academics, relationships, overthinking) with clear, practical framing.
 - Vary phrasing between replies to avoid repetition.
 
-Additional context from Bhagavad Gita themes (keep internal, never cite numbers):
+Additional context from the wisdom knowledge base (keep internal, never cite titles or names):
 {gita_context}
 
-Here is the user’s message: analyze, interpret, and synthesize advice aligned with Gita principles. Keep responses to 200-300 words and end with encouragement (e.g., “You’ve got this. 💖”)."""
+Here is the user’s message: analyze, interpret, and synthesize advice aligned with these principles. Keep responses to 200-300 words and end with encouragement (e.g., “You’ve got this. 💖”)."""
 
-            strict_system_prompt = system_prompt + "\n\nSTRICT MODE: Do not respond unless all four labeled sections appear exactly once, with bullet points under Practical Steps and explicit Bhagavad Gita framing without verse numbers."
+            strict_system_prompt = system_prompt + "\n\nSTRICT MODE: Do not respond unless all four labeled sections appear exactly once, with bullet points under Practical Steps and absolutely no scripture titles, verse numbers, or character names."
 
             messages = [
                 {"role": "system", "content": system_prompt},
@@ -385,7 +410,7 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
         if wisdom_payload.get("practical"):
             context_lines.append(f"Practical: {wisdom_payload['practical']}")
 
-        return "\n".join(context_lines)
+        return self._sanitize_text("\n".join(context_lines))
 
     def _build_gita_context(self, verse_results: list) -> str:
         if not verse_results:
@@ -404,6 +429,7 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
                     sanitized_english = verse.english
 
                 if sanitized_english:
+                    sanitized_english = self._sanitize_text(sanitized_english)
                     context_parts.append(f"Wisdom: {sanitized_english}")
                 if hasattr(verse, 'theme') and verse.theme:
                     formatted_theme = verse.theme.replace("_", " ").title()
@@ -414,7 +440,7 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
                         context_parts.append("Applications: " + ", ".join(apps[:3]))
                 context_parts.append("---")
         
-        return "\n".join(context_parts) if context_parts else "Focus on duty, detachment, inner peace."
+        return self._sanitize_text("\n".join(context_parts)) if context_parts else "Focus on duty, detachment, inner peace."
 
     async def _create_completion_with_retries(self, model: str, messages: list) -> str:
         attempt = 0
@@ -524,7 +550,7 @@ async def about() -> Dict[str, Any]:
         "version": "13.0",
         "model": kiaan.last_model_used or kiaan.model_name,
         "status": "Operational" if kiaan.ready else "Error",
-        "description": "GPT-4o guided coach grounded in the Bhagavad Gita's 700 verses",
+        "description": "GPT-4o guided coach grounded in timeless yogic wisdom",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations"
     }
