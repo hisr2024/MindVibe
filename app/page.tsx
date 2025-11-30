@@ -214,30 +214,28 @@ function QuickHelp() {
     { emoji: '🎯', label: 'Finding purpose', query: "I'm searching for my purpose" },
     { emoji: '🙏', label: 'Need peace', query: "I need inner peace" },
   ]
-
-    return (
-      <section className="bg-white/5 backdrop-blur border border-cyan-500/10 rounded-3xl p-5 md:p-6 space-y-3 shadow-[0_10px_50px_rgba(148,179,253,0.12)]">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-cyan-300 to-purple-200 bg-clip-text text-transparent">🎯 Quick Help</h2>
-          <p className="text-xs text-cyan-100/70">Tap a vibe to auto-fill the chat</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {scenarios.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                const input = document.querySelector('input[placeholder*\"Type\"]') as HTMLInputElement
-                if (input) { input.value = s.query; input.focus() }
-              }}
-              className="group bg-gradient-to-br from-[#0f172a]/70 via-[#111827]/60 to-[#1f2937]/60 border border-white/5 hover:border-cyan-400/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(125,226,209,0.08)] hover:-translate-y-1">
-            >
-              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
-              <div className="text-sm text-cyan-50">{s.label}</div>
-            </button>
-          ))}
-        </div>
-      </section>
-    )
+  return (
+    <section className="bg-white/5 backdrop-blur border border-cyan-500/10 rounded-3xl p-5 md:p-6 space-y-3 shadow-[0_10px_50px_rgba(148,179,253,0.12)]">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <h2 className="text-xl font-semibold bg-gradient-to-r from-cyan-300 to-purple-200 bg-clip-text text-transparent">🎯 Quick Help</h2>
+        <p className="text-xs text-cyan-100/70">Tap a vibe to auto-fill the chat</p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {scenarios.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              const input = document.querySelector('input[placeholder*"Type"]') as HTMLInputElement
+              if (input) { input.value = s.query; input.focus() }
+            }}
+            className="group bg-gradient-to-br from-[#0f172a]/70 via-[#111827]/60 to-[#1f2937]/60 border border-white/5 hover:border-cyan-400/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(125,226,209,0.08)] hover:-translate-y-1">
+            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
+            <div className="text-sm text-cyan-50">{s.label}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
 }
 
 function DailyWisdom() {
