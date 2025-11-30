@@ -65,27 +65,41 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#0f1b2c] to-[#0c1424] text-white p-4 md:p-8">
-      <div className="pointer-events-none absolute inset-0 opacity-70 mix-blend-screen">
-        <div className="absolute -left-10 top-10 h-64 w-64 rounded-full bg-gradient-to-br from-[#7de2d1] via-[#c3f8ff] to-[#9d7efc] blur-3xl" />
-        <div className="absolute right-0 bottom-10 h-72 w-72 rounded-full bg-gradient-to-br from-[#ffb6c1] via-[#94b3fd] to-[#7edce2] blur-3xl" />
-        <div className="absolute left-1/3 top-1/4 h-40 w-40 rounded-full bg-gradient-to-br from-[#6dd5fa] via-[#c8b5ff] to-[#7cf4ff] blur-2xl opacity-70 animate-pulse" />
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/30 via-amber-500/10 to-transparent blur-3xl" />
+        <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-amber-400/20 via-orange-500/10 to-transparent blur-[120px]" />
+        <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-[#1f2937] via-orange-500/10 to-transparent blur-[90px] animate-pulse" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.04),transparent_35%)]" />
       </div>
 
-      <div className="relative max-w-5xl mx-auto space-y-8">
-        <header className="text-center space-y-4 py-8">
-          <div className="mx-auto w-max rounded-full bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-cyan-100 border border-white/10 shadow-[0_0_30px_rgba(125,226,209,0.35)]">
-            Calm • Kind • Creative
+      <div className="relative max-w-6xl mx-auto space-y-8">
+        <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 md:p-10 shadow-[0_30px_120px_rgba(255,115,39,0.18)]">
+          <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-amber-400/30 to-transparent blur-2xl" />
+          <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <PeaceLogo />
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
+                <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-200 to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
+                <p className="text-lg md:text-xl text-orange-100/90">Calm wisdom, in a glow of black + ember.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 flex-wrap justify-center">
+              <TokenCard label="Inner Peace" note="Gentle breath and soft focus" gradient="from-orange-500/70 via-amber-400/60 to-orange-300/50" icon={<SunriseIcon />} />
+              <TokenCard label="Mind Control" note="Steady steps, one thought at a time" gradient="from-slate-900 via-slate-800 to-orange-500/30" icon={<MindWaveIcon />} />
+              <TokenCard label="Self Kindness" note="You are welcome here" gradient="from-orange-700/70 via-amber-500/60 to-rose-400/40" icon={<HeartBreezeIcon />} />
+            </div>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold bg-[radial-gradient(circle_at_30%_30%,#7de2d1,transparent_40%),radial-gradient(circle_at_70%_40%,#a299ff,transparent_35%),linear-gradient(90deg,#7de2d1,#a5b4fc,#ffb6c1)] bg-clip-text text-transparent drop-shadow-[0_10px_35px_rgba(162,153,255,0.25)]">
-            🕉️ KIAAN
-          </h1>
-          <p className="text-xl md:text-2xl text-cyan-100/90 font-light">Your inner peace, your friend indeed.</p>
-          <p className="text-sm text-cyan-100/70">Ancient wisdom, Gen Z glow • 700+ timeless teachings tuned to you</p>
+          <div className="mt-6 grid gap-3 md:grid-cols-3 text-sm text-orange-100/80">
+            <BadgePill>700+ timeless prompts curated for everyday calm</BadgePill>
+            <BadgePill>Private by default • no sign-up needed</BadgePill>
+            <BadgePill>Responsive, mobile-first, and joyfully simple</BadgePill>
+          </div>
         </header>
 
-        <div className="bg-white/5 backdrop-blur border border-cyan-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(125,226,209,0.15)]">
-          <p className="text-sm text-cyan-100/80">🔒 All conversations stay yours • a serene, confidential sanctuary</p>
+        <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
+          <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
         <KIAANChat />
@@ -94,8 +108,94 @@ export default function Home() {
         <PublicChatRooms />
         <Journal />
         <MoodTracker />
+
+        <section className="bg-[#0b0b0f] border border-orange-500/15 rounded-3xl p-5 md:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-3">
+          <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
+          <p className="text-sm text-orange-100/80 leading-relaxed">
+            KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country’s emergency medical services or a licensed professional right away.
+          </p>
+        </section>
       </div>
     </main>
+  )
+}
+
+function BadgePill({ children }: { children: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-2 backdrop-blur text-xs font-semibold shadow-[0_0_30px_rgba(255,115,39,0.18)]">
+      <span className="inline-block h-2 w-2 rounded-full bg-orange-400 animate-pulse" />
+      <span className="text-orange-50/90">{children}</span>
+    </div>
+  )
+}
+
+function PeaceLogo() {
+  return (
+    <div className="relative h-20 w-20 rounded-3xl bg-gradient-to-br from-[#141414] via-[#1a120f] to-[#0c0c0e] border border-orange-500/30 shadow-[0_20px_60px_rgba(255,115,39,0.25)] flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-[conic-gradient(from_120deg_at_50%_50%,rgba(255,140,64,0.4),rgba(255,255,255,0.08),rgba(255,140,64,0.4))] opacity-70" />
+      <svg viewBox="0 0 120 120" className="relative h-14 w-14 text-orange-100">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="6" className="opacity-60" />
+        <path d="M60 16c12 14 17 28 17 44 0 16-5 30-17 44-12-14-17-28-17-44 0-16 5-30 17-44Z" fill="url(#peaceGlow)" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+        <path d="M45 64c5 6 10 9 15 9s10-3 15-9" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+        <defs>
+          <linearGradient id="peaceGlow" x1="40" y1="20" x2="80" y2="100" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#ff7a1f" stopOpacity="0.8" />
+            <stop offset="1" stopColor="#f3d9b0" stopOpacity="0.9" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  )
+}
+
+function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: JSX.Element }) {
+  return (
+    <div className={`relative min-w-[180px] rounded-2xl border border-orange-400/25 bg-gradient-to-br ${gradient} p-3 shadow-[0_10px_45px_rgba(255,115,39,0.22)] overflow-hidden`}>
+      <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-orange-400/30 blur-2xl" />
+      <div className="flex items-center gap-3">
+        <div className="h-12 w-12 rounded-xl bg-black/40 border border-orange-200/30 flex items-center justify-center text-2xl text-orange-100">
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-orange-50">{label}</p>
+          <p className="text-xs text-orange-100/80 leading-snug">{note}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SunriseIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <path d="M16 36c0-8 6.5-14 16-14s16 6 16 14" strokeLinejoin="round" />
+      <path d="M12 44h40" />
+      <path d="M20 48h24" />
+      <path d="M32 12v8" />
+      <path d="M20 18 16 14" />
+      <path d="M44 18 48 14" />
+      <circle cx="32" cy="34" r="6" fill="currentColor" className="text-orange-300" />
+    </svg>
+  )
+}
+
+function MindWaveIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <path d="M18 28c0-10 6-18 14-18s14 8 14 18c0 8-4 14-10 17v9l-8-5v-4C22 42 18 36 18 28Z" strokeLinejoin="round" />
+      <path d="M22 28c2 2 4 3 6 3s4-1 6-3" />
+      <path d="M24 18c2 1 4 2 8 2s6-1 8-2" />
+    </svg>
+  )
+}
+
+function HeartBreezeIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <path d="M22 22c-4 0-8 3-8 9 0 9 12 16 18 20 6-4 18-11 18-20 0-6-4-9-8-9-4 0-7 3-10 6-3-3-6-6-10-6Z" strokeLinejoin="round" />
+      <path d="M16 36c3-1 6-1 8 1" />
+      <path d="M40 32c3-1 5-1 8 1" />
+    </svg>
   )
 }
 
@@ -140,31 +240,31 @@ function KIAANChat() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(125,226,209,0.15)]">
-      <div className="absolute right-10 top-10 h-24 w-24 rounded-full bg-gradient-to-br from-[#7de2d1]/40 via-[#c3f8ff]/30 to-[#9d7efc]/30 blur-2xl" />
+    <section className="relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)]">
+      <div className="absolute right-10 top-10 h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/30 via-amber-400/25 to-orange-200/10 blur-2xl" />
       <div className="flex items-center gap-3 relative">
         <div className="text-4xl">💬</div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-cyan-300 via-indigo-200 to-pink-200 bg-clip-text text-transparent">Talk to KIAAN</h2>
-          <p className="text-sm text-cyan-100/70">Gentle guidance with a soft neon glow</p>
+          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-orange-300 via-amber-200 to-rose-200 bg-clip-text text-transparent">Talk to KIAAN</h2>
+          <p className="text-sm text-orange-100/80">Gentle guidance with an ember glow</p>
         </div>
       </div>
 
-      <div className="bg-[#0d1627]/70 border border-white/10 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
+      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-cyan-100/60 py-20 md:py-32">
+          <div className="text-center text-orange-100/70 py-20 md:py-32">
             <p className="text-6xl mb-4">✨</p>
             <p className="text-xl mb-2">How can I guide you today?</p>
-            <p className="text-sm text-cyan-100/60">Share what's on your mind</p>
+            <p className="text-sm text-orange-100/70">Share what's on your mind</p>
           </div>
         )}
 
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-cyan-500/10 ${
+            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
               msg.role === 'user'
-                ? 'bg-gradient-to-r from-cyan-500/80 via-blue-500/80 to-indigo-500/80 text-white'
-                : 'bg-white/5 border border-white/10 text-cyan-50 backdrop-blur'
+                ? 'bg-gradient-to-r from-orange-500/80 via-amber-500/80 to-rose-500/80 text-white'
+                : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
             }`}>
               <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
             </div>
@@ -173,7 +273,7 @@ function KIAANChat() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white/10 border border-white/10 px-4 py-3 rounded-2xl text-cyan-100/80">
+            <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
               <span className="animate-pulse">KIAAN is reflecting...</span>
             </div>
           </div>
@@ -189,12 +289,12 @@ function KIAANChat() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-          className="flex-1 px-4 py-3 bg-white/5 border border-cyan-500/30 rounded-xl focus:ring-2 focus:ring-cyan-400/70 outline-none placeholder:text-cyan-100/60 text-cyan-50"
+          className="flex-1 px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="px-6 py-3 bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-400 hover:scale-105 disabled:from-slate-700 disabled:via-slate-700 disabled:to-slate-700 rounded-xl font-semibold transition-all text-slate-950 shadow-lg shadow-cyan-500/20"
+          className="px-6 py-3 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-200 hover:scale-105 disabled:from-zinc-700 disabled:via-zinc-700 disabled:to-zinc-700 rounded-xl font-semibold transition-all text-slate-950 shadow-lg shadow-orange-500/25"
         >
           Send
         </button>
@@ -215,10 +315,10 @@ function QuickHelp() {
     { emoji: '🙏', label: 'Need peace', query: "I need inner peace" },
   ]
   return (
-    <section className="bg-white/5 backdrop-blur border border-cyan-500/10 rounded-3xl p-5 md:p-6 space-y-3 shadow-[0_10px_50px_rgba(148,179,253,0.12)]">
+    <section className="bg-[#0d0d10]/80 backdrop-blur border border-orange-500/15 rounded-3xl p-5 md:p-6 space-y-3 shadow-[0_10px_50px_rgba(255,115,39,0.16)]">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h2 className="text-xl font-semibold bg-gradient-to-r from-cyan-300 to-purple-200 bg-clip-text text-transparent">🎯 Quick Help</h2>
-        <p className="text-xs text-cyan-100/70">Tap a vibe to auto-fill the chat</p>
+        <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-300 to-amber-200 bg-clip-text text-transparent">🎯 Quick Help</h2>
+        <p className="text-xs text-orange-100/80">Tap a vibe to auto-fill the chat</p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {scenarios.map((s, i) => (
@@ -228,9 +328,9 @@ function QuickHelp() {
               const input = document.querySelector('input[placeholder*"Type"]') as HTMLInputElement
               if (input) { input.value = s.query; input.focus() }
             }}
-            className="group bg-gradient-to-br from-[#0f172a]/70 via-[#111827]/60 to-[#1f2937]/60 border border-white/5 hover:border-cyan-400/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(125,226,209,0.08)] hover:-translate-y-1">
+            className="group bg-gradient-to-br from-[#0f0f12]/80 via-[#1a1a1f]/70 to-[#1f1f24]/70 border border-orange-500/10 hover:border-orange-400/40 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(255,115,39,0.12)] hover:-translate-y-1">
             <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
-            <div className="text-sm text-cyan-50">{s.label}</div>
+            <div className="text-sm text-orange-50">{s.label}</div>
           </button>
         ))}
       </div>
@@ -246,29 +346,29 @@ function DailyWisdom() {
   }
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1528] via-[#0d1c30] to-[#0a1224] border border-purple-300/10 p-6 md:p-8 shadow-[0_20px_80px_rgba(162,153,255,0.12)]">
-      <div className="absolute -right-6 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-[#a299ff]/30 via-[#7de2d1]/20 to-transparent blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#94b3fd]/25 via-[#ffb6c1]/20 to-transparent blur-3xl" />
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f0d0c] via-[#140f0c] to-[#0c0a0a] border border-orange-400/15 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.16)]">
+      <div className="absolute -right-6 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/25 via-amber-300/20 to-transparent blur-3xl" />
+      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#2b1a13]/50 via-orange-500/15 to-transparent blur-3xl" />
       <div className="relative flex justify-between mb-4 items-start gap-3">
         <div className="flex gap-2 items-center">
           <span className="text-3xl">💎</span>
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-cyan-200 to-pink-200 bg-clip-text text-transparent">Today's Wisdom</h2>
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Today's Wisdom</h2>
         </div>
-        <div className="text-sm text-cyan-100/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
+        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
       </div>
 
-      <blockquote className="relative text-lg text-cyan-50 mb-4 italic leading-relaxed bg-white/5 border border-white/10 rounded-2xl p-4 shadow-[0_10px_40px_rgba(148,179,253,0.15)]">
+      <blockquote className="relative text-lg text-orange-50 mb-4 italic leading-relaxed bg-white/5 border border-orange-200/15 rounded-2xl p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
         “{wisdom.text}”
       </blockquote>
 
-      <p className="text-sm text-cyan-100/80 mb-4">✨ Principle: {wisdom.principle}</p>
+      <p className="text-sm text-orange-100/80 mb-4">✨ Principle: {wisdom.principle}</p>
 
       <div className="flex gap-3 flex-wrap">
-        <button className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-indigo-400 text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-cyan-500/20 hover:scale-105 transition">💬 Chat about this</button>
-        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-white/10 border border-white/20 hover:border-cyan-200/60 rounded-lg text-sm text-cyan-50 transition">
+        <button className="px-4 py-2 bg-gradient-to-r from-orange-400 to-amber-300 text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-orange-500/20 hover:scale-105 transition">💬 Chat about this</button>
+        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">
           {saved ? '⭐ Saved' : '☆ Save'}
         </button>
-        <button className="px-4 py-2 bg-white/10 border border-white/20 hover:border-pink-200/60 rounded-lg text-sm text-cyan-50 transition">📤 Share</button>
+        <button className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">📤 Share</button>
       </div>
     </section>
   )
@@ -341,14 +441,14 @@ function PublicChatRooms() {
   }
 
   return (
-    <section className="bg-white/5 backdrop-blur border border-cyan-500/15 rounded-3xl p-6 md:p-8 space-y-4 shadow-[0_15px_60px_rgba(125,226,209,0.12)]">
+    <section className="bg-[#0c0c10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 md:p-8 space-y-4 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-sm text-cyan-100/70">Community Rooms</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-cyan-200 to-pink-200 bg-clip-text text-transparent">Respectful Public Chats</h2>
-          <p className="text-sm text-cyan-100/60">Positive, helpful exchanges only. Foul language in any language is blocked.</p>
+          <p className="text-sm text-orange-100/80">Community Rooms</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Respectful Public Chats</h2>
+          <p className="text-sm text-orange-100/70">Positive, helpful exchanges only. Foul language in any language is blocked.</p>
         </div>
-        <div className="text-xs text-cyan-100/80 bg-white/10 border border-white/10 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
+        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -358,8 +458,8 @@ function PublicChatRooms() {
             onClick={() => { setActiveRoom(room.id); setAlert(null); }}
             className={`px-4 py-2 rounded-2xl border text-sm transition-all ${
               activeRoom === room.id
-                ? 'bg-gradient-to-r from-cyan-400/70 via-indigo-400/70 to-pink-400/70 text-slate-950 font-semibold shadow shadow-cyan-500/20'
-                : 'bg-white/5 border-white/10 text-cyan-50 hover:border-cyan-300/40'
+                ? 'bg-gradient-to-r from-orange-400/70 via-amber-400/70 to-rose-400/70 text-slate-950 font-semibold shadow shadow-orange-500/25'
+                : 'bg-white/5 border-orange-200/10 text-orange-50 hover:border-orange-300/40'
             }`}
           >
             {room.name}
@@ -367,17 +467,17 @@ function PublicChatRooms() {
         ))}
       </div>
 
-      <div className="bg-[#0d1627]/70 border border-white/10 rounded-2xl p-4 space-y-3 h-[320px] overflow-y-auto shadow-inner shadow-cyan-500/5">
+      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 h-[320px] overflow-y-auto shadow-inner shadow-orange-500/5">
         {activeMessages.map((msg, index) => (
           <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-cyan-500/10 ${
+            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-orange-500/10 ${
               msg.author === 'You'
-                ? 'bg-gradient-to-r from-cyan-500/80 via-indigo-500/80 to-pink-500/80 text-white'
-                : 'bg-white/5 border border-white/10 text-cyan-50 backdrop-blur'
+                ? 'bg-gradient-to-r from-orange-500/80 via-amber-500/80 to-rose-500/80 text-white'
+                : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
             }`}>
               <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
               <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className="text-[11px] text-cyan-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
+              <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
             </div>
           </div>
         ))}
@@ -392,12 +492,12 @@ function PublicChatRooms() {
           onChange={e => setMessage(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
           placeholder="Share something helpful for the room..."
-          className="flex-1 px-4 py-3 bg-white/5 border border-cyan-500/30 rounded-xl focus:ring-2 focus:ring-cyan-400/70 outline-none placeholder:text-cyan-100/60 text-cyan-50"
+          className="flex-1 px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
         />
         <button
           onClick={sendRoomMessage}
           disabled={!message.trim()}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-400 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-cyan-500/20"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-amber-300 to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20"
         >
           Share warmly
         </button>
@@ -568,24 +668,24 @@ function Journal() {
 
   return (
     <section className="space-y-4">
-      <div className="bg-white/5 backdrop-blur border border-cyan-500/15 rounded-3xl p-6 shadow-[0_15px_60px_rgba(125,226,209,0.12)]">
+      <div className="bg-[#0d0d10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="text-sm text-cyan-100/80">Private Journal</p>
-            <h2 className="text-2xl font-semibold bg-gradient-to-r from-cyan-200 to-pink-200 bg-clip-text text-transparent">Sacred Reflections</h2>
-            <p className="text-sm text-cyan-100/70">Entries stay on your device and refresh the weekly guidance automatically.</p>
+            <p className="text-sm text-orange-100/80">Private Journal</p>
+            <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Sacred Reflections</h2>
+            <p className="text-sm text-orange-100/70">Entries stay on your device and refresh the weekly guidance automatically.</p>
           </div>
-          <div className="bg-white/10 border border-white/10 text-cyan-50 px-4 py-2 rounded-2xl text-sm">
+          <div className="bg-white/5 border border-orange-500/20 text-orange-50 px-4 py-2 rounded-2xl text-sm">
             Weekly entries: {weeklyEntries.length}
           </div>
         </div>
 
         <div className="mt-4 space-y-2">
-          <div className="bg-[#0d1627]/70 border border-white/10 text-cyan-50 px-4 py-3 rounded-2xl text-sm flex items-start gap-2">
+          <div className="bg-black/60 border border-orange-500/20 text-orange-50 px-4 py-3 rounded-2xl text-sm flex items-start gap-2">
             <span>🔒</span>
             <div>
               <p className="font-semibold">Fully encrypted on your device</p>
-              <p className="text-cyan-100/70">Entries are sealed locally with AES-GCM before saving. Only this browser can decrypt them.</p>
+              <p className="text-orange-100/70">Entries are sealed locally with AES-GCM before saving. Only this browser can decrypt them.</p>
             </div>
           </div>
           {!encryptionReady && (
@@ -599,7 +699,7 @@ function Journal() {
         <div className="mt-4 grid md:grid-cols-2 gap-4">
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-emerald-200">Today’s tone</label>
+              <label className="text-sm text-orange-100/90">Today’s tone</label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {moods.map(option => (
                   <button
@@ -607,8 +707,8 @@ function Journal() {
                     onClick={() => setMood(option.label)}
                     className={`px-3 py-2 rounded-2xl border text-sm transition-all ${
                       mood === option.label
-                        ? 'bg-emerald-700/70 border-emerald-400 text-white shadow'
-                        : 'bg-emerald-950/40 border-emerald-800 text-emerald-100 hover:border-emerald-600'
+                        ? 'bg-gradient-to-r from-orange-500/70 via-amber-500/70 to-orange-300/70 border-orange-300 text-black shadow'
+                        : 'bg-black/50 border-orange-800/60 text-orange-100 hover:border-orange-500/60'
                     }`}
                   >
                     <span className="mr-1">{option.emoji}</span>{option.label}
@@ -621,43 +721,43 @@ function Journal() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="Title (optional)"
-              className="w-full bg-emerald-950/60 border border-emerald-800 rounded-2xl px-3 py-2 text-emerald-50"
+              className="w-full bg-black/50 border border-orange-800/60 rounded-2xl px-3 py-2 text-orange-50 placeholder:text-orange-100/60"
             />
             <textarea
               value={body}
               onChange={e => setBody(e.target.value)}
               placeholder="Write freely. Only you can see this."
-              className="w-full h-32 bg-emerald-950/60 border border-emerald-800 rounded-2xl p-3 text-emerald-50"
+              className="w-full h-32 bg-black/50 border border-orange-800/60 rounded-2xl p-3 text-orange-50 placeholder:text-orange-100/60"
             />
             <button
               onClick={addEntry}
               disabled={!body.trim()}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 to-amber-300 text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
             >
               Add Journal Entry
             </button>
           </div>
 
-          <div className="bg-[#0d1627]/70 border border-white/10 rounded-2xl p-4 space-y-2">
+          <div className="bg-black/60 border border-orange-500/20 rounded-2xl p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-emerald-100">Weekly Assessment</h3>
-              <div className="text-xs text-emerald-200">Updated automatically</div>
+              <h3 className="text-lg font-semibold text-orange-100">Weekly Assessment</h3>
+              <div className="text-xs text-orange-100/80">Updated automatically</div>
             </div>
-            <p className="text-sm text-emerald-200/90">Most present mood: <span className="font-semibold text-emerald-100">{mostCommonMood}</span></p>
-            <div className="grid grid-cols-2 gap-2 text-sm text-emerald-200/90">
-              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="text-xs text-emerald-300/80">Positive moments logged</div>
-                <div className="text-xl font-semibold text-emerald-100">{positiveDays}</div>
+            <p className="text-sm text-orange-100/85">Most present mood: <span className="font-semibold text-orange-50">{mostCommonMood}</span></p>
+            <div className="grid grid-cols-2 gap-2 text-sm text-orange-100/85">
+              <div className="bg-white/5 rounded-xl p-3 border border-orange-200/20">
+                <div className="text-xs text-orange-200/80">Positive moments logged</div>
+                <div className="text-xl font-semibold text-orange-50">{positiveDays}</div>
               </div>
-              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="text-xs text-emerald-300/80">Tender/Challenging days</div>
-                <div className="text-xl font-semibold text-emerald-100">{challengingDays}</div>
+              <div className="bg-white/5 rounded-xl p-3 border border-orange-200/20">
+                <div className="text-xs text-orange-200/80">Tender/Challenging days</div>
+                <div className="text-xl font-semibold text-orange-50">{challengingDays}</div>
               </div>
             </div>
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-sm text-emerald-100 font-semibold">KIAAN’s gentle guidance</p>
-              <p className="text-sm text-emerald-200/80 leading-relaxed">{assessment.headline}</p>
-              <ul className="mt-2 space-y-1 text-sm text-emerald-200/80 list-disc list-inside">
+            <div className="bg-white/5 rounded-xl p-3 border border-orange-200/20">
+              <p className="text-sm text-orange-50 font-semibold">KIAAN’s gentle guidance</p>
+              <p className="text-sm text-orange-100/80 leading-relaxed">{assessment.headline}</p>
+              <ul className="mt-2 space-y-1 text-sm text-orange-100/80 list-disc list-inside">
                 {assessment.guidance.map((tip, i) => (
                   <li key={i}>{tip}</li>
                 ))}
@@ -667,33 +767,33 @@ function Journal() {
         </div>
       </div>
 
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-5 space-y-3">
+      <div className="bg-[#0c0c10]/80 border border-orange-500/15 rounded-3xl p-5 space-y-3 shadow-[0_10px_40px_rgba(255,115,39,0.1)]">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <h3 className="text-lg font-semibold text-zinc-100">Recent entries</h3>
-          <p className="text-xs text-zinc-400">Newest first • stored locally</p>
+          <h3 className="text-lg font-semibold text-orange-50">Recent entries</h3>
+          <p className="text-xs text-orange-100/70">Newest first • stored locally</p>
         </div>
         {entries.length === 0 ? (
-          <p className="text-sm text-zinc-400">No entries yet. Your reflections will appear here.</p>
+          <p className="text-sm text-orange-100/70">No entries yet. Your reflections will appear here.</p>
         ) : (
           <ul className="space-y-3">
             {entries.map(entry => (
-              <li key={entry.id} className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800">
-                <div className="flex items-center justify-between text-xs text-zinc-400">
+              <li key={entry.id} className="p-4 rounded-2xl bg-black/60 border border-orange-800/40">
+                <div className="flex items-center justify-between text-xs text-orange-100/70">
                   <span>{new Date(entry.at).toLocaleString()}</span>
-                  <span className="px-2 py-1 rounded-lg bg-emerald-900/60 text-emerald-100 border border-emerald-800 text-[11px]">{entry.mood}</span>
+                  <span className="px-2 py-1 rounded-lg bg-orange-900/50 text-orange-100 border border-orange-700 text-[11px]">{entry.mood}</span>
                 </div>
-                {entry.title && <div className="mt-1 font-semibold text-zinc-100">{entry.title}</div>}
-                <div className="mt-1 text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">{entry.body}</div>
+                {entry.title && <div className="mt-1 font-semibold text-orange-50">{entry.title}</div>}
+                <div className="mt-1 text-sm text-orange-100 whitespace-pre-wrap leading-relaxed">{entry.body}</div>
                 <div className="mt-3 space-y-2">
                   <button
                     onClick={() => requestGuidance(entry)}
                     disabled={!!guidanceLoading[entry.id]}
-                    className="px-3 py-2 rounded-xl bg-gradient-to-r from-blue-700 to-purple-700 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-400 text-sm font-semibold text-black disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
                   >
                     {guidanceLoading[entry.id] ? 'KIAAN is reading...' : "Get KIAAN's opinion"}
                   </button>
                   {guidance[entry.id] && (
-                    <p className="text-sm text-emerald-200/90 bg-emerald-950/50 border border-emerald-800 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-sm text-orange-100/90 bg-black/50 border border-orange-700 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
                       {guidance[entry.id]}
                     </p>
                   )}
@@ -710,23 +810,23 @@ function Journal() {
 function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const moods = [
-    { emoji: '😊', label: 'Great', color: 'from-green-600 to-emerald-600' },
-    { emoji: '😐', label: 'Okay', color: 'from-blue-600 to-cyan-600' },
-    { emoji: '😔', label: 'Low', color: 'from-gray-600 to-slate-600' },
-    { emoji: '😰', label: 'Anxious', color: 'from-orange-600 to-red-600' },
-    { emoji: '🙏', label: 'Peaceful', color: 'from-purple-600 to-pink-600' },
+    { emoji: '😊', label: 'Great', color: 'from-orange-500 to-amber-400' },
+    { emoji: '😐', label: 'Okay', color: 'from-amber-600 to-orange-500' },
+    { emoji: '😔', label: 'Low', color: 'from-zinc-700 to-slate-700' },
+    { emoji: '😰', label: 'Anxious', color: 'from-red-600 to-orange-600' },
+    { emoji: '🙏', label: 'Peaceful', color: 'from-amber-500 to-rose-400' },
   ]
 
   return (
-    <section className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6">
-      <h2 className="text-xl font-semibold mb-4 text-zinc-300">📊 How are you feeling?</h2>
+    <section className="bg-[#0d0d10]/80 border border-orange-500/15 rounded-2xl p-6 shadow-[0_10px_40px_rgba(255,115,39,0.08)]">
+      <h2 className="text-xl font-semibold mb-4 text-orange-100">📊 How are you feeling?</h2>
       <div className="flex flex-wrap justify-center gap-3">
         {moods.map((m) => (
           <button
             key={m.label}
             onClick={() => setSelectedMood(m.label)}
             className={`flex flex-col items-center p-4 rounded-xl transition-all ${
-              selectedMood === m.label ? `bg-gradient-to-br ${m.color} scale-105` : 'bg-zinc-800 hover:bg-zinc-700'
+              selectedMood === m.label ? `bg-gradient-to-br ${m.color} scale-105 text-black` : 'bg-black/50 text-orange-50 hover:bg-zinc-800'
             }`}
           >
             <span className="text-4xl mb-2">{m.emoji}</span>
@@ -734,7 +834,7 @@ function MoodTracker() {
           </button>
         ))}
       </div>
-      {selectedMood && <p className="mt-4 text-center text-sm text-green-400">✓ Mood logged</p>}
+      {selectedMood && <p className="mt-4 text-center text-sm text-orange-300">✓ Mood logged</p>}
     </section>
   )
 }
