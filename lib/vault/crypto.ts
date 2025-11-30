@@ -14,7 +14,15 @@ function getBaseKey(): Buffer {
 
 function deriveUserKey(userId: string): Buffer {
   const baseKey = getBaseKey()
-  return crypto.hkdfSync('sha256', baseKey, Buffer.from(userId, 'utf-8'), JOURNAL_KDF_INFO, ENCRYPTION_KEY_LENGTH)
+  const derivedKey = crypto.hkdfSync(
+    'sha256',
+    baseKey,
+    Buffer.from(userId, 'utf-8'),
+    JOURNAL_KDF_INFO,
+    ENCRYPTION_KEY_LENGTH
+  )
+
+  return Buffer.isBuffer(derivedKey) ? derivedKey : Buffer.from(derivedKey)
 }
 
 export function encryptJournalContent(plainText: string, userId: string): {
