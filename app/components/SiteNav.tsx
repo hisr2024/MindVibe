@@ -6,11 +6,11 @@ import { useState } from 'react'
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/features', label: 'Features' },
-  { href: '/flows', label: 'Flows' },
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/contact', label: 'Contact' }
+  { href: '/flows', label: 'Flows' },
+  { href: '/features', label: 'Features' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/about', label: 'About' },
 ]
 
 export default function SiteNav() {
@@ -49,10 +49,10 @@ export default function SiteNav() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard"
+            href="/account"
             className="hidden rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] md:inline-flex"
           >
-            Open Dashboard
+            Account Access
           </Link>
           <button
             onClick={() => setOpen(value => !value)}
@@ -84,11 +84,11 @@ export default function SiteNav() {
               )
             })}
             <Link
-              href="/dashboard"
+              href="/account"
               onClick={() => setOpen(false)}
               className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-md shadow-orange-500/25"
             >
-              Go to Dashboard
+              Account Access
             </Link>
           </div>
         </div>
