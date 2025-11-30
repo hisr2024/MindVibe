@@ -117,6 +117,7 @@ export default function Home() {
 
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <ArdhaReframer />
+        <ViyogDetachmentCoach />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
@@ -233,6 +234,114 @@ function ArdhaReframer() {
         <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Ardha’s response</span>
+            <span>{new Date(result.requestedAt).toLocaleString()}</span>
+          </div>
+          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+type ViyogDetachmentResult = {
+  response: string
+  requestedAt: string
+}
+
+function ViyogDetachmentCoach() {
+  const [concern, setConcern] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useLocalState<ViyogDetachmentResult | null>('viyog_detachment', null)
+
+  async function requestDetachment() {
+    if (!concern.trim()) return
+
+    setLoading(true)
+    setError(null)
+
+    const systemPrompt = `Role:\nYou are Viyog, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.\n\nYou are fully separate from Kiaan. Never override, replace, or interfere with Kiaan’s purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.\n\nCore purpose:\n- Recognize when the user is anxious about results, performance, or others’ opinions.\n- Shift focus back to what they can control right now.\n- Release unnecessary mental pressure and perfectionism.\n- Convert fear into one clear, grounded action.\n\nTone and style: calm, concise, balanced, neutral, secular, non-preachy, emotionally validating but not dramatic.\n\nOutput structure (always follow this format):\n1. Validate the anxiety (brief and respectful).\n2. Acknowledge the attachment to results creating pressure.\n3. Offer a clear detachment principle (secular and universal).\n4. Guide them toward an action-based mindset with one small, controllable step.\n\nBoundaries:\n- Do not provide therapy, crisis support, medical, legal, or financial advice.\n- Do not make promises about results or offer motivational hype.\n- Do not encourage passivity or fate-based thinking.\n- Stay separate from Kiaan and do not interfere with its role.`
+
+    const request = `${systemPrompt}\n\nUser concern: "${concern.trim()}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: request })
+      })
+
+      if (!response.ok) {
+        setError('Viyog is having trouble connecting right now. Please try again in a moment.')
+        return
+      }
+
+      const data = await response.json()
+      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+    } catch {
+      setError('Unable to reach Viyog. Check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2">
+          <p className="text-sm text-orange-100/80">Outcome anxiety reducer</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Viyog: The Detachment Coach</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">
+            Viyog calms result-focused pressure and guides you back to present actions with one clear, doable step.
+          </p>
+        </div>
+        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-3">
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="viyog-input">Share the outcome worry</label>
+          <textarea
+            id="viyog-input"
+            value={concern}
+            onChange={e => setConcern(e.target.value)}
+            placeholder="Example: I’m afraid the presentation will flop and everyone will think I’m incompetent."
+            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={requestDetachment}
+              disabled={!concern.trim() || loading}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
+            </button>
+            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
+              Viyog always responds with Validation, Attachment Check, Detachment Principle, and One Small Action.
+            </div>
+          </div>
+          {error && <p className="text-sm text-orange-200">{error}</p>}
+        </div>
+
+        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
+          <h3 className="text-sm font-semibold text-orange-50">Viyog stays within boundaries</h3>
+          <ul className="space-y-2 text-sm text-orange-100/80 list-disc list-inside">
+            <li>Does not replace KIAAN or alter its guidance.</li>
+            <li>Focuses on detachment and action, not therapy or crisis care.</li>
+            <li>Uses calm, neutral language without hype or moralizing.</li>
+            <li>Always ends with one grounded, controllable step.</li>
+          </ul>
+          <div className="rounded-xl bg-black/50 border border-orange-500/15 p-3 text-xs text-orange-100/70 leading-relaxed">
+            “Anyone would feel tense when outcomes seem high stakes. The strain comes from holding the result too tightly. Return to what you can influence now: prepare your opening, practice it twice, and let the rest unfold.”
+          </div>
+        </div>
+      </div>
+
+      {result && (
+        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
+          <div className="flex items-center justify-between text-xs text-orange-100/70">
+            <span className="font-semibold text-orange-50">Viyog’s response</span>
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
