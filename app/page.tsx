@@ -43,6 +43,20 @@ async function decryptText(payload: string) {
   return new TextDecoder().decode(decrypted)
 }
 
+function summarizeContent(content: string) {
+  const clean = content.trim()
+  if (clean.length <= 220) return clean
+
+  const sentences = clean.split(/(?<=[.!?])\s+/)
+  let summary = ''
+  for (const sentence of sentences) {
+    if ((summary + sentence).length > 180) break
+    summary = `${summary}${summary ? ' ' : ''}${sentence}`
+  }
+
+  return summary || `${clean.slice(0, 180)}...`
+}
+
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
     if (typeof window === 'undefined') return initial
@@ -721,20 +735,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   function toggleMotionReduction() {
     setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
-  }
-
-  function summarizeContent(content: string) {
-    const clean = content.trim()
-    if (clean.length <= 220) return clean
-
-    const sentences = clean.split(/(?<=[.!?])\s+/)
-    let summary = ''
-    for (const sentence of sentences) {
-      if ((summary + sentence).length > 180) break
-      summary = `${summary}${summary ? ' ' : ''}${sentence}`
-    }
-
-    return summary || `${clean.slice(0, 180)}...`
   }
 
   function renderAssistantContent(content: string, index: number) {
