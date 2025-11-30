@@ -124,6 +124,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
 
+# Load Karma Footprint router
+print("\n[Karma Footprint] Attempting to import Karma Footprint router...")
+try:
+    from backend.routes.karma_footprint import router as karma_router
+    app.include_router(karma_router)
+    print("✅ [SUCCESS] Karma Footprint router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karma Footprint router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
