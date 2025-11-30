@@ -39,24 +39,7 @@ const nunjucksTemplate = `{% set arrow = {
   }
 } %}`
 
-const arrowCheckpoints = [
-  {
-    label: 'Purpose',
-    description: 'Why this matters to you and the values it serves.'
-  },
-  {
-    label: 'Effort',
-    description: 'Actions fully within your control and smallest next step.'
-  },
-  {
-    label: 'Detachment',
-    description: 'Release outcome pressure and reframe fears into perspective.'
-  },
-  {
-    label: 'Consistency',
-    description: 'Set a rhythm, tiny habit, and simple tracking with a fallback.'
-  }
-]
+const arrowCheckpoints = ['Purpose', 'Effort', 'Detachment', 'Consistency']
 
 function toScore(value: string, bonus = 0) {
   if (!value.trim()) return 2 + bonus
@@ -189,21 +172,18 @@ export function PrecisionArrowEngine() {
               <span className="h-7 w-7 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-50 flex items-center justify-center text-xs font-semibold">1</span>
               <div>
                 <p className="font-semibold text-orange-50">Step cards</p>
-                <p className="text-orange-100/80">Each pillar is a collapsible card with the smallest input first; keyboard-safe margins for thumbs.</p>
               </div>
             </li>
             <li className="flex gap-3">
               <span className="h-7 w-7 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-50 flex items-center justify-center text-xs font-semibold">2</span>
               <div>
                 <p className="font-semibold text-orange-50">Live arrow bar</p>
-                <p className="text-orange-100/80">Pinned at bottom on mobile, mirroring the scoring visual for immediate feedback.</p>
               </div>
             </li>
             <li className="flex gap-3">
               <span className="h-7 w-7 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-50 flex items-center justify-center text-xs font-semibold">3</span>
               <div>
                 <p className="font-semibold text-orange-50">JSON preview</p>
-                <p className="text-orange-100/80">Scrollable code block shows the exact payload to send; tap to copy for quick handoff.</p>
               </div>
             </li>
           </ol>
@@ -213,11 +193,10 @@ export function PrecisionArrowEngine() {
           <h3 className="text-sm font-semibold text-orange-50">Checkpoints</h3>
           <div className="space-y-3">
             {arrowCheckpoints.map(checkpoint => (
-              <div key={checkpoint.label} className="flex gap-3 items-start">
+              <div key={checkpoint} className="flex gap-3 items-start">
                 <div className="h-3 w-3 rounded-full bg-gradient-to-br from-orange-400 to-orange-200 mt-1" />
                 <div>
-                  <p className="text-sm font-semibold text-orange-50">{checkpoint.label}</p>
-                  <p className="text-xs text-orange-100/75">{checkpoint.description}</p>
+                  <p className="text-sm font-semibold text-orange-50">{checkpoint}</p>
                 </div>
               </div>
             ))}
