@@ -709,30 +709,53 @@ function AnimatedKiaanLogo() {
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center text-center gap-1">
         <div className="relative flex items-center justify-center">
-          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-[#1b1b1e] via-[#24110c] to-[#0f0f0f] border border-orange-400/40 shadow-[0_10px_35px_rgba(255,140,64,0.32)]">
-            <div className="absolute inset-[3px] rounded-[15px] bg-[radial-gradient(circle_at_40%_35%,rgba(255,200,150,0.18),transparent_55%),radial-gradient(circle_at_70%_65%,rgba(255,255,255,0.12),transparent_48%)]" />
-            <svg viewBox="0 0 64 64" className="absolute inset-0 m-auto h-10 w-10 text-orange-50 drop-shadow-[0_0_18px_rgba(255,163,94,0.55)]">
+          <div className="absolute -inset-6 rounded-[30px] bg-[conic-gradient(from_40deg_at_50%_50%,rgba(255,190,135,0.08),rgba(255,124,66,0.2),rgba(255,190,135,0.08))] blur-lg opacity-90" />
+          <div className="absolute -inset-10 rounded-[36px] border border-orange-200/15 [mask:radial-gradient(circle_at_center,black_55%,transparent_65%)]" />
+          <div className="relative h-16 w-16 rounded-[20px] bg-gradient-to-br from-[#151517] via-[#1f1114] to-[#080808] border border-orange-400/45 shadow-[0_14px_46px_rgba(255,140,64,0.38)]">
+            <div className="absolute inset-[3px] rounded-[17px] bg-[radial-gradient(circle_at_38%_32%,rgba(255,205,160,0.3),transparent_50%),radial-gradient(circle_at_70%_68%,rgba(255,255,255,0.14),transparent_45%)]" />
+            <svg viewBox="0 0 64 64" className="absolute inset-0 m-auto h-12 w-12 text-orange-50 drop-shadow-[0_0_20px_rgba(255,163,94,0.55)]">
               <defs>
                 <linearGradient id="kiaan-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(255,200,150,0.95)" />
-                  <stop offset="50%" stopColor="rgba(255,166,94,1)" />
-                  <stop offset="100%" stopColor="rgba(255,235,200,0.95)" />
+                  <stop offset="0%" stopColor="rgba(255,208,168,1)" />
+                  <stop offset="45%" stopColor="rgba(255,157,90,1)" />
+                  <stop offset="100%" stopColor="rgba(255,236,210,0.98)" />
                 </linearGradient>
+                <radialGradient id="kiaan-glow" cx="50%" cy="50%" r="60%">
+                  <stop offset="0%" stopColor="rgba(255,220,180,0.6)" />
+                  <stop offset="70%" stopColor="rgba(255,158,90,0.25)" />
+                  <stop offset="100%" stopColor="rgba(255,130,70,0)" />
+                </radialGradient>
               </defs>
+              <circle cx="32" cy="32" r="23" fill="url(#kiaan-glow)" className="animate-[glowPulse_4s_ease-in-out_infinite]" />
               <path
-                d="M20 48V16h6l8.5 11.5L43 16h6v32h-6V32.5l-8.5 10.5H29V21.5l-3 4.2V48h-6Z"
+                d="M17 47V17.5c0-.8.6-1.5 1.4-1.5h5.6c.5 0 .9.2 1.2.6l6.8 10 7-10c.3-.4.7-.6 1.2-.6h5.8c.8 0 1.4.7 1.4 1.5V47c0 .8-.6 1.5-1.4 1.5h-5.4c-.8 0-1.4-.7-1.4-1.5V31.6l-7.2 10.8c-.6.9-2 .9-2.6 0L25.2 32v15c0 .8-.6 1.5-1.4 1.5h-5.4c-.8 0-1.4-.7-1.4-1.5Z"
                 fill="url(#kiaan-gradient)"
-                stroke="rgba(255,205,158,0.9)"
+                stroke="rgba(255,210,170,0.95)"
                 strokeWidth="1.6"
                 strokeLinejoin="round"
-                className="animate-[glowPulse_4s_ease-in-out_infinite]"
+              />
+              <path
+                d="M18 22.5c3.6 1.2 7.8 1.9 11.8 1.9 4 0 8.2-.7 11.8-1.9"
+                fill="none"
+                stroke="rgba(255,225,190,0.75)"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                className="animate-[beamSweep_5s_ease-in-out_infinite]"
+              />
+              <path
+                d="M32 14.5c5 3.2 8.5 8.9 8.5 15.4S37 42.4 32 45.6"
+                fill="none"
+                stroke="rgba(255,150,90,0.5)"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                className="animate-[glowPulse_5s_ease-in-out_infinite_reverse]"
               />
             </svg>
           </div>
         </div>
         <div className="text-[10px] font-semibold uppercase tracking-[0.42em] text-orange-100/80">K I A A N</div>
-        <div className="text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-orange-200 via-amber-100 to-white drop-shadow-[0_6px_26px_rgba(255,180,122,0.4)]">
-          Living Mark
+        <div className="text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-orange-50 via-amber-100 to-white drop-shadow-[0_6px_26px_rgba(255,180,122,0.4)]">
+          Mental Vibe
         </div>
         <div className="relative flex items-center gap-1 text-[10px] text-orange-50/85">
           {virtues.map(word => (
