@@ -116,6 +116,7 @@ export default function Home() {
         </div>
 
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
+        <ArdhaReframer />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
@@ -130,6 +131,114 @@ export default function Home() {
         </section>
       </div>
     </main>
+  )
+}
+
+type ArdhaReframerResult = {
+  response: string
+  requestedAt: string
+}
+
+function ArdhaReframer() {
+  const [thought, setThought] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useLocalState<ArdhaReframerResult | null>('ardha_reframe', null)
+
+  async function requestReframe() {
+    if (!thought.trim()) return
+
+    setLoading(true)
+    setError(null)
+
+    const systemPrompt = `Role:\nYou are Ardha, the Reframing Assistant—a calm, wise, Gita-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.\n\nYou stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan’s core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using Gita principles. Your job is complementary, not overlapping.\n\nCore Behavior:\n- Identify the negative belief or emotional distortion the user expresses.\n- Acknowledge their feeling with compassion (never invalidate).\n- Apply Bhagavad Gita principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).\n- Generate a clear, modern, emotionally intelligent reframe.\n- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.\n- Never offer spiritual authority—only perspective reshaping.\n- No judgment, no moralizing, no sermons.\n- Reframe in simple, conversational, modern English.\n\nOutput Format:\nWhen the user shares a negative thought, respond with:\n1. Recognition (validate the feeling)\n2. Gita-Based Insight (the principle being applied)\n3. Reframe (positive but realistic)\n4. Small Action Step (something within their control)\n\nBoundaries:\n- You are NOT a therapist.\n- You do NOT give medical, legal, or crisis advice.\n- You do NOT contradict Kiaan.\n- You ONLY transform the user’s thought into a healthier, clearer version.`
+
+    const request = `${systemPrompt}\n\nUser thought: "${thought.trim()}"\n\nRespond using the four-part format with short, direct language.`
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: request })
+      })
+
+      if (!response.ok) {
+        setError('Ardha is having trouble connecting right now. Please try again in a moment.')
+        return
+      }
+
+      const data = await response.json()
+      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+    } catch {
+      setError('Unable to reach Ardha. Check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2">
+          <p className="text-sm text-orange-100/80">Gita-aligned reframing</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Ardha: The Reframing Assistant</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">
+            Ardha listens for the distortion inside a heavy thought, validates the feeling, and then reshapes it using calm Bhagavad Gita principles—always separate from KIAAN’s guidance.
+          </p>
+        </div>
+        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-3">
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="ardha-input">Share the thought to reframe</label>
+          <textarea
+            id="ardha-input"
+            value={thought}
+            onChange={e => setThought(e.target.value)}
+            placeholder="Example: I keep messing up at work, maybe I’m just not cut out for this."
+            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={requestReframe}
+              disabled={!thought.trim() || loading}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Ardha is reflecting...' : 'Reframe with Ardha'}
+            </button>
+            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
+              Ardha will respond with Recognition, Gita-Based Insight, Reframe, and a Small Action Step.
+            </div>
+          </div>
+          {error && <p className="text-sm text-orange-200">{error}</p>}
+        </div>
+
+        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
+          <h3 className="text-sm font-semibold text-orange-50">Ardha stays within boundaries</h3>
+          <ul className="space-y-2 text-sm text-orange-100/80 list-disc list-inside">
+            <li>Does not replace KIAAN or contradict its guidance.</li>
+            <li>Transforms thoughts; never offers medical, legal, or crisis advice.</li>
+            <li>Uses calm, modern language without preaching.</li>
+            <li>Applies detachment, clarity, and duty from Gita principles.</li>
+          </ul>
+          <div className="rounded-xl bg-black/50 border border-orange-500/15 p-3 text-xs text-orange-100/70 leading-relaxed">
+            “It’s understandable to feel discouraged when plans slip. In the Gita, clarity comes from focusing on effort, not the outcome. You’re still learning—each try refines your path. One small step now: choose the next action you can complete in 10 minutes.”
+          </div>
+        </div>
+      </div>
+
+      {result && (
+        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
+          <div className="flex items-center justify-between text-xs text-orange-100/70">
+            <span className="font-semibold text-orange-50">Ardha’s response</span>
+            <span>{new Date(result.requestedAt).toLocaleString()}</span>
+          </div>
+          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+        </div>
+      )}
+    </section>
   )
 }
 
