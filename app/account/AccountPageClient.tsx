@@ -165,49 +165,14 @@ export default function AccountPageClient() {
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16">
       <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
-        <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account</p>
-        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <h1 className="text-3xl font-bold text-orange-50">Create, log in, and keep your support synced</h1>
-            <p className="max-w-2xl text-orange-100/80">
-              Streamlined account access inspired by the smoothest consumer apps. Fast, focused, and privacy-forward so you can get back to what matters.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-orange-500/30 bg-black/40 px-4 py-3 text-sm text-orange-100/80 shadow-lg shadow-orange-500/10">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-200 text-slate-900 font-semibold">MV</span>
-            <div>
-              <p className="text-orange-50 font-semibold">World-class polish</p>
-              <p className="text-orange-100/70">Zero clutter, just decisive actions.</p>
-            </div>
-          </div>
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account</p>
+          <h1 className="text-3xl font-bold text-orange-50">Access your account</h1>
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
         <div className="space-y-4">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-orange-100/70">
-            <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
-            Responsive, accessible, immediate
-            <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4">
-              <p className="text-sm font-semibold text-orange-50">Local-first security</p>
-              <p className="mt-1 text-sm text-orange-100/75">Credentials stay on-device with hashed passwords and instant validation.</p>
-            </div>
-            <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4">
-              <p className="text-sm font-semibold text-orange-50">Momentum preserved</p>
-              <p className="mt-1 text-sm text-orange-100/75">One tap between create and login modes with smart field memories.</p>
-            </div>
-            <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4">
-              <p className="text-sm font-semibold text-orange-50">Fast paths</p>
-              <p className="mt-1 text-sm text-orange-100/75">Inline states, tactile feedback, and focused primary actions.</p>
-            </div>
-            <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4">
-              <p className="text-sm font-semibold text-orange-50">Session clarity</p>
-              <p className="mt-1 text-sm text-orange-100/75">Clear sign-in status with immediate access to dashboard routes.</p>
-            </div>
-          </div>
           {sessionUser ? (
             <div className="flex flex-col gap-3 rounded-3xl border border-emerald-400/30 bg-emerald-400/10 p-5 text-sm text-emerald-50 shadow-lg shadow-emerald-500/20">
               <div className="flex items-center justify-between gap-3">
@@ -336,9 +301,7 @@ export default function AccountPageClient() {
                 >
                   Create account
                 </button>
-                <p className="text-center text-xs text-orange-100/70">
-                  We keep credentials local to your device for instant, secure access.
-                </p>
+                <p className="text-center text-xs text-orange-100/70">All credentials stay on your device.</p>
               </form>
             ) : (
               <form className="mt-6 space-y-4" onSubmit={handleLogin}>
@@ -376,7 +339,6 @@ export default function AccountPageClient() {
                   >
                     Need an account? Create one
                   </button>
-                  <span>Zero-nag login, optimized for speed.</span>
                 </div>
                 <button
                   type="submit"
@@ -384,9 +346,7 @@ export default function AccountPageClient() {
                 >
                   Sign in securely
                 </button>
-                <p className="text-center text-xs text-orange-100/70">
-                  We verify passwords locally using SHA-256 hashing. Nothing is sent to a server.
-                </p>
+                <p className="text-center text-xs text-orange-100/70">Passwords are verified locally with SHA-256 hashing.</p>
               </form>
             )}
           </div>
