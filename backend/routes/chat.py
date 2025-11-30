@@ -18,7 +18,7 @@ from backend.deps import get_db
 from backend.services.wisdom_engine import validate_gita_response
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
-preferred_model = os.getenv("OPENAI_MODEL", "gpt-4o").strip() or "gpt-4o"
+preferred_model = os.getenv("OPENAI_MODEL", "gpt-4").strip() or "gpt-4"
 fallback_model = os.getenv("OPENAI_FALLBACK_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
 client = OpenAI(api_key=api_key) if api_key else None
 
@@ -71,6 +71,19 @@ class KIAAN:
         )
         self._last_crisis_response_at: float | None = None
         self.repo_wisdom = self._load_repo_wisdom()
+
+    def _display_model(self) -> str:
+        """Return a human-friendly model label for metadata responses."""
+
+        active_model = (self.last_model_used or self.model_name or "").lower()
+        if active_model.startswith("gpt-4"):
+            return "GPT-4"
+        if active_model:
+            return active_model
+        return "unknown"
+
+    def _active_model(self) -> str:
+        return self.last_model_used or self.model_name
 
     def _sanitize_text(self, text: str) -> str:
         """Remove explicit scripture or character references from context."""
@@ -147,6 +160,64 @@ class KIAAN:
             "🆘 Crisis support already provided. Please reach out immediately: \n"
             "📞 988 (24/7) or text HOME to 741741."
         )
+
+    def generate_response(self, user_message: str) -> str:
+        """Synchronous, test-friendly chat flow with defensive error handling."""
+
+        try:
+            if self.is_crisis(user_message):
+                if self._crisis_backoff_active():
+                    return self.get_crisis_backoff_response()
+                return self.get_crisis_response()
+
+            if not self.ready or not self.client:
+                return "❌ API Key not configured for KIAAN. Please add configuration."
+
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are KIAAN, a calming mental health guide. Provide concise, supportive guidance.",
+                },
+                {"role": "user", "content": user_message},
+            ]
+
+            models_to_try: List[str] = []
+            if self.model_name:
+                models_to_try.append(self.model_name)
+            if self.fallback_model and self.fallback_model not in models_to_try:
+                models_to_try.append(self.fallback_model)
+
+            for model in models_to_try:
+                try:
+                    response = self.client.chat.completions.create(
+                        model=model,
+                        messages=messages,
+                        temperature=0.7,
+                        max_tokens=500,
+                    )
+                    self.last_model_used = model
+                    return response.choices[0].message.content or "I'm here for you. Let's try again. 💙"
+                except AuthenticationError:
+                    logger.error("Authentication error for model", extra={"model": model})
+                    return "❌ API authentication failed. Please check configuration."
+                except BadRequestError:
+                    logger.warning("Bad request for model", extra={"model": model})
+                    return "❌ Invalid request. Please try again with a different input."
+                except RateLimitError:
+                    logger.warning("Rate limit reached", extra={"model": model})
+                    return "⏱️ Too many requests right now. Please wait and try again."
+                except APIError:
+                    logger.warning("API error encountered; attempting fallback", extra={"model": model})
+                    continue
+                except Exception:
+                    logger.exception("Unexpected error during generate_response")
+                    return "I'm here for you. Let's try again. 💙"
+
+            return "I'm here for you. Let's try again. 💙"
+
+        except Exception:
+            logger.exception("Unhandled error in generate_response")
+            return "I'm here for you. Let's try again. 💙"
 
     async def generate_response_with_gita(
         self,
@@ -510,20 +581,27 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
-        
-        response = await kiaan.generate_response_with_gita(
+
+        response: str
+        # Prefer the async, knowledge-base powered flow when available.
+        maybe_response = kiaan.generate_response_with_gita(
             message,
             db,
             theme=chat.theme,
             application=chat.application,
         )
 
+        if asyncio.iscoroutine(maybe_response):
+            response = await maybe_response
+        else:
+            response = kiaan.generate_response(message)
+
         return {
             "status": "success",
             "response": response,
             "bot": "KIAAN",
             "version": "13.0",
-            "model": kiaan.last_model_used or kiaan.model_name,
+            "model": kiaan._display_model(),
             "gita_powered": True
         }
     except Exception as e:
@@ -548,9 +626,19 @@ async def about() -> Dict[str, Any]:
     return {
         "name": "KIAAN",
         "version": "13.0",
-        "model": kiaan.last_model_used or kiaan.model_name,
+        "model": (kiaan._active_model() or "gpt-4").lower(),
         "status": "Operational" if kiaan.ready else "Error",
         "description": "GPT-4o guided coach grounded in timeless yogic wisdom",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations"
+    }
+
+
+@router.get("/debug")
+async def debug() -> Dict[str, Any]:
+    return {
+        "status": "healthy" if kiaan.ready else "error",
+        "model": (kiaan._active_model() or "gpt-4").lower(),
+        "fallback_available": bool(kiaan.fallback_model),
+        "gita_kb_loaded": kiaan.gita_kb is not None,
     }
