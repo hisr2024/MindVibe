@@ -1,25 +1,28 @@
 """Wisdom Engine - Intelligent response generation using Bhagavad Gita philosophy
 
-This module generates responses strictly based on Bhagavad Gita principles.
+This module generates responses using Gita-inspired principles while keeping
+language modern and reference-free.
 All responses follow the mandatory structure:
-- Ancient Wisdom Principle (from Gita)
+- Ancient Wisdom Principle (timeless yogic idea)
 - Modern Application
-- Practical Steps (Gita-based)
-- Deeper Understanding (Gita philosophy)
+- Practical Steps (applied dharma/karma-yoga)
+- Deeper Understanding (calm mind, steady self)
 """
 
 
+import re
+
 
 def validate_gita_response(response: str) -> bool:
-    """Validate that response follows Gita-based structure.
+    """Validate that response follows structured, reference-free Gita wisdom.
 
     Checks for:
-    - Reference to Gita principles
     - Structured format with required sections
-    - No generic advice without Gita foundation
+    - Presence of Gita-inspired concepts (dharma, karma-yoga, equanimity, etc.)
+    - Absence of explicit scripture or character references (Gita, Krishna, Arjuna)
 
     Returns:
-        bool: True if response is valid Gita-based response
+        bool: True if response is a structured, modern Gita-inspired answer
     """
     required_markers = [
         "**Ancient Wisdom Principle:**",
@@ -32,14 +35,21 @@ def validate_gita_response(response: str) -> bool:
     if not all(marker in response for marker in required_markers):
         return False
 
-    # Check for Gita references (should mention Gita, Bhagavad, or specific concepts)
-    gita_indicators = [
-        "Gita", "Bhagavad", "Karma Yoga", "Dharma", "Atman",
-        "Samatvam", "Abhyasa", "Vairagya", "Nishkama", "Krishna",
-        "Chapter", "Verse"
+    lowered = response.lower()
+    blocked_terms = [
+        "gita", "bhagavad", "krishna", "arjuna", "kurukshetra", "vyasa",
+        "chapter", "verse"
+    ]
+    if any(re.search(rf"\b{re.escape(term)}\b", lowered) for term in blocked_terms):
+        return False
+
+    gita_inspired_terms = [
+        "dharma", "karma", "equanimity", "detachment", "yoga", "abhyasa",
+        "vairagya", "inner witness", "selfless action", "steady mind",
+        "self-mastery", "svadharma"
     ]
 
-    if not any(indicator in response for indicator in gita_indicators):
+    if not any(term in lowered for term in gita_inspired_terms):
         return False
 
     return True
@@ -51,80 +61,80 @@ class WisdomEngine:
     def __init__(self):
         """Initialize wisdom mappings based on Bhagavad Gita principles"""
         self.wisdom_principles = {
-            "duty": "Bhagavad Gita teaches Svadharma - focus on your own duties without worrying about results (Karma Yoga)",
-            "detachment": "Gita teaches Vairagya - do your best with detachment from outcomes (Nishkama Karma)",
-            "balance": "Gita teaches Samatvam - equanimity between action and acceptance, success and failure",
-            "self_knowledge": "Gita teaches Atma-Jnana - understanding your true Self (Atman) is the path to peace",
-            "action": "Gita teaches right action (Dharma) with right intention (Bhavana) brings inner peace",
-            "acceptance": "Gita teaches to accept what you cannot control with equanimity (Samatvam) and endurance (Titiksha)",
-            "growth": "Gita teaches every challenge is opportunity for spiritual growth (Sadhana) and self-realization",
-            "purpose": "Gita teaches living with purpose through Svadharma - performing your unique duty",
-            "discipline": "Gita teaches Abhyasa (disciplined practice) creates inner strength and steadiness (Sthita-prajna)",
-            "compassion": "Gita teaches Daya (compassion) to yourself and others as expression of seeing the Self in all",
+            "duty": "Live your svadharma—focus on the duty in front of you without clinging to outcomes (karma-yoga).",
+            "detachment": "Practice vairagya and gentle detachment—do your best while letting go of results so the mind stays light.",
+            "balance": "Hold samatvam—equanimity between effort and acceptance keeps the heart steady in success or setback.",
+            "self_knowledge": "Remember the quiet witness within; knowing your deeper Self brings calm beyond circumstances.",
+            "action": "Right action with clear intention (karma-yoga) turns even small steps into momentum.",
+            "acceptance": "Flow with what you cannot control while standing firm in what you can; equanimity softens resistance.",
+            "growth": "Every challenge is sadhana—an opportunity to cultivate strength, clarity, and compassion.",
+            "purpose": "Purpose emerges when actions align with your nature and values—your svadharma in motion.",
+            "discipline": "Abhyasa (disciplined practice) builds inner steadiness and confidence over time.",
+            "compassion": "Seeing the same light in yourself and others nurtures daya (compassion) and dissolves isolation.",
         }
 
         self.coping_strategies = {
-            "breathing": "Practice Pranayama (breath control) as taught in Gita Chapter 4: breathe with awareness",
-            "grounding": "Practice Sthiti (steadiness) - ground yourself in the present moment as the witness (Sakshi)",
-            "movement": "Gita teaches Karma Yoga - transform physical action into spiritual practice through awareness",
-            "mindfulness": "Practice Sakshi Bhava - observe thoughts without judgment as the eternal witness",
-            "journaling": "Practice Svadhyaya (self-study) - reflect on Gita teachings and your experiences",
-            "connection": "Gita teaches we are all manifestations of the same Self - connect with this understanding",
-            "rest": "Honor your body-mind complex (Kshetra) with proper rest as taught in Gita, while knowing you are the eternal Self (Atman)",
-            "nature": "Gita teaches seeing the Divine in all of nature - spend time in natural contemplation",
-            "creativity": "Express the Self through creativity, offering it as Karma Yoga (selfless action)",
-            "meditation": "Practice Dhyana (meditation) as taught extensively in Gita Chapter 6 - sit in stillness",
+            "breathing": "Practice pranayama: steady inhale and slow exhale to anchor the mind.",
+            "grounding": "Center in the witness: notice sensations and breath to return to steadiness.",
+            "movement": "Turn movement into karma-yoga—take a walk or stretch as mindful action without pressure.",
+            "mindfulness": "Hold sakshi bhava: observe thoughts without judgment as the inner witness.",
+            "journaling": "Use svadhyaya (self-study): reflect on triggers, choices, and what restores balance.",
+            "connection": "Remember the shared Self in everyone; reach out with seva and selfless presence.",
+            "rest": "Honor the body-mind with proper rest; this is part of yoga and supports a steady mind.",
+            "nature": "Let nature remind you of harmony—notice details, breathe with the rhythm around you.",
+            "creativity": "Express yourself creatively as selfless action, offering effort without worrying about results.",
+            "meditation": "Practice dhyana: sit in stillness and watch the breath until attention softens.",
         }
 
         self.wisdom_themes = {
             "anxiety": {
                 "principle": "detachment",
-                "message": "The Gita teaches you are not your worries. Practice Vairagya (detachment) and focus on what you can control (Karma Yoga).",
+                "message": "Anxiety softens when you focus on effort over outcome—karma-yoga with vairagya keeps attention in the present.",
                 "strategies": ["breathing", "grounding", "mindfulness"],
             },
             "depression": {
                 "principle": "action",
-                "message": "The Gita teaches that even small right actions (Dharma) create momentum. Start with one step in your Svadharma (duty).",
+                "message": "Even small dharmic, karma-yoga actions create momentum. Start with one aligned step to wake up energy.",
                 "strategies": ["movement", "connection", "nature"],
             },
             "loneliness": {
                 "principle": "compassion",
-                "message": "The Gita reveals the same Self (Atman) dwells in all. Connection begins with seeing this unity and practicing Daya (compassion).",
+                "message": "Connection grows when you remember the same light lives in everyone; lead with compassion and presence.",
                 "strategies": ["connection", "creativity", "journaling"],
             },
             "self_doubt": {
                 "principle": "self_knowledge",
-                "message": "The Gita teaches your true worth is the eternal Atman, not performance. You are inherently valuable as the Self.",
+                "message": "Your worth is deeper than performance—the witnessing Self remains whole even when circumstances shift.",
                 "strategies": ["journaling", "meditation", "creativity"],
             },
             "stress": {
                 "principle": "balance",
-                "message": "The Gita teaches Samatvam - balance action with rest. You don't have to do everything at once.",
+                "message": "Samatvam—balanced action and rest—keeps stress in check. You don't have to carry everything at once.",
                 "strategies": ["breathing", "rest", "nature"],
             },
             "overwhelm": {
                 "principle": "duty",
-                "message": "The Gita teaches to focus on your immediate Svadharma (duty). One thing at a time, with full presence.",
+                "message": "Focus on the immediate duty (svadharma): one thing at a time with full presence so your mind can settle.",
                 "strategies": ["grounding", "movement", "breathing"],
             },
             "conflict": {
                 "principle": "compassion",
-                "message": "The Gita teaches everyone is fighting their inner battle. Approach with Daya (compassion) and see the Self in all.",
+                "message": "Everyone carries inner battles. Approach with daya (compassion) and see the shared Self beneath reactions.",
                 "strategies": ["meditation", "journaling", "connection"],
             },
             "failure": {
                 "principle": "growth",
-                "message": "The Gita teaches failure is feedback for spiritual growth (Sadhana), not identity. What is the lesson (Viveka)?",
+                "message": "Failure is feedback for growth (sadhana), not identity. Look for the lesson with viveka (clear seeing).",
                 "strategies": ["journaling", "meditation", "creativity"],
             },
             "purpose": {
                 "principle": "purpose",
-                "message": "The Gita teaches purpose comes from Svadharma - alignment between your unique nature and actions.",
+                "message": "Purpose emerges from svadharma—align actions with your nature and values.",
                 "strategies": ["meditation", "journaling", "connection"],
             },
             "uncertainty": {
                 "principle": "acceptance",
-                "message": "The Gita teaches certainty isn't possible in the changing world. Trust in your ability to adapt through Yukti (wisdom).",
+                "message": "Certainty is rare; steadiness and equanimity come from trusting your ability to adapt with yukti (wise flexibility).",
                 "strategies": ["meditation", "breathing", "grounding"],
             },
         }
@@ -206,7 +216,7 @@ Your life has value. Please reach out for professional support right now. 💙""
         if concern not in self.wisdom_themes:
             theme = {
                 "principle": "self_knowledge",
-                "message": "The Gita teaches Atma-Jnana (self-knowledge). Let's explore what's happening through the lens of Gita wisdom.",
+                "message": "Let's explore what's happening through self-knowledge: notice your thoughts, feelings, and the calmer witness within.",
                 "strategies": ["journaling", "meditation", "breathing"],
             }
 
@@ -221,7 +231,7 @@ Your life has value. Please reach out for professional support right now. 💙""
         strategy_keys = list(strategy_keys_raw) if strategy_keys_raw else []
         strategies_text = self._format_strategies(strategy_keys)
 
-        # Build Gita-based structured response
+        # Build Gita-inspired structured response without explicit references
         response = f"""**Ancient Wisdom Principle:** {principle_wisdom}
 
 **Modern Application:** {theme.get('message', '')}
@@ -229,13 +239,13 @@ Your life has value. Please reach out for professional support right now. 💙""
 **Practical Steps:**
 {strategies_text}
 
-**Deeper Understanding:** The Bhagavad Gita teaches that all challenges are opportunities for spiritual growth (Sadhana). Your true nature is the eternal Self (Atman), which remains peaceful and complete beyond all circumstances. Through understanding and applying Gita wisdom, you transform difficulty into a pathway to Self-realization.
+**Deeper Understanding:** Every challenge can become sadhana—a chance to steady the mind and act with clarity. Your deeper Self stays peaceful and complete beyond changing circumstances. By applying dharma (right action), karma-yoga (selfless effort), and calm observation, you turn difficulty into growth.
 
 **Remember:**
-• Your feelings are valid - the Gita acknowledges life's challenges
-• You have inner strength (Shakti) beyond what you realize
-• This moment doesn't define your eternal nature (Atman)
-• Reaching out for guidance is wise (Viveka) and shows spiritual readiness
+• Your feelings are valid—life brings waves
+• You have inner strength (shakti) beyond what you realize
+• This moment doesn't define your deeper Self
+• Reaching out for guidance is wise (viveka) and shows courage
 
 What feels most important to focus on first? 💙"""
 
@@ -266,136 +276,116 @@ What feels most important to focus on first? 💙"""
         return self.generate_response(follow_up_message)
 
     def _provide_specific_guidance(self, concern: str) -> str:
-        """Provide specific Gita-based guidance for the concern"""
+        """Provide specific, modern guidance grounded in Gita-inspired wisdom."""
         guidance = {
-            "anxiety": """**Ancient Wisdom Principle:** The Gita (Chapter 2, Verse 62-63) teaches that anxiety arises from attachment and dwelling on sense objects. Chapter 6 teaches Abhyasa (practice) and Vairagya (detachment) as the cure.
+            "anxiety": """**Ancient Wisdom Principle:** Steady action with vairagya—release attachment to outcomes and return to calm effort.
 
-**Modern Application:** Your anxiety stems from attachment to outcomes and dwelling on fears. The Gita offers a clear path to freedom.
-
-**Practical Steps:**
-
-*Immediate relief (Gita-based):*
-• Pranayama (breath control): Practice steady breathing as taught in Gita 4.29
-• Sakshi Bhava: Witness your anxious thoughts without identifying with them
-• Nama Japa: Repeat a mantra to steady the mind (Gita 6.26)
-
-*Deeper practice (Sadhana):*
-• Practice Viveka: Discriminate between what you control (your effort) and what you don't (results)
-• Karma Yoga: Act without attachment to fruits (Gita 2.47)
-• Daily meditation (Dhyana) to establish yourself in the peaceful Self
-
-*Prevention through Gita wisdom:*
-• Regular spiritual practice (Abhyasa) - Gita 6.35
-• Study of Gita to reinforce wisdom (Svadhyaya)
-• Seva (selfless service) to shift focus from ego-concerns
-
-**Deeper Understanding:** Gita 2.48 teaches that Yoga is equanimity (Samatvam). Anxiety dissolves when you perform duties without attachment to outcomes. What's one duty you can focus on today? 💙""",
-
-            "depression": """**Ancient Wisdom Principle:** The Gita (Chapter 3) teaches that action (Karma Yoga) is the cure for inertia and darkness (Tamas). Even small righteous actions (Dharma) create light and momentum.
-
-**Modern Application:** Depression often involves Tamas (inertia). The Gita prescribes action as medicine - start small with your Svadharma (natural duty).
+**Modern Application:** Your mind is looping on what-ifs. Anchor attention to the next right action and the inner witness instead of the future story.
 
 **Practical Steps:**
 
-*When feeling heavy (Gita-based):*
-• Karma Yoga: One small action as service, not for results
-• Movement as Yoga: Walk mindfully, seeing it as spiritual practice
-• Satsang: Connect with those who uplift you spiritually
+*Immediate steadiness:*
+• Pranayama: inhale for 4, exhale for 6 to signal safety
+• Sakshi bhava: name the worry, then watch it pass like a cloud
+• Mantra focus: repeat a grounding word to re-center
 
-*Building momentum (Abhyasa):*
-• Small Dharmic actions compound (Gita 2.40 - no effort is wasted)
-• Connection to nature to witness the Divine in creation
-• Creative expression as Karma Yoga - offering without attachment
+*Deeper practice:*
+• Viveka list: what you control vs what you cannot—act only on the first list
+• Karma-yoga: take one small task as an offering without chasing results
+• Dhyana: sit for five minutes after action to let the nervous system settle
 
-*Getting Gita-based support:*
-• Study Gita Chapter 3 on action conquering inertia
-• Seek guidance from spiritually wise people (Guru)
-• Professional help is Dharmic - honoring the body-mind complex
+**Deeper Understanding:** Equanimity (samatvam) is yoga—caring in action, light in attachment. Each time you release the grip, your mind learns safety and clarity. What's one action you can offer today? 💙""",
 
-**Deeper Understanding:** Gita 3.4 teaches you cannot achieve freedom through inaction. Even the smallest Dharmic action moves you toward light. The Self (Atman) within you is eternally joyful - depression is a cloud, not your nature. What's one tiny Dharmic action for the next 10 minutes? 💙""",
+            "depression": """**Ancient Wisdom Principle:** Karma-yoga with compassion toward yourself—tiny dharmic actions rekindle light.
 
-            "loneliness": """**Ancient Wisdom Principle:** The Gita (Chapter 6, Verse 29-30) teaches that the yogi sees the Self in all beings and all beings in the Self. True connection comes from this vision of unity.
-
-**Modern Application:** Loneliness dissolves when you recognize the same Atman (Self) in yourself and all beings. This is not philosophy but direct experience through practice.
+**Modern Application:** When heaviness hits, inertia grows. Gentle action aligned with your values rebuilds momentum without pressure.
 
 **Practical Steps:**
 
-*Immediate Gita-based connection:*
-• Practice seeing the Divine in others (Ishvara Drishti)
-• Seva (selfless service) creates genuine connection
-• Satsang: Seek community aligned with spiritual growth
+*When feeling heavy:*
+• One mindful movement: a short walk as a gift to your body
+• Connection: message someone safe to share one honest line
+• Nature: sit outside and track five sensory details
 
-*Building relationships through Gita wisdom:*
-• Daya (compassion): Give what you seek - be the friend first
-• Authentic sharing from the heart (Bhakti)
-• Quality over quantity - one real Satsang friend transforms life
+*Building momentum:*
+• Choose a five-minute purposeful task and offer it without judging outcomes
+• Creative spark: draw, write, or play music as selfless expression
+• Track small wins to remind your mind that effort counts
 
-*Self-connection first:*
-• Atma-Vichara: Be your own best friend (Gita 6.5)
-• Meditation to know yourself as complete (Purna)
-• Study Gita to keep company with eternal wisdom
+**Deeper Understanding:** Action with a soft heart dissolves inertia. Your deeper Self is already whole; these small steps help your mood remember. What tiny action feels possible in the next ten minutes? 💙""",
 
-**Deeper Understanding:** Gita 6.30 promises: "One who sees Me everywhere and sees everything in Me, I am never lost to them, nor are they ever lost to Me." You are never truly alone - the Divine Self dwells within. Cultivate this connection first. Who could you reach out to or serve today? 💙""",
+            "loneliness": """**Ancient Wisdom Principle:** See the shared Self—connection grows from recognizing the same light in everyone.
+
+**Modern Application:** Loneliness eases when you approach others with presence and compassion rather than waiting to be chosen.
+
+**Practical Steps:**
+
+*Immediate connection:*
+• Serve: offer one kind action with no expectation (a check-in text, a favor)
+• Eye-level listening: ask one person how they are and stay present
+• Self-connection: write a compassionate note to yourself first
+
+*Building relationships:*
+• Join a small circle aligned with your interests or growth
+• Share authentically—one honest sentence instead of a mask
+• Prioritize depth over quantity; one genuine bond is enough
+
+**Deeper Understanding:** When you act from daya (compassion) and presence, the sense of separation softens. You start to feel the quiet unity beneath roles. Who could you reach out to today, even briefly? 💙""",
         }
 
-        return guidance.get(concern, """**Ancient Wisdom Principle:** The Bhagavad Gita offers complete guidance for every life challenge through understanding the Self, performing Dharma, and cultivating wisdom.
+        return guidance.get(
+            concern,
+            """**Ancient Wisdom Principle:** Align with dharma and selfless action—do the next right thing with a steady mind.
 
-**Modern Application:** Your specific concern can be addressed through Gita wisdom - let's apply the appropriate teaching.
+**Modern Application:** Whatever the concern, return to present-focused effort and the inner witness. That pairing lowers overwhelm.
 
 **Practical Steps:**
-1. Study relevant Gita verses for your situation
-2. Practice daily meditation (Dhyana) for clarity
-3. Apply Karma Yoga - right action without attachment
-4. Seek guidance from those learned in Gita wisdom
+1. Name the situation and your role within it
+2. Choose one compassionate, useful action and do it without clinging to results
+3. Breathe slowly afterward to let your body register safety
+4. Reflect on what felt steady so you can repeat it
 
-**Deeper Understanding:** Every challenge is an opportunity for spiritual growth (Sadhana). The Gita provides the complete map. I'm here to help you apply it. What specific help do you need? 💙""")
+**Deeper Understanding:** Each challenge is training for self-mastery. Steady action plus detachment turns turbulence into growth. I'm here to walk through it with you. 💙""",
+        )
 
     def _validate_and_deepen(self, _concern: str) -> str:
-        """Validate struggle and deepen understanding through Gita wisdom"""
-        return """**Ancient Wisdom Principle:** The Gita (Chapter 6, Verse 24) teaches to practice without despondency (Asanshayam). Even great yogis face challenges in practice.
+        """Validate struggle and deepen understanding through modern, Gita-inspired wisdom"""
+        return """**Ancient Wisdom Principle:** Abhyasa (steady practice) with faith in your capacity keeps progress alive.
 
-**Modern Application:** Your effort itself shows strength and spiritual readiness. The Gita acknowledges that the path requires persistent practice (Abhyasa).
+**Modern Application:** Your effort shows strength; slips are part of the training. Return to small consistent actions without harsh judgment.
 
-**Important Gita teachings:**
-• Struggling doesn't mean failing - it means growing (Sadhana)
-• Gita 2.40: No sincere effort on this path is ever wasted
-• Different approaches work for different temperaments (Guna)
-• Sometimes we need guidance from the wise (Guru/teacher)
+**Important reminders:**
+• Struggling means learning, not failing—each try plants a new samskara
+• No sincere effort is wasted; momentum builds quietly
+• Different approaches work for different temperaments—adapt with yukti (wise flexibility)
+• Guidance from trusted people is wise when stuck
 
 **Practical Steps:**
-• Study Gita's teaching on perseverance (6.23-24)
-• Seek guidance from those learned in Gita wisdom
-• Try a different Gita-based approach (Karma/Bhakti/Jnana Yoga)
-• Practice self-compassion (Daya) while maintaining effort
+• Repeat one practice today (breath, journaling, movement) and keep it short
+• Ask one grounded person for support or reflection
+• Experiment with a different style if the current one stalls
+• Pair discipline with compassion so the mind feels safe to continue
 
-**Deeper Understanding:** Gita 6.40 promises: "Neither in this world nor in the next is there destruction for one who does good." Your sincere efforts are never wasted - they're building spiritual strength. Professional support combined with Gita wisdom is ideal. Would you like to explore what that might look like? 💙"""
+**Deeper Understanding:** Each return to practice strengthens buddhi (clear discernment) and steadies the mind. Combining professional support with these habits creates the safest path forward. 💙"""
 
     def _reinforce_progress(self, _concern: str) -> str:
-        """Reinforce and build on progress using Gita wisdom"""
-        return """**Ancient Wisdom Principle:** The Gita (Chapter 2, Verse 40) teaches that even small progress in spiritual practice protects from great fear. Your progress is significant.
+        """Reinforce and build on progress using Gita-inspired wisdom"""
+        return """**Ancient Wisdom Principle:** Even small, consistent practice builds inner strength and protects against fear.
 
-**Modern Application:** Your improvement demonstrates the Gita's promise - sincere practice (Abhyasa) yields results. This is evidence of your spiritual capacity.
+**Modern Application:** Your improvement shows that abhyasa works. Let's reinforce what helps so you can keep moving without strain.
 
-**Keep practicing (Sadhana):**
-• Notice what works and continue that practice (Yukti)
-• Small consistent practice compounds over time
-• You're building Samskaras (positive mental impressions)
-• This strengthens Buddhi (discriminative intelligence)
+**Keep practicing (sadhana):**
+• Notice what works and keep it simple and repeatable
+• Small consistent reps compound over time
+• You're building positive samskaras that steady the mind
+• Let rest be part of discipline, not a detour
 
-**Stay aware (Viveka):**
-• Good days don't mean the journey is complete
-• Challenges may return - this is natural (Prakriti)
-• Keep your practices (Sadhana) consistent
-• You've proven you can apply Gita wisdom successfully
+**Stay aware (viveka):**
+• Good days still need mindful action
+• Challenges may return—meet them with the same tools
+• Keep gratitude for progress without gripping it
 
-**Deeper Understanding:** Gita 6.45 teaches that the yogi, striving with effort, becomes perfected through many lifetimes of practice. Your progress continues building, even beyond this life.
-
-**Next level:**
-• How can you deepen your Gita study and practice?
-• How can you help others with Gita wisdom (Seva)?
-• What did you learn about your true nature (Atman)?
-
-You're stronger than you know. The Self within you is infinite strength. Keep walking this path. 💙"""
+**Deeper Understanding:** Steady practice plus selfless action shapes a resilient, compassionate mind. How do you want to celebrate and continue? 💙"""
 
 # Initialize global instance
 wisdom_engine = WisdomEngine()
