@@ -258,18 +258,18 @@ export default function Home() {
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
             title="Thumb-friendly layout"
-            description="Large tap targets, single-column flows, and mobile spacing keep KIAAN effortless on any screen size."
             badge="Mobile optimized"
+            points={['Single-column flows', '44px+ tap targets', 'Generous mobile spacing']}
           />
           <FeatureCard
             title="Offline-trusting journal"
-            description="Encrypted entries stay on your device with clear status cues so you always know your reflections are safe."
             badge="Secure by default"
+            points={['Encrypted on-device', 'Offline-safe autosave', 'Clear status cues']}
           />
           <FeatureCard
             title="Instant access bar"
-            description="Jump to chat, clarity pause, or your journal with a single tap—no matter where you are on the page."
             badge="Quick actions"
+            points={['Docked on every screen', 'One-tap chat/pause/journal', 'Thumb reach zone']}
           />
         </section>
 
@@ -666,16 +666,33 @@ function BadgePill({ children }: { children: string }) {
   )
 }
 
-function FeatureCard({ title, description, badge }: { title: string, description: string, badge: string }) {
+function StatusPill({ label, tone = 'ok' }: { label: string, tone?: 'ok' | 'warn' }) {
+  const toneStyles = tone === 'ok' ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-50' : 'bg-orange-500/15 border-orange-400/40 text-orange-50'
+
+  return (
+    <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${toneStyles}`}>
+      <span className={`h-2 w-2 rounded-full ${tone === 'ok' ? 'bg-emerald-300 animate-pulse' : 'bg-orange-300 animate-pulse'}`} />
+      <span>{label}</span>
+    </div>
+  )
+}
+
+function FeatureCard({ title, badge, points }: { title: string, badge: string, points: string[] }) {
   return (
     <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 shadow-[0_12px_40px_rgba(255,115,39,0.18)] flex gap-3">
       <div className="mt-1 h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500/70 via-[#ffb347]/70 to-orange-200/80 flex items-center justify-center text-lg">📱</div>
-      <div className="space-y-1">
+      <div className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-base font-semibold text-orange-50">{title}</h3>
           <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-orange-100/80 border border-orange-500/25">{badge}</span>
         </div>
-        <p className="text-sm text-orange-100/75 leading-relaxed">{description}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {points.map(point => (
+            <span key={point} className="rounded-full bg-orange-500/10 border border-orange-400/30 px-3 py-1 text-[11px] text-orange-50/90">
+              {point}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -2046,8 +2063,24 @@ function Journal() {
   const [entries, setEntries] = useState<JournalEntry[]>([])
   const [encryptionReady, setEncryptionReady] = useState(false)
   const [encryptionMessage, setEncryptionMessage] = useState<string | null>(null)
+  const [isOnline, setIsOnline] = useState(true)
   const [guidance, setGuidance] = useState<Record<string, string>>({})
   const [guidanceLoading, setGuidanceLoading] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const updateStatus = () => setIsOnline(window.navigator.onLine)
+    updateStatus()
+
+    window.addEventListener('online', updateStatus)
+    window.addEventListener('offline', updateStatus)
+
+    return () => {
+      window.removeEventListener('online', updateStatus)
+      window.removeEventListener('offline', updateStatus)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -2205,6 +2238,11 @@ function Journal() {
           </div>
         </div>
 
+        <div className="mt-3 flex flex-wrap gap-2">
+          <StatusPill label={encryptionReady ? 'AES-GCM secured locally' : 'Preparing encryption lock'} tone={encryptionReady ? 'ok' : 'warn'} />
+          <StatusPill label={isOnline ? 'Offline-ready: saves on device' : 'Offline mode: stored on this device'} tone={isOnline ? 'ok' : 'warn'} />
+        </div>
+
         <div className="mt-4 space-y-2">
           <div className="bg-black/60 border border-orange-500/20 text-orange-50 px-4 py-3 rounded-2xl text-sm flex items-start gap-2">
             <span>🔒</span>
@@ -2335,22 +2373,25 @@ function Journal() {
 function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void, onClarity: () => void, onJournal: () => void }) {
   return (
     <div className="fixed inset-x-4 bottom-4 z-30 md:hidden">
-      <div className="flex items-center gap-2 rounded-2xl border border-orange-500/30 bg-[#0b0b0f]/95 p-3 shadow-[0_18px_70px_rgba(255,115,39,0.3)] backdrop-blur">
+      <div className="flex items-center gap-3 rounded-2xl border border-orange-500/30 bg-[#0b0b0f]/95 p-3 shadow-[0_18px_70px_rgba(255,115,39,0.3)] backdrop-blur touch-manipulation">
         <button
           onClick={onChat}
-          className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-200 px-3 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/30"
+          aria-label="Open chat"
+          className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-200 px-4 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-orange-500/30 min-h-[52px]"
         >
           Chat
         </button>
         <button
           onClick={onClarity}
-          className="flex-1 rounded-xl border border-orange-400/50 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-50"
+          aria-label="Start clarity pause"
+          className="flex-1 rounded-xl border border-orange-400/50 bg-white/5 px-4 py-3 text-base font-semibold text-orange-50 min-h-[52px]"
         >
           Pause
         </button>
         <button
           onClick={onJournal}
-          className="flex-1 rounded-xl border border-orange-400/40 bg-black/40 px-3 py-2 text-sm font-semibold text-orange-100"
+          aria-label="Open journal"
+          className="flex-1 rounded-xl border border-orange-400/40 bg-black/40 px-4 py-3 text-base font-semibold text-orange-100 min-h-[52px]"
         >
           Journal
         </button>
