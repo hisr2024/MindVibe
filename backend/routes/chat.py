@@ -317,7 +317,7 @@ class KIAAN:
     async def generate_response_with_gita(
         self,
         user_message: str,
-        db: AsyncSession,
+        db: AsyncSession | None,
         theme: str | None = None,
         application: str | None = None,
         conversation_history: list[dict[str, str]] | None = None,
@@ -346,7 +346,13 @@ class KIAAN:
                 return "❌ API Key not configured"
 
             gita_context = ""
-            kb_ready = await self._ensure_kb_seeded(db)
+            kb_ready = False
+
+            if db:
+                kb_ready = await self._ensure_kb_seeded(db)
+            else:
+                logger.warning("Database session unavailable; skipping KB lookup")
+
             if self.gita_kb and db and kb_ready:
                 try:
                     verse_results = await self.gita_kb.search_relevant_verses(
@@ -707,8 +713,8 @@ async def start_session() -> Dict[str, Any]:
 @router.post("/message")
 async def send_message(
     chat: ChatMessage,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
+    request: Request = None,
+    db: AsyncSession | None = Depends(get_db),
 ) -> Dict[str, Any]:
     session_id = _extract_session_id(chat, request)
     try:
