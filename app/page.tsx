@@ -756,7 +756,7 @@ function AnimatedKiaanLogo() {
         <div className="text-[10px] font-semibold uppercase tracking-[0.42em] text-orange-100/80">K I A A N</div>
         <div className="relative flex items-center justify-center">
           <div className="absolute inset-x-0 -top-2 h-10 bg-gradient-to-r from-orange-400/22 via-amber-200/16 to-white/12 blur-2xl" />
-          <div className="logo-wordmark relative inline-flex items-center justify-center px-3 text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-[#fff3e3] via-[#ffd2a6] to-[#ff9c6b] drop-shadow-[0_10px_34px_rgba(255,163,94,0.55)]">
+          <div className="logo-wordmark relative inline-flex items-center justify-center px-3 text-[1.35rem] md:text-3xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-[#fff7ed] via-[#ffd8aa] to-[#ff9f62] drop-shadow-[0_10px_34px_rgba(255,163,94,0.65)]">
             Mental Vibe
           </div>
         </div>
@@ -777,20 +777,21 @@ function AnimatedKiaanLogo() {
         .logo-wordmark {
           position: relative;
           text-transform: uppercase;
-          letter-spacing: 0.18em;
-          -webkit-text-stroke: 0.55px rgba(255, 235, 217, 0.8);
+          letter-spacing: 0.16em;
+          font-family: 'Inter', 'Manrope', 'Poppins', sans-serif;
+          -webkit-text-stroke: 0.75px rgba(42, 18, 8, 0.45);
           text-shadow:
-            0 1px 0 rgba(17, 10, 6, 0.45),
-            0 12px 28px rgba(255, 153, 90, 0.45),
-            0 4px 18px rgba(255, 234, 210, 0.45);
+            0 1px 0 rgba(255, 245, 231, 0.9),
+            0 2px 10px rgba(26, 14, 8, 0.55),
+            0 10px 28px rgba(255, 160, 94, 0.5);
         }
         .logo-wordmark::before {
           content: '';
           position: absolute;
-          inset: -6px -10px;
-          background: radial-gradient(circle at 50% 45%, rgba(255, 206, 150, 0.18), transparent 58%);
-          filter: blur(12px);
-          opacity: 0.95;
+          inset: -4px -8px;
+          background: radial-gradient(circle at 50% 45%, rgba(255, 218, 174, 0.14), transparent 60%);
+          filter: blur(9px);
+          opacity: 0.85;
           pointer-events: none;
           z-index: -1;
         }
@@ -799,14 +800,14 @@ function AnimatedKiaanLogo() {
           position: absolute;
           inset: 0;
           border-radius: 9999px;
-          border: 1px solid rgba(255, 210, 170, 0.35);
-          box-shadow: 0 0 18px rgba(255, 171, 110, 0.28), inset 0 0 8px rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 208, 162, 0.45);
+          box-shadow: 0 0 18px rgba(255, 171, 110, 0.28), inset 0 0 10px rgba(255, 250, 242, 0.2);
           pointer-events: none;
           z-index: -2;
         }
         @media (min-width: 768px) {
           .logo-wordmark {
-            letter-spacing: 0.24em;
+            letter-spacing: 0.2em;
           }
         }
         @keyframes floaty {
