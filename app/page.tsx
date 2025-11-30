@@ -756,7 +756,7 @@ function AnimatedKiaanLogo() {
         <div className="text-[10px] font-semibold uppercase tracking-[0.42em] text-orange-100/80">K I A A N</div>
         <div className="relative flex items-center justify-center">
           <div className="absolute inset-x-0 -top-2 h-10 bg-gradient-to-r from-orange-400/22 via-amber-200/16 to-white/12 blur-2xl" />
-          <div className="logo-wordmark relative inline-flex items-center justify-center px-3 text-[1.1rem] md:text-2xl font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-[#fff7ed] via-[#ffd8aa] to-[#ff9f62] drop-shadow-[0_10px_34px_rgba(255,163,94,0.65)]">
+          <div className="logo-wordmark relative inline-flex items-center justify-center px-2 text-[0.55rem] md:text-sm font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-[#fff7ed] via-[#ffd8aa] to-[#ff9f62] drop-shadow-[0_10px_34px_rgba(255,163,94,0.65)]">
             Mental Vibe
           </div>
         </div>
