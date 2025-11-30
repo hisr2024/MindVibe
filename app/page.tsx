@@ -222,6 +222,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [promptMotion, setPromptMotion] = useState(false)
+  const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -278,6 +279,61 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
   }
 
+  function summarizeContent(content: string) {
+    const clean = content.trim()
+    if (clean.length <= 220) return clean
+
+    const sentences = clean.split(/(?<=[.!?])\s+/)
+    let summary = ''
+    for (const sentence of sentences) {
+      if ((summary + sentence).length > 180) break
+      summary = `${summary}${summary ? ' ' : ''}${sentence}`
+    }
+
+    return summary || `${clean.slice(0, 180)}...`
+  }
+
+  function renderAssistantContent(content: string, index: number) {
+    const view = detailViews[index] ?? 'summary'
+    const summary = summarizeContent(content)
+
+    return (
+      <div className="space-y-3">
+        <div className="flex gap-2 text-[11px] text-orange-100/70 font-semibold">
+          <button
+            className={`px-3 py-1 rounded-full border transition ${
+              view === 'summary'
+                ? 'border-orange-300/60 bg-orange-400/20 text-orange-50 shadow-[0_6px_20px_rgba(255,179,71,0.25)]'
+                : 'border-orange-200/15 hover:border-orange-300/40'
+            }`}
+            onClick={() => setDetailViews(prev => ({ ...prev, [index]: 'summary' }))}
+          >
+            Summary view
+          </button>
+          <button
+            className={`px-3 py-1 rounded-full border transition ${
+              view === 'detailed'
+                ? 'border-orange-300/60 bg-orange-400/20 text-orange-50 shadow-[0_6px_20px_rgba(255,179,71,0.25)]'
+                : 'border-orange-200/15 hover:border-orange-300/40'
+            }`}
+            onClick={() => setDetailViews(prev => ({ ...prev, [index]: 'detailed' }))}
+          >
+            Detailed view
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs uppercase tracking-wide text-orange-200/70 font-semibold">{view === 'summary' ? 'Summary' : 'Detailed explanation'}</div>
+          <div className="bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm">
+            <p className="whitespace-pre-wrap leading-relaxed text-sm text-orange-50/90">
+              {view === 'summary' ? summary : content}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <section
       id="kiaan-chat"
@@ -318,7 +374,11 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                 ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
                 : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
             }`}>
-              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              {msg.role === 'assistant' ? (
+                renderAssistantContent(msg.content, i)
+              ) : (
+                <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              )}
             </div>
           </div>
         ))}
