@@ -19,6 +19,14 @@ type ChatMessage = {
   status?: 'pending' | 'error'
 }
 
+type ResponseMetadata = {
+  model?: string
+  gitaPowered?: boolean
+  validationFallback?: boolean | string
+  repoContextUsed?: boolean
+  regenerated?: boolean
+}
+
 const navItems = ['Home', 'Journal', 'KIAAN Chat', 'Insights']
 
 const quickStats = [
@@ -76,6 +84,7 @@ const Chat = () => {
   const [isSending, setIsSending] = useState(false)
   const [isLoadingSession, setIsLoadingSession] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [responseMetadata, setResponseMetadata] = useState<ResponseMetadata | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   const quickPromptOptions: QuickPrompt[] = [
@@ -139,6 +148,10 @@ const Chat = () => {
           content: data.message,
         },
       ])
+      setResponseMetadata({
+        gitaPowered: data.gita_powered ?? data.gitaPowered,
+        model: data.model,
+      })
     } catch (err) {
       setError('Unable to connect to KIAAN. Please try again.')
     } finally {
@@ -189,6 +202,19 @@ const Chat = () => {
       }
 
       const data = await response.json()
+      const metadata: ResponseMetadata = {
+        model: data.model,
+        gitaPowered: data.gita_powered ?? data.gitaPowered,
+        validationFallback:
+          data.validation_fallback ||
+          data.validationFallback ||
+          data.validation_fallback_notice ||
+          data.validation_notice,
+        repoContextUsed: data.repo_context_used || data.used_repo_context || data.repo_context,
+        regenerated: data.regenerated || data.was_regenerated || data.response_regenerated,
+      }
+
+      setResponseMetadata(metadata)
       setMessages(prev =>
         prev.map(message =>
           message.id === pendingAssistantMessage.id ? { ...message, content: data.response, status: undefined } : message,
@@ -287,6 +313,38 @@ const Chat = () => {
               {error && (
                 <div className="rounded-xl border border-vibrant-pink/30 bg-vibrant-pink/10 px-4 py-2 text-sm text-ink-100 shadow-soft">
                   {error}
+                </div>
+              )}
+
+              {(responseMetadata?.model || responseMetadata?.gitaPowered !== undefined ||
+                responseMetadata?.validationFallback || responseMetadata?.repoContextUsed || responseMetadata?.regenerated) && (
+                <div className="space-y-1 rounded-xl border border-calm-200 bg-calm-100 px-4 py-3 text-xs text-ink-100 shadow-soft">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-vibrant-blue">Response details</p>
+                  <div className="flex flex-wrap items-center gap-3 text-ink-300">
+                    {responseMetadata?.model && (
+                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-100 ring-1 ring-vibrant-blue/30">
+                        Model in use: {responseMetadata.model}
+                      </span>
+                    )}
+                    {responseMetadata?.gitaPowered !== undefined && (
+                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-100 ring-1 ring-vibrant-green/30">
+                        {responseMetadata.gitaPowered
+                          ? 'Bhagavad Gita grounding active'
+                          : 'Gita grounding unavailable'}
+                      </span>
+                    )}
+                    {responseMetadata?.validationFallback && (
+                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-100 ring-1 ring-vibrant-pink/40">
+                        Validation fallback refreshed this reply
+                      </span>
+                    )}
+                  </div>
+                  {(responseMetadata?.regenerated || responseMetadata?.repoContextUsed) && (
+                    <div className="space-y-1 text-ink-300">
+                      {responseMetadata?.regenerated && <p>The response was regenerated for clarity.</p>}
+                      {responseMetadata?.repoContextUsed && <p>Fallback repository context was used to guide this message.</p>}
+                    </div>
+                  )}
                 </div>
               )}
 
