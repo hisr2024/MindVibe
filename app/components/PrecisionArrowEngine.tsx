@@ -4,12 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 
 const arrowCheckpoints = ['Purpose', 'Effort', 'Detachment', 'Consistency']
 
-function toScore(value: string, bonus = 0) {
-  if (!value.trim()) return 2 + bonus
-  const base = Math.min(10, Math.round(value.trim().length / 28) + 3)
-  return Math.min(10, base + bonus)
-}
-
 function average(values: number[]) {
   if (!values.length) return 0
   const total = values.reduce((sum, value) => sum + value, 0)
@@ -20,30 +14,33 @@ export function PrecisionArrowEngine() {
   const [originalGoal, setOriginalGoal] = useState('Ship the Precision Arrow Engine UI prototype')
   const [refinedGoal, setRefinedGoal] = useState('Deliver a shippable Precision Arrow screen with scoring visual and mobile flow')
   const [timeFrame, setTimeFrame] = useState('This week')
-  const [whyItMatters, setWhyItMatters] = useState('Clarifies what to build, keeps scope tight, and reduces decision fatigue for the team.')
+  const [whyItMatters, setWhyItMatters] = useState(
+    'Clarifies what to build, keeps scope tight, and reduces decision fatigue for the team.'
+  )
   const [coreValues, setCoreValues] = useState('Clarity, craftsmanship')
   const [keyActions, setKeyActions] = useState('Sketch layout → Build React components → Validate responsive flow')
   const [todayAction, setTodayAction] = useState('Draft the Precision Arrow canvas and align scores to the schema')
   const [effortFocus, setEffortFocus] = useState('Own the actions; let outcomes follow')
   const [outcomeFears, setOutcomeFears] = useState('That the UI feels heavy or unclear on mobile')
-  const [detachmentReframe, setDetachmentReframe] = useState('Ship the cleanest version possible, then iterate with real usage instead of predicting reactions.')
+  const [detachmentReframe, setDetachmentReframe] = useState(
+    'Ship the cleanest version possible, then iterate with real usage instead of predicting reactions.'
+  )
   const [letGoStatement, setLetGoStatement] = useState('Build with focus, learn from release')
   const [rhythm, setRhythm] = useState('Daily touch, 45-minute blocks')
   const [tinyHabit, setTinyHabit] = useState('Open the Precision Arrow screen and refine one alignment card')
   const [trackingMethod, setTrackingMethod] = useState('Checkbox list for Purpose/Effort/Detachment/Consistency')
   const [fallbackPlan, setFallbackPlan] = useState('If a day slips, rebuild momentum with one tiny habit and log why it slipped.')
-
-  const purposeAlignment = useMemo(() => toScore(whyItMatters, coreValues ? 1 : 0), [whyItMatters, coreValues])
-  const effortAlignment = useMemo(() => toScore(keyActions, todayAction ? 1 : 0), [keyActions, todayAction])
-  const detachmentAlignment = useMemo(() => toScore(detachmentReframe, letGoStatement ? 1 : 0), [detachmentReframe, letGoStatement])
-  const consistencyAlignment = useMemo(() => toScore(rhythm + tinyHabit + trackingMethod + fallbackPlan), [rhythm, tinyHabit, trackingMethod, fallbackPlan])
+  const [purposeAlignment, setPurposeAlignment] = useState(7)
+  const [effortAlignment, setEffortAlignment] = useState(6)
+  const [detachmentAlignment, setDetachmentAlignment] = useState(7)
+  const [consistencyAlignment, setConsistencyAlignment] = useState(10)
 
   const overallScore = useMemo(
     () => average([purposeAlignment, effortAlignment, detachmentAlignment, consistencyAlignment]),
     [purposeAlignment, effortAlignment, detachmentAlignment, consistencyAlignment]
   )
 
-  const progress = Math.max(8, overallScore * 10)
+  const progress = Math.min(100, Math.max(0, overallScore * 10))
 
   const arrowPayload = useMemo(
     () => ({
@@ -173,9 +170,6 @@ export function PrecisionArrowEngine() {
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Precision Arrow Engine</p>
           <h2 className="text-2xl md:text-3xl font-bold text-orange-50">Goal Alignment Canvas</h2>
-          <p className="text-sm text-orange-100/80 max-w-2xl">
-            Neutral, structured layout for turning any goal into a Purpose–Effort–Detachment–Consistency arrow. Built for React, with a Nunjucks schema handoff and a live scoring visual.
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <span className="px-3 py-1 rounded-full text-xs bg-white/5 border border-orange-400/20 text-orange-100/80">JSON aligned</span>
@@ -205,6 +199,13 @@ export function PrecisionArrowEngine() {
             <LabeledField label="Tiny habit" value={tinyHabit} onChange={setTinyHabit} />
             <LabeledField label="Tracking method" value={trackingMethod} onChange={setTrackingMethod} />
             <LabeledField label="Fallback plan" value={fallbackPlan} onChange={setFallbackPlan} multiline />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <ScoreInput label="Purpose" value={purposeAlignment} onChange={setPurposeAlignment} />
+            <ScoreInput label="Effort" value={effortAlignment} onChange={setEffortAlignment} />
+            <ScoreInput label="Detachment" value={detachmentAlignment} onChange={setDetachmentAlignment} />
+            <ScoreInput label="Consistency" value={consistencyAlignment} onChange={setConsistencyAlignment} />
           </div>
         </div>
 
@@ -238,68 +239,43 @@ export function PrecisionArrowEngine() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-4">
-          <h3 className="text-sm font-semibold text-orange-50">Scoring Visual</h3>
-          <div className="space-y-3">
-            <div className="relative h-3 rounded-full bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-orange-400/30 overflow-hidden">
-              <div
-                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-200 transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-              <div
-                className="absolute -top-1 h-5 w-5 rounded-full border-2 border-orange-300 bg-orange-500/80 shadow-[0_0_20px_rgba(255,158,94,0.6)] transition-all duration-500"
-                style={{ left: `calc(${progress}% - 10px)` }}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs text-orange-100/80">
-              <ScorePill label="Purpose" value={purposeAlignment} />
-              <ScorePill label="Effort" value={effortAlignment} />
-              <ScorePill label="Detachment" value={detachmentAlignment} />
-              <ScorePill label="Consistency" value={consistencyAlignment} />
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-4">
+            <h3 className="text-sm font-semibold text-orange-50">Scoring Visual</h3>
+            <div className="space-y-3">
+              <div className="relative h-3 rounded-full bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-orange-400/30 overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-200 transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+                <div
+                  className="absolute -top-1 h-5 w-5 rounded-full border-2 border-orange-300 bg-orange-500/80 shadow-[0_0_20px_rgba(255,158,94,0.6)] transition-all duration-500"
+                  style={{ left: `calc(${progress}% - 10px)` }}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs text-orange-100/80">
+                <ScorePill label="Purpose" value={purposeAlignment} />
+                <ScorePill label="Effort" value={effortAlignment} />
+                <ScorePill label="Detachment" value={detachmentAlignment} />
+                <ScorePill label="Consistency" value={consistencyAlignment} />
+              </div>
             </div>
           </div>
-          <p className="text-xs text-orange-100/70">Arrow flight animates on score updates; keep every pillar above 7 for a straight trajectory.</p>
-        </div>
 
-        <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-4">
-          <h3 className="text-sm font-semibold text-orange-50">Mobile-first flow</h3>
-          <ol className="space-y-3 text-sm text-orange-100/80">
-            <li className="flex gap-3">
-              <span className="h-7 w-7 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-50 flex items-center justify-center text-xs font-semibold">1</span>
-              <div>
-                <p className="font-semibold text-orange-50">Step cards</p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <span className="h-7 w-7 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-50 flex items-center justify-center text-xs font-semibold">2</span>
-              <div>
-                <p className="font-semibold text-orange-50">Live arrow bar</p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <span className="h-7 w-7 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-50 flex items-center justify-center text-xs font-semibold">3</span>
-              <div>
-                <p className="font-semibold text-orange-50">JSON preview</p>
-              </div>
-            </li>
-          </ol>
-        </div>
-
-        <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-orange-50">Checkpoints</h3>
-          <div className="space-y-3">
-            {arrowCheckpoints.map(checkpoint => (
-              <div key={checkpoint} className="flex gap-3 items-start">
-                <div className="h-3 w-3 rounded-full bg-gradient-to-br from-orange-400 to-orange-200 mt-1" />
-                <div>
-                  <p className="text-sm font-semibold text-orange-50">{checkpoint}</p>
+          <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-orange-50">Checkpoints</h3>
+            <div className="space-y-3">
+              {arrowCheckpoints.map(checkpoint => (
+                <div key={checkpoint} className="flex gap-3 items-start">
+                  <div className="h-3 w-3 rounded-full bg-gradient-to-br from-orange-400 to-orange-200 mt-1" />
+                  <div>
+                    <p className="text-sm font-semibold text-orange-50">{checkpoint}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
     </section>
   )
 }
@@ -344,6 +320,27 @@ function LabeledField({
   )
 }
 
+function ScoreInput({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return (
+    <label className="space-y-2 block">
+      <span className="text-xs font-semibold text-orange-100/80">{label} alignment</span>
+      <input
+        type="number"
+        min={0}
+        max={10}
+        step={1}
+        value={value}
+        onChange={event => {
+          const parsed = Number(event.target.value)
+          const next = Number.isFinite(parsed) ? parsed : 0
+          onChange(Math.min(10, Math.max(0, next)))
+        }}
+        className="w-full rounded-2xl bg-black/50 border border-orange-500/20 text-orange-50 p-3 focus:ring-2 focus:ring-orange-400/60 outline-none"
+      />
+    </label>
+  )
+}
+
 function AlignmentCard({
   overallScore,
   purposeAlignment,
@@ -358,15 +355,11 @@ function AlignmentCard({
   consistencyAlignment: number
 }) {
   return (
-    <div className="rounded-2xl border border-orange-500/15 bg-gradient-to-b from-[#0d0d10] to-[#0c0c10] p-4 space-y-3 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
+      <div className="rounded-2xl border border-orange-500/15 bg-gradient-to-b from-[#0d0d10] to-[#0c0c10] p-4 space-y-3 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-orange-100/70">Arrow alignment</p>
           <h3 className="text-lg font-semibold text-orange-50">Overall: {overallScore}/10</h3>
-        </div>
-        <div className="text-right text-xs text-orange-100/70">
-          <p className="text-orange-50 font-semibold">Scoring logic</p>
-          <p>Presence + clarity weighting</p>
         </div>
       </div>
       <div className="space-y-2 text-sm text-orange-100/85">
@@ -375,7 +368,6 @@ function AlignmentCard({
         <ScoreBar label="Detachment" value={detachmentAlignment} />
         <ScoreBar label="Consistency" value={consistencyAlignment} />
       </div>
-      <p className="text-xs text-orange-100/70">Keep Purpose and Effort above 7 to maintain a straight flight; strengthen Detachment and Consistency to reduce wobble.</p>
     </div>
   )
 }
