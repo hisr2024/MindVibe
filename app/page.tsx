@@ -255,18 +255,18 @@ export default function Home() {
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
+        <MoodTracker />
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <PrecisionArrowEngine />
         <ArdhaReframer />
         <ViyogDetachmentCoach />
-        <RelationalCompass onSelectPrompt={setChatPrefill} />
+        <RelationshipCompass onSelectPrompt={setChatPrefill} />
         <ClarityPauseSuite />
         <KarmaResetGuide onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
         <Journal />
-        <MoodTracker />
 
         <section className="bg-[#0b0b0f] border border-orange-500/15 rounded-3xl p-5 md:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-3">
           <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
@@ -290,7 +290,7 @@ type ArdhaReframerResult = {
   requestedAt: string
 }
 
-type RelationalCompassResult = {
+type RelationshipCompassResult = {
   response: string
   requestedAt: string
 }
@@ -508,11 +508,11 @@ function ViyogDetachmentCoach() {
   )
 }
 
-function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
+function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const [conflict, setConflict] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [result, setResult] = useLocalState<RelationalCompassResult | null>('relational_compass', null)
+  const [result, setResult] = useLocalState<RelationshipCompassResult | null>('relationship_compass', null)
 
   useEffect(() => {
     if (error) setError(null)
@@ -521,7 +521,7 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
   const handoffPrompt = conflict
     ? `Kiaan, help me speak calmly about this relationship conflict while keeping your supportive tone: ${summarizeContent(conflict)}`
     : result
-      ? `Kiaan, keep your warmth while helping me phrase this relational compass plan: ${summarizeContent(result.response)}`
+      ? `Kiaan, keep your warmth while helping me phrase this relationship compass plan: ${summarizeContent(result.response)}`
       : ''
 
   async function requestCompass() {
@@ -531,7 +531,7 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `You are Relational Compass, a neutral, calm assistant that guides users through relationship conflicts with clarity, fairness, composure, and compassion. You are not Kiaan and never interfere with Kiaan. You reduce reactivity and ego-driven responses while keeping tone secular, modern, concise, and non-judgmental. Boundaries: do not provide therapy, legal, medical, or financial advice; do not take sides; do not tell someone to leave or stay; do not spiritualize; if safety is a concern, suggest reaching out to a trusted person or professional.\n\nFlow to follow for every reply:\n1) Acknowledge the conflict and its emotional weight.\n2) Separate emotions from ego impulses.\n3) Identify the user’s values or desired outcome (respect, honesty, understanding, peace).\n4) Offer right-action guidance rooted in fairness, accountability, calm honesty, boundaries, and listening before reacting.\n5) Provide ego-detachment suggestions (no need to win, pause before replying, focus on conduct over outcomes).\n6) Offer one compassion-based perspective without excusing harm.\n7) Share a non-reactive communication pattern with “I” language and one clarifying question.\n8) End with one simple next step the user can control.\nTone: short, clear sentences; calm; secular; never shaming.`
+    const systemPrompt = `You are Relationship Compass, a neutral, calm assistant that guides users through relationship conflicts with clarity, fairness, composure, and compassion. You are not Kiaan and never interfere with Kiaan. You reduce reactivity and ego-driven responses while keeping tone secular, modern, concise, and non-judgmental. Boundaries: do not provide therapy, legal, medical, or financial advice; do not take sides; do not tell someone to leave or stay; do not spiritualize; if safety is a concern, suggest reaching out to a trusted person or professional.\n\nFlow to follow for every reply:\n1) Acknowledge the conflict and its emotional weight.\n2) Separate emotions from ego impulses.\n3) Identify the user’s values or desired outcome (respect, honesty, understanding, peace).\n4) Offer right-action guidance rooted in fairness, accountability, calm honesty, boundaries, and listening before reacting.\n5) Provide ego-detachment suggestions (no need to win, pause before replying, focus on conduct over outcomes).\n6) Offer one compassion-based perspective without excusing harm.\n7) Share a non-reactive communication pattern with “I” language and one clarifying question.\n8) End with one simple next step the user can control.\nTone: short, clear sentences; calm; secular; never shaming.`
 
     const request = `${systemPrompt}\n\nUser conflict: "${trimmedConflict}"\n\nReturn the structured eight-part response in numbered sections with concise guidance only.`
 
@@ -544,14 +544,14 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
       })
 
       if (!response.ok) {
-        setError('Relational Compass is unavailable right now. Please try again shortly.')
+        setError('Relationship Compass is unavailable right now. Please try again shortly.')
         return
       }
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
     } catch {
-      setError('Unable to reach Relational Compass. Check your connection and retry.')
+      setError('Unable to reach Relationship Compass. Check your connection and retry.')
     } finally {
       setLoading(false)
     }
@@ -565,7 +565,7 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
       <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.12em] text-orange-100/80">Dharma Compass for Relationships</p>
-          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Relational Compass</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Relationship Compass</h2>
           <p className="text-sm text-orange-100/80 max-w-3xl">
             Calm, secular guidance for conflicts while KIAAN stays untouched—focus on right action, ego-detachment, and respectful communication.
           </p>
@@ -579,9 +579,9 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
       <div className="relative grid gap-4 md:grid-cols-3">
         <div className="md:col-span-2 space-y-4">
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-orange-100" htmlFor="relational-conflict">Describe the conflict</label>
+            <label className="block text-sm font-semibold text-orange-100" htmlFor="relationship-conflict">Describe the conflict</label>
             <textarea
-              id="relational-conflict"
+              id="relationship-conflict"
               value={conflict}
               onChange={e => setConflict(e.target.value)}
               placeholder="Example: My partner feels I don’t listen, and I keep getting defensive when they bring it up."
@@ -595,7 +595,7 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
               disabled={!conflict.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Balancing guidance...' : 'Guide me with Relational Compass'}
+              {loading ? 'Balancing guidance...' : 'Guide me with Relationship Compass'}
             </button>
             <button
               onClick={() => handoffPrompt && onSelectPrompt(handoffPrompt)}
@@ -613,7 +613,7 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
           {result && (
             <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
               <div className="flex items-center justify-between text-xs text-orange-100/70">
-                <span className="font-semibold text-orange-50">Relational Compass response</span>
+                <span className="font-semibold text-orange-50">Relationship Compass response</span>
                 <span>{new Date(result.requestedAt).toLocaleString()}</span>
               </div>
               <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
@@ -2432,31 +2432,122 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
 function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const moods = [
-    { emoji: '😊', label: 'Great', color: 'from-orange-500 to-[#ffb347]' },
-    { emoji: '😐', label: 'Okay', color: 'from-[#ffae42] to-orange-500' },
-    { emoji: '😔', label: 'Low', color: 'from-zinc-700 to-slate-700' },
-    { emoji: '😰', label: 'Anxious', color: 'from-red-600 to-orange-600' },
-    { emoji: '🙏', label: 'Peaceful', color: 'from-[#ffb347] to-rose-400' },
+    { label: 'Steady', gradient: 'from-orange-400 via-[#ffb347] to-amber-200', beam: 'bg-orange-200/70', halo: 'shadow-[0_0_50px_rgba(255,186,140,0.35)]', delay: '0s' },
+    { label: 'Open', gradient: 'from-emerald-300 via-teal-200 to-cyan-200', beam: 'bg-emerald-100/70', halo: 'shadow-[0_0_50px_rgba(134,239,172,0.35)]', delay: '0.08s' },
+    { label: 'Reflective', gradient: 'from-indigo-300 via-violet-400 to-purple-500', beam: 'bg-indigo-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.35)]', delay: '0.16s' },
+    { label: 'Charged', gradient: 'from-rose-400 via-orange-400 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.3)]', delay: '0.24s' },
+    { label: 'Calm', gradient: 'from-amber-200 via-rose-200 to-white', beam: 'bg-amber-50/80', halo: 'shadow-[0_0_45px_rgba(255,237,213,0.32)]', delay: '0.32s' },
   ]
 
   return (
-    <section className="bg-[#0d0d10]/80 border border-orange-500/15 rounded-2xl p-6 shadow-[0_10px_40px_rgba(255,115,39,0.08)]">
-      <h2 className="text-xl font-semibold mb-4 text-orange-100">📊 How are you feeling?</h2>
-      <div className="flex flex-wrap justify-center gap-3">
-        {moods.map((m) => (
-          <button
-            key={m.label}
-            onClick={() => setSelectedMood(m.label)}
-            className={`flex flex-col items-center p-4 rounded-xl transition-all ${
-              selectedMood === m.label ? `bg-gradient-to-br ${m.color} scale-105 text-black` : 'bg-black/50 text-orange-50 hover:bg-zinc-800'
-            }`}
-          >
-            <span className="text-4xl mb-2">{m.emoji}</span>
-            <span className="text-sm">{m.label}</span>
-          </button>
-        ))}
+    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 shadow-[0_16px_70px_rgba(255,115,39,0.12)] space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-orange-100/70">State check-in</p>
+          <h2 className="text-xl font-semibold text-orange-50">How are you feeling?</h2>
+        </div>
+        {selectedMood && (
+          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1 text-xs font-semibold text-orange-100 shadow-[0_0_25px_rgba(255,153,51,0.25)]">
+            Logged: {selectedMood}
+          </span>
+        )}
       </div>
-      {selectedMood && <p className="mt-4 text-center text-sm text-orange-300">✓ Mood logged</p>}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {moods.map(mood => {
+          const active = selectedMood === mood.label
+          return (
+            <button
+              key={mood.label}
+              onClick={() => setSelectedMood(mood.label)}
+              className={`group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-[#09090d]/85 text-left transition duration-300 ${
+                active
+                  ? 'ring-2 ring-orange-400/70 shadow-[0_24px_80px_rgba(255,115,39,0.28)] scale-[1.02]'
+                  : 'hover:-translate-y-1 hover:shadow-[0_18px_60px_rgba(255,115,39,0.18)]'
+              }`}
+              style={{ animationDelay: mood.delay }}
+            >
+              <div className={`absolute -inset-8 bg-gradient-to-br ${mood.gradient} opacity-20 blur-3xl`} />
+              <div className={`absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,200,150,0.25),transparent_46%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.16),transparent_42%)] animate-glowPulse`} />
+              <div className={`absolute inset-0 opacity-70 ${active ? 'animate-sheen' : ''}`}>
+                <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]" />
+              </div>
+
+              <div className="relative flex items-center gap-4 p-4">
+                <div className="relative h-14 w-14 shrink-0">
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mood.gradient} opacity-80 blur-sm ${mood.halo}`} />
+                  <div className="absolute inset-1 rounded-2xl border border-white/10 bg-[#0b0b0f]/80 backdrop-blur" />
+                  <div className="absolute inset-2 rounded-xl border border-white/10" style={{ animation: 'spin 14s linear infinite' }} />
+                  <div className="absolute inset-2 rounded-xl bg-gradient-to-br from-white/8 via-transparent to-white/8" style={{ animation: 'spin 10s linear infinite reverse' }} />
+                  <div className="absolute inset-3 rounded-xl border border-white/10" />
+                  <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-white/5 via-transparent to-white/10 animate-glowPulse" />
+                  <div className="absolute inset-0">
+                    <span
+                      className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[2px] animate-orbitTrail"
+                      style={{ background: `radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)`, animationDelay: mood.delay }}
+                    />
+                    <span
+                      className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-70 animate-orbitTrail"
+                      style={{ background: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 60%)`, animationDelay: `calc(${mood.delay} + 0.2s)` }}
+                    />
+                    <span
+                      className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full animate-orbitTrail"
+                      style={{ background: `radial-gradient(circle at 60% 70%, rgba(255,255,255,0.2), transparent 65%)`, animationDelay: `calc(${mood.delay} + 0.35s)` }}
+                    />
+                    <span
+                      className={`absolute left-1/2 top-1/2 h-3 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full ${mood.beam} mix-blend-screen`}
+                      style={{ animation: 'pulseLine 2.6s ease-in-out infinite', animationDelay: mood.delay }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-orange-50">{mood.label}</p>
+                  <div className="flex items-center gap-1.5">
+                    {[0, 1, 2].map(level => (
+                      <span
+                        key={level}
+                        className={`h-1.5 rounded-full bg-gradient-to-r ${mood.gradient}`}
+                        style={{ width: `${18 + level * 6}px`, opacity: active ? 1 : 0.6, animation: active ? `pulseLine 2.4s ease-in-out ${level * 0.1}s infinite` : undefined }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {selectedMood && <p className="text-center text-sm text-orange-300">✓ Mood captured</p>}
+
+      <style jsx>{`
+        .animate-glowPulse { animation: glowPulse 6s ease-in-out infinite; }
+        .animate-sheen { animation: sheen 7s ease-in-out infinite; }
+        .animate-orbitTrail { animation: orbitTrail 8s ease-in-out infinite; }
+        @keyframes glowPulse {
+          0%, 100% { opacity: 0.75; filter: drop-shadow(0 0 10px rgba(255,153,51,0.25)); }
+          50% { opacity: 1; filter: drop-shadow(0 0 20px rgba(255,179,71,0.35)); }
+        }
+        @keyframes sheen {
+          0% { transform: translateX(-80%); opacity: 0; }
+          50% { opacity: 0.4; }
+          100% { transform: translateX(120%); opacity: 0; }
+        }
+        @keyframes pulseLine {
+          0%, 100% { transform: scaleX(0.9); opacity: 0.8; }
+          50% { transform: scaleX(1.06); opacity: 1; }
+        }
+        @keyframes orbitTrail {
+          0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.94); opacity: 0.8; }
+          50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.02); opacity: 1; }
+          100% { transform: translate(-50%, -50%) rotate(360deg) scale(0.94); opacity: 0.8; }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </section>
   )
 }
