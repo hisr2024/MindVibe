@@ -117,6 +117,7 @@ export default function Home() {
 
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <ArdhaReframer />
+        <KarmaResetGuide />
         <QuickHelp onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
@@ -236,6 +237,172 @@ function ArdhaReframer() {
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function KarmaResetGuide() {
+  const [arrivalWords, setArrivalWords] = useState('')
+  const [actions, setActions] = useState('')
+  const [attachments, setAttachments] = useState('')
+  const [regrets, setRegrets] = useState('')
+  const [expectations, setExpectations] = useState('')
+  const [intention, setIntention] = useState('')
+  const [response, setResponse] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function requestReset() {
+    setLoading(true)
+    setError(null)
+
+    const systemPrompt = `Role:
+You are the Karma Reset Guide, an in-the-moment, end-of-day ritual assistant inspired by Nishkama Karma. You are a separate module from Kiaan and cannot change Kiaan’s guidance. You exist only to facilitate the “Reset Karma” ritual right now.
+
+Tone & style:
+- Calm, warm, grounded, inclusive, present-tense.
+- No judgment, no guilt, no long lectures.
+- Not therapy or planning; this is a short ritual.
+
+Ritual flow (follow in order):
+1) Arrival & grounding: acknowledge end of day, invite slow breath, reflect their feeling words.
+2) Collect four elements briefly: actions, attachments, regrets, expectations. Acknowledge without analysis.
+3) Reset ritual: gather everything into a bundle, connect to acting without clinging to results, guide 2–4 breaths to release, then dissolve the bundle while keeping lessons.
+4) Closure: affirm day is complete, invite one gentle intention if offered, and close. Keep the close simple.
+
+Boundaries:
+- No medical, legal, or financial advice.
+- If crisis or self-harm appears, gently direct them to trusted people or local professionals.`
+
+    const ritualRequest = `${systemPrompt}
+
+User check-in (present moment, do not generalize):
+- Arrival words: ${arrivalWords || 'not shared'}
+- Actions: ${actions || 'not shared'}
+- Attachments: ${attachments || 'not shared'}
+- Regrets: ${regrets || 'not shared'}
+- Expectations: ${expectations || 'not shared'}
+- Gentle intention: ${intention || 'not shared'}
+
+Guide the live ritual now with concise steps. Keep it under 220 words, stay present-focused (“right now”, “as you exhale”), match a soft visual release animation, and end with a clean-slate closing.`
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const result = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: ritualRequest })
+      })
+
+      if (!result.ok) {
+        setError('The Karma Reset Guide is quiet right now. Please try again in a moment.')
+        return
+      }
+
+      const data = await result.json()
+      setResponse(data.response)
+    } catch {
+      setError('Unable to reach the Karma Reset Guide. Check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
+    }
+
+    return (
+    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-6">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-2">
+          <p className="text-sm text-orange-100/80">Nishkama-inspired nightly release</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Guide</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">
+            A present-moment ritual that helps you gather today’s actions, attachments, regrets, and expectations, then release their weight without touching KIAAN’s core guidance.
+          </p>
+        </div>
+        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">Separate module • Does not alter KIAAN</div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3">
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="arrival-words">Arrival words</label>
+          <input
+            id="arrival-words"
+            value={arrivalWords}
+            onChange={e => setArrivalWords(e.target.value)}
+            placeholder="Example: heavy, unfinished"
+            className="w-full rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="actions">Actions that stood out</label>
+          <textarea
+            id="actions"
+            value={actions}
+            onChange={e => setActions(e.target.value)}
+            placeholder="2–3 actions you noticed today"
+            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="attachments">Attachments you felt</label>
+          <textarea
+            id="attachments"
+            value={attachments}
+            onChange={e => setAttachments(e.target.value)}
+            placeholder="What did you find yourself clinging to?"
+            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+        </div>
+
+        <div className="space-y-3">
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="regrets">Regrets replaying</label>
+          <textarea
+            id="regrets"
+            value={regrets}
+            onChange={e => setRegrets(e.target.value)}
+            placeholder="Moments you wish went differently"
+            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="expectations">Expectations that feel heavy</label>
+          <textarea
+            id="expectations"
+            value={expectations}
+            onChange={e => setExpectations(e.target.value)}
+            placeholder="Hopes or outcomes you feel attached to"
+            className="w-full min-h-[90px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+
+          <label className="block text-sm font-semibold text-orange-100" htmlFor="intention">Gentle intention for tomorrow (optional)</label>
+          <input
+            id="intention"
+            value={intention}
+            onChange={e => setIntention(e.target.value)}
+            placeholder="Example: move with kindness"
+            className="w-full rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3 items-center">
+        <button
+          onClick={requestReset}
+          disabled={loading}
+          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Guiding your reset...' : 'Run the Karma Reset ritual'}
+        </button>
+        <p className="text-xs text-orange-100/80">Stay present—this ritual does not change KIAAN’s responses.</p>
+      </div>
+
+      {error && <p className="text-sm text-orange-200">{error}</p>}
+
+      {response && (
+        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
+          <div className="flex items-center justify-between text-xs text-orange-100/70">
+            <span className="font-semibold text-orange-50">Live ritual script</span>
+            <span>{new Date().toLocaleString()}</span>
+          </div>
+          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{response}</div>
         </div>
       )}
     </section>
