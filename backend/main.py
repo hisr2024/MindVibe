@@ -124,6 +124,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
 
+# Load Profile router
+print("\n[Profile] Attempting to import Profile router...")
+try:
+    from backend.routes.profile import router as profile_router
+    app.include_router(profile_router)
+    print("✅ [SUCCESS] Profile router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Profile router: {e}")
+
 # Load Karma Footprint router
 print("\n[Karma Footprint] Attempting to import Karma Footprint router...")
 try:

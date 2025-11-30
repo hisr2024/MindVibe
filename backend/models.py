@@ -1,6 +1,6 @@
 from __future__ import annotations
 import datetime
-from sqlalchemy import JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class SoftDeleteMixin:
@@ -28,8 +28,28 @@ class User(SoftDeleteMixin, Base):
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="en")
+    two_factor_secret: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, default=None
+    )
+    two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
+
+class UserProfile(SoftDeleteMixin, Base):
+    __tablename__ = "user_profiles"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
+    )
+    full_name: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    base_experience: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
 class Mood(SoftDeleteMixin, Base):
