@@ -187,34 +187,6 @@ const RELATIONAL_TRIGGER_PATTERNS = [
   'Admissions of feeling defensive, judged, or misunderstood with someone specific.'
 ]
 
-const RELATIONAL_UI_COPY = [
-  { label: 'Screen title', text: 'Dharma Compass for Relationships' },
-  { label: 'Tagline', text: 'Grounded guidance for calm, fair responses.' },
-  { label: 'CTA', text: 'Return to clarity before you reply.' },
-  { label: 'Subtext', text: 'Route heated conflicts here while KIAAN keeps uplifting support unchanged.' }
-]
-
-const RELATIONAL_VISUAL_METAPHORS = [
-  'Compass ring glowing softly = finding a heading without force.',
-  'Balance scale steadying = fairness and mutual respect.',
-  'Calm center pulse = breath-led pause before speaking.',
-  'Bridge line between two dots = safe channel to reconnect.'
-]
-
-const RELATIONAL_GROUNDING_STEPS = [
-  '0–5s: Compass ring brightens as you inhale slowly.',
-  '5–10s: Balance scale tilts then steadies while you exhale.',
-  '10–20s: Center pulse expands and contracts with two calm breaths.',
-  '20–30s: Bridge line draws between two points; rehearse your calm opener.'
-]
-
-const RELATIONAL_INTEGRATION_BLUEPRINT = [
-  'Auto-route conflict-heavy inputs to Relational Compass while KIAAN stays the default for general support.',
-  'Keep Kiaan’s replies untouched; Relational Compass only offers a companion plan beside the main chat.',
-  'Offer a one-click handoff prompt so users can ask KIAAN to help phrase the calm message.',
-  'Log trigger signals separately so impulse detection and Kiaan’s flow remain independent.'
-]
-
 type ClaritySession = {
   active: boolean
   started: boolean
@@ -646,57 +618,6 @@ function RelationalCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: string
             </div>
             <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
               {RELATIONAL_TRIGGER_PATTERNS.map(item => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl bg-[#0c0c10]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-            <div className="flex items-center justify-between text-xs text-orange-100/80">
-              <span className="font-semibold text-orange-50">UI copy</span>
-              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Screen text</span>
-            </div>
-            <ul className="space-y-1 text-sm text-orange-100/85">
-              {RELATIONAL_UI_COPY.map(copy => (
-                <li key={copy.label} className="flex items-start gap-2">
-                  <span className="font-semibold text-orange-50 min-w-[90px]">{copy.label}:</span>
-                  <span className="text-orange-100/80">{copy.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl bg-[#0b0b0f]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-            <div className="flex items-center justify-between text-xs text-orange-100/80">
-              <span className="font-semibold text-orange-50">Metaphor system</span>
-              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Visual anchors</span>
-            </div>
-            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
-              {RELATIONAL_VISUAL_METAPHORS.map(item => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl bg-[#0c0c10]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-            <div className="flex items-center justify-between text-xs text-orange-100/80">
-              <span className="font-semibold text-orange-50">Grounding animation</span>
-              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">4 steps</span>
-            </div>
-            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
-              {RELATIONAL_GROUNDING_STEPS.map(step => (
-                <li key={step}>{step}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl bg-[#0c0c10]/90 border border-orange-500/20 p-4 space-y-2 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-            <div className="flex items-center justify-between text-xs text-orange-100/80">
-              <span className="font-semibold text-orange-50">Integration blueprint</span>
-              <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">With KIAAN</span>
-            </div>
-            <ul className="list-disc list-inside text-sm text-orange-100/85 space-y-1">
-              {RELATIONAL_INTEGRATION_BLUEPRINT.map(item => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
