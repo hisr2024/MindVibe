@@ -342,8 +342,10 @@ class KIAAN:
                 return self.get_crisis_response()
 
             if not self.ready or not self.client:
-                logger.warning("OPENAI_API_KEY not configured; chat unavailable")
-                return "❌ API Key not configured"
+                logger.warning("OPENAI_API_KEY not configured; using offline grounding")
+                return self._offline_repo_response(
+                    user_message, theme=theme, application=application
+                )
 
             gita_context = ""
             kb_ready = False
@@ -613,6 +615,27 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
             context_lines.append(f"Practical: {wisdom_payload['practical']}")
 
         return self._sanitize_text("\n".join(context_lines))
+
+    def _offline_repo_response(
+        self, user_message: str, theme: str | None = None, application: str | None = None
+    ) -> str:
+        """Provide a grounded response when the OpenAI client is unavailable."""
+
+        repo_context = self._build_repo_context(
+            user_message, theme=theme, application=application
+        )
+
+        if repo_context:
+            return (
+                "I'm here for you, drawing from timeless steadiness even while offline.\n"
+                f"{repo_context}\n\n"
+                "Keep breathing gently, act with calm intention, and be kind to yourself. 💙"
+            )
+
+        return (
+            "I'm here for you even without the full toolkit."
+            " Let's focus on steady breath, balanced action, and self-kindness. 💙"
+        )
 
     def _build_gita_context(self, verse_results: list) -> str:
         if not verse_results:
