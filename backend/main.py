@@ -133,6 +133,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Footprint router: {e}")
 
+# Load Guidance Engines router
+print("\n[Guidance Engines] Attempting to import Guidance router...")
+try:
+    from backend.routes.guidance import router as guidance_router
+    app.include_router(guidance_router)
+    print("✅ [SUCCESS] Guidance router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Guidance router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
