@@ -7,12 +7,13 @@ export type CodexRequest = {
   model?: string
   messages: CodexMessage[]
   temperature?: number
+  response_format?: { type: 'json_object' | 'text' }
 }
 
 const CODEX_MODEL = process.env.CODEX_MODEL || 'gpt-4o-mini'
 const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions'
 
-export async function codex({ model = CODEX_MODEL, messages, temperature = 0.7 }: CodexRequest) {
+export async function codex({ model = CODEX_MODEL, messages, temperature = 0.7, response_format }: CodexRequest) {
   const apiKey = process.env.OPENAI_API_KEY || process.env.CODEX_API_KEY
 
   if (!apiKey) {
@@ -28,7 +29,8 @@ export async function codex({ model = CODEX_MODEL, messages, temperature = 0.7 }
     body: JSON.stringify({
       model,
       messages,
-      temperature
+      temperature,
+      ...(response_format ? { response_format } : {})
     })
   })
 

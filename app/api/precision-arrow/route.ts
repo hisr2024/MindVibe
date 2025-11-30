@@ -22,6 +22,17 @@ function getPrecisionArrowModel() {
   return process.env.PRECISION_ARROW_MODEL || process.env.CODEX_MODEL || 'gpt-4o-mini'
 }
 
+function normalizeJsonText(text: string) {
+  const trimmed = text.trim()
+
+  if (trimmed.startsWith('```')) {
+    const content = trimmed.replace(/^```(json)?/i, '').replace(/```$/, '').trim()
+    return content
+  }
+
+  return trimmed
+}
+
 function validateArrowPayload(payload: ArrowAlignment) {
   const requiredKeys: (keyof ArrowAlignment)[] = [
     'goal_clarity',
@@ -69,20 +80,32 @@ export async function POST(request: Request) {
     const completion = await codex({
       model: getPrecisionArrowModel(),
       messages,
-      temperature: 0.3
+      temperature: 0.3,
+      response_format: { type: 'json_object' }
     })
 
-    const text = completion.content.trim()
+    const text = normalizeJsonText(completion.content)
     if (!text) {
       throw new Error('Precision Arrow Engine returned an empty response')
     }
 
-    const parsed = JSON.parse(text) as ArrowAlignment
+    let parsed: ArrowAlignment
+
+    try {
+      parsed = JSON.parse(text) as ArrowAlignment
+    } catch (parseError) {
+      throw new Error('Precision Arrow Engine returned invalid JSON')
+    }
+
     const arrow = validateArrowPayload(parsed)
 
     return NextResponse.json(arrow)
   } catch (error) {
     console.error('Precision Arrow error:', error)
-    return NextResponse.json({ error: 'Precision Arrow Engine failed' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Precision Arrow Engine failed'
+    return NextResponse.json(
+      { error: message, kiaan_hint: 'KIAAN chat remains available while we steady the Precision Arrow Engine.' },
+      { status: 500 }
+    )
   }
 }
