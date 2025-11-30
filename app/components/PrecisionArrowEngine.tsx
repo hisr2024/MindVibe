@@ -109,20 +109,62 @@ export function PrecisionArrowEngine() {
   const nunjucksBlock = useMemo(() => `{% set arrow = ${JSON.stringify(arrowPayload, null, 2)} %}`, [arrowPayload])
   const jsonPreview = useMemo(() => JSON.stringify(arrowPayload, null, 2), [arrowPayload])
   const [copied, setCopied] = useState<'nunjucks' | 'json' | null>(null)
+  const [copyStatus, setCopyStatus] = useState<{
+    type: 'nunjucks' | 'json' | null
+    message: string
+    tone: 'success' | 'error'
+  }>({ type: null, message: '', tone: 'success' })
 
   useEffect(() => {
     if (!copied) return
-    const timeout = setTimeout(() => setCopied(null), 1600)
+    const timeout = setTimeout(() => {
+      setCopied(null)
+      setCopyStatus(current => (current.type === copied ? { type: null, message: '', tone: 'success' } : current))
+    }, 1600)
     return () => clearTimeout(timeout)
   }, [copied])
 
   async function handleCopy(value: string, type: 'nunjucks' | 'json') {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopied(type)
-    } catch (error) {
-      console.error('Copy failed', error)
+    async function attemptClipboardCopy() {
+      if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) return false
+      try {
+        await navigator.clipboard.writeText(value)
+        return true
+      } catch (error) {
+        console.error('Clipboard API failed', error)
+        return false
+      }
     }
+
+    function fallbackCopy() {
+      if (typeof document === 'undefined') return false
+
+      const textarea = document.createElement('textarea')
+      textarea.value = value
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.select()
+      const success = document.execCommand('copy')
+      document.body.removeChild(textarea)
+      return success
+    }
+
+    const clipboardSuccess = await attemptClipboardCopy()
+    const succeeded = clipboardSuccess || fallbackCopy()
+
+    if (succeeded) {
+      setCopied(type)
+      setCopyStatus({ type, message: 'Copied to clipboard', tone: 'success' })
+      return
+    }
+
+    setCopyStatus({
+      type,
+      message: 'Copy not supported here. Select the block and copy manually.',
+      tone: 'error'
+    })
   }
 
   return (
@@ -182,6 +224,7 @@ export function PrecisionArrowEngine() {
             code={nunjucksBlock}
             onCopy={() => handleCopy(nunjucksBlock, 'nunjucks')}
             copied={copied === 'nunjucks'}
+            status={copyStatus.type === 'nunjucks' ? copyStatus : null}
           />
           <CodeCard
             label="React payload"
@@ -190,6 +233,7 @@ export function PrecisionArrowEngine() {
             code={jsonPreview}
             onCopy={() => handleCopy(jsonPreview, 'json')}
             copied={copied === 'json'}
+            status={copyStatus.type === 'json' ? copyStatus : null}
           />
         </div>
       </div>
@@ -365,7 +409,8 @@ function CodeCard({
   badge,
   code,
   onCopy,
-  copied
+  copied,
+  status
 }: {
   label: string
   title: string
@@ -373,6 +418,7 @@ function CodeCard({
   code: string
   onCopy: () => void
   copied: boolean
+  status: { type: 'nunjucks' | 'json' | null; message: string; tone: 'success' | 'error' } | null
 }) {
   return (
     <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4 space-y-3">
@@ -392,6 +438,14 @@ function CodeCard({
         </div>
       </div>
       <pre className="text-[11px] leading-relaxed text-orange-50 bg-[#0c0c10] border border-orange-500/10 rounded-xl p-3 overflow-auto whitespace-pre">{code}</pre>
+      {status?.message ? (
+        <p
+          className={`text-[11px] ${status.tone === 'error' ? 'text-red-200' : 'text-orange-100/80'}`}
+          role={status.tone === 'error' ? 'alert' : undefined}
+        >
+          {status.message}
+        </p>
+      ) : null}
       <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/70">
         <span className="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">Nunjucks-ready</span>
         <span className="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">JSON aligned</span>
