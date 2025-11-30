@@ -1,569 +1,250 @@
 'use client'
+import { useState, useEffect, useRef } from 'react'
 
-import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import {
-  BarChart3,
-  Bot,
-  CheckCircle2,
-  Heart,
-  Home,
-  Lock,
-  Mic,
-  NotebookPen,
-  PauseCircle,
-  PhoneCall,
-  ShieldCheck,
-  Sparkles,
-  Star,
-} from 'lucide-react'
+function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
+  const [state, setState] = useState<T>(() => {
+    if (typeof window === 'undefined') return initial
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initial
+    } catch {
+      return initial
+    }
+  })
 
-import { ThemeToggle } from './components/theme-toggle'
-import { ChatBubble } from './components/ChatBubble'
-import { GenZNavbar } from './components/GenZNavbar'
-import { KiaanAvatar } from './components/KiaanAvatar'
-import { ParticleBackground } from './components/ParticleBackground'
-import { Badge } from './components/ui/badge'
-import { Button } from './components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
-import { Input } from './components/ui/input'
-import { Modal, ModalContent, ModalDescription, ModalTitle, ModalTrigger } from './components/ui/modal'
-import { Skeleton } from './components/ui/skeleton'
-import { Textarea } from './components/ui/textarea'
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(state))
+    } catch {}
+  }, [key, state])
 
-interface Conversation {
-  role: 'user' | 'assistant'
-  content: string
+  return [state, setState]
 }
 
-const onboardingSteps = [
-  {
-    title: 'Welcome',
-    description: 'Quick hello and setup.',
-  },
-  {
-    title: 'Set goals',
-    description: 'Choose calm, sleep, or focus.',
-  },
-  {
-    title: 'Privacy consent',
-    description: 'Confirm private storage.',
-  },
-]
-
-const bottomNav = [
-  { icon: Home, label: 'Home' },
-  { icon: NotebookPen, label: 'Journal' },
-  { icon: Bot, label: 'KIAAN' },
-  { icon: BarChart3, label: 'Insights' },
-]
-
-function useTimedLoader(delay = 900) {
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-  return loading
-}
-
-export default function HomePage() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [goal, setGoal] = useState('Build a calmer evening routine')
-  const [consent, setConsent] = useState(false)
-  const [mood, setMood] = useState(6)
-  const [journal, setJournal] = useState('')
-  const [noteSaved, setNoteSaved] = useState(false)
-  const [messages, setMessages] = useState<Conversation[]>([
-    { role: 'assistant', content: 'Hi, I’m KIAAN. I’m here to offer gentle support whenever you need it.' },
-    { role: 'user', content: 'I feel tense before bedtime and want a gentle plan.' },
-    {
-      role: 'assistant',
-      content: 'Thank you for sharing. Let’s create a soft wind-down plan together and bring some ease to your evening.',
-    },
-  ])
-  const [draftMessage, setDraftMessage] = useState('')
-  const [isResponding, setIsResponding] = useState(false)
-  const isLoadingChat = useTimedLoader()
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem('mv-journal')
-    if (saved) setJournal(saved)
-  }, [])
-
-  useEffect(() => {
-    if (!journal) return
-    const handle = setTimeout(() => {
-      window.localStorage.setItem('mv-journal', journal)
-      setNoteSaved(true)
-      setTimeout(() => setNoteSaved(false), 1200)
-    }, 500)
-    return () => clearTimeout(handle)
-  }, [journal])
-
-  const moodLabel = useMemo(() => {
-    if (mood <= 2) return 'Low'
-    if (mood <= 4) return 'Tender'
-    if (mood <= 6) return 'Steady'
-    if (mood <= 8) return 'Hopeful'
-    return 'Light'
-  }, [mood])
-
-  const createGroundedResponse = (text: string) => {
-    const lower = text.toLowerCase()
-    if (lower.includes('sleep') || lower.includes('bed')) {
-      return 'Sleepy vibes 💤 dim lights, 3 slow breaths, shoulders melting.'
-    }
-    if (lower.includes('tense') || lower.includes('anxious')) {
-      return 'I feel you 🤝 hand to heart, soften the jaw, name one safe thing.'
-    }
-    return 'Vibes are key! ✨ Inhale 4, hold 2, exhale 6—what feels cozy next?'
-  }
-
-  const handleSend = (value = draftMessage) => {
-    if (!value.trim() || isResponding) return
-    setMessages(prev => [...prev, { role: 'user', content: value }])
-    setDraftMessage('')
-    setIsResponding(true)
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'assistant', content: createGroundedResponse(value) }])
-      setIsResponding(false)
-    }, 950)
-  }
-
-  const quickPrompts = [
-    'Guide me through a 2-minute breath',
-    'I need a gentle bedtime plan',
-    'How do I calm racing thoughts?',
-    'Can you remind me I’m safe right now?',
-  ]
-
-  const MotionButton = motion(Button)
-
+export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden pb-24">
-      <div className="aurora-sheen" aria-hidden />
-      <div className="aurora-pearl" aria-hidden />
-      <div className="starfield" aria-hidden />
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pt-8 md:px-8 md:pt-10">
-        <GenZNavbar />
-        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div
-              className="glow relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-amber-50 via-white to-calm-100 text-ink-100 shadow-soft"
-              animate={{ scale: [1, 1.08, 1], rotate: [0, 2, -2, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-              role="img"
-              aria-label="Soft star avatar"
-            >
-              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-100/50 via-white/40 to-calm-100/40" aria-hidden />
-              <Star aria-hidden className="h-6 w-6 text-ink-500" />
-            </motion.div>
-            <div>
-              <p className="text-sm font-semibold text-ink-100/70 dark:text-calm-100/80">Meet KIAAN • MindVibe</p>
-              <h1 className="text-3xl font-bold text-ink-100 dark:text-calm-50">Steady support for night and day</h1>
-              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Simple, private, soothing.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-calm-200 bg-white/70 px-3 py-2 text-sm text-ink-100/80 shadow-soft md:flex dark:border-ink-300/70 dark:bg-ink-200/50">
-              <ShieldCheck className="h-4 w-4" aria-hidden />
-              <span>End-to-end encrypted</span>
-            </div>
-            <ThemeToggle />
-          </div>
+    <main className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white p-4 md:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <header className="text-center space-y-3 py-8">
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            🕉️ KIAAN
+          </h1>
+          <p className="text-xl md:text-2xl text-zinc-300 font-light">Your AI Guide to Inner Peace</p>
+          <p className="text-sm text-zinc-500">Ancient Wisdom for Modern Life • Powered by 700+ Timeless Teachings</p>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="card-surface relative overflow-hidden p-6">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-calm-100/60 via-white/30 to-calm-200/40 dark:from-ink-200/40 dark:via-ink-200/10 dark:to-ink-200/40" aria-hidden />
-            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <Badge className="bg-ink-500 text-white shadow-soft">KIAAN status</Badge>
-                <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Calm lane</h2>
-                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Soft visuals, predictable replies.</p>
-              </div>
-              <div className="flex flex-col gap-2 text-sm text-ink-100/80 dark:text-calm-100">
-                <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-soft dark:bg-ink-200/60">
-                  <Sparkles className="h-4 w-4" aria-hidden />
-                  <span>Steady, soothing tone</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-soft dark:bg-ink-200/60">
-                  <ShieldCheck className="h-4 w-4" aria-hidden />
-                  <span>Safety filters on</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {[{ label: 'Grounding speed', value: 'Under 1s' }, { label: 'Tone', value: 'Warm & calm' }, { label: 'Uptime', value: '99.9%' }].map(item => (
-                <div key={item.label} className="rounded-2xl border border-calm-200/70 bg-white/70 p-4 text-sm shadow-soft dark:border-ink-300/60 dark:bg-ink-200/50">
-                  <p className="text-ink-100/70 dark:text-calm-100/80">{item.label}</p>
-                  <p className="text-xl font-semibold text-ink-100 dark:text-calm-50">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-800/50 rounded-2xl p-4 text-center">
+          <p className="text-sm text-blue-200">🔒 All conversations are private and confidential • Your journey, your space</p>
+        </div>
 
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
-          <motion.div
-            className="card-surface p-6"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <Badge>Onboarding</Badge>
-                <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Progressive welcome</h2>
-                <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Three quick steps.</p>
-              </div>
-              <Modal>
-                <ModalTrigger asChild>
-                  <Button variant="secondary">Privacy policy</Button>
-                </ModalTrigger>
-                <ModalContent>
-                  <ModalTitle>Privacy at MindVibe</ModalTitle>
-                  <ModalDescription>Entries stay private until you choose to sync.</ModalDescription>
-                  <div className="mt-4 space-y-2 text-sm text-ink-100/80 dark:text-calm-100/80">
-                    <p>Encrypted end to end. Pause anytime.</p>
-                    <p className="flex items-center gap-2 text-ink-100">
-                      <Lock className="h-4 w-4" aria-hidden />
-                      Your choices stay reversible.
-                    </p>
-                  </div>
-                </ModalContent>
-              </Modal>
-            </div>
+        <KIAANChat />
+        <QuickHelp />
+        <DailyWisdom />
+        <MoodTracker />
+      </div>
+    </main>
+  )
+}
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              {onboardingSteps.map((step, index) => {
-                const active = index === currentStep
-                const done = index < currentStep
-                return (
-                  <button
-                    key={step.title}
-                    className={`rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-calm-400 focus-visible:ring-offset-2 ${
-                      active
-                        ? 'border-ink-500 bg-calm-100 shadow-soft'
-                        : 'border-calm-200 bg-white/80 dark:border-ink-300/70 dark:bg-ink-200/40'
-                    }`}
-                    onClick={() => setCurrentStep(index)}
-                    aria-current={active}
-                    aria-label={`Onboarding step ${index + 1}: ${step.title}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {done ? (
-                        <CheckCircle2 className="h-5 w-5 text-ink-500" aria-hidden />
-                      ) : (
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-calm-200 text-xs font-semibold text-ink-100">
-                          {index + 1}
-                        </span>
-                      )}
-                      <p className="text-sm font-semibold text-ink-100 dark:text-calm-50">{step.title}</p>
-                    </div>
-                    <p className="mt-2 text-sm text-ink-100/70 dark:text-calm-100/80">{step.description}</p>
-                  </button>
-                )
-              })}
-            </div>
+function KIAANChat() {
+  const [messages, setMessages] = useLocalState<{role: 'user' | 'assistant', content: string}[]>('kiaan_chat', [])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="space-y-2">
-                <span className="text-sm font-semibold text-ink-100 dark:text-calm-50">Goal focus</span>
-                <Input
-                  aria-describedby="goal-help"
-                  value={goal}
-                  onChange={e => setGoal(e.target.value)}
-                  placeholder="Describe what you want to nurture"
-                />
-                <p id="goal-help" className="text-xs text-ink-100/60 dark:text-calm-100/70">
-                  Example: Build a calmer evening routine.
-                </p>
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm font-semibold text-ink-100 dark:text-calm-50">Consent toggle</span>
-                <div className="flex items-center gap-3 rounded-2xl border border-calm-200 bg-white/70 px-4 py-3 shadow-soft dark:border-ink-300/70 dark:bg-ink-200/40">
-                  <input
-                    type="checkbox"
-                    checked={consent}
-                    onChange={e => setConsent(e.target.checked)}
-                    className="h-5 w-5 accent-ink-500"
-                    aria-describedby="consent-copy"
-                  />
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-ink-100 dark:text-calm-50">I agree to mindful data use</p>
-                    <p id="consent-copy" className="text-xs text-ink-100/60 dark:text-calm-100/70">
-                      Clear language, reversible at any time.
-                    </p>
-                  </div>
-                </div>
-              </label>
-            </div>
-          </motion.div>
+  async function sendMessage() {
+    if (!input.trim()) return
+    
+    const userMessage = { role: 'user' as const, content: input }
+    const newMessages = [...messages, userMessage]
+    setMessages(newMessages)
+    setInput('')
+    setLoading(true)
 
-          <motion.div
-            className="card-surface p-6"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.45 }}
-          >
-            <div className="flex items-start justify-between">
-              <div>
-              <Badge className="bg-calm-200 text-ink-100">Mood</Badge>
-              <h2 className="mt-2 text-2xl font-semibold text-ink-100 dark:text-calm-50">Mood tracker</h2>
-              <p className="text-sm text-ink-100/70 dark:text-calm-100/80">Emoji scale with quick feedback.</p>
-            </div>
-              <Heart className="h-6 w-6 text-ink-500" aria-hidden />
-            </div>
-            <div className="mt-6 space-y-4">
-              <div className="flex items-center gap-3 rounded-2xl bg-calm-100/80 p-4 text-ink-100 shadow-soft dark:bg-ink-200/50">
-                <span className="text-2xl" aria-hidden>
-                  {mood <= 2 ? '😢' : mood <= 4 ? '😟' : mood <= 6 ? '🙂' : mood <= 8 ? '😊' : '🤗'}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold">How are you feeling?</p>
-                  <p className="text-xs text-ink-100/70">{moodLabel} • Tap arrows or drag for nuance.</p>
-                </div>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={mood}
-                aria-label="Mood level"
-                onChange={e => setMood(Number(e.target.value))}
-                className="w-full accent-ink-500"
-              />
-              <div className="flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
-                {['Gentle stretch', 'Water break', 'Two-minute breath', 'Send note to coach'].map(item => (
-                  <Badge key={item} className="bg-white text-ink-100 shadow-soft dark:bg-ink-200/60">
-                    {item}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </section>
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input })
+      })
 
-        <section className="section-grid">
-          <Card className="p-6">
-            <CardHeader>
-              <Badge className="bg-calm-200 text-ink-100">Journal</Badge>
-              <CardTitle>Encrypted journal with auto-save</CardTitle>
-              <CardDescription>Auto-saves with voice-to-text and privacy badges.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-semibold text-ink-100 dark:text-calm-50">Today’s entry</span>
-                <Textarea
-                  aria-label="Journal entry"
-                  minLength={12}
-                  rows={5}
-                  value={journal}
-                  onChange={e => setJournal(e.target.value)}
-                  placeholder="How are you feeling? What do you want to remember?"
-                />
-              </label>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-ink-100/70 dark:text-calm-100/80">
-                <div className="flex items-center gap-2 rounded-full bg-calm-100 px-3 py-1 shadow-soft dark:bg-ink-200/50">
-                  <Lock className="h-4 w-4" aria-hidden />
-                  <span>End-to-end encrypted</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full bg-calm-100 px-3 py-1 shadow-soft dark:bg-ink-200/50">
-                  <Mic className="h-4 w-4" aria-hidden />
-                  <span>Voice-to-text ready</span>
-                </div>
-                {noteSaved && <span className="text-ink-500">Saved • breathing space protected</span>}
-              </div>
-            </CardContent>
-          </Card>
+      if (response.ok) {
+        const data = await response.json()
+        setMessages([...newMessages, { role: 'assistant', content: data.response }])
+      } else {
+        setMessages([...newMessages, { role: 'assistant', content: 'I\'m having trouble connecting. Please try again. 💙' }])
+      }
+    } catch {
+      setMessages([...newMessages, { role: 'assistant', content: 'Connection issue. I\'m here when you\'re ready. 💙' }])
+    } finally {
+      setLoading(false)
+    }
+  }
 
-          <Card className="p-6">
-            <CardHeader>
-              <Badge className="bg-ink-500 text-white">KIAAN</Badge>
-              <CardTitle>Calm chat companion</CardTitle>
-              <CardDescription>Grounded replies with gentle breathing prompts.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="glass-aurora relative overflow-hidden rounded-3xl border border-vibrant-blue/30 bg-white/80 p-6 text-ink-100">
-                <ParticleBackground />
-                <div className="relative flex flex-col gap-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-ink-300">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft ring-1 ring-vibrant-blue/25">
-                        <Sparkles className="h-4 w-4" aria-hidden />
-                        Quick replies
-                      </span>
-                      <span className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 shadow-soft ring-1 ring-vibrant-blue/25">
-                        <Lock className="h-4 w-4" aria-hidden />
-                        Encrypted & gentle
-                      </span>
-                      {isResponding && (
-                        <span className="rounded-full bg-vibrant-blue/15 px-3 py-1 text-ink-100 shadow-soft ring-1 ring-vibrant-blue/30">
-                          Preparing a calm reply…
-                        </span>
-                      )}
-                    </div>
-                    <button className="neon-button" type="button">
-                      Start Chat 🚀
-                    </button>
-                  </div>
-
-                  <KiaanAvatar />
-
-                  <div className="flex flex-wrap gap-2 text-xs text-ink-300">
-                    {['Quick interactions', 'Gentle tone', 'Soft animations'].map(item => (
-                      <span
-                        key={item}
-                        className="rounded-full bg-vibrant-blue/15 px-3 py-1 text-ink-100 shadow-soft ring-1 ring-vibrant-blue/30"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="relative mt-2 flex min-h-[180px] flex-col gap-3" role="log" aria-live="polite" aria-busy={isResponding}>
-                    {isLoadingChat ? (
-                      <div className="space-y-2" aria-label="Loading chat">
-                        <Skeleton className="h-5 w-2/3" />
-                        <Skeleton className="h-5 w-1/2" />
-                        <Skeleton className="h-5 w-3/4" />
-                      </div>
-                    ) : (
-                      <AnimatePresence initial={false}>
-                        {messages.map((message, index) => (
-                          <ChatBubble
-                            key={`${message.role}-${index}-${message.content.slice(0, 12)}`}
-                            text={message.content}
-                            sender={message.role}
-                          />
-                        ))}
-                      </AnimatePresence>
-                    )}
-                  </div>
-
-                  <div className="relative mt-2 flex flex-wrap gap-2" role="group" aria-label="Quick prompts">
-                    {quickPrompts.map(prompt => (
-                      <motion.button
-                        key={prompt}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold text-ink-100 shadow-soft ring-1 ring-vibrant-blue/30"
-                        onClick={() => handleSend(prompt)}
-                        aria-label={`Send prompt: ${prompt}`}
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" aria-hidden /> {prompt}
-                        </span>
-                      </motion.button>
-                    ))}
-                  </div>
-
-                  <label className="sr-only" htmlFor="chat-input">
-                    Message KIAAN
-                  </label>
-                  <div className="mt-2 flex flex-col gap-2 md:flex-row">
-                    <Input
-                      id="chat-input"
-                      aria-label="Message KIAAN"
-                      value={draftMessage}
-                      onChange={e => setDraftMessage(e.target.value)}
-                      placeholder="Tell KIAAN what you need right now"
-                      aria-describedby="chat-actions"
-                      className="border-calm-200 bg-white text-ink-100 placeholder:text-ink-300 focus:border-vibrant-blue/50 focus:ring-vibrant-blue/40"
-                    />
-                    <MotionButton
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleSend()}
-                      disabled={!draftMessage.trim() || isResponding}
-                      className="neon-button md:w-40"
-                      aria-label={isResponding ? 'KIAAN is responding' : 'Send message to KIAAN'}
-                    >
-                      {isResponding ? 'Calming…' : 'Send to KIAAN'}
-                    </MotionButton>
-                  </div>
-                  <div id="chat-actions" className="flex flex-wrap gap-2 text-xs text-ink-100/70 dark:text-calm-100/80">
-                    <Button variant="outline" size="sm" className="gap-2 border-calm-200 bg-white text-ink-100">
-                      <PauseCircle className="h-4 w-4" aria-hidden /> Pause chat
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-2 text-ink-100">
-                      <PhoneCall className="h-4 w-4" aria-hidden /> Get help
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-2 text-ink-100">
-                      <ShieldCheck className="h-4 w-4" aria-hidden /> Safety filters on
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="section-grid">
-          <Card className="p-6">
-            <CardHeader>
-              <Badge className="bg-calm-200 text-ink-100">Insights</Badge>
-              <CardTitle>Privacy-aware analytics</CardTitle>
-              <CardDescription>Summaries without raw entry exposure.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[{ label: 'Sleep readiness', value: '82%' }, { label: 'Calm streak', value: '6 days' }, { label: 'Journals this week', value: '4' }, { label: 'Emergency contacts', value: '2 saved' }].map(item => (
-                  <div key={item.label} className="rounded-2xl border border-calm-200 bg-white/70 p-4 shadow-soft dark:border-ink-300/70 dark:bg-ink-200/40">
-                    <p className="text-xs text-ink-100/60 dark:text-calm-100/80">{item.label}</p>
-                    <p className="text-xl font-semibold text-ink-100 dark:text-calm-50">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-ink-100/70 dark:text-calm-100/80">
-                We avoid harsh reds/oranges and respect WCAG AA contrast.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="p-6">
-            <CardHeader>
-              <Badge className="bg-calm-200 text-ink-100">Feedback</Badge>
-              <CardTitle>Listening loop</CardTitle>
-              <CardDescription>Quick, privacy-friendly feedback.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-3" aria-label="Feedback form">
-                <label className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold text-ink-100 dark:text-calm-50">What felt supportive?</span>
-                  <Input name="supportive" placeholder="Gentle check-ins, calming colors, etc." />
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold text-ink-100 dark:text-calm-50">What should we refine?</span>
-                  <Textarea name="refine" rows={3} placeholder="Share any friction or access needs." />
-                </label>
-                <Button type="submit" className="gap-2">
-                  <Heart className="h-4 w-4" aria-hidden /> Send feedback
-                </Button>
-              </form>
-              <p className="text-xs text-ink-100/70 dark:text-calm-100/80">
-                Designed for keyboard navigation with visible focus rings and aria-describedby bindings for errors.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
+  return (
+    <section className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border border-zinc-700 rounded-3xl p-6 md:p-8 space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="text-4xl">💬</div>
+        <div>
+          <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Talk to KIAAN</h2>
+          <p className="text-sm text-zinc-400">Powered by ancient wisdom and modern AI</p>
+        </div>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 bg-white/90 px-4 py-3 shadow-soft backdrop-blur dark:bg-ink-200/80">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
-          {bottomNav.map(item => (
-            <button
-              key={item.label}
-              className="flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold text-ink-100/80 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-calm-400 focus-visible:ring-offset-2"
-              aria-label={`${item.label} tab`}
-            >
-              <item.icon className="h-5 w-5" aria-hidden />
-              <span>{item.label}</span>
-            </button>
-          ))}
+      <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-zinc-500 py-20 md:py-32">
+            <p className="text-6xl mb-4">🕉️</p>
+            <p className="text-xl mb-2">How can I guide you today?</p>
+            <p className="text-sm text-zinc-600">Share what\'s on your mind</p>
+          </div>
+        )}
+        
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}> 
+            <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
+              msg.role === 'user' 
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                : 'bg-gradient-to-r from-zinc-700 to-zinc-600 text-zinc-100 shadow-md' 
+            }`}> 
+              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+            </div>
+          </div>
+        ))}
+        
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-zinc-700 px-4 py-3 rounded-2xl">
+              <span className="animate-pulse">KIAAN is reflecting...</span>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="flex gap-3">
+        <input
+          type="text"
+          placeholder="Type your message..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+          className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+        <button
+          onClick={sendMessage}
+          disabled={!input.trim() || loading}
+          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-zinc-700 disabled:to-zinc-700 rounded-xl font-semibold transition-all"
+        >
+          Send
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function QuickHelp() {
+  const scenarios = [
+    { emoji: '😰', label: 'Feeling anxious', query: "I'm feeling anxious and worried" },
+    { emoji: '😔', label: 'Feeling sad', query: "I'm feeling down and sad" },
+    { emoji: '😠', label: 'Dealing with anger', query: "I'm struggling with anger" },
+    { emoji: '🤔', label: 'Making a decision', query: "I need help making a decision" },
+    { emoji: '💼', label: 'Work stress', query: "I'm stressed about work" },
+    { emoji: '💔', label: 'Relationship issues', query: "I'm having relationship problems" },
+    { emoji: '🎯', label: 'Finding purpose', query: "I'm searching for my purpose" },
+    { emoji: '🙏', label: 'Need peace', query: "I need inner peace" },
+  ]
+
+  return (
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold text-zinc-300">🎯 Quick Help</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {scenarios.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              const input = document.querySelector('input[placeholder*="Type"]') as HTMLInputElement
+              if (input) { input.value = s.query; input.focus() }
+            }}
+            className="bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-2xl p-4 transition-all text-left group"
+          >
+            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{s.emoji}</div>
+            <div className="text-sm text-zinc-300">{s.label}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function DailyWisdom() {
+  const [saved, setSaved] = useState(false)
+  const wisdom = {
+    text: "The key to peace lies not in controlling outcomes, but in mastering your response. Focus your energy on doing your best without attachment to results, and discover true freedom.",
+    principle: "Action without Attachment"
+  }
+
+  return (
+    <section className="bg-gradient-to-r from-orange-900/30 to-yellow-900/20 border border-orange-800/50 rounded-3xl p-6 md:p-8">
+      <div className="flex justify-between mb-4">
+        <div className="flex gap-2">
+          <span className="text-3xl">💎</span>
+          <h2 className="text-xl font-semibold text-orange-200">Today's Wisdom</h2>
         </div>
-      </nav>
-    </main>
+        <div className="text-sm text-orange-400">{new Date().toLocaleDateString()}</div>
+      </div>
+      
+      <blockquote className="text-lg text-zinc-100 mb-4 italic leading-relaxed">
+        "{wisdom.text}"
+      </blockquote>
+      
+      <p className="text-sm text-orange-300 mb-4">✨ Principle: {wisdom.principle}</p>
+      
+      <div className="flex gap-3">
+        <button className="px-4 py-2 bg-orange-600/50 hover:bg-orange-600 rounded-lg text-sm">💬 Chat about this</button>
+        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">
+          {saved ? '⭐ Saved' : '☆ Save'}
+        </button>
+        <button className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm">📤 Share</button>
+      </div>
+    </section>
+  )
+}
+
+function MoodTracker() {
+  const [selectedMood, setSelectedMood] = useState<string | null>(null)
+  const moods = [
+    { emoji: '😊', label: 'Great', color: 'from-green-600 to-emerald-600' },
+    { emoji: '😐', label: 'Okay', color: 'from-blue-600 to-cyan-600' },
+    { emoji: '😔', label: 'Low', color: 'from-gray-600 to-slate-600' },
+    { emoji: '😰', label: 'Anxious', color: 'from-orange-600 to-red-600' },
+    { emoji: '🙏', label: 'Peaceful', color: 'from-purple-600 to-pink-600' },
+  ]
+
+  return (
+    <section className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6">
+      <h2 className="text-xl font-semibold mb-4 text-zinc-300">📊 How are you feeling?</h2>
+      <div className="flex flex-wrap justify-center gap-3">
+        {moods.map((m) => (
+          <button
+            key={m.label}
+            onClick={() => setSelectedMood(m.label)}
+            className={`flex flex-col items-center p-4 rounded-xl transition-all ${
+              selectedMood === m.label ? `bg-gradient-to-br ${m.color} scale-105` : 'bg-zinc-800 hover:bg-zinc-700'
+            }`}
+          >
+            <span className="text-4xl mb-2">{m.emoji}</span>
+            <span className="text-sm">{m.label}</span>
+          </button>
+        ))}
+      </div>
+      {selectedMood && <p className="mt-4 text-center text-sm text-green-400">✓ Mood logged</p>}
+    </section>
   )
 }

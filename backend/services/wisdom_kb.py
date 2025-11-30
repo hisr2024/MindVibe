@@ -5,7 +5,6 @@ Provides functionality for sanitizing text, searching verses, and formatting res
 """
 
 import difflib
-from typing import Tuple
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,7 +42,7 @@ class WisdomKnowledgeBase:
             "krishna": "the teacher",
             "Arjuna": "the student",
             "arjuna": "the student",
-            "Lord": "The Wise One",
+            "Lord": "the wise one",
             "lord": "the wise one",
             "God": "inner wisdom",
             "god": "inner wisdom",
@@ -119,7 +118,7 @@ class WisdomKnowledgeBase:
         return matching_verses
 
     @staticmethod
-    def compute_text_similarity(text1: str | None, text2: str | None) -> float:
+    def compute_text_similarity(text1: str, text2: str) -> float:
         """
         Compute similarity between two text strings using SequenceMatcher.
 
@@ -130,53 +129,7 @@ class WisdomKnowledgeBase:
         Returns:
             Similarity score between 0.0 and 1.0
         """
-        if not text1 or not text2:
-            return 0.0
-
         return difflib.SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
-
-    @staticmethod
-    def infer_theme_and_application(query: str) -> Tuple[str | None, str | None]:
-        """Infer the most relevant theme and application from a user's query."""
-
-        normalized = query.lower()
-
-        theme_keywords = {
-            "equanimity_in_adversity": ["failure", "setback", "overwhelmed", "losing", "mistake", "struggle"],
-            "action_without_attachment": ["overthink", "results", "outcome", "detached", "expectation", "control"],
-            "control_of_mind": ["anxiety", "spiral", "racing", "panic", "thoughts", "worry"],
-            "mastering_the_mind": ["discipline", "consistent", "focus", "habit", "self control", "routine"],
-            "self_empowerment": ["purpose", "confidence", "motivation", "direction", "meaning"],
-            "inner_peace": ["calm", "peace", "balance", "stress", "rest"],
-            "impermanence": ["change", "uncertainty", "unstable", "transition"],
-            "practice_and_persistence": ["practice", "perseverance", "keep going", "persistence"],
-        }
-
-        application_keywords = {
-            "resilience": ["resilience", "bounce back", "recover"],
-            "stress_reduction": ["stress", "stressed", "pressure"],
-            "letting_go": ["let go", "detach", "attachment"],
-            "anxiety_management": ["anxiety", "anxious", "panic"],
-            "present_moment_focus": ["present", "mindful", "right now"],
-            "self_discipline": ["discipline", "consistent", "habit", "routine"],
-            "self_empowerment": ["purpose", "empower", "confidence"],
-            "mindfulness": ["overthink", "mindfulness", "ruminate"],
-        }
-
-        inferred_theme = None
-        inferred_application = None
-
-        for theme, keywords in theme_keywords.items():
-            if any(keyword in normalized for keyword in keywords):
-                inferred_theme = theme
-                break
-
-        for app, keywords in application_keywords.items():
-            if any(keyword in normalized for keyword in keywords):
-                inferred_application = app
-                break
-
-        return inferred_theme, inferred_application
 
     @staticmethod
     async def search_relevant_verses(
@@ -201,53 +154,26 @@ class WisdomKnowledgeBase:
         """
         kb = WisdomKnowledgeBase()
 
-        inferred_theme, inferred_application = kb.infer_theme_and_application(query)
-        effective_theme = theme or inferred_theme
-        effective_application = application or inferred_application
-
-        verse_candidates: list[WisdomVerse] = []
-
-        if effective_theme:
-            verse_candidates.extend(await kb.get_verses_by_theme(db, effective_theme))
-
-        if effective_application:
-            verse_candidates.extend(
-                await kb.search_verses_by_application(db, effective_application)
-            )
-
-        if not verse_candidates:
+        # Get verses, optionally filtered by theme or application
+        if theme:
+            verses = await kb.get_verses_by_theme(db, theme)
+        elif application:
+            verses = await kb.search_verses_by_application(db, application)
+        else:
             result = await db.execute(select(WisdomVerse))
-            verse_candidates = list(result.scalars().all())
-
-        # Deduplicate while preserving order
-        seen_ids: set[int] = set()
-        unique_candidates: list[WisdomVerse] = []
-        for verse in verse_candidates:
-            if verse.id not in seen_ids:
-                seen_ids.add(verse.id)
-                unique_candidates.append(verse)
-
-        verse_candidates = unique_candidates
+            verses = list(result.scalars().all())
 
         # Compute similarity scores for each verse
         verse_scores = []
-        for verse in verse_candidates:
+        for verse in verses:
+            # Compare query against english text and context
             english_score = kb.compute_text_similarity(query, verse.english)
             context_score = kb.compute_text_similarity(query, verse.context)
 
+            # Use the max score
             max_score = max(english_score, context_score)
 
-            theme_bonus = 0.0
-            if effective_theme and verse.theme == effective_theme:
-                theme_bonus = 0.1
-
-            application_bonus = 0.0
-            if effective_application and verse.mental_health_applications:
-                apps = verse.mental_health_applications.get("applications", [])
-                if effective_application in apps:
-                    application_bonus = 0.1
-
-            verse_scores.append({"verse": verse, "score": max_score + theme_bonus + application_bonus})
+            verse_scores.append({"verse": verse, "score": max_score})
 
         # Sort by score descending
         verse_scores.sort(key=lambda x: float(x["score"]), reverse=True)  # type: ignore[arg-type]

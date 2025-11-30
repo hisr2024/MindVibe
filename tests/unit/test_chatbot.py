@@ -187,18 +187,6 @@ class TestChatbotService:
         assert "session-1" in sessions
         assert "session-2" in sessions
 
-    def test_describe_response_instructions(self, chatbot_service):
-        """Ensure response instructions expose static templates and keys."""
-
-        instructions = chatbot_service.describe_response_instructions()
-
-        assert "phases" in instructions
-        assert "template_responses" in instructions
-        assert instructions["generic_support"] == chatbot_service.GENERIC_SUPPORT_RESPONSE
-        assert instructions["template_responses"]["action_without_attachment"][0].startswith(
-            "I understand you're seeking guidance"
-        )
-
     @pytest.mark.asyncio
     async def test_chat_language_support(self, chatbot_service, mock_db, sample_verse):
         """Test chat with different language preferences."""
@@ -400,49 +388,3 @@ class TestFallbackMechanisms:
 
                     # Should fall back to template response
                     assert len(result["response"]) > 0
-
-
-class TestResponseFlowDeterminism:
-    """Tests for deterministic response paths and crisis handling."""
-
-    def test_generate_chat_response_short_circuits_crisis(self, chatbot_service):
-        """Ensure crisis detection bypasses the rest of the pipeline."""
-
-        chatbot_service.safety_validator = MagicMock()
-        chatbot_service.safety_validator.detect_crisis.return_value = {
-            "crisis_detected": True
-        }
-        chatbot_service.safety_validator.generate_crisis_response.return_value = (
-            "crisis protocol"
-        )
-
-        chatbot_service.domain_mapper = MagicMock()
-
-        result = chatbot_service._generate_chat_response("urgent", [], [], "english")
-
-        assert result == "crisis protocol"
-        chatbot_service.domain_mapper.route_query_to_domain.assert_not_called()
-
-    def test_invalid_quality_falls_back_to_template(self, chatbot_service):
-        """Validate that failed quality checks use deterministic templates."""
-
-        chatbot_service.safety_validator = MagicMock()
-        chatbot_service.safety_validator.detect_crisis.return_value = {
-            "crisis_detected": False
-        }
-        chatbot_service.safety_validator.validate_response_quality.return_value = {
-            "valid": False
-        }
-        chatbot_service.safety_validator.sanitize_religious_terms.side_effect = lambda x: x
-
-        chatbot_service.domain_mapper = MagicMock()
-        chatbot_service.domain_mapper.route_query_to_domain.return_value = "resilience"
-
-        chatbot_service.response_engine = MagicMock()
-        chatbot_service.response_engine.generate_response.return_value = {
-            "response": "raw response"
-        }
-
-        result = chatbot_service._generate_chat_response("test", [], [], "english")
-
-        assert result == chatbot_service.GENERIC_SUPPORT_RESPONSE

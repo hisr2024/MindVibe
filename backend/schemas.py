@@ -56,25 +56,3 @@ class MoodOut(BaseModel):
     tags: list[str] | None
     note: str | None
     at: str
-
-
-class ConsentDecision(BaseModel):
-    consented: bool
-    context: str | None = None
-
-
-class ConsentStatus(BaseModel):
-    consented: bool
-    context: str | None = None
-    recorded_at: str | None = None
-
-
-class AuditEventOut(BaseModel):
-    action: str
-    created_at: str
-    metadata: dict | None = None
-
-
-class ExportBundle(BaseModel):
-    moods: list[MoodOut]
-    journals: list[BlobOut]

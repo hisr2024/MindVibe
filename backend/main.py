@@ -72,17 +72,8 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
-def _require_openai_key() -> None:
-    """Fail fast when the OpenAI API key is not configured."""
-
-    if not OPENAI_API_KEY:
-        raise RuntimeError(
-            "OPENAI_API_KEY is missing. Set it before starting the MindVibe backend to enable chat operations."
-        )
-
 @app.on_event("startup")
 async def startup():
-    _require_openai_key()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -132,25 +123,6 @@ try:
     print("✅ [SUCCESS] Auth router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
-
-# Load Privacy router
-print("\n[Privacy] Attempting to import Privacy router...")
-try:
-    from backend.routes.privacy import router as privacy_router
-
-    app.include_router(privacy_router)
-    print("✅ [SUCCESS] Privacy router loaded")
-except Exception as e:
-    print(f"❌ [ERROR] Failed to load Privacy router: {e}")
-
-# Load Monitoring router
-print("\n[Monitoring] Attempting to import Monitoring router...")
-try:
-    from backend.routes.monitoring import router as monitoring_router
-    app.include_router(monitoring_router)
-    print("✅ [SUCCESS] Monitoring router loaded")
-except Exception as e:
-    print(f"❌ [ERROR] Failed to load Monitoring router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")

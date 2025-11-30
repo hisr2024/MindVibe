@@ -25,7 +25,7 @@ MindVibe is a comprehensive mental health platform that provides:
 
 ```
 MindVibe/
-├── backend/                    # FastAPI Backend
+├── backend/                    # FastAPI Backend (NEW!)
 │   ├── __init__.py            # Package initialization
 │   ├── main.py                # FastAPI app with 8 routers
 │   ├── models.py              # Database models (SQLAlchemy)
@@ -40,7 +40,6 @@ MindVibe/
 │   │   ├── journal.py        # Encrypted journal/blob storage
 │   │   ├── chat.py           # AI chatbot conversations
 │   │   ├── wisdom_guide.py   # Universal wisdom guide API
-│   │   ├── privacy.py        # Compliance, consent, and export APIs
 │   │   └── gita_api.py       # Gita verses API
 │   ├── services/              # Business logic
 │   │   ├── chatbot.py        # AI chatbot service
@@ -196,11 +195,6 @@ MindVibe backend includes **8 comprehensive API routers**:
 - `DELETE /api/chat/history/{session_id}` - Clear conversation
 - `GET /api/chat/health` - Check chatbot status
 
-**Chat deployment requirements**
-- `DATABASE_URL` **must** point to your Postgres instance using the async driver (`postgresql+asyncpg://`); apply `migrations/20251109_add_gita_wisdom_database.sql` before first boot so the chapters/verses/keywords tables exist.
-- Seed the wisdom data so `/api/chat/message` can ground replies: `python scripts/seed_wisdom.py` (universal verses) and `python scripts/seed_gita_wisdom.py` (Bhagavad Gita chapters/verses/contexts/keywords).
-- Configure OpenAI access: `OPENAI_API_KEY` (required), `OPENAI_MODEL` (default `gpt-4o`), and `OPENAI_FALLBACK_MODEL` (default `gpt-4o-mini`). Without these, the service falls back to a lightweight repository map with limited context.
-
 #### **7. Universal Wisdom Guide** (`/api/wisdom`)
 - `GET /api/wisdom/verses` - List wisdom verses (with filtering)
 - `GET /api/wisdom/verses/{verse_id}` - Get specific verse
@@ -248,12 +242,6 @@ MindVibe has a comprehensive test suite with **100% updated imports** for the ne
   - Warn on missing return types
   - Strict equality checks
   - Type checking for all definitions
-
-## 🔒 Privacy, Compliance, and Security
-
-- **End-to-End Encryption:** Configure `DATA_ENCRYPTION_KEY` (32 bytes or a Fernet key) to encrypt mood notes and journal blobs at rest while decrypting transparently on retrieval.
-- **User Rights:** Use `/privacy/consent`, `/privacy/export`, `/privacy/data`, and `/privacy/audit` endpoints for consent capture, GDPR-style export, deletion scheduling, and audit visibility.
-- **Pipeline Hardening:** Security scans now include CodeQL v4 and optional Snyk dependency scanning (`SNYK_TOKEN` secret required to enable the Snyk job).
 - Gradually increasing strictness as codebase improves
 
 ### CI/CD Quality Gates
@@ -458,8 +446,7 @@ npm audit
 - [Developer Onboarding Guide](docs/developer_onboarding.md) - **Start here!** Complete guide for new developers
 - [Testing Guide](tests/README.md) - Comprehensive testing documentation
 - [Scripts Package](scripts/README.md) - Utility scripts reference
-- [Chatbot Guide](docs/chatbot.md) - Canonical KIAAN chatbot behavior and setup
-- [Bhagavad Gita Implementation Summary](GITA_IMPLEMENTATION_SUMMARY.md) - Canonical wisdom data design and API coverage
+- [Chatbot Guide](docs/chatbot.md) - AI chatbot documentation
 - [Wisdom API](docs/wisdom_api.md) - Wisdom guide API reference
 - [Pipeline](docs/pipeline.md) - Content transformation pipeline
 - [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
@@ -526,12 +513,6 @@ mypy backend/
 npm run lint
 npm run format
 ```
-
-### **Operational checklist (KIAAN)**
-
-- **Environment variables:** Set `DATABASE_URL`, `OPENAI_API_KEY`, and either `EDDSA_KEYSET_DIR` with `EDDSA_ENABLED=true` or `JWT_SECRET` for local signing.
-- **Database migrations:** `alembic upgrade head`
-- **Targeted tests:** `pytest tests/unit/test_chat_error_handling.py` and `pytest tests/integration/test_chat_api.py`
 
 ---
 

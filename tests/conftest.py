@@ -5,7 +5,6 @@ This module provides common fixtures used across unit and integration tests.
 """
 
 import asyncio
-import importlib.util
 import os
 import sys
 from collections.abc import AsyncGenerator
@@ -15,15 +14,15 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-AIOSQLITE_AVAILABLE = importlib.util.find_spec("aiosqlite") is not None
-
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Set environment variable to use SQLite for testing
-if AIOSQLITE_AVAILABLE:
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+
+from backend import main as app_module
+from backend import models
 
 
 @pytest.fixture(scope="session")
@@ -40,11 +39,6 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
     Create a test database session.
     Uses an in-memory SQLite database for testing.
     """
-    if not AIOSQLITE_AVAILABLE:
-        pytest.skip("aiosqlite is required for async sqlite tests")
-
-    from backend import models
-
     # Create an in-memory SQLite database
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
@@ -74,10 +68,6 @@ async def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None
     Create a test client for integration testing.
     Overrides the get_db dependency to use the test database.
     """
-    if not AIOSQLITE_AVAILABLE:
-        pytest.skip("aiosqlite is required for async sqlite tests")
-
-    from backend import main as app_module
     from backend import deps
 
     async def override_get_db():
