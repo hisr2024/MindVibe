@@ -220,7 +220,7 @@ export default function Home() {
           <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
           <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
             <div className="flex items-center gap-4">
-              <PeaceLogo />
+              <AnimatedKiaanLogo />
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
@@ -681,21 +681,45 @@ function FeatureCard({ title, description, badge }: { title: string, description
   )
 }
 
-function PeaceLogo() {
+function AnimatedKiaanLogo() {
+  const virtues = ['Self Growth', 'Karmic Journey', 'Inner Peace']
+
   return (
-    <div className="relative h-20 w-20 rounded-3xl bg-gradient-to-br from-[#141414] via-[#1a120f] to-[#0c0c0e] border border-orange-500/30 shadow-[0_20px_60px_rgba(255,115,39,0.25)] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-[conic-gradient(from_120deg_at_50%_50%,rgba(255,140,64,0.4),rgba(255,255,255,0.08),rgba(255,140,64,0.4))] opacity-70" />
-      <svg viewBox="0 0 120 120" className="relative h-14 w-14 text-orange-100">
-        <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="6" className="opacity-60" />
-        <path d="M60 16c12 14 17 28 17 44 0 16-5 30-17 44-12-14-17-28-17-44 0-16 5-30 17-44Z" fill="url(#peaceGlow)" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-        <path d="M45 64c5 6 10 9 15 9s10-3 15-9" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
-        <defs>
-          <linearGradient id="peaceGlow" x1="40" y1="20" x2="80" y2="100" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#ff7a1f" stopOpacity="0.8" />
-            <stop offset="1" stopColor="#f3d9b0" stopOpacity="0.9" />
-          </linearGradient>
-        </defs>
-      </svg>
+    <div className="group relative h-20 w-20 md:h-24 md:w-24 rounded-3xl bg-gradient-to-br from-[#141414] via-[#1a120f] to-[#0c0c0e] border border-orange-500/40 shadow-[0_20px_60px_rgba(255,115,39,0.25)] overflow-hidden transition-transform duration-500 hover:scale-105">
+      <div className="absolute inset-[3px] rounded-[22px] bg-[radial-gradient(circle_at_30%_20%,rgba(255,153,51,0.3),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.18),transparent_45%)] opacity-80" />
+      <div className="absolute inset-0 rounded-[22px] border border-orange-400/40" />
+
+      <div className="absolute inset-0 animate-[spin_16s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,rgba(255,140,64,0.38),rgba(255,255,255,0.08),rgba(255,140,64,0.38))] opacity-60" />
+      <div className="absolute inset-3 rounded-2xl bg-[#050505]/80 backdrop-blur-md" />
+
+      <div className="absolute inset-4 rounded-2xl border border-orange-400/30 animate-[pulse_3.6s_ease-in-out_infinite]" />
+      <div className="absolute left-2 top-2 h-3 w-3 rounded-full bg-orange-300 blur-[2px] animate-[bounce_3.5s_ease-in-out_infinite]" />
+      <div className="absolute right-2 bottom-3 h-2.5 w-2.5 rounded-full bg-emerald-200/90 blur-[1px] animate-[bounce_4s_ease-in-out_infinite]" />
+
+      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center gap-1">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.38em] text-orange-100/80">K I A A N</div>
+        <div className="text-xl md:text-2xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-200 to-orange-50 drop-shadow-[0_6px_24px_rgba(255,163,94,0.45)]">
+          KIAAN
+        </div>
+        <div className="relative flex items-center gap-1 text-[10px] text-orange-50/85">
+          {virtues.map(word => (
+            <span
+              key={word}
+              className="rounded-full border border-orange-300/30 bg-white/5 px-2 py-0.5 shadow-[0_0_18px_rgba(255,140,64,0.25)] animate-[floaty_6s_ease-in-out_infinite] [animation-delay:var(--delay)]"
+              style={{ ['--delay' as string]: `${virtues.indexOf(word) * 0.45}s` }}
+            >
+              {word}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes floaty {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.92; }
+          50% { transform: translateY(-6px) scale(1.03); opacity: 1; }
+        }
+      `}</style>
     </div>
   )
 }
