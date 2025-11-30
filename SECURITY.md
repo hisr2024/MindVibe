@@ -37,11 +37,6 @@ Please report (suspected) security vulnerabilities to **hisr2024@gmail.com**. Yo
 - Input validation and sanitization
 - API versioning for backward compatibility
 
-### Dependency Management
-- Dependabot updates are reviewed with full test runs (unit, integration, and security linters like Bandit) before merge
-- npm/yarn audits accompany frontend dependency bumps to catch regressions early
-- Lockfiles are committed to ensure deterministic builds across environments
-
 ## Best Practices for Contributors
 
 1. Never commit secrets, API keys, or credentials
@@ -74,11 +69,10 @@ Security updates will be announced through:
 This repository uses multiple automated security tools:
 
 - **Dependabot**: Automatic dependency updates
-- **CodeQL (v4)**: Static code analysis for vulnerabilities
+- **CodeQL**: Static code analysis for vulnerabilities
 - **Bandit**: Python security linter
 - **Safety**: Python dependency vulnerability checker
 - **npm audit**: JavaScript dependency security
-- **Snyk (optional)**: Dependency scanning when `SNYK_TOKEN` is provided
 - **TruffleHog**: Secrets detection
 - **Trivy**: Docker container scanning
 

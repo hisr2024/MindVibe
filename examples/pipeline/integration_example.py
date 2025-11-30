@@ -21,7 +21,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from backend.services.pipeline import ContextTransformationPipeline
+from services.pipeline import ContextTransformationPipeline
 
 
 def load_wisdom_verses(filepath: str | None = None):

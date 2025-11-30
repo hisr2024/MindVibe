@@ -69,7 +69,7 @@ pip install -r requirements.txt
 ### Basic Usage
 
 ```python
-from backend.services.pipeline import ContextTransformationPipeline
+from services.pipeline import ContextTransformationPipeline
 
 # Create a full pipeline
 pipeline = ContextTransformationPipeline.create_full_pipeline()
@@ -236,7 +236,7 @@ The pipeline adds the following fields to each verse:
 Sanitizes religious terminology and standardizes text.
 
 ```python
-from backend.services.pipeline import TextSanitizer
+from services.pipeline import TextSanitizer
 
 # Sanitize text
 sanitized = TextSanitizer.sanitize("Krishna taught Arjuna")
@@ -257,7 +257,7 @@ standardized = TextSanitizer.standardize_punctuation("text without period")
 Validates verse data structure and content.
 
 ```python
-from backend.services.pipeline import VerseValidator, ValidationError
+from services.pipeline import VerseValidator, ValidationError
 
 # Validate verse (raises ValidationError if invalid)
 try:
@@ -281,7 +281,7 @@ normalized = VerseValidator.validate_and_normalize(verse_data)
 Enriches verses with additional metadata.
 
 ```python
-from backend.services.pipeline import MetadataEnricher
+from services.pipeline import MetadataEnricher
 
 # Enrich verse with metadata
 enriched = MetadataEnricher.enrich(verse_data)
@@ -362,7 +362,7 @@ python -m pytest tests/unit/test_pipeline.py -v
 python -m pytest tests/unit/test_pipeline.py::TestTextSanitizer -v
 
 # Run with coverage
-python -m pytest tests/unit/test_pipeline.py --cov=backend.services.pipeline
+python -m pytest tests/unit/test_pipeline.py --cov=services.pipeline
 ```
 
 ## Examples
