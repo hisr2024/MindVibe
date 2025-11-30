@@ -119,6 +119,8 @@ export default function Home() {
         <ArdhaReframer />
         <ViyogDetachmentCoach />
         <QuickHelp onSelectPrompt={setChatPrefill} />
+        <ArdhaReframer />
+        <KarmaResetGuide />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
         <Journal />
@@ -544,7 +546,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
             }`}
             onClick={() => setDetailViews(prev => ({ ...prev, [index]: 'summary' }))}
           >
-            Summary view
+            summary
           </button>
           <button
             className={`px-3 py-1 rounded-full border transition ${
@@ -554,13 +556,22 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
             }`}
             onClick={() => setDetailViews(prev => ({ ...prev, [index]: 'detailed' }))}
           >
-            Detailed view
+            detailed view
           </button>
         </div>
 
         <div className="space-y-2">
-          <div className="text-xs uppercase tracking-wide text-orange-200/70 font-semibold">{view === 'summary' ? 'Summary' : 'Detailed explanation'}</div>
-          <div className="bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm">
+          <div className="text-xs tracking-wide text-orange-200/70 font-semibold">{view === 'summary' ? 'summary' : 'detailed explanation'}</div>
+          {view === 'detailed' && (
+            <div className="bg-white/5 border border-orange-200/20 rounded-lg p-3 text-[12px] text-orange-50/80 leading-relaxed">
+              <span className="font-semibold text-orange-50">Quick summary:</span> {summary}
+            </div>
+          )}
+          <div
+            className={`bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm ${
+              view === 'detailed' ? 'max-h-64 overflow-y-auto' : ''
+            }`}
+          >
             <p className="whitespace-pre-wrap leading-relaxed text-sm text-orange-50/90">
               {view === 'summary' ? summary : content}
             </p>
