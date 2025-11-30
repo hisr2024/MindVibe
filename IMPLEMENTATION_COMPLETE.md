@@ -4,6 +4,8 @@
 
 Successfully implemented a complete AI-powered chatbot feature for MindVibe that provides mental health guidance based on Bhagavad Gita teachings, presented in a completely secular, universally applicable way.
 
+> **Canonical summary:** This document is the current, authoritative implementation summary. Superseded summaries have been archived under `archive/legacy_summaries/`.
+
 ## Problem Statement Requirements - Compliance Check
 
 ### ✅ 1. Utilize authentic Bhagavad Gita verses in Sanskrit, Hindi, and English translations

@@ -25,7 +25,7 @@ MindVibe is a comprehensive mental health platform that provides:
 
 ```
 MindVibe/
-├── backend/                    # FastAPI Backend (NEW!)
+├── backend/                    # FastAPI Backend
 │   ├── __init__.py            # Package initialization
 │   ├── main.py                # FastAPI app with 8 routers
 │   ├── models.py              # Database models (SQLAlchemy)
@@ -453,7 +453,8 @@ npm audit
 - [Developer Onboarding Guide](docs/developer_onboarding.md) - **Start here!** Complete guide for new developers
 - [Testing Guide](tests/README.md) - Comprehensive testing documentation
 - [Scripts Package](scripts/README.md) - Utility scripts reference
-- [Chatbot Guide](docs/chatbot.md) - AI chatbot documentation
+- [Chatbot Guide](docs/chatbot.md) - Canonical KIAAN chatbot behavior and setup
+- [Bhagavad Gita Implementation Summary](GITA_IMPLEMENTATION_SUMMARY.md) - Canonical wisdom data design and API coverage
 - [Wisdom API](docs/wisdom_api.md) - Wisdom guide API reference
 - [Pipeline](docs/pipeline.md) - Content transformation pipeline
 - [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
@@ -520,6 +521,12 @@ mypy backend/
 npm run lint
 npm run format
 ```
+
+### **Operational checklist (KIAAN)**
+
+- **Environment variables:** Set `DATABASE_URL`, `OPENAI_API_KEY`, and either `EDDSA_KEYSET_DIR` with `EDDSA_ENABLED=true` or `JWT_SECRET` for local signing.
+- **Database migrations:** `alembic upgrade head`
+- **Targeted tests:** `pytest tests/unit/test_chat_error_handling.py` and `pytest tests/integration/test_chat_api.py`
 
 ---
 
