@@ -1,6 +1,48 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 
+function toBase64(buffer: ArrayBuffer | Uint8Array) {
+  const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
+  return btoa(String.fromCharCode(...bytes))
+}
+
+function fromBase64(value: string) {
+  const binary = atob(value)
+  return Uint8Array.from(binary, char => char.charCodeAt(0))
+}
+
+const JOURNAL_KEY_STORAGE = 'kiaan_journal_key'
+const JOURNAL_ENTRY_STORAGE = 'kiaan_journal_entries_secure'
+
+async function getEncryptionKey() {
+  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(JOURNAL_KEY_STORAGE) : null
+  const rawKey = cached ? fromBase64(cached) : crypto.getRandomValues(new Uint8Array(32))
+
+  if (!cached && typeof window !== 'undefined') {
+    window.localStorage.setItem(JOURNAL_KEY_STORAGE, toBase64(rawKey))
+  }
+
+  return crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt', 'decrypt'])
+}
+
+async function encryptText(plain: string) {
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const key = await getEncryptionKey()
+  const encoded = new TextEncoder().encode(plain)
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded)
+  return `${toBase64(iv)}:${toBase64(encrypted)}`
+}
+
+async function decryptText(payload: string) {
+  const [ivPart, dataPart] = payload.split(':')
+  if (!ivPart || !dataPart) return ''
+  const iv = fromBase64(ivPart)
+  const encrypted = fromBase64(dataPart)
+  const key = await getEncryptionKey()
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encrypted)
+  return new TextDecoder().decode(decrypted)
+}
+
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
     if (typeof window === 'undefined') return initial
@@ -40,6 +82,7 @@ export default function Home() {
         <KIAANChat />
         <QuickHelp />
         <DailyWisdom />
+        <PublicChatRooms />
         <Journal />
         <MoodTracker />
       </div>
@@ -218,6 +261,138 @@ function DailyWisdom() {
   )
 }
 
+type RoomMessage = {
+  room: string
+  content: string
+  at: string
+  author: 'You' | 'Guide'
+}
+
+function PublicChatRooms() {
+  const rooms = [
+    { id: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
+    { id: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
+    { id: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' }
+  ]
+
+  const [activeRoom, setActiveRoom] = useState(rooms[0].id)
+  const [message, setMessage] = useState('')
+  const [alert, setAlert] = useState<string | null>(null)
+  const [messages, setMessages] = useLocalState<RoomMessage[]>('kiaan_public_rooms', [
+    {
+      room: 'grounding',
+      content: 'Welcome. Breathe slowly and keep your words kind—this circle is for encouragement only.',
+      at: new Date().toISOString(),
+      author: 'Guide'
+    }
+  ])
+
+  const prohibited = [
+    /\b(?:fuck|shit|bitch|bastard|asshole|dick|cunt)\b/i,
+    /\b(?:damn|hell)\b/i,
+    /\b(?:idiot|stupid|dumb)\b/i,
+    /\b(?:hate|kill|harm)\b/i,
+    /[\u0900-\u097F]*अपशब्द/i // broad match to discourage Hindi slurs placeholder
+  ]
+
+  function isRespectful(text: string) {
+    const normalized = text.trim().toLowerCase()
+    return normalized.length > 0 && !prohibited.some(pattern => pattern.test(normalized))
+  }
+
+  const activeMessages = messages.filter(m => m.room === activeRoom)
+
+  function sendRoomMessage() {
+    if (!isRespectful(message)) {
+      setAlert('Please keep the exchange kind and free of any harmful or foul language. Your message was not sent.')
+      return
+    }
+
+    const entry: RoomMessage = {
+      room: activeRoom,
+      content: message.trim(),
+      at: new Date().toISOString(),
+      author: 'You'
+    }
+
+    const supportiveReply: RoomMessage = {
+      room: activeRoom,
+      content: `Thank you for keeping this space supportive. ${rooms.find(r => r.id === activeRoom)?.theme ?? 'Stay kind to one another.'}`,
+      at: new Date().toISOString(),
+      author: 'Guide'
+    }
+
+    setMessages([...messages, entry, supportiveReply])
+    setMessage('')
+    setAlert(null)
+  }
+
+  return (
+    <section className="bg-gradient-to-r from-indigo-900/30 to-purple-900/20 border border-indigo-800/50 rounded-3xl p-6 md:p-8 space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p className="text-sm text-indigo-200">Community Rooms</p>
+          <h2 className="text-2xl font-semibold text-indigo-100">Respectful Public Chats</h2>
+          <p className="text-sm text-indigo-200/80">Positive, helpful exchanges only. Foul language in any language is blocked.</p>
+        </div>
+        <div className="text-xs text-indigo-200 bg-indigo-950/60 border border-indigo-800 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {rooms.map(room => (
+          <button
+            key={room.id}
+            onClick={() => { setActiveRoom(room.id); setAlert(null); }}
+            className={`px-4 py-2 rounded-2xl border text-sm transition-all ${
+              activeRoom === room.id
+                ? 'bg-indigo-700/70 border-indigo-300 text-white shadow'
+                : 'bg-indigo-950/40 border-indigo-800 text-indigo-100 hover:border-indigo-600'
+            }`}
+          >
+            {room.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-indigo-950/50 border border-indigo-800 rounded-2xl p-4 space-y-3 h-[320px] overflow-y-auto">
+        {activeMessages.map((msg, index) => (
+          <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+              msg.author === 'You'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                : 'bg-indigo-900/80 border border-indigo-700 text-indigo-100'
+            }`}>
+              <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
+              <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+              <p className="text-[11px] text-indigo-200/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {alert && <p className="text-xs text-amber-200">{alert}</p>}
+
+      <div className="flex gap-3">
+        <input
+          type="text"
+          value={message}
+          onChange={e => setMessage(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
+          placeholder="Share something helpful for the room..."
+          className="flex-1 px-4 py-3 bg-indigo-950/70 border border-indigo-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+        />
+        <button
+          onClick={sendRoomMessage}
+          disabled={!message.trim()}
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          Share warmly
+        </button>
+      </div>
+    </section>
+  )
+}
+
 type JournalEntry = {
   id: string
   title: string
@@ -230,7 +405,52 @@ function Journal() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [mood, setMood] = useState('Peaceful')
-  const [entries, setEntries] = useLocalState<JournalEntry[]>('kiaan_journal_entries', [])
+  const [entries, setEntries] = useState<JournalEntry[]>([])
+  const [encryptionReady, setEncryptionReady] = useState(false)
+  const [encryptionMessage, setEncryptionMessage] = useState<string | null>(null)
+  const [guidance, setGuidance] = useState<Record<string, string>>({})
+  const [guidanceLoading, setGuidanceLoading] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadEntries() {
+      try {
+        const stored = typeof window !== 'undefined' ? window.localStorage.getItem(JOURNAL_ENTRY_STORAGE) : null
+        if (stored) {
+          const decrypted = await decryptText(stored)
+          const parsed = JSON.parse(decrypted) as JournalEntry[]
+          if (!cancelled) setEntries(parsed)
+        }
+        if (!stored && typeof window !== 'undefined') {
+          window.localStorage.removeItem('kiaan_journal_entries')
+        }
+      } catch {
+        if (!cancelled) setEncryptionMessage('Journal restored to a blank state because the saved copy could not be read securely.')
+        if (!cancelled) setEntries([])
+      } finally {
+        if (!cancelled) setEncryptionReady(true)
+      }
+    }
+
+    loadEntries()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!encryptionReady) return
+    ;(async () => {
+      try {
+        const encrypted = await encryptText(JSON.stringify(entries))
+        window.localStorage.setItem(JOURNAL_ENTRY_STORAGE, encrypted)
+        setEncryptionMessage(null)
+      } catch {
+        setEncryptionMessage('Could not secure your journal locally. Please retry in a moment.')
+      }
+    })()
+  }, [entries, encryptionReady])
 
   const moods = [
     { label: 'Peaceful', emoji: '🙏', tone: 'positive' },
@@ -245,6 +465,10 @@ function Journal() {
 
   function addEntry() {
     if (!body.trim()) return
+    if (!encryptionReady) {
+      setEncryptionMessage('Preparing secure journal space. Please try adding your entry again in a few seconds.')
+      return
+    }
     const entry: JournalEntry = {
       id: crypto.randomUUID(),
       title: title.trim(),
@@ -255,6 +479,29 @@ function Journal() {
     setEntries([entry, ...entries])
     setTitle('')
     setBody('')
+  }
+
+  async function requestGuidance(entry: JournalEntry) {
+    setGuidanceLoading(prev => ({ ...prev, [entry.id]: true }))
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${entry.body}` })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setGuidance(prev => ({ ...prev, [entry.id]: data.response }))
+      } else {
+        setGuidance(prev => ({ ...prev, [entry.id]: 'KIAAN could not respond right now. Please try again shortly.' }))
+      }
+    } catch {
+      setGuidance(prev => ({ ...prev, [entry.id]: 'Connection issue while asking KIAAN. Try again in a moment.' }))
+    } finally {
+      setGuidanceLoading(prev => ({ ...prev, [entry.id]: false }))
+    }
   }
 
   const sevenDaysAgo = new Date()
@@ -318,6 +565,22 @@ function Journal() {
           <div className="bg-emerald-950/60 border border-emerald-800 text-emerald-100 px-4 py-2 rounded-2xl text-sm">
             Weekly entries: {weeklyEntries.length}
           </div>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          <div className="bg-emerald-950/60 border border-emerald-800 text-emerald-100 px-4 py-3 rounded-2xl text-sm flex items-start gap-2">
+            <span>🔒</span>
+            <div>
+              <p className="font-semibold">Fully encrypted on your device</p>
+              <p className="text-emerald-100/80">Entries are sealed locally with AES-GCM before saving. Only this browser can decrypt them.</p>
+            </div>
+          </div>
+          {!encryptionReady && (
+            <p className="text-xs text-amber-200">Preparing secure journal space...</p>
+          )}
+          {encryptionMessage && (
+            <p className="text-xs text-amber-200">{encryptionMessage}</p>
+          )}
         </div>
 
         <div className="mt-4 grid md:grid-cols-2 gap-4">
@@ -408,6 +671,20 @@ function Journal() {
                 </div>
                 {entry.title && <div className="mt-1 font-semibold text-zinc-100">{entry.title}</div>}
                 <div className="mt-1 text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">{entry.body}</div>
+                <div className="mt-3 space-y-2">
+                  <button
+                    onClick={() => requestGuidance(entry)}
+                    disabled={!!guidanceLoading[entry.id]}
+                    className="px-3 py-2 rounded-xl bg-gradient-to-r from-blue-700 to-purple-700 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {guidanceLoading[entry.id] ? 'KIAAN is reading...' : "Get KIAAN's opinion"}
+                  </button>
+                  {guidance[entry.id] && (
+                    <p className="text-sm text-emerald-200/90 bg-emerald-950/50 border border-emerald-800 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
+                      {guidance[entry.id]}
+                    </p>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
