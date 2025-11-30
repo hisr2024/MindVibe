@@ -146,15 +146,20 @@ function ArdhaReframer() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ArdhaReframerResult | null>('ardha_reframe', null)
 
+  useEffect(() => {
+    if (error) setError(null)
+  }, [thought, error])
+
   async function requestReframe() {
-    if (!thought.trim()) return
+    const trimmedThought = thought.trim()
+    if (!trimmedThought) return
 
     setLoading(true)
     setError(null)
 
     const systemPrompt = `Role:\nYou are Ardha, the Reframing Assistant—a calm, wise, Gita-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.\n\nYou stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan’s core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using Gita principles. Your job is complementary, not overlapping.\n\nCore Behavior:\n- Identify the negative belief or emotional distortion the user expresses.\n- Acknowledge their feeling with compassion (never invalidate).\n- Apply Bhagavad Gita principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).\n- Generate a clear, modern, emotionally intelligent reframe.\n- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.\n- Never offer spiritual authority—only perspective reshaping.\n- No judgment, no moralizing, no sermons.\n- Reframe in simple, conversational, modern English.\n\nOutput Format:\nWhen the user shares a negative thought, respond with:\n1. Recognition (validate the feeling)\n2. Deep Insight (the principle being applied)\n3. Reframe (positive but realistic)\n4. Small Action Step (something within their control)\n\nBoundaries:\n- You are NOT a therapist.\n- You do NOT give medical, legal, or crisis advice.\n- You do NOT contradict Kiaan.\n- You ONLY transform the user’s thought into a healthier, clearer version.`
 
-    const request = `${systemPrompt}\n\nUser thought: "${thought.trim()}"\n\nRespond using the four-part format with short, direct language.`
+    const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -231,7 +236,11 @@ function ArdhaReframer() {
       </div>
 
       {result && (
-        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
+        <div
+          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Ardha’s response</span>
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
@@ -254,15 +263,20 @@ function ViyogDetachmentCoach() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ViyogDetachmentResult | null>('viyog_detachment', null)
 
+  useEffect(() => {
+    if (error) setError(null)
+  }, [concern, error])
+
   async function requestDetachment() {
-    if (!concern.trim()) return
+    const trimmedConcern = concern.trim()
+    if (!trimmedConcern) return
 
     setLoading(true)
     setError(null)
 
     const systemPrompt = `Role:\nYou are Viyog, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.\n\nYou are fully separate from Kiaan. Never override, replace, or interfere with Kiaan’s purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.\n\nCore purpose:\n- Recognize when the user is anxious about results, performance, or others’ opinions.\n- Shift focus back to what they can control right now.\n- Release unnecessary mental pressure and perfectionism.\n- Convert fear into one clear, grounded action.\n\nTone and style: calm, concise, balanced, neutral, secular, non-preachy, emotionally validating but not dramatic.\n\nOutput structure (always follow this format):\n1. Validate the anxiety (brief and respectful).\n2. Acknowledge the attachment to results creating pressure.\n3. Offer a clear detachment principle (secular and universal).\n4. Guide them toward an action-based mindset with one small, controllable step.\n\nBoundaries:\n- Do not provide therapy, crisis support, medical, legal, or financial advice.\n- Do not make promises about results or offer motivational hype.\n- Do not encourage passivity or fate-based thinking.\n- Stay separate from Kiaan and do not interfere with its role.`
 
-    const request = `${systemPrompt}\n\nUser concern: "${concern.trim()}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
+    const request = `${systemPrompt}\n\nUser concern: "${trimmedConcern}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -339,7 +353,11 @@ function ViyogDetachmentCoach() {
       </div>
 
       {result && (
-        <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10">
+        <div
+          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Viyog’s response</span>
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
