@@ -190,6 +190,7 @@ const Chat = () => {
           },
           body: JSON.stringify({
             message: userMessage.content,
+            session_id: sessionId,
             ...(theme ? { theme } : {}),
             ...(application ? { application } : {}),
           }),
@@ -212,6 +213,10 @@ const Chat = () => {
           data.validation_notice,
         repoContextUsed: data.repo_context_used || data.used_repo_context || data.repo_context,
         regenerated: data.regenerated || data.was_regenerated || data.response_regenerated,
+      }
+
+      if (data.session_id && data.session_id !== sessionId) {
+        setSessionId(data.session_id)
       }
 
       setResponseMetadata(metadata)

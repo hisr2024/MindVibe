@@ -9,12 +9,14 @@ import re
 from importlib import util as importlib_util
 from pathlib import Path
 from typing import Dict, Any, List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
+from backend.models import WisdomVerse
 from backend.services.wisdom_engine import validate_gita_response
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
@@ -34,11 +36,55 @@ try:
 except Exception as e:
     logger.warning(f"⚠️ Gita KB unavailable: {e}")
 
+MAX_HISTORY_MESSAGES = 20
+session_histories: dict[str, list[dict[str, str]]] = {}
+session_lock = asyncio.Lock()
+
 
 class ChatMessage(BaseModel):
     message: str
     theme: str | None = None
     application: str | None = None
+    session_id: str | None = None
+
+
+async def _initialize_session_history(session_id: str, assistant_greeting: str) -> None:
+    async with session_lock:
+        session_histories[session_id] = [
+            {"role": "assistant", "content": assistant_greeting}
+        ]
+
+
+async def _get_session_history(session_id: str) -> list[dict[str, str]]:
+    async with session_lock:
+        history = session_histories.get(session_id, [])
+        return history[-MAX_HISTORY_MESSAGES:]
+
+
+async def _append_session_turn(
+    session_id: str, user_message: str, assistant_message: str
+) -> None:
+    async with session_lock:
+        history = session_histories.setdefault(session_id, [])
+        history.append({"role": "user", "content": user_message})
+        history.append({"role": "assistant", "content": assistant_message})
+        if len(history) > MAX_HISTORY_MESSAGES:
+            session_histories[session_id] = history[-MAX_HISTORY_MESSAGES:]
+
+
+def _extract_session_id(chat: ChatMessage, request: Request | None) -> str:
+    candidate = chat.session_id
+    header_fallback = None
+
+    if request:
+        header_fallback = request.headers.get("X-Session-Id") or request.headers.get(
+            "X-Auth-UID"
+        )
+
+    if not candidate and header_fallback:
+        candidate = header_fallback
+
+    return candidate or str(uuid.uuid4())
 
 
 class KIAAN:
@@ -71,6 +117,10 @@ class KIAAN:
         )
         self._last_crisis_response_at: float | None = None
         self.repo_wisdom = self._load_repo_wisdom()
+        self._kb_seed_verified = False
+        self._kb_seed_available = False
+        self._kb_last_check: float | None = None
+        self._kb_check_interval_seconds = 300
 
     def _display_model(self) -> str:
         """Return a human-friendly model label for metadata responses."""
@@ -161,6 +211,51 @@ class KIAAN:
             "📞 988 (24/7) or text HOME to 741741."
         )
 
+    def _kb_check_due(self) -> bool:
+        if self._kb_last_check is None:
+            return True
+
+        elapsed = time.time() - self._kb_last_check
+        return elapsed >= self._kb_check_interval_seconds
+
+    async def _ensure_kb_seeded(self, db: AsyncSession) -> bool:
+        if not self.gita_kb or not db:
+            if self._kb_check_due():
+                logger.warning("Wisdom KB not available; using repository fallback")
+                self._kb_last_check = time.time()
+                self._kb_seed_verified = True
+                self._kb_seed_available = False
+            return False
+
+        if self._kb_seed_verified and not self._kb_check_due():
+            return self._kb_seed_available
+
+        try:
+            result = await db.execute(select(func.count()).select_from(WisdomVerse))
+            count = result.scalar_one() or 0
+            self._kb_seed_available = count > 0
+            self._kb_last_check = time.time()
+            self._kb_seed_verified = True
+            if not self._kb_seed_available:
+                logger.error(
+                    "Wisdom KB contains no verses; seed scripts must run",
+                    extra={"script": "python scripts/seed_wisdom.py"},
+                )
+            else:
+                logger.info(
+                    "Wisdom KB ready",
+                    extra={"verse_count": count},
+                )
+            return self._kb_seed_available
+        except Exception as e:  # noqa: BLE001
+            self._kb_seed_verified = True
+            self._kb_seed_available = False
+            self._kb_last_check = time.time()
+            logger.exception(
+                "Failed to verify wisdom KB", extra={"error": type(e).__name__}
+            )
+            return False
+
     def generate_response(self, user_message: str) -> str:
         """Synchronous, test-friendly chat flow with defensive error handling."""
 
@@ -225,9 +320,12 @@ class KIAAN:
         db: AsyncSession,
         theme: str | None = None,
         application: str | None = None,
+        conversation_history: list[dict[str, str]] | None = None,
     ) -> str:
         start_time = time.perf_counter()
         kb_used = False
+        last_rate_limit_error: RateLimitError | None = None
+        last_auth_error: AuthenticationError | None = None
         try:
             if self.is_crisis(user_message):
                 if self._crisis_backoff_active():
@@ -248,7 +346,8 @@ class KIAAN:
                 return "❌ API Key not configured"
 
             gita_context = ""
-            if self.gita_kb and db:
+            kb_ready = await self._ensure_kb_seeded(db)
+            if self.gita_kb and db and kb_ready:
                 try:
                     verse_results = await self.gita_kb.search_relevant_verses(
                         db=db,
@@ -257,12 +356,22 @@ class KIAAN:
                         application=application,
                         limit=5,
                     )
+                    if not verse_results:
+                        logger.warning(
+                            "Wisdom KB returned no verses for query",
+                            extra={"theme": theme, "application": application},
+                        )
                     gita_context = self._build_gita_context(verse_results)
                     kb_used = bool(verse_results)
                     logger.info("Relevant Gita verses located", extra={"count": len(verse_results)})
                 except Exception as e:
                     logger.error("Error fetching Gita verses", extra={"error": type(e).__name__})
                     gita_context = ""
+            elif self.gita_kb and not kb_ready:
+                logger.warning(
+                    "Skipping KB lookup due to missing or unseeded wisdom data",
+                    extra={"theme": theme, "application": application},
+                )
 
             if not gita_context:
                 gita_context = self._build_repo_context(
@@ -297,13 +406,17 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
 
             strict_system_prompt = system_prompt + "\n\nSTRICT MODE: Do not respond unless all four labeled sections appear exactly once, with bullet points under Practical Steps and absolutely no scripture titles, verse numbers, or character names."
 
+            history_messages = conversation_history or []
+
             messages = [
                 {"role": "system", "content": system_prompt},
+                *history_messages,
                 {"role": "user", "content": user_message}
             ]
 
             strict_messages = [
                 {"role": "system", "content": strict_system_prompt},
+                *history_messages,
                 {"role": "user", "content": user_message}
             ]
 
@@ -339,12 +452,14 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
                         "Authentication error for model",
                         extra={"model": model, "error": type(e).__name__},
                     )
-                    return "❌ API Key authentication failed"
+                    last_auth_error = e
+                    raise
                 except RateLimitError as e:
                     logger.error(
                         "Rate limit reached for model",
                         extra={"model": model, "error": type(e).__name__},
                     )
+                    last_rate_limit_error = e
                     continue
                 except APIError as e:
                     logger.error(
@@ -353,8 +468,18 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
                     )
                     continue
 
+            if last_auth_error:
+                raise last_auth_error
+
+            if last_rate_limit_error:
+                raise last_rate_limit_error
+
             return "I'm here for you. Let's try again. 💙"
 
+        except RateLimitError:
+            return "⏱️ Too many requests right now. Please wait and try again."
+        except AuthenticationError:
+            return "❌ API Key authentication failed"
         except Exception as e:
             logger.error("Unhandled error during response generation", extra={"error": type(e).__name__})
             return "I'm here for you. Let's try again. 💙"
@@ -566,9 +691,13 @@ kiaan = KIAAN()
 
 @router.post("/start")
 async def start_session() -> Dict[str, Any]:
+    session_id = str(uuid.uuid4())
+    greeting = "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙"
+    await _initialize_session_history(session_id, greeting)
+
     return {
-        "session_id": str(uuid.uuid4()),
-        "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
+        "session_id": session_id,
+        "message": greeting,
         "bot": "KIAAN",
         "version": "13.0",
         "gita_powered": True
@@ -576,12 +705,18 @@ async def start_session() -> Dict[str, Any]:
 
 
 @router.post("/message")
-async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+async def send_message(
+    chat: ChatMessage,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> Dict[str, Any]:
+    session_id = _extract_session_id(chat, request)
     try:
         message = chat.message.strip()
         if not message:
-            return {"status": "error", "response": "What's on your mind? 💙"}
+            return {"status": "error", "response": "What's on your mind? 💙", "session_id": session_id}
 
+        conversation_history = await _get_session_history(session_id)
         response: str
         # Prefer the async, knowledge-base powered flow when available.
         maybe_response = kiaan.generate_response_with_gita(
@@ -589,6 +724,7 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
             db,
             theme=chat.theme,
             application=chat.application,
+            conversation_history=conversation_history,
         )
 
         if asyncio.iscoroutine(maybe_response):
@@ -596,17 +732,41 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
         else:
             response = kiaan.generate_response(message)
 
+        await _append_session_turn(session_id, message, response)
+
         return {
             "status": "success",
             "response": response,
             "bot": "KIAAN",
             "version": "13.0",
             "model": kiaan._display_model(),
-            "gita_powered": True
+            "gita_powered": True,
+            "session_id": session_id,
+        }
+    except AuthenticationError as e:
+        logger.exception("Authentication failure during send_message", extra={"error": type(e).__name__})
+        return {
+            "status": "error",
+            "response": "Authentication failed with the AI provider. Please update the API key.",
+            "error": "auth",
+            "session_id": session_id,
+        }
+    except RateLimitError as e:
+        logger.warning("Rate limit encountered in send_message", extra={"error": type(e).__name__})
+        return {
+            "status": "error",
+            "response": "⏱️ Too many requests right now. Please wait and try again.",
+            "error": "rate_limit",
+            "session_id": session_id,
         }
     except Exception as e:
         logger.exception("Error in send_message", extra={"error": type(e).__name__})
-        return {"status": "error", "response": "I'm here for you. Let's try again. 💙"}
+        return {
+            "status": "error",
+            "response": "I'm here for you. Let's try again. 💙",
+            "error": "generic",
+            "session_id": session_id,
+        }
 
 
 @router.get("/health")
