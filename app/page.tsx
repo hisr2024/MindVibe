@@ -201,24 +201,6 @@ type ClaritySession = {
 
 export default function Home() {
   const [chatPrefill, setChatPrefill] = useState<string | null>(null)
-  const experiencePages = [
-    {
-      title: 'Feature atlas',
-      href: '/kiaan/features',
-      note: 'Review every KIAAN capability on its own page without changing the chat.'
-    },
-    {
-      title: 'Experience flows',
-      href: '/kiaan/experiences',
-      note: 'Follow guided routes that link back to existing sections.'
-    },
-    {
-      title: 'Personal profile',
-      href: '/kiaan/profile',
-      note: 'Create a local-only profile for your own sessions.'
-    }
-  ]
-
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -266,39 +248,6 @@ export default function Home() {
         <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
-
-        <section className="rounded-3xl border border-orange-500/15 bg-[#0b0b0f]/80 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Multi-page site</p>
-              <h2 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#ffb347] to-orange-100">
-                Explore KIAAN without disturbing the ecosystem
-              </h2>
-              <p className="text-sm text-orange-100/80 max-w-3xl">
-                Dedicated pages showcase each capability and provide a device-only profile area. All navigation routes back here, keeping the original chat untouched.
-              </p>
-            </div>
-            <Link
-              href="/kiaan"
-              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
-            >
-              Open the KIAAN site
-            </Link>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-3">
-            {experiencePages.map(page => (
-              <Link
-                key={page.href}
-                href={page.href}
-                className="rounded-2xl border border-orange-400/25 bg-black/50 p-4 text-sm text-orange-100/80 shadow-[0_10px_40px_rgba(255,115,39,0.14)] transition hover:border-orange-300/60 hover:shadow-orange-500/20"
-              >
-                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">{page.title}</p>
-                <p className="mt-2 text-orange-50 font-semibold">{page.note}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
 
         <MoodTracker />
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
