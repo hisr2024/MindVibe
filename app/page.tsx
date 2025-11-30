@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, type ReactElement } from 'react'
+import { PrecisionArrowEngine } from './components/PrecisionArrowEngine'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -252,6 +253,7 @@ export default function Home() {
 
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
+        <PrecisionArrowEngine />
         <ArdhaReframer />
         <ViyogDetachmentCoach />
         <RelationalCompass onSelectPrompt={setChatPrefill} />
