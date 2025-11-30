@@ -256,7 +256,6 @@ export default function Home() {
         <ViyogDetachmentCoach />
         <RelationalCompass onSelectPrompt={setChatPrefill} />
         <ClarityPauseSuite />
-        <ArdhaReframer />
         <KarmaResetGuide onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
