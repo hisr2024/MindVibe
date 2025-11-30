@@ -223,7 +223,7 @@ export default function Home() {
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
-                <p className="text-base sm:text-lg md:text-xl text-orange-100/90">Calm Wisdom.</p>
+                <p className="text-base sm:text-lg md:text-xl text-orange-100/90">Crisp, calm guidance.</p>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
@@ -240,7 +240,7 @@ export default function Home() {
               Wisdom Chat Rooms
             </button>
             <div className="px-3 py-2 rounded-xl border border-orange-400/30 text-xs text-orange-100/80 bg-black/40 w-full sm:w-auto text-center">
-              Explore multiple guidance rooms in one place
+              Multiple guidance rooms in one tap
             </div>
           </div>
         </header>
@@ -337,9 +337,7 @@ function ArdhaReframer() {
         <div className="space-y-2">
           <p className="text-sm text-orange-100/80">Gita-aligned reframing</p>
           <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Ardha: The Reframing Assistant</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">
-            Ardha listens for the distortion inside a heavy thought, validates the feeling, and then reshapes it using calm, grounded insight.
-          </p>
+          <p className="text-sm text-orange-100/80 max-w-3xl">Ardha spots the distortion, validates the feeling, and reshapes it with grounded insight.</p>
         </div>
         <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
       </div>
@@ -363,7 +361,7 @@ function ArdhaReframer() {
               {loading ? 'Ardha is reflecting...' : 'Reframe with Ardha'}
             </button>
             <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
-              Ardha will respond with Recognition, Deep Insight, Reframe, and a Small Action Step.
+              Ardha replies with Recognition, Insight, Reframe, and one small action.
             </div>
           </div>
           {error && <p className="text-sm text-orange-200">{error}</p>}
@@ -371,7 +369,7 @@ function ArdhaReframer() {
 
         <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
           <h3 className="text-sm font-semibold text-orange-50">Ardha</h3>
-          <p className="text-sm text-orange-100/80">Offers balanced reframes while leaving Kiaan’s guidance untouched.</p>
+          <p className="text-sm text-orange-100/80">Balanced reframes that leave Kiaan untouched.</p>
         </div>
       </div>
 
@@ -446,9 +444,7 @@ function ViyogDetachmentCoach() {
         <div className="space-y-2">
           <p className="text-sm text-orange-100/80">Outcome anxiety reducer</p>
           <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Viyog: The Detachment Coach</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">
-            Viyog calms result-focused pressure and guides you back to present actions with one clear, doable step.
-          </p>
+          <p className="text-sm text-orange-100/80 max-w-3xl">Viyog eases result pressure and redirects you to one grounded action.</p>
         </div>
         <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
       </div>
@@ -472,7 +468,7 @@ function ViyogDetachmentCoach() {
               {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
             </button>
             <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
-              Viyog always responds with Validation, Attachment Check, Detachment Principle, and One Small Action.
+              Viyog delivers Validation, Attachment Check, Detachment Principle, and one action.
             </div>
           </div>
           {error && <p className="text-sm text-orange-200">{error}</p>}
@@ -480,7 +476,7 @@ function ViyogDetachmentCoach() {
 
         <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
           <h3 className="text-sm font-semibold text-orange-50">Viyog</h3>
-          <p className="text-sm text-orange-100/80">Guide outcome worries back toward steady, actionable steps.</p>
+          <p className="text-sm text-orange-100/80">Guides outcome worries back into steady, actionable steps.</p>
         </div>
       </div>
 
@@ -562,9 +558,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.12em] text-orange-100/80">Dharma Compass for Relationships</p>
           <h2 className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent">Relationship Compass</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">
-            Calm, secular guidance for conflicts while KIAAN stays untouched—focus on right action, ego-detachment, and respectful communication.
-          </p>
+          <p className="text-sm text-orange-100/80 max-w-3xl">Calm, secular conflict guidance that keeps KIAAN intact—right action, ego detachment, clear wording.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs text-orange-100/80">
           <span className="rounded-full bg-white/10 border border-orange-500/20 px-3 py-1">Neutral and grounded</span>
@@ -601,10 +595,10 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
               Send context to KIAAN
             </button>
             <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-xl">
-              Output format: 1) Acknowledge 2) Emotion vs ego 3) Values 4) Right Action 5) Ego-detachment 6) Compassion lens 7) Non-reactive phrasing 8) Next step.
+              Output format: acknowledge, separate ego, name values, right action, detach, add compassion, suggest phrasing, then one next step.
             </div>
-          </div>
-          {error && <p className="text-sm text-orange-200">{error}</p>}
+        </div>
+        {error && <p className="text-sm text-orange-200">{error}</p>}
 
           {result && (
             <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
@@ -1479,7 +1473,7 @@ function ClarityPauseSuite() {
         <div className="space-y-1">
           <p className="text-xs text-orange-100/80">High-Stress Decision Timer</p>
           <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Interact with the pause overlay Kiaan uses—detect a trigger, launch a pause prompt, and watch the 60-second guide animate in real time.</p>
+          <p className="text-sm text-orange-100/80 max-w-3xl">Use the same pause overlay as Kiaan: detect a trigger, launch the prompt, and watch the 60-second guide run.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
           <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Separate from Kiaan</span>
@@ -1552,7 +1546,7 @@ function ClarityPauseSuite() {
                   style={{ width: `${((labEvaluation.impulseScore ?? 0) / 5) * 100}%` }}
                 />
               </div>
-              <p className="text-xs text-orange-100/70">Confidence tiers: High auto-starts, Medium offers pause, Low logs only—Kiaan still responds.</p>
+              <p className="text-xs text-orange-100/70">Confidence tiers: High auto-starts, Medium offers a pause, Low just logs while KIAAN replies.</p>
             </div>
           )}
 

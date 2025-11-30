@@ -8,11 +8,8 @@ export default function ContactPage() {
     <main className="mx-auto max-w-4xl space-y-8 px-4 pb-16">
       <section className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Contact</p>
-        <h1 className="text-3xl font-bold text-orange-50">We are here to support</h1>
-        <p className="mt-4 text-orange-100/80">
-          Share feedback, request accessibility accommodations, or report a concern. We respond with care and keep your
-          information confidential.
-        </p>
+        <h1 className="text-3xl font-bold text-orange-50">We’re here to help</h1>
+        <p className="mt-4 text-orange-100/80">Share feedback, request accessibility support, or report a concern—responses stay private.</p>
       </section>
 
       <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
@@ -65,10 +62,7 @@ export default function ContactPage() {
             Send securely
           </button>
         </form>
-        <p className="mt-4 text-xs text-orange-100/70">
-          By sharing, you agree not to include medical emergencies or protected health information. For urgent needs, contact
-          local emergency services.
-        </p>
+        <p className="mt-4 text-xs text-orange-100/70">Please avoid medical emergencies or protected health info. For urgent needs, contact local emergency services.</p>
       </section>
     </main>
   )
