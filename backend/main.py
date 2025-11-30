@@ -72,8 +72,17 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
+def _require_openai_key() -> None:
+    """Fail fast when the OpenAI API key is not configured."""
+
+    if not OPENAI_API_KEY:
+        raise RuntimeError(
+            "OPENAI_API_KEY is missing. Set it before starting the MindVibe backend to enable chat operations."
+        )
+
 @app.on_event("startup")
 async def startup():
+    _require_openai_key()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

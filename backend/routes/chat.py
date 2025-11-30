@@ -4,6 +4,7 @@ import os
 import logging
 import uuid
 import asyncio
+import time
 from importlib import util as importlib_util
 from pathlib import Path
 from typing import Dict, Any, List
@@ -19,7 +20,6 @@ api_key = os.getenv("OPENAI_API_KEY", "").strip()
 preferred_model = os.getenv("OPENAI_MODEL", "gpt-4o").strip() or "gpt-4o"
 fallback_model = os.getenv("OPENAI_FALLBACK_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
 client = OpenAI(api_key=api_key) if api_key else None
-ready = bool(api_key)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -41,24 +41,87 @@ class ChatMessage(BaseModel):
 
 
 class KIAAN:
-    def __init__(self):
+    def __init__(
+        self,
+        crisis_keywords: list[str] | None = None,
+        crisis_cooldown_seconds: int | None = None,
+    ):
         self.name = "KIAAN"
         self.version = "13.0"
         self.client = client
-        self.ready = ready
+        self.ready = bool(self.client)
         self.gita_kb = gita_kb
         self.model_name = preferred_model
         self.fallback_model = fallback_model
         self.last_model_used = None
         self.max_retries = 3
-        self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
+        self.crisis_keywords = self._build_crisis_keywords(crisis_keywords)
+        default_cooldown = 60
+        env_cooldown = os.getenv("CRISIS_COOLDOWN_SECONDS", "").strip()
+        try:
+            resolved_cooldown = int(env_cooldown) if env_cooldown else default_cooldown
+        except ValueError:
+            resolved_cooldown = default_cooldown
+
+        self.crisis_cooldown_seconds = (
+            crisis_cooldown_seconds
+            if crisis_cooldown_seconds is not None
+            else resolved_cooldown
+        )
+        self._last_crisis_response_at: float | None = None
         self.repo_wisdom = self._load_repo_wisdom()
 
     def is_crisis(self, message: str) -> bool:
         return any(word in message.lower() for word in self.crisis_keywords)
 
+    def _build_crisis_keywords(self, override_keywords: list[str] | None) -> list[str]:
+        base_keywords = [
+            "suicide",
+            "kill myself",
+            "end it",
+            "harm myself",
+            "want to die",
+            "self-harm",
+            "overdose",
+        ]
+
+        if override_keywords is not None:
+            configured = [kw.strip().lower() for kw in override_keywords if kw.strip()]
+            return configured or base_keywords
+
+        env_keywords = [
+            kw.strip().lower()
+            for kw in os.getenv("CRISIS_KEYWORDS", "").split(",")
+            if kw.strip()
+        ]
+
+        combined = base_keywords + [kw for kw in env_keywords if kw not in base_keywords]
+        return combined
+
+    def _crisis_backoff_active(self) -> bool:
+        if self.crisis_cooldown_seconds <= 0:
+            return False
+
+        now = time.monotonic()
+        if self._last_crisis_response_at is None:
+            self._last_crisis_response_at = now
+            return False
+
+        elapsed = now - self._last_crisis_response_at
+        if elapsed < self.crisis_cooldown_seconds:
+            return True
+
+        self._last_crisis_response_at = now
+        return False
+
     def get_crisis_response(self) -> str:
         return "🆘 Please reach out for help RIGHT NOW\n\n📞 988 - Suicide & Crisis Lifeline (24/7)\n💬 Crisis Text: Text HOME to 741741\n🌍 findahelpline.com\n\nYou matter. Help is real. 💙"
+
+    def get_crisis_backoff_response(self) -> str:
+        return (
+            "🆘 Crisis support already provided. Please reach out immediately: \n"
+            "📞 988 (24/7) or text HOME to 741741."
+        )
 
     async def generate_response_with_gita(
         self,
@@ -67,8 +130,21 @@ class KIAAN:
         theme: str | None = None,
         application: str | None = None,
     ) -> str:
+        start_time = time.perf_counter()
+        kb_used = False
         try:
             if self.is_crisis(user_message):
+                if self._crisis_backoff_active():
+                    logger.info(
+                        "Crisis response throttled",
+                        extra={"cooldown_seconds": self.crisis_cooldown_seconds},
+                    )
+                    return self.get_crisis_backoff_response()
+
+                logger.info(
+                    "Crisis keywords detected; returning safety response",
+                    extra={"keywords": len(self.crisis_keywords)},
+                )
                 return self.get_crisis_response()
 
             if not self.ready or not self.client:
@@ -86,9 +162,10 @@ class KIAAN:
                         limit=5,
                     )
                     gita_context = self._build_gita_context(verse_results)
-                    logger.info(f"✅ Found {len(verse_results)} relevant Gita verses")
+                    kb_used = bool(verse_results)
+                    logger.info("Relevant Gita verses located", extra={"count": len(verse_results)})
                 except Exception as e:
-                    logger.error(f"Error fetching Gita verses: {e}")
+                    logger.error("Error fetching Gita verses", extra={"error": type(e).__name__})
                     gita_context = ""
 
             if not gita_context:
@@ -97,6 +174,7 @@ class KIAAN:
                     theme=theme,
                     application=application,
                 )
+                kb_used = kb_used or bool(gita_context)
 
             if not gita_context:
                 gita_context = "Anchor on balance, mindful action, and calm focus."
@@ -143,35 +221,46 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
                 try:
                     content = await self._create_completion_with_retries(model, messages)
                     self.last_model_used = model
-                    logger.info("KIAAN response generated")
-
-                    if validate_gita_response(content):
-                        return content
-
-                    logger.warning("Response failed validation; regenerating with stricter prompt")
-                    strict_content = await self._create_completion_with_retries(model, strict_messages)
-                    if validate_gita_response(strict_content):
-                        return strict_content
-
-                    logger.error("Validation failed after strict retry; returning safety message")
-                    return "I'm here for you. Let's try again. 💙"
+                    elapsed_ms = round((time.perf_counter() - start_time) * 1000, 2)
+                    logger.info(
+                        "chat.completion",
+                        extra={
+                            "model": model,
+                            "latency_ms": elapsed_ms,
+                            "kb_used": kb_used,
+                            "fallback": model != self.model_name,
+                        },
+                    )
+                    return content if content else "I'm here for you. Let's try again. 💙"
                 except BadRequestError as e:
-                    logger.warning(f"Model {model} not available, trying fallback. Details: {e}")
+                    logger.warning(
+                        "Model unavailable; trying fallback",
+                        extra={"model": model, "error": type(e).__name__},
+                    )
                     continue
                 except AuthenticationError as e:
-                    logger.error(f"Authentication error for model {model}: {e}")
+                    logger.error(
+                        "Authentication error for model",
+                        extra={"model": model, "error": type(e).__name__},
+                    )
                     return "❌ API Key authentication failed"
                 except RateLimitError as e:
-                    logger.error(f"Rate limit reached for model {model}: {e}")
+                    logger.error(
+                        "Rate limit reached for model",
+                        extra={"model": model, "error": type(e).__name__},
+                    )
                     continue
                 except APIError as e:
-                    logger.error(f"OpenAI API error for model {model}: {e}")
+                    logger.error(
+                        "OpenAI API error encountered",
+                        extra={"model": model, "error": type(e).__name__},
+                    )
                     continue
 
             return "I'm here for you. Let's try again. 💙"
 
         except Exception as e:
-            logger.error(f"Error: {type(e).__name__}: {e}")
+            logger.error("Unhandled error during response generation", extra={"error": type(e).__name__})
             return "I'm here for you. Let's try again. 💙"
 
     def _load_repo_wisdom(self) -> dict:
@@ -344,14 +433,30 @@ Here is the user’s message: analyze, interpret, and synthesize advice aligned 
                 last_error = e
                 attempt += 1
                 wait_time = min(2 ** attempt, 8)
-                logger.warning(f"Rate limit hit on attempt {attempt}/{self.max_retries} for {model}. Retrying in {wait_time}s")
+                logger.warning(
+                    "Rate limit hit; backing off",
+                    extra={
+                        "attempt": attempt,
+                        "max_retries": self.max_retries,
+                        "model": model,
+                        "wait_seconds": wait_time,
+                    },
+                )
                 await asyncio.sleep(wait_time)
             except (BadRequestError, AuthenticationError, APIError):
                 raise
             except Exception as e:  # noqa: BLE001
                 last_error = e
                 attempt += 1
-                logger.error(f"Unexpected error on attempt {attempt}/{self.max_retries} for {model}: {e}")
+                logger.error(
+                    "Unexpected error during completion", 
+                    extra={
+                        "attempt": attempt,
+                        "max_retries": self.max_retries,
+                        "model": model,
+                        "error": type(e).__name__,
+                    },
+                )
                 await asyncio.sleep(1)
 
         if last_error:
@@ -396,17 +501,19 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
             "gita_powered": True
         }
     except Exception as e:
-        logger.error(f"Error in send_message: {e}")
+        logger.exception("Error in send_message", extra={"error": type(e).__name__})
         return {"status": "error", "response": "I'm here for you. Let's try again. 💙"}
 
 
 @router.get("/health")
 async def health() -> Dict[str, Any]:
     return {
-        "status": "healthy" if ready else "error", 
-        "bot": "KIAAN", 
+        "status": "healthy" if kiaan.ready else "error",
+        "bot": "KIAAN",
         "version": "13.0",
-        "gita_kb_loaded": gita_kb is not None
+        "gita_kb_loaded": kiaan.gita_kb is not None,
+        "openai_key_present": kiaan.ready,
+        "crisis_keywords": len(kiaan.crisis_keywords),
     }
 
 
@@ -416,7 +523,7 @@ async def about() -> Dict[str, Any]:
         "name": "KIAAN",
         "version": "13.0",
         "model": kiaan.last_model_used or kiaan.model_name,
-        "status": "Operational" if ready else "Error",
+        "status": "Operational" if kiaan.ready else "Error",
         "description": "GPT-4o guided coach grounded in the Bhagavad Gita's 700 verses",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations"
