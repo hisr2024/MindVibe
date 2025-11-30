@@ -12,9 +12,12 @@ export const metadata = {
   themeColor: '#0b0b0f',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icons/icon.svg',
-    shortcut: '/icons/icon.svg',
-    apple: '/icons/icon.svg'
+    icon: [
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+      { url: '/icons/icon.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: '/icon.png',
+    apple: '/apple-icon.png'
   }
 }
 
