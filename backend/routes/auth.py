@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+import pyotp
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select, update
@@ -48,6 +49,7 @@ class SignupOut(BaseModel):
 class LoginIn(BaseModel):
     email: EmailStr
     password: str
+    two_factor_code: str | None = None
 
 
 class LoginOut(BaseModel):
@@ -57,6 +59,20 @@ class LoginOut(BaseModel):
     expires_in: int
     user_id: str
     email: EmailStr
+
+
+class TwoFactorSetupOut(BaseModel):
+    secret: str
+    otpauth_url: str
+
+
+class TwoFactorVerifyIn(BaseModel):
+    code: str
+
+
+class TwoFactorStatusOut(BaseModel):
+    enabled: bool
+    configured: bool
 
 
 class MeOut(BaseModel):
@@ -146,6 +162,21 @@ async def _get_user_or_401(db: AsyncSession, user_id: str) -> User:
     return user
 
 
+async def _get_user_and_active_session(
+    request: Request, db: AsyncSession
+) -> tuple[dict, User, Session, int | None]:
+    payload, user_id, session_id, exp = await _extract_auth_context(request)
+    user = await _get_user_or_401(db, user_id)
+
+    session_row = await get_session(db, session_id)
+    if not session_row or not session_is_active(session_row):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Session inactive"
+        )
+
+    return payload, user, session_row, exp
+
+
 # ----------------------
 # Signup
 # ----------------------
@@ -189,6 +220,27 @@ async def login(
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
+    if user.two_factor_enabled:
+        if not payload.two_factor_code:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Two-factor code required",
+            )
+
+        code = payload.two_factor_code.strip().replace(" ", "")
+        if not user.two_factor_secret:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Two-factor secret missing",
+            )
+
+        totp = pyotp.TOTP(user.two_factor_secret)
+        if not totp.verify(code, valid_window=1):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid two-factor code",
+            )
+
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
     access_token = create_access_token(user_id=user.id, session_id=session.id)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
@@ -218,17 +270,78 @@ async def login(
 
 
 # ----------------------
+# Two Factor Authentication
+# ----------------------
+@router.get("/2fa/status", response_model=TwoFactorStatusOut)
+async def two_factor_status(request: Request, db: AsyncSession = Depends(get_db)):
+    _, user, session_row, _ = await _get_user_and_active_session(request, db)
+    await touch_session(db, session_row)
+    return TwoFactorStatusOut(
+        enabled=bool(user.two_factor_enabled),
+        configured=bool(user.two_factor_secret),
+    )
+
+
+@router.post("/2fa/setup", response_model=TwoFactorSetupOut)
+async def initiate_two_factor(request: Request, db: AsyncSession = Depends(get_db)):
+    _, user, session_row, _ = await _get_user_and_active_session(request, db)
+
+    if user.two_factor_enabled:
+        raise HTTPException(status_code=409, detail="Two-factor already enabled")
+
+    secret = user.two_factor_secret or pyotp.random_base32()
+    await db.execute(
+        update(User).where(User.id == user.id).values(two_factor_secret=secret)
+    )
+    await db.commit()
+
+    await touch_session(db, session_row)
+    totp = pyotp.TOTP(secret)
+    account_name = user.email or user.auth_uid
+    otpauth_url = totp.provisioning_uri(name=account_name, issuer_name="MindVibe")
+
+    return TwoFactorSetupOut(secret=secret, otpauth_url=otpauth_url)
+
+
+@router.post("/2fa/verify", response_model=TwoFactorStatusOut)
+async def verify_two_factor(
+    payload: TwoFactorVerifyIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    _, user, session_row, _ = await _get_user_and_active_session(request, db)
+
+    if not user.two_factor_secret:
+        raise HTTPException(status_code=400, detail="Two-factor setup not initiated")
+
+    code = payload.code.strip().replace(" ", "")
+    totp = pyotp.TOTP(user.two_factor_secret)
+    if not totp.verify(code, valid_window=1):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid two-factor code",
+        )
+
+    await db.execute(
+        update(User)
+        .where(User.id == user.id)
+        .values(two_factor_enabled=True)
+    )
+    await db.commit()
+
+    await touch_session(db, session_row)
+
+    return TwoFactorStatusOut(enabled=True, configured=True)
+
+
+# ----------------------
 # Me
 # ----------------------
 @router.get("/me", response_model=MeOut)
 async def me(request: Request, db: AsyncSession = Depends(get_db)):
-    payload, user_id, session_id, exp = await _extract_auth_context(request)
-    user = await _get_user_or_401(db, user_id)
-    session_row = await get_session(db, session_id)
-    if not session_row or not session_is_active(session_row):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Session inactive"
-        )
+    payload, user, session_row, exp = await _get_user_and_active_session(
+        request, db
+    )
 
     await touch_session(db, session_row)
 
