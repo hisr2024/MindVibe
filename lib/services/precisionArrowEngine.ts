@@ -34,12 +34,21 @@ function makeRefinedGoal(goal: string, timeFrame: string | null | undefined) {
   return `${trimmed} — scoped to be shippable`
 }
 
-function buildPurpose(goal: string, timeFrame: string | null | undefined, context: string | null | undefined) {
-  const why = context?.trim()
+function buildPurpose(
+  goal: string,
+  timeFrame: string | null | undefined,
+  context: string | null | undefined,
+  kiaanContext: string | null | undefined
+) {
+  const contextualWhy = context?.trim()
     ? `${context.trim()} Keep decisions tied to the goal’s finish line.`
     : `Ensure every action ladders up to "${goal}"${timeFrame ? ` within ${timeFrame}` : ''}.`
 
-  return why
+  if (!kiaanContext?.trim()) {
+    return contextualWhy
+  }
+
+  return `${contextualWhy} Honor this KIAAN insight while staying objective: ${kiaanContext.trim()}`
 }
 
 function makeKeyActions(goal: string) {
@@ -96,11 +105,12 @@ export function buildPrecisionArrow(payload: PrecisionArrowInput) {
   const timeFrame = payload.time_frame?.trim() || null
   const context = payload.context?.trim() || null
   const emotionalState = payload.emotional_state?.trim() || null
+  const kiaanContext = payload.kiaan_context?.trim() || null
 
   const refinedGoal = makeRefinedGoal(goal, timeFrame)
-  const values = extractValues(context ?? goal)
+  const values = extractValues(context ?? goal ?? kiaanContext)
   const keyActions = makeKeyActions(goal)
-  const whyItMatters = buildPurpose(goal, timeFrame, context)
+  const whyItMatters = buildPurpose(goal, timeFrame, context, kiaanContext)
   const effortFocusStatement = 'Own the controllable inputs; let results trail the craft.'
   const todayAction = `Draft the canvas for "${goal}" and anchor scores to the schema.`
 
@@ -120,6 +130,13 @@ export function buildPrecisionArrow(payload: PrecisionArrowInput) {
 
   const scores = computeAlignmentScores(payload)
   const coaching = coachingNote(scores)
+
+  const kiaanBridge = {
+    context_applied: kiaanContext
+      ? `Used KIAAN context without changing KIAAN: ${kiaanContext}`
+      : 'No KIAAN context was provided; the Precision Arrow Engine used the goal and optional context only.',
+    protection_note: 'KIAAN remains fully separate; the Precision Arrow Engine only reads the provided context.'
+  }
 
   return {
     goal_clarity: {
@@ -155,6 +172,7 @@ export function buildPrecisionArrow(payload: PrecisionArrowInput) {
       consistency_alignment: scores.consistencyAlignment,
       overall_straightness_score: scores.overall,
       coaching_note: coaching
-    }
+    },
+    kiaan_bridge: kiaanBridge
   }
 }

@@ -41,6 +41,10 @@ type ArrowPayload = {
     overall_straightness_score: number
     coaching_note: string
   }
+  kiaan_bridge: {
+    context_applied: string
+    protection_note: string
+  }
 }
 
 const defaultArrow: ArrowPayload = {
@@ -77,6 +81,10 @@ const defaultArrow: ArrowPayload = {
     consistency_alignment: 10,
     overall_straightness_score: 8,
     coaching_note: 'Keep tiny habits visible; update alignment weekly.'
+  },
+  kiaan_bridge: {
+    context_applied: 'No KIAAN insight provided yet. The Precision Arrow Engine can optionally weave in KIAAN context without altering KIAAN.',
+    protection_note: 'KIAAN remains unchanged; the Precision Arrow Engine simply borrows any provided context.'
   }
 }
 
@@ -91,6 +99,7 @@ export function PrecisionArrowEngine() {
   const [inputTimeFrame, setInputTimeFrame] = useState(defaultArrow.goal_clarity.time_frame ?? '')
   const [inputContext, setInputContext] = useState('')
   const [inputEmotion, setInputEmotion] = useState('')
+  const [inputKiaanContext, setInputKiaanContext] = useState('')
   const [arrowPayload, setArrowPayload] = useState<ArrowPayload>(defaultArrow)
   const [status, setStatus] = useState<{ message: string; tone: 'success' | 'error' } | null>(null)
   const [loading, setLoading] = useState(false)
@@ -124,7 +133,8 @@ export function PrecisionArrowEngine() {
       goal: trimmedGoal,
       time_frame: inputTimeFrame || undefined,
       context: inputContext || undefined,
-      emotional_state: inputEmotion || undefined
+      emotional_state: inputEmotion || undefined,
+      kiaan_context: inputKiaanContext || undefined
     }
 
     try {
@@ -164,6 +174,12 @@ export function PrecisionArrowEngine() {
           <LabeledField label="Time frame" value={inputTimeFrame} onChange={setInputTimeFrame} />
           <LabeledField label="Context (optional)" value={inputContext} onChange={setInputContext} multiline />
           <LabeledField label="Emotional state (optional)" value={inputEmotion} onChange={setInputEmotion} />
+          <LabeledField
+            label="KIAAN insight to weave in (optional)"
+            value={inputKiaanContext}
+            onChange={setInputKiaanContext}
+            multiline
+          />
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -278,6 +294,15 @@ export function PrecisionArrowEngine() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-orange-50">KIAAN collaboration</p>
+              <span className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">Protected</span>
+            </div>
+            <p className="text-sm text-orange-100/80 leading-relaxed">{arrowPayload.kiaan_bridge.context_applied}</p>
+            <p className="text-xs text-orange-100/70">{arrowPayload.kiaan_bridge.protection_note}</p>
           </div>
         </div>
       </div>

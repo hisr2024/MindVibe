@@ -8,6 +8,7 @@ export type PrecisionArrowInput = {
   time_frame?: string | null
   context?: string | null
   emotional_state?: string | null
+  kiaan_context?: string | null
 }
 
 type ArrowAlignment = {
@@ -17,6 +18,10 @@ type ArrowAlignment = {
   detachment: unknown
   consistency: unknown
   arrow_alignment: unknown
+  kiaan_bridge?: {
+    context_applied: string
+    protection_note: string
+  }
 }
 
 function getPrecisionArrowModel() {
@@ -64,7 +69,7 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as PrecisionArrowInput
-  const { goal, time_frame, context, emotional_state } = body
+  const { goal, time_frame, context, emotional_state, kiaan_context } = body
 
   if (!goal || typeof goal !== 'string') {
     return NextResponse.json({ error: "Missing or invalid 'goal'" }, { status: 400 })
@@ -74,7 +79,8 @@ export async function POST(request: Request) {
     goal,
     time_frame: time_frame ?? null,
     context: context ?? null,
-    emotional_state: emotional_state ?? null
+    emotional_state: emotional_state ?? null,
+    kiaan_context: kiaan_context ?? null
   }
 
   try {
@@ -110,6 +116,15 @@ export async function POST(request: Request) {
     }
 
     const arrow = validateArrowPayload(parsed)
+
+    if (!arrow.kiaan_bridge) {
+      arrow.kiaan_bridge = {
+        context_applied: payload.kiaan_context
+          ? `KIAAN insight applied: ${payload.kiaan_context}`
+          : 'No KIAAN insight was provided; the Precision Arrow Engine relied on the goal and context fields.',
+        protection_note: 'KIAAN stays untouched. The Precision Arrow Engine only borrows context, never alters KIAAN.'
+      }
+    }
 
     return NextResponse.json(arrow)
   } catch (error) {
