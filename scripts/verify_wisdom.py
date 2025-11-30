@@ -35,7 +35,7 @@ except Exception as e:
 # Test 2: Import wisdom knowledge base service
 print("\n[2/6] Testing service imports...")
 try:
-    from services.wisdom_kb import WisdomKnowledgeBase
+    from backend.services.wisdom_kb import WisdomKnowledgeBase
 
     print("✓ WisdomKnowledgeBase service imported successfully")
 except Exception as e:
