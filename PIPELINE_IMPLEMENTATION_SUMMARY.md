@@ -179,7 +179,7 @@ Transformed Verse Data
 
 ### Basic Usage
 ```python
-from services.pipeline import ContextTransformationPipeline
+from backend.services.pipeline import ContextTransformationPipeline
 
 pipeline = ContextTransformationPipeline.create_full_pipeline()
 transformed = pipeline.transform(raw_verse)
