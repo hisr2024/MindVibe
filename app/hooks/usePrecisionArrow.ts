@@ -3,6 +3,7 @@ export type PrecisionArrowInput = {
   time_frame?: string
   context?: string
   emotional_state?: string
+  kiaan_context?: string
 }
 
 export async function createPrecisionArrow(input: PrecisionArrowInput) {
