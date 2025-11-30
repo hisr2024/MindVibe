@@ -1,43 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-
-const nunjucksTemplate = `{% set arrow = {
-  goal_clarity: {
-    original_goal: original_goal,
-    refined_goal: refined_goal,
-    time_frame: time_frame
-  },
-  purpose: {
-    why_it_matters: why_it_matters,
-    core_values: core_values,
-    alignment_score: purpose_alignment
-  },
-  effort: {
-    key_actions: key_actions,
-    today_action: today_action,
-    effort_focus_statement: effort_focus_statement
-  },
-  detachment: {
-    outcome_fears: outcome_fears,
-    detachment_reframe: detachment_reframe,
-    let_go_statement: let_go_statement
-  },
-  consistency: {
-    rhythm: rhythm,
-    tiny_habit: tiny_habit,
-    tracking_method: tracking_method,
-    fallback_plan: fallback_plan
-  },
-  arrow_alignment: {
-    purpose_alignment: purpose_alignment,
-    effort_alignment: effort_alignment,
-    detachment_alignment: detachment_alignment,
-    consistency_alignment: consistency_alignment,
-    overall_straightness_score: overall_score,
-    coaching_note: coaching_note
-  }
-} %}`
+import { useEffect, useMemo, useState } from 'react'
 
 const arrowCheckpoints = ['Purpose', 'Effort', 'Detachment', 'Consistency']
 
@@ -81,6 +44,86 @@ export function PrecisionArrowEngine() {
   )
 
   const progress = Math.max(8, overallScore * 10)
+
+  const arrowPayload = useMemo(
+    () => ({
+      goal_clarity: {
+        original_goal: originalGoal,
+        refined_goal: refinedGoal,
+        time_frame: timeFrame
+      },
+      purpose: {
+        why_it_matters: whyItMatters,
+        core_values: coreValues,
+        alignment_score: purposeAlignment
+      },
+      effort: {
+        key_actions: keyActions,
+        today_action: todayAction,
+        effort_focus_statement: effortFocus
+      },
+      detachment: {
+        outcome_fears: outcomeFears,
+        detachment_reframe: detachmentReframe,
+        let_go_statement: letGoStatement
+      },
+      consistency: {
+        rhythm,
+        tiny_habit: tinyHabit,
+        tracking_method: trackingMethod,
+        fallback_plan: fallbackPlan
+      },
+      arrow_alignment: {
+        purpose_alignment: purposeAlignment,
+        effort_alignment: effortAlignment,
+        detachment_alignment: detachmentAlignment,
+        consistency_alignment: consistencyAlignment,
+        overall_straightness_score: overallScore,
+        coaching_note: 'Keep tiny habits visible; update alignment weekly.'
+      }
+    }),
+    [
+      coreValues,
+      detachmentAlignment,
+      detachmentReframe,
+      effortAlignment,
+      effortFocus,
+      fallbackPlan,
+      keyActions,
+      letGoStatement,
+      outcomeFears,
+      overallScore,
+      purposeAlignment,
+      refinedGoal,
+      rhythm,
+      timeFrame,
+      tinyHabit,
+      todayAction,
+      trackingMethod,
+      whyItMatters,
+      originalGoal,
+      consistencyAlignment
+    ]
+  )
+
+  const nunjucksBlock = useMemo(() => `{% set arrow = ${JSON.stringify(arrowPayload, null, 2)} %}`, [arrowPayload])
+  const jsonPreview = useMemo(() => JSON.stringify(arrowPayload, null, 2), [arrowPayload])
+  const [copied, setCopied] = useState<'nunjucks' | 'json' | null>(null)
+
+  useEffect(() => {
+    if (!copied) return
+    const timeout = setTimeout(() => setCopied(null), 1600)
+    return () => clearTimeout(timeout)
+  }, [copied])
+
+  async function handleCopy(value: string, type: 'nunjucks' | 'json') {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(type)
+    } catch (error) {
+      console.error('Copy failed', error)
+    }
+  }
 
   return (
     <section className="bg-[#0c0c10]/90 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_18px_80px_rgba(255,115,39,0.12)] space-y-6" id="precision-arrow">
@@ -132,18 +175,22 @@ export function PrecisionArrowEngine() {
             consistencyAlignment={consistencyAlignment}
           />
 
-          <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Nunjucks handoff</p>
-                <h3 className="text-sm font-semibold text-orange-50">Precision Arrow block</h3>
-              </div>
-              <span className="text-xs text-orange-100/70 bg-white/5 px-2 py-1 rounded-lg border border-orange-500/20">Drop-in</span>
-            </div>
-            <pre className="text-[11px] leading-relaxed text-orange-50 bg-[#0c0c10] border border-orange-500/10 rounded-xl p-3 overflow-auto">
-{nunjucksTemplate}
-            </pre>
-          </div>
+          <CodeCard
+            label="Nunjucks handoff"
+            title="Live block"
+            badge="Drop-in"
+            code={nunjucksBlock}
+            onCopy={() => handleCopy(nunjucksBlock, 'nunjucks')}
+            copied={copied === 'nunjucks'}
+          />
+          <CodeCard
+            label="React payload"
+            title="Arrow JSON"
+            badge="Synced"
+            code={jsonPreview}
+            onCopy={() => handleCopy(jsonPreview, 'json')}
+            copied={copied === 'json'}
+          />
         </div>
       </div>
 
@@ -151,9 +198,15 @@ export function PrecisionArrowEngine() {
         <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4 space-y-4">
           <h3 className="text-sm font-semibold text-orange-50">Scoring Visual</h3>
           <div className="space-y-3">
-            <div className="arrow-track">
-              <div className="arrow-flight" style={{ width: `${progress}%` }} />
-              <div className="arrow-head" style={{ left: `${progress}%` }} />
+            <div className="relative h-3 rounded-full bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-orange-400/30 overflow-hidden">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-200 transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+              <div
+                className="absolute -top-1 h-5 w-5 rounded-full border-2 border-orange-300 bg-orange-500/80 shadow-[0_0_20px_rgba(255,158,94,0.6)] transition-all duration-500"
+                style={{ left: `calc(${progress}% - 10px)` }}
+              />
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs text-orange-100/80">
               <ScorePill label="Purpose" value={purposeAlignment} />
@@ -302,6 +355,48 @@ function ScorePill({ label, value }: { label: string; value: number }) {
     <div className="flex items-center justify-between rounded-xl border border-orange-500/15 bg-orange-500/10 px-3 py-2">
       <span className="text-xs text-orange-100/80">{label}</span>
       <span className="text-sm font-semibold text-orange-50">{value}</span>
+    </div>
+  )
+}
+
+function CodeCard({
+  label,
+  title,
+  badge,
+  code,
+  onCopy,
+  copied
+}: {
+  label: string
+  title: string
+  badge: string
+  code: string
+  onCopy: () => void
+  copied: boolean
+}) {
+  return (
+    <div className="rounded-2xl border border-orange-500/15 bg-black/50 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">{label}</p>
+          <h3 className="text-sm font-semibold text-orange-50">{title}</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-orange-100/70 bg-white/5 px-2 py-1 rounded-lg border border-orange-500/20">{badge}</span>
+          <button
+            onClick={onCopy}
+            className="text-[11px] px-2 py-1 rounded-lg border border-orange-500/30 text-orange-50 bg-orange-500/10 hover:bg-orange-500/20 transition"
+          >
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+      </div>
+      <pre className="text-[11px] leading-relaxed text-orange-50 bg-[#0c0c10] border border-orange-500/10 rounded-xl p-3 overflow-auto whitespace-pre">{code}</pre>
+      <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/70">
+        <span className="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">Nunjucks-ready</span>
+        <span className="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">JSON aligned</span>
+        <span className="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">Clipboard enabled</span>
+      </div>
     </div>
   )
 }
