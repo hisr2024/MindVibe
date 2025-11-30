@@ -37,6 +37,12 @@ Please report (suspected) security vulnerabilities to **hisr2024@gmail.com**. Yo
 - Input validation and sanitization
 - API versioning for backward compatibility
 
+### Backend Hardening for KIAAN
+- Enforce API key headers on privileged routes with environment-based toggles to avoid breaking existing clients
+- Keep JWT authentication for user endpoints and add role checks for admin/service paths
+- Prefer mTLS for internal services and apply WAF + rate limits at the edge
+- See [docs/BACKEND_SECURITY_HARDENING.md](docs/BACKEND_SECURITY_HARDENING.md) for end-to-end guidance on protecting APIs, sensitive data, and proprietary content without impacting KIAAN responses
+
 ## Best Practices for Contributors
 
 1. Never commit secrets, API keys, or credentials
