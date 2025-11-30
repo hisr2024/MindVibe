@@ -196,6 +196,11 @@ MindVibe backend includes **8 comprehensive API routers**:
 - `DELETE /api/chat/history/{session_id}` - Clear conversation
 - `GET /api/chat/health` - Check chatbot status
 
+**Chat deployment requirements**
+- `DATABASE_URL` **must** point to your Postgres instance using the async driver (`postgresql+asyncpg://`); apply `migrations/20251109_add_gita_wisdom_database.sql` before first boot so the chapters/verses/keywords tables exist.
+- Seed the wisdom data so `/api/chat/message` can ground replies: `python scripts/seed_wisdom.py` (universal verses) and `python scripts/seed_gita_wisdom.py` (Bhagavad Gita chapters/verses/contexts/keywords).
+- Configure OpenAI access: `OPENAI_API_KEY` (required), `OPENAI_MODEL` (default `gpt-4o`), and `OPENAI_FALLBACK_MODEL` (default `gpt-4o-mini`). Without these, the service falls back to a lightweight repository map with limited context.
+
 #### **7. Universal Wisdom Guide** (`/api/wisdom`)
 - `GET /api/wisdom/verses` - List wisdom verses (with filtering)
 - `GET /api/wisdom/verses/{verse_id}` - Get specific verse
