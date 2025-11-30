@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MindVibe icon">
+  <defs>
+    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#f97316" />
+      <stop offset="50%" stop-color="#fb923c" />
+      <stop offset="100%" stop-color="#fde68a" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="#050509" />
+  <rect x="18" y="18" width="220" height="220" rx="44" fill="url(#g)" opacity="0.12" />
+  <path fill="#fefefe" d="M70 182V74h22l20 49 20-49h22v108h-19v-67l-17 44h-12l-17-44v67H70zm118 0V74h22v108h-22z" />
+</svg>
