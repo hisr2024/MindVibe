@@ -64,6 +64,8 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 }
 
 export default function Home() {
+  const [chatPrefill, setChatPrefill] = useState<string | null>(null)
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
       <div className="pointer-events-none absolute inset-0">
@@ -113,9 +115,9 @@ export default function Home() {
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
-        <KIAANChat />
-        <QuickHelp />
-        <DailyWisdom />
+        <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
+        <QuickHelp onSelectPrompt={setChatPrefill} />
+        <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
         <Journal />
         <MoodTracker />
@@ -210,12 +212,18 @@ function HeartBreezeIcon() {
   )
 }
 
-function KIAANChat() {
+type KIAANChatProps = {
+  prefill: string | null
+  onPrefillHandled: () => void
+}
+
+function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [messages, setMessages] = useLocalState<{role: 'user' | 'assistant', content: string}[]>('kiaan_chat', [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [promptMotion, setPromptMotion] = useState(false)
   const messageListRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     const container = messageListRef.current
@@ -229,6 +237,14 @@ function KIAANChat() {
     const timer = setTimeout(() => setPromptMotion(false), 900)
     return () => clearTimeout(timer)
   }, [promptMotion])
+
+  useEffect(() => {
+    if (!prefill) return
+    setInput(prefill)
+    setPromptMotion(true)
+    requestAnimationFrame(() => inputRef.current?.focus())
+    onPrefillHandled()
+  }, [prefill, onPrefillHandled])
 
   async function sendMessage() {
     if (!input.trim()) return
@@ -263,7 +279,10 @@ function KIAANChat() {
   }
 
   return (
-    <section className={`relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)] transition-all duration-500 ${promptMotion ? 'animate-chat-wobble ring-1 ring-orange-200/35 shadow-[0_25px_90px_rgba(255,156,89,0.32)]' : ''}`}>
+    <section
+      id="kiaan-chat"
+      className={`relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)] transition-all duration-500 ${promptMotion ? 'animate-chat-wobble ring-1 ring-orange-200/35 shadow-[0_25px_90px_rgba(255,156,89,0.32)]' : ''}`}
+    >
       <div className="absolute right-10 top-10 h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/30 via-[#ffb347]/25 to-orange-200/10 blur-2xl" />
       <div className="absolute -left-16 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-[#1c1c20]/70 via-orange-500/10 to-transparent blur-3xl" />
       <div className="flex items-center gap-3 relative">
@@ -320,6 +339,7 @@ function KIAANChat() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+          ref={inputRef}
           className="flex-1 px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
         />
         <button
@@ -334,16 +354,16 @@ function KIAANChat() {
   )
 }
 
-function QuickHelp() {
+function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const scenarios = [
-    { emoji: '😰', label: 'Feeling anxious', query: "I'm feeling anxious and worried" },
-    { emoji: '😔', label: 'Feeling sad', query: "I'm feeling down and sad" },
-    { emoji: '😠', label: 'Dealing with anger', query: "I'm struggling with anger" },
-    { emoji: '🤔', label: 'Making a decision', query: "I need help making a decision" },
-    { emoji: '💼', label: 'Work stress', query: "I'm stressed about work" },
-    { emoji: '💔', label: 'Relationship issues', query: "I'm having relationship problems" },
-    { emoji: '🎯', label: 'Finding purpose', query: "I'm searching for my purpose" },
-    { emoji: '🙏', label: 'Need peace', query: "I need inner peace" },
+    { emoji: '😰', label: 'Anxiety to calm', query: 'Guide me through a grounding exercise to steady anxious thoughts.' },
+    { emoji: '😔', label: 'Heart feels heavy', query: 'I need gentle words to lift my mood and remind me of my strengths.' },
+    { emoji: '😠', label: 'Cooling anger', query: 'Help me cool down my anger and respond with more patience.' },
+    { emoji: '🤔', label: 'Clarity check', query: 'Can you help me see the pros and cons before I decide on something important?' },
+    { emoji: '💼', label: 'Work balance', query: 'Work feels overwhelming—walk me through a quick reset to regain focus.' },
+    { emoji: '💔', label: 'Tender relationships', query: 'How can I handle a tough conversation with care and honesty?' },
+    { emoji: '🎯', label: 'Purpose pulse', query: 'I want a short reflection to reconnect with my purpose and direction.' },
+    { emoji: '🙏', label: 'Quiet peace', query: 'Lead me in a brief mindful moment so I can feel peaceful again.' },
   ]
   return (
     <section className="bg-[#0d0d10]/80 backdrop-blur border border-orange-500/15 rounded-3xl p-5 md:p-6 space-y-4 shadow-[0_10px_50px_rgba(255,115,39,0.16)]">
@@ -356,8 +376,7 @@ function QuickHelp() {
           <button
             key={i}
             onClick={() => {
-              const input = document.querySelector('input[placeholder*"Type"]') as HTMLInputElement
-              if (input) { input.value = s.query; input.focus() }
+              onSelectPrompt(s.query)
             }}
             className="group relative overflow-hidden bg-gradient-to-br from-[#0f0f12]/85 via-[#19181c]/80 to-[#1f1f24]/80 border border-orange-400/25 hover:border-[#ffb347]/50 rounded-2xl p-4 transition-all text-left shadow-[0_10px_30px_rgba(255,115,39,0.14)] hover:-translate-y-1">
             <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/8 to-transparent opacity-0 group-hover:opacity-100 transition" />
@@ -372,7 +391,7 @@ function QuickHelp() {
   )
 }
 
-function DailyWisdom() {
+function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void }) {
   const [saved, setSaved] = useState(false)
   const wisdom = {
     text: "The key to peace lies not in controlling outcomes, but in mastering your response. Focus your energy on doing your best without attachment to results, and discover true freedom.",
@@ -398,7 +417,15 @@ function DailyWisdom() {
       <p className="text-sm text-orange-100/80 mb-4">✨ Principle: {wisdom.principle}</p>
 
       <div className="flex gap-3 flex-wrap">
-        <button className="px-4 py-2 bg-gradient-to-r from-orange-400 to-[#ffb347] text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-orange-500/20 hover:scale-105 transition">💬 Chat about this</button>
+        <button
+          className="px-4 py-2 bg-gradient-to-r from-orange-400 to-[#ffb347] text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-orange-500/20 hover:scale-105 transition"
+          onClick={() => {
+            onChatClick(`I'd like to talk about today's wisdom: "${wisdom.text}"`)
+            document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+        >
+          💬 Chat about this
+        </button>
         <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">
           {saved ? '⭐ Saved' : '☆ Save'}
         </button>
