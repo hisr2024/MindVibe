@@ -757,10 +757,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               <span className="font-semibold text-orange-50">Quick summary:</span> {summary}
             </div>
           )}
-          <div
-            className={`bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm ${
-            }`}
-          >
+          <div className="bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm">
             <p className="whitespace-pre-wrap leading-relaxed text-sm text-orange-50/90">
               {view === 'summary' ? summary : content}
             </p>
