@@ -82,7 +82,7 @@ export default function Home() {
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
                 <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-200 to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
-                <p className="text-lg md:text-xl text-orange-100/90">Calm wisdom, in a glow of black + ember.</p>
+                <p className="text-lg md:text-xl text-orange-100/90">Calm Wisdom.</p>
               </div>
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
@@ -203,15 +203,24 @@ function KIAANChat() {
   const [messages, setMessages] = useLocalState<{role: 'user' | 'assistant', content: string}[]>('kiaan_chat', [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [promptMotion, setPromptMotion] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-  
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  useEffect(() => {
+    if (!promptMotion) return
+    const timer = setTimeout(() => setPromptMotion(false), 900)
+    return () => clearTimeout(timer)
+  }, [promptMotion])
+
   async function sendMessage() {
     if (!input.trim()) return
-    
+
+    setPromptMotion(true)
+
     const userMessage = { role: 'user' as const, content: input }
     const newMessages = [...messages, userMessage]
     setMessages(newMessages)
@@ -240,8 +249,9 @@ function KIAANChat() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)]">
+    <section className={`relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)] transition-all duration-500 ${promptMotion ? 'animate-chat-wobble ring-1 ring-orange-200/35 shadow-[0_25px_90px_rgba(255,156,89,0.32)]' : ''}`}>
       <div className="absolute right-10 top-10 h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/30 via-amber-400/25 to-orange-200/10 blur-2xl" />
+      <div className="absolute -left-16 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-[#1c1c20]/70 via-orange-500/10 to-transparent blur-3xl" />
       <div className="flex items-center gap-3 relative">
         <div className="text-4xl">💬</div>
         <div>
@@ -250,7 +260,16 @@ function KIAANChat() {
         </div>
       </div>
 
-      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4">
+      <div className="flex items-center gap-3 text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-2xl px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur">
+        <span className="relative flex h-3 w-3"> 
+          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400" />
+        </span>
+        <span className="font-semibold text-orange-50">Private, steady connection</span>
+        <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
+      </div>
+
+      <div className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10">
         {messages.length === 0 && (
           <div className="text-center text-orange-100/70 py-20 md:py-32">
             <p className="text-6xl mb-4">✨</p>
