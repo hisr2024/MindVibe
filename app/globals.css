@@ -49,10 +49,53 @@
   animation: calmBreath 10s ease-in-out infinite;
 }
 
+.arrow-track {
+  position: relative;
+  height: 12px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255, 153, 51, 0.08), rgba(255, 153, 51, 0.2));
+  overflow: hidden;
+}
+
+.arrow-flight {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ff7a1a, #ffb347, #ffe7c0);
+  box-shadow: 0 0 18px rgba(255, 133, 51, 0.45);
+  transition: width 0.8s ease;
+}
+
+.arrow-head {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 30% 30%, #fff7ec, #ff9d36);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 16px rgba(255, 153, 51, 0.45),
+    0 0 32px rgba(255, 153, 51, 0.25);
+  transition: left 0.8s ease, transform 0.3s ease;
+  animation: arrowPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-chat-wobble,
   .aurora-pane::after,
-  .breathing-orb {
+  .breathing-orb,
+  .arrow-head {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
