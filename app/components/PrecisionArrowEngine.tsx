@@ -133,7 +133,9 @@ export function PrecisionArrowEngine() {
       setStatus({ tone: 'success', message: 'Precision Arrow updated from the live model.' })
     } catch (error) {
       console.error('Precision Arrow generation failed', error)
-      setStatus({ tone: 'error', message: 'Could not generate the Precision Arrow. Try again.' })
+      const message = error instanceof Error ? error.message : 'Could not generate the Precision Arrow. Try again.'
+      const kiaanSupport = 'KIAAN can still support you while the Precision Arrow Engine retries.'
+      setStatus({ tone: 'error', message: `${message} ${kiaanSupport}` })
     } finally {
       setLoading(false)
     }

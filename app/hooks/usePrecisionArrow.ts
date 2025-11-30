@@ -13,7 +13,9 @@ export async function createPrecisionArrow(input: PrecisionArrowInput) {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to generate precision arrow')
+    const errorPayload = await response.json().catch(() => null)
+    const message = errorPayload?.error ?? 'Failed to generate precision arrow'
+    throw new Error(message)
   }
 
   return response.json()
