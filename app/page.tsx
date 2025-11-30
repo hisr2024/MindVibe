@@ -313,7 +313,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
+            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 max-h-[60vh] overflow-y-auto sm:max-h-none ${
               msg.role === 'user'
                 ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
                 : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
