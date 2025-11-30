@@ -8,6 +8,26 @@ const navLinks = [
     detail: 'Dedicated breakdown of guidance suites and safeguards.'
   },
   {
+    href: '/kiaan/rooms',
+    title: 'Rooms & chat anchors',
+    detail: 'Jump into public rooms and the live chat surface safely.'
+  },
+  {
+    href: '/kiaan/clarity',
+    title: 'Clarity pause suite',
+    detail: 'Breath-led timers, overlays, and reasoning prompts.'
+  },
+  {
+    href: '/kiaan/journal',
+    title: 'Journal & privacy',
+    detail: 'Local-first notes, AES-GCM storage, and summaries.'
+  },
+  {
+    href: '/kiaan/relationships',
+    title: 'Relationship compass',
+    detail: 'Repair steps and response guides that protect tone.'
+  },
+  {
     href: '/kiaan/experiences',
     title: 'Experience flows',
     detail: 'Multi-page journeys that keep the chat ecosystem intact.'
@@ -71,7 +91,7 @@ export default function KiaanLayout({ children }: { children: ReactNode }) {
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-4">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
             {navLinks.map(link => (
               <NavCard key={link.href} {...link} />
             ))}

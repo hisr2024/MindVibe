@@ -1,33 +1,41 @@
+import Link from 'next/link'
+
 const features = [
   {
     title: 'Wisdom chat rooms',
     description: 'Guided conversations stay intact—each room mirrors the original intent while being discoverable from its own page.',
-    highlights: ['KIAAN chat core', 'Public rooms overview', 'Warm, private tone preserved']
+    highlights: ['KIAAN chat core', 'Public rooms overview', 'Warm, private tone preserved'],
+    href: '/kiaan/rooms'
   },
   {
     title: 'Clarity pause suite',
     description: 'Grounding timers, reasoning prompts, and closing choices laid out clearly so you can choose without altering the chat logic.',
-    highlights: ['Impulsive-signal awareness', 'Breath-led countdowns', 'Calm decision prompts']
+    highlights: ['Impulsive-signal awareness', 'Breath-led countdowns', 'Calm decision prompts'],
+    href: '/kiaan/clarity'
   },
   {
     title: 'Journaling',
     description: 'Encrypted, local-first journaling keeps privacy intact while showing how entries and summaries work together.',
-    highlights: ['AES-GCM storage reminder', 'Local summaries', 'No account required']
+    highlights: ['AES-GCM storage reminder', 'Local summaries', 'No account required'],
+    href: '/kiaan/journal'
   },
   {
     title: 'Reframing assistants',
     description: 'Ardha and Viyog are presented separately so their voices stay complementary and do not override KIAAN.',
-    highlights: ['Gita-aligned reframes', 'Detachment coaching', 'Supportive boundaries']
+    highlights: ['Gita-aligned reframes', 'Detachment coaching', 'Supportive boundaries'],
+    href: '/kiaan/relationships'
   },
   {
     title: 'Relationship compass',
     description: 'Conflict guidance is spelled out with clear entry points back to the live chat rooms.',
-    highlights: ['Check-ins before replying', 'Repair micro-steps', 'Links back to chat anchors']
+    highlights: ['Check-ins before replying', 'Repair micro-steps', 'Links back to chat anchors'],
+    href: '/kiaan/relationships'
   },
   {
     title: 'Daily wisdom & karma reset',
     description: 'Daily prompts and restart guides get their own section while remaining in sync with the existing experience.',
-    highlights: ['Fresh prompts', 'Gentle resets', 'No backend changes']
+    highlights: ['Fresh prompts', 'Gentle resets', 'No backend changes'],
+    href: '/kiaan/experiences'
   }
 ]
 
@@ -55,6 +63,15 @@ export default function FeatureAtlas() {
                   {item}
                 </span>
               ))}
+            </div>
+            <div className="mt-4">
+              <Link
+                href={feature.href}
+                className="inline-flex items-center gap-2 rounded-full border border-orange-400/40 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 transition hover:border-orange-300/80"
+              >
+                Open page
+                <span aria-hidden>→</span>
+              </Link>
             </div>
           </div>
         ))}
