@@ -14,8 +14,37 @@ export default function DashboardClient() {
         </p>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <article className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 shadow-[0_10px_40px_rgba(255,115,39,0.12)]">
+      <section className="grid gap-6 lg:grid-cols-3">
+        <article className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 shadow-[0_10px_40px_rgba(255,115,39,0.12)] lg:col-span-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-orange-50">Flow shortcuts</h2>
+              <p className="text-sm text-orange-100/80">Jump into the dedicated pages without changing behaviors.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm font-semibold text-slate-900">
+              <a
+                href="/flows/access"
+                className="rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-2 shadow-orange-500/20"
+              >
+                Access
+              </a>
+              <a href="/flows/check-in" className="rounded-2xl border border-orange-500/25 px-4 py-2 text-orange-50">
+                State check-in
+              </a>
+              <a href="/flows/kiaan" className="rounded-2xl border border-orange-500/25 px-4 py-2 text-orange-50">
+                KIAAN chat
+              </a>
+              <a href="/flows/viyog" className="rounded-2xl border border-orange-500/25 px-4 py-2 text-orange-50">
+                Outcome reducer
+              </a>
+              <a href="/flows/journal" className="rounded-2xl border border-orange-500/25 px-4 py-2 text-orange-50">
+                Private journal
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <article className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 shadow-[0_10px_40px_rgba(255,115,39,0.12)] lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-orange-50">Guided chat</h2>
