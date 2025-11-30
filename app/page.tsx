@@ -119,6 +119,7 @@ export default function Home() {
         <ArdhaReframer />
         <ViyogDetachmentCoach />
         <QuickHelp onSelectPrompt={setChatPrefill} />
+        <ClarityPauseSuite />
         <ArdhaReframer />
         <KarmaResetGuide onSelectPrompt={setChatPrefill} />
         <DailyWisdom onChatClick={setChatPrefill} />
@@ -656,6 +657,150 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         >
           Send
         </button>
+      </div>
+    </section>
+  )
+}
+
+function ClarityPauseSuite() {
+  const uiMicrocopy = [
+    { label: 'Header', value: 'Clarity Pause' },
+    { label: 'Subhead', value: 'Create space before you act.' },
+    { label: 'Interrupt CTA', value: 'Pause for 60 seconds' },
+    { label: 'Safety note', value: 'No advice. Just space to decide from clarity.' }
+  ]
+
+  const groundingSequence = [
+    { time: '0–10s', prompt: 'Let’s pause. Slow inhale… gentle exhale.' },
+    { time: '10–20s', prompt: 'Drop your shoulders. Unclench your jaw.' },
+    { time: '20–30s', prompt: 'Notice your feet on the ground. Let intensity lower by 5%.' },
+    { time: '30–40s', prompt: 'One more slow breath in… and out.' },
+    { time: '40–50s', prompt: 'Ask: Are you acting from clarity or from emotion?' },
+    { time: '50–60s', prompt: 'If it still feels right in calm, it will still be right in an hour.' }
+  ]
+
+  const triggerSignals = [
+    'Urgency + emotion: “about to quit”, “so angry right now”, “need to send this now”.',
+    'High intent verbs: “I’m going to…”, “I should just…”, “I’ll do it now”.',
+    'Impulsive risk phrases: “sell all”, “bet it all”, “burn it down”, “don’t care anymore”.',
+    'Exclude neutral mentions (e.g., discussing anger academically) to avoid over-triggering.'
+  ]
+
+  const reasoningPrompts = [
+    'If this action still feels right after calm returns, it will still be right in an hour.',
+    'You can decide from clarity, not pressure.',
+    'Separate facts from feelings before you act.'
+  ]
+
+  const closingChoices = [
+    'Pause a little longer and re-check your clarity.',
+    'Act now with full awareness of your intent.',
+    'Wait 10 minutes, then revisit with a calmer baseline.'
+  ]
+
+  return (
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
+      <div className="absolute -left-10 top-0 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/16 to-transparent blur-3xl" />
+      <div className="absolute -right-12 bottom-0 h-40 w-40 rounded-full bg-gradient-to-tr from-[#1b1f29]/60 via-orange-500/14 to-transparent blur-3xl" />
+
+      <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="space-y-2">
+          <p className="text-xs text-orange-100/80">High-Stress Decision Timer</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause (secular, non-interfering)</h2>
+          <p className="text-sm text-orange-100/80 max-w-3xl">
+            A calm interrupt layer that slows impulsive decisions with a 60-second grounding, a single clarity question, and neutral reflection—always separate from Kiaan.
+          </p>
+        </div>
+        <div className="relative rounded-2xl border border-orange-400/25 bg-white/5 px-4 py-3 text-xs text-orange-50 max-w-sm">
+          <p className="font-semibold text-orange-50">Compatibility Guard</p>
+          <p className="text-orange-100/80 leading-relaxed">
+            Runs as an optional overlay. It never edits, delays, or replaces Kiaan’s responses. If declined, control returns instantly to Kiaan unchanged.
+          </p>
+        </div>
+      </div>
+
+      <div className="relative grid gap-4 md:grid-cols-3">
+        <div className="space-y-3 rounded-2xl bg-black/50 border border-orange-500/20 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
+          <div className="flex items-center justify-between text-xs text-orange-100/80">
+            <span className="font-semibold text-orange-50">UI microcopy</span>
+            <span className="rounded-full bg-white/10 px-3 py-1">Instant overlay</span>
+          </div>
+          <ul className="space-y-2 text-sm text-orange-50/90">
+            {uiMicrocopy.map(item => (
+              <li key={item.label} className="flex items-start gap-2">
+                <span className="mt-[5px] h-2 w-2 rounded-full bg-orange-300" />
+                <div>
+                  <p className="font-semibold text-orange-50">{item.label}</p>
+                  <p className="text-orange-100/80 text-sm leading-relaxed">{item.value}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="rounded-xl border border-orange-400/30 bg-white/5 p-3 text-xs text-orange-100/85 space-y-2">
+            <p className="font-semibold text-orange-50">Clarity question</p>
+            <p>“Are you acting from clarity or from emotion right now?”</p>
+            <p className="font-semibold text-orange-50 pt-2">Neutral reasoning</p>
+            <ul className="list-disc list-inside space-y-1 text-orange-100/85">
+              {reasoningPrompts.map(line => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/80 border border-orange-500/20 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
+          <div className="flex items-center justify-between text-xs text-orange-100/80">
+            <span className="font-semibold text-orange-50">60-second guided script</span>
+            <span className="rounded-full bg-white/10 px-3 py-1">Live cues</span>
+          </div>
+          <ul className="space-y-2 text-sm text-orange-50/90">
+            {groundingSequence.map(step => (
+              <li key={step.time} className="flex gap-2">
+                <div className="min-w-[64px] text-xs font-semibold text-orange-300">{step.time}</div>
+                <div className="text-orange-100/85 leading-relaxed">{step.prompt}</div>
+              </li>
+            ))}
+          </ul>
+          <div className="rounded-xl border border-orange-400/25 bg-white/5 p-3 space-y-1 text-xs text-orange-100/85">
+            <p className="font-semibold text-orange-50">Close with grounded choice</p>
+            <ul className="list-disc list-inside space-y-1">
+              {closingChoices.map(choice => (
+                <li key={choice}>{choice}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-[#0c1012]/85 border border-emerald-200/20 p-4 shadow-[0_10px_36px_rgba(92,150,146,0.18)] space-y-2">
+            <div className="flex items-center justify-between text-xs text-emerald-50/80">
+              <span className="font-semibold text-emerald-50">Trigger detection system</span>
+              <span className="rounded-full bg-emerald-200/10 px-3 py-1 text-[11px]">Non-blocking</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-sm text-emerald-50/85">
+              {triggerSignals.map(signal => (
+                <li key={signal}>{signal}</li>
+              ))}
+            </ul>
+            <div className="rounded-lg border border-emerald-200/25 bg-black/40 p-3 text-[11px] text-emerald-50/80 leading-relaxed">
+              Confidence tiers: High (auto interrupt), Medium (offer pause), Low (log only). Designed to flag impulse while letting Kiaan continue normally.
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-[#0b0b10]/85 border border-orange-500/20 p-4 shadow-[0_10px_36px_rgba(255,115,39,0.14)] space-y-2">
+            <div className="flex items-center justify-between text-xs text-orange-100/80">
+              <span className="font-semibold text-orange-50">Calming animation + compatibility</span>
+              <span className="rounded-full bg-white/10 px-3 py-1">Builder notes</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-sm text-orange-100/85">
+              <li>Breathing orb: smooth expand/contract at ~6 breaths/min (5s inhale, 5s exhale).</li>
+              <li>Soft, low-contrast palette with ease-in/ease-out motion; no flashing.</li>
+              <li>Motion-reduction toggle with static “inhale/exhale” cues; optional haptic pulse on inhale.</li>
+              <li>API contract: input `user_message`, `context_intent_score`, `impulse_trigger_flags`; output `pass_through` or `pause_payload`.</li>
+              <li>Pause payload renders as overlay while Kiaan’s responses remain untouched.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   )
