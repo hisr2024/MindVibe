@@ -313,6 +313,69 @@ class TestWisdomKnowledgeBaseSearch:
         assert len(results) == 1
         assert results[0]["verse"].theme == "self_control"
 
+    @pytest.mark.asyncio
+    async def test_search_relevant_verses_matches_sample_themes(
+        self, test_db: AsyncSession
+    ):
+        """Ensure search returns matches for common wellbeing concerns."""
+
+        verses = [
+            WisdomVerse(
+                verse_id="9.1",
+                chapter=9,
+                verse_number=1,
+                theme="control_of_mind",
+                english="Calming the mind eases anxiety and reduces stress when focus returns to the present moment.",
+                hindi="मन को शांत करना चिंता और तनाव को कम करता है।",
+                sanskrit="",
+                context="Guidance for navigating anxiety by softening attachments and redirecting thoughts.",
+                mental_health_applications={
+                    "applications": ["anxiety_management", "stress_reduction"]
+                },
+            ),
+            WisdomVerse(
+                verse_id="9.2",
+                chapter=9,
+                verse_number=2,
+                theme="self_empowerment",
+                english="Steady discipline and self-belief reveal your purpose and inner direction.",
+                hindi="अनुशासन और आत्मविश्वास आपके उद्देश्य को स्पष्ट करते हैं।",
+                sanskrit="",
+                context="Encourages aligning actions with a meaningful purpose and trusting personal agency.",
+                mental_health_applications={
+                    "applications": ["self_empowerment", "purpose_alignment"]
+                },
+            ),
+            WisdomVerse(
+                verse_id="9.3",
+                chapter=9,
+                verse_number=3,
+                theme="inner_peace",
+                english="Like the still ocean, restful attention dissolves daily stress and restores balance.",
+                hindi="शांत सागर की तरह, विश्रांत ध्यान दैनिक तनाव को घुला देता है।",
+                sanskrit="",
+                context="Illustrates how grounded awareness steadies the mind during stressful times.",
+                mental_health_applications={"applications": ["stress_reduction"]},
+            ),
+        ]
+
+        test_db.add_all(verses)
+        await test_db.commit()
+
+        anxiety_results = await WisdomKnowledgeBase.search_relevant_verses(
+            test_db, "I feel anxiety and need to calm down", limit=1
+        )
+        purpose_results = await WisdomKnowledgeBase.search_relevant_verses(
+            test_db, "looking for purpose and direction", limit=1
+        )
+        stress_results = await WisdomKnowledgeBase.search_relevant_verses(
+            test_db, "overwhelmed by stress", limit=1
+        )
+
+        assert anxiety_results and anxiety_results[0]["verse"].verse_id == "9.1"
+        assert purpose_results and purpose_results[0]["verse"].verse_id == "9.2"
+        assert stress_results and stress_results[0]["verse"].verse_id == "9.3"
+
 
 class TestWisdomKnowledgeBaseFormatting:
     """Test verse formatting functionality."""
