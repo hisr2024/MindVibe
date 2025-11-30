@@ -10,6 +10,7 @@ Implements complete MindVibe AI Mental-Wellness Coach with 4-phase framework:
 """
 
 import datetime
+from typing import Any, Dict, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,6 +24,39 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 class ChatbotService:
     """Enhanced chatbot service with wisdom knowledge base integration."""
+
+    TEMPLATE_RESPONSES: Dict[str, List[str]] = {
+        "action_without_attachment": [
+            "I understand you're seeking guidance on taking action while managing expectations.",
+            "Focus on your effort and process, rather than worrying about outcomes.",
+            "Remember that you can control your actions, but not always the results.",
+        ],
+        "equanimity_in_adversity": [
+            "Maintaining stability and calm during difficult times is a valuable practice.",
+            "Finding peace within yourself, regardless of external circumstances, brings true strength.",
+            "Balance in both success and failure leads to greater emotional resilience.",
+        ],
+        "control_of_mind": [
+            "Awareness of your thought patterns is the first step toward managing them.",
+            "Observing your thoughts without judgment can help create mental space.",
+            "Practice brings gradual mastery over the fluctuations of the mind.",
+        ],
+        "self_empowerment": [
+            "You have the power to create change in your life.",
+            "Taking control starts with recognizing your own agency and capability.",
+            "Small steps toward empowerment build lasting confidence.",
+        ],
+        "mastering_the_mind": [
+            "Cultivating mental mastery is a journey that requires patience and practice.",
+            "The mind can be your greatest ally when properly understood and trained.",
+            "Regular practice and persistence lead to greater mental clarity.",
+        ],
+    }
+
+    GENERIC_SUPPORT_RESPONSE = (
+        "I understand what you're going through. While I don't have specific guidance at this "
+        "moment, know that seeking inner peace and clarity is a valuable journey."
+    )
 
     def __init__(self) -> None:
         """Initialize the chatbot service."""
@@ -91,40 +125,12 @@ class ChatbotService:
         Returns:
             Generated response text
         """
-        # Template responses based on themes
-        theme_templates = {
-            "action_without_attachment": [
-                "I understand you're seeking guidance on taking action while managing expectations.",
-                "Focus on your effort and process, rather than worrying about outcomes.",
-                "Remember that you can control your actions, but not always the results.",
-            ],
-            "equanimity_in_adversity": [
-                "Maintaining stability and calm during difficult times is a valuable practice.",
-                "Finding peace within yourself, regardless of external circumstances, brings true strength.",
-                "Balance in both success and failure leads to greater emotional resilience.",
-            ],
-            "control_of_mind": [
-                "Awareness of your thought patterns is the first step toward managing them.",
-                "Observing your thoughts without judgment can help create mental space.",
-                "Practice brings gradual mastery over the fluctuations of the mind.",
-            ],
-            "self_empowerment": [
-                "You have the power to create change in your life.",
-                "Taking control starts with recognizing your own agency and capability.",
-                "Small steps toward empowerment build lasting confidence.",
-            ],
-            "mastering_the_mind": [
-                "Cultivating mental mastery is a journey that requires patience and practice.",
-                "The mind can be your greatest ally when properly understood and trained.",
-                "Regular practice and persistence lead to greater mental clarity.",
-            ],
-        }
 
         # If we have verses, use theme-specific response
         if verses and len(verses) > 0:
             verse = verses[0]["verse"]
             theme = verse.theme
-            templates = theme_templates.get(
+            templates = self.TEMPLATE_RESPONSES.get(
                 theme,
                 [
                     "I hear what you're sharing. Let me offer some wisdom that might help.",
@@ -136,7 +142,7 @@ class ChatbotService:
             )
         else:
             # Generic supportive response when no verses found
-            base_response = "I understand what you're going through. While I don't have specific guidance at this moment, know that seeking inner peace and clarity is a valuable journey."
+            base_response = self.GENERIC_SUPPORT_RESPONSE
 
         return base_response
 
@@ -200,6 +206,31 @@ class ChatbotService:
             return self._generate_template_chat_response(message, verses, language)
 
         return response_text
+
+    def describe_response_instructions(self) -> Dict[str, Any]:
+        """Return a structured view of the chatbot's logical instructions.
+
+        This keeps static messaging paths transparent for debugging and
+        supports tests that need to assert which deterministic responses are
+        available without invoking any external AI services.
+        """
+
+        return {
+            "phases": {
+                "core_engine": "6-step response engine that crafts the main reply.",
+                "domain_mapping": "Routes the prompt into evidence-backed psychological domains.",
+                "safety": "Crisis detection, religious-term sanitization, and quality validation.",
+                "psychology": "Applies evidence-based psychology patterns where applicable.",
+            },
+            "template_responses": self.TEMPLATE_RESPONSES,
+            "generic_support": self.GENERIC_SUPPORT_RESPONSE,
+            "static_keys": [
+                "crisis_detected",
+                "validation_fallback",
+                "action_plan",
+                "psychology_pattern",
+            ],
+        }
 
     async def chat(
         self,
