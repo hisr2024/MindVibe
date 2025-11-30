@@ -83,8 +83,8 @@ export default function Home() {
               <PeaceLogo />
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
-                <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
-                <p className="text-lg md:text-xl text-orange-100/90">Calm Wisdom.</p>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
+                <p className="text-base sm:text-lg md:text-xl text-orange-100/90">Calm Wisdom.</p>
               </div>
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
@@ -101,11 +101,11 @@ export default function Home() {
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               onClick={() => document.getElementById('wisdom-chat-rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition w-full sm:w-auto text-center"
             >
               Wisdom Chat Rooms
             </button>
-            <div className="px-3 py-2 rounded-xl border border-orange-400/30 text-xs text-orange-100/80 bg-black/40">
+            <div className="px-3 py-2 rounded-xl border border-orange-400/30 text-xs text-orange-100/80 bg-black/40 w-full sm:w-auto text-center">
               Explore multiple guidance rooms in one place
             </div>
           </div>
@@ -163,7 +163,7 @@ function PeaceLogo() {
 
 function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: ReactElement }) {
   return (
-    <div className={`relative min-w-[180px] rounded-2xl border border-orange-400/25 bg-gradient-to-br ${gradient} p-3 shadow-[0_10px_45px_rgba(255,115,39,0.22)] overflow-hidden`}>
+    <div className={`relative min-w-[150px] sm:min-w-[180px] rounded-2xl border border-orange-400/25 bg-gradient-to-br ${gradient} p-3 shadow-[0_10px_45px_rgba(255,115,39,0.22)] overflow-hidden`}>
       <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-orange-400/30 blur-2xl" />
       <div className="flex items-center gap-3">
         <div className="h-12 w-12 rounded-xl bg-black/40 border border-orange-200/30 flex items-center justify-center text-2xl text-orange-100">
@@ -293,8 +293,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-2xl px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur">
-        <span className="relative flex h-3 w-3"> 
+      <div className="flex flex-col sm:flex-row items-center gap-3 text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-2xl px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur text-center sm:text-left">
+        <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
           <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400" />
         </span>
@@ -302,7 +302,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
-      <div ref={messageListRef} className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[400px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10">
+      <div ref={messageListRef} className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10">
         {messages.length === 0 && (
           <div className="text-center text-orange-100/70 py-20 md:py-32">
             <p className="text-6xl mb-4">✨</p>
@@ -332,7 +332,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         )}
       </div>
 
-      <div className="flex gap-3 relative">
+      <div className="flex gap-3 relative flex-col sm:flex-row">
         <input
           type="text"
           placeholder="Type your message..."
@@ -340,12 +340,12 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           onChange={e => setInput(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
           ref={inputRef}
-          className="flex-1 px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
+          className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="px-6 py-3 bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 hover:scale-105 disabled:from-zinc-700 disabled:via-zinc-700 disabled:to-zinc-700 rounded-xl font-semibold transition-all text-slate-950 shadow-lg shadow-orange-500/25"
+          className="px-6 py-3 bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 hover:scale-105 disabled:from-zinc-700 disabled:via-zinc-700 disabled:to-zinc-700 rounded-xl font-semibold transition-all text-slate-950 shadow-lg shadow-orange-500/25 w-full sm:w-auto"
         >
           Send
         </button>
@@ -528,7 +528,7 @@ function PublicChatRooms() {
         ))}
       </div>
 
-      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 h-[320px] overflow-y-auto shadow-inner shadow-orange-500/5">
+      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 min-h-[280px] max-h-[50vh] md:min-h-[320px] md:max-h-none overflow-y-auto shadow-inner shadow-orange-500/5">
         {activeMessages.map((msg, index) => (
           <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-orange-500/10 ${
@@ -546,19 +546,19 @@ function PublicChatRooms() {
 
       {alert && <p className="text-xs text-orange-200">{alert}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-col sm:flex-row">
         <input
           type="text"
           value={message}
           onChange={e => setMessage(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
           placeholder="Share something helpful for the room..."
-          className="flex-1 px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
+          className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
         />
         <button
           onClick={sendRoomMessage}
           disabled={!message.trim()}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20 w-full sm:w-auto"
         >
           Share warmly
         </button>
@@ -793,7 +793,7 @@ function Journal() {
             <button
               onClick={addEntry}
               disabled={!body.trim()}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 to-[#ffb347] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 to-[#ffb347] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20 w-full sm:w-auto"
             >
               Add Journal Entry
             </button>
