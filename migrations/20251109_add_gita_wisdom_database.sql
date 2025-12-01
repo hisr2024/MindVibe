@@ -75,7 +75,8 @@ BEGIN
         ADD CONSTRAINT fk_gita_verses_source FOREIGN KEY (source_id)
             REFERENCES gita_sources(id) ON DELETE SET NULL;
     END IF;
-END $$;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE INDEX IF NOT EXISTS idx_gita_verses_chapter ON gita_verses(chapter);
 CREATE INDEX IF NOT EXISTS idx_gita_verses_verse ON gita_verses(verse);
