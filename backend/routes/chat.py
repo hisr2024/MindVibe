@@ -12,6 +12,7 @@ from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError,
 
 from backend.deps import get_db
 from backend.middleware.feature_gates import require_feature
+from backend.security.rate_limiter import rate_limit
 from backend.services.analytics_service import AnalyticsService
 from backend.services.event_pipeline import EventPipeline
 from backend.services.gita_service import GitaService
@@ -206,7 +207,7 @@ async def start_session() -> Dict[str, Any]:
     }
 
 
-@router.post("/message")
+@router.post("/message", dependencies=[Depends(rate_limit(30, 60))])
 @require_feature("chat")
 async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     try:
@@ -239,6 +240,7 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
                     "version": "13.0",
                     "crisis": crisis_info,
                     "gita_powered": False,
+                    "crisis_redirected": True,
                 }
 
         response = await kiaan.generate_response_with_gita(message, db)
@@ -251,6 +253,7 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
             "model": "GPT-4",
             "gita_powered": True,
             "crisis": crisis_info,
+            "crisis_redirected": crisis_info.get("crisis_detected", False),
         }
     except Exception as e:
         logger.error(f"Error in send_message: {e}")

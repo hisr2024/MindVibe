@@ -14,7 +14,9 @@ print("🕉️  MINDVIBE - STARTUP SEQUENCE")
 print("="*80)
 
 # Set API key explicitly for this module
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+from backend.security.secret_manager import secret_manager
+
+OPENAI_API_KEY = secret_manager().get("OPENAI_API_KEY", "").strip()
 print(f"✅ OPENAI_API_KEY found: {bool(OPENAI_API_KEY)}")
 print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
 
@@ -42,6 +44,7 @@ from backend.middleware.feature_gates import PlanGateMiddleware
 from backend.middleware.rate_limit import global_rate_limit
 from backend.observability import setup_observability
 from backend.services.background_jobs import ensure_jobs_started
+from backend.services.data_retention import apply_retention_policies
 
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
     "1",
@@ -104,6 +107,9 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 @app.on_event("startup")
 async def startup():
     await ensure_base_schema(engine)
+
+    # Apply data retention safeguards before processing traffic
+    await apply_retention_policies(SessionLocal)
 
     try:
         if RUN_MIGRATIONS_ON_STARTUP:
@@ -197,6 +203,16 @@ try:
     print("✅ [SUCCESS] Karma Footprint router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Footprint router: {e}")
+
+# Load Compliance router
+print("\n[Compliance] Attempting to import Data Compliance router...")
+try:
+    from backend.routes.compliance import router as compliance_router
+
+    api_v1_router.include_router(compliance_router)
+    print("✅ [SUCCESS] Compliance router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Compliance router: {e}")
 
 # Load Guidance Engines router
 print("\n[Guidance Engines] Attempting to import Guidance router...")
