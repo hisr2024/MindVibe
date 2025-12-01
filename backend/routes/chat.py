@@ -11,7 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
+from backend.services.analytics_service import AnalyticsService
+from backend.services.event_pipeline import EventPipeline
 from backend.services.gita_service import GitaService
+from backend.services.safety_validator import SafetyValidator
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
 client = OpenAI(api_key=api_key) if api_key else None
@@ -31,6 +34,10 @@ try:
     logger.info("✅ Gita knowledge base loaded for KIAAN v13.0")
 except Exception as e:
     logger.warning(f"⚠️ Gita KB unavailable: {e}")
+
+analytics = AnalyticsService()
+event_pipeline = EventPipeline()
+safety_validator = SafetyValidator()
 
 
 class ChatMessage(BaseModel):
@@ -203,16 +210,44 @@ async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) ->
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
-        
+
+        crisis_info = safety_validator.detect_crisis(message)
+        analytics.track_user_engagement(user_id="anonymous", action="chat_message")
+        await event_pipeline.capture(
+            "chat_message",
+            user_id="anonymous",
+            properties={
+                "crisis_detected": crisis_info.get("crisis_detected"),
+                "crisis_types": crisis_info.get("crisis_types"),
+                "severity": crisis_info.get("severity"),
+            },
+        )
+
+        if crisis_info.get("crisis_detected"):
+            analytics.log_crisis_incident(
+                "anonymous", ",".join(crisis_info.get("crisis_types", [])) or "crisis"
+            )
+            crisis_response = safety_validator.generate_crisis_response(crisis_info)
+            if crisis_response:
+                return {
+                    "status": "escalated",
+                    "response": crisis_response,
+                    "bot": "KIAAN",
+                    "version": "13.0",
+                    "crisis": crisis_info,
+                    "gita_powered": False,
+                }
+
         response = await kiaan.generate_response_with_gita(message, db)
-        
+
         return {
             "status": "success",
             "response": response,
             "bot": "KIAAN",
             "version": "13.0",
             "model": "GPT-4",
-            "gita_powered": True
+            "gita_powered": True,
+            "crisis": crisis_info,
         }
     except Exception as e:
         logger.error(f"Error in send_message: {e}")

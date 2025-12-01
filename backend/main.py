@@ -202,6 +202,16 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
 
+# Load Analytics router
+print("\n[Analytics] Attempting to import Analytics router...")
+try:
+    from backend.routes.analytics import router as analytics_router
+
+    app.include_router(analytics_router)
+    print("✅ [SUCCESS] Analytics router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Analytics router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
