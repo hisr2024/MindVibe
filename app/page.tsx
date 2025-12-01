@@ -2552,7 +2552,7 @@ function Journal() {
             {entries.map(entry => (
               <li key={entry.id} className="p-4 rounded-2xl bg-black/60 border border-orange-800/40">
                 <div className="flex items-center justify-between text-xs text-orange-100/70">
-                  <span>{new Date(entry.at).toLocaleString()}</span>
+                  <span suppressHydrationWarning>{new Date(entry.at).toLocaleString()}</span>
                   <span className="px-2 py-1 rounded-lg bg-orange-900/50 text-orange-100 border border-orange-700 text-[11px]">{entry.mood}</span>
                 </div>
                 {entry.title && <div className="mt-1 font-semibold text-orange-50">{entry.title}</div>}
