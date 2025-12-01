@@ -976,7 +976,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+       const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content })
