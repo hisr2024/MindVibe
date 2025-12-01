@@ -15,7 +15,7 @@ from backend.security.rate_limiter import rate_limit
 from backend.security.rbac import Role, require_roles
 from backend.services.stripe_service import create_subscription
 
-router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
+router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
 
 class PlanCreate(BaseModel):

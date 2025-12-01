@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db
 from backend.models import GitaVerse
 
-router = APIRouter(prefix="/api/gita", tags=["gita"])
+router = APIRouter(prefix="/gita", tags=["gita"])
 
 
 # Request/Response Schemas
