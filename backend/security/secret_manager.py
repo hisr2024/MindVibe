@@ -48,6 +48,12 @@ class SecretManager:
         self.namespace = self.config.namespace
         self._client = None
         if self.config.provider == "aws":
+            if not self.config.region:
+                logger.warning(
+                    "secret_manager_disabled_missing_region",
+                    extra={"provider": self.config.provider},
+                )
+                return
             self._client = boto3.client("secretsmanager", region_name=self.config.region)
 
     @property

@@ -43,3 +43,11 @@ def test_get_secret_logs_redacted_identifier(log_handler):
     record = log_handler.records[0]
     assert getattr(record, "secret_id", None) == "pr***/key"
     assert "api/key" not in str(record.__dict__)
+
+
+def test_aws_secret_manager_disabled_without_region(log_handler):
+    manager = SecretManager(SecretManagerConfig(provider="aws", region=None, namespace="prod/"))
+
+    assert manager.enabled is False
+    assert log_handler.records, "expected a warning when region is missing"
+    assert log_handler.records[0].msg == "secret_manager_disabled_missing_region"
