@@ -158,7 +158,9 @@ class JournalAttachment(SoftDeleteMixin, Base):
     media_type: Mapped[str] = mapped_column(String(128))
     storage_path: Mapped[str] = mapped_column(String(512))
     encryption_key_id: Mapped[str] = mapped_column(String(64))
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # "metadata" is reserved in SQLAlchemy's Declarative API; keep the column name but
+    # expose it via a safe attribute name.
+    attachment_metadata: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
