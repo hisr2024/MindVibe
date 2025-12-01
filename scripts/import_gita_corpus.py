@@ -47,15 +47,12 @@ def normalize(v: dict[str, Any]) -> dict[str, Any]:
     return v
 
 
-def upsert_verses(
-    conn: psycopg2.extensions.connection, verses: list[dict[str, Any]]
-) -> None:
-    """Upsert verses into the gita_verses table.
+def ensure_unique_constraint(conn: psycopg2.extensions.connection) -> None:
+    """Ensure the unique constraint on (chapter, verse) exists.
 
-    Note: This requires a UNIQUE constraint on (chapter, verse) to work properly.
-    If the constraint doesn't exist, this will insert duplicates instead of updating.
+    This is a one-time setup that should ideally be in a migration,
+    but is included here for robustness during imports.
     """
-    # First, ensure the unique constraint exists
     ensure_unique_constraint_sql = """
     DO $$
     BEGIN
@@ -68,7 +65,18 @@ def upsert_verses(
         END IF;
     END $$;
     """
+    with conn.cursor() as cur:
+        cur.execute(ensure_unique_constraint_sql)
+    conn.commit()
 
+
+def upsert_verses(
+    conn: psycopg2.extensions.connection, verses: list[dict[str, Any]]
+) -> None:
+    """Upsert verses into the gita_verses table.
+
+    Note: Requires ensure_unique_constraint() to be called first.
+    """
     sql = """
     INSERT INTO gita_verses
       (chapter, verse, sanskrit, transliteration, hindi, english,
@@ -101,8 +109,6 @@ def upsert_verses(
             )
         )
     with conn.cursor() as cur:
-        # Ensure unique constraint exists for ON CONFLICT to work
-        cur.execute(ensure_unique_constraint_sql)
         execute_batch(cur, sql, params, page_size=500)
     conn.commit()
 
@@ -118,27 +124,31 @@ def main() -> None:
         raise SystemExit("DATABASE_URL environment variable is required")
 
     conn = psycopg2.connect(database_url)
+    try:
+        # Ensure unique constraint for ON CONFLICT to work
+        ensure_unique_constraint(conn)
 
-    total, invalid = 0, 0
-    for f in chapter_files:
-        verses = load_chapter_file(f)
-        valid_batch: list[dict[str, Any]] = []
-        for v in verses:
-            total += 1
-            v = normalize(v)
-            ok, errs = validate_verse_shape(v)
-            if not ok:
-                invalid += 1
-                print(
-                    f"[INVALID] {v.get('chapter')}.{v.get('verse')} in {f.name}: {errs}"
-                )
-            else:
-                valid_batch.append(v)
-        if valid_batch:
-            upsert_verses(conn, valid_batch)
+        total, invalid = 0, 0
+        for f in chapter_files:
+            verses = load_chapter_file(f)
+            valid_batch: list[dict[str, Any]] = []
+            for v in verses:
+                total += 1
+                v = normalize(v)
+                ok, errs = validate_verse_shape(v)
+                if not ok:
+                    invalid += 1
+                    print(
+                        f"[INVALID] {v.get('chapter')}.{v.get('verse')} in {f.name}: {errs}"
+                    )
+                else:
+                    valid_batch.append(v)
+            if valid_batch:
+                upsert_verses(conn, valid_batch)
 
-    conn.close()
-    print(f"Processed: {total}, invalid: {invalid}")
+        print(f"Processed: {total}, invalid: {invalid}")
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":

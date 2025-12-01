@@ -57,8 +57,11 @@ def main() -> None:
             continue
         try:
             verses = json.loads(file.read_text(encoding="utf-8"))
-        except Exception as exc:
+        except json.JSONDecodeError as exc:
             errors.append(f"Invalid JSON in {file}: {exc}")
+            continue
+        except OSError as exc:
+            errors.append(f"Error reading {file}: {exc}")
             continue
 
         expected = CHAPTER_VERSE_COUNTS[ch]
