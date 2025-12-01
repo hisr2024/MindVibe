@@ -31,6 +31,13 @@ from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.models import Base
 from backend.db_utils import build_database_url
 
+RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
+)
+
 DATABASE_URL = build_database_url()
 
 engine = create_async_engine(DATABASE_URL, echo=False)
