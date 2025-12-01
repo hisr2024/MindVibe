@@ -37,6 +37,23 @@ class User(SoftDeleteMixin, Base):
     )
 
 
+class Work(SoftDeleteMixin, Base):
+    __tablename__ = "works"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str] = mapped_column(String(256))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
 class UserProfile(SoftDeleteMixin, Base):
     __tablename__ = "user_profiles"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
