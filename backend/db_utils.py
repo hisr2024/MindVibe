@@ -59,12 +59,12 @@ async def ensure_base_schema(engine: AsyncEngine) -> None:
     the SQL migrations don't fail with missing foreign key targets.
     """
 
-    async with engine.connect() as connection:
-        inspector = inspect(connection)
-        tables = set(inspector.get_table_names())
+    async with engine.begin() as connection:
+        tables = await connection.run_sync(
+            lambda sync_conn: set(inspect(sync_conn).get_table_names())
+        )
 
         if "users" in tables:
             return
 
-        async with connection.begin():
-            await connection.run_sync(Base.metadata.create_all)
+        await connection.run_sync(Base.metadata.create_all)
