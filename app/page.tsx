@@ -1055,6 +1055,20 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
   }
 
+  function scrollChatToTop() {
+    const container = messageListRef.current
+    if (!container) return
+
+    container.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function scrollChatToBottom() {
+    const container = messageListRef.current
+    if (!container) return
+
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  }
+
   function handleMessageListScroll() {
     const container = messageListRef.current
     if (!container) return
@@ -1337,6 +1351,21 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
+      <div className="flex justify-end gap-2 text-xs text-orange-100/80">
+        <button
+          onClick={scrollChatToTop}
+          className="rounded-full border border-orange-400/40 bg-white/10 px-3 py-1 font-semibold text-orange-50 shadow-[0_6px_20px_rgba(255,179,71,0.18)] hover:border-orange-300/70"
+        >
+          Scroll up
+        </button>
+        <button
+          onClick={scrollChatToBottom}
+          className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-50 shadow-[0_6px_20px_rgba(92,150,146,0.22)] hover:border-emerald-200/60"
+        >
+          Scroll down
+        </button>
+      </div>
+
       <div className="relative">
         <div
           ref={messageListRef}
@@ -1359,9 +1388,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                   : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
               }`}>
                 {msg.role === 'assistant' ? (
-                  <div className="max-h-[45vh] overflow-y-auto pr-1 chat-scrollbar">
-                    {renderAssistantContent(msg.content, i)}
-                  </div>
+                  renderAssistantContent(msg.content, i)
                 ) : (
                   <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                 )}
@@ -1396,33 +1423,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                   {journalNotice}
                 </span>
               )}
-            </div>
-          </div>
-        )}
-
-        {messages.length > 0 && (
-          <div className="mt-4 space-y-2 rounded-2xl border border-orange-500/20 bg-[#0c0f12]/80 px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.14)] backdrop-blur">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-orange-50">Earlier KIAAN chats</p>
-                <p className="text-xs text-orange-100/70">Scroll through previous exchanges without losing your place.</p>
-              </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-orange-100/80 border border-orange-400/30">History</span>
-            </div>
-
-            <div className="max-h-56 overflow-y-auto pr-1 chat-scrollbar space-y-2 scroll-stable">
-              {messages.map((msg, idx) => (
-                <div
-                  key={`history-${idx}-${msg.role}`}
-                  className="rounded-xl border border-orange-500/20 bg-black/40 px-3 py-2 text-orange-50/90"
-                >
-                  <div className="flex items-center justify-between text-[11px] text-orange-100/70">
-                    <span className="font-semibold text-orange-50">{msg.role === 'user' ? 'You' : 'KIAAN'}</span>
-                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-orange-100/70">#{idx + 1}</span>
-                  </div>
-                  <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap text-orange-50/90">{previewMessage(msg.content)}</p>
-                </div>
-              ))}
             </div>
           </div>
         )}
