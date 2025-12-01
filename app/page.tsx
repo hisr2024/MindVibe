@@ -81,9 +81,9 @@ function previewMessage(content: string, limit = 200) {
 
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
-    if (typeof window === 'undefined') return initial
+    if (typeof window === 'undefined') return initial  // ← This line is CRITICAL
     try {
-      const item = window.localStorage.getItem(key)
+      const item = window. localStorage.getItem(key)
       return item ? JSON.parse(item) : initial
     } catch {
       return initial
@@ -91,8 +91,9 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   })
 
   useEffect(() => {
+    if (typeof window === 'undefined') return  // ← Also important
     try {
-      window.localStorage.setItem(key, JSON.stringify(state))
+      window. localStorage.setItem(key, JSON.stringify(state))
     } catch {}
   }, [key, state])
 
