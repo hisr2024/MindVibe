@@ -128,7 +128,7 @@ async def ensure_jobs_started(session_factory: Optional[async_sessionmaker] = No
     await orchestrator.start(session_factory)
 
 
-async def enqueue_journal_summary(entry_id: int, user_id: int) -> None:
+async def enqueue_journal_summary(entry_id: int, user_id: str) -> None:
     payload = {"entry_id": entry_id, "user_id": user_id}
     if settings.USE_CELERY:
         dispatch_async_task("journal_summary", payload)

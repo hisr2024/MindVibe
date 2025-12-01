@@ -12,7 +12,7 @@ router = APIRouter(prefix="/live", tags=["realtime"])
 
 
 @router.websocket("/journal/{user_id}")
-async def journal_stream(websocket: WebSocket, user_id: int) -> None:
+async def journal_stream(websocket: WebSocket, user_id: str) -> None:
     await manager.connect(user_id, websocket)
     try:
         await manager.broadcast(
@@ -46,6 +46,6 @@ async def journal_stream(websocket: WebSocket, user_id: int) -> None:
 
 
 @router.get("/status/{user_id}")
-async def live_status(user_id: int) -> Dict[str, Any]:
+async def live_status(user_id: str) -> Dict[str, Any]:
     connections = await manager.active_count(user_id)
     return {"user_id": user_id, "active_connections": connections}

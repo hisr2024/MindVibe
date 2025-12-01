@@ -17,7 +17,7 @@ def upgrade() -> None:
         "refresh_tokens",
         sa.Column("id", sa.String(length=64), primary_key=True),
         sa.Column(
-            "user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+            "user_id", sa.String(length=64), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
         ),
         sa.Column(
             "session_id",

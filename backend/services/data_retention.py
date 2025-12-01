@@ -50,7 +50,7 @@ async def _expire_old_profiles(session: AsyncSession, cutoff: datetime) -> None:
         logger.warning("user_profiles_expired", extra={"count": result.rowcount})
 
 
-async def export_user_bundle(user_id: int, session: AsyncSession) -> dict:
+async def export_user_bundle(user_id: str, session: AsyncSession) -> dict:
     """Return decrypted user bundle for export."""
 
     manager = EncryptionManager()
@@ -87,7 +87,7 @@ async def export_user_bundle(user_id: int, session: AsyncSession) -> dict:
     }
 
 
-async def delete_user_bundle(user_id: int, session: AsyncSession) -> dict:
+async def delete_user_bundle(user_id: str, session: AsyncSession) -> dict:
     """Soft-delete user and related data for privacy compliance."""
 
     profile_stmt = (

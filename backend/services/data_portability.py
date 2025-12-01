@@ -8,7 +8,7 @@ from backend.models import JournalEntry, User
 from backend.security.encryption import decrypt_sensitive
 
 
-async def export_user_data(db: AsyncSession, user_id: int) -> dict:
+async def export_user_data(db: AsyncSession, user_id: str) -> dict:
     entries_stmt = select(JournalEntry).where(
         JournalEntry.user_id == user_id, JournalEntry.deleted_at.is_(None)
     )
@@ -31,7 +31,7 @@ async def export_user_data(db: AsyncSession, user_id: int) -> dict:
     return {"entries": materialized}
 
 
-async def anonymize_user(db: AsyncSession, user_id: int) -> None:
+async def anonymize_user(db: AsyncSession, user_id: str) -> None:
     await db.execute(
         update(User)
         .where(User.id == user_id)

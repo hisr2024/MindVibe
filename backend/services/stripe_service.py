@@ -40,7 +40,7 @@ gateway = StripeGateway(settings.STRIPE_SECRET_KEY)
 
 
 async def ensure_customer(
-    db: AsyncSession, user_id: int, email: str | None
+    db: AsyncSession, user_id: str, email: str | None
 ) -> StripeCustomer:
     existing = await db.execute(select(StripeCustomer).where(StripeCustomer.user_id == user_id))
     customer = existing.scalars().first()
@@ -56,7 +56,7 @@ async def ensure_customer(
 
 
 async def create_subscription(
-    db: AsyncSession, user_id: int, plan_code: str, metadata: dict[str, Any] | None = None
+    db: AsyncSession, user_id: str, plan_code: str, metadata: dict[str, Any] | None = None
 ) -> Subscription:
     plan_result = await db.execute(
         select(SubscriptionPlan).where(
