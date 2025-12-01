@@ -5,6 +5,11 @@ from __future__ import annotations
 import os
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
+from sqlalchemy import inspect
+from sqlalchemy.ext.asyncio import AsyncEngine
+
+from backend.models import Base
+
 DEFAULT_DATABASE_URL = "postgresql+asyncpg://navi:navi@db:5432/navi"
 
 
@@ -41,4 +46,25 @@ def build_database_url() -> str:
     return urlunparse(parsed._replace(query=normalized_query))
 
 
-__all__ = ["build_database_url", "DEFAULT_DATABASE_URL"]
+__all__ = ["build_database_url", "DEFAULT_DATABASE_URL", "ensure_base_schema"]
+
+
+async def ensure_base_schema(engine: AsyncEngine) -> None:
+    """Create core tables if they are missing.
+
+    The lightweight SQL migrations expect foundational tables like ``users`` to
+    exist. In some deployment environments (e.g., preview apps or fresh
+    databases) the startup hook may run before Alembic has initialized the
+    schema. We defensively ensure the declarative metadata has been created so
+    the SQL migrations don't fail with missing foreign key targets.
+    """
+
+    async with engine.connect() as connection:
+        inspector = inspect(connection)
+        tables = set(inspector.get_table_names())
+
+        if "users" in tables:
+            return
+
+        async with connection.begin():
+            await connection.run_sync(Base.metadata.create_all)

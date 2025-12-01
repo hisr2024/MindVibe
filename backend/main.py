@@ -35,8 +35,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.core.logging import configure_logging, log_request
-from backend.models import Base
-from backend.db_utils import build_database_url
+from backend.db_utils import build_database_url, ensure_base_schema
 from backend.services.background_jobs import ensure_jobs_started
 
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
@@ -90,8 +89,7 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    await ensure_base_schema(engine)
 
     try:
         if RUN_MIGRATIONS_ON_STARTUP:
