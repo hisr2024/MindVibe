@@ -9,7 +9,7 @@ ALTER TABLE users
 CREATE TABLE IF NOT EXISTS journal_entries (
     id SERIAL PRIMARY KEY,
     entry_uuid VARCHAR(64) UNIQUE NOT NULL,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(128) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title_ciphertext TEXT NOT NULL,
     content_ciphertext TEXT NOT NULL,
     encryption_key_id VARCHAR(64) NOT NULL,
