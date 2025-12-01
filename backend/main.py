@@ -66,6 +66,7 @@ api_v1_router = APIRouter(prefix=API_V1_PREFIX)
 
 configure_logging()
 setup_observability(app)
+register_exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
