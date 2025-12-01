@@ -1,14 +1,15 @@
 CREATE TABLE IF NOT EXISTS refresh_tokens (
-    id UUID PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    id VARCHAR(64) PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    session_id VARCHAR(64) NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
     token_hash TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ NOT NULL,
     rotated_at TIMESTAMPTZ,
     revoked_at TIMESTAMPTZ,
-    parent_id UUID REFERENCES refresh_tokens(id) ON DELETE SET NULL,
-    reuse_detected BOOLEAN NOT NULL DEFAULT FALSE
+    parent_id VARCHAR(64) REFERENCES refresh_tokens(id) ON DELETE SET NULL,
+    reuse_detected BOOLEAN NOT NULL DEFAULT FALSE,
+    rotated_to_id VARCHAR(64)
 );
 
 -- Indexes to optimize common queries

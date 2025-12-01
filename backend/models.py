@@ -243,4 +243,8 @@ class RefreshToken(Base):
     revoked_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
+    parent_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("refresh_tokens.id", ondelete="SET NULL"), nullable=True
+    )
+    reuse_detected: Mapped[bool] = mapped_column(Boolean, default=False)
     rotated_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
