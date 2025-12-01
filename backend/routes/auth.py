@@ -13,6 +13,8 @@ from backend.security.jwt import create_access_token, decode_access_token
 from backend.security.password_hash import hash_password, verify_password
 from backend.security.password_policy import policy
 from backend.security.rate_limiter import rate_limit
+from backend.services.analytics_service import analytics_service
+from backend.services.email import email_client
 from backend.services.refresh_service import (
     create_refresh_token,
     get_refresh_token_by_raw,
@@ -224,6 +226,17 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(user)
 
+    await analytics_service.record_event(
+        db,
+        event="user_signup",
+        user_id=str(user.id),
+        source="auth",
+        properties={"email": user.email, "email_verified": False},
+    )
+
+    if user.email:
+        await email_client.send_verification_email(to=user.email, token=verification_token, db=db)
+
     return SignupOut(user_id=user.id, email=user.email, policy_passed=True)
 
 
@@ -280,6 +293,15 @@ async def login(
         samesite="strict",
         path="/api/auth",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
+    await analytics_service.record_event(
+        db,
+        event="user_login",
+        user_id=str(user.id),
+        session_id=str(session.id),
+        source="auth",
+        properties={"method": "password", "two_factor": bool(user.two_factor_enabled)},
     )
 
     return LoginOut(
@@ -572,6 +594,14 @@ async def verify_email(payload: VerifyEmailIn, db: AsyncSession = Depends(get_db
         .values(email_verified=True, verification_token=None)
     )
     await db.commit()
+
+    await analytics_service.record_event(
+        db,
+        event="email_verified",
+        user_id=str(user.id),
+        source="auth",
+        properties={"method": "token", "email": user.email},
+    )
     return {"user_id": user.id, "email_verified": True}
 
 
@@ -591,6 +621,23 @@ async def request_magic_link(payload: MagicLinkRequest, db: AsyncSession = Depen
         .values(magic_link_token=token, magic_link_expires_at=expiry)
     )
     await db.commit()
+
+    await analytics_service.record_event(
+        db,
+        event="magic_link_requested",
+        user_id=str(user.id),
+        source="auth",
+        properties={"email": user.email, "expires_at": expiry.isoformat()},
+    )
+
+    if user.email:
+        await email_client.send_magic_link(
+            to=user.email,
+            token=token,
+            expires_at=expiry,
+            db=db,
+        )
+
     return {"user_id": user.id, "magic_link_token": token, "expires_at": expiry.isoformat()}
 
 
@@ -627,6 +674,15 @@ async def magic_link_login(
         samesite="strict",
         path="/api/auth",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
+    await analytics_service.record_event(
+        db,
+        event="user_login",
+        user_id=str(user.id),
+        session_id=str(session.id),
+        source="auth",
+        properties={"method": "magic_link"},
     )
 
     return LoginOut(
