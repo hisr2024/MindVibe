@@ -413,3 +413,33 @@ class SubscriptionEvent(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
+
+
+class AnalyticsEvent(Base):
+    __tablename__ = "analytics_events"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
+    session_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    event_name: Mapped[str] = mapped_column(String(128), index=True)
+    source: Mapped[str] = mapped_column(String(64), default="client", index=True)
+    properties: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+
+
+class EmailNotification(Base):
+    __tablename__ = "email_notifications"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    recipient: Mapped[str] = mapped_column(String(256), index=True)
+    template: Mapped[str] = mapped_column(String(64), index=True)
+    subject: Mapped[str] = mapped_column(String(256))
+    payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="queued", index=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sent_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
