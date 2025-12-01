@@ -80,22 +80,35 @@ function previewMessage(content: string, limit = 200) {
 }
 
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
-  const [state, setState] = useState<T>(() => {
-    if (typeof window === 'undefined') return initial  // ← This line is CRITICAL
-    try {
-      const item = window. localStorage.getItem(key)
-      return item ? JSON.parse(item) : initial
-    } catch {
-      return initial
-    }
-  })
+  // Always start with initial value to match SSR
+  const [state, setState] = useState<T>(initial)
+  const [mounted, setMounted] = useState(false)
 
+  // Load from localStorage only after client mount
   useEffect(() => {
-    if (typeof window === 'undefined') return  // ← Also important
+    setMounted(true)
+    if (typeof window === 'undefined') return
+    
     try {
-      window. localStorage.setItem(key, JSON.stringify(state))
-    } catch {}
-  }, [key, state])
+      const item = window.localStorage.getItem(key)
+      if (item) {
+        setState(JSON.parse(item))
+      }
+    } catch {
+      // Silently fail
+    }
+  }, [key])
+
+  // Save to localStorage only after mount
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return
+    
+    try {
+      window.localStorage.setItem(key, JSON.stringify(state))
+    } catch {
+      // Silently fail
+    }
+  }, [key, state, mounted])
 
   return [state, setState]
 }
@@ -403,7 +416,7 @@ function ArdhaReframer() {
         >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Ardha’s response</span>
-            <span>{new Date(result.requestedAt).toLocaleString()}</span>
+            <span suppressHydrationWarning>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
         </div>
@@ -510,7 +523,7 @@ function ViyogDetachmentCoach() {
         >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Viyog’s response</span>
-            <span>{new Date(result.requestedAt).toLocaleString()}</span>
+            <span suppressHydrationWarning>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
         </div>
@@ -626,7 +639,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
             <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
               <div className="flex items-center justify-between text-xs text-orange-100/70">
                 <span className="font-semibold text-orange-50">Relationship Compass response</span>
-                <span>{new Date(result.requestedAt).toLocaleString()}</span>
+                <span suppressHydrationWarning>{new Date(result.requestedAt).toLocaleString()}</span>
               </div>
               <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
             </div>
@@ -2078,7 +2091,7 @@ function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void })
           <span className="text-3xl">💎</span>
           <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Today's Wisdom</h2>
         </div>
-        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
+        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1" suppressHydrationWarning>{new Date().toLocaleDateString()}</div>
       </div>
 
       <blockquote className="relative text-lg text-orange-50 mb-4 italic leading-relaxed bg-white/5 border border-orange-200/15 rounded-2xl p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
@@ -2209,7 +2222,7 @@ function PublicChatRooms() {
             }`}>
               <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
               <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
+              <p className="text-[11px] text-orange-100/70 mt-1" suppressHydrationWarning>{new Date(msg.at).toLocaleTimeString()}</p>
             </div>
           </div>
         ))}
@@ -2449,8 +2462,12 @@ function Journal() {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          <StatusPill label={encryptionReady ? 'AES-GCM secured locally' : 'Preparing encryption lock'} tone={encryptionReady ? 'ok' : 'warn'} />
-          <StatusPill label={isOnline ? 'Offline-ready: saves on device' : 'Offline mode: stored on this device'} tone={isOnline ? 'ok' : 'warn'} />
+          {typeof window !== 'undefined' && (
+            <>
+              <StatusPill label={encryptionReady ? 'AES-GCM secured locally' : 'Preparing encryption lock'} tone={encryptionReady ? 'ok' : 'warn'} />
+              <StatusPill label={isOnline ? 'Offline-ready: saves on device' : 'Offline mode: stored on this device'} tone={isOnline ? 'ok' : 'warn'} />
+            </>
+          )}
         </div>
 
         <div className="mt-4 space-y-2">
