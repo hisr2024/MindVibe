@@ -3,7 +3,7 @@
 import os
 import sys
 import traceback
-from typing import Dict, Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict
 
 # CRITICAL: Load environment variables BEFORE anything else
 from dotenv import load_dotenv
@@ -22,15 +22,21 @@ print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
 if OPENAI_API_KEY:
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from backend.core.migrations import apply_sql_migrations
+from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.models import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
+RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
@@ -79,11 +85,19 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
     try:
-        applied = await apply_sql_migrations(engine)
-        if applied:
-            print(f"✅ Applied SQL migrations: {', '.join(applied)}")
+        if RUN_MIGRATIONS_ON_STARTUP:
+            migration_result = await apply_sql_migrations(engine)
+            if migration_result.applied:
+                print(f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}")
+            else:
+                print("ℹ️ No new SQL migrations to apply")
         else:
-            print("ℹ️ No new SQL migrations to apply")
+            migration_result = await get_migration_status(engine)
+            if migration_result.pending:
+                print("⚠️ RUN_MIGRATIONS_ON_STARTUP disabled; pending migrations detected")
+                print(f"   Pending: {', '.join(migration_result.pending)}")
+            else:
+                print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
     except Exception as exc:
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
         raise
@@ -166,6 +180,41 @@ print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
 
+
+async def _assert_migrations_healthy() -> dict[str, Any]:
+    """Ensure migrations are applied; raise HTTP 503 if not."""
+
+    migration_status = await get_migration_status(engine)
+    if migration_status.error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "reason": "migration_failed",
+                "message": migration_status.error,
+                "failed_file": migration_status.failed_file,
+                "failed_statement": migration_status.failed_statement,
+                "current_revision": migration_status.current_revision,
+            },
+        )
+
+    if migration_status.pending:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "reason": "migrations_pending",
+                "message": "Pending migrations detected; service unavailable until applied.",
+                "pending": migration_status.pending,
+                "current_revision": migration_status.current_revision,
+                "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+            },
+        )
+
+    return {
+        "current_revision": migration_status.current_revision,
+        "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+    }
+
+
 @app.get("/")
 async def root() -> Dict[str, Any]:
     return {
@@ -177,21 +226,25 @@ async def root() -> Dict[str, Any]:
 
 @app.get("/health")
 async def health() -> Dict[str, Any]:
+    migration_state = await _assert_migrations_healthy()
     return {
         "status": "healthy",
         "service": "mindvibe-api",
         "version": "1.0.0",
-        "kiaan_ready": kiaan_router_loaded
+        "kiaan_ready": kiaan_router_loaded,
+        "migration": migration_state,
     }
 
 @app.get("/api/health")
 async def api_health() -> Dict[str, Any]:
+    migration_state = await _assert_migrations_healthy()
     return {
         "status": "operational" if kiaan_router_loaded else "degraded",
         "service": "MindVibe AI - KIAAN",
         "version": "1.0.0",
         "chat_ready": kiaan_router_loaded,
-        "openai_key_present": bool(OPENAI_API_KEY)
+        "openai_key_present": bool(OPENAI_API_KEY),
+        "migration": migration_state,
     }
 
 @app.options("/{full_path:path}")

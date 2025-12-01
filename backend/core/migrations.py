@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
@@ -9,6 +11,21 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 MIGRATIONS_PATH = Path(__file__).resolve().parents[2] / "migrations"
+
+
+@dataclass
+class MigrationResult:
+    """Summary of the last migration attempt."""
+
+    applied: list[str]
+    pending: list[str]
+    current_revision: str | None = None
+    error: str | None = None
+    failed_statement: str | None = None
+    failed_file: str | None = None
+
+
+LATEST_MIGRATION_RESULT: MigrationResult | None = None
 
 
 async def _ensure_migrations_table(engine: AsyncEngine) -> None:
@@ -46,11 +63,66 @@ def _statements(sql_text: str) -> Iterable[str]:
             yield statement
 
 
-async def apply_sql_migrations(engine: AsyncEngine) -> list[str]:
-    """Apply .sql migrations in order and return the list applied."""
+def _capture_alembic_current() -> str | None:
+    """Return the output of ``alembic current`` to aid debugging."""
+
+    try:
+        result = subprocess.run(
+            ["alembic", "current"], capture_output=True, text=True, check=False
+        )
+    except FileNotFoundError:
+        return "alembic not installed"
+
+    output = result.stdout.strip() or result.stderr.strip()
+    if result.returncode != 0:
+        return f"alembic current failed (code {result.returncode}): {output}" or None
+    return output or None
+
+
+def _record_result(result: MigrationResult) -> None:
+    global LATEST_MIGRATION_RESULT
+    LATEST_MIGRATION_RESULT = result
+
+
+async def get_migration_status(engine: AsyncEngine) -> MigrationResult:
+    """Return the migration status without mutating the database."""
+
+    await _ensure_migrations_table(engine)
+    applied_files = await _fetch_applied(engine)
+    pending = [path.name for path in _sql_files() if path.name not in applied_files]
+
+    cached_error = LATEST_MIGRATION_RESULT.error if LATEST_MIGRATION_RESULT else None
+    cached_failed_statement = (
+        LATEST_MIGRATION_RESULT.failed_statement if LATEST_MIGRATION_RESULT else None
+    )
+    cached_failed_file = (
+        LATEST_MIGRATION_RESULT.failed_file if LATEST_MIGRATION_RESULT else None
+    )
+
+    status = MigrationResult(
+        applied=sorted(applied_files),
+        pending=pending,
+        current_revision=_capture_alembic_current(),
+        error=cached_error,
+        failed_statement=cached_failed_statement,
+        failed_file=cached_failed_file,
+    )
+    _record_result(status)
+    return status
+
+
+async def apply_sql_migrations(engine: AsyncEngine) -> MigrationResult:
+    """Apply .sql migrations in order and return the result summary."""
+
     await _ensure_migrations_table(engine)
     applied = await _fetch_applied(engine)
-    newly_applied: list[str] = []
+    pending = [path.name for path in _sql_files() if path.name not in applied]
+
+    result = MigrationResult(
+        applied=[],
+        pending=pending,
+        current_revision=_capture_alembic_current(),
+    )
 
     for path in _sql_files():
         if path.name in applied:
@@ -59,14 +131,28 @@ async def apply_sql_migrations(engine: AsyncEngine) -> list[str]:
         sql_text = path.read_text()
         async with engine.begin() as conn:
             for statement in _statements(sql_text):
-                await conn.execute(text(statement))
+                try:
+                    await conn.execute(text(statement))
+                except Exception as exc:  # pragma: no cover - defensive logging
+                    result.error = f"Failed to apply {path.name}: {exc}"
+                    result.failed_statement = statement
+                    result.failed_file = path.name
+                    _record_result(result)
+                    print("❌ [MIGRATIONS] Error executing SQL statement")
+                    print(f"   File: {path.name}")
+                    print(f"   Statement: {statement}")
+                    print(f"   Current revision: {result.current_revision}")
+                    raise
             await conn.execute(
                 text("INSERT INTO schema_migrations (filename) VALUES (:filename)"),
                 {"filename": path.name},
             )
-        newly_applied.append(path.name)
+        result.applied.append(path.name)
 
-    return newly_applied
+    # refresh pending list after applying
+    result.pending = [path.name for path in _sql_files() if path.name not in applied.union(set(result.applied))]
+    _record_result(result)
+    return result
 
 
-__all__ = ["apply_sql_migrations"]
+__all__ = ["apply_sql_migrations", "get_migration_status", "MigrationResult"]
