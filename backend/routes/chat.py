@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
+from backend.middleware.feature_gates import require_feature
 from backend.services.analytics_service import AnalyticsService
 from backend.services.event_pipeline import EventPipeline
 from backend.services.gita_service import GitaService
@@ -20,7 +21,7 @@ api_key = os.getenv("OPENAI_API_KEY", "").strip()
 client = OpenAI(api_key=api_key) if api_key else None
 ready = bool(api_key)
 
-router = APIRouter(prefix="/api/chat", tags=["chat"])
+router = APIRouter(prefix="/chat", tags=["chat"])
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +195,7 @@ kiaan = KIAAN()
 
 
 @router.post("/start")
+@require_feature("chat")
 async def start_session() -> Dict[str, Any]:
     return {
         "session_id": str(uuid.uuid4()),
@@ -205,6 +207,7 @@ async def start_session() -> Dict[str, Any]:
 
 
 @router.post("/message")
+@require_feature("chat")
 async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     try:
         message = chat.message.strip()

@@ -5,7 +5,7 @@ from backend.deps import get_db, get_user_id
 from backend.services.mood_analytics import compute_daily_mood_summary
 from backend.services.semantic_insights import SemanticInsightsService
 
-router = APIRouter(prefix="/api/insights", tags=["insights"])
+router = APIRouter(prefix="/insights", tags=["insights"])
 
 
 @router.get("/semantic-wisdom")

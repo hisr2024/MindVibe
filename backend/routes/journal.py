@@ -8,16 +8,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db, get_user_id
 from backend.models import JournalEntry
 from backend.schemas import JournalEntryIn, JournalEntryOut, JournalExport
+from backend.middleware.feature_gates import require_feature
 from backend.security.encryption import EncryptionManager
 from backend.security.rate_limiter import rate_limit
 from backend.services.background_jobs import enqueue_journal_summary
+from backend.services.analytics_service import AnalyticsService
+from backend.services.safety_validator import SafetyValidator
 
-router = APIRouter(prefix="/api/journal", tags=["journal"])
+router = APIRouter(prefix="/journal", tags=["journal"])
+
+analytics = AnalyticsService()
+safety_validator = SafetyValidator()
 
 
 @router.post("/entries", response_model=JournalEntryOut, dependencies=[Depends(rate_limit(10, 60))])
+@require_feature("journal")
 async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_db)):
     user_id = get_user_id()
+    crisis_info = safety_validator.detect_crisis(payload.content)
     manager = EncryptionManager()
     title_cipher, key_id = manager.encrypt(payload.title)
     content_cipher, _ = manager.encrypt(payload.content)
@@ -35,6 +43,10 @@ async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_d
     await db.commit()
     await db.refresh(entry)
     await enqueue_journal_summary(entry.id, user_id)
+    analytics.track_user_engagement(user_id=str(user_id), action="journal_entry_created")
+    if crisis_info.get("crisis_detected"):
+        analytics.log_crisis_incident(str(user_id), ",".join(crisis_info.get("crisis_types", [])))
+    crisis_response = safety_validator.generate_crisis_response(crisis_info) if crisis_info.get("crisis_detected") else ""
     return JournalEntryOut(
         id=entry.id,
         entry_uuid=entry.entry_uuid,
@@ -45,10 +57,15 @@ async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_d
         attachments=payload.attachments,
         created_at=entry.created_at.isoformat(),
         updated_at=None,
+        crisis_detected=crisis_info.get("crisis_detected", False),
+        crisis_types=crisis_info.get("crisis_types"),
+        crisis_severity=crisis_info.get("severity"),
+        crisis_support_message=crisis_response or None,
     )
 
 
 @router.get("/entries", response_model=list[JournalEntryOut])
+@require_feature("journal")
 async def list_entries(db: AsyncSession = Depends(get_db)):
     user_id = get_user_id()
     stmt = select(JournalEntry).where(
@@ -69,12 +86,17 @@ async def list_entries(db: AsyncSession = Depends(get_db)):
                 attachments=entry.attachments,
                 created_at=entry.created_at.isoformat(),
                 updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
+                crisis_detected=False,
+                crisis_types=None,
+                crisis_severity="none",
+                crisis_support_message=None,
             )
         )
     return response
 
 
 @router.delete("/entries/{entry_uuid}")
+@require_feature("journal")
 async def delete_entry(entry_uuid: str, db: AsyncSession = Depends(get_db)):
     user_id = get_user_id()
     stmt = (
@@ -90,6 +112,7 @@ async def delete_entry(entry_uuid: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/export", response_model=JournalExport)
+@require_feature("journal", minimum_plan="pro")
 async def export_entries(db: AsyncSession = Depends(get_db)):
     user_id = get_user_id()
     manager = EncryptionManager()
@@ -108,6 +131,10 @@ async def export_entries(db: AsyncSession = Depends(get_db)):
             attachments=entry.attachments,
             created_at=entry.created_at.isoformat(),
             updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
+            crisis_detected=False,
+            crisis_types=None,
+            crisis_severity="none",
+            crisis_support_message=None,
         )
         for entry in entries
     ]

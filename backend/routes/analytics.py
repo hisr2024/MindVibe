@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from backend.services.event_pipeline import EventPipeline
 
-router = APIRouter(prefix="/api/analytics", tags=["analytics"])
+router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 class AnalyticsEvent(BaseModel):
