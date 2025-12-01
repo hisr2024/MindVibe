@@ -23,8 +23,12 @@ export type CipherBlob = CipherBlobV2 | LegacyCipherBlob
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
+const normalizeBytes = (bytes: Uint8Array): Uint8Array<ArrayBuffer> =>
+  new Uint8Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength))
+
 const b64 = (a: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(a)))
-const ub64 = (s: string) => new Uint8Array(atob(s).split('').map(c => c.charCodeAt(0)))
+const ub64 = (s: string): Uint8Array<ArrayBuffer> =>
+  normalizeBytes(new Uint8Array(atob(s).split('').map(c => c.charCodeAt(0))))
 
 const DEFAULT_ITERATIONS = 350_000
 const MIN_PASS_LENGTH = 12
