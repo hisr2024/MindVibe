@@ -39,6 +39,8 @@ from backend.core.logging import configure_logging, log_request
 from backend.core.metrics import create_metrics_router, metrics_middleware
 from backend.core.settings import settings
 from backend.db_utils import build_database_url, ensure_base_schema
+from backend.middleware.feature_gates import PlanGateMiddleware
+from backend.observability import setup_observability
 from backend.services.background_jobs import ensure_jobs_started
 
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
@@ -60,7 +62,7 @@ app = FastAPI(
 )
 
 configure_logging()
-register_exception_handlers(app)
+setup_observability(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -72,8 +74,7 @@ app.add_middleware(
     max_age=3600,
 )
 
-if settings.REQUEST_METRICS_ENABLED:
-    app.middleware("http")(metrics_middleware)
+app.add_middleware(PlanGateMiddleware)
 
 app.middleware("http")(log_request)
 app.include_router(create_metrics_router())
@@ -210,14 +211,14 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
 
-# Load Subscription router
-print("\n[Subscriptions] Attempting to import Subscription router...")
+# Load Webhooks router
+print("\n[Webhooks] Attempting to import Webhooks router...")
 try:
-    from backend.routes.subscriptions import router as subscriptions_router
-    app.include_router(subscriptions_router)
-    print("✅ [SUCCESS] Subscription router loaded")
+    from backend.routes.webhooks import router as webhooks_router
+    app.include_router(webhooks_router)
+    print("✅ [SUCCESS] Webhooks router loaded")
 except Exception as e:
-    print(f"❌ [ERROR] Failed to load Subscription router: {e}")
+    print(f"❌ [ERROR] Failed to load Webhooks router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
