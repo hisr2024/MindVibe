@@ -1,113 +1,87 @@
-"""Centralized secret retrieval with managed vault support."""
+"""Secret manager client with minimal logging of sensitive identifiers."""
 from __future__ import annotations
 
-import json
+import base64
 import logging
 import os
-import time
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("mindvibe.secret_manager")
+
+
+def _redact_secret_id(secret_id: str) -> str:
+    """Return a redacted version of a secret identifier for logging.
+
+    The redaction keeps only a small prefix and suffix when available so
+    operators can correlate to the original value without exposing the full
+    identifier in logs.
+    """
+
+    if not secret_id:
+        return ""
+    if len(secret_id) <= 8:
+        return "***"
+    return f"{secret_id[:2]}***{secret_id[-4:]}"
 
 
 @dataclass
-class SecretCacheEntry:
-    value: str | None
-    expires_at: float
+class SecretManagerConfig:
+    provider: str
+    region: Optional[str]
+    namespace: str
 
-    def is_valid(self) -> bool:
-        return time.time() < self.expires_at
+    @classmethod
+    def from_env(cls) -> "SecretManagerConfig":
+        provider = os.getenv("SECRET_MANAGER_PROVIDER", "aws").lower()
+        region = os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION"))
+        namespace = os.getenv("SECRET_MANAGER_NAMESPACE", "")
+        return cls(provider=provider, region=region, namespace=namespace)
 
 
-class ManagedSecretManager:
-    """Fetch secrets from AWS Secrets Manager with env fallback."""
-
-    def __init__(
-        self,
-        provider: str | None = None,
-        namespace: str | None = None,
-        cache_ttl_seconds: int | None = None,
-    ) -> None:
-        self.provider = (provider or os.getenv("SECRET_BACKEND", "env")).lower()
-        self.namespace = namespace or os.getenv("SECRET_NAMESPACE", "mindvibe/")
-        self.cache_ttl_seconds = cache_ttl_seconds or int(
-            os.getenv("SECRET_CACHE_TTL_SECONDS", "300")
-        )
-        self.region = os.getenv("AWS_REGION", "us-east-1")
-        self._cache: Dict[str, SecretCacheEntry] = {}
+class SecretManager:
+    def __init__(self, config: SecretManagerConfig | None = None):
+        self.config = config or SecretManagerConfig.from_env()
+        self.namespace = self.config.namespace
         self._client = None
+        if self.config.provider == "aws":
+            self._client = boto3.client("secretsmanager", region_name=self.config.region)
 
-    def _client_for_provider(self):
-        if self.provider != "aws":
+    @property
+    def enabled(self) -> bool:
+        return bool(self._client)
+
+    def _secret_id(self, key: str) -> str:
+        return f"{self.namespace}{key}" if not key.startswith(self.namespace) else key
+
+    def get_secret(self, key: str) -> Optional[str]:
+        if not self.enabled:
             return None
-        if self._client is None:
-            self._client = boto3.client("secretsmanager", region_name=self.region)
-        return self._client
 
-    def _cache_get(self, key: str) -> Optional[str]:
-        entry = self._cache.get(key)
-        if entry and entry.is_valid():
-            return entry.value
-        if entry:
-            self._cache.pop(key, None)
-        return None
-
-    def _cache_set(self, key: str, value: str | None) -> None:
-        self._cache[key] = SecretCacheEntry(
-            value=value, expires_at=time.time() + self.cache_ttl_seconds
-        )
-
-    def get(self, key: str, default: str | None = None) -> Optional[str]:
-        cached = self._cache_get(key)
-        if cached is not None:
-            return cached
-
-        value: Optional[str] = None
-        if self.provider == "aws":
-            value = self._get_from_aws(key)
-
-        if value is None:
-            value = os.getenv(key, default)
-
-        self._cache_set(key, value)
-        return value
-
-    def _get_from_aws(self, key: str) -> Optional[str]:
-        client = self._client_for_provider()
-        if not client:
-            return None
-        secret_id = f"{self.namespace}{key}" if not key.startswith(self.namespace) else key
+        secret_id = self._secret_id(key)
         try:
-            result = client.get_secret_value(SecretId=secret_id)
+            result = self._client.get_secret_value(SecretId=secret_id)
         except (ClientError, BotoCoreError) as exc:
-            logger.warning("secret_manager_aws_failed", extra={"secret_id": "[REDACTED]", "error": str(exc)})
+            logger.warning(
+                "secret_manager_request_failed",
+                extra={"secret_id": _redact_secret_id(secret_id), "error": str(exc)},
+            )
             return None
 
         secret_string = result.get("SecretString")
-        if not secret_string:
-            return None
-
-        try:
-            payload = json.loads(secret_string)
-            if isinstance(payload, dict) and key in payload:
-                return str(payload[key])
-        except json.JSONDecodeError:
-            pass
-        return secret_string
-
-
-def secret_manager() -> ManagedSecretManager:
-    # Use a singleton-style instance to share cache across imports
-    global _SECRET_MANAGER_SINGLETON
-    try:
-        return _SECRET_MANAGER_SINGLETON
-    except NameError:
-        _SECRET_MANAGER_SINGLETON = ManagedSecretManager()
-        return _SECRET_MANAGER_SINGLETON
-
-
-__all__ = ["ManagedSecretManager", "secret_manager"]
+        if secret_string:
+            return secret_string
+        secret_binary = result.get("SecretBinary")
+        if secret_binary:
+            try:
+                return base64.b64decode(secret_binary).decode()
+            except Exception:
+                logger.warning(
+                    "secret_manager_decode_failed",
+                    extra={"secret_id": _redact_secret_id(secret_id)},
+                )
+                return None
+        return None
