@@ -25,12 +25,13 @@ export const metadata = {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const cookieLocale = cookies().get('mv-locale')?.value as SupportedLocale | undefined
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get('mv-locale')?.value as SupportedLocale | undefined
   const locale: SupportedLocale = cookieLocale && supportedLocales.includes(cookieLocale) ? cookieLocale : 'en'
 
   return (
