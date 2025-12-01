@@ -5,28 +5,23 @@ terraform {
       source  = "kreuzwerker/docker"
       version = "~> 3.0"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 }
 
 provider "docker" {}
 
-variable "app_image" {
-  description = "Container image for the MindVibe backend"
-  type        = string
-  default     = "mindvibe-backend:latest"
-}
-
-variable "db_image" {
-  description = "Postgres image for stateful data"
-  type        = string
-  default     = "postgres:15"
-}
-
-variable "db_password" {
-  description = "Database password"
-  type        = string
-  sensitive   = true
-  default     = "mindvibe"
+provider "aws" {
+  region                      = var.aws_region
+  skip_credentials_validation = var.enable_aws_resources ? false : true
+  skip_metadata_api_check     = var.enable_aws_resources ? false : true
 }
 
 resource "docker_network" "mindvibe" {
