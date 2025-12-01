@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
+import logging
 from collections import defaultdict
+from datetime import datetime
 
 class AnalyticsService:
     def __init__(self):

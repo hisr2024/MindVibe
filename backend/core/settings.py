@@ -3,6 +3,8 @@
 import os
 from pydantic_settings import BaseSettings
 
+from backend.security.secret_manager import secret_manager
+
 
 class Settings(BaseSettings):
     """Application settings."""
@@ -15,8 +17,12 @@ class Settings(BaseSettings):
 
     # Security
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
-    WEBHOOK_SIGNING_SECRET: str = os.getenv("WEBHOOK_SIGNING_SECRET", "dev-webhook-secret")
+    SECRET_KEY: str = secret_manager().get(
+        "SECRET_KEY", "dev-secret-key-change-in-production"
+    )
+    WEBHOOK_SIGNING_SECRET: str = secret_manager().get(
+        "WEBHOOK_SIGNING_SECRET", "dev-webhook-secret"
+    )
     WEBHOOK_TOLERANCE_SECONDS: int = int(os.getenv("WEBHOOK_TOLERANCE_SECONDS", "300"))
 
     # Session settings
@@ -34,6 +40,22 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", REDIS_URL)
     CELERY_DEFAULT_QUEUE: str = os.getenv("CELERY_DEFAULT_QUEUE", "mindvibe")
     USE_CELERY: bool = os.getenv("USE_CELERY", "false").lower() in {"1", "true", "yes", "on"}
+
+    # Secret management
+    SECRET_BACKEND: str = os.getenv("SECRET_BACKEND", "env")
+    SECRET_NAMESPACE: str = os.getenv("SECRET_NAMESPACE", "mindvibe/")
+    SECRET_CACHE_TTL_SECONDS: int = int(os.getenv("SECRET_CACHE_TTL_SECONDS", "300"))
+    AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
+
+    # Data retention
+    DATA_RETENTION_DAYS: int = int(os.getenv("DATA_RETENTION_DAYS", "365"))
+    _RETENTION_ENABLED_RAW: str = os.getenv("DATA_RETENTION_ENABLED", "true")
+    DATA_RETENTION_ENABLED: bool = _RETENTION_ENABLED_RAW.lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
     # Observability
     SENTRY_DSN: str = os.getenv("SENTRY_DSN", "")
