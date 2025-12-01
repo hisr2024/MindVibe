@@ -57,10 +57,52 @@ def _sql_files() -> Iterable[Path]:
 
 
 def _statements(sql_text: str) -> Iterable[str]:
-    for chunk in sql_text.split(";"):
-        statement = chunk.strip()
-        if statement:
-            yield statement
+    """Split SQL text into executable statements while respecting dollar-quotes.
+
+    The previous implementation naively split on ``;`` which breaks ``DO $$``
+    blocks because the semicolons inside the block are significant and should
+    not terminate the statement. This parser tracks whether we are inside a
+    single quote, double quote, or ``$$`` dollar-quoted block and only splits
+    when a semicolon appears outside of those contexts.
+    """
+
+    statements: list[str] = []
+    buffer: list[str] = []
+    in_single_quote = False
+    in_double_quote = False
+    in_dollar_quote = False
+    i = 0
+
+    while i < len(sql_text):
+        ch = sql_text[i]
+        next_two = sql_text[i : i + 2]
+
+        if not in_single_quote and not in_double_quote and next_two == "$$":
+            in_dollar_quote = not in_dollar_quote
+            buffer.append(next_two)
+            i += 2
+            continue
+
+        if ch == "'" and not in_double_quote and not in_dollar_quote:
+            in_single_quote = not in_single_quote
+        elif ch == '"' and not in_single_quote and not in_dollar_quote:
+            in_double_quote = not in_double_quote
+
+        if ch == ";" and not in_single_quote and not in_double_quote and not in_dollar_quote:
+            statement = "".join(buffer).strip()
+            if statement:
+                statements.append(statement)
+            buffer.clear()
+        else:
+            buffer.append(ch)
+
+        i += 1
+
+    tail = "".join(buffer).strip()
+    if tail:
+        statements.append(tail)
+
+    return statements
 
 
 def _capture_alembic_current() -> str | None:
