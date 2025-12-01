@@ -1,5 +1,6 @@
 """Global rate limiting middleware."""
 
+import asyncio
 import os
 from typing import Iterable
 
@@ -21,10 +22,14 @@ async def global_rate_limit(request: Request, call_next):
     if any(path.startswith(prefix) for prefix in EXEMPT_PATH_PREFIXES):
         return await call_next(request)
 
-    client_ip = request.client.host if request.client else "unknown"
-    allowed, remaining, reset_at = limiter.evaluate(
-        (client_ip, path), DEFAULT_LIMIT, DEFAULT_WINDOW
-    )
+    client_ip = request.client. host if request.client else "unknown"
+    
+    # Handle both sync and async rate limiters
+    result = limiter.evaluate((client_ip, path), DEFAULT_LIMIT, DEFAULT_WINDOW)
+    if asyncio.iscoroutine(result):
+        allowed, remaining, reset_at = await result
+    else:
+        allowed, remaining, reset_at = result
 
     if not allowed:
         record_rate_limit_rejection(path)
