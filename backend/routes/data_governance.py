@@ -7,7 +7,7 @@ from backend.schemas import JournalExport
 from backend.services.data_portability import export_user_data, anonymize_user
 from backend.services.data_retention import get_retention_policy
 
-router = APIRouter(prefix="/api/data", tags=["data-governance"])
+router = APIRouter(prefix="/data", tags=["data-governance"])
 
 
 @router.get("/export", response_model=JournalExport)

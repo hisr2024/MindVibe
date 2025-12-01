@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { buildHealthStatus } from '../../../lib/health/status'
+import { buildHealthStatus } from '../../lib/health/status'
 
 export async function GET() {
   const status = buildHealthStatus()

@@ -21,7 +21,7 @@ model_name = os.getenv("KARMA_FOOTPRINT_MODEL", "gpt-4o-mini")
 client = OpenAI(api_key=api_key) if api_key else None
 ready = bool(client)
 
-router = APIRouter(prefix="/api/karma-footprint", tags=["karma_footprint"])
+router = APIRouter(prefix="/karma-footprint", tags=["karma_footprint"])
 
 
 KARMA_SYSTEM_PROMPT = """
