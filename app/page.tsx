@@ -332,7 +332,7 @@ function ArdhaReframer() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
@@ -439,7 +439,7 @@ function ViyogDetachmentCoach() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
@@ -976,7 +976,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content })
@@ -2365,7 +2365,7 @@ function Journal() {
     setGuidanceLoading(prev => ({ ...prev, [entry.id]: true }))
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${entry.body}` })
