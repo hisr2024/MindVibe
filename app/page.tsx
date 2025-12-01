@@ -884,6 +884,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [loading, setLoading] = useState(false)
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
+  const [autoScrollPinned, setAutoScrollPinned] = useState(true)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const clarityInitialState: ClaritySession = {
@@ -901,10 +902,10 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   useEffect(() => {
     const container = messageListRef.current
-    if (!container) return
+    if (!container || !autoScrollPinned) return
 
     container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [messages])
+  }, [messages, autoScrollPinned])
 
   useEffect(() => {
     if (!promptMotion) return
@@ -946,6 +947,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
     const newMessages = [...messages, userMessage]
+    setAutoScrollPinned(true)
     setMessages(newMessages)
     setInput('')
     setLoading(true)
@@ -1029,6 +1031,14 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   function toggleMotionReduction() {
     setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
+  }
+
+  function handleMessageListScroll() {
+    const container = messageListRef.current
+    if (!container) return
+
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
+    setAutoScrollPinned(distanceFromBottom < 120)
   }
 
   function renderAssistantContent(content: string, index: number) {
@@ -1286,7 +1296,11 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
-      <div ref={messageListRef} className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10">
+      <div
+        ref={messageListRef}
+        onScroll={handleMessageListScroll}
+        className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
+      >
         {messages.length === 0 && (
           <div className="text-center text-orange-100/70 py-20 md:py-32">
             <p className="text-6xl mb-4">✨</p>
@@ -2090,7 +2104,7 @@ function PublicChatRooms() {
         ))}
       </div>
 
-      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 min-h-[280px] max-h-[50vh] md:min-h-[320px] md:max-h-none overflow-y-auto shadow-inner shadow-orange-500/5">
+      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 min-h-[280px] max-h-[50vh] md:min-h-[320px] md:max-h-none overflow-y-auto shadow-inner shadow-orange-500/5 scroll-stable">
         {activeMessages.map((msg, index) => (
           <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-orange-500/10 ${
