@@ -1,7 +1,8 @@
-from datetime import UTC, datetime
+import logging
 import secrets
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,18 +12,43 @@ from backend.schemas import JournalEntryIn, JournalEntryOut, JournalExport
 from backend.security.encryption import EncryptionManager
 from backend.security.rate_limiter import rate_limit
 from backend.services.background_jobs import enqueue_journal_summary
+from backend.services.object_storage import JournalObjectArchiver
 
 router = APIRouter(prefix="/api/journal", tags=["journal"])
+logger = logging.getLogger("mindvibe.journal")
 
 
 @router.post("/entries", response_model=JournalEntryOut, dependencies=[Depends(rate_limit(10, 60))])
 async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_db)):
     user_id = get_user_id()
     manager = EncryptionManager()
+    archiver = JournalObjectArchiver()
+    entry_uuid = secrets.token_hex(8)
+
+    archive_locator = None
+    try:
+        archive = archiver.archive_entry(
+            entry_uuid=entry_uuid,
+            user_id=user_id,
+            title=payload.title,
+            content=payload.content,
+            tags=payload.tags,
+            attachments=payload.attachments,
+            mood_score=payload.mood_score,
+            encryption_fn=manager.encrypt,
+        )
+        if archive:
+            archive_locator = archive.as_dict()
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.exception(
+            "journal_archive_failed",
+            extra={"user_id": user_id, "entry_uuid": entry_uuid, "error": str(exc)},
+        )
+
     title_cipher, key_id = manager.encrypt(payload.title)
     content_cipher, _ = manager.encrypt(payload.content)
     entry = JournalEntry(
-        entry_uuid=secrets.token_hex(8),
+        entry_uuid=entry_uuid,
         user_id=user_id,
         title_ciphertext=title_cipher,
         content_ciphertext=content_cipher,
@@ -30,6 +56,7 @@ async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_d
         mood_score=payload.mood_score,
         tags=payload.tags,
         attachments=payload.attachments,
+        archive_locator=archive_locator,
     )
     db.add(entry)
     await db.commit()
@@ -43,6 +70,7 @@ async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_d
         mood_score=payload.mood_score,
         tags=payload.tags,
         attachments=payload.attachments,
+        archive_locator=archive_locator,
         created_at=entry.created_at.isoformat(),
         updated_at=None,
     )
@@ -67,6 +95,7 @@ async def list_entries(db: AsyncSession = Depends(get_db)):
                 mood_score=entry.mood_score,
                 tags=entry.tags,
                 attachments=entry.attachments,
+                archive_locator=entry.archive_locator,
                 created_at=entry.created_at.isoformat(),
                 updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
             )
@@ -106,6 +135,7 @@ async def export_entries(db: AsyncSession = Depends(get_db)):
             mood_score=entry.mood_score,
             tags=entry.tags,
             attachments=entry.attachments,
+            archive_locator=entry.archive_locator,
             created_at=entry.created_at.isoformat(),
             updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
         )

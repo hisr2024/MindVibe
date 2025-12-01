@@ -10,7 +10,12 @@
    - Check `/health` and `/metrics/performance` on the active environment.
    - Inspect background worker logs for `summary_generation_failed` or `backup_failed` events.
 2. **Fail over the database**
-   - Promote the most recent backup artifact from `reports/backups/` to the target Postgres instance.
+   - Promote the most recent backup artifact from `reports/backups/` or the remote backup bucket to the target Postgres instance.
+   - Use `python - <<'PY'
+from pathlib import Path
+from backend.services.backup import fetch_latest_remote_backup
+print(fetch_latest_remote_backup(Path('reports/backups')))
+PY` to pull the newest object from S3-compatible storage when configured.
    - Verify connectivity with `psql $DATABASE_URL -c "SELECT NOW();"`.
 3. **Redeploy services**
    - Use Terraform to recreate containers: `cd infra/terraform && terraform init && terraform apply`.
@@ -26,6 +31,7 @@
 - Nightly backups run inside the FastAPI process via the `BackgroundOrchestrator` (configurable with `BACKUP_INTERVAL_SECONDS`).
 - `ENABLE_AUTOMATED_BACKUPS=false` disables automated runs for sensitive environments.
 - Backup artifacts default to `reports/backups/` and store a SQL dump when `pg_dump` and `DATABASE_URL` are available. Otherwise a manifest documents missing prerequisites.
+- When `BACKUP_S3_BUCKET`/`BACKUP_S3_PREFIX` are configured the generated artifact is mirrored to S3 with server-side encryption; `fetch_latest_remote_backup()` retrieves the newest object for restores.
 
 ## Verification Checklist
 - [ ] Latest backup artifact timestamped within RPO window.

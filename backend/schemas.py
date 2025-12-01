@@ -74,6 +74,7 @@ class JournalEntryOut(BaseModel):
     mood_score: int | None
     tags: list[str] | None
     attachments: list[dict] | None
+    archive_locator: dict | None = None
     created_at: str
     updated_at: str | None
 
