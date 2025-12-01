@@ -71,6 +71,17 @@ configure_logging()
 setup_observability(app)
 register_exception_handlers(app)
 
+# Track startup anomalies so we can return a degraded health response instead of
+# crashing the entire application (which causes Render health checks to time out
+# before we can report the underlying issue).
+STARTUP_ERRORS: list[str] = []
+
+
+def _record_startup_error(context: str, exc: Exception) -> None:
+    message = f"{context}: {exc}"
+    STARTUP_ERRORS.append(message)
+    print(f"❌ [STARTUP] {message}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -106,7 +117,11 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 
 @app.on_event("startup")
 async def startup():
-    await ensure_base_schema(engine)
+    try:
+        await ensure_base_schema(engine)
+    except Exception as exc:
+        _record_startup_error("ensure_base_schema_failed", exc)
+        return
 
     try:
         if RUN_MIGRATIONS_ON_STARTUP:
@@ -124,11 +139,19 @@ async def startup():
                 print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
     except Exception as exc:
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
-        raise
+        _record_startup_error("migrations_failed", exc)
+        return
 
     # Apply data retention safeguards after migrations to avoid missing tables
-    await apply_retention_policies(SessionLocal)
-    await ensure_jobs_started(SessionLocal)
+    try:
+        await apply_retention_policies(SessionLocal)
+    except Exception as exc:
+        _record_startup_error("retention_policy_failed", exc)
+
+    try:
+        await ensure_jobs_started(SessionLocal)
+    except Exception as exc:
+        _record_startup_error("background_jobs_failed", exc)
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
 kiaan_router_loaded = False
@@ -290,8 +313,17 @@ app.include_router(api_v1_router)
 
 async def _assert_migrations_healthy() -> dict[str, Any]:
     """Ensure migrations are applied; raise HTTP 503 if not."""
-
-    migration_status = await get_migration_status(engine)
+    try:
+        migration_status = await get_migration_status(engine)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "reason": "migration_status_error",
+                "message": str(exc),
+                "startup_errors": STARTUP_ERRORS,
+            },
+        ) from exc
     if migration_status.error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -324,11 +356,13 @@ async def _assert_migrations_healthy() -> dict[str, Any]:
 
 @app.get("/")
 async def root() -> Dict[str, Any]:
+    status_value = "healthy" if not STARTUP_ERRORS else "degraded"
     return {
         "message": "MindVibe API is running",
         "version": "1.0.0",
-        "status": "healthy",
-        "kiaan_loaded": kiaan_router_loaded
+        "status": status_value,
+        "kiaan_loaded": kiaan_router_loaded,
+        "startup_errors": STARTUP_ERRORS,
     }
 
 @app.get("/health")
@@ -340,6 +374,7 @@ async def health() -> Dict[str, Any]:
         "version": "1.0.0",
         "kiaan_ready": kiaan_router_loaded,
         "migration": migration_state,
+        "startup_errors": STARTUP_ERRORS,
     }
 
 @app.get(f"{API_V1_PREFIX}/health")
@@ -352,6 +387,7 @@ async def api_health() -> Dict[str, Any]:
         "chat_ready": kiaan_router_loaded,
         "openai_key_present": bool(OPENAI_API_KEY),
         "migration": migration_state,
+        "startup_errors": STARTUP_ERRORS,
     }
 
 
