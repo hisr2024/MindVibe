@@ -22,26 +22,27 @@ export type CipherBlob = CipherBlobV2 | LegacyCipherBlob
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
+type SafeUint8Array = Uint8Array<ArrayBuffer>
 
-const normalizeBytes = (bytes: Uint8Array<ArrayBufferLike>): Uint8Array<ArrayBufferLike> =>
-  new Uint8Array<ArrayBufferLike>(
-    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+const normalizeBytes = (bytes: Uint8Array): SafeUint8Array =>
+  Uint8Array.from(bytes) as SafeUint8Array
+
+const toBytes = (input: ArrayBuffer | ArrayBufferView): SafeUint8Array =>
+  normalizeBytes(
+    input instanceof ArrayBuffer
+      ? new Uint8Array(input)
+      : new Uint8Array(input.buffer, input.byteOffset, input.byteLength)
   )
-
-const toBytes = (input: ArrayBuffer | ArrayBufferView): Uint8Array =>
-  input instanceof ArrayBuffer
-    ? new Uint8Array(input)
-    : new Uint8Array(input.buffer, input.byteOffset, input.byteLength)
 
 const b64 = (input: ArrayBuffer | ArrayBufferView) =>
   btoa(String.fromCharCode(...toBytes(input)))
-const ub64 = (s: string): Uint8Array<ArrayBufferLike> =>
-  normalizeBytes(new Uint8Array<ArrayBufferLike>(atob(s).split('').map(c => c.charCodeAt(0))))
+const ub64 = (s: string): SafeUint8Array =>
+  normalizeBytes(Uint8Array.from(atob(s), c => c.charCodeAt(0)))
 
 const DEFAULT_ITERATIONS = 350_000
 const MIN_PASS_LENGTH = 12
 
-async function deriveBits(passphrase: string, salt: Uint8Array, iterations: number) {
+async function deriveBits(passphrase: string, salt: SafeUint8Array, iterations: number) {
   const baseKey = await crypto.subtle.importKey('raw', encoder.encode(passphrase), { name: 'PBKDF2' }, false, [
     'deriveBits',
     'deriveKey',
@@ -50,7 +51,7 @@ async function deriveBits(passphrase: string, salt: Uint8Array, iterations: numb
   return b64(bits)
 }
 
-async function deriveKey(passphrase: string, salt: Uint8Array, iterations: number) {
+async function deriveKey(passphrase: string, salt: SafeUint8Array, iterations: number) {
   const baseKey = await crypto.subtle.importKey('raw', encoder.encode(passphrase), { name: 'PBKDF2' }, false, [
     'deriveKey',
   ])
