@@ -1353,7 +1353,9 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                   : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
               }`}>
                 {msg.role === 'assistant' ? (
-                  renderAssistantContent(msg.content, i)
+                  <div className="max-h-[45vh] overflow-y-auto pr-1 chat-scrollbar">
+                    {renderAssistantContent(msg.content, i)}
+                  </div>
                 ) : (
                   <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                 )}
@@ -1374,7 +1376,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           <div className="mt-3 flex items-start justify-between gap-3 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur flex-col sm:flex-row sm:items-center">
             <div className="space-y-1 text-orange-100/80">
               <p className="text-sm font-semibold text-orange-50">Save the latest KIAAN guidance</p>
-              <p className="text-xs">Use the scrollbar inside the conversation to review older messages, then send the newest solution straight to your journal.</p>
             </div>
             <div className="flex flex-col items-stretch gap-2 sm:items-end">
               <button
