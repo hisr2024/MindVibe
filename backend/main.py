@@ -34,7 +34,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core.migrations import apply_sql_migrations, get_migration_status
+from backend.core.errors import register_exception_handlers
 from backend.core.logging import configure_logging, log_request
+from backend.core.metrics import create_metrics_router, metrics_middleware
+from backend.core.settings import settings
 from backend.db_utils import build_database_url, ensure_base_schema
 from backend.middleware.feature_gates import PlanGateMiddleware
 from backend.observability import setup_observability
@@ -74,6 +77,7 @@ app.add_middleware(
 app.add_middleware(PlanGateMiddleware)
 
 app.middleware("http")(log_request)
+app.include_router(create_metrics_router())
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:

@@ -156,6 +156,16 @@ docker-compose down
 
 ---
 
+## 🛡️ Operational Hardening
+
+- Structured JSON logging with automatic request IDs for traceability.
+- Prometheus-compatible metrics exposed at `/metrics` for platform monitoring.
+- Consistent rate limiting responses with helpful headers and `429` error payloads.
+- Role-based access scaffolding baked into JWTs for protected administrative APIs.
+- Subscription primitives (plans, customer records, Stripe sandbox hooks) to support premium features.
+
+---
+
 ## 🔌 **API Documentation**
 
 ### **All 8 API Routers:**
