@@ -167,11 +167,11 @@ export default function JournalEncrypted() {
         body: JSON.stringify({ items: pending }),
       })
       if (!res.ok) throw new Error('Failed to sync')
-      const updated = syncQueue.map(item => ({ ...item, status: 'synced' }))
+      const updated: SyncPayload[] = syncQueue.map(item => ({ ...item, status: 'synced' }))
       setSyncQueue(updated)
       setSyncMessage('Entries synced securely. Your ciphertext stays encrypted end-to-end.')
     } catch (error) {
-      const updated = syncQueue.map(item => ({ ...item, status: item.status === 'synced' ? 'synced' : 'failed' }))
+      const updated: SyncPayload[] = syncQueue.map(item => ({ ...item, status: item.status === 'synced' ? 'synced' : 'failed' }))
       setSyncQueue(updated)
       setSyncMessage('Offline or sync failed. We will retry when you are back online.')
     } finally {
