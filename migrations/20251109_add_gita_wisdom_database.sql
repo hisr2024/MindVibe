@@ -49,6 +49,34 @@ CREATE TABLE IF NOT EXISTS gita_verses (
     FOREIGN KEY (source_id) REFERENCES gita_sources(id) ON DELETE SET NULL
 );
 
+-- Ensure legacy tables get the new source_id column and constraint before indexing
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'gita_verses'
+          AND column_name = 'source_id'
+    ) THEN
+        ALTER TABLE gita_verses ADD COLUMN source_id INTEGER;
+    END IF;
+
+    -- Add the foreign key constraint if it is missing
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+            ON tc.constraint_name = kcu.constraint_name
+        WHERE tc.table_name = 'gita_verses'
+          AND tc.constraint_type = 'FOREIGN KEY'
+          AND kcu.column_name = 'source_id'
+    ) THEN
+        ALTER TABLE gita_verses
+        ADD CONSTRAINT fk_gita_verses_source FOREIGN KEY (source_id)
+            REFERENCES gita_sources(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_gita_verses_chapter ON gita_verses(chapter);
 CREATE INDEX IF NOT EXISTS idx_gita_verses_verse ON gita_verses(verse);
 CREATE INDEX IF NOT EXISTS idx_gita_verses_theme ON gita_verses(theme);
