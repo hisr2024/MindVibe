@@ -38,6 +38,7 @@ class User(SoftDeleteMixin, Base):
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="en")
+    role: Mapped[str] = mapped_column(String(32), default="member", nullable=False, index=True)
     two_factor_secret: Mapped[str | None] = mapped_column(
         String(64), nullable=True, default=None
     )
@@ -351,3 +352,64 @@ class RefreshToken(Base):
     )
     reuse_detected: Mapped[bool] = mapped_column(Boolean, default=False)
     rotated_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class StripeCustomer(Base):
+    __tablename__ = "stripe_customers"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    customer_id: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    email: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+
+
+class SubscriptionPlan(Base):
+    __tablename__ = "subscription_plans"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(128))
+    price_cents: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(8), default="usd")
+    interval: Mapped[str] = mapped_column(String(32), default="month")
+    stripe_price_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    features: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    plan_id: Mapped[int] = mapped_column(Integer, ForeignKey("subscription_plans.id", ondelete="SET NULL"), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="active", index=True)
+    stripe_subscription_id: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
+    current_period_end: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    cancel_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    subscription_metadata: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
+class SubscriptionEvent(Base):
+    __tablename__ = "subscription_events"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subscription_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("subscriptions.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    event_type: Mapped[str] = mapped_column(String(64))
+    payload: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )

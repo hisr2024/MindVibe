@@ -34,7 +34,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core.migrations import apply_sql_migrations, get_migration_status
+from backend.core.errors import register_exception_handlers
 from backend.core.logging import configure_logging, log_request
+from backend.core.metrics import create_metrics_router, metrics_middleware
+from backend.core.settings import settings
 from backend.db_utils import build_database_url, ensure_base_schema
 from backend.services.background_jobs import ensure_jobs_started
 
@@ -57,6 +60,7 @@ app = FastAPI(
 )
 
 configure_logging()
+register_exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -68,7 +72,11 @@ app.add_middleware(
     max_age=3600,
 )
 
+if settings.REQUEST_METRICS_ENABLED:
+    app.middleware("http")(metrics_middleware)
+
 app.middleware("http")(log_request)
+app.include_router(create_metrics_router())
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
@@ -201,6 +209,15 @@ try:
     print("✅ [SUCCESS] Data governance router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
+
+# Load Subscription router
+print("\n[Subscriptions] Attempting to import Subscription router...")
+try:
+    from backend.routes.subscriptions import router as subscriptions_router
+    app.include_router(subscriptions_router)
+    print("✅ [SUCCESS] Subscription router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Subscription router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")

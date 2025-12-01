@@ -60,6 +60,7 @@ class LoginOut(BaseModel):
     expires_in: int
     user_id: str
     email: EmailStr
+    role: str
 
 
 class TwoFactorSetupOut(BaseModel):
@@ -84,6 +85,7 @@ class MeOut(BaseModel):
     session_expires_at: datetime | None
     session_last_used_at: datetime | None
     access_token_expires_in: int | None
+    role: str
 
 
 class LogoutOut(BaseModel):
@@ -263,7 +265,7 @@ async def login(
             )
 
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
-    access_token = create_access_token(user_id=user.id, session_id=session.id)
+    access_token = create_access_token(user_id=user.id, session_id=session.id, role=user.role)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # Create refresh token + set cookie
@@ -287,6 +289,7 @@ async def login(
         expires_in=expires_in_seconds,
         user_id=user.id,
         email=user.email,
+        role=user.role,
     )
 
 
@@ -382,6 +385,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         session_expires_at=session_row.expires_at,
         session_last_used_at=session_row.last_used_at,
         access_token_expires_in=access_token_expires_in,
+        role=user.role,
     )
 
 
@@ -525,9 +529,12 @@ async def refresh_tokens(
     # Rotate
     new_rt, new_raw = await rotate_refresh_token(db, token_row)
 
+    user_row = await db.get(User, token_row.user_id)
+    user_role = user_row.role if user_row else "member"
+
     # New access token
     access_token = create_access_token(
-        user_id=token_row.user_id, session_id=token_row.session_id
+        user_id=token_row.user_id, session_id=token_row.session_id, role=user_role
     )
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
@@ -603,7 +610,7 @@ async def magic_link_login(
         raise HTTPException(status_code=401, detail="Magic link expired")
 
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
-    access_token = create_access_token(user_id=user.id, session_id=session.id)
+    access_token = create_access_token(user_id=user.id, session_id=session.id, role=user.role)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     _, raw_refresh = await create_refresh_token(db, user_id=user.id, session_id=session.id)
 
@@ -629,4 +636,5 @@ async def magic_link_login(
         expires_in=expires_in_seconds,
         user_id=str(user.id),
         email=user.email,
+        role=user.role,
     )
