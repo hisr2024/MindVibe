@@ -211,14 +211,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
 
-# Load Webhooks router
-print("\n[Webhooks] Attempting to import Webhooks router...")
+# Load Analytics router
+print("\n[Analytics] Attempting to import Analytics router...")
 try:
-    from backend.routes.webhooks import router as webhooks_router
-    app.include_router(webhooks_router)
-    print("✅ [SUCCESS] Webhooks router loaded")
+    from backend.routes.analytics import router as analytics_router
+
+    app.include_router(analytics_router)
+    print("✅ [SUCCESS] Analytics router loaded")
 except Exception as e:
-    print(f"❌ [ERROR] Failed to load Webhooks router: {e}")
+    print(f"❌ [ERROR] Failed to load Analytics router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
