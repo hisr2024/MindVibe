@@ -26,6 +26,7 @@ tests/
 - **pyproject.toml**: Added pytest configuration with coverage settings
 - **requirements-dev.txt**: Updated with pytest-asyncio, httpx, and aiosqlite
 - **.gitignore**: Updated to exclude coverage reports
+- **Coverage policy**: Coverage gates raised to 60% and enforced consistently across tooling
 
 ### 3. Test Fixtures (conftest.py)
 - `test_db`: Provides in-memory SQLite database for testing
@@ -113,6 +114,7 @@ The existing GitHub Actions workflow (`.github/workflows/ci.yml`) already includ
 - Installation of pytest and pytest-cov
 - Mypy type checking
 - Test execution if tests directory exists
+- Dedicated security checks (Safety, Bandit, npm audit) running alongside lint, type-check, build, and test stages
 
 ## How to Use
 

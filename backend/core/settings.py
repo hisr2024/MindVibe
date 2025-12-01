@@ -20,6 +20,15 @@ class Settings(BaseSettings):
     # Session settings
     SESSION_EXPIRE_DAYS: int = 7
     SESSION_TOUCH_INTERVAL_MINUTES: int = 5
+
+    # Observability & integrations
+    STRIPE_SECRET_KEY: str | None = os.getenv("STRIPE_SECRET_KEY")
+    STRIPE_WEBHOOK_SECRET: str | None = os.getenv("STRIPE_WEBHOOK_SECRET")
+    REQUEST_METRICS_ENABLED: bool = os.getenv("REQUEST_METRICS_ENABLED", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
     
     class Config:
         """Pydantic config."""
