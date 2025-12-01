@@ -6,6 +6,16 @@
   color-scheme: dark;
 }
 
+:focus-visible {
+  outline: 3px solid #fb923c;
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
 @keyframes chatWobbleLift {
   0% { transform: translateY(0) scale(1); }
   30% { transform: translateY(-4px) scale(1.01); }
@@ -122,28 +132,12 @@
   overscroll-behavior: contain;
 }
 
-.chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(251, 146, 60, 0.7) rgba(15, 23, 42, 0.75);
-}
-
-.chat-scrollbar::-webkit-scrollbar {
-  width: 10px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.75);
-  border-radius: 9999px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(255, 156, 85, 0.9), rgba(255, 200, 130, 0.85));
-  border-radius: 9999px;
-  border: 2px solid rgba(15, 23, 42, 0.85);
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(255, 180, 120, 0.95), rgba(255, 214, 160, 0.9));
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -153,5 +147,13 @@
   .arrow-head {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

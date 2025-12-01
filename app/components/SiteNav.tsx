@@ -4,18 +4,25 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
-const links = [
-  { href: '/', label: 'Home' },
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/flows', label: 'Flows' },
-  { href: '/features', label: 'Features' },
-  { href: '/contact', label: 'Contact' },
-  { href: '/about', label: 'About' },
-]
+import LocaleSwitcher from './LocaleSwitcher'
+import { useI18n } from './LocaleProvider'
 
 export default function SiteNav() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const { t } = useI18n()
+
+  const links = [
+    { href: '/', label: t('nav.home') },
+    { href: '/dashboard', label: t('nav.dashboard') },
+    { href: '/flows', label: t('nav.flows') },
+    { href: '/journeys', label: t('nav.journeys') },
+    { href: '/onboarding', label: t('nav.onboarding') },
+    { href: '/insights', label: t('nav.insights') },
+    { href: '/features', label: t('nav.features') },
+    { href: '/contact', label: t('nav.contact') },
+    { href: '/about', label: t('nav.about') },
+  ]
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-orange-500/10 bg-slate-950/85 backdrop-blur-lg">
@@ -48,6 +55,7 @@ export default function SiteNav() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <LocaleSwitcher />
           <Link
             href="/account"
             className="hidden rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] md:inline-flex"
@@ -83,6 +91,9 @@ export default function SiteNav() {
                 </Link>
               )
             })}
+            <div className="py-2">
+              <LocaleSwitcher />
+            </div>
             <Link
               href="/account"
               onClick={() => setOpen(false)}
