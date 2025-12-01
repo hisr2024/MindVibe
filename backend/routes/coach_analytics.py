@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db
 from backend.services.coach_analytics import CoachAnalyticsService
 
-router = APIRouter(prefix="/api/v1/coach", tags=["coach-analytics"])
+router = APIRouter(prefix="/coach", tags=["coach-analytics"])
 service = CoachAnalyticsService()
 
 

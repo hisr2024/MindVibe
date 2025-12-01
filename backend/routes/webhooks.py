@@ -17,7 +17,7 @@ from backend.services.task_queue import dispatch_async_task
 
 logger = logging.getLogger("mindvibe.webhooks")
 
-router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
+router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
 
 async def _verify_signature(request: Request, secret: str) -> Dict[str, Any]:
