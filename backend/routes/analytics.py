@@ -1,38 +1,56 @@
-"""Analytics ingestion endpoints that forward events to PostHog or Segment."""
+"""Analytics ingestion endpoints for in-product behavioral metrics."""
 
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.services.event_pipeline import EventPipeline
+from backend.deps import get_db
+from backend.services.analytics_service import analytics_service
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
-class AnalyticsEvent(BaseModel):
+class AnalyticsEventPayload(BaseModel):
     event: str = Field(..., description="Human-readable event name")
-    user_id: str = Field(..., description="Distinct user identifier")
+    user_id: Optional[str] = Field(None, description="Distinct user identifier or anonymous key")
+    session_id: Optional[str] = Field(None, description="Client session identifier")
+    source: str = Field("client", description="Source context for the event")
     properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
-pipeline = EventPipeline()
-
-
 @router.post("/events")
-async def ingest_event(payload: AnalyticsEvent) -> Dict[str, Any]:
-    """Capture a single analytics event and forward to configured providers."""
+async def ingest_event(payload: AnalyticsEventPayload, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+    """Capture a single analytics event, persist it, and forward to providers."""
 
-    result = await pipeline.capture(
+    result = await analytics_service.record_event(
+        db,
         event=payload.event,
         user_id=payload.user_id,
+        session_id=payload.session_id,
+        source=payload.source,
         properties=payload.properties,
     )
-    return {"status": result.get("status", "sent"), "details": result}
+    return {"status": "ok", "result": result}
 
 
-@router.get("/buffer")
-async def buffered_events() -> Dict[str, Any]:
-    """Expose buffered events when no provider keys are configured."""
+@router.get("/events/recent")
+async def recent_events(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+    """Return the most recent stored analytics events and any buffered deliveries."""
 
-    return {"buffer": pipeline.flush_buffer()}
+    events = await analytics_service.recent_events(db)
+    return {
+        "events": [
+            {
+                "id": event.id,
+                "event": event.event_name,
+                "user_id": event.user_id,
+                "source": event.source,
+                "properties": event.properties or {},
+                "created_at": event.created_at.isoformat() if event.created_at else None,
+            }
+            for event in events
+        ],
+        "buffer": analytics_service.buffered_events(),
+    }

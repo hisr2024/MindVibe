@@ -1,3 +1,7 @@
+"""Central service for capturing analytics events with persistence and delivery."""
+
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 import logging
@@ -5,51 +9,70 @@ from collections import defaultdict
 from datetime import datetime
 
 class AnalyticsService:
-    def __init__(self):
-        self.user_engagement = []
-        self.crisis_incidents = []
-        self.domain_usage = defaultdict(int)
-        self.response_quality = []
-        self.retention_metrics = defaultdict(int)
+    """Persist analytics events and forward them to downstream providers."""
 
-    def track_user_engagement(self, user_id, action):
-        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        self.user_engagement.append({
-            'user_id': user_id,
-            'action': action,
-            'timestamp': timestamp
-        })
-        logging.info(f"User Engagement Tracked: {user_id} performed {action} at {timestamp}")
+    def __init__(self, pipeline: EventPipeline | None = None) -> None:
+        self.pipeline = pipeline or EventPipeline()
+        self.buffer_limit = settings.ANALYTICS_BUFFER_LIMIT
 
-    def log_crisis_incident(self, user_id, incident_type):
-        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        self.crisis_incidents.append({
-            'user_id': user_id,
-            'incident_type': incident_type,
-            'timestamp': timestamp
-        })
-        logging.warning(f"Crisis Incident Logged: {incident_type} by {user_id} at {timestamp}")
+    async def record_event(
+        self,
+        db: AsyncSession,
+        *,
+        event: str,
+        user_id: str | None,
+        session_id: str | None = None,
+        source: str = "client",
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Store an analytics event and relay it to configured providers."""
 
-    def track_domain_usage(self, domain):
-        self.domain_usage[domain] += 1
-        logging.info(f"Domain Usage Tracked: {domain} usage incremented.")
+        payload = properties or {}
 
-    def log_response_quality(self, user_id, rating):
-        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        self.response_quality.append({
-            'user_id': user_id,
-            'rating': rating,
-            'timestamp': timestamp
-        })
-        logging.info(f"Response Quality Logged: {user_id} rated {rating} at {timestamp}")
+        db_event = AnalyticsEvent(
+            user_id=user_id,
+            session_id=session_id,
+            event_name=event,
+            source=source,
+            properties=payload,
+        )
+        db.add(db_event)
+        await db.commit()
+        await db.refresh(db_event)
 
-    def analyze_retention(self, user_id):
-        # This function would implement logic to analyze user retention
-        # Placeholder for retention analysis
-        self.retention_metrics[user_id] += 1
-        logging.info(f"Retention Metrics Updated for user: {user_id}")
+        delivery_result: dict[str, Any] | None = None
+        try:
+            delivery_result = await self.pipeline.capture(
+                event=event,
+                user_id=user_id or "anonymous",
+                properties={**payload, "db_event_id": db_event.id, "source": source},
+            )
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.exception("analytics_delivery_failed", extra={"event": event, "error": str(exc)})
 
-# Example usage:
-# analytics = AnalyticsService()
-# analytics.track_user_engagement('user123', 'login')
-# analytics.log_crisis_incident('user123', 'system_failure')
+        buffered = self.pipeline.buffer_snapshot()
+        if len(buffered) > self.buffer_limit:
+            self.pipeline.trim_buffer(self.buffer_limit)
+            buffered = self.pipeline.buffer_snapshot()
+        if buffered:
+            logger.info(
+                "analytics_buffer_present",
+                extra={"buffer_size": len(buffered), "most_recent": buffered[-1]},
+            )
+
+        return {
+            "event_id": db_event.id,
+            "stored": True,
+            "delivery": delivery_result or {"status": "buffered", "buffer_size": len(buffered)},
+        }
+
+    async def recent_events(self, db: AsyncSession, limit: int = 50) -> list[AnalyticsEvent]:
+        stmt = select(AnalyticsEvent).order_by(AnalyticsEvent.created_at.desc()).limit(limit)
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    def buffered_events(self) -> list[dict[str, Any]]:
+        return self.pipeline.buffer_snapshot()
+
+
+analytics_service = AnalyticsService()

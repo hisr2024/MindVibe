@@ -63,6 +63,18 @@ class Settings(BaseSettings):
     PROMETHEUS_ENABLED: bool = os.getenv("PROMETHEUS_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
     OTEL_EXPORTER_OTLP_ENDPOINT: str = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
     OTEL_SERVICE_NAME: str = os.getenv("OTEL_SERVICE_NAME", "mindvibe-api")
+
+    # Email delivery
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USERNAME: str = os.getenv("SMTP_USERNAME", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL", "")
+    SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in {"1", "true", "yes", "on"}
+
+    # Product analytics
+    ANALYTICS_BUFFER_LIMIT: int = int(os.getenv("ANALYTICS_BUFFER_LIMIT", "250"))
+    FRONTEND_BASE_URL: str = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
     
     class Config:
         """Pydantic config."""
