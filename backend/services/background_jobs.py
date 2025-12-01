@@ -6,6 +6,9 @@ import logging
 from dataclasses import dataclass
 from typing import Awaitable, Callable
 
+from backend.core.settings import settings
+from backend.services.task_queue import dispatch_async_task
+
 logger = logging.getLogger("mindvibe.jobs")
 
 
@@ -36,6 +39,9 @@ class JobQueue:
                 self.queue.task_done()
 
     async def _dispatch(self, task: TaskEnvelope) -> None:
+        if settings.USE_CELERY:
+            dispatch_async_task(task.name, task.payload)
+            return
         if task.name == "journal_summary":
             await self._generate_summary(task.payload)
         else:
@@ -53,8 +59,15 @@ job_queue = JobQueue()
 
 
 async def ensure_jobs_started() -> None:
+    if settings.USE_CELERY:
+        logger.info("celery_mode_enabled")
+        return
     await job_queue.start()
 
 
 async def enqueue_journal_summary(entry_id: int, user_id: int) -> None:
-    await job_queue.enqueue("journal_summary", {"entry_id": entry_id, "user_id": user_id})
+    payload = {"entry_id": entry_id, "user_id": user_id}
+    if settings.USE_CELERY:
+        dispatch_async_task("journal_summary", payload)
+        return
+    await job_queue.enqueue("journal_summary", payload)
