@@ -7,16 +7,20 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db, get_user_id
+from backend.middleware.feature_gates import require_feature
 from backend.models import JournalEntry
 from backend.schemas import JournalEntryIn, JournalEntryOut, JournalExport
-from backend.middleware.feature_gates import require_feature
 from backend.security.encryption import EncryptionManager
 from backend.security.rate_limiter import rate_limit
+from backend.services.analytics_service import AnalyticsService
 from backend.services.background_jobs import enqueue_journal_summary
 from backend.services.object_storage import JournalObjectArchiver
+from backend.services.safety_validator import SafetyValidator
 
 router = APIRouter(prefix="/api/journal", tags=["journal"])
 logger = logging.getLogger("mindvibe.journal")
+analytics = AnalyticsService()
+safety_validator = SafetyValidator()
 
 
 @router.post("/entries", response_model=JournalEntryOut, dependencies=[Depends(rate_limit(10, 60))])
