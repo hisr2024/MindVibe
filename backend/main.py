@@ -14,9 +14,9 @@ print("🕉️  MINDVIBE - STARTUP SEQUENCE")
 print("="*80)
 
 # Set API key explicitly for this module
-from backend.security.secret_manager import secret_manager
+from backend.security.secret_manager import get
 
-OPENAI_API_KEY = secret_manager().get("OPENAI_API_KEY", "").strip()
+OPENAI_API_KEY = (get("OPENAI_API_KEY", "") or "").strip()
 print(f"✅ OPENAI_API_KEY found: {bool(OPENAI_API_KEY)}")
 print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
 
