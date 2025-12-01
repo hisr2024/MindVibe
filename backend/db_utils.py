@@ -25,6 +25,15 @@ def build_database_url() -> str:
 
     raw_url = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
 
+    # SQLite URLs require a different normalization path because they do not
+    # support the same query-string TLS parameters. When using an in-memory
+    # database (common in tests), ensure the URL retains the triple-slash form
+    # that SQLAlchemy expects.
+    if raw_url.startswith("sqlite"):
+        if raw_url.startswith("sqlite+aiosqlite:") and "//" not in raw_url.split(":", 1)[1]:
+            return "sqlite+aiosqlite:///:memory:"
+        return raw_url
+
     if raw_url.startswith("postgres://"):
         raw_url = raw_url.replace("postgres://", "postgresql+asyncpg://", 1)
     elif raw_url.startswith("postgresql://"):

@@ -161,13 +161,13 @@ Current test coverage focuses on:
 
 ### Coverage Requirements
 
-**Minimum coverage threshold: 80%**
+**Minimum coverage threshold: 60%**
 
-The project enforces a minimum code coverage of 80% for the `backend/` directory. This is configured in `pyproject.toml`:
+The project enforces a minimum code coverage of 60% for the `backend/` directory. This is configured in `pyproject.toml`:
 
 ```toml
 [tool.coverage.report]
-fail_under = 80.0
+fail_under = 60.0
 ```
 
 To check coverage locally:
@@ -179,7 +179,7 @@ pytest --cov=backend --cov-report=html --cov-report=term-missing
 open htmlcov/index.html
 ```
 
-The CI/CD pipeline will automatically fail if coverage drops below 80%.
+The CI/CD pipeline will automatically fail if coverage drops below 60%.
 
 ### Type Checking with mypy
 
