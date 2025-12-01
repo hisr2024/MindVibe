@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+}
+
 @keyframes chatWobbleLift {
   0% { transform: translateY(0) rotate(0deg); }
   20% { transform: translateY(-6px) rotate(-1deg); }
@@ -47,6 +51,30 @@
 
 .breathing-orb {
   animation: calmBreath 10s ease-in-out infinite;
+}
+
+.mobile-safe-area {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+}
+
+.mobile-safe-padding {
+  padding-top: max(env(safe-area-inset-top), 0px);
+  padding-left: max(env(safe-area-inset-left), 0px);
+  padding-right: max(env(safe-area-inset-right), 0px);
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@supports not (padding: env(safe-area-inset-bottom)) {
+  .mobile-safe-area {
+    padding-bottom: 12px;
+  }
+
+  .mobile-safe-padding {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+  }
 }
 
 .arrow-track {

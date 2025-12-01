@@ -206,7 +206,7 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8 pb-28">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8 pb-28 mobile-safe-padding">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/30 via-[#ff9933]/14 to-transparent blur-3xl" />
         <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/20 via-orange-500/12 to-transparent blur-[120px]" />
@@ -2458,7 +2458,7 @@ function Journal() {
 function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void, onClarity: () => void, onJournal: () => void }) {
   return (
     <div className="fixed inset-x-4 bottom-4 z-30 md:hidden">
-      <div className="flex items-center gap-3 rounded-2xl border border-orange-500/30 bg-[#0b0b0f]/95 p-3 shadow-[0_18px_70px_rgba(255,115,39,0.3)] backdrop-blur touch-manipulation">
+      <div className="mobile-safe-area flex items-center gap-3 rounded-2xl border border-orange-500/30 bg-gradient-to-r from-[#0b0b0f]/95 via-[#0d0d12]/95 to-[#0b0b0f]/95 p-3 shadow-[0_18px_70px_rgba(255,115,39,0.3)] backdrop-blur touch-manipulation">
         <button
           onClick={onChat}
           aria-label="Open chat"
