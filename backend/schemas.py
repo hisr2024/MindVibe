@@ -74,8 +74,13 @@ class JournalEntryOut(BaseModel):
     mood_score: int | None
     tags: list[str] | None
     attachments: list[dict] | None
+    archive_locator: dict | None = None
     created_at: str
     updated_at: str | None
+    crisis_detected: bool = False
+    crisis_types: list[str] | None = None
+    crisis_severity: str | None = None
+    crisis_support_message: str | None = None
 
 
 class JournalExport(BaseModel):

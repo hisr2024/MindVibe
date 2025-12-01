@@ -1,7 +1,13 @@
 'use client'
 
 import { useI18n } from './LocaleProvider'
-import { supportedLocales } from '../../lib/i18n/messages'
+import { supportedLocales, type SupportedLocale } from '../../lib/i18n/messages'
+
+const localeLabels: Record<SupportedLocale, string> = {
+  en: 'English',
+  es: 'Español',
+  hi: 'हिंदी',
+}
 
 export default function LocaleSwitcher() {
   const { locale, setLocale, t } = useI18n()
@@ -21,7 +27,8 @@ export default function LocaleSwitcher() {
                 : 'border-orange-500/20 bg-black/30 text-orange-100/80 hover:border-orange-400/50'
             }`}
           >
-            {code === 'en' ? t('locale.switcher.english') : t('locale.switcher.spanish')}
+            {t(`locale.switcher.${code === 'es' ? 'spanish' : code === 'hi' ? 'hindi' : 'english'}`)}
+            <span className="sr-only">({localeLabels[code]})</span>
           </button>
         ))}
       </div>

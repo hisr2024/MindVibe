@@ -32,7 +32,7 @@ from backend.services.session_service import (
     touch_session,
 )
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 # ----------------------

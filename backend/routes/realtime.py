@@ -8,7 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from backend.services.realtime import manager
 
-router = APIRouter(prefix="/api/v1/live", tags=["realtime"])
+router = APIRouter(prefix="/live", tags=["realtime"])
 
 
 @router.websocket("/journal/{user_id}")

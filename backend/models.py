@@ -116,6 +116,7 @@ class JournalEntry(SoftDeleteMixin, Base):
     mood_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     attachments: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    archive_locator: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )

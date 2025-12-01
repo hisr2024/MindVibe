@@ -14,7 +14,9 @@ print("🕉️  MINDVIBE - STARTUP SEQUENCE")
 print("="*80)
 
 # Set API key explicitly for this module
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+from backend.security.secret_manager import secret_manager
+
+OPENAI_API_KEY = secret_manager().get("OPENAI_API_KEY", "").strip()
 print(f"✅ OPENAI_API_KEY found: {bool(OPENAI_API_KEY)}")
 print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
 
@@ -28,7 +30,7 @@ RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower
     "yes",
 )
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import APIRouter, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -39,8 +41,10 @@ from backend.core.logging import configure_logging, log_request
 from backend.core.performance import performance_middleware, performance_tracker
 from backend.db_utils import build_database_url, ensure_base_schema
 from backend.middleware.feature_gates import PlanGateMiddleware
+from backend.middleware.rate_limit import global_rate_limit
 from backend.observability import setup_observability
 from backend.services.background_jobs import ensure_jobs_started
+from backend.services.data_retention import apply_retention_policies
 
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
     "1",
@@ -60,8 +64,12 @@ app = FastAPI(
     description="AI Mental Wellness Coach Backend",
 )
 
+API_V1_PREFIX = "/api/v1"
+api_v1_router = APIRouter(prefix=API_V1_PREFIX)
+
 configure_logging()
 setup_observability(app)
+register_exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,6 +82,7 @@ app.add_middleware(
 )
 
 app.add_middleware(PlanGateMiddleware)
+app.middleware("http")(global_rate_limit)
 
 app.middleware("http")(log_request)
 app.middleware("http")(performance_middleware)
@@ -98,6 +107,9 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 @app.on_event("startup")
 async def startup():
     await ensure_base_schema(engine)
+
+    # Apply data retention safeguards before processing traffic
+    await apply_retention_policies(SessionLocal)
 
     try:
         if RUN_MIGRATIONS_ON_STARTUP:
@@ -126,15 +138,15 @@ try:
     print("✅ [SUCCESS] Chat router imported successfully")
     
     print("[2/3] Attempting to include router in FastAPI app...")
-    app.include_router(chat_router)
+    api_v1_router.include_router(chat_router)
     print("✅ [SUCCESS] Chat router included in FastAPI app")
     
     kiaan_router_loaded = True
     print("[3/3] KIAAN Router Status: ✅ OPERATIONAL")
     print("✅ Endpoints now available:")
-    print("   • POST   /api/chat/message - KIAAN chat endpoint")
-    print("   • GET    /api/chat/health - Health check")
-    print("   • GET    /api/chat/about - KIAAN information")
+    print(f"   • POST   {API_V1_PREFIX}/chat/message - KIAAN chat endpoint")
+    print(f"   • GET    {API_V1_PREFIX}/chat/health - Health check")
+    print(f"   • GET    {API_V1_PREFIX}/chat/about - KIAAN information")
     
 except ImportError as e:
     print(f"❌ [IMPORT ERROR] Failed to import chat router:")
@@ -151,7 +163,7 @@ except Exception as e:
 print("\n[Gita API] Attempting to import Gita API router...")
 try:
     from backend.routes.gita_api import router as gita_router
-    app.include_router(gita_router)
+    api_v1_router.include_router(gita_router)
     print("✅ [SUCCESS] Gita API router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Gita API router: {e}")
@@ -160,7 +172,7 @@ except Exception as e:
 print("\n[Auth] Attempting to import Auth router...")
 try:
     from backend.routes.auth import router as auth_router
-    app.include_router(auth_router)
+    api_v1_router.include_router(auth_router)
     print("✅ [SUCCESS] Auth router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
@@ -169,7 +181,7 @@ except Exception as e:
 print("\n[Journal] Attempting to import Journal router...")
 try:
     from backend.routes.journal import router as journal_router
-    app.include_router(journal_router)
+    api_v1_router.include_router(journal_router)
     print("✅ [SUCCESS] Journal router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Journal router: {e}")
@@ -178,7 +190,7 @@ except Exception as e:
 print("\n[Profile] Attempting to import Profile router...")
 try:
     from backend.routes.profile import router as profile_router
-    app.include_router(profile_router)
+    api_v1_router.include_router(profile_router)
     print("✅ [SUCCESS] Profile router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Profile router: {e}")
@@ -187,16 +199,26 @@ except Exception as e:
 print("\n[Karma Footprint] Attempting to import Karma Footprint router...")
 try:
     from backend.routes.karma_footprint import router as karma_router
-    app.include_router(karma_router)
+    api_v1_router.include_router(karma_router)
     print("✅ [SUCCESS] Karma Footprint router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Footprint router: {e}")
+
+# Load Compliance router
+print("\n[Compliance] Attempting to import Data Compliance router...")
+try:
+    from backend.routes.compliance import router as compliance_router
+
+    api_v1_router.include_router(compliance_router)
+    print("✅ [SUCCESS] Compliance router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Compliance router: {e}")
 
 # Load Guidance Engines router
 print("\n[Guidance Engines] Attempting to import Guidance router...")
 try:
     from backend.routes.guidance import router as guidance_router
-    app.include_router(guidance_router)
+    api_v1_router.include_router(guidance_router)
     print("✅ [SUCCESS] Guidance router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Guidance router: {e}")
@@ -205,7 +227,7 @@ except Exception as e:
 print("\n[Data Governance] Attempting to import Data router...")
 try:
     from backend.routes.data_governance import router as data_router
-    app.include_router(data_router)
+    api_v1_router.include_router(data_router)
     print("✅ [SUCCESS] Data governance router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
@@ -214,7 +236,7 @@ except Exception as e:
 print("\n[Insights] Attempting to import Insights router...")
 try:
     from backend.routes.insights import router as insights_router
-    app.include_router(insights_router)
+    api_v1_router.include_router(insights_router)
     print("✅ [SUCCESS] Insights router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Insights router: {e}")
@@ -222,7 +244,7 @@ except Exception as e:
 print("\n[Realtime] Attempting to import live streaming router...")
 try:
     from backend.routes.realtime import router as realtime_router
-    app.include_router(realtime_router)
+    api_v1_router.include_router(realtime_router)
     print("✅ [SUCCESS] Realtime router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Realtime router: {e}")
@@ -238,7 +260,7 @@ except Exception as e:
 print("\n[Coach Analytics] Attempting to import analytics dashboard router...")
 try:
     from backend.routes.coach_analytics import router as coach_analytics_router
-    app.include_router(coach_analytics_router)
+    api_v1_router.include_router(coach_analytics_router)
     print("✅ [SUCCESS] Coach analytics router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Coach analytics router: {e}")
@@ -246,7 +268,7 @@ except Exception as e:
 print("\n[Recommendations] Attempting to import recommendation router...")
 try:
     from backend.routes.recommendations import router as recommendations_router
-    app.include_router(recommendations_router)
+    api_v1_router.include_router(recommendations_router)
     print("✅ [SUCCESS] Recommendation router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Recommendation router: {e}")
@@ -254,7 +276,7 @@ except Exception as e:
 print("\n[Mobile] Attempting to import mobile manifest router...")
 try:
     from backend.routes.mobile import router as mobile_router
-    app.include_router(mobile_router)
+    api_v1_router.include_router(mobile_router)
     print("✅ [SUCCESS] Mobile router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Mobile router: {e}")
@@ -262,6 +284,8 @@ except Exception as e:
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
+
+app.include_router(api_v1_router)
 
 
 async def _assert_migrations_healthy() -> dict[str, Any]:
@@ -318,7 +342,7 @@ async def health() -> Dict[str, Any]:
         "migration": migration_state,
     }
 
-@app.get("/api/health")
+@app.get(f"{API_V1_PREFIX}/health")
 async def api_health() -> Dict[str, Any]:
     migration_state = await _assert_migrations_healthy()
     return {

@@ -10,9 +10,15 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sentry_sdk import capture_exception
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from backend.core.logging import request_id_ctx
+from backend.core.logging import (
+    correlation_id_ctx,
+    request_id_ctx,
+    user_id_ctx,
+)
+from backend.core.settings import settings
 
 
 def _request_id(request: Request) -> str:
@@ -59,16 +65,24 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     request_id = _request_id(request)
-    logging.getLogger("mindvibe").error(
-        json.dumps(
-            {
-                "event": "unhandled_exception",
-                "request_id": request_id,
-                "error": str(exc),
-                "trace": traceback.format_exc(),
-            }
-        )
-    )
+    correlation_id = getattr(request.state, "correlation_id", None) or request.headers.get("x-correlation-id")
+    if correlation_id:
+        correlation_id_ctx.set(correlation_id)
+
+    payload = {
+        "event": "unhandled_exception",
+        "request_id": request_id,
+        "correlation_id": correlation_id,
+        "path": request.url.path,
+        "method": request.method,
+        "user_id": user_id_ctx.get(),
+        "error": str(exc),
+        "trace": traceback.format_exc(),
+    }
+
+    logging.getLogger("mindvibe").error(payload)
+    if settings.SENTRY_DSN:
+        capture_exception(exc)
     payload = {
         "error": {
             "code": 500,
