@@ -19,17 +19,23 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const endRef = useRef<HTMLDivElement | null>(null)
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const [autoScrollPinned, setAutoScrollPinned] = useState(true)
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (!autoScrollPinned) return
+    const container = listRef.current
+    if (!container) return
+
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  }, [messages, autoScrollPinned])
 
   async function sendMessage(text?: string) {
     const content = (text ?? input).trim()
     if (!content) return
 
     const userMessage: Message = { sender: 'user', text: content, timestamp: new Date().toISOString() }
+    setAutoScrollPinned(true)
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
@@ -66,6 +72,14 @@ export default function Chat() {
     }
   }
 
+  function handleScroll() {
+    const container = listRef.current
+    if (!container) return
+
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
+    setAutoScrollPinned(distanceFromBottom < 48)
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
@@ -79,7 +93,11 @@ export default function Chat() {
           </button>
         ))}
       </div>
-      <div className="h-64 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4">
+      <div
+        ref={listRef}
+        onScroll={handleScroll}
+        className="h-64 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 scroll-stable"
+      >
         {messages.length === 0 && (
           <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
         )}
@@ -103,7 +121,6 @@ export default function Chat() {
               </div>
             </div>
           ))}
-          <div ref={endRef} />
         </div>
       </div>
       <div className="flex flex-col gap-3 md:flex-row">
