@@ -27,6 +27,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
+from backend.core.migrations import apply_sql_migrations
 from backend.models import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
@@ -76,6 +77,16 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    try:
+        applied = await apply_sql_migrations(engine)
+        if applied:
+            print(f"✅ Applied SQL migrations: {', '.join(applied)}")
+        else:
+            print("ℹ️ No new SQL migrations to apply")
+    except Exception as exc:
+        print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
+        raise
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
 kiaan_router_loaded = False
