@@ -1041,6 +1041,22 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setAutoScrollPinned(distanceFromBottom < 120)
   }
 
+  function scrollToTop() {
+    const container = messageListRef.current
+    if (!container) return
+
+    setAutoScrollPinned(false)
+    container.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function scrollToBottom() {
+    const container = messageListRef.current
+    if (!container) return
+
+    setAutoScrollPinned(true)
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  }
+
   function renderAssistantContent(content: string, index: number) {
     const view = detailViews[index] ?? 'summary'
     const summary = summarizeContent(content)
@@ -1296,39 +1312,69 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
-      <div
-        ref={messageListRef}
-        onScroll={handleMessageListScroll}
-        className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
-      >
-        {messages.length === 0 && (
-          <div className="text-center text-orange-100/70 py-20 md:py-32">
-            <p className="text-6xl mb-4">✨</p>
-            <p className="text-xl mb-2">How can I guide you today?</p>
-            <p className="text-sm text-orange-100/70">Share what's on your mind</p>
-          </div>
-        )}
-
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
-              msg.role === 'user'
-                ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
-                : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
-            }`}>
-              {msg.role === 'assistant' ? (
-                renderAssistantContent(msg.content, i)
-              ) : (
-                <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-              )}
+      <div className="relative">
+        <div
+          ref={messageListRef}
+          onScroll={handleMessageListScroll}
+          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
+        >
+          {messages.length === 0 && (
+            <div className="text-center text-orange-100/70 py-20 md:py-32">
+              <p className="text-6xl mb-4">✨</p>
+              <p className="text-xl mb-2">How can I guide you today?</p>
+              <p className="text-sm text-orange-100/70">Share what's on your mind</p>
             </div>
-          </div>
-        ))}
+          )}
 
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
-              <span className="animate-pulse">KIAAN is reflecting...</span>
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
+                msg.role === 'user'
+                  ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
+                  : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
+              }`}>
+                {msg.role === 'assistant' ? (
+                  renderAssistantContent(msg.content, i)
+                ) : (
+                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
+                <span className="animate-pulse">KIAAN is reflecting...</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {messages.length > 0 && (
+          <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4">
+            <div className="pointer-events-auto flex flex-col gap-2 rounded-2xl bg-black/70 border border-orange-500/30 px-3 py-3 shadow-[0_12px_40px_rgba(255,115,39,0.18)] backdrop-blur">
+              <button
+                onClick={scrollToTop}
+                className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/50"
+              >
+                ↑ Scroll up
+              </button>
+              <button
+                onClick={scrollToBottom}
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-3 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+              >
+                ↓ Scroll down
+              </button>
+              <span
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold text-center border ${
+                  autoScrollPinned
+                    ? 'bg-emerald-500/15 text-emerald-50 border-emerald-200/30'
+                    : 'bg-white/5 text-orange-100/80 border-orange-500/25'
+                }`}
+              >
+                {autoScrollPinned ? 'Pinned to latest replies' : 'Manual scroll mode'}
+              </span>
             </div>
           </div>
         )}
