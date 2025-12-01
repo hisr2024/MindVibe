@@ -463,6 +463,8 @@ npm audit
 
 ### **Backend Development:**
 
+Set `DATABASE_URL` in your environment (or `.env`) first, then keep the database schema up to date with Alembic before launching services. Alembic now requires an explicit `DATABASE_URL`—there is no SQLite fallback—to avoid running migrations against the wrong database.
+
 ```bash
 # Start backend with hot reload
 uvicorn backend.main:app --reload
