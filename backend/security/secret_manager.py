@@ -85,3 +85,24 @@ class SecretManager:
                 )
                 return None
         return None
+
+
+_singleton: SecretManager | None = None
+
+
+def secret_manager() -> SecretManager:
+    """Return a singleton SecretManager instance."""
+
+    global _singleton
+    if _singleton is None:
+        _singleton = SecretManager()
+    return _singleton
+
+
+def get(key: str, default: Optional[str] = None) -> Optional[str]:
+    """Retrieve a secret with an environment variable fallback."""
+
+    value = secret_manager().get_secret(key)
+    if value is None:
+        return os.getenv(key, default)
+    return value
