@@ -14,6 +14,21 @@ function fromBase64(value: string) {
 
 const JOURNAL_KEY_STORAGE = 'kiaan_journal_key'
 const JOURNAL_ENTRY_STORAGE = 'kiaan_journal_entries_secure'
+const JOURNAL_CAPTURE_EVENT = 'kiaan:save-to-journal'
+
+type JournalEntry = {
+  id: string
+  title: string
+  body: string
+  mood: string
+  at: string
+}
+
+type JournalCapturePayload = {
+  title?: string
+  body: string
+  mood?: string
+}
 
 async function getEncryptionKey() {
   const cached = typeof window !== 'undefined' ? window.localStorage.getItem(JOURNAL_KEY_STORAGE) : null
@@ -885,6 +900,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
   const [autoScrollPinned, setAutoScrollPinned] = useState(true)
+  const [journalNotice, setJournalNotice] = useState<string | null>(null)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const clarityInitialState: ClaritySession = {
@@ -1041,20 +1057,22 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setAutoScrollPinned(distanceFromBottom < 120)
   }
 
-  function scrollToTop() {
-    const container = messageListRef.current
-    if (!container) return
+  function sendSolutionToJournal(content: string) {
+    const clean = content.trim()
+    if (!clean || typeof window === 'undefined') return
 
-    setAutoScrollPinned(false)
-    container.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    window.dispatchEvent(
+      new CustomEvent<JournalCapturePayload>(JOURNAL_CAPTURE_EVENT, {
+        detail: {
+          title: 'KIAAN solution',
+          body: clean,
+          mood: 'Reflective'
+        }
+      })
+    )
 
-  function scrollToBottom() {
-    const container = messageListRef.current
-    if (!container) return
-
-    setAutoScrollPinned(true)
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    setJournalNotice('Sent to journal for safekeeping.')
+    setTimeout(() => setJournalNotice(null), 2400)
   }
 
   function renderAssistantContent(content: string, index: number) {
@@ -1108,6 +1126,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const activeGroundingStep = claritySession.started
     ? Math.min(CLARITY_GROUNDING_SEQUENCE.length - 1, Math.floor((60 - claritySession.countdown) / 10))
     : 0
+  const latestAssistantMessage = [...messages].reverse().find(msg => msg.role === 'assistant')
 
   return (
     <section
@@ -1316,7 +1335,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <div
           ref={messageListRef}
           onScroll={handleMessageListScroll}
-          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
+          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable chat-scrollbar"
         >
           {messages.length === 0 && (
             <div className="text-center text-orange-100/70 py-20 md:py-32">
@@ -1352,29 +1371,24 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         </div>
 
         {messages.length > 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4">
-            <div className="pointer-events-auto flex flex-col gap-2 rounded-2xl bg-black/70 border border-orange-500/30 px-3 py-3 shadow-[0_12px_40px_rgba(255,115,39,0.18)] backdrop-blur">
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur flex-col sm:flex-row sm:items-center">
+            <div className="space-y-1 text-orange-100/80">
+              <p className="text-sm font-semibold text-orange-50">Save the latest KIAAN guidance</p>
+              <p className="text-xs">Use the scrollbar inside the conversation to review older messages, then send the newest solution straight to your journal.</p>
+            </div>
+            <div className="flex flex-col items-stretch gap-2 sm:items-end">
               <button
-                onClick={scrollToTop}
-                className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/50"
+                onClick={() => latestAssistantMessage && sendSolutionToJournal(latestAssistantMessage.content)}
+                disabled={!latestAssistantMessage}
+                className="rounded-lg border border-orange-400/30 bg-orange-500/10 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/60 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                ↑ Scroll up
+                Bring latest solution to the journal
               </button>
-              <button
-                onClick={scrollToBottom}
-                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-3 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-              >
-                ↓ Scroll down
-              </button>
-              <span
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold text-center border ${
-                  autoScrollPinned
-                    ? 'bg-emerald-500/15 text-emerald-50 border-emerald-200/30'
-                    : 'bg-white/5 text-orange-100/80 border-orange-500/25'
-                }`}
-              >
-                {autoScrollPinned ? 'Pinned to latest replies' : 'Manual scroll mode'}
-              </span>
+              {journalNotice && (
+                <span className="rounded-full border border-emerald-200/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-50 text-center">
+                  {journalNotice}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -2189,14 +2203,6 @@ function PublicChatRooms() {
   )
 }
 
-type JournalEntry = {
-  id: string
-  title: string
-  body: string
-  mood: string
-  at: string
-}
-
 function Journal() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -2249,6 +2255,30 @@ function Journal() {
     return () => {
       cancelled = true
     }
+  }, [])
+
+  useEffect(() => {
+    function handleExternalSave(event: Event) {
+      const detail = (event as CustomEvent<JournalCapturePayload>).detail
+      if (!detail || typeof detail.body !== 'string') return
+
+      const cleanBody = detail.body.trim()
+      if (!cleanBody) return
+
+      const entry: JournalEntry = {
+        id: crypto.randomUUID(),
+        title: detail.title?.trim() || 'KIAAN solution',
+        body: cleanBody,
+        mood: detail.mood ?? 'Reflective',
+        at: new Date().toISOString()
+      }
+
+      setEntries(prev => [entry, ...prev])
+      setEncryptionMessage('Added from Kiaan chat and saved locally.')
+    }
+
+    window.addEventListener(JOURNAL_CAPTURE_EVENT, handleExternalSave as EventListener)
+    return () => window.removeEventListener(JOURNAL_CAPTURE_EVENT, handleExternalSave as EventListener)
   }, [])
 
   useEffect(() => {

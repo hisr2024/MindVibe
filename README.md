@@ -452,6 +452,12 @@ npm audit
 - [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
 - [Gita Corpus Pipeline](docs/GITA_CORPUS_README.md) - Bhagavad Gita corpus validation, import, and maintenance
 
+### **Gita Corpus Pipeline:**
+- [Gita Corpus README](docs/GITA_CORPUS_README.md) - Full 700-verse corpus coverage, sources, and licensing
+- Validator: `scripts/validate_gita_corpus.py` - Validates chapter files and verse counts
+- Importer: `scripts/import_gita_corpus.py` - Idempotent upsert into the database
+- Corpus files: `data/gita/corpus/01.json` … `18.json`
+
 ### **Additional Resources:**
 - [Backend Reorganization](BACKEND_REORGANIZATION_COMPLETE.md) - Migration details
 - [Cleanup Progress](CLEANUP_PROGRESS.md) - Project cleanup tracking
