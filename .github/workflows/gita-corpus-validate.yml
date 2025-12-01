@@ -1,0 +1,26 @@
+name: Validate Gita Corpus
+
+on:
+  pull_request:
+    paths:
+      - 'data/gita/corpus/**'
+      - 'scripts/validate_gita_corpus.py'
+      - '.github/workflows/gita-corpus-validate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/gita/corpus/**'
+      - 'scripts/validate_gita_corpus.py'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run validator
+        run: |
+          python scripts/validate_gita_corpus.py
