@@ -1,12 +1,3 @@
-"""Validator script for Bhagavad Gita corpus JSON files.
-
-This script validates the structure, verse counts, and required fields
-of the Gita corpus files located in data/gita/corpus/.
-
-Usage:
-    python scripts/validate_gita_corpus.py
-"""
-
 import json
 import sys
 from pathlib import Path
@@ -48,7 +39,6 @@ REQUIRED_FIELDS = [
 
 
 def main() -> None:
-    """Validate all chapter files in the corpus directory."""
     errors: list[str] = []
     for ch in range(1, 19):
         file = DATA_DIR / f"{ch:02}.json"
@@ -56,19 +46,21 @@ def main() -> None:
             errors.append(f"Missing file for chapter {ch}: {file}")
             continue
         try:
-            verses = json.loads(file.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            errors.append(f"Invalid JSON in {file}: {exc}")
+            content = file.read_text(encoding="utf-8")
+        except OSError as e:
+            errors.append(f"Cannot read file {file}: {e}")
             continue
-        except OSError as exc:
-            errors.append(f"Error reading {file}: {exc}")
+        try:
+            verses = json.loads(content)
+        except json.JSONDecodeError as e:
+            errors.append(f"Invalid JSON in {file}: {e}")
             continue
 
         expected = CHAPTER_VERSE_COUNTS[ch]
         if len(verses) != expected:
             errors.append(f"Chapter {ch} has {len(verses)} verses, expected {expected}")
 
-        seen: set[str] = set()
+        seen = set()
         for v in verses:
             cid = f"{v.get('chapter')}.{v.get('verse')}"
             if cid in seen:

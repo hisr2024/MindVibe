@@ -1,14 +1,6 @@
-"""Importer script for Bhagavad Gita corpus into the database.
-
-This script performs an idempotent upsert of verse data from JSON files
-into the gita_verses table.
-
-Usage:
-    DATABASE_URL="postgresql://..." python scripts/import_gita_corpus.py
-"""
-
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -19,14 +11,12 @@ DATA_DIR = Path("data/gita/corpus")
 
 
 def load_chapter_file(path: Path) -> list[dict[str, Any]]:
-    """Load and parse a chapter JSON file."""
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def validate_verse_shape(v: dict[str, Any]) -> tuple[bool, list[str]]:
-    """Validate that a verse has all required fields."""
-    errors: list[str] = []
+    errors = []
     req = ["chapter", "verse", "sanskrit", "translations"]
     for k in req:
         if k not in v:
@@ -37,7 +27,6 @@ def validate_verse_shape(v: dict[str, Any]) -> tuple[bool, list[str]]:
 
 
 def normalize(v: dict[str, Any]) -> dict[str, Any]:
-    """Normalize verse data by setting default values for optional fields."""
     v.setdefault("themes", [])
     v.setdefault("principles", [])
     v.setdefault("sources", [])
@@ -47,51 +36,22 @@ def normalize(v: dict[str, Any]) -> dict[str, Any]:
     return v
 
 
-def ensure_unique_constraint(conn: psycopg2.extensions.connection) -> None:
-    """Ensure the unique constraint on (chapter, verse) exists.
-
-    This is a one-time setup that should ideally be in a migration,
-    but is included here for robustness during imports.
-    """
-    ensure_unique_constraint_sql = """
-    DO $$
-    BEGIN
-        IF NOT EXISTS (
-            SELECT 1 FROM pg_constraint
-            WHERE conname = 'uq_gita_verses_chapter_verse'
-        ) THEN
-            ALTER TABLE gita_verses
-            ADD CONSTRAINT uq_gita_verses_chapter_verse UNIQUE (chapter, verse);
-        END IF;
-    END $$;
-    """
-    with conn.cursor() as cur:
-        cur.execute(ensure_unique_constraint_sql)
-    conn.commit()
-
-
 def upsert_verses(
-    conn: psycopg2.extensions.connection, verses: list[dict[str, Any]]
+    conn: "psycopg2.extensions.connection", verses: list[dict[str, Any]]
 ) -> None:
-    """Upsert verses into the gita_verses table.
-
-    Note: Requires ensure_unique_constraint() to be called first.
-    """
     sql = """
     INSERT INTO gita_verses
-      (chapter, verse, sanskrit, transliteration, hindi, english,
-       word_meanings, principle, theme, source_id)
+      (chapter, verse, sanskrit, transliteration, hindi, english, word_meanings, principle, theme, source_id)
     VALUES
-      (%s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)
+      (%s,%s,%s,%s,%s,%s,%s,%s,%s,NULL)
     ON CONFLICT (chapter, verse) DO UPDATE SET
-      sanskrit = EXCLUDED.sanskrit,
-      transliteration = EXCLUDED.transliteration,
-      hindi = EXCLUDED.hindi,
-      english = EXCLUDED.english,
-      word_meanings = EXCLUDED.word_meanings,
-      principle = EXCLUDED.principle,
-      theme = EXCLUDED.theme,
-      updated_at = CURRENT_TIMESTAMP;
+      sanskrit=EXCLUDED.sanskrit,
+      transliteration=EXCLUDED.transliteration,
+      hindi=EXCLUDED.hindi,
+      english=EXCLUDED.english,
+      word_meanings=EXCLUDED.word_meanings,
+      principle=EXCLUDED.principle,
+      theme=EXCLUDED.theme;
     """
     params = []
     for v in verses:
@@ -114,24 +74,23 @@ def upsert_verses(
 
 
 def main() -> None:
-    """Main entry point for the importer."""
     chapter_files = sorted(DATA_DIR.glob("*.json"))
     if not chapter_files:
-        raise SystemExit(f"No chapter files found in {DATA_DIR}")
+        print(f"No chapter files found in {DATA_DIR}")
+        sys.exit(1)
 
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
-        raise SystemExit("DATABASE_URL environment variable is required")
+        print("DATABASE_URL environment variable is not set")
+        sys.exit(1)
 
-    conn = psycopg2.connect(database_url)
+    conn = None
     try:
-        # Ensure unique constraint for ON CONFLICT to work
-        ensure_unique_constraint(conn)
-
+        conn = psycopg2.connect(database_url)
         total, invalid = 0, 0
         for f in chapter_files:
             verses = load_chapter_file(f)
-            valid_batch: list[dict[str, Any]] = []
+            valid_batch = []
             for v in verses:
                 total += 1
                 v = normalize(v)
@@ -147,8 +106,12 @@ def main() -> None:
                 upsert_verses(conn, valid_batch)
 
         print(f"Processed: {total}, invalid: {invalid}")
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        sys.exit(1)
     finally:
-        conn.close()
+        if conn is not None:
+            conn.close()
 
 
 if __name__ == "__main__":
