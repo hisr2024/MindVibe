@@ -4,9 +4,18 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-import logging
-from collections import defaultdict
-from datetime import datetime
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.core.settings import settings
+from backend.models import AnalyticsEvent
+from backend.services.event_pipeline import EventPipeline
+
+
+logger = logging.getLogger("mindvibe.analytics_service")
+
 
 class AnalyticsService:
     """Persist analytics events and forward them to downstream providers."""
