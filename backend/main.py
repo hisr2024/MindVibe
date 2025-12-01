@@ -36,6 +36,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.core.logging import configure_logging, log_request
 from backend.db_utils import build_database_url, ensure_base_schema
+from backend.middleware.feature_gates import PlanGateMiddleware
+from backend.observability import setup_observability
 from backend.services.background_jobs import ensure_jobs_started
 
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
@@ -57,6 +59,7 @@ app = FastAPI(
 )
 
 configure_logging()
+setup_observability(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -67,6 +70,8 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=3600,
 )
+
+app.add_middleware(PlanGateMiddleware)
 
 app.middleware("http")(log_request)
 
@@ -201,6 +206,15 @@ try:
     print("✅ [SUCCESS] Data governance router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
+
+# Load Webhooks router
+print("\n[Webhooks] Attempting to import Webhooks router...")
+try:
+    from backend.routes.webhooks import router as webhooks_router
+    app.include_router(webhooks_router)
+    print("✅ [SUCCESS] Webhooks router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Webhooks router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
