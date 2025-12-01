@@ -12,6 +12,9 @@ on:
       - 'data/gita/corpus/**'
       - 'scripts/validate_gita_corpus.py'
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
