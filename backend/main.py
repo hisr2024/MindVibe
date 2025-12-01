@@ -227,6 +227,14 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Realtime router: {e}")
 
+print("\n[Analytics] Attempting to import analytics ingestion router...")
+try:
+    from backend.routes.analytics import router as analytics_router
+    app.include_router(analytics_router)
+    print("✅ [SUCCESS] Analytics router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Analytics router: {e}")
+
 print("\n[Coach Analytics] Attempting to import analytics dashboard router...")
 try:
     from backend.routes.coach_analytics import router as coach_analytics_router
