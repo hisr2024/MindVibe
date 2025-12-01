@@ -29,19 +29,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.models import Base
+from backend.db_utils import build_database_url
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
-RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+DATABASE_URL = build_database_url()
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
