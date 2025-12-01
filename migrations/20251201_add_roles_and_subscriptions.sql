@@ -3,7 +3,7 @@ ADD COLUMN IF NOT EXISTS role VARCHAR(32) NOT NULL DEFAULT 'member';
 
 CREATE TABLE IF NOT EXISTS stripe_customers (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(128) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     customer_id VARCHAR(128) UNIQUE NOT NULL,
     email VARCHAR(256),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -29,7 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_subscription_plans_created_at ON subscription_pla
 
 CREATE TABLE IF NOT EXISTS subscriptions (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(128) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     plan_id INTEGER REFERENCES subscription_plans(id) ON DELETE SET NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'active',
     stripe_subscription_id VARCHAR(128) UNIQUE,

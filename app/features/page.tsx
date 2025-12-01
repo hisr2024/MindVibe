@@ -1,3 +1,5 @@
+import AccessibilityChecklist from '../components/AccessibilityChecklist'
+
 export const metadata = {
   title: 'Features | MindVibe',
   description: 'Explore journaling, guided chats, dashboards, and accessibility-first design for calmer support.'
@@ -113,6 +115,8 @@ export default function FeaturesPage() {
           </div>
         </div>
       </section>
+
+      <AccessibilityChecklist />
 
       <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
         <h3 className="text-lg font-semibold text-orange-50">Performance & SEO</h3>
