@@ -155,6 +155,113 @@
   background: linear-gradient(180deg, rgba(255, 204, 128, 0.95), rgba(255, 158, 86, 0.95));
 }
 
+.brand-logo-aurora {
+  position: absolute;
+  inset: -22%;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255, 186, 132, 0.48), transparent 46%),
+    radial-gradient(circle at 75% 22%, rgba(255, 255, 255, 0.35), transparent 38%),
+    radial-gradient(circle at 55% 78%, rgba(255, 140, 82, 0.35), transparent 52%);
+  filter: blur(18px) saturate(120%);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: brandAurora 16s ease-in-out infinite;
+}
+
+.brand-logo-shine {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(from 120deg, rgba(255, 255, 255, 0.08), rgba(255, 206, 150, 0.35), rgba(255, 255, 255, 0.08));
+  mix-blend-mode: screen;
+  filter: blur(22px);
+  opacity: 0.7;
+  animation: brandSheen 12s ease-in-out infinite;
+}
+
+.brand-logo-glyph {
+  position: relative;
+  z-index: 1;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  font-size: 1.05rem;
+  background: linear-gradient(135deg, #0f0f11 0%, #1a181b 25%, #0b0b0f 50%, #20100d 100%);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow:
+    0 0 18px rgba(255, 193, 142, 0.55),
+    0 0 28px rgba(255, 153, 51, 0.35),
+    0 6px 26px rgba(0, 0, 0, 0.35);
+  animation: brandSheen 10s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.brand-logo-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.brand-logo-sparkle {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, #fff 25%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0) 70%);
+  box-shadow:
+    0 0 18px rgba(255, 220, 180, 0.6),
+    0 0 32px rgba(255, 153, 51, 0.35);
+  filter: drop-shadow(0 0 10px rgba(255, 186, 132, 0.45));
+  opacity: 0.8;
+  animation: brandGlitter 3.2s ease-in-out infinite;
+}
+
+.brand-logo-sparkle::after {
+  content: '';
+  position: absolute;
+  inset: -160%;
+  background: radial-gradient(circle, rgba(255, 227, 190, 0.45) 0%, transparent 70%);
+  filter: blur(6px);
+  opacity: 0.8;
+}
+
+@keyframes brandAurora {
+  0% {
+    transform: translate3d(-6%, 4%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(7%, -5%, 0) scale(1.02) rotate(1deg);
+  }
+  100% {
+    transform: translate3d(-6%, 4%, 0) scale(1);
+  }
+}
+
+@keyframes brandGlitter {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateY(0) scale(0.85);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1);
+  }
+  70% {
+    opacity: 0.9;
+    transform: translateY(-1px) scale(0.95) rotate(6deg);
+  }
+}
+
+@keyframes brandSheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .reduce-motion *,
 .reduce-motion *::before,
 .reduce-motion *::after {
