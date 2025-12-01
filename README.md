@@ -450,6 +450,7 @@ npm audit
 - [Wisdom API](docs/wisdom_api.md) - Wisdom guide API reference
 - [Pipeline](docs/pipeline.md) - Content transformation pipeline
 - [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
+- [Gita Corpus Pipeline](docs/GITA_CORPUS_README.md) - Bhagavad Gita corpus validation, import, and maintenance
 
 ### **Additional Resources:**
 - [Backend Reorganization](BACKEND_REORGANIZATION_COMPLETE.md) - Migration details
