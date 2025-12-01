@@ -3,7 +3,7 @@
 import os
 from pydantic_settings import BaseSettings
 
-from backend.security.secret_manager import secret_manager
+from backend.security.secret_manager import get
 
 
 class Settings(BaseSettings):
@@ -17,10 +17,10 @@ class Settings(BaseSettings):
 
     # Security
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
-    SECRET_KEY: str = secret_manager().get(
+    SECRET_KEY: str = get(
         "SECRET_KEY", "dev-secret-key-change-in-production"
     )
-    WEBHOOK_SIGNING_SECRET: str = secret_manager().get(
+    WEBHOOK_SIGNING_SECRET: str = get(
         "WEBHOOK_SIGNING_SECRET", "dev-webhook-secret"
     )
     WEBHOOK_TOLERANCE_SECONDS: int = int(os.getenv("WEBHOOK_TOLERANCE_SECONDS", "300"))
