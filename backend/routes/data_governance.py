@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db, get_user_id
 from backend.schemas import JournalExport
 from backend.services.data_portability import export_user_data, anonymize_user
+from backend.services.data_retention import get_retention_policy
 
 router = APIRouter(prefix="/api/data", tags=["data-governance"])
 
@@ -45,4 +46,16 @@ async def delete_account(db: AsyncSession = Depends(get_db)):
         "user_id": user_id,
         "status": "scheduled_for_deletion",
         "message": "Your account has been queued for secure deletion.",
+    }
+
+
+@router.get("/retention-policy")
+async def retention_policy():
+    """Expose the currently active data retention configuration."""
+
+    policy = get_retention_policy()
+    return {
+        "days": policy.days,
+        "mode": policy.mode,
+        "enabled": policy.enabled,
     }

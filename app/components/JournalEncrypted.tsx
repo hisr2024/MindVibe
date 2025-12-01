@@ -17,6 +17,8 @@ type SyncPayload = {
 
 type CipherBlob = { s: string; i: string; c: string }
 
+const PASS_TTL_MS = 10 * 60 * 1000 // 10 minutes of inactivity before clearing
+
 function useLocalState<T>(key: string, initial: T) {
   const [val, setVal] = useState<T>(() => {
     try {
@@ -74,7 +76,39 @@ export default function JournalEncrypted() {
   const [online, setOnline] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState('')
+  const [passStatus, setPassStatus] = useState('Locked - enter your passphrase to decrypt.')
+  const [passExpiresAt, setPassExpiresAt] = useState<number | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const clearPassphrase = (reason?: string) => {
+    setPass('')
+    setEntries(null)
+    setPassExpiresAt(null)
+    setPassStatus(reason || 'Passphrase cleared from memory for safety.')
+  }
+
+  useEffect(() => {
+    if (!pass) return
+    const expiry = Date.now() + PASS_TTL_MS
+    setPassExpiresAt(expiry)
+    setPassStatus('Passphrase active locally. It will auto-clear after inactivity.')
+  }, [pass])
+
+  useEffect(() => {
+    if (!pass || !passExpiresAt) return
+    const timeout = window.setTimeout(() => clearPassphrase('Passphrase expired after inactivity.'), Math.max(passExpiresAt - Date.now(), 0))
+    return () => window.clearTimeout(timeout)
+  }, [pass, passExpiresAt])
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.hidden && pass) {
+        clearPassphrase('Passphrase cleared when you left the page.')
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [pass])
 
   async function addEntry() {
     if (!pass || !body.trim()) return
@@ -95,8 +129,10 @@ export default function JournalEncrypted() {
       const out: Entry[] = []
       for (const b of cipherList) out.push(JSON.parse(await decryptText(b, pass)))
       setEntries(out)
+      setPassStatus('Passphrase verified and used only in-memory.')
     } catch {
       setEntries(null)
+      clearPassphrase('Passphrase rejected after failed decryption attempt.')
       alert('Wrong passphrase or corrupted data')
     }
   }
@@ -179,6 +215,8 @@ export default function JournalEncrypted() {
     }
   }
 
+  const expiryLabel = passExpiresAt ? new Date(passExpiresAt).toLocaleTimeString() : null
+
   return (
     <main className="space-y-4 text-orange-50">
       <div
@@ -204,7 +242,7 @@ export default function JournalEncrypted() {
       <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">
         <h2 className="text-lg font-semibold">Encrypted Journal</h2>
         <p className="text-sm text-orange-100/80">Protected with AES-GCM; your passphrase never leaves this device.</p>
-        <div className="mt-3 flex flex-wrap items-end gap-3">
+        <div className="mt-3 flex flex-wrap items-start gap-3">
           <label className="text-sm text-orange-100/80">
             <span className="font-semibold text-orange-50">Passphrase</span>
             <input
@@ -215,7 +253,17 @@ export default function JournalEncrypted() {
               aria-label="Journal passphrase"
             />
           </label>
-          <div className="text-xs text-orange-100/70">Your passphrase is never stored.</div>
+          <div className="text-xs text-orange-100/70">
+            {passStatus}
+            {pass && expiryLabel && <div className="mt-1 text-[11px] text-orange-100/60">Will auto-clear at {expiryLabel}</div>}
+          </div>
+          <button
+            type="button"
+            onClick={() => clearPassphrase('Journal locked and passphrase wiped.')}
+            className="rounded-xl border border-orange-500/30 px-4 py-2 text-xs font-semibold text-orange-50 transition hover:bg-orange-500/10"
+          >
+            Lock journal
+          </button>
         </div>
       </section>
 
