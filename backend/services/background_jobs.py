@@ -1,15 +1,32 @@
-"""Lightweight background job runner for async journal insights."""
+"""Lightweight background job runner for async journal insights and analytics."""
 from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from dataclasses import dataclass
-from typing import Awaitable, Callable
+from typing import Optional
+
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from backend.services.mood_analytics import (
+    compute_daily_mood_summary,
+    persist_summary_report,
+)
+from backend.services.backup import run_backup
 
 from backend.core.settings import settings
 from backend.services.task_queue import dispatch_async_task
 
 logger = logging.getLogger("mindvibe.jobs")
+
+SUMMARY_INTERVAL_SECONDS = int(os.getenv("MOOD_SUMMARY_INTERVAL_SECONDS", "86400"))
+BACKUP_INTERVAL_SECONDS = int(os.getenv("BACKUP_INTERVAL_SECONDS", "86400"))
+AUTOMATED_BACKUPS_ENABLED = os.getenv("ENABLE_AUTOMATED_BACKUPS", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 
 @dataclass
@@ -58,11 +75,57 @@ class JobQueue:
 job_queue = JobQueue()
 
 
-async def ensure_jobs_started() -> None:
-    if settings.USE_CELERY:
-        logger.info("celery_mode_enabled")
-        return
+class BackgroundOrchestrator:
+    def __init__(self) -> None:
+        self.summary_task: asyncio.Task | None = None
+        self.backup_task: asyncio.Task | None = None
+
+    async def start(self, session_factory: Optional[async_sessionmaker] = None) -> None:
+        if session_factory:
+            await self._start_summary_loop(session_factory)
+        await self._start_backup_loop()
+
+    async def _start_summary_loop(self, session_factory: async_sessionmaker) -> None:
+        if self.summary_task:
+            return
+
+        async def _runner() -> None:
+            while True:
+                try:
+                    summary = await compute_daily_mood_summary(session_factory)
+                    await persist_summary_report(summary)
+                    logger.info(
+                        "daily_mood_summary",
+                        extra={"count": summary.get("count", 0)},
+                    )
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.exception("summary_generation_failed", exc_info=exc)
+                await asyncio.sleep(SUMMARY_INTERVAL_SECONDS)
+
+        self.summary_task = asyncio.create_task(_runner())
+
+    async def _start_backup_loop(self) -> None:
+        if self.backup_task or not AUTOMATED_BACKUPS_ENABLED:
+            return
+
+        async def _runner() -> None:
+            while True:
+                try:
+                    await asyncio.to_thread(run_backup)
+                    logger.info("backup_completed")
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.exception("backup_failed", exc_info=exc)
+                await asyncio.sleep(BACKUP_INTERVAL_SECONDS)
+
+        self.backup_task = asyncio.create_task(_runner())
+
+
+orchestrator = BackgroundOrchestrator()
+
+
+async def ensure_jobs_started(session_factory: Optional[async_sessionmaker] = None) -> None:
     await job_queue.start()
+    await orchestrator.start(session_factory)
 
 
 async def enqueue_journal_summary(entry_id: int, user_id: int) -> None:

@@ -36,8 +36,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.core.errors import register_exception_handlers
 from backend.core.logging import configure_logging, log_request
-from backend.core.metrics import create_metrics_router, metrics_middleware
-from backend.core.settings import settings
+from backend.core.performance import performance_middleware, performance_tracker
 from backend.db_utils import build_database_url, ensure_base_schema
 from backend.middleware.feature_gates import PlanGateMiddleware
 from backend.observability import setup_observability
@@ -77,7 +76,7 @@ app.add_middleware(
 app.add_middleware(PlanGateMiddleware)
 
 app.middleware("http")(log_request)
-app.include_router(create_metrics_router())
+app.middleware("http")(performance_middleware)
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
@@ -117,7 +116,7 @@ async def startup():
     except Exception as exc:
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
         raise
-    await ensure_jobs_started()
+    await ensure_jobs_started(SessionLocal)
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
 kiaan_router_loaded = False
@@ -211,15 +210,14 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Data governance router: {e}")
 
-# Load Analytics router
-print("\n[Analytics] Attempting to import Analytics router...")
+# Load Insights router
+print("\n[Insights] Attempting to import Insights router...")
 try:
-    from backend.routes.analytics import router as analytics_router
-
-    app.include_router(analytics_router)
-    print("✅ [SUCCESS] Analytics router loaded")
+    from backend.routes.insights import router as insights_router
+    app.include_router(insights_router)
+    print("✅ [SUCCESS] Insights router loaded")
 except Exception as e:
-    print(f"❌ [ERROR] Failed to load Analytics router: {e}")
+    print(f"❌ [ERROR] Failed to load Insights router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
@@ -291,6 +289,13 @@ async def api_health() -> Dict[str, Any]:
         "openai_key_present": bool(OPENAI_API_KEY),
         "migration": migration_state,
     }
+
+
+@app.get("/metrics/performance")
+async def performance_metrics() -> Dict[str, Any]:
+    """Expose lightweight latency metrics for load testing dashboards."""
+
+    return {"routes": await performance_tracker.snapshot()}
 
 @app.options("/{full_path:path}")
 async def preflight(full_path: str) -> dict[str, str]:
