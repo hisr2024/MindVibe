@@ -84,7 +84,7 @@ class ManagedSecretManager:
         try:
             result = client.get_secret_value(SecretId=secret_id)
         except (ClientError, BotoCoreError) as exc:
-            logger.warning("secret_manager_aws_failed", extra={"secret_id": secret_id, "error": str(exc)})
+            logger.warning("secret_manager_aws_failed", extra={"secret_id": "[REDACTED]", "error": str(exc)})
             return None
 
         secret_string = result.get("SecretString")
