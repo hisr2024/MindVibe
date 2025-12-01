@@ -1,5 +1,6 @@
 """Dependency injection for FastAPI routes"""
 
+import os
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from fastapi import Depends, HTTPException, status
@@ -20,7 +21,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         finally:
             await session.close()
 
-def get_user_id() -> str:
-    """Get user ID - returns test user for now"""
-    # For development/testing, return a test user ID
-    return "dev-anon"
+def get_user_id() -> int:
+    """Get user ID - returns test user for now."""
+    return int(os.getenv("DEV_USER_ID", "1"))

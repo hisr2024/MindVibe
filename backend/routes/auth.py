@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pyotp
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -12,6 +12,7 @@ from backend.models import Session, User
 from backend.security.jwt import create_access_token, decode_access_token
 from backend.security.password_hash import hash_password, verify_password
 from backend.security.password_policy import policy
+from backend.security.rate_limiter import rate_limit
 from backend.services.refresh_service import (
     create_refresh_token,
     get_refresh_token_by_raw,
@@ -177,10 +178,23 @@ async def _get_user_and_active_session(
     return payload, user, session_row, exp
 
 
+class VerifyEmailIn(BaseModel):
+    token: str
+
+
+class MagicLinkRequest(BaseModel):
+    email: EmailStr
+
+
+class MagicLinkLogin(BaseModel):
+    token: str
+    email: EmailStr
+
+
 # ----------------------
 # Signup
 # ----------------------
-@router.post("/signup", response_model=SignupOut, status_code=201)
+@router.post("/signup", response_model=SignupOut, status_code=201, dependencies=[Depends(rate_limit(10, 60))])
 async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     result = policy.validate(payload.password)
     if not result.ok:
@@ -195,10 +209,14 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     import secrets
     auth_uid = secrets.token_urlsafe(16)
     
+    verification_token = secrets.token_urlsafe(16)
+
     user = User(
         auth_uid=auth_uid,
         email=payload.email.lower(),
         hashed_password=hash_password(payload.password),
+        verification_token=verification_token,
+        verification_sent_at=datetime.now(UTC),
     )
     db.add(user)
     await db.commit()
@@ -210,7 +228,7 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
 # ----------------------
 # Login (issues refresh cookie)
 # ----------------------
-@router.post("/login", response_model=LoginOut)
+@router.post("/login", response_model=LoginOut, dependencies=[Depends(rate_limit(15, 60))])
 async def login(
     payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)
 ):
@@ -219,6 +237,9 @@ async def login(
     user = (await db.execute(stmt)).scalars().first()
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Email not verified")
 
     if user.two_factor_enabled:
         if not payload.two_factor_code:
@@ -526,4 +547,86 @@ async def refresh_tokens(
         expires_in=expires_in_seconds,
         session_id=str(session_row.id),
         refresh_token=new_raw if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None,
+    )
+
+
+@router.post("/verify-email")
+async def verify_email(payload: VerifyEmailIn, db: AsyncSession = Depends(get_db)):
+    stmt = select(User).where(
+        User.verification_token == payload.token, User.deleted_at.is_(None)
+    )
+    user = (await db.execute(stmt)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Invalid verification token")
+
+    await db.execute(
+        update(User)
+        .where(User.id == user.id)
+        .values(email_verified=True, verification_token=None)
+    )
+    await db.commit()
+    return {"user_id": user.id, "email_verified": True}
+
+
+@router.post("/magic-link/request", dependencies=[Depends(rate_limit(5, 60))])
+async def request_magic_link(payload: MagicLinkRequest, db: AsyncSession = Depends(get_db)):
+    email_norm = payload.email.lower()
+    stmt = select(User).where(User.email == email_norm)
+    user = (await db.execute(stmt)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    token = secrets.token_urlsafe(20)
+    expiry = datetime.now(UTC) + timedelta(minutes=15)
+    await db.execute(
+        update(User)
+        .where(User.id == user.id)
+        .values(magic_link_token=token, magic_link_expires_at=expiry)
+    )
+    await db.commit()
+    return {"user_id": user.id, "magic_link_token": token, "expires_at": expiry.isoformat()}
+
+
+@router.post("/magic-link/login", response_model=LoginOut)
+async def magic_link_login(
+    payload: MagicLinkLogin, response: Response, db: AsyncSession = Depends(get_db)
+):
+    stmt = select(User).where(User.email == payload.email.lower())
+    user = (await db.execute(stmt)).scalars().first()
+    if not user or not user.magic_link_token:
+        raise HTTPException(status_code=401, detail="Invalid magic link")
+
+    if user.magic_link_token != payload.token:
+        raise HTTPException(status_code=401, detail="Invalid magic link")
+
+    if user.magic_link_expires_at and datetime.now(UTC) > user.magic_link_expires_at:
+        raise HTTPException(status_code=401, detail="Magic link expired")
+
+    session = await create_session(db, user_id=user.id, ip=None, ua=None)
+    access_token = create_access_token(user_id=user.id, session_id=session.id)
+    expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    _, raw_refresh = await create_refresh_token(db, user_id=user.id, session_id=session.id)
+
+    await db.execute(
+        update(User).where(User.id == user.id).values(magic_link_token=None)
+    )
+    await db.commit()
+
+    response.set_cookie(
+        key="refresh_token",
+        value=raw_refresh,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="strict",
+        path="/api/auth",
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
+    return LoginOut(
+        access_token=access_token,
+        token_type="bearer",  # nosec B106
+        session_id=str(session.id),
+        expires_in=expires_in_seconds,
+        user_id=str(user.id),
+        email=user.email,
     )
