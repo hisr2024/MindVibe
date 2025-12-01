@@ -219,6 +219,38 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Insights router: {e}")
 
+print("\n[Realtime] Attempting to import live streaming router...")
+try:
+    from backend.routes.realtime import router as realtime_router
+    app.include_router(realtime_router)
+    print("✅ [SUCCESS] Realtime router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Realtime router: {e}")
+
+print("\n[Coach Analytics] Attempting to import analytics dashboard router...")
+try:
+    from backend.routes.coach_analytics import router as coach_analytics_router
+    app.include_router(coach_analytics_router)
+    print("✅ [SUCCESS] Coach analytics router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Coach analytics router: {e}")
+
+print("\n[Recommendations] Attempting to import recommendation router...")
+try:
+    from backend.routes.recommendations import router as recommendations_router
+    app.include_router(recommendations_router)
+    print("✅ [SUCCESS] Recommendation router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Recommendation router: {e}")
+
+print("\n[Mobile] Attempting to import mobile manifest router...")
+try:
+    from backend.routes.mobile import router as mobile_router
+    app.include_router(mobile_router)
+    print("✅ [SUCCESS] Mobile router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Mobile router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
