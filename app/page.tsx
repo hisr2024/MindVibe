@@ -73,6 +73,12 @@ function summarizeContent(content: string) {
   return summary || `${clean.slice(0, 180)}...`
 }
 
+function previewMessage(content: string, limit = 200) {
+  const clean = content.replace(/\s+/g, ' ').trim()
+  if (clean.length <= limit) return clean
+  return `${clean.slice(0, limit)}…`
+}
+
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
     if (typeof window === 'undefined') return initial
@@ -1390,6 +1396,33 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                   {journalNotice}
                 </span>
               )}
+            </div>
+          </div>
+        )}
+
+        {messages.length > 0 && (
+          <div className="mt-4 space-y-2 rounded-2xl border border-orange-500/20 bg-[#0c0f12]/80 px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.14)] backdrop-blur">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-orange-50">Earlier KIAAN chats</p>
+                <p className="text-xs text-orange-100/70">Scroll through previous exchanges without losing your place.</p>
+              </div>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-orange-100/80 border border-orange-400/30">History</span>
+            </div>
+
+            <div className="max-h-56 overflow-y-auto pr-1 chat-scrollbar space-y-2 scroll-stable">
+              {messages.map((msg, idx) => (
+                <div
+                  key={`history-${idx}-${msg.role}`}
+                  className="rounded-xl border border-orange-500/20 bg-black/40 px-3 py-2 text-orange-50/90"
+                >
+                  <div className="flex items-center justify-between text-[11px] text-orange-100/70">
+                    <span className="font-semibold text-orange-50">{msg.role === 'user' ? 'You' : 'KIAAN'}</span>
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-orange-100/70">#{idx + 1}</span>
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap text-orange-50/90">{previewMessage(msg.content)}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
