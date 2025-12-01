@@ -108,9 +108,6 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 async def startup():
     await ensure_base_schema(engine)
 
-    # Apply data retention safeguards before processing traffic
-    await apply_retention_policies(SessionLocal)
-
     try:
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
@@ -128,6 +125,9 @@ async def startup():
     except Exception as exc:
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
         raise
+
+    # Apply data retention safeguards after migrations to avoid missing tables
+    await apply_retention_policies(SessionLocal)
     await ensure_jobs_started(SessionLocal)
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
