@@ -28,8 +28,13 @@ const normalizeBytes = (bytes: Uint8Array<ArrayBufferLike>): Uint8Array<ArrayBuf
     bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
   )
 
-const b64 = (a: ArrayBufferLike | Uint8Array<ArrayBufferLike>) =>
-  btoa(String.fromCharCode(...new Uint8Array(a)))
+const toBytes = (input: ArrayBuffer | ArrayBufferView): Uint8Array =>
+  input instanceof ArrayBuffer
+    ? new Uint8Array(input)
+    : new Uint8Array(input.buffer, input.byteOffset, input.byteLength)
+
+const b64 = (input: ArrayBuffer | ArrayBufferView) =>
+  btoa(String.fromCharCode(...toBytes(input)))
 const ub64 = (s: string): Uint8Array<ArrayBufferLike> =>
   normalizeBytes(new Uint8Array<ArrayBufferLike>(atob(s).split('').map(c => c.charCodeAt(0))))
 
