@@ -1,182 +1,131 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
-  color-scheme: dark;
+  --mv-base-0: #070912;
+  --mv-base-1: #0a0f1e;
+  --mv-accent-blue: 46 132 255;   /* rgb */
+  --mv-accent-gold: 255 196 77;   /* rgb */
+  --mv-accent-cyan: 0 255 213;    /* rgb */
 }
 
-:focus-visible {
-  outline: 3px solid #fb923c;
-  outline-offset: 3px;
-  border-radius: 12px;
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-@keyframes chatWobbleLift {
-  0% { transform: translateY(0) scale(1); }
-  30% { transform: translateY(-4px) scale(1.01); }
-  60% { transform: translateY(-2px) scale(1.005); }
-  100% { transform: translateY(0) scale(1); }
-}
-
-.animate-chat-wobble {
-  animation: chatWobbleLift 0.6s ease-out;
-}
-
-.aurora-pane {
-  position: relative;
-  overflow: hidden;
-}
-
-.aurora-pane::after {
-  content: '';
-  position: absolute;
-  inset: -35%;
+html, body {
   background:
-    radial-gradient(circle at 20% 30%, rgba(255, 180, 120, 0.12), transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 228, 196, 0.08), transparent 45%),
-    radial-gradient(circle at 40% 70%, rgba(255, 115, 39, 0.1), transparent 52%);
-  opacity: 0.9;
+    radial-gradient(120vmax 80vmax at 85% -10%, rgba(var(--mv-accent-gold) / 0.06), transparent 60%),
+    radial-gradient(90vmax 90vmax at -10% 95%, rgba(var(--mv-accent-blue) / 0.05), transparent 60%),
+    linear-gradient(180deg, var(--mv-base-0), var(--mv-base-1) 60%, #070a14 100%);
+  background-attachment: fixed, fixed, fixed;
+}
+
+/* Immovable layered background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -6vmax;
+  z-index: -1;
   pointer-events: none;
-  filter: blur(26px) saturate(110%);
-  animation: emberDrift 14s ease-in-out infinite;
+  /* Energy waves + Time Chakra rings + soft glows */
+  background:
+    /* Energy waves A */
+    repeating-linear-gradient(
+      -18deg,
+      rgba(255 255 255 / 0.035) 0 2px,
+      transparent 2px 14px
+    ),
+    /* Energy waves B (cyan) */
+    repeating-linear-gradient(
+      18deg,
+      rgba(var(--mv-accent-cyan) / 0.045) 0 1px,
+      transparent 1px 11px
+    ),
+    /* Time Chakra concentric rings */
+    repeating-radial-gradient(
+      circle at 50% 42%,
+      rgba(var(--mv-accent-blue) / 0.08) 0 6px,
+      transparent 6px 16px
+    ),
+    /* soft gold glow */
+    radial-gradient(60vmin 60vmin at 75% 25%, rgba(var(--mv-accent-gold) / 0.08), transparent 60%),
+    /* soft blue glow */
+    radial-gradient(70vmin 70vmin at 15% 85%, rgba(var(--mv-accent-blue) / 0.07), transparent 60%);
+  background-blend-mode: screen, screen, screen, normal, normal;
+  filter: saturate(105%);
 }
 
-@keyframes emberDrift {
-  0% { transform: translate3d(-8%, 4%, 0) scale(1); }
-  50% { transform: translate3d(6%, -6%, 0) scale(1.02); }
-  100% { transform: translate3d(-8%, 4%, 0) scale(1); }
-}
-
-@keyframes calmBreath {
-  0%, 100% { transform: scale(0.9); opacity: 0.9; }
-  50% { transform: scale(1.05); opacity: 1; }
-}
-
-.breathing-orb {
-  animation: calmBreath 10s ease-in-out infinite;
-}
-
-.mobile-safe-area {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
-}
-
-.mobile-safe-padding {
-  padding-top: max(env(safe-area-inset-top), 0px);
-  padding-left: max(env(safe-area-inset-left), 0px);
-  padding-right: max(env(safe-area-inset-right), 0px);
-  padding-bottom: max(env(safe-area-inset-bottom), 0px);
-}
-
-@supports not (padding: env(safe-area-inset-bottom)) {
-  .mobile-safe-area {
-    padding-bottom: 12px;
-  }
-
-  .mobile-safe-padding {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-  }
-}
-
-.arrow-track {
-  position: relative;
-  height: 12px;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(255, 153, 51, 0.08), rgba(255, 153, 51, 0.2));
-  overflow: hidden;
-}
-
-.arrow-flight {
-  position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #ff7a1a, #ffb347, #ffe7c0);
-  box-shadow: 0 0 18px rgba(255, 133, 51, 0.45);
-  transition: width 0.8s ease;
-}
-
-.arrow-head {
-  position: absolute;
-  top: 50%;
-  width: 16px;
-  height: 16px;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle at 30% 30%, #fff7ec, #ff9d36);
-  border-radius: 9999px;
+/* Sudarshan-style spoked disc (immovable) */
+body::after {
+  content: "";
+  position: fixed;
+  top: 8vh;
+  right: 7vw;
+  width: min(70vmin, 720px);
+  aspect-ratio: 1;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.55;
+  background:
+    /* golden spokes */
+    repeating-conic-gradient(
+      from -10deg,
+      rgba(var(--mv-accent-gold) / 0.16) 0 3deg,
+      rgba(var(--mv-accent-gold) / 0.0) 3deg 12deg
+    ),
+    /* blue spokes (fine) */
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(var(--mv-accent-blue) / 0.14) 0 2deg,
+      rgba(var(--mv-accent-blue) / 0.0) 2deg 8deg
+    ),
+    /* subtle surface vignette */
+    radial-gradient(circle at center, rgba(255 255 255 / 0.05) 0%, rgba(255 255 255 / 0.02) 40%, transparent 70%);
+  /* cut to a ring (disc with inner hole) */
+  -webkit-mask:
+    radial-gradient(circle at center, transparent 0 22%, #000 22% 96%, transparent 96% 100%);
+  mask:
+    radial-gradient(circle at center, transparent 0 22%, #000 22% 96%, transparent 96% 100%);
   box-shadow:
-    0 0 16px rgba(255, 153, 51, 0.45),
-    0 0 32px rgba(255, 153, 51, 0.25);
-  transition: left 0.8s ease, transform 0.3s ease;
-  animation: arrowPulse 1.8s ease-in-out infinite;
+    0 0 0 1px rgba(255 255 255 / 0.06) inset,
+    0 0 60px 10px rgba(var(--mv-accent-blue) / 0.08),
+    0 0 120px 20px rgba(var(--mv-accent-gold) / 0.06);
 }
 
-@keyframes arrowPulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(0.95);
+/* Secondary smaller disc (bottom-left) */
+html::before {
+  content: "";
+  position: fixed;
+  bottom: 8vh;
+  left: 8vw;
+  width: min(40vmin, 440px);
+  aspect-ratio: 1;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.5;
+  background:
+    repeating-conic-gradient(
+      from 5deg,
+      rgba(var(--mv-accent-blue) / 0.15) 0 3deg,
+      rgba(var(--mv-accent-blue) / 0.0) 3deg 10deg
+    ),
+    radial-gradient(circle at center, rgba(255 255 255 / 0.04) 0%, transparent 70%);
+  -webkit-mask:
+    radial-gradient(circle at center, transparent 0 26%, #000 26% 98%, transparent 98% 100%);
+  mask:
+    radial-gradient(circle at center, transparent 0 26%, #000 26% 98%, transparent 98% 100%);
+  box-shadow:
+    0 0 0 1px rgba(255 255 255 / 0.06) inset,
+    0 0 50px 8px rgba(var(--mv-accent-blue) / 0.08);
+}
+
+/* Tuning for smaller screens */
+@media (max-width: 960px) {
+  body::after {
+    top: 6vh;
+    right: 4vw;
+    opacity: 0.48;
+    width: min(76vmin, 560px);
   }
-  50% {
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-}
-
-.scroll-stable {
-  scrollbar-gutter: stable both-edges;
-  overscroll-behavior: contain;
-}
-
-.chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 179, 71, 0.6) rgba(255, 255, 255, 0.08);
-}
-
-.chat-scrollbar::-webkit-scrollbar {
-  width: 10px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(255, 179, 71, 0.85), rgba(255, 137, 56, 0.85));
-  border-radius: 12px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(255, 204, 128, 0.95), rgba(255, 158, 86, 0.95));
-}
-
-.reduce-motion *,
-.reduce-motion *::before,
-.reduce-motion *::after {
-  transition-duration: 0.01ms !important;
-  animation-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-chat-wobble,
-  .aurora-pane::after,
-  .breathing-orb,
-  .arrow-head {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  html::before {
+    bottom: 6vh;
+    left: 5vw;
+    width: min(55vmin, 420px);
   }
 }
