@@ -68,10 +68,23 @@ class RedisSlidingWindowLimiter:
 
 
 def _build_limiter() -> SlidingWindowRateLimiter | RedisSlidingWindowLimiter:
+    """Build rate limiter with Redis if available, otherwise use in-memory."""
     try:
-        client = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
+        # Only attempt Redis if URL is not localhost or if it's explicitly configured
+        redis_url = settings.REDIS_URL
+        
+        # Skip Redis connection if using default localhost (not available in production)
+        if "localhost" in redis_url and not os.getenv("FORCE_REDIS", ""). lower() in {"1", "true"}:
+            import logging
+            logging.getLogger("mindvibe"). info("Redis URL points to localhost, using in-memory rate limiter")
+            return SlidingWindowRateLimiter()
+        
+        # Try to create Redis client with connection test
+        client = redis.from_url(redis_url, encoding="utf-8", decode_responses=True)
         return RedisSlidingWindowLimiter(client)
-    except Exception:  # pragma: no cover - defensive: redis misconfig
+    except Exception as exc:  # pragma: no cover - defensive: redis misconfig
+        import logging
+        logging.getLogger("mindvibe").warning(f"Redis unavailable ({exc}), using in-memory rate limiter")
         return SlidingWindowRateLimiter()
 
 
