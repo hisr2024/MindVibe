@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -72,32 +73,45 @@ def upsert_verses(
     conn.commit()
 
 
-def main():
+def main() -> None:
     chapter_files = sorted(DATA_DIR.glob("*.json"))
     if not chapter_files:
-        raise SystemExit(f"No chapter files found in {DATA_DIR}")
+        print(f"No chapter files found in {DATA_DIR}")
+        sys.exit(1)
 
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        print("DATABASE_URL environment variable is not set")
+        sys.exit(1)
 
-    total, invalid = 0, 0
-    for f in chapter_files:
-        verses = load_chapter_file(f)
-        valid_batch = []
-        for v in verses:
-            total += 1
-            v = normalize(v)
-            ok, errs = validate_verse_shape(v)
-            if not ok:
-                invalid += 1
-                print(
-                    f"[INVALID] {v.get('chapter')}.{v.get('verse')} in {f.name}: {errs}"
-                )
-            else:
-                valid_batch.append(v)
-        if valid_batch:
-            upsert_verses(conn, valid_batch)
+    conn = None
+    try:
+        conn = psycopg2.connect(database_url)
+        total, invalid = 0, 0
+        for f in chapter_files:
+            verses = load_chapter_file(f)
+            valid_batch = []
+            for v in verses:
+                total += 1
+                v = normalize(v)
+                ok, errs = validate_verse_shape(v)
+                if not ok:
+                    invalid += 1
+                    print(
+                        f"[INVALID] {v.get('chapter')}.{v.get('verse')} in {f.name}: {errs}"
+                    )
+                else:
+                    valid_batch.append(v)
+            if valid_batch:
+                upsert_verses(conn, valid_batch)
 
-    print(f"Processed: {total}, invalid: {invalid}")
+        print(f"Processed: {total}, invalid: {invalid}")
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        sys.exit(1)
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 if __name__ == "__main__":

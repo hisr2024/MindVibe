@@ -38,16 +38,21 @@ REQUIRED_FIELDS = [
 ]
 
 
-def main():
-    errors = []
+def main() -> None:
+    errors: list[str] = []
     for ch in range(1, 19):
         file = DATA_DIR / f"{ch:02}.json"
         if not file.exists():
             errors.append(f"Missing file for chapter {ch}: {file}")
             continue
         try:
-            verses = json.loads(file.read_text(encoding="utf-8"))
-        except Exception as e:
+            content = file.read_text(encoding="utf-8")
+        except OSError as e:
+            errors.append(f"Cannot read file {file}: {e}")
+            continue
+        try:
+            verses = json.loads(content)
+        except json.JSONDecodeError as e:
             errors.append(f"Invalid JSON in {file}: {e}")
             continue
 
