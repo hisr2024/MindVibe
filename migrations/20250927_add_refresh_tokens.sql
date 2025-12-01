@@ -12,6 +12,14 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     rotated_to_id VARCHAR(64)
 );
 
+-- Ensure columns exist even if the table was created without the latest fields
+ALTER TABLE IF EXISTS refresh_tokens
+    ADD COLUMN IF NOT EXISTS parent_id VARCHAR(64) REFERENCES refresh_tokens(id) ON DELETE SET NULL;
+ALTER TABLE IF EXISTS refresh_tokens
+    ADD COLUMN IF NOT EXISTS rotated_to_id VARCHAR(64);
+ALTER TABLE IF EXISTS refresh_tokens
+    ADD COLUMN IF NOT EXISTS reuse_detected BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Indexes to optimize common queries
 -- Fast filter by session and active state
 CREATE INDEX IF NOT EXISTS ix_refresh_tokens_session_active ON refresh_tokens (session_id) WHERE revoked_at IS NULL;
