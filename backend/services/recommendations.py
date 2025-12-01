@@ -25,7 +25,7 @@ class RecommendationEngine:
     def __init__(self, recent_limit: int = 20) -> None:
         self.recent_limit = recent_limit
 
-    async def _fetch_recent_moods(self, session: AsyncSession, user_id: int) -> list[Mood]:
+    async def _fetch_recent_moods(self, session: AsyncSession, user_id: str) -> list[Mood]:
         result = await session.execute(
             select(Mood)
             .where(Mood.user_id == user_id)
@@ -35,7 +35,7 @@ class RecommendationEngine:
         return list(result.scalars().all())
 
     async def _fetch_recent_journals(
-        self, session: AsyncSession, user_id: int
+        self, session: AsyncSession, user_id: str
     ) -> list[JournalEntry]:
         result = await session.execute(
             select(JournalEntry)
@@ -71,7 +71,7 @@ class RecommendationEngine:
         return statistics.fmean(scores)
 
     async def recommend(
-        self, session: AsyncSession, user_id: int, context: str | None = None
+        self, session: AsyncSession, user_id: str, context: str | None = None
     ) -> list[Recommendation]:
         moods = await self._fetch_recent_moods(session, user_id)
         journals = await self._fetch_recent_journals(session, user_id)

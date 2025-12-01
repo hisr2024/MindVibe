@@ -15,7 +15,7 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "users",
-        sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
+        sa.Column("id", sa.String(length=64), primary_key=True),
         sa.Column("auth_uid", sa.String(length=128), nullable=False),
         sa.Column("email", sa.String(length=256), nullable=True),
         sa.Column("hashed_password", sa.String(length=256), nullable=True),
@@ -42,7 +42,7 @@ def upgrade() -> None:
         "works",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column(
-            "user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+            "user_id", sa.String(length=64), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
         ),
         sa.Column("title", sa.String(length=256), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -63,7 +63,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column(
             "user_id",
-            sa.Integer(),
+            sa.String(length=64),
             sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
             unique=True,
@@ -86,7 +86,7 @@ def upgrade() -> None:
         "moods",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column(
-            "user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+            "user_id", sa.String(length=64), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
         ),
         sa.Column("score", sa.Integer(), nullable=False),
         sa.Column("tags", sa.JSON(), nullable=True),
@@ -105,7 +105,7 @@ def upgrade() -> None:
         "journal_blobs",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column(
-            "user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+            "user_id", sa.String(length=64), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
         ),
         sa.Column("blob_json", sa.Text(), nullable=False),
         sa.Column(
@@ -163,7 +163,7 @@ def upgrade() -> None:
         "sessions",
         sa.Column("id", sa.String(length=64), primary_key=True),
         sa.Column(
-            "user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+            "user_id", sa.String(length=64), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
         ),
         sa.Column(
             "created_at",

@@ -44,7 +44,7 @@ class SignupIn(BaseModel):
 
 
 class SignupOut(BaseModel):
-    user_id: int
+    user_id: str
     email: EmailStr
     policy_passed: bool
 

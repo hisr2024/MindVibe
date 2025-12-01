@@ -1,5 +1,8 @@
 from __future__ import annotations
+
 import datetime
+from uuid import uuid4
+
 from sqlalchemy import (
     Boolean,
     JSON,
@@ -33,7 +36,7 @@ class Base(DeclarativeBase):
 
 class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: str(uuid4()))
     auth_uid: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
@@ -60,8 +63,8 @@ class User(SoftDeleteMixin, Base):
 class Work(SoftDeleteMixin, Base):
     __tablename__ = "works"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     title: Mapped[str] = mapped_column(String(256))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -77,8 +80,8 @@ class Work(SoftDeleteMixin, Base):
 class UserProfile(SoftDeleteMixin, Base):
     __tablename__ = "user_profiles"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
     )
     full_name: Mapped[str | None] = mapped_column(String(256), nullable=True)
     base_experience: Mapped[str] = mapped_column(Text)
@@ -92,8 +95,8 @@ class UserProfile(SoftDeleteMixin, Base):
 class Mood(SoftDeleteMixin, Base):
     __tablename__ = "moods"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     score: Mapped[int] = mapped_column(Integer)
     tags: Mapped[dict | None] = mapped_column(JSON)
@@ -107,8 +110,8 @@ class JournalEntry(SoftDeleteMixin, Base):
     __tablename__ = "journal_entries"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     entry_uuid: Mapped[str] = mapped_column(String(64), unique=True, index=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     title_ciphertext: Mapped[str] = mapped_column(Text)
     content_ciphertext: Mapped[str] = mapped_column(Text)
@@ -173,8 +176,8 @@ class JournalAttachment(SoftDeleteMixin, Base):
 class EncryptedBlob(SoftDeleteMixin, Base):
     __tablename__ = "journal_blobs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     blob_json: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -310,8 +313,8 @@ class GitaVerseKeyword(Base):
 class Session(Base):
     __tablename__ = "sessions"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
@@ -331,8 +334,8 @@ class Session(Base):
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     session_id: Mapped[str] = mapped_column(
         String(64), ForeignKey("sessions.id", ondelete="CASCADE"), index=True
@@ -358,7 +361,7 @@ class RefreshToken(Base):
 class StripeCustomer(Base):
     __tablename__ = "stripe_customers"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True)
     customer_id: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     email: Mapped[str | None] = mapped_column(String(256), nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -388,7 +391,7 @@ class SubscriptionPlan(Base):
 class Subscription(Base):
     __tablename__ = "subscriptions"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True)
     plan_id: Mapped[int] = mapped_column(Integer, ForeignKey("subscription_plans.id", ondelete="SET NULL"), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="active", index=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)

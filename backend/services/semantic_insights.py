@@ -14,7 +14,7 @@ class SemanticInsightsService:
     def __init__(self) -> None:
         self.store = VectorStore()
 
-    async def bootstrap(self, session: AsyncSession, user_id: int | None = None) -> None:
+    async def bootstrap(self, session: AsyncSession, user_id: str | None = None) -> None:
         await self._index_wisdom(session)
         if user_id is not None:
             await self._index_recent_moods(session, user_id)
@@ -34,7 +34,7 @@ class SemanticInsightsService:
                 },
             )
 
-    async def _index_recent_moods(self, session: AsyncSession, user_id: int) -> None:
+    async def _index_recent_moods(self, session: AsyncSession, user_id: str) -> None:
         result = await session.execute(
             select(Mood)
             .where(Mood.user_id == user_id, Mood.deleted_at.is_(None))

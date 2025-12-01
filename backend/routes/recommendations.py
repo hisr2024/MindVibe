@@ -16,7 +16,7 @@ engine = RecommendationEngine()
 
 @router.get("/{user_id}")
 async def fetch_recommendations(
-    user_id: int,
+    user_id: str,
     context: str | None = Query(None, description="Optional mobile context (home, coach, journey)"),
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:

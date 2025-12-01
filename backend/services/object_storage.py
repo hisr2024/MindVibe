@@ -201,7 +201,7 @@ class JournalObjectArchiver:
         self,
         *,
         entry_uuid: str,
-        user_id: int,
+        user_id: str,
         title: str,
         content: str,
         tags: list[str] | None,

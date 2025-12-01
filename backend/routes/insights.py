@@ -12,7 +12,7 @@ router = APIRouter(prefix="/insights", tags=["insights"])
 async def semantic_wisdom(
     q: str = Query(..., description="User question or reflection"),
     limit: int = Query(5, ge=1, le=10),
-    user_id: int = Depends(get_user_id),
+    user_id: str = Depends(get_user_id),
     db: AsyncSession = Depends(get_db),
 ):
     service = SemanticInsightsService()

@@ -57,7 +57,7 @@ class SubscriptionOut(BaseModel):
         from_attributes = True
 
 
-def _user_from_authorization(authorization: str | None) -> tuple[int, str | None]:
+def _user_from_authorization(authorization: str | None) -> tuple[str, str | None]:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
     token = authorization.split(" ", 1)[1].strip()
@@ -66,7 +66,7 @@ def _user_from_authorization(authorization: str | None) -> tuple[int, str | None
     role = payload.get("role")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    return int(user_id), role
+    return user_id, role
 
 
 @router.get("/plans", response_model=list[PlanOut], dependencies=[Depends(rate_limit(30, 60))])
