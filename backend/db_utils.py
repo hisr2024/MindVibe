@@ -69,11 +69,19 @@ async def ensure_base_schema(engine: AsyncEngine) -> None:
     """
 
     async with engine.begin() as connection:
-        tables = await connection.run_sync(
+        existing_tables = await connection.run_sync(
             lambda sync_conn: set(inspect(sync_conn).get_table_names())
         )
 
-        if "users" in tables:
+        # Only create tables that are missing to avoid errors when the database
+        # schema is partially initialized (e.g., users exists but user_profiles does
+        # not). ``create_all`` is idempotent when ``checkfirst`` is True (default),
+        # so invoking it here will fill in any gaps without altering existing
+        # structures.
+        defined_tables = set(Base.metadata.tables.keys())
+        missing_tables = defined_tables - existing_tables
+
+        if not missing_tables:
             return
 
         await connection.run_sync(Base.metadata.create_all)
