@@ -12,8 +12,11 @@ from typing import Iterable
 
 from cryptography.fernet import Fernet, InvalidToken, MultiFernet
 
+from backend.security.secret_vault import get_json_secret, get_secret
+
 DEFAULT_KEY_ENV = "JOURNAL_ENCRYPTION_KEYS"
 PRIMARY_KEY_ENV = "JOURNAL_PRIMARY_KEY_ID"
+SECRET_KEYSET_NAME = os.getenv("JOURNAL_KEYSET_NAME", "mindvibe/journal/keys")
 
 
 @dataclass
@@ -23,7 +26,17 @@ class EncryptionConfig:
 
     @classmethod
     def from_env(cls) -> "EncryptionConfig":
-        raw = os.getenv(DEFAULT_KEY_ENV, "")
+        raw = get_secret(DEFAULT_KEY_ENV) or ""
+        if not raw:
+            # Prefer managed vault payloads when configured
+            vault_keys = get_json_secret(SECRET_KEYSET_NAME, default={})
+            if vault_keys:
+                key_items = {
+                    key: base64.urlsafe_b64decode(value)
+                    for key, value in vault_keys.items()
+                }
+                primary = os.getenv(PRIMARY_KEY_ENV) or next(iter(key_items.keys()))
+                return cls(keys=key_items, primary_key_id=primary)
         key_items: dict[str, bytes] = {}
         for idx, token in enumerate(filter(None, (part.strip() for part in raw.split(",")))):
             key_id = str(idx)

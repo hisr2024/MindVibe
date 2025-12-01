@@ -76,6 +76,7 @@ class JournalEntryOut(BaseModel):
     attachments: list[dict] | None
     created_at: str
     updated_at: str | None
+    crisis: dict | None = None
 
 
 class JournalExport(BaseModel):

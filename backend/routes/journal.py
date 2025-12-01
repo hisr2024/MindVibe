@@ -1,7 +1,7 @@
-from datetime import UTC, datetime
 import secrets
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,13 +11,16 @@ from backend.schemas import JournalEntryIn, JournalEntryOut, JournalExport
 from backend.security.encryption import EncryptionManager
 from backend.security.rate_limiter import rate_limit
 from backend.services.background_jobs import enqueue_journal_summary
+from backend.services.safety_validator import SafetyValidator
 
 router = APIRouter(prefix="/api/journal", tags=["journal"])
+safety_validator = SafetyValidator()
 
 
 @router.post("/entries", response_model=JournalEntryOut, dependencies=[Depends(rate_limit(10, 60))])
 async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_db)):
     user_id = get_user_id()
+    crisis_info = safety_validator.detect_crisis(f"{payload.title}\n{payload.content}")
     manager = EncryptionManager()
     title_cipher, key_id = manager.encrypt(payload.title)
     content_cipher, _ = manager.encrypt(payload.content)
@@ -45,6 +48,7 @@ async def create_entry(payload: JournalEntryIn, db: AsyncSession = Depends(get_d
         attachments=payload.attachments,
         created_at=entry.created_at.isoformat(),
         updated_at=None,
+        crisis=crisis_info if crisis_info.get("crisis_detected") else None,
     )
 
 
@@ -69,8 +73,14 @@ async def list_entries(db: AsyncSession = Depends(get_db)):
                 attachments=entry.attachments,
                 created_at=entry.created_at.isoformat(),
                 updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
+                crisis=None,
             )
         )
+        if response[-1].content:
+            crisis = safety_validator.detect_crisis(
+                f"{response[-1].title}\n{response[-1].content}"
+            )
+            response[-1].crisis = crisis if crisis.get("crisis_detected") else None
     return response
 
 
@@ -97,18 +107,23 @@ async def export_entries(db: AsyncSession = Depends(get_db)):
         JournalEntry.user_id == user_id, JournalEntry.deleted_at.is_(None)
     )
     entries = (await db.execute(stmt)).scalars().all()
-    payload = [
-        JournalEntryOut(
-            id=entry.id,
-            entry_uuid=entry.entry_uuid,
-            title=manager.decrypt(entry.title_ciphertext),
-            content=manager.decrypt(entry.content_ciphertext),
-            mood_score=entry.mood_score,
-            tags=entry.tags,
-            attachments=entry.attachments,
-            created_at=entry.created_at.isoformat(),
-            updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
+    payload = []
+    for entry in entries:
+        title = manager.decrypt(entry.title_ciphertext)
+        content = manager.decrypt(entry.content_ciphertext)
+        crisis = safety_validator.detect_crisis(f"{title}\n{content}")
+        payload.append(
+            JournalEntryOut(
+                id=entry.id,
+                entry_uuid=entry.entry_uuid,
+                title=title,
+                content=content,
+                mood_score=entry.mood_score,
+                tags=entry.tags,
+                attachments=entry.attachments,
+                created_at=entry.created_at.isoformat(),
+                updated_at=entry.updated_at.isoformat() if entry.updated_at else None,
+                crisis=crisis if crisis.get("crisis_detected") else None,
+            )
         )
-        for entry in entries
-    ]
     return JournalExport(entries=payload)

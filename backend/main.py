@@ -5,6 +5,8 @@ import sys
 import traceback
 from typing import Any, Awaitable, Callable, Dict
 
+from backend.security.secret_vault import get_secret
+
 # CRITICAL: Load environment variables BEFORE anything else
 from dotenv import load_dotenv
 load_dotenv()
@@ -13,8 +15,8 @@ print("\n" + "="*80)
 print("🕉️  MINDVIBE - STARTUP SEQUENCE")
 print("="*80)
 
-# Set API key explicitly for this module
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+# Set API key explicitly for this module. Prefer managed secret vaults.
+OPENAI_API_KEY = (get_secret("OPENAI_API_KEY") or "").strip()
 print(f"✅ OPENAI_API_KEY found: {bool(OPENAI_API_KEY)}")
 print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
 
@@ -39,6 +41,7 @@ from backend.core.logging import configure_logging, log_request
 from backend.core.performance import performance_middleware, performance_tracker
 from backend.db_utils import build_database_url, ensure_base_schema
 from backend.middleware.feature_gates import PlanGateMiddleware
+from backend.middleware.rate_limit import rate_limit_middleware
 from backend.observability import setup_observability
 from backend.services.background_jobs import ensure_jobs_started
 
@@ -74,6 +77,7 @@ app.add_middleware(
 )
 
 app.add_middleware(PlanGateMiddleware)
+app.middleware("http")(rate_limit_middleware())
 
 app.middleware("http")(log_request)
 app.middleware("http")(performance_middleware)

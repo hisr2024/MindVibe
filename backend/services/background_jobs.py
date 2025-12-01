@@ -14,6 +14,7 @@ from backend.services.mood_analytics import (
     persist_summary_report,
 )
 from backend.services.backup import run_backup
+from backend.services.data_retention import enforce_journal_retention, retention_interval_seconds
 
 from backend.core.settings import settings
 from backend.services.task_queue import dispatch_async_task
@@ -79,10 +80,12 @@ class BackgroundOrchestrator:
     def __init__(self) -> None:
         self.summary_task: asyncio.Task | None = None
         self.backup_task: asyncio.Task | None = None
+        self.retention_task: asyncio.Task | None = None
 
     async def start(self, session_factory: Optional[async_sessionmaker] = None) -> None:
         if session_factory:
             await self._start_summary_loop(session_factory)
+            await self._start_retention_loop(session_factory)
         await self._start_backup_loop()
 
     async def _start_summary_loop(self, session_factory: async_sessionmaker) -> None:
@@ -118,6 +121,26 @@ class BackgroundOrchestrator:
                 await asyncio.sleep(BACKUP_INTERVAL_SECONDS)
 
         self.backup_task = asyncio.create_task(_runner())
+
+    async def _start_retention_loop(self, session_factory: async_sessionmaker) -> None:
+        if self.retention_task:
+            return
+
+        interval = retention_interval_seconds()
+
+        async def _runner() -> None:
+            while True:
+                try:
+                    purged = await enforce_journal_retention(session_factory)
+                    logger.info(
+                        "retention_enforced",
+                        extra={"purged": purged, "interval_seconds": interval},
+                    )
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.exception("retention_enforcement_failed", exc_info=exc)
+                await asyncio.sleep(interval)
+
+        self.retention_task = asyncio.create_task(_runner())
 
 
 orchestrator = BackgroundOrchestrator()
