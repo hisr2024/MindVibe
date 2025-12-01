@@ -16,9 +16,15 @@ function ensureSessionId(): string {
   if (typeof window === 'undefined') return 'anonymous-server'
   const existing = window.localStorage.getItem(SESSION_KEY)
   if (existing) return existing
-  const generated = typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `anon-${Math.random().toString(36).slice(2)}`
+  let generated: string;
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    generated = crypto.randomUUID();
+  } else if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
+    generated = `anon-${secureRandomId(16)}`;
+  } else {
+    // fallback to Math.random, but this should almost never be used
+    generated = `anon-legacy-${Math.random().toString(36).slice(2)}`;
+  }
   window.localStorage.setItem(SESSION_KEY, generated)
   return generated
 }
