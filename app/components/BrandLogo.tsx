@@ -46,7 +46,6 @@ export default function BrandLogo({ className = '', showWordmark = true }: Brand
             MindVibe
           </p>
           <p className="text-base font-bold text-orange-50 drop-shadow-[0_6px_30px_rgba(255,153,51,0.35)]">Companion</p>
-          <p className="text-xs font-semibold text-orange-100/70">Gen Z sparkle energy</p>
         </div>
       )}
     </Link>
