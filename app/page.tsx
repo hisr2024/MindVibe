@@ -1057,22 +1057,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setAutoScrollPinned(distanceFromBottom < 120)
   }
 
-  function scrollToTop() {
-    const container = messageListRef.current
-    if (!container) return
-
-    setAutoScrollPinned(false)
-    container.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  function scrollToBottom() {
-    const container = messageListRef.current
-    if (!container) return
-
-    setAutoScrollPinned(true)
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }
-
   function sendSolutionToJournal(content: string) {
     const clean = content.trim()
     if (!clean || typeof window === 'undefined') return
@@ -1387,23 +1371,12 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         </div>
 
         {messages.length > 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4">
-            <div className="pointer-events-auto flex flex-col gap-2 rounded-2xl bg-black/70 border border-orange-500/30 px-3 py-3 shadow-[0_12px_40px_rgba(255,115,39,0.18)] backdrop-blur">
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={scrollToTop}
-                  className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/50"
-                >
-                  ↑ Scroll up
-                </button>
-                <button
-                  onClick={scrollToBottom}
-                  className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-3 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-                >
-                  ↓ Scroll down
-                </button>
-              </div>
-
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur flex-col sm:flex-row sm:items-center">
+            <div className="space-y-1 text-orange-100/80">
+              <p className="text-sm font-semibold text-orange-50">Save the latest KIAAN guidance</p>
+              <p className="text-xs">Use the scrollbar inside the conversation to review older messages, then send the newest solution straight to your journal.</p>
+            </div>
+            <div className="flex flex-col items-stretch gap-2 sm:items-end">
               <button
                 onClick={() => latestAssistantMessage && sendSolutionToJournal(latestAssistantMessage.content)}
                 disabled={!latestAssistantMessage}
@@ -1411,7 +1384,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               >
                 Bring latest solution to the journal
               </button>
-
               {journalNotice && (
                 <span className="rounded-full border border-emerald-200/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-50 text-center">
                   {journalNotice}
