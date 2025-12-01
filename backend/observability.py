@@ -17,6 +17,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+from backend.core.metrics import create_metrics_router, metrics_middleware
 from backend.core.settings import settings
 
 logger = logging.getLogger("mindvibe.observability")
@@ -52,10 +53,13 @@ def setup_prometheus(app: FastAPI) -> Optional[Instrumentator]:
         logger.info("prometheus_disabled")
         return None
 
+    app.middleware("http")(metrics_middleware)
+    app.include_router(create_metrics_router())
+
     instrumentator = Instrumentator()
     instrumentator.instrument(app)
-    instrumentator.expose(app, include_in_schema=False)
-    logger.info("prometheus_instrumented")
+    instrumentator.expose(app, include_in_schema=False, endpoint="/instrumentator/metrics")
+    logger.info("prometheus_instrumented", extra={"custom_metrics_endpoint": "/metrics"})
     return instrumentator
 
 

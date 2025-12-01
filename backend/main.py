@@ -62,6 +62,7 @@ app = FastAPI(
 
 configure_logging()
 setup_observability(app)
+register_exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
