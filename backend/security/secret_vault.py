@@ -81,7 +81,7 @@ def get_secret(key: str, default: Optional[str] = None) -> Optional[str]:
     try:
         value = provider.get(key)
     except Exception as exc:  # pragma: no cover - defensive logging
-        logger.exception("secret_retrieval_failed", extra={"key": key, "provider": provider.name})
+        logger.exception("secret_retrieval_failed", extra={"provider": provider.name})
         value = None
 
     if value is None:
