@@ -98,3 +98,10 @@ class EventPipeline:
         buffered = self._buffer.copy()
         self._buffer.clear()
         return buffered
+
+    def buffer_snapshot(self) -> list[dict[str, Any]]:
+        return list(self._buffer)
+
+    def trim_buffer(self, limit: int) -> None:
+        if len(self._buffer) > limit:
+            self._buffer = self._buffer[-limit:]

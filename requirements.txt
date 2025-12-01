@@ -33,6 +33,8 @@ cryptography>=42.0.0
 python-dotenv>=1.0.0,<2.0.0
 prometheus-client>=0.20.0
 stripe>=8.0.0
+httpx>=0.27.2
+aiosmtplib>=3.0.1
 
 openai>=1.3.0
 

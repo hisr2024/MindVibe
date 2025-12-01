@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import CrisisResources from '../components/CrisisResources'
 import { useI18n } from '../components/LocaleProvider'
+import { trackEvent } from '../lib/analytics'
 
 type Prefs = {
   demoData: boolean
@@ -51,8 +52,28 @@ export default function OnboardingClient() {
     }
   }, [prefs.reducedMotion])
 
+  useEffect(() => {
+    if (prefs.analytics) {
+      void trackEvent('onboarding_viewed', { onboarding_status: status })
+    }
+  }, [prefs.analytics, status])
+
   function toggle<K extends keyof Prefs>(key: K) {
-    setPrefs(prev => ({ ...prev, [key]: !prev[key] }))
+    setPrefs(prev => {
+      const next = { ...prev, [key]: !prev[key] }
+      if (key === 'analytics') {
+        void trackEvent(next.analytics ? 'analytics_opt_in' : 'analytics_opt_out', {
+          source: 'onboarding_preferences',
+        }, { force: true })
+      } else if (prev.analytics) {
+        void trackEvent('preference_updated', {
+          key,
+          value: next[key],
+          source: 'onboarding_preferences',
+        })
+      }
+      return next
+    })
   }
 
   return (
