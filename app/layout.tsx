@@ -1,11 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { cookies } from 'next/headers'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
-import { LocaleProvider } from './components/LocaleProvider'
-import ServiceWorkerRegister from './components/ServiceWorkerRegister'
-import { supportedLocales, type SupportedLocale } from '../lib/i18n/messages'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -25,32 +21,17 @@ export const metadata = {
   }
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get('mv-locale')?.value as SupportedLocale | undefined
-  const locale: SupportedLocale = cookieLocale && supportedLocales.includes(cookieLocale) ? cookieLocale : 'en'
-
   return (
-    <html lang={locale}>
+    <html lang="en">
       <body className={`${inter.className} bg-slate-950 text-slate-50 antialiased`}>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-orange-500 focus:px-4 focus:py-2 focus:text-slate-950"
-        >
-          Skip to content
-        </a>
-        <LocaleProvider initialLocale={locale}>
-          <ServiceWorkerRegister />
-          <SiteNav />
-          <div id="main-content" className="pt-20 lg:pt-24">
-            {children}
-          </div>
-          <SiteFooter />
-        </LocaleProvider>
+        <SiteNav />
+        <div className="pt-20 lg:pt-24">{children}</div>
+        <SiteFooter />
       </body>
     </html>
   )

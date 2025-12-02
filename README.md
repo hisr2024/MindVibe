@@ -451,12 +451,6 @@ npm audit
 - [Pipeline](docs/pipeline.md) - Content transformation pipeline
 - [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
 
-### **Gita Corpus Pipeline:**
-- [Gita Corpus README](docs/GITA_CORPUS_README.md) - Full 700-verse corpus coverage, sources, and licensing
-- Validator: `scripts/validate_gita_corpus.py` - Validates chapter files and verse counts
-- Importer: `scripts/import_gita_corpus.py` - Idempotent upsert into the database
-- Corpus files: `data/gita/corpus/01.json` … `18.json`
-
 ### **Additional Resources:**
 - [Backend Reorganization](BACKEND_REORGANIZATION_COMPLETE.md) - Migration details
 - [Cleanup Progress](CLEANUP_PROGRESS.md) - Project cleanup tracking
@@ -468,8 +462,6 @@ npm audit
 ## 🛠️ **Development**
 
 ### **Backend Development:**
-
-Set `DATABASE_URL` in your environment (or `.env`) first, then keep the database schema up to date with Alembic before launching services. Alembic now requires an explicit `DATABASE_URL`—there is no SQLite fallback—to avoid running migrations against the wrong database.
 
 ```bash
 # Start backend with hot reload

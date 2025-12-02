@@ -56,27 +56,3 @@ class MoodOut(BaseModel):
     tags: list[str] | None
     note: str | None
     at: str
-
-
-class JournalEntryIn(BaseModel):
-    title: Annotated[str, Field(max_length=200)]
-    content: str
-    mood_score: Annotated[int | None, Field(ge=-5, le=5)] = None
-    tags: list[str] | None = None
-    attachments: list[dict] | None = None
-
-
-class JournalEntryOut(BaseModel):
-    id: int
-    entry_uuid: str
-    title: str
-    content: str
-    mood_score: int | None
-    tags: list[str] | None
-    attachments: list[dict] | None
-    created_at: str
-    updated_at: str | None
-
-
-class JournalExport(BaseModel):
-    entries: list[JournalEntryOut]

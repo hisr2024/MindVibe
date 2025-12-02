@@ -55,12 +55,6 @@ We take data security seriously and implement industry-standard measures:
 - **Encrypted storage** for sensitive data at rest
 - **EdDSA cryptographic signatures** for enhanced security
 
-#### Journal encryption and key management
-- Journal titles and bodies are encrypted at rest using symmetric keys configured via the `JOURNAL_ENCRYPTION_KEYS` environment variable (Fernet-compatible key material). The primary key ID is controlled with `JOURNAL_PRIMARY_KEY_ID` for rotation.
-- A fallback key derived from `SECRET_KEY` is used only for development; production deployments must supply explicit keys.
-- Key rotation is performed by re-encrypting existing ciphertexts onto the current primary key; key IDs are stored alongside each record to support recovery.
-- For client-side, end-to-end encryption of highly sensitive fields, mobile/web clients can pre-encrypt payloads before calling `/api/journal/entries`; the backend will store ciphertext as provided.
-
 ### Access Controls
 - Strong password requirements
 - JWT-based authentication

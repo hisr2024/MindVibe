@@ -1,16 +1,6 @@
 from __future__ import annotations
 import datetime
-from sqlalchemy import (
-    Boolean,
-    JSON,
-    TIMESTAMP,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    UniqueConstraint,
-    func,
-)
+from sqlalchemy import Boolean, JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class SoftDeleteMixin:
@@ -42,15 +32,6 @@ class User(SoftDeleteMixin, Base):
         String(64), nullable=True, default=None
     )
     two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
-    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    verification_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    verification_sent_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True
-    )
-    magic_link_token: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    magic_link_expires_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True
-    )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
@@ -99,71 +80,6 @@ class Mood(SoftDeleteMixin, Base):
     note: Mapped[str | None] = mapped_column(Text)
     at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
-    )
-
-
-class JournalEntry(SoftDeleteMixin, Base):
-    __tablename__ = "journal_entries"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    entry_uuid: Mapped[str] = mapped_column(String(64), unique=True, index=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
-    )
-    title_ciphertext: Mapped[str] = mapped_column(Text)
-    content_ciphertext: Mapped[str] = mapped_column(Text)
-    encryption_key_id: Mapped[str] = mapped_column(String(64))
-    mood_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    attachments: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-    updated_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
-    )
-
-
-class JournalTag(SoftDeleteMixin, Base):
-    __tablename__ = "journal_tags"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(64), index=True)
-    description: Mapped[str | None] = mapped_column(String(256), nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
-
-    __table_args__ = (UniqueConstraint("name", name="uq_journal_tags_name"),)
-
-
-class JournalEntryTag(Base):
-    __tablename__ = "journal_entry_tags"
-    entry_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("journal_entries.id", ondelete="CASCADE"), primary_key=True
-    )
-    tag_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("journal_tags.id", ondelete="CASCADE"), primary_key=True
-    )
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
-
-
-class JournalAttachment(SoftDeleteMixin, Base):
-    __tablename__ = "journal_attachments"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    entry_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("journal_entries.id", ondelete="CASCADE"), index=True
-    )
-    file_name: Mapped[str] = mapped_column(String(256))
-    media_type: Mapped[str] = mapped_column(String(128))
-    storage_path: Mapped[str] = mapped_column(String(512))
-    encryption_key_id: Mapped[str] = mapped_column(String(64))
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-    updated_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
 class EncryptedBlob(SoftDeleteMixin, Base):

@@ -13,8 +13,6 @@ services:
         fromDatabase:
           name: mindvibe-db
           property: connectionString
-      - key: DB_SSLMODE
-        value: "require"
       - key: PYTHON_VERSION
         value: "3.11.9"
       - key: JWT_SECRET

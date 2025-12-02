@@ -29,8 +29,11 @@ CREATE TABLE IF NOT EXISTS gita_sources (
 
 CREATE INDEX IF NOT EXISTS idx_gita_sources_name ON gita_sources(name);
 
--- Create new gita_verses table with enhanced schema (skip if already present)
-CREATE TABLE IF NOT EXISTS gita_verses (
+-- Drop old gita_verses table if exists and recreate with new schema
+DROP TABLE IF EXISTS gita_verses CASCADE;
+
+-- Create new gita_verses table with enhanced schema
+CREATE TABLE gita_verses (
     id SERIAL PRIMARY KEY,
     chapter INTEGER NOT NULL,
     verse INTEGER NOT NULL,
