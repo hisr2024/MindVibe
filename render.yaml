@@ -21,14 +21,33 @@ services:
         value: "false"
       - key: PYTHONPATH
         value: "."
-    healthCheckPath: /
+      # Security settings
+      - key: DB_SSL_MODE
+        value: "require"
+      - key: ENVIRONMENT
+        value: "production"
+      - key: SECURE_COOKIE
+        value: "true"
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      # Encryption key for data at rest (generated securely)
+      - key: ENCRYPTION_KEY
+        generateValue: true
+    healthCheckPath: /health
     healthCheckProtocol: http
     healthCheckTimeout: 30
     maxConnections: 20
+    # Autoscaling settings
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 80
+      targetCPUPercent: 80
 
 databases:
-  # PostgreSQL Database
+  # PostgreSQL Database with SSL enforced
   - name: mindvibe-db
     plan: standard
     databaseName: mindvibe
     user: navi
+    # SSL is enabled by default on Render PostgreSQL
