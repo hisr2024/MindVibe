@@ -57,10 +57,66 @@ def _sql_files() -> Iterable[Path]:
 
 
 def _statements(sql_text: str) -> Iterable[str]:
-    for chunk in sql_text.split(";"):
-        statement = chunk.strip()
-        if statement:
-            yield statement
+    """Yield SQL statements while respecting dollar-quoted blocks."""
+
+    statements: list[str] = []
+    current: list[str] = []
+    in_single_quote = False
+    in_double_quote = False
+    dollar_tag: str | None = None
+    i = 0
+
+    while i < len(sql_text):
+        ch = sql_text[i]
+
+        # Toggle single-quote strings
+        if ch == "'" and not in_double_quote and dollar_tag is None:
+            in_single_quote = not in_single_quote
+            current.append(ch)
+            i += 1
+            continue
+
+        # Toggle double-quote identifiers
+        if ch == '"' and not in_single_quote and dollar_tag is None:
+            in_double_quote = not in_double_quote
+            current.append(ch)
+            i += 1
+            continue
+
+        # Enter or exit a dollar-quoted block (e.g., $$ or $tag$)
+        if ch == "$" and not in_single_quote and not in_double_quote:
+            # detect the full tag
+            end_pos = i + 1
+            while end_pos < len(sql_text) and sql_text[end_pos].isalnum():
+                end_pos += 1
+            if end_pos < len(sql_text) and sql_text[end_pos] == "$":
+                tag = sql_text[i : end_pos + 1]  # includes both '$'
+                if dollar_tag is None:
+                    dollar_tag = tag
+                elif tag == dollar_tag:
+                    dollar_tag = None
+                current.append(tag)
+                i = end_pos + 1
+                continue
+
+        # Statement delimiter only when not inside any quoted context
+        if ch == ";" and not any([in_single_quote, in_double_quote, dollar_tag]):
+            statement = "".join(current).strip()
+            if statement:
+                statements.append(statement)
+            current = []
+            i += 1
+            continue
+
+        current.append(ch)
+        i += 1
+
+    # Append any trailing statement
+    trailing = "".join(current).strip()
+    if trailing:
+        statements.append(trailing)
+
+    return statements
 
 
 def _capture_alembic_current() -> str | None:
