@@ -13,8 +13,6 @@ from backend.security.jwt import create_access_token, decode_access_token
 from backend.security.password_hash import hash_password, verify_password
 from backend.security.password_policy import policy
 from backend.security.rate_limiter import rate_limit
-from backend.services.analytics_service import analytics_service
-from backend.services.email import email_client
 from backend.services.refresh_service import (
     create_refresh_token,
     get_refresh_token_by_raw,
@@ -32,7 +30,7 @@ from backend.services.session_service import (
     touch_session,
 )
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 # ----------------------
@@ -44,7 +42,7 @@ class SignupIn(BaseModel):
 
 
 class SignupOut(BaseModel):
-    user_id: str
+    user_id: int
     email: EmailStr
     policy_passed: bool
 
@@ -62,7 +60,6 @@ class LoginOut(BaseModel):
     expires_in: int
     user_id: str
     email: EmailStr
-    role: str
 
 
 class TwoFactorSetupOut(BaseModel):
@@ -87,7 +84,6 @@ class MeOut(BaseModel):
     session_expires_at: datetime | None
     session_last_used_at: datetime | None
     access_token_expires_in: int | None
-    role: str
 
 
 class LogoutOut(BaseModel):
@@ -226,17 +222,6 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(user)
 
-    await analytics_service.record_event(
-        db,
-        event="user_signup",
-        user_id=str(user.id),
-        source="auth",
-        properties={"email": user.email, "email_verified": False},
-    )
-
-    if user.email:
-        await email_client.send_verification_email(to=user.email, token=verification_token, db=db)
-
     return SignupOut(user_id=user.id, email=user.email, policy_passed=True)
 
 
@@ -278,7 +263,7 @@ async def login(
             )
 
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
-    access_token = create_access_token(user_id=user.id, session_id=session.id, role=user.role)
+    access_token = create_access_token(user_id=user.id, session_id=session.id)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # Create refresh token + set cookie
@@ -295,15 +280,6 @@ async def login(
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
     )
 
-    await analytics_service.record_event(
-        db,
-        event="user_login",
-        user_id=str(user.id),
-        session_id=str(session.id),
-        source="auth",
-        properties={"method": "password", "two_factor": bool(user.two_factor_enabled)},
-    )
-
     return LoginOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
@@ -311,7 +287,6 @@ async def login(
         expires_in=expires_in_seconds,
         user_id=user.id,
         email=user.email,
-        role=user.role,
     )
 
 
@@ -407,7 +382,6 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         session_expires_at=session_row.expires_at,
         session_last_used_at=session_row.last_used_at,
         access_token_expires_in=access_token_expires_in,
-        role=user.role,
     )
 
 
@@ -551,12 +525,9 @@ async def refresh_tokens(
     # Rotate
     new_rt, new_raw = await rotate_refresh_token(db, token_row)
 
-    user_row = await db.get(User, token_row.user_id)
-    user_role = user_row.role if user_row else "member"
-
     # New access token
     access_token = create_access_token(
-        user_id=token_row.user_id, session_id=token_row.session_id, role=user_role
+        user_id=token_row.user_id, session_id=token_row.session_id
     )
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
@@ -594,14 +565,6 @@ async def verify_email(payload: VerifyEmailIn, db: AsyncSession = Depends(get_db
         .values(email_verified=True, verification_token=None)
     )
     await db.commit()
-
-    await analytics_service.record_event(
-        db,
-        event="email_verified",
-        user_id=str(user.id),
-        source="auth",
-        properties={"method": "token", "email": user.email},
-    )
     return {"user_id": user.id, "email_verified": True}
 
 
@@ -621,23 +584,6 @@ async def request_magic_link(payload: MagicLinkRequest, db: AsyncSession = Depen
         .values(magic_link_token=token, magic_link_expires_at=expiry)
     )
     await db.commit()
-
-    await analytics_service.record_event(
-        db,
-        event="magic_link_requested",
-        user_id=str(user.id),
-        source="auth",
-        properties={"email": user.email, "expires_at": expiry.isoformat()},
-    )
-
-    if user.email:
-        await email_client.send_magic_link(
-            to=user.email,
-            token=token,
-            expires_at=expiry,
-            db=db,
-        )
-
     return {"user_id": user.id, "magic_link_token": token, "expires_at": expiry.isoformat()}
 
 
@@ -657,7 +603,7 @@ async def magic_link_login(
         raise HTTPException(status_code=401, detail="Magic link expired")
 
     session = await create_session(db, user_id=user.id, ip=None, ua=None)
-    access_token = create_access_token(user_id=user.id, session_id=session.id, role=user.role)
+    access_token = create_access_token(user_id=user.id, session_id=session.id)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     _, raw_refresh = await create_refresh_token(db, user_id=user.id, session_id=session.id)
 
@@ -676,15 +622,6 @@ async def magic_link_login(
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
     )
 
-    await analytics_service.record_event(
-        db,
-        event="user_login",
-        user_id=str(user.id),
-        session_id=str(session.id),
-        source="auth",
-        properties={"method": "magic_link"},
-    )
-
     return LoginOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
@@ -692,5 +629,4 @@ async def magic_link_login(
         expires_in=expires_in_seconds,
         user_id=str(user.id),
         email=user.email,
-        role=user.role,
     )

@@ -28,7 +28,7 @@ api_key = os.getenv("OPENAI_API_KEY", "").strip()
 model_name = os.getenv("GUIDANCE_MODEL", "gpt-4o-mini")
 client = OpenAI(api_key=api_key) if api_key else None
 
-router = APIRouter(prefix="/guidance", tags=["guidance"])
+router = APIRouter(prefix="/api", tags=["guidance"])
 
 
 KIAAN_WEEKLY_PROMPT = """

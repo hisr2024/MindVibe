@@ -21,6 +21,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         finally:
             await session.close()
 
-def get_user_id() -> str:
+def get_user_id() -> int:
     """Get user ID - returns test user for now."""
-    return os.getenv("DEV_USER_ID", "1")
+    return int(os.getenv("DEV_USER_ID", "1"))

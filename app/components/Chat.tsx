@@ -42,7 +42,7 @@ export default function Chat() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content })
@@ -82,9 +82,6 @@ export default function Chat() {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 px-4 py-3 text-xs text-orange-100/80">
-        KIAAN responses are grounded in the 700+ verses of the Bhagavad Gita stored in this app’s database. Guidance stays modern, practical, and private.
-      </div>
       <div className="flex flex-wrap gap-2">
         {starterPrompts.map(prompt => (
           <button

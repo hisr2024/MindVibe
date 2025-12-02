@@ -13,7 +13,7 @@ from backend.deps import get_db
 from backend.models import WisdomVerse
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
-router = APIRouter(prefix="/wisdom", tags=["wisdom"])
+router = APIRouter(prefix="/api/wisdom", tags=["wisdom"])
 
 
 # Request/Response Models

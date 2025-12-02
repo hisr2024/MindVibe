@@ -9,13 +9,11 @@ import jwt
 from backend.core.settings import settings
 
 
-def create_access_token(user_id: str, session_id: str, role: str = "member") -> str:
-    """Create a new access token with role claims."""
-
+def create_access_token(user_id: str, session_id: str) -> str:
+    """Create a new access token."""
     payload = {
         "sub": user_id,
         "sid": session_id,
-        "role": role,
         "exp": datetime.now(UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
         "iat": datetime.now(UTC),
     }

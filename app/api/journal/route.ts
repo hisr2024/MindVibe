@@ -7,8 +7,6 @@ type SyncPayload = {
   createdAt: string
   cipher: { s: string; i: string; c: string }
   status?: 'pending' | 'synced' | 'failed'
-  keyId?: string
-  crisisFlagged?: boolean
 }
 
 const FILE_PATH = join(process.cwd(), 'data', 'journal-sync.json')
@@ -24,8 +22,6 @@ export async function POST(request: Request) {
     id: item.id,
     createdAt: item.createdAt,
     cipher: item.cipher,
-    keyId: item.keyId,
-    crisisFlagged: Boolean(item.crisisFlagged),
   }))
 
   await fs.mkdir(join(process.cwd(), 'data'), { recursive: true })

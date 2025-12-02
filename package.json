@@ -12,7 +12,6 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "test": "jest --passWithNoTests",
-    "test:a11y": "jest tests/accessibility --runInBand",
     "test:coverage": "jest --coverage --passWithNoTests",
     "prepare": "command -v pre-commit >/dev/null 2>&1 && pre-commit install || echo 'pre-commit not installed, skipping hook setup'",
     "aider": "bash scripts/run-aider.sh",

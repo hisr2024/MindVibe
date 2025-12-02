@@ -1,139 +1,43 @@
-"""Distributed rate limiter with Redis-backed sliding windows."""
+"""Minimal in-memory rate limiter for FastAPI routes."""
 from __future__ import annotations
 
-import asyncio
-import os
 import time
 from collections import defaultdict, deque
 from typing import Deque, Dict, Tuple
 
-import redis.asyncio as redis
-from fastapi import HTTPException, Request, Response, status
-
-from backend.core.metrics import record_rate_limit_rejection
-from backend.core.settings import settings
+from fastapi import HTTPException, Request, status
 
 
 class SlidingWindowRateLimiter:
     def __init__(self):
         self.requests: Dict[Tuple[str, str], Deque[float]] = defaultdict(deque)
 
-    def evaluate(
-        self, key: Tuple[str, str], limit: int, window_seconds: int
-    ) -> tuple[bool, int, int]:
+    def is_allowed(self, key: Tuple[str, str], limit: int, window_seconds: int) -> bool:
         now = time.time()
         window_start = now - window_seconds
         bucket = self.requests[key]
         while bucket and bucket[0] < window_start:
             bucket.popleft()
-
-        remaining = limit - len(bucket)
-        allowed = remaining > 0
-        if allowed:
-            bucket.append(now)
-            remaining -= 1
-
-        reset_at = int(window_start + window_seconds)
-        return allowed, max(remaining, 0), reset_at
+        if len(bucket) >= limit:
+            return False
+        bucket.append(now)
+        return True
 
 
-class RedisSlidingWindowLimiter:
-    """Redis-based limiter to support overlapping backend instances."""
-
-    def __init__(self, client: redis.Redis):
-        self.client = client
-
-    async def evaluate(
-        self, key: Tuple[str, str], limit: int, window_seconds: int
-    ) -> tuple[bool, int, int]:
-        now_ms = int(time.time() * 1000)
-        window_start = now_ms - (window_seconds * 1000)
-        member = f"{now_ms}:{key[0]}:{key[1]}"
-        redis_key = f"rl:{key[0]}:{key[1]}"
-
-        async with self.client.pipeline() as pipe:
-            pipe.zremrangebyscore(redis_key, 0, window_start)
-            pipe.zcard(redis_key)
-            pipe.zadd(redis_key, {member: now_ms})
-            pipe.expire(redis_key, window_seconds)
-            cleaned, current_count, *_ = await pipe.execute()
-
-        remaining = max(limit - int(current_count), 0)
-        allowed = remaining > 0
-        if not allowed:
-            reset_at = int((window_start + (window_seconds * 1000)) / 1000)
-            return False, 0, reset_at
-
-        reset_at = int((window_start + (window_seconds * 1000)) / 1000)
-        return True, remaining - 1, reset_at
-
-
-def _build_limiter() -> SlidingWindowRateLimiter | RedisSlidingWindowLimiter:
-    """Build rate limiter with Redis if available, otherwise use in-memory."""
-    import logging
-    
-    try:
-        redis_url = settings.REDIS_URL
-        
-        # Skip Redis if using localhost (not available in production)
-        if "localhost" in redis_url and not os.getenv("FORCE_REDIS", "").lower() in {"1", "true"}:
-            logging.getLogger("mindvibe"). info("Redis URL is localhost, using in-memory rate limiter")
-            return SlidingWindowRateLimiter()
-        
-        # Try Redis connection
-        client = redis.from_url(redis_url, encoding="utf-8", decode_responses=True)
-        return RedisSlidingWindowLimiter(client)
-        
-    except Exception as exc:
-        logging.getLogger("mindvibe").warning(f"Redis unavailable ({exc}), using in-memory rate limiter")
-        return SlidingWindowRateLimiter()
-        
-        # Try to create Redis client with connection test
-        client = redis.from_url(redis_url, encoding="utf-8", decode_responses=True)
-        return RedisSlidingWindowLimiter(client)
-    except Exception as exc:  # pragma: no cover - defensive: redis misconfig
-        import logging
-        logging.getLogger("mindvibe").warning(f"Redis unavailable ({exc}), using in-memory rate limiter")
-        return SlidingWindowRateLimiter()
-
-
-limiter = _build_limiter()
+limiter = SlidingWindowRateLimiter()
 
 
 def rate_limit(limit: int, window_seconds: int = 60):
-    async def dependency(request: Request, response: Response):
+    async def dependency(request: Request):
         client_ip = request.client.host if request.client else "unknown"
-        path = request.scope.get("route").path if request.scope.get("route") else request.url.path
-        key = (client_ip, path)
-        evaluate = limiter.evaluate
-        result = evaluate(key, limit, window_seconds)
-        if asyncio.iscoroutine(result):
-            allowed, remaining, reset_at = await result
-        else:
-            allowed, remaining, reset_at = result
-
-        response.headers["X-RateLimit-Limit"] = str(limit)
-        response.headers["X-RateLimit-Remaining"] = str(remaining)
-        response.headers["X-RateLimit-Reset"] = str(reset_at)
-        response.headers["Retry-After"] = str(max(reset_at - int(time.time()), 0))
-
-        if not allowed:
-            record_rate_limit_rejection(path)
+        key = (client_ip, request.url.path)
+        if not limiter.is_allowed(key, limit, window_seconds):
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail={
-                    "code": "rate_limit_exceeded",
-                    "message": "Rate limit exceeded. Please retry later.",
-                    "retry_after": window_seconds,
-                },
+                detail="Rate limit exceeded. Please retry later.",
             )
 
     return dependency
 
 
-__all__ = [
-    "rate_limit",
-    "limiter",
-    "SlidingWindowRateLimiter",
-    "RedisSlidingWindowLimiter",
-]
+__all__ = ["rate_limit", "limiter", "SlidingWindowRateLimiter"]
