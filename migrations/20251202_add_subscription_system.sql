@@ -4,7 +4,6 @@
 --       This approach is fully idempotent and avoids DO block parsing issues with the migration runner.
 --       CHECK constraints provide equivalent data validation at the database level.
 
--- Create subscription_plans table
 CREATE TABLE IF NOT EXISTS subscription_plans (
     id SERIAL PRIMARY KEY,
     tier VARCHAR(32) UNIQUE NOT NULL CHECK (tier IN ('free', 'basic', 'premium', 'enterprise')),
@@ -23,7 +22,136 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     updated_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_subscription_plans_tier ON subscription_plans(tier);
+-- Backfill missing columns on pre-existing tables (idempotent safety)
+DO $$
+BEGIN
+    -- Add tier column if it does not exist (needed for index creation later)
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'tier'
+    ) THEN
+        ALTER TABLE subscription_plans
+            ADD COLUMN tier VARCHAR(32) DEFAULT 'free';
+    END IF;
+
+    -- Normalize existing rows before enforcing constraints
+    UPDATE subscription_plans SET tier = 'free' WHERE tier IS NULL;
+
+    -- Enforce NOT NULL on tier if it is currently nullable
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans'
+          AND column_name = 'tier'
+          AND is_nullable = 'YES'
+    ) THEN
+        ALTER TABLE subscription_plans ALTER COLUMN tier SET NOT NULL;
+    END IF;
+
+    -- Add a deterministic check constraint for valid tiers
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE table_name = 'subscription_plans'
+          AND constraint_name = 'subscription_plans_tier_check'
+    ) THEN
+        ALTER TABLE subscription_plans
+            ADD CONSTRAINT subscription_plans_tier_check
+            CHECK (tier IN ('free', 'basic', 'premium', 'enterprise'));
+    END IF;
+
+    -- Add missing descriptive columns to align with current schema
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'name'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN name VARCHAR(64) NOT NULL DEFAULT 'Free';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'description'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN description TEXT;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'price_monthly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN price_monthly NUMERIC(10, 2) DEFAULT 0;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'price_yearly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN price_yearly NUMERIC(10, 2);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'stripe_price_id_monthly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN stripe_price_id_monthly VARCHAR(128);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'stripe_price_id_yearly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN stripe_price_id_yearly VARCHAR(128);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'features'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN features JSONB DEFAULT '{}';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'kiaan_questions_monthly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN kiaan_questions_monthly INTEGER DEFAULT 10;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'encrypted_journal'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN encrypted_journal BOOLEAN DEFAULT FALSE;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'data_retention_days'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN data_retention_days INTEGER DEFAULT 30;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'is_active'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'created_at'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW();
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'updated_at'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN updated_at TIMESTAMPTZ;
+    END IF;
+END $$;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscription_plans_tier ON subscription_plans(tier);
 
 -- Create user_subscriptions table
 CREATE TABLE IF NOT EXISTS user_subscriptions (
