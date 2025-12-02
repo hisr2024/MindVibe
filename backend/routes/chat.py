@@ -129,6 +129,11 @@ DO: "The key to peace is focusing on your actions, not outcomes. When you pour e
 
 Remember: You are KIAAN, a compassionate friend who understands ancient wisdom and modern struggles. Make wisdom feel natural, relevant, immediately helpful."""
 
+    def connection_status(self) -> str:
+        """Return whether the KIAAN engine is using the online model or offline fallback."""
+
+        return "online" if self.ready and self.client else "offline"
+
     def _call_model(self, user_message: str, gita_context: str) -> str:
         """Invoke the model with Bhagavad Gita grounding and rich error handling."""
 
@@ -272,7 +277,8 @@ async def start_session() -> Dict[str, Any]:
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
         "bot": "KIAAN",
         "version": "13.0",
-        "gita_powered": True
+        "gita_powered": True,
+        "connection": kiaan.connection_status(),
     }
 
 
@@ -314,6 +320,7 @@ async def send_message(chat: ChatMessage, db: AsyncSession | None = Depends(get_
 
         gita_context = await kiaan.build_gita_context(message, db)
         response = kiaan.generate_response(message, gita_context)
+        connection = kiaan.connection_status()
 
         return {
             "status": "success",
@@ -324,6 +331,7 @@ async def send_message(chat: ChatMessage, db: AsyncSession | None = Depends(get_
             "gita_powered": True,
             "crisis": crisis_info,
             "crisis_redirected": crisis_info.get("crisis_detected", False),
+            "connection": connection,
         }
     except Exception as e:
         logger.error(f"Error in send_message: {e}")
@@ -333,10 +341,11 @@ async def send_message(chat: ChatMessage, db: AsyncSession | None = Depends(get_
 @router.get("/health")
 async def health() -> Dict[str, Any]:
     return {
-        "status": "healthy" if ready else "error", 
-        "bot": "KIAAN", 
+        "status": "healthy" if ready else "error",
+        "bot": "KIAAN",
         "version": "13.0",
-        "gita_kb_loaded": gita_kb is not None
+        "gita_kb_loaded": gita_kb is not None,
+        "connection": kiaan.connection_status(),
     }
 
 
@@ -346,7 +355,8 @@ async def about() -> Dict[str, Any]:
         "name": "KIAAN",
         "version": "13.0",
         "model": "gpt-4",
-        "status": "Operational" if ready else "Error",
+        "status": "Operational" if ready else "Degraded (offline)",
+        "connection": kiaan.connection_status(),
         "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations",
@@ -363,4 +373,5 @@ async def debug() -> Dict[str, Any]:
         "fallback_available": bool(kiaan._fallback_gita_context("debug")),
         "gita_kb_loaded": gita_kb is not None,
         "ready": ready,
+        "connection": kiaan.connection_status(),
     }
