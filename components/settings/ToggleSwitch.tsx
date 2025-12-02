@@ -1,5 +1,8 @@
 'use client'
 
+import * as Switch from '@radix-ui/react-switch'
+import { motion } from 'framer-motion'
+
 interface ToggleSwitchProps {
   enabled: boolean
   onToggle: (enabled: boolean) => void
@@ -16,24 +19,27 @@ export function ToggleSwitch({
   className = '',
 }: ToggleSwitchProps) {
   return (
-    <button
-      role="switch"
-      aria-checked={enabled}
-      aria-label={label}
+    <Switch.Root
+      checked={enabled}
+      onCheckedChange={onToggle}
       disabled={disabled}
-      onClick={() => onToggle(!enabled)}
-      className={`relative h-6 w-11 rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
+      aria-label={label}
+      className={`relative h-6 w-11 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
         enabled
           ? 'bg-orange-500 border-orange-400'
           : 'bg-slate-800 border-orange-500/30'
       } ${className}`}
     >
-      <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-          enabled ? 'translate-x-5' : 'translate-x-0.5'
-        }`}
-      />
-    </button>
+      <Switch.Thumb asChild>
+        <motion.span
+          layout
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          className={`block h-5 w-5 rounded-full bg-white shadow-sm ${
+            enabled ? 'translate-x-5' : 'translate-x-0.5'
+          }`}
+        />
+      </Switch.Thumb>
+    </Switch.Root>
   )
 }
 

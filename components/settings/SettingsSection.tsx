@@ -1,6 +1,7 @@
 'use client'
 
 import { type ReactNode } from 'react'
+import { HelpIcon } from '@/components/ui'
 
 interface SettingsSectionProps {
   title: string
@@ -17,11 +18,9 @@ export function SettingsSection({
 }: SettingsSectionProps) {
   return (
     <div className={`rounded-2xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 ${className}`}>
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-2">
         <h3 className="text-lg font-semibold text-orange-50">{title}</h3>
-        {description && (
-          <p className="mt-1 text-sm text-orange-100/60">{description}</p>
-        )}
+        {description && <HelpIcon content={description} size="sm" />}
       </div>
       {children}
     </div>
@@ -43,11 +42,9 @@ export function SettingsItem({
 }: SettingsItemProps) {
   return (
     <div className={`flex items-center justify-between py-3 ${className}`}>
-      <div>
+      <div className="flex items-center gap-2">
         <p className="text-sm font-medium text-orange-50">{label}</p>
-        {description && (
-          <p className="text-xs text-orange-100/50 mt-0.5">{description}</p>
-        )}
+        {description && <HelpIcon content={description} size="sm" />}
       </div>
       <div>{children}</div>
     </div>
