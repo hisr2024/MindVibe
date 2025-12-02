@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface MessageBubbleProps {
@@ -14,6 +14,7 @@ interface MessageBubbleProps {
 export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal }: MessageBubbleProps) {
   const [showMenu, setShowMenu] = useState(false)
   const [saved, setSaved] = useState(false)
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
   
   const handleSaveToJournal = () => {
     if (onSaveToJournal) {
@@ -38,17 +39,14 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
     }
   }
   
-  // Long press detection for mobile
-  let longPressTimer: NodeJS.Timeout | null = null
-  
   const handleTouchStart = () => {
-    longPressTimer = setTimeout(handleLongPress, 500)
+    longPressTimer.current = setTimeout(handleLongPress, 500)
   }
   
   const handleTouchEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer)
-      longPressTimer = null
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
     }
   }
   
