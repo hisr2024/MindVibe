@@ -98,5 +98,3 @@ export function OnboardingLayout({
     </main>
   )
 }
-
-export default OnboardingLayout

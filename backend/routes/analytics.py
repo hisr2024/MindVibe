@@ -114,6 +114,17 @@ class Achievement(BaseModel):
     rarity: str
 
 
+def _generate_hourly_usage() -> list[dict]:
+    """Generate usage by hour data with higher activity during daytime hours."""
+    usage = []
+    for hour in range(24):
+        # Higher message count during active hours (8am-10pm)
+        is_active_hour = 8 <= hour <= 22
+        message_count = 10 if is_active_hour else 5
+        usage.append({"hour": hour, "messageCount": message_count})
+    return usage
+
+
 @router.get("/dashboard")
 async def analytics_dashboard():
     """Get complete dashboard analytics data."""
@@ -157,20 +168,31 @@ async def get_mood_trends(
     Get mood trend data for visualization.
     Returns mood scores over time with trend analysis.
     """
-    # Generate sample mood data based on period
-    data_points = 7 if period == AnalyticsPeriod.DAILY else 4 if period == AnalyticsPeriod.WEEKLY else 12
+    # Data points mapping based on period
+    period_data_points = {
+        AnalyticsPeriod.DAILY: 7,
+        AnalyticsPeriod.WEEKLY: 4,
+        AnalyticsPeriod.MONTHLY: 12,
+        AnalyticsPeriod.YEARLY: 12,
+        AnalyticsPeriod.ALL: 12,
+    }
+    data_points = period_data_points.get(period, 7)
+    
+    # Days multiplier for calculating date offsets
+    days_multiplier = 1 if period == AnalyticsPeriod.DAILY else 7
     
     data = []
     base_date = datetime.now()
+    mood_labels = ["😊", "😌", "😐", "😔", "😊"]
+    
     for i in range(data_points):
-        days_back = (data_points - 1 - i) * (1 if period == AnalyticsPeriod.DAILY else 7)
+        days_back = (data_points - 1 - i) * days_multiplier
         date = (base_date - timedelta(days=days_back)).strftime("%Y-%m-%d")
         score = 5.0 + (i / data_points) * 4.0  # Gradually improving trend
-        labels = ["😊", "😌", "😐", "😔", "😊"]
         data.append(MoodDataPoint(
             date=date,
             score=round(score, 1),
-            label=labels[i % len(labels)]
+            label=mood_labels[i % len(mood_labels)]
         ))
     
     return MoodTrendResponse(
@@ -239,7 +261,7 @@ async def get_kiaan_insights():
             TagFrequency(tag="sleep", count=5, percentage=13.0),
         ],
         engagementLevel="high",
-        usageByHour=[{"hour": i, "messageCount": max(0, 5 + (5 if 8 <= i <= 22 else 0))} for i in range(24)],
+        usageByHour=_generate_hourly_usage(),
         usageByDay=[
             {"dayOfWeek": 0, "dayName": "Sun", "messageCount": 18},
             {"dayOfWeek": 1, "dayName": "Mon", "messageCount": 24},
