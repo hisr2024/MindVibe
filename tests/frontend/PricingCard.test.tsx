@@ -16,16 +16,16 @@ const mockTier: PricingTier = {
   id: 'basic',
   name: 'Basic',
   description: 'Perfect for individuals starting their wellness journey',
-  monthlyPrice: 9.99,
-  yearlyPrice: 99.99,
+  monthlyPrice: 2.49,
+  yearlyPrice: 24.99,
   features: [
-    '100 KIAAN questions/month',
+    '50 KIAAN questions/month',
     'Encrypted journal',
     'Mood tracking',
-    'Priority support',
+    'Email support',
   ],
   cta: 'Get Started',
-  kiaanQuota: 100,
+  kiaanQuota: 50,
 }
 
 const mockFreeTier: PricingTier = {
@@ -35,29 +35,43 @@ const mockFreeTier: PricingTier = {
   monthlyPrice: 0,
   yearlyPrice: 0,
   features: [
-    '10 KIAAN questions/month',
-    'Basic mood tracking',
+    '20 KIAAN questions/month',
+    'Mood tracking',
     'Community access',
   ],
   cta: 'Start Free',
-  kiaanQuota: 10,
+  kiaanQuota: 20,
 }
 
 const mockPremiumTier: PricingTier = {
   id: 'premium',
   name: 'Premium',
-  description: 'Unlimited access to all features',
-  monthlyPrice: 19.99,
-  yearlyPrice: 199.99,
+  description: 'Full access to all features',
+  monthlyPrice: 15,
+  yearlyPrice: 149.99,
   features: [
-    'Unlimited KIAAN questions',
+    '300 KIAAN questions/month',
     'Advanced analytics',
-    'Offline access',
     'Priority support',
   ],
   highlighted: true,
   badge: 'Most Popular',
   cta: 'Go Premium',
+  kiaanQuota: 300,
+}
+
+const mockExecutiveTier: PricingTier = {
+  id: 'executive',
+  name: 'Executive',
+  description: 'Unlimited access for power users',
+  monthlyPrice: 20,
+  yearlyPrice: 199.99,
+  features: [
+    'Unlimited KIAAN questions',
+    'API access',
+    'Dedicated support',
+  ],
+  cta: 'Go Executive',
   kiaanQuota: 'unlimited',
 }
 
@@ -130,13 +144,13 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('100/month')).toBeInTheDocument()
+      expect(screen.getByText('50/month')).toBeInTheDocument()
     })
 
     it('displays unlimited quota correctly', () => {
       render(
         <PricingCard
-          tier={mockPremiumTier}
+          tier={mockExecutiveTier}
           isYearly={false}
           onSelect={mockOnSelect}
         />
@@ -145,7 +159,7 @@ describe('PricingCard', () => {
       expect(screen.getByText('Unlimited')).toBeInTheDocument()
     })
 
-    it('displays free tier quota (10 questions)', () => {
+    it('displays free tier quota (20 questions)', () => {
       render(
         <PricingCard
           tier={mockFreeTier}
@@ -154,7 +168,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('10/month')).toBeInTheDocument()
+      expect(screen.getByText('20/month')).toBeInTheDocument()
     })
 
     it('shows KIAAN Questions label', () => {
@@ -180,7 +194,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('$9.99')).toBeInTheDocument()
+      expect(screen.getByText('$2.49')).toBeInTheDocument()
       expect(screen.getByText('/month')).toBeInTheDocument()
     })
 
@@ -193,7 +207,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('$99.99')).toBeInTheDocument()
+      expect(screen.getByText('$24.99')).toBeInTheDocument()
       expect(screen.getByText('/year')).toBeInTheDocument()
     })
 
@@ -206,8 +220,8 @@ describe('PricingCard', () => {
         />
       )
 
-      // $99.99 / 12 = $8.33
-      expect(screen.getByText(/\$8\.33\/month when billed yearly/)).toBeInTheDocument()
+      // $24.99 / 12 = $2.08
+      expect(screen.getByText(/\$2\.08\/month when billed yearly/)).toBeInTheDocument()
     })
 
     it('displays $0 for free tier', () => {

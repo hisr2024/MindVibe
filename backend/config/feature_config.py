@@ -12,7 +12,7 @@ from backend.models import SubscriptionTier
 # kiaan_questions_monthly: -1 = unlimited
 TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
     SubscriptionTier.FREE: {
-        "kiaan_questions_monthly": 10,
+        "kiaan_questions_monthly": 20,
         "encrypted_journal": False,
         "mood_tracking": True,
         "wisdom_access": True,
@@ -25,11 +25,11 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "data_retention_days": 30,
     },
     SubscriptionTier.BASIC: {
-        "kiaan_questions_monthly": 100,
+        "kiaan_questions_monthly": 50,
         "encrypted_journal": True,
         "mood_tracking": True,
         "wisdom_access": True,
-        "advanced_analytics": True,
+        "advanced_analytics": False,
         "priority_support": False,
         "offline_access": False,
         "white_label": False,
@@ -38,7 +38,7 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "data_retention_days": 365,
     },
     SubscriptionTier.PREMIUM: {
-        "kiaan_questions_monthly": -1,  # Unlimited
+        "kiaan_questions_monthly": 300,
         "encrypted_journal": True,
         "mood_tracking": True,
         "wisdom_access": True,
