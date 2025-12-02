@@ -76,7 +76,6 @@ function getMoodEmoji(mood: string): string {
     'Anxious': '😰',
     'Heavy': '🌧️',
     'Angry': '🔥',
-    'Anger': '🔥',
     'Worried': '💭',
     'Sad': '💙',
     'Loneliness': '🤝',
@@ -202,12 +201,18 @@ export function GrowthJourney() {
       today.setHours(0, 0, 0, 0)
       
       let checkDate = today.getTime()
+      // Allow streak to start from today or yesterday
       for (const date of uniqueDates) {
         if (date === checkDate) {
           streak++
           checkDate -= 24 * 60 * 60 * 1000 // Go back one day
+        } else if (date === checkDate - 24 * 60 * 60 * 1000 && streak === 0) {
+          // Streak started yesterday, not today
+          checkDate = date
+          streak++
+          checkDate -= 24 * 60 * 60 * 1000
         } else if (date < checkDate) {
-          // Check if we missed yesterday but have today
+          // Gap found, break the streak
           break
         }
       }
