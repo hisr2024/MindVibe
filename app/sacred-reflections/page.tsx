@@ -102,6 +102,27 @@ export default function SacredReflectionsPage() {
     }
   }, [])
 
+  // Handle prefill from KIAAN chat
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('prefill') === 'true') {
+      const prefillData = localStorage.getItem('journal_prefill')
+      if (prefillData) {
+        try {
+          const { body: prefillBody } = JSON.parse(prefillData)
+          if (prefillBody) {
+            setBody(prefillBody)
+          }
+          localStorage.removeItem('journal_prefill')
+        } catch {
+          // Ignore parsing errors
+        }
+      }
+    }
+  }, [])
+
   useEffect(() => {
     let cancelled = false
 
