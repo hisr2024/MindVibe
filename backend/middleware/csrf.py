@@ -1,0 +1,142 @@
+"""CSRF Protection middleware for state-changing requests.
+
+This middleware implements CSRF protection using the Synchronizer Token Pattern:
+- Generates a CSRF token for each session
+- Validates the token on state-changing requests (POST, PUT, PATCH, DELETE)
+- Exempt paths can be configured for webhook endpoints
+
+KIAAN Impact: ✅ POSITIVE - Adds security without affecting KIAAN response quality.
+"""
+
+import secrets
+import hmac
+import hashlib
+from typing import Awaitable, Callable, Set
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response, JSONResponse
+
+
+# Paths that are exempt from CSRF protection (webhooks, etc.)
+CSRF_EXEMPT_PATHS: Set[str] = {
+    "/api/webhooks/stripe",
+    "/api/webhooks/payment",
+    "/health",
+    "/",
+    "/api/health",
+}
+
+# Methods that require CSRF protection
+CSRF_PROTECTED_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+# CSRF Token header name
+CSRF_HEADER_NAME = "X-CSRF-Token"
+CSRF_COOKIE_NAME = "csrf_token"
+
+
+def generate_csrf_token() -> str:
+    """Generate a secure CSRF token."""
+    return secrets.token_urlsafe(32)
+
+
+def validate_csrf_token(token: str, expected: str) -> bool:
+    """Validate CSRF token using constant-time comparison."""
+    if not token or not expected:
+        return False
+    return hmac.compare_digest(token, expected)
+
+
+class CSRFMiddleware(BaseHTTPMiddleware):
+    """Middleware to protect against CSRF attacks.
+    
+    How it works:
+    1. On GET requests, sets a CSRF token cookie if not present
+    2. On state-changing requests (POST, PUT, PATCH, DELETE):
+       - Validates the X-CSRF-Token header matches the cookie
+       - Returns 403 if validation fails
+    3. Exempt paths skip CSRF validation (webhooks, health checks)
+    
+    Frontend integration:
+    - Read the csrf_token cookie
+    - Include it in the X-CSRF-Token header for all state-changing requests
+    """
+
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        """Process request with CSRF protection."""
+        path = request.url.path
+        method = request.method.upper()
+        
+        # Skip CSRF for OPTIONS requests (CORS preflight)
+        if method == "OPTIONS":
+            return await call_next(request)
+        
+        # Check if path is exempt
+        is_exempt = any(
+            path == exempt_path or path.startswith(exempt_path + "/")
+            for exempt_path in CSRF_EXEMPT_PATHS
+        )
+        
+        # Get existing CSRF token from cookie
+        existing_token = request.cookies.get(CSRF_COOKIE_NAME)
+        
+        # For GET/HEAD requests, set token if not present
+        if method in {"GET", "HEAD"}:
+            response = await call_next(request)
+            
+            # Set CSRF token cookie if not present
+            if not existing_token:
+                new_token = generate_csrf_token()
+                response.set_cookie(
+                    key=CSRF_COOKIE_NAME,
+                    value=new_token,
+                    # httponly=False is required for CSRF tokens so JavaScript can read them
+                    # and include them in request headers. This is safe because:
+                    # 1. SameSite=strict prevents cross-site cookie sending
+                    # 2. The token must match what's in the cookie for validation
+                    # 3. XSS attacks are mitigated by CSP headers
+                    httponly=False,
+                    samesite="strict",
+                    secure=True,  # Only send over HTTPS
+                    max_age=86400,  # 24 hours
+                )
+            
+            return response
+        
+        # For state-changing methods, validate CSRF token (unless exempt)
+        if method in CSRF_PROTECTED_METHODS and not is_exempt:
+            # Get token from header
+            header_token = request.headers.get(CSRF_HEADER_NAME)
+            
+            # Also check form data for compatibility
+            if not header_token:
+                content_type = request.headers.get("Content-Type", "")
+                if "application/x-www-form-urlencoded" in content_type:
+                    try:
+                        form = await request.form()
+                        header_token = form.get("csrf_token")
+                    except Exception:
+                        pass
+            
+            # Validate token
+            if not existing_token:
+                return JSONResponse(
+                    status_code=403,
+                    content={
+                        "detail": "CSRF token missing. Please refresh the page and try again.",
+                        "error": "csrf_token_missing",
+                    },
+                )
+            
+            if not validate_csrf_token(str(header_token or ""), existing_token):
+                return JSONResponse(
+                    status_code=403,
+                    content={
+                        "detail": "CSRF token validation failed. Please refresh the page and try again.",
+                        "error": "csrf_token_invalid",
+                    },
+                )
+        
+        return await call_next(request)

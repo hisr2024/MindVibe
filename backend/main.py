@@ -190,6 +190,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
 
+# Load 2FA router
+print("\n[2FA] Attempting to import 2FA router...")
+try:
+    from backend.routes.two_factor_auth import router as tfa_router
+    app.include_router(tfa_router)
+    print("✅ [SUCCESS] 2FA router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load 2FA router: {e}")
+
 # Load Profile router
 print("\n[Profile] Attempting to import Profile router...")
 try:
@@ -303,6 +312,28 @@ if admin_routers_loaded:
     print(f"✅ [SUCCESS] Admin routers loaded: {', '.join(admin_routers_loaded)}")
 else:
     print("❌ [ERROR] No Admin routers were loaded")
+
+# Load GDPR/Compliance routers
+print("\n[Compliance] Attempting to import Compliance routers...")
+compliance_routers_loaded = []
+try:
+    from backend.routes.gdpr import router as gdpr_router
+    app.include_router(gdpr_router)
+    compliance_routers_loaded.append("gdpr")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load GDPR router: {e}")
+
+try:
+    from backend.routes.compliance import router as compliance_router
+    app.include_router(compliance_router)
+    compliance_routers_loaded.append("compliance")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Compliance router: {e}")
+
+if compliance_routers_loaded:
+    print(f"✅ [SUCCESS] Compliance routers loaded: {', '.join(compliance_routers_loaded)}")
+else:
+    print("❌ [ERROR] No Compliance routers were loaded")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
