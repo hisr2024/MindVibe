@@ -90,6 +90,20 @@ class KIAAN:
             f"- Key teachings: {teachings}"
         )
 
+    def _build_offline_response(self, user_message: str, gita_context: str) -> str:
+        """Provide a fully local response when the OpenAI client is unavailable."""
+
+        fallback_context = gita_context or self._fallback_gita_context(user_message)
+        trimmed_context = fallback_context.replace("ON-DEVICE GITA GUIDANCE (internal):", "").strip()
+
+        return (
+            "I'm still here even without the cloud connection. "
+            "Grounded in our trusted wisdom, here's a gentle path forward:\n"
+            f"{trimmed_context}\n\n"
+            "Try one step: take three slow breaths, name what hurts, then choose one small, kind action you can do today. "
+            "We'll sync with the full KIAAN engine as soon as it's back. 💙"
+        )
+
     def _build_system_prompt(self, gita_context: str) -> str:
         """Create the strict system prompt anchoring KIAAN to the 700+ verse corpus."""
 
@@ -124,7 +138,7 @@ Remember: You are KIAAN, a compassionate friend who understands ancient wisdom a
             return self.get_crisis_response()
 
         if not self.ready or not self.client:
-            return "❌ API Key not configured"
+            return self._build_offline_response(user_message, gita_context)
 
         try:
             response = self.client.chat.completions.create(
@@ -145,13 +159,9 @@ Remember: You are KIAAN, a compassionate friend who understands ancient wisdom a
         except RateLimitError:
             return "⏱️ Too many requests right now. Please wait a moment before trying again. 💙"
         except APIError:
-            fallback = self._fallback_gita_context(user_message)
-            return (
-                "KIAAN hit a connection issue but still holds space for you. "
-                f"Here is grounded guidance: {fallback} 💙"
-            )
+            return self._build_offline_response(user_message, gita_context)
         except Exception:
-            return "I'm here for you. Let's try again. 💙"
+            return self._build_offline_response(user_message, gita_context)
 
     async def build_gita_context(self, user_message: str, db: AsyncSession | None) -> str:
         """Construct the full Bhagavad Gita context from the database when available."""
