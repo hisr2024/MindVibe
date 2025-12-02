@@ -53,6 +53,17 @@ BEGIN
         END;
     END IF;
 
+    -- Legacy compatibility: earlier schemas used price_cents (INTEGER NOT NULL)
+    -- without a default. Ensure inserts below do not fail on the not-null
+    -- constraint by backfilling nulls and setting a safe default.
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'price_cents'
+    ) THEN
+        UPDATE subscription_plans SET price_cents = 0 WHERE price_cents IS NULL;
+        ALTER TABLE subscription_plans ALTER COLUMN price_cents SET DEFAULT 0;
+    END IF;
+
     -- Normalize existing rows before enforcing constraints
     UPDATE subscription_plans SET tier = 'free' WHERE tier IS NULL;
 
