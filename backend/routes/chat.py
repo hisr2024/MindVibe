@@ -192,7 +192,7 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             return {"status": "error", "response": "What's on your mind? 💙"}
         
         # Quota tracking for subscription system
-        user_id: Optional[int] = None
+        user_id: Optional[str] = None
         quota_info: Optional[Dict[str, Any]] = None
         
         if SUBSCRIPTION_ENABLED:

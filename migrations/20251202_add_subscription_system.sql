@@ -46,7 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_subscription_plans_tier ON subscription_plans(tie
 -- Create user_subscriptions table
 CREATE TABLE IF NOT EXISTS user_subscriptions (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     plan_id INTEGER NOT NULL REFERENCES subscription_plans(id) ON DELETE RESTRICT,
     status subscription_status DEFAULT 'active',
     stripe_customer_id VARCHAR(128),
@@ -70,7 +70,7 @@ CREATE INDEX IF NOT EXISTS idx_user_subscriptions_stripe_subscription_id ON user
 -- Create usage_tracking table
 CREATE TABLE IF NOT EXISTS usage_tracking (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     feature VARCHAR(64) NOT NULL,
     period_start TIMESTAMPTZ NOT NULL,
     period_end TIMESTAMPTZ NOT NULL,
@@ -87,7 +87,7 @@ CREATE INDEX IF NOT EXISTS idx_usage_tracking_period_start ON usage_tracking(per
 -- Create payments table
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     subscription_id INTEGER REFERENCES user_subscriptions(id) ON DELETE SET NULL,
     stripe_payment_intent_id VARCHAR(128) UNIQUE,
     stripe_invoice_id VARCHAR(128),
