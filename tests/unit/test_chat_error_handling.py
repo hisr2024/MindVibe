@@ -5,8 +5,9 @@ Tests the specific error handling improvements for the chat loop fix.
 Validates that proper error messages are returned for different failure scenarios.
 """
 
+import asyncio
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 from openai import AuthenticationError, BadRequestError, RateLimitError, APIError
 
 
@@ -166,36 +167,58 @@ class TestKIAANErrorHandling:
 class TestEndpointMetadata:
     """Test that endpoint metadata reflects gpt-4 model."""
 
-    @pytest.mark.asyncio
-    async def test_message_endpoint_returns_gpt4_model(self):
+    def test_message_endpoint_returns_gpt4_model(self):
         """Test that /message endpoint returns GPT-4 in metadata."""
         from backend.routes.chat import send_message, ChatMessage
-        
-        with patch('backend.routes.chat.kiaan') as mock_kiaan:
+
+        with patch('backend.routes.chat.kiaan') as mock_kiaan, \
+                patch('backend.routes.chat.analytics') as mock_analytics, \
+                patch('backend.routes.chat.event_pipeline') as mock_event_pipeline:
             mock_kiaan.generate_response.return_value = "Test response 💙"
-            
-            result = await send_message(ChatMessage(message="Hello"))
-            
+            mock_kiaan.connection_status.return_value = "online"
+            mock_kiaan.build_gita_context = AsyncMock(return_value="context")
+            mock_analytics.track_user_engagement.return_value = None
+            mock_event_pipeline.capture = AsyncMock(return_value=None)
+
+            result = asyncio.run(send_message(ChatMessage(message="Hello")))
+
             assert result["model"] == "GPT-4"
             assert result["bot"] == "KIAAN"
+            assert result["connection"] == "online"
 
-    @pytest.mark.asyncio
-    async def test_about_endpoint_returns_gpt4_model(self):
+    def test_about_endpoint_returns_gpt4_model(self):
         """Test that /about endpoint returns gpt-4 in model field."""
         from backend.routes.chat import about
-        
-        result = await about()
-        
+
+        result = asyncio.run(about())
+
         assert result["model"] == "gpt-4"
         assert result["name"] == "KIAAN"
+        assert result["connection"] in {"online", "offline"}
 
-    @pytest.mark.asyncio
-    async def test_debug_endpoint_includes_fallback_status(self):
+    def test_debug_endpoint_includes_fallback_status(self):
         """Test that /debug endpoint includes fallback_available field."""
         from backend.routes.chat import debug
-        
-        result = await debug()
-        
+
+        result = asyncio.run(debug())
+
         assert "fallback_available" in result
         assert result["model"] == "gpt-4"
         assert isinstance(result["fallback_available"], bool)
+        assert result["connection"] in {"online", "offline"}
+
+    def test_health_reports_connection_status(self):
+        """Health endpoint should surface online/offline state."""
+        from backend.routes.chat import health, kiaan
+
+        original_ready = kiaan.ready
+        original_client = kiaan.client
+        kiaan.ready = False
+        kiaan.client = None
+
+        result = asyncio.run(health())
+
+        assert result["connection"] == "offline"
+
+        kiaan.ready = original_ready
+        kiaan.client = original_client
