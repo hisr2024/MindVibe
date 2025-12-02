@@ -1,31 +1,13 @@
 -- Migration: Add subscription system tables
 -- Description: Creates tables for subscription plans, user subscriptions, usage tracking, and payments
-
--- Create subscription_tier enum type
-DO $$ BEGIN
-    CREATE TYPE subscription_tier AS ENUM ('free', 'basic', 'premium', 'enterprise');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
--- Create subscription_status enum type
-DO $$ BEGIN
-    CREATE TYPE subscription_status AS ENUM ('active', 'past_due', 'canceled', 'expired', 'trialing');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
--- Create payment_status enum type
-DO $$ BEGIN
-    CREATE TYPE payment_status AS ENUM ('pending', 'succeeded', 'failed', 'refunded');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+-- Note: Using VARCHAR with CHECK constraints instead of PostgreSQL ENUM types.
+--       This approach is fully idempotent and avoids DO block parsing issues with the migration runner.
+--       CHECK constraints provide equivalent data validation at the database level.
 
 -- Create subscription_plans table
 CREATE TABLE IF NOT EXISTS subscription_plans (
     id SERIAL PRIMARY KEY,
-    tier subscription_tier UNIQUE NOT NULL,
+    tier VARCHAR(32) UNIQUE NOT NULL CHECK (tier IN ('free', 'basic', 'premium', 'enterprise')),
     name VARCHAR(64) NOT NULL,
     description TEXT,
     price_monthly NUMERIC(10, 2) DEFAULT 0,
@@ -48,7 +30,7 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     plan_id INTEGER NOT NULL REFERENCES subscription_plans(id) ON DELETE RESTRICT,
-    status subscription_status DEFAULT 'active',
+    status VARCHAR(32) DEFAULT 'active' CHECK (status IN ('active', 'past_due', 'canceled', 'expired', 'trialing')),
     stripe_customer_id VARCHAR(128),
     stripe_subscription_id VARCHAR(128),
     current_period_start TIMESTAMPTZ,
@@ -93,7 +75,7 @@ CREATE TABLE IF NOT EXISTS payments (
     stripe_invoice_id VARCHAR(128),
     amount NUMERIC(10, 2) NOT NULL,
     currency VARCHAR(3) DEFAULT 'usd',
-    status payment_status DEFAULT 'pending',
+    status VARCHAR(32) DEFAULT 'pending' CHECK (status IN ('pending', 'succeeded', 'failed', 'refunded')),
     description TEXT,
     deleted_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
