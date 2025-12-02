@@ -1,5 +1,6 @@
 export { OnboardingWizard, type OnboardingStep } from './OnboardingWizard'
 export { OnboardingContainer, type OnboardingStepConfig } from './OnboardingContainer'
+export { OnboardingLayout } from './OnboardingLayout'
 export { ProgressIndicator } from './ProgressIndicator'
 export { WelcomeScreen } from './WelcomeScreen'
 export { ProfileSetupStep } from './ProfileSetupStep'
