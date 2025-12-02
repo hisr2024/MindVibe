@@ -20,8 +20,12 @@ function SuccessContent() {
 
   useEffect(() => {
     // Update subscription in localStorage (simulating successful checkout)
+    // Generate a more unique ID to avoid collisions
+    const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const newSubscription: Subscription = {
-      id: `sub_${Date.now()}`,
+      id: `sub_${uniqueId}`,
       tierId: tier,
       tierName: tierNames[tier] || 'Basic',
       status: 'active',
