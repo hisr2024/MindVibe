@@ -336,10 +336,9 @@ function ArdhaReframer() {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <p className="text-sm text-orange-100/80">Gita-aligned reframing</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Ardha: The Reframing Assistant</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Ardha spots the distortion, validates the feeling, and reshapes it with grounded insight.</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Ardha: Reframing Assistant</h2>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
+        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">Local only</div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -358,11 +357,8 @@ function ArdhaReframer() {
               disabled={!thought.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Ardha is reflecting...' : 'Reframe with Ardha'}
+              {loading ? 'Reflecting...' : 'Reframe'}
             </button>
-            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
-              Ardha replies with Recognition, Insight, Reframe, and one small action.
-            </div>
           </div>
           {error && <p className="text-sm text-orange-200">{error}</p>}
         </div>
@@ -443,10 +439,9 @@ function ViyogDetachmentCoach() {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <p className="text-sm text-orange-100/80">Outcome anxiety reducer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Viyog: The Detachment Coach</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Viyog eases result pressure and redirects you to one grounded action.</p>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Viyog: Detachment Coach</h2>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
+        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">Local only</div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -465,18 +460,15 @@ function ViyogDetachmentCoach() {
               disabled={!concern.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
+              {loading ? 'Centering...' : 'Shift'}
             </button>
-            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
-              Viyog delivers Validation, Attachment Check, Detachment Principle, and one action.
-            </div>
           </div>
           {error && <p className="text-sm text-orange-200">{error}</p>}
         </div>
 
         <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
           <h3 className="text-sm font-semibold text-orange-50">Viyog</h3>
-          <p className="text-sm text-orange-100/80">Guides outcome worries back into steady, actionable steps.</p>
+          <p className="text-sm text-orange-100/80">Redirects worries to actionable steps.</p>
         </div>
       </div>
 
