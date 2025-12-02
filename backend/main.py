@@ -3,7 +3,9 @@
 import os
 import sys
 import traceback
+import ssl
 from typing import Any, Awaitable, Callable, Dict
+from urllib.parse import parse_qs, urlparse
 
 # CRITICAL: Load environment variables BEFORE anything else
 from dotenv import load_dotenv
@@ -47,7 +49,35 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+
+def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
+    """Build asyncpg connect args to honor sslmode/ssl query params.
+
+    Render Postgres instances require TLS by default. When using asyncpg, the
+    ``sslmode=require`` query parameter from the connection string is ignored
+    unless we translate it into the ``ssl`` flag expected by asyncpg. This
+    helper preserves explicit ``sslmode``/``ssl`` values while defaulting to a
+    secure connection when SSL is required.
+    """
+
+    parsed = urlparse(db_url)
+    query_params = parse_qs(parsed.query)
+
+    ssl_pref = os.getenv("DB_SSL_MODE") or query_params.get("sslmode", [None])[0] or query_params.get("ssl", [None])[0]
+    if not ssl_pref:
+        return {}
+
+    ssl_pref = ssl_pref.lower()
+    if ssl_pref in {"require", "required", "verify-ca", "verify-full", "true", "1"}:
+        return {"ssl": ssl.create_default_context()}
+    if ssl_pref in {"disable", "false", "0"}:
+        return {"ssl": False}
+
+    # Fallback to enabling SSL for unrecognized but present values
+    return {"ssl": ssl.create_default_context()}
+
+
+engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args_for_ssl(DATABASE_URL))
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 app = FastAPI(
