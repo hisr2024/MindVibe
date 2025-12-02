@@ -17,7 +17,8 @@ from decimal import Decimal
 from pathlib import Path
 
 # Add the project root to the path
-project_root = Path(__file__).resolve().parents[3]
+# Path: backend/scripts/seed_subscription_plans.py -> parents[2] = project root
+project_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy import select

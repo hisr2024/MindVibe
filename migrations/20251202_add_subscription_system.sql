@@ -129,4 +129,4 @@ ON CONFLICT (tier) DO UPDATE SET
     kiaan_questions_monthly = EXCLUDED.kiaan_questions_monthly,
     encrypted_journal = EXCLUDED.encrypted_journal,
     data_retention_days = EXCLUDED.data_retention_days,
-    updated_at = NOW()
+    updated_at = NOW();

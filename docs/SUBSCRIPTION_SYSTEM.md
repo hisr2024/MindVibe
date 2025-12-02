@@ -10,7 +10,7 @@ MindVibe uses a subscription-based monetization system with four tiers: Free, Ba
 
 1. **Free Tier: 10 KIAAN questions/month maximum**
 2. **Encrypted Journal: Subscribers only** (Basic tier and above)
-3. **Response Quality: Unchanged across ALL tiers** - KIAAN provides the same quality of wisdom regardless of subscription level
+3. **Response Quality: Unchanged across all tiers** - KIAAN provides the same quality of wisdom regardless of subscription level
 4. **Privacy: All encryption and security maintained**
 
 ## Subscription Tiers
