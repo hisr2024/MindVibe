@@ -14,6 +14,14 @@ type JournalEntry = {
 const JOURNAL_KEY_STORAGE = 'kiaan_journal_key'
 const JOURNAL_ENTRY_STORAGE = 'kiaan_journal_entries_secure'
 
+// Sanitize user input to prevent prompt injection when sending to API
+function sanitizeForApi(input: string): string {
+  return input
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .replace(/\\/g, '') // Remove backslashes
+    .slice(0, 5000) // Limit length for journal entries
+}
+
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
   return btoa(String.fromCharCode(...bytes))
@@ -151,11 +159,12 @@ export default function SacredReflectionsPage() {
   async function requestGuidance(entry: JournalEntry) {
     setGuidanceLoading(prev => ({ ...prev, [entry.id]: true }))
     try {
+      const sanitizedBody = sanitizeForApi(entry.body)
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${entry.body}` })
+        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${sanitizedBody}` })
       })
 
       if (response.ok) {
@@ -230,7 +239,7 @@ export default function SacredReflectionsPage() {
                 Sacred Reflections
               </h1>
               <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-                Your encrypted private journal. All entries stay on your device with military-grade protection.
+                Your encrypted private journal. Entries are secured with AES-GCM encryption and never leave your device.
               </p>
             </div>
             <div className="flex flex-col gap-2">

@@ -3,6 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+// Sanitize user input to prevent prompt injection
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .replace(/\\/g, '') // Remove backslashes
+    .slice(0, 2000) // Limit length
+}
+
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
     if (typeof window === 'undefined') return initial
@@ -45,7 +53,7 @@ export default function ViyogPage() {
   }, [concern, error])
 
   async function requestDetachment() {
-    const trimmedConcern = concern.trim()
+    const trimmedConcern = sanitizeInput(concern.trim())
     if (!trimmedConcern) return
 
     setLoading(true)

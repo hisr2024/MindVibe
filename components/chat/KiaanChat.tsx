@@ -128,7 +128,7 @@ export function KiaanChat({
           <button
             onClick={() => {
               setAutoScroll(true)
-              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+              scrollToBottom()
             }}
             className="absolute -top-14 left-1/2 -translate-x-1/2 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 hover:scale-105 transition-all animate-bounce"
             aria-label="Jump to latest message"

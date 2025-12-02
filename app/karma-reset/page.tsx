@@ -3,6 +3,17 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+// Constants
+const PLAN_PREVIEW_LENGTH = 200
+
+// Sanitize user input to prevent prompt injection
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .replace(/\\/g, '') // Remove backslashes
+    .slice(0, 2000) // Limit length
+}
+
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
     if (typeof window === 'undefined') return initial
@@ -72,12 +83,16 @@ export default function KarmaResetPage() {
   async function buildPlan() {
     setLoading(true)
 
+    const sanitizedMisstep = sanitizeInput(misstep) || 'A brief misstep or moment that felt off'
+    const sanitizedImpact = sanitizeInput(impact) || 'Someone I care about'
+    const sanitizedIntention = sanitizeInput(intention) || 'Stay kind, steady, and clear'
+    
     const context = `Help me create a gentle karma reset plan based on this situation:
 
-What happened: ${misstep || 'A brief misstep or moment that felt off'}
-Who felt it: ${impact || 'Someone I care about'}
+What happened: ${sanitizedMisstep}
+Who felt it: ${sanitizedImpact}
 Repair choice: ${repairAction}
-My intention moving forward: ${intention || 'Stay kind, steady, and clear'}
+My intention moving forward: ${sanitizedIntention}
 
 Please provide a structured, warm, non-judgmental plan that includes:
 1. A brief acknowledgment of the situation
@@ -320,7 +335,7 @@ Keep the tone calm, supportive, and free of guilt or shame. Format it clearly.`
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {savedPlans.map((savedPlan, idx) => (
                 <div key={idx} className="text-xs text-orange-100/70 bg-black/40 rounded-lg p-3 whitespace-pre-wrap">
-                  {savedPlan.slice(0, 200)}...
+                  {savedPlan.slice(0, PLAN_PREVIEW_LENGTH)}...
                 </div>
               ))}
             </div>
