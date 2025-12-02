@@ -36,7 +36,10 @@ except Exception as e:
 
 
 def sanitize_input(text: str) -> str:
-    """Sanitize user input to prevent XSS and injection attacks.
+    """Sanitize user input to prevent XSS attacks.
+    
+    Note: SQL injection is already handled by the ORM (SQLAlchemy).
+    This function focuses on XSS prevention as a defense-in-depth measure.
     
     Args:
         text: The raw user input.
@@ -48,21 +51,9 @@ def sanitize_input(text: str) -> str:
     text = html.escape(text)
     
     # Remove potential script injection patterns
-    # This is a defense-in-depth measure
+    # This is a defense-in-depth measure (already escaped above)
     script_pattern = re.compile(r'<script[^>]*>.*?</script>', re.IGNORECASE | re.DOTALL)
     text = script_pattern.sub('', text)
-    
-    # Remove potential SQL injection patterns (defense in depth - ORM handles this)
-    # Common SQL injection patterns
-    sql_patterns = [
-        r"(?i)(\b(union|select|insert|update|delete|drop|create|alter|exec|execute)\b.*\b(from|into|table|database)\b)",
-        r"(?i)(--|#|\/\*|\*\/)",  # SQL comment markers
-        r"(?i)(\bor\b\s+\d+\s*=\s*\d+)",  # OR 1=1 patterns
-        r"(?i)(\band\b\s+\d+\s*=\s*\d+)",  # AND 1=1 patterns
-    ]
-    
-    for pattern in sql_patterns:
-        text = re.sub(pattern, '', text)
     
     return text.strip()
 
@@ -77,8 +68,7 @@ class ChatMessage(BaseModel):
         """Validate and sanitize the message."""
         if not v or not v.strip():
             raise ValueError("Message cannot be empty")
-        if len(v) > MAX_MESSAGE_LENGTH:
-            raise ValueError(f"Message too long. Maximum {MAX_MESSAGE_LENGTH} characters allowed")
+        # Note: max_length is already validated by Pydantic Field
         return sanitize_input(v)
 
 

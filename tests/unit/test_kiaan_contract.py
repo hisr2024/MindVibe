@@ -1,32 +1,13 @@
 import asyncio
 import uuid
 from types import SimpleNamespace
-from unittest.mock import Mock
 
 import pytest
-from starlette.requests import Request
-from starlette.testclient import TestClient
 
 
-def _create_mock_request():
-    """Create a mock request for rate limiter that satisfies Starlette requirements."""
-    scope = {
-        "type": "http",
-        "method": "POST",
-        "path": "/api/chat/message",
-        "query_string": b"",
-        "root_path": "",
-        "headers": [],
-        "server": ("127.0.0.1", 8000),
-        "client": ("127.0.0.1", 12345),
-    }
-    return Request(scope)
-
-
-def test_start_session_preserves_kiaan_identity():
+def test_start_session_preserves_kiaan_identity(mock_request):
     from backend.routes.chat import start_session
 
-    mock_request = _create_mock_request()
     result = asyncio.run(start_session(request=mock_request))
 
     assert result["bot"] == "KIAAN"
@@ -34,7 +15,7 @@ def test_start_session_preserves_kiaan_identity():
     assert uuid.UUID(result["session_id"])  # validates UUID format
 
 
-def test_message_endpoint_preserves_contract(monkeypatch):
+def test_message_endpoint_preserves_contract(mock_request, monkeypatch):
     from backend.routes import chat
     from backend.routes.chat import ChatMessage, send_message
 
@@ -43,7 +24,6 @@ def test_message_endpoint_preserves_contract(monkeypatch):
 
     monkeypatch.setattr(chat, "kiaan", SimpleNamespace(generate_response_with_gita=_stable_response))
 
-    mock_request = _create_mock_request()
     result = asyncio.run(send_message(request=mock_request, chat=ChatMessage(message="Hello"), db=None))
 
     assert result["status"] == "success"

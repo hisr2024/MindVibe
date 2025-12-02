@@ -264,6 +264,16 @@ class RedisCache:
     ) -> tuple[bool, int]:
         """Check if a rate limit has been exceeded.
         
+        Note: This is an optional Redis-backed rate limiting method. The primary
+        rate limiting is handled by slowapi in backend/middleware/rate_limiter.py
+        which uses in-memory storage by default. This Redis-backed method can be
+        used for distributed rate limiting when Redis is enabled.
+        
+        When Redis is not connected, this method allows all requests through
+        since the primary rate limiting is still active via slowapi. In production
+        with multiple instances, consider ensuring Redis is available for
+        consistent rate limiting across instances.
+        
         Args:
             key: The rate limit key (e.g., "rate_limit:chat:192.168.1.1").
             limit: Maximum requests allowed in the window.
@@ -273,7 +283,10 @@ class RedisCache:
             tuple: (is_allowed: bool, current_count: int)
         """
         if not self.is_connected:
-            # If Redis is not connected, allow the request
+            # If Redis is not connected, allow the request since primary
+            # rate limiting via slowapi is still active with in-memory storage.
+            # Log this in production for monitoring.
+            logger.debug("Redis not connected, falling back to primary rate limiter")
             return (True, 0)
         
         count = await self.incr(key, window_seconds)
