@@ -122,17 +122,20 @@ export function KiaanChat({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Auto-scroll indicator */}
+      {/* Floating Jump to Latest button */}
       {!autoScroll && messages.length > 0 && (
-        <button
-          onClick={() => {
-            setAutoScroll(true)
-            scrollToBottom()
-          }}
-          className="mx-4 mb-2 rounded-full bg-orange-500/20 px-4 py-1.5 text-xs text-orange-100 hover:bg-orange-500/30 transition-colors"
-        >
-          ↓ Scroll to latest
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => {
+              setAutoScroll(true)
+              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+            }}
+            className="absolute -top-14 left-1/2 -translate-x-1/2 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 hover:scale-105 transition-all animate-bounce"
+            aria-label="Jump to latest message"
+          >
+            ↓ Jump to Latest
+          </button>
+        </div>
       )}
 
       {/* Input Form */}

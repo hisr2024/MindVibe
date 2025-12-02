@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import Chat from '../components/Chat'
 import JournalEncrypted from '../components/JournalEncrypted'
 import { HelpIcon, AnimatedCard, FadeIn, StaggerContainer, StaggerItem, HoverCard, HoverCardTitle, HoverCardDescription } from '@/components/ui'
@@ -167,6 +168,75 @@ export default function DashboardClient() {
                 <p className="text-xs text-orange-100/70 mt-1">{body}</p>
               </AnimatedCard>
             ))}
+          </div>
+        </section>
+      </FadeIn>
+
+      {/* Tool Cards Section */}
+      <FadeIn delay={0.35}>
+        <section className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-orange-50">Guidance Tools</h2>
+            <HelpIcon content="Specialized assistants for different situations" />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Relationship Compass Card */}
+            <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10] to-[#0c0f14] p-5 shadow-[0_10px_40px_rgba(255,115,39,0.1)] hover:border-orange-400/40 transition">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-400/30 to-orange-400/30 flex items-center justify-center text-xl">
+                  🧭
+                </div>
+                <div>
+                  <h3 className="font-semibold text-orange-50">Relationship Compass</h3>
+                  <p className="text-xs text-orange-100/70">Calm conflict guidance</p>
+                </div>
+              </div>
+              <Link
+                href="/relationship-compass"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
+              >
+                Guide me with Relationship Compass
+              </Link>
+            </div>
+
+            {/* Viyog Card */}
+            <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10] to-[#0c0f14] p-5 shadow-[0_10px_40px_rgba(255,115,39,0.1)] hover:border-orange-400/40 transition">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400/30 to-blue-400/30 flex items-center justify-center text-xl">
+                  🎯
+                </div>
+                <div>
+                  <h3 className="font-semibold text-orange-50">Viyog – Detachment Coach</h3>
+                  <p className="text-xs text-orange-100/70">Reduces outcome anxiety</p>
+                </div>
+              </div>
+              <Link
+                href="/viyog"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
+              >
+                Shift with Viyog
+              </Link>
+            </div>
+
+            {/* Ardha Card */}
+            <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10] to-[#0c0f14] p-5 shadow-[0_10px_40px_rgba(255,115,39,0.1)] hover:border-orange-400/40 transition">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400/30 to-yellow-400/30 flex items-center justify-center text-xl">
+                  💡
+                </div>
+                <div>
+                  <h3 className="font-semibold text-orange-50">Ardha – Reframing Assistant</h3>
+                  <p className="text-xs text-orange-100/70">Reframes distorted thoughts</p>
+                </div>
+              </div>
+              <Link
+                href="/ardha"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
+              >
+                Reframe with Ardha
+              </Link>
+            </div>
           </div>
         </section>
       </FadeIn>

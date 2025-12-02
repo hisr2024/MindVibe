@@ -233,12 +233,12 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
-            <button
-              onClick={() => document.getElementById('wisdom-chat-rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            <Link
+              href="/wisdom-rooms"
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition w-full sm:w-auto text-center"
             >
               Wisdom Chat Rooms
-            </button>
+            </Link>
             <div className="px-3 py-2 rounded-xl border border-orange-400/30 text-xs text-orange-100/80 bg-black/40 w-full sm:w-auto text-center">
               Multiple guidance rooms in one tap
             </div>
@@ -2547,6 +2547,9 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
 
 function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
+  const [microResponse, setMicroResponse] = useState<string | null>(null)
+  const [loadingResponse, setLoadingResponse] = useState(false)
+  
   const moods = [
     { label: 'Peaceful', gradient: 'from-emerald-200 via-teal-300 to-cyan-200', beam: 'bg-emerald-100/70', halo: 'shadow-[0_0_50px_rgba(52,211,153,0.32)]', delay: '0s' },
     { label: 'Happy', gradient: 'from-yellow-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_55px_rgba(252,211,77,0.35)]', delay: '0.08s' },
@@ -2559,6 +2562,43 @@ function MoodTracker() {
     { label: 'Loneliness', gradient: 'from-cyan-200 via-blue-200 to-indigo-300', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(165,243,252,0.32)]', delay: '0.8s' },
     { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.88s' },
   ]
+
+  async function handleMoodSelect(mood: string) {
+    setSelectedMood(mood)
+    setLoadingResponse(true)
+    setMicroResponse(null)
+
+    const prompt = `The user just checked in and said they are feeling "${mood}". As KIAAN, provide a warm, empathetic micro-response (1-2 sentences max) that:
+- Feels like an understanding friend
+- Is gentle and comforting
+- Is emotionally grounding
+- Does not give advice, just acknowledges and validates
+
+Examples of tone:
+- For "Happy": "That warmth you're feeling? You've earned it. Let it stay."
+- For "Anxious": "I'm here. Let's take this moment together, one breath at a time."
+- For "Sad": "It's okay to feel this. You don't have to carry it alone."
+
+Respond ONLY with the micro-response, nothing else.`
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMicroResponse(data.response)
+      }
+    } catch {
+      // Silently fail - micro-response is optional
+    } finally {
+      setLoadingResponse(false)
+    }
+  }
 
   return (
     <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 shadow-[0_16px_70px_rgba(255,115,39,0.12)] space-y-4">
@@ -2580,7 +2620,7 @@ function MoodTracker() {
           return (
             <button
               key={mood.label}
-              onClick={() => setSelectedMood(mood.label)}
+              onClick={() => handleMoodSelect(mood.label)}
               className={`group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-[#09090d]/85 text-left transition duration-300 ${
                 active
                   ? 'ring-2 ring-orange-400/70 shadow-[0_24px_80px_rgba(255,115,39,0.28)] scale-[1.02]'
@@ -2640,7 +2680,21 @@ function MoodTracker() {
         })}
       </div>
 
-      {selectedMood && <p className="text-center text-sm text-orange-300">✓ Mood captured</p>}
+      {/* KIAAN Micro-Response */}
+      {selectedMood && (
+        <div className="rounded-2xl bg-gradient-to-br from-orange-500/10 via-transparent to-orange-500/5 border border-orange-400/20 p-4 text-center">
+          {loadingResponse ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-4 w-4 rounded-full bg-orange-400/60 animate-pulse" />
+              <span className="text-sm text-orange-100/70">KIAAN is here...</span>
+            </div>
+          ) : microResponse ? (
+            <p className="text-sm text-orange-50 leading-relaxed italic">&ldquo;{microResponse}&rdquo;</p>
+          ) : (
+            <p className="text-sm text-orange-300">✓ Mood captured</p>
+          )}
+        </div>
+      )}
 
       <style jsx>{`
         .animate-glowPulse { animation: glowPulse 6s ease-in-out infinite; }

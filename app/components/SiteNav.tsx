@@ -8,10 +8,10 @@ import { ThemeToggle } from '@/components/ui'
 const links = [
   { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
+  { href: '/sacred-reflections', label: 'Journal' },
+  { href: '/karma-reset', label: 'Karma Reset' },
   { href: '/features', label: 'Features' },
-  { href: '/karmic-tree', label: 'Growth' },
-  { href: '/about', label: 'About' },
 ]
 
 export default function SiteNav() {
