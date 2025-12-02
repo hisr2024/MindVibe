@@ -190,6 +190,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
 
+# Load 2FA router
+print("\n[2FA] Attempting to import 2FA router...")
+try:
+    from backend.routes.two_factor_auth import router as tfa_router
+    app.include_router(tfa_router)
+    print("✅ [SUCCESS] 2FA router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load 2FA router: {e}")
+
 # Load Profile router
 print("\n[Profile] Attempting to import Profile router...")
 try:

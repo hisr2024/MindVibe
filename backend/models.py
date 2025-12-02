@@ -60,6 +60,7 @@ class User(SoftDeleteMixin, Base):
         String(64), nullable=True, default=None
     )
     two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    mfa_backup_codes: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
