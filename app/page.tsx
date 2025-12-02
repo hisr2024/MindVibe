@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, type ReactElement } from 'react'
+import { useState, useEffect, useRef, type Dispatch, type ReactElement, type SetStateAction } from 'react'
 import Link from 'next/link'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
@@ -79,7 +79,7 @@ function previewMessage(content: string, limit = 200) {
   return `${clean.slice(0, limit)}…`
 }
 
-function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
+function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetStateAction<T>>] {
   // Always start with initial value to match SSR
   const [state, setState] = useState<T>(initial)
   const [mounted, setMounted] = useState(false)
@@ -982,15 +982,14 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
-    const newMessages = [...messages, userMessage]
     setAutoScrollPinned(true)
-    setMessages(newMessages)
+    setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-       const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content })
@@ -998,12 +997,18 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
       if (response.ok) {
         const data = await response.json()
-        setMessages([...newMessages, { role: 'assistant', content: data.response }])
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
       } else {
-        setMessages([...newMessages, { role: 'assistant', content: 'I\'m having trouble connecting. Please try again. 💙' }])
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: "I'm having trouble connecting. Please try again. 💙" }
+        ])
       }
     } catch {
-      setMessages([...newMessages, { role: 'assistant', content: 'Connection issue. I\'m here when you\'re ready. 💙' }])
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: "Connection issue. I'm here when you're ready. 💙" }
+      ])
     } finally {
       setLoading(false)
     }
@@ -2180,7 +2185,7 @@ function PublicChatRooms() {
       author: 'Guide'
     }
 
-    setMessages([...messages, entry, supportiveReply])
+    setMessages(prev => [...prev, entry, supportiveReply])
     setMessage('')
     setAlert(null)
   }
