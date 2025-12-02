@@ -310,8 +310,8 @@ async def enable_mfa(
     if not await verify_mfa_code(admin, code):
         return False, None
     
-    # Generate backup codes
-    backup_codes = [secrets.token_hex(4).upper() for _ in range(10)]
+    # Generate backup codes using cryptographically secure token
+    backup_codes = [secrets.token_urlsafe(6).upper()[:8] for _ in range(10)]
     
     await db.execute(
         update(AdminUser)
