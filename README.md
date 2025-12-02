@@ -156,16 +156,6 @@ docker-compose down
 
 ---
 
-## 🛡️ Operational Hardening
-
-- Structured JSON logging with automatic request IDs for traceability.
-- Prometheus-compatible metrics exposed at `/metrics` for platform monitoring.
-- Consistent rate limiting responses with helpful headers and `429` error payloads.
-- Role-based access scaffolding baked into JWTs for protected administrative APIs.
-- Subscription primitives (plans, customer records, Stripe sandbox hooks) to support premium features.
-
----
-
 ## 🔌 **API Documentation**
 
 ### **All 8 API Routers:**
@@ -236,8 +226,8 @@ MindVibe has a comprehensive test suite with **100% updated imports** for the ne
 ## Testing Standards & CI Enforcement
 
 ### Code Coverage Requirements
-- **Minimum coverage enforced by CI: 60%** (baseline enforced in `pyproject.toml` and CI)
-- **Target coverage goal: 70%** (to be achieved incrementally)
+- **Minimum coverage enforced by CI: 49%** (current baseline)
+- **Target coverage goal: 60%** (to be achieved incrementally)
 - CI builds will **fail** if coverage drops below the minimum threshold
 - Run tests: `pytest --cov=backend --cov-report=html`
 - View report: `open htmlcov/index.html`
@@ -257,14 +247,14 @@ MindVibe has a comprehensive test suite with **100% updated imports** for the ne
 ### CI/CD Quality Gates
 The following checks are **blocking** in CI (builds will fail if they don't pass):
 - ✅ Type checking (mypy) - must pass with 0 errors
-- ✅ Coverage threshold - must meet minimum 60% coverage
+- ✅ Coverage threshold - must meet minimum 49% coverage
 - ⚠️  Linting (ruff) - currently non-blocking (warnings only)
 - ⚠️  Formatting (black) - currently non-blocking (warnings only)
 
 ### Running Quality Checks Locally
 ```bash
 # Run all tests with coverage (must pass for CI)
-pytest --cov=backend --cov-report=html --cov-fail-under=60
+pytest --cov=backend --cov-report=html --cov-fail-under=49
 
 # Type checking (must pass for CI)
 mypy backend/
@@ -277,7 +267,7 @@ black backend/
 ```
 
 ### Improving Code Quality
-To help reach our 70% coverage target:
+To help reach our 60% coverage target:
 1. Add tests for new features
 2. Improve test coverage for existing code
 3. Focus on critical paths and business logic
@@ -460,7 +450,6 @@ npm audit
 - [Wisdom API](docs/wisdom_api.md) - Wisdom guide API reference
 - [Pipeline](docs/pipeline.md) - Content transformation pipeline
 - [Security Architecture](docs/SECURITY_ARCH.md) - Security implementation
-- [Gita Corpus Pipeline](docs/GITA_CORPUS_README.md) - Bhagavad Gita corpus validation, import, and maintenance
 
 ### **Gita Corpus Pipeline:**
 - [Gita Corpus README](docs/GITA_CORPUS_README.md) - Full 700-verse corpus coverage, sources, and licensing

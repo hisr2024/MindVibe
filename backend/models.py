@@ -1,8 +1,5 @@
 from __future__ import annotations
-
 import datetime
-from uuid import uuid4
-
 from sqlalchemy import (
     Boolean,
     JSON,
@@ -36,12 +33,11 @@ class Base(DeclarativeBase):
 
 class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
-    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     auth_uid: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(256), unique=True, index=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="en")
-    role: Mapped[str] = mapped_column(String(32), default="member", nullable=False, index=True)
     two_factor_secret: Mapped[str | None] = mapped_column(
         String(64), nullable=True, default=None
     )
@@ -63,8 +59,8 @@ class User(SoftDeleteMixin, Base):
 class Work(SoftDeleteMixin, Base):
     __tablename__ = "works"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     title: Mapped[str] = mapped_column(String(256))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -80,8 +76,8 @@ class Work(SoftDeleteMixin, Base):
 class UserProfile(SoftDeleteMixin, Base):
     __tablename__ = "user_profiles"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
     )
     full_name: Mapped[str | None] = mapped_column(String(256), nullable=True)
     base_experience: Mapped[str] = mapped_column(Text)
@@ -95,8 +91,8 @@ class UserProfile(SoftDeleteMixin, Base):
 class Mood(SoftDeleteMixin, Base):
     __tablename__ = "moods"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     score: Mapped[int] = mapped_column(Integer)
     tags: Mapped[dict | None] = mapped_column(JSON)
@@ -110,8 +106,8 @@ class JournalEntry(SoftDeleteMixin, Base):
     __tablename__ = "journal_entries"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     entry_uuid: Mapped[str] = mapped_column(String(64), unique=True, index=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     title_ciphertext: Mapped[str] = mapped_column(Text)
     content_ciphertext: Mapped[str] = mapped_column(Text)
@@ -119,7 +115,6 @@ class JournalEntry(SoftDeleteMixin, Base):
     mood_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     attachments: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
-    archive_locator: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
@@ -163,9 +158,7 @@ class JournalAttachment(SoftDeleteMixin, Base):
     media_type: Mapped[str] = mapped_column(String(128))
     storage_path: Mapped[str] = mapped_column(String(512))
     encryption_key_id: Mapped[str] = mapped_column(String(64))
-    # "metadata" is reserved in SQLAlchemy's Declarative API; keep the column name but
-    # expose it via a safe attribute name.
-    attachment_metadata: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
+    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
@@ -176,8 +169,8 @@ class JournalAttachment(SoftDeleteMixin, Base):
 class EncryptedBlob(SoftDeleteMixin, Base):
     __tablename__ = "journal_blobs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     blob_json: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -313,8 +306,8 @@ class GitaVerseKeyword(Base):
 class Session(Base):
     __tablename__ = "sessions"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
@@ -334,8 +327,8 @@ class Session(Base):
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    user_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     session_id: Mapped[str] = mapped_column(
         String(64), ForeignKey("sessions.id", ondelete="CASCADE"), index=True
@@ -356,94 +349,3 @@ class RefreshToken(Base):
     )
     reuse_detected: Mapped[bool] = mapped_column(Boolean, default=False)
     rotated_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-
-
-class StripeCustomer(Base):
-    __tablename__ = "stripe_customers"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    customer_id: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    email: Mapped[str | None] = mapped_column(String(256), nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-
-
-class SubscriptionPlan(Base):
-    __tablename__ = "subscription_plans"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    code: Mapped[str] = mapped_column(String(64), unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(128))
-    price_cents: Mapped[int] = mapped_column(Integer)
-    currency: Mapped[str] = mapped_column(String(8), default="usd")
-    interval: Mapped[str] = mapped_column(String(32), default="month")
-    stripe_price_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    features: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-    updated_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
-    )
-
-
-class Subscription(Base):
-    __tablename__ = "subscriptions"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    plan_id: Mapped[int] = mapped_column(Integer, ForeignKey("subscription_plans.id", ondelete="SET NULL"), nullable=True)
-    status: Mapped[str] = mapped_column(String(32), default="active", index=True)
-    stripe_subscription_id: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
-    current_period_end: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    cancel_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    subscription_metadata: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-    updated_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
-    )
-
-
-class SubscriptionEvent(Base):
-    __tablename__ = "subscription_events"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    subscription_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("subscriptions.id", ondelete="SET NULL"), nullable=True, index=True
-    )
-    event_type: Mapped[str] = mapped_column(String(64))
-    payload: Mapped[dict] = mapped_column(JSON)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-
-
-class AnalyticsEvent(Base):
-    __tablename__ = "analytics_events"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
-    session_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    event_name: Mapped[str] = mapped_column(String(128), index=True)
-    source: Mapped[str] = mapped_column(String(64), default="client", index=True)
-    properties: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )
-
-
-class EmailNotification(Base):
-    __tablename__ = "email_notifications"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    recipient: Mapped[str] = mapped_column(String(256), index=True)
-    template: Mapped[str] = mapped_column(String(64), index=True)
-    subject: Mapped[str] = mapped_column(String(256))
-    payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    status: Mapped[str] = mapped_column(String(32), default="queued", index=True)
-    error: Mapped[str | None] = mapped_column(Text, nullable=True)
-    sent_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True
-    )
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), index=True
-    )

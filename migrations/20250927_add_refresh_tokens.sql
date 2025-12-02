@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id VARCHAR(64) PRIMARY KEY,
-    user_id VARCHAR(128) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     session_id VARCHAR(64) NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
     token_hash TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -11,14 +11,6 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     reuse_detected BOOLEAN NOT NULL DEFAULT FALSE,
     rotated_to_id VARCHAR(64)
 );
-
--- Ensure columns exist even if the table was created without the latest fields
-ALTER TABLE IF EXISTS refresh_tokens
-    ADD COLUMN IF NOT EXISTS parent_id VARCHAR(64) REFERENCES refresh_tokens(id) ON DELETE SET NULL;
-ALTER TABLE IF EXISTS refresh_tokens
-    ADD COLUMN IF NOT EXISTS rotated_to_id VARCHAR(64);
-ALTER TABLE IF EXISTS refresh_tokens
-    ADD COLUMN IF NOT EXISTS reuse_detected BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Indexes to optimize common queries
 -- Fast filter by session and active state

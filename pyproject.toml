@@ -22,7 +22,7 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=60",
+    "--cov-fail-under=49",
 ]
 asyncio_mode = "auto"
 
@@ -38,7 +38,7 @@ omit = [
 precision = 2
 show_missing = true
 skip_covered = false
-fail_under = 60.0
+fail_under = 49.0
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

@@ -305,7 +305,7 @@ uvicorn backend.main:app --workers 4 --log-level info
 ## 7. Test Coverage Targets
 
 ### Coverage Goals
-- **Minimum**: 60% overall coverage
+- **Minimum**: 80% overall coverage
 - **Target**: 90%+ for critical paths
 - **Current**: Comprehensive coverage of models, services, and API routes
 

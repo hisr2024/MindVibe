@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, type Dispatch, type ReactElement, type SetStateAction } from 'react'
+import { useState, useEffect, useRef, type ReactElement } from 'react'
 import Link from 'next/link'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
@@ -14,21 +14,6 @@ function fromBase64(value: string) {
 
 const JOURNAL_KEY_STORAGE = 'kiaan_journal_key'
 const JOURNAL_ENTRY_STORAGE = 'kiaan_journal_entries_secure'
-const JOURNAL_CAPTURE_EVENT = 'kiaan:save-to-journal'
-
-type JournalEntry = {
-  id: string
-  title: string
-  body: string
-  mood: string
-  at: string
-}
-
-type JournalCapturePayload = {
-  title?: string
-  body: string
-  mood?: string
-}
 
 async function getEncryptionKey() {
   const cached = typeof window !== 'undefined' ? window.localStorage.getItem(JOURNAL_KEY_STORAGE) : null
@@ -73,42 +58,22 @@ function summarizeContent(content: string) {
   return summary || `${clean.slice(0, 180)}...`
 }
 
-function previewMessage(content: string, limit = 200) {
-  const clean = content.replace(/\s+/g, ' ').trim()
-  if (clean.length <= limit) return clean
-  return `${clean.slice(0, limit)}…`
-}
-
-function useLocalState<T>(key: string, initial: T): [T, Dispatch<SetStateAction<T>>] {
-  // Always start with initial value to match SSR
-  const [state, setState] = useState<T>(initial)
-  const [mounted, setMounted] = useState(false)
-
-  // Load from localStorage only after client mount
-  useEffect(() => {
-    setMounted(true)
-    if (typeof window === 'undefined' || !window.localStorage) return
-    
+function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
+  const [state, setState] = useState<T>(() => {
+    if (typeof window === 'undefined') return initial
     try {
       const item = window.localStorage.getItem(key)
-      if (item) {
-        setState(JSON.parse(item))
-      }
+      return item ? JSON.parse(item) : initial
     } catch {
-      // Silently fail
+      return initial
     }
-  }, [key])
+  })
 
-  // Save to localStorage only after mount
   useEffect(() => {
-    if (!mounted || typeof window === 'undefined' || !window.localStorage) return
-    
     try {
       window.localStorage.setItem(key, JSON.stringify(state))
-    } catch {
-      // Silently fail
-    }
-  }, [key, state, mounted])
+    } catch {}
+  }, [key, state])
 
   return [state, setState]
 }
@@ -346,7 +311,7 @@ function ArdhaReframer() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
@@ -416,7 +381,7 @@ function ArdhaReframer() {
         >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Ardha’s response</span>
-            <span suppressHydrationWarning>{new Date(result.requestedAt).toLocaleString()}</span>
+            <span>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
         </div>
@@ -453,7 +418,7 @@ function ViyogDetachmentCoach() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
@@ -523,7 +488,7 @@ function ViyogDetachmentCoach() {
         >
           <div className="flex items-center justify-between text-xs text-orange-100/70">
             <span className="font-semibold text-orange-50">Viyog’s response</span>
-            <span suppressHydrationWarning>{new Date(result.requestedAt).toLocaleString()}</span>
+            <span>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
           <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
         </div>
@@ -639,7 +604,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
             <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
               <div className="flex items-center justify-between text-xs text-orange-100/70">
                 <span className="font-semibold text-orange-50">Relationship Compass response</span>
-                <span suppressHydrationWarning>{new Date(result.requestedAt).toLocaleString()}</span>
+                <span>{new Date(result.requestedAt).toLocaleString()}</span>
               </div>
               <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
             </div>
@@ -920,7 +885,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
   const [autoScrollPinned, setAutoScrollPinned] = useState(true)
-  const [journalNotice, setJournalNotice] = useState<string | null>(null)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const clarityInitialState: ClaritySession = {
@@ -982,14 +946,15 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
+    const newMessages = [...messages, userMessage]
     setAutoScrollPinned(true)
-    setMessages(prev => [...prev, userMessage])
+    setMessages(newMessages)
     setInput('')
     setLoading(true)
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content })
@@ -997,18 +962,12 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
       if (response.ok) {
         const data = await response.json()
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
+        setMessages([...newMessages, { role: 'assistant', content: data.response }])
       } else {
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: "I'm having trouble connecting. Please try again. 💙" }
-        ])
+        setMessages([...newMessages, { role: 'assistant', content: 'I\'m having trouble connecting. Please try again. 💙' }])
       }
     } catch {
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: "Connection issue. I'm here when you're ready. 💙" }
-      ])
+      setMessages([...newMessages, { role: 'assistant', content: 'Connection issue. I\'m here when you\'re ready. 💙' }])
     } finally {
       setLoading(false)
     }
@@ -1074,20 +1033,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
   }
 
-  function scrollChatToTop() {
-    const container = messageListRef.current
-    if (!container) return
-
-    container.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  function scrollChatToBottom() {
-    const container = messageListRef.current
-    if (!container) return
-
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }
-
   function handleMessageListScroll() {
     const container = messageListRef.current
     if (!container) return
@@ -1096,22 +1041,20 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setAutoScrollPinned(distanceFromBottom < 120)
   }
 
-  function sendSolutionToJournal(content: string) {
-    const clean = content.trim()
-    if (!clean || typeof window === 'undefined') return
+  function scrollToTop() {
+    const container = messageListRef.current
+    if (!container) return
 
-    window.dispatchEvent(
-      new CustomEvent<JournalCapturePayload>(JOURNAL_CAPTURE_EVENT, {
-        detail: {
-          title: 'KIAAN solution',
-          body: clean,
-          mood: 'Reflective'
-        }
-      })
-    )
+    setAutoScrollPinned(false)
+    container.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
-    setJournalNotice('Sent to journal for safekeeping.')
-    setTimeout(() => setJournalNotice(null), 2400)
+  function scrollToBottom() {
+    const container = messageListRef.current
+    if (!container) return
+
+    setAutoScrollPinned(true)
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
   }
 
   function renderAssistantContent(content: string, index: number) {
@@ -1150,7 +1093,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               <span className="font-semibold text-orange-50">Quick summary:</span> {summary}
             </div>
           )}
-          <div className="bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm max-h-80 overflow-y-auto chat-scrollbar pr-1">
+          <div className="bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm">
             <p className="whitespace-pre-wrap leading-relaxed text-sm text-orange-50/90">
               {view === 'summary' ? summary : content}
             </p>
@@ -1165,7 +1108,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const activeGroundingStep = claritySession.started
     ? Math.min(CLARITY_GROUNDING_SEQUENCE.length - 1, Math.floor((60 - claritySession.countdown) / 10))
     : 0
-  const latestAssistantMessage = [...messages].reverse().find(msg => msg.role === 'assistant')
 
   return (
     <section
@@ -1370,26 +1312,11 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
-      <div className="flex justify-end gap-2 text-xs text-orange-100/80">
-        <button
-          onClick={scrollChatToTop}
-          className="rounded-full border border-orange-400/40 bg-white/10 px-3 py-1 font-semibold text-orange-50 shadow-[0_6px_20px_rgba(255,179,71,0.18)] hover:border-orange-300/70"
-        >
-          Scroll up
-        </button>
-        <button
-          onClick={scrollChatToBottom}
-          className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-50 shadow-[0_6px_20px_rgba(92,150,146,0.22)] hover:border-emerald-200/60"
-        >
-          Scroll down
-        </button>
-      </div>
-
       <div className="relative">
         <div
           ref={messageListRef}
           onScroll={handleMessageListScroll}
-          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable chat-scrollbar"
+          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
         >
           {messages.length === 0 && (
             <div className="text-center text-orange-100/70 py-20 md:py-32">
@@ -1425,23 +1352,29 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         </div>
 
         {messages.length > 0 && (
-          <div className="mt-3 flex items-start justify-between gap-3 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 shadow-[0_10px_30px_rgba(255,115,39,0.12)] backdrop-blur flex-col sm:flex-row sm:items-center">
-            <div className="space-y-1 text-orange-100/80">
-              <p className="text-sm font-semibold text-orange-50">Save the latest KIAAN guidance</p>
-            </div>
-            <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4">
+            <div className="pointer-events-auto flex flex-col gap-2 rounded-2xl bg-black/70 border border-orange-500/30 px-3 py-3 shadow-[0_12px_40px_rgba(255,115,39,0.18)] backdrop-blur">
               <button
-                onClick={() => latestAssistantMessage && sendSolutionToJournal(latestAssistantMessage.content)}
-                disabled={!latestAssistantMessage}
-                className="rounded-lg border border-orange-400/30 bg-orange-500/10 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/60 disabled:opacity-60 disabled:cursor-not-allowed"
+                onClick={scrollToTop}
+                className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/50"
               >
-                Bring latest solution to the journal
+                ↑ Scroll up
               </button>
-              {journalNotice && (
-                <span className="rounded-full border border-emerald-200/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-50 text-center">
-                  {journalNotice}
-                </span>
-              )}
+              <button
+                onClick={scrollToBottom}
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-3 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+              >
+                ↓ Scroll down
+              </button>
+              <span
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold text-center border ${
+                  autoScrollPinned
+                    ? 'bg-emerald-500/15 text-emerald-50 border-emerald-200/30'
+                    : 'bg-white/5 text-orange-100/80 border-orange-500/25'
+                }`}
+              >
+                {autoScrollPinned ? 'Pinned to latest replies' : 'Manual scroll mode'}
+              </span>
             </div>
           </div>
         )}
@@ -2096,7 +2029,7 @@ function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void })
           <span className="text-3xl">💎</span>
           <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Today's Wisdom</h2>
         </div>
-        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1" suppressHydrationWarning>{new Date().toLocaleDateString()}</div>
+        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
       </div>
 
       <blockquote className="relative text-lg text-orange-50 mb-4 italic leading-relaxed bg-white/5 border border-orange-200/15 rounded-2xl p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
@@ -2185,7 +2118,7 @@ function PublicChatRooms() {
       author: 'Guide'
     }
 
-    setMessages(prev => [...prev, entry, supportiveReply])
+    setMessages([...messages, entry, supportiveReply])
     setMessage('')
     setAlert(null)
   }
@@ -2227,7 +2160,7 @@ function PublicChatRooms() {
             }`}>
               <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
               <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className="text-[11px] text-orange-100/70 mt-1" suppressHydrationWarning>{new Date(msg.at).toLocaleTimeString()}</p>
+              <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
             </div>
           </div>
         ))}
@@ -2254,6 +2187,14 @@ function PublicChatRooms() {
       </div>
     </section>
   )
+}
+
+type JournalEntry = {
+  id: string
+  title: string
+  body: string
+  mood: string
+  at: string
 }
 
 function Journal() {
@@ -2311,30 +2252,6 @@ function Journal() {
   }, [])
 
   useEffect(() => {
-    function handleExternalSave(event: Event) {
-      const detail = (event as CustomEvent<JournalCapturePayload>).detail
-      if (!detail || typeof detail.body !== 'string') return
-
-      const cleanBody = detail.body.trim()
-      if (!cleanBody) return
-
-      const entry: JournalEntry = {
-        id: crypto.randomUUID(),
-        title: detail.title?.trim() || 'KIAAN solution',
-        body: cleanBody,
-        mood: detail.mood ?? 'Reflective',
-        at: new Date().toISOString()
-      }
-
-      setEntries(prev => [entry, ...prev])
-      setEncryptionMessage('Added from Kiaan chat and saved locally.')
-    }
-
-    window.addEventListener(JOURNAL_CAPTURE_EVENT, handleExternalSave as EventListener)
-    return () => window.removeEventListener(JOURNAL_CAPTURE_EVENT, handleExternalSave as EventListener)
-  }, [])
-
-  useEffect(() => {
     if (!encryptionReady) return
     ;(async () => {
       try {
@@ -2384,7 +2301,7 @@ function Journal() {
     setGuidanceLoading(prev => ({ ...prev, [entry.id]: true }))
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${entry.body}` })
@@ -2467,12 +2384,8 @@ function Journal() {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          {typeof window !== 'undefined' && (
-            <>
-              <StatusPill label={encryptionReady ? 'AES-GCM secured locally' : 'Preparing encryption lock'} tone={encryptionReady ? 'ok' : 'warn'} />
-              <StatusPill label={isOnline ? 'Offline-ready: saves on device' : 'Offline mode: stored on this device'} tone={isOnline ? 'ok' : 'warn'} />
-            </>
-          )}
+          <StatusPill label={encryptionReady ? 'AES-GCM secured locally' : 'Preparing encryption lock'} tone={encryptionReady ? 'ok' : 'warn'} />
+          <StatusPill label={isOnline ? 'Offline-ready: saves on device' : 'Offline mode: stored on this device'} tone={isOnline ? 'ok' : 'warn'} />
         </div>
 
         <div className="mt-4 space-y-2">
@@ -2574,7 +2487,7 @@ function Journal() {
             {entries.map(entry => (
               <li key={entry.id} className="p-4 rounded-2xl bg-black/60 border border-orange-800/40">
                 <div className="flex items-center justify-between text-xs text-orange-100/70">
-                  <span suppressHydrationWarning>{new Date(entry.at).toLocaleString()}</span>
+                  <span>{new Date(entry.at).toLocaleString()}</span>
                   <span className="px-2 py-1 rounded-lg bg-orange-900/50 text-orange-100 border border-orange-700 text-[11px]">{entry.mood}</span>
                 </div>
                 {entry.title && <div className="mt-1 font-semibold text-orange-50">{entry.title}</div>}

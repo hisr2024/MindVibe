@@ -12,8 +12,6 @@ from typing import Iterable
 
 from cryptography.fernet import Fernet, InvalidToken, MultiFernet
 
-from backend.security.secret_manager import secret_manager
-
 DEFAULT_KEY_ENV = "JOURNAL_ENCRYPTION_KEYS"
 PRIMARY_KEY_ENV = "JOURNAL_PRIMARY_KEY_ID"
 
@@ -25,8 +23,7 @@ class EncryptionConfig:
 
     @classmethod
     def from_env(cls) -> "EncryptionConfig":
-        manager = secret_manager()
-        raw = manager.get(DEFAULT_KEY_ENV, "") or ""
+        raw = os.getenv(DEFAULT_KEY_ENV, "")
         key_items: dict[str, bytes] = {}
         for idx, token in enumerate(filter(None, (part.strip() for part in raw.split(",")))):
             key_id = str(idx)
@@ -41,8 +38,7 @@ class EncryptionConfig:
 
         if not key_items:
             # Derive a stable key from SECRET_KEY for development fallback
-            secret_value = manager.get("SECRET_KEY", "dev-secret-key-change-in-production")
-            secret = (secret_value or "dev-secret-key-change-in-production").encode()
+            secret = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production").encode()
             key_items["fallback"] = base64.urlsafe_b64encode(secret.ljust(32, b"0")[:32])
 
         primary = os.getenv(PRIMARY_KEY_ENV) or next(iter(key_items.keys()))

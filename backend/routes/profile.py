@@ -10,7 +10,7 @@ from backend.models import Session, User, UserProfile
 from backend.security.jwt import decode_access_token
 from backend.services.session_service import get_session, session_is_active, touch_session
 
-router = APIRouter(prefix="/profile", tags=["profile"])
+router = APIRouter(prefix="/api/profile", tags=["profile"])
 
 
 class ProfileCreateUpdateIn(BaseModel):
@@ -20,7 +20,7 @@ class ProfileCreateUpdateIn(BaseModel):
 
 class ProfileOut(BaseModel):
     profile_id: int
-    user_id: str
+    user_id: int
     full_name: str | None
     base_experience: str
     created_at: datetime

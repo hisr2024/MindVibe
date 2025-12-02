@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 
-import { useI18n } from '../components/LocaleProvider'
-
 type Account = {
   name: string
   email: string
@@ -30,14 +28,10 @@ function formatDate(dateString: string) {
 }
 
 export default function AccountPageClient() {
-  const { t } = useI18n()
   const [mode, setMode] = useState<'create' | 'login'>('create')
   const [accounts, setAccounts] = useState<Account[]>([])
   const [sessionUser, setSessionUser] = useState<Account | null>(null)
   const [status, setStatus] = useState<Status | null>(null)
-  const [dataStatus, setDataStatus] = useState<Status | null>(null)
-  const [downloading, setDownloading] = useState(false)
-  const [deletingAccount, setDeletingAccount] = useState(false)
   const [hydrated, setHydrated] = useState(false)
 
   const [createForm, setCreateForm] = useState({
@@ -168,97 +162,12 @@ export default function AccountPageClient() {
     setStatus({ type: 'info', message: 'Signed out. You can log back in anytime.' })
   }
 
-  const handleDownloadData = async () => {
-    setDataStatus({ type: 'info', message: t('account.data.subtitle') })
-    setDownloading(true)
-
-    try {
-      const response = await fetch('/api/data/download')
-      if (!response.ok) throw new Error('download_failed')
-      const payload = await response.json()
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const anchor = document.createElement('a')
-      anchor.href = url
-      anchor.download = 'mindvibe-data-export.json'
-      anchor.click()
-      URL.revokeObjectURL(url)
-      setDataStatus({ type: 'success', message: 'Data export downloaded securely.' })
-    } catch (error) {
-      setDataStatus({ type: 'error', message: 'Could not download your data right now.' })
-      console.error('download failed', error)
-    } finally {
-      setDownloading(false)
-    }
-  }
-
-  const handleDeleteAccount = async () => {
-    setDataStatus({ type: 'info', message: t('account.data.notice') })
-    setDeletingAccount(true)
-
-    try {
-      const response = await fetch('/api/data/account', { method: 'DELETE' })
-      if (!response.ok) throw new Error('delete_failed')
-      setAccounts([])
-      setSessionUser(null)
-      window.localStorage.removeItem(ACCOUNT_STORAGE_KEY)
-      window.sessionStorage.removeItem('mindvibe_session_user')
-      setDataStatus({ type: 'success', message: 'Account deletion has been queued securely.' })
-    } catch (error) {
-      console.error('delete failed', error)
-      setDataStatus({ type: 'error', message: 'We could not process that deletion request just yet.' })
-    } finally {
-      setDeletingAccount(false)
-    }
-  }
-
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16">
       <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account</p>
           <h1 className="text-3xl font-bold text-orange-50">Access your account</h1>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6 shadow-[0_16px_60px_rgba(255,115,39,0.12)]" aria-labelledby="data-controls-heading">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-2">
-            <p id="data-controls-heading" className="text-sm font-semibold text-orange-50">
-              {t('account.data.title')}
-            </p>
-            <p className="max-w-2xl text-sm text-orange-100/80">{t('account.data.subtitle')}</p>
-            <p className="text-xs text-orange-100/70">{t('account.data.notice')}</p>
-          </div>
-          <div className="flex flex-col gap-3 md:w-80" aria-live="polite">
-            <button
-              onClick={handleDownloadData}
-              className="inline-flex items-center justify-center rounded-xl border border-orange-400/30 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-50 shadow hover:border-orange-300/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400"
-              disabled={downloading}
-            >
-              {downloading ? 'Preparing download…' : t('account.data.download')}
-            </button>
-            <button
-              onClick={handleDeleteAccount}
-              className="inline-flex items-center justify-center rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-50 shadow hover:border-red-300/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
-              disabled={deletingAccount}
-            >
-              {deletingAccount ? 'Requesting deletion…' : t('account.data.delete')}
-            </button>
-            {dataStatus && (
-              <div
-                className={`rounded-xl border px-3 py-2 text-sm ${
-                  dataStatus.type === 'success'
-                    ? 'border-emerald-400/50 bg-emerald-500/10 text-emerald-50'
-                    : dataStatus.type === 'error'
-                      ? 'border-red-400/40 bg-red-500/10 text-red-50'
-                      : 'border-orange-400/40 bg-orange-500/10 text-orange-50'
-                }`}
-              >
-                {dataStatus.message}
-              </div>
-            )}
-          </div>
         </div>
       </section>
 
