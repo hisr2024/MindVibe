@@ -4,7 +4,7 @@ import html
 import os
 import logging
 import uuid
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
@@ -13,6 +13,18 @@ from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError,
 
 from backend.deps import get_db
 from backend.middleware.rate_limiter import limiter, CHAT_RATE_LIMIT
+
+# Import subscription/quota services - optional for backwards compatibility
+try:
+    from backend.services.subscription_service import (
+        check_kiaan_quota,
+        increment_kiaan_usage,
+        get_or_create_free_subscription,
+    )
+    from backend.middleware.feature_access import get_current_user_id
+    SUBSCRIPTION_ENABLED = True
+except ImportError:
+    SUBSCRIPTION_ENABLED = False
 
 # Maximum message length to prevent abuse
 MAX_MESSAGE_LENGTH = 2000
@@ -179,10 +191,51 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
         
+        # Quota tracking for subscription system
+        user_id: Optional[int] = None
+        quota_info: Optional[Dict[str, Any]] = None
+        
+        if SUBSCRIPTION_ENABLED:
+            try:
+                user_id = await get_current_user_id(request)
+                
+                # Ensure user has a subscription (auto-assigns free tier)
+                await get_or_create_free_subscription(db, user_id)
+                
+                # Check quota before processing
+                has_quota, usage_count, usage_limit = await check_kiaan_quota(db, user_id)
+                
+                if not has_quota:
+                    return {
+                        "status": "error",
+                        "response": "You've reached your monthly limit of KIAAN conversations. 💙 "
+                                   "Upgrade your plan to continue our journey together.",
+                        "error_code": "quota_exceeded",
+                        "usage_count": usage_count,
+                        "usage_limit": usage_limit,
+                        "upgrade_url": "/subscription/upgrade",
+                    }
+                
+                quota_info = {
+                    "usage_count": usage_count + 1,  # Will be incremented after response
+                    "usage_limit": usage_limit,
+                    "is_unlimited": usage_limit == -1,
+                }
+            except Exception as quota_error:
+                # Log but don't block - graceful degradation
+                logger.warning(f"Quota check failed, allowing request: {quota_error}")
+        
         # Message is already sanitized by the ChatMessage validator
         response = await kiaan.generate_response_with_gita(message, db)
         
-        return {
+        # Increment usage after successful response
+        if SUBSCRIPTION_ENABLED and user_id is not None:
+            try:
+                await increment_kiaan_usage(db, user_id)
+            except Exception as usage_error:
+                logger.warning(f"Failed to increment usage: {usage_error}")
+        
+        result: Dict[str, Any] = {
             "status": "success",
             "response": response,
             "bot": "KIAAN",
@@ -190,6 +243,12 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "model": "GPT-4",
             "gita_powered": True
         }
+        
+        # Include quota info if available
+        if quota_info:
+            result["quota"] = quota_info
+        
+        return result
     except Exception as e:
         logger.error(f"Error in send_message: {e}")
         return {"status": "error", "response": "I'm here for you. Let's try again. 💙"}
