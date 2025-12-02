@@ -2550,16 +2550,26 @@ function MoodTracker() {
   const [kiaanResponse, setKiaanResponse] = useState<string>('')
   
   const moods = [
+    // Positive moods
     { label: 'Peaceful', gradient: 'from-emerald-200 via-teal-300 to-cyan-200', beam: 'bg-emerald-100/70', halo: 'shadow-[0_0_50px_rgba(52,211,153,0.32)]', delay: '0s' },
-    { label: 'Happy', gradient: 'from-yellow-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_55px_rgba(252,211,77,0.35)]', delay: '0.08s' },
-    { label: 'Charged', gradient: 'from-orange-200 via-amber-300 to-yellow-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,146,60,0.34)]', delay: '0.24s' },
-    { label: 'Open', gradient: 'from-sky-200 via-cyan-200 to-emerald-200', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.32)]', delay: '0.32s' },
-    { label: 'Angry', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0.48s' },
-    { label: 'Sad', gradient: 'from-sky-300 via-blue-400 to-indigo-500', beam: 'bg-sky-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.35)]', delay: '0.56s' },
-    { label: 'Anxious', gradient: 'from-amber-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_45px_rgba(253,230,138,0.35)]', delay: '0.64s' },
-    { label: 'Worried', gradient: 'from-violet-300 via-purple-400 to-fuchsia-500', beam: 'bg-violet-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.32)]', delay: '0.72s' },
-    { label: 'Loneliness', gradient: 'from-cyan-200 via-blue-200 to-indigo-300', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(165,243,252,0.32)]', delay: '0.8s' },
-    { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.88s' },
+    { label: 'Happy', gradient: 'from-yellow-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_55px_rgba(252,211,77,0.35)]', delay: '0.05s' },
+    { label: 'Grateful', gradient: 'from-green-200 via-emerald-300 to-teal-200', beam: 'bg-green-100/70', halo: 'shadow-[0_0_50px_rgba(74,222,128,0.32)]', delay: '0.1s' },
+    { label: 'Charged', gradient: 'from-orange-200 via-amber-300 to-yellow-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,146,60,0.34)]', delay: '0.15s' },
+    { label: 'Open', gradient: 'from-sky-200 via-cyan-200 to-emerald-200', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.32)]', delay: '0.2s' },
+    { label: 'Determined', gradient: 'from-orange-300 via-red-400 to-rose-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.34)]', delay: '0.25s' },
+    // Neutral moods
+    { label: 'Neutral', gradient: 'from-slate-200 via-gray-300 to-zinc-200', beam: 'bg-slate-100/70', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.3s' },
+    { label: 'Reflective', gradient: 'from-indigo-200 via-violet-300 to-purple-200', beam: 'bg-indigo-100/70', halo: 'shadow-[0_0_50px_rgba(165,180,252,0.32)]', delay: '0.35s' },
+    { label: 'Tender', gradient: 'from-pink-200 via-rose-300 to-red-200', beam: 'bg-pink-100/70', halo: 'shadow-[0_0_50px_rgba(251,207,232,0.32)]', delay: '0.4s' },
+    { label: 'Tired', gradient: 'from-blue-200 via-slate-300 to-gray-200', beam: 'bg-blue-100/60', halo: 'shadow-[0_0_45px_rgba(147,197,253,0.32)]', delay: '0.45s' },
+    // Challenging moods
+    { label: 'Anxious', gradient: 'from-amber-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_45px_rgba(253,230,138,0.35)]', delay: '0.5s' },
+    { label: 'Worried', gradient: 'from-violet-300 via-purple-400 to-fuchsia-500', beam: 'bg-violet-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.32)]', delay: '0.55s' },
+    { label: 'Heavy', gradient: 'from-slate-300 via-gray-400 to-zinc-400', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.35)]', delay: '0.6s' },
+    { label: 'Angry', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0.65s' },
+    { label: 'Sad', gradient: 'from-sky-300 via-blue-400 to-indigo-500', beam: 'bg-sky-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.35)]', delay: '0.7s' },
+    { label: 'Loneliness', gradient: 'from-cyan-200 via-blue-200 to-indigo-300', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(165,243,252,0.32)]', delay: '0.75s' },
+    { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.8s' },
   ]
 
   // Static micro-responses as specified in requirements
