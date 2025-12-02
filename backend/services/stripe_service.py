@@ -364,7 +364,8 @@ async def _handle_checkout_completed(db: AsyncSession, data: dict) -> bool:
         logger.warning("Checkout completed but missing user_id or plan_tier in metadata")
         return False
     
-    # user_id is already a string from metadata
+    # user_id is already a string from Stripe metadata (we store it as str(user.id) in checkout session)
+    # No int() conversion needed since User.id is now String type in the database
     tier = SubscriptionTier(plan_tier)
     plan = await get_plan_by_tier(db, tier)
     

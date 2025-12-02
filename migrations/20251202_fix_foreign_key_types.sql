@@ -43,7 +43,7 @@ ALTER TABLE sessions DROP CONSTRAINT IF EXISTS sessions_user_id_fkey;
 ALTER TABLE refresh_tokens DROP CONSTRAINT IF EXISTS refresh_tokens_user_id_fkey;
 
 -- Step 2: Alter column types from INTEGER to VARCHAR(255) to match users.id
--- Note: postgresql_using casts existing integer values to strings during the conversion
+-- Note: The USING clause (e.g., user_id::VARCHAR) casts existing integer values to strings during conversion
 
 -- Alter user_subscriptions.user_id
 ALTER TABLE user_subscriptions 

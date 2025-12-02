@@ -33,8 +33,12 @@ async def get_current_user_id(request: Request) -> str:
     
     This should be replaced with your actual authentication logic.
     For now, it looks for user_id in request state or returns a test user.
+    
+    Returns:
+        str: The user ID (UUID format or legacy integer as string).
     """
     # Check if user_id is set in request state (from auth middleware)
+    # Convert to string to ensure consistent type (supports both UUID and legacy int IDs)
     if hasattr(request.state, "user_id"):
         return str(request.state.user_id)
     
@@ -48,12 +52,14 @@ async def get_current_user_id(request: Request) -> str:
             payload = decode_access_token(token)
             user_id = payload.get("sub")
             if user_id:
+                # JWT subject already contains user_id as string
                 return str(user_id)
         except Exception:
             pass
     
-    # For development/testing, return a default user ID
+    # DEVELOPMENT ONLY: Return a default user ID for testing
     # In production, this should raise an authentication error
+    # Note: This is a legacy-format ID; real users will have UUID format IDs
     return "1"
 
 
