@@ -72,6 +72,20 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
   const handleExport = async () => {
     if (!analyticsData) return
     
+    // Validate date range
+    const startDate = new Date(dateRange.start)
+    const endDate = new Date(dateRange.end)
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      resetState()
+      return
+    }
+    
+    if (startDate > endDate) {
+      resetState()
+      return
+    }
+    
     await exportData(
       analyticsData,
       selectedFormat,

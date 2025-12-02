@@ -292,19 +292,22 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     refresh()
   }, [refresh])
 
-  // Initial fetch
+  // Initial fetch - refresh is stable due to useCallback
   useEffect(() => {
     refresh()
-  }, []) // Only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Refetch mood trends when period changes
   useEffect(() => {
     refreshMoodTrends()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.period])
 
   // Refetch overview when date range changes
   useEffect(() => {
     refreshOverview()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.dateRange])
 
   return {

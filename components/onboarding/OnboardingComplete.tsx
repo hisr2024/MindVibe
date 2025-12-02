@@ -9,8 +9,11 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 
-// Dynamic import for confetti to avoid SSR issues
-const ReactConfetti = dynamic(() => import('react-confetti'), { ssr: false })
+// Dynamic import for confetti to avoid SSR issues with error handling
+const ReactConfetti = dynamic(
+  () => import('react-confetti').catch(() => () => null),
+  { ssr: false }
+)
 
 interface OnboardingCompleteProps {
   userName?: string
