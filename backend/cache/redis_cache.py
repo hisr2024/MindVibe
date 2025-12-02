@@ -496,18 +496,12 @@ def cached(
             )
 
         # Return appropriate wrapper based on function type
-        if asyncio_function(func):
+        import asyncio
+        if asyncio.iscoroutinefunction(func):
             return async_wrapper
         return sync_wrapper
 
     return decorator
-
-
-def asyncio_function(func: Callable[..., Any]) -> bool:
-    """Check if function is async."""
-    import asyncio
-
-    return asyncio.iscoroutinefunction(func)
 
 
 async def invalidate_pattern(pattern: str) -> int:
