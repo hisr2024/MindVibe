@@ -5,6 +5,7 @@ Tests the full chatbot API including message handling, session management,
 and conversation history.
 """
 
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -33,6 +34,45 @@ def sample_verse_data():
 @pytest.mark.asyncio
 class TestChatEndpoints:
     """Test suite for chat API endpoints."""
+
+    async def test_chat_smoke_contract_after_middlewares(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
+        """Ensure KIAAN contract stays stable after middleware/router setup."""
+        from backend.routes import chat as chat_module
+
+        async def _stable_response(message: str, db):
+            return "Contract steady 💙"
+
+        monkeypatch.setattr(
+            chat_module,
+            "kiaan",
+            SimpleNamespace(generate_response_with_gita=_stable_response),
+        )
+
+        response = await test_client.post(
+            "/api/chat/message",
+            json={"message": "Hello"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        expected_keys = {"status", "response", "bot", "version", "model", "gita_powered"}
+        assert set(data.keys()) == expected_keys
+        assert data["bot"] == "KIAAN"
+        assert data["version"] == "13.0"
+        assert data["status"] == "success"
+        assert data["response"] == "Contract steady 💙"
+
+    async def test_chat_health_contract_after_router_init(self, test_client: AsyncClient):
+        """Verify chat health retains identity fields after app middleware initialization."""
+        response = await test_client.get("/api/chat/health")
+
+        assert response.status_code == 200
+        data = response.json()
+        expected_keys = {"status", "bot", "version", "gita_kb_loaded"}
+        assert set(data.keys()) == expected_keys
+        assert data["bot"] == "KIAAN"
+        assert data["version"] == "13.0"
+        assert data["status"] in {"healthy", "error"}
 
     async def test_start_new_session(self, test_client: AsyncClient):
         """Test starting a new chat session."""
