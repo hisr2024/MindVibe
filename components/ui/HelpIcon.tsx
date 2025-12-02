@@ -21,54 +21,52 @@ export function HelpIcon({ content, side = 'top', size = 'md', className = '' }:
   const [isOpen, setIsOpen] = React.useState(false)
 
   return (
-    <TooltipPrimitive.Provider delayDuration={200}>
-      <TooltipPrimitive.Root onOpenChange={setIsOpen}>
-        <TooltipPrimitive.Trigger asChild>
-          <button
-            type="button"
-            className={`inline-flex items-center justify-center rounded-full text-orange-400/70 hover:text-orange-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${className}`}
-            aria-label="More information"
+    <TooltipPrimitive.Root onOpenChange={setIsOpen}>
+      <TooltipPrimitive.Trigger asChild>
+        <button
+          type="button"
+          className={`inline-flex items-center justify-center rounded-full text-orange-400/70 hover:text-orange-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${className}`}
+          aria-label="More information"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={sizeStyles[size]}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={sizeStyles[size]}
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </button>
+      </TooltipPrimitive.Trigger>
+      <AnimatePresence>
+        {isOpen && (
+          <TooltipPrimitive.Portal forceMount>
+            <TooltipPrimitive.Content
+              side={side}
+              sideOffset={6}
+              asChild
             >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          </button>
-        </TooltipPrimitive.Trigger>
-        <AnimatePresence>
-          {isOpen && (
-            <TooltipPrimitive.Portal forceMount>
-              <TooltipPrimitive.Content
-                side={side}
-                sideOffset={6}
-                asChild
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.12, ease: 'easeOut' }}
+                className="z-50 max-w-xs rounded-lg border border-orange-500/20 bg-slate-900 px-3 py-2 text-xs text-orange-100/90 shadow-lg shadow-orange-500/10"
               >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.12, ease: 'easeOut' }}
-                  className="z-50 max-w-xs rounded-lg border border-orange-500/20 bg-slate-900 px-3 py-2 text-xs text-orange-100/90 shadow-lg shadow-orange-500/10"
-                >
-                  {content}
-                  <TooltipPrimitive.Arrow className="fill-slate-900" />
-                </motion.div>
-              </TooltipPrimitive.Content>
-            </TooltipPrimitive.Portal>
-          )}
-        </AnimatePresence>
-      </TooltipPrimitive.Root>
-    </TooltipPrimitive.Provider>
+                {content}
+                <TooltipPrimitive.Arrow className="fill-slate-900" />
+              </motion.div>
+            </TooltipPrimitive.Content>
+          </TooltipPrimitive.Portal>
+        )}
+      </AnimatePresence>
+    </TooltipPrimitive.Root>
   )
 }
 

@@ -1,6 +1,7 @@
 import './globals.css'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
+import Providers from './providers'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -26,9 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans bg-slate-950 text-slate-50 antialiased">
-        <SiteNav />
-        <div className="pt-20 lg:pt-24">{children}</div>
-        <SiteFooter />
+        <Providers>
+          <SiteNav />
+          <div className="pt-20 lg:pt-24">{children}</div>
+          <SiteFooter />
+        </Providers>
       </body>
     </html>
   )
