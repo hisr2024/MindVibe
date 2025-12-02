@@ -1,9 +1,6 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
-
-const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -28,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-950 text-slate-50 antialiased`}>
+      <body className="font-sans bg-slate-950 text-slate-50 antialiased">
         <SiteNav />
         <div className="pt-20 lg:pt-24">{children}</div>
         <SiteFooter />

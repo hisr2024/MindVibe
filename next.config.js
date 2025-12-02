@@ -48,11 +48,12 @@ const nextConfig = {
   },
 
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com';
     return {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+          destination: `${apiUrl}/:path*`,
         },
       ],
     };
