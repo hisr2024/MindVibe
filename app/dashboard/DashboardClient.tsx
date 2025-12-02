@@ -2,81 +2,61 @@
 
 import Chat from '../components/Chat'
 import JournalEncrypted from '../components/JournalEncrypted'
+import { HelpIcon, AnimatedCard, FadeIn, StaggerContainer, StaggerItem, HoverCard, HoverCardTitle, HoverCardDescription } from '@/components/ui'
 
 export default function DashboardClient() {
   const shortcuts = [
-    { href: '/flows/check-in', label: 'State check-in' },
-    { href: '/flows/kiaan', label: 'KIAAN chat' },
-    { href: '/flows/viyog', label: 'Outcome reducer' },
-    { href: '/flows/journal', label: 'Private journal' }
+    { href: '/flows/check-in', label: 'State check-in', hint: 'Capture your mood' },
+    { href: '/flows/kiaan', label: 'KIAAN chat', hint: 'Guided conversation' },
+    { href: '/flows/viyog', label: 'Outcome reducer', hint: 'Ease result anxiety' },
+    { href: '/flows/journal', label: 'Private journal', hint: 'Encrypted notes' }
   ]
 
   const focusItems = [
-    {
-      title: 'Check in',
-      body: 'Capture your current state and align the assistant tone instantly.',
-      accent: 'bg-orange-400'
-    },
-    {
-      title: 'Run a flow',
-      body: 'Jump into Access, KIAAN, or Outcome Reducer without leaving the dashboard.',
-      accent: 'bg-amber-300'
-    },
-    {
-      title: 'Save it',
-      body: 'Drop quick thoughts into your encrypted journal for later review.',
-      accent: 'bg-orange-200'
-    }
+    { title: 'Check in', body: 'Align the assistant tone', accent: 'bg-orange-400' },
+    { title: 'Run a flow', body: 'Jump into any tool', accent: 'bg-amber-300' },
+    { title: 'Save it', body: 'Quick encrypted notes', accent: 'bg-orange-200' }
   ]
 
   const features = [
-    { title: 'Guided chat', body: 'Stay in flow with a calm assistant tuned for your context and history.' },
-    { title: 'Encrypted journal', body: 'AES-GCM local storage keeps notes private—no servers involved.' },
-    { title: 'Flow launcher', body: 'Dedicated shortcuts load your favorite flows with a single click.' },
-    { title: 'Focused layout', body: 'High-contrast typography and spacing keep attention on the task.' },
-    { title: 'Mobile ready', body: 'Cards stack elegantly so you can work comfortably on any screen.' },
-    { title: 'Immediate context', body: 'Priority tasks surface here so you start with clarity.' }
+    { title: 'Guided chat', summary: 'Calm assistant', detail: 'Stay in flow with context-aware responses and history.' },
+    { title: 'Encrypted journal', summary: 'Local AES-GCM', detail: 'Notes stay private—no servers involved.' },
+    { title: 'Flow launcher', summary: 'One-click flows', detail: 'Dedicated shortcuts for your favorite tools.' },
+    { title: 'Focused layout', summary: 'High contrast', detail: 'Typography and spacing optimized for attention.' },
+    { title: 'Mobile ready', summary: 'Stacks elegantly', detail: 'Work comfortably on any screen size.' },
+    { title: 'Immediate context', summary: 'Priority first', detail: 'Important tasks surface right away.' }
   ]
 
   const kiaanHighlights = [
-    {
-      title: 'Ecosystem intact',
-      body: 'All KIAAN pathways remain one tap away with consistent URLs and layout anchors.'
-    },
-    {
-      title: 'Reliability first',
-      body: 'Shortcuts and focus items are mapped directly to KIAAN flows to avoid regressions.'
-    },
-    {
-      title: 'Speed maintained',
-      body: 'Lean markup, fewer repeats, and responsive grids keep interactions snappy on any device.'
-    }
+    { title: 'Ecosystem intact', body: 'All KIAAN pathways remain one tap away.' },
+    { title: 'Reliability first', body: 'Shortcuts map directly to flows.' },
+    { title: 'Speed maintained', body: 'Lean markup keeps it snappy.' }
   ]
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 pb-16 lg:px-6">
-      <section className="relative overflow-hidden rounded-4xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
-        <div className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full bg-orange-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/10 blur-3xl" />
+      <FadeIn>
+        <section className="relative overflow-hidden rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
+          <div className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full bg-orange-500/20 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/10 blur-3xl" />
 
-        <div className="relative grid gap-8 lg:grid-cols-[1.7fr,1fr] lg:items-start">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 text-orange-100/80">
-              <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-orange-50">
-                Dashboard
-              </span>
-              <span className="text-xs font-semibold text-orange-100/70">Private & on-device first</span>
-            </div>
+          <div className="relative grid gap-8 lg:grid-cols-[1.7fr,1fr] lg:items-start">
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 text-orange-100/80">
+                <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-orange-50">
+                  Dashboard
+                </span>
+                <HelpIcon content="All data stays on your device with AES-GCM encryption" />
+              </div>
 
-            <div className="space-y-3">
-              <h1 className="text-4xl font-bold leading-tight text-orange-50 md:text-5xl">
-                Your world-class control room
-              </h1>
-              <p className="max-w-3xl text-lg text-orange-100/85">
-                Start every session here. Launch flows, jump into chat, and secure your notes without wading through clutter.
-                Everything is tuned for speed, clarity, and confidentiality.
-              </p>
-            </div>
+              <div className="space-y-3">
+                <h1 className="text-4xl font-bold leading-tight text-orange-50 md:text-5xl">
+                  Your control room
+                </h1>
+                <p className="max-w-2xl text-lg text-orange-100/85">
+                  Launch flows, chat, and secure notes in one place.
+                </p>
+              </div>
 
             <div className="flex flex-wrap gap-3 text-sm font-semibold">
               <a
@@ -93,149 +73,133 @@ export default function DashboardClient() {
               </a>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="flex flex-wrap gap-2">
               {["Realtime guidance", "Encrypted journaling", "Actionable shortcuts"].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-orange-500/15 bg-black/40 px-4 py-3 text-sm font-semibold text-orange-50 shadow-[0_10px_40px_rgba(255,115,39,0.12)]"
-                >
-                  {item}
-                </div>
+                <span key={item} className="rounded-xl bg-orange-500/15 px-3 py-1 text-xs text-orange-100">{item}</span>
               ))}
             </div>
           </div>
 
           <div className="rounded-3xl border border-orange-500/20 bg-black/50 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Shortcuts</p>
-                <h2 className="text-xl font-semibold text-orange-50">Jump anywhere instantly</h2>
-              </div>
-              <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-50">Always on</span>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <h2 className="text-lg font-semibold text-orange-50">Shortcuts</h2>
+              <HelpIcon content="Jump to any flow with one click" />
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {shortcuts.map(({ href, label }) => (
-                <a
+            <div className="grid gap-2 sm:grid-cols-2">
+              {shortcuts.map(({ href, label, hint }) => (
+                <HoverCard
                   key={href}
-                  href={href}
-                  className="group flex items-center justify-between rounded-2xl border border-orange-500/20 bg-black/40 px-4 py-3 text-sm font-semibold text-orange-50 transition hover:border-orange-400/50"
+                  trigger={
+                    <a href={href} className="group flex items-center justify-between rounded-2xl border border-orange-500/20 bg-black/40 px-4 py-3 text-sm font-semibold text-orange-50 transition hover:border-orange-400/50">
+                      <span>{label}</span>
+                      <span className="text-orange-200/90 transition group-hover:translate-x-0.5">→</span>
+                    </a>
+                  }
                 >
-                  <span>{label}</span>
-                  <span className="text-orange-200/90 transition group-hover:translate-x-0.5">→</span>
-                </a>
+                  <HoverCardTitle>{label}</HoverCardTitle>
+                  <HoverCardDescription>{hint}</HoverCardDescription>
+                </HoverCard>
               ))}
             </div>
-
-            <p className="mt-3 text-xs text-orange-100/70">Everything you need lives here—no extra clicks or filler text.</p>
           </div>
         </div>
       </section>
+      </FadeIn>
 
-      <section className="grid gap-6 lg:grid-cols-3">
-        <article className="rounded-3xl border border-orange-500/15 bg-black/40 p-6 shadow-[0_12px_48px_rgba(255,115,39,0.12)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-orange-50">Today&apos;s focus</h2>
-            <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-50">Crisp view</span>
+      <StaggerContainer className="grid gap-6 lg:grid-cols-3">
+        <StaggerItem>
+          <AnimatedCard className="p-6 h-full">
+            <h2 className="text-lg font-semibold text-orange-50 mb-4">Today&apos;s focus</h2>
+            <ul className="space-y-2 text-sm text-orange-100/85">
+              {focusItems.map(({ title, body, accent }) => (
+                <li key={title} className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${accent}`} />
+                  <span className="font-semibold text-orange-50">{title}</span>
+                  <span className="text-orange-100/60">·</span>
+                  <span className="text-xs">{body}</span>
+                </li>
+              ))}
+            </ul>
+          </AnimatedCard>
+        </StaggerItem>
+
+        <StaggerItem className="lg:col-span-2">
+          <AnimatedCard className="p-6 h-full">
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-lg font-semibold text-orange-50">Features</h2>
+              <HelpIcon content="All features work offline and respect your privacy" />
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map(({ title, summary, detail }) => (
+                <HoverCard
+                  key={title}
+                  trigger={
+                    <div className="rounded-xl border border-orange-500/15 bg-slate-950/60 p-3 text-sm cursor-pointer hover:border-orange-400/40 transition">
+                      <p className="font-semibold text-orange-50">{title}</p>
+                      <p className="text-xs text-orange-100/70">{summary}</p>
+                    </div>
+                  }
+                >
+                  <HoverCardTitle>{title}</HoverCardTitle>
+                  <HoverCardDescription>{detail}</HoverCardDescription>
+                </HoverCard>
+              ))}
+            </div>
+          </AnimatedCard>
+        </StaggerItem>
+      </StaggerContainer>
+
+      <FadeIn delay={0.3}>
+        <section className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-orange-50">KIAAN ecosystem</h2>
+              <span className="rounded-xl bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-50">Protected</span>
+            </div>
+            <HelpIcon content="All KIAAN pathways remain intact and forward-compatible" />
           </div>
-          <ul className="mt-4 space-y-3 text-sm text-orange-100/85">
-            {focusItems.map(({ title, body, accent }) => (
-              <li
-                key={title}
-                className="flex items-start gap-2 rounded-2xl border border-orange-500/10 bg-slate-950/50 px-3 py-2"
-              >
-                <span className={`mt-0.5 h-2 w-2 rounded-full ${accent}`} />
-                <div>
-                  <p className="font-semibold text-orange-50">{title}</p>
-                  <p>{body}</p>
-                </div>
-              </li>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            {kiaanHighlights.map(({ title, body }) => (
+              <AnimatedCard key={title} className="p-4">
+                <p className="font-semibold text-orange-50">{title}</p>
+                <p className="text-xs text-orange-100/70 mt-1">{body}</p>
+              </AnimatedCard>
             ))}
-          </ul>
-        </article>
-
-        <article className="rounded-3xl border border-orange-500/15 bg-black/40 p-6 shadow-[0_12px_48px_rgba(255,115,39,0.12)] lg:col-span-2">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Feature deck</p>
-              <h2 className="text-xl font-semibold text-orange-50">Built to stay out of your way</h2>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs font-semibold text-orange-50">
-              <span className="rounded-full border border-orange-500/20 px-3 py-1">Minimal clutter</span>
-              <span className="rounded-full border border-orange-500/20 px-3 py-1">Responsive by default</span>
-              <span className="rounded-full border border-orange-500/20 px-3 py-1">Secure-by-design</span>
-            </div>
           </div>
+        </section>
+      </FadeIn>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map(({ title, body }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-orange-500/15 bg-slate-950/60 p-4 text-sm text-orange-100/85 transition hover:border-orange-400/40"
-              >
-                <p className="text-base font-semibold text-orange-50">{title}</p>
-                <p className="mt-2 leading-relaxed">{body}</p>
+      <FadeIn delay={0.4}>
+        <section className="grid gap-6 lg:grid-cols-[1.2fr,1fr]" id="chat">
+          <article className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-orange-50">Guided chat</h2>
+                <HelpIcon content="Calm, server-backed responses with context awareness" />
               </div>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">KIAAN ecosystem</p>
-            <h2 className="text-2xl font-semibold text-orange-50">Every KIAAN flow stays at your fingertips</h2>
-            <p className="mt-2 text-sm text-orange-100/80">
-              We keep KIAAN and its pathways forward-compatible: shortcuts map directly to the live experiences so nothing gets
-              lost in the redesign.
-            </p>
-          </div>
-          <span className="rounded-xl bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-50">Protected</span>
-        </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {kiaanHighlights.map(({ title, body }) => (
-            <div
-              key={title}
-              className="rounded-2xl border border-orange-500/15 bg-slate-950/60 p-4 text-sm text-orange-100/85 transition hover:border-orange-400/40"
-            >
-              <p className="text-base font-semibold text-orange-50">{title}</p>
-              <p className="mt-2 leading-relaxed">{body}</p>
+              <span className="rounded-xl bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-50">Secure</span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[1.2fr,1fr]" id="chat">
-        <article className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Guided chat</p>
-              <h2 className="text-2xl font-semibold text-orange-50">Stay in conversation without leaving home base</h2>
-              <p className="mt-2 text-sm text-orange-100/80">Send a message and receive calm, server-backed responses instantly.</p>
+            <div className="rounded-2xl border border-orange-500/20 bg-slate-950/60 p-4">
+              <Chat />
             </div>
-            <span className="rounded-xl bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-50">Secure</span>
-          </div>
-          <div className="mt-4 rounded-2xl border border-orange-500/20 bg-slate-950/60 p-4">
-            <Chat />
-          </div>
-        </article>
+          </article>
 
-        <article className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]" id="journal">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Encrypted journal</p>
-              <h2 className="text-2xl font-semibold text-orange-50">Capture notes without distraction</h2>
-              <p className="mt-2 text-sm text-orange-100/80">Entries stay local with AES-GCM encryption. Crisp, compact, and ready when you are.</p>
+          <article className="rounded-3xl border border-orange-500/15 bg-black/45 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]" id="journal">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-orange-50">Encrypted journal</h2>
+                <HelpIcon content="AES-GCM encryption keeps entries local and private" />
+              </div>
+              <span className="rounded-xl bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-50">Local only</span>
             </div>
-            <span className="rounded-xl bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-50">Local only</span>
-          </div>
-          <div className="mt-4 rounded-2xl border border-orange-500/20 bg-slate-950/60 p-4">
-            <JournalEncrypted />
-          </div>
-        </article>
-      </section>
+            <div className="rounded-2xl border border-orange-500/20 bg-slate-950/60 p-4">
+              <JournalEncrypted />
+            </div>
+          </article>
+        </section>
+      </FadeIn>
     </main>
   )
 }
