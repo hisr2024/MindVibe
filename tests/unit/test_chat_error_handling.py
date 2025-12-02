@@ -94,9 +94,8 @@ class TestKIAANErrorHandling:
         
         response = kiaan.generate_response("Hello")
         
-        # Should either return fallback message or generic message
+        assert "cloud connection" in response
         assert "💙" in response
-        assert len(response) > 0
 
     @patch('backend.routes.chat.client')
     def test_generic_exception_handling(self, mock_client):
@@ -112,7 +111,7 @@ class TestKIAANErrorHandling:
         
         response = kiaan.generate_response("Hello")
         
-        assert "I'm here for you" in response
+        assert "cloud connection" in response
         assert "💙" in response
 
     def test_no_api_key_configured(self):
@@ -125,7 +124,8 @@ class TestKIAANErrorHandling:
         
         response = kiaan.generate_response("Hello")
         
-        assert "❌ API Key not configured" in response
+        assert "cloud connection" in response
+        assert "💙" in response
 
     def test_crisis_detection_still_works(self):
         """Test that crisis detection works regardless of API errors."""
