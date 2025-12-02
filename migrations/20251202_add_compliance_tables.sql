@@ -17,6 +17,25 @@ CREATE TABLE IF NOT EXISTS user_consents (
     updated_at TIMESTAMP WITH TIME ZONE
 );
 
+-- Ensure the consent_type column exists for legacy deployments where the table may
+-- have been created without it. This prevents index creation from failing when the
+-- column is missing (see Render migration error f405/UndefinedColumnError).
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'user_consents'
+          AND column_name = 'consent_type'
+    ) THEN
+        ALTER TABLE user_consents ADD COLUMN consent_type VARCHAR(64);
+        -- Default existing rows to privacy_policy to satisfy NOT NULL
+        UPDATE user_consents SET consent_type = 'privacy_policy'
+        WHERE consent_type IS NULL;
+        ALTER TABLE user_consents ALTER COLUMN consent_type SET NOT NULL;
+    END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_user_consents_user_id ON user_consents(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_consents_type ON user_consents(consent_type);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_consents_unique ON user_consents(user_id, consent_type);
