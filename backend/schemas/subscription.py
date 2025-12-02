@@ -48,7 +48,7 @@ class UserSubscriptionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     id: int
-    user_id: int
+    user_id: str
     plan: SubscriptionPlanOut
     status: SubscriptionStatus
     current_period_start: datetime | None = None

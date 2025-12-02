@@ -27,7 +27,7 @@ from backend.config.feature_config import get_tier_features, get_kiaan_quota
 logger = logging.getLogger(__name__)
 
 
-async def get_user_subscription(db: AsyncSession, user_id: int) -> Optional[UserSubscription]:
+async def get_user_subscription(db: AsyncSession, user_id: str) -> Optional[UserSubscription]:
     """Get a user's current subscription.
     
     Args:
@@ -51,7 +51,7 @@ async def get_user_subscription(db: AsyncSession, user_id: int) -> Optional[User
 
 
 async def get_or_create_free_subscription(
-    db: AsyncSession, user_id: int
+    db: AsyncSession, user_id: str
 ) -> UserSubscription:
     """Get existing subscription or create a free tier subscription for a user.
     
@@ -125,7 +125,7 @@ async def get_all_plans(db: AsyncSession) -> list[SubscriptionPlan]:
     return list(result.scalars().all())
 
 
-async def get_user_tier(db: AsyncSession, user_id: int) -> SubscriptionTier:
+async def get_user_tier(db: AsyncSession, user_id: str) -> SubscriptionTier:
     """Get the subscription tier for a user.
     
     Args:
@@ -146,7 +146,7 @@ async def get_user_tier(db: AsyncSession, user_id: int) -> SubscriptionTier:
 
 
 async def check_feature_access(
-    db: AsyncSession, user_id: int, feature: str
+    db: AsyncSession, user_id: str, feature: str
 ) -> bool:
     """Check if a user has access to a specific feature.
     
@@ -163,7 +163,7 @@ async def check_feature_access(
     return features.get(feature, False)
 
 
-async def check_journal_access(db: AsyncSession, user_id: int) -> bool:
+async def check_journal_access(db: AsyncSession, user_id: str) -> bool:
     """Check if a user has access to the encrypted journal.
     
     Args:
@@ -195,7 +195,7 @@ def _get_current_period() -> tuple[datetime, datetime]:
 
 
 async def get_or_create_usage_record(
-    db: AsyncSession, user_id: int, feature: str
+    db: AsyncSession, user_id: str, feature: str
 ) -> UsageTracking:
     """Get or create a usage tracking record for the current period.
     
@@ -241,7 +241,7 @@ async def get_or_create_usage_record(
     return usage
 
 
-async def check_kiaan_quota(db: AsyncSession, user_id: int) -> tuple[bool, int, int]:
+async def check_kiaan_quota(db: AsyncSession, user_id: str) -> tuple[bool, int, int]:
     """Check if a user has remaining KIAAN questions quota.
     
     Args:
@@ -267,7 +267,7 @@ async def check_kiaan_quota(db: AsyncSession, user_id: int) -> tuple[bool, int, 
     return has_quota, usage.usage_count, usage.usage_limit
 
 
-async def increment_kiaan_usage(db: AsyncSession, user_id: int) -> UsageTracking:
+async def increment_kiaan_usage(db: AsyncSession, user_id: str) -> UsageTracking:
     """Increment the KIAAN questions usage count for a user.
     
     Args:
@@ -290,7 +290,7 @@ async def increment_kiaan_usage(db: AsyncSession, user_id: int) -> UsageTracking
 
 
 async def get_usage_stats(
-    db: AsyncSession, user_id: int, feature: str = "kiaan_questions"
+    db: AsyncSession, user_id: str, feature: str = "kiaan_questions"
 ) -> dict:
     """Get usage statistics for a user.
     
@@ -318,7 +318,7 @@ async def get_usage_stats(
 
 async def update_subscription_status(
     db: AsyncSession,
-    user_id: int,
+    user_id: str,
     status: SubscriptionStatus,
     cancel_at_period_end: bool = False,
 ) -> Optional[UserSubscription]:
@@ -352,7 +352,7 @@ async def update_subscription_status(
 
 async def upgrade_subscription(
     db: AsyncSession,
-    user_id: int,
+    user_id: str,
     new_plan_id: int,
     stripe_subscription_id: Optional[str] = None,
     stripe_customer_id: Optional[str] = None,
@@ -409,7 +409,7 @@ async def upgrade_subscription(
 
 
 async def _update_usage_limits(
-    db: AsyncSession, user_id: int, plan_id: int
+    db: AsyncSession, user_id: str, plan_id: int
 ) -> None:
     """Update usage tracking limits when a user's plan changes.
     

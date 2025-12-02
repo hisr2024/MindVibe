@@ -237,7 +237,7 @@ async def create_checkout_session(
 
 async def cancel_subscription(
     db: AsyncSession,
-    user_id: int,
+    user_id: str,
     cancel_immediately: bool = False,
 ) -> bool:
     """Cancel a user's subscription.
@@ -364,7 +364,7 @@ async def _handle_checkout_completed(db: AsyncSession, data: dict) -> bool:
         logger.warning("Checkout completed but missing user_id or plan_tier in metadata")
         return False
     
-    user_id = int(user_id)
+    # user_id is already a string from metadata
     tier = SubscriptionTier(plan_tier)
     plan = await get_plan_by_tier(db, tier)
     

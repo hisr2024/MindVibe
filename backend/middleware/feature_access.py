@@ -28,7 +28,7 @@ from backend.services.subscription_service import (
 logger = logging.getLogger(__name__)
 
 
-async def get_current_user_id(request: Request) -> int:
+async def get_current_user_id(request: Request) -> str:
     """Extract user ID from the request.
     
     This should be replaced with your actual authentication logic.
@@ -36,7 +36,7 @@ async def get_current_user_id(request: Request) -> int:
     """
     # Check if user_id is set in request state (from auth middleware)
     if hasattr(request.state, "user_id"):
-        return request.state.user_id
+        return str(request.state.user_id)
     
     # Check authorization header
     auth_header = request.headers.get("Authorization")
@@ -48,13 +48,13 @@ async def get_current_user_id(request: Request) -> int:
             payload = decode_access_token(token)
             user_id = payload.get("sub")
             if user_id:
-                return int(user_id)
+                return str(user_id)
         except Exception:
             pass
     
     # For development/testing, return a default user ID
     # In production, this should raise an authentication error
-    return 1
+    return "1"
 
 
 class SubscriptionRequired:
@@ -64,7 +64,7 @@ class SubscriptionRequired:
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
-    ) -> int:
+    ) -> str:
         """Check that user has an active subscription.
         
         Args:
@@ -72,7 +72,7 @@ class SubscriptionRequired:
             db: Database session.
             
         Returns:
-            int: The user ID.
+            str: The user ID.
             
         Raises:
             HTTPException: If user doesn't have an active subscription.
@@ -105,7 +105,7 @@ class KiaanQuotaRequired:
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
-    ) -> tuple[int, int, int]:
+    ) -> tuple[str, int, int]:
         """Check that user has remaining KIAAN quota.
         
         Args:
@@ -154,7 +154,7 @@ class JournalAccessRequired:
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
-    ) -> int:
+    ) -> str:
         """Check that user has journal access.
         
         Args:
@@ -162,7 +162,7 @@ class JournalAccessRequired:
             db: Database session.
             
         Returns:
-            int: The user ID.
+            str: The user ID.
             
         Raises:
             HTTPException: If user doesn't have journal access.
@@ -207,7 +207,7 @@ class FeatureRequired:
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
-    ) -> int:
+    ) -> str:
         """Check that user has access to the specified feature.
         
         Args:
@@ -215,7 +215,7 @@ class FeatureRequired:
             db: Database session.
             
         Returns:
-            int: The user ID.
+            str: The user ID.
             
         Raises:
             HTTPException: If user doesn't have access to the feature.
@@ -256,7 +256,7 @@ def require_feature(feature_name: str) -> FeatureRequired:
     
     Usage:
         @router.get("/analytics")
-        async def get_analytics(user_id: int = Depends(require_feature("advanced_analytics"))):
+        async def get_analytics(user_id: str = Depends(require_feature("advanced_analytics"))):
             ...
     
     Args:

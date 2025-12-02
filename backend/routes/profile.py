@@ -20,7 +20,7 @@ class ProfileCreateUpdateIn(BaseModel):
 
 class ProfileOut(BaseModel):
     profile_id: int
-    user_id: int
+    user_id: str
     full_name: str | None
     base_experience: str
     created_at: datetime
