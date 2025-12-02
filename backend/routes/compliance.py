@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_current_user
+from backend.deps import get_db, get_current_user_optional
 from backend.middleware.rbac import (
     AdminContext,
     PermissionChecker,
@@ -95,7 +95,7 @@ async def save_cookie_preferences(
     request: Request,
     preferences: CookieConsentInput,
     db: AsyncSession = Depends(get_db),
-    user_id: Optional[str] = None,
+    user_id: Optional[str] = Depends(get_current_user_optional),
 ):
     """
     Save cookie preferences.
@@ -105,16 +105,6 @@ async def save_cookie_preferences(
     """
     ip_address = get_client_ip(request)
     user_agent = request.headers.get("User-Agent", "")[:512]
-    
-    # Try to get current user if authenticated
-    try:
-        from backend.deps import get_current_user
-        auth_header = request.headers.get("Authorization")
-        if auth_header and auth_header.startswith("Bearer "):
-            # User might be authenticated
-            user_id = await get_current_user(request, db)
-    except Exception:
-        pass  # Not authenticated, use anonymous_id
     
     # Force necessary cookies to True (always required)
     preferences.necessary = True
@@ -128,6 +118,7 @@ async def save_cookie_preferences(
         )
     else:
         # Create new anonymous preference
+        stmt = None
         stmt = None
     
     existing = None
@@ -175,23 +166,13 @@ async def get_cookie_preferences(
     request: Request,
     anonymous_id: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
+    user_id: Optional[str] = Depends(get_current_user_optional),
 ):
     """
     Get current cookie preferences.
     
     Works for both authenticated users and anonymous visitors.
     """
-    user_id = None
-    
-    # Try to get current user if authenticated
-    try:
-        from backend.deps import get_current_user
-        auth_header = request.headers.get("Authorization")
-        if auth_header and auth_header.startswith("Bearer "):
-            user_id = await get_current_user(request, db)
-    except Exception:
-        pass
-    
     # Find preference
     if user_id:
         stmt = select(CookiePreference).where(CookiePreference.user_id == user_id)

@@ -15,10 +15,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db, get_current_user
 from backend.models import User, ComplianceAuditLog
+from backend.security.password_hash import verify_password
 from backend.security.two_factor import (
     TwoFactorAuth,
     verify_totp_code,
     verify_backup_code,
+    generate_backup_codes,
 )
 
 router = APIRouter(prefix="/api/auth/2fa", tags=["two-factor-auth"])
@@ -401,9 +403,7 @@ async def disable_2fa(
             detail="Invalid 2FA code",
         )
     
-    # Verify password (basic check - in production use proper password verification)
-    from backend.security.password_hash import verify_password
-    
+    # Verify password
     if user.hashed_password and not verify_password(input_data.password, user.hashed_password):
         await log_2fa_action(
             db=db,
@@ -481,8 +481,7 @@ async def regenerate_backup_codes(
             detail="Invalid 2FA code",
         )
     
-    # Generate new backup codes
-    from backend.security.two_factor import generate_backup_codes
+    # Generate new backup codes (already imported at top of file)
     new_codes = generate_backup_codes()
     
     # Store the new codes

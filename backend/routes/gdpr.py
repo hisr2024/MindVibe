@@ -434,7 +434,11 @@ async def download_data_export(
         journal_entries=[
             {
                 "id": j.id,
-                "blob_json": j.blob_json,  # Encrypted, user has their own key
+                # Note: This data is encrypted with your personal key.
+                # You will need your encryption key to decrypt this content.
+                # The server cannot read your journal entries.
+                "encrypted_content": j.blob_json,
+                "encryption_notice": "This content is end-to-end encrypted. Use your personal encryption key to decrypt.",
                 "created_at": j.created_at.isoformat(),
             }
             for j in journal_entries

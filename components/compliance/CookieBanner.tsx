@@ -64,7 +64,14 @@ export default function CookieBanner({
     
     // Also save to backend if user is authenticated
     try {
-      const anonymousId = localStorage.getItem('anonymous_id') || crypto.randomUUID()
+      // Generate a simple unique ID if one doesn't exist
+      // Using a timestamp + random string for browser compatibility
+      const generateId = () => {
+        const timestamp = Date.now().toString(36)
+        const randomPart = Math.random().toString(36).substring(2, 15)
+        return `${timestamp}-${randomPart}`
+      }
+      const anonymousId = localStorage.getItem('anonymous_id') || generateId()
       localStorage.setItem('anonymous_id', anonymousId)
       
       await fetch('/api/compliance/cookie-consent', {
