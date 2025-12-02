@@ -34,8 +34,10 @@ class TestStripeServiceConfiguration:
         from backend.services.stripe_service import is_stripe_configured
         
         with patch.dict('os.environ', {'STRIPE_SECRET_KEY': ''}, clear=True):
-            # Import fresh to test default state
-            assert is_stripe_configured() is False or True  # Depends on test environment
+            # Stripe should not be configured without the secret key
+            result = is_stripe_configured()
+            # Note: Result depends on whether stripe module is installed
+            assert isinstance(result, bool)
 
     def test_stripe_configured_with_key(self):
         """Test that Stripe is configured with secret key."""

@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Restrict permissions for security
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   test:
     name: Run Tests
