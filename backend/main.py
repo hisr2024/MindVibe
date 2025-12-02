@@ -226,6 +226,84 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
 
+# Load Admin routers
+print("\n[Admin] Attempting to import Admin routers...")
+admin_routers_loaded = []
+try:
+    from backend.routes.admin.auth import router as admin_auth_router
+    app.include_router(admin_auth_router)
+    admin_routers_loaded.append("auth")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Auth router: {e}")
+
+try:
+    from backend.routes.admin.users import router as admin_users_router
+    app.include_router(admin_users_router)
+    admin_routers_loaded.append("users")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Users router: {e}")
+
+try:
+    from backend.routes.admin.subscriptions import router as admin_subscriptions_router
+    app.include_router(admin_subscriptions_router)
+    admin_routers_loaded.append("subscriptions")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Subscriptions router: {e}")
+
+try:
+    from backend.routes.admin.moderation import router as admin_moderation_router
+    app.include_router(admin_moderation_router)
+    admin_routers_loaded.append("moderation")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Moderation router: {e}")
+
+try:
+    from backend.routes.admin.feature_flags import router as admin_feature_flags_router
+    app.include_router(admin_feature_flags_router)
+    admin_routers_loaded.append("feature_flags")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Feature Flags router: {e}")
+
+try:
+    from backend.routes.admin.announcements import router as admin_announcements_router
+    app.include_router(admin_announcements_router)
+    admin_routers_loaded.append("announcements")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Announcements router: {e}")
+
+try:
+    from backend.routes.admin.ab_tests import router as admin_ab_tests_router
+    app.include_router(admin_ab_tests_router)
+    admin_routers_loaded.append("ab_tests")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin A/B Tests router: {e}")
+
+try:
+    from backend.routes.admin.audit_logs import router as admin_audit_logs_router
+    app.include_router(admin_audit_logs_router)
+    admin_routers_loaded.append("audit_logs")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Audit Logs router: {e}")
+
+try:
+    from backend.routes.admin.export import router as admin_export_router
+    app.include_router(admin_export_router)
+    admin_routers_loaded.append("export")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Export router: {e}")
+
+try:
+    from backend.routes.admin.kiaan_analytics import router as admin_kiaan_analytics_router
+    app.include_router(admin_kiaan_analytics_router)
+    admin_routers_loaded.append("kiaan_analytics")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin KIAAN Analytics router: {e}")
+
+if admin_routers_loaded:
+    print(f"✅ [SUCCESS] Admin routers loaded: {', '.join(admin_routers_loaded)}")
+else:
+    print("❌ [ERROR] No Admin routers were loaded")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
