@@ -9,8 +9,8 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/pricing', label: 'Pricing' },
-  { href: '/flows', label: 'Flows' },
   { href: '/features', label: 'Features' },
+  { href: '/karmic-tree', label: 'Growth' },
   { href: '/about', label: 'About' },
 ]
 

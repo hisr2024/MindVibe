@@ -2,16 +2,16 @@
 
 import { useState } from 'react'
 
-const states = ['Grounded', 'Tense', 'Worried', 'Drained', 'Energized']
+const states = ['Excellent', 'Good', 'Neutral', 'Low', 'Very Low']
 const prompts = ['What triggered this?', 'Where do you feel it?', 'What helps right now?']
 
-// KIAAN micro-responses based on mood selection
+// KIAAN micro-responses based on mood selection - empathetic, human-centered responses
 const moodResponses: Record<string, string> = {
-  'Grounded': "That's wonderful! I'm so glad you're feeling this way. 💙",
-  'Energized': "That's wonderful! I'm so glad you're feeling this way. 💙",
-  'Tense': "I see you, and I'm here. You're not alone in this. 💙",
-  'Worried': "I see you, and I'm here. You're not alone in this. 💙",
-  'Drained': "I see you, and I'm here. You're not alone in this. 💙",
+  'Excellent': "That's wonderful! I'm so glad you're feeling this way. 💙",
+  'Good': "It's beautiful to feel good. I'm here to support your journey. 💙",
+  'Neutral': "I'm here with you. Sometimes neutral is exactly where we need to be. 💙",
+  'Low': "I see you, and I'm here. You're not alone in this. 💙",
+  'Very Low': "I'm here with you through this difficult moment. You matter. 💙",
 }
 
 export default function StateCheckIn() {
@@ -52,9 +52,9 @@ export default function StateCheckIn() {
             ))}
           </div>
           
-          {/* KIAAN Micro-Response */}
+          {/* KIAAN Micro-Response - Empathetic state check-in response */}
           {showResponse && selectedMood && (
-            <div className="mt-3 rounded-2xl border border-orange-400/30 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 p-4 animate-in fade-in duration-300">
+            <div className="mt-3 rounded-2xl border border-indigo-400/30 bg-gradient-to-r from-indigo-950/50 via-indigo-900/40 to-indigo-950/50 p-4 animate-in fade-in duration-300 transition-all">
               <div className="flex items-start gap-3">
                 <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-xs font-bold text-slate-900">
                   K
