@@ -11,12 +11,6 @@ const pages = [
   { href: '/flows/journal', title: 'Page 8: Private journal', detail: 'AES-GCM local storage with weekly refresh.' },
 ]
 
-const journeyAdditions = [
-  { href: '/onboarding', title: 'Onboarding', detail: 'Guided intro, privacy primer, demo data mode, opt-ins, reduced motion.' },
-  { href: '/insights', title: 'Insights', detail: 'Weekly digest, offline-first coaching notes, crisis-aware nudges.' },
-  { href: '/flows/viyog', title: 'Coaching', detail: 'Outcome reducer with crisis guardrails and accountability prompts.' },
-]
-
 export default function FlowsHome() {
   return (
     <section className="space-y-8">
@@ -41,34 +35,6 @@ export default function FlowsHome() {
             <p className="mt-2 text-sm text-orange-100/80">{page.detail}</p>
           </Link>
         ))}
-      </div>
-
-      <div className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-6 shadow-[0_12px_48px_rgba(255,115,39,0.12)]">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Core journeys</p>
-            <h3 className="text-xl font-semibold text-orange-50">Onboarding, insights, and coaching kept intact</h3>
-            <p className="text-sm text-orange-100/80">These routes complete the information architecture the product brief calls for.</p>
-          </div>
-          <Link
-            href="/journeys"
-            className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-orange-500/25"
-          >
-            View journey map
-          </Link>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {journeyAdditions.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-2xl border border-orange-500/20 bg-black/40 p-4 text-sm text-orange-100/80 transition hover:border-orange-400/50"
-            >
-              <p className="text-base font-semibold text-orange-50">{item.title}</p>
-              <p className="mt-2 leading-relaxed">{item.detail}</p>
-            </Link>
-          ))}
-        </div>
       </div>
     </section>
   )

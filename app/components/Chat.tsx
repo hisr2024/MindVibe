@@ -96,7 +96,7 @@ export default function Chat() {
       <div
         ref={listRef}
         onScroll={handleScroll}
-        className="chat-scrollbar h-64 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 scroll-stable"
+        className="h-64 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 scroll-stable"
       >
         {messages.length === 0 && (
           <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>

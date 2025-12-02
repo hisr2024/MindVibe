@@ -64,13 +64,10 @@ npm install
 # Environment setup
 cp .env.example .env
 # Edit .env with your configuration:
-# - DATABASE_URL: PostgreSQL connection string (required for Alembic; no SQLite fallback)
+# - DATABASE_URL: PostgreSQL connection string
 # - OPENAI_API_KEY: Your OpenAI API key
 # - JWT_SECRET: Random secret for JWT signing
 # - Other environment variables as needed
-
-# Apply database migrations after DATABASE_URL is set
-alembic upgrade head
 
 # Generate EdDSA keys for JWT signing
 python scripts/generate_eddsa_key.py --dir keyset_eddsa

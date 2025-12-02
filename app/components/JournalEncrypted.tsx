@@ -8,13 +8,6 @@ type Entry = {
   at: string
 }
 
-type SyncPayload = {
-  id: string
-  createdAt: string
-  cipher: CipherBlob
-  status: 'pending' | 'synced' | 'failed'
-}
-
 type CipherBlob = { s: string; i: string; c: string }
 
 function useLocalState<T>(key: string, initial: T) {
@@ -70,10 +63,6 @@ export default function JournalEncrypted() {
   const [body, setBody] = useState('')
   const [cipherList, setCipherList] = useLocalState<CipherBlob[]>('aadi_journal_cipher', [])
   const [entries, setEntries] = useState<Entry[] | null>(null)
-  const [syncQueue, setSyncQueue] = useLocalState<SyncPayload[]>('mv_journal_sync_queue', [])
-  const [online, setOnline] = useState(true)
-  const [syncing, setSyncing] = useState(false)
-  const [syncMessage, setSyncMessage] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function addEntry() {
@@ -81,10 +70,6 @@ export default function JournalEncrypted() {
     const payload: Entry = { title: title.trim() || undefined, body: body.trim(), at: new Date().toISOString() }
     const blob = await encryptText(JSON.stringify(payload), pass)
     setCipherList([blob, ...cipherList])
-    setSyncQueue([
-      { id: crypto.randomUUID(), createdAt: payload.at, cipher: blob, status: 'pending' },
-      ...syncQueue,
-    ])
     setTitle('')
     setBody('')
   }
@@ -133,74 +118,8 @@ export default function JournalEncrypted() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pass, cipherList])
 
-  useEffect(() => {
-    const setNetwork = () => setOnline(navigator.onLine)
-    setNetwork()
-    window.addEventListener('online', setNetwork)
-    window.addEventListener('offline', setNetwork)
-    return () => {
-      window.removeEventListener('online', setNetwork)
-      window.removeEventListener('offline', setNetwork)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (online && syncQueue.some(item => item.status === 'pending')) {
-      void syncQueued()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [online])
-
-  async function syncQueued() {
-    if (!online || syncQueue.length === 0) return
-    setSyncing(true)
-    setSyncMessage('')
-    try {
-      const pending = syncQueue.filter(item => item.status !== 'synced')
-      if (pending.length === 0) {
-        setSyncing(false)
-        return
-      }
-      const res = await fetch('/api/journal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: pending }),
-      })
-      if (!res.ok) throw new Error('Failed to sync')
-      const updated: SyncPayload[] = syncQueue.map(item => ({ ...item, status: 'synced' }))
-      setSyncQueue(updated)
-      setSyncMessage('Entries synced securely. Your ciphertext stays encrypted end-to-end.')
-    } catch (error) {
-      const updated: SyncPayload[] = syncQueue.map(item => ({ ...item, status: item.status === 'synced' ? 'synced' : 'failed' }))
-      setSyncQueue(updated)
-      setSyncMessage('Offline or sync failed. We will retry when you are back online.')
-    } finally {
-      setSyncing(false)
-    }
-  }
-
   return (
     <main className="space-y-4 text-orange-50">
-      <div
-        className={`flex items-center justify-between gap-3 rounded-3xl border px-4 py-3 text-sm ${
-          online
-            ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-50'
-            : 'border-orange-500/40 bg-orange-500/10 text-orange-50'
-        }`}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="space-y-1">
-          <p className="font-semibold">{online ? 'Offline caching ready' : 'You are offline; journaling still works.'}</p>
-          <p className="text-xs opacity-90">
-            Entries are encrypted locally; queued ciphertext will sync to the server endpoint when you reconnect.
-          </p>
-        </div>
-        <div className="text-xs font-semibold uppercase tracking-[0.12em]">
-          {online ? 'Online' : 'Offline'}
-        </div>
-      </div>
-
       <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">
         <h2 className="text-lg font-semibold">Encrypted Journal</h2>
         <p className="text-sm text-orange-100/80">Protected with AES-GCM; your passphrase never leaves this device.</p>
@@ -251,50 +170,6 @@ export default function JournalEncrypted() {
             <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={importFile} />
           </label>
         </div>
-      </section>
-
-      <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5 space-y-3" aria-live="polite">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-semibold">Offline queue</h3>
-            <p className="text-sm text-orange-100/80">Ciphertext is queued locally until it syncs to the journal endpoint.</p>
-          </div>
-          <button
-            onClick={syncQueued}
-            disabled={syncQueue.length === 0 || syncing}
-            className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {syncing ? 'Syncing…' : 'Sync queued securely'}
-          </button>
-        </div>
-        {syncQueue.length === 0 && <p className="text-sm text-orange-100/70">No queued items. Add an entry to populate the queue.</p>}
-        {syncQueue.length > 0 && (
-          <ul className="space-y-2 text-sm">
-            {syncQueue.map(item => (
-              <li
-                key={item.id}
-                className="flex items-center justify-between gap-2 rounded-2xl border border-orange-500/20 bg-black/50 px-3 py-2"
-              >
-                <div>
-                  <p className="font-semibold text-orange-50">{new Date(item.createdAt).toLocaleString()}</p>
-                  <p className="text-orange-100/70">Encrypted block ready to sync.</p>
-                </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
-                    item.status === 'synced'
-                      ? 'bg-emerald-500/20 text-emerald-100'
-                      : item.status === 'failed'
-                        ? 'bg-orange-500/20 text-orange-50'
-                        : 'bg-orange-400/20 text-orange-50'
-                  }`}
-                >
-                  {item.status}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {syncMessage && <p className="text-xs text-orange-100/70">{syncMessage}</p>}
       </section>
 
       <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">

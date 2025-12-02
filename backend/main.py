@@ -22,31 +22,26 @@ print(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
 if OPENAI_API_KEY:
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
-    "1",
-    "true",
-    "yes",
-)
-
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core.migrations import apply_sql_migrations, get_migration_status
-from backend.core.logging import configure_logging, log_request
 from backend.models import Base
-from backend.db_utils import build_database_url
-from backend.services.background_jobs import ensure_jobs_started
 
-RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in (
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
+RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
     "1",
     "true",
     "yes",
     "on",
-)
+}
 
-DATABASE_URL = build_database_url()
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
@@ -57,8 +52,6 @@ app = FastAPI(
     description="AI Mental Wellness Coach Backend",
 )
 
-configure_logging()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -68,8 +61,6 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=3600,
 )
-
-app.middleware("http")(log_request)
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
@@ -110,7 +101,6 @@ async def startup():
     except Exception as exc:
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
         raise
-    await ensure_jobs_started()
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
 kiaan_router_loaded = False
@@ -159,15 +149,6 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Auth router: {e}")
 
-# Load Journal router
-print("\n[Journal] Attempting to import Journal router...")
-try:
-    from backend.routes.journal import router as journal_router
-    app.include_router(journal_router)
-    print("✅ [SUCCESS] Journal router loaded")
-except Exception as e:
-    print(f"❌ [ERROR] Failed to load Journal router: {e}")
-
 # Load Profile router
 print("\n[Profile] Attempting to import Profile router...")
 try:
@@ -194,15 +175,6 @@ try:
     print("✅ [SUCCESS] Guidance router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Guidance router: {e}")
-
-# Load Data Governance router
-print("\n[Data Governance] Attempting to import Data router...")
-try:
-    from backend.routes.data_governance import router as data_router
-    app.include_router(data_router)
-    print("✅ [SUCCESS] Data governance router loaded")
-except Exception as e:
-    print(f"❌ [ERROR] Failed to load Data governance router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")

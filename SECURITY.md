@@ -43,11 +43,6 @@ Please report (suspected) security vulnerabilities to **hisr2024@gmail.com**. Yo
 - Prefer mTLS for internal services and apply WAF + rate limits at the edge
 - See [docs/BACKEND_SECURITY_HARDENING.md](docs/BACKEND_SECURITY_HARDENING.md) for end-to-end guidance on protecting APIs, sensitive data, and proprietary content without impacting KIAAN responses
 
-### Secrets Management
-- Consolidate configuration into environment-specific files (`.env.development`, `.env.test`, `.env.staging`) and rely on injected secrets for production; see [docs/ENV_VARS.md](docs/ENV_VARS.md).
-- Never commit secrets or credentials. Pre-commit hooks run `gitleaks` with redaction on commits and pushes; install hooks with `pre-commit install --hook-type pre-commit --hook-type pre-push`.
-- Production keys should live in a cloud secret manager or KMS rather than local files; mount secrets read-only when files are unavoidable.
-
 ## Best Practices for Contributors
 
 1. Never commit secrets, API keys, or credentials
@@ -59,10 +54,6 @@ Please report (suspected) security vulnerabilities to **hisr2024@gmail.com**. Yo
 ## Security Architecture
 
 For detailed information about our security architecture, authentication flows, and threat model, please see [docs/SECURITY_ARCH.md](docs/SECURITY_ARCH.md).
-
-## Compliance Alignment
-
-Baseline privacy and security expectations for GDPR, and additional guardrails when handling PHI under HIPAA, are outlined in [docs/COMPLIANCE_POSTURE.md](docs/COMPLIANCE_POSTURE.md). Apply those controls to hosting choices, audit logging, encryption, and vendor reviews before onboarding regulated data.
 
 ## Vulnerability Disclosure Timeline
 
@@ -90,8 +81,6 @@ This repository uses multiple automated security tools:
 - **npm audit**: JavaScript dependency security
 - **TruffleHog**: Secrets detection
 - **Trivy**: Docker container scanning
-
-Review STRIDE risks, Bandit triage, and dependency scanning expectations in [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
 Security scans run:
 - On every push to main/develop
