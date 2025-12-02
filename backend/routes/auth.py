@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.settings import settings
 from backend.deps import get_db
+from backend.middleware.rate_limiter import limiter, AUTH_RATE_LIMIT
 from backend.models import Session, User
 from backend.security.jwt import create_access_token, decode_access_token
 from backend.security.password_hash import hash_password, verify_password
@@ -181,7 +182,8 @@ async def _get_user_and_active_session(
 # Signup
 # ----------------------
 @router.post("/signup", response_model=SignupOut, status_code=201)
-async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
+@limiter.limit(AUTH_RATE_LIMIT)
+async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends(get_db)):
     result = policy.validate(payload.password)
     if not result.ok:
         raise HTTPException(status_code=422, detail=result.errors)
@@ -211,8 +213,9 @@ async def signup(payload: SignupIn, db: AsyncSession = Depends(get_db)):
 # Login (issues refresh cookie)
 # ----------------------
 @router.post("/login", response_model=LoginOut)
+@limiter.limit(AUTH_RATE_LIMIT)
 async def login(
-    payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)
+    request: Request, payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)
 ):
     email_norm = payload.email.lower()
     stmt = select(User).where(User.email == email_norm)

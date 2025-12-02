@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from starlette.requests import Request
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
@@ -93,3 +94,23 @@ def test_user_id():
 def test_auth_uid():
     """Provide a test auth UID for tests."""
     return "test-user-123"
+
+
+@pytest.fixture
+def mock_request():
+    """Create a mock Starlette Request for unit testing rate-limited endpoints.
+    
+    This fixture creates a minimal Request object that satisfies the slowapi
+    rate limiter's requirements for extracting client IP address.
+    """
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/api/test",
+        "query_string": b"",
+        "root_path": "",
+        "headers": [],
+        "server": ("127.0.0.1", 8000),
+        "client": ("127.0.0.1", 12345),
+    }
+    return Request(scope)

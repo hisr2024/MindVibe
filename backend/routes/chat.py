@@ -1,16 +1,21 @@
 """KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v13.0) - Krishna's Blessing"""
 
+import html
 import os
 import logging
 import uuid
 from typing import Dict, Any
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
+from backend.middleware.rate_limiter import limiter, CHAT_RATE_LIMIT
+
+# Maximum message length to prevent abuse
+MAX_MESSAGE_LENGTH = 2000
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
 client = OpenAI(api_key=api_key) if api_key else None
@@ -29,8 +34,37 @@ except Exception as e:
     logger.warning(f"⚠️ Gita KB unavailable: {e}")
 
 
+def sanitize_input(text: str) -> str:
+    """Sanitize user input to prevent XSS attacks.
+    
+    Note: SQL injection is already handled by the ORM (SQLAlchemy).
+    This function focuses on XSS prevention as a defense-in-depth measure.
+    
+    Args:
+        text: The raw user input.
+        
+    Returns:
+        str: Sanitized text safe for processing.
+    """
+    # HTML escape to prevent XSS - this converts < > & " ' to their HTML entities
+    # After this, <script> becomes &lt;script&gt; and cannot be executed
+    text = html.escape(text)
+    
+    return text.strip()
+
+
 class ChatMessage(BaseModel):
-    message: str
+    """Chat message model with validation."""
+    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    
+    @field_validator('message')
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        """Validate and sanitize the message."""
+        if not v or not v.strip():
+            raise ValueError("Message cannot be empty")
+        # Note: max_length is already validated by Pydantic Field
+        return sanitize_input(v)
 
 
 class KIAAN:
@@ -126,7 +160,8 @@ kiaan = KIAAN()
 
 
 @router.post("/start")
-async def start_session() -> Dict[str, Any]:
+@limiter.limit(CHAT_RATE_LIMIT)
+async def start_session(request: Request) -> Dict[str, Any]:
     return {
         "session_id": str(uuid.uuid4()),
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
@@ -137,12 +172,14 @@ async def start_session() -> Dict[str, Any]:
 
 
 @router.post("/message")
-async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+@limiter.limit(CHAT_RATE_LIMIT)
+async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     try:
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
         
+        # Message is already sanitized by the ChatMessage validator
         response = await kiaan.generate_response_with_gita(message, db)
         
         return {

@@ -2,18 +2,20 @@ import asyncio
 import uuid
 from types import SimpleNamespace
 
+import pytest
 
-def test_start_session_preserves_kiaan_identity():
+
+def test_start_session_preserves_kiaan_identity(mock_request):
     from backend.routes.chat import start_session
 
-    result = asyncio.run(start_session())
+    result = asyncio.run(start_session(request=mock_request))
 
     assert result["bot"] == "KIAAN"
     assert result["gita_powered"] is True
     assert uuid.UUID(result["session_id"])  # validates UUID format
 
 
-def test_message_endpoint_preserves_contract(monkeypatch):
+def test_message_endpoint_preserves_contract(mock_request, monkeypatch):
     from backend.routes import chat
     from backend.routes.chat import ChatMessage, send_message
 
@@ -22,7 +24,7 @@ def test_message_endpoint_preserves_contract(monkeypatch):
 
     monkeypatch.setattr(chat, "kiaan", SimpleNamespace(generate_response_with_gita=_stable_response))
 
-    result = asyncio.run(send_message(ChatMessage(message="Hello"), db=None))
+    result = asyncio.run(send_message(request=mock_request, chat=ChatMessage(message="Hello"), db=None))
 
     assert result["status"] == "success"
     assert result["bot"] == "KIAAN"
@@ -32,12 +34,12 @@ def test_message_endpoint_preserves_contract(monkeypatch):
 
 
 def test_message_endpoint_rejects_empty_input():
-    from backend.routes.chat import ChatMessage, send_message
-
-    result = asyncio.run(send_message(ChatMessage(message="   "), db=None))
-
-    assert result["status"] == "error"
-    assert "What's on your mind?" in result["response"]
+    """Test that empty/whitespace messages are rejected by validation."""
+    from backend.routes.chat import ChatMessage
+    
+    # The ChatMessage validator should reject empty/whitespace messages
+    with pytest.raises(ValueError):
+        ChatMessage(message="   ")
 
 
 def test_health_endpoint_consistent_identity():

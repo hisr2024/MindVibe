@@ -25,9 +25,13 @@ if OPENAI_API_KEY:
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core.migrations import apply_sql_migrations, get_migration_status
+from backend.middleware.security import SecurityHeadersMiddleware
+from backend.middleware.rate_limiter import limiter
 from backend.models import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
@@ -51,6 +55,13 @@ app = FastAPI(
     version="1.0.0",
     description="AI Mental Wellness Coach Backend",
 )
+
+# Add security headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Configure rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
