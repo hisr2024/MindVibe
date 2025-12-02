@@ -87,7 +87,7 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   // Load from localStorage only after client mount
   useEffect(() => {
     setMounted(true)
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || !window.localStorage) return
     
     try {
       const item = window.localStorage.getItem(key)
@@ -101,7 +101,7 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
   // Save to localStorage only after mount
   useEffect(() => {
-    if (!mounted || typeof window === 'undefined') return
+    if (!mounted || typeof window === 'undefined' || !window.localStorage) return
     
     try {
       window.localStorage.setItem(key, JSON.stringify(state))
