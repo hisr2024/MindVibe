@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { HoverCard, HoverCardTitle, HoverCardDescription, HelpIcon, AnimatedCard, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui'
 
-// Feature cards with demo videos (4 cards as requested)
+// Feature cards with visual placeholders (4 cards as requested)
 const featureCards = [
   {
     title: 'KIAAN Wisdom',
