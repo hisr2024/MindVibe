@@ -34,6 +34,25 @@ BEGIN
             ADD COLUMN tier VARCHAR(32) DEFAULT 'free';
     END IF;
 
+    -- Legacy compatibility: some databases used a NOT NULL "code" column
+    -- instead of the current "tier" column. Relax the constraint so the
+    -- insert/upsert below won't fail, and migrate any existing values into
+    -- the new tier field.
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'code'
+    ) THEN
+        UPDATE subscription_plans
+        SET tier = COALESCE(tier, code)
+        WHERE tier IS NULL AND code IS NOT NULL;
+
+        BEGIN
+            ALTER TABLE subscription_plans ALTER COLUMN code DROP NOT NULL;
+        EXCEPTION
+            WHEN undefined_column THEN NULL; -- already removed in some environments
+        END;
+    END IF;
+
     -- Normalize existing rows before enforcing constraints
     UPDATE subscription_plans SET tier = 'free' WHERE tier IS NULL;
 
@@ -240,3 +259,14 @@ ON CONFLICT (tier) DO UPDATE SET
     encrypted_journal = EXCLUDED.encrypted_journal,
     data_retention_days = EXCLUDED.data_retention_days,
     updated_at = NOW();
+
+-- Keep legacy "code" column (if present) aligned with the canonical tier values
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'code'
+    ) THEN
+        UPDATE subscription_plans SET code = tier WHERE code IS DISTINCT FROM tier;
+    END IF;
+END $$;
