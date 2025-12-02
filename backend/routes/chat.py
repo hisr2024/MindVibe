@@ -3,7 +3,6 @@
 import html
 import os
 import logging
-import re
 import uuid
 from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -47,13 +46,9 @@ def sanitize_input(text: str) -> str:
     Returns:
         str: Sanitized text safe for processing.
     """
-    # HTML escape to prevent XSS
+    # HTML escape to prevent XSS - this converts < > & " ' to their HTML entities
+    # After this, <script> becomes &lt;script&gt; and cannot be executed
     text = html.escape(text)
-    
-    # Remove potential script injection patterns
-    # This is a defense-in-depth measure (already escaped above)
-    script_pattern = re.compile(r'<script[^>]*>.*?</script>', re.IGNORECASE | re.DOTALL)
-    text = script_pattern.sub('', text)
     
     return text.strip()
 
