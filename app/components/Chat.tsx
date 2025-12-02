@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { MessageBubble } from '@/components/chat'
 
 type Message = {
   sender: 'user' | 'assistant'
@@ -21,6 +22,7 @@ export default function Chat() {
   const [loading, setLoading] = useState(false)
   const listRef = useRef<HTMLDivElement | null>(null)
   const [autoScrollPinned, setAutoScrollPinned] = useState(true)
+  const [savedNotification, setSavedNotification] = useState<string | null>(null)
 
   useEffect(() => {
     if (!autoScrollPinned) return
@@ -80,8 +82,41 @@ export default function Chat() {
     setAutoScrollPinned(distanceFromBottom < 48)
   }
 
+  function handleSaveToJournal(text: string) {
+    // Save to local storage journal entries
+    try {
+      const existingEntries = localStorage.getItem('mindvibe_journal_entries')
+      const entries = existingEntries ? JSON.parse(existingEntries) : []
+      
+      const newEntry = {
+        id: Date.now().toString(),
+        content: `KIAAN Insight:\n\n${text}`,
+        timestamp: new Date().toISOString(),
+        source: 'kiaan_chat',
+      }
+      
+      entries.push(newEntry)
+      localStorage.setItem('mindvibe_journal_entries', JSON.stringify(entries))
+      
+      // Show notification
+      setSavedNotification('Saved to Journal! 📝')
+      setTimeout(() => setSavedNotification(null), 2000)
+    } catch (error) {
+      console.error('Failed to save to journal:', error)
+    }
+  }
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 relative">
+      {/* Saved notification toast */}
+      {savedNotification && (
+        <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2">
+          <div className="rounded-xl bg-emerald-500/90 px-4 py-2 text-sm font-medium text-white shadow-lg">
+            {savedNotification}
+          </div>
+        </div>
+      )}
+      
       <div className="flex flex-wrap gap-2">
         {starterPrompts.map(prompt => (
           <button
@@ -96,30 +131,21 @@ export default function Chat() {
       <div
         ref={listRef}
         onScroll={handleScroll}
-        className="h-64 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 scroll-stable"
+        className="h-80 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 scroll-smooth scroll-stable"
       >
         {messages.length === 0 && (
           <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
         )}
         <div className="space-y-3">
           {messages.map((message, idx) => (
-            <div key={`${message.timestamp}-${idx}`} className="space-y-1">
-              <div className="flex items-center gap-2 text-xs text-orange-100/60">
-                <span className="font-semibold text-orange-50">{message.sender === 'user' ? 'You' : 'KIAAN'}</span>
-                <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
-              </div>
-              <div
-                className={`whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  message.sender === 'user'
-                    ? 'bg-orange-500/10 text-orange-50'
-                    : message.status === 'error'
-                      ? 'border border-red-500/40 bg-red-500/10 text-red-50'
-                      : 'bg-white/5 text-orange-50 border border-orange-500/15'
-                }`}
-              >
-                {message.text}
-              </div>
-            </div>
+            <MessageBubble
+              key={`${message.timestamp}-${idx}`}
+              sender={message.sender}
+              text={message.text}
+              timestamp={message.timestamp}
+              status={message.status}
+              onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
+            />
           ))}
         </div>
       </div>

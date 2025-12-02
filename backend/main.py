@@ -235,6 +235,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
 
+# Load Karmic Tree Analytics router
+print("\n[Karmic Tree] Attempting to import Karmic Tree Analytics router...")
+try:
+    from backend.routes.analytics.karmic_tree import router as karmic_tree_router
+    app.include_router(karmic_tree_router, prefix="/api/analytics")
+    print("✅ [SUCCESS] Karmic Tree Analytics router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karmic Tree Analytics router: {e}")
+
 # Load Admin routers
 print("\n[Admin] Attempting to import Admin routers...")
 admin_routers_loaded = []

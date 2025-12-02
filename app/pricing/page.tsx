@@ -13,10 +13,9 @@ const pricingTiers: PricingTier[] = [
     description: 'Perfect for getting started with KIAAN',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    kiaanQuota: 10,
+    kiaanQuota: 20,
     features: [
-      '10 KIAAN questions/month',
-      'Journal with encryption',
+      '20 KIAAN questions/month',
       'Mood tracking',
       'Daily wisdom',
       'Basic breathing exercises',
@@ -27,56 +26,68 @@ const pricingTiers: PricingTier[] = [
     id: 'basic',
     name: 'Basic',
     description: 'For regular mental wellness practice',
-    monthlyPrice: 9,
-    yearlyPrice: 89,
+    monthlyPrice: 2.49,
+    yearlyPrice: 24.99,
     kiaanQuota: 50,
     features: [
       '50 KIAAN questions/month',
       'All Free features',
-      'Ardha Reframing Assistant',
-      'Viyog Detachment Coach',
+      'Journal with encryption',
       'Extended journal insights',
       'Email support',
     ],
     cta: 'Start Basic',
   },
   {
+    id: 'pro',
+    name: 'Pro',
+    description: 'Enhanced tools for deeper practice',
+    monthlyPrice: 7.49,
+    yearlyPrice: 74.99,
+    kiaanQuota: 150,
+    features: [
+      '150 KIAAN questions/month',
+      'All Basic features',
+      'Ardha Reframing Assistant',
+      'Viyog Detachment Coach',
+      'Advanced mood analytics',
+    ],
+    cta: 'Go Pro',
+  },
+  {
     id: 'premium',
     name: 'Premium',
     description: 'Full access to all KIAAN features',
-    monthlyPrice: 19,
-    yearlyPrice: 189,
-    kiaanQuota: 200,
+    monthlyPrice: 15,
+    yearlyPrice: 149.99,
+    kiaanQuota: 300,
     highlighted: true,
     badge: 'Most Popular',
     features: [
-      '200 KIAAN questions/month',
-      'All Basic features',
+      '300 KIAAN questions/month',
+      'All Pro features',
       'Relationship Compass',
       'Karma Reset Guide',
-      'Advanced mood analytics',
       'Priority support',
       'Custom breathing patterns',
     ],
     cta: 'Go Premium',
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
+    id: 'executive',
+    name: 'Executive',
     description: 'Unlimited access for power users',
-    monthlyPrice: 49,
-    yearlyPrice: 490,
+    monthlyPrice: 20,
+    yearlyPrice: 199.99,
     kiaanQuota: 'unlimited',
     features: [
       'Unlimited KIAAN questions',
       'All Premium features',
       'API access',
-      'Team management',
-      'Custom integrations',
       'Dedicated support',
       'SLA guarantee',
     ],
-    cta: 'Contact Sales',
+    cta: 'Go Executive',
   },
 ]
 
@@ -84,37 +95,37 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '10', basic: '50', premium: '200', enterprise: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', premium: 'Same for all', enterprise: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Monthly Questions', values: { free: '20', basic: '50', pro: '150', premium: '300', executive: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, basic: true, premium: true, enterprise: true } },
-      { name: 'Viyog Detachment', values: { free: false, basic: true, premium: true, enterprise: true } },
-      { name: 'Relationship Compass', values: { free: false, basic: false, premium: true, enterprise: true } },
-      { name: 'Karma Reset Guide', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'Ardha Reframing', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
+      { name: 'Viyog Detachment', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
+      { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Karma Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Mood Tracking', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Daily Wisdom', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Advanced Analytics', values: { free: false, basic: false, premium: true, enterprise: true } },
-      { name: 'API Access', values: { free: false, basic: false, premium: false, enterprise: true } },
+      { name: 'Encrypted Journal', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Mood Tracking', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Daily Wisdom', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Advanced Analytics', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
+      { name: 'API Access', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Email Support', values: { free: false, basic: true, premium: true, enterprise: true } },
-      { name: 'Priority Support', values: { free: false, basic: false, premium: true, enterprise: true } },
-      { name: 'Dedicated Support', values: { free: false, basic: false, premium: false, enterprise: true } },
+      { name: 'Community Access', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Email Support', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Priority Support', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Dedicated Support', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
     ],
   },
 ]
@@ -131,7 +142,7 @@ export default function PricingPage() {
       return
     }
 
-    if (tierId === 'enterprise') {
+    if (tierId === 'executive') {
       router.push('/contact')
       return
     }
@@ -159,7 +170,7 @@ export default function PricingPage() {
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-16">
         {pricingTiers.map((tier) => (
           <PricingCard
             key={tier.id}
