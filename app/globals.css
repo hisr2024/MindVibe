@@ -4,6 +4,39 @@
 
 :root {
   color-scheme: dark;
+  --color-background: theme('colors.slate.950');
+  --color-foreground: theme('colors.slate.50');
+  --color-accent: theme('colors.orange.500');
+}
+
+/* Light mode styles using CSS custom properties */
+html.light {
+  color-scheme: light;
+  --color-background: theme('colors.orange.50');
+  --color-foreground: theme('colors.slate.900');
+}
+
+html.light body {
+  @apply bg-orange-50 text-slate-900;
+}
+
+/* Accordion animations */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
 }
 
 @keyframes chatWobbleLift {
@@ -126,7 +159,9 @@
   .animate-chat-wobble,
   .aurora-pane::after,
   .breathing-orb,
-  .arrow-head {
+  .arrow-head,
+  .animate-accordion-down,
+  .animate-accordion-up {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }

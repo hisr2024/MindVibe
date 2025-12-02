@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { ThemeToggle } from '@/components/ui'
 
 const links = [
   { href: '/', label: 'Home' },
@@ -48,6 +49,7 @@ export default function SiteNav() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle className="hidden sm:inline-flex" />
           <Link
             href="/account"
             className="hidden rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] md:inline-flex"
@@ -83,6 +85,10 @@ export default function SiteNav() {
                 </Link>
               )
             })}
+            <div className="flex items-center justify-between rounded-xl px-3 py-2">
+              <span className="text-sm text-orange-100/80">Theme</span>
+              <ThemeToggle />
+            </div>
             <Link
               href="/account"
               onClick={() => setOpen(false)}
