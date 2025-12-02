@@ -187,6 +187,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Guidance router: {e}")
 
+# Load Subscriptions router
+print("\n[Subscriptions] Attempting to import Subscriptions router...")
+try:
+    from backend.routes.subscriptions import router as subscriptions_router
+    app.include_router(subscriptions_router)
+    print("✅ [SUCCESS] Subscriptions router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
