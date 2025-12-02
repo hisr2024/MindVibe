@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 
 interface MessageBubbleProps {
@@ -13,7 +11,6 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal }: MessageBubbleProps) {
-  const [saved, setSaved] = useState(false)
   const router = useRouter()
   
   const handleSaveToJournal = () => {
@@ -23,7 +20,6 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         localStorage.setItem('journal_prefill', JSON.stringify({ body: text }))
       }
       onSaveToJournal(text)
-      setSaved(true)
       // Navigate to journal page with prefill parameter
       router.push('/sacred-reflections?prefill=true')
     }
@@ -34,19 +30,6 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       <div className="flex items-center gap-2 text-xs text-orange-100/60">
         <span className="font-semibold text-orange-50">{sender === 'user' ? 'You' : 'KIAAN'}</span>
         <span>{new Date(timestamp).toLocaleTimeString()}</span>
-        {saved && (
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-emerald-400 flex items-center gap-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            Saved
-          </motion.span>
-        )}
       </div>
       
       <div
