@@ -5,11 +5,12 @@ based on ancient teachings presented in a non-religious, universally applicable 
 
 import os
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
+from backend.middleware.rate_limiter import limiter, WISDOM_RATE_LIMIT
 from backend.models import WisdomVerse
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
@@ -58,8 +59,9 @@ class SearchQuery(BaseModel):
 
 
 @router.post("/query", response_model=WisdomResponse)
+@limiter.limit(WISDOM_RATE_LIMIT)
 async def query_wisdom(
-    query: WisdomQuery, db: AsyncSession = Depends(get_db)
+    request: Request, query: WisdomQuery, db: AsyncSession = Depends(get_db)
 ) -> WisdomResponse:
     """Query the universal wisdom guide with a question or concern."""
     valid_languages = ["english", "hindi", "sanskrit"]
@@ -98,7 +100,8 @@ async def query_wisdom(
 
 
 @router.get("/themes")
-async def list_themes(db: AsyncSession = Depends(get_db)) -> dict:
+@limiter.limit(WISDOM_RATE_LIMIT)
+async def list_themes(request: Request, db: AsyncSession = Depends(get_db)) -> dict:
     """List all available wisdom themes."""
     from sqlalchemy import distinct, select
 
@@ -113,7 +116,9 @@ async def list_themes(db: AsyncSession = Depends(get_db)) -> dict:
 
 
 @router.get("/verses/{verse_id}")
+@limiter.limit(WISDOM_RATE_LIMIT)
 async def get_verse(
+    request: Request,
     verse_id: str,
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     include_sanskrit: bool = Query(default=False),
@@ -131,7 +136,9 @@ async def get_verse(
 
 
 @router.get("/verses")
+@limiter.limit(WISDOM_RATE_LIMIT)
 async def list_verses(
+    request: Request,
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     theme: str | None = Query(default=None),
     application: str | None = Query(default=None),
@@ -196,7 +203,9 @@ async def list_verses(
 
 
 @router.post("/search")
+@limiter.limit(WISDOM_RATE_LIMIT)
 async def semantic_search(
+    request: Request,
     search_query: SearchQuery,
     language: str = Query(default="english", pattern="^(english|hindi|sanskrit)$"),
     theme: str | None = Query(default=None),
@@ -238,7 +247,8 @@ async def semantic_search(
 
 
 @router.get("/applications")
-async def list_applications(db: AsyncSession = Depends(get_db)) -> dict:
+@limiter.limit(WISDOM_RATE_LIMIT)
+async def list_applications(request: Request, db: AsyncSession = Depends(get_db)) -> dict:
     """List all available mental health applications."""
     from sqlalchemy import select
 

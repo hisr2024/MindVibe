@@ -1,16 +1,22 @@
 """KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v13.0) - Krishna's Blessing"""
 
+import html
 import os
 import logging
+import re
 import uuid
 from typing import Dict, Any
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
+from backend.middleware.rate_limiter import limiter, CHAT_RATE_LIMIT
+
+# Maximum message length to prevent abuse
+MAX_MESSAGE_LENGTH = 2000
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
 client = OpenAI(api_key=api_key) if api_key else None
@@ -29,8 +35,51 @@ except Exception as e:
     logger.warning(f"⚠️ Gita KB unavailable: {e}")
 
 
+def sanitize_input(text: str) -> str:
+    """Sanitize user input to prevent XSS and injection attacks.
+    
+    Args:
+        text: The raw user input.
+        
+    Returns:
+        str: Sanitized text safe for processing.
+    """
+    # HTML escape to prevent XSS
+    text = html.escape(text)
+    
+    # Remove potential script injection patterns
+    # This is a defense-in-depth measure
+    script_pattern = re.compile(r'<script[^>]*>.*?</script>', re.IGNORECASE | re.DOTALL)
+    text = script_pattern.sub('', text)
+    
+    # Remove potential SQL injection patterns (defense in depth - ORM handles this)
+    # Common SQL injection patterns
+    sql_patterns = [
+        r"(?i)(\b(union|select|insert|update|delete|drop|create|alter|exec|execute)\b.*\b(from|into|table|database)\b)",
+        r"(?i)(--|#|\/\*|\*\/)",  # SQL comment markers
+        r"(?i)(\bor\b\s+\d+\s*=\s*\d+)",  # OR 1=1 patterns
+        r"(?i)(\band\b\s+\d+\s*=\s*\d+)",  # AND 1=1 patterns
+    ]
+    
+    for pattern in sql_patterns:
+        text = re.sub(pattern, '', text)
+    
+    return text.strip()
+
+
 class ChatMessage(BaseModel):
-    message: str
+    """Chat message model with validation."""
+    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    
+    @field_validator('message')
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        """Validate and sanitize the message."""
+        if not v or not v.strip():
+            raise ValueError("Message cannot be empty")
+        if len(v) > MAX_MESSAGE_LENGTH:
+            raise ValueError(f"Message too long. Maximum {MAX_MESSAGE_LENGTH} characters allowed")
+        return sanitize_input(v)
 
 
 class KIAAN:
@@ -126,7 +175,8 @@ kiaan = KIAAN()
 
 
 @router.post("/start")
-async def start_session() -> Dict[str, Any]:
+@limiter.limit(CHAT_RATE_LIMIT)
+async def start_session(request: Request) -> Dict[str, Any]:
     return {
         "session_id": str(uuid.uuid4()),
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
@@ -137,12 +187,14 @@ async def start_session() -> Dict[str, Any]:
 
 
 @router.post("/message")
-async def send_message(chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+@limiter.limit(CHAT_RATE_LIMIT)
+async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     try:
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
         
+        # Message is already sanitized by the ChatMessage validator
         response = await kiaan.generate_response_with_gita(message, db)
         
         return {

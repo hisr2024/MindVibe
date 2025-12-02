@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     SESSION_EXPIRE_DAYS: int = 7
     SESSION_TOUCH_INTERVAL_MINUTES: int = 5
     
+    # Redis Configuration
+    REDIS_ENABLED: bool = False
+    REDIS_URL: str = "redis://localhost:6379"
+    CACHE_KIAAN_RESPONSES: bool = False
+    
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    
     class Config:
         """Pydantic config."""
         env_file = ".env"
