@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, type ReactElement } from 'react'
 import Link from 'next/link'
+import { GrowthJourney } from '@/components/GrowthJourney'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -257,6 +258,7 @@ export default function Home() {
         <RelationshipCompass onSelectPrompt={setChatPrefill} />
         <ClarityPauseSuite />
         <KarmaResetGuide onSelectPrompt={setChatPrefill} />
+        <GrowthJourney />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
         <Journal />
@@ -1049,6 +1051,18 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
   }
 
+  function handleSaveToJournal(messageContent: string) {
+    // Store in temporary state
+    localStorage.setItem('journal_prefill', JSON.stringify({
+      body: messageContent,
+      timestamp: new Date().toISOString(),
+      source: 'kiaan'
+    }))
+    
+    // Navigate to journal
+    window.location.href = '/sacred-reflections?prefill=true'
+  }
+
   function renderAssistantContent(content: string, index: number) {
     const view = detailViews[index] ?? 'summary'
     const summary = summarizeContent(content)
@@ -1308,7 +1322,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <div
           ref={messageListRef}
           onScroll={handleMessageListScroll}
-          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
+          className="chat-scrollbar aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
+          style={{ scrollBehavior: 'smooth' }}
         >
           {messages.length === 0 && (
             <div className="text-center text-orange-100/70 py-20 md:py-32">
@@ -1326,7 +1341,18 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                   : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
               }`}>
                 {msg.role === 'assistant' ? (
-                  renderAssistantContent(msg.content, i)
+                  <>
+                    {renderAssistantContent(msg.content, i)}
+                    <button
+                      onClick={() => handleSaveToJournal(msg.content)}
+                      className="mt-2 text-xs text-orange-300 hover:text-orange-200 flex items-center gap-1 transition"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      Send to Journal
+                    </button>
+                  </>
                 ) : (
                   <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                 )}
@@ -1343,32 +1369,14 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           )}
         </div>
 
-        {messages.length > 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4">
-            <div className="pointer-events-auto flex flex-col gap-2 rounded-2xl bg-black/70 border border-orange-500/30 px-3 py-3 shadow-[0_12px_40px_rgba(255,115,39,0.18)] backdrop-blur">
-              <button
-                onClick={scrollToTop}
-                className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/50"
-              >
-                ↑ Scroll up
-              </button>
-              <button
-                onClick={scrollToBottom}
-                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-3 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-              >
-                ↓ Scroll down
-              </button>
-              <span
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold text-center border ${
-                  autoScrollPinned
-                    ? 'bg-emerald-500/15 text-emerald-50 border-emerald-200/30'
-                    : 'bg-white/5 text-orange-100/80 border-orange-500/25'
-                }`}
-              >
-                {autoScrollPinned ? 'Pinned to latest replies' : 'Manual scroll mode'}
-              </span>
-            </div>
-          </div>
+        {/* Jump to Latest button - only visible when scrolled up */}
+        {!autoScrollPinned && messages.length > 0 && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-orange-500/90 text-white text-sm font-semibold shadow-lg shadow-orange-500/30 hover:bg-orange-500 transition-all hover:scale-105 flex items-center gap-2"
+          >
+            ↓ Jump to Latest
+          </button>
         )}
       </div>
 
@@ -2539,15 +2547,14 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
 
 function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
-  const [microResponse, setMicroResponse] = useState<string | null>(null)
-  const [loadingResponse, setLoadingResponse] = useState(false)
+  const [kiaanResponse, setKiaanResponse] = useState<string>('')
   
   const moods = [
     { label: 'Peaceful', gradient: 'from-emerald-200 via-teal-300 to-cyan-200', beam: 'bg-emerald-100/70', halo: 'shadow-[0_0_50px_rgba(52,211,153,0.32)]', delay: '0s' },
     { label: 'Happy', gradient: 'from-yellow-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_55px_rgba(252,211,77,0.35)]', delay: '0.08s' },
     { label: 'Charged', gradient: 'from-orange-200 via-amber-300 to-yellow-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,146,60,0.34)]', delay: '0.24s' },
     { label: 'Open', gradient: 'from-sky-200 via-cyan-200 to-emerald-200', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.32)]', delay: '0.32s' },
-    { label: 'Anger', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0.48s' },
+    { label: 'Angry', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0.48s' },
     { label: 'Sad', gradient: 'from-sky-300 via-blue-400 to-indigo-500', beam: 'bg-sky-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.35)]', delay: '0.56s' },
     { label: 'Anxious', gradient: 'from-amber-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_45px_rgba(253,230,138,0.35)]', delay: '0.64s' },
     { label: 'Worried', gradient: 'from-violet-300 via-purple-400 to-fuchsia-500', beam: 'bg-violet-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.32)]', delay: '0.72s' },
@@ -2555,40 +2562,46 @@ function MoodTracker() {
     { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.88s' },
   ]
 
-  async function handleMoodSelect(mood: string) {
+  // Static micro-responses as specified in requirements
+  const moodResponses: Record<string, string> = {
+    'Peaceful': "I'm glad you're feeling calm — stay with that softness for a moment. 💙",
+    'Happy': "It's beautiful to see you feeling bright. Let that warmth stay with you. ✨",
+    'Neutral': "Steady is good. You're showing up, and that matters. 🌿",
+    'Charged': "That energy is powerful — channel it wisely. ⚡",
+    'Open': "Being open takes courage. I'm here to support you. 🌤️",
+    'Grateful': "Gratitude is a gift to yourself. Hold onto this feeling. 🙏",
+    'Reflective': "Reflection brings clarity. Take your time with what you're feeling. 🪞",
+    'Determined': "That fire in you is strong. Move forward with purpose. 🔥",
+    'Tender': "Tenderness is strength. Be gentle with yourself right now. 💙",
+    'Tired': "Rest is not weakness. Your body is telling you something important. 😴",
+    'Anxious': "That anxious feeling is tough — take a breath, I'm with you. 🌊",
+    'Heavy': "I'm sorry you're feeling low… you're not alone. I'm right here with you. 🌧️",
+    'Angry': "It's okay — anger means something important needs attention. I'm here beside you. 🔥",
+    'Worried': "Worry can feel overwhelming. Let's take this one step at a time together. 💭",
+    'Sad': "Sadness is heavy, but you're not alone right now. I'm here with you. 💙",
+    'Loneliness': "Loneliness is tough, but you're not alone right now. I'm here with you. 🤝",
+    'Depressed': "This weight is real, and it's hard. Please reach out — you don't have to carry this alone. 💙",
+  }
+
+  function handleMoodSelect(mood: string) {
     setSelectedMood(mood)
-    setLoadingResponse(true)
-    setMicroResponse(null)
-
-    const prompt = `The user just checked in and said they are feeling "${mood}". As KIAAN, provide a warm, empathetic micro-response (1-2 sentences max) that:
-- Feels like an understanding friend
-- Is gentle and comforting
-- Is emotionally grounding
-- Does not give advice, just acknowledges and validates
-
-Examples of tone:
-- For "Happy": "That warmth you're feeling? You've earned it. Let it stay."
-- For "Anxious": "I'm here. Let's take this moment together, one breath at a time."
-- For "Sad": "It's okay to feel this. You don't have to carry it alone."
-
-Respond ONLY with the micro-response, nothing else.`
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt })
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setMicroResponse(data.response)
+    setKiaanResponse(moodResponses[mood] || "I'm here with you. 💙")
+    
+    // Save mood check-in to localStorage for analytics
+    if (typeof window !== 'undefined') {
+      try {
+        const existing = localStorage.getItem('mood_check_ins')
+        const checkIns = existing ? JSON.parse(existing) : []
+        checkIns.push({
+          mood,
+          timestamp: new Date().toISOString()
+        })
+        // Keep only last 100 check-ins
+        const trimmed = checkIns.slice(-100)
+        localStorage.setItem('mood_check_ins', JSON.stringify(trimmed))
+      } catch {
+        // Ignore storage errors
       }
-    } catch {
-      // Silently fail - micro-response is optional
-    } finally {
-      setLoadingResponse(false)
     }
   }
 
@@ -2673,18 +2686,21 @@ Respond ONLY with the micro-response, nothing else.`
       </div>
 
       {/* KIAAN Micro-Response */}
-      {selectedMood && (
-        <div className="rounded-2xl bg-gradient-to-br from-orange-500/10 via-transparent to-orange-500/5 border border-orange-400/20 p-4 text-center">
-          {loadingResponse ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="h-4 w-4 rounded-full bg-orange-400/60 animate-pulse" />
-              <span className="text-sm text-orange-100/70">KIAAN is here...</span>
+      {selectedMood && kiaanResponse && (
+        <div className="animate-fadeIn mt-4">
+          <div className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-amber-300/10 p-4 shadow-lg shadow-orange-500/10">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
+                K
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-orange-100/70 mb-1">KIAAN</p>
+                <p className="text-sm text-orange-50 leading-relaxed">
+                  {kiaanResponse}
+                </p>
+              </div>
             </div>
-          ) : microResponse ? (
-            <p className="text-sm text-orange-50 leading-relaxed italic">&ldquo;{microResponse}&rdquo;</p>
-          ) : (
-            <p className="text-sm text-orange-300">✓ Mood captured</p>
-          )}
+          </div>
         </div>
       )}
 
