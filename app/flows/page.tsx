@@ -14,6 +14,17 @@ const pages = [
 export default function FlowsHome() {
   return (
     <section className="space-y-8">
+      {/* Redirect notice */}
+      <div className="rounded-2xl border border-orange-400/30 bg-orange-500/10 p-4">
+        <p className="text-sm text-orange-100">
+          💡 <strong>Looking for features?</strong> Flows are now part of our unified{' '}
+          <Link href="/features" className="text-orange-300 underline hover:text-orange-200">
+            Features page
+          </Link>
+          .
+        </p>
+      </div>
+
       <div className="rounded-3xl border border-orange-500/15 bg-[#0b0b0f]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Flow index</p>
         <h2 className="mt-2 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#ffb347] to-orange-100">
