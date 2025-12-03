@@ -420,6 +420,12 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
         forward_intention = parsed.get("forward_intention") or parsed.get("moveWithIntention")
 
         reset_guidance = {
+            # Preferred camelCase keys to match frontend contract
+            "breathingLine": breathing_line,
+            "rippleSummary": ripple_summary,
+            "repairAction": repair_action,
+            "forwardIntention": forward_intention,
+            # snake_case aliases for backward compatibility
             "breathing_line": breathing_line,
             "ripple_summary": ripple_summary,
             "repair_action": repair_action,
