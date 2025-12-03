@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
 interface MessageBubbleProps {
   sender: 'user' | 'assistant'
@@ -12,6 +13,17 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal }: MessageBubbleProps) {
   const router = useRouter()
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      setPrefersReducedMotion(mediaQuery.matches)
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+      mediaQuery.addEventListener('change', handler)
+      return () => mediaQuery.removeEventListener('change', handler)
+    }
+  }, [])
   
   const handleSaveToJournal = () => {
     if (onSaveToJournal) {
@@ -50,8 +62,12 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       {sender === 'assistant' && onSaveToJournal && !status && (
         <button
           onClick={handleSaveToJournal}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-200 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 hover:border-orange-500/40 rounded-xl transition-all animate-fadeIn"
-          aria-label="Send to Journal"
+          className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-200 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 hover:border-orange-500/40 rounded-xl animate-fadeIn focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${
+            prefersReducedMotion 
+              ? '' 
+              : 'transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(255,115,39,0.2)]'
+          }`}
+          aria-label="Send this response to Journal"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
