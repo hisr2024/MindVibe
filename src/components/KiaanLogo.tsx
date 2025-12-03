@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { easeInOut, motion, useReducedMotion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 
 export type KiaanLogoSize = 'sm' | 'md' | 'lg'
@@ -84,7 +84,7 @@ export function KiaanLogo({
               animate={motionEnabled ? { opacity: hovered ? 1 : [0.75, 0.92, 0.75] } : undefined}
               transition={
                 motionEnabled
-                  ? { duration: hovered ? 0.3 : 2.8, repeat: hovered ? 0 : Infinity, ease: 'easeInOut' }
+                  ? { duration: hovered ? 0.3 : 2.8, repeat: hovered ? 0 : Infinity, ease: easeInOut }
                   : undefined
               }
             >
@@ -96,7 +96,7 @@ export function KiaanLogo({
               animate={motionEnabled ? { opacity: hovered ? 0.95 : [0.6, 0.86, 0.6], y: 0 } : undefined}
               transition={
                 motionEnabled
-                  ? { duration: hovered ? 0.4 : 3.6, repeat: hovered ? 0 : Infinity, ease: 'easeInOut', delay: 0.4 }
+                  ? { duration: hovered ? 0.4 : 3.6, repeat: hovered ? 0 : Infinity, ease: easeInOut, delay: 0.4 }
                   : undefined
               }
             >
@@ -140,7 +140,7 @@ function EnergyAura({ size, animated, hovered }: { size: number; animated: boole
         }
         transition={
           animated
-            ? { duration: hovered ? 2.6 : 4, repeat: Infinity, ease: 'easeInOut' }
+            ? { duration: hovered ? 2.6 : 4, repeat: Infinity, ease: easeInOut }
             : undefined
         }
       />
@@ -166,7 +166,7 @@ function LogoMark({
     : undefined
 
   const fluteShimmer = animated
-    ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3.6 }
+    ? { duration: 1.4, repeat: Infinity, ease: easeInOut, repeatDelay: 3.6 }
     : undefined
 
   const glowBreathing = animated
@@ -182,7 +182,7 @@ function LogoMark({
         className="absolute inset-1 rounded-xl"
         style={{ background: 'radial-gradient(circle at 45% 35%, rgba(106,215,255,0.2), transparent 55%)' }}
         animate={glowBreathing}
-        transition={animated ? { duration: 4, repeat: Infinity, ease: 'easeInOut' } : undefined}
+        transition={animated ? { duration: 4, repeat: Infinity, ease: easeInOut } : undefined}
       />
       <motion.svg
         width={size}
@@ -224,7 +224,7 @@ function LogoMark({
           fill="url(#feather-fill)"
           opacity={0.08}
           animate={glowBreathing}
-          transition={animated ? { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.3 } : undefined}
+          transition={animated ? { duration: 4, repeat: Infinity, ease: easeInOut, delay: 0.3 } : undefined}
         />
 
         <motion.circle
@@ -235,10 +235,10 @@ function LogoMark({
           strokeWidth="1.8"
           opacity={0.28}
           animate={animated ? { scale: [0.98, 1.05, 0.98], opacity: [0.25, 0.5, 0.25] } : undefined}
-          transition={animated ? { duration: 3.4, repeat: Infinity, ease: 'easeInOut' } : undefined}
+          transition={animated ? { duration: 3.4, repeat: Infinity, ease: easeInOut } : undefined}
         />
 
-        <motion.g animate={glowBreathing} transition={animated ? { duration: 4, repeat: Infinity, ease: 'easeInOut' } : undefined}>
+        <motion.g animate={glowBreathing} transition={animated ? { duration: 4, repeat: Infinity, ease: easeInOut } : undefined}>
           <line x1="44" y1="28" x2="44" y2="94" stroke="url(#flute-body)" strokeWidth="9" strokeLinecap="round" />
           {[38, 54, 70].map(y => (
             <circle key={y} cx="44" cy={y} r="2" fill="#0b1020" opacity={0.8} />
@@ -267,7 +267,7 @@ function LogoMark({
         <motion.g
           transform="translate(62 4)"
           animate={featherSway}
-          transition={animated ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut' } : undefined}
+          transition={animated ? { duration: 2.8, repeat: Infinity, ease: easeInOut } : undefined}
           style={{ transformOrigin: '20px 32px' }}
         >
           <motion.path
@@ -292,7 +292,7 @@ function LogoMark({
             fill="url(#feather-eye)"
             opacity={0.92}
             animate={animated ? { scale: hovered ? [1.02, 1.08, 1.02] : [1, 1.05, 1] } : undefined}
-            transition={animated ? { duration: hovered ? 1.4 : 2.2, repeat: Infinity, ease: 'easeInOut' } : undefined}
+            transition={animated ? { duration: hovered ? 1.4 : 2.2, repeat: Infinity, ease: easeInOut } : undefined}
           />
           <motion.circle
             cx="38"
@@ -302,7 +302,7 @@ function LogoMark({
             strokeWidth="1"
             opacity={0.55}
             animate={animated ? { scale: [0.96, 1.08, 0.96], opacity: [0.4, 0.8, 0.4] } : undefined}
-            transition={animated ? { duration: 3.2, repeat: Infinity, ease: 'easeInOut' } : undefined}
+            transition={animated ? { duration: 3.2, repeat: Infinity, ease: easeInOut } : undefined}
           />
         </motion.g>
       </motion.svg>
