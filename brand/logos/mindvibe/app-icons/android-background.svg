@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Android Adaptive Icon - Background Layer -->
+  <defs>
+    <linearGradient id="android-bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="50%" stop-color="#F7931E"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    <radialGradient id="android-bg-glow" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.4)"/>
+      <stop offset="70%" stop-color="rgba(255, 107, 53, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(255, 107, 53, 0)"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Full background -->
+  <rect width="512" height="512" fill="url(#android-bg-gradient)"/>
+  
+  <!-- Inner Glow -->
+  <rect width="512" height="512" fill="url(#android-bg-glow)"/>
+</svg>
