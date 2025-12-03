@@ -1,4 +1,61 @@
 -- Journal backend tables with E2E encrypted blobs
+-- NOTE: Some legacy deployments created `journal_entries.id` as an integer primary
+-- key. Because this migration introduces new tables that reference
+-- `journal_entries(id)` as a VARCHAR(64) UUID string, we proactively align the
+-- column type before creating those tables. This avoids PostgreSQL rejecting the
+-- foreign keys with a "DatatypeMismatchError" during deployment.
+
+DO $$
+DECLARE
+    column_is_integer BOOLEAN;
+BEGIN
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'journal_entries'
+          AND column_name = 'id'
+          AND data_type = 'integer'
+    ) INTO column_is_integer;
+
+    IF column_is_integer THEN
+        -- Drop dependent foreign keys if legacy tables already exist
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
+            ALTER TABLE journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
+            ALTER TABLE journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
+            ALTER TABLE journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
+        END IF;
+
+        -- Update the primary key column to the expected VARCHAR(64) type
+        ALTER TABLE journal_entries
+            ALTER COLUMN id TYPE VARCHAR(64) USING id::VARCHAR(64);
+
+        -- Restore foreign keys with the corrected type
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
+            ALTER TABLE journal_entry_tags
+                ADD CONSTRAINT journal_entry_tags_entry_id_fkey
+                FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
+            ALTER TABLE journal_versions
+                ADD CONSTRAINT journal_versions_entry_id_fkey
+                FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
+            ALTER TABLE journal_search_index
+                ADD CONSTRAINT journal_search_index_entry_id_fkey
+                FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+        END IF;
+    END IF;
+END $$;
+
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE IF NOT EXISTS journal_entries (
