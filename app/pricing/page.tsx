@@ -185,7 +185,9 @@ function CurrencySwitcher({
         {currencies.map((curr) => (
           <button
             key={curr}
-            ref={el => (buttonRefs.current[curr] = el)}
+            ref={(el) => {
+              buttonRefs.current[curr] = el
+            }}
             role="tab"
             aria-selected={currency === curr}
             onClick={() => onCurrencyChange(curr)}
