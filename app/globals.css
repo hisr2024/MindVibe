@@ -247,12 +247,15 @@ html.light .chat-scrollbar::-webkit-scrollbar-thumb:hover {
   scrollbar-color: transparent transparent;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  transition: scrollbar-color 0.3s ease;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 1rem;
+  scroll-padding-right: 1rem;
+  touch-action: pan-y;
+  transition: scrollbar-color 0.3s ease, background 0.3s ease;
 }
 
-.subscription-scroll:hover,
-.subscription-scroll:focus,
-.subscription-scroll.scrolling {
+.subscription-scroll.scrolling,
+.subscription-scroll:focus-visible {
   scrollbar-color: rgba(251, 146, 60, 0.5) rgba(0, 0, 0, 0.1);
 }
 
@@ -261,26 +264,28 @@ html.light .chat-scrollbar::-webkit-scrollbar-thumb:hover {
 }
 
 .subscription-scroll::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+  background: radial-gradient(circle at 0% 50%, rgba(255, 115, 39, 0.12), transparent),
+    radial-gradient(circle at 100% 50%, rgba(255, 200, 80, 0.12), transparent);
+  border-radius: 9999px;
 }
 
 .subscription-scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #ff7327, #ffc850);
-  border-radius: 3px;
+  background: linear-gradient(90deg, #ff7a2c, #ffc14f);
+  border-radius: 9999px;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  box-shadow: 0 0 0 rgba(255, 140, 74, 0.25);
+  transition: opacity 0.35s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
-.subscription-scroll:hover::-webkit-scrollbar-thumb,
-.subscription-scroll:focus::-webkit-scrollbar-thumb,
-.subscription-scroll.scrolling::-webkit-scrollbar-thumb {
+.subscription-scroll.scrolling::-webkit-scrollbar-thumb,
+.subscription-scroll:focus-visible::-webkit-scrollbar-thumb {
   opacity: 1;
+  box-shadow: 0 0 12px rgba(255, 140, 74, 0.35);
 }
 
 .subscription-scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(90deg, #ff8c4a, #ffd06f);
-  box-shadow: 0 0 8px rgba(255, 115, 39, 0.4);
+  box-shadow: 0 0 14px rgba(255, 115, 39, 0.45);
 }
 
 /* Light mode horizontal scrollbar */
