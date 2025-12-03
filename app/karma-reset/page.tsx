@@ -115,8 +115,7 @@ export default function KarmaResetPage() {
     const sanitizedWhoFeltRipple = sanitizeInput(whoFeltRipple) || 'Someone I care about'
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/karma-reset/generate`, {
+      const response = await fetch(`/api/karma-reset/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
