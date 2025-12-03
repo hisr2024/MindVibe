@@ -1136,7 +1136,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
             ref: messageListRef,
             tabIndex: 0,
             'aria-label': 'Conversation with Kiaan',
-            className: 'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none',
+            className:
+              'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none',
           }}
           className="mv-energy-scrollbar"
         >
@@ -1151,41 +1152,44 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
-                  msg.role === 'user'
-                    ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
-                    : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
-                }`}>
+                <div
+                  className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
+                    msg.role === 'user'
+                      ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
+                      : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
+                  }`}
+                >
                   {msg.role === 'assistant' ? (
                     <>
-                    {renderAssistantContent(msg.content, i)}
-                    <div className="pt-2">
-                      <button
-                        onClick={() => handleSaveToJournal(msg.content)}
-                        className="group inline-flex items-center gap-2 rounded-xl border border-orange-300/25 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/10 to-amber-200/10 px-3 py-2 text-xs font-semibold text-orange-50 transition-all duration-200 shadow-[0_10px_30px_rgba(255,153,51,0.16)] hover:-translate-y-0.5 hover:shadow-orange-400/30"
-                        aria-label="Send this response to Sacred Reflections"
-                      >
-                        <svg className="w-4 h-4 text-orange-300 group-hover:text-amber-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Sacred Reflections</span>
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                )}
+                      {renderAssistantContent(msg.content, i)}
+                      <div className="pt-2">
+                        <button
+                          onClick={() => handleSaveToJournal(msg.content)}
+                          className="group inline-flex items-center gap-2 rounded-xl border border-orange-300/25 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/10 to-amber-200/10 px-3 py-2 text-xs font-semibold text-orange-50 transition-all duration-200 shadow-[0_10px_30px_rgba(255,153,51,0.16)] hover:-translate-y-0.5 hover:shadow-orange-400/30"
+                          aria-label="Send this response to Sacred Reflections"
+                        >
+                          <svg className="w-4 h-4 text-orange-300 group-hover:text-amber-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                          <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Sacred Reflections</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
-                <span className="animate-pulse">KIAAN is reflecting...</span>
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
+                  <span className="animate-pulse">KIAAN is reflecting...</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </SimpleBar>
 
       </div>
