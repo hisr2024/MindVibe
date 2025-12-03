@@ -234,9 +234,14 @@ export default function KarmaResetPage() {
         setBreathCount(0)
         setBreathPhaseIndex(0)
         setBreathProgress(0)
-        setIsBreathing(false)
+        lastBreathPhaseRef.current = 0
+        setIsBreathing(true) // Auto-start breathing cycle after KIAAN API returns
         setJournalSaved(false)
         setRevealedCards(0)
+        // Resume AudioContext if suspended (needed for auto-start)
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume().catch(() => null)
+        }
       } else {
         setError('KIAAN returned an unexpected response. Please try again.')
       }
@@ -471,7 +476,7 @@ export default function KarmaResetPage() {
                   disabled={isBreathing}
                   className="rounded-full bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-4 py-2 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60"
                 >
-                  {isBreathing ? 'Guiding breaths…' : 'Begin 4-Breath Reset'}
+                  {isBreathing ? 'Guiding breaths…' : 'Restart 4-Breath Reset'}
                 </button>
               </div>
             </div>
