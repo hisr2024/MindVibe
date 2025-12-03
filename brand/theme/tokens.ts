@@ -53,30 +53,31 @@ export const darkTheme: ThemeTokens = {
 }
 
 export const lightTheme: ThemeTokens = {
-  background: 'radial-gradient(circle at 15% 20%, rgba(255,188,120,0.18), transparent 30%), radial-gradient(circle at 85% 15%, rgba(149, 213, 255, 0.18), transparent 40%), linear-gradient(135deg, #fdf7f2 0%, #f8fbff 55%, #f3f6fb 100%)',
+  background:
+    'linear-gradient(135deg, #ffffff 0%, #f6f8fb 45%, #eef2f7 100%), radial-gradient(circle at 18% 22%, rgba(255,188,120,0.16), transparent 32%), radial-gradient(circle at 82% 18%, rgba(149,213,255,0.16), transparent 38%)',
   surface: '#ffffff',
-  surfaceSubtle: '#f5f1eb',
+  surfaceSubtle: '#f3f4f6',
   surfaceElevated: '#f8fafc',
-  textPrimary: '#111827',
-  textSecondary: '#374151',
-  textMuted: '#4b5563',
-  border: '#e2e8f0',
-  borderStrong: '#d97706',
-  cardTealBg: 'linear-gradient(135deg, #d2f3ee, #b2e5da, #8ed2c7)',
-  cardTealText: '#0f172a',
-  cardBlueBg: 'linear-gradient(135deg, #dbe8ff, #c1d6f6, #9fc0ea)',
+  textPrimary: '#0b1220',
+  textSecondary: '#1f2937',
+  textMuted: '#334155',
+  border: '#cbd5e1',
+  borderStrong: '#0f172a',
+  cardTealBg: 'linear-gradient(135deg, #bff0e8, #9ee0d2, #7acdbf)',
+  cardTealText: '#0b1220',
+  cardBlueBg: 'linear-gradient(135deg, #d7e6ff, #b8d0f3, #94b8e6)',
   cardBlueText: '#0b1a2b',
-  cardLilacBg: 'linear-gradient(135deg, #f1e8fb, #dfd1f1, #c9b3e3)',
-  cardLilacText: '#271638',
+  cardLilacBg: 'linear-gradient(135deg, #ece4f9, #d6c9ef, #c0addf)',
+  cardLilacText: '#221534',
   cardShadow: '0 16px 40px rgba(15, 23, 42, 0.08)',
   panelBg: '#ffffff',
-  panelBorder: '#e2e8f0',
-  panelTextPrimary: '#0f172a',
-  panelTextSecondary: '#475569',
-  inputBg: '#f9fafb',
-  inputBorder: '#cbd5e1',
-  inputPlaceholder: '#64748b',
-  overlaySoft: 'linear-gradient(180deg, rgba(255,255,255,0.78), rgba(249,250,251,0.85))'
+  panelBorder: '#cbd5e1',
+  panelTextPrimary: '#0b1220',
+  panelTextSecondary: '#1f2937',
+  inputBg: '#ffffff',
+  inputBorder: '#94a3b8',
+  inputPlaceholder: '#475569',
+  overlaySoft: 'linear-gradient(180deg, rgba(255,255,255,0.92), rgba(243,244,246,0.95))'
 }
 
 export function applyThemeTokens(tokens: ThemeTokens) {
