@@ -1,0 +1,58 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Orange-Gold Primary Gradient -->
+    <linearGradient id="lockup-v-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="50%" stop-color="#F7931E"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    
+    <!-- Text Gradient -->
+    <linearGradient id="lockup-v-text" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="50%" stop-color="#F7931E"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    
+    <!-- Inner Glow -->
+    <radialGradient id="lockup-v-glow" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.4)"/>
+      <stop offset="70%" stop-color="rgba(255, 107, 53, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(255, 107, 53, 0)"/>
+    </radialGradient>
+    
+    <!-- Symbol Gradient -->
+    <linearGradient id="lockup-v-symbol" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+    
+    <!-- Shadow Filter -->
+    <filter id="lockup-v-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#FF6B35" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Icon Circle -->
+  <circle cx="100" cy="70" r="56" fill="url(#lockup-v-primary)" filter="url(#lockup-v-shadow)"/>
+  <circle cx="100" cy="70" r="53" fill="url(#lockup-v-glow)"/>
+  <circle cx="100" cy="70" r="49" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1"/>
+  
+  <!-- M Symbol in Icon -->
+  <path d="M72 92V48c0-2 1.2-3.3 3.2-3.3h10.5c1.3 0 2.2 0.4 2.8 1.3L100 65l11.5-19c0.6-0.9 1.5-1.3 2.8-1.3h10.5c2 0 3.2 1.3 3.2 3.3v44c0 2-1.2 3.3-3.2 3.3h-9c-2 0-3.2-1.3-3.2-3.3V68l-11 17c-1 1.6-3.6 1.6-4.6 0l-11-17v24c0 2-1.2 3.3-3.2 3.3h-9c-2 0-3.2-1.3-3.2-3.3z" fill="url(#lockup-v-symbol)"/>
+  
+  <!-- Highlight Arc -->
+  <path d="M67 54 C76 36, 124 36, 133 54" fill="none" stroke="rgba(255, 255, 255, 0.2)" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- MindVibe Wordmark -->
+  <text 
+    x="100" 
+    y="165" 
+    text-anchor="middle"
+    font-family="Inter, SF Pro Display, system-ui, sans-serif" 
+    font-size="26" 
+    font-weight="700" 
+    letter-spacing="0.02em"
+    fill="url(#lockup-v-text)"
+  >MindVibe</text>
+</svg>

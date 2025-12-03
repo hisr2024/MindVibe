@@ -1,0 +1,67 @@
+<svg width="64" height="96" viewBox="0 0 32 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Peacock Feather Element - Standalone -->
+  <defs>
+    <!-- Feather gradient - teal to gold to deep blue -->
+    <linearGradient id="feather-el-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4fd1c5"/>
+      <stop offset="35%" stop-color="#38b2ac"/>
+      <stop offset="65%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+    
+    <!-- Eye gradient - gold center -->
+    <radialGradient id="feather-el-eye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffc850"/>
+      <stop offset="50%" stop-color="#ff9933"/>
+      <stop offset="100%" stop-color="#ff7327"/>
+    </radialGradient>
+    
+    <!-- Shimmer effect -->
+    <filter id="feather-shimmer" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="0.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Main Feather Shaft -->
+  <path 
+    d="M16 48 C16 48, 14 35, 15 20 C16 5, 16 2, 16 2" 
+    stroke="url(#feather-el-gradient)" 
+    stroke-width="1.5" 
+    stroke-linecap="round" 
+    fill="none"
+  />
+  
+  <!-- Upper Barbs - Left -->
+  <path d="M15 8 C12 7, 8 5, 5 4 C8 6, 12 8, 15 10" fill="url(#feather-el-gradient)" opacity="0.6"/>
+  
+  <!-- Upper Barbs - Right -->
+  <path d="M17 8 C20 7, 24 5, 27 4 C24 6, 20 8, 17 10" fill="url(#feather-el-gradient)" opacity="0.6"/>
+  
+  <!-- Middle Barbs - Left -->
+  <path d="M15 20 C12 18, 8 15, 4 14 C8 16, 12 19, 15 22" fill="url(#feather-el-gradient)" opacity="0.8"/>
+  
+  <!-- Middle Barbs - Right -->
+  <path d="M17 20 C20 18, 24 15, 28 14 C24 16, 20 19, 17 22" fill="url(#feather-el-gradient)" opacity="0.8"/>
+  
+  <!-- Lower Barbs - Left -->
+  <path d="M15 32 C13 30, 10 28, 7 27 C10 29, 13 31, 15 34" fill="url(#feather-el-gradient)" opacity="0.5"/>
+  
+  <!-- Lower Barbs - Right -->
+  <path d="M17 32 C19 30, 22 28, 25 27 C22 29, 19 31, 17 34" fill="url(#feather-el-gradient)" opacity="0.5"/>
+  
+  <!-- Peacock Eye - Outer Ring -->
+  <ellipse cx="16" cy="12" rx="8" ry="6" fill="none" stroke="url(#feather-el-gradient)" stroke-width="2" filter="url(#feather-shimmer)"/>
+  
+  <!-- Peacock Eye - Middle Ring -->
+  <ellipse cx="16" cy="12" rx="5" ry="4" fill="none" stroke="#1e40af" stroke-width="1.5" opacity="0.9"/>
+  
+  <!-- Peacock Eye - Inner Golden Center -->
+  <ellipse cx="16" cy="12" rx="3" ry="2.5" fill="url(#feather-el-eye)"/>
+  
+  <!-- Eye Highlight -->
+  <ellipse cx="15" cy="11" rx="1" ry="0.8" fill="rgba(255, 255, 255, 0.4)"/>
+</svg>

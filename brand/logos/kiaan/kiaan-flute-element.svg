@@ -1,0 +1,45 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Krishna's Flute Element - Stylized, Modern -->
+  <defs>
+    <!-- Main flute gradient -->
+    <linearGradient id="flute-main-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff7327"/>
+      <stop offset="50%" stop-color="#ff9933"/>
+      <stop offset="100%" stop-color="#ffc850"/>
+    </linearGradient>
+    
+    <!-- Flute accent gradient -->
+    <linearGradient id="flute-accent-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4fd1c5"/>
+      <stop offset="100%" stop-color="#38b2ac"/>
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="flute-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feFlood flood-color="#ff9933" flood-opacity="0.3"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Main Flute Body -->
+  <rect x="10" y="16" width="100" height="8" rx="4" fill="url(#flute-main-gradient)" filter="url(#flute-glow)"/>
+  
+  <!-- Flute Holes -->
+  <circle cx="30" cy="20" r="2" fill="#d97706" opacity="0.8"/>
+  <circle cx="45" cy="20" r="2" fill="#d97706" opacity="0.8"/>
+  <circle cx="60" cy="20" r="2" fill="#d97706" opacity="0.8"/>
+  <circle cx="75" cy="20" r="2" fill="#d97706" opacity="0.8"/>
+  <circle cx="90" cy="20" r="2" fill="#d97706" opacity="0.8"/>
+  
+  <!-- Decorative Bands -->
+  <rect x="18" y="15" width="3" height="10" rx="1" fill="url(#flute-accent-gradient)" opacity="0.7"/>
+  <rect x="98" y="15" width="3" height="10" rx="1" fill="url(#flute-accent-gradient)" opacity="0.7"/>
+  
+  <!-- Mouthpiece -->
+  <ellipse cx="8" cy="20" rx="4" ry="3" fill="url(#flute-main-gradient)"/>
+</svg>
