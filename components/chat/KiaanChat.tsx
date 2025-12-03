@@ -28,10 +28,8 @@ export function KiaanChat({
   className = '',
 }: KiaanChatProps) {
   const [inputText, setInputText] = useState('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const [autoScroll, setAutoScroll] = useState(true)
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isAtBottom, setIsAtBottom] = useState(true)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
   // Check for reduced motion preference
@@ -45,118 +43,60 @@ export function KiaanChat({
     }
   }, [])
 
-  // Auto-scroll to bottom when new messages arrive (if autoScroll is enabled)
+  // Auto-scroll to bottom when allowed
   const scrollToBottom = useCallback(() => {
-    if (autoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-      })
-    }
-  }, [autoScroll, prefersReducedMotion])
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth'
+    })
+  }, [prefersReducedMotion])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, scrollToBottom])
+    if (isAtBottom) {
+      scrollToBottom()
+    }
+  }, [isAtBottom, messages.length, scrollToBottom])
 
-  // Detect scrolling state for scrollbar visibility
+  // Detect scroll position to manage auto-scroll behavior
   const handleScroll = useCallback(() => {
     const container = messagesContainerRef.current
     if (!container) return
 
-    // Mark as scrolling (using CSS class for visibility)
-    container.classList.add('scrolling')
-
-    // Clear existing timeout
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current)
-    }
-
-    // Set timeout to hide scrollbar after 1.5s of no scrolling
-    scrollTimeoutRef.current = setTimeout(() => {
-      container.classList.remove('scrolling')
-    }, 1500)
-
-    // Check if at bottom for auto-scroll toggle
-    const isAtBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100
-    setAutoScroll(isAtBottom)
+    const threshold = 40
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold
+    setIsAtBottom(isNearBottom)
   }, [])
 
-  // Cleanup scroll timeout on unmount
+  // Initialize scroll position state on mount
   useEffect(() => {
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // Keyboard navigation for chat scroll
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const container = messagesContainerRef.current
     if (!container) return
 
-    const scrollAmount = 100
-
-    switch (e.key) {
-      case 'PageUp':
-        e.preventDefault()
-        container.scrollBy({ 
-          top: -container.clientHeight * 0.8, 
-          behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-        })
-        break
-      case 'PageDown':
-        e.preventDefault()
-        container.scrollBy({ 
-          top: container.clientHeight * 0.8, 
-          behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-        })
-        break
-      case 'Home':
-        e.preventDefault()
-        container.scrollTo({ 
-          top: 0, 
-          behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-        })
-        setAutoScroll(false)
-        break
-      case 'End':
-        e.preventDefault()
-        container.scrollTo({ 
-          top: container.scrollHeight, 
-          behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-        })
-        setAutoScroll(true)
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        container.scrollBy({ 
-          top: -scrollAmount, 
-          behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-        })
-        break
-      case 'ArrowDown':
-        e.preventDefault()
-        container.scrollBy({ 
-          top: scrollAmount, 
-          behavior: prefersReducedMotion ? 'auto' : 'smooth' 
-        })
-        break
-    }
-  }, [prefersReducedMotion])
+    const threshold = 40
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold
+    setIsAtBottom(isNearBottom)
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputText.trim() && onSendMessage) {
       onSendMessage(inputText.trim())
       setInputText('')
-      setAutoScroll(true) // Re-enable auto-scroll on new message
+      setIsAtBottom(true)
     }
   }
 
   return (
-    <div className={`flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 ${className}`}>
+    <div
+      className={`relative flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 ${className}`}
+    >
       {/* Chat Header */}
       <div className="flex items-center gap-3 border-b border-orange-500/15 px-4 py-3">
         <KiaanLogo size="sm" showTagline={false} animated={true} />
@@ -166,15 +106,14 @@ export function KiaanChat({
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        onKeyDown={handleKeyDown}
         tabIndex={0}
         role="log"
         aria-label="Chat messages"
         aria-live="polite"
-        className="chat-scrollbar flex-1 overflow-y-auto px-4 py-4 space-y-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset"
-        style={{ 
-          maxHeight: 'calc(100vh - 300px)', 
-          minHeight: '300px', 
+        className="kiaan-chat-scroll-container flex-1 overflow-y-auto px-4 py-4 space-y-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset"
+        style={{
+          maxHeight: 'calc(100vh - 300px)',
+          minHeight: '300px',
           scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth' 
         }}
       >
@@ -216,24 +155,20 @@ export function KiaanChat({
           </div>
         )}
 
-        {/* Scroll anchor */}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Floating Jump to Latest button */}
-      {!autoScroll && messages.length > 0 && (
-        <div className="relative">
-          <button
-            onClick={() => {
-              setAutoScroll(true)
-              scrollToBottom()
-            }}
-            className="absolute -top-14 left-1/2 -translate-x-1/2 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 hover:scale-105 transition-all animate-bounce"
-            aria-label="Jump to latest message"
-          >
-            ↓ Jump to Latest
-          </button>
-        </div>
+      {!isAtBottom && messages.length > 0 && (
+        <button
+          onClick={() => {
+            setIsAtBottom(true)
+            scrollToBottom()
+          }}
+          className="absolute bottom-[116px] right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105"
+          aria-label="Jump to latest message"
+        >
+          ↓ Jump to Latest
+        </button>
       )}
 
       {/* Input Form */}
