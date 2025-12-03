@@ -8,10 +8,10 @@ export type RepairType = 'apology' | 'clarification' | 'calm_followup'
 
 /** KIAAN structured 4-part reset plan response */
 export interface KiaanResetResponse {
-  pauseAndBreathe: string
-  nameTheRipple: string
-  repair: string
-  moveWithIntention: string
+  breathingLine: string
+  rippleSummary: string
+  repairAction: string
+  forwardIntention: string
 }
 
 /** Reset flow step identifiers */
@@ -38,7 +38,18 @@ export interface KarmaResetPayload {
 /** API response for karma reset */
 export interface KarmaResetApiResponse {
   status: 'success' | 'partial_success' | 'error'
-  reset_guidance?: KiaanResetResponse
+  reset_guidance?:
+    | KiaanResetResponse
+    | {
+        breathing_line?: string
+        ripple_summary?: string
+        repair_action?: string
+        forward_intention?: string
+        pauseAndBreathe?: string
+        nameTheRipple?: string
+        repair?: string
+        moveWithIntention?: string
+      }
   raw_text?: string
   model: string
   provider: string

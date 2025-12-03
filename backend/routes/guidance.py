@@ -172,14 +172,14 @@ CRITICAL RULES - BREVITY IS ESSENTIAL:
 - Keep each field to 1-2 SHORT sentences MAXIMUM
 - Be warm, gentle, calm, and to the point
 - No long explanations, lectures, or heavy paragraphs
-- Focus on actionable guidance
+- Focus on actionable guidance that feels doable now
 - Present wisdom as universal life principles
 
 The 4-part plan you generate:
-1. pauseAndBreathe: One grounding line about taking a breath before responding
-2. nameTheRipple: One line summarizing what happened and who felt the impact
-3. repair: One line describing the repair action based on repair type
-4. moveWithIntention: One line describing how to show up next time
+1. breathing_line: One grounding line about taking four slow breaths before responding
+2. ripple_summary: One line summarizing what happened and who felt the impact
+3. repair_action: One line describing the repair action based on repair type
+4. forward_intention: One line describing how to show up next time
 
 Repair types and guidance:
 - "apology": Offer a sincere apology that stays brief and grounded
@@ -188,39 +188,39 @@ Repair types and guidance:
 
 Crisis detection:
 If the situation describes harm, abuse, or severe distress, respond with:
-- pauseAndBreathe: "Please take a moment to breathe and find safety first."
-- nameTheRipple: "A difficult moment that may need professional support."
-- repair: "Your safety and wellbeing come first - please seek support."
-- moveWithIntention: "You deserve care and support. Reach out: 988 (Crisis Line)."
+- breathing_line: "Please take a moment to breathe and find safety first."
+- ripple_summary: "A difficult moment that may need professional support."
+- repair_action: "Your safety and wellbeing come first - please seek support."
+- forward_intention: "You deserve care and support. Reach out: 988 (Crisis Line)."
 
 Return ONLY this JSON structure:
 {
-  "pauseAndBreathe": "<one grounding line, e.g., 'Take one slow breath before you respond.'>",
-  "nameTheRipple": "<one line summarizing what happened + impact>",
-  "repair": "<one line describing the action based on repair type>",
-  "moveWithIntention": "<one line describing how to show up next time>"
+  "breathing_line": "<one grounding line, e.g., 'Take four slow breaths and soften your shoulders.'>",
+  "ripple_summary": "<one line summarizing what happened + impact>",
+  "repair_action": "<one line describing the action based on repair type>",
+  "forward_intention": "<one line describing the forward-looking intention>"
 }
 
 Examples:
 {
-  "pauseAndBreathe": "Take one slow breath before you respond.",
-  "nameTheRipple": "You raised your tone during the discussion, and your teammate felt dismissed.",
-  "repair": "Acknowledge the moment with a brief, honest apology.",
-  "moveWithIntention": "Show up with patience in your next interaction."
+  "breathing_line": "Take four slow breaths before you respond.",
+  "ripple_summary": "You raised your tone during the discussion, and your teammate felt dismissed.",
+  "repair_action": "Acknowledge the moment with a brief, honest apology.",
+  "forward_intention": "Show up with patience in your next interaction."
 }
 
 {
-  "pauseAndBreathe": "Ground yourself. This moment will pass.",
-  "nameTheRipple": "You sent a message in frustration, and your friend felt hurt.",
-  "repair": "Clarify your intention gently so they feel understood.",
-  "moveWithIntention": "Lead with clarity and kindness."
+  "breathing_line": "Ground yourself. This moment will pass.",
+  "ripple_summary": "You sent a message in frustration, and your friend felt hurt.",
+  "repair_action": "Clarify your intention gently so they feel understood.",
+  "forward_intention": "Lead with clarity and kindness."
 }
 
 {
-  "pauseAndBreathe": "Breathe deeply. You can reset this.",
-  "nameTheRipple": "A sharp comment landed harshly on your colleague.",
-  "repair": "Send a warm follow-up note to re-center the conversation.",
-  "moveWithIntention": "Return to conversations with a calmer presence."
+  "breathing_line": "Breathe deeply. You can reset this.",
+  "ripple_summary": "A sharp comment landed harshly on your colleague.",
+  "repair_action": "Send a warm follow-up note to re-center the conversation.",
+  "forward_intention": "Return to conversations with a calmer presence."
 }
 """
 
@@ -401,6 +401,7 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
         "what_happened": payload.get("what_happened", "A brief misstep"),
         "who_felt_it": payload.get("who_felt_it", "Someone I care about"),
         "repair_type": repair_type,
+        "style": "Short, direct, warm, and practical. 1-2 sentences per field only.",
     }
 
     parsed, raw_text = await _generate_response(
@@ -408,12 +409,31 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
         user_payload=normalized_payload,
         expect_json=True,
         temperature=0.4,
-        max_tokens=300,
+        max_tokens=220,
     )
+
+    reset_guidance: Optional[Dict[str, str]] = None
+    if parsed:
+        breathing_line = parsed.get("breathing_line") or parsed.get("pauseAndBreathe")
+        ripple_summary = parsed.get("ripple_summary") or parsed.get("nameTheRipple")
+        repair_action = parsed.get("repair_action") or parsed.get("repair")
+        forward_intention = parsed.get("forward_intention") or parsed.get("moveWithIntention")
+
+        reset_guidance = {
+            "breathing_line": breathing_line,
+            "ripple_summary": ripple_summary,
+            "repair_action": repair_action,
+            "forward_intention": forward_intention,
+            # Legacy aliases preserved for clients that still expect prior field names
+            "pauseAndBreathe": breathing_line,
+            "nameTheRipple": ripple_summary,
+            "repair": repair_action,
+            "moveWithIntention": forward_intention,
+        }
 
     return EngineResult(
         status="success" if parsed else "partial_success",
-        reset_guidance=parsed,
+        reset_guidance=reset_guidance,
         raw_text=raw_text,
         model=model_name,
         provider="openai",
