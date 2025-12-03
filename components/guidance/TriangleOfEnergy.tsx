@@ -54,8 +54,8 @@ export function TriangleOfEnergy({
         label: 'Inner Peace',
         x: topX,
         y: topY,
-        color: '#4fd1c5', // Teal
-        secondaryColor: '#38b2ac',
+        color: '#1fb8c0', // Soft teal
+        secondaryColor: '#6dd7f2',
         description: 'Breath-like expanding rings',
       },
       {
@@ -63,8 +63,8 @@ export function TriangleOfEnergy({
         label: 'Mind Control',
         x: bottomLeftX,
         y: bottomLeftY,
-        color: '#3b82f6', // Blue
-        secondaryColor: '#2563eb',
+        color: '#1e3a8a', // Deep blue
+        secondaryColor: '#3b82f6',
         description: 'Focused linear pulse',
       },
       {
@@ -72,8 +72,8 @@ export function TriangleOfEnergy({
         label: 'Self Kindness',
         x: bottomRightX,
         y: bottomRightY,
-        color: '#ec4899', // Rose
-        secondaryColor: '#a78bfa', // Lilac gradient
+        color: '#e57ac5', // Rose-lilac
+        secondaryColor: '#c2a5ff', // Lilac gradient
         description: 'Warm heart bloom',
       },
     ]
@@ -115,9 +115,9 @@ export function TriangleOfEnergy({
         <defs>
           {/* Gradient for energy flow */}
           <linearGradient id="energy-flow-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#4fd1c5" stopOpacity="0.6" />
-            <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#ec4899" stopOpacity="0.6" />
+            <stop offset="0%" stopColor="#1fb8c0" stopOpacity="0.6" />
+            <stop offset="50%" stopColor="#1e3a8a" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#e57ac5" stopOpacity="0.6" />
           </linearGradient>
 
           {/* Glow filter for selected state */}

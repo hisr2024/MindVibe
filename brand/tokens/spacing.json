@@ -1,0 +1,20 @@
+{
+  "meta": { "description": "Standard spacing scale for layout and touch targets." },
+  "scale": {
+    "xxs": 4,
+    "xs": 8,
+    "sm": 12,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "2xl": 40,
+    "3xl": 56,
+    "4xl": 72
+  },
+  "radii": {
+    "pill": "9999px",
+    "soft": "16px",
+    "card": "20px",
+    "sheet": "28px"
+  }
+}

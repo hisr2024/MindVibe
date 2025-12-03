@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "description": "MindVibe + KIAAN brand color system with culturally inclusive, calming hues.",
+    "version": "2024.09",
+    "accessibility": "All primary on neutral surfaces meet WCAG AA for text at 16px+."
+  },
+  "core": {
+    "mvSunrise": { "value": "#ff9159", "description": "MindVibe Sunrise orange for optimism" },
+    "mvSunriseHighlight": { "value": "#ffd070", "description": "Sunrise highlight gold for glow" },
+    "mvOcean": { "value": "#17b1a7", "description": "MindVibe Ocean teal for calm" },
+    "mvOceanSky": { "value": "#6dd7f2", "description": "Sky accent for Ocean theme" },
+    "mvAurora": { "value": "#ff8fb4", "description": "MindVibe Aurora rose for compassion" },
+    "mvAuroraLilac": { "value": "#c2a5ff", "description": "Lilac lift for Aurora" },
+    "kiaanDeep": { "value": "#0f172a", "description": "Anchor navy for KIAAN wordmark depth" },
+    "kiaanGlow": { "value": "#6ad7ff", "description": "Resonance halo for KIAAN" }
+  },
+  "modes": {
+    "innerPeacePrimary": { "value": "#1fb8c0", "description": "Soft teal for Inner Peace vertex" },
+    "mindControlPrimary": { "value": "#1e3a8a", "description": "Deep blue for focus and clarity" },
+    "selfKindnessPrimary": { "value": "#e57ac5", "description": "Rose-lilac glow for self-kindness" }
+  },
+  "neutrals": {
+    "ink": "#0b0b0f",
+    "fog": "#0f1624",
+    "cloud": "#e8edf5",
+    "mist": "#f6f8fb",
+    "sand": "#fdf7f2"
+  },
+  "status": {
+    "success": "#35c48d",
+    "warning": "#f7b500",
+    "error": "#ef476f",
+    "info": "#3b82f6"
+  },
+  "overlays": {
+    "glowTeal": "rgba(31, 184, 192, 0.28)",
+    "glowBlue": "rgba(30, 58, 138, 0.3)",
+    "glowRose": "rgba(229, 122, 197, 0.32)",
+    "shadow": "rgba(6, 10, 22, 0.45)"
+  }
+}

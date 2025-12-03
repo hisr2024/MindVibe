@@ -1,0 +1,66 @@
+---
+title: Motion Spec — MindVibe + KIAAN
+updated: 2024-09-01
+status: production
+summary: Keyframe, timing, and easing specs for the refreshed identity animations.
+---
+
+import motion from '../brand/tokens/motion.json'
+import gradients from '../brand/tokens/gradients.json'
+
+# Motion Principles
+- **Calm, empathic, precise**: All movement is low-noise, 60fps-friendly, and respects `prefers-reduced-motion`.
+- **Energy routing**: Motion flows toward the user’s focus (hover/focus), then settles into a meditative idle.
+- **Physical softness**: Avoid abrupt stops; use soft and pulse curves from `motion.json`.
+
+## Timing & Easing Primitives
+```json title="motion.json"
+{
+  "timing": motion.timing,
+  "easings": motion.easings,
+  "curves": motion.curves
+}
+```
+- **Breath loop**: 8s, `soft` ease.
+- **Shimmer**: 1.4s, `pulse` ease, 1–2 passes.
+- **Ripple**: 3.2s, `ripples` ease; decay opacity to 0.
+- **Focus pulse**: 900ms, `linear` for dash-offset.
+
+## KIAAN Logo Animation
+- **Intro (0–1200ms)**: Feather draws on with `energyLoop` curve; flute underline slides in with metallic gradient (`kiaanResonance`).
+- **Feather sway**: 3s loop, ±3° rotation, slight Y-shift (2–4px).
+- **Flute shimmer**: 1.4s sweep along the underline every 8s, paused on reduced motion.
+- **Resonance ripple**: Circular gradient behind wordmark expands 90%→115% scale over 3.2s with 0.6→0 opacity.
+- **Subtitle**: “MindVibe Companion” fades from 70%→100% over 500ms; micro-tagline uses 0.06em tracking.
+
+## MindVibe Icon Ripple
+- **Glow breath**: Badge radius oscillates 100%→104% over 2.6s.
+- **Ripple**: Two rings scale 120%→180% with 0.5→0 opacity; stagger 900ms.
+- **Highlight arc**: 1.6s fade-in/out on top edge; matches Sunrise gradient.
+
+## Triangle Energy Flow
+- **Idle loop**: Energy orbit runs every 6s using `energyLoop` easing; dash-offset drifts -30px.
+- **Hover**: Increase glow to 45% opacity on hovered vertex color; redirect flow to nearest leg.
+- **Active**: Selected vertex scales to 110% with 2.2s breathing glow; chosen edge stroke-width +0.5px.
+- **Mode-specific**:
+  - Inner Peace: Breath rings 30%→120% scale, 0.35→0 opacity.
+  - Mind Control: Linear beam animates along one edge in 1.2s loops.
+  - Self Kindness: Heart bloom radial gradient 0.8→1.2 scale, 0.4→0.7 opacity.
+
+## Feather Sway
+- **Loop**: 3s, `featherSway` easing, ±2–3° rotation, subtle anchor at stem.
+- **Aura**: Radial glow pulses 0.85→1 over 2.2s.
+
+## Flute Shimmer
+- **Sweep**: 1400ms gradient translate along underline; blur 6px→0; opacity 0.2→0.55→0.2.
+- **Rest**: Idle for 6.6s before repeating to avoid noise.
+
+## Performance & Delivery
+- Max animation payload per view: **<180KB** Lottie or SVG.
+- Prefer vector + CSS/GSAP for UI; Lottie/WebM for hero moments.
+- Provide static fallbacks and pause loops when tab is hidden.
+
+## Assets in Repo
+- **SVG Motion**: `brand/animations/kiaan-logo-animated.svg`
+- **Framer Components**: `components/branding/KiaanLogo.tsx`, `MindVibeIcon.tsx`
+- **Triangle Flow**: `components/guidance/TriangleOfEnergy.tsx` with new color routing.

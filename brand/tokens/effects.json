@@ -1,0 +1,19 @@
+{
+  "meta": { "description": "Glow, shadow, and blur specs tuned for calm motion language." },
+  "shadows": {
+    "card": "0 18px 48px rgba(6, 10, 22, 0.28)",
+    "floating": "0 24px 80px rgba(6, 10, 22, 0.36)",
+    "glowSunrise": "0 0 32px rgba(255, 147, 89, 0.45)",
+    "glowOcean": "0 0 32px rgba(23, 177, 167, 0.35)",
+    "glowAurora": "0 0 32px rgba(255, 143, 180, 0.4)"
+  },
+  "blur": {
+    "soft": "18px",
+    "ambient": "28px",
+    "aura": "42px"
+  },
+  "border": {
+    "subtle": "1px solid rgba(255,255,255,0.08)",
+    "frosted": "1px solid rgba(255,255,255,0.16)"
+  }
+}

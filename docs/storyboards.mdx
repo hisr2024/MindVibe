@@ -1,0 +1,46 @@
+---
+title: Animation Storyboards — MindVibe & KIAAN
+updated: 2024-09-01
+status: production
+summary: Frame-by-frame breakdowns for hero and UI animations.
+---
+
+# 1) KIAAN Animated Logo
+- **Intro (0–800ms)**: Wordmark letters fade up sequentially; flute underline draws from left to right with shimmer.
+- **Build (800–1600ms)**: Peacock feather strokes draw on with slight overshoot; outer resonance ripple appears at 30% opacity.
+- **Idle (1600–5400ms)**: Feather sways ±3°, ripple cycles every 3.2s; subtitle “MindVibe Companion” holds at 85% opacity.
+- **Hover/Focus (stateful)**: Ripple re-centers behind hovered letter; shimmer passes once; glow intensifies to 45%.
+- **Exit (200ms)**: Fade to 0.6 opacity, scale to 98% for graceful retreat.
+
+# 2) MindVibe Icon Ripple
+- **Intro (0–600ms)**: Badge scales 90%→100%, inner glow blooms.
+- **Idle (loop 2.6s)**: Two ripples expand 120%→180% with 0.45→0 opacity; highlight arc breathes.
+- **Hover (stateful)**: Scale 103%, glowSunrise shadow; ripple frequency increases slightly.
+- **Exit**: Return to 100%, remove halo.
+
+# 3) Triangle Flow Energy System
+- **Intro (0–900ms)**: Triangle outline appears with 15% opacity, nodes pop in with scale 0.9→1.
+- **Idle (6s loop)**: Dash-offset drifts counter-clockwise; center nexus pulses 8→10px radius.
+- **Hover**: Redirect dash gradient toward hovered vertex; glow matches mode color (teal/blue/rose).
+- **Active**: Selected node holds 110% scale, edge stroke widens; mode-specific animation plays (breath rings / focus beam / heart bloom).
+- **Exit**: Fade glows, return to idle orbit.
+
+# 4) Peacock Feather Sway
+- **Intro (0–700ms)**: Stem draws upward, eye appears with gold gradient.
+- **Idle (3s loop)**: ±3° sway, 2–4px vertical drift, aura pulse 0.85→1 opacity.
+- **Hover**: Slightly brighter eye (10% scale), shimmer particles rise at 1.2–1.8s intervals.
+- **Exit**: Fade aura to 0.2, hold stem.
+
+# 5) Flute Shimmer Accent
+- **Intro (0–400ms)**: Underline slides in from left at 92% opacity.
+- **Loop (every 8s)**: Metallic gradient travels left→right in 1.4s; blur reduces 6px→0; spark particles fade up.
+- **Hover**: Trigger immediate shimmer plus micro-ripple behind underline.
+- **Exit**: Ease opacity to 0.4, hold underline for legibility.
+
+## Framing & Layout
+- Logos center-align in a 16:9 safe area with 15% margin on all sides.
+- Triangle system fits within a square viewport; minimum size 260px, optimal 320–420px.
+
+## Easing & Quality Bars
+- Use `motion.curves` (soft, empathic, pulse) from tokens; avoid abrupt linear stops except for dash-offset loops.
+- Render at 60fps targets; prefer vector over raster for crispness.

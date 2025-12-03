@@ -1,0 +1,91 @@
+---
+title: MindVibe + KIAAN Brand System
+status: production
+updated: 2024-09-01
+summary: Design tokens, gradients, typography, and accessibility guidance for the refreshed MindVibe + KIAAN identity.
+---
+
+import colors from '../brand/tokens/colors.json'
+import gradients from '../brand/tokens/gradients.json'
+import typography from '../brand/tokens/typography.json'
+import spacing from '../brand/tokens/spacing.json'
+import effects from '../brand/tokens/effects.json'
+
+# Brand System Overview
+MindVibe now uses a universal, calming visual language with three signature gradient stories — **Sunrise**, **Ocean**, and **Aurora** — paired with the wise presence of **KIAAN — MindVibe Companion**. All assets are human-centered, soft-edged, and emotionally intelligent.
+
+## Core Identity Assets
+- **MindVibeIcon**: Rounded badge with soft glow and ripple; available in Sunrise, Ocean, and Aurora themes.
+- **MindVibeWordmark**: Humanist sans, expanded tracking, sunrise-to-gold emboss.
+- **MindVibeLockup**: Icon + wordmark + optional tagline.
+- **KiaanLogoAnimated**: Feather sway + flute shimmer + resonance ripple; subtitle **MindVibe Companion**.
+- **KiaanLogoStatic**: Reduced-motion, embossed gradient wordmark and calm aura.
+
+## Color & Gradient Tokens
+```json title="colors.json"
+{"core": colors.core, "modes": colors.modes, "neutrals": colors.neutrals}
+```
+
+```json title="gradients.json"
+{ "themes": gradients.gradients }
+```
+
+### Usage Notes
+- **mvGradientSunrise** → Warm hero zones, CTAs, success moments.
+- **mvGradientOcean** → Inner Peace tabs, breathwork, ambient panes.
+- **mvGradientAurora** → Self Kindness coaching, journaling, nurture prompts.
+- **kiaanResonance** → KIAAN lockups, guidance modals, progress halos.
+
+## Typography & Hierarchy
+```json title="typography.json"
+{
+  "fonts": typography.fonts,
+  "scale": {
+    "display": typography.scale.display,
+    "h1": typography.scale.h1,
+    "body": typography.scale.body,
+    "microcopy": typography.scale.microcopy
+  },
+  "wordmarks": typography.wordmarks
+}
+```
+- Display & H1–H3 use **Manrope**; body & UI use **Inter**.
+- Wordmark tracking: MindVibe **0.06em**, KIAAN **0.14em**; keep generous breathing room.
+
+## Spacing, Radii, Shadows
+```json title="spacing.json"
+{"scale": spacing.scale, "radii": spacing.radii}
+```
+
+```json title="effects.json"
+{"shadows": effects.shadows, "blur": effects.blur}
+```
+- Default card radius: **20px**; pills remain fully rounded.
+- Shadows favor glow over hard drop: use `glowSunrise`, `glowOcean`, or `glowAurora` per context.
+
+## Motion Language
+- Default easing: `cubic-bezier(0.4, 0, 0.2, 1)` with 200–320ms UI transitions.
+- Breathing loops: 8s; shimmer pulses: 1.4s; resonance ripples: 3.2s.
+- Respect `prefers-reduced-motion`: swap to **KiaanLogoStatic** and pause continuous loops.
+
+## Accessibility & Tone
+- Maintain WCAG AA contrast (4.5:1 for body text, 3:1 for large text) on both dark (**#0b0b0f**) and light (**#fdf7f2**) backgrounds.
+- Voice is calm and reassuring; avoid clinical phrasing. Use the micro-tagline **“KIAAN — Crisp, calm guidance.”** for supportive microcopy.
+
+## Iconography Principles
+- 24px grid, 2px strokes, 12–16px corner radii on tiles.
+- Use gradient strokes sparingly; prefer filled icons for active states and outlined for idle.
+
+## Interaction States
+- **Hover**: 105% scale + 25–35% glow.
+- **Focus**: Add 2px focus ring using `mvOceanSky` on dark, `kiaanDeep` on light.
+- **Active/Pressed**: 98–100% scale, deepen shadow; motion curve `pulse`.
+
+## Deliverables Wired into Repo
+- Tokens: `brand/tokens/*.json`
+- Components: `components/branding/MindVibeIcon.tsx`, `MindVibeWordmark.tsx`, `MindVibeLockup.tsx`, `KiaanLogo.tsx`
+- Motion assets: `brand/animations/kiaan-logo-animated.svg`
+- Storyboards & specs: `docs/motion-spec.mdx`, `docs/storyboards.mdx`
+- AI prompts: `brand/ai-prompts/logo-prompts.md`
+
+> Pair MindVibe warmth (Sunrise) with KIAAN clarity (Resonance) for a balanced, premium feel.
