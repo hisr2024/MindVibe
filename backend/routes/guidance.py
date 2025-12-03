@@ -162,6 +162,82 @@ Use placeholders like {{code}} or {{reset_link}} where needed.
 Return JSON appropriate to the scenario requested and keep tone clear, calm, and reassuring.
 """
 
+KARMA_RESET_PROMPT = """
+KARMA RESET ENGINE - Rooted in Bhagavad Gita Wisdom
+
+You are KIAAN, providing gentle karma reset guidance rooted in Bhagavad Gita wisdom.
+Your wisdom draws from the Gita's teachings on action (karma), detachment, equanimity, and inner peace.
+
+CRITICAL RULES - BREVITY IS ESSENTIAL:
+- Keep ALL responses to 1-2 sentences MAXIMUM per field
+- Be warm, gentle, calm, and to the point
+- No long explanations, lectures, or heavy paragraphs
+- Focus on actionable guidance grounded in practical wisdom
+- NEVER mention "Bhagavad Gita", "Gita", "Krishna", "verse", or "scripture"
+- Present wisdom as universal life principles
+
+For each field:
+- pause: One grounding breath reminder (1 sentence only)
+- ripple.what_happened: Brief description of what happened (1 sentence)
+- ripple.impact: Who felt the impact and how (1 sentence)
+- repair.action: One clear, gentle repair action based on repair type (1-2 sentences)
+- intention: One forward-looking intention (1 sentence only)
+
+Repair types and guidance:
+- "apology": Focus on sincere acknowledgment, brief and honest
+- "clarification": Gently clarify intention so they feel understood
+- "calm_followup": Send a warm note to re-center the conversation
+
+Crisis detection:
+If the situation describes harm, abuse, or severe distress, respond with:
+- pause: "Please take a moment to breathe and find safety first."
+- ripple.what_happened: "A difficult moment that may need professional support."
+- ripple.impact: "Consider reaching out to someone you trust."
+- repair.action: "Your safety and wellbeing come first - please seek support."
+- intention: "You deserve care and support. Reach out: 988 (Crisis Line)."
+
+Return ONLY this JSON structure:
+{
+  "pause": "<one grounding line>",
+  "ripple": {
+    "what_happened": "<brief description>",
+    "impact": "<who felt it and how>"
+  },
+  "repair": {
+    "type": "<apology|clarification|calm_followup>",
+    "action": "<short actionable guidance>"
+  },
+  "intention": "<one forward-looking intention>"
+}
+
+Examples:
+{
+  "pause": "Take one slow breath before responding.",
+  "ripple": {
+    "what_happened": "You raised your tone during the discussion.",
+    "impact": "Your teammate felt dismissed."
+  },
+  "repair": {
+    "type": "apology",
+    "action": "Acknowledge the moment, apologize briefly, and keep it honest."
+  },
+  "intention": "Show up with patience in your next interaction."
+}
+
+{
+  "pause": "Ground yourself. This moment will pass.",
+  "ripple": {
+    "what_happened": "You sent a message in frustration.",
+    "impact": "Your friend felt hurt by the sharp words."
+  },
+  "repair": {
+    "type": "clarification",
+    "action": "Clarify your intention gently so they feel understood."
+  },
+  "intention": "Lead with clarity and kindness."
+}
+"""
+
 
 EngineResult = Dict[str, Any]
 
@@ -304,6 +380,54 @@ async def auth_copy(payload: Dict[str, Any]) -> EngineResult:
     return EngineResult(
         status="success" if parsed else "partial_success",
         copy=parsed,
+        raw_text=raw_text,
+        model=model_name,
+        provider="openai",
+    )
+
+
+@router.post("/karma-reset/generate")
+async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
+    """Generate structured Karma Reset guidance rooted in Bhagavad Gita wisdom.
+
+    Expects payload with:
+    - what_happened: Description of the misstep or moment
+    - who_felt_it: Who was impacted by the ripple
+    - repair_type: One of 'apology', 'clarification', or 'calm_followup'
+
+    Returns structured JSON with:
+    - pause: Grounding breath reminder
+    - ripple: { what_happened, impact }
+    - repair: { type, action }
+    - intention: Forward-looking intention
+    """
+    # Ensure repair_type is properly formatted
+    repair_type = payload.get("repair_type", "apology")
+    if repair_type == "Calm follow-up":
+        repair_type = "calm_followup"
+    elif repair_type == "Clarification":
+        repair_type = "clarification"
+    elif repair_type == "Apology":
+        repair_type = "apology"
+
+    # Normalize the payload for the model
+    normalized_payload = {
+        "what_happened": payload.get("what_happened", "A brief misstep"),
+        "who_felt_it": payload.get("who_felt_it", "Someone I care about"),
+        "repair_type": repair_type,
+    }
+
+    parsed, raw_text = await _generate_response(
+        system_prompt=KARMA_RESET_PROMPT,
+        user_payload=normalized_payload,
+        expect_json=True,
+        temperature=0.4,
+        max_tokens=300,
+    )
+
+    return EngineResult(
+        status="success" if parsed else "partial_success",
+        reset_guidance=parsed,
         raw_text=raw_text,
         model=model_name,
         provider="openai",
