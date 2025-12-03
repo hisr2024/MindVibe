@@ -52,7 +52,7 @@ export function CheckoutButton({
         size="lg"
         className="w-full"
       >
-        {loading ? 'Processing...' : `Subscribe to ${tierName}`}
+        {loading ? 'Processing...' : `Start 15-day free trial of ${tierName}`}
       </Button>
       
       {error && (
@@ -60,11 +60,9 @@ export function CheckoutButton({
       )}
       
       <p className="mt-2 text-xs text-orange-100/50 text-center">
-        {price === 0 ? (
-          'Free forever, no credit card required'
-        ) : (
-          `You'll be charged $${price}/${isYearly ? 'year' : 'month'}. Cancel anytime.`
-        )}
+        {price === 0
+          ? 'Free forever, no credit card required'
+          : `Your 15-day free trial starts now. Billing begins at $${price}/${isYearly ? 'year' : 'month'} for ${tierName} after the trial if you choose to continue.`}
       </p>
     </div>
   )

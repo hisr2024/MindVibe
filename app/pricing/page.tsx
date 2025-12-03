@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { BillingToggle, PricingCard, FeatureComparison, type PricingTier } from '@/components/pricing'
 import { Card, CardContent } from '@/components/ui'
@@ -31,6 +31,23 @@ const createPricingTiers = (
     cta: 'Get Started Free',
   },
   {
+    id: 'basic',
+    name: 'Basic',
+    description: 'Build a steady practice with guided support',
+    monthlyPrice: getMonthlyPrice('basic'),
+    yearlyPrice: getYearlyPrice('basic'),
+    kiaanQuota: 75,
+    features: [
+      '75 KIAAN questions/month',
+      'All Free features',
+      'Guided breathing sessions',
+      'Mood journaling prompts',
+      'Priority email support',
+    ],
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
+  },
+  {
     id: 'pro',
     name: 'Pro',
     description: 'Enhanced tools for deeper practice',
@@ -44,7 +61,8 @@ const createPricingTiers = (
       'Ardha Reframing Assistant',
       'Viyog Detachment Coach',
     ],
-    cta: 'Go Pro',
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
   },
   {
     id: 'premium',
@@ -63,7 +81,8 @@ const createPricingTiers = (
       'Priority support',
       'Advanced mood analytics',
     ],
-    cta: 'Go Premium',
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
   },
   {
     id: 'executive',
@@ -79,7 +98,8 @@ const createPricingTiers = (
       'Dedicated support',
       'SLA guarantee',
     ],
-    cta: 'Go Executive',
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
   },
 ]
 
@@ -87,37 +107,37 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '20', pro: '150', premium: '300', executive: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, pro: true, premium: true, executive: true } },
+      { name: 'Monthly Questions', values: { free: '20', basic: '75', pro: '150', premium: '300', executive: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, pro: true, premium: true, executive: true } },
-      { name: 'Viyog Detachment', values: { free: false, pro: true, premium: true, executive: true } },
-      { name: 'Relationship Compass', values: { free: false, pro: false, premium: true, executive: true } },
-      { name: 'Karma Reset Guide', values: { free: false, pro: false, premium: true, executive: true } },
+      { name: 'Ardha Reframing', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Viyog Detachment', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Karma Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: false, pro: true, premium: true, executive: true } },
-      { name: 'Mood Tracking', values: { free: true, pro: true, premium: true, executive: true } },
-      { name: 'Daily Wisdom', values: { free: true, pro: true, premium: true, executive: true } },
-      { name: 'Advanced Analytics', values: { free: false, pro: true, premium: true, executive: true } },
-      { name: 'API Access', values: { free: false, pro: false, premium: false, executive: true } },
+      { name: 'Encrypted Journal', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Mood Tracking', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Daily Wisdom', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Advanced Analytics', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
+      { name: 'API Access', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, pro: true, premium: true, executive: true } },
-      { name: 'Email Support', values: { free: false, pro: true, premium: true, executive: true } },
-      { name: 'Priority Support', values: { free: false, pro: false, premium: true, executive: true } },
-      { name: 'Dedicated Support', values: { free: false, pro: false, premium: false, executive: true } },
+      { name: 'Community Access', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Email Support', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Priority Support', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Dedicated Support', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
     ],
   },
 ]
@@ -130,23 +150,57 @@ function CurrencySwitcher({
   currency: Currency
   onCurrencyChange: (currency: Currency) => void
 }) {
+  const currencies: Currency[] = ['USD', 'EUR', 'INR']
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const buttonRefs = useRef<Partial<Record<Currency, HTMLButtonElement | null>>>({})
+
+  useEffect(() => {
+    const activeButton = buttonRefs.current[currency]
+    activeButton?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [currency])
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = currencies.indexOf(currency)
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      const next = (currentIndex + 1) % currencies.length
+      onCurrencyChange(currencies[next])
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      const prev = (currentIndex - 1 + currencies.length) % currencies.length
+      onCurrencyChange(currencies[prev])
+    }
+  }
+
   return (
-    <div className="flex items-center gap-2" role="group" aria-label="Currency selector">
-      {(Object.keys(CURRENCIES) as Currency[]).map((curr) => (
-        <button
-          key={curr}
-          onClick={() => onCurrencyChange(curr)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-            currency === curr
-              ? 'bg-gradient-to-r from-orange-400 to-amber-300 text-slate-900'
-              : 'bg-orange-500/10 text-orange-100/70 hover:bg-orange-500/20 hover:text-orange-50'
-          }`}
-          aria-pressed={currency === curr}
-          aria-label={`Select ${CURRENCIES[curr].name}`}
-        >
-          {CURRENCIES[curr].symbol} {curr}
-        </button>
-      ))}
+    <div className="w-full max-w-xl" aria-label="Currency selector">
+      <div
+        ref={scrollerRef}
+        className="flex gap-3 overflow-x-auto no-scrollbar rounded-2xl bg-orange-500/10 p-2 shadow-inner"
+        role="tablist"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        {currencies.map((curr) => (
+          <button
+            key={curr}
+            ref={el => (buttonRefs.current[curr] = el)}
+            role="tab"
+            aria-selected={currency === curr}
+            onClick={() => onCurrencyChange(curr)}
+            className={`flex min-w-[110px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
+              currency === curr
+                ? 'bg-gradient-to-r from-orange-400 via-amber-300 to-orange-200 text-slate-900 shadow-lg shadow-orange-500/30'
+                : 'bg-orange-500/10 text-orange-100/80 hover:bg-orange-500/20'
+            }`}
+          >
+            <span className="text-base">{CURRENCIES[curr].symbol}</span>
+            <span>{curr}</span>
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-center text-xs text-orange-100/70">Scroll or tap to choose your currency.</p>
     </div>
   )
 }
@@ -366,11 +420,6 @@ export default function PricingPage() {
       return
     }
 
-    if (tierId === 'executive') {
-      router.push('/contact')
-      return
-    }
-
     setLoading(tierId)
     
     // Simulate checkout process
@@ -405,12 +454,18 @@ export default function PricingPage() {
           Every plan includes the same quality KIAAN guidance. Choose based on how often you&apos;d like to connect.
         </p>
         
-        {/* Currency Switcher */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-          <CurrencySwitcher currency={currency} onCurrencyChange={setCurrency} />
+        {/* Currency Switcher + Billing Toggle */}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-4 w-full">
+            <CurrencySwitcher currency={currency} onCurrencyChange={setCurrency} />
+            <div className="w-full lg:w-auto">
+              <BillingToggle isYearly={isYearly} onToggle={setIsYearly} />
+            </div>
+          </div>
+          <p className="text-sm text-orange-100/70">
+            INR pricing is always 20% less than USD/EUR, with symbols updating instantly as you scroll.
+          </p>
         </div>
-        
-        <BillingToggle isYearly={isYearly} onToggle={setIsYearly} />
       </div>
 
       {/* Scrollable Pricing Cards Container */}
