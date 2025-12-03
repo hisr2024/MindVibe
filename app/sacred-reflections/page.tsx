@@ -51,7 +51,7 @@ function fromBase64(value: string) {
   return Uint8Array.from(binary, char => char.charCodeAt(0))
 }
 
-async function deriveKey(passphrase: string, salt: Uint8Array) {
+async function deriveKey(passphrase: string, salt: ArrayBuffer) {
   const enc = new TextEncoder()
   const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey'])
   return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
@@ -60,7 +60,7 @@ async function deriveKey(passphrase: string, salt: Uint8Array) {
 async function encryptText(plain: string, passphrase: string): Promise<EncryptedPayload> {
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const iv = crypto.getRandomValues(new Uint8Array(12))
-  const key = await deriveKey(passphrase, salt)
+  const key = await deriveKey(passphrase, salt.buffer)
   const encoded = new TextEncoder().encode(plain)
   const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded)
   return { ciphertext: toBase64(encrypted), iv: toBase64(iv), salt: toBase64(salt), algorithm: 'AES-GCM' }
@@ -70,7 +70,7 @@ async function decryptText(payload: EncryptedPayload, passphrase: string): Promi
   const salt = fromBase64(payload.salt)
   const iv = fromBase64(payload.iv)
   const encrypted = fromBase64(payload.ciphertext)
-  const key = await deriveKey(passphrase, salt)
+  const key = await deriveKey(passphrase, salt.buffer)
   const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encrypted)
   return new TextDecoder().decode(decrypted)
 }
