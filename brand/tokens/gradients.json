@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "description": "Primary gradient recipes for MindVibe and KIAAN.",
+    "themes": ["mvGradientSunrise", "mvGradientOcean", "mvGradientAurora", "kiaanResonance"]
+  },
+  "gradients": {
+    "mvGradientSunrise": {
+      "stops": [
+        { "color": "#ff7a3c", "position": 0 },
+        { "color": "#ff9f52", "position": 0.48 },
+        { "color": "#ffd36f", "position": 1 }
+      ],
+      "angle": 135,
+      "use": "Primary CTA glow, MindVibe badge, warm surfaces"
+    },
+    "mvGradientOcean": {
+      "stops": [
+        { "color": "#0fa9a2", "position": 0 },
+        { "color": "#2ac8d4", "position": 0.55 },
+        { "color": "#9ae8ff", "position": 1 }
+      ],
+      "angle": 130,
+      "use": "Inner Peace experiences, ambient overlays"
+    },
+    "mvGradientAurora": {
+      "stops": [
+        { "color": "#ff7fa8", "position": 0 },
+        { "color": "#c987ff", "position": 0.52 },
+        { "color": "#e8d3ff", "position": 1 }
+      ],
+      "angle": 140,
+      "use": "Self Kindness tone, supportive banners"
+    },
+    "kiaanResonance": {
+      "stops": [
+        { "color": "#1e3a8a", "position": 0 },
+        { "color": "#2563eb", "position": 0.42 },
+        { "color": "#6ad7ff", "position": 1 }
+      ],
+      "angle": 120,
+      "use": "KIAAN wordmark emboss, resonance ripple"
+    }
+  }
+}

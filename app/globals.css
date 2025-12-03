@@ -4,54 +4,54 @@
 
 :root {
   color-scheme: dark;
-  --color-background: theme('colors.slate.950');
-  --color-foreground: theme('colors.slate.50');
-  --color-accent: theme('colors.orange.500');
+  --color-background: #0b0b0f;
+  --color-foreground: #f8fafc;
+  --color-surface: #0f1624;
+  --mv-sunrise: #ff9159;
+  --mv-sunrise-highlight: #ffd070;
+  --mv-ocean: #17b1a7;
+  --mv-ocean-sky: #6dd7f2;
+  --mv-aurora: #ff8fb4;
+  --mv-aurora-lilac: #c2a5ff;
+  --kiaan-deep: #0f172a;
+  --kiaan-glow: #6ad7ff;
+  --brand-surface: linear-gradient(145deg, rgba(15, 22, 36, 0.9), rgba(8, 12, 20, 0.9));
+  --mv-gradient-sunrise: linear-gradient(135deg, #ff7a3c 0%, #ff9f52 50%, #ffd36f 100%);
+  --mv-gradient-ocean: linear-gradient(130deg, #0fa9a2 0%, #2ac8d4 55%, #9ae8ff 100%);
+  --mv-gradient-aurora: linear-gradient(140deg, #ff7fa8 0%, #c987ff 52%, #e8d3ff 100%);
+  --kiaan-resonance: linear-gradient(120deg, #1e3a8a 0%, #2563eb 42%, #6ad7ff 100%);
+  --shadow-soft: 0 18px 48px rgba(6, 10, 22, 0.28);
+  --shadow-glow-sunrise: 0 0 32px rgba(255, 147, 89, 0.45);
+  --shadow-glow-ocean: 0 0 32px rgba(23, 177, 167, 0.35);
+  --shadow-glow-aurora: 0 0 32px rgba(255, 143, 180, 0.4);
 }
 
 /* Light mode styles using CSS custom properties */
 html.light {
   color-scheme: light;
-  --color-background: theme('colors.orange.50');
-  --color-foreground: theme('colors.slate.900');
-  /* WCAG AA compliant light mode colors */
-  --text-primary: #1e293b;        /* slate-800 */
-  --text-secondary: #475569;       /* slate-600 */
-  --text-tertiary: #64748b;        /* slate-500 */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;         /* slate-50 */
-  --bg-tertiary: #f1f5f9;          /* slate-100 */
-  --border-color: #e2e8f0;         /* slate-200 */
+  --color-background: #fdf7f2;
+  --color-foreground: #0f172a;
+  --color-surface: #ffffff;
+  --brand-surface: linear-gradient(165deg, #ffffff, #f8fbff);
+  --text-primary: #111827;
+  --text-secondary: #334155;
+  --text-tertiary: #475569;
+  --border-color: #e2e8f0;
 }
 
 html.light body {
-  @apply bg-orange-50 text-slate-900;
+  @apply bg-white text-slate-900;
 }
 
-/* Light mode text contrast fixes */
-html.light .text-orange-100\/70,
-html.light .text-orange-100\/60,
-html.light .text-orange-100\/50,
-html.light .text-orange-100\/40 {
-  @apply text-slate-600;
-}
-
-html.light .text-orange-100\/80 {
-  @apply text-slate-700;
-}
-
-html.light .text-orange-50 {
-  @apply text-slate-900;
+/* Light mode text contrast fixes for orange legacy classes */
+html.light [class*="text-orange"] {
+  @apply text-slate-800;
 }
 
 /* Light mode card backgrounds - using data attribute instead */
 html.light [class*="bg-black"],
 html.light [class*="bg-slate-950"] {
-  background-color: white !important;
-}
-
-html.light [class*="border-orange-500"] {
-  border-color: rgb(226 232 240) !important;
+  background-color: var(--color-surface) !important;
 }
 
 /* Accordion animations */

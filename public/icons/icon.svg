@@ -1,12 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MindVibe icon">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MindVibe universal icon">
   <defs>
-    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
-      <stop offset="0%" stop-color="#f97316" />
-      <stop offset="50%" stop-color="#fb923c" />
-      <stop offset="100%" stop-color="#fde68a" />
+    <linearGradient id="mvSunrise" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7a3c" />
+      <stop offset="50%" stop-color="#ff9f52" />
+      <stop offset="100%" stop-color="#ffd36f" />
     </linearGradient>
+    <radialGradient id="mvAura" cx="30%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="rgba(255, 147, 89, 0.42)" />
+      <stop offset="60%" stop-color="rgba(255, 208, 112, 0.12)" />
+      <stop offset="100%" stop-color="rgba(255, 147, 89, 0)" />
+    </radialGradient>
   </defs>
-  <rect width="256" height="256" rx="48" fill="#050509" />
-  <rect x="18" y="18" width="220" height="220" rx="44" fill="url(#g)" opacity="0.12" />
-  <path fill="#fefefe" d="M70 182V74h22l20 49 20-49h22v108h-19v-67l-17 44h-12l-17-44v67H70zm118 0V74h22v108h-22z" />
+  <rect width="256" height="256" rx="52" fill="#0b0b0f" />
+  <rect x="18" y="18" width="220" height="220" rx="48" fill="#0f1624" />
+  <rect x="26" y="26" width="204" height="204" rx="44" fill="url(#mvAura)" />
+  <rect x="34" y="34" width="188" height="188" rx="40" fill="url(#mvSunrise)" />
+  <rect x="48" y="48" width="160" height="160" rx="34" fill="rgba(255,255,255,0.08)" />
+  <path fill="#fefefe" d="M82 186V96c0-4.4 3.4-8 7.8-8h15.2c2.7 0 5.2 1.3 6.6 3.6l16.4 27 16.4-27c1.4-2.3 3.9-3.6 6.6-3.6H167c4.4 0 7.8 3.6 7.8 8v90c0 4.4-3.4 8-7.8 8h-13.8c-4.4 0-7.8-3.6-7.8-8v-47l-12.8 20c-2.5 3.9-8.3 3.9-10.8 0l-12.8-20v47c0 4.4-3.4 8-7.8 8H89.8c-4.4 0-7.8-3.6-7.8-8Z" />
+  <path d="M74 102c12-16 32-26 54.4-26 22.6 0 42.6 10 54.6 26" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity="0.28" />
 </svg>
