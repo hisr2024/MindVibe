@@ -3,8 +3,8 @@ import Link from 'next/link'
 const journeys = [
   {
     title: 'From overwhelm to calm action',
-    steps: ['Start with the clarity pause suite', 'Move into grounding prompts', 'Return to KIAAN chat for next actions'],
-    anchor: '#clarity-suite'
+    steps: ['Start with the clarity pause in KIAAN chat', 'Move into grounding prompts', 'Return to KIAAN chat for next actions'],
+    anchor: '#kiaan-chat'
   },
   {
     title: 'Relationship reset',
