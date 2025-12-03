@@ -103,17 +103,13 @@ export default function SacredReflectionsPage() {
   const [guidance, setGuidance] = useState<Record<string, string>>({})
   const [guidanceLoading, setGuidanceLoading] = useState<Record<string, boolean>>({})
 
-  // Capture user passphrase and hydrate from local cache
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const cached = window.localStorage.getItem(JOURNAL_KEY_STORAGE)
-    if (cached) setPassphrase(cached)
-  }, [])
+  // Capture user passphrase (session-only; do not hydrate from local cache)
+  // Removed localStorage to avoid cleartext storage of sensitive passphrase
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (passphrase) {
-      window.localStorage.setItem(JOURNAL_KEY_STORAGE, passphrase)
+      // Removed localStorage to avoid cleartext storage of sensitive passphrase
       setEncryptionReady(true)
     } else {
       setEncryptionReady(false)
