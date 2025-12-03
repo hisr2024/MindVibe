@@ -94,7 +94,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         translationCache.set(lang, data)
         setTranslations(data)
       }
-    } catch (error) {
+    } catch {
       console.warn(`Failed to load translations for ${lang}, using fallback`)
       // Fallback to English
       if (lang !== 'en') {

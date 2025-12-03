@@ -30,7 +30,6 @@ export function KiaanChat({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const [autoScroll, setAutoScroll] = useState(true)
-  const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
@@ -63,8 +62,7 @@ export function KiaanChat({
     const container = messagesContainerRef.current
     if (!container) return
 
-    // Mark as scrolling
-    setIsScrolling(true)
+    // Mark as scrolling (using CSS class for visibility)
     container.classList.add('scrolling')
 
     // Clear existing timeout
@@ -74,7 +72,6 @@ export function KiaanChat({
 
     // Set timeout to hide scrollbar after 1.5s of no scrolling
     scrollTimeoutRef.current = setTimeout(() => {
-      setIsScrolling(false)
       container.classList.remove('scrolling')
     }, 1500)
 

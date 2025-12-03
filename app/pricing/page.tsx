@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { BillingToggle, PricingCard, FeatureComparison, type PricingTier } from '@/components/pricing'
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
-import { useCurrency, CURRENCIES, PRICING, YEARLY_DISCOUNT, type Currency } from '@/hooks/useCurrency'
+import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
 // Updated pricing tiers per requirements:
 // Pro: $5, Premium: $10, Executive: $15
@@ -154,7 +154,7 @@ function CurrencySwitcher({
 export default function PricingPage() {
   const router = useRouter()
   const { subscription } = useSubscription()
-  const { currency, setCurrency, formatPrice, getMonthlyPrice, getYearlyPrice, isInitialized } = useCurrency()
+  const { currency, setCurrency, formatPrice, getMonthlyPrice, getYearlyPrice } = useCurrency()
   const [isYearly, setIsYearly] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
   const [centeredCardIndex, setCenteredCardIndex] = useState(0)
