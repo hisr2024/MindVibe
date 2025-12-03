@@ -48,6 +48,15 @@ html.light [class*="text-orange"] {
   @apply text-slate-800;
 }
 
+/* Ensure legacy white/near-white text remains readable on light backgrounds */
+html.light .text-white,
+html.light [class*="text-slate-50"],
+html.light [class*="text-slate-100"],
+html.light [class*="text-orange-50"],
+html.light [class*="text-orange-100"] {
+  color: #0f172a !important;
+}
+
 /* Light mode card backgrounds - using data attribute instead */
 html.light [class*="bg-black"],
 html.light [class*="bg-slate-950"] {
