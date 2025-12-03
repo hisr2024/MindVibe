@@ -149,18 +149,18 @@ kiaan_router_loaded = False
 try:
     from backend.routes.chat import router as chat_router
     print("✅ [SUCCESS] Chat router imported successfully")
-    
+
     print("[2/3] Attempting to include router in FastAPI app...")
     app.include_router(chat_router)
     print("✅ [SUCCESS] Chat router included in FastAPI app")
-    
+
     kiaan_router_loaded = True
     print("[3/3] KIAAN Router Status: ✅ OPERATIONAL")
     print("✅ Endpoints now available:")
     print("   • POST   /api/chat/message - KIAAN chat endpoint")
     print("   • GET    /api/chat/health - Health check")
     print("   • GET    /api/chat/about - KIAAN information")
-    
+
 except ImportError as e:
     print(f"❌ [IMPORT ERROR] Failed to import chat router:")
     print(f"   Error: {e}")
@@ -171,6 +171,14 @@ except Exception as e:
     print(f"   Error Type: {type(e).__name__}")
     print(f"   Error Message: {e}")
     traceback.print_exc(file=sys.stdout)
+
+print("\n[Chat Rooms] Loading real-time rooms router...")
+try:
+    from backend.routes.chat_rooms import router as chat_rooms_router
+    app.include_router(chat_rooms_router)
+    print("✅ [SUCCESS] Chat rooms router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load chat rooms router: {e}")
 
 # Load Gita API router
 print("\n[Gita API] Attempting to import Gita API router...")
