@@ -1139,25 +1139,25 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
             className: 'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none',
           }}
           className="mv-energy-scrollbar"
-          contentClassName="p-4 md:p-6 space-y-4"
         >
-          {messages.length === 0 && (
-            <div className="text-center text-orange-100/70 py-20 md:py-32">
-              <p className="text-6xl mb-4">✨</p>
-              <p className="text-xl mb-2">How can I guide you today?</p>
-              <p className="text-sm text-orange-100/70">Share what's on your mind</p>
-            </div>
-          )}
+          <div className="p-4 md:p-6 space-y-4">
+            {messages.length === 0 && (
+              <div className="text-center text-orange-100/70 py-20 md:py-32">
+                <p className="text-6xl mb-4">✨</p>
+                <p className="text-xl mb-2">How can I guide you today?</p>
+                <p className="text-sm text-orange-100/70">Share what's on your mind</p>
+              </div>
+            )}
 
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
-                msg.role === 'user'
-                  ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
-                  : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
-              }`}>
-                {msg.role === 'assistant' ? (
-                  <>
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
+                  msg.role === 'user'
+                    ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
+                    : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
+                }`}>
+                  {msg.role === 'assistant' ? (
+                    <>
                     {renderAssistantContent(msg.content, i)}
                     <div className="pt-2">
                       <button
