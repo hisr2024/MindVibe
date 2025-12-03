@@ -243,23 +243,11 @@ export interface ChartTheme {
   neutralColor: string
 }
 
-/** Default chart themes */
+/** Default chart theme */
 export const DARK_CHART_THEME: ChartTheme = {
   backgroundColor: '#0d0d10',
   textColor: '#f5e6d3',
   gridColor: 'rgba(255, 115, 39, 0.1)',
-  primaryColor: '#ff7327',
-  secondaryColor: '#fbbf24',
-  accentColor: '#f59e0b',
-  positiveColor: '#10b981',
-  negativeColor: '#ef4444',
-  neutralColor: '#6b7280',
-}
-
-export const LIGHT_CHART_THEME: ChartTheme = {
-  backgroundColor: '#ffffff',
-  textColor: '#1f2937',
-  gridColor: 'rgba(0, 0, 0, 0.1)',
   primaryColor: '#ff7327',
   secondaryColor: '#fbbf24',
   accentColor: '#f59e0b',
