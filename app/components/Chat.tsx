@@ -21,23 +21,16 @@ export default function Chat() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const listRef = useRef<HTMLDivElement | null>(null)
-  const [autoScrollPinned, setAutoScrollPinned] = useState(true)
   const [savedNotification, setSavedNotification] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!autoScrollPinned) return
-    const container = listRef.current
-    if (!container) return
-
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [messages, autoScrollPinned])
+  const [hasNewAnswer, setHasNewAnswer] = useState(false)
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const [canScrollUp, setCanScrollUp] = useState(false)
 
   async function sendMessage(text?: string) {
     const content = (text ?? input).trim()
     if (!content) return
 
     const userMessage: Message = { sender: 'user', text: content, timestamp: new Date().toISOString() }
-    setAutoScrollPinned(true)
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
@@ -61,6 +54,7 @@ export default function Chat() {
         timestamp: new Date().toISOString()
       }
       setMessages(prev => [...prev, assistant])
+      setHasNewAnswer(true)
     } catch (error) {
       const assistant: Message = {
         sender: 'assistant',
@@ -69,6 +63,7 @@ export default function Chat() {
         status: 'error'
       }
       setMessages(prev => [...prev, assistant])
+      setHasNewAnswer(true)
     } finally {
       setLoading(false)
     }
@@ -79,7 +74,33 @@ export default function Chat() {
     if (!container) return
 
     const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
-    setAutoScrollPinned(distanceFromBottom < 48)
+    const atBottom = distanceFromBottom < 48
+    setIsAtBottom(atBottom)
+    setCanScrollUp(container.scrollTop > 12)
+
+    if (atBottom) {
+      setHasNewAnswer(false)
+    }
+  }
+
+  useEffect(() => {
+    handleScroll()
+  }, [messages])
+
+  function scrollByAmount(amount: number) {
+    const container = listRef.current
+    if (!container) return
+
+    container.scrollBy({ top: amount, behavior: 'smooth' })
+  }
+
+  function scrollToLatest() {
+    const container = listRef.current
+    if (!container) return
+
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    setHasNewAnswer(false)
+    setIsAtBottom(true)
   }
 
   function handleSaveToJournal(text: string) {
@@ -128,29 +149,61 @@ export default function Chat() {
           </button>
         ))}
       </div>
-      <div
-        ref={listRef}
-        onScroll={handleScroll}
-        role="log"
-        aria-live="polite"
-        aria-label="Conversation history"
-        tabIndex={0}
-        className="h-80 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 pr-3 sm:pr-4 scroll-smooth scroll-stable chat-scrollbar smooth-touch-scroll"
-      >
-        {messages.length === 0 && (
-          <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
-        )}
-        <div className="space-y-3">
-          {messages.map((message, idx) => (
-            <MessageBubble
-              key={`${message.timestamp}-${idx}`}
-              sender={message.sender}
-              text={message.text}
-              timestamp={message.timestamp}
-              status={message.status}
-              onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
-            />
-          ))}
+      <div className="relative">
+        <div
+          ref={listRef}
+          onScroll={handleScroll}
+          role="log"
+          aria-live="polite"
+          aria-label="Conversation history"
+          tabIndex={0}
+          className="h-80 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 pr-3 sm:pr-4 scroll-smooth scroll-stable chat-scrollbar smooth-touch-scroll"
+        >
+          {messages.length === 0 && (
+            <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
+          )}
+          <div className="space-y-3">
+            {messages.map((message, idx) => (
+              <MessageBubble
+                key={`${message.timestamp}-${idx}`}
+                sender={message.sender}
+                text={message.text}
+                timestamp={message.timestamp}
+                status={message.status}
+                onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-3">
+          <div className="pointer-events-auto flex flex-col gap-2 text-xs font-semibold text-orange-50">
+            <button
+              type="button"
+              onClick={() => scrollByAmount(-200)}
+              disabled={!canScrollUp}
+              className="rounded-xl border border-orange-500/30 bg-slate-900/80 px-3 py-2 shadow-lg shadow-orange-500/15 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Scroll up
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollByAmount(200)}
+              disabled={isAtBottom}
+              className="rounded-xl border border-orange-500/30 bg-slate-900/80 px-3 py-2 shadow-lg shadow-orange-500/15 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Scroll down
+            </button>
+            {hasNewAnswer && !isAtBottom && (
+              <button
+                type="button"
+                onClick={scrollToLatest}
+                className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-slate-950 shadow-lg shadow-orange-500/35 transition hover:scale-[1.02]"
+              >
+                Show latest answer
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-3 md:flex-row">
