@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, type ReactElement } from 'react'
+import { useState, useEffect, useRef, useCallback, type ReactElement, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import Link from 'next/link'
 import { GrowthJourney } from '@/components/GrowthJourney'
 
@@ -879,8 +879,11 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
   const [autoScrollPinned, setAutoScrollPinned] = useState(true)
+  const [scrollLocked, setScrollLocked] = useState(false)
+  const [scrollbarVisible, setScrollbarVisible] = useState(false)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const scrollbarTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const clarityInitialState: ClaritySession = {
     active: false,
     started: false,
@@ -896,10 +899,10 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   useEffect(() => {
     const container = messageListRef.current
-    if (!container || !autoScrollPinned) return
+    if (!container || !autoScrollPinned || scrollLocked) return
 
     container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [messages, autoScrollPinned])
+  }, [messages, autoScrollPinned, scrollLocked])
 
   useEffect(() => {
     if (!promptMotion) return
@@ -937,6 +940,22 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
     setClaritySession(prev => ({ ...prev, active: false, completed: true, pendingMessage: null }))
   }, [claritySession])
+
+  const showScrollbar = useCallback(() => {
+    if (scrollbarTimeoutRef.current) {
+      clearTimeout(scrollbarTimeoutRef.current)
+    }
+    setScrollbarVisible(true)
+    scrollbarTimeoutRef.current = setTimeout(() => setScrollbarVisible(false), 1400)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (scrollbarTimeoutRef.current) {
+        clearTimeout(scrollbarTimeoutRef.current)
+      }
+    }
+  }, [])
 
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
@@ -1031,24 +1050,89 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     const container = messageListRef.current
     if (!container) return
 
+    showScrollbar()
     const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
-    setAutoScrollPinned(distanceFromBottom < 120)
+    if (!scrollLocked) {
+      setAutoScrollPinned(distanceFromBottom < 120)
+    }
   }
 
   function scrollToTop() {
     const container = messageListRef.current
     if (!container) return
 
+    showScrollbar()
     setAutoScrollPinned(false)
     container.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  function scrollToBottom() {
+  function scrollToBottom(options: { forceUnlock?: boolean } = {}) {
     const container = messageListRef.current
     if (!container) return
 
+    if (options.forceUnlock) {
+      setScrollLocked(false)
+    }
+    showScrollbar()
     setAutoScrollPinned(true)
     container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  }
+
+  function handleKeyNavigation(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const container = messageListRef.current
+    if (!container) return
+
+    const step = Math.max(64, container.clientHeight * 0.18)
+
+    switch (event.key) {
+      case 'PageDown':
+        event.preventDefault()
+        container.scrollBy({ top: container.clientHeight * 0.9, behavior: 'smooth' })
+        setAutoScrollPinned(false)
+        showScrollbar()
+        break
+      case 'PageUp':
+        event.preventDefault()
+        container.scrollBy({ top: container.clientHeight * -0.9, behavior: 'smooth' })
+        setAutoScrollPinned(false)
+        showScrollbar()
+        break
+      case 'ArrowDown':
+        event.preventDefault()
+        container.scrollBy({ top: step, behavior: 'smooth' })
+        setAutoScrollPinned(false)
+        showScrollbar()
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        container.scrollBy({ top: -step, behavior: 'smooth' })
+        setAutoScrollPinned(false)
+        showScrollbar()
+        break
+      case 'End':
+        event.preventDefault()
+        scrollToBottom({ forceUnlock: true })
+        break
+      case 'Home':
+        event.preventDefault()
+        scrollToTop()
+        break
+      default:
+        break
+    }
+  }
+
+  function toggleScrollLock() {
+    setScrollLocked(prev => {
+      const next = !prev
+      if (!next) {
+        setAutoScrollPinned(true)
+        requestAnimationFrame(() => scrollToBottom())
+      } else {
+        setAutoScrollPinned(false)
+      }
+      return next
+    })
   }
 
   function handleSaveToJournal(messageContent: string) {
@@ -1318,12 +1402,37 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-orange-100/80 bg-black/40 border border-orange-500/15 rounded-2xl px-4 py-3 shadow-[0_8px_26px_rgba(255,115,39,0.1)] backdrop-blur-sm">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`rounded-full px-3 py-1 text-[11px] font-semibold border ${scrollLocked ? 'border-orange-400/40 bg-orange-500/15 text-orange-50' : 'border-orange-200/20 bg-white/5 text-orange-100/80'}`}>
+            {scrollLocked ? 'Scroll locked for reading' : 'Auto-scroll follows new replies'}
+          </span>
+          <span className="text-orange-100/60">PageUp/PageDown, arrows, Home/End all work here.</span>
+        </div>
+        <button
+          onClick={toggleScrollLock}
+          className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 font-semibold transition-all text-[11px] ${
+            scrollLocked
+              ? 'border-orange-400/50 bg-orange-500/20 text-orange-50 shadow-[0_10px_30px_rgba(255,153,51,0.18)] hover:shadow-orange-400/30'
+              : 'border-orange-300/20 bg-white/10 text-orange-100/80 hover:border-orange-300/50 hover:bg-white/20'
+          }`}
+        >
+          <span className="text-lg leading-none">{scrollLocked ? '🔒' : '🧭'}</span>
+          {scrollLocked ? 'Unlock & jump to latest' : 'Lock scrolling here'}
+        </button>
+      </div>
+
       <div className="relative">
         <div
           ref={messageListRef}
           onScroll={handleMessageListScroll}
-          className="chat-scrollbar aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
-          style={{ scrollBehavior: 'smooth' }}
+          onKeyDown={handleKeyNavigation}
+          onMouseEnter={showScrollbar}
+          onFocus={showScrollbar}
+          onTouchStart={showScrollbar}
+          className={`chat-scrollbar aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable smooth-touch-scroll focus:outline-none ${scrollbarVisible ? 'scrolling' : ''} ${scrollLocked ? 'scroll-locked' : ''}`}
+          tabIndex={0}
+          aria-label="Conversation with Kiaan"
         >
           {messages.length === 0 && (
             <div className="text-center text-orange-100/70 py-20 md:py-32">
@@ -1343,15 +1452,18 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                 {msg.role === 'assistant' ? (
                   <>
                     {renderAssistantContent(msg.content, i)}
-                    <button
-                      onClick={() => handleSaveToJournal(msg.content)}
-                      className="mt-2 text-xs text-orange-300 hover:text-orange-200 flex items-center gap-1 transition"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                      Send to Journal
-                    </button>
+                    <div className="pt-2">
+                      <button
+                        onClick={() => handleSaveToJournal(msg.content)}
+                        className="group inline-flex items-center gap-2 rounded-xl border border-orange-300/25 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/10 to-amber-200/10 px-3 py-2 text-xs font-semibold text-orange-50 transition-all duration-200 shadow-[0_10px_30px_rgba(255,153,51,0.16)] hover:-translate-y-0.5 hover:shadow-orange-400/30"
+                        aria-label="Send this response to journal"
+                      >
+                        <svg className="w-4 h-4 text-orange-300 group-hover:text-amber-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Journal</span>
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -1372,7 +1484,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         {/* Jump to Latest button - only visible when scrolled up */}
         {!autoScrollPinned && messages.length > 0 && (
           <button
-            onClick={scrollToBottom}
+            onClick={() => scrollToBottom({ forceUnlock: true })}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-orange-500/90 text-white text-sm font-semibold shadow-lg shadow-orange-500/30 hover:bg-orange-500 transition-all hover:scale-105 flex items-center gap-2"
           >
             ↓ Jump to Latest

@@ -193,50 +193,89 @@ html.light [class*="border-orange-500"] {
    MODERN SCROLLBAR STYLES - KIAAN Chat
    ===================================================== */
 .chat-scrollbar {
+  --chat-thumb: linear-gradient(180deg, #ff7a1a, #ffb347 55%, #ffe3b0);
+  --chat-thumb-light: linear-gradient(180deg, #ea580c, #f59e0b 55%, #f9d976);
+  --chat-track: rgba(255, 255, 255, 0.06);
+  --chat-track-light: rgba(15, 23, 42, 0.06);
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.3s ease;
+  transition: scrollbar-color 0.35s ease;
+  scrollbar-gutter: stable;
 }
 
 .chat-scrollbar:hover,
 .chat-scrollbar:focus,
 .chat-scrollbar.scrolling {
-  scrollbar-color: rgba(251, 146, 60, 0.5) transparent;
+  scrollbar-color: rgba(255, 149, 64, 0.78) transparent;
 }
 
 .chat-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  background: transparent;
 }
 
 .chat-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
+  background: var(--chat-track);
+  border-radius: 9999px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff7327, #ffc850);
-  border-radius: 3px;
+  background: var(--chat-thumb);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 16px rgba(255, 153, 51, 0.35);
   opacity: 0;
-  transition: opacity 0.3s ease, background 0.2s ease;
+  transform: translateX(4px);
+  transition: opacity 0.35s ease, transform 0.35s ease, background 0.35s ease;
 }
 
 .chat-scrollbar:hover::-webkit-scrollbar-thumb,
 .chat-scrollbar:focus::-webkit-scrollbar-thumb,
 .chat-scrollbar.scrolling::-webkit-scrollbar-thumb {
   opacity: 1;
+  transform: translateX(0);
 }
 
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ff8c4a, #ffd06f);
+.chat-scrollbar:hover::-webkit-scrollbar-track,
+.chat-scrollbar:focus::-webkit-scrollbar-track,
+.chat-scrollbar.scrolling::-webkit-scrollbar-track {
+  opacity: 1;
+}
+
+.chat-scrollbar.scroll-locked {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.chat-scrollbar.scroll-locked::-webkit-scrollbar-thumb {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 20px rgba(255, 179, 71, 0.28);
 }
 
 /* Light mode scrollbar for chat */
 html.light .chat-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ea580c, #f59e0b);
+  background: var(--chat-thumb-light);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 0 14px rgba(250, 204, 21, 0.35);
 }
 
-html.light .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c2410c, #d97706);
+html.light .chat-scrollbar {
+  --chat-track: var(--chat-track-light);
+}
+
+html.light .chat-scrollbar.scrolling {
+  scrollbar-color: rgba(234, 88, 12, 0.85) transparent;
+}
+
+.smooth-touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 /* =====================================================
@@ -356,8 +395,12 @@ html.light .subscription-scroll::-webkit-scrollbar-thumb:hover {
   .subscription-scroll::-webkit-scrollbar-thumb {
     transition: none !important;
   }
-  
+
   .subscription-scroll {
+    scroll-behavior: auto !important;
+  }
+
+  .smooth-touch-scroll {
     scroll-behavior: auto !important;
   }
 }
