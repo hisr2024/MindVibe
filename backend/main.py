@@ -234,6 +234,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Guidance router: {e}")
 
+# Load Journal router
+print("\n[Journal] Attempting to import Journal router...")
+try:
+    from backend.routes.journal import router as journal_router
+    app.include_router(journal_router)
+    print("✅ [SUCCESS] Journal router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Journal router: {e}")
+
 # Load Subscriptions router
 print("\n[Subscriptions] Attempting to import Subscriptions router...")
 try:
