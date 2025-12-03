@@ -14,6 +14,7 @@ export interface PricingTier {
   badge?: string
   cta: string
   kiaanQuota: number | 'unlimited'
+  trialAvailable?: boolean
 }
 
 interface PricingCardProps {
@@ -87,7 +88,14 @@ export function PricingCard({
         <p className="mt-1 text-sm text-orange-100/70">{tier.description}</p>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 space-y-2">
+        <div className="flex items-center gap-2">
+          {tier.trialAvailable && (
+            <span className="rounded-full bg-emerald-500/15 text-emerald-300 px-3 py-1 text-xs font-semibold border border-emerald-500/30">
+              15-day free trial
+            </span>
+          )}
+        </div>
         <div className="flex items-baseline gap-1">
           <span className="text-4xl font-bold text-orange-50">
             {displayPrice}
@@ -99,6 +107,11 @@ export function PricingCard({
         {isYearly && tier.monthlyPrice > 0 && displayMonthlyEquivalent && (
           <p className="mt-1 text-xs text-orange-100/50">
             {displayMonthlyEquivalent}/month when billed yearly
+          </p>
+        )}
+        {tier.trialAvailable && (
+          <p className="text-xs text-orange-100/70">
+            Start with a 15-day free trial. Cancel anytime before it ends.
           </p>
         )}
       </div>

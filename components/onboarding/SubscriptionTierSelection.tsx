@@ -203,8 +203,7 @@ export function SubscriptionTierSelection({
 
       {/* Note */}
       <p className="text-center text-xs text-orange-100/50 mt-6">
-        You can upgrade or change your plan anytime. All plans include a 7-day
-        free trial.
+        You can upgrade or change your plan anytime. All paid plans include a 15-day free trial.
       </p>
     </div>
   )

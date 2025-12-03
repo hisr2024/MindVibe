@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export type Currency = 'USD' | 'EUR' | 'INR'
 
@@ -16,13 +16,18 @@ export const CURRENCIES: Record<Currency, CurrencyConfig> = {
   INR: { symbol: '₹', code: 'INR', name: 'Indian Rupee' },
 }
 
-// Pricing in each currency (as per requirements)
-export const PRICING: Record<string, Record<Currency, number>> = {
-  free: { USD: 0, EUR: 0, INR: 0 },
-  pro: { USD: 5, EUR: 4.60, INR: 420 },
-  premium: { USD: 10, EUR: 9.20, INR: 830 },
-  executive: { USD: 15, EUR: 13.80, INR: 1250 },
+export const BASE_PRICES_USD: Record<string, number> = {
+  free: 0,
+  basic: 2.49,
+  pro: 5,
+  premium: 10,
+  executive: 15,
 }
+
+// Conversion + discount rules
+const EUR_RATE = 0.92
+const INR_RATE = 83
+const INR_DISCOUNT = 0.2 // 20% cheaper than USD/EUR equivalent
 
 // Yearly discount (15%)
 export const YEARLY_DISCOUNT = 0.15
@@ -31,10 +36,9 @@ const STORAGE_KEY = 'mindvibe_currency'
 
 function detectCurrencyFromLocale(): Currency {
   if (typeof window === 'undefined') return 'USD'
-  
+
   const locale = navigator.language || ''
-  
-  // European locales
+
   if (
     locale.startsWith('de') ||
     locale.startsWith('fr') ||
@@ -45,20 +49,27 @@ function detectCurrencyFromLocale(): Currency {
   ) {
     return 'EUR'
   }
-  
-  // Indian locales
+
   if (locale.startsWith('hi') || locale === 'en-IN') {
     return 'INR'
   }
-  
+
   return 'USD'
+}
+
+const roundForCurrency = (currency: Currency, amount: number) => {
+  if (currency === 'INR') {
+    // Round to the nearest 10 rupees for simplicity
+    return Math.round(amount / 10) * 10
+  }
+
+  return Number(amount.toFixed(2))
 }
 
 export function useCurrency() {
   const [currency, setCurrencyState] = useState<Currency>('USD')
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Initialize currency from localStorage or auto-detect
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -80,36 +91,64 @@ export function useCurrency() {
     }
   }, [])
 
-  const formatPrice = useCallback(
-    (amount: number, options?: { showDecimals?: boolean }): string => {
-      const config = CURRENCIES[currency]
-      const showDecimals = options?.showDecimals ?? (currency !== 'INR')
-      
-      if (currency === 'INR') {
-        // Format Indian Rupees without decimals
-        return `${config.symbol}${Math.round(amount).toLocaleString('en-IN')}`
+  const convertFromUsd = useCallback(
+    (usdAmount: number) => {
+      if (currency === 'EUR') {
+        return usdAmount * EUR_RATE
       }
-      
-      return `${config.symbol}${showDecimals ? amount.toFixed(2) : Math.round(amount)}`
+
+      if (currency === 'INR') {
+        return usdAmount * INR_RATE * (1 - INR_DISCOUNT)
+      }
+
+      return usdAmount
     },
     [currency]
   )
 
   const getMonthlyPrice = useCallback(
     (tierId: string): number => {
-      return PRICING[tierId]?.[currency] ?? 0
+      const usdPrice = BASE_PRICES_USD[tierId] ?? 0
+      const converted = convertFromUsd(usdPrice)
+      return roundForCurrency(currency, converted)
     },
-    [currency]
+    [convertFromUsd, currency]
   )
 
   const getYearlyPrice = useCallback(
     (tierId: string): number => {
-      const monthly = getMonthlyPrice(tierId)
-      // Yearly = 12 months with 15% discount
-      return monthly * 12 * (1 - YEARLY_DISCOUNT)
+      const usdPrice = BASE_PRICES_USD[tierId] ?? 0
+      const converted = convertFromUsd(usdPrice)
+      const yearly = converted * 12 * (1 - YEARLY_DISCOUNT)
+      return roundForCurrency(currency, yearly)
     },
-    [getMonthlyPrice]
+    [convertFromUsd, currency]
   )
+
+  const formatPrice = useCallback(
+    (amount: number, options?: { showDecimals?: boolean }): string => {
+      const config = CURRENCIES[currency]
+      const showDecimals = options?.showDecimals ?? currency !== 'INR'
+
+      if (currency === 'INR') {
+        const rounded = roundForCurrency(currency, amount)
+        return `${config.symbol}${rounded.toLocaleString('en-IN')}`
+      }
+
+      const rounded = roundForCurrency(currency, amount)
+      const formatted = showDecimals ? rounded.toFixed(2) : Math.round(rounded).toString()
+      return `${config.symbol}${formatted}`
+    },
+    [currency]
+  )
+
+  const priceTable = useMemo(() => {
+    const entries = Object.keys(BASE_PRICES_USD).reduce<Record<string, number>>((acc, tierId) => {
+      acc[tierId] = getMonthlyPrice(tierId)
+      return acc
+    }, {})
+    return entries
+  }, [getMonthlyPrice])
 
   return {
     currency,
@@ -119,6 +158,7 @@ export function useCurrency() {
     getYearlyPrice,
     config: CURRENCIES[currency],
     isInitialized,
+    priceTable,
   }
 }
 
