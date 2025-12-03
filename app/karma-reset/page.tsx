@@ -112,7 +112,9 @@ export default function KarmaResetPage() {
     setIsBreathing(true)
     setRevealedCards(0)
     if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(() => null)
+      audioContextRef.current.resume().catch((audioError) => {
+        console.warn('AudioContext resume failed - sounds may be muted:', audioError)
+      })
     }
   }, [kiaanResponse])
 
@@ -240,7 +242,9 @@ export default function KarmaResetPage() {
         setRevealedCards(0)
         // Resume AudioContext if suspended (needed for auto-start)
         if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume().catch(() => null)
+          audioContextRef.current.resume().catch((audioError) => {
+            console.warn('AudioContext resume failed - sounds may be muted:', audioError)
+          })
         }
       } else {
         setError('KIAAN returned an unexpected response. Please try again.')
