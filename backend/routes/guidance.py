@@ -414,10 +414,26 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
 
     reset_guidance: Optional[Dict[str, str]] = None
     if parsed:
-        breathing_line = parsed.get("breathing_line") or parsed.get("pauseAndBreathe")
-        ripple_summary = parsed.get("ripple_summary") or parsed.get("nameTheRipple")
-        repair_action = parsed.get("repair_action") or parsed.get("repair")
-        forward_intention = parsed.get("forward_intention") or parsed.get("moveWithIntention")
+        breathing_line = (
+            parsed.get("breathingLine")
+            or parsed.get("breathing_line")
+            or parsed.get("pauseAndBreathe")
+        )
+        ripple_summary = (
+            parsed.get("rippleSummary")
+            or parsed.get("ripple_summary")
+            or parsed.get("nameTheRipple")
+        )
+        repair_action = (
+            parsed.get("repairAction")
+            or parsed.get("repair_action")
+            or parsed.get("repair")
+        )
+        forward_intention = (
+            parsed.get("forwardIntention")
+            or parsed.get("forward_intention")
+            or parsed.get("moveWithIntention")
+        )
 
         reset_guidance = {
             # Preferred camelCase keys to match frontend contract
