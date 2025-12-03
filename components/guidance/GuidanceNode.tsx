@@ -281,5 +281,3 @@ export function GuidanceNode({
     </motion.button>
   )
 }
-
-export default GuidanceNode

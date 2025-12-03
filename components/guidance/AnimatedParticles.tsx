@@ -246,5 +246,3 @@ export function AnimatedParticles({
     </svg>
   )
 }
-
-export default AnimatedParticles

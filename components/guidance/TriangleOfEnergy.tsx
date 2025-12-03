@@ -2,8 +2,8 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState, useMemo } from 'react'
-import GuidanceNode from './GuidanceNode'
-import AnimatedParticles from './AnimatedParticles'
+import { GuidanceNode } from './GuidanceNode'
+import { AnimatedParticles } from './AnimatedParticles'
 
 export type GuidanceMode = 'inner-peace' | 'mind-control' | 'self-kindness'
 
@@ -279,5 +279,3 @@ export function TriangleOfEnergy({
     </div>
   )
 }
-
-export default TriangleOfEnergy

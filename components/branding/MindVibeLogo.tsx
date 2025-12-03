@@ -175,5 +175,3 @@ export function MindVibeLogo({
     </motion.svg>
   )
 }
-
-export default MindVibeLogo

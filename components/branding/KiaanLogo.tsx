@@ -369,5 +369,3 @@ function PeacockFeatherIcon({
     </motion.svg>
   )
 }
-
-export default KiaanLogo
