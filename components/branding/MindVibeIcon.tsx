@@ -10,13 +10,13 @@ export interface MindVibeIconProps {
   className?: string
 }
 
-const gradientMap: Record<MindVibeIconProps['theme'], GradientKey> = {
+const gradientMap: Record<NonNullable<MindVibeIconProps['theme']>, GradientKey> = {
   sunrise: 'mvGradientSunrise',
   ocean: 'mvGradientOcean',
   aurora: 'mvGradientAurora',
 }
 
-const auraMap: Record<MindVibeIconProps['theme'], AuraKey> = {
+const auraMap: Record<NonNullable<MindVibeIconProps['theme']>, AuraKey> = {
   sunrise: 'sunrise',
   ocean: 'ocean',
   aurora: 'aurora',
