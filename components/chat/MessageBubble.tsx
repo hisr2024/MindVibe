@@ -29,7 +29,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
     <div className="space-y-2 group">
       <div className="flex items-center gap-2 text-xs text-orange-100/60">
         <span className="font-semibold text-orange-50">{sender === 'user' ? 'You' : 'KIAAN'}</span>
-        <span>{new Date(timestamp).toLocaleTimeString()}</span>
+        <span suppressHydrationWarning>
+          {timestamp ? new Date(timestamp).toLocaleTimeString() : ''}
+        </span>
       </div>
       
       <div
@@ -41,7 +43,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               : 'bg-white/5 text-orange-50 border border-orange-500/15'
         }`}
       >
-        {text}
+        {String(text).trim() || ''}
       </div>
       
       {/* Send to Journal button for assistant messages */}
