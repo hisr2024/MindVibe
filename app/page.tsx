@@ -1336,71 +1336,32 @@ function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void })
   )
 }
 
-type RoomMessage = {
-  room: string
-  content: string
-  at: string
-  author: 'You' | 'Guide'
-}
+type RoomSummary = { id: string; slug: string; name: string; theme: string; active_count?: number }
 
 function PublicChatRooms() {
-  const rooms = [
-    { id: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
-    { id: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
-    { id: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' }
-  ]
-
-  const [activeRoom, setActiveRoom] = useState(rooms[0].id)
-  const [message, setMessage] = useState('')
+  const [rooms, setRooms] = useState<RoomSummary[]>([])
   const [alert, setAlert] = useState<string | null>(null)
-  const [messages, setMessages] = useLocalState<RoomMessage[]>('kiaan_public_rooms', [
-    {
-      room: 'grounding',
-      content: 'Welcome. Breathe slowly and keep your words kind—this circle is for encouragement only.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    }
-  ])
 
-  const prohibited = [
-    /\b(?:fuck|shit|bitch|bastard|asshole|dick|cunt)\b/i,
-    /\b(?:damn|hell)\b/i,
-    /\b(?:idiot|stupid|dumb)\b/i,
-    /\b(?:hate|kill|harm)\b/i,
-    /[\u0900-\u097F]*अपशब्द/i // broad match to discourage Hindi slurs placeholder
-  ]
-
-  function isRespectful(text: string) {
-    const normalized = text.trim().toLowerCase()
-    return normalized.length > 0 && !prohibited.some(pattern => pattern.test(normalized))
-  }
-
-  const activeMessages = messages.filter(m => m.room === activeRoom)
-
-  function sendRoomMessage() {
-    if (!isRespectful(message)) {
-      setAlert('Please keep the exchange kind and free of any harmful or foul language. Your message was not sent.')
-      return
+  useEffect(() => {
+    async function loadRooms() {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/rooms`)
+        if (!response.ok) throw new Error('Unable to load rooms')
+        const data = await response.json()
+        setRooms(data)
+      } catch (error) {
+        console.error(error)
+        setRooms([
+          { id: 'grounding', slug: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
+          { id: 'gratitude', slug: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
+          { id: 'courage', slug: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' }
+        ])
+        setAlert('Showing cached rooms while the live service reconnects.')
+      }
     }
 
-    const entry: RoomMessage = {
-      room: activeRoom,
-      content: message.trim(),
-      at: new Date().toISOString(),
-      author: 'You'
-    }
-
-    const supportiveReply: RoomMessage = {
-      room: activeRoom,
-      content: `Thank you for keeping this space supportive. ${rooms.find(r => r.id === activeRoom)?.theme ?? 'Stay kind to one another.'}`,
-      at: new Date().toISOString(),
-      author: 'Guide'
-    }
-
-    setMessages([...messages, entry, supportiveReply])
-    setMessage('')
-    setAlert(null)
-  }
+    loadRooms()
+  }, [])
 
   return (
     <section id="wisdom-chat-rooms" className="bg-[#0c0c10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 md:p-8 space-y-4 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
@@ -1413,56 +1374,28 @@ function PublicChatRooms() {
         <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {rooms.map(room => (
-          <button
-            key={room.id}
-            onClick={() => { setActiveRoom(room.id); setAlert(null); }}
-            className={`px-4 py-2 rounded-2xl border text-sm transition-all ${
-              activeRoom === room.id
-                ? 'bg-gradient-to-r from-orange-400/70 via-[#ffb347]/70 to-rose-400/70 text-slate-950 font-semibold shadow shadow-orange-500/25'
-                : 'bg-white/5 border-orange-200/10 text-orange-50 hover:border-orange-300/40'
-            }`}
-          >
-            {room.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 min-h-[280px] max-h-[50vh] md:min-h-[320px] md:max-h-none overflow-y-auto shadow-inner shadow-orange-500/5 scroll-stable">
-        {activeMessages.map((msg, index) => (
-          <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-orange-500/10 ${
-              msg.author === 'You'
-                ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
-                : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
-            }`}>
-              <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
-              <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {rooms.map(room => (
+              <span key={room.id} className="px-4 py-2 rounded-2xl border border-orange-200/10 text-orange-50 bg-white/5 inline-flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-green-400" />
+                <span>{room.name}</span>
+                <span className="text-[11px] text-orange-100/80">{room.active_count ?? 0} active</span>
+              </span>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {alert && <p className="text-xs text-orange-200">{alert}</p>}
-
-      <div className="flex gap-3 flex-col sm:flex-row">
-        <input
-          type="text"
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-          onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
-          placeholder="Share something helpful for the room..."
-          className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
-        />
-        <button
-          onClick={sendRoomMessage}
-          disabled={!message.trim()}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20 w-full sm:w-auto"
-        >
-          Share warmly
-        </button>
+          {alert && <p className="text-xs text-orange-200">{alert}</p>}
+        </div>
+        <div className="flex flex-col gap-3 items-start">
+          <p className="text-orange-100/80 text-sm">Hop into a room to experience the new real-time chat with server-side safety filters.</p>
+          <Link
+            href="/wisdom-rooms"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold text-slate-950 shadow-lg shadow-orange-500/20"
+          >
+            Open live chat rooms
+          </Link>
+        </div>
       </div>
     </section>
   )

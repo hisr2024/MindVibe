@@ -1037,3 +1037,70 @@ class ComplianceAuditLog(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
+
+
+class ChatRoom(Base):
+    __tablename__ = "chat_rooms"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    slug: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(128))
+    theme: Mapped[str] = mapped_column(String(256))
+    created_by: Mapped[str | None] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+
+    participants: Mapped[list["RoomParticipant"]] = relationship(
+        "RoomParticipant", back_populates="room", cascade="all, delete-orphan"
+    )
+    messages: Mapped[list["ChatMessage"]] = relationship(
+        "ChatMessage", back_populates="room", cascade="all, delete-orphan"
+    )
+
+
+class RoomParticipant(Base):
+    __tablename__ = "room_participants"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    room_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("chat_rooms.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    joined_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    left_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+
+    room: Mapped[ChatRoom] = relationship("ChatRoom", back_populates="participants")
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    room_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("chat_rooms.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    content: Mapped[str] = mapped_column(Text)
+    flagged: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+
+    room: Mapped[ChatRoom] = relationship("ChatRoom", back_populates="messages")

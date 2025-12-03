@@ -1,132 +1,160 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+const defaultRooms: RoomSummary[] = [
+  { id: 'grounding', slug: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
+  { id: 'gratitude', slug: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
+  { id: 'courage', slug: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' },
+  { id: 'clarity', slug: 'clarity', name: 'Clarity Corner', theme: 'Finding mental stillness' },
+  { id: 'compassion', slug: 'compassion', name: 'Compassion Cave', theme: 'Self-kindness and acceptance' }
+]
+
+type RoomSummary = {
+  id: string
+  slug: string
+  name: string
+  theme: string
+  active_count?: number
+}
+
 type RoomMessage = {
-  room: string
+  id: string
+  room_id: string
+  user_id: string
   content: string
-  at: string
-  author: 'You' | 'Guide'
+  created_at: string
 }
 
-function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
-  const [state, setState] = useState<T>(() => {
-    if (typeof window === 'undefined') return initial
-    try {
-      const item = window.localStorage.getItem(key)
-      return item ? JSON.parse(item) : initial
-    } catch {
-      return initial
-    }
-  })
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(key, JSON.stringify(state))
-    } catch {}
-  }, [key, state])
-
-  return [state, setState]
-}
-
-const rooms = [
-  { id: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths', emoji: '🧘' },
-  { id: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today', emoji: '🌿' },
-  { id: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments', emoji: '💪' },
-  { id: 'clarity', name: 'Clarity Corner', theme: 'Finding mental stillness', emoji: '✨' },
-  { id: 'compassion', name: 'Compassion Cave', theme: 'Self-kindness and acceptance', emoji: '💙' },
-]
-
-const prohibited = [
-  /\b(?:fuck|shit|bitch|bastard|asshole|dick|cunt)\b/i,
-  /\b(?:damn|hell)\b/i,
-  /\b(?:idiot|stupid|dumb)\b/i,
-  /\b(?:hate|kill|harm)\b/i,
-]
-
-function isRespectful(text: string) {
-  const normalized = text.trim().toLowerCase()
-  return normalized.length > 0 && !prohibited.some(pattern => pattern.test(normalized))
+type Participant = {
+  id: string
+  label: string
 }
 
 export default function WisdomRoomsPage() {
-  const [activeRoom, setActiveRoom] = useState(rooms[0].id)
+  const [rooms, setRooms] = useState<RoomSummary[]>([])
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+  const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
+  const [participants, setParticipants] = useState<Record<string, Participant[]>>({})
   const [message, setMessage] = useState('')
+  const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
   const [alert, setAlert] = useState<string | null>(null)
+  const [socket, setSocket] = useState<WebSocket | null>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-  const [messages, setMessages] = useLocalState<RoomMessage[]>('kiaan_wisdom_rooms', [
-    {
-      room: 'grounding',
-      content: 'Welcome to Calm Grounding. Breathe slowly and keep your words kind—this circle is for encouragement only.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    },
-    {
-      room: 'gratitude',
-      content: 'Welcome to the Gratitude Garden. Share what brought you peace or joy today.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    },
-    {
-      room: 'courage',
-      content: 'Welcome to the Courage Circle. Share your challenges and receive encouragement.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    },
-    {
-      room: 'clarity',
-      content: 'Welcome to Clarity Corner. A space for mental stillness and clear thinking.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    },
-    {
-      room: 'compassion',
-      content: 'Welcome to the Compassion Cave. Practice self-kindness and acceptance here.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    }
-  ])
 
-  const activeMessages = messages.filter(m => m.room === activeRoom)
-  const activeRoomData = rooms.find(r => r.id === activeRoom)
+  const token = useMemo(() => {
+    if (typeof window === 'undefined') return ''
+    return localStorage.getItem('access_token') || localStorage.getItem('admin_token') || ''
+  }, [])
+
+  useEffect(() => {
+    async function loadRooms() {
+      try {
+        const response = await fetch(`${apiUrl}/api/rooms`)
+        if (!response.ok) throw new Error('Unable to load rooms')
+        const data = await response.json()
+        setRooms(data.length ? data : defaultRooms)
+        if (data.length) {
+          setActiveRoomId(data[0].id)
+        }
+      } catch (err) {
+        console.error(err)
+        setRooms(defaultRooms)
+        setActiveRoomId(defaultRooms[0].slug)
+        setAlert('Using default rooms because the server is offline. Messages will not persist until reconnected.')
+      }
+    }
+
+    loadRooms()
+  }, [])
+
+  useEffect(() => {
+    if (!activeRoomId || !rooms.length) return
+    const room = rooms.find(r => r.id === activeRoomId || r.slug === activeRoomId)
+    if (!room || !token) {
+      setStatus('disconnected')
+      return
+    }
+
+    const roomId = room.id || room.slug
+    setStatus('connecting')
+    setAlert(null)
+
+    const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/api/rooms/${roomId}/ws?token=${encodeURIComponent(token)}`
+    const ws = new WebSocket(wsUrl)
+
+    ws.onopen = () => {
+      setStatus('connected')
+      setAlert(null)
+    }
+
+    ws.onmessage = event => {
+      try {
+        const payload = JSON.parse(event.data)
+        if (payload.type === 'history') {
+          setRoomMessages(prev => ({ ...prev, [roomId]: payload.messages }))
+        }
+        if (payload.type === 'message') {
+          setRoomMessages(prev => ({
+            ...prev,
+            [roomId]: [...(prev[roomId] || []), payload]
+          }))
+        }
+        if (payload.type === 'participants') {
+          setParticipants(prev => ({ ...prev, [roomId]: payload.participants }))
+        }
+        if (payload.type === 'error') {
+          setAlert(payload.message || 'Unable to send message right now')
+        }
+      } catch (error) {
+        console.error('Failed to parse message', error)
+      }
+    }
+
+    ws.onclose = () => {
+      setStatus('disconnected')
+    }
+
+    setSocket(ws)
+
+    return () => {
+      ws.close()
+      setSocket(null)
+    }
+  }, [activeRoomId, rooms, token])
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' })
     }
-  }, [activeMessages.length])
+  }, [roomMessages, activeRoomId])
 
-  function sendRoomMessage() {
-    if (!isRespectful(message)) {
-      setAlert('Please keep the exchange kind and free of harmful language. Your message was not sent.')
+  const activeRoom = rooms.find(r => r.id === activeRoomId || r.slug === activeRoomId)
+  const activeMessages = activeRoom ? roomMessages[activeRoom.id || activeRoom.slug] || [] : []
+  const activeParticipants = activeRoom ? participants[activeRoom.id || activeRoom.slug] || [] : []
+
+  async function sendMessage() {
+    if (!message.trim()) return
+    if (status !== 'connected' || !socket) {
+      setAlert('You are not connected. Please wait while we reconnect to the room.')
       return
     }
-
-    const entry: RoomMessage = {
-      room: activeRoom,
-      content: message.trim(),
-      at: new Date().toISOString(),
-      author: 'You'
-    }
-
-    const supportiveReply: RoomMessage = {
-      room: activeRoom,
-      content: `Thank you for sharing. ${activeRoomData?.theme ?? 'Stay kind to one another.'}`,
-      at: new Date().toISOString(),
-      author: 'Guide'
-    }
-
-    setMessages([...messages, entry, supportiveReply])
+    socket.send(JSON.stringify({ content: message.trim() }))
     setMessage('')
-    setAlert(null)
+  }
+
+  const participantLabel = (userId: string) => {
+    if (!token) return userId
+    return userId === extractUserId(token) ? 'You' : userId.slice(0, 8)
   }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header */}
         <header className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-start gap-4">
@@ -137,14 +165,14 @@ export default function WisdomRoomsPage() {
                   Wisdom Chat Rooms
                 </h1>
                 <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-                  Move seamlessly between calm rooms. Kindness-first moderation keeps every exchange supportive.
+                  Real-time rooms with server-side moderation. Messages are stored safely so you can rejoin without losing the thread.
                 </p>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 items-start">
               <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-50">
-                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-                Kindness-first moderation
+                <span className={`h-2 w-2 rounded-full ${status === 'connected' ? 'bg-green-400 animate-pulse' : 'bg-orange-300'}`} />
+                {status === 'connected' ? 'Live & moderated' : status === 'connecting' ? 'Connecting...' : 'Offline'}
               </span>
               <Link href="/" className="text-xs text-orange-100/70 hover:text-orange-200 transition">
                 ← Back to home
@@ -153,113 +181,102 @@ export default function WisdomRoomsPage() {
           </div>
         </header>
 
-        {/* Room Selection Pills */}
         <div className="flex flex-wrap gap-2 justify-center md:justify-start">
           {rooms.map(room => (
             <button
-              key={room.id}
-              onClick={() => { setActiveRoom(room.id); setAlert(null) }}
+              key={room.id || room.slug}
+              onClick={() => { setActiveRoomId(room.id || room.slug); setAlert(null) }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-semibold transition-all ${
-                activeRoom === room.id
+                (room.id || room.slug) === activeRoomId
                   ? 'bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 text-slate-950 border-transparent shadow-lg shadow-orange-500/25'
                   : 'bg-white/5 border-orange-400/20 text-orange-50 hover:border-orange-300/50 hover:bg-white/10'
               }`}
             >
-              <span>{room.emoji}</span>
+              <span className="h-2 w-2 rounded-full bg-orange-300" />
               <span>{room.name}</span>
+              <span className="text-[11px] text-orange-100/80">{room.active_count ?? 0} active</span>
             </button>
           ))}
         </div>
 
-        {/* Chat Container */}
         <section className="rounded-3xl border border-orange-500/15 bg-[#0c0c10]/85 shadow-[0_20px_80px_rgba(255,115,39,0.14)] overflow-hidden">
-          {/* Room Info Banner */}
           <div className="px-6 py-4 border-b border-orange-500/15 bg-gradient-to-r from-orange-500/10 via-transparent to-transparent">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{activeRoomData?.emoji}</span>
+              <span className="text-2xl">🧘</span>
               <div>
-                <h2 className="text-lg font-semibold text-orange-50">{activeRoomData?.name}</h2>
-                <p className="text-xs text-orange-100/70">{activeRoomData?.theme}</p>
+                <h2 className="text-lg font-semibold text-orange-50">{activeRoom?.name ?? 'Choose a room'}</h2>
+                <p className="text-xs text-orange-100/70">{activeRoom?.theme ?? 'Pick a room to start chatting'}</p>
               </div>
             </div>
           </div>
 
-          {/* Messages */}
-          <div
-            ref={chatContainerRef}
-            className="p-4 md:p-6 space-y-4 h-[400px] md:h-[500px] overflow-y-auto scroll-smooth"
-          >
-            {activeMessages.map((msg, index) => (
-              <div
-                key={`${msg.at}-${index}`}
-                className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-sm shadow-lg ${
-                    msg.author === 'You'
+          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] divide-y md:divide-y-0 md:divide-x divide-orange-500/15">
+            <div className="p-4 md:p-6 space-y-4 h-[420px] overflow-y-auto scroll-smooth" ref={chatContainerRef}>
+              {activeMessages.length === 0 && (
+                <p className="text-orange-100/70 text-sm">No messages yet. Say hello to open the conversation.</p>
+              )}
+              {activeMessages.map(msg => (
+                <div key={msg.id} className={`flex ${msg.user_id === extractUserId(token) ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-sm shadow-lg ${
+                    msg.user_id === extractUserId(token)
                       ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-orange-400/80 text-white'
-                      : 'bg-white/5 border border-orange-200/15 text-orange-50'
-                  }`}
-                >
-                  <p className="font-semibold text-xs mb-1 opacity-80">
-                    {msg.author === 'You' ? 'You' : 'Community Guide'}
-                  </p>
-                  <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                  <p className="text-[10px] opacity-60 mt-2">{new Date(msg.at).toLocaleTimeString()}</p>
+                      : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
+                  }`}>
+                    <p className="font-semibold mb-1">{msg.user_id === extractUserId(token) ? 'You' : 'Participant'}</p>
+                    <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            <aside className="p-4 md:p-6 bg-white/5">
+              <h3 className="text-sm font-semibold text-orange-50 mb-2">Active participants</h3>
+              <div className="space-y-2 text-sm text-orange-100/80">
+                {activeParticipants.length === 0 && <p className="text-orange-100/60">No one is here yet.</p>}
+                {activeParticipants.map(person => (
+                  <div key={person.id} className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-green-400" />
+                    <span>{participantLabel(person.id)}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-
-          {/* Alert */}
-          {alert && (
-            <div className="mx-4 mb-2 px-4 py-2 rounded-xl bg-red-500/15 border border-red-400/30 text-sm text-red-200">
-              {alert}
-            </div>
-          )}
-
-          {/* Input */}
-          <div className="p-4 border-t border-orange-500/15 bg-black/30">
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
-                placeholder="Share warmly..."
-                className="flex-1 px-4 py-3 bg-black/50 border border-orange-500/30 rounded-2xl focus:ring-2 focus:ring-orange-400/50 outline-none placeholder:text-orange-100/50 text-orange-50 text-sm"
-                aria-label="Share warmly"
-              />
-              <button
-                onClick={sendRoomMessage}
-                disabled={!message.trim()}
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold text-slate-950 shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.02]"
-              >
-                Share warmly
-              </button>
-            </div>
+            </aside>
           </div>
         </section>
 
-        {/* Guidelines */}
-        <section className="rounded-2xl border border-orange-500/15 bg-black/30 p-4 md:p-6">
-          <h3 className="text-sm font-semibold text-orange-50 mb-3">Community Guidelines</h3>
-          <ul className="grid md:grid-cols-3 gap-3 text-xs text-orange-100/80">
-            <li className="flex items-start gap-2">
-              <span className="text-green-400">✓</span>
-              <span>Keep words kind and supportive</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400">✓</span>
-              <span>Listen with compassion</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400">✓</span>
-              <span>Share from a place of growth</span>
-            </li>
-          </ul>
-        </section>
+        {alert && <p className="text-xs text-orange-200">{alert}</p>}
+
+        <div className="flex gap-3 flex-col sm:flex-row">
+          <input
+            type="text"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
+            placeholder={token ? 'Share something helpful for the room...' : 'Sign in to start sharing'}
+            disabled={!token}
+            className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50 disabled:opacity-70"
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!message.trim() || !token || status !== 'connected'}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20 w-full sm:w-auto"
+          >
+            {status === 'connected' ? 'Share warmly' : 'Connecting...'}
+          </button>
+        </div>
       </div>
     </main>
   )
+}
+
+function extractUserId(token: string): string {
+  if (!token) return ''
+  try {
+    const [, payload] = token.split('.')
+    const decoded = JSON.parse(atob(payload))
+    return decoded.sub || ''
+  } catch {
+    return ''
+  }
 }
