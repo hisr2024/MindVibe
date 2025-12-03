@@ -6,7 +6,7 @@ import time
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect, status
 from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -158,6 +158,7 @@ async def list_rooms(db: AsyncSession = Depends(get_db)) -> list[dict[str, Any]]
 @router.post("", status_code=status.HTTP_201_CREATED)
 @limiter.limit(CHAT_RATE_LIMIT)
 async def create_room(
+    request: Request,
     payload: Dict[str, str],
     user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -185,6 +186,7 @@ async def create_room(
 @router.post("/{room_id}/join")
 @limiter.limit(CHAT_RATE_LIMIT)
 async def join_room(
+    request: Request,
     room_id: str,
     user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -199,6 +201,7 @@ async def join_room(
 @router.post("/{room_id}/leave")
 @limiter.limit(CHAT_RATE_LIMIT)
 async def leave_room(
+    request: Request,
     room_id: str,
     user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
