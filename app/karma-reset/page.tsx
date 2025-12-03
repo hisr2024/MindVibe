@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import type { KiaanResetResponse, ResetStep, RepairType } from '@/types/karma-reset.types'
-import { REPAIR_ACTIONS, RESET_STEP_ORDER } from '@/types/karma-reset.types'
+import { REPAIR_ACTIONS, RESET_STEP_ORDER, REPAIR_TYPE_DISPLAY } from '@/types/karma-reset.types'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -358,9 +358,7 @@ export default function KarmaResetPage() {
               {(isStepCompleted('repair') || isStepActive('repair')) && kiaanResponse?.repair && (
                 <div className="kiaan-response space-y-2 bg-black/30 rounded-lg p-3 border border-green-500/15">
                   <p className="text-xs text-green-300/80 uppercase tracking-wide">
-                    {kiaanResponse.repair.type === 'apology' && '💚 Apology'}
-                    {kiaanResponse.repair.type === 'clarification' && '💬 Clarification'}
-                    {kiaanResponse.repair.type === 'calm_followup' && '🕊️ Calm Follow-up'}
+                    {REPAIR_TYPE_DISPLAY[kiaanResponse.repair.type]?.icon} {REPAIR_TYPE_DISPLAY[kiaanResponse.repair.type]?.label}
                   </p>
                   <p className="text-sm text-green-100/90">{kiaanResponse.repair.action}</p>
                 </div>

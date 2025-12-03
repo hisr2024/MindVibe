@@ -401,14 +401,14 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
     - repair: { type, action }
     - intention: Forward-looking intention
     """
-    # Ensure repair_type is properly formatted
+    # Map repair_type labels to API format
+    repair_type_map = {
+        "Calm follow-up": "calm_followup",
+        "Clarification": "clarification",
+        "Apology": "apology",
+    }
     repair_type = payload.get("repair_type", "apology")
-    if repair_type == "Calm follow-up":
-        repair_type = "calm_followup"
-    elif repair_type == "Clarification":
-        repair_type = "clarification"
-    elif repair_type == "Apology":
-        repair_type = "apology"
+    repair_type = repair_type_map.get(repair_type, repair_type)
 
     # Normalize the payload for the model
     normalized_payload = {

@@ -53,8 +53,8 @@ export interface KarmaResetApiResponse {
   provider: string
 }
 
-/** Default repair actions */
-export const REPAIR_ACTIONS: RepairAction[] = [
+/** Default repair actions - immutable constant */
+export const REPAIR_ACTIONS = [
   { 
     label: 'Apology', 
     value: 'apology', 
@@ -70,7 +70,14 @@ export const REPAIR_ACTIONS: RepairAction[] = [
     value: 'calm_followup', 
     helper: 'Return with a warm note that re-centers the conversation.' 
   }
-]
+] as const
+
+/** Repair type icon and label mapping */
+export const REPAIR_TYPE_DISPLAY: Record<RepairType, { icon: string; label: string }> = {
+  apology: { icon: '💚', label: 'Apology' },
+  clarification: { icon: '💬', label: 'Clarification' },
+  calm_followup: { icon: '🕊️', label: 'Calm Follow-up' },
+}
 
 /** Reset step order for progression */
 export const RESET_STEP_ORDER: ResetStep[] = [
