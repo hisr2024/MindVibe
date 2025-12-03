@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 
 const showcasePages = [
@@ -51,6 +52,17 @@ export default function KiaanHome() {
 
   return (
     <section className="space-y-8">
+      <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/85 to-[#0f0a08]/90 p-6 md:p-8 shadow-[0_20px_80px_rgba(46,160,255,0.14)]">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
+          <KiaanLogo size="lg" className="shrink-0" />
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Talk to KIAAN</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#ffb347] to-orange-100">MindVibe Companion</h1>
+            <p className="text-sm text-orange-100/85 max-w-2xl">A modern, spiritual-but-universal companion woven from Krishna&apos;s flute and peacock feather with calm ripples guiding every interaction.</p>
+          </div>
+        </div>
+      </div>
+
       {/* Triangle of Flowing Energy Section */}
       <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
         <div className="flex flex-col md:flex-row items-center gap-8">

@@ -1,34 +1,62 @@
-<svg width="640" height="320" viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="960" height="520" viewBox="0 0 960 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KIAAN — MindVibe Companion premium logo">
   <defs>
-    <linearGradient id="resonance" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e3a8a" />
-      <stop offset="45%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#6ad7ff" />
+    <linearGradient id="fluteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d6a240" />
+      <stop offset="45%" stop-color="#f5c56a" />
+      <stop offset="100%" stop-color="#c0c7d4" />
     </linearGradient>
-    <linearGradient id="flute" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#ff7a3c" />
-      <stop offset="50%" stop-color="#ff9f52" />
-      <stop offset="100%" stop-color="#ffd36f" />
+    <linearGradient id="kArm" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f8fbff" />
+      <stop offset="100%" stop-color="#d2dae7" />
     </linearGradient>
-    <radialGradient id="aura" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" stop-color="rgba(106, 215, 255, 0.42)" />
-      <stop offset="70%" stop-color="rgba(37, 99, 235, 0.18)" />
-      <stop offset="100%" stop-color="rgba(15, 23, 42, 0)" />
+    <linearGradient id="featherGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12c8c7" />
+      <stop offset="45%" stop-color="#1ca3e0" />
+      <stop offset="78%" stop-color="#7ad6ff" />
+      <stop offset="100%" stop-color="#c5b7ff" />
+    </linearGradient>
+    <radialGradient id="featherEye" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#ffe7a3" />
+      <stop offset="55%" stop-color="#ffbf6b" />
+      <stop offset="100%" stop-color="#1d3b8b" />
+    </radialGradient>
+    <radialGradient id="aura" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="rgba(106,215,255,0.35)" />
+      <stop offset="60%" stop-color="rgba(37,99,235,0.18)" />
+      <stop offset="100%" stop-color="rgba(6,9,18,0)" />
     </radialGradient>
   </defs>
-  <rect width="320" height="160" rx="28" fill="#0b0b0f" />
-  <rect x="6" y="6" width="308" height="148" rx="24" fill="#0f1624" />
-  <circle cx="84" cy="80" r="46" fill="url(#aura)" />
-  <g transform="translate(40 10)">
-    <path d="M80 132 C80 132, 76 102, 78 64 C80 22, 80 14, 80 10" stroke="url(#resonance)" stroke-width="2.4" stroke-linecap="round" fill="none" />
-    <path d="M78 64 C70 58, 60 52, 50 48 C60 54, 70 60, 78 68" fill="url(#resonance)" opacity="0.9" />
-    <path d="M82 64 C90 58, 100 52, 110 48 C100 54, 90 60, 82 68" fill="url(#resonance)" opacity="0.9" />
-    <ellipse cx="80" cy="40" rx="16" ry="12" fill="none" stroke="url(#resonance)" stroke-width="3" />
-    <ellipse cx="80" cy="40" rx="10" ry="7" fill="none" stroke="#1e3a8a" stroke-width="2" opacity="0.9" />
-    <ellipse cx="80" cy="40" rx="6" ry="4.8" fill="url(#flute)" />
+  <rect width="960" height="520" rx="40" fill="#07080d" />
+  <rect x="18" y="18" width="924" height="484" rx="36" fill="#0d101a" stroke="rgba(255,255,255,0.04)" />
+  <g transform="translate(120 90)">
+    <circle cx="160" cy="170" r="132" fill="url(#aura)" />
+    <circle cx="160" cy="170" r="108" stroke="url(#featherGradient)" stroke-width="3.5" opacity="0.35" />
+    <circle cx="160" cy="170" r="92" stroke="url(#featherGradient)" stroke-width="2" opacity="0.28" />
+
+    <line x1="124" y1="66" x2="124" y2="274" stroke="url(#fluteGradient)" stroke-width="18" stroke-linecap="round" />
+    <g fill="#0b1020" opacity="0.82">
+      <circle cx="124" cy="118" r="4" />
+      <circle cx="124" cy="156" r="4" />
+      <circle cx="124" cy="194" r="4" />
+      <circle cx="124" cy="232" r="4" />
+    </g>
+    <rect x="100" y="60" width="48" height="224" rx="16" fill="url(#fluteGradient)" opacity="0.2" />
+
+    <path d="M136 176 L236 88" stroke="url(#kArm)" stroke-width="18" stroke-linecap="round" />
+    <path d="M136 188 L246 252" stroke="url(#kArm)" stroke-width="18" stroke-linecap="round" />
+
+    <g transform="translate(210 16)">
+      <path d="M46 224 C52 176 96 118 152 98 C186 86 214 112 208 150 C200 198 152 230 112 246 C90 256 64 252 50 238" fill="url(#featherGradient)" stroke="rgba(27,86,152,0.48)" stroke-width="3" filter="drop-shadow(0 12px 30px rgba(32,120,190,0.38))" />
+      <path d="M92 96 C100 120 84 160 62 200" stroke="#f5fbff" stroke-width="3" stroke-linecap="round" opacity="0.9" />
+      <ellipse cx="132" cy="96" rx="26" ry="18" fill="url(#featherEye)" opacity="0.95" />
+      <circle cx="132" cy="96" r="34" stroke="rgba(255,255,255,0.65)" stroke-width="2" opacity="0.6" />
+    </g>
   </g>
-  <text x="200" y="78" text-anchor="middle" fill="url(#resonance)" font-family="'Manrope', 'Inter', sans-serif" font-weight="800" font-size="44" letter-spacing="8">KIAAN</text>
-  <line x1="116" y1="96" x2="284" y2="96" stroke="url(#flute)" stroke-width="5" stroke-linecap="round" />
-  <text x="200" y="120" text-anchor="middle" fill="#e8edf5" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="16" letter-spacing="1.6">MindVibe Companion</text>
-  <text x="200" y="138" text-anchor="middle" fill="#c2d9ff" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="12" letter-spacing="2">KIAAN — Crisp, calm guidance.</text>
+
+  <g transform="translate(420 132)">
+    <text x="0" y="110" fill="url(#fluteGradient)" font-family="'Plus Jakarta Sans','Inter','Manrope',sans-serif" font-weight="800" font-size="120" letter-spacing="14">KIAAN</text>
+    <rect x="6" y="136" width="454" height="10" rx="5" fill="url(#fluteGradient)" opacity="0.85" />
+    <text x="6" y="188" fill="#e8edf5" font-family="'Plus Jakarta Sans','Inter','Manrope',sans-serif" font-weight="700" font-size="28" letter-spacing="4">MindVibe Companion</text>
+    <text x="6" y="226" fill="#c9d5ee" font-family="'Plus Jakarta Sans','Inter','Manrope',sans-serif" font-weight="600" font-size="20" letter-spacing="5">KIAAN — Crisp, calm guidance.</text>
+  </g>
 </svg>
