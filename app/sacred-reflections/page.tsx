@@ -297,8 +297,8 @@ export default function SacredReflectionsPage() {
 
   const positiveMoods = new Set(moods.filter(m => m.tone === 'positive').map(m => m.label))
   const challengingMoods = new Set(moods.filter(m => m.tone === 'challenging').map(m => m.label))
-  const positiveDays = weeklyEntries.filter(e => positiveMoods.has(e.mood)).length
-  const challengingDays = weeklyEntries.filter(e => challengingMoods.has(e.mood)).length
+  const positiveDays = weeklyEntries.filter(e => positiveMoods.has(e.mood ?? '')).length
+  const challengingDays = weeklyEntries.filter(e => challengingMoods.has(e.mood ?? '')).length
 
   const assessment = (() => {
     if (weeklyEntries.length === 0) {
