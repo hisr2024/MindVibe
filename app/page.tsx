@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, type CSSProperties, type ReactElement } fr
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { GrowthJourney } from '@/components/GrowthJourney'
+import SimpleBar from 'simplebar-react'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -1129,11 +1130,16 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
       </div>
 
       <div className="relative">
-        <div
-          ref={messageListRef}
-          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable smooth-touch-scroll focus:outline-none"
-          tabIndex={0}
-          aria-label="Conversation with Kiaan"
+        <SimpleBar
+          autoHide={false}
+          scrollableNodeProps={{
+            ref: messageListRef,
+            tabIndex: 0,
+            'aria-label': 'Conversation with Kiaan',
+            className: 'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none',
+          }}
+          className="mv-energy-scrollbar"
+          contentClassName="p-4 md:p-6 space-y-4"
         >
           {messages.length === 0 && (
             <div className="text-center text-orange-100/70 py-20 md:py-32">
@@ -1180,7 +1186,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               </div>
             </div>
           )}
-        </div>
+        </SimpleBar>
 
       </div>
 

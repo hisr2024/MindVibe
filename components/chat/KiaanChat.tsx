@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import SimpleBar from 'simplebar-react'
 import { MessageBubble } from './MessageBubble'
 import { KiaanLogo } from '@/components/branding'
 
@@ -103,19 +104,24 @@ export function KiaanChat({
       </div>
 
       {/* Scrollable Messages Container */}
-      <div
-        ref={messagesContainerRef}
-        onScroll={handleScroll}
-        tabIndex={0}
-        role="log"
-        aria-label="Chat messages"
-        aria-live="polite"
-        className="kiaan-chat-scroll-container flex-1 overflow-y-auto px-4 py-4 space-y-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset"
-        style={{
-          maxHeight: 'calc(100vh - 300px)',
-          minHeight: '300px',
-          scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth' 
+      <SimpleBar
+        autoHide={false}
+        scrollableNodeProps={{
+          ref: messagesContainerRef,
+          onScroll: handleScroll,
+          tabIndex: 0,
+          role: 'log',
+          'aria-label': 'Chat messages',
+          'aria-live': 'polite',
+          className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
+          style: {
+            maxHeight: 'calc(100vh - 300px)',
+            minHeight: '300px',
+            scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth'
+          }
         }}
+        className="mv-energy-scrollbar flex-1"
+        contentClassName="px-4 py-4 space-y-4"
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-12">
@@ -155,7 +161,7 @@ export function KiaanChat({
           </div>
         )}
 
-      </div>
+      </SimpleBar>
 
       {/* Floating Jump to Latest button */}
       {!isAtBottom && messages.length > 0 && (
