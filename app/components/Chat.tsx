@@ -131,7 +131,11 @@ export default function Chat() {
       <div
         ref={listRef}
         onScroll={handleScroll}
-        className="h-80 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 scroll-smooth scroll-stable"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation history"
+        tabIndex={0}
+        className="h-80 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 pr-3 sm:pr-4 scroll-smooth scroll-stable chat-scrollbar smooth-touch-scroll"
       >
         {messages.length === 0 && (
           <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
