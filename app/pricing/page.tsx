@@ -158,7 +158,13 @@ export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
   const [centeredCardIndex, setCenteredCardIndex] = useState(0)
+  const [isScrolling, setIsScrolling] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const scrollRafRef = useRef<number>()
+  const scrollFadeTimeoutRef = useRef<NodeJS.Timeout>()
+  const snapTimeoutRef = useRef<NodeJS.Timeout>()
+  const isDraggingRef = useRef(false)
+  const lastDragXRef = useRef(0)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
   // Get pricing tiers with current currency
@@ -201,6 +207,47 @@ export default function PricingPage() {
     setCenteredCardIndex(closestIndex)
   }, [])
 
+  const snapToClosestCard = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const cards = Array.from(container.querySelectorAll<HTMLElement>('.pricing-card'))
+    if (!cards.length) return
+
+    const containerCenter = container.scrollLeft + container.clientWidth / 2
+
+    let closestIndex = 0
+    let closestDistance = Number.POSITIVE_INFINITY
+
+    cards.forEach((card, index) => {
+      const cardCenter = card.offsetLeft + card.clientWidth / 2
+      const distance = Math.abs(containerCenter - cardCenter)
+
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestIndex = index
+      }
+    })
+
+    const targetCard = cards[closestIndex]
+    const targetCenter = targetCard.offsetLeft + targetCard.clientWidth / 2
+    const targetScrollLeft = targetCenter - container.clientWidth / 2
+
+    container.scrollTo({
+      left: targetScrollLeft,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    })
+  }, [prefersReducedMotion])
+
+  const handleActiveScroll = useCallback(() => {
+    setIsScrolling(true)
+    if (scrollFadeTimeoutRef.current) clearTimeout(scrollFadeTimeoutRef.current)
+    scrollFadeTimeoutRef.current = setTimeout(() => setIsScrolling(false), 900)
+
+    if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
+    snapTimeoutRef.current = setTimeout(() => snapToClosestCard(), 180)
+  }, [snapToClosestCard])
+
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
@@ -209,14 +256,82 @@ export default function PricingPage() {
     updateCenteredCard()
 
     // Listen for scroll
-    container.addEventListener('scroll', updateCenteredCard, { passive: true })
+    const onScroll = () => {
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current)
+      scrollRafRef.current = requestAnimationFrame(() => {
+        updateCenteredCard()
+        handleActiveScroll()
+      })
+    }
+
+    container.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', updateCenteredCard, { passive: true })
 
     return () => {
-      container.removeEventListener('scroll', updateCenteredCard)
+      container.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', updateCenteredCard)
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current)
+      if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
+      if (scrollFadeTimeoutRef.current) clearTimeout(scrollFadeTimeoutRef.current)
     }
-  }, [updateCenteredCard])
+  }, [handleActiveScroll, updateCenteredCard])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const handleWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        event.preventDefault()
+        container.scrollBy({ left: event.deltaY, behavior: 'auto' })
+      }
+
+      handleActiveScroll()
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+      isDraggingRef.current = true
+      lastDragXRef.current = event.clientX
+      container.setPointerCapture(event.pointerId)
+      container.style.scrollBehavior = 'auto'
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!isDraggingRef.current) return
+      event.preventDefault()
+      const deltaX = event.clientX - lastDragXRef.current
+      container.scrollLeft -= deltaX
+      lastDragXRef.current = event.clientX
+      handleActiveScroll()
+    }
+
+    const handlePointerUp = (event: PointerEvent) => {
+      if (!isDraggingRef.current) return
+      isDraggingRef.current = false
+      if (container.hasPointerCapture(event.pointerId)) {
+        container.releasePointerCapture(event.pointerId)
+      }
+      container.style.scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth'
+      snapToClosestCard()
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    container.addEventListener('pointerdown', handlePointerDown)
+    container.addEventListener('pointermove', handlePointerMove)
+    container.addEventListener('pointerup', handlePointerUp)
+    container.addEventListener('pointerleave', handlePointerUp)
+    container.addEventListener('pointercancel', handlePointerUp)
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel)
+      container.removeEventListener('pointerdown', handlePointerDown)
+      container.removeEventListener('pointermove', handlePointerMove)
+      container.removeEventListener('pointerup', handlePointerUp)
+      container.removeEventListener('pointerleave', handlePointerUp)
+      container.removeEventListener('pointercancel', handlePointerUp)
+    }
+  }, [handleActiveScroll, prefersReducedMotion, snapToClosestCard])
 
   // Keyboard navigation for scroll container
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -305,10 +420,11 @@ export default function PricingPage() {
         tabIndex={0}
         role="region"
         aria-label="Pricing plans carousel"
-        className="subscription-scroll flex gap-6 overflow-x-auto pb-6 mb-16 snap-x snap-mandatory scroll-px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg"
+        className={`subscription-scroll flex gap-6 overflow-x-auto pb-6 mb-16 snap-x snap-mandatory scroll-px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg ${isScrolling ? 'scrolling' : ''}`}
         style={{
           scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
           WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
         }}
       >
         {pricingTiers.map((tier, index) => (
