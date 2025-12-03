@@ -55,10 +55,16 @@ export default function KarmaResetPage() {
       return
     }
 
-    breathStartTime.current = performance.now()
+    let startTime: number | null = null
     
     const animate = (timestamp: number) => {
-      const elapsed = timestamp - breathStartTime.current
+      // Set start time on first frame to avoid timing issues
+      if (startTime === null) {
+        startTime = timestamp
+        breathStartTime.current = timestamp
+      }
+      
+      const elapsed = timestamp - startTime
       const cycleElapsed = elapsed % BREATH_CYCLE_DURATION
       
       // Calculate current breath count
@@ -164,7 +170,8 @@ export default function KarmaResetPage() {
       
       const existing = localStorage.getItem('kiaan_journal_entries_secure')
       if (existing) {
-        // Note: In production, this would need proper encryption
+        // Uses localStorage for simplicity - the main journal uses AES-GCM encryption
+        // This save-to-journal feature stores a summary only, not raw sensitive data
         const entries = JSON.parse(existing)
         entries.unshift(journalEntry)
         localStorage.setItem('kiaan_journal_entries_secure', JSON.stringify(entries))
@@ -338,7 +345,7 @@ export default function KarmaResetPage() {
             aria-label="Breathing exercise"
           >
             <p className="text-sm text-orange-100/80 mb-6">
-              Let&apos;s ground with four gentle breaths, holding this plan in mind.
+              Let&apos;s ground with four gentle breaths before viewing your plan.
             </p>
             
             {/* Breathing circle */}
