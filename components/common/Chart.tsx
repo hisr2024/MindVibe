@@ -25,7 +25,7 @@ import {
   type TooltipProps,
 } from 'recharts'
 import type { ChartTheme } from '@/types/analytics.types'
-import { DARK_CHART_THEME, LIGHT_CHART_THEME } from '@/types/analytics.types'
+import { DARK_CHART_THEME } from '@/types/analytics.types'
 
 type ChartType = 'line' | 'area' | 'bar' | 'pie'
 
@@ -39,7 +39,6 @@ interface ChartProps {
   dataKey: string
   xAxisKey?: string
   height?: number
-  isDark?: boolean
   showGrid?: boolean
   showLegend?: boolean
   showTooltip?: boolean
@@ -56,11 +55,9 @@ function CustomTooltip({
   active,
   payload,
   label,
-  isDark,
   formatter,
   labelFormatter,
 }: TooltipProps<number, string> & {
-  isDark?: boolean
   formatter?: (value: number) => string
   labelFormatter?: (label: string) => string
 }) {
@@ -68,11 +65,7 @@ function CustomTooltip({
 
   return (
     <div
-      className={`rounded-lg border px-3 py-2 shadow-lg ${
-        isDark
-          ? 'border-orange-500/20 bg-[#0d0d10]/95 text-orange-50'
-          : 'border-gray-200 bg-white text-gray-900'
-      }`}
+      className="rounded-lg border border-orange-500/20 bg-[#0d0d10]/95 px-3 py-2 text-orange-50 shadow-lg"
     >
       <p className="text-xs font-medium mb-1">
         {labelFormatter ? labelFormatter(label as string) : label}
@@ -96,7 +89,6 @@ export function Chart({
   dataKey,
   xAxisKey = 'date',
   height = 300,
-  isDark = true,
   showGrid = true,
   showLegend = false,
   showTooltip = true,
@@ -107,7 +99,7 @@ export function Chart({
   tooltipFormatter,
   labelFormatter,
 }: ChartProps) {
-  const theme: ChartTheme = isDark ? DARK_CHART_THEME : LIGHT_CHART_THEME
+  const theme: ChartTheme = DARK_CHART_THEME
 
   const chartColors = useMemo(
     () =>
@@ -148,7 +140,6 @@ export function Chart({
               <Tooltip
                 content={
                   <CustomTooltip
-                    isDark={isDark}
                     formatter={tooltipFormatter}
                     labelFormatter={labelFormatter}
                   />
@@ -197,7 +188,6 @@ export function Chart({
               <Tooltip
                 content={
                   <CustomTooltip
-                    isDark={isDark}
                     formatter={tooltipFormatter}
                     labelFormatter={labelFormatter}
                   />
@@ -239,7 +229,6 @@ export function Chart({
               <Tooltip
                 content={
                   <CustomTooltip
-                    isDark={isDark}
                     formatter={tooltipFormatter}
                     labelFormatter={labelFormatter}
                   />
@@ -263,7 +252,6 @@ export function Chart({
               <Tooltip
                 content={
                   <CustomTooltip
-                    isDark={isDark}
                     formatter={tooltipFormatter}
                     labelFormatter={labelFormatter}
                   />

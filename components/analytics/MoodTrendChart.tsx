@@ -155,7 +155,6 @@ export function MoodTrendChart({
           dataKey="score"
           xAxisKey="date"
           height={250}
-          isDark={true}
           showGrid={true}
           showTooltip={true}
           tooltipFormatter={(value) => `${value.toFixed(1)} ${getMoodEmoji(value)}`}
