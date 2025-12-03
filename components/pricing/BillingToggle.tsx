@@ -9,29 +9,29 @@ interface BillingToggleProps {
 
 export function BillingToggle({ isYearly, onToggle, yearlySavings = 20, className = '' }: BillingToggleProps) {
   return (
-    <div className={`flex items-center justify-center gap-4 ${className}`}>
+    <div className={`flex items-center justify-center gap-3 ${className}`}>
       <button
         onClick={() => onToggle(false)}
-        className={`text-sm font-semibold transition-colors ${
+        className={`text-sm font-semibold transition-colors min-w-[70px] text-right ${
           !isYearly ? 'text-orange-50' : 'text-orange-100/60 hover:text-orange-100/80'
         }`}
       >
         Monthly
       </button>
-      
+
       <button
         onClick={() => onToggle(!isYearly)}
-        className="relative h-8 w-14 rounded-full border border-orange-500/30 bg-black/40 transition-colors hover:border-orange-400"
+        className="relative h-8 w-14 flex-shrink-0 rounded-full border border-orange-500/30 bg-black/40 transition-colors hover:border-orange-400"
         aria-label={`Switch to ${isYearly ? 'monthly' : 'yearly'} billing`}
       >
         <span
-          className={`absolute top-1 h-6 w-6 rounded-full bg-gradient-to-r from-orange-400 to-amber-300 transition-transform ${
-            isYearly ? 'translate-x-7' : 'translate-x-1'
+          className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-gradient-to-r from-orange-400 to-amber-300 transition-transform ${
+            isYearly ? 'translate-x-6' : 'translate-x-0'
           }`}
         />
       </button>
-      
-      <div className="flex items-center gap-2">
+
+      <div className="flex min-w-[70px] items-center gap-2">
         <button
           onClick={() => onToggle(true)}
           className={`text-sm font-semibold transition-colors ${
