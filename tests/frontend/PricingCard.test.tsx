@@ -217,6 +217,7 @@ describe('PricingCard', () => {
           tier={mockTier}
           isYearly={true}
           onSelect={mockOnSelect}
+          formattedMonthlyEquivalent="$2.08"
         />
       )
 

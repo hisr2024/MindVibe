@@ -14,10 +14,44 @@ html.light {
   color-scheme: light;
   --color-background: theme('colors.orange.50');
   --color-foreground: theme('colors.slate.900');
+  /* WCAG AA compliant light mode colors */
+  --text-primary: #1e293b;        /* slate-800 */
+  --text-secondary: #475569;       /* slate-600 */
+  --text-tertiary: #64748b;        /* slate-500 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;         /* slate-50 */
+  --bg-tertiary: #f1f5f9;          /* slate-100 */
+  --border-color: #e2e8f0;         /* slate-200 */
 }
 
 html.light body {
   @apply bg-orange-50 text-slate-900;
+}
+
+/* Light mode text contrast fixes */
+html.light .text-orange-100\/70,
+html.light .text-orange-100\/60,
+html.light .text-orange-100\/50,
+html.light .text-orange-100\/40 {
+  @apply text-slate-600;
+}
+
+html.light .text-orange-100\/80 {
+  @apply text-slate-700;
+}
+
+html.light .text-orange-50 {
+  @apply text-slate-900;
+}
+
+/* Light mode card backgrounds - using data attribute instead */
+html.light [class*="bg-black"],
+html.light [class*="bg-slate-950"] {
+  background-color: white !important;
+}
+
+html.light [class*="border-orange-500"] {
+  border-color: rgb(226 232 240) !important;
 }
 
 /* Accordion animations */
@@ -155,30 +189,122 @@ html.light body {
   overscroll-behavior: contain;
 }
 
-/* Modern minimal scrollbar for chat */
+/* =====================================================
+   MODERN SCROLLBAR STYLES - KIAAN Chat
+   ===================================================== */
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.chat-scrollbar:hover,
+.chat-scrollbar:focus,
+.chat-scrollbar.scrolling {
+  scrollbar-color: rgba(251, 146, 60, 0.5) transparent;
+}
+
 .chat-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .chat-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  background: transparent;
+  border-radius: 3px;
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(251, 146, 60, 0.3);
-  border-radius: 10px;
-  transition: background 0.2s;
+  background: linear-gradient(180deg, #ff7327, #ffc850);
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.3s ease, background 0.2s ease;
+}
+
+.chat-scrollbar:hover::-webkit-scrollbar-thumb,
+.chat-scrollbar:focus::-webkit-scrollbar-thumb,
+.chat-scrollbar.scrolling::-webkit-scrollbar-thumb {
+  opacity: 1;
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(251, 146, 60, 0.5);
+  background: linear-gradient(180deg, #ff8c4a, #ffd06f);
 }
 
-/* Firefox scrollbar */
-.chat-scrollbar {
+/* Light mode scrollbar for chat */
+html.light .chat-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ea580c, #f59e0b);
+}
+
+html.light .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #c2410c, #d97706);
+}
+
+/* =====================================================
+   SUBSCRIPTION SCROLL CONTAINER - Horizontal Scroll
+   ===================================================== */
+.subscription-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(251, 146, 60, 0.3) rgba(0, 0, 0, 0.1);
+  scrollbar-color: transparent transparent;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.subscription-scroll:hover,
+.subscription-scroll:focus,
+.subscription-scroll.scrolling {
+  scrollbar-color: rgba(251, 146, 60, 0.5) rgba(0, 0, 0, 0.1);
+}
+
+.subscription-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.subscription-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.subscription-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #ff7327, #ffc850);
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.subscription-scroll:hover::-webkit-scrollbar-thumb,
+.subscription-scroll:focus::-webkit-scrollbar-thumb,
+.subscription-scroll.scrolling::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+.subscription-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #ff8c4a, #ffd06f);
+  box-shadow: 0 0 8px rgba(255, 115, 39, 0.4);
+}
+
+/* Light mode horizontal scrollbar */
+html.light .subscription-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html.light .subscription-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #ea580c, #f59e0b);
+}
+
+html.light .subscription-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #c2410c, #d97706);
+}
+
+/* Auto-hide scrollbar animation */
+@keyframes scrollbarFadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes scrollbarFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* Fade in animation for micro-responses */
@@ -197,14 +323,41 @@ html.light body {
   animation: fadeIn 0.4s ease-out;
 }
 
+/* Pricing card scale animation */
+.pricing-card {
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  will-change: transform;
+}
+
+.pricing-card:focus-visible {
+  outline: 2px solid #fb923c;
+  outline-offset: 4px;
+}
+
+/* =====================================================
+   REDUCED MOTION SUPPORT
+   ===================================================== */
 @media (prefers-reduced-motion: reduce) {
   .animate-chat-wobble,
   .aurora-pane::after,
   .breathing-orb,
   .arrow-head,
   .animate-accordion-down,
-  .animate-accordion-up {
+  .animate-accordion-up,
+  .animate-fadeIn {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .pricing-card,
+  .subscription-scroll,
+  .chat-scrollbar,
+  .chat-scrollbar::-webkit-scrollbar-thumb,
+  .subscription-scroll::-webkit-scrollbar-thumb {
+    transition: none !important;
+  }
+  
+  .subscription-scroll {
+    scroll-behavior: auto !important;
   }
 }

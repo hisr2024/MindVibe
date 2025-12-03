@@ -1,12 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { BillingToggle, PricingCard, FeatureComparison, type PricingTier } from '@/components/pricing'
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
-const pricingTiers: PricingTier[] = [
+// Updated pricing tiers per requirements:
+// Pro: $5, Premium: $10, Executive: $15
+const createPricingTiers = (
+  currency: Currency,
+  formatPrice: (amount: number, options?: { showDecimals?: boolean }) => string,
+  getMonthlyPrice: (tierId: string) => number,
+  getYearlyPrice: (tierId: string) => number
+): PricingTier[] => [
   {
     id: 'free',
     name: 'Free',
@@ -23,34 +31,18 @@ const pricingTiers: PricingTier[] = [
     cta: 'Get Started Free',
   },
   {
-    id: 'basic',
-    name: 'Basic',
-    description: 'For regular mental wellness practice',
-    monthlyPrice: 2.49,
-    yearlyPrice: 24.99,
-    kiaanQuota: 50,
-    features: [
-      '50 KIAAN questions/month',
-      'All Free features',
-      'Journal with encryption',
-      'Extended journal insights',
-      'Email support',
-    ],
-    cta: 'Start Basic',
-  },
-  {
     id: 'pro',
     name: 'Pro',
     description: 'Enhanced tools for deeper practice',
-    monthlyPrice: 7.49,
-    yearlyPrice: 74.99,
+    monthlyPrice: getMonthlyPrice('pro'),
+    yearlyPrice: getYearlyPrice('pro'),
     kiaanQuota: 150,
     features: [
       '150 KIAAN questions/month',
-      'All Basic features',
+      'All Free features',
+      'Journal with encryption',
       'Ardha Reframing Assistant',
       'Viyog Detachment Coach',
-      'Advanced mood analytics',
     ],
     cta: 'Go Pro',
   },
@@ -58,8 +50,8 @@ const pricingTiers: PricingTier[] = [
     id: 'premium',
     name: 'Premium',
     description: 'Full access to all KIAAN features',
-    monthlyPrice: 15,
-    yearlyPrice: 149.99,
+    monthlyPrice: getMonthlyPrice('premium'),
+    yearlyPrice: getYearlyPrice('premium'),
     kiaanQuota: 300,
     highlighted: true,
     badge: 'Most Popular',
@@ -69,7 +61,7 @@ const pricingTiers: PricingTier[] = [
       'Relationship Compass',
       'Karma Reset Guide',
       'Priority support',
-      'Custom breathing patterns',
+      'Advanced mood analytics',
     ],
     cta: 'Go Premium',
   },
@@ -77,8 +69,8 @@ const pricingTiers: PricingTier[] = [
     id: 'executive',
     name: 'Executive',
     description: 'Unlimited access for power users',
-    monthlyPrice: 20,
-    yearlyPrice: 199.99,
+    monthlyPrice: getMonthlyPrice('executive'),
+    yearlyPrice: getYearlyPrice('executive'),
     kiaanQuota: 'unlimited',
     features: [
       'Unlimited KIAAN questions',
@@ -95,46 +87,163 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '20', basic: '50', pro: '150', premium: '300', executive: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Monthly Questions', values: { free: '20', pro: '150', premium: '300', executive: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, pro: true, premium: true, executive: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
-      { name: 'Viyog Detachment', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
-      { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
-      { name: 'Karma Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Ardha Reframing', values: { free: false, pro: true, premium: true, executive: true } },
+      { name: 'Viyog Detachment', values: { free: false, pro: true, premium: true, executive: true } },
+      { name: 'Relationship Compass', values: { free: false, pro: false, premium: true, executive: true } },
+      { name: 'Karma Reset Guide', values: { free: false, pro: false, premium: true, executive: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Mood Tracking', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Daily Wisdom', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Advanced Analytics', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
-      { name: 'API Access', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
+      { name: 'Encrypted Journal', values: { free: false, pro: true, premium: true, executive: true } },
+      { name: 'Mood Tracking', values: { free: true, pro: true, premium: true, executive: true } },
+      { name: 'Daily Wisdom', values: { free: true, pro: true, premium: true, executive: true } },
+      { name: 'Advanced Analytics', values: { free: false, pro: true, premium: true, executive: true } },
+      { name: 'API Access', values: { free: false, pro: false, premium: false, executive: true } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Email Support', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Priority Support', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
-      { name: 'Dedicated Support', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
+      { name: 'Community Access', values: { free: true, pro: true, premium: true, executive: true } },
+      { name: 'Email Support', values: { free: false, pro: true, premium: true, executive: true } },
+      { name: 'Priority Support', values: { free: false, pro: false, premium: true, executive: true } },
+      { name: 'Dedicated Support', values: { free: false, pro: false, premium: false, executive: true } },
     ],
   },
 ]
 
+// Currency Switcher Component
+function CurrencySwitcher({
+  currency,
+  onCurrencyChange,
+}: {
+  currency: Currency
+  onCurrencyChange: (currency: Currency) => void
+}) {
+  return (
+    <div className="flex items-center gap-2" role="group" aria-label="Currency selector">
+      {(Object.keys(CURRENCIES) as Currency[]).map((curr) => (
+        <button
+          key={curr}
+          onClick={() => onCurrencyChange(curr)}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            currency === curr
+              ? 'bg-gradient-to-r from-orange-400 to-amber-300 text-slate-900'
+              : 'bg-orange-500/10 text-orange-100/70 hover:bg-orange-500/20 hover:text-orange-50'
+          }`}
+          aria-pressed={currency === curr}
+          aria-label={`Select ${CURRENCIES[curr].name}`}
+        >
+          {CURRENCIES[curr].symbol} {curr}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function PricingPage() {
   const router = useRouter()
   const { subscription } = useSubscription()
+  const { currency, setCurrency, formatPrice, getMonthlyPrice, getYearlyPrice } = useCurrency()
   const [isYearly, setIsYearly] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
+  const [centeredCardIndex, setCenteredCardIndex] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+
+  // Get pricing tiers with current currency
+  const pricingTiers = createPricingTiers(currency, formatPrice, getMonthlyPrice, getYearlyPrice)
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      setPrefersReducedMotion(mediaQuery.matches)
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+      mediaQuery.addEventListener('change', handler)
+      return () => mediaQuery.removeEventListener('change', handler)
+    }
+  }, [])
+
+  // Scroll-related logic for detecting centered card
+  const updateCenteredCard = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const cards = container.querySelectorAll('.pricing-card')
+    const containerRect = container.getBoundingClientRect()
+    const containerCenter = containerRect.left + containerRect.width / 2
+
+    let closestIndex = 0
+    let closestDistance = Infinity
+
+    cards.forEach((card, index) => {
+      const cardRect = card.getBoundingClientRect()
+      const cardCenter = cardRect.left + cardRect.width / 2
+      const distance = Math.abs(containerCenter - cardCenter)
+      
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestIndex = index
+      }
+    })
+
+    setCenteredCardIndex(closestIndex)
+  }, [])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    // Initial check
+    updateCenteredCard()
+
+    // Listen for scroll
+    container.addEventListener('scroll', updateCenteredCard, { passive: true })
+    window.addEventListener('resize', updateCenteredCard, { passive: true })
+
+    return () => {
+      container.removeEventListener('scroll', updateCenteredCard)
+      window.removeEventListener('resize', updateCenteredCard)
+    }
+  }, [updateCenteredCard])
+
+  // Keyboard navigation for scroll container
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const cardWidth = 320 // Approximate card width + gap
+    
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault()
+        container.scrollBy({ left: -cardWidth, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+      case 'ArrowRight':
+        e.preventDefault()
+        container.scrollBy({ left: cardWidth, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+      case 'Home':
+        e.preventDefault()
+        container.scrollTo({ left: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+      case 'End':
+        e.preventDefault()
+        container.scrollTo({ left: container.scrollWidth, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+    }
+  }, [prefersReducedMotion])
 
   const handleSelectTier = async (tierId: string) => {
     if (tierId === 'free') {
@@ -156,6 +265,20 @@ export default function PricingPage() {
     }, 1000)
   }
 
+  // Format prices for display
+  const getFormattedPrice = (tierId: string, yearly: boolean) => {
+    if (tierId === 'free') return formatPrice(0)
+    const price = yearly ? getYearlyPrice(tierId) : getMonthlyPrice(tierId)
+    return formatPrice(price)
+  }
+
+  const getFormattedMonthlyEquivalent = (tierId: string) => {
+    if (tierId === 'free') return null
+    const yearlyPrice = getYearlyPrice(tierId)
+    const monthlyEquivalent = yearlyPrice / 12
+    return formatPrice(monthlyEquivalent)
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-12">
       {/* Header */}
@@ -164,22 +287,46 @@ export default function PricingPage() {
           Choose Your Path to Inner Peace
         </h1>
         <p className="text-lg text-orange-100/70 max-w-2xl mx-auto mb-8">
-          Every plan includes the same quality KIAAN guidance. Choose based on how often you'd like to connect.
+          Every plan includes the same quality KIAAN guidance. Choose based on how often you&apos;d like to connect.
         </p>
+        
+        {/* Currency Switcher */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <CurrencySwitcher currency={currency} onCurrencyChange={setCurrency} />
+        </div>
+        
         <BillingToggle isYearly={isYearly} onToggle={setIsYearly} />
       </div>
 
-      {/* Pricing Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-16">
-        {pricingTiers.map((tier) => (
-          <PricingCard
+      {/* Scrollable Pricing Cards Container */}
+      <div
+        ref={scrollContainerRef}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label="Pricing plans carousel"
+        className="subscription-scroll flex gap-6 overflow-x-auto pb-6 mb-16 snap-x snap-mandatory scroll-px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg"
+        style={{
+          scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {pricingTiers.map((tier, index) => (
+          <div
             key={tier.id}
-            tier={tier}
-            isYearly={isYearly}
-            onSelect={handleSelectTier}
-            currentPlan={subscription?.tierId}
-            loading={loading === tier.id}
-          />
+            className="flex-shrink-0 w-[280px] sm:w-[300px] snap-center"
+          >
+            <PricingCard
+              tier={tier}
+              isYearly={isYearly}
+              onSelect={handleSelectTier}
+              currentPlan={subscription?.tierId}
+              loading={loading === tier.id}
+              formattedPrice={getFormattedPrice(tier.id, isYearly)}
+              formattedMonthlyEquivalent={isYearly ? getFormattedMonthlyEquivalent(tier.id) ?? undefined : undefined}
+              isCentered={index === centeredCardIndex}
+            />
+          </div>
         ))}
       </div>
 
@@ -250,7 +397,7 @@ export default function PricingPage() {
             },
             {
               q: 'Can I get a refund?',
-              a: "We offer a 14-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund.",
+              a: 'We offer a 14-day money-back guarantee for all paid plans. If you&apos;re not satisfied, contact us for a full refund.',
             },
           ].map((faq, i) => (
             <Card key={i} variant="bordered">
