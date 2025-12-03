@@ -288,7 +288,8 @@ export default function SacredReflectionsPage() {
   const weeklyEntries = entries.filter(e => new Date(e.at) >= sevenDaysAgo)
 
   const moodCounts = weeklyEntries.reduce<Record<string, number>>((acc, curr) => {
-    acc[curr.mood] = (acc[curr.mood] || 0) + 1
+    const moodKey = curr.mood ?? 'Unspecified'
+    acc[moodKey] = (acc[moodKey] || 0) + 1
     return acc
   }, {})
 
