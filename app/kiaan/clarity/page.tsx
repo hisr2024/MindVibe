@@ -4,19 +4,19 @@ const steps = [
   {
     title: 'Auto-detected overlays',
     detail: 'Urgency and emotion signals trigger the pause overlay while keeping messages queued.',
-    anchor: '/#clarity-suite',
+    anchor: '/#kiaan-chat',
     chips: ['Impulse scoring', 'Safety-first UX', 'Non-blocking']
   },
   {
     title: 'Manual pause starter',
     detail: 'Manually start the 60-second clarity timer with the exact prompts from the main flow.',
-    anchor: '/#clarity-suite',
+    anchor: '/#kiaan-chat',
     chips: ['Breath pacing', 'Grounding steps', 'Same countdown copy']
   },
   {
     title: 'Reasoning prompts',
     detail: 'Surface the reasoning and closing choices without changing how KIAAN evaluates risk.',
-    anchor: '/#clarity-suite',
+    anchor: '/#kiaan-chat',
     chips: ['Reversible', 'No new state', 'Gita-aligned language']
   }
 ]
