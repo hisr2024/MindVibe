@@ -24,6 +24,32 @@
   --shadow-glow-sunrise: 0 0 32px rgba(255, 147, 89, 0.45);
   --shadow-glow-ocean: 0 0 32px rgba(23, 177, 167, 0.35);
   --shadow-glow-aurora: 0 0 32px rgba(255, 143, 180, 0.4);
+  --mv-background: radial-gradient(circle at 15% 20%, rgba(255, 153, 51, 0.08), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 40%),
+    linear-gradient(135deg, #050505 0%, #0b0b0f 45%, #120907 100%);
+  --mv-surface: #0f1624;
+  --mv-surface-subtle: #0b0b10;
+  --mv-surface-elevated: rgba(13, 13, 16, 0.9);
+  --mv-text-primary: #f8fafc;
+  --mv-text-secondary: #e2e8f0;
+  --mv-text-muted: #cbd5e1;
+  --mv-border: rgba(226, 232, 240, 0.16);
+  --mv-border-strong: rgba(255, 153, 51, 0.22);
+  --mv-card-teal-bg: linear-gradient(140deg, rgba(18, 92, 92, 0.85), rgba(60, 152, 142, 0.7), rgba(98, 204, 190, 0.6));
+  --mv-card-teal-text: #e7fffb;
+  --mv-card-blue-bg: linear-gradient(145deg, rgba(24, 42, 74, 0.86), rgba(58, 93, 132, 0.75), rgba(124, 173, 226, 0.68));
+  --mv-card-blue-text: #eaf2ff;
+  --mv-card-lilac-bg: linear-gradient(145deg, rgba(72, 46, 78, 0.85), rgba(122, 76, 124, 0.7), rgba(196, 158, 214, 0.64));
+  --mv-card-lilac-text: #f9f0ff;
+  --mv-card-shadow: 0 16px 48px rgba(6, 10, 22, 0.32);
+  --mv-panel-bg: rgba(13, 13, 16, 0.9);
+  --mv-panel-border: rgba(255, 153, 51, 0.22);
+  --mv-panel-text-primary: #f8fafc;
+  --mv-panel-text-secondary: #e2e8f0;
+  --mv-input-bg: rgba(0, 0, 0, 0.55);
+  --mv-input-border: rgba(255, 153, 51, 0.28);
+  --mv-input-placeholder: rgba(248, 250, 252, 0.72);
+  --mv-overlay-soft: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.4));
 }
 
 /* Light mode styles using CSS custom properties */
@@ -37,10 +63,117 @@ html.light {
   --text-secondary: #334155;
   --text-tertiary: #475569;
   --border-color: #e2e8f0;
+  --mv-background: radial-gradient(circle at 15% 20%, rgba(255, 188, 120, 0.18), transparent 30%),
+    radial-gradient(circle at 85% 15%, rgba(149, 213, 255, 0.18), transparent 40%),
+    linear-gradient(135deg, #fdf7f2 0%, #f8fbff 55%, #f3f6fb 100%);
+  --mv-surface: #ffffff;
+  --mv-surface-subtle: #f5f1eb;
+  --mv-surface-elevated: #f8fafc;
+  --mv-text-primary: #111827;
+  --mv-text-secondary: #374151;
+  --mv-text-muted: #4b5563;
+  --mv-border: #e2e8f0;
+  --mv-border-strong: #d97706;
+  --mv-card-teal-bg: linear-gradient(135deg, #d2f3ee, #b2e5da, #8ed2c7);
+  --mv-card-teal-text: #0f172a;
+  --mv-card-blue-bg: linear-gradient(135deg, #dbe8ff, #c1d6f6, #9fc0ea);
+  --mv-card-blue-text: #0b1a2b;
+  --mv-card-lilac-bg: linear-gradient(135deg, #f1e8fb, #dfd1f1, #c9b3e3);
+  --mv-card-lilac-text: #271638;
+  --mv-card-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  --mv-panel-bg: #ffffff;
+  --mv-panel-border: #e2e8f0;
+  --mv-panel-text-primary: #0f172a;
+  --mv-panel-text-secondary: #475569;
+  --mv-input-bg: #f9fafb;
+  --mv-input-border: #cbd5e1;
+  --mv-input-placeholder: #64748b;
+  --mv-overlay-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(249, 250, 251, 0.85));
 }
 
 html.light body {
   @apply bg-white text-slate-900;
+}
+
+.mv-page {
+  background: var(--mv-background);
+  color: var(--mv-text-primary);
+}
+
+.mv-surface-panel {
+  background: var(--mv-panel-bg);
+  border: 1px solid var(--mv-panel-border);
+  color: var(--mv-panel-text-primary);
+  box-shadow: var(--mv-card-shadow, 0 16px 48px rgba(6, 10, 22, 0.18));
+}
+
+.mv-chip {
+  color: var(--mv-panel-text-secondary);
+  border-color: var(--mv-border);
+  background: var(--mv-surface-subtle);
+}
+
+.mv-panel-title {
+  color: var(--mv-panel-text-primary);
+}
+
+.mv-panel-subtle {
+  color: var(--mv-panel-text-secondary);
+}
+
+.mv-input {
+  background: var(--mv-input-bg);
+  border: 1px solid var(--mv-input-border);
+  color: var(--mv-text-primary);
+}
+
+.mv-input::placeholder {
+  color: var(--mv-input-placeholder);
+}
+
+.mv-token-card {
+  background: var(--mv-card-bg);
+  color: var(--mv-card-text);
+  box-shadow: var(--mv-card-shadow);
+  border: 1px solid var(--mv-border);
+}
+
+.mv-token-card .mv-token-text {
+  color: var(--mv-card-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.mood-card {
+  color: var(--mv-panel-text-primary);
+  background: var(--mv-surface-subtle);
+  border-color: var(--mv-border);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.14);
+}
+
+.mood-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  background: var(--mv-overlay-soft);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+html.light .mood-card {
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+}
+
+html.light .mood-card .mv-panel-subtle,
+html.light .mood-card .mv-panel-title {
+  color: var(--mv-panel-text-primary);
+}
+
+.clarity-card {
+  background: var(--mv-surface-subtle);
+  border-color: var(--mv-border);
+  color: var(--mv-panel-text-primary);
+  box-shadow: 0 14px 45px rgba(15, 23, 42, 0.12);
 }
 
 /* Light mode text contrast fixes for orange legacy classes */

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { applyThemeTokens, darkTheme, lightTheme } from '@/brand/theme/tokens'
 
 interface ThemeToggleProps {
   className?: string
@@ -23,6 +24,7 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
     localStorage.setItem('mindvibe-theme', theme)
     document.documentElement.classList.toggle('light', theme === 'light')
     document.documentElement.classList.toggle('dark', theme === 'dark')
+    applyThemeTokens(theme === 'light' ? lightTheme : darkTheme)
   }, [theme])
 
   const toggle = () => {
