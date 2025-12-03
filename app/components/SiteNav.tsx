@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { ThemeToggle } from '@/components/ui'
+import { MindVibeLogo } from '@/components/branding'
 
 const links = [
   { href: '/', label: 'Home' },
@@ -24,12 +25,10 @@ export default function SiteNav() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-orange-500/10 bg-slate-950/85 backdrop-blur-lg">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="flex items-center gap-3 text-orange-100 transition hover:text-orange-200" aria-label="MindVibe home">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-200 text-slate-900 font-black">
-            MV
-          </span>
+          <MindVibeLogo size={40} animated={true} />
           <div className="leading-tight">
             <p className="text-xs uppercase tracking-[0.24em] text-orange-100/80">MindVibe</p>
-            <p className="text-sm font-semibold text-orange-50">Mental Health Companion</p>
+            <p className="text-sm font-semibold text-orange-50">MindVibe Companion</p>
           </div>
         </Link>
 
