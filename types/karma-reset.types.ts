@@ -6,28 +6,19 @@
 /** Repair type options */
 export type RepairType = 'apology' | 'clarification' | 'calm_followup'
 
-/** KIAAN structured reset response */
+/** KIAAN structured 4-part reset plan response */
 export interface KiaanResetResponse {
-  pause: string
-  ripple: {
-    what_happened: string
-    impact: string
-  }
-  repair: {
-    type: RepairType
-    action: string
-  }
-  intention: string
+  pauseAndBreathe: string
+  nameTheRipple: string
+  repair: string
+  moveWithIntention: string
 }
 
 /** Reset flow step identifiers */
 export type ResetStep = 
   | 'input' 
   | 'breathing' 
-  | 'pause' 
-  | 'ripple' 
-  | 'repair' 
-  | 'intention' 
+  | 'plan'
   | 'complete'
 
 /** Repair action configuration */
@@ -83,9 +74,6 @@ export const REPAIR_TYPE_DISPLAY: Record<RepairType, { icon: string; label: stri
 export const RESET_STEP_ORDER: ResetStep[] = [
   'input', 
   'breathing', 
-  'pause', 
-  'ripple', 
-  'repair', 
-  'intention', 
+  'plan',
   'complete'
 ]

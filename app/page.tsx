@@ -1785,57 +1785,11 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
 
 function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const resetSteps = [
-    { title: 'Pause and breathe', detail: 'Take 4 slow breaths to let the nervous system settle before reacting.' },
-    { title: 'Name the ripple', detail: 'What happened? Who was impacted? Acknowledge it without self-blame.' },
-    { title: 'Choose the repair', detail: 'Pick one caring action: apology, clarification, or a calm follow-up.' },
-    { title: 'Move with intention', detail: 'Return to your values; act in a way future-you will respect.' }
+    { title: 'Pause and breathe', detail: 'Take 4 slow breaths to let the nervous system settle.' },
+    { title: 'Name the ripple', detail: 'Acknowledge what happened and who was impacted.' },
+    { title: 'Choose the repair', detail: 'Pick one caring action: apology, clarification, or follow-up.' },
+    { title: 'Move with intention', detail: 'Return to your values and act with clarity.' }
   ]
-
-  const actions = [
-    { label: 'Apology', helper: 'Offer a sincere apology that stays brief and grounded.' },
-    { label: 'Clarification', helper: 'Gently clarify what you meant and invite understanding.' },
-    { label: 'Calm follow-up', helper: 'Return with a warm note that re-centers the conversation.' }
-  ]
-
-  const prompts = [
-    "Help me reset after a misstep so I stay aligned with Kiaan's calm guidance.",
-    'I want to repair a small mistake—walk me through a kind response.',
-    'Give me a short reflection to release guilt and act with clarity.'
-  ]
-
-  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({})
-  const [breathActive, setBreathActive] = useState(false)
-  const [breathTick, setBreathTick] = useState(0)
-  const [misstep, setMisstep] = useState('')
-  const [impact, setImpact] = useState('')
-  const [repairAction, setRepairAction] = useState(actions[0].label)
-  const [intention, setIntention] = useState('')
-  const [plan, setPlan] = useState('')
-
-  useEffect(() => {
-    if (!breathActive) return
-    setBreathTick(0)
-    let current = 0
-    const id = setInterval(() => {
-      current += 1
-      setBreathTick(current)
-      if (current >= 16) {
-        setBreathActive(false)
-        clearInterval(id)
-      }
-    }, 900)
-
-    return () => clearInterval(id)
-  }, [breathActive])
-
-  const breathPhase = ['Inhale gently', 'Hold softly', 'Exhale slowly', 'Rest in calm'][breathTick % 4] ?? 'Inhale gently'
-  const breathsDone = Math.min(4, Math.floor(breathTick / 4))
-
-  function buildPlan() {
-    const summary = `Gentle course correction\n\n- Pause: ${breathActive ? 'in progress' : breathsDone >= 4 ? 'completed 4 slow breaths' : 'begin with 4 slow breaths'}\n- What happened: ${misstep || 'a brief misstep'}\n- Who felt it: ${impact || 'I noticed the tone shifted'}\n- Repair choice: ${repairAction}\n- Intention: ${intention || 'stay kind, steady, and clear'}`
-    const prompt = `${summary}\n\nGuide me through a calm message that keeps Kiaan's supportive tone and helps me repair with care.`
-    setPlan(prompt)
-  }
 
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0c10] via-[#120d0c] to-[#0b0b0f] border border-orange-500/15 p-6 md:p-7 space-y-5 shadow-[0_20px_80px_rgba(255,115,39,0.14)]">
@@ -1845,174 +1799,93 @@ function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) 
       <div className="relative flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-xs text-orange-100/80">Gentle course correction</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Guide</h2>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Ritual</h2>
           <p className="text-sm text-orange-100/80 max-w-2xl">
-            A calm checklist to reset after small missteps while keeping KIAAN’s warm, non-judgmental tone intact.
+            A calm, unified reset ritual. Tell KIAAN what happened, choose your repair, and complete a grounding 4-breath reset with a personalized plan.
           </p>
         </div>
-        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/25 rounded-full px-3 py-1">Keeps conversations kind and respectful</div>
+        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/25 rounded-full px-3 py-1">🕐 20-40 seconds</div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="space-y-3 md:col-span-2">
-          <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-            <div className="flex items-start justify-between gap-3 flex-wrap">
-              <div>
-                <p className="text-sm font-semibold text-orange-50">4-breath reset</p>
-                <p className="text-xs text-orange-100/75">Let the guided breathing animation lead you.</p>
-              </div>
-              <button
-                className="px-3 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-orange-500 to-[#ffb347] text-slate-950 shadow-md shadow-orange-500/25 hover:scale-105 transition"
-                onClick={() => setBreathActive(true)}
-              >
-                {breathActive ? 'Reset in motion' : breathsDone >= 4 ? 'Replay reset' : 'Begin reset'}
-              </button>
-            </div>
-            <div className="mt-4 flex items-center gap-4">
-              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/20 via-[#ffb347]/20 to-transparent flex items-center justify-center">
-                <div
-                  className={`h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ff9933]/20 to-orange-200/10 shadow-inner shadow-orange-500/30 ${breathActive ? 'animate-ping' : 'animate-pulse'}`}
-                />
-                <div className="absolute inset-2 rounded-full border border-orange-400/30" />
-              </div>
-              <div className="space-y-1">
-                <div className="text-sm font-semibold text-orange-50">{breathPhase}</div>
-                <div className="text-xs text-orange-100/75">{Math.min(4, breathsDone + 1)} / 4 breaths</div>
-                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-orange-400 to-[#ffb347] transition-all" style={{ width: `${(Math.min(breathTick, 16) / 16) * 100}%` }} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            {resetSteps.map(step => (
-              <button
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Reset steps preview */}
+        <div className="space-y-3">
+          <p className="text-xs text-orange-100/70 font-semibold uppercase tracking-wide">The 4-Part Reset Plan</p>
+          <div className="grid gap-2">
+            {resetSteps.map((step, index) => (
+              <div
                 key={step.title}
-                onClick={() => setCompletedSteps(prev => ({ ...prev, [step.title]: !prev[step.title] }))}
-                className={`text-left rounded-2xl border bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)] transition ${
-                  completedSteps[step.title]
-                    ? 'border-green-300/50 bg-green-500/10 shadow-green-500/20'
-                    : 'border-orange-500/20 hover:border-orange-300/60'
-                }`}
+                className="flex items-start gap-3 rounded-xl border border-orange-500/15 bg-black/30 p-3"
               >
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`h-5 w-5 rounded-full border flex items-center justify-center text-[11px] ${
-                      completedSteps[step.title]
-                        ? 'border-green-300 bg-green-500/30 text-green-50'
-                        : 'border-orange-400/60 text-orange-100'
-                    }`}
-                  >
-                    {completedSteps[step.title] ? '✓' : '○'}
-                  </span>
+                <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold border ${
+                  index === 0 ? 'bg-orange-500/20 border-orange-400 text-orange-50' :
+                  index === 1 ? 'bg-purple-500/20 border-purple-400 text-purple-50' :
+                  index === 2 ? 'bg-green-500/20 border-green-400 text-green-50' :
+                  'bg-blue-500/20 border-blue-400 text-blue-50'
+                }`}>
+                  {index + 1}
+                </span>
+                <div>
                   <p className="text-sm font-semibold text-orange-50">{step.title}</p>
+                  <p className="text-xs text-orange-100/70">{step.detail}</p>
                 </div>
-                <p className="text-xs text-orange-100/75 leading-relaxed mt-2">{step.detail}</p>
-              </button>
+              </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-4 space-y-4 shadow-[0_10px_40px_rgba(255,115,39,0.12)]">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-orange-50">Talk it through with KIAAN</h3>
-            <span className="text-[11px] text-orange-100/70 bg-white/5 border border-orange-500/20 rounded-full px-2 py-1">Quick fill</span>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">What happened?</label>
-            <textarea
-              value={misstep}
-              onChange={e => setMisstep(e.target.value)}
-              placeholder="A brief slip or tone that felt off..."
-              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
-              rows={2}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">Who felt the ripple?</label>
-            <input
-              value={impact}
-              onChange={e => setImpact(e.target.value)}
-              placeholder="A teammate, friend, or even myself"
-              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">Choose the repair</label>
-            <div className="grid grid-cols-1 gap-2">
-              {actions.map(action => (
-                <button
-                  key={action.label}
-                  onClick={() => setRepairAction(action.label)}
-                  className={`rounded-xl border px-3 py-2 text-left transition ${
-                    repairAction === action.label
-                      ? 'border-green-300/60 bg-green-500/10 text-green-50 shadow-[0_8px_24px_rgba(52,211,153,0.18)]'
-                      : 'border-orange-400/25 bg-white/5 text-orange-50 hover:border-orange-300/60'
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{action.label}</div>
-                  <div className="text-[11px] text-orange-100/75">{action.helper}</div>
-                </button>
-              ))}
+        {/* Launch panel */}
+        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-5 space-y-4 shadow-[0_10px_40px_rgba(255,115,39,0.12)] flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-400/30 to-[#ffb347]/30 flex items-center justify-center text-xl">
+                🔄
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-orange-50">Begin Your Reset</h3>
+                <p className="text-xs text-orange-100/70">KIAAN generates a personalized plan</p>
+              </div>
+            </div>
+            
+            <div className="rounded-xl bg-black/40 border border-orange-500/15 p-3 space-y-2">
+              <p className="text-xs text-orange-100/80">
+                <strong className="text-orange-200">Step 1:</strong> Tell KIAAN what happened
+              </p>
+              <p className="text-xs text-orange-100/80">
+                <strong className="text-orange-200">Step 2:</strong> Identify who felt the ripple
+              </p>
+              <p className="text-xs text-orange-100/80">
+                <strong className="text-orange-200">Step 3:</strong> Choose your repair type
+              </p>
+              <p className="text-xs text-orange-100/80">
+                <strong className="text-orange-200">Step 4:</strong> Complete 4-breath reset with plan
+              </p>
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">Move with intention</label>
-            <textarea
-              value={intention}
-              onChange={e => setIntention(e.target.value)}
-              placeholder="How do you want to show up next?"
-              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
-              rows={2}
-            />
-          </div>
 
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={buildPlan}
-              className="flex-1 min-w-[140px] px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition"
+          <div className="space-y-3">
+            <Link
+              href="/karma-reset"
+              className="block w-full text-center px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-[1.02] transition"
             >
-              Build reset plan
-            </button>
+              Begin Reset Ritual →
+            </Link>
+            
             <button
               onClick={() => {
-                const chosen = plan || prompts[0]
-                onSelectPrompt(chosen)
+                onSelectPrompt("Help me reset after a misstep so I stay aligned with Kiaan's calm guidance.")
                 document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }}
-              className="px-4 py-2 rounded-xl border border-orange-400/25 bg-white/5 text-sm text-orange-50 hover:border-orange-300/60 transition"
+              className="w-full px-4 py-2 rounded-xl border border-orange-400/25 bg-white/5 text-sm text-orange-50 hover:border-orange-300/60 transition"
             >
-              Send to KIAAN
+              💬 Or discuss with KIAAN first
             </button>
           </div>
-
-          <div className="flex flex-col gap-2">
-            {prompts.map(prompt => (
-              <button
-                key={prompt}
-                onClick={() => {
-                  onSelectPrompt(prompt)
-                  document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }}
-                className="text-left rounded-xl border border-orange-400/25 bg-white/5 px-3 py-3 text-sm text-orange-50 hover:border-orange-300/60 transition"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-
-          {plan && (
-            <div className="text-[11px] text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-lg p-3 whitespace-pre-line">
-              {plan}
-            </div>
-          )}
         </div>
       </div>
     </section>
   )
 }
-
 function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void }) {
   const [saved, setSaved] = useState(false)
   const wisdom = {

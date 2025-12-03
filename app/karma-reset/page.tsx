@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import type { KiaanResetResponse, ResetStep, RepairType } from '@/types/karma-reset.types'
-import { REPAIR_ACTIONS, RESET_STEP_ORDER, REPAIR_TYPE_DISPLAY } from '@/types/karma-reset.types'
+import { REPAIR_ACTIONS, RESET_STEP_ORDER } from '@/types/karma-reset.types'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -13,10 +13,19 @@ function sanitizeInput(input: string): string {
     .slice(0, 2000) // Limit length
 }
 
+// Breathing phase configuration (4s inhale, 1s hold, 5s exhale = 10s per breath)
+const BREATH_PHASES = [
+  { label: 'Inhale', duration: 4000, instruction: 'Breathe in slowly...' },
+  { label: 'Hold', duration: 1000, instruction: 'Hold gently...' },
+  { label: 'Exhale', duration: 5000, instruction: 'Release slowly...' },
+]
+const TOTAL_BREATHS = 4
+const BREATH_CYCLE_DURATION = BREATH_PHASES.reduce((acc, p) => acc + p.duration, 0)
+
 export default function KarmaResetPage() {
   // User inputs
-  const [misstep, setMisstep] = useState('')
-  const [impact, setImpact] = useState('')
+  const [whatHappened, setWhatHappened] = useState('')
+  const [whoFeltRipple, setWhoFeltRipple] = useState('')
   const [repairType, setRepairType] = useState<RepairType>(REPAIR_ACTIONS[0].value)
   
   // Reset flow state
@@ -25,37 +34,79 @@ export default function KarmaResetPage() {
   const [kiaanResponse, setKiaanResponse] = useState<KiaanResetResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Breathing animation state
-  const [breathActive, setBreathActive] = useState(false)
-  const [breathTick, setBreathTick] = useState(0)
+  // Breathing state
+  const [breathCount, setBreathCount] = useState(0)
+  const [breathPhaseIndex, setBreathPhaseIndex] = useState(0)
+  const [breathProgress, setBreathProgress] = useState(0)
+  const [isBreathing, setIsBreathing] = useState(false)
+  const breathStartTime = useRef<number>(0)
+  const animationFrame = useRef<number | undefined>(undefined)
 
+  // Save to journal state
+  const [journalSaved, setJournalSaved] = useState(false)
+
+  // Breathing animation loop
   useEffect(() => {
-    if (!breathActive) return
-    setBreathTick(0)
-    let current = 0
-    const id = setInterval(() => {
-      current += 1
-      setBreathTick(current)
-      if (current >= 16) {
-        setBreathActive(false)
-        clearInterval(id)
-        // Auto-advance to pause step after breathing is complete
-        setCurrentStep('pause')
+    if (!isBreathing || breathCount >= TOTAL_BREATHS) {
+      if (breathCount >= TOTAL_BREATHS && isBreathing) {
+        setIsBreathing(false)
+        setCurrentStep('plan')
       }
-    }, 900)
-    return () => clearInterval(id)
-  }, [breathActive])
+      return
+    }
 
-  const breathPhase = ['Inhale gently', 'Hold softly', 'Exhale slowly', 'Rest in calm'][breathTick % 4] ?? 'Inhale gently'
-  const breathsDone = Math.min(4, Math.floor(breathTick / 4))
+    breathStartTime.current = performance.now()
+    
+    const animate = (timestamp: number) => {
+      const elapsed = timestamp - breathStartTime.current
+      const cycleElapsed = elapsed % BREATH_CYCLE_DURATION
+      
+      // Calculate current breath count
+      const completedBreaths = Math.floor(elapsed / BREATH_CYCLE_DURATION)
+      if (completedBreaths !== breathCount && completedBreaths < TOTAL_BREATHS) {
+        setBreathCount(completedBreaths)
+      }
+      
+      if (completedBreaths >= TOTAL_BREATHS) {
+        setBreathCount(TOTAL_BREATHS)
+        setIsBreathing(false)
+        setCurrentStep('plan')
+        return
+      }
+      
+      // Calculate current phase and progress within phase
+      let phaseStart = 0
+      let currentPhase = 0
+      for (let i = 0; i < BREATH_PHASES.length; i++) {
+        if (cycleElapsed < phaseStart + BREATH_PHASES[i].duration) {
+          currentPhase = i
+          const phaseElapsed = cycleElapsed - phaseStart
+          setBreathProgress(phaseElapsed / BREATH_PHASES[i].duration)
+          break
+        }
+        phaseStart += BREATH_PHASES[i].duration
+      }
+      setBreathPhaseIndex(currentPhase)
+      
+      animationFrame.current = requestAnimationFrame(animate)
+    }
+    
+    animationFrame.current = requestAnimationFrame(animate)
+    
+    return () => {
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current)
+      }
+    }
+  }, [isBreathing, breathCount])
 
   // Generate KIAAN reset guidance
   const generateResetGuidance = useCallback(async () => {
     setLoading(true)
     setError(null)
 
-    const sanitizedMisstep = sanitizeInput(misstep) || 'A brief misstep or moment that felt off'
-    const sanitizedImpact = sanitizeInput(impact) || 'Someone I care about'
+    const sanitizedWhatHappened = sanitizeInput(whatHappened) || 'A brief misstep or moment that felt off'
+    const sanitizedWhoFeltRipple = sanitizeInput(whoFeltRipple) || 'Someone I care about'
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -63,8 +114,8 @@ export default function KarmaResetPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          what_happened: sanitizedMisstep,
-          who_felt_it: sanitizedImpact,
+          what_happened: sanitizedWhatHappened,
+          who_felt_it: sanitizedWhoFeltRipple,
           repair_type: repairType
         })
       })
@@ -75,7 +126,10 @@ export default function KarmaResetPage() {
           setKiaanResponse(data.reset_guidance)
           // Start the breathing exercise
           setCurrentStep('breathing')
-          setBreathActive(true)
+          setBreathCount(0)
+          setBreathPhaseIndex(0)
+          setBreathProgress(0)
+          setIsBreathing(true)
         } else {
           setError('KIAAN returned an unexpected response. Please try again.')
         }
@@ -87,35 +141,74 @@ export default function KarmaResetPage() {
     } finally {
       setLoading(false)
     }
-  }, [misstep, impact, repairType])
+  }, [whatHappened, whoFeltRipple, repairType])
 
-  // Handle step progression
-  const advanceStep = () => {
-    const currentIndex = RESET_STEP_ORDER.indexOf(currentStep)
-    if (currentIndex < RESET_STEP_ORDER.length - 1) {
-      setCurrentStep(RESET_STEP_ORDER[currentIndex + 1])
+  // Save to journal
+  const saveToJournal = useCallback(() => {
+    if (!kiaanResponse || journalSaved) return
+    
+    try {
+      const journalEntry = {
+        id: crypto.randomUUID(),
+        type: 'karma_reset',
+        title: 'Karma Reset Ritual',
+        body: `**Pause & Breathe:** ${kiaanResponse.pauseAndBreathe}\n\n**Name the Ripple:** ${kiaanResponse.nameTheRipple}\n\n**Repair:** ${kiaanResponse.repair}\n\n**Move with Intention:** ${kiaanResponse.moveWithIntention}`,
+        context: {
+          whatHappened,
+          whoFeltRipple,
+          repairType
+        },
+        mood: 'Reflective',
+        at: new Date().toISOString()
+      }
+      
+      const existing = localStorage.getItem('kiaan_journal_entries_secure')
+      if (existing) {
+        // Note: In production, this would need proper encryption
+        const entries = JSON.parse(existing)
+        entries.unshift(journalEntry)
+        localStorage.setItem('kiaan_journal_entries_secure', JSON.stringify(entries))
+      } else {
+        localStorage.setItem('kiaan_journal_entries_secure', JSON.stringify([journalEntry]))
+      }
+      
+      setJournalSaved(true)
+    } catch {
+      // Silent fail - journal save is optional
     }
-  }
+  }, [kiaanResponse, whatHappened, whoFeltRipple, repairType, journalSaved])
 
   // Reset the flow
   const resetFlow = () => {
     setCurrentStep('input')
-    setMisstep('')
-    setImpact('')
+    setWhatHappened('')
+    setWhoFeltRipple('')
     setRepairType(REPAIR_ACTIONS[0].value)
     setKiaanResponse(null)
     setError(null)
-    setBreathActive(false)
-    setBreathTick(0)
+    setIsBreathing(false)
+    setBreathCount(0)
+    setBreathPhaseIndex(0)
+    setBreathProgress(0)
+    setJournalSaved(false)
   }
 
-  // Check if step is completed
-  const isStepCompleted = (step: ResetStep): boolean => {
-    return RESET_STEP_ORDER.indexOf(step) < RESET_STEP_ORDER.indexOf(currentStep)
+  // Get current breath phase info
+  const currentBreathPhase = BREATH_PHASES[breathPhaseIndex]
+  
+  // Calculate breathing circle scale based on phase
+  const getBreathScale = () => {
+    if (breathPhaseIndex === 0) {
+      // Inhale: grow from 1 to 1.3
+      return 1 + (breathProgress * 0.3)
+    } else if (breathPhaseIndex === 1) {
+      // Hold: stay at 1.3
+      return 1.3
+    } else {
+      // Exhale: shrink from 1.3 to 1
+      return 1.3 - (breathProgress * 0.3)
+    }
   }
-
-  // Check if step is active
-  const isStepActive = (step: ResetStep): boolean => currentStep === step
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
@@ -124,9 +217,9 @@ export default function KarmaResetPage() {
         <header className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Gentle Course Correction</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Unified Karma Reset</p>
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
-                Karma Reset Guide
+                Karma Reset Ritual
               </h1>
               <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
                 A calm, focused reset ritual. One cohesive flow to return to your values.
@@ -134,7 +227,7 @@ export default function KarmaResetPage() {
             </div>
             <div className="flex flex-col gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-50">
-                20-40 second practice
+                🕐 20-40 second practice
               </span>
               <Link href="/" className="text-xs text-orange-100/70 hover:text-orange-200 transition">
                 ← Back to home
@@ -146,63 +239,73 @@ export default function KarmaResetPage() {
         {/* Input Step */}
         {currentStep === 'input' && (
           <section 
-            className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)] space-y-5 animate-fade-in"
+            className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)] space-y-6"
             role="region"
             aria-label="Reset input form"
           >
-            <h2 className="text-lg font-semibold text-orange-50">Tell KIAAN what happened</h2>
-
-            {/* What happened */}
-            <div>
-              <label htmlFor="misstep-input" className="text-xs text-orange-100/80 font-semibold">
-                What happened?
-              </label>
-              <textarea
-                id="misstep-input"
-                value={misstep}
-                onChange={e => setMisstep(e.target.value)}
-                placeholder="A brief slip or tone that felt off..."
-                className="mt-2 w-full rounded-xl border border-orange-400/25 bg-black/40 p-3 text-sm text-orange-50 placeholder:text-orange-100/50 focus:border-orange-300/70 outline-none resize-none"
-                rows={2}
-                aria-describedby="misstep-hint"
-              />
-              <p id="misstep-hint" className="sr-only">Describe what happened briefly</p>
+            {/* Step 1: What happened */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-6 w-6 rounded-full bg-orange-500/30 text-orange-50 border border-orange-400 flex items-center justify-center text-xs font-bold">1</span>
+                <h2 className="text-lg font-semibold text-orange-50">Tell KIAAN what happened</h2>
+              </div>
+              <div>
+                <label htmlFor="what-happened-input" className="text-xs text-orange-100/80 font-semibold">
+                  What happened?
+                </label>
+                <textarea
+                  id="what-happened-input"
+                  value={whatHappened}
+                  onChange={e => setWhatHappened(e.target.value)}
+                  placeholder="A brief slip or tone that felt off…"
+                  className="mt-2 w-full rounded-xl border border-orange-400/25 bg-black/40 p-3 text-sm text-orange-50 placeholder:text-orange-100/50 focus:border-orange-300/70 outline-none resize-none"
+                  rows={2}
+                  aria-describedby="what-happened-hint"
+                />
+                <p id="what-happened-hint" className="sr-only">Describe what happened briefly</p>
+              </div>
             </div>
 
-            {/* Who felt it */}
-            <div>
-              <label htmlFor="impact-input" className="text-xs text-orange-100/80 font-semibold">
-                Who felt the ripple?
-              </label>
-              <input
-                id="impact-input"
-                value={impact}
-                onChange={e => setImpact(e.target.value)}
-                placeholder="A teammate, friend, or even myself"
-                className="mt-2 w-full rounded-xl border border-orange-400/25 bg-black/40 p-3 text-sm text-orange-50 placeholder:text-orange-100/50 focus:border-orange-300/70 outline-none"
-                aria-describedby="impact-hint"
-              />
-              <p id="impact-hint" className="sr-only">Who was affected by this moment</p>
+            {/* Step 2: Who felt the ripple */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-6 w-6 rounded-full bg-purple-500/30 text-purple-50 border border-purple-400 flex items-center justify-center text-xs font-bold">2</span>
+                <h3 className="text-lg font-semibold text-purple-50">Who felt the ripple?</h3>
+              </div>
+              <div>
+                <input
+                  id="who-felt-input"
+                  value={whoFeltRipple}
+                  onChange={e => setWhoFeltRipple(e.target.value)}
+                  placeholder="A teammate, friend, or even myself"
+                  className="w-full rounded-xl border border-purple-400/25 bg-black/40 p-3 text-sm text-purple-50 placeholder:text-purple-100/50 focus:border-purple-300/70 outline-none"
+                  aria-describedby="who-felt-hint"
+                />
+                <p id="who-felt-hint" className="sr-only">Who was affected by this moment</p>
+              </div>
             </div>
 
-            {/* Choose the repair */}
-            <div>
-              <label className="text-xs text-orange-100/80 font-semibold">Choose the repair</label>
-              <div className="mt-2 space-y-2" role="radiogroup" aria-label="Repair type selection">
+            {/* Step 3: Choose the repair */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-6 w-6 rounded-full bg-green-500/30 text-green-50 border border-green-400 flex items-center justify-center text-xs font-bold">3</span>
+                <h3 className="text-lg font-semibold text-green-50">Choose the repair</h3>
+              </div>
+              <div className="grid gap-3 md:grid-cols-3" role="radiogroup" aria-label="Repair type selection">
                 {REPAIR_ACTIONS.map(action => (
                   <button
                     key={action.value}
                     onClick={() => setRepairType(action.value)}
                     role="radio"
                     aria-checked={repairType === action.value}
-                    className={`w-full rounded-xl border px-4 py-3 text-left transition ${
+                    className={`rounded-xl border px-4 py-4 text-left transition ${
                       repairType === action.value
-                        ? 'border-green-300/60 bg-green-500/10 text-green-50 shadow-lg shadow-green-500/10'
+                        ? 'border-green-300/60 bg-green-500/15 text-green-50 shadow-lg shadow-green-500/15'
                         : 'border-orange-400/25 bg-black/30 text-orange-50 hover:border-orange-300/50'
                     }`}
                   >
                     <div className="text-sm font-semibold">{action.label}</div>
-                    <div className="text-xs text-orange-100/70">{action.helper}</div>
+                    <div className="text-xs text-orange-100/70 mt-1">{action.helper}</div>
                   </button>
                 ))}
               </div>
@@ -215,241 +318,192 @@ export default function KarmaResetPage() {
               </div>
             )}
 
-            {/* Start Reset Button */}
+            {/* Begin Reset Ritual Button */}
             <button
               onClick={generateResetGuidance}
               disabled={loading}
               className="w-full px-5 py-4 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 transition hover:scale-[1.02]"
-              aria-label={loading ? 'Starting reset...' : 'Start Reset'}
+              aria-label={loading ? 'Starting reset...' : 'Begin Reset Ritual'}
             >
               {loading ? 'Starting reset...' : 'Begin Reset Ritual'}
             </button>
           </section>
         )}
 
-        {/* Four Reset Cards */}
-        {currentStep !== 'input' && (
-          <div className="space-y-4">
-            {/* Card 1: Pause and Breathe (Orange) */}
-            <div
-              className={`rounded-2xl border p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)] transition-all duration-500 ${
-                isStepCompleted('pause') || isStepActive('pause') || isStepActive('breathing')
-                  ? 'border-orange-400/40 bg-gradient-to-br from-orange-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85'
-                  : 'border-orange-500/10 bg-[#0d0d10]/50 opacity-50'
-              }`}
-              role="region"
-              aria-label="Pause and Breathe step"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  isStepCompleted('pause') ? 'bg-green-500/30 text-green-50 border border-green-300' :
-                  isStepActive('pause') || isStepActive('breathing') ? 'bg-orange-500/30 text-orange-50 border border-orange-400' :
-                  'bg-white/5 text-orange-100/50 border border-orange-500/20'
-                }`}>
-                  {isStepCompleted('pause') ? '✓' : '1'}
-                </span>
-                <h3 className="text-lg font-semibold text-orange-50">Pause and Breathe</h3>
-              </div>
-
-              {/* Breathing animation (only when active) */}
-              {(isStepActive('breathing') || (isStepActive('pause') && !isStepCompleted('pause'))) && (
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="relative h-16 w-16 rounded-full bg-gradient-to-br from-orange-500/20 via-[#ffb347]/20 to-transparent flex items-center justify-center">
-                    <div className={`h-12 w-12 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ff9933]/20 to-orange-200/10 shadow-inner shadow-orange-500/30 ${breathActive ? 'animate-ping' : 'animate-pulse'}`} />
-                    <div className="absolute inset-1 rounded-full border border-orange-400/30" />
-                  </div>
-                  <div className="space-y-1 flex-1">
-                    <div className="text-sm font-semibold text-orange-50">{breathPhase}</div>
-                    <div className="text-xs text-orange-100/70">{Math.min(4, breathsDone + 1)} / 4 breaths</div>
-                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-orange-400 to-[#ffb347] transition-all duration-300"
-                        style={{ width: `${(Math.min(breathTick, 16) / 16) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* KIAAN pause response */}
-              {(isStepCompleted('pause') || isStepActive('pause')) && kiaanResponse?.pause && (
-                <div className="kiaan-response text-sm text-orange-100/90 italic bg-black/30 rounded-lg p-3 border border-orange-500/15">
-                  &ldquo;{kiaanResponse.pause}&rdquo;
-                </div>
-              )}
-
-              {isStepActive('pause') && !breathActive && (
-                <button
-                  onClick={advanceStep}
-                  className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-orange-500/20 text-orange-50 hover:bg-orange-500/30 transition"
-                  aria-label="Continue to next step"
-                >
-                  Next →
-                </button>
-              )}
-            </div>
-
-            {/* Card 2: Name the Ripple (Purple) */}
-            <div
-              className={`rounded-2xl border p-5 shadow-[0_15px_60px_rgba(167,139,250,0.08)] transition-all duration-500 ${
-                isStepCompleted('ripple') || isStepActive('ripple')
-                  ? 'border-purple-400/40 bg-gradient-to-br from-purple-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85'
-                  : 'border-purple-500/10 bg-[#0d0d10]/50 opacity-50'
-              }`}
-              role="region"
-              aria-label="Name the Ripple step"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  isStepCompleted('ripple') ? 'bg-green-500/30 text-green-50 border border-green-300' :
-                  isStepActive('ripple') ? 'bg-purple-500/30 text-purple-50 border border-purple-400' :
-                  'bg-white/5 text-purple-100/50 border border-purple-500/20'
-                }`}>
-                  {isStepCompleted('ripple') ? '✓' : '2'}
-                </span>
-                <h3 className="text-lg font-semibold text-purple-50">Name the Ripple</h3>
-              </div>
-
-              {/* KIAAN ripple response */}
-              {(isStepCompleted('ripple') || isStepActive('ripple')) && kiaanResponse?.ripple && (
-                <div className="kiaan-response space-y-2 bg-black/30 rounded-lg p-3 border border-purple-500/15">
-                  <p className="text-sm text-purple-100/90">
-                    <strong className="text-purple-200">What happened:</strong> {kiaanResponse.ripple.what_happened}
-                  </p>
-                  <p className="text-sm text-purple-100/90">
-                    <strong className="text-purple-200">Ripple:</strong> {kiaanResponse.ripple.impact}
-                  </p>
-                </div>
-              )}
-
-              {isStepActive('ripple') && (
-                <button
-                  onClick={advanceStep}
-                  className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-purple-500/20 text-purple-50 hover:bg-purple-500/30 transition"
-                  aria-label="Continue to next step"
-                >
-                  Next →
-                </button>
-              )}
-            </div>
-
-            {/* Card 3: Choose the Repair (Green) */}
-            <div
-              className={`rounded-2xl border p-5 shadow-[0_15px_60px_rgba(74,222,128,0.08)] transition-all duration-500 ${
-                isStepCompleted('repair') || isStepActive('repair')
-                  ? 'border-green-400/40 bg-gradient-to-br from-green-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85'
-                  : 'border-green-500/10 bg-[#0d0d10]/50 opacity-50'
-              }`}
-              role="region"
-              aria-label="Choose the Repair step"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  isStepCompleted('repair') ? 'bg-green-500/30 text-green-50 border border-green-300' :
-                  isStepActive('repair') ? 'bg-green-500/30 text-green-50 border border-green-400' :
-                  'bg-white/5 text-green-100/50 border border-green-500/20'
-                }`}>
-                  {isStepCompleted('repair') ? '✓' : '3'}
-                </span>
-                <h3 className="text-lg font-semibold text-green-50">Choose the Repair</h3>
-              </div>
-
-              {/* KIAAN repair response */}
-              {(isStepCompleted('repair') || isStepActive('repair')) && kiaanResponse?.repair && (
-                <div className="kiaan-response space-y-2 bg-black/30 rounded-lg p-3 border border-green-500/15">
-                  <p className="text-xs text-green-300/80 uppercase tracking-wide">
-                    {REPAIR_TYPE_DISPLAY[kiaanResponse.repair.type]?.icon} {REPAIR_TYPE_DISPLAY[kiaanResponse.repair.type]?.label}
-                  </p>
-                  <p className="text-sm text-green-100/90">{kiaanResponse.repair.action}</p>
-                </div>
-              )}
-
-              {isStepActive('repair') && (
-                <button
-                  onClick={advanceStep}
-                  className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-green-500/20 text-green-50 hover:bg-green-500/30 transition"
-                  aria-label="Continue to next step"
-                >
-                  Next →
-                </button>
-              )}
-            </div>
-
-            {/* Card 4: Move With Intention (Blue) */}
-            <div
-              className={`rounded-2xl border p-5 shadow-[0_15px_60px_rgba(96,165,250,0.08)] transition-all duration-500 ${
-                isStepCompleted('intention') || isStepActive('intention')
-                  ? 'border-blue-400/40 bg-gradient-to-br from-blue-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85'
-                  : 'border-blue-500/10 bg-[#0d0d10]/50 opacity-50'
-              }`}
-              role="region"
-              aria-label="Move With Intention step"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  isStepCompleted('intention') ? 'bg-green-500/30 text-green-50 border border-green-300' :
-                  isStepActive('intention') ? 'bg-blue-500/30 text-blue-50 border border-blue-400' :
-                  'bg-white/5 text-blue-100/50 border border-blue-500/20'
-                }`}>
-                  {isStepCompleted('intention') ? '✓' : '4'}
-                </span>
-                <h3 className="text-lg font-semibold text-blue-50">Move With Intention</h3>
-              </div>
-
-              {/* KIAAN intention response */}
-              {(isStepCompleted('intention') || isStepActive('intention')) && kiaanResponse?.intention && (
-                <div className="kiaan-response text-sm text-blue-100/90 italic bg-black/30 rounded-lg p-3 border border-blue-500/15">
-                  &ldquo;{kiaanResponse.intention}&rdquo;
-                </div>
-              )}
-
-              {isStepActive('intention') && (
-                <button
-                  onClick={advanceStep}
-                  className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-500/20 text-blue-50 hover:bg-blue-500/30 transition"
-                  aria-label="Complete reset ritual"
-                >
-                  Complete ✓
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Final Summary (shown after complete) */}
-        {currentStep === 'complete' && kiaanResponse && (
+        {/* Breathing Step */}
+        {currentStep === 'breathing' && (
           <section 
-            className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/5 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.15)] animate-fade-in"
+            className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.12)] text-center"
             role="region"
-            aria-label="Reset summary"
+            aria-label="Breathing exercise"
           >
-            <h3 className="text-sm font-semibold text-orange-50 mb-3 flex items-center gap-2">
-              <span className="h-5 w-5 rounded-full bg-green-500/30 text-green-50 flex items-center justify-center text-xs">✓</span>
-              Reset Complete
-            </h3>
-            <div className="text-sm text-orange-100/80 space-y-1 bg-black/30 rounded-lg p-4 border border-orange-500/15">
-              <p><strong className="text-orange-200">Ripple:</strong> {kiaanResponse.ripple.what_happened}</p>
-              <p><strong className="text-orange-200">Impact:</strong> {kiaanResponse.ripple.impact}</p>
-              <p><strong className="text-orange-200">Repair:</strong> {kiaanResponse.repair.action}</p>
-              <p><strong className="text-orange-200">Intention:</strong> {kiaanResponse.intention}</p>
+            <p className="text-sm text-orange-100/80 mb-6">
+              Let&apos;s ground with four gentle breaths, holding this plan in mind.
+            </p>
+            
+            {/* Breathing circle */}
+            <div className="flex flex-col items-center justify-center mb-6">
+              <div 
+                className="relative h-40 w-40 rounded-full bg-gradient-to-br from-orange-500/20 via-[#ffb347]/20 to-transparent flex items-center justify-center transition-transform duration-300"
+                style={{ transform: `scale(${getBreathScale()})` }}
+              >
+                <div className="h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/30 via-[#ff9933]/25 to-orange-200/15 shadow-inner shadow-orange-500/30 flex items-center justify-center">
+                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-300/10 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-orange-50">{breathCount + 1}/4</span>
+                  </div>
+                </div>
+                <div className="absolute inset-2 rounded-full border border-orange-400/30" />
+              </div>
             </div>
             
-            <div className="mt-4 flex gap-3">
-              <button
-                onClick={resetFlow}
-                className="px-4 py-2 text-sm font-semibold rounded-lg bg-orange-500/20 text-orange-50 hover:bg-orange-500/30 transition"
-                aria-label="Start a new reset"
-              >
-                New Reset
-              </button>
-              <Link
-                href="/"
-                className="px-4 py-2 text-sm font-semibold rounded-lg border border-orange-400/25 text-orange-50 hover:bg-white/5 transition"
-              >
-                Return Home
-              </Link>
+            {/* Breathing phase label */}
+            <div className="space-y-2">
+              <div className="text-xl font-semibold text-orange-50">{currentBreathPhase?.label}</div>
+              <div className="text-sm text-orange-100/70">{currentBreathPhase?.instruction}</div>
             </div>
+            
+            {/* Progress bar */}
+            <div className="mt-6 h-2 rounded-full bg-white/10 overflow-hidden max-w-md mx-auto">
+              <div
+                className="h-full bg-gradient-to-r from-orange-400 to-[#ffb347] transition-all duration-100"
+                style={{ width: `${((breathCount * 3 + breathPhaseIndex + breathProgress) / (TOTAL_BREATHS * 3)) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-orange-100/50 mt-2">
+              Breath {breathCount + 1} of {TOTAL_BREATHS}
+            </p>
           </section>
+        )}
+
+        {/* Plan Display Step */}
+        {(currentStep === 'plan' || currentStep === 'complete') && kiaanResponse && (
+          <>
+            {/* Completion header */}
+            {currentStep === 'complete' && (
+              <div className="rounded-2xl border border-green-400/30 bg-green-500/10 p-4 text-center">
+                <p className="text-sm text-green-100">
+                  ✨ Your Karma Reset is complete. When you&apos;re ready, carry this plan into your next step.
+                </p>
+              </div>
+            )}
+
+            {/* Four Plan Cards */}
+            <div className="space-y-4">
+              {/* Card 1: Pause and Breathe */}
+              <div
+                className="rounded-2xl border border-orange-400/40 bg-gradient-to-br from-orange-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]"
+                role="region"
+                aria-label="Pause and Breathe"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="h-8 w-8 rounded-full bg-orange-500/30 text-orange-50 border border-orange-400 flex items-center justify-center text-sm font-bold">
+                    1
+                  </span>
+                  <h3 className="text-lg font-semibold text-orange-50">Pause and Breathe</h3>
+                </div>
+                <div className="text-sm text-orange-100/90 bg-black/30 rounded-lg p-3 border border-orange-500/15">
+                  {kiaanResponse.pauseAndBreathe}
+                </div>
+              </div>
+
+              {/* Card 2: Name the Ripple */}
+              <div
+                className="rounded-2xl border border-purple-400/40 bg-gradient-to-br from-purple-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(167,139,250,0.08)]"
+                role="region"
+                aria-label="Name the Ripple"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="h-8 w-8 rounded-full bg-purple-500/30 text-purple-50 border border-purple-400 flex items-center justify-center text-sm font-bold">
+                    2
+                  </span>
+                  <h3 className="text-lg font-semibold text-purple-50">Name the Ripple</h3>
+                </div>
+                <div className="text-sm text-purple-100/90 bg-black/30 rounded-lg p-3 border border-purple-500/15">
+                  {kiaanResponse.nameTheRipple}
+                </div>
+              </div>
+
+              {/* Card 3: Choose the Repair */}
+              <div
+                className="rounded-2xl border border-green-400/40 bg-gradient-to-br from-green-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(74,222,128,0.08)]"
+                role="region"
+                aria-label="Choose the Repair"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="h-8 w-8 rounded-full bg-green-500/30 text-green-50 border border-green-400 flex items-center justify-center text-sm font-bold">
+                    3
+                  </span>
+                  <h3 className="text-lg font-semibold text-green-50">Choose the Repair</h3>
+                </div>
+                <div className="text-sm text-green-100/90 bg-black/30 rounded-lg p-3 border border-green-500/15">
+                  {kiaanResponse.repair}
+                </div>
+              </div>
+
+              {/* Card 4: Move with Intention */}
+              <div
+                className="rounded-2xl border border-blue-400/40 bg-gradient-to-br from-blue-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(96,165,250,0.08)]"
+                role="region"
+                aria-label="Move with Intention"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="h-8 w-8 rounded-full bg-blue-500/30 text-blue-50 border border-blue-400 flex items-center justify-center text-sm font-bold">
+                    4
+                  </span>
+                  <h3 className="text-lg font-semibold text-blue-50">Move with Intention</h3>
+                </div>
+                <div className="text-sm text-blue-100/90 bg-black/30 rounded-lg p-3 border border-blue-500/15">
+                  {kiaanResponse.moveWithIntention}
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            {currentStep === 'plan' && (
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setCurrentStep('complete')}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 transition hover:scale-[1.02]"
+                >
+                  Complete Reset Ritual ✓
+                </button>
+              </div>
+            )}
+
+            {currentStep === 'complete' && (
+              <div className="flex flex-wrap gap-3 justify-center">
+                <button
+                  onClick={saveToJournal}
+                  disabled={journalSaved}
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
+                    journalSaved
+                      ? 'bg-green-500/20 text-green-50 border border-green-400/30'
+                      : 'bg-orange-500/20 text-orange-50 hover:bg-orange-500/30 border border-orange-400/25'
+                  }`}
+                >
+                  {journalSaved ? '✓ Saved to Journal' : '📓 Save to Journal'}
+                </button>
+                <Link
+                  href="/?openChat=true"
+                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-purple-500/20 text-purple-50 hover:bg-purple-500/30 border border-purple-400/25 transition"
+                >
+                  💬 Discuss with KIAAN
+                </Link>
+                <button
+                  onClick={resetFlow}
+                  className="px-4 py-2 text-sm font-semibold rounded-lg border border-orange-400/25 text-orange-50 hover:bg-white/5 transition"
+                >
+                  🔄 New Reset
+                </button>
+                <Link
+                  href="/"
+                  className="px-4 py-2 text-sm font-semibold rounded-lg border border-orange-400/25 text-orange-50 hover:bg-white/5 transition"
+                >
+                  ← Return Home
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
