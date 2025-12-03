@@ -777,7 +777,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
     const newMessages = [...messages, userMessage]
-    setAutoScrollPinned(true)
     setMessages(newMessages)
     setInput('')
     setLoading(true)
