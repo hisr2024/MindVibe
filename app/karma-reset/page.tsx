@@ -13,6 +13,14 @@ function sanitizeInput(input: string): string {
     .slice(0, 2000) // Limit length
 }
 
+// Keep lines compact and enforce brevity on the client as well
+const MAX_LINE_LENGTH = 200
+function compactLine(input?: string | null): string {
+  if (!input) return ''
+  const cleaned = input.replace(/\s+/g, ' ').trim()
+  return cleaned.slice(0, MAX_LINE_LENGTH)
+}
+
 // Breathing phase configuration (4s inhale, 1s hold, 5s exhale = 10s per breath)
 const BREATH_PHASES = [
   { label: 'Inhale', duration: 4000, instruction: 'Breathe in slowly...' },
@@ -41,9 +49,72 @@ export default function KarmaResetPage() {
   const [isBreathing, setIsBreathing] = useState(false)
   const breathStartTime = useRef<number>(0)
   const animationFrame = useRef<number | undefined>(undefined)
+  const [revealedCards, setRevealedCards] = useState(0)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const lastBreathPhaseRef = useRef<number>(0)
 
   // Save to journal state
   const [journalSaved, setJournalSaved] = useState(false)
+
+  const normalizeGuidance = useCallback((guidance: any): KiaanResetResponse | null => {
+    if (!guidance) return null
+
+    const breathingLine = compactLine(guidance.breathing_line ?? guidance.pauseAndBreathe ?? guidance.breathingLine)
+    const rippleSummary = compactLine(guidance.ripple_summary ?? guidance.nameTheRipple ?? guidance.rippleSummary)
+    const repairAction = compactLine(guidance.repair_action ?? guidance.repair ?? guidance.repairAction)
+    const forwardIntention = compactLine(
+      guidance.forward_intention ?? guidance.moveWithIntention ?? guidance.forwardIntention
+    )
+
+    if (!breathingLine || !rippleSummary || !repairAction || !forwardIntention) return null
+
+    return {
+      breathingLine,
+      rippleSummary,
+      repairAction,
+      forwardIntention
+    }
+  }, [])
+
+  const playChime = useCallback(() => {
+    if (!soundEnabled) return
+    try {
+      const ctx = audioContextRef.current || new AudioContext()
+      audioContextRef.current = ctx
+      const now = ctx.currentTime
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+
+      osc.type = 'sine'
+      osc.frequency.value = 520
+      gain.gain.setValueAtTime(0.0001, now)
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc.start(now)
+      osc.stop(now + 0.65)
+    } catch (chimeError) {
+      console.error('Chime playback failed', chimeError)
+    }
+  }, [soundEnabled])
+
+  const startBreathingCycle = useCallback(() => {
+    if (!kiaanResponse) return
+    setCurrentStep('breathing')
+    setBreathCount(0)
+    setBreathPhaseIndex(0)
+    setBreathProgress(0)
+    lastBreathPhaseRef.current = 0
+    setIsBreathing(true)
+    setRevealedCards(0)
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().catch(() => null)
+    }
+  }, [kiaanResponse])
 
   // Breathing animation loop
   useEffect(() => {
@@ -92,8 +163,13 @@ export default function KarmaResetPage() {
         }
         phaseStart += BREATH_PHASES[i].duration
       }
+      if (currentPhase !== lastBreathPhaseRef.current) {
+        lastBreathPhaseRef.current = currentPhase
+        playChime()
+      }
+
       setBreathPhaseIndex(currentPhase)
-      
+
       animationFrame.current = requestAnimationFrame(animate)
     }
     
@@ -104,7 +180,21 @@ export default function KarmaResetPage() {
         cancelAnimationFrame(animationFrame.current)
       }
     }
-  }, [isBreathing, breathCount])
+  }, [isBreathing, breathCount, playChime])
+
+  useEffect(() => {
+    if (currentStep === 'plan') {
+      setRevealedCards(0)
+      const timers = [150, 550, 950, 1350].map((delay, idx) =>
+        setTimeout(() => setRevealedCards(idx + 1), delay)
+      )
+      return () => timers.forEach(timer => clearTimeout(timer))
+    }
+
+    if (currentStep === 'complete') {
+      setRevealedCards(4)
+    }
+  }, [currentStep])
 
   // Generate KIAAN reset guidance
   const generateResetGuidance = useCallback(async () => {
@@ -115,38 +205,48 @@ export default function KarmaResetPage() {
     const sanitizedWhoFeltRipple = sanitizeInput(whoFeltRipple) || 'Someone I care about'
 
     try {
-      const response = await fetch(`/api/karma-reset/generate`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/karma-reset/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           what_happened: sanitizedWhatHappened,
           who_felt_it: sanitizedWhoFeltRipple,
-          repair_type: repairType
+          repair_type: repairType,
+          whatHappened: sanitizedWhatHappened,
+          whoFeltRipple: sanitizedWhoFeltRipple,
+          repairType,
+          style: 'Short, direct, emotionally warm, and practical. 1-2 sentences per step. No bullet lists.',
         })
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.reset_guidance) {
-          setKiaanResponse(data.reset_guidance)
-          // Start the breathing exercise
-          setCurrentStep('breathing')
-          setBreathCount(0)
-          setBreathPhaseIndex(0)
-          setBreathProgress(0)
-          setIsBreathing(true)
-        } else {
-          setError('KIAAN returned an unexpected response. Please try again.')
-        }
-      } else {
-        setError('KIAAN is having trouble connecting. Please try again in a moment.')
+      if (!response.ok) {
+        console.error('KIAAN reset request failed', response.status, response.statusText)
+        setError('KIAAN couldn’t be reached. Please check your connection and try again.')
+        return
       }
-    } catch {
-      setError('Unable to reach KIAAN. Check your connection and try again.')
+
+      const data = await response.json()
+      const normalized = normalizeGuidance(data.reset_guidance)
+      if (normalized) {
+        setKiaanResponse(normalized)
+        setCurrentStep('breathing')
+        setBreathCount(0)
+        setBreathPhaseIndex(0)
+        setBreathProgress(0)
+        setIsBreathing(false)
+        setJournalSaved(false)
+        setRevealedCards(0)
+      } else {
+        setError('KIAAN returned an unexpected response. Please try again.')
+      }
+    } catch (requestError) {
+      console.error('KIAAN reset request error', requestError)
+      setError('KIAAN couldn’t be reached. Please check your connection and try again.')
     } finally {
       setLoading(false)
     }
-  }, [whatHappened, whoFeltRipple, repairType])
+  }, [whatHappened, whoFeltRipple, repairType, normalizeGuidance])
 
   // Save to journal
   const saveToJournal = useCallback(() => {
@@ -157,7 +257,7 @@ export default function KarmaResetPage() {
         id: crypto.randomUUID(),
         type: 'karma_reset',
         title: 'Karma Reset Ritual',
-        body: `**Pause & Breathe:** ${kiaanResponse.pauseAndBreathe}\n\n**Name the Ripple:** ${kiaanResponse.nameTheRipple}\n\n**Repair:** ${kiaanResponse.repair}\n\n**Move with Intention:** ${kiaanResponse.moveWithIntention}`,
+        body: `**Pause & Breathe:** ${kiaanResponse.breathingLine}\n\n**Name the Ripple:** ${kiaanResponse.rippleSummary}\n\n**Repair:** ${kiaanResponse.repairAction}\n\n**Move with Intention:** ${kiaanResponse.forwardIntention}`,
         context: {
           whatHappened,
           whoFeltRipple,
@@ -196,6 +296,9 @@ export default function KarmaResetPage() {
     setBreathCount(0)
     setBreathPhaseIndex(0)
     setBreathProgress(0)
+    setRevealedCards(0)
+    setSoundEnabled(true)
+    lastBreathPhaseRef.current = 0
     setJournalSaved(false)
   }
 
@@ -337,52 +440,75 @@ export default function KarmaResetPage() {
         )}
 
         {/* Breathing Step */}
-        {currentStep === 'breathing' && (
-          <section 
-            className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.12)] text-center"
+        {kiaanResponse && currentStep !== 'input' && (
+          <section
+            className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.12)]"
             role="region"
-            aria-label="Breathing exercise"
+            aria-label="4-breath reset"
           >
-            <p className="text-sm text-orange-100/80 mb-6">
-              Let&apos;s ground with four gentle breaths before viewing your plan.
-            </p>
-            
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">4-Breath Reset</p>
+                <h2 className="text-2xl font-semibold text-orange-50">Pause &amp; Breathe</h2>
+                <p className="text-sm text-orange-100/80 max-w-2xl">
+                  {kiaanResponse.breathingLine || 'Take four slow breaths; let each exhale soften the moment.'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSoundEnabled(prev => !prev)}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                    soundEnabled
+                      ? 'border-green-400/40 bg-green-500/15 text-green-50'
+                      : 'border-orange-400/30 bg-black/30 text-orange-100/80'
+                  }`}
+                  aria-pressed={soundEnabled}
+                >
+                  {soundEnabled ? '🔔 Sound on' : '🔕 Sound muted'}
+                </button>
+                <button
+                  onClick={startBreathingCycle}
+                  disabled={isBreathing}
+                  className="rounded-full bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-4 py-2 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60"
+                >
+                  {isBreathing ? 'Guiding breaths…' : 'Begin 4-Breath Reset'}
+                </button>
+              </div>
+            </div>
+
             {/* Breathing circle */}
-            <div className="flex flex-col items-center justify-center mb-6">
-              <div 
+            <div className="flex flex-col items-center justify-center mt-6 mb-4 text-center">
+              <div
                 className="relative h-40 w-40 rounded-full bg-gradient-to-br from-orange-500/20 via-[#ffb347]/20 to-transparent flex items-center justify-center transition-transform duration-300"
                 style={{ transform: `scale(${getBreathScale()})` }}
               >
                 <div className="h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/30 via-[#ff9933]/25 to-orange-200/15 shadow-inner shadow-orange-500/30 flex items-center justify-center">
                   <div className="h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-300/10 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-orange-50">{breathCount + 1}/4</span>
+                    <span className="text-2xl font-bold text-orange-50">{Math.min(breathCount + 1, 4)}/4</span>
                   </div>
                 </div>
                 <div className="absolute inset-2 rounded-full border border-orange-400/30" />
               </div>
+              <div className="mt-4 space-y-1">
+                <div className="text-xl font-semibold text-orange-50">{isBreathing ? currentBreathPhase?.label : 'Ready'}</div>
+                <div className="text-sm text-orange-100/70">
+                  {isBreathing ? currentBreathPhase?.instruction : 'Inhale 4s → Hold 1s → Exhale 5s • Repeat 4x'}
+                </div>
+              </div>
             </div>
-            
-            {/* Breathing phase label */}
-            <div className="space-y-2">
-              <div className="text-xl font-semibold text-orange-50">{currentBreathPhase?.label}</div>
-              <div className="text-sm text-orange-100/70">{currentBreathPhase?.instruction}</div>
-            </div>
-            
+
             {/* Progress bar */}
-            <div className="mt-6 h-2 rounded-full bg-white/10 overflow-hidden max-w-md mx-auto">
+            <div className="mt-4 h-2 rounded-full bg-white/10 overflow-hidden max-w-md mx-auto">
               <div
-                className="h-full bg-gradient-to-r from-orange-400 to-[#ffb347] transition-all duration-100"
-                style={{ width: `${((breathCount * 3 + breathPhaseIndex + breathProgress) / (TOTAL_BREATHS * 3)) * 100}%` }}
+                className="h-full bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 transition-all"
+                style={{ width: `${((breathCount * BREATH_PHASES.length + breathPhaseIndex + breathProgress) / (TOTAL_BREATHS * BREATH_PHASES.length)) * 100}%` }}
               />
             </div>
-            <p className="text-xs text-orange-100/50 mt-2">
-              Breath {breathCount + 1} of {TOTAL_BREATHS}
-            </p>
           </section>
         )}
 
         {/* Plan Display Step */}
-        {(currentStep === 'plan' || currentStep === 'complete') && kiaanResponse && (
+        {kiaanResponse && (currentStep === 'plan' || currentStep === 'complete') && (
           <>
             {/* Completion header */}
             {currentStep === 'complete' && (
@@ -397,7 +523,9 @@ export default function KarmaResetPage() {
             <div className="space-y-4">
               {/* Card 1: Pause and Breathe */}
               <div
-                className="rounded-2xl border border-orange-400/40 bg-gradient-to-br from-orange-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]"
+                className={`rounded-2xl border border-orange-400/40 bg-gradient-to-br from-orange-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)] transition-opacity duration-500 ${
+                  revealedCards >= 1 ? 'opacity-100' : 'opacity-0'
+                }`}
                 role="region"
                 aria-label="Pause and Breathe"
               >
@@ -408,13 +536,15 @@ export default function KarmaResetPage() {
                   <h3 className="text-lg font-semibold text-orange-50">Pause and Breathe</h3>
                 </div>
                 <div className="text-sm text-orange-100/90 bg-black/30 rounded-lg p-3 border border-orange-500/15">
-                  {kiaanResponse.pauseAndBreathe}
+                  {kiaanResponse.breathingLine}
                 </div>
               </div>
 
               {/* Card 2: Name the Ripple */}
               <div
-                className="rounded-2xl border border-purple-400/40 bg-gradient-to-br from-purple-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(167,139,250,0.08)]"
+                className={`rounded-2xl border border-purple-400/40 bg-gradient-to-br from-purple-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(167,139,250,0.08)] transition-opacity duration-500 ${
+                  revealedCards >= 2 ? 'opacity-100' : 'opacity-0'
+                }`}
                 role="region"
                 aria-label="Name the Ripple"
               >
@@ -425,13 +555,15 @@ export default function KarmaResetPage() {
                   <h3 className="text-lg font-semibold text-purple-50">Name the Ripple</h3>
                 </div>
                 <div className="text-sm text-purple-100/90 bg-black/30 rounded-lg p-3 border border-purple-500/15">
-                  {kiaanResponse.nameTheRipple}
+                  {kiaanResponse.rippleSummary}
                 </div>
               </div>
 
               {/* Card 3: Choose the Repair */}
               <div
-                className="rounded-2xl border border-green-400/40 bg-gradient-to-br from-green-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(74,222,128,0.08)]"
+                className={`rounded-2xl border border-green-400/40 bg-gradient-to-br from-green-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(74,222,128,0.08)] transition-opacity duration-500 ${
+                  revealedCards >= 3 ? 'opacity-100' : 'opacity-0'
+                }`}
                 role="region"
                 aria-label="Choose the Repair"
               >
@@ -442,13 +574,15 @@ export default function KarmaResetPage() {
                   <h3 className="text-lg font-semibold text-green-50">Choose the Repair</h3>
                 </div>
                 <div className="text-sm text-green-100/90 bg-black/30 rounded-lg p-3 border border-green-500/15">
-                  {kiaanResponse.repair}
+                  {kiaanResponse.repairAction}
                 </div>
               </div>
 
               {/* Card 4: Move with Intention */}
               <div
-                className="rounded-2xl border border-blue-400/40 bg-gradient-to-br from-blue-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(96,165,250,0.08)]"
+                className={`rounded-2xl border border-blue-400/40 bg-gradient-to-br from-blue-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(96,165,250,0.08)] transition-opacity duration-500 ${
+                  revealedCards >= 4 ? 'opacity-100' : 'opacity-0'
+                }`}
                 role="region"
                 aria-label="Move with Intention"
               >
@@ -459,7 +593,7 @@ export default function KarmaResetPage() {
                   <h3 className="text-lg font-semibold text-blue-50">Move with Intention</h3>
                 </div>
                 <div className="text-sm text-blue-100/90 bg-black/30 rounded-lg p-3 border border-blue-500/15">
-                  {kiaanResponse.moveWithIntention}
+                  {kiaanResponse.forwardIntention}
                 </div>
               </div>
             </div>
