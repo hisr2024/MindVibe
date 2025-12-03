@@ -222,7 +222,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <AnimatedKiaanLogo />
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">MindVibe Companion</p>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
                 <p className="text-base sm:text-lg md:text-xl text-orange-100/90">Crisp, calm guidance.</p>
               </div>

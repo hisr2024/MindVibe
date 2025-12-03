@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { MessageBubble } from './MessageBubble'
+import { KiaanLogo } from '@/components/branding'
 
 export interface Message {
   id: string
@@ -65,13 +66,7 @@ export function KiaanChat({
     <div className={`flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 ${className}`}>
       {/* Chat Header */}
       <div className="flex items-center gap-3 border-b border-orange-500/15 px-4 py-3">
-        <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
-          K
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-orange-50">KIAAN</h2>
-          <p className="text-xs text-orange-100/60">Your wisdom companion</p>
-        </div>
+        <KiaanLogo size="sm" showTagline={false} animated={true} />
       </div>
 
       {/* Scrollable Messages Container */}
