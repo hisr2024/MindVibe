@@ -43,7 +43,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               : 'bg-white/5 text-orange-50 border border-orange-500/15'
         }`}
       >
-        {String(text).trim() || ''}
+        {text || ''}
       </div>
       
       {/* Send to Journal button for assistant messages */}
