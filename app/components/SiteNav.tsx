@@ -13,6 +13,7 @@ const links = [
   { href: '/karmic-tree', label: 'Karmic Tree' },
   { href: '/karma-reset', label: 'Karma Reset' },
   { href: '/features', label: 'Features' },
+  { href: '/pricing', label: 'Subscription' },
 ]
 
 export default function SiteNav() {
