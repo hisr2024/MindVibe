@@ -163,22 +163,23 @@ export default function Chat() {
             className: 'chat-scrollbar smooth-touch-scroll scroll-stable',
           }}
           className="mv-energy-scrollbar h-80 rounded-2xl border border-orange-500/20 bg-slate-950/70 shadow-inner shadow-orange-500/10"
-          contentClassName="p-4 pr-3 sm:pr-4"
         >
-          {messages.length === 0 && (
-            <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
-          )}
-          <div className="space-y-3">
-            {messages.map((message, idx) => (
-              <MessageBubble
-                key={`${message.timestamp}-${idx}`}
-                sender={message.sender}
-                text={message.text}
-                timestamp={message.timestamp}
-                status={message.status}
-                onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
-              />
-            ))}
+          <div className="p-4 pr-3 sm:pr-4">
+            {messages.length === 0 && (
+              <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
+            )}
+            <div className="space-y-3">
+              {messages.map((message, idx) => (
+                <MessageBubble
+                  key={`${message.timestamp}-${idx}`}
+                  sender={message.sender}
+                  text={message.text}
+                  timestamp={message.timestamp}
+                  status={message.status}
+                  onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
+                />
+              ))}
+            </div>
           </div>
         </SimpleBar>
 
