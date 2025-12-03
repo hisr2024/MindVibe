@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Chat from '../components/Chat'
 import JournalEncrypted from '../components/JournalEncrypted'
+import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { HelpIcon, AnimatedCard, FadeIn, StaggerContainer, StaggerItem, HoverCard, HoverCardTitle, HoverCardDescription } from '@/components/ui'
 
 export default function DashboardClient() {
@@ -43,6 +44,10 @@ export default function DashboardClient() {
 
           <div className="relative grid gap-8 lg:grid-cols-[1.7fr,1fr] lg:items-start">
             <div className="space-y-6">
+              <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-orange-500/20 bg-black/40 px-4 py-3 shadow-[0_14px_60px_rgba(46,160,255,0.18)]">
+                <KiaanLogo size="md" className="shrink-0" />
+                <p className="text-sm text-orange-100/85">Crisp, calm guidance for every dashboard action.</p>
+              </div>
               <div className="flex items-center gap-3 text-orange-100/80">
                 <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-orange-50">
                   Dashboard
