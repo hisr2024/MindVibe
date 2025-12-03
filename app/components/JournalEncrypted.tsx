@@ -121,7 +121,7 @@ export default function JournalEncrypted() {
   return (
     <main className="space-y-4 text-orange-50">
       <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">
-        <h2 className="text-lg font-semibold">Encrypted Journal</h2>
+        <h2 className="text-lg font-semibold">Encrypted Sacred Reflections</h2>
         <p className="text-sm text-orange-100/80">Protected with AES-GCM; your passphrase never leaves this device.</p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="text-sm text-orange-100/80">
@@ -131,7 +131,7 @@ export default function JournalEncrypted() {
               value={pass}
               onChange={e => setPass(e.target.value)}
               className="mt-1 block w-64 rounded-2xl border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
-              aria-label="Journal passphrase"
+              aria-label="Sacred Reflections passphrase"
             />
           </label>
           <div className="text-xs text-orange-100/70">Your passphrase is never stored.</div>

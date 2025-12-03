@@ -10,9 +10,8 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
-  { href: '/sacred-reflections', label: 'Journal' },
+  { href: '/sacred-reflections', label: 'Sacred Reflections' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
-  { href: '/karma-reset', label: 'Karma Reset' },
   { href: '/features', label: 'Features' },
   { href: '/pricing', label: 'Subscription' },
 ]

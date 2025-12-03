@@ -120,7 +120,7 @@ export default function Chat() {
       localStorage.setItem('mindvibe_journal_entries', JSON.stringify(entries))
       
       // Show notification
-      setSavedNotification('Saved to Journal! 📝')
+      setSavedNotification('Saved to Sacred Reflections! 📝')
       setTimeout(() => setSavedNotification(null), 2000)
     } catch (error) {
       console.error('Failed to save to journal:', error)

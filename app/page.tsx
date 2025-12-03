@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, useCallback, type CSSProperties, type ReactElement, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useState, useEffect, useRef, type CSSProperties, type ReactElement } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { GrowthJourney } from '@/components/GrowthJourney'
@@ -255,7 +255,6 @@ export default function Home() {
         <ViyogDetachmentCoach />
         <RelationshipCompass onSelectPrompt={setChatPrefill} />
         <ClarityPauseSuite />
-        <KarmaResetGuide onSelectPrompt={setChatPrefill} />
         <GrowthJourney />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
@@ -716,12 +715,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [loading, setLoading] = useState(false)
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
-  const [autoScrollPinned, setAutoScrollPinned] = useState(true)
-  const [scrollLocked, setScrollLocked] = useState(false)
-  const [scrollbarVisible, setScrollbarVisible] = useState(false)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const scrollbarTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const clarityInitialState: ClaritySession = {
     active: false,
     started: false,
@@ -737,10 +732,10 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   useEffect(() => {
     const container = messageListRef.current
-    if (!container || !autoScrollPinned || scrollLocked) return
+    if (!container) return
 
     container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [messages, autoScrollPinned, scrollLocked])
+  }, [messages])
 
   useEffect(() => {
     if (!promptMotion) return
@@ -778,22 +773,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
     setClaritySession(prev => ({ ...prev, active: false, completed: true, pendingMessage: null }))
   }, [claritySession])
-
-  const showScrollbar = useCallback(() => {
-    if (scrollbarTimeoutRef.current) {
-      clearTimeout(scrollbarTimeoutRef.current)
-    }
-    setScrollbarVisible(true)
-    scrollbarTimeoutRef.current = setTimeout(() => setScrollbarVisible(false), 1400)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (scrollbarTimeoutRef.current) {
-        clearTimeout(scrollbarTimeoutRef.current)
-      }
-    }
-  }, [])
 
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
@@ -882,95 +861,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   function toggleMotionReduction() {
     setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
-  }
-
-  function handleMessageListScroll() {
-    const container = messageListRef.current
-    if (!container) return
-
-    showScrollbar()
-    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
-    if (!scrollLocked) {
-      setAutoScrollPinned(distanceFromBottom < 120)
-    }
-  }
-
-  function scrollToTop() {
-    const container = messageListRef.current
-    if (!container) return
-
-    showScrollbar()
-    setAutoScrollPinned(false)
-    container.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  function scrollToBottom(options: { forceUnlock?: boolean } = {}) {
-    const container = messageListRef.current
-    if (!container) return
-
-    if (options.forceUnlock) {
-      setScrollLocked(false)
-    }
-    showScrollbar()
-    setAutoScrollPinned(true)
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }
-
-  function handleKeyNavigation(event: ReactKeyboardEvent<HTMLDivElement>) {
-    const container = messageListRef.current
-    if (!container) return
-
-    const step = Math.max(64, container.clientHeight * 0.18)
-
-    switch (event.key) {
-      case 'PageDown':
-        event.preventDefault()
-        container.scrollBy({ top: container.clientHeight * 0.9, behavior: 'smooth' })
-        setAutoScrollPinned(false)
-        showScrollbar()
-        break
-      case 'PageUp':
-        event.preventDefault()
-        container.scrollBy({ top: container.clientHeight * -0.9, behavior: 'smooth' })
-        setAutoScrollPinned(false)
-        showScrollbar()
-        break
-      case 'ArrowDown':
-        event.preventDefault()
-        container.scrollBy({ top: step, behavior: 'smooth' })
-        setAutoScrollPinned(false)
-        showScrollbar()
-        break
-      case 'ArrowUp':
-        event.preventDefault()
-        container.scrollBy({ top: -step, behavior: 'smooth' })
-        setAutoScrollPinned(false)
-        showScrollbar()
-        break
-      case 'End':
-        event.preventDefault()
-        scrollToBottom({ forceUnlock: true })
-        break
-      case 'Home':
-        event.preventDefault()
-        scrollToTop()
-        break
-      default:
-        break
-    }
-  }
-
-  function toggleScrollLock() {
-    setScrollLocked(prev => {
-      const next = !prev
-      if (!next) {
-        setAutoScrollPinned(true)
-        requestAnimationFrame(() => scrollToBottom())
-      } else {
-        setAutoScrollPinned(false)
-      }
-      return next
-    })
   }
 
   function handleSaveToJournal(messageContent: string) {
@@ -1240,35 +1130,10 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-orange-100/80 bg-black/40 border border-orange-500/15 rounded-2xl px-4 py-3 shadow-[0_8px_26px_rgba(255,115,39,0.1)] backdrop-blur-sm">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={`rounded-full px-3 py-1 text-[11px] font-semibold border ${scrollLocked ? 'border-orange-400/40 bg-orange-500/15 text-orange-50' : 'border-orange-200/20 bg-white/5 text-orange-100/80'}`}>
-            {scrollLocked ? 'Scroll locked for reading' : 'Auto-scroll follows new replies'}
-          </span>
-          <span className="text-orange-100/60">PageUp/PageDown, arrows, Home/End all work here.</span>
-        </div>
-        <button
-          onClick={toggleScrollLock}
-          className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 font-semibold transition-all text-[11px] ${
-            scrollLocked
-              ? 'border-orange-400/50 bg-orange-500/20 text-orange-50 shadow-[0_10px_30px_rgba(255,153,51,0.18)] hover:shadow-orange-400/30'
-              : 'border-orange-300/20 bg-white/10 text-orange-100/80 hover:border-orange-300/50 hover:bg-white/20'
-          }`}
-        >
-          <span className="text-lg leading-none">{scrollLocked ? '🔒' : '🧭'}</span>
-          {scrollLocked ? 'Unlock & jump to latest' : 'Lock scrolling here'}
-        </button>
-      </div>
-
       <div className="relative">
         <div
           ref={messageListRef}
-          onScroll={handleMessageListScroll}
-          onKeyDown={handleKeyNavigation}
-          onMouseEnter={showScrollbar}
-          onFocus={showScrollbar}
-          onTouchStart={showScrollbar}
-          className={`chat-scrollbar aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable smooth-touch-scroll focus:outline-none ${scrollbarVisible ? 'scrolling' : ''} ${scrollLocked ? 'scroll-locked' : ''}`}
+          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable smooth-touch-scroll focus:outline-none"
           tabIndex={0}
           aria-label="Conversation with Kiaan"
         >
@@ -1294,12 +1159,12 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                       <button
                         onClick={() => handleSaveToJournal(msg.content)}
                         className="group inline-flex items-center gap-2 rounded-xl border border-orange-300/25 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/10 to-amber-200/10 px-3 py-2 text-xs font-semibold text-orange-50 transition-all duration-200 shadow-[0_10px_30px_rgba(255,153,51,0.16)] hover:-translate-y-0.5 hover:shadow-orange-400/30"
-                        aria-label="Send this response to journal"
+                        aria-label="Send this response to Sacred Reflections"
                       >
                         <svg className="w-4 h-4 text-orange-300 group-hover:text-amber-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
-                        <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Journal</span>
+                        <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Sacred Reflections</span>
                       </button>
                     </div>
                   </>
@@ -1319,15 +1184,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           )}
         </div>
 
-        {/* Jump to Latest button - only visible when scrolled up */}
-        {!autoScrollPinned && messages.length > 0 && (
-          <button
-            onClick={() => scrollToBottom({ forceUnlock: true })}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-orange-500/90 text-white text-sm font-semibold shadow-lg shadow-orange-500/30 hover:bg-orange-500 transition-all hover:scale-105 flex items-center gap-2"
-          >
-            ↓ Jump to Latest
-          </button>
-        )}
       </div>
 
       <div className="flex gap-3 relative flex-col sm:flex-row">
@@ -1736,109 +1592,6 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
   )
 }
 
-function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
-  const resetSteps = [
-    { title: 'Pause and breathe', detail: 'Take 4 slow breaths to let the nervous system settle.' },
-    { title: 'Name the ripple', detail: 'Acknowledge what happened and who was impacted.' },
-    { title: 'Choose the repair', detail: 'Pick one caring action: apology, clarification, or follow-up.' },
-    { title: 'Move with intention', detail: 'Return to your values and act with clarity.' }
-  ]
-
-  return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0c10] via-[#120d0c] to-[#0b0b0f] border border-orange-500/15 p-6 md:p-7 space-y-5 shadow-[0_20px_80px_rgba(255,115,39,0.14)]">
-      <div className="absolute -right-6 -top-8 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/18 to-transparent blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#1f1720]/60 via-orange-500/14 to-transparent blur-3xl" />
-
-      <div className="relative flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <p className="text-xs text-orange-100/80">Gentle course correction</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Ritual</h2>
-          <p className="text-sm text-orange-100/80 max-w-2xl">
-            A calm, unified reset ritual. Tell KIAAN what happened, choose your repair, and complete a grounding 4-breath reset with a personalized plan.
-          </p>
-        </div>
-        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/25 rounded-full px-3 py-1">🕐 20-40 seconds</div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Reset steps preview */}
-        <div className="space-y-3">
-          <p className="text-xs text-orange-100/70 font-semibold uppercase tracking-wide">The 4-Part Reset Plan</p>
-          <div className="grid gap-2">
-            {resetSteps.map((step, index) => (
-              <div
-                key={step.title}
-                className="flex items-start gap-3 rounded-xl border border-orange-500/15 bg-black/30 p-3"
-              >
-                <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold border ${
-                  index === 0 ? 'bg-orange-500/20 border-orange-400 text-orange-50' :
-                  index === 1 ? 'bg-purple-500/20 border-purple-400 text-purple-50' :
-                  index === 2 ? 'bg-green-500/20 border-green-400 text-green-50' :
-                  'bg-blue-500/20 border-blue-400 text-blue-50'
-                }`}>
-                  {index + 1}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-orange-50">{step.title}</p>
-                  <p className="text-xs text-orange-100/70">{step.detail}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Launch panel */}
-        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-5 space-y-4 shadow-[0_10px_40px_rgba(255,115,39,0.12)] flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-400/30 to-[#ffb347]/30 flex items-center justify-center text-xl">
-                🔄
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-orange-50">Begin Your Reset</h3>
-                <p className="text-xs text-orange-100/70">KIAAN generates a personalized plan</p>
-              </div>
-            </div>
-            
-            <div className="rounded-xl bg-black/40 border border-orange-500/15 p-3 space-y-2">
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-200">Step 1:</strong> Tell KIAAN what happened
-              </p>
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-200">Step 2:</strong> Identify who felt the ripple
-              </p>
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-200">Step 3:</strong> Choose your repair type
-              </p>
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-200">Step 4:</strong> Complete 4-breath reset with plan
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <Link
-              href="/karma-reset"
-              className="block w-full text-center px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-[1.02] transition"
-            >
-              Begin Reset Ritual →
-            </Link>
-            
-            <button
-              onClick={() => {
-                onSelectPrompt("Help me reset after a misstep so I stay aligned with Kiaan's calm guidance.")
-                document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-              className="w-full px-4 py-2 rounded-xl border border-orange-400/25 bg-white/5 text-sm text-orange-50 hover:border-orange-300/60 transition"
-            >
-              💬 Or discuss with KIAAN first
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
 function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void }) {
   const [saved, setSaved] = useState(false)
   const wisdom = {
@@ -2064,7 +1817,7 @@ function Journal() {
           window.localStorage.removeItem('kiaan_journal_entries')
         }
       } catch {
-        if (!cancelled) setEncryptionMessage('Journal restored to a blank state because the saved copy could not be read securely.')
+        if (!cancelled) setEncryptionMessage('Sacred Reflections restored to a blank state because the saved copy could not be read securely.')
         if (!cancelled) setEntries([])
       } finally {
         if (!cancelled) setEncryptionReady(true)
@@ -2085,7 +1838,7 @@ function Journal() {
         window.localStorage.setItem(JOURNAL_ENTRY_STORAGE, encrypted)
         setEncryptionMessage(null)
       } catch {
-        setEncryptionMessage('Could not secure your journal locally. Please retry in a moment.')
+        setEncryptionMessage('Could not secure your Sacred Reflections locally. Please retry in a moment.')
       }
     })()
   }, [entries, encryptionReady])
@@ -2108,7 +1861,7 @@ function Journal() {
   function addEntry() {
     if (!body.trim()) return
     if (!encryptionReady) {
-      setEncryptionMessage('Preparing secure journal space. Please try adding your entry again in a few seconds.')
+      setEncryptionMessage('Preparing your Sacred Reflections space. Please try adding your entry again in a few seconds.')
       return
     }
     const entry: JournalEntry = {
@@ -2130,7 +1883,7 @@ function Journal() {
       const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${entry.body}` })
+        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private Sacred Reflections entry: ${entry.body}` })
       })
 
       if (response.ok) {
@@ -2165,7 +1918,7 @@ function Journal() {
   const assessment = (() => {
     if (weeklyEntries.length === 0) {
       return {
-        headline: 'KIAAN gently invites you to begin your journal practice this week.',
+        headline: 'KIAAN gently invites you to begin your Sacred Reflections practice this week.',
         guidance: [
           'Start with two or three lines on what felt peaceful or challenging today.',
           'Return here each evening; KIAAN will keep the space steady and private.',
@@ -2200,7 +1953,7 @@ function Journal() {
       <div className="bg-[#0d0d10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="text-sm text-orange-100/80">Private Journal</p>
+            <p className="text-sm text-orange-100/80">Sacred Reflections</p>
             <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Sacred Reflections</h2>
             <p className="text-sm text-orange-100/70">Entries stay on your device and refresh the weekly guidance automatically.</p>
           </div>
@@ -2223,7 +1976,7 @@ function Journal() {
             </div>
           </div>
           {!encryptionReady && (
-            <p className="text-xs text-orange-200">Preparing secure journal space...</p>
+            <p className="text-xs text-orange-200">Preparing your Sacred Reflections space...</p>
           )}
           {encryptionMessage && (
             <p className="text-xs text-orange-200">{encryptionMessage}</p>
@@ -2268,7 +2021,7 @@ function Journal() {
               disabled={!body.trim()}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 to-[#ffb347] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20 w-full sm:w-auto"
             >
-              Add Journal Entry
+              Add Reflection
             </button>
           </div>
 
@@ -2361,10 +2114,10 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
         </button>
         <button
           onClick={onJournal}
-          aria-label="Open journal"
+          aria-label="Open Sacred Reflections"
           className="flex-1 rounded-xl border border-orange-400/40 bg-black/40 px-4 py-3 text-base font-semibold text-orange-100 min-h-[52px]"
         >
-          Journal
+          Sacred Reflections
         </button>
       </div>
     </div>
