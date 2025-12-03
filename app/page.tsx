@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, useCallback, type ReactElement, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useState, useEffect, useRef, useCallback, type CSSProperties, type ReactElement, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { GrowthJourney } from '@/components/GrowthJourney'
@@ -208,29 +208,29 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8 pb-28 mobile-safe-padding">
+    <main className="mv-page relative min-h-screen overflow-hidden p-4 md:p-8 pb-28 mobile-safe-padding">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/30 via-[#ff9933]/14 to-transparent blur-3xl" />
-        <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/20 via-orange-500/12 to-transparent blur-[120px]" />
-        <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-[#1f2937] via-[#ff9933]/12 to-transparent blur-[90px] animate-pulse" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.04),transparent_35%)]" />
+        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/25 via-[#ff9933]/14 to-transparent blur-3xl" />
+        <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/18 via-orange-500/10 to-transparent blur-[120px]" />
+        <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-[#1f2937]/70 via-[#ff9933]/10 to-transparent blur-[90px] animate-pulse" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.06),transparent_35%)]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto space-y-8">
-        <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 md:p-10 shadow-[0_30px_120px_rgba(255,115,39,0.18)]">
-          <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
-          <div className="absolute left-4 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
-          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-            <div className="space-y-3">
-              <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
-              <p className="text-sm sm:text-base text-orange-100/85 max-w-xl">A premium, animated companion shaped by Krishna&apos;s flute and peacock feather — always calm, always modern.</p>
+        <div className="relative max-w-6xl mx-auto space-y-8">
+          <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 md:p-10 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur">
+            <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
+            <div className="absolute left-4 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+              <div className="space-y-3">
+                <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
+                <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">A premium, animated companion shaped by Krishna&apos;s flute and peacock feather — always calm, always modern.</p>
+              </div>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <TokenCard label="Inner Peace" note="Gentle breath and soft focus" tone="teal" icon={<SunriseIcon />} />
+                <TokenCard label="Mind Control" note="Steady steps, one thought at a time" tone="blue" icon={<MindWaveIcon />} />
+                <TokenCard label="Self Kindness" note="You are welcome here" tone="lilac" icon={<HeartBreezeIcon />} />
+              </div>
             </div>
-            <div className="flex gap-2 flex-wrap justify-center">
-              <TokenCard label="Inner Peace" note="Gentle breath and soft focus" gradient="from-[#3b6f6b]/60 via-[#4f9088]/50 to-[#d6f3ec]/50" icon={<SunriseIcon />} />
-              <TokenCard label="Mind Control" note="Steady steps, one thought at a time" gradient="from-[#20324a]/60 via-[#405b75]/50 to-[#dbe7f6]/40" icon={<MindWaveIcon />} />
-              <TokenCard label="Self Kindness" note="You are welcome here" gradient="from-[#5a3f52]/60 via-[#7c5d73]/50 to-[#f3e6f0]/45" icon={<HeartBreezeIcon />} />
-            </div>
-          </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/wisdom-rooms"
@@ -331,57 +331,58 @@ function ArdhaReframer() {
     }
   }
 
-  return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm text-orange-100/80">Gita-aligned reframing</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Ardha: Reframing Assistant</h2>
+    return (
+      <section className="mv-surface-panel rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <p className="text-sm mv-panel-subtle">Gita-aligned reframing</p>
+            <h2 className="text-2xl font-semibold mv-panel-title">Ardha: Reframing Assistant</h2>
+          </div>
+          <div className="mv-chip px-3 py-2 rounded-2xl text-xs">Local only</div>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">Local only</div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-3">
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="ardha-input">Share the thought to reframe</label>
-          <textarea
-            id="ardha-input"
-            value={thought}
-            onChange={e => setThought(e.target.value)}
-            placeholder="Example: I keep messing up at work, maybe I’m just not cut out for this."
-            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={requestReframe}
-              disabled={!thought.trim() || loading}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-3">
+            <label className="block text-sm font-semibold mv-panel-title" htmlFor="ardha-input">Share the thought to reframe</label>
+            <textarea
+              id="ardha-input"
+              value={thought}
+              onChange={e => setThought(e.target.value)}
+              placeholder="Example: I keep messing up at work, maybe I’m just not cut out for this."
+              className="mv-input w-full min-h-[120px] rounded-2xl p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+            />
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={requestReframe}
+                disabled={!thought.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Reflecting...' : 'Reframe'}
             </button>
           </div>
-          {error && <p className="text-sm text-orange-200">{error}</p>}
-        </div>
-
-        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
-          <h3 className="text-sm font-semibold text-orange-50">Ardha</h3>
-          <p className="text-sm text-orange-100/80">Balanced reframes that leave Kiaan untouched.</p>
-        </div>
-      </div>
-
-      {result && (
-        <div
-          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
-          role="status"
-          aria-live="polite"
-        >
-          <div className="flex items-center justify-between text-xs text-orange-100/70">
-            <span className="font-semibold text-orange-50">Ardha’s response</span>
-            <span>{new Date(result.requestedAt).toLocaleString()}</span>
+            {error && <p className="text-sm mv-panel-title">{error}</p>}
           </div>
-          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+
+          <div className="space-y-3 rounded-2xl border p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]" style={{ background: 'var(--mv-surface-subtle)', borderColor: 'var(--mv-border)' }}>
+            <h3 className="text-sm font-semibold mv-panel-title">Ardha</h3>
+            <p className="text-sm mv-panel-subtle">Balanced reframes that leave Kiaan untouched.</p>
+          </div>
         </div>
-      )}
+
+        {result && (
+          <div
+            className="rounded-2xl p-4 space-y-2 shadow-inner"
+            style={{ background: 'var(--mv-surface-subtle)', border: `1px solid var(--mv-border)` }}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex items-center justify-between text-xs mv-panel-subtle">
+              <span className="font-semibold mv-panel-title">Ardha’s response</span>
+              <span>{new Date(result.requestedAt).toLocaleString()}</span>
+            </div>
+            <div className="whitespace-pre-wrap text-sm mv-panel-title leading-relaxed">{result.response}</div>
+          </div>
+        )}
     </section>
   )
 }
@@ -435,54 +436,55 @@ function ViyogDetachmentCoach() {
   }
 
   return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+    <section className="mv-surface-panel rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <p className="text-sm text-orange-100/80">Outcome anxiety reducer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Viyog: Detachment Coach</h2>
+          <p className="text-sm mv-panel-subtle">Outcome anxiety reducer</p>
+          <h2 className="text-2xl font-semibold mv-panel-title">Viyog: Detachment Coach</h2>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">Local only</div>
+        <div className="mv-chip px-3 py-2 rounded-2xl text-xs">Local only</div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-3">
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="viyog-input">Share the outcome worry</label>
-          <textarea
-            id="viyog-input"
-            value={concern}
-            onChange={e => setConcern(e.target.value)}
-            placeholder="Example: I’m afraid the presentation will flop and everyone will think I’m incompetent."
-            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={requestDetachment}
-              disabled={!concern.trim() || loading}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-3">
+            <label className="block text-sm font-semibold mv-panel-title" htmlFor="viyog-input">Share the outcome worry</label>
+            <textarea
+              id="viyog-input"
+              value={concern}
+              onChange={e => setConcern(e.target.value)}
+              placeholder="Example: I’m afraid the presentation will flop and everyone will think I’m incompetent."
+              className="mv-input w-full min-h-[120px] rounded-2xl p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+            />
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={requestDetachment}
+                disabled={!concern.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Centering...' : 'Shift'}
             </button>
           </div>
-          {error && <p className="text-sm text-orange-200">{error}</p>}
-        </div>
+            {error && <p className="text-sm mv-panel-title">{error}</p>}
+          </div>
 
-        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
-          <h3 className="text-sm font-semibold text-orange-50">Viyog</h3>
-          <p className="text-sm text-orange-100/80">Redirects worries to actionable steps.</p>
+          <div className="space-y-3 rounded-2xl border p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]" style={{ background: 'var(--mv-surface-subtle)', borderColor: 'var(--mv-border)' }}>
+            <h3 className="text-sm font-semibold mv-panel-title">Viyog</h3>
+            <p className="text-sm mv-panel-subtle">Redirects worries to actionable steps.</p>
+          </div>
         </div>
-      </div>
 
       {result && (
         <div
-          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
+          className="rounded-2xl p-4 space-y-2 shadow-inner"
+          style={{ background: 'var(--mv-surface-subtle)', border: `1px solid var(--mv-border)` }}
           role="status"
           aria-live="polite"
         >
-          <div className="flex items-center justify-between text-xs text-orange-100/70">
-            <span className="font-semibold text-orange-50">Viyog’s response</span>
+          <div className="flex items-center justify-between text-xs mv-panel-subtle">
+            <span className="font-semibold mv-panel-title">Viyog’s response</span>
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
-          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+          <div className="whitespace-pre-wrap text-sm mv-panel-title leading-relaxed">{result.response}</div>
         </div>
       )}
     </section>
@@ -641,17 +643,28 @@ function StatusPill({ label, tone = 'ok' }: { label: string, tone?: 'ok' | 'warn
   )
 }
 
-function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: ReactElement }) {
+function TokenCard({ label, note, tone, icon }: { label: string, note: string, tone: 'teal' | 'blue' | 'lilac', icon: ReactElement }) {
+  const toneMap: Record<'teal' | 'blue' | 'lilac', { bg: string; text: string }> = {
+    teal: { bg: '--mv-card-teal-bg', text: '--mv-card-teal-text' },
+    blue: { bg: '--mv-card-blue-bg', text: '--mv-card-blue-text' },
+    lilac: { bg: '--mv-card-lilac-bg', text: '--mv-card-lilac-text' }
+  }
+
+  const style = {
+    '--mv-card-bg': `var(${toneMap[tone].bg})`,
+    '--mv-card-text': `var(${toneMap[tone].text})`
+  } as CSSProperties
+
   return (
-    <div className={`relative min-w-[135px] sm:min-w-[150px] rounded-xl border border-white/10 bg-gradient-to-br ${gradient} p-2.5 shadow-[0_8px_26px_rgba(64,98,104,0.28)] overflow-hidden cursor-default select-none`}> 
-      <div className="absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/20 blur-2xl" />
+    <div className="mv-token-card relative min-w-[135px] sm:min-w-[150px] rounded-xl p-2.5 shadow-[0_8px_26px_rgba(64,98,104,0.28)] overflow-hidden cursor-default select-none" style={style}>
+      <div className="absolute -right-5 -top-5 h-14 w-14 rounded-full bg-black/10 blur-2xl" />
       <div className="flex items-center gap-2.5">
-        <div className="h-10 w-10 rounded-lg bg-black/40 border border-white/20 flex items-center justify-center text-xl text-emerald-50">
+        <div className="h-10 w-10 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center text-xl text-emerald-50">
           {icon}
         </div>
-        <div>
-          <p className="text-[13px] font-semibold text-emerald-50 drop-shadow-sm">{label}</p>
-          <p className="text-[11px] text-emerald-50/80 leading-snug">{note}</p>
+        <div className="mv-token-text">
+          <p className="text-[13px] font-semibold mv-panel-title drop-shadow-sm">{label}</p>
+          <p className="text-[11px] mv-panel-subtle leading-snug">{note}</p>
         </div>
       </div>
     </div>
@@ -1462,82 +1475,85 @@ function ClarityPauseSuite() {
   }
 
   return (
-    <section id="clarity-suite" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
+    <section id="clarity-suite" className="clarity-panel mv-surface-panel relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
       <div className="absolute -left-10 top-0 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/16 to-transparent blur-3xl" />
       <div className="absolute -right-12 bottom-0 h-40 w-40 rounded-full bg-gradient-to-tr from-[#1b1f29]/60 via-orange-500/14 to-transparent blur-3xl" />
 
-      <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1">
-          <p className="text-xs text-orange-100/80">High-Stress Decision Timer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Use the same pause overlay as Kiaan: detect a trigger, launch the prompt, and watch the 60-second guide run.</p>
-        </div>
-        <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Separate from Kiaan</span>
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Never edits responses</span>
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Decline anytime</span>
-        </div>
-      </div>
-
-      <div className="relative grid gap-4 md:grid-cols-2">
-        <div className="space-y-3 rounded-2xl bg-black/50 border border-orange-500/20 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
-          <div className="flex items-center justify-between text-xs text-orange-100/80">
-            <span className="font-semibold text-orange-50">Trigger detection system</span>
-            <span className="rounded-full bg-white/10 px-3 py-1">Non-blocking</span>
+        <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs mv-panel-subtle">High-Stress Decision Timer</p>
+            <h2 className="text-2xl font-semibold mv-panel-title">Clarity Pause</h2>
+            <p className="text-sm mv-panel-subtle max-w-3xl">Use the same pause overlay as Kiaan: detect a trigger, launch the prompt, and watch the 60-second guide run.</p>
           </div>
-          <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-            {labTriggers.map(trigger => (
+          <div className="flex flex-wrap gap-2 text-[11px]">
+            <span className="mv-chip rounded-full px-3 py-1">Separate from Kiaan</span>
+            <span className="mv-chip rounded-full px-3 py-1">Never edits responses</span>
+            <span className="mv-chip rounded-full px-3 py-1">Decline anytime</span>
+          </div>
+        </div>
+
+        <div className="relative grid gap-4 md:grid-cols-2">
+          <div className="space-y-3 rounded-2xl clarity-card border p-4">
+            <div className="flex items-center justify-between text-xs mv-panel-subtle">
+              <span className="font-semibold mv-panel-title">Trigger detection system</span>
+              <span className="mv-chip rounded-full px-3 py-1">Non-blocking</span>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px] mv-panel-subtle">
+              {labTriggers.map(trigger => (
+                <button
+                  key={trigger}
+                  onClick={() => setLabMessage(trigger)}
+                  className="rounded-full border px-3 py-1 transition"
+                  style={{ borderColor: 'var(--mv-border)', color: 'var(--mv-panel-text-primary)' }}
+                >
+                  {trigger}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={labMessage}
+              onChange={e => setLabMessage(e.target.value)}
+              className="mv-input w-full rounded-xl p-3 text-sm focus:border-orange-300/70 focus:outline-none"
+              rows={3}
+              placeholder="Type a high-intent, urgent, or calm message"
+            />
+            <div className="flex flex-wrap gap-2 text-[11px] mv-panel-subtle">
               <button
-                key={trigger}
-                onClick={() => setLabMessage(trigger)}
-                className="rounded-full border border-orange-400/30 px-3 py-1 hover:border-orange-300/60 transition"
+                onClick={runEvaluation}
+                className="rounded-lg bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-4 py-2 font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
               >
-                {trigger}
+                Evaluate triggers
               </button>
-            ))}
-          </div>
-          <textarea
-            value={labMessage}
-            onChange={e => setLabMessage(e.target.value)}
-            className="w-full rounded-xl border border-orange-500/30 bg-black/40 p-3 text-sm text-orange-50 focus:border-orange-300/70 focus:outline-none"
-            rows={3}
-            placeholder="Type a high-intent, urgent, or calm message"
-          />
-          <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-            <button
-              onClick={runEvaluation}
-              className="rounded-lg bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-4 py-2 font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-            >
-              Evaluate triggers
-            </button>
-            <button
-              onClick={launchOverlay}
-              className="rounded-lg border border-orange-500/40 bg-white/5 px-4 py-2 font-semibold text-orange-50"
-            >
-              Launch clarity overlay
-            </button>
-            <button
-              onClick={resetLab}
-              className="rounded-lg border border-white/10 px-4 py-2 text-orange-100/80"
-            >
-              Reset model
-            </button>
-          </div>
+              <button
+                onClick={launchOverlay}
+                className="rounded-lg border px-4 py-2 font-semibold"
+                style={{ borderColor: 'var(--mv-border)', color: 'var(--mv-panel-text-primary)' }}
+              >
+                Launch clarity overlay
+              </button>
+              <button
+                onClick={resetLab}
+                className="rounded-lg border px-4 py-2"
+                style={{ borderColor: 'var(--mv-border)', color: 'var(--mv-panel-text-primary)' }}
+              >
+                Reset model
+              </button>
+            </div>
 
-          {labEvaluation && (
-            <div className="space-y-2 rounded-xl border border-orange-400/30 bg-white/5 p-3 text-sm text-orange-100/85">
-              <div className="flex flex-wrap gap-2 text-[11px]">
-                <span className="rounded-full bg-orange-500/20 px-3 py-1 text-orange-50">{labEvaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'}</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-orange-50">Confidence: {labEvaluation.confidence}</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-orange-50">Intent score: {labEvaluation.impulseScore}/5</span>
-              </div>
-              <p className="font-semibold text-orange-50">Flags</p>
-              <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-                {(labEvaluation.flags.length ? labEvaluation.flags : ['No explicit triggers']).map(flag => (
-                  <span key={flag} className="rounded-full border border-orange-400/30 bg-black/40 px-3 py-1">{flag}</span>
-                ))}
-              </div>
-              <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+            {labEvaluation && (
+              <div className="space-y-2 rounded-xl clarity-card border p-3 text-sm">
+                <div className="flex flex-wrap gap-2 text-[11px]">
+                  <span className="mv-chip rounded-full px-3 py-1">{labEvaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'}</span>
+                  <span className="mv-chip rounded-full px-3 py-1">Confidence: {labEvaluation.confidence}</span>
+                  <span className="mv-chip rounded-full px-3 py-1">Intent score: {labEvaluation.impulseScore}/5</span>
+                </div>
+                <p className="font-semibold mv-panel-title">Flags</p>
+                <div className="flex flex-wrap gap-2 text-[11px] mv-panel-subtle">
+                  {(labEvaluation.flags.length ? labEvaluation.flags : ['No explicit triggers']).map(flag => (
+                    <span key={flag} className="rounded-full border px-3 py-1" style={{ borderColor: 'var(--mv-border)' }}>{flag}</span>
+                  ))}
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-orange-300 to-orange-500 transition-[width] duration-700"
                   style={{ width: `${((labEvaluation.impulseScore ?? 0) / 5) * 100}%` }}
@@ -2426,47 +2442,50 @@ function MoodTracker() {
   }
 
   return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 shadow-[0_16px_70px_rgba(255,115,39,0.12)] space-y-4">
+    <section className="mv-surface-panel rounded-3xl p-6 shadow-[0_16px_70px_rgba(255,115,39,0.12)] space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-orange-100/70">State check-in</p>
-          <h2 className="text-xl font-semibold text-orange-50">How are you feeling?</h2>
+          <p className="text-[11px] uppercase tracking-[0.18em] mv-panel-subtle">State check-in</p>
+          <h2 className="text-xl font-semibold mv-panel-title">How are you feeling?</h2>
         </div>
         {selectedMood && (
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1 text-xs font-semibold text-orange-100 shadow-[0_0_25px_rgba(255,153,51,0.25)]">
+          <span className="mv-chip rounded-full px-3 py-1 text-xs font-semibold shadow-[0_0_25px_rgba(255,153,51,0.15)]">
             Logged: {selectedMood}
           </span>
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {moods.map(mood => {
-          const active = selectedMood === mood.label
-          return (
-            <button
-              key={mood.label}
-              onClick={() => handleMoodSelect(mood.label)}
-              className={`group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-[#09090d]/85 text-left transition duration-300 ${
-                active
-                  ? 'ring-2 ring-orange-400/70 shadow-[0_24px_80px_rgba(255,115,39,0.28)] scale-[1.02]'
-                  : 'hover:-translate-y-1 hover:shadow-[0_18px_60px_rgba(255,115,39,0.18)]'
-              }`}
-              style={{ animationDelay: mood.delay }}
-            >
-              <div className={`absolute -inset-8 bg-gradient-to-br ${mood.gradient} opacity-20 blur-3xl`} />
-              <div className={`absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,200,150,0.25),transparent_46%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.16),transparent_42%)] animate-glowPulse`} />
-              <div className={`absolute inset-0 opacity-70 ${active ? 'animate-sheen' : ''}`}>
-                <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]" />
-              </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {moods.map(mood => {
+            const active = selectedMood === mood.label
+            const cardStyle: CSSProperties = {
+              animationDelay: mood.delay,
+              boxShadow: active ? '0 24px 80px rgba(217,119,6,0.25)' : undefined,
+              borderColor: active ? 'var(--mv-border-strong)' : undefined
+            }
+            return (
+              <button
+                key={mood.label}
+                onClick={() => handleMoodSelect(mood.label)}
+                className={`group relative overflow-hidden rounded-2xl mood-card border text-left transition duration-300 ${
+                  active ? 'scale-[1.02]' : 'hover:-translate-y-1'
+                }`}
+                style={cardStyle}
+              >
+                <div className={`absolute -inset-8 bg-gradient-to-br ${mood.gradient} opacity-20 blur-3xl`} />
+                <div className={`absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,200,150,0.25),transparent_46%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.16),transparent_42%)] animate-glowPulse`} />
+                <div className={`absolute inset-0 opacity-70 ${active ? 'animate-sheen' : ''}`}>
+                  <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]" />
+                </div>
 
-              <div className="relative flex items-center gap-4 p-4">
-                <div className="relative h-14 w-14 shrink-0">
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mood.gradient} opacity-80 blur-sm ${mood.halo}`} />
-                  <div className="absolute inset-1 rounded-2xl border border-white/10 bg-[#0b0b0f]/80 backdrop-blur" />
-                  <div className="absolute inset-2 rounded-xl border border-white/10" style={{ animation: 'spin 14s linear infinite' }} />
-                  <div className="absolute inset-2 rounded-xl bg-gradient-to-br from-white/8 via-transparent to-white/8" style={{ animation: 'spin 10s linear infinite reverse' }} />
-                  <div className="absolute inset-3 rounded-xl border border-white/10" />
-                  <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-white/5 via-transparent to-white/10 animate-glowPulse" />
+                <div className="relative z-[1] flex items-center gap-4 p-4">
+                  <div className="relative h-14 w-14 shrink-0">
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mood.gradient} opacity-80 blur-sm ${mood.halo}`} />
+                    <div className="absolute inset-1 rounded-2xl border border-white/10 bg-black/40 backdrop-blur" />
+                    <div className="absolute inset-2 rounded-xl border border-white/10" style={{ animation: 'spin 14s linear infinite' }} />
+                    <div className="absolute inset-2 rounded-xl bg-gradient-to-br from-white/8 via-transparent to-white/8" style={{ animation: 'spin 10s linear infinite reverse' }} />
+                    <div className="absolute inset-3 rounded-xl border border-white/10" />
+                    <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-white/5 via-transparent to-white/10 animate-glowPulse" />
                   <div className="absolute inset-0">
                     <span
                       className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[2px] animate-orbitTrail"
@@ -2488,7 +2507,7 @@ function MoodTracker() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold text-orange-50">{mood.label}</p>
+                  <p className="text-sm font-semibold mv-panel-title">{mood.label}</p>
                   <div className="flex items-center gap-1.5">
                     {[0, 1, 2].map(level => (
                       <span
@@ -2506,21 +2525,21 @@ function MoodTracker() {
       </div>
 
       {/* KIAAN Micro-Response */}
-      {selectedMood && kiaanResponse && (
-        <div className="animate-fadeIn mt-4">
-          <div className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-amber-300/10 p-4 shadow-lg shadow-orange-500/10">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
-                K
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-orange-100/70 mb-1">KIAAN</p>
-                <p className="text-sm text-orange-50 leading-relaxed">
-                  {kiaanResponse}
-                </p>
+        {selectedMood && kiaanResponse && (
+          <div className="animate-fadeIn mt-4">
+            <div className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-amber-300/10 p-4 shadow-lg shadow-orange-500/10">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
+                  K
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs mv-panel-subtle mb-1">KIAAN</p>
+                  <p className="text-sm mv-panel-title leading-relaxed">
+                    {kiaanResponse}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
         </div>
       )}
 
