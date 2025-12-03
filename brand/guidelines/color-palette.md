@@ -1,273 +1,170 @@
 # Color Palette System
 
 ## Overview
-
-MindVibe's color system is designed to evoke calm, warmth, and emotional intelligence. The palette supports both light and dark modes while maintaining WCAG AA/AAA accessibility standards.
+MindVibe’s palette balances warmth, clarity, and compassion across three gradient themes plus a precision blue accent. All values include Hex / RGB / HSL and are AA-ready against the prescribed backgrounds.
 
 ---
 
-## Primary Theme: Orange–Gold (Warmth & Energy)
+## Primary Theme: Orange–Gold (Warmth & Optimism)
+The hero spectrum for the MindVibe badge and core CTAs.
 
-The signature MindVibe palette represents warmth, optimism, and positive energy.
+| Name | Hex | RGB | HSL | Usage |
+|------|-----|-----|-----|-------|
+| Orange Primary | `#FF6B35` | 255, 107, 53 | 18°, 100%, 60% | Primary actions, halo core |
+| Orange Mid | `#F7931E` | 247, 147, 30 | 32°, 92%, 54% | Gradient midpoint |
+| Gold Primary | `#FFD700` | 255, 215, 0 | 51°, 100%, 50% | Highlights, success |
+| Amber Glow | `#FFC680` | 255, 198, 128 | 35°, 100%, 75% | Soft overlays |
+| Warm Light | `#FFE8CC` | 255, 232, 204 | 33°, 100%, 90% | Light surfaces |
 
-### Primary Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Orange Primary | `#FF6B35` | 255, 107, 53 | Primary actions, brand accent |
-| Orange Mid | `#F7931E` | 247, 147, 30 | Gradient midpoint |
-| Gold Primary | `#FFD700` | 255, 215, 0 | Highlights, success states |
-
-### Secondary Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Orange Secondary | `#FFA500` | 255, 165, 0 | Secondary elements |
-| Orange Light | `#FFB84D` | 255, 184, 77 | Hover states |
-| Orange Accent | `#FFEDD8` | 255, 237, 216 | Light backgrounds |
-
-### Gradients
+**Gradient Recipes**
 ```css
-/* Primary Orange-Gold Gradient */
+/* Badge Core */
 background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFD700 100%);
-
-/* Warm Glow Gradient */
-background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 107, 53, 0.15) 70%, transparent 100%);
+/* Halo */
+background: radial-gradient(circle, rgba(255, 215, 0, 0.35) 0%, rgba(255, 107, 53, 0.18) 55%, transparent 100%);
 ```
 
 ---
 
-## Secondary Theme: Teal–Sky (Calm & Clarity)
+## Secondary Theme: Teal–Sky (Inner Peace)
+Optimized for breathing flows and tranquil UI states.
 
-Used for Inner Peace features, meditation, and calming elements.
+| Name | Hex | RGB | HSL | Usage |
+|------|-----|-----|-----|-------|
+| Teal Core | `#0FB5C9` | 15, 181, 201 | 186°, 87%, 42% | Inner Peace primary |
+| Sky Lift | `#43D3E8` | 67, 211, 232 | 189°, 76%, 59% | Gradient midpoint |
+| Cloud Light | `#A8E8FF` | 168, 232, 255 | 200°, 100%, 83% | Soft rings, backgrounds |
+| Mist | `#D9F6FF` | 217, 246, 255 | 198°, 100%, 92% | Cards, overlays |
 
-### Primary Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Teal Primary | `#00CED1` | 0, 206, 209 | Inner Peace tab, calm states |
-| Sky Primary | `#87CEEB` | 135, 206, 235 | Light calm elements |
-| Teal Light | `#E0F7FA` | 224, 247, 250 | Light backgrounds |
-
-### Secondary Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Teal Secondary | `#4DD0E1` | 77, 208, 225 | Secondary calm elements |
-| Sky Secondary | `#80DEEA` | 128, 222, 234 | Hover states |
-| Teal Accent | `#B2EBF2` | 178, 235, 242 | Subtle accents |
-
-### Gradients
+**Gradient Recipes**
 ```css
-/* Calm Teal Gradient */
-background: linear-gradient(135deg, #00CED1 0%, #87CEEB 50%, #E0F7FA 100%);
-
-/* Breath Ring Gradient */
-background: radial-gradient(circle, rgba(0, 206, 209, 0.5) 0%, rgba(135, 206, 235, 0.2) 70%, transparent 100%);
+/* Breath Gradient */
+background: linear-gradient(135deg, #0FB5C9 0%, #43D3E8 55%, #A8E8FF 100%);
+/* Ring Glow */
+background: radial-gradient(circle, rgba(15, 181, 201, 0.45) 0%, rgba(67, 211, 232, 0.2) 65%, transparent 100%);
 ```
 
 ---
 
-## Tertiary Theme: Rose–Lilac (Compassion & Peace)
+## Tertiary Theme: Rose–Lilac (Self Kindness)
+A compassionate palette for journaling, kindness, and reflective spaces.
 
-Used for Self Kindness features, emotional support, and gentle encouragement.
+| Name | Hex | RGB | HSL | Usage |
+|------|-----|-----|-----|-------|
+| Rose Core | `#FF6B9D` | 255, 107, 157 | 342°, 100%, 71% | Self Kindness primary |
+| Lilac Beam | `#C77DFF` | 199, 125, 255 | 276°, 100%, 74% | Gradient midpoint |
+| Blush Light | `#E6C9FF` | 230, 201, 255 | 274°, 100%, 89% | Blooms, overlays |
+| Petal Mist | `#F6E9FF` | 246, 233, 255 | 280°, 100%, 95% | Backgrounds |
 
-### Primary Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Rose Primary | `#FF6B9D` | 255, 107, 157 | Self Kindness tab |
-| Lilac Primary | `#C77DFF` | 199, 125, 255 | Gentle accents |
-| Rose Light | `#E0BBE4` | 224, 187, 228 | Light backgrounds |
-
-### Secondary Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Rose Secondary | `#FF8FAB` | 255, 143, 171 | Secondary elements |
-| Lilac Secondary | `#D4A5F9` | 212, 165, 249 | Hover states |
-| Rose Accent | `#F3E5F5` | 243, 229, 245 | Subtle backgrounds |
-
-### Gradients
+**Gradient Recipes**
 ```css
 /* Compassion Gradient */
-background: linear-gradient(135deg, #FF6B9D 0%, #C77DFF 50%, #E0BBE4 100%);
-
-/* Heart Bloom Gradient */
-background: radial-gradient(circle, rgba(255, 107, 157, 0.5) 0%, rgba(199, 125, 255, 0.2) 70%, transparent 100%);
+background: linear-gradient(135deg, #FF6B9D 0%, #C77DFF 55%, #E6C9FF 100%);
+/* Heart Bloom */
+background: radial-gradient(circle, rgba(255, 107, 157, 0.45) 0%, rgba(199, 125, 255, 0.22) 70%, transparent 100%);
 ```
 
 ---
 
 ## Focus Theme: Deep Blue (Mind Control)
 
-Used for Mind Control features, focus, and concentration.
+| Name | Hex | RGB | HSL | Usage |
+|------|-----|-----|-----|-------|
+| Focus Deep | `#1E40AF` | 30, 64, 175 | 227°, 71%, 40% | Mind Control anchor |
+| Focus Primary | `#3B82F6` | 59, 130, 246 | 217°, 91%, 60% | Beam core |
+| Focus Mist | `#80B3F6` | 128, 179, 246 | 216°, 84%, 73% | Trails, accents |
 
-### Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Blue Deep | `#1E40AF` | 30, 64, 175 | Mind Control tab |
-| Blue Primary | `#3B82F6` | 59, 130, 246 | Focus elements |
-| Blue Light | `#80B3F6` | 128, 179, 246 | Accents |
-
-### Gradients
+**Gradient Recipe**
 ```css
-/* Focus Beam Gradient */
-background: linear-gradient(90deg, #1E40AF 0%, #3B82F6 50%, #80B3F6 100%);
+background: linear-gradient(90deg, #1E40AF 0%, #3B82F6 55%, #80B3F6 100%);
 ```
 
 ---
 
-## KIAAN Brand Colors
+## Light & Dark Mode Foundations
 
-Special palette for KIAAN branding elements.
+### Dark Mode
+| Token | Hex | HSL | Usage |
+|-------|-----|-----|-------|
+| Background | `#050505` | 0°, 0%, 2% | Canvas |
+| Surface | `#0B0B0F` | 240°, 15%, 4% | Cards |
+| Surface Elevated | `#121218` | 240°, 22%, 8% | Modals |
+| Border | `#1E1E24` | 240°, 11%, 13% | Dividers |
+| Text Primary | `#FEFEFE` | 0°, 0%, 100% | Headlines |
+| Text Secondary | `#A0A0A0` | 0°, 0%, 63% | Body |
 
-### Feather Colors
-| Name | Hex | Usage |
-|------|-----|-------|
-| Feather Teal | `#4FD1C5` | Feather start |
-| Feather Mid | `#38B2AC` | Feather body |
-| Feather Blue | `#3B82F6` | Feather tip |
-| Feather Deep | `#1E40AF` | Feather accent |
-
-### Eye Colors
-| Name | Hex | Usage |
-|------|-----|-------|
-| Eye Gold | `#FFC850` | Eye center highlight |
-| Eye Orange | `#FF9933` | Eye middle ring |
-| Eye Warm | `#FF7327` | Eye outer glow |
-
----
-
-## Dark Mode
-
-### Background Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Background | `#050505` | 5, 5, 5 | Main background |
-| Surface | `#0B0B0F` | 11, 11, 15 | Cards, elevated surfaces |
-| Surface Elevated | `#121218` | 18, 18, 24 | Modals, dropdowns |
-| Border | `#1E1E24` | 30, 30, 36 | Dividers, borders |
-
-### Text Colors
-| Name | Hex | Opacity | Usage |
-|------|-----|---------|-------|
-| Primary | `#FEFEFE` | 100% | Headings, important text |
-| Secondary | `#A0A0A0` | — | Body text |
-| Tertiary | `#707070` | — | Captions, placeholders |
-| Disabled | `#404040` | — | Disabled states |
-
-### Semantic Colors
-| State | Color | Hex |
-|-------|-------|-----|
-| Success | Green | `#22C55E` |
-| Warning | Amber | `#F59E0B` |
-| Error | Red | `#EF4444` |
-| Info | Blue | `#3B82F6` |
+### Light Mode
+| Token | Hex | HSL | Usage |
+|-------|-----|-----|-------|
+| Background | `#FEFEFE` | 0°, 0%, 100% | Canvas |
+| Surface | `#F8FAFC` | 210°, 40%, 97% | Cards |
+| Surface Warm | `#FFF7ED` | 32°, 100%, 96% | Warm sections |
+| Border | `#E2E8F0` | 210°, 29%, 89% | Dividers |
+| Text Primary | `#1E293B` | 215°, 33%, 17% | Headlines |
+| Text Secondary | `#475569` | 213°, 24%, 34% | Body |
 
 ---
 
-## Light Mode
-
-### Background Colors
-| Name | Hex | RGB | Usage |
-|------|-----|-----|-------|
-| Background | `#FEFEFE` | 254, 254, 254 | Main background |
-| Surface | `#F8FAFC` | 248, 250, 252 | Cards, elevated surfaces |
-| Surface Warm | `#FFF7ED` | 255, 247, 237 | Warm accented surfaces |
-| Border | `#E2E8F0` | 226, 232, 240 | Dividers, borders |
-
-### Text Colors
-| Name | Hex | Usage |
-|------|-----|-------|
-| Primary | `#1E293B` | Headings, important text |
-| Secondary | `#475569` | Body text |
-| Tertiary | `#64748B` | Captions, placeholders |
-| Disabled | `#94A3B8` | Disabled states |
+## Glow & Shadow Tokens
+- **Subtle Glow**: `0 0 20px rgba(255, 215, 0, 0.18)` (light) or `rgba(67, 211, 232, 0.18)` (teal).
+- **Ambient Glow**: `0 0 32px rgba(199, 125, 255, 0.25)` for Rose–Lilac or `rgba(59, 130, 246, 0.22)` for Focus Blue.
+- **Shadow (Elevated)**: `0 10px 40px rgba(0,0,0,0.25)` on dark; `0 16px 48px rgba(17, 24, 39, 0.18)` on light.
 
 ---
 
 ## Accessibility
-
-### Contrast Ratios (Dark Mode)
-
-| Foreground | Background | Ratio | Level |
-|------------|------------|-------|-------|
-| `#FEFEFE` | `#050505` | 21:1 | AAA |
-| `#A0A0A0` | `#050505` | 8.5:1 | AAA |
-| `#FF6B35` | `#050505` | 5.2:1 | AA |
-| `#00CED1` | `#050505` | 9.1:1 | AAA |
-
-### Contrast Ratios (Light Mode)
-
-| Foreground | Background | Ratio | Level |
-|------------|------------|-------|-------|
-| `#1E293B` | `#FEFEFE` | 14.5:1 | AAA |
-| `#475569` | `#FEFEFE` | 7.1:1 | AAA |
-| `#FF6B35` | `#FEFEFE` | 3.2:1 | AA Large |
-| `#1E40AF` | `#FEFEFE` | 8.8:1 | AAA |
-
-### Color Blindness Considerations
-- Primary actions use distinct hues, not just saturation
-- Error states include icon + text, not color alone
-- Charts use patterns in addition to colors
+- Target **WCAG 2.1 AA/AAA**; all text on dark surfaces uses ≥4.5:1 contrast, large text ≥3:1.
+- Color is never the only indicator; pair hues with icons, labels, or patterns.
+- Provide desaturated variants for color-blind safe charts and ensure glows do not mask focus rings.
 
 ---
 
 ## CSS Custom Properties
-
 ```css
 :root {
-  /* Orange-Gold Theme */
+  /* Orange–Gold */
   --color-orange-primary: #FF6B35;
   --color-orange-mid: #F7931E;
   --color-gold-primary: #FFD700;
-  --color-orange-secondary: #FFA500;
-  --color-orange-light: #FFB84D;
-  --color-orange-accent: #FFEDD8;
-  
-  /* Teal-Sky Theme */
-  --color-teal-primary: #00CED1;
-  --color-sky-primary: #87CEEB;
-  --color-teal-light: #E0F7FA;
-  --color-teal-secondary: #4DD0E1;
-  --color-sky-secondary: #80DEEA;
-  --color-teal-accent: #B2EBF2;
-  
-  /* Rose-Lilac Theme */
-  --color-rose-primary: #FF6B9D;
-  --color-lilac-primary: #C77DFF;
-  --color-rose-light: #E0BBE4;
-  --color-rose-secondary: #FF8FAB;
-  --color-lilac-secondary: #D4A5F9;
-  --color-rose-accent: #F3E5F5;
-  
+  --color-amber-glow: #FFC680;
+  --color-warm-light: #FFE8CC;
+
+  /* Teal–Sky */
+  --color-teal-core: #0FB5C9;
+  --color-sky-lift: #43D3E8;
+  --color-cloud-light: #A8E8FF;
+  --color-mist: #D9F6FF;
+
+  /* Rose–Lilac */
+  --color-rose-core: #FF6B9D;
+  --color-lilac-beam: #C77DFF;
+  --color-blush-light: #E6C9FF;
+  --color-petal-mist: #F6E9FF;
+
   /* Focus Blue */
-  --color-blue-deep: #1E40AF;
-  --color-blue-primary: #3B82F6;
-  --color-blue-light: #80B3F6;
-  
-  /* Semantic */
+  --color-focus-deep: #1E40AF;
+  --color-focus-primary: #3B82F6;
+  --color-focus-mist: #80B3F6;
+
+  /* Semantics */
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #3B82F6;
-}
 
-/* Dark Mode */
-[data-theme="dark"] {
-  --color-background: #050505;
-  --color-surface: #0B0B0F;
-  --color-text-primary: #FEFEFE;
-  --color-text-secondary: #A0A0A0;
-  --color-border: #1E1E24;
-}
-
-/* Light Mode */
-[data-theme="light"] {
-  --color-background: #FEFEFE;
-  --color-surface: #F8FAFC;
-  --color-text-primary: #1E293B;
-  --color-text-secondary: #475569;
-  --color-border: #E2E8F0;
+  /* Base surfaces */
+  --color-bg-dark: #050505;
+  --color-surface-dark: #0B0B0F;
+  --color-text-dark: #FEFEFE;
+  --color-muted-dark: #A0A0A0;
+  --color-bg-light: #FEFEFE;
+  --color-surface-light: #F8FAFC;
+  --color-text-light: #1E293B;
+  --color-muted-light: #475569;
 }
 ```
 
 ---
 
 *Last Updated: 2024*
-*Version: 1.0*
+*Version: 2.0*
