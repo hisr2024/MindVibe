@@ -39,10 +39,13 @@ from backend.middleware.rate_limiter import limiter
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
-ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS",
-    "https://mind-vibe-universal.vercel.app,http://localhost:3000,http://localhost:3001"
-).split(",")
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "https://mind-vibe-universal.vercel.app,http://localhost:3000,http://localhost:3001"
+    ).split(",")
+]
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
