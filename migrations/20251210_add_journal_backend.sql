@@ -161,15 +161,23 @@ CREATE TABLE IF NOT EXISTS journal_entry_tags (
     PRIMARY KEY(entry_id, tag_id)
 );
 
+-- Render's migration runner splits statements by semicolon, so keep the
+-- journal_versions definition free of inline semicolons inside the table body
+-- (i.e., avoid separate ALTERs right after this block). Explicitly declare the
+-- foreign keys inside the table so the statement stands alone.
 CREATE TABLE IF NOT EXISTS journal_versions (
     id SERIAL PRIMARY KEY,
-    entry_id VARCHAR(64) NOT NULL REFERENCES journal_entries(id) ON DELETE CASCADE,
-    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    entry_id VARCHAR(64) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     version INTEGER NOT NULL,
     encrypted_content JSONB NOT NULL,
     encryption_meta JSONB NULL,
     client_updated_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT journal_versions_entry_id_fkey
+        FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE,
+    CONSTRAINT journal_versions_user_id_fkey
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_journal_versions_entry ON journal_versions(entry_id, version DESC);
