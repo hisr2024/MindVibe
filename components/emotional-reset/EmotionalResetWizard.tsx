@@ -75,7 +75,7 @@ export function EmotionalResetWizard({
     if (isMounted && !sessionId) {
       startSession()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sessionId excluded intentionally: we only want to start a session once after mount, not re-run when sessionId changes. startSession is defined inline.
   }, [isMounted])
 
   const startSession = async () => {
