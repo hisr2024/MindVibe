@@ -1,4 +1,5 @@
 -- Migration: Align journal_entries.id with application UUID string type
+-- dialect: postgres-only
 -- Description: Cast journal_entries.id to VARCHAR(64) when legacy integer schema exists,
 --              then restore foreign keys that depend on the column.
 -- Date: 2025-12-11

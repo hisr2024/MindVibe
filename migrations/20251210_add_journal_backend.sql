@@ -1,4 +1,5 @@
 -- Journal backend tables with E2E encrypted blobs
+-- dialect: postgres-only
 -- NOTE: Some legacy deployments created `journal_entries.id` as an integer primary
 -- key. Because this migration introduces new tables that reference
 -- `journal_entries(id)` as a VARCHAR(64) UUID string, we proactively align the
