@@ -140,7 +140,7 @@ BEGIN
 
         ALTER TABLE journal_entries ALTER COLUMN client_updated_at SET NOT NULL;
     END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 CREATE INDEX IF NOT EXISTS idx_journal_entries_client_ts ON journal_entries(client_updated_at);
 
