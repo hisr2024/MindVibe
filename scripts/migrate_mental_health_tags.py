@@ -115,6 +115,8 @@ async def migrate_mental_health_tags() -> None:
             # Parse chapter and verse number from verse_id (e.g., "2.47")
             try:
                 parts = verse_id.split(".")
+                if len(parts) != 2 or not parts[0] or not parts[1]:
+                    raise ValueError("Invalid format")
                 chapter = int(parts[0])
                 verse_num = int(parts[1])
             except (ValueError, IndexError):
