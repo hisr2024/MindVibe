@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_current_user_optional, get_db
 from backend.middleware.rate_limiter import limiter
 from backend.services.emotional_reset_service import EmotionalResetService
 
@@ -72,7 +72,7 @@ def _check_feature_enabled() -> None:
 async def start_session(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str | None = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
     Start a new emotional reset session.
@@ -111,7 +111,7 @@ async def process_step(
     request: Request,
     step_input: StepInput,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str | None = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
     Process current step and advance to next.
@@ -173,7 +173,7 @@ async def get_session(
     request: Request,
     session_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str | None = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
     Retrieve current session state.
@@ -218,7 +218,7 @@ async def complete_session(
     request: Request,
     session_request: SessionRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str | None = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
     Finalize session and create journal entry.

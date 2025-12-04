@@ -113,18 +113,22 @@ class EmotionalResetService:
         return sessions_today < MAX_SESSIONS_PER_DAY, sessions_today
 
     async def start_session(
-        self, db: AsyncSession, user_id: str
+        self, db: AsyncSession, user_id: str | None
     ) -> dict[str, Any]:
         """
         Start a new emotional reset session.
 
         Args:
             db: Database session
-            user_id: User identifier
+            user_id: User identifier (optional, generates anonymous ID if None)
 
         Returns:
             Session info with step 1 content
         """
+        # Generate anonymous session ID for unauthenticated users
+        if not user_id:
+            user_id = f"anon-{uuid.uuid4().hex[:12]}"
+
         # Check rate limit
         is_allowed, sessions_today = await self.check_rate_limit(db, user_id)
         if not is_allowed:
@@ -160,7 +164,7 @@ class EmotionalResetService:
         }
 
     async def get_session(
-        self, db: AsyncSession, session_id: str, user_id: str
+        self, db: AsyncSession, session_id: str, user_id: str | None
     ) -> dict[str, Any] | None:
         """
         Get current session state.
@@ -168,18 +172,30 @@ class EmotionalResetService:
         Args:
             db: Database session
             session_id: Session identifier
-            user_id: User identifier for verification
+            user_id: User identifier for verification (optional)
 
         Returns:
             Session state or None if not found
         """
-        result = await db.execute(
-            select(EmotionalResetSession).where(
-                EmotionalResetSession.session_id == session_id,
-                EmotionalResetSession.user_id == user_id,
-                EmotionalResetSession.deleted_at.is_(None),
+        # Build query based on whether user_id is provided
+        if user_id:
+            result = await db.execute(
+                select(EmotionalResetSession).where(
+                    EmotionalResetSession.session_id == session_id,
+                    EmotionalResetSession.user_id == user_id,
+                    EmotionalResetSession.deleted_at.is_(None),
+                )
             )
-        )
+        else:
+            # For anonymous users, security relies on the unguessable UUID session_id.
+            # The anon-% filter ensures only anonymous sessions can be accessed without auth.
+            result = await db.execute(
+                select(EmotionalResetSession).where(
+                    EmotionalResetSession.session_id == session_id,
+                    EmotionalResetSession.user_id.like("anon-%"),
+                    EmotionalResetSession.deleted_at.is_(None),
+                )
+            )
         session = result.scalar_one_or_none()
 
         if not session:
@@ -588,7 +604,7 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
         self,
         db: AsyncSession,
         session_id: str,
-        user_id: str,
+        user_id: str | None,
         current_step: int,
         user_input: str | None = None,
     ) -> dict[str, Any]:
@@ -598,21 +614,31 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
         Args:
             db: Database session
             session_id: Session identifier
-            user_id: User identifier
+            user_id: User identifier (optional)
             current_step: Current step number (1-7)
             user_input: User input for step 1
 
         Returns:
             Next step content and data
         """
-        # Verify session exists
-        result = await db.execute(
-            select(EmotionalResetSession).where(
-                EmotionalResetSession.session_id == session_id,
-                EmotionalResetSession.user_id == user_id,
-                EmotionalResetSession.deleted_at.is_(None),
+        # Build query based on whether user_id is provided
+        if user_id:
+            result = await db.execute(
+                select(EmotionalResetSession).where(
+                    EmotionalResetSession.session_id == session_id,
+                    EmotionalResetSession.user_id == user_id,
+                    EmotionalResetSession.deleted_at.is_(None),
+                )
             )
-        )
+        else:
+            # For anonymous users, retrieve by session_id only
+            result = await db.execute(
+                select(EmotionalResetSession).where(
+                    EmotionalResetSession.session_id == session_id,
+                    EmotionalResetSession.user_id.like("anon-%"),
+                    EmotionalResetSession.deleted_at.is_(None),
+                )
+            )
         session = result.scalar_one_or_none()
 
         if not session:
@@ -719,7 +745,7 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
         return response_data
 
     async def complete_session(
-        self, db: AsyncSession, session_id: str, user_id: str
+        self, db: AsyncSession, session_id: str, user_id: str | None
     ) -> dict[str, Any]:
         """
         Complete session and optionally create journal entry.
@@ -727,18 +753,29 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
         Args:
             db: Database session
             session_id: Session identifier
-            user_id: User identifier
+            user_id: User identifier (optional)
 
         Returns:
             Completion data with optional journal entry ID
         """
-        result = await db.execute(
-            select(EmotionalResetSession).where(
-                EmotionalResetSession.session_id == session_id,
-                EmotionalResetSession.user_id == user_id,
-                EmotionalResetSession.deleted_at.is_(None),
+        # Build query based on whether user_id is provided
+        if user_id:
+            result = await db.execute(
+                select(EmotionalResetSession).where(
+                    EmotionalResetSession.session_id == session_id,
+                    EmotionalResetSession.user_id == user_id,
+                    EmotionalResetSession.deleted_at.is_(None),
+                )
             )
-        )
+        else:
+            # For anonymous users, retrieve by session_id only
+            result = await db.execute(
+                select(EmotionalResetSession).where(
+                    EmotionalResetSession.session_id == session_id,
+                    EmotionalResetSession.user_id.like("anon-%"),
+                    EmotionalResetSession.deleted_at.is_(None),
+                )
+            )
         session = result.scalar_one_or_none()
 
         if not session:

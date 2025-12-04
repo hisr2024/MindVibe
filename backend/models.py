@@ -1366,7 +1366,16 @@ class ChatMessage(Base):
 
 
 class EmotionalResetSession(SoftDeleteMixin, Base):
-    """Tracks user emotional reset sessions with the 7-step guided flow."""
+    """Tracks user emotional reset sessions with the 7-step guided flow.
+    
+    Supports both authenticated and anonymous users:
+    - Authenticated users: user_id is their actual user ID from users table
+    - Anonymous users: user_id follows pattern "anon-{12-char-hex}"
+    
+    Note: Foreign key constraint removed to support anonymous users.
+    For authenticated users, application-level validation is performed via
+    get_current_user() dependency which verifies the user exists.
+    """
 
     __tablename__ = "emotional_reset_sessions"
 
@@ -1374,7 +1383,9 @@ class EmotionalResetSession(SoftDeleteMixin, Base):
         String(64), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+        String(255), index=True
+        # Note: No FK constraint - supports anonymous users (anon-{uuid})
+        # Authenticated user IDs are validated at the application layer
     )
     session_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     current_step: Mapped[int] = mapped_column(Integer, default=1)
