@@ -54,7 +54,7 @@ export function SecondaryActionCard({
           {title}
         </h3>
         {description && (
-          <p className="mt-0.5 text-xs text-gray-500 truncate">{description}</p>
+          <p className="mt-0.5 text-xs text-gray-500 truncate" title={description}>{description}</p>
         )}
       </div>
 

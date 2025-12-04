@@ -64,7 +64,7 @@ export function ToolCard({
       </h3>
 
       {/* Description */}
-      <p className="mb-4 text-sm text-gray-500 line-clamp-2">{description}</p>
+      <p className="mb-4 text-sm text-gray-500 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{description}</p>
 
       {/* CTA */}
       <span className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 transition group-hover:gap-2">

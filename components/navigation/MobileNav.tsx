@@ -137,7 +137,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
         })}
       </div>
       {/* Safe area padding for devices with home indicator */}
-      <div className="h-safe-area-inset-bottom bg-white/95" />
+      <div className="pb-[env(safe-area-inset-bottom)] bg-white/95" />
     </nav>
   )
 }
