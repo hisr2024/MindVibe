@@ -9,6 +9,14 @@ from backend.schemas.subscription import (
     CheckoutSessionOut,
     WebhookEvent,
 )
+from backend.schemas.karmic_tree import (
+    ActivityCounts,
+    AchievementProgress,
+    UnlockableOut,
+    ProgressResponse,
+    UnlockRequest,
+    TreeNotification,
+)
 
 __all__ = [
     "SubscriptionPlanOut",
@@ -18,4 +26,10 @@ __all__ = [
     "CheckoutSessionCreate",
     "CheckoutSessionOut",
     "WebhookEvent",
+    "ActivityCounts",
+    "AchievementProgress",
+    "UnlockableOut",
+    "ProgressResponse",
+    "UnlockRequest",
+    "TreeNotification",
 ]
