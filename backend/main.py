@@ -124,10 +124,6 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 @app.on_event("startup")
 async def startup():
     try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        print("✅ Ensured ORM tables exist before applying migrations")
-
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
             if migration_result.applied:
@@ -141,6 +137,10 @@ async def startup():
                 print(f"   Pending: {', '.join(migration_result.pending)}")
             else:
                 print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
+
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✅ Ensured ORM tables exist after applying migrations")
     except Exception as exc:
         failed_meta = migrations_module.LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
