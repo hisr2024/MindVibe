@@ -12,21 +12,33 @@ function sanitizeInput(input: string): string {
 }
 
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
-  const [state, setState] = useState<T>(() => {
-    if (typeof window === 'undefined') return initial
+  // Always start with initial value (same on server and client)
+  const [state, setState] = useState<T>(initial)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Load from localStorage AFTER hydration completes
+  useEffect(() => {
+    setIsHydrated(true)
     try {
       const item = window.localStorage.getItem(key)
-      return item ? JSON.parse(item) : initial
-    } catch {
-      return initial
+      if (item) {
+        const parsed = JSON.parse(item)
+        setState(parsed)
+      }
+    } catch (error) {
+      console.warn(`Failed to load localStorage key "${key}":`, error)
     }
-  })
+  }, [key])
 
+  // Save to localStorage when state changes (but skip initial hydration)
   useEffect(() => {
+    if (!isHydrated) return // Don't save during initial hydration
     try {
       window.localStorage.setItem(key, JSON.stringify(state))
-    } catch {}
-  }, [key, state])
+    } catch (error) {
+      console.warn(`Failed to save localStorage key "${key}":`, error)
+    }
+  }, [key, state, isHydrated])
 
   return [state, setState]
 }
