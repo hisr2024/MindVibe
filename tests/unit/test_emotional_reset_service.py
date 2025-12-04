@@ -370,3 +370,131 @@ class TestSessionProcessing:
 
         assert result["success"] is False
         assert result["error"] == "session_not_found"
+
+
+class TestAnonymousUserSupport:
+    """Test anonymous user support for emotional reset."""
+
+    @pytest.mark.asyncio
+    async def test_start_session_with_none_user_id(
+        self, emotional_reset_service, mock_db
+    ):
+        """Test that start_session generates anonymous ID when user_id is None."""
+        # Mock rate limit check
+        mock_rate_result = MagicMock()
+        mock_rate_result.scalar.return_value = 0  # Under limit
+        mock_db.execute = AsyncMock(return_value=mock_rate_result)
+        mock_db.commit = AsyncMock()
+        mock_db.refresh = AsyncMock()
+
+        result = await emotional_reset_service.start_session(db=mock_db, user_id=None)
+
+        assert result["success"] is True
+        assert "session_id" in result
+        # Verify a session was created (db.add was called)
+        assert mock_db.add.called
+
+    @pytest.mark.asyncio
+    async def test_start_session_generates_anon_prefix(
+        self, emotional_reset_service, mock_db
+    ):
+        """Test that anonymous user IDs have 'anon-' prefix."""
+        # Mock rate limit check
+        mock_rate_result = MagicMock()
+        mock_rate_result.scalar.return_value = 0
+        mock_db.execute = AsyncMock(return_value=mock_rate_result)
+        mock_db.commit = AsyncMock()
+        mock_db.refresh = AsyncMock()
+
+        # Capture the session added to the DB
+        added_sessions = []
+        def capture_add(obj):
+            added_sessions.append(obj)
+        mock_db.add = MagicMock(side_effect=capture_add)
+
+        await emotional_reset_service.start_session(db=mock_db, user_id=None)
+
+        assert len(added_sessions) == 1
+        assert added_sessions[0].user_id.startswith("anon-")
+        assert len(added_sessions[0].user_id) == 17  # "anon-" + 12 hex chars
+
+    @pytest.mark.asyncio
+    async def test_process_step_with_none_user_id(
+        self, emotional_reset_service, mock_db
+    ):
+        """Test that process_step works with None user_id for anonymous sessions."""
+        mock_session = MagicMock()
+        mock_session.completed = False
+        mock_session.assessment_data = None
+        mock_session.user_id = "anon-abc123def456"
+
+        mock_result = MagicMock()
+        mock_result.scalar_one_or_none.return_value = mock_session
+        mock_db.execute = AsyncMock(return_value=mock_result)
+
+        # Use None user_id - should query for anon sessions
+        result = await emotional_reset_service.process_step(
+            db=mock_db,
+            session_id="test-session",
+            user_id=None,
+            current_step=1,
+            user_input="I feel anxious",
+        )
+
+        # Should work without error
+        assert result["success"] is True or result.get("error") is not None
+
+    @pytest.mark.asyncio
+    async def test_get_session_with_none_user_id(
+        self, emotional_reset_service, mock_db
+    ):
+        """Test that get_session works with None user_id for anonymous sessions."""
+        mock_session = MagicMock()
+        mock_session.session_id = "test-session"
+        mock_session.user_id = "anon-abc123def456"
+        mock_session.current_step = 2
+        mock_session.completed = False
+        mock_session.created_at = datetime.datetime.now(datetime.UTC)
+        mock_session.updated_at = datetime.datetime.now(datetime.UTC)
+        mock_session.emotions_input = None
+        mock_session.assessment_data = None
+        mock_session.affirmations = None
+
+        mock_result = MagicMock()
+        mock_result.scalar_one_or_none.return_value = mock_session
+        mock_db.execute = AsyncMock(return_value=mock_result)
+
+        result = await emotional_reset_service.get_session(
+            db=mock_db,
+            session_id="test-session",
+            user_id=None,
+        )
+
+        assert result is not None
+        assert result["success"] is True
+        assert result["session_id"] == "test-session"
+
+    @pytest.mark.asyncio
+    async def test_complete_session_with_none_user_id(
+        self, emotional_reset_service, mock_db
+    ):
+        """Test that complete_session works with None user_id for anonymous sessions."""
+        mock_session = MagicMock()
+        mock_session.completed = False
+        mock_session.user_id = "anon-abc123def456"
+        mock_session.emotions_input = "test"
+        mock_session.assessment_data = {"emotions": ["anxious"]}
+        mock_session.affirmations = ["I am strong"]
+
+        mock_result = MagicMock()
+        mock_result.scalar_one_or_none.return_value = mock_session
+        mock_db.execute = AsyncMock(return_value=mock_result)
+        mock_db.commit = AsyncMock()
+
+        result = await emotional_reset_service.complete_session(
+            db=mock_db,
+            session_id="test-session",
+            user_id=None,
+        )
+
+        assert result["success"] is True

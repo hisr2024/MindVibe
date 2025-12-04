@@ -1374,7 +1374,9 @@ class EmotionalResetSession(SoftDeleteMixin, Base):
         String(64), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+        String(255), index=True
+        # Note: Foreign key removed to support anonymous users (anon-{uuid})
+        # Authenticated users still have valid user IDs that reference users.id
     )
     session_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     current_step: Mapped[int] = mapped_column(Integer, default=1)
