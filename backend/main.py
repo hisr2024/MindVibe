@@ -242,14 +242,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Guidance router: {e}")
 
-# Load Journal router
-print("\n[Journal] Attempting to import Journal router...")
+# Load Karmic Tree gamification router
+print("\n[Karmic Tree] Attempting to import Karmic Tree router...")
 try:
-    from backend.routes.journal import router as journal_router
-    app.include_router(journal_router)
-    print("✅ [SUCCESS] Journal router loaded")
+    from backend.routes.karmic_tree import router as karmic_tree_router
+
+    app.include_router(karmic_tree_router, prefix="/api")
+    print("✅ [SUCCESS] Karmic Tree router loaded")
 except Exception as e:
-    print(f"❌ [ERROR] Failed to load Journal router: {e}")
+    print(f"❌ [ERROR] Failed to load Karmic Tree router: {e}")
 
 # Load Subscriptions router
 print("\n[Subscriptions] Attempting to import Subscriptions router...")
