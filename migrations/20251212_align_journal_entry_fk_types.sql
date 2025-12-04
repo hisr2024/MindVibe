@@ -1,4 +1,5 @@
 -- Migration: Enforce VARCHAR(64) journal entry IDs across all dependent tables
+-- dialect: postgres-only
 -- Purpose: Prevent PostgreSQL DatatypeMismatchError when recreating foreign keys
 --          for journal_versions, journal_entry_tags, and journal_search_index.
 -- Date: 2025-12-12

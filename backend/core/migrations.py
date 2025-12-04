@@ -56,6 +56,25 @@ def _sql_files() -> Iterable[Path]:
     return sorted(p for p in MIGRATIONS_PATH.glob("*.sql") if p.is_file())
 
 
+def _dialect_for_engine(engine: AsyncEngine) -> str:
+    """Return the SQLAlchemy backend name (e.g., ``postgresql`` or ``sqlite``)."""
+
+    return engine.url.get_backend_name()
+
+
+def _should_skip_file(path: Path, dialect: str) -> bool:
+    """Determine whether a migration should be skipped for the current dialect.
+
+    Migrations can opt into skipping on non-PostgreSQL databases by including the
+    marker comment ``-- dialect: postgres-only`` anywhere in the file. This keeps
+    our SQLite-based test database from executing PostgreSQL-specific DDL while
+    still recording the migration as applied.
+    """
+
+    marker = "-- dialect: postgres-only"
+    return dialect != "postgresql" and marker in path.read_text().lower()
+
+
 def _statements(sql_text: str) -> Iterable[str]:
     """Yield SQL statements while respecting dollar-quoted blocks."""
 
@@ -180,12 +199,22 @@ async def apply_sql_migrations(engine: AsyncEngine) -> MigrationResult:
         current_revision=_capture_alembic_current(),
     )
 
+    dialect = _dialect_for_engine(engine)
+
     for path in _sql_files():
         if path.name in applied:
             continue
 
         sql_text = path.read_text()
         async with engine.begin() as conn:
+            if _should_skip_file(path, dialect):
+                await conn.execute(
+                    text("INSERT INTO schema_migrations (filename) VALUES (:filename)"),
+                    {"filename": path.name},
+                )
+                result.applied.append(path.name)
+                continue
+
             for statement in _statements(sql_text):
                 try:
                     await conn.execute(text(statement))
