@@ -131,6 +131,24 @@ class TestGetColumnType:
     """Tests for _get_column_type helper function."""
 
     @pytest.mark.asyncio
+    async def test_rejects_invalid_table_name(self) -> None:
+        """Should reject table names with invalid characters."""
+        engine = MagicMock()
+        engine.url.get_backend_name.return_value = "sqlite"
+
+        with pytest.raises(ValueError, match="Invalid table name"):
+            await _get_column_type(engine, "table; DROP TABLE users;--", "id")
+
+    @pytest.mark.asyncio
+    async def test_rejects_invalid_column_name(self) -> None:
+        """Should reject column names with invalid characters."""
+        engine = MagicMock()
+        engine.url.get_backend_name.return_value = "sqlite"
+
+        with pytest.raises(ValueError, match="Invalid column name"):
+            await _get_column_type(engine, "journal_entries", "id; DROP TABLE users;--")
+
+    @pytest.mark.asyncio
     async def test_sqlite_returns_column_type(self) -> None:
         """Should return column type from SQLite PRAGMA."""
         engine = MagicMock()
@@ -256,6 +274,27 @@ class TestAlignJournalEntriesSchema:
         assert result["status"] == "skipped"
         assert "already" in result["message"]
         assert result["previous_type"] == "character varying"
+
+    @pytest.mark.asyncio
+    async def test_skips_when_already_varchar_with_length(self) -> None:
+        """Should skip when id is already VARCHAR(64) type (parameterized)."""
+        engine = MagicMock()
+        engine.url.get_backend_name.return_value = "postgresql"
+
+        with patch(
+            "backend.core.manual_migrations._table_exists",
+            new_callable=AsyncMock,
+            return_value=True,
+        ), patch(
+            "backend.core.manual_migrations._get_column_type",
+            new_callable=AsyncMock,
+            return_value="varchar(64)",
+        ):
+            result = await align_journal_entries_schema(engine)
+
+        assert result["status"] == "skipped"
+        assert "already" in result["message"]
+        assert result["previous_type"] == "varchar(64)"
 
     @pytest.mark.asyncio
     async def test_skips_on_non_postgresql(self) -> None:

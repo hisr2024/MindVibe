@@ -10,12 +10,16 @@ All functions are idempotent - safe to run multiple times without side effects.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 logger = logging.getLogger(__name__)
+
+# Pattern to validate table/column names (alphanumeric and underscore only)
+_IDENTIFIER_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 async def enable_pg_trgm_extension(engine: AsyncEngine) -> bool:
@@ -60,17 +64,27 @@ async def _get_column_type(
 
     Args:
         engine: SQLAlchemy async engine connected to the database.
-        table_name: Name of the table to inspect.
-        column_name: Name of the column to inspect.
+        table_name: Name of the table to inspect (must be valid identifier).
+        column_name: Name of the column to inspect (must be valid identifier).
 
     Returns:
         The data_type string (e.g., 'integer', 'character varying') or None if
         the column does not exist.
+
+    Raises:
+        ValueError: If table_name or column_name contain invalid characters.
     """
+    # Validate identifiers to prevent SQL injection
+    if not _IDENTIFIER_PATTERN.match(table_name):
+        raise ValueError(f"Invalid table name: {table_name}")
+    if not _IDENTIFIER_PATTERN.match(column_name):
+        raise ValueError(f"Invalid column name: {column_name}")
+
     dialect = engine.url.get_backend_name()
 
     if dialect != "postgresql":
         # For SQLite, use PRAGMA table_info
+        # Table name is validated above, safe to use in PRAGMA
         async with engine.connect() as conn:
             result = await conn.execute(
                 text(f"PRAGMA table_info({table_name})")  # noqa: S608
@@ -185,8 +199,16 @@ async def align_journal_entries_schema(engine: AsyncEngine) -> dict[str, Any]:
     # Normalize type names for comparison
     normalized_type = current_type.lower()
 
+    # Check if already a string/text type (including parameterized types like varchar(64))
+    # Handles: character varying, varchar, varchar(64), text, etc.
+    is_string_type = (
+        normalized_type.startswith("character varying")
+        or normalized_type.startswith("varchar")
+        or normalized_type == "text"
+    )
+
     # Already VARCHAR/TEXT - no migration needed
-    if normalized_type in ("character varying", "varchar", "text"):
+    if is_string_type:
         result["message"] = f"id column is already {current_type}, no migration needed"
         logger.info(f"ℹ️ {result['message']}")
         return result
