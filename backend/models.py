@@ -460,6 +460,14 @@ class GitaVerse(Base):
         index=True,
     )
     embedding: Mapped[list[float] | None] = mapped_column(JSON, nullable=True)
+    # Mental health application tags for KIAAN wisdom engine
+    mental_health_applications: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    primary_domain: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
+    secondary_domains: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )

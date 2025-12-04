@@ -525,6 +525,110 @@ class GitaService:
         return context
 
     @staticmethod
+    async def get_all_verses_with_tags(
+        db: AsyncSession, limit: int | None = None
+    ) -> list[GitaVerse]:
+        """
+        Get all 700+ verses with mental health tags.
+
+        Args:
+            db: Database session
+            limit: Optional limit on number of verses returned
+
+        Returns:
+            List of all GitaVerse objects with their mental health tags
+        """
+        query = select(GitaVerse).order_by(GitaVerse.chapter, GitaVerse.verse)
+
+        if limit is not None:
+            query = query.limit(limit)
+
+        result = await db.execute(query)
+        return list(result.scalars().all())
+
+    @staticmethod
+    async def search_by_mental_health_application(
+        db: AsyncSession, application: str, limit: int = 50
+    ) -> list[GitaVerse]:
+        """
+        Search verses by mental health application tag.
+
+        Args:
+            db: Database session
+            application: Mental health application to search for (e.g., 'anxiety_management')
+            limit: Maximum number of results (default 50)
+
+        Returns:
+            List of GitaVerse objects matching the application
+        """
+        # First get all verses with mental_health_applications
+        result = await db.execute(
+            select(GitaVerse).where(
+                GitaVerse.mental_health_applications.isnot(None)
+            )
+        )
+        all_verses = result.scalars().all()
+
+        # Filter verses that have the application in their list
+        matching_verses = []
+        for verse in all_verses:
+            if verse.mental_health_applications:
+                apps = verse.mental_health_applications
+                if isinstance(apps, list) and application in apps:
+                    matching_verses.append(verse)
+                    if len(matching_verses) >= limit:
+                        break
+
+        return matching_verses
+
+    @staticmethod
+    async def search_by_primary_domain(
+        db: AsyncSession, domain: str, limit: int = 50
+    ) -> list[GitaVerse]:
+        """
+        Search verses by primary emotional domain.
+
+        Args:
+            db: Database session
+            domain: Primary domain to search for (e.g., 'anxiety', 'grief')
+            limit: Maximum number of results (default 50)
+
+        Returns:
+            List of GitaVerse objects matching the domain
+        """
+        result = await db.execute(
+            select(GitaVerse)
+            .where(GitaVerse.primary_domain == domain)
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+    @staticmethod
+    def convert_to_wisdom_verse_format(gita_verse: GitaVerse) -> dict[str, Any]:
+        """
+        Convert a GitaVerse to the dict format used by WisdomKnowledgeBase.
+
+        Args:
+            gita_verse: GitaVerse object to convert
+
+        Returns:
+            Dictionary in the format expected by wisdom search
+        """
+        return {
+            "verse_id": f"{gita_verse.chapter}.{gita_verse.verse}",
+            "chapter": gita_verse.chapter,
+            "verse_number": gita_verse.verse,
+            "theme": gita_verse.theme,
+            "english": gita_verse.english,
+            "hindi": gita_verse.hindi,
+            "sanskrit": gita_verse.sanskrit,
+            "context": gita_verse.principle,  # Use principle as context
+            "mental_health_applications": gita_verse.mental_health_applications or [],
+            "primary_domain": gita_verse.primary_domain,
+            "secondary_domains": gita_verse.secondary_domains or [],
+        }
+
+    @staticmethod
     def format_verse_response(
         verse: GitaVerse,
         language: str = "english",
@@ -572,5 +676,13 @@ class GitaService:
 
         if include_word_meanings and verse.word_meanings:
             response["word_meanings"] = verse.word_meanings
+
+        # Add mental health tags if present
+        if verse.mental_health_applications:
+            response["mental_health_applications"] = verse.mental_health_applications
+        if verse.primary_domain:
+            response["primary_domain"] = verse.primary_domain
+        if verse.secondary_domains:
+            response["secondary_domains"] = verse.secondary_domains
 
         return response
