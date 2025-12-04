@@ -61,14 +61,22 @@ export function EmotionalResetWizard({
   const [crisisResponse, setCrisisResponse] = useState<string | null>(null)
   const [breathingComplete, setBreathingComplete] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
 
-  // Start session on mount - intentionally run only once when component mounts
+  // Track client-side mount to prevent hydration mismatch
   useEffect(() => {
-    startSession()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- startSession is defined inline and we only want to run on mount
+    setIsMounted(true)
   }, [])
+
+  // Start session only after client-side hydration is complete
+  useEffect(() => {
+    if (isMounted && !sessionId) {
+      startSession()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted])
 
   const startSession = async () => {
     setIsLoading(true)
@@ -439,6 +447,17 @@ export function EmotionalResetWizard({
       </div>
     </div>
   )
+
+  // Prevent hydration mismatch by waiting for client-side mount
+  if (!isMounted) {
+    return (
+      <div className={`bg-black/50 border border-orange-500/20 rounded-2xl p-6 ${className}`}>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin h-8 w-8 border-2 border-orange-400 border-t-transparent rounded-full" />
+        </div>
+      </div>
+    )
+  }
 
   if (isCompleted) {
     return (
