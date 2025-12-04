@@ -1228,118 +1228,34 @@ class ChatMessage(Base):
     room: Mapped[ChatRoom] = relationship("ChatRoom", back_populates="messages")
 
 
-class Achievement(SoftDeleteMixin, Base):
-    __tablename__ = "achievements"
+class EmotionalResetSession(SoftDeleteMixin, Base):
+    """Tracks user emotional reset sessions with the 7-step guided flow."""
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    key: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(256))
-    description: Mapped[str] = mapped_column(Text)
-    category: Mapped[AchievementCategory] = mapped_column(Enum(AchievementCategory))
-    target_value: Mapped[int] = mapped_column(Integer, default=1)
-    rarity: Mapped[AchievementRarity] = mapped_column(
-        Enum(AchievementRarity), default=AchievementRarity.COMMON
+    __tablename__ = "emotional_reset_sessions"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    badge_icon: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    reward_hint: Mapped[str | None] = mapped_column(String(256), nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
-
-    user_achievements: Mapped[list["UserAchievement"]] = relationship(
-        "UserAchievement", back_populates="achievement", cascade="all, delete-orphan"
-    )
-
-
-class UserAchievement(SoftDeleteMixin, Base):
-    __tablename__ = "user_achievements"
-    __table_args__ = (
-        UniqueConstraint("user_id", "achievement_id", name="uq_user_achievement"),
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    achievement_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("achievements.id", ondelete="CASCADE"), index=True
-    )
-    progress: Mapped[int] = mapped_column(Integer, default=0)
-    unlocked: Mapped[bool] = mapped_column(Boolean, default=False)
-    unlocked_at: Mapped[datetime.datetime | None] = mapped_column(
+    session_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    current_step: Mapped[int] = mapped_column(Integer, default=1)
+    emotions_input: Mapped[str | None] = mapped_column(Text, nullable=True)
+    assessment_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    wisdom_verses: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    affirmations: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    completed_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
-    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-
-    achievement: Mapped[Achievement] = relationship(
-        Achievement, back_populates="user_achievements"
-    )
-
-
-class Unlockable(SoftDeleteMixin, Base):
-    __tablename__ = "unlockables"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    key: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(256))
-    description: Mapped[str] = mapped_column(Text)
-    kind: Mapped[UnlockableType] = mapped_column(Enum(UnlockableType))
-    rarity: Mapped[AchievementRarity] = mapped_column(
-        Enum(AchievementRarity), default=AchievementRarity.COMMON
-    )
-    required_achievement_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("achievements.id", ondelete="SET NULL"), nullable=True
-    )
-    reward_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
-
-    achievement: Mapped[Achievement | None] = relationship(Achievement)
-    user_unlocks: Mapped[list["UserUnlockable"]] = relationship(
-        "UserUnlockable", back_populates="unlockable", cascade="all, delete-orphan"
-    )
-
-
-class UserUnlockable(SoftDeleteMixin, Base):
-    __tablename__ = "user_unlockables"
-    __table_args__ = (
-        UniqueConstraint("user_id", "unlockable_id", name="uq_user_unlockable"),
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
-    )
-    unlockable_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("unlockables.id", ondelete="CASCADE"), index=True
-    )
-    unlocked: Mapped[bool] = mapped_column(Boolean, default=False)
-    unlocked_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True
-    )
-    source: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-
-    unlockable: Mapped[Unlockable] = relationship(Unlockable, back_populates="user_unlocks")
-
-
-class UserProgress(SoftDeleteMixin, Base):
-    __tablename__ = "user_progress"
-
-    user_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    total_mood_entries: Mapped[int] = mapped_column(Integer, default=0)
-    total_journals: Mapped[int] = mapped_column(Integer, default=0)
-    total_chat_sessions: Mapped[int] = mapped_column(Integer, default=0)
-    xp: Mapped[int] = mapped_column(Integer, default=0)
-    level: Mapped[int] = mapped_column(Integer, default=1)
-    current_stage: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    last_awarded_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True
+    journal_entry_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("journal_entries.id", ondelete="SET NULL"),
+        nullable=True, index=True
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
-
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
