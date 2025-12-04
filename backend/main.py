@@ -31,6 +31,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
+from backend.core import migrations as migrations_module
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
@@ -122,10 +123,11 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
     try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✅ Ensured ORM tables exist before applying migrations")
+
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
             if migration_result.applied:
@@ -140,6 +142,12 @@ async def startup():
             else:
                 print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
     except Exception as exc:
+        failed_meta = migrations_module.LATEST_MIGRATION_RESULT
+        if failed_meta and failed_meta.failed_file:
+            print("❌ [MIGRATIONS] Context for the failure:")
+            print(f"   File: {failed_meta.failed_file}")
+            if failed_meta.failed_statement:
+                print(f"   Statement: {failed_meta.failed_statement}")
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
         raise
 

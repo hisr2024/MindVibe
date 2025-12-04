@@ -31,7 +31,24 @@ function useLocalState<T>(key: string, initial: T) {
   return [val, setVal] as const
 }
 
-async function deriveKey(passphrase: string, salt: BufferSource) {
+function toArrayBuffer(source: BufferSource): ArrayBuffer {
+  if (source instanceof ArrayBuffer) return source
+
+  if (ArrayBuffer.isView(source)) {
+    const { buffer, byteOffset, byteLength } = source
+
+    if (buffer instanceof ArrayBuffer) {
+      return buffer.slice(byteOffset, byteOffset + byteLength)
+    }
+
+    return new Uint8Array(buffer, byteOffset, byteLength).slice().buffer
+  }
+
+  throw new Error('Unsupported buffer source')
+}
+
+async function deriveKey(passphrase: string, saltSource: BufferSource) {
+  const salt = toArrayBuffer(saltSource)
   const enc = new TextEncoder()
   const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey'])
   return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])

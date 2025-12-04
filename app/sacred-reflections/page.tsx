@@ -3,15 +3,34 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+type EncryptedPayload = {
+  ciphertext: string
+  iv: string
+  salt: string
+  auth_tag?: string | null
+  algorithm?: string
+  key_version?: string
+}
+
 type JournalEntry = {
   id: string
-  title: string
+  title?: string
   body: string
-  mood: string
+  mood?: string
   at: string
 }
 
-const JOURNAL_KEY_STORAGE = 'kiaan_journal_key'
+type ApiEntry = {
+  id: string
+  encrypted_title?: EncryptedPayload | null
+  encrypted_content: EncryptedPayload
+  moods?: string[] | null
+  tags?: string[] | null
+  client_updated_at: string
+  created_at: string
+  updated_at: string
+}
+
 const JOURNAL_ENTRY_STORAGE = 'kiaan_journal_entries_secure'
 
 // Sanitize user input to prevent prompt injection when sending to API
@@ -32,31 +51,26 @@ function fromBase64(value: string) {
   return Uint8Array.from(binary, char => char.charCodeAt(0))
 }
 
-async function getEncryptionKey() {
-  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(JOURNAL_KEY_STORAGE) : null
-  const rawKey = cached ? fromBase64(cached) : crypto.getRandomValues(new Uint8Array(32))
-
-  if (!cached && typeof window !== 'undefined') {
-    window.localStorage.setItem(JOURNAL_KEY_STORAGE, toBase64(rawKey))
-  }
-
-  return crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt', 'decrypt'])
+async function deriveKey(passphrase: string, salt: ArrayBuffer) {
+  const enc = new TextEncoder()
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey'])
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
 }
 
-async function encryptText(plain: string) {
+async function encryptText(plain: string, passphrase: string): Promise<EncryptedPayload> {
+  const salt = crypto.getRandomValues(new Uint8Array(16))
   const iv = crypto.getRandomValues(new Uint8Array(12))
-  const key = await getEncryptionKey()
+  const key = await deriveKey(passphrase, salt.buffer)
   const encoded = new TextEncoder().encode(plain)
   const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded)
-  return `${toBase64(iv)}:${toBase64(encrypted)}`
+  return { ciphertext: toBase64(encrypted), iv: toBase64(iv), salt: toBase64(salt), algorithm: 'AES-GCM' }
 }
 
-async function decryptText(payload: string) {
-  const [ivPart, dataPart] = payload.split(':')
-  if (!ivPart || !dataPart) return ''
-  const iv = fromBase64(ivPart)
-  const encrypted = fromBase64(dataPart)
-  const key = await getEncryptionKey()
+async function decryptText(payload: EncryptedPayload, passphrase: string): Promise<string> {
+  const salt = fromBase64(payload.salt)
+  const iv = fromBase64(payload.iv)
+  const encrypted = fromBase64(payload.ciphertext)
+  const key = await deriveKey(passphrase, salt.buffer)
   const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encrypted)
   return new TextDecoder().decode(decrypted)
 }
@@ -77,6 +91,7 @@ const moods = [
 ]
 
 export default function SacredReflectionsPage() {
+  const [passphrase, setPassphrase] = useState('')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [mood, setMood] = useState('Peaceful')
@@ -86,6 +101,15 @@ export default function SacredReflectionsPage() {
   const [isOnline, setIsOnline] = useState(true)
   const [guidance, setGuidance] = useState<Record<string, string>>({})
   const [guidanceLoading, setGuidanceLoading] = useState<Record<string, boolean>>({})
+
+  // Track passphrase only in-memory; do not persist sensitive material to disk
+  useEffect(() => {
+    if (passphrase) {
+      setEncryptionReady(true)
+    } else {
+      setEncryptionReady(false)
+    }
+  }, [passphrase])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -127,10 +151,12 @@ export default function SacredReflectionsPage() {
     let cancelled = false
 
     async function loadEntries() {
+      if (!passphrase) return
       try {
         const stored = typeof window !== 'undefined' ? window.localStorage.getItem(JOURNAL_ENTRY_STORAGE) : null
         if (stored) {
-          const decrypted = await decryptText(stored)
+          const parsedPayload = JSON.parse(stored) as EncryptedPayload
+          const decrypted = await decryptText(parsedPayload, passphrase)
           const parsed = JSON.parse(decrypted) as JournalEntry[]
           if (!cancelled) setEntries(parsed)
         }
@@ -144,26 +170,60 @@ export default function SacredReflectionsPage() {
 
     loadEntries()
     return () => { cancelled = true }
-  }, [])
+  }, [passphrase])
 
   useEffect(() => {
-    if (!encryptionReady) return
+    if (!encryptionReady || !passphrase) return
     ;(async () => {
       try {
-        const encrypted = await encryptText(JSON.stringify(entries))
-        window.localStorage.setItem(JOURNAL_ENTRY_STORAGE, encrypted)
+        const encrypted = await encryptText(JSON.stringify(entries), passphrase)
+        window.localStorage.setItem(JOURNAL_ENTRY_STORAGE, JSON.stringify(encrypted))
         setEncryptionMessage(null)
       } catch {
         setEncryptionMessage('Could not secure your journal locally. Please retry.')
       }
     })()
-  }, [entries, encryptionReady])
+  }, [entries, encryptionReady, passphrase])
 
-  function addEntry() {
+  async function syncFromServer() {
+    if (!passphrase) return
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/journal/entries`, {
+        credentials: 'include'
+      })
+      if (!response.ok) return
+      const data: ApiEntry[] = await response.json()
+      const decrypted: JournalEntry[] = []
+      for (const entry of data) {
+        const raw = await decryptText(entry.encrypted_content, passphrase)
+        const parsed = JSON.parse(raw) as JournalEntry
+        decrypted.push(parsed)
+      }
+      setEntries(prev => {
+        const merged = [...decrypted, ...prev]
+        const seen = new Set<string>()
+        return merged.filter(entry => {
+          if (seen.has(entry.id)) return false
+          seen.add(entry.id)
+          return true
+        }).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+      })
+    } catch {
+      // ignore sync failures in offline mode
+    }
+  }
+
+  useEffect(() => {
+    if (!passphrase) return
+    syncFromServer()
+  }, [passphrase])
+
+  async function addEntry() {
     if (!body.trim()) return
-    if (!encryptionReady) {
-      setEncryptionMessage('Preparing secure space. Please try again shortly.')
-      return
+    if (!encryptionReady || !passphrase) {
+        setEncryptionMessage('Enter a passphrase to secure your journal.')
+        return
     }
     const entry: JournalEntry = {
       id: crypto.randomUUID(),
@@ -172,9 +232,30 @@ export default function SacredReflectionsPage() {
       mood,
       at: new Date().toISOString()
     }
+
     setEntries([entry, ...entries])
     setTitle('')
     setBody('')
+
+    // Push to backend for cross-device sync (encrypted only)
+    try {
+      const payload = await encryptText(JSON.stringify(entry), passphrase)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      await fetch(`${apiUrl}/journal/entries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          entry_id: entry.id,
+          content: payload,
+          moods: mood ? [mood] : [],
+          tags: mood ? [mood] : [],
+          client_updated_at: entry.at
+        })
+      })
+    } catch {
+      // remain silent if offline; local cache holds encrypted data
+    }
   }
 
   async function requestGuidance(entry: JournalEntry) {
@@ -207,7 +288,8 @@ export default function SacredReflectionsPage() {
   const weeklyEntries = entries.filter(e => new Date(e.at) >= sevenDaysAgo)
 
   const moodCounts = weeklyEntries.reduce<Record<string, number>>((acc, curr) => {
-    acc[curr.mood] = (acc[curr.mood] || 0) + 1
+    const moodKey = curr.mood ?? 'Unspecified'
+    acc[moodKey] = (acc[moodKey] || 0) + 1
     return acc
   }, {})
 
@@ -215,8 +297,8 @@ export default function SacredReflectionsPage() {
 
   const positiveMoods = new Set(moods.filter(m => m.tone === 'positive').map(m => m.label))
   const challengingMoods = new Set(moods.filter(m => m.tone === 'challenging').map(m => m.label))
-  const positiveDays = weeklyEntries.filter(e => positiveMoods.has(e.mood)).length
-  const challengingDays = weeklyEntries.filter(e => challengingMoods.has(e.mood)).length
+  const positiveDays = weeklyEntries.filter(e => positiveMoods.has(e.mood ?? '')).length
+  const challengingDays = weeklyEntries.filter(e => challengingMoods.has(e.mood ?? '')).length
 
   const assessment = (() => {
     if (weeklyEntries.length === 0) {
@@ -260,7 +342,7 @@ export default function SacredReflectionsPage() {
                 Sacred Reflections
               </h1>
               <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-                Your encrypted private journal. Entries are secured with AES-GCM encryption and never leave your device.
+                Your encrypted private journal. Entries are sealed with AES-GCM in your browser and synced to the cloud only as ciphertext.
               </p>
             </div>
             <div className="flex flex-col gap-2">
@@ -302,6 +384,18 @@ export default function SacredReflectionsPage() {
             <div>
               <h2 className="text-lg font-semibold text-orange-50">New Reflection</h2>
               <p className="text-xs text-orange-100/70 mt-1">KIAAN holds space for your thoughts with warmth and privacy.</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-orange-100">Encryption passphrase</label>
+              <input
+                type="password"
+                value={passphrase}
+                onChange={e => setPassphrase(e.target.value)}
+                placeholder="Required for decryption and sync"
+                className="mt-2 w-full bg-black/50 border border-orange-800/60 rounded-2xl px-4 py-3 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
+              />
+              <p className="mt-1 text-xs text-orange-100/60">Stored only in your browser. MindVibe never sees it.</p>
             </div>
 
             {/* Mood Selection */}

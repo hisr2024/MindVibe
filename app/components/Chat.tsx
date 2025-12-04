@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import SimpleBar from 'simplebar-react'
 import { MessageBubble } from '@/components/chat'
 
 type Message = {
@@ -150,31 +151,37 @@ export default function Chat() {
         ))}
       </div>
       <div className="relative">
-        <div
-          ref={listRef}
-          onScroll={handleScroll}
-          role="log"
-          aria-live="polite"
-          aria-label="Conversation history"
-          tabIndex={0}
-          className="h-80 overflow-y-auto rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 pr-3 sm:pr-4 scroll-smooth scroll-stable chat-scrollbar smooth-touch-scroll"
+        <SimpleBar
+          autoHide={false}
+          scrollableNodeProps={{
+            ref: listRef,
+            onScroll: handleScroll,
+            role: 'log',
+            'aria-live': 'polite',
+            'aria-label': 'Conversation history',
+            tabIndex: 0,
+            className: 'chat-scrollbar smooth-touch-scroll scroll-stable',
+          }}
+          className="mv-energy-scrollbar h-80 rounded-2xl border border-orange-500/20 bg-slate-950/70 shadow-inner shadow-orange-500/10"
         >
-          {messages.length === 0 && (
-            <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
-          )}
-          <div className="space-y-3">
-            {messages.map((message, idx) => (
-              <MessageBubble
-                key={`${message.timestamp}-${idx}`}
-                sender={message.sender}
-                text={message.text}
-                timestamp={message.timestamp}
-                status={message.status}
-                onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
-              />
-            ))}
+          <div className="p-4 pr-3 sm:pr-4">
+            {messages.length === 0 && (
+              <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
+            )}
+            <div className="space-y-3">
+              {messages.map((message, idx) => (
+                <MessageBubble
+                  key={`${message.timestamp}-${idx}`}
+                  sender={message.sender}
+                  text={message.text}
+                  timestamp={message.timestamp}
+                  status={message.status}
+                  onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </SimpleBar>
 
         <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-3">
           <div className="pointer-events-auto flex flex-col gap-2 text-xs font-semibold text-orange-50">

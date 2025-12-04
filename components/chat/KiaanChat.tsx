@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import SimpleBar from 'simplebar-react'
 import { MessageBubble } from './MessageBubble'
 import { KiaanLogo } from '@/components/branding'
 
@@ -103,59 +104,64 @@ export function KiaanChat({
       </div>
 
       {/* Scrollable Messages Container */}
-      <div
-        ref={messagesContainerRef}
-        onScroll={handleScroll}
-        tabIndex={0}
-        role="log"
-        aria-label="Chat messages"
-        aria-live="polite"
-        className="kiaan-chat-scroll-container flex-1 overflow-y-auto px-4 py-4 space-y-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset"
-        style={{
-          maxHeight: 'calc(100vh - 300px)',
-          minHeight: '300px',
-          scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth' 
+      <SimpleBar
+        autoHide={false}
+        scrollableNodeProps={{
+          ref: messagesContainerRef,
+          onScroll: handleScroll,
+          tabIndex: 0,
+          role: 'log',
+          'aria-label': 'Chat messages',
+          'aria-live': 'polite',
+          className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
+          style: {
+            maxHeight: 'calc(100vh - 300px)',
+            minHeight: '300px',
+            scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth'
+          }
         }}
+        className="mv-energy-scrollbar flex-1"
       >
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-12">
-            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mb-4">
-              <span className="text-3xl">💬</span>
-            </div>
-            <h3 className="text-lg font-semibold text-orange-50 mb-2">Welcome to KIAAN</h3>
-            <p className="text-sm text-orange-100/70 max-w-sm">
-              Share what&apos;s on your mind. I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.
-            </p>
-          </div>
-        ) : (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              sender={message.sender}
-              text={message.text}
-              timestamp={message.timestamp}
-              status={message.status}
-              onSaveToJournal={message.sender === 'assistant' ? onSaveToJournal : undefined}
-            />
-          ))
-        )}
+          <div className="px-4 py-4 space-y-4">
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mb-4">
+                  <span className="text-3xl">💬</span>
+                </div>
+                <h3 className="text-lg font-semibold text-orange-50 mb-2">Welcome to KIAAN</h3>
+                <p className="text-sm text-orange-100/70 max-w-sm">
+                  Share what&apos;s on your mind. I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.
+                </p>
+              </div>
+            ) : (
+              messages.map((message) => (
+                <MessageBubble
+                  key={message.id}
+                  sender={message.sender}
+                  text={message.text}
+                  timestamp={message.timestamp}
+                  status={message.status}
+                  onSaveToJournal={message.sender === 'assistant' ? onSaveToJournal : undefined}
+                />
+              ))
+            )}
 
-        {/* Loading indicator */}
-        {isLoading && (
-          <div className="flex items-center gap-3 animate-pulse" role="status" aria-label="KIAAN is typing">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-xs font-bold text-slate-900">
-              K
-            </div>
-            <div className="flex gap-1">
-              <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-            <span className="sr-only">KIAAN is typing...</span>
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="flex items-center gap-3 animate-pulse" role="status" aria-label="KIAAN is typing">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-xs font-bold text-slate-900">
+                  K
+                </div>
+                <div className="flex gap-1">
+                  <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <span className="sr-only">KIAAN is typing...</span>
+              </div>
+            )}
           </div>
-        )}
-
-      </div>
+        </SimpleBar>
 
       {/* Floating Jump to Latest button */}
       {!isAtBottom && messages.length > 0 && (
