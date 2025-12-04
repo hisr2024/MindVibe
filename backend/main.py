@@ -47,6 +47,18 @@ ALLOWED_ORIGINS = [
     ).split(",")
 ]
 
+# Explicitly list allowed headers (wildcards don't work with credentials: 'include')
+ALLOWED_HEADERS = [
+    "content-type",
+    "authorization",
+    "accept",
+    "origin",
+    "user-agent",
+    "x-requested-with",
+    "x-csrf-token",
+    "cache-control",
+]
+
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
     "1",
@@ -125,8 +137,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=ALLOWED_HEADERS,
     expose_headers=["*"],
     max_age=3600,
 )
@@ -149,7 +161,7 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
                 "Access-Control-Allow-Origin": allowed_origin,
                 "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
             },
         )
 
@@ -157,7 +169,7 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
     response.headers["Access-Control-Allow-Origin"] = allowed_origin
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = ", ".join(ALLOWED_HEADERS)
     return response
 
 @app.on_event("startup")
