@@ -97,7 +97,7 @@ BEGIN
                 FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
         END IF;
     END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
