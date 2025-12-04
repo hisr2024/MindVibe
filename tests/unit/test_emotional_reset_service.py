@@ -416,7 +416,9 @@ class TestAnonymousUserSupport:
 
         assert len(added_sessions) == 1
         assert added_sessions[0].user_id.startswith("anon-")
-        assert len(added_sessions[0].user_id) == 17  # "anon-" + 12 hex chars
+        # anon- (5 chars) + 12 hex chars = 17 total chars
+        expected_length = len("anon-") + 12
+        assert len(added_sessions[0].user_id) == expected_length
 
     @pytest.mark.asyncio
     async def test_process_step_with_none_user_id(

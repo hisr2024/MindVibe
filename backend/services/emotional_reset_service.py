@@ -187,7 +187,8 @@ class EmotionalResetService:
                 )
             )
         else:
-            # For anonymous users, retrieve by session_id only
+            # For anonymous users, security relies on the unguessable UUID session_id.
+            # The anon-% filter ensures only anonymous sessions can be accessed without auth.
             result = await db.execute(
                 select(EmotionalResetSession).where(
                     EmotionalResetSession.session_id == session_id,
