@@ -186,6 +186,25 @@ export default function DashboardClient() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Emotional Reset Card */}
+            <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10] to-[#0c0f14] p-5 shadow-[0_10px_40px_rgba(255,115,39,0.1)] hover:border-orange-400/40 transition">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-400/30 to-amber-300/30 flex items-center justify-center text-xl">
+                  🕉️
+                </div>
+                <div>
+                  <h3 className="font-semibold text-orange-50">Emotional Reset</h3>
+                  <p className="text-xs text-orange-100/70">7-step guided wellness flow</p>
+                </div>
+              </div>
+              <Link
+                href="/emotional-reset"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
+              >
+                Start Emotional Reset
+              </Link>
+            </div>
+
             {/* Relationship Compass Card */}
             <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10] to-[#0c0f14] p-5 shadow-[0_10px_40px_rgba(255,115,39,0.1)] hover:border-orange-400/40 transition">
               <div className="flex items-start gap-3 mb-3">

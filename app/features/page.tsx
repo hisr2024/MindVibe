@@ -3,8 +3,16 @@
 import Link from 'next/link'
 import { HoverCard, HoverCardTitle, HoverCardDescription, HelpIcon, AnimatedCard, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui'
 
-// Feature cards with visual placeholders (4 cards as requested)
+// Feature cards with visual placeholders (5 cards)
 const featureCards = [
+  {
+    title: 'KIAAN Emotional Reset',
+    summary: '7-step guided wellness',
+    detail: 'Process emotions, find calm, and reset your mental state with Gita wisdom in a guided 7-step flow with breathing exercises.',
+    icon: '🕉️',
+    videoPlaceholder: '🧘',
+    featured: true,
+  },
   {
     title: 'KIAAN Wisdom',
     summary: 'Warm, grounded guidance',
@@ -59,6 +67,7 @@ const howItWorks = [
 
 // Flow pages for exploring different features
 const flowPages = [
+  { href: '/emotional-reset', title: 'Emotional Reset', detail: '7-step guided wellness flow with Gita wisdom' },
   { href: '/flows/check-in', title: 'State check-in', detail: 'Quick mood capture with empathetic responses' },
   { href: '/flows/kiaan', title: 'Talk to KIAAN', detail: 'Chat with clarity pause watch' },
   { href: '/flows/ardha', title: 'Ardha reframing', detail: 'Reframes with validation and steps' },
