@@ -31,6 +31,31 @@ BEGIN
             ALTER TABLE journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
         END IF;
 
+        -- Align referencing columns to the expected VARCHAR(64) type
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'journal_entry_tags' AND column_name = 'entry_id' AND data_type = 'integer'
+        ) THEN
+            ALTER TABLE journal_entry_tags
+                ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+        END IF;
+
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'journal_versions' AND column_name = 'entry_id' AND data_type = 'integer'
+        ) THEN
+            ALTER TABLE journal_versions
+                ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+        END IF;
+
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'journal_search_index' AND column_name = 'entry_id' AND data_type = 'integer'
+        ) THEN
+            ALTER TABLE journal_search_index
+                ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+        END IF;
+
         -- Update the primary key column to the expected VARCHAR(64) type
         ALTER TABLE journal_entries
             ALTER COLUMN id TYPE VARCHAR(64) USING id::VARCHAR(64);
