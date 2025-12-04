@@ -5,104 +5,34 @@
 -- column type before creating those tables. This avoids PostgreSQL rejecting the
 -- foreign keys with a "DatatypeMismatchError" during deployment.
 
-DO $$
-DECLARE
-    column_is_integer BOOLEAN;
-BEGIN
-    BEGIN
-        SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_name = 'journal_entries'
-              AND column_name = 'id'
-              AND data_type = 'integer'
-        ) INTO column_is_integer;
+-- Drop dependent foreign keys if legacy tables already exist
+ALTER TABLE IF EXISTS journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
+ALTER TABLE IF EXISTS journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
+ALTER TABLE IF EXISTS journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
+ALTER TABLE IF EXISTS emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
 
-        IF column_is_integer THEN
-            -- Drop dependent foreign keys if legacy tables already exist
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
-                ALTER TABLE journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
-            END IF;
+-- Align referencing columns to the expected VARCHAR(64) type
+ALTER TABLE IF EXISTS journal_entry_tags ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS journal_versions ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS journal_search_index ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS emotional_reset_sessions ALTER COLUMN IF EXISTS journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
 
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
-                ALTER TABLE journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
-            END IF;
+-- Update the primary key column to the expected VARCHAR(64) type
+ALTER TABLE IF EXISTS journal_entries ALTER COLUMN IF EXISTS id TYPE VARCHAR(64) USING id::VARCHAR(64);
 
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
-                ALTER TABLE journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
-            END IF;
-
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
-                ALTER TABLE emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
-            END IF;
-
-            -- Align referencing columns to the expected VARCHAR(64) type
-            IF EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_name = 'journal_entry_tags' AND column_name = 'entry_id' AND data_type = 'integer'
-            ) THEN
-                ALTER TABLE journal_entry_tags
-                    ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-            END IF;
-
-            IF EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_name = 'journal_versions' AND column_name = 'entry_id' AND data_type = 'integer'
-            ) THEN
-                ALTER TABLE journal_versions
-                    ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-            END IF;
-
-            IF EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_name = 'journal_search_index' AND column_name = 'entry_id' AND data_type = 'integer'
-            ) THEN
-                ALTER TABLE journal_search_index
-                    ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-            END IF;
-
-            IF EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_name = 'emotional_reset_sessions' AND column_name = 'journal_entry_id' AND data_type = 'integer'
-            ) THEN
-                ALTER TABLE emotional_reset_sessions
-                    ALTER COLUMN journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
-            END IF;
-
-            -- Update the primary key column to the expected VARCHAR(64) type
-            ALTER TABLE journal_entries
-                ALTER COLUMN id TYPE VARCHAR(64) USING id::VARCHAR(64);
-
-            -- Restore foreign keys with the corrected type
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
-                ALTER TABLE journal_entry_tags
-                    ADD CONSTRAINT journal_entry_tags_entry_id_fkey
-                    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-            END IF;
-
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
-                ALTER TABLE journal_versions
-                    ADD CONSTRAINT journal_versions_entry_id_fkey
-                    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-            END IF;
-
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
-                ALTER TABLE journal_search_index
-                    ADD CONSTRAINT journal_search_index_entry_id_fkey
-                    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-            END IF;
-
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
-                ALTER TABLE emotional_reset_sessions
-                    ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
-                    FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
-            END IF;
-        END IF;
-    EXCEPTION
-        WHEN others THEN
-            RAISE NOTICE '[journal_migration] Skipping legacy type alignment for journal_entries.id: %', SQLERRM;
-    END;
-END $$ LANGUAGE plpgsql;
+-- Restore foreign keys with the corrected type
+ALTER TABLE IF EXISTS journal_entry_tags
+    ADD CONSTRAINT journal_entry_tags_entry_id_fkey
+    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+ALTER TABLE IF EXISTS journal_versions
+    ADD CONSTRAINT journal_versions_entry_id_fkey
+    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+ALTER TABLE IF EXISTS journal_search_index
+    ADD CONSTRAINT journal_search_index_entry_id_fkey
+    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+ALTER TABLE IF EXISTS emotional_reset_sessions
+    ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
+    FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -123,24 +53,13 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 CREATE INDEX IF NOT EXISTS idx_journal_entries_user ON journal_entries(user_id);
 
 -- Ensure legacy deployments have the client_updated_at column before creating the index
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'journal_entries'
-          AND column_name = 'client_updated_at'
-    ) THEN
-        ALTER TABLE journal_entries ADD COLUMN client_updated_at TIMESTAMPTZ;
+ALTER TABLE IF EXISTS journal_entries ADD COLUMN IF NOT EXISTS client_updated_at TIMESTAMPTZ;
 
-        -- Backfill with the best available timestamp to satisfy the NOT NULL expectation
-        UPDATE journal_entries
-        SET client_updated_at = COALESCE(updated_at, created_at, NOW())
-        WHERE client_updated_at IS NULL;
+UPDATE journal_entries
+SET client_updated_at = COALESCE(updated_at, created_at, NOW())
+WHERE client_updated_at IS NULL;
 
-        ALTER TABLE journal_entries ALTER COLUMN client_updated_at SET NOT NULL;
-    END IF;
-END $$ LANGUAGE plpgsql;
+ALTER TABLE IF EXISTS journal_entries ALTER COLUMN client_updated_at SET NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_journal_entries_client_ts ON journal_entries(client_updated_at);
 
