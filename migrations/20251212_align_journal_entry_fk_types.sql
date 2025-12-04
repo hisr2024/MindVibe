@@ -28,6 +28,10 @@ BEGIN
             ALTER TABLE journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
         END IF;
 
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
+            ALTER TABLE emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
+        END IF;
+
         -- Align referencing columns to VARCHAR(64) when they don't already match
         IF EXISTS (
             SELECT 1 FROM information_schema.columns
@@ -59,6 +63,16 @@ BEGIN
                 ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
         END IF;
 
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'emotional_reset_sessions'
+              AND column_name = 'journal_entry_id'
+              AND (data_type <> 'character varying' OR character_maximum_length <> 64)
+        ) THEN
+            ALTER TABLE emotional_reset_sessions
+                ALTER COLUMN journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
+        END IF;
+
         -- Update the primary key column to the expected VARCHAR(64) type
         ALTER TABLE journal_entries
             ALTER COLUMN id TYPE VARCHAR(64) USING id::VARCHAR(64);
@@ -80,6 +94,12 @@ BEGIN
             ALTER TABLE journal_search_index
                 ADD CONSTRAINT journal_search_index_entry_id_fkey
                 FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
+            ALTER TABLE emotional_reset_sessions
+                ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
+                FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
         END IF;
     END IF;
 END $$;
