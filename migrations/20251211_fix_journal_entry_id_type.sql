@@ -3,100 +3,27 @@
 --              then restore foreign keys that depend on the column.
 -- Date: 2025-12-11
 
-DO $$
-DECLARE
-    entry_data_type TEXT;
-    entry_length INT;
-BEGIN
-    SELECT data_type, character_maximum_length
-    INTO entry_data_type, entry_length
-    FROM information_schema.columns
-    WHERE table_name = 'journal_entries'
-      AND column_name = 'id';
+-- Re-run alignment defensively without PL/pgSQL so Render's splitter stays happy
+ALTER TABLE IF EXISTS journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
+ALTER TABLE IF EXISTS journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
+ALTER TABLE IF EXISTS journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
+ALTER TABLE IF EXISTS emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
 
-    IF entry_data_type IS NOT NULL THEN
-        -- Drop dependent foreign keys if the tables already exist
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
-            ALTER TABLE journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
-        END IF;
+ALTER TABLE IF EXISTS journal_entry_tags ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS journal_versions ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS journal_search_index ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS emotional_reset_sessions ALTER COLUMN IF EXISTS journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
+ALTER TABLE IF EXISTS journal_entries ALTER COLUMN IF EXISTS id TYPE VARCHAR(64) USING id::VARCHAR(64);
 
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
-            ALTER TABLE journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
-        END IF;
-
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
-            ALTER TABLE journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
-        END IF;
-
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
-            ALTER TABLE emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
-        END IF;
-
-        -- Align referencing columns to the expected VARCHAR(64) type when needed
-        IF EXISTS (
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'journal_entry_tags'
-              AND column_name = 'entry_id'
-              AND (data_type <> 'character varying' OR character_maximum_length <> 64)
-        ) THEN
-            ALTER TABLE journal_entry_tags ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-        END IF;
-
-        IF EXISTS (
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'journal_versions'
-              AND column_name = 'entry_id'
-              AND (data_type <> 'character varying' OR character_maximum_length <> 64)
-        ) THEN
-            ALTER TABLE journal_versions ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-        END IF;
-
-        IF EXISTS (
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'journal_search_index'
-              AND column_name = 'entry_id'
-              AND (data_type <> 'character varying' OR character_maximum_length <> 64)
-        ) THEN
-            ALTER TABLE journal_search_index ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-        END IF;
-
-        IF EXISTS (
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'emotional_reset_sessions'
-              AND column_name = 'journal_entry_id'
-              AND (data_type <> 'character varying' OR character_maximum_length <> 64)
-        ) THEN
-            ALTER TABLE emotional_reset_sessions ALTER COLUMN journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
-        END IF;
-
-        -- Update the primary key column to the expected VARCHAR(64) type when needed
-        IF entry_data_type <> 'character varying' OR entry_length <> 64 THEN
-            ALTER TABLE journal_entries ALTER COLUMN id TYPE VARCHAR(64) USING id::VARCHAR(64);
-        END IF;
-
-        -- Restore foreign keys with the corrected type
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
-            ALTER TABLE journal_entry_tags
-                ADD CONSTRAINT journal_entry_tags_entry_id_fkey
-                FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-        END IF;
-
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
-            ALTER TABLE journal_versions
-                ADD CONSTRAINT journal_versions_entry_id_fkey
-                FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-        END IF;
-
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
-            ALTER TABLE journal_search_index
-                ADD CONSTRAINT journal_search_index_entry_id_fkey
-                FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-        END IF;
-
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
-            ALTER TABLE emotional_reset_sessions
-                ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
-                FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
-        END IF;
-    END IF;
-END $$;
+ALTER TABLE IF EXISTS journal_entry_tags
+    ADD CONSTRAINT journal_entry_tags_entry_id_fkey
+    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+ALTER TABLE IF EXISTS journal_versions
+    ADD CONSTRAINT journal_versions_entry_id_fkey
+    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+ALTER TABLE IF EXISTS journal_search_index
+    ADD CONSTRAINT journal_search_index_entry_id_fkey
+    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+ALTER TABLE IF EXISTS emotional_reset_sessions
+    ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
+    FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
