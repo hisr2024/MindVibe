@@ -1,5 +1,5 @@
 -- Migration: Remove foreign key constraint from emotional_reset_sessions to allow anonymous users
--- Date: 2025-12-05
+-- Date: 2025-12-07
 -- Description: Drops the user_id foreign key constraint to enable anonymous emotional reset sessions.
 --              Anonymous users have user_id like 'anon-abc123' which doesn't exist in users table.
 --              This migration is safe and idempotent.
