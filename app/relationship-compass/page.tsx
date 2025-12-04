@@ -18,7 +18,6 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
   // Load from localStorage AFTER hydration completes
   useEffect(() => {
-    setIsHydrated(true)
     try {
       const item = window.localStorage.getItem(key)
       if (item) {
@@ -28,6 +27,8 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
     } catch (error) {
       console.warn(`Failed to load localStorage key "${key}":`, error)
     }
+    // Set hydrated after localStorage operation to avoid race condition
+    setIsHydrated(true)
   }, [key])
 
   // Save to localStorage when state changes (but skip initial hydration)
