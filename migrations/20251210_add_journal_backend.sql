@@ -101,7 +101,20 @@ BEGIN
     END IF;
 END $$;
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- Attempt to enable pg_trgm, but don't fail startup if the role lacks privileges
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm') THEN
+        BEGIN
+            EXECUTE 'CREATE EXTENSION IF NOT EXISTS pg_trgm';
+        EXCEPTION
+            WHEN insufficient_privilege THEN
+                RAISE NOTICE 'Skipping pg_trgm extension (insufficient privileges)';
+            WHEN undefined_file THEN
+                RAISE NOTICE 'Skipping pg_trgm extension (not available on this host)';
+        END;
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS journal_entries (
     id VARCHAR(64) PRIMARY KEY,
