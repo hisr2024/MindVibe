@@ -52,30 +52,47 @@ elif DATABASE_URL.startswith("postgresql://"):
 
 
 def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
-    """Build asyncpg connect args to honor sslmode/ssl query params.
+    """Build asyncpg connect args to honor sslmode/ssl query params. 
 
-    Render Postgres instances require TLS by default. When using asyncpg, the
+    Render Postgres instances require TLS by default.  When using asyncpg, the
     ``sslmode=require`` query parameter from the connection string is ignored
-    unless we translate it into the ``ssl`` flag expected by asyncpg. This
+    unless we translate it into the ``ssl`` flag expected by asyncpg.  This
     helper preserves explicit ``sslmode``/``ssl`` values while defaulting to a
-    secure connection when SSL is required.
+    secure connection when SSL is required. 
     """
+    import ssl as ssl_module
+    from urllib.parse import parse_qs, urlparse
 
     parsed = urlparse(db_url)
     query_params = parse_qs(parsed.query)
 
     ssl_pref = os.getenv("DB_SSL_MODE") or query_params.get("sslmode", [None])[0] or query_params.get("ssl", [None])[0]
+    
+    # Default to require SSL for Render
     if not ssl_pref:
-        return {}
-
+        ssl_pref = "require"
+    
     ssl_pref = ssl_pref.lower()
-    if ssl_pref in {"require", "required", "verify-ca", "verify-full", "true", "1"}:
-        return {"ssl": ssl.create_default_context()}
+    
+    if ssl_pref in {"require", "required"}:
+        # Create SSL context that doesn't verify certificates (for Render)
+        ssl_context = ssl_module.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl_module.CERT_NONE
+        return {"ssl": ssl_context}
+    
+    if ssl_pref in {"verify-ca", "verify-full", "true", "1"}:
+        # Full verification
+        return {"ssl": ssl_module.create_default_context()}
+    
     if ssl_pref in {"disable", "false", "0"}:
         return {"ssl": False}
 
-    # Fallback to enabling SSL for unrecognized but present values
-    return {"ssl": ssl.create_default_context()}
+    # Fallback: enable SSL without verification for Render compatibility
+    ssl_context = ssl_module.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl_module.CERT_NONE
+    return {"ssl": ssl_context}
 
 
 engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args_for_ssl(DATABASE_URL))
