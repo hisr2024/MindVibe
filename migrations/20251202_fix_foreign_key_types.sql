@@ -165,9 +165,15 @@ END $$;
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='user_subscriptions') THEN
-        ALTER TABLE user_subscriptions
-            ADD CONSTRAINT user_subscriptions_user_id_fkey
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='user_subscriptions'
+              AND constraint_name='user_subscriptions_user_id_fkey'
+        ) THEN
+            ALTER TABLE user_subscriptions
+                ADD CONSTRAINT user_subscriptions_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
@@ -175,9 +181,15 @@ END $$;
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='usage_tracking') THEN
-        ALTER TABLE usage_tracking
-            ADD CONSTRAINT usage_tracking_user_id_fkey
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='usage_tracking'
+              AND constraint_name='usage_tracking_user_id_fkey'
+        ) THEN
+            ALTER TABLE usage_tracking
+                ADD CONSTRAINT usage_tracking_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
@@ -185,69 +197,111 @@ END $$;
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='payments') THEN
-        ALTER TABLE payments
-            ADD CONSTRAINT payments_user_id_fkey
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='payments'
+              AND constraint_name='payments_user_id_fkey'
+        ) THEN
+            ALTER TABLE payments
+                ADD CONSTRAINT payments_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
 -- Re-create foreign key on user_profiles (if table exists)
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='user_profiles') THEN
-        ALTER TABLE user_profiles 
-            ADD CONSTRAINT user_profiles_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='user_profiles'
+              AND constraint_name='user_profiles_user_id_fkey'
+        ) THEN
+            ALTER TABLE user_profiles
+                ADD CONSTRAINT user_profiles_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
 -- Re-create foreign key on moods (if table exists)
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='moods') THEN
-        ALTER TABLE moods 
-            ADD CONSTRAINT moods_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='moods'
+              AND constraint_name='moods_user_id_fkey'
+        ) THEN
+            ALTER TABLE moods
+                ADD CONSTRAINT moods_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
 -- Re-create foreign key on journal_blobs (if table exists)
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='journal_blobs') THEN
-        ALTER TABLE journal_blobs 
-            ADD CONSTRAINT journal_blobs_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='journal_blobs'
+              AND constraint_name='journal_blobs_user_id_fkey'
+        ) THEN
+            ALTER TABLE journal_blobs
+                ADD CONSTRAINT journal_blobs_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
--- Re-create foreign key on works (if table exists)
-DO $$ 
+-- Re-create foreign key on works (if exists)
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='works') THEN
-        ALTER TABLE works 
-            ADD CONSTRAINT works_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='works'
+              AND constraint_name='works_user_id_fkey'
+        ) THEN
+            ALTER TABLE works
+                ADD CONSTRAINT works_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
--- Re-create foreign key on sessions (if table exists)
-DO $$ 
+-- Re-create foreign key on sessions (if exists)
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='sessions') THEN
-        ALTER TABLE sessions 
-            ADD CONSTRAINT sessions_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='sessions'
+              AND constraint_name='sessions_user_id_fkey'
+        ) THEN
+            ALTER TABLE sessions
+                ADD CONSTRAINT sessions_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 
--- Re-create foreign key on refresh_tokens (if table exists)
-DO $$ 
+-- Re-create foreign key on refresh_tokens (if exists)
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='refresh_tokens') THEN
-        ALTER TABLE refresh_tokens 
-            ADD CONSTRAINT refresh_tokens_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_name='refresh_tokens'
+              AND constraint_name='refresh_tokens_user_id_fkey'
+        ) THEN
+            ALTER TABLE refresh_tokens
+                ADD CONSTRAINT refresh_tokens_user_id_fkey
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
     END IF;
 END $$;
 

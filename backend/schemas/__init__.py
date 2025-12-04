@@ -13,6 +13,14 @@ from backend.schemas.subscription import (
     UserSubscriptionOut,
     WebhookEvent,
 )
+from backend.schemas.karmic_tree import (
+    ActivityCounts,
+    AchievementProgress,
+    UnlockableOut,
+    ProgressResponse,
+    UnlockRequest,
+    TreeNotification,
+)
 
 
 class MoodIn(BaseModel):
@@ -79,12 +87,10 @@ __all__ = [
     "CheckoutSessionCreate",
     "CheckoutSessionOut",
     "WebhookEvent",
-    "MoodIn",
-    "UserAuth",
-    "JournalEntry",
-    "ContentPack",
-    "WisdomVerse",
-    "BlobIn",
-    "BlobOut",
-    "MoodOut",
+    "ActivityCounts",
+    "AchievementProgress",
+    "UnlockableOut",
+    "ProgressResponse",
+    "UnlockRequest",
+    "TreeNotification",
 ]

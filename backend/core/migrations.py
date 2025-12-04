@@ -198,7 +198,9 @@ async def apply_sql_migrations(engine: AsyncEngine) -> MigrationResult:
                     print(f"   File: {path.name}")
                     print(f"   Statement: {statement}")
                     print(f"   Current revision: {result.current_revision}")
-                    raise
+                    raise RuntimeError(
+                        f"{path.name} failed while running: {statement}"
+                    ) from exc
             await conn.execute(
                 text("INSERT INTO schema_migrations (filename) VALUES (:filename)"),
                 {"filename": path.name},

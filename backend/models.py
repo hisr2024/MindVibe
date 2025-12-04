@@ -3,19 +3,7 @@ import datetime
 import enum
 import uuid
 from decimal import Decimal
-from sqlalchemy import (
-    Boolean,
-    JSON,
-    TIMESTAMP,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    func,
-    Numeric,
-    Enum,
-    ARRAY,
-)
+from sqlalchemy import Boolean, JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func, Numeric, Enum, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -42,6 +30,34 @@ class PaymentStatus(str, enum.Enum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     REFUNDED = "refunded"
+
+
+class AchievementCategory(str, enum.Enum):
+    """Activity category that drives achievement progress."""
+
+    MOOD = "mood"
+    JOURNAL = "journal"
+    CHAT = "chat"
+    STREAK = "streak"
+    WELLNESS = "wellness"
+
+
+class AchievementRarity(str, enum.Enum):
+    """Rarity tiers for badges and unlockables."""
+
+    COMMON = "common"
+    RARE = "rare"
+    EPIC = "epic"
+    LEGENDARY = "legendary"
+
+
+class UnlockableType(str, enum.Enum):
+    """Unlockable reward types available in the Karmic Tree."""
+
+    THEME = "theme"
+    PROMPT = "prompt"
+    BADGE = "badge"
+    BOOST = "boost"
 
 class SoftDeleteMixin:
     deleted_at: Mapped[datetime.datetime | None] = mapped_column(
