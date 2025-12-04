@@ -122,9 +122,6 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
     try:
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
@@ -139,6 +136,9 @@ async def startup():
                 print(f"   Pending: {', '.join(migration_result.pending)}")
             else:
                 print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
+
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     except Exception as exc:
         print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
         raise
