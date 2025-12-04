@@ -6,34 +6,116 @@
 -- column type before creating those tables. This avoids PostgreSQL rejecting the
 -- foreign keys with a "DatatypeMismatchError" during deployment.
 
--- Align legacy journal ID columns without using a DO block (Render splits on semicolons)
-ALTER TABLE IF EXISTS journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
-ALTER TABLE IF EXISTS journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
-ALTER TABLE IF EXISTS journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
-ALTER TABLE IF EXISTS emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
-ALTER TABLE IF EXISTS journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_pkey;
-ALTER TABLE IF EXISTS journal_entries DROP CONSTRAINT IF EXISTS journal_entries_pkey;
+-- Align journal entry identifiers and dependent foreign keys defensively
+DO $$
+BEGIN
+    -- Align journal_entries.id and dependent foreign keys to VARCHAR(64) when needed.
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'journal_entries'
+          AND column_name = 'id'
+    ) THEN
+        PERFORM 1 FROM information_schema.columns
+         WHERE table_name = 'journal_entries'
+           AND column_name = 'id'
+           AND data_type = 'character varying'
+           AND character_maximum_length = 64;
 
-ALTER TABLE IF EXISTS journal_entry_tags ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-ALTER TABLE IF EXISTS journal_versions ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-ALTER TABLE IF EXISTS journal_search_index ALTER COLUMN IF EXISTS entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
-ALTER TABLE IF EXISTS emotional_reset_sessions ALTER COLUMN IF EXISTS journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
-ALTER TABLE IF EXISTS journal_entries ALTER COLUMN IF EXISTS id TYPE VARCHAR(64) USING id::VARCHAR(64);
-ALTER TABLE IF EXISTS journal_entries ADD CONSTRAINT journal_entries_pkey PRIMARY KEY (id);
-ALTER TABLE IF EXISTS journal_entry_tags ADD CONSTRAINT journal_entry_tags_pkey PRIMARY KEY(entry_id, tag_id);
+        IF NOT FOUND THEN
+            -- Drop dependent foreign keys before altering column types
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
+                ALTER TABLE journal_entry_tags DROP CONSTRAINT IF EXISTS journal_entry_tags_entry_id_fkey;
+            END IF;
 
-ALTER TABLE IF EXISTS journal_entry_tags
-    ADD CONSTRAINT journal_entry_tags_entry_id_fkey
-    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-ALTER TABLE IF EXISTS journal_versions
-    ADD CONSTRAINT journal_versions_entry_id_fkey
-    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-ALTER TABLE IF EXISTS journal_search_index
-    ADD CONSTRAINT journal_search_index_entry_id_fkey
-    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
-ALTER TABLE IF EXISTS emotional_reset_sessions
-    ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
-    FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
+                ALTER TABLE journal_versions DROP CONSTRAINT IF EXISTS journal_versions_entry_id_fkey;
+            END IF;
+
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
+                ALTER TABLE journal_search_index DROP CONSTRAINT IF EXISTS journal_search_index_entry_id_fkey;
+            END IF;
+
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
+                ALTER TABLE emotional_reset_sessions DROP CONSTRAINT IF EXISTS emotional_reset_sessions_journal_entry_id_fkey;
+            END IF;
+
+            -- Align referencing columns
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'journal_entry_tags'
+                  AND column_name = 'entry_id'
+                  AND (data_type <> 'character varying' OR character_maximum_length <> 64)
+            ) THEN
+                ALTER TABLE journal_entry_tags ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+            END IF;
+
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'journal_versions'
+                  AND column_name = 'entry_id'
+                  AND (data_type <> 'character varying' OR character_maximum_length <> 64)
+            ) THEN
+                ALTER TABLE journal_versions ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+            END IF;
+
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'journal_search_index'
+                  AND column_name = 'entry_id'
+                  AND (data_type <> 'character varying' OR character_maximum_length <> 64)
+            ) THEN
+                ALTER TABLE journal_search_index ALTER COLUMN entry_id TYPE VARCHAR(64) USING entry_id::VARCHAR(64);
+            END IF;
+
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'emotional_reset_sessions'
+                  AND column_name = 'journal_entry_id'
+                  AND (data_type <> 'character varying' OR character_maximum_length <> 64)
+            ) THEN
+                ALTER TABLE emotional_reset_sessions ALTER COLUMN journal_entry_id TYPE VARCHAR(64) USING journal_entry_id::VARCHAR(64);
+            END IF;
+
+            -- Align primary key column
+            ALTER TABLE journal_entries ALTER COLUMN id TYPE VARCHAR(64) USING id::VARCHAR(64);
+
+            -- Recreate or ensure primary key exists
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint
+                WHERE conrelid = 'journal_entries'::regclass
+                  AND contype = 'p'
+            ) THEN
+                ALTER TABLE journal_entries ADD CONSTRAINT journal_entries_pkey PRIMARY KEY (id);
+            END IF;
+
+            -- Restore foreign keys with correct ON DELETE actions
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_entry_tags') THEN
+                ALTER TABLE journal_entry_tags
+                    ADD CONSTRAINT journal_entry_tags_entry_id_fkey
+                    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+            END IF;
+
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_versions') THEN
+                ALTER TABLE journal_versions
+                    ADD CONSTRAINT journal_versions_entry_id_fkey
+                    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+            END IF;
+
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'journal_search_index') THEN
+                ALTER TABLE journal_search_index
+                    ADD CONSTRAINT journal_search_index_entry_id_fkey
+                    FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE;
+            END IF;
+
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'emotional_reset_sessions') THEN
+                ALTER TABLE emotional_reset_sessions
+                    ADD CONSTRAINT emotional_reset_sessions_journal_entry_id_fkey
+                    FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL;
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
 -- Attempt to enable pg_trgm, but don't fail startup if the role lacks privileges
 DO $$
