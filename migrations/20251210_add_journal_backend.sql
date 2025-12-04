@@ -121,6 +121,27 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_journal_entries_user ON journal_entries(user_id);
+
+-- Ensure legacy deployments have the client_updated_at column before creating the index
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'journal_entries'
+          AND column_name = 'client_updated_at'
+    ) THEN
+        ALTER TABLE journal_entries ADD COLUMN client_updated_at TIMESTAMPTZ;
+
+        -- Backfill with the best available timestamp to satisfy the NOT NULL expectation
+        UPDATE journal_entries
+        SET client_updated_at = COALESCE(updated_at, created_at, NOW())
+        WHERE client_updated_at IS NULL;
+
+        ALTER TABLE journal_entries ALTER COLUMN client_updated_at SET NOT NULL;
+    END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_journal_entries_client_ts ON journal_entries(client_updated_at);
 
 CREATE TABLE IF NOT EXISTS journal_tags (
