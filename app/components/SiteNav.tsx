@@ -12,6 +12,7 @@ const links = [
   { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
   { href: '/sacred-reflections', label: 'Sacred Reflections' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
+  { href: '/emotional-reset', label: 'Emotional Reset' },
   { href: '/features', label: 'Features' },
   { href: '/pricing', label: 'Subscription' },
 ]

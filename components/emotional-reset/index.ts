@@ -1,2 +1,6 @@
 export { EmotionalResetWizard } from './EmotionalResetWizard'
 export { BreathingAnimation } from './BreathingAnimation'
+export { StepIndicator } from './StepIndicator'
+export { CrisisAlert } from './CrisisAlert'
+export { SessionSummary } from './SessionSummary'
+export { EmotionalResetCard } from './EmotionalResetCard'
