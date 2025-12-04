@@ -162,45 +162,26 @@ async def startup():
         try:
             from backend.core.manual_migrations import run_manual_migrations
             manual_results = await run_manual_migrations(engine)
-            for migration_name, result in manual_results. items():
-                status = "✅" if result['success'] else "⚠️"
-                print(f"{status} {migration_name}: {result['message']}")
+            for migration_name, result in manual_results.items():
+                status_icon = "✅" if result['success'] else "⚠️"
+                print(f"{status_icon} {migration_name}: {result['message']}")
         except Exception as manual_error:
             print(f"⚠️ Manual migrations had issues: {manual_error}")
             # Don't fail startup - manual migrations are supplementary
 
-        # Step 3: Create ORM-managed tables ONLY (skip journal tables managed by SQL)
-        print("\n🔧 Creating ORM-managed tables...")
+        # Step 3: Ensure ORM tables exist (standard SQLAlchemy approach)
+        print("\n🔧 Ensuring ORM tables exist...")
         async with engine.begin() as conn:
-            # Get list of tables that exist
-            existing_tables_result = await conn.execute(text("""
-                SELECT table_name 
-                FROM information_schema. tables 
-                WHERE table_schema = 'public'
-            """))
-            existing_tables = {row[0] for row in existing_tables_result.fetchall()}
+            await conn.run_sync(Base.metadata.create_all)
             
-            # Create tables that don't exist yet
-            # Note: Journal tables are managed by SQL migrations, not ORM
-            def create_non_journal_tables(target, connection, **kw):
-                """Only create tables not managed by SQL migrations."""
-                for table in target. tables. values():
-                    # Skip journal tables - they're managed by SQL migrations
-                    if table.name. startswith('journal_'):
-                        continue
-                    if table.name not in existing_tables:
-                        table.create(connection, checkfirst=True)
-            
-            await conn.run_sync(create_non_journal_tables, Base.metadata)
-            
-        print("✅ Ensured ORM tables exist after applying migrations")
+        print("✅ Database schema ready")
         
     except Exception as exc:
         failed_meta = migrations_module. LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
             print("❌ [MIGRATIONS] Context for the failure:")
             print(f"   File: {failed_meta.failed_file}")
-            if failed_meta.failed_statement:
+            if failed_meta. failed_statement:
                 print(f"   Statement: {failed_meta.failed_statement}")
         print(f"❌ [MIGRATIONS] Failed to apply migrations: {exc}")
         raise
