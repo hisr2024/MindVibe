@@ -64,10 +64,10 @@ export function EmotionalResetWizard({
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
 
-  // Start session on mount
+  // Start session on mount - intentionally run only once when component mounts
   useEffect(() => {
     startSession()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- startSession is defined inline and we only want to run on mount
   }, [])
 
   const startSession = async () => {
