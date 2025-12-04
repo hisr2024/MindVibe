@@ -124,6 +124,7 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 @app.on_event("startup")
 async def startup():
     try:
+        # Step 1: Run SQL migrations
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
             if migration_result.applied:
@@ -138,17 +139,27 @@ async def startup():
             else:
                 print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
 
+        # Step 2: Run manual Python migrations
+        print("\n🔧 Running manual migrations...")
+        from backend.core.manual_migrations import run_manual_migrations
+        manual_results = await run_manual_migrations(engine)
+        for migration_name, result in manual_results. items():
+            status = "✅" if result['success'] else "❌"
+            print(f"{status} {migration_name}: {result['message']}")
+
+        # Step 3: Ensure ORM tables exist
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         print("✅ Ensured ORM tables exist after applying migrations")
+        
     except Exception as exc:
-        failed_meta = migrations_module.LATEST_MIGRATION_RESULT
+        failed_meta = migrations_module. LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
             print("❌ [MIGRATIONS] Context for the failure:")
             print(f"   File: {failed_meta.failed_file}")
             if failed_meta.failed_statement:
                 print(f"   Statement: {failed_meta.failed_statement}")
-        print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
+        print(f"❌ [MIGRATIONS] Failed to apply migrations: {exc}")
         raise
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
