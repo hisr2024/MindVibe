@@ -32,6 +32,7 @@ from slowapi.errors import RateLimitExceeded
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.core import migrations as migrations_module
+from backend.core.manual_migrations import run_manual_migrations
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
@@ -130,6 +131,16 @@ async def startup():
                 print(f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}")
             else:
                 print("ℹ️ No new SQL migrations to apply")
+
+            # Run manual Python-based migrations
+            manual_results = await run_manual_migrations(engine)
+            if manual_results.get("pg_trgm"):
+                print("✅ pg_trgm extension ready")
+            journal_result = manual_results.get("journal_alignment", {})
+            if journal_result.get("status") == "aligned":
+                print(f"✅ Journal schema aligned: {journal_result.get('message')}")
+            elif journal_result.get("status") == "error":
+                print(f"⚠️ Journal schema alignment issue: {journal_result.get('message')}")
         else:
             migration_result = await get_migration_status(engine)
             if migration_result.pending:
