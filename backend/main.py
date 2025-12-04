@@ -252,6 +252,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
 
+# Load Emotional Reset router
+print("\n[Emotional Reset] Attempting to import Emotional Reset router...")
+try:
+    from backend.routes.emotional_reset import router as emotional_reset_router
+    app.include_router(emotional_reset_router)
+    print("✅ [SUCCESS] Emotional Reset router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Emotional Reset router: {e}")
+
 # Load Karmic Tree Analytics router
 print("\n[Karmic Tree] Attempting to import Karmic Tree Analytics router...")
 try:
