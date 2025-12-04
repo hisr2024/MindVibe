@@ -38,6 +38,12 @@ from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
 from backend.models import Base
 
+# Get allowed origins from environment variable or use defaults
+ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "https://mind-vibe-universal.vercel.app,http://localhost:3000,http://localhost:3001"
+).split(",")
+
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
     "1",
@@ -114,7 +120,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -124,17 +130,29 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
+    origin = request.headers.get("origin")
+
+    # Check if origin is allowed
+    if origin and origin in ALLOWED_ORIGINS:
+        allowed_origin = origin
+    else:
+        # Fallback to first allowed origin (for non-browser clients)
+        allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "*"
+
     if request.method == "OPTIONS":
         return JSONResponse(
             content={"status": "ok"},
             headers={
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": allowed_origin,
+                "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
                 "Access-Control-Allow-Headers": "*",
             },
         )
+
     response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Origin"] = allowed_origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
