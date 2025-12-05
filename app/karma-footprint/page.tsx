@@ -163,12 +163,10 @@ Respond using the four-part format with brief, grounded insights.`
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <ToolHeader
+          icon="👣"
           title="Karma Footprint"
-          subtitle="Daily Action Reflection"
-          description="Track your daily actions and understand their ripple effects. Build awareness of how small choices shape your path."
-          badge="👣 Track your impact"
-          backHref="/dashboard"
-          backText="← Back to dashboard"
+          subtitle="Track your daily actions and understand their ripple effects. Build awareness of how small choices shape your path."
+          backLink={{ label: 'Back to dashboard', href: '/dashboard' }}
         />
 
         {/* Main Content */}
