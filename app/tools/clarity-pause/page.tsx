@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
-const BREATHING_STEPS = [
+type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest'
+
+const BREATHING_STEPS: { phase: BreathingPhase; duration: number; instruction: string }[] = [
   { phase: 'inhale', duration: 4, instruction: 'Breathe in slowly...' },
   { phase: 'hold', duration: 4, instruction: 'Hold gently...' },
   { phase: 'exhale', duration: 6, instruction: 'Release slowly...' },
@@ -31,6 +33,7 @@ export default function ClarityPausePage() {
   const [completed, setCompleted] = useState(false)
   const [journalEntry, setJournalEntry] = useState('')
   const [promptIndex, setPromptIndex] = useState(0)
+  const [promptTimer, setPromptTimer] = useState(0)
 
   const currentStep = BREATHING_STEPS[currentStepIndex]
   const progress = ((totalSeconds - timeRemaining) / totalSeconds) * 100
@@ -76,14 +79,19 @@ export default function ClarityPausePage() {
         return newProgress
       })
 
-      // Change grounding prompt every 8 seconds
-      if (timeRemaining % 8 === 0) {
-        setPromptIndex((prev) => (prev + 1) % GROUNDING_PROMPTS.length)
-      }
+      // Change grounding prompt every 8 seconds using a counter
+      setPromptTimer((prev) => {
+        const newTimer = prev + 1
+        if (newTimer >= 8) {
+          setPromptIndex((idx) => (idx + 1) % GROUNDING_PROMPTS.length)
+          return 0
+        }
+        return newTimer
+      })
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isActive, isPaused, currentStep.duration, timeRemaining, handleComplete])
+  }, [isActive, isPaused, currentStep.duration, handleComplete])
 
   function handleStart() {
     setIsActive(true)
@@ -93,6 +101,7 @@ export default function ClarityPausePage() {
     setCurrentStepIndex(0)
     setStepProgress(0)
     setPromptIndex(0)
+    setPromptTimer(0)
     setJournalEntry('')
   }
 
@@ -119,7 +128,7 @@ export default function ClarityPausePage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const phaseColors = {
+  const phaseColors: Record<BreathingPhase, string> = {
     inhale: 'from-sky-400 to-cyan-400',
     hold: 'from-purple-400 to-violet-400',
     exhale: 'from-orange-400 to-amber-400',
@@ -201,7 +210,7 @@ export default function ClarityPausePage() {
               {/* Breathing Circle */}
               <div className="flex justify-center">
                 <div
-                  className={`relative rounded-full bg-gradient-to-br ${phaseColors[currentStep.phase as keyof typeof phaseColors]} transition-all duration-1000 ease-in-out flex items-center justify-center`}
+                  className={`relative rounded-full bg-gradient-to-br ${phaseColors[currentStep.phase]} transition-all duration-1000 ease-in-out flex items-center justify-center`}
                   style={{
                     width: currentStep.phase === 'inhale' ? '180px' : currentStep.phase === 'hold' ? '180px' : currentStep.phase === 'exhale' ? '100px' : '120px',
                     height: currentStep.phase === 'inhale' ? '180px' : currentStep.phase === 'hold' ? '180px' : currentStep.phase === 'exhale' ? '100px' : '120px',
