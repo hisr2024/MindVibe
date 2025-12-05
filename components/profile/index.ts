@@ -1,3 +1,7 @@
 export { ProfileHeader } from './ProfileHeader'
 export { ProfileEditForm } from './ProfileEditForm'
 export { AvatarUpload } from './AvatarUpload'
+export { ActivityStatsDisplay } from './ActivityStats'
+export { ActivityTimeline } from './ActivityTimeline'
+export { KarmicTreePreview } from './KarmicTreePreview'
+export { DataExport } from './DataExport'
