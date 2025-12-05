@@ -1,5 +1,11 @@
-import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
+import KarmaFootprintClient from './KarmaFootprintClient'
 
-export default function ToolsKarmaFootprintPage() {
-  redirect('/karma-footprint')
+export const metadata: Metadata = {
+  title: 'Karma Footprint Analyzer | MindVibe',
+  description: 'Reflect on your daily actions and visualize your karma footprint to cultivate mindful living.',
+}
+
+export default function KarmaFootprintPage() {
+  return <KarmaFootprintClient />
 }

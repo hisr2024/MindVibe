@@ -627,6 +627,114 @@ tests/
 
 ---
 
-*Phase 1 of 5 - Design System Foundation*
-*Phase 3 of 5 - Specialized Tool Pages and Reusable Components*
+# Phase 3: Specialized Tool Pages
+
+## Overview
+
+Phase 3 adds dedicated tool pages under `app/tools/` with reusable components, clear headings, and fast access to core actions. All pages use the shared design system tokens and maintain accessibility standards.
+
+## New Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Viyog | `/tools/viyog` | Detachment Coach - outcome anxiety reducer |
+| Ardha | `/tools/ardha` | Reframing Assistant - Gita-aligned perspective shifts |
+| Relationship Compass | `/tools/relationship-compass` | Calm conflict guidance |
+| Emotional Reset | `/tools/emotional-reset` | 7-step guided processing flow |
+| Karma Reset | `/tools/karma-reset` | 4-part reset ritual |
+| Karma Footprint | `/tools/karma-footprint` | Daily action reflection analyzer |
+| Karmic Tree | `/tools/karmic-tree` | Visual progress tracking visualization |
+
+## Tool Components (`components/tools/`)
+
+### ToolHeader
+
+Small header with icon, title, subtitle, and optional CTA.
+
+```tsx
+import { ToolHeader } from '@/components/tools'
+
+<ToolHeader
+  icon="🎯"
+  title="Viyog - Detachment Coach"
+  subtitle="Shift from result-focused anxiety to grounded action."
+  cta={{ label: 'Start Now', href: '/tools/viyog#start' }}
+  backLink={{ label: 'Back to home', href: '/' }}
+/>
+```
+
+### ToolActionCard
+
+Icon, title, short line, and CTA for quick tool actions.
+
+```tsx
+import { ToolActionCard } from '@/components/tools'
+
+<ToolActionCard
+  icon="⏱️"
+  title="Launch 60s Clarity Pause"
+  description="A quick reset when outcome anxiety feels overwhelming."
+  ctaLabel="Start Pause"
+  href="/tools/viyog#clarity-pause"
+  gradient="from-cyan-500/10 to-blue-500/10"
+/>
+```
+
+### KarmaPlant
+
+Visual SVG component for karma footprint states.
+
+```tsx
+import { KarmaPlant, type KarmaFootprintState } from '@/components/tools'
+
+// States: 'strong_positive' | 'mild_positive' | 'neutral' | 'mild_heavy' | 'heavy'
+<KarmaPlant state="mild_positive" size="md" />
+```
+
+### ResetPlanCard
+
+Displays the 4-element reset plan from KIAAN.
+
+```tsx
+import { ResetPlanCard } from '@/components/tools'
+
+<ResetPlanCard
+  plan={{
+    pauseAndBreathe: 'Take a deep breath and center yourself.',
+    nameTheRipple: 'Your words created discomfort.',
+    repair: 'A sincere apology can begin healing.',
+    moveWithIntention: 'Next time, pause before speaking.',
+  }}
+  animated={true}
+/>
+```
+
+### KarmicTreeClient
+
+Client component fetching analytics and rendering tree visualization.
+
+```tsx
+import { KarmicTreeClient } from '@/components/tools'
+
+<KarmicTreeClient />
+```
+
+## Navigation Updates
+
+The Tools dropdown (`components/navigation/ToolsDropdown.tsx`) now links to the new `/tools/*` pages through updated constants in `lib/constants/tools.ts`.
+
+## Tests
+
+Tests are located at `tests/frontend/tools/ToolComponents.test.tsx` and cover:
+
+- ToolHeader rendering and interactions
+- ToolActionCard link/button modes
+- KarmaPlant state visualizations
+- ResetPlanCard step rendering
+
+Run tests with: `npm test`
+
+---
+
+*Phase 3 of 5 - Specialized Tool Pages*
 *Last Updated: December 2024*

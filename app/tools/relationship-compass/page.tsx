@@ -1,5 +1,11 @@
-import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
+import RelationshipCompassClient from './RelationshipCompassClient'
 
-export default function ToolsRelationshipCompassPage() {
-  redirect('/relationship-compass')
+export const metadata: Metadata = {
+  title: 'Relationship Compass | MindVibe',
+  description: 'Navigate relationship challenges with clarity, fairness, and compassion.',
+}
+
+export default function RelationshipCompassPage() {
+  return <RelationshipCompassClient />
 }

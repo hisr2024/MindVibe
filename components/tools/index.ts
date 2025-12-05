@@ -1,11 +1,11 @@
 /**
- * MindVibe Tool Components
+ * Tools Components - Barrel Export
  *
- * Reusable components for specialized tool pages.
+ * Reusable components for the MindVibe tool pages (Phase 3).
  */
 
 export { ToolHeader, type ToolHeaderProps } from './ToolHeader'
 export { ToolActionCard, type ToolActionCardProps } from './ToolActionCard'
-export { KarmaPlant, type KarmaPlantProps, type KarmaPlantStage } from './KarmaPlant'
-export { KarmicTreeClient, type KarmicTreeClientProps, type KarmicTreeProgress } from './KarmicTreeClient'
+export { KarmaPlant, type KarmaPlantProps, type KarmaFootprintState } from './KarmaPlant'
+export { KarmicTreeClient, type KarmicTreeClientProps } from './KarmicTreeClient'
 export { ResetPlanCard, type ResetPlanCardProps, type ResetPlanStep } from './ResetPlanCard'

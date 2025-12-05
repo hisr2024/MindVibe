@@ -1,50 +1,46 @@
 'use client'
 
-import Link from 'next/link'
 import { type ReactNode } from 'react'
-import { MindVibeLockup } from '@/components/branding'
+import Link from 'next/link'
 
 export interface ToolHeaderProps {
-  /** Main title of the tool (e.g., "Viyog - Detachment Coach") */
+  /** Icon emoji or element for the tool */
+  icon: ReactNode
+  /** Main title of the tool */
   title: string
-  /** Subtitle or tagline */
-  subtitle?: string
-  /** Short description of the tool */
-  description?: string
-  /** Badge content */
-  badge?: string
-  /** Back link URL */
-  backHref?: string
-  /** Back link text */
-  backText?: string
-  /** Show MindVibe logo */
-  showLogo?: boolean
-  /** Additional actions/badges */
-  actions?: ReactNode
-  /** Additional className */
+  /** Subtitle or brief description */
+  subtitle: string
+  /** Optional CTA button configuration */
+  cta?: {
+    label: string
+    href?: string
+    onClick?: () => void
+  }
+  /** Optional back link configuration */
+  backLink?: {
+    label: string
+    href: string
+  }
+  /** Additional className for styling */
   className?: string
 }
 
 /**
  * ToolHeader component for consistent tool page headers.
- *
+ * 
  * Features:
- * - Gradient title styling
- * - Subtitle and description
- * - Back navigation link
- * - Optional MindVibe logo
- * - Accessibility attributes
- * - Responsive design
+ * - Left-aligned heading with icon
+ * - Subtitle text
+ * - Optional CTA button
+ * - Optional back link
+ * - Accessible and keyboard-navigable
  */
 export function ToolHeader({
+  icon,
   title,
   subtitle,
-  description,
-  badge,
-  backHref = '/',
-  backText = '← Back to home',
-  showLogo = false,
-  actions,
+  cta,
+  backLink,
   className = '',
 }: ToolHeaderProps) {
   return (
@@ -53,43 +49,50 @@ export function ToolHeader({
       role="banner"
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-2">
-          {showLogo && (
-            <MindVibeLockup
-              theme="sunrise"
-              className="h-8 w-auto mb-3 drop-shadow-[0_10px_40px_rgba(255,147,89,0.28)]"
-            />
-          )}
-          {subtitle && (
-            <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">
-              {subtitle}
-            </p>
-          )}
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
-            {title}
-          </h1>
-          {description && (
-            <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-              {description}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-2">
-          {badge && (
+        <div className="text-left">
+          <div className="flex items-center gap-3 mb-2">
             <span
-              className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-50"
-              role="status"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 text-xl"
+              aria-hidden="true"
             >
-              {badge}
+              {icon}
             </span>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
+              {title}
+            </h1>
+          </div>
+          <p className="text-sm text-orange-100/80 max-w-xl ml-[52px]">
+            {subtitle}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 items-end">
+          {cta && (
+            cta.href ? (
+              <Link
+                href={cta.href}
+                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
+                {cta.label}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={cta.onClick}
+                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
+                {cta.label}
+              </button>
+            )
           )}
-          {actions}
-          <Link
-            href={backHref}
-            className="text-xs text-orange-100/70 hover:text-orange-200 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded"
-          >
-            {backText}
-          </Link>
+          {backLink && (
+            <Link
+              href={backLink.href}
+              className="text-xs text-orange-100/70 hover:text-orange-200 transition focus:outline-none focus:ring-2 focus:ring-orange-400/50 rounded px-1"
+            >
+              ← {backLink.label}
+            </Link>
+          )}
         </div>
       </div>
     </header>

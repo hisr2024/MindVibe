@@ -73,7 +73,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     title: 'Viyog',
     description: 'Outcome anxiety reducer',
     gradient: 'from-cyan-400/30 to-blue-400/30',
-    href: '/viyog',
+    href: '/tools/viyog',
     badge: 'new',
   },
   {
@@ -82,7 +82,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     title: 'Ardha',
     description: 'Gita-aligned reframing',
     gradient: 'from-amber-400/30 to-yellow-400/30',
-    href: '/ardha',
+    href: '/tools/ardha',
   },
   {
     id: 'relationship-compass',
@@ -90,7 +90,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     title: 'Relationship Compass',
     description: 'Calm conflict guidance',
     gradient: 'from-rose-400/30 to-orange-400/30',
-    href: '/relationship-compass',
+    href: '/tools/relationship-compass',
   },
 ]
 
@@ -104,7 +104,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     title: 'Karmic Tree',
     description: 'Visual progress tracking',
     gradient: 'from-green-400/30 to-emerald-400/30',
-    href: '/karmic-tree',
+    href: '/tools/karmic-tree',
   },
   {
     id: 'karma-footprint',
@@ -112,7 +112,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     title: 'Karma Footprint',
     description: 'Daily action reflection',
     gradient: 'from-lime-400/30 to-green-400/30',
-    href: '/karma-footprint',
+    href: '/tools/karma-footprint',
   },
   {
     id: 'karma-reset',
@@ -120,7 +120,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     title: 'Karma Reset',
     description: '4-part emotional repair',
     gradient: 'from-indigo-400/30 to-purple-400/30',
-    href: '/karma-reset',
+    href: '/tools/karma-reset',
   },
   {
     id: 'emotional-reset',
@@ -128,7 +128,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     title: 'Emotional Reset',
     description: '7-step guided processing',
     gradient: 'from-orange-400/30 to-amber-300/30',
-    href: '/emotional-reset',
+    href: '/tools/emotional-reset',
   },
 ]
 

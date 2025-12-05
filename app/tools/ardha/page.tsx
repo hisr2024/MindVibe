@@ -1,5 +1,11 @@
-import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
+import ArdhaClient from './ArdhaClient'
 
-export default function ToolsArdhaPage() {
-  redirect('/ardha')
+export const metadata: Metadata = {
+  title: 'Ardha - Reframing Assistant | MindVibe',
+  description: 'Transform negative thoughts into balanced, empowering perspectives with Gita-inspired wisdom.',
+}
+
+export default function ArdhaPage() {
+  return <ArdhaClient />
 }
