@@ -67,7 +67,8 @@ describe('Karma Footprint Page', () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
     
-    expect(screen.getByText('Your Karmic Tree')).toBeInTheDocument()
+    // KarmicTreeClient shows loading state initially
+    expect(screen.getByText('Loading Karmic Tree...')).toBeInTheDocument()
   })
 
   it('renders related tools links', async () => {

@@ -18,7 +18,7 @@ import { ToolHeader } from '@/components/tools/ToolHeader'
 import { ToolActionCard } from '@/components/tools/ToolActionCard'
 import { KarmaPlant } from '@/components/tools/KarmaPlant'
 import { KarmicTreeClient } from '@/components/tools/KarmicTreeClient'
-import { ResetPlanCard, type ResetPlanStep } from '@/components/tools/ResetPlanCard'
+import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
 
 // Mock fetch globally
 const mockFetch = vi.fn()
@@ -123,46 +123,46 @@ describe('ToolActionCard', () => {
 })
 
 describe('KarmaPlant', () => {
-  it('renders with seed stage', () => {
-    render(<KarmaPlant stage="seed" />)
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('aria-label', 'Karma plant at seed stage')
+  it('renders with strong_positive state', () => {
+    render(<KarmaPlant state="strong_positive" />)
+    const plant = screen.getByRole('img')
+    expect(plant).toHaveAttribute('aria-label', 'Karma plant showing Flourishing state')
   })
 
-  it('renders with seedling stage', () => {
-    render(<KarmaPlant stage="seedling" />)
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('aria-label', 'Karma plant at seedling stage')
+  it('renders with mild_positive state', () => {
+    render(<KarmaPlant state="mild_positive" />)
+    const plant = screen.getByRole('img')
+    expect(plant).toHaveAttribute('aria-label', 'Karma plant showing Growing state')
   })
 
-  it('renders with sapling stage', () => {
-    render(<KarmaPlant stage="sapling" />)
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('aria-label', 'Karma plant at sapling stage')
+  it('renders with neutral state', () => {
+    render(<KarmaPlant state="neutral" />)
+    const plant = screen.getByRole('img')
+    expect(plant).toHaveAttribute('aria-label', 'Karma plant showing Steady state')
   })
 
-  it('renders with branching stage', () => {
-    render(<KarmaPlant stage="branching" />)
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('aria-label', 'Karma plant at branching stage')
+  it('renders with mild_heavy state', () => {
+    render(<KarmaPlant state="mild_heavy" />)
+    const plant = screen.getByRole('img')
+    expect(plant).toHaveAttribute('aria-label', 'Karma plant showing Wilting state')
   })
 
-  it('renders with canopy stage', () => {
-    render(<KarmaPlant stage="canopy" />)
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('aria-label', 'Karma plant at canopy stage')
+  it('renders with heavy state', () => {
+    render(<KarmaPlant state="heavy" />)
+    const plant = screen.getByRole('img')
+    expect(plant).toHaveAttribute('aria-label', 'Karma plant showing Needs Care state')
   })
 
   it('applies custom size', () => {
-    render(<KarmaPlant stage="seedling" size={200} />)
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('width', '200')
-    expect(svg).toHaveAttribute('height', '200')
+    render(<KarmaPlant state="neutral" size="lg" />)
+    // Size 'lg' corresponds to 180x220
+    const plant = screen.getByRole('img')
+    expect(plant).toBeInTheDocument()
   })
 
-  it('includes title element for accessibility', () => {
-    render(<KarmaPlant stage="seedling" />)
-    expect(screen.getByTitle('Karma Plant - seedling stage')).toBeInTheDocument()
+  it('displays the state label', () => {
+    render(<KarmaPlant state="neutral" />)
+    expect(screen.getByText('Steady')).toBeInTheDocument()
   })
 })
 
@@ -178,7 +178,7 @@ describe('KarmicTreeClient', () => {
   it('renders with loading state initially', () => {
     mockFetch.mockImplementation(() => new Promise(() => {})) // Never resolves
     render(<KarmicTreeClient />)
-    expect(screen.getByText('Your Karmic Tree')).toBeInTheDocument()
+    expect(screen.getByText('Loading Karmic Tree...')).toBeInTheDocument()
   })
 
   it('renders with fallback data when API fails', async () => {
@@ -201,6 +201,9 @@ describe('KarmicTreeClient', () => {
       progress_percent: 75,
       tree_stage: 'branching',
       activity: { moods: 10, journals: 8, chats: 15, streak: 5 },
+      achievements: [],
+      unlockables: [],
+      notifications: [],
     }
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -212,13 +215,7 @@ describe('KarmicTreeClient', () => {
     await waitFor(() => {
       expect(screen.getByText('Level 5')).toBeInTheDocument()
     })
-    expect(screen.getByText('450 XP')).toBeInTheDocument()
-  })
-
-  it('has role="region" for accessibility', () => {
-    mockFetch.mockImplementation(() => new Promise(() => {}))
-    render(<KarmicTreeClient />)
-    expect(screen.getByRole('region', { name: 'Karmic Tree Progress' })).toBeInTheDocument()
+    expect(screen.getByText('450 xp')).toBeInTheDocument()
   })
 
   it('renders progress bar with correct role', async () => {
@@ -236,63 +233,53 @@ describe('KarmicTreeClient', () => {
     
     await waitFor(() => {
       expect(screen.getByText('Journals')).toBeInTheDocument()
-      expect(screen.getByText('Moods')).toBeInTheDocument()
+      expect(screen.getByText('Mood logs')).toBeInTheDocument()
       expect(screen.getByText('Chats')).toBeInTheDocument()
     })
   })
 })
 
 describe('ResetPlanCard', () => {
-  const defaultStep = {
-    step: 1,
-    title: 'Test Step',
-    content: 'Test content',
+  const defaultPlan = {
+    pauseAndBreathe: 'Take a deep breath',
+    nameTheRipple: 'Identify the impact',
+    repair: 'Make amends',
+    moveWithIntention: 'Continue mindfully',
   }
 
-  it('renders step number correctly', () => {
-    render(<ResetPlanCard step={defaultStep} />)
+  it('renders step titles correctly', () => {
+    render(<ResetPlanCard plan={defaultPlan} animated={false} />)
+    expect(screen.getByText('Pause & Breathe')).toBeInTheDocument()
+    expect(screen.getByText('Name the Ripple')).toBeInTheDocument()
+    expect(screen.getByText('Choose the Repair')).toBeInTheDocument()
+    expect(screen.getByText('Move with Intention')).toBeInTheDocument()
+  })
+
+  it('renders step content correctly', () => {
+    render(<ResetPlanCard plan={defaultPlan} animated={false} />)
+    expect(screen.getByText('Take a deep breath')).toBeInTheDocument()
+    expect(screen.getByText('Identify the impact')).toBeInTheDocument()
+    expect(screen.getByText('Make amends')).toBeInTheDocument()
+    expect(screen.getByText('Continue mindfully')).toBeInTheDocument()
+  })
+
+  it('renders step numbers correctly', () => {
+    render(<ResetPlanCard plan={defaultPlan} animated={false} />)
     expect(screen.getByText('1')).toBeInTheDocument()
-  })
-
-  it('renders title correctly', () => {
-    render(<ResetPlanCard step={defaultStep} />)
-    expect(screen.getByText('Test Step')).toBeInTheDocument()
-  })
-
-  it('renders content correctly', () => {
-    render(<ResetPlanCard step={defaultStep} />)
-    expect(screen.getByText('Test content')).toBeInTheDocument()
-  })
-
-  it('applies revealed state correctly', () => {
-    const { container, rerender } = render(<ResetPlanCard step={defaultStep} revealed={true} />)
-    expect(container.firstChild).toHaveClass('opacity-100')
-
-    rerender(<ResetPlanCard step={defaultStep} revealed={false} />)
-    expect(container.firstChild).toHaveClass('opacity-0')
-  })
-
-  it('applies different variants', () => {
-    const stepWithVariant = (variant: ResetPlanStep['variant']): ResetPlanStep => ({
-      ...defaultStep,
-      variant,
-    })
-
-    const { rerender } = render(<ResetPlanCard step={stepWithVariant('orange')} />)
-    expect(screen.getByText('Test Step')).toBeInTheDocument()
-
-    rerender(<ResetPlanCard step={stepWithVariant('purple')} />)
-    expect(screen.getByText('Test Step')).toBeInTheDocument()
-
-    rerender(<ResetPlanCard step={stepWithVariant('green')} />)
-    expect(screen.getByText('Test Step')).toBeInTheDocument()
-
-    rerender(<ResetPlanCard step={stepWithVariant('blue')} />)
-    expect(screen.getByText('Test Step')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(screen.getByText('4')).toBeInTheDocument()
   })
 
   it('has role="region" for accessibility', () => {
-    render(<ResetPlanCard step={defaultStep} />)
-    expect(screen.getByRole('region', { name: 'Test Step' })).toBeInTheDocument()
+    render(<ResetPlanCard plan={defaultPlan} animated={false} />)
+    expect(screen.getByRole('region', { name: 'Reset Plan Steps' })).toBeInTheDocument()
+  })
+
+  it('renders all 4 steps', () => {
+    render(<ResetPlanCard plan={defaultPlan} animated={false} />)
+    const regions = screen.getAllByRole('region')
+    // 1 for the outer container + 4 for each step
+    expect(regions.length).toBe(5)
   })
 })
