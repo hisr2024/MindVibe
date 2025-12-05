@@ -266,7 +266,10 @@ export default function SettingsPage() {
               {fontSizeOptions.map((option) => (
                 <button
                   key={option.value}
-                  onClick={() => updateSetting('accessibility', 'fontSize', option.value as 'small' | 'medium' | 'large')}
+                  onClick={() => {
+                    const fontSize = option.value as Settings['accessibility']['fontSize']
+                    updateSetting('accessibility', 'fontSize', fontSize)
+                  }}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                     settings.accessibility.fontSize === option.value
                       ? 'bg-orange-500/20 text-orange-50 border border-orange-400'

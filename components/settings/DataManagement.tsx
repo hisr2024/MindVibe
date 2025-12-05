@@ -13,7 +13,7 @@ export function DataManagement({ className = '' }: DataManagementProps) {
   const [clearingChat, setClearingChat] = useState(false)
   const [clearingJournal, setClearingJournal] = useState(false)
 
-  const handleClearChatHistory = async () => {
+  const handleClearChatHistory = () => {
     setClearingChat(true)
     try {
       localStorage.removeItem('mindvibe_chat_history')
@@ -24,7 +24,7 @@ export function DataManagement({ className = '' }: DataManagementProps) {
     }
   }
 
-  const handleClearJournalEntries = async () => {
+  const handleClearJournalEntries = () => {
     setClearingJournal(true)
     try {
       localStorage.removeItem('mindvibe_journals')

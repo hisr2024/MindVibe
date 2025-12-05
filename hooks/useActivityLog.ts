@@ -55,7 +55,7 @@ export function useActivityLog(): UseActivityLogResult {
     (activity: Omit<ActivityLogEntry, 'id' | 'timestamp'>) => {
       const newActivity: ActivityLogEntry = {
         ...activity,
-        id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `activity_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         timestamp: new Date().toISOString(),
       }
 

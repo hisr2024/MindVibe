@@ -85,8 +85,8 @@ export function DataExport({ className = '' }: DataExportProps) {
         }
       })
 
-      // Redirect to home page after deletion
-      window.location.href = '/'
+      // Redirect to home page after deletion - using window.location for full page reload to clear all state
+      window.location.replace('/')
     } catch (error) {
       console.error('Delete failed:', error)
       setDeleting(false)
