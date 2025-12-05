@@ -234,9 +234,10 @@ describe('ToolsDropdown', () => {
 
 describe('ToolCard', () => {
   const defaultProps = {
-    icon: <span data-testid="icon">Icon</span>,
+    icon: '🎯',
     title: 'Tool Title',
     description: 'Tool description text',
+    gradient: 'from-blue-400/30 to-purple-400/30',
     href: '/tool',
   }
 
@@ -252,17 +253,17 @@ describe('ToolCard', () => {
 
   it('renders icon', () => {
     render(<ToolCard {...defaultProps} />)
-    expect(screen.getByTestId('icon')).toBeInTheDocument()
+    expect(screen.getByText('🎯')).toBeInTheDocument()
   })
 
-  it('renders default CTA text', () => {
-    render(<ToolCard {...defaultProps} />)
-    expect(screen.getByText('Open')).toBeInTheDocument()
+  it('renders badge when provided', () => {
+    render(<ToolCard {...defaultProps} badge="new" />)
+    expect(screen.getByText('new')).toBeInTheDocument()
   })
 
-  it('renders custom CTA text', () => {
-    render(<ToolCard {...defaultProps} ctaText="Start Now" />)
-    expect(screen.getByText('Start Now')).toBeInTheDocument()
+  it('renders premium badge when provided', () => {
+    render(<ToolCard {...defaultProps} badge="premium" />)
+    expect(screen.getByText('premium')).toBeInTheDocument()
   })
 
   it('links to correct href', () => {
@@ -271,10 +272,15 @@ describe('ToolCard', () => {
     expect(link).toHaveAttribute('href', '/tool')
   })
 
-  it('applies custom gradient colors', () => {
-    const gradient = { from: '#ff0000', to: '#0000ff' }
-    render(<ToolCard {...defaultProps} gradient={gradient} />)
+  it('applies gradient classes', () => {
+    render(<ToolCard {...defaultProps} />)
     // Just verify it renders without error
+    expect(screen.getByText('Tool Title')).toBeInTheDocument()
+  })
+
+  it('renders as disabled when disabled prop is true', () => {
+    render(<ToolCard {...defaultProps} disabled />)
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
     expect(screen.getByText('Tool Title')).toBeInTheDocument()
   })
 })

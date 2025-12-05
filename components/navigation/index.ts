@@ -12,3 +12,4 @@ export {
   type ToolItem,
   type ToolCategory,
 } from './ToolsDropdown'
+export { ToolsSheet, type ToolsSheetProps } from './ToolsSheet'

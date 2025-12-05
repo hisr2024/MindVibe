@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { colors } from '@/lib/design-tokens'
+import Link from 'next/link'
+import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
 
 export interface ToolItem {
   id: string
@@ -18,8 +19,8 @@ export interface ToolCategory {
 }
 
 export interface ToolsDropdownProps {
-  /** Categories of tools to display */
-  categories: ToolCategory[]
+  /** Categories of tools to display (optional - uses defaults from constants) */
+  categories?: ToolCategory[]
   /** Optional className for styling */
   className?: string
 }
@@ -32,6 +33,7 @@ export interface ToolsDropdownProps {
  * - Keyboard navigation support
  * - Focus trap when open
  * - Click outside to close
+ * - MindVibe dark theme styling
  */
 export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -68,13 +70,28 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
     }
   }, [isOpen])
 
+  // Use provided categories or convert from TOOLS_BY_CATEGORY
+  const displayCategories: ToolCategory[] = categories || TOOLS_BY_CATEGORY.filter(
+    cat => cat.id === 'guidance' || cat.id === 'karma'
+  ).map(cat => ({
+    id: cat.id,
+    name: cat.name,
+    items: cat.tools.map((tool: ToolConfig) => ({
+      id: tool.id,
+      name: tool.title,
+      description: tool.description,
+      href: tool.href,
+      icon: <span className="text-base">{tool.icon}</span>,
+    })),
+  }))
+
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
       <button
         ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -98,51 +115,72 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
 
       {isOpen && (
         <div
-          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg"
+          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-orange-500/20 bg-[#0f0f14] shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
           role="menu"
           aria-orientation="vertical"
         >
           <div className="p-2">
-            {categories.map((category, categoryIndex) => (
+            {displayCategories.map((category, categoryIndex) => (
               <div key={category.id}>
                 {categoryIndex > 0 && (
-                  <div className="my-2 border-t border-gray-100" />
+                  <div className="my-2 border-t border-white/5" />
                 )}
                 <div className="px-3 py-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-100/50">
                     {category.name}
                   </span>
                 </div>
                 <div className="space-y-1">
                   {category.items.map((item) => (
-                    <a
+                    <Link
                       key={item.id}
                       href={item.href}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-start gap-3 rounded-lg px-3 py-2 transition hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                      className="flex items-start gap-3 rounded-lg px-3 py-2 transition hover:bg-white/5 focus:bg-white/5 focus:outline-none"
                       role="menuitem"
                     >
-                      <div
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                        style={{
-                          background: `linear-gradient(135deg, ${colors.brand.primary}, ${colors.brand.secondary})`,
-                        }}
-                      >
-                        <span className="text-white">{item.icon}</span>
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20">
+                        {item.icon}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-orange-50">
                           {item.name}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-orange-100/60">
                           {item.description}
                         </div>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>
             ))}
+
+            {/* About Tools Link */}
+            <div className="mt-2 border-t border-white/5 pt-2">
+              <Link
+                href="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-orange-100/70 transition hover:bg-white/5 hover:text-orange-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M3 9h18" />
+                  <path d="M9 21V9" />
+                </svg>
+                View All Tools
+              </Link>
+            </div>
           </div>
         </div>
       )}

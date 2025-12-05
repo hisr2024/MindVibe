@@ -1,14 +1,16 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { colors } from '@/lib/design-tokens'
+import { ToolsSheet } from './ToolsSheet'
 
 export interface NavTab {
   id: string
   label: string
   href: string
   icon: React.ReactNode
+  isToolsButton?: boolean
 }
 
 export interface MobileNavProps {
@@ -66,7 +68,8 @@ const defaultTabs: NavTab[] = [
   {
     id: 'tools',
     label: 'Tools',
-    href: '/karmic-tree',
+    href: '#',
+    isToolsButton: true,
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -75,7 +78,7 @@ const defaultTabs: NavTab[] = [
   },
   {
     id: 'profile',
-    label: 'Profile',
+    label: 'You',
     href: '/profile',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -95,50 +98,91 @@ const defaultTabs: NavTab[] = [
  * - Active state indicator
  * - Touch-friendly (min 44x44px touch targets)
  * - Fixed to bottom of viewport
+ * - Tools tab opens bottom sheet with all tools
  */
 export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps) {
   const pathname = usePathname()
+  const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
 
   return (
-    <nav
-      className={`fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-xl md:hidden ${className}`}
-      aria-label="Mobile navigation"
-    >
-      <div className="flex items-center justify-around">
-        {tabs.map((tab) => {
-          const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`)
-          return (
-            <Link
-              key={tab.id}
-              href={tab.href}
-              className={`flex min-h-[60px] min-w-[60px] flex-1 flex-col items-center justify-center gap-0.5 py-2 transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 ${
-                isActive
-                  ? 'text-indigo-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <span
-                className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                  isActive ? 'bg-indigo-100' : ''
+    <>
+      <nav
+        className={`fixed inset-x-0 bottom-0 z-50 border-t border-orange-500/20 bg-[#0b0b0f]/95 backdrop-blur-xl md:hidden ${className}`}
+        aria-label="Mobile navigation"
+      >
+        <div className="flex items-center justify-around">
+          {tabs.map((tab) => {
+            const isActive = tab.href !== '#' && (pathname === tab.href || pathname.startsWith(`${tab.href}/`))
+            
+            // Tools button opens sheet instead of navigating
+            if (tab.isToolsButton) {
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setToolsSheetOpen(true)}
+                  className={`flex min-h-[60px] min-w-[60px] flex-1 flex-col items-center justify-center gap-0.5 py-2 transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${
+                    toolsSheetOpen
+                      ? 'text-orange-400'
+                      : 'text-white/60 hover:text-white/80'
+                  }`}
+                  aria-expanded={toolsSheetOpen}
+                  aria-haspopup="dialog"
+                >
+                  <span
+                    className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
+                      toolsSheetOpen ? 'bg-orange-500/20' : ''
+                    }`}
+                  >
+                    {tab.icon}
+                  </span>
+                  <span
+                    className={`text-[10px] font-medium ${
+                      toolsSheetOpen ? 'font-semibold' : ''
+                    }`}
+                  >
+                    {tab.label}
+                  </span>
+                </button>
+              )
+            }
+
+            return (
+              <Link
+                key={tab.id}
+                href={tab.href}
+                className={`flex min-h-[60px] min-w-[60px] flex-1 flex-col items-center justify-center gap-0.5 py-2 transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${
+                  isActive
+                    ? 'text-orange-400'
+                    : 'text-white/60 hover:text-white/80'
                 }`}
+                aria-current={isActive ? 'page' : undefined}
               >
-                {tab.icon}
-              </span>
-              <span
-                className={`text-[10px] font-medium ${
-                  isActive ? 'font-semibold' : ''
-                }`}
-              >
-                {tab.label}
-              </span>
-            </Link>
-          )
-        })}
-      </div>
-      {/* Safe area padding for devices with home indicator */}
-      <div className="pb-[env(safe-area-inset-bottom)] bg-white/95" />
-    </nav>
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
+                    isActive ? 'bg-orange-500/20' : ''
+                  }`}
+                >
+                  {tab.icon}
+                </span>
+                <span
+                  className={`text-[10px] font-medium ${
+                    isActive ? 'font-semibold' : ''
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+        {/* Safe area padding for devices with home indicator */}
+        <div className="bg-[#0b0b0f]/95 pb-[env(safe-area-inset-bottom)]" />
+      </nav>
+
+      {/* Tools Bottom Sheet */}
+      <ToolsSheet isOpen={toolsSheetOpen} onClose={() => setToolsSheetOpen(false)} />
+    </>
   )
 }
 
