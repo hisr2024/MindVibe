@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 
 type TriggerEntry = {
@@ -68,24 +68,28 @@ export default function TriggerFactorPage() {
     setLogged(false)
   }
 
-  // Calculate pattern insights
-  const recentEntries = entries.slice(0, 10)
-  const avgIntensity = recentEntries.length > 0
-    ? (recentEntries.reduce((sum, e) => sum + e.intensity, 0) / recentEntries.length).toFixed(1)
-    : '—'
-  
-  // Find most common trigger words
-  const triggerWords = entries.slice(0, 20).flatMap(e => 
-    e.trigger.toLowerCase().split(/\s+/).filter(w => w.length > 3)
-  )
-  const wordCounts: Record<string, number> = {}
-  triggerWords.forEach(word => {
-    wordCounts[word] = (wordCounts[word] || 0) + 1
-  })
-  const topPatterns = Object.entries(wordCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([word]) => word)
+  // Calculate pattern insights using useMemo for performance
+  const { avgIntensity, topPatterns } = useMemo(() => {
+    const recentEntries = entries.slice(0, 10)
+    const avg = recentEntries.length > 0
+      ? (recentEntries.reduce((sum, e) => sum + e.intensity, 0) / recentEntries.length).toFixed(1)
+      : '—'
+    
+    // Find most common trigger words
+    const triggerWords = entries.slice(0, 20).flatMap(e => 
+      e.trigger.toLowerCase().split(/\s+/).filter(w => w.length > 3)
+    )
+    const wordCounts: Record<string, number> = {}
+    triggerWords.forEach(word => {
+      wordCounts[word] = (wordCounts[word] || 0) + 1
+    })
+    const patterns = Object.entries(wordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([word]) => word)
+    
+    return { avgIntensity: avg, topPatterns: patterns }
+  }, [entries])
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
