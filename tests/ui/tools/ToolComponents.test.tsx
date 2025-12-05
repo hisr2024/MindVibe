@@ -18,7 +18,7 @@ import { ToolHeader } from '@/components/tools/ToolHeader'
 import { ToolActionCard } from '@/components/tools/ToolActionCard'
 import { KarmaPlant } from '@/components/tools/KarmaPlant'
 import { KarmicTreeClient } from '@/components/tools/KarmicTreeClient'
-import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
+import { ResetPlanCard, type ResetPlanStep } from '@/components/tools/ResetPlanCard'
 
 // Mock fetch globally
 const mockFetch = vi.fn()
@@ -273,7 +273,7 @@ describe('ResetPlanCard', () => {
   })
 
   it('applies different variants', () => {
-    const stepWithVariant = (variant: 'orange' | 'purple' | 'green' | 'blue') => ({
+    const stepWithVariant = (variant: ResetPlanStep['variant']): ResetPlanStep => ({
       ...defaultStep,
       variant,
     })

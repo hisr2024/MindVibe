@@ -18,7 +18,7 @@ export interface KarmicTreeProgress {
 }
 
 export interface KarmicTreeClientProps {
-  /** API endpoint to fetch tree progress */
+  /** Full API endpoint URL to fetch tree progress (default: /api/analytics/karmic_tree) */
   apiEndpoint?: string
   /** Optional className */
   className?: string
@@ -78,7 +78,10 @@ export function KarmicTreeClient({
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const apiBase = apiEndpoint || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  // Build the full API URL - apiEndpoint overrides everything if provided
+  const apiUrl = apiEndpoint
+    ? apiEndpoint
+    : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analytics/karmic_tree`
 
   useEffect(() => {
     const controller = new AbortController()
@@ -86,7 +89,7 @@ export function KarmicTreeClient({
     const loadProgress = async () => {
       setLoading(true)
       try {
-        const response = await fetch(`${apiBase}/api/analytics/karmic_tree`, {
+        const response = await fetch(apiUrl, {
           method: 'GET',
           signal: controller.signal,
           headers: { 'Content-Type': 'application/json' },
@@ -114,7 +117,7 @@ export function KarmicTreeClient({
     loadProgress()
 
     return () => controller.abort()
-  }, [apiBase, onLoad, onError])
+  }, [apiUrl, onLoad, onError])
 
   const progress = data ?? fallbackProgress
   const plantStage = mapTreeStage(progress.tree_stage)

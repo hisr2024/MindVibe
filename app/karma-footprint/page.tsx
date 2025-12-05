@@ -121,7 +121,7 @@ Respond using the four-part format with brief, grounded insights.`
       })
 
       if (!response.ok) {
-        setError('Karma Footprint analyzer is unavailable right now. Please try again shortly.')
+        setError('Unable to analyze your action right now. Please try again shortly.')
         return
       }
 
@@ -129,9 +129,13 @@ Respond using the four-part format with brief, grounded insights.`
       const newResult = { response: data.response, requestedAt: new Date().toISOString() }
       setResult(newResult)
 
-      // Save today's action
+      // Save today's action - use fallback for older browsers
+      const actionId =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
       const newAction: DailyAction = {
-        id: crypto.randomUUID(),
+        id: actionId,
         action: trimmedAction,
         impact,
         reflection: reflection.trim() || undefined,
