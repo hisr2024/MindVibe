@@ -1,9 +1,9 @@
+'use client'
+
 /**
  * Analytics Dashboard Client Component
  * Dashboard-integrated analytics page with authentication
  */
-
-'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'

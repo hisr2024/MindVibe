@@ -1,9 +1,9 @@
+'use client'
+
 /**
  * Dynamic Onboarding Step Page
  * Handles step-by-step onboarding flow with URL routing
  */
-
-'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
