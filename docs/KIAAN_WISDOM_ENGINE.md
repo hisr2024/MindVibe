@@ -327,6 +327,87 @@ The search automatically:
 2. Applies tag boosting for emotion-matched verses
 3. Returns sanitized text ready for display
 
+## Complete Bhagavad Gita Database
+
+MindVibe KIAAN now has access to **all 700 verses** of the Bhagavad Gita across 18 chapters:
+
+- ✅ 700 authentic verses (complete coverage)
+- ✅ Sanskrit (Devanagari), Hindi, English translations
+- ✅ Word-by-word meanings (where available)
+- ✅ Mental health application tags
+- ✅ Modern context mapping
+- ✅ Psychological domain classification
+
+### Chapter Distribution
+
+| Chapter | Name | Verses | Primary Theme |
+|---------|------|--------|---------------|
+| 1 | Arjuna Vishada Yoga | 47 | Emotional crisis, moral conflict |
+| 2 | Sankhya Yoga | 72 | Knowledge, equanimity, self-mastery |
+| 3 | Karma Yoga | 43 | Selfless action |
+| 4 | Jnana Karma Sanyasa Yoga | 42 | Knowledge and wisdom |
+| 5 | Karma Sanyasa Yoga | 29 | Action and renunciation |
+| 6 | Dhyana Yoga | 47 | Meditation and mindfulness |
+| 7 | Jnana Vijnana Yoga | 30 | Self-knowledge |
+| 8 | Aksara Brahma Yoga | 28 | Attaining the supreme |
+| 9 | Raja Vidya Raja Guhya Yoga | 34 | Sovereign knowledge |
+| 10 | Vibhuti Yoga | 42 | Divine manifestations |
+| 11 | Visvarupa Darsana Yoga | 55 | Universal form |
+| 12 | Bhakti Yoga | 20 | Devotion |
+| 13 | Ksetra Ksetrajna Vibhaga Yoga | 34 | Matter and spirit |
+| 14 | Gunatraya Vibhaga Yoga | 27 | Three modes of nature |
+| 15 | Purusottama Yoga | 20 | The supreme person |
+| 16 | Daivasura Sampad Vibhaga Yoga | 24 | Divine and demonic qualities |
+| 17 | Sraddhatraya Vibhaga Yoga | 28 | Three types of faith |
+| 18 | Moksha Sanyasa Yoga | 78 | Liberation through renunciation |
+
+**Total: 700 verses**
+
+### Seeding the Database
+
+```bash
+# Seed all 700 verses from local JSON (default)
+python scripts/seed_complete_gita.py
+
+# Use chapter-wise files instead
+python scripts/seed_complete_gita.py --chapters
+
+# Apply mental health tags
+python scripts/migrate_mental_health_tags.py
+
+# Verify completeness
+python scripts/verify_700_verses.py --all
+
+# Check database stats
+python -c "
+import asyncio
+from backend.services.wisdom_kb import WisdomKnowledgeBase
+# Note: Requires database session - see full example in scripts/
+"
+```
+
+### Verse Coverage by Theme
+
+- **Action without attachment** (Karma Yoga): 120+ verses
+- **Knowledge & wisdom** (Jnana Yoga): 150+ verses
+- **Meditation & mindfulness** (Dhyana Yoga): 80+ verses
+- **Devotion** (Bhakti Yoga): 90+ verses
+- **Equanimity & balance**: 100+ verses
+- **Self-mastery**: 90+ verses
+- **Purpose & duty**: 70+ verses
+
+### Key Verses for Mental Health
+
+| Verse | Teaching | Applications |
+|-------|----------|--------------|
+| 2.47 | Action without attachment | Anxiety, stress reduction |
+| 2.48 | Equanimity in success/failure | Emotional regulation |
+| 2.56 | Steady wisdom | Emotional stability |
+| 6.5 | Self-empowerment | Depression recovery |
+| 6.35 | Mind control through practice | Anxiety management |
+| 12.13-14 | Compassion and contentment | Relationships, self-compassion |
+| 18.66 | Surrender and trust | Letting go, anxiety |
+
 ## Future Enhancements
 
 1. **Semantic embeddings**: Replace SequenceMatcher with vector embeddings for better semantic matching
