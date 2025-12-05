@@ -258,11 +258,15 @@ class WisdomKnowledgeBase:
                 db, query, theme=theme, limit=2
             )
             # Add unique results
-            existing_ids = {r["verse"].get("verse_id") for r in results}
+            existing_ids = {
+                r.get("verse", {}).get("verse_id") for r in results if r.get("verse")
+            }
             for tr in theme_results:
-                if tr["verse"].get("verse_id") not in existing_ids:
+                verse = tr.get("verse", {})
+                verse_id = verse.get("verse_id") if verse else None
+                if verse_id and verse_id not in existing_ids:
                     results.append(tr)
-                    existing_ids.add(tr["verse"].get("verse_id"))
+                    existing_ids.add(verse_id)
 
         return results[:limit]
 

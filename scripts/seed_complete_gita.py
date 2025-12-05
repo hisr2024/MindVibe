@@ -66,7 +66,7 @@ engine = create_async_engine(DATABASE_URL, echo=False)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 # Chapter metadata (18 chapters with verse counts)
-CHAPTER_INFO = {
+CHAPTER_INFO: dict[int, dict[str, int | str]] = {
     1: {"verses": 47, "theme": "emotional_crisis_moral_conflict", "name": "Arjuna Vishada Yoga"},
     2: {"verses": 72, "theme": "transcendental_knowledge", "name": "Sankhya Yoga"},
     3: {"verses": 43, "theme": "selfless_action", "name": "Karma Yoga"},
@@ -314,11 +314,13 @@ async def seed_chapter(chapter_num: int) -> tuple[int, int, int]:
         Tuple of (seeded_count, skipped_count, failed_count)
     """
     chapter_info = CHAPTER_INFO[chapter_num]
-    total_verses = chapter_info["verses"]
+    total_verses = int(chapter_info["verses"])
+    chapter_name = str(chapter_info["name"])
+    chapter_theme = str(chapter_info["theme"])
 
     print(f"\n{'='*70}")
-    print(f"📖 Seeding Chapter {chapter_num}: {chapter_info['name']}")
-    print(f"   Theme: {chapter_info['theme']}")
+    print(f"📖 Seeding Chapter {chapter_num}: {chapter_name}")
+    print(f"   Theme: {chapter_theme}")
     print(f"   Total verses: {total_verses}")
     print(f"{'='*70}\n")
 
@@ -359,8 +361,8 @@ async def seed_chapter(chapter_num: int) -> tuple[int, int, int]:
                     "english": verse_data.get("translation") or verse_data.get("english") or "",
                     "hindi": verse_data.get("hindi") or "",
                     "word_meanings": verse_data.get("word_meanings"),
-                    "principle": f"Teaching from {chapter_info['name']}",
-                    "theme": chapter_info["theme"],
+                    "principle": f"Teaching from {chapter_name}",
+                    "theme": chapter_theme,
                     "embedding": None,
                 }
                 await session.execute(insert(GitaVerse).values(**db_verse))
@@ -406,11 +408,11 @@ async def verify_seeding() -> dict[str, Any]:
     async with Session() as session:
         # Check each chapter
         for chapter in range(1, 19):
-            expected_count = CHAPTER_INFO[chapter]["verses"]
+            expected_count = int(CHAPTER_INFO[chapter]["verses"])
             result = await session.execute(
                 text(f"SELECT COUNT(*) FROM gita_verses WHERE chapter = {chapter}")
             )
-            actual_count = result.scalar()
+            actual_count = result.scalar() or 0
 
             results["by_chapter"][chapter] = {
                 "expected": expected_count,
@@ -427,7 +429,7 @@ async def verify_seeding() -> dict[str, Any]:
 
         # Total count
         result = await session.execute(text("SELECT COUNT(*) FROM gita_verses"))
-        total = result.scalar()
+        total = result.scalar() or 0
         results["total"] = total
 
         print(f"\n📊 Total verses in database: {total}/{TOTAL_EXPECTED}")

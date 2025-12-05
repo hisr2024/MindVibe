@@ -97,7 +97,7 @@ def verify_json_file() -> tuple[bool, list[str]]:
 
     # Check each chapter
     print("\n📖 Checking verse counts per chapter:")
-    chapter_counts = {}
+    chapter_counts: dict[int, int] = {}
     for verse in verses:
         chapter = verse.get("chapter", 0)
         chapter_counts[chapter] = chapter_counts.get(chapter, 0) + 1
@@ -264,7 +264,7 @@ async def verify_database() -> tuple[bool, list[str]]:
             result = await session.execute(
                 text("SELECT COUNT(*) FROM gita_verses WHERE mental_health_applications IS NOT NULL")
             )
-            tagged_count = result.scalar()
+            tagged_count = result.scalar() or 0
             tag_percentage = (tagged_count / total) * 100 if total > 0 else 0
             status = "✅" if tagged_count > 500 else "⚠️"
             print(f"   {status} Verses with mental health tags: {tagged_count}/{total} ({tag_percentage:.1f}%)")
