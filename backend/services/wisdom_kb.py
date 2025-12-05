@@ -173,6 +173,132 @@ class WisdomKnowledgeBase:
         """Clear the verse cache to force a fresh database fetch."""
         self._verse_cache = None
 
+    async def get_database_stats(self, db: AsyncSession) -> dict[str, Any]:
+        """
+        Get statistics about loaded verses in the database.
+
+        Args:
+            db: Database session
+
+        Returns:
+            Dictionary with database statistics including:
+            - total_verses: Total number of verses
+            - by_chapter: Count per chapter
+            - by_theme: Count per theme
+            - tagged_verses: Verses with mental health tags
+            - coverage: "complete" if 700 verses, else "partial"
+        """
+        from sqlalchemy import text
+
+        from backend.models import GitaVerse
+
+        # Total count
+        result = await db.execute(text("SELECT COUNT(*) FROM gita_verses"))
+        total = result.scalar() or 0
+
+        # By chapter
+        result = await db.execute(
+            text(
+                "SELECT chapter, COUNT(*) as cnt FROM gita_verses "
+                "GROUP BY chapter ORDER BY chapter"
+            )
+        )
+        by_chapter = {row[0]: row[1] for row in result.fetchall()}
+
+        # By theme
+        result = await db.execute(
+            text("SELECT theme, COUNT(*) as cnt FROM gita_verses GROUP BY theme")
+        )
+        by_theme = {row[0]: row[1] for row in result.fetchall()}
+
+        # Tagged verses (with mental health applications)
+        result = await db.execute(
+            text(
+                "SELECT COUNT(*) FROM gita_verses "
+                "WHERE mental_health_applications IS NOT NULL"
+            )
+        )
+        tagged = result.scalar() or 0
+
+        return {
+            "total_verses": total,
+            "by_chapter": by_chapter,
+            "by_theme": by_theme,
+            "tagged_verses": tagged,
+            "coverage": "complete" if total == 700 else "partial",
+        }
+
+    async def search_with_fallback(
+        self,
+        db: AsyncSession,
+        query: str,
+        limit: int = 5,
+    ) -> list[dict[str, Any]]:
+        """
+        Search with intelligent fallback if initial search yields few results.
+
+        Args:
+            db: Database session
+            query: Search query text
+            limit: Maximum number of results (default 5)
+
+        Returns:
+            List of verse results with scores
+        """
+        # Initial search
+        results = await self.search_relevant_verses_full_db(db, query, limit=limit)
+
+        if len(results) >= 3:
+            return results
+
+        # Expand search to related themes
+        themes = self._extract_themes(query)
+        for theme in themes:
+            theme_results = await self.search_relevant_verses_full_db(
+                db, query, theme=theme, limit=2
+            )
+            # Add unique results
+            existing_ids = {r["verse"].get("verse_id") for r in results}
+            for tr in theme_results:
+                if tr["verse"].get("verse_id") not in existing_ids:
+                    results.append(tr)
+                    existing_ids.add(tr["verse"].get("verse_id"))
+
+        return results[:limit]
+
+    def _extract_themes(self, query: str) -> list[str]:
+        """
+        Extract relevant themes from a query for expanded search.
+
+        Args:
+            query: Search query text
+
+        Returns:
+            List of theme keywords
+        """
+        query_lower = query.lower()
+
+        # Theme keyword mapping
+        theme_mapping = {
+            "anxiety": ["emotional", "stress", "fear"],
+            "stress": ["action", "work", "balance"],
+            "depression": ["grief", "despair", "hope"],
+            "anger": ["control", "peace", "patience"],
+            "fear": ["courage", "strength", "trust"],
+            "lonely": ["connection", "devotion", "love"],
+            "purpose": ["duty", "action", "meaning"],
+            "confused": ["knowledge", "wisdom", "clarity"],
+            "overwhelmed": ["peace", "balance", "meditation"],
+        }
+
+        themes = []
+        for keyword, related_themes in theme_mapping.items():
+            if keyword in query_lower:
+                themes.extend(related_themes)
+
+        return list(set(themes))[:3]  # Return up to 3 unique themes
+
+
     async def search_relevant_verses_full_db(
         self,
         db: AsyncSession,
