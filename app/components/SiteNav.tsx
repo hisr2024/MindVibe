@@ -8,12 +8,13 @@ import { MindVibeLockup } from '@/components/branding'
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/kiaan', label: 'KIAAN' },
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/kiaan', label: 'KIAAN Chat' },
   { href: '/sacred-reflections', label: 'Journal' },
   { href: '/wisdom-rooms', label: 'Rooms' },
   { href: '/ardha', label: 'Ardha' },
   { href: '/viyog', label: 'Vyyoga' },
-  { href: '/relationship-compass', label: 'Compass' },
+  { href: '/relationship-compass', label: 'Relationship Compass' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
   { href: '/profile', label: 'Profile' },
 ]

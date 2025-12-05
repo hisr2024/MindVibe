@@ -10,14 +10,12 @@ type MoodEntry = {
 }
 
 const moods = [
-  { label: 'Peaceful', emoji: '🙏', color: 'from-emerald-400 to-teal-400' },
-  { label: 'Happy', emoji: '😊', color: 'from-yellow-400 to-amber-400' },
-  { label: 'Neutral', emoji: '😐', color: 'from-slate-400 to-gray-400' },
-  { label: 'Anxious', emoji: '😰', color: 'from-amber-400 to-orange-400' },
-  { label: 'Sad', emoji: '😢', color: 'from-blue-400 to-indigo-400' },
-  { label: 'Angry', emoji: '😠', color: 'from-red-400 to-rose-400' },
-  { label: 'Tired', emoji: '😴', color: 'from-purple-400 to-violet-400' },
-  { label: 'Grateful', emoji: '🌿', color: 'from-green-400 to-emerald-400' },
+  { label: 'Peaceful', emoji: '🔵', color: 'from-blue-400 to-sky-400' },
+  { label: 'Happy', emoji: '🟢', color: 'from-green-400 to-emerald-400' },
+  { label: 'Neutral', emoji: '🟡', color: 'from-yellow-400 to-amber-400' },
+  { label: 'Anxious', emoji: '🔴', color: 'from-red-400 to-rose-400' },
+  { label: 'Sad', emoji: '🟣', color: 'from-purple-400 to-violet-400' },
+  { label: 'Other', emoji: '⚪', color: 'from-slate-400 to-gray-400' },
 ]
 
 const moodResponses: Record<string, string> = {
@@ -26,9 +24,7 @@ const moodResponses: Record<string, string> = {
   'Neutral': "Steady is good. You're present, and that matters. 🌿",
   'Anxious': "Anxiety is temporary. Take a slow breath—I'm here with you. 🌊",
   'Sad': "Sadness is valid. You're not alone in this feeling. 💙",
-  'Angry': "Anger signals something important. Let's acknowledge it calmly. 🔥",
-  'Tired': "Rest is wisdom, not weakness. Honor what your body needs. 😴",
-  'Grateful': "Gratitude opens doors. What a gift to notice the good. 🙏",
+  'Other': "Thank you for checking in. Every feeling is valid. 🌟",
 }
 
 export default function StateCheckInPage() {
@@ -108,7 +104,7 @@ export default function StateCheckInPage() {
             {/* Mood Selector */}
             <section className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h2 className="text-lg font-semibold text-orange-50 mb-4">How are you feeling?</h2>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {moods.map((mood) => (
                   <button
                     key={mood.label}

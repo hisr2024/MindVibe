@@ -83,28 +83,28 @@ export default function Home() {
       icon: '💬',
       title: 'Talk to KIAAN',
       description: 'AI companion for guidance',
-      gradient: 'from-[#0d0d10]/90 to-[#0f1214]/90'
+      gradient: 'from-orange-500/20 to-amber-500/15'
+    },
+    {
+      href: '/tools/state-check-in',
+      icon: '🔵🟢🟡🔴🟣',
+      title: 'Mood Check-In',
+      description: 'Log your current state',
+      gradient: 'from-[#0d0d10]/90 to-[#10120d]/90'
     },
     {
       href: '/sacred-reflections',
       icon: '📝',
-      title: 'Private Journal',
+      title: 'Journal',
       description: 'Encrypted personal reflections',
       gradient: 'from-[#0d0d10]/90 to-[#121010]/90'
     },
     {
       href: '/wisdom-rooms',
       icon: '🌍',
-      title: 'Wisdom Rooms',
+      title: 'Rooms',
       description: 'Community chat spaces',
       gradient: 'from-[#0d0d10]/90 to-[#0d1012]/90'
-    },
-    {
-      href: '/tools/state-check-in',
-      icon: '🎯',
-      title: 'State Check-In',
-      description: 'Log your current mood',
-      gradient: 'from-[#0d0d10]/90 to-[#10120d]/90'
     },
     {
       href: '/tools/output-reducer',
@@ -162,38 +162,6 @@ export default function Home() {
               <QuickAccessCard key={tool.href} {...tool} />
             ))}
           </div>
-        </section>
-
-        {/* Feature Links */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link
-            href="/ardha"
-            className="rounded-xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 text-center hover:border-orange-400/40 transition"
-          >
-            <span className="text-2xl block mb-1">🔄</span>
-            <span className="text-sm font-medium text-orange-50">Ardha</span>
-          </Link>
-          <Link
-            href="/viyog"
-            className="rounded-xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 text-center hover:border-orange-400/40 transition"
-          >
-            <span className="text-2xl block mb-1">🎯</span>
-            <span className="text-sm font-medium text-orange-50">Vyyoga</span>
-          </Link>
-          <Link
-            href="/relationship-compass"
-            className="rounded-xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 text-center hover:border-orange-400/40 transition"
-          >
-            <span className="text-2xl block mb-1">🧭</span>
-            <span className="text-sm font-medium text-orange-50">Compass</span>
-          </Link>
-          <Link
-            href="/karmic-tree"
-            className="rounded-xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 text-center hover:border-orange-400/40 transition"
-          >
-            <span className="text-2xl block mb-1">🌱</span>
-            <span className="text-sm font-medium text-orange-50">Karmic Tree</span>
-          </Link>
         </section>
 
         {/* Disclaimer */}
