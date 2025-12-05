@@ -53,9 +53,13 @@ export function useActivityLog(): UseActivityLogResult {
 
   const addActivity = useCallback(
     (activity: Omit<ActivityLogEntry, 'id' | 'timestamp'>) => {
+      // Use crypto.randomUUID for consistent ID generation (avoids SSR hydration mismatch)
+      const uniquePart = typeof window !== 'undefined' && typeof crypto?.randomUUID === 'function'
+        ? crypto.randomUUID().slice(0, 11)
+        : Date.now().toString(36)
       const newActivity: ActivityLogEntry = {
         ...activity,
-        id: `activity_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+        id: `activity_${Date.now()}_${uniquePart}`,
         timestamp: new Date().toISOString(),
       }
 
