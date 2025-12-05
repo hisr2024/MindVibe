@@ -43,7 +43,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     title: 'Private Journal',
     description: 'Encrypted journaling',
     gradient: 'from-amber-400/30 to-orange-400/30',
-    href: '/sacred-reflections',
+    href: '/sacred-reflections', // Same page as Sacred Reflections - encrypted journaling feature
   },
   {
     id: 'wisdom',
@@ -175,7 +175,7 @@ export const QUICK_ACCESS_TOOLS: ToolConfig[] = [
     title: 'Sacred Reflections',
     description: 'Spiritual journaling',
     gradient: 'from-purple-400/30 to-indigo-400/30',
-    href: '/sacred-reflections',
+    href: '/sacred-reflections', // Same page as Private Journal - spiritual/encrypted journaling
   },
 ]
 
