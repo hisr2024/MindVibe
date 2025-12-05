@@ -8,6 +8,7 @@ export const metadata = {
   title: 'MindVibe - Mental Health App',
   description: 'Calm, privacy-first mental health companion with journaling, guided chats, and dashboards.',
   metadataBase: new URL('https://mindvibe.app'),
+  themeColor: '#0b0b0f',
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -17,10 +18,6 @@ export const metadata = {
     shortcut: '/icon.png',
     apple: '/apple-icon.png'
   }
-}
-
-export const viewport = {
-  themeColor: '#0b0b0f',
 }
 
 export default function RootLayout({

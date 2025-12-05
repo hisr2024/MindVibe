@@ -5,7 +5,6 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Skeleton } from '@/components/ui'
 import type { WeeklySummaryData, Achievement } from '@/types/analytics.types'
@@ -47,19 +46,11 @@ export function WeeklySummary({
   isLoading = false,
   className = '',
 }: WeeklySummaryProps) {
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
   if (isLoading || !summary) {
     return <SummarySkeleton />
   }
 
   const formatDateRange = () => {
-    // Only render formatted dates after client hydration to avoid SSR mismatch
-    if (!isClient) return '...'
     const start = new Date(summary.weekStart).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
