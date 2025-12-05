@@ -159,7 +159,7 @@ export default function ClarityPausePage() {
             <section className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h2 className="text-lg font-semibold text-orange-50 mb-4">Select Duration</h2>
               <div className="grid grid-cols-3 gap-3">
-                {[30, 60, 120].map((seconds) => (
+                {[60, 180, 300].map((seconds) => (
                   <button
                     key={seconds}
                     onClick={() => setTotalSeconds(seconds)}
@@ -169,7 +169,7 @@ export default function ClarityPausePage() {
                         : 'border-orange-500/20 bg-black/40 text-orange-100/70 hover:border-orange-400/40'
                     }`}
                   >
-                    {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
+                    {seconds / 60}min
                   </button>
                 ))}
               </div>
