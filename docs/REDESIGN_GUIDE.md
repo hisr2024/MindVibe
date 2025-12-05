@@ -396,6 +396,229 @@ docs/
 - **State**: React hooks, Context API
 - **Testing**: Vitest, React Testing Library
 
+---
+
+## Phase 3: Specialized Tool Pages and Reusable Components
+
+### Overview
+
+Phase 3 adds specialized tool pages under `app/tools/` and introduces reusable components for consistent tool page development. This phase maintains all existing functionality while providing a structured approach for tool pages.
+
+### Tool Pages
+
+All specialized tools are accessible via dedicated routes:
+
+| Tool | Primary Route | Tools Route | Description |
+|------|---------------|-------------|-------------|
+| Viyog | `/viyog` | `/tools/viyog` | Detachment Coach - Outcome anxiety reducer |
+| Ardha | `/ardha` | `/tools/ardha` | Reframing Assistant - Gita-aligned cognitive reframing |
+| Relationship Compass | `/relationship-compass` | `/tools/relationship-compass` | Calm conflict guidance |
+| Emotional Reset | `/emotional-reset` | `/tools/emotional-reset` | 7-step guided emotional processing |
+| Karma Reset | `/karma-reset` | `/tools/karma-reset` | 4-part emotional repair ritual |
+| Karma Footprint | `/karma-footprint` | `/tools/karma-footprint` | Daily action reflection analyzer |
+| Karmic Tree | `/karmic-tree` | `/tools/karmic-tree` | Visual progress tracking |
+
+### Reusable Components (`components/tools/`)
+
+#### ToolHeader
+
+Standard header component for tool pages with consistent styling.
+
+```tsx
+import { ToolHeader } from '@/components/tools'
+
+<ToolHeader
+  title="Viyog - Detachment Coach"
+  subtitle="Outcome Anxiety Reducer"
+  description="Shift from result-focused anxiety to grounded action."
+  badge="🎯 New feature"
+  backHref="/dashboard"
+  backText="← Back to dashboard"
+  showLogo={false}
+/>
+```
+
+**Props:**
+- `title` (required): Main heading text
+- `subtitle`: Optional tagline above title
+- `description`: Optional description below title
+- `badge`: Optional badge content
+- `backHref`: Back link URL (default: `/`)
+- `backText`: Back link text (default: `← Back to home`)
+- `showLogo`: Whether to show MindVibe logo
+- `actions`: Additional action elements
+
+#### ToolActionCard
+
+Action card component with multiple color variants.
+
+```tsx
+import { ToolActionCard } from '@/components/tools'
+
+<ToolActionCard
+  title="Start Detachment Flow"
+  description="Begin your journey to release outcome anxiety."
+  icon="🎯"
+  href="/viyog/start"
+  variant="orange"
+/>
+```
+
+**Props:**
+- `title` (required): Card title
+- `description`: Card description
+- `icon`: Icon or emoji
+- `href`: Link URL (makes card clickable)
+- `onClick`: Click handler (alternative to href)
+- `variant`: Color scheme (`orange`, `purple`, `green`, `blue`, `rose`)
+- `disabled`: Disable interaction
+- `children`: Additional content
+
+#### KarmaPlant
+
+SVG component with five growth stages for karma visualization.
+
+```tsx
+import { KarmaPlant } from '@/components/tools'
+
+<KarmaPlant
+  stage="seedling"  // 'seed' | 'seedling' | 'sapling' | 'branching' | 'canopy'
+  size={120}
+  animate={true}
+/>
+```
+
+**Props:**
+- `stage` (required): Growth stage
+- `size`: SVG size in pixels (default: 120)
+- `animate`: Enable pulse animation for canopy stage
+- `className`: Additional CSS classes
+
+#### KarmicTreeClient
+
+Client component for fetching and displaying Karmic Tree progress with API fallback.
+
+```tsx
+import { KarmicTreeClient } from '@/components/tools'
+
+<KarmicTreeClient
+  apiEndpoint="/api/analytics/karmic_tree"
+  onLoad={(data) => console.log('Loaded:', data)}
+  onError={(error) => console.error('Error:', error)}
+/>
+```
+
+**Features:**
+- Fetches from `/api/analytics/karmic_tree` (configurable)
+- Graceful fallback to mocked data on API failure
+- Displays KarmaPlant visualization
+- Shows progress bar and activity stats
+
+**Props:**
+- `apiEndpoint`: Custom API endpoint
+- `onLoad`: Callback with loaded data
+- `onError`: Callback with error message
+- `className`: Additional CSS classes
+
+#### ResetPlanCard
+
+Card component for displaying reset plan steps (Karma Reset ritual).
+
+```tsx
+import { ResetPlanCard } from '@/components/tools'
+
+<ResetPlanCard
+  step={{
+    step: 1,
+    title: 'Pause and Breathe',
+    content: 'Take four slow breaths; let each exhale soften the moment.',
+    variant: 'orange',
+  }}
+  revealed={true}
+/>
+```
+
+**Props:**
+- `step` (required): Step data object
+  - `step`: Step number
+  - `title`: Step title
+  - `content`: Step guidance text
+  - `variant`: Color variant (`orange`, `purple`, `green`, `blue`)
+- `revealed`: Controls opacity transition
+- `className`: Additional CSS classes
+
+### Page Structure
+
+Each tool page follows a consistent structure:
+
+1. **Header**: Uses `ToolHeader` with tool-specific content
+2. **Main Content**: Two-column layout (input/response + info/widgets)
+3. **Input Section**: Form for user input
+4. **Response Section**: Displays API response
+5. **Info Section**: About, flow steps, or related tools
+
+### Accessibility Requirements
+
+All tool pages must:
+- Use semantic HTML (`<main>`, `<header>`, `<section>`)
+- Include proper ARIA attributes (`role`, `aria-label`, `aria-describedby`)
+- Support keyboard navigation
+- Provide visible focus indicators
+- Include form labels and error messages
+
+### Testing
+
+Tests are located in `tests/ui/tools/`:
+- `ToolComponents.test.tsx`: Unit tests for reusable components
+- `ToolPages.test.tsx`: Page rendering tests
+
+Run tests with:
+```bash
+npm run test
+```
+
+### File Structure
+
+```
+app/
+  tools/
+    viyog/page.tsx          # Redirects to /viyog
+    ardha/page.tsx          # Redirects to /ardha
+    relationship-compass/   # Redirects to /relationship-compass
+    emotional-reset/        # Redirects to /emotional-reset
+    karma-reset/           # Redirects to /karma-reset
+    karma-footprint/       # Redirects to /karma-footprint
+    karmic-tree/           # Redirects to /karmic-tree
+  karma-footprint/
+    page.tsx               # Karma Footprint analyzer page
+
+components/
+  tools/
+    ToolHeader.tsx         # Page header component
+    ToolActionCard.tsx     # Action card component
+    KarmaPlant.tsx         # SVG plant stages
+    KarmicTreeClient.tsx   # Karmic Tree fetch component
+    ResetPlanCard.tsx      # Reset plan step card
+    index.ts               # Barrel export
+
+tests/
+  ui/
+    tools/
+      ToolComponents.test.tsx  # Component tests
+      ToolPages.test.tsx       # Page tests
+```
+
+### Non-Negotiable Rules
+
+- **DO NOT** modify backend or API routes
+- **DO NOT** alter MindVibe or KIAAN logos
+- **DO NOT** break existing tool functionality
+- **MUST** use TypeScript for all components
+- **MUST** include accessibility attributes
+- **MUST** use mocked data fallback for Karma endpoints
+
+---
+
 ## Related Documentation
 
 - [Tech Summary](./TECH_SUMMARY.md)
@@ -405,4 +628,5 @@ docs/
 ---
 
 *Phase 1 of 5 - Design System Foundation*
+*Phase 3 of 5 - Specialized Tool Pages and Reusable Components*
 *Last Updated: December 2024*
