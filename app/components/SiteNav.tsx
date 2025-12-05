@@ -8,13 +8,14 @@ import { MindVibeLockup } from '@/components/branding'
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
-  { href: '/sacred-reflections', label: 'Sacred Reflections' },
+  { href: '/kiaan', label: 'KIAAN' },
+  { href: '/sacred-reflections', label: 'Journal' },
+  { href: '/wisdom-rooms', label: 'Rooms' },
+  { href: '/ardha', label: 'Ardha' },
+  { href: '/viyog', label: 'Vyyoga' },
+  { href: '/relationship-compass', label: 'Compass' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
-  { href: '/emotional-reset', label: 'Emotional Reset' },
-  { href: '/features', label: 'Features' },
-  { href: '/pricing', label: 'Subscription' },
+  { href: '/profile', label: 'Profile' },
 ]
 
 export default function SiteNav() {
