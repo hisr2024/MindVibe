@@ -27,6 +27,11 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
     // In production, fetch from API
@@ -173,7 +178,7 @@ export default function AdminUsersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-400">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {isClient ? new Date(user.createdAt).toLocaleDateString() : '...'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">

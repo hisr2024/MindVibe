@@ -52,6 +52,10 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
+          source: '/favicon.ico',
+          destination: '/icon',
+        },
+        {
           source: '/api/:path*',
           destination: `${apiUrl}/:path*`,
         },
