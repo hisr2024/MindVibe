@@ -4,7 +4,6 @@
  */
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
 
 const PATTERNS_TO_CHECK = [
   {
@@ -20,18 +19,49 @@ const PATTERNS_TO_CHECK = [
     fix: '{condition ? <span>yes</span> : <span>no</span>}'
   },
   {
-    pattern: /<>\s*[A-Za-z][^<>]*\s*</g,
+    pattern: /<>\s*[A-Za-z][^<]*<\/>/g,
     issue: 'Text directly in fragment without wrapper',
     example: '<>Text content</>',
     fix: '<><span>Text content</span></>'
   },
   {
-    pattern: /\.map\([^)]*=>\s*[^<{][^)]*\)/g,
-    issue: 'Array map returning unwrapped text',
-    example: '.map(x => x.name)',
-    fix: '.map(x => <span key={x.id}>{x.name}</span>)'
+    pattern: /\.map\(\s*\w+\s*=>\s*["'`][^"'`]+["'`]\s*\)/g,
+    issue: 'Array map returning string literal',
+    example: '.map(x => "text")',
+    fix: '.map(x => <span key={...}>text</span>)'
   }
 ];
+
+/**
+ * Recursively get all files matching extensions in a directory
+ */
+function getFilesRecursive(dir, extensions) {
+  const files = [];
+  
+  if (!fs.existsSync(dir)) {
+    return files;
+  }
+  
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    
+    if (entry.isDirectory()) {
+      // Skip node_modules and hidden directories
+      if (entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
+        files.push(...getFilesRecursive(fullPath, extensions));
+      }
+    } else if (entry.isFile()) {
+      const ext = path.extname(entry.name);
+      if (extensions.includes(ext)) {
+        files.push(fullPath);
+      }
+    }
+  }
+  
+  return files;
+}
 
 function scanFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf-8');
@@ -56,10 +86,11 @@ function scanFile(filePath) {
 function main() {
   const componentsDir = path.join(process.cwd(), 'components');
   const appDir = path.join(process.cwd(), 'app');
+  const extensions = ['.tsx', '.jsx'];
   
   const files = [
-    ...glob.sync(`${componentsDir}/**/*.{tsx,jsx}`),
-    ...glob.sync(`${appDir}/**/*.{tsx,jsx}`)
+    ...getFilesRecursive(componentsDir, extensions),
+    ...getFilesRecursive(appDir, extensions)
   ];
   
   console.log('🔍 Scanning for React Error #418 patterns...\n');
