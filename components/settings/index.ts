@@ -1,6 +1,3 @@
 export { SettingsSection, SettingsItem, SettingsDivider } from './SettingsSection'
 export { ToggleSwitch } from './ToggleSwitch'
 export { LanguageSwitcher } from './LanguageSwitcher'
-export { LanguageSelector } from './LanguageSelector'
-export { DataManagement } from './DataManagement'
-export { NotificationTiming } from './NotificationTiming'

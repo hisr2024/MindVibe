@@ -13,11 +13,3 @@ export {
   type CurrencyConfig,
 } from './useCurrency'
 export { useLanguage, LanguageProvider, LANGUAGES, type Language, type LanguageConfig } from './useLanguage'
-export { useProfile, type ProfileData, type ActivityStats } from './useProfile'
-export {
-  useActivityLog,
-  getRelativeTime,
-  getActivityIcon,
-  type ActivityType,
-  type ActivityLogEntry,
-} from './useActivityLog'

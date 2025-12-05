@@ -130,30 +130,6 @@ export const KARMA_TOOLS: ToolConfig[] = [
     gradient: 'from-orange-400/30 to-amber-300/30',
     href: '/tools/emotional-reset',
   },
-  {
-    id: 'state-check-in',
-    icon: '🎯',
-    title: 'State Check-In',
-    description: 'Log your current mood',
-    gradient: 'from-teal-400/30 to-cyan-400/30',
-    href: '/tools/state-check-in',
-  },
-  {
-    id: 'output-reducer',
-    icon: '✂️',
-    title: 'Output Reducer',
-    description: 'Simplify lengthy text',
-    gradient: 'from-violet-400/30 to-purple-400/30',
-    href: '/tools/output-reducer',
-  },
-  {
-    id: 'clarity-pause',
-    icon: '🧘',
-    title: 'Clarity Pause',
-    description: 'Guided breathing moment',
-    gradient: 'from-sky-400/30 to-blue-400/30',
-    href: '/tools/clarity-pause',
-  },
 ]
 
 /**

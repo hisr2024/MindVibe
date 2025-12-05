@@ -1,182 +1,159 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
+import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 
-type Message = {
-  sender: 'user' | 'assistant'
-  text: string
-  timestamp: string
-  status?: 'error'
+const showcasePages = [
+  {
+    href: '/kiaan/features',
+    title: 'Feature atlas',
+    summary: 'Each suite detailed on its own page to keep guidance organized.',
+    bullets: ['Wisdom chat rooms', 'Grounding tools', 'Journaling safeguards']
+  },
+  {
+    href: '/kiaan/experiences',
+    title: 'Experience flows',
+    summary: 'Sequential routes that describe how to engage KIAAN without altering the ecosystem.',
+    bullets: ['From pause to action', 'Relationship repair paths', 'Balance for busy days']
+  },
+  {
+    href: '/kiaan/profile',
+    title: 'Personal profile',
+    summary: 'Create a local, private record of your focus areas for a tailored feel.',
+    bullets: ['Name + focus areas', 'Room preferences', 'Session notes stored locally']
+  }
+]
+
+const integrityHighlights = [
+  'No backend mutations—everything is client-side and self-contained.',
+  'Navigation cards keep the core KIAAN chat untouched and easily reachable.',
+  'Pages mirror existing capabilities instead of replacing them.'
+]
+
+const guidanceModeDescriptions: Record<GuidanceMode, { title: string; description: string }> = {
+  'inner-peace': {
+    title: 'Inner Peace',
+    description: 'Find stillness through breath-focused exercises and gentle grounding techniques. Perfect for moments when you need to calm your mind and reconnect with tranquility.'
+  },
+  'mind-control': {
+    title: 'Mind Control',
+    description: 'Develop focused clarity through structured mindfulness practices. Ideal for decision-making, concentration, and maintaining mental discipline.'
+  },
+  'self-kindness': {
+    title: 'Self Kindness',
+    description: 'Cultivate compassion for yourself through warm, supportive exercises. Essential for healing, self-acceptance, and nurturing your emotional well-being.'
+  }
 }
 
-export default function KiaanChatPage() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
-
-  async function sendMessage(text?: string) {
-    const content = (text ?? input).trim()
-    if (!content) return
-
-    const userMessage: Message = { sender: 'user', text: content, timestamp: new Date().toISOString() }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setLoading(true)
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content })
-      })
-
-      if (!response.ok) {
-        throw new Error('Request failed')
-      }
-
-      const data = await response.json()
-      const assistant: Message = {
-        sender: 'assistant',
-        text: data.response || 'I am here for you with a calm response.',
-        timestamp: new Date().toISOString()
-      }
-      setMessages(prev => [...prev, assistant])
-    } catch {
-      const assistant: Message = {
-        sender: 'assistant',
-        text: 'I could not reach the guidance service. Please try again.',
-        timestamp: new Date().toISOString(),
-        status: 'error'
-      }
-      setMessages(prev => [...prev, assistant])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
-  }
+export default function KiaanHome() {
+  const [selectedMode, setSelectedMode] = useState<GuidanceMode | null>(null)
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white flex flex-col">
-      {/* Header */}
-      <header className="border-b border-orange-500/15 bg-[#0d0d10]/95 backdrop-blur px-4 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <KiaanLogo size="sm" />
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
-                Talk to KIAAN
-              </h1>
-              <p className="text-xs text-orange-100/60">Your calm AI companion</p>
-            </div>
+    <section className="space-y-8">
+      <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/85 to-[#0f0a08]/90 p-6 md:p-8 shadow-[0_20px_80px_rgba(46,160,255,0.14)]">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
+          <KiaanLogo size="lg" className="shrink-0" />
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Talk to KIAAN</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#ffb347] to-orange-100">MindVibe Companion</h1>
+            <p className="text-sm text-orange-100/85 max-w-2xl">A modern, spiritual-but-universal companion woven from Krishna&apos;s flute and peacock feather with calm ripples guiding every interaction.</p>
           </div>
-          <Link href="/" className="text-sm text-orange-100/60 hover:text-orange-200 transition">
-            ← Home
-          </Link>
         </div>
-      </header>
+      </div>
 
-      {/* Scrollable Chat Area */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-6"
-        style={{ scrollBehavior: 'smooth' }}
-      >
-        <div className="max-w-3xl mx-auto space-y-4">
-          {messages.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-orange-100/60 text-sm">Start a conversation with KIAAN</p>
-              <p className="text-orange-100/40 text-xs mt-2">Your messages are private and secure</p>
-            </div>
-          )}
-          {messages.map((message, idx) => (
-            <div
-              key={`${message.timestamp}-${idx}`}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                  message.sender === 'user'
-                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/15 border border-orange-500/30'
-                    : message.status === 'error'
-                      ? 'bg-red-500/10 border border-red-500/30'
-                      : 'bg-black/50 border border-orange-500/20'
-                }`}
-              >
-                <p className="text-sm text-orange-50 whitespace-pre-wrap">{message.text}</p>
-                <p className="text-xs text-orange-100/40 mt-2">
-                  {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      {/* Triangle of Flowing Energy Section */}
+      <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="flex-shrink-0">
+            <TriangleOfEnergy
+              selectedMode={selectedMode}
+              onSelectMode={setSelectedMode}
+              size={280}
+            />
+          </div>
+          <div className="flex-1 space-y-4">
+            <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Guidance Modes</p>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#ffb347] to-orange-100">
+              Triangle of Flowing Energy
+            </h2>
+            <p className="text-sm text-orange-100/85 max-w-xl">
+              Three interconnected paths to wellness. Each mode flows into the others, creating a balanced approach to mental health. Select a node to explore.
+            </p>
+            
+            {selectedMode && (
+              <div className="mt-4 rounded-2xl border border-orange-400/25 bg-black/40 p-4 animate-fadeIn">
+                <h3 className="text-lg font-semibold text-orange-50 flex items-center gap-2">
+                  <span 
+                    className="h-3 w-3 rounded-full"
+                    style={{
+                      backgroundColor: selectedMode === 'inner-peace' ? '#4fd1c5' 
+                        : selectedMode === 'mind-control' ? '#3b82f6' 
+                        : '#ec4899'
+                    }}
+                  />
+                  {guidanceModeDescriptions[selectedMode].title}
+                </h3>
+                <p className="mt-2 text-sm text-orange-100/80">
+                  {guidanceModeDescriptions[selectedMode].description}
                 </p>
               </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-black/50 border border-orange-500/20 rounded-2xl px-4 py-3">
-                <div className="flex gap-1">
-                  <span className="h-2 w-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="h-2 w-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="h-2 w-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
+            )}
+
+            {!selectedMode && (
+              <div className="mt-4 text-sm text-orange-100/60 italic">
+                Click on a node in the triangle to learn more about each guidance mode.
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Fixed Input Bar */}
-      <div className="border-t border-orange-500/15 bg-[#0d0d10]/95 backdrop-blur px-4 py-4">
-        <div className="max-w-3xl mx-auto space-y-3">
-          <div className="flex gap-3">
-            <textarea
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={2}
-              className="flex-1 rounded-xl border border-orange-500/25 bg-black/50 px-4 py-3 text-sm text-orange-50 placeholder:text-orange-100/40 outline-none focus:ring-2 focus:ring-orange-400/50 resize-none"
-              placeholder="Share what's on your mind..."
-            />
-            <button
-              onClick={() => sendMessage()}
-              disabled={!input.trim() || loading}
-              className="px-6 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Send
-            </button>
-          </div>
-          
-          {/* Trigger Factor and Clarity Pause buttons */}
-          <div className="flex gap-3">
+      <div className="rounded-3xl border border-orange-500/15 bg-[#0b0b0f]/80 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Site overview</p>
+        <h2 className="mt-2 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#ffb347] to-orange-100">
+          Multi-page KIAAN experience
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm text-orange-100/85">
+          This dedicated site organizes KIAAN into focused, linked pages so you can explore rooms, routines, and personalization without disturbing the primary chat environment.
+        </p>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {showcasePages.map(page => (
             <Link
-              href="/tools/trigger-factor"
-              className="flex-1 py-3 rounded-xl border border-orange-500/25 bg-orange-500/10 text-center text-sm font-medium text-orange-100 hover:bg-orange-500/20 transition"
+              key={page.href}
+              href={page.href}
+              className="rounded-2xl border border-orange-400/25 bg-black/50 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)] transition hover:border-orange-300/60 hover:shadow-orange-500/20"
             >
-              🎯 Trigger Factor
+              <h3 className="text-lg font-semibold text-orange-50">{page.title}</h3>
+              <p className="mt-1 text-sm text-orange-100/80">{page.summary}</p>
+              <ul className="mt-3 space-y-1 text-sm text-orange-100/80">
+                {page.bullets.map(point => (
+                  <li key={point} className="flex items-start gap-2">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-gradient-to-r from-orange-400 to-[#ffb347]" aria-hidden />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </Link>
-            <Link
-              href="/tools/clarity-pause"
-              className="flex-1 py-3 rounded-xl border border-orange-500/25 bg-orange-500/10 text-center text-sm font-medium text-orange-100 hover:bg-orange-500/20 transition"
-            >
-              ⏸️ Clarity Pause
-            </Link>
-          </div>
+          ))}
         </div>
       </div>
-    </main>
+
+      <div className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
+        <h3 className="text-lg font-semibold text-orange-50">Ecosystem integrity</h3>
+        <p className="mt-2 max-w-3xl text-sm text-orange-100/80">
+          Every page keeps the KIAAN chat and journal ecosystems intact. Navigation always points back to the primary experience, and all profile data stays on your device.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {integrityHighlights.map(item => (
+            <div key={item} className="rounded-2xl border border-orange-400/20 bg-black/50 p-4 text-sm text-orange-100/80">
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
