@@ -59,7 +59,7 @@ export function WeeklySummary({
 
   const formatDateRange = () => {
     // Only render formatted dates after client hydration to avoid SSR mismatch
-    if (!isClient) return ''
+    if (!isClient) return '...'
     const start = new Date(summary.weekStart).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
