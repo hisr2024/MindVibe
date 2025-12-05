@@ -61,7 +61,12 @@ export function ToolHeader({
   className = '',
 }: ToolHeaderProps) {
   // Support both object-based backLink and string-based backHref/backText
-  const effectiveBackLink = backLink ?? (backHref ? { href: backHref, label: backText ?? 'Back' } : undefined)
+  // Normalize the label to always include the arrow prefix
+  const effectiveBackLink = backLink 
+    ? { ...backLink, label: backLink.label.startsWith('←') ? backLink.label : `← ${backLink.label}` }
+    : backHref 
+      ? { href: backHref, label: backText?.startsWith('←') ? backText : `← ${backText ?? 'Back'}` }
+      : undefined
   return (
     <header
       className={`rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)] ${className}`}
@@ -124,7 +129,7 @@ export function ToolHeader({
               href={effectiveBackLink.href}
               className="text-xs text-orange-100/70 hover:text-orange-200 transition focus:outline-none focus:ring-2 focus:ring-orange-400/50 rounded px-1"
             >
-              {effectiveBackLink.label.startsWith('←') ? effectiveBackLink.label : `← ${effectiveBackLink.label}`}
+              {effectiveBackLink.label}
             </Link>
           )}
         </div>

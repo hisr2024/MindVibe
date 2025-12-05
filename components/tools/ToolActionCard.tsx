@@ -5,6 +5,14 @@ import Link from 'next/link'
 
 export type ToolActionCardVariant = 'orange' | 'purple' | 'green' | 'blue' | 'rose'
 
+const variantGradients: Record<ToolActionCardVariant, string> = {
+  orange: 'from-orange-500/10 to-amber-500/10',
+  purple: 'from-purple-500/10 to-violet-500/10',
+  green: 'from-green-500/10 to-emerald-500/10',
+  blue: 'from-blue-500/10 to-cyan-500/10',
+  rose: 'from-rose-500/10 to-pink-500/10',
+}
+
 export interface ToolActionCardProps {
   /** Icon emoji or element */
   icon?: ReactNode
@@ -52,15 +60,6 @@ export function ToolActionCard({
   className = '',
   children,
 }: ToolActionCardProps) {
-  // Variant to gradient mapping
-  const variantGradients: Record<ToolActionCardVariant, string> = {
-    orange: 'from-orange-500/10 to-amber-500/10',
-    purple: 'from-purple-500/10 to-violet-500/10',
-    green: 'from-green-500/10 to-emerald-500/10',
-    blue: 'from-blue-500/10 to-cyan-500/10',
-    rose: 'from-rose-500/10 to-pink-500/10',
-  }
-
   const effectiveGradient = gradient ?? variantGradients[variant]
 
   const cardContent = (
