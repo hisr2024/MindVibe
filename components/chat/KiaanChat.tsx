@@ -11,6 +11,7 @@ export interface Message {
   text: string
   timestamp: string
   status?: 'error'
+  summary?: string
 }
 
 interface KiaanChatProps {
@@ -32,6 +33,12 @@ export function KiaanChat({
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [userHasScrolledUp, setUserHasScrolledUp] = useState(false)
+  const [pendingAutoScroll, setPendingAutoScroll] = useState(false)
+  const [confirmingClear, setConfirmingClear] = useState(false)
+  const [clearedUntil, setClearedUntil] = useState(0)
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const previousMessageCountRef = useRef(messages.length)
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -56,10 +63,26 @@ export function KiaanChat({
   }, [prefersReducedMotion])
 
   useEffect(() => {
-    if (isAtBottom) {
-      scrollToBottom()
+    const previousCount = previousMessageCountRef.current
+    const hasNewMessage = messages.length > previousCount
+    const latestMessage = messages[messages.length - 1]
+
+    if (hasNewMessage && latestMessage) {
+      const allowSnap = pendingAutoScroll || !userHasScrolledUp || latestMessage.sender === 'user'
+
+      if (allowSnap) {
+        scrollToBottom()
+        setIsAtBottom(true)
+        setUserHasScrolledUp(false)
+      }
+
+      if (pendingAutoScroll && latestMessage.sender === 'assistant') {
+        setPendingAutoScroll(false)
+      }
     }
-  }, [isAtBottom, messages.length, scrollToBottom])
+
+    previousMessageCountRef.current = messages.length
+  }, [messages, pendingAutoScroll, scrollToBottom, userHasScrolledUp])
 
   // Detect scroll position to manage auto-scroll behavior
   const handleScroll = useCallback(() => {
@@ -71,7 +94,11 @@ export function KiaanChat({
       container.scrollHeight - container.scrollTop - container.clientHeight <
       threshold
     setIsAtBottom(isNearBottom)
-  }, [])
+    setUserHasScrolledUp(!isNearBottom)
+    if (!isNearBottom && pendingAutoScroll) {
+      setPendingAutoScroll(false)
+    }
+  }, [pendingAutoScroll])
 
   // Initialize scroll position state on mount
   useEffect(() => {
@@ -91,8 +118,44 @@ export function KiaanChat({
       onSendMessage(inputText.trim())
       setInputText('')
       setIsAtBottom(true)
+      setUserHasScrolledUp(false)
+      setPendingAutoScroll(true)
     }
   }
+
+  const startScroll = (direction: 'up' | 'down') => {
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    const delta = direction === 'up' ? -28 : 28
+    container.scrollBy({ top: delta, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current)
+    }
+
+    scrollIntervalRef.current = setInterval(() => {
+      container.scrollBy({
+        top: direction === 'up' ? -18 : 18,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth'
+      })
+    }, 110)
+  }
+
+  const stopScroll = () => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current)
+      scrollIntervalRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      stopScroll()
+    }
+  }, [])
+
+  const visibleMessages = messages.slice(clearedUntil)
 
   return (
     <div
@@ -101,29 +164,69 @@ export function KiaanChat({
       {/* Chat Header */}
       <div className="flex items-center gap-3 border-b border-orange-500/15 px-4 py-3">
         <KiaanLogo size="sm" showTagline={false} animated={true} />
+
+        <div className="ml-auto flex items-center gap-2">
+          {!confirmingClear && (
+            <button
+              type="button"
+              onClick={() => setConfirmingClear(true)}
+              className="rounded-full border border-orange-500/25 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-orange-100/80 transition hover:border-orange-400/60 hover:text-orange-50"
+            >
+              Clear old messages
+            </button>
+          )}
+
+          {confirmingClear && (
+            <div className="flex items-center gap-2 rounded-full border border-orange-500/30 bg-black/70 px-3 py-1.5 text-[11px] text-orange-50 shadow-lg shadow-orange-500/20">
+              <span>Clear history?</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setClearedUntil(messages.length)
+                  setConfirmingClear(false)
+                  setIsAtBottom(true)
+                  setUserHasScrolledUp(false)
+                  scrollToBottom()
+                }}
+                className="rounded-full bg-gradient-to-r from-orange-400 via-[#ff9933] to-orange-200 px-2.5 py-1 text-[11px] font-semibold text-slate-950 shadow-md shadow-orange-500/30"
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingClear(false)}
+                className="rounded-full border border-orange-500/30 px-2.5 py-1 text-[11px] font-semibold text-orange-100/80"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Scrollable Messages Container */}
-      <SimpleBar
-        autoHide={false}
-        scrollableNodeProps={{
-          ref: messagesContainerRef,
-          onScroll: handleScroll,
-          tabIndex: 0,
-          role: 'log',
-          'aria-label': 'Chat messages',
-          'aria-live': 'polite',
-          className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
-          style: {
-            maxHeight: 'calc(100vh - 300px)',
-            minHeight: '300px',
-            scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth'
-          }
-        }}
-        className="mv-energy-scrollbar flex-1"
-      >
-          <div className="px-4 py-4 space-y-4">
-            {messages.length === 0 ? (
+      <div className="relative flex-1">
+        <SimpleBar
+          autoHide={false}
+          scrollableNodeProps={{
+            ref: messagesContainerRef,
+            onScroll: handleScroll,
+            tabIndex: 0,
+            role: 'log',
+            'aria-label': 'Chat messages',
+            'aria-live': 'polite',
+            className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
+            style: {
+              maxHeight: 'calc(100vh - 300px)',
+              minHeight: '300px',
+              scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
+              paddingRight: '0.25rem'
+            }
+          }}
+          className="mv-energy-scrollbar flex-1 pr-3 md:pr-5"
+        >
+          <div className="px-4 pr-6 md:pr-10 py-4 space-y-4">
+            {visibleMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mb-4">
                   <span className="text-3xl">💬</span>
@@ -134,13 +237,14 @@ export function KiaanChat({
                 </p>
               </div>
             ) : (
-              messages.map((message) => (
+              visibleMessages.map((message) => (
                 <MessageBubble
                   key={message.id}
                   sender={message.sender}
                   text={message.text}
                   timestamp={message.timestamp}
                   status={message.status}
+                  summary={message.summary}
                   onSaveToJournal={message.sender === 'assistant' ? onSaveToJournal : undefined}
                 />
               ))
@@ -163,12 +267,43 @@ export function KiaanChat({
           </div>
         </SimpleBar>
 
+        <div className="pointer-events-none absolute inset-y-6 right-1 flex flex-col items-center justify-between gap-3 md:right-2">
+          <button
+            type="button"
+            onMouseDown={() => startScroll('up')}
+            onMouseUp={stopScroll}
+            onMouseLeave={stopScroll}
+            onTouchStart={() => startScroll('up')}
+            onTouchEnd={stopScroll}
+            onTouchCancel={stopScroll}
+            className="pointer-events-auto h-12 w-12 rounded-2xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400"
+            aria-label="Scroll up"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onMouseDown={() => startScroll('down')}
+            onMouseUp={stopScroll}
+            onMouseLeave={stopScroll}
+            onTouchStart={() => startScroll('down')}
+            onTouchEnd={stopScroll}
+            onTouchCancel={stopScroll}
+            className="pointer-events-auto h-12 w-12 rounded-2xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400"
+            aria-label="Scroll down"
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+
       {/* Floating Jump to Latest button */}
       {!isAtBottom && messages.length > 0 && (
         <button
           onClick={() => {
             setIsAtBottom(true)
             scrollToBottom()
+            setUserHasScrolledUp(false)
           }}
           className="absolute bottom-[116px] right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105"
           aria-label="Jump to latest message"

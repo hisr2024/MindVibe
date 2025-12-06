@@ -9,12 +9,23 @@ interface MessageBubbleProps {
   timestamp: string
   status?: 'error'
   onSaveToJournal?: (text: string) => void
+  summary?: string
 }
 
-export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal }: MessageBubbleProps) {
+function buildSummary(text: string) {
+  const normalized = text.replace(/\s+/g, ' ').trim()
+  if (!normalized) return ''
+
+  const sentences = normalized.split(/(?<=[.!?])\s+/)
+  const selected = sentences.slice(0, 3).join(' ')
+  return selected.length > 280 ? `${selected.slice(0, 277)}...` : selected
+}
+
+export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary }: MessageBubbleProps) {
   const router = useRouter()
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  
+  const [showSummary, setShowSummary] = useState(false)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -36,7 +47,10 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       router.push('/sacred-reflections?prefill=true')
     }
   }
-  
+
+  const condensedSummary = summary || buildSummary(text)
+  const showSummaryToggle = sender === 'assistant' && condensedSummary && condensedSummary !== text
+
   return (
     <div className="space-y-2 group">
       <div className="flex items-center gap-2 text-xs text-orange-100/60">
@@ -57,7 +71,27 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       >
         {text || ''}
       </div>
-      
+
+      {showSummaryToggle && (
+        <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-3 space-y-2 text-[13px] text-orange-50/85">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">Summary view</div>
+            <button
+              type="button"
+              onClick={() => setShowSummary(!showSummary)}
+              className="rounded-full border border-orange-500/30 px-3 py-1 text-[11px] font-semibold text-orange-50 transition hover:border-orange-300/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400"
+            >
+              {showSummary ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {showSummary && (
+            <div className="rounded-xl bg-white/5 p-3 text-sm leading-relaxed text-orange-50/90">
+              {condensedSummary}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Send to Sacred Reflections button for assistant messages */}
       {sender === 'assistant' && onSaveToJournal && !status && (
         <button
