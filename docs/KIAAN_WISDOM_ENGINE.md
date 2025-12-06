@@ -408,9 +408,206 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 | 12.13-14 | Compassion and contentment | Relationships, self-compassion |
 | 18.66 | Surrender and trust | Letting go, anxiety |
 
+## Validation System
+
+KIAAN v13.0 includes a comprehensive validation system to ensure all responses are authentically rooted in Gita wisdom.
+
+### Validation Requirements
+
+Every KIAAN response must meet these criteria:
+
+1. **Gita Terminology** (minimum 2 terms):
+   - Sanskrit terms: dharma, karma, atman, yoga, moksha, buddhi, etc.
+   - Universal principles: detachment, equanimity, duty, wisdom, peace, etc.
+
+2. **Wisdom Markers** (minimum 1):
+   - Ancient wisdom, timeless teaching, universal principle
+   - Eternal truth, path to, journey of, practice of
+   - Cultivate, embrace, release, transcend, etc.
+
+3. **No Forbidden Generic Terms**:
+   - ❌ "studies show", "research indicates", "according to research"
+   - ❌ "scientists say", "experts recommend", "data suggests"
+   - ❌ "modern psychology", "clinical studies", "therapy suggests"
+   - ❌ Explicit verse citations like "Bhagavad Gita 2.47"
+
+4. **Appropriate Length**: 200-500 words
+
+5. **Verse Context Used**: Must have at least one relevant verse in context
+
+6. **4-Part Structure** (recommended):
+   - Ancient Wisdom: Eternal principle from Gita
+   - Modern Application: Bridge to current situation
+   - Practical Steps: Specific actionable guidance
+   - Deeper Understanding: Profound insight
+
+### Validation Process
+
+```python
+from backend.services.gita_validator import GitaValidator
+
+validator = GitaValidator()
+
+# Validate a response
+is_valid, details = validator.validate_response(
+    response=chatbot_response,
+    verse_context=verse_results
+)
+
+if not is_valid:
+    # Use fallback response
+    response = validator.get_fallback_response(user_message)
+```
+
+### Valid vs Invalid Examples
+
+#### ✅ Valid Gita-Rooted Response
+
+```
+The timeless wisdom teaches us that true peace comes from focusing on your 
+actions, not the outcomes. You pour your energy into doing your best, then 
+release attachment to how things turn out. This is the path of karma yoga - 
+acting with full presence but without anxiety about results.
+
+In your situation with work stress, this means: First, identify what's actually 
+in your control today - your effort, your attitude, your response. Second, give 
+those things your best without obsessing over the promotion or recognition. 
+Third, practice this daily mantra: 'I do my dharma and trust the process.'
+
+When you shift from outcome-obsession to action-devotion, something profound 
+happens. The anxiety dissolves because you're no longer fighting reality - 
+you're flowing with it. Your buddhi (higher wisdom) recognizes that you're 
+the eternal observer, not the temporary doer-result chain. 💙
+```
+
+**Why it passes:**
+- ✅ Contains Gita terms: karma yoga, dharma, buddhi, detachment
+- ✅ Has wisdom markers: timeless wisdom, path of, profound
+- ✅ No forbidden generic terms
+- ✅ Appropriate length (~240 words)
+- ✅ Assumes verse context was provided
+- ✅ Follows 4-part structure
+
+#### ❌ Invalid Generic Response
+
+```
+According to recent studies, stress management is important for mental health. 
+Research indicates that mindfulness and therapy can help reduce anxiety. Experts 
+recommend practicing deep breathing and seeking professional help if needed.
+
+You should try to set boundaries at work and make time for self-care. Modern 
+psychology shows that cognitive behavioral therapy is effective for managing 
+work stress. Talk to a therapist about developing coping strategies. 💙
+```
+
+**Why it fails:**
+- ❌ Contains forbidden terms: "studies", "research indicates", "experts recommend"
+- ❌ No Gita terminology
+- ❌ No wisdom markers
+- ❌ Generic psychological advice, not rooted in Gita
+
+## Analytics System
+
+The Gita Analytics Service tracks verse usage patterns to ensure comprehensive coverage of all 700 verses.
+
+### Tracked Metrics
+
+1. **Verse Usage**: Which verses are used most frequently
+2. **Theme Distribution**: Coverage across different Gita themes
+3. **Validation Stats**: Pass/fail rates and common issues
+4. **Coverage Percentage**: What % of 700 verses have been used
+
+### Analytics Reports
+
+```python
+from backend.services.gita_analytics import GitaAnalyticsService
+
+# Get comprehensive analytics report
+report = await GitaAnalyticsService.generate_analytics_report(db)
+
+print(f"Verse Coverage: {report['verse_coverage']['coverage_percent']}%")
+print(f"Validation Pass Rate: {report['validation_statistics']['pass_rate_percent']}%")
+print(f"Most Used Verses: {report['most_used_verses'][:5]}")
+```
+
+### Sample Analytics Output
+
+```json
+{
+  "generated_at": "2024-01-15T10:30:00Z",
+  "verse_coverage": {
+    "total_verses_in_db": 700,
+    "unique_verses_used": 387,
+    "coverage_percent": 55.29,
+    "is_complete_db": true
+  },
+  "validation_statistics": {
+    "total_validations": 1543,
+    "passed": 1489,
+    "failed": 54,
+    "pass_rate_percent": 96.50,
+    "failure_reasons": {
+      "missing_gita_terms": 23,
+      "forbidden_terms": 18,
+      "inappropriate_length": 13
+    }
+  },
+  "most_used_verses": [
+    {"verse_id": "2.47", "usage_count": 234},
+    {"verse_id": "2.48", "usage_count": 189},
+    {"verse_id": "6.35", "usage_count": 156}
+  ],
+  "recommendations": [
+    "✅ Good verse coverage (>50%). Maintain diverse selection.",
+    "✅ Excellent validation pass rate (96.50%).",
+    "✅ Good theme diversity across multiple topics."
+  ]
+}
+```
+
+### Interpreting Analytics
+
+- **Coverage < 25%**: Low diversity, improve search algorithm
+- **Coverage 25-50%**: Moderate coverage, continue diversifying
+- **Coverage > 50%**: Good coverage, maintain quality
+
+- **Pass Rate < 80%**: Review system prompt and validation rules
+- **Pass Rate 80-95%**: Consider minor improvements
+- **Pass Rate > 95%**: Excellent adherence to Gita principles
+
+## Enhanced Emotion-to-Theme Mapping
+
+The search algorithm now includes comprehensive emotion-to-theme mapping for better verse coverage:
+
+### Emotion Categories
+
+| Emotion Category | Mapped Themes |
+|-----------------|---------------|
+| Anxiety | equanimity, peace, balance, detachment, surrender |
+| Fear | courage, strength, trust, faith, inner_power |
+| Depression | hope, light, purpose, self_compassion, renewal |
+| Anger | control, peace, patience, equanimity, restraint |
+| Loneliness | connection, devotion, love, inner_self, unity |
+| Purpose | duty, action, meaning, dharma, calling |
+| Stress | action, work, balance, equanimity, mindfulness |
+| Confusion | knowledge, wisdom, clarity, understanding, discernment |
+
+### Multi-Strategy Search
+
+The search algorithm now combines:
+
+1. **Keyword Matching**: Direct text similarity
+2. **Emotion Mapping**: Maps emotions to relevant themes
+3. **Mental Health Tags**: Boosts verses with relevant applications
+4. **Theme Expansion**: Searches related themes for more results
+
+This ensures comprehensive coverage across all 700 verses while maintaining relevance.
+
 ## Future Enhancements
 
 1. **Semantic embeddings**: Replace SequenceMatcher with vector embeddings for better semantic matching
 2. **User preferences**: Learn from user feedback to personalize verse selection
 3. **Multi-language search**: Support search queries in Hindi and Sanskrit
 4. **Verse recommendations**: Suggest related verses based on viewing history
+5. **Real-time analytics dashboard**: Visualize verse usage and validation metrics
+6. **A/B testing framework**: Test different prompts and validation rules
