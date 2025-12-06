@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import type { KiaanResetResponse, ResetStep, RepairType } from '@/types/karma-reset.types'
 import { REPAIR_ACTIONS, RESET_STEP_ORDER } from '@/types/karma-reset.types'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -207,10 +208,8 @@ export default function KarmaResetPage() {
     const sanitizedWhoFeltRipple = sanitizeInput(whoFeltRipple) || 'Someone I care about'
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/karma-reset/generate`, {
+      const response = await apiCall('/api/karma-reset/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           what_happened: sanitizedWhatHappened,
           who_felt_it: sanitizedWhoFeltRipple,
@@ -221,12 +220,6 @@ export default function KarmaResetPage() {
           style: 'Short, direct, emotionally warm, and practical. 1-2 sentences per step. No bullet lists.',
         })
       })
-
-      if (!response.ok) {
-        console.error('KIAAN reset request failed', response.status, response.statusText)
-        setError('KIAAN couldn’t be reached. Please check your connection and try again.')
-        return
-      }
 
       const data = await response.json()
       const normalized = normalizeGuidance(data.reset_guidance)
@@ -249,9 +242,8 @@ export default function KarmaResetPage() {
       } else {
         setError('KIAAN returned an unexpected response. Please try again.')
       }
-    } catch (requestError) {
-      console.error('KIAAN reset request error', requestError)
-      setError('KIAAN couldn’t be reached. Please check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }

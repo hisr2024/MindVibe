@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import SimpleBar from 'simplebar-react'
 import { MessageBubble } from '@/components/chat'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 type Message = {
   sender: 'user' | 'assistant'
@@ -37,16 +38,10 @@ export default function Chat() {
     setLoading(true)
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content })
       })
-
-      if (!response.ok) {
-        throw new Error('Request failed')
-      }
 
       const data = await response.json()
       const assistant: Message = {
@@ -59,7 +54,7 @@ export default function Chat() {
     } catch (error) {
       const assistant: Message = {
         sender: 'assistant',
-        text: 'I could not reach the guidance service. Please try again.',
+        text: getErrorMessage(error),
         timestamp: new Date().toISOString(),
         status: 'error'
       }

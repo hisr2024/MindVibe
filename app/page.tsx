@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 import SimpleBar from 'simplebar-react'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -411,10 +412,8 @@ function ArdhaReframer() {
     const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
@@ -425,8 +424,8 @@ function ArdhaReframer() {
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Ardha. Check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -515,10 +514,8 @@ function ViyogDetachmentCoach() {
     const request = `${systemPrompt}\n\nUser concern: "${trimmedConcern}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
@@ -529,8 +526,8 @@ function ViyogDetachmentCoach() {
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Viyog. Check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -620,10 +617,8 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
     const request = `${systemPrompt}\n\nUser conflict: "${trimmedConflict}"\n\nReturn the structured eight-part response in numbered sections with concise guidance only.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
@@ -634,8 +629,8 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Relationship Compass. Check your connection and retry.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }

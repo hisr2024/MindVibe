@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { ToolHeader, ToolActionCard, KarmicTreeClient } from '@/components/tools'
 
 // Sanitize user input to prevent prompt injection
@@ -113,17 +114,10 @@ ${reflection ? `User reflection: "${sanitizeInput(reflection)}"` : ''}
 Respond using the four-part format with brief, grounded insights.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request }),
       })
-
-      if (!response.ok) {
-        setError('Unable to analyze your action right now. Please try again shortly.')
-        return
-      }
 
       const data = await response.json()
       const newResult = { response: data.response, requestedAt: new Date().toISOString() }
@@ -146,8 +140,8 @@ Respond using the four-part format with brief, grounded insights.`
       // Clear form
       setAction('')
       setReflection('')
-    } catch {
-      setError('Unable to reach Karma Footprint analyzer. Check your connection and retry.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }

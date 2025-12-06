@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -91,22 +92,15 @@ Boundaries:
     const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
-      if (!response.ok) {
-        setError('Ardha is having trouble connecting right now. Please try again in a moment.')
-        return
-      }
-
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Ardha. Check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
