@@ -24,11 +24,11 @@ describe('ToolHeader', () => {
     render(
       <ToolHeader
         icon="🎯"
-        title="Viyog - Detachment Coach"
+        title="Viyoga - Detachment Coach"
         subtitle="Test subtitle"
       />
     )
-    expect(screen.getByText('Viyog - Detachment Coach')).toBeInTheDocument()
+    expect(screen.getByText('Viyoga - Detachment Coach')).toBeInTheDocument()
     expect(screen.getByText('🎯')).toBeInTheDocument()
   })
 

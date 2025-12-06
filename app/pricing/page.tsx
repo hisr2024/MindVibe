@@ -59,7 +59,7 @@ const createPricingTiers = (
       'All Free features',
       'Journal with encryption',
       'Ardha Reframing Assistant',
-      'Viyog Detachment Coach',
+      'Viyoga Detachment Coach',
     ],
     cta: 'Start 15-day free trial',
     trialAvailable: true,
@@ -116,7 +116,7 @@ const comparisonFeatures = [
     category: 'Assistants',
     items: [
       { name: 'Ardha Reframing', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Viyog Detachment', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Viyoga Detachment', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
       { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
       { name: 'Emotional Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
     ],

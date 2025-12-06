@@ -4,8 +4,8 @@ const pages = [
   { href: '/flows/access', title: 'Page 1: Access', detail: 'Login ID, password, and first-time registration kept local.' },
   { href: '/flows/check-in', title: 'Page 2: State check-in', detail: 'Quick mood capture with present-moment context.' },
   { href: '/flows/kiaan', title: 'Page 3: Talk to KIAAN', detail: 'Chat plus clarity pause watch with pass-through controls.' },
-  { href: '/flows/ardha', title: 'Page 4: Ardha reframing', detail: 'Gita-aligned reframes with validation and steps.' },
-  { href: '/flows/viyog', title: 'Page 5: Viyog outcome reducer', detail: 'Detachment coaching, decision timer, and pause overlay.' },
+  { href: '/flows/ardha', title: 'Page 4: Ardha reframing', detail: 'Ancient wisdom-aligned reframes with validation and steps.' },
+  { href: '/flows/viyog', title: 'Page 5: Viyoga outcome reducer', detail: 'Detachment coaching, decision timer, and pause overlay.' },
   { href: '/flows/wisdom', title: 'Page 6: Today’s wisdom', detail: 'Timestamped insight with chat, save, and share actions.' },
   { href: '/flows/journal', title: 'Page 7: Private journal', detail: 'AES-GCM local storage with weekly refresh.' },
 ]

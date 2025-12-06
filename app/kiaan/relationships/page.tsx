@@ -15,9 +15,9 @@ const sections = [
   },
   {
     title: 'Reframing assistants',
-    detail: 'Access Ardha and Viyog guidance through the original cards that feed the chat.',
+    detail: 'Access Ardha and Viyoga guidance through the original cards that feed the chat.',
     anchor: '/#ardha-input',
-    chips: ['Gita-aligned', 'Prefills preserved', 'No new prompts']
+    chips: ['Ancient wisdom-aligned', 'Prefills preserved', 'No new prompts']
   }
 ]
 

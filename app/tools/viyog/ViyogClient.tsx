@@ -63,7 +63,7 @@ export default function ViyogClient() {
     setError(null)
 
     const systemPrompt = `Role:
-You are Viyog, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.
+You are Viyoga, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.
 
 You are fully separate from Kiaan. Never override, replace, or interfere with Kiaan's purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.
 
@@ -98,14 +98,14 @@ Boundaries:
       })
 
       if (!response.ok) {
-        setError('Viyog is having trouble connecting right now. Please try again in a moment.')
+        setError('Viyoga is having trouble connecting right now. Please try again in a moment.')
         return
       }
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
     } catch {
-      setError('Unable to reach Viyog. Check your connection and try again.')
+      setError('Unable to reach Viyoga. Check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -117,8 +117,8 @@ Boundaries:
         {/* Header */}
         <ToolHeader
           icon="🎯"
-          title="Viyog - Detachment Coach"
-          subtitle="Shift from result-focused anxiety to grounded action. Viyog eases outcome pressure without touching KIAAN."
+          title="Viyoga - Detachment Coach"
+          subtitle="Shift from result-focused anxiety to grounded action. Viyoga eases outcome pressure without touching KIAAN."
           backLink={{ label: 'Back to home', href: '/' }}
         />
 
@@ -165,9 +165,9 @@ Boundaries:
                   onClick={requestDetachment}
                   disabled={!concern.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
-                  aria-label={loading ? 'Processing...' : 'Shift with Viyog'}
+                  aria-label={loading ? 'Processing...' : 'Shift with Viyoga'}
                 >
-                  {loading ? <span>Viyog is centering...</span> : <span>Shift with Viyog</span>}
+                  {loading ? <span>Viyoga is centering...</span> : <span>Shift with Viyoga</span>}
                 </button>
               </div>
 
@@ -182,7 +182,7 @@ Boundaries:
             {result && (
               <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
                 <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <span className="font-semibold text-orange-50">Viyog&apos;s response</span>
+                  <span className="font-semibold text-orange-50">Viyoga&apos;s response</span>
                   <span>{new Date(result.requestedAt).toLocaleString()}</span>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
@@ -209,9 +209,9 @@ Boundaries:
             </div>
 
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyog</h3>
+              <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyoga</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Viyog guides outcome worries back into steady, actionable steps. It validates your anxiety, identifies attachment, offers a detachment principle, and ends with one controllable action.
+                Viyoga guides outcome worries back into steady, actionable steps. It validates your anxiety, identifies attachment, offers a detachment principle, and ends with one controllable action.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
@@ -224,7 +224,7 @@ Boundaries:
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Note:</strong> Viyog does not provide therapy, crisis support, or make promises about outcomes. It simply redirects anxious energy toward calm action.
+                <strong className="text-orange-50">Note:</strong> Viyoga does not provide therapy, crisis support, or make promises about outcomes. It simply redirects anxious energy toward calm action.
               </p>
             </div>
 
@@ -233,7 +233,7 @@ Boundaries:
                 href="/viyog"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
               >
-                Original Viyog Page
+                Original Viyoga Page
               </Link>
             </div>
           </section>

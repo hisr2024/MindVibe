@@ -42,7 +42,7 @@ type ArdhaResult = {
 const pillars = [
   'Validate the feeling without dilution.',
   'Spot the distortion before offering the shift.',
-  'Use Gita-aligned calm insight, not sermons.',
+  'Use ancient-wisdom-aligned calm insight, not sermons.',
   "Close with one doable action inside the user's control.",
 ]
 
@@ -64,14 +64,14 @@ export default function ArdhaClient() {
     setError(null)
 
     const systemPrompt = `Role:
-You are Ardha, the Reframing Assistant—a calm, wise, Gita-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.
+You are Ardha, the Reframing Assistant—a calm, wise, ancient wisdom-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.
 
-You stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan's core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using Gita principles. Your job is complementary, not overlapping.
+You stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan's core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using ancient wisdom principles. Your job is complementary, not overlapping.
 
 Core Behavior:
 - Identify the negative belief or emotional distortion the user expresses.
 - Acknowledge their feeling with compassion (never invalidate).
-- Apply Bhagavad Gita principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).
+- Apply ancient wisdom principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).
 - Generate a clear, modern, emotionally intelligent reframe.
 - Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.
 - Never offer spiritual authority—only perspective reshaping.
@@ -122,7 +122,7 @@ Boundaries:
         <ToolHeader
           icon="🔄"
           title="Ardha - Reframing Assistant"
-          subtitle="Transform negative thoughts into balanced, empowering perspectives with Gita-inspired wisdom."
+          subtitle="Transform negative thoughts into balanced, empowering perspectives with ancient wisdom."
           backLink={{ label: 'Back to home', href: '/' }}
         />
 
@@ -139,7 +139,7 @@ Boundaries:
           <ToolActionCard
             icon="📚"
             title="Learn the Principles"
-            description="Understand how Gita wisdom applies to cognitive reframing."
+            description="Understand how ancient wisdom applies to cognitive reframing."
             ctaLabel="Explore Wisdom"
             href="/wisdom-rooms"
             gradient="from-amber-500/10 to-orange-500/10"

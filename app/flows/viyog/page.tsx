@@ -16,7 +16,7 @@ export default function ViyogFlow() {
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Page 5</p>
         <h2 className="text-2xl font-semibold text-orange-50">Outcome anxiety reducer</h2>
-        <p className="text-sm text-orange-100/80">Meet Viyog: The Detachment Coach.</p>
+        <p className="text-sm text-orange-100/80">Meet Viyoga: The Detachment Coach.</p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-3">

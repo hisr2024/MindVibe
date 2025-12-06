@@ -175,7 +175,7 @@ describe('ToolsDropdown', () => {
       items: [
         {
           id: 'viyog',
-          name: 'Viyog',
+          name: 'Viyoga',
           description: 'Detachment guidance',
           href: '/viyog',
           icon: <span>V</span>,
@@ -212,7 +212,7 @@ describe('ToolsDropdown', () => {
   it('displays category items when open', () => {
     render(<ToolsDropdown categories={mockCategories} />)
     fireEvent.click(screen.getByText('Tools'))
-    expect(screen.getByText('Viyog')).toBeInTheDocument()
+    expect(screen.getByText('Viyoga')).toBeInTheDocument()
     expect(screen.getByText('Karmic Tree')).toBeInTheDocument()
   })
 
