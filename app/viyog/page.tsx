@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -87,22 +88,15 @@ Boundaries:
     const request = `${systemPrompt}\n\nUser concern: "${trimmedConcern}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
-      if (!response.ok) {
-        setError('Viyog is having trouble connecting right now. Please try again in a moment.')
-        return
-      }
-
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Viyog. Check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -155,11 +149,11 @@ Boundaries:
                   disabled={!concern.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02]"
                 >
-                  {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
+                  {loading ? <span>Viyog is centering...</span> : <span>Shift with Viyog</span>}
                 </button>
               </div>
 
-              {error && <p className="mt-3 text-sm text-orange-200">{error}</p>}
+              {error && <p className="mt-3 text-sm text-orange-200"><span>{error}</span></p>}
             </div>
 
             {/* Response */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -89,22 +90,15 @@ Tone: short, clear sentences; calm; secular; never shaming.`
     const request = `${systemPrompt}\n\nUser conflict: "${trimmedConflict}"\n\nReturn the structured eight-part response in numbered sections with concise guidance only.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
-      if (!response.ok) {
-        setError('Relationship Compass is unavailable right now. Please try again shortly.')
-        return
-      }
-
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Relationship Compass. Check your connection and retry.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -162,7 +156,7 @@ Tone: short, clear sentences; calm; secular; never shaming.`
                   disabled={!conflict.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02]"
                 >
-                  {loading ? 'Balancing guidance...' : 'Guide me with Relationship Compass'}
+                  {loading ? <span>Balancing guidance...</span> : <span>Guide me with Relationship Compass</span>}
                 </button>
                 <Link
                   href="/#kiaan-chat"
@@ -172,7 +166,7 @@ Tone: short, clear sentences; calm; secular; never shaming.`
                 </Link>
               </div>
 
-              {error && <p className="mt-3 text-sm text-orange-200">{error}</p>}
+              {error && <p className="mt-3 text-sm text-orange-200"><span>{error}</span></p>}
             </div>
 
             {/* Response */}

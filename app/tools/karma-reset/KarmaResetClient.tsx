@@ -435,7 +435,7 @@ export default function KarmaResetClient() {
               className="w-full px-5 py-4 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
               aria-label={loading ? 'Starting reset...' : 'Begin Reset Ritual'}
             >
-              {loading ? 'Starting reset...' : 'Begin Reset Ritual'}
+              {loading ? <span>Starting reset...</span> : <span>Begin Reset Ritual</span>}
             </button>
           </section>
         )}
