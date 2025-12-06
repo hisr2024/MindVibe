@@ -8,7 +8,7 @@ import { UsageCard } from '@/components/dashboard/UsageCard'
 import { UpgradePrompt } from '@/components/cta/UpgradePrompt'
 import { CancelSubscriptionModal } from '@/components/modals'
 import { Card, CardContent, Button, Badge } from '@/components/ui'
-import { useSubscription, updateSubscription } from '@/hooks/useSubscription'
+import { useSubscription, cancelSubscription } from '@/hooks/useSubscription'
 import { useKiaanQuota } from '@/hooks/useKiaanQuota'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 
@@ -24,13 +24,9 @@ export default function SubscriptionDashboardPage() {
 
   const handleCancelSubscription = async () => {
     if (!subscription) return
-    
-    // Update subscription to mark as canceling at period end
-    const updated = {
-      ...subscription,
-      cancelAtPeriodEnd: true,
-    }
-    updateSubscription(updated)
+
+    await cancelSubscription()
+    // Refresh to get latest state from backend/cache
     await refetch()
   }
 

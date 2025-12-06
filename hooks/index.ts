@@ -1,4 +1,9 @@
-export { useSubscription, updateSubscription, type Subscription } from './useSubscription'
+export {
+  useSubscription,
+  updateSubscription,
+  cancelSubscription,
+  type Subscription,
+} from './useSubscription'
 export { useKiaanQuota } from './useKiaanQuota'
 export { useCountdown } from './useCountdown'
 export { useOnboarding, useIsOnboardingComplete } from './useOnboarding'
