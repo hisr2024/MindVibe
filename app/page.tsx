@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, type CSSProperties, type ReactElement } fr
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
+import { TOOLS_BY_CATEGORY } from '@/lib/constants/tools'
 import SimpleBar from 'simplebar-react'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
@@ -293,6 +294,8 @@ export default function Home() {
             </div>
         </header>
 
+        <ToolsDashboardStrip />
+
         <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
@@ -376,6 +379,60 @@ export default function Home() {
         />
       </div>
     </main>
+  )
+}
+
+function ToolsDashboardStrip() {
+  return (
+    <section className="rounded-3xl border border-orange-500/15 bg-white/5 p-5 shadow-[0_18px_70px_rgba(255,147,71,0.16)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Dashboard</p>
+          <h2 className="text-xl font-semibold text-orange-50">All tools in one place</h2>
+        </div>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-white/10 px-4 py-2 text-xs font-semibold text-orange-50 transition hover:border-orange-300/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:ring-offset-2 focus:ring-offset-[#0b0b0f]"
+        >
+          Open full view
+          <span aria-hidden>→</span>
+        </Link>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {TOOLS_BY_CATEGORY.map(category => (
+          <div
+            key={category.id}
+            className="rounded-2xl border border-white/5 bg-black/30 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.1)]"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-orange-50">{category.name}</h3>
+              <span className="text-[11px] text-orange-100/70">{category.tools.length} tools</span>
+            </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {category.tools.map(tool => (
+                <Link
+                  key={tool.id}
+                  href={tool.href}
+                  className="flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-50 transition hover:border-orange-400/40 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:ring-offset-2 focus:ring-offset-[#0b0b0f]"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-base">{tool.icon}</span>
+                    {tool.title}
+                  </span>
+                  {tool.badge && (
+                    <span className="rounded-full border border-orange-400/40 bg-orange-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-orange-100">
+                      {tool.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
