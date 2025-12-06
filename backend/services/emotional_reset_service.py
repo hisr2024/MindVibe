@@ -24,6 +24,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import EmotionalResetSession, WisdomVerse
+from backend.services.gita_service import GitaService
 from backend.services.safety_validator import SafetyValidator
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
@@ -36,6 +37,34 @@ openai_client = OpenAI(api_key=api_key) if api_key else None
 # Rate limiting constants
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
 SESSION_TIMEOUT_SECONDS = int(os.getenv("EMOTIONAL_RESET_SESSION_TIMEOUT", "1800"))
+
+# Emotional Reset: Specialized emotion-to-verse mapping
+EMOTION_VERSE_MAPPING = {
+    "anxious": [(2, 47), (2, 48), (6, 5), (6, 35)],
+    "stressed": [(2, 14), (2, 15), (6, 13), (6, 17)],
+    "sad": [(2, 22), (2, 23), (15, 7), (12, 13)],
+    "angry": [(16, 1), (16, 2), (16, 3), (2, 56)],
+    "overwhelmed": [(2, 40), (2, 50), (18, 58), (6, 25)],
+    "hopeless": [(4, 36), (4, 38), (9, 2), (18, 66)],
+    "confused": [(4, 34), (5, 15), (5, 16), (18, 63)],
+}
+
+
+def get_verse_identifier(verse) -> str:
+    """
+    Extract verse identifier consistently across different verse objects.
+
+    Args:
+        verse: Verse object (GitaVerse, WisdomVerse, or _GitaVerseWrapper)
+
+    Returns:
+        String verse identifier in format "chapter.verse"
+    """
+    chapter = getattr(verse, 'chapter', None)
+    verse_num = getattr(verse, 'verse_number', None) or getattr(verse, 'verse', None)
+    if chapter and verse_num:
+        return f"{chapter}.{verse_num}"
+    return ""
 
 
 class EmotionalResetService:
@@ -423,31 +452,51 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
     ) -> list[dict[str, str]]:
         """
         Generate wisdom insights based on assessment (Step 5).
+        Enhanced to use 5 verses and return top 3 insights.
 
         Args:
             db: Database session
             assessment: Assessment data from Step 2
 
         Returns:
-            List of 1-2 wisdom insights (no citations)
+            List of top 3 wisdom insights (no citations)
         """
         themes = assessment.get("themes", [])
         emotions = assessment.get("emotions", [])
 
-        # Search for relevant verses
+        # Get specialized verses first using module-level mapping
+        key_verse_results = []
+        primary_emotion = emotions[0] if emotions else None
+
+        if primary_emotion and primary_emotion in EMOTION_VERSE_MAPPING:
+            for chapter, verse_num in EMOTION_VERSE_MAPPING[primary_emotion][:3]:
+                try:
+                    verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+                    if verse:
+                        key_verse_results.append({"verse": verse, "score": 0.9})
+                except Exception as e:
+                    logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
+
+        # Search for additional verses (increased from 3 to 5)
         search_query = " ".join(themes + emotions)
-        verse_results = await self.wisdom_kb.search_relevant_verses(
-            db=db,
-            query=search_query,
-            limit=3,
-        )
+        verse_results = await self.wisdom_kb.search_relevant_verses(db=db, query=search_query, limit=5)
+
+        # Combine and deduplicate
+        all_verse_results = key_verse_results + verse_results
+        seen_ids = set()
+        unique_verses = []
+        for result in all_verse_results:
+            verse = result["verse"]
+            verse_id = get_verse_identifier(verse)
+            if verse_id and verse_id not in seen_ids:
+                seen_ids.add(verse_id)
+                unique_verses.append(result)
 
         insights = []
-
-        if verse_results:
-            for result in verse_results[:2]:
+        if unique_verses:
+            # Return top 3 insights (increased from 2)
+            for result in unique_verses[:3]:
                 verse = result["verse"]
-                # Format without citations
                 sanitized = self.wisdom_kb.sanitize_text(verse.english)
                 if sanitized:
                     insights.append({

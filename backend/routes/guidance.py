@@ -17,13 +17,20 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from openai import APIError, AuthenticationError, BadRequestError, OpenAI, RateLimitError
+from openai import (
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    OpenAI,
+    RateLimitError,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
+from backend.services.gita_service import GitaService
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 logger = logging.getLogger(__name__)
@@ -33,6 +40,20 @@ model_name = os.getenv("GUIDANCE_MODEL", "gpt-4o-mini")
 client = OpenAI(api_key=api_key) if api_key else None
 
 router = APIRouter(prefix="/api", tags=["guidance"])
+
+# Karma Reset: Specialized verse mapping by repair type
+KARMA_RESET_VERSE_MAPPING = {
+    "apology": [(11, 44), (12, 13), (12, 14), (12, 15), (16, 2), (16, 3), (18, 66)],
+    "clarification": [(4, 7), (13, 7), (13, 8), (13, 11), (17, 15), (18, 20)],
+    "calm_followup": [(2, 56), (2, 57), (6, 5), (6, 6), (12, 13), (12, 14), (12, 15)],
+}
+
+# Karma Reset: Theme mapping by repair type
+KARMA_RESET_THEME_MAPPING = {
+    "apology": "compassion",
+    "clarification": "truthfulness",
+    "calm_followup": "equanimity",
+}
 
 
 KIAAN_WEEKLY_PROMPT = """
@@ -229,17 +250,17 @@ Examples:
 """
 
 
-EngineResult = Dict[str, Any]
+EngineResult = dict[str, Any]
 
 
 async def _generate_response(
     *,
     system_prompt: str,
-    user_payload: Dict[str, Any],
+    user_payload: dict[str, Any],
     expect_json: bool,
     temperature: float = 0.4,
     max_tokens: int = 1200,
-) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
+) -> tuple[dict[str, Any] | None, str | None]:
     if not client:
         logger.error("Guidance engines unavailable: missing OpenAI API key")
         raise HTTPException(status_code=503, detail="Guidance engines are not configured")
@@ -271,7 +292,7 @@ async def _generate_response(
         raise HTTPException(status_code=500, detail="Unexpected error generating guidance") from exc
 
     raw_text = completion.choices[0].message.content if completion.choices else None
-    parsed: Optional[Dict[str, Any]] = None
+    parsed: dict[str, Any] | None = None
 
     if expect_json and raw_text:
         try:
@@ -283,7 +304,7 @@ async def _generate_response(
 
 
 @router.post("/kiaan/weekly-guidance")
-async def generate_weekly_guidance(payload: Dict[str, Any]) -> EngineResult:
+async def generate_weekly_guidance(payload: dict[str, Any]) -> EngineResult:
     parsed, raw_text = await _generate_response(
         system_prompt=KIAAN_WEEKLY_PROMPT,
         user_payload=payload,
@@ -301,7 +322,7 @@ async def generate_weekly_guidance(payload: Dict[str, Any]) -> EngineResult:
 
 
 @router.post("/journal/reflect")
-async def reflect_journal_entry(payload: Dict[str, Any]) -> EngineResult:
+async def reflect_journal_entry(payload: dict[str, Any]) -> EngineResult:
     parsed, raw_text = await _generate_response(
         system_prompt=JOURNAL_REFLECTION_PROMPT,
         user_payload=payload,
@@ -320,7 +341,7 @@ async def reflect_journal_entry(payload: Dict[str, Any]) -> EngineResult:
 
 
 @router.post("/journal/weekly-evaluation")
-async def weekly_evaluation(payload: Dict[str, Any]) -> EngineResult:
+async def weekly_evaluation(payload: dict[str, Any]) -> EngineResult:
     parsed, raw_text = await _generate_response(
         system_prompt=WEEKLY_EVALUATION_PROMPT,
         user_payload=payload,
@@ -339,7 +360,7 @@ async def weekly_evaluation(payload: Dict[str, Any]) -> EngineResult:
 
 
 @router.post("/profile/build")
-async def build_profile(payload: Dict[str, Any]) -> EngineResult:
+async def build_profile(payload: dict[str, Any]) -> EngineResult:
     parsed, raw_text = await _generate_response(
         system_prompt=PROFILE_BUILDER_PROMPT,
         user_payload=payload,
@@ -358,7 +379,7 @@ async def build_profile(payload: Dict[str, Any]) -> EngineResult:
 
 
 @router.post("/auth/copy")
-async def auth_copy(payload: Dict[str, Any]) -> EngineResult:
+async def auth_copy(payload: dict[str, Any]) -> EngineResult:
     parsed, raw_text = await _generate_response(
         system_prompt=AUTH_COPY_PROMPT,
         user_payload=payload,
@@ -376,9 +397,76 @@ async def auth_copy(payload: Dict[str, Any]) -> EngineResult:
     )
 
 
+def get_verse_identifier(verse) -> str:
+    """
+    Extract verse identifier consistently across different verse objects.
+
+    Args:
+        verse: Verse object (GitaVerse, WisdomVerse, or _GitaVerseWrapper)
+
+    Returns:
+        String verse identifier in format "chapter.verse"
+    """
+    chapter = getattr(verse, 'chapter', None)
+    verse_num = getattr(verse, 'verse_number', None) or getattr(verse, 'verse', None)
+    if chapter and verse_num:
+        return f"{chapter}.{verse_num}"
+    return ""
+
+
+async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happened: str, limit: int = 5) -> list[dict[str, Any]]:
+    """
+    Get specialized Gita verses for Karma Reset based on repair type.
+
+    Uses module-level KARMA_RESET_VERSE_MAPPING and KARMA_RESET_THEME_MAPPING.
+    """
+    kb = WisdomKnowledgeBase()
+
+    # Get key verses for this repair type
+    key_verses = KARMA_RESET_VERSE_MAPPING.get(repair_type, KARMA_RESET_VERSE_MAPPING["apology"])
+
+    key_verse_results = []
+    for chapter, verse_num in key_verses:
+        try:
+            verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+            if verse:
+                key_verse_results.append({
+                    "verse": verse,
+                    "score": 0.9,
+                    "sanitized_text": kb.sanitize_text(verse.english)
+                })
+        except Exception as e:
+            logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
+
+    # Theme search using module-level mapping
+    theme = KARMA_RESET_THEME_MAPPING.get(repair_type, "compassion")
+
+    theme_search_results = []
+    try:
+        search_query = f"{what_happened} {theme} forgiveness understanding balance"
+        theme_search_results = await kb.search_relevant_verses_full_db(db=db, query=search_query, theme=theme, limit=3)
+    except Exception as e:
+        logger.debug(f"Theme search failed: {e}")
+
+    # Combine and deduplicate
+    all_results = key_verse_results[:6] + theme_search_results
+    seen_ids = set()
+    unique_results = []
+    for result in all_results:
+        verse = result.get("verse")
+        if verse:
+            verse_id = get_verse_identifier(verse)
+            if verse_id and verse_id not in seen_ids:
+                seen_ids.add(verse_id)
+                unique_results.append(result)
+
+    unique_results.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return unique_results[:limit]
+
+
 @router.post("/karma-reset/generate")
 async def generate_karma_reset(
-    payload: Dict[str, Any],
+    payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> EngineResult:
     """Generate structured Karma Reset guidance as a crisp 4-part plan.
@@ -402,59 +490,42 @@ async def generate_karma_reset(
     }
     repair_type = payload.get("repair_type", "apology")
     repair_type = repair_type_map.get(repair_type, repair_type)
-    
+
     # Extract situation context for Gita verse search
     what_happened = payload.get("what_happened", "")
-    
-    # Build search query based on repair type
-    search_queries = {
-        "apology": "forgiveness humility acknowledging mistakes karma duty",
-        "clarification": "truth clear communication understanding dharma",
-        "calm_followup": "equanimity peace emotional balance self-control"
-    }
-    
-    query = f"{what_happened} {search_queries.get(repair_type, 'karma dharma action')}"
-    
-    # Search relevant Gita verses
-    gita_kb = WisdomKnowledgeBase()
+
     verse_results = []
     gita_context = ""
-    
+
     try:
-        verse_results = await gita_kb.search_relevant_verses(
-            db=db, 
-            query=query, 
-            limit=5
-        )
-        
-        # Build Gita context for the prompt
+        # Use specialized Karma Reset verse function
+        verse_results = await get_karma_reset_verses(db=db, repair_type=repair_type, what_happened=what_happened, limit=5)
+
+        # Build Gita context
         if verse_results:
             for v in verse_results:
                 verse_obj = v.get("verse")
                 if verse_obj:
-                    # Handle both verse_number (WisdomVerse, _GitaVerseWrapper) and verse (GitaVerse) attributes
-                    verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
-                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
-                    # Use principle if available, otherwise use context
+                    verse_id = get_verse_identifier(verse_obj)
+                    gita_context += f"\n{verse_id}:\n{verse_obj.english}\n"
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
                         gita_context += f"Principle: {principle}\n"
-        
-        logger.info(f"Karma Reset - Found {len(verse_results)} Gita verses for query: {query[:50]}")
-        logger.debug(f"Gita context built: {gita_context[:200]}...")
+
+        logger.info(f"Karma Reset - Found {len(verse_results)} specialized verses for {repair_type}")
     except Exception as e:
         logger.error(f"Error fetching Gita verses for Karma Reset: {e}")
         gita_context = ""
-    
+
     # Use default principles if no Gita context was built
     if not gita_context:
         gita_context = "Apply universal principles of dharma (duty), karma (action), and kshama (forgiveness)."
-    
+
     # Update the system prompt to include Gita wisdom
     KARMA_RESET_WITH_GITA_PROMPT = f"""
 KARMA RESET ENGINE - Unified 4-Part Reset Plan (Powered by Bhagavad Gita)
 
-You are KIAAN, providing a crisp 4-part karma reset plan rooted in the wisdom 
+You are KIAAN, providing a crisp 4-part karma reset plan rooted in the wisdom
 of the Bhagavad Gita's 700 verses.
 
 GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite directly):
@@ -531,7 +602,7 @@ Examples:
         max_tokens=220,
     )
 
-    reset_guidance: Optional[Dict[str, str]] = None
+    reset_guidance: dict[str, str] | None = None
     if parsed:
         breathing_line = (
             parsed.get("breathingLine")
@@ -583,7 +654,7 @@ Examples:
 
 
 @router.get("/guidance/health")
-async def guidance_healthcheck() -> Dict[str, Any]:
+async def guidance_healthcheck() -> dict[str, Any]:
     return {
         "status": "ready" if client else "degraded",
         "model": model_name,
