@@ -446,7 +446,7 @@ export default function PricingPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-12">
+    <main className="mx-auto max-w-6xl px-4 py-12">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-orange-50 mb-4">
@@ -477,17 +477,20 @@ export default function PricingPage() {
         tabIndex={0}
         role="region"
         aria-label="Pricing plans carousel"
-        className={`subscription-scroll flex gap-6 overflow-x-auto pb-6 mb-16 snap-x snap-mandatory scroll-px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg ${isScrolling ? 'scrolling' : ''}`}
+        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 xl:grid-cols-3 ${
+          isScrolling ? 'scrolling' : ''
+        }`}
         style={{
           scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
           WebkitOverflowScrolling: 'touch',
           touchAction: 'pan-y',
+          overflowX: 'auto',
         }}
       >
         {pricingTiers.map((tier, index) => (
           <div
             key={tier.id}
-            className="flex-shrink-0 w-[280px] sm:w-[300px] snap-center"
+            className="flex-shrink-0 w-full snap-center sm:snap-auto sm:w-full"
           >
             <PricingCard
               tier={tier}
