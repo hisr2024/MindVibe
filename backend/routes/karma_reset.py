@@ -41,8 +41,8 @@ if openai_key and openai_key != "your-api-key-here":
 
 @router.post("/generate", response_model=KarmaResetResponse)
 async def generate_karma_reset(
-    request: KarmaResetRequest,
-    db: AsyncSession = Depends(get_db)
+    request: KarmaResetRequest
+    # db: AsyncSession = Depends(get_db)  # Reserved for future database logging
 ) -> KarmaResetResponse:
     """Generate karma reset guidance based on situation and repair choice."""
     
@@ -97,27 +97,27 @@ End with a short mantra for moving forward.
         
         guidance_text = response.choices[0].message.content or ""
         
+        # Helper function to extract content after a header
+        def extract_section_content(lines, keywords, start_markers):
+            """Extract content after finding a section header."""
+            for i, line in enumerate(lines):
+                lower_line = line.lower()
+                # Check if this line contains any of the keywords or starts with a marker
+                if any(kw in lower_line for kw in keywords) or any(line.startswith(m) for m in start_markers):
+                    # Return the next non-header line as content
+                    next_line = lines[i+1] if i+1 < len(lines) else line
+                    if not any(next_line.startswith(m) for m in ['1.', '2.', '3.', '4.', '**']):
+                        return next_line
+                    return line.replace('**', '').strip()
+            return ""
+        
         # Parse the response into structured parts
-        # Look for numbered sections or bold headers
         lines = [line.strip() for line in guidance_text.split('\n') if line.strip()]
         
-        breathing_line = ""
-        ripple_summary = ""
-        repair_action = ""
-        forward_intention = ""
-        
-        # Simple parsing - look for keywords or numbered sections
-        for i, line in enumerate(lines):
-            lower_line = line.lower()
-            if 'pause' in lower_line or 'breathe' in lower_line or line.startswith('1.'):
-                # Capture the next non-header line as breathing guidance
-                breathing_line = lines[i+1] if i+1 < len(lines) and not lines[i+1].startswith(('1.', '2.', '3.', '4.', '**')) else line
-            elif 'ripple' in lower_line or line.startswith('2.'):
-                ripple_summary = lines[i+1] if i+1 < len(lines) and not lines[i+1].startswith(('1.', '2.', '3.', '4.', '**')) else line
-            elif 'repair' in lower_line or line.startswith('3.'):
-                repair_action = lines[i+1] if i+1 < len(lines) and not lines[i+1].startswith(('1.', '2.', '3.', '4.', '**')) else line
-            elif 'intention' in lower_line or line.startswith('4.'):
-                forward_intention = lines[i+1] if i+1 < len(lines) and not lines[i+1].startswith(('1.', '2.', '3.', '4.', '**')) else line
+        breathing_line = extract_section_content(lines, ['pause', 'breathe'], ['1.'])
+        ripple_summary = extract_section_content(lines, ['ripple'], ['2.'])
+        repair_action = extract_section_content(lines, ['repair'], ['3.'])
+        forward_intention = extract_section_content(lines, ['intention'], ['4.'])
         
         # Fallback: if parsing failed, use generic text
         if not breathing_line:
