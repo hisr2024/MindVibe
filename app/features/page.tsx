@@ -72,7 +72,6 @@ const flowPages = [
   { href: '/flows/kiaan', title: 'Talk to KIAAN', detail: 'Chat with clarity pause watch' },
   { href: '/flows/ardha', title: 'Ardha reframing', detail: 'Reframes with validation and steps' },
   { href: '/flows/viyog', title: 'Viyog outcome reducer', detail: 'Detachment coaching' },
-  { href: '/flows/karma-reset', title: 'Karma reset', detail: 'Gentle course correction' },
   { href: '/flows/journal', title: 'Private journal', detail: 'AES-GCM encrypted storage' },
 ]
 

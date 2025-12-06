@@ -235,10 +235,10 @@ export default function KarmaFootprintClient() {
                       🔄 Analyze Another Day
                     </button>
                     <Link
-                      href="/tools/karma-reset"
+                      href="/tools/emotional-reset"
                       className="px-4 py-2 text-sm font-semibold rounded-lg bg-purple-500/20 text-purple-50 hover:bg-purple-500/30 border border-purple-400/25 transition"
                     >
-                      🔧 Start Karma Reset
+                      💫 Emotional Reset
                     </Link>
                   </div>
                 </div>
@@ -304,10 +304,10 @@ export default function KarmaFootprintClient() {
                   Karmic Tree
                 </Link>
                 <Link
-                  href="/tools/karma-reset"
+                  href="/tools/emotional-reset"
                   className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
                 >
-                  Karma Reset
+                  Emotional Reset
                 </Link>
               </div>
             </FadeIn>

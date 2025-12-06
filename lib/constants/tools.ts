@@ -115,14 +115,6 @@ export const KARMA_TOOLS: ToolConfig[] = [
     href: '/tools/karma-footprint',
   },
   {
-    id: 'karma-reset',
-    icon: '🔧',
-    title: 'Karma Reset',
-    description: '4-part emotional repair',
-    gradient: 'from-indigo-400/30 to-purple-400/30',
-    href: '/tools/karma-reset',
-  },
-  {
     id: 'emotional-reset',
     icon: '💫',
     title: 'Emotional Reset',

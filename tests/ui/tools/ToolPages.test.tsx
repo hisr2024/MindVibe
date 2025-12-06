@@ -73,8 +73,8 @@ describe('Karma Footprint Page', () => {
   it('renders related tools links', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
-    expect(screen.getByText('Karma Reset Ritual')).toBeInTheDocument()
+
+    expect(screen.getByText('Emotional Reset')).toBeInTheDocument()
     expect(screen.getByText('Full Karmic Tree View')).toBeInTheDocument()
     expect(screen.getByText('Sacred Reflections Journal')).toBeInTheDocument()
   })
@@ -116,11 +116,6 @@ describe('Tool Redirect Pages', () => {
     expect(module.default).toBeDefined()
   })
 
-  it('karma-reset redirect page exists', async () => {
-    const module = await import('@/app/tools/karma-reset/page')
-    expect(module.default).toBeDefined()
-  })
-
   it('karma-footprint redirect page exists', async () => {
     const module = await import('@/app/tools/karma-footprint/page')
     expect(module.default).toBeDefined()
@@ -150,15 +145,8 @@ describe('Existing Tool Pages Headers', () => {
   it('relationship-compass page has correct heading', async () => {
     const { default: RelationshipCompassPage } = await import('@/app/relationship-compass/page')
     render(<RelationshipCompassPage />)
-    
-    expect(screen.getByText('Relationship Compass')).toBeInTheDocument()
-  })
 
-  it('karma-reset page has correct heading', async () => {
-    const { default: KarmaResetPage } = await import('@/app/karma-reset/page')
-    render(<KarmaResetPage />)
-    
-    expect(screen.getByText('Karma Reset Ritual')).toBeInTheDocument()
+    expect(screen.getByText('Relationship Compass')).toBeInTheDocument()
   })
 
   // Note: emotional-reset page uses useRouter which requires special mocking

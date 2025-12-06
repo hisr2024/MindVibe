@@ -77,7 +77,7 @@ const createPricingTiers = (
       '300 KIAAN questions/month',
       'All Pro features',
       'Relationship Compass',
-      'Karma Reset Guide',
+      'Emotional Reset Guide',
       'Priority support',
       'Advanced mood analytics',
     ],
@@ -118,7 +118,7 @@ const comparisonFeatures = [
       { name: 'Ardha Reframing', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
       { name: 'Viyog Detachment', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
       { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
-      { name: 'Karma Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Emotional Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
     ],
   },
   {
