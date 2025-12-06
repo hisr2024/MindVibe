@@ -35,6 +35,118 @@ DEFAULT_GITA_PRINCIPLES = "Apply universal principles of nishkama karma (desirel
 
 router = APIRouter(prefix="/api/viyoga", tags=["viyoga"])
 
+# Verse scoring constants for prioritization
+PRIORITY_VERSE_SCORE = 0.95  # For verse 2.47 (most famous karma yoga verse)
+KEY_VERSE_SCORE = 0.9        # For other important karma yoga verses
+THEME_VERSE_SCORE = 0.75     # For thematically relevant verses
+
+
+async def get_detachment_verses(db: AsyncSession, concern: str, limit: int = 5) -> list[dict[str, Any]]:
+    """
+    Get karma yoga verses for outcome detachment coaching.
+    
+    Focuses on verses about nishkama karma (desireless action), detachment from results,
+    and equanimity in success and failure.
+    
+    Key verses:
+    - 2.47: Nishkama karma - You have right to action, not fruits (MOST FAMOUS)
+    - 2.48: Yoga is skill in action, equanimity
+    - 3.19: Perform duty without attachment to achieve the highest
+    - 4.20: Free from attachment to results, always content
+    - 5.10: Acts without attachment, untouched by sin
+    - 18.66: Surrender all dharmas to me, I will free you
+    
+    Args:
+        db: Database session
+        concern: The outcome worry or concern
+        limit: Maximum number of verses to return (default 5)
+        
+    Returns:
+        List of relevant verse results with scores
+    """
+    from backend.services.gita_service import GitaService
+    
+    kb = WisdomKnowledgeBase()
+    
+    # Priority 1: Get key karma yoga verses
+    key_karma_verses = [
+        (2, 47),   # THE most famous verse on nishkama karma
+        (2, 48),   # Equanimity in success/failure
+        (3, 19),   # Perform duty without attachment
+        (4, 20),   # Free from attachment to results
+        (5, 10),   # Acts without attachment
+        (18, 66),  # Ultimate surrender
+        (2, 38),   # Treating pleasure and pain equally
+        (2, 50),   # Yoga is skill in actions
+        (3, 30),   # Dedicating all actions
+        (6, 1),    # True renunciate performs duty
+    ]
+    
+    key_verse_results = []
+    for chapter, verse_num in key_karma_verses:
+        try:
+            verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+            if verse:
+                # Higher score for the most important verse (2.47)
+                score = PRIORITY_VERSE_SCORE if verse_num == 47 and chapter == 2 else KEY_VERSE_SCORE
+                key_verse_results.append({
+                    "verse": verse,
+                    "score": score,
+                    "sanitized_text": kb.sanitize_text(verse.english)
+                })
+        except Exception as e:
+            logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
+    
+    # Priority 2: Search by theme for additional context
+    theme_search_results = []
+    try:
+        # Search for karma yoga and detachment themes
+        search_query = f"{concern} karma action detachment duty equanimity results"
+        theme_search_results = await kb.search_relevant_verses_full_db(
+            db=db,
+            query=search_query,
+            theme="selfless_action",
+            limit=3
+        )
+    except Exception as e:
+        logger.debug(f"Theme search failed: {e}")
+    
+    # Priority 3: Search by mental health application
+    application_search_results = []
+    try:
+        # Search for outcome anxiety and perfectionism tags
+        for app in ["outcome_anxiety", "perfectionism", "anxiety_management"]:
+            try:
+                results = await GitaService.search_by_mental_health_application(db, app, limit=2)
+                for verse in results:
+                    application_search_results.append({
+                        "verse": verse,
+                        "score": THEME_VERSE_SCORE,
+                        "sanitized_text": kb.sanitize_text(verse.english)
+                    })
+            except Exception as e:
+                logger.debug(f"Application search for {app} failed: {e}")
+    except Exception as e:
+        logger.debug(f"Application search failed: {e}")
+    
+    # Combine all sources, prioritizing key karma yoga verses
+    all_results = key_verse_results[:6] + theme_search_results + application_search_results
+    
+    # Remove duplicates (by verse_id)
+    seen_ids = set()
+    unique_results = []
+    for result in all_results:
+        verse = result.get("verse")
+        if verse:
+            verse_id = f"{verse.chapter}.{verse.verse}"
+            if verse_id not in seen_ids:
+                seen_ids.add(verse_id)
+                unique_results.append(result)
+    
+    # Sort by score and return top N
+    unique_results.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return unique_results[:limit]
+
 
 async def _generate_response(
     *,
@@ -112,17 +224,13 @@ async def detach_from_outcome(
     # Search query focusing on nishkama karma, detachment, and equanimity
     search_query = f"{outcome_worry} karma yoga nishkama karma detachment equanimity action duty results"
 
-    # Search relevant Gita verses
-    gita_kb = WisdomKnowledgeBase()
+    # Get karma yoga verses for detachment coaching
     verse_results = []
     gita_context = ""
 
     try:
-        verse_results = await gita_kb.search_relevant_verses(
-            db=db,
-            query=search_query,
-            limit=5
-        )
+        # Use dedicated function for karma yoga verses
+        verse_results = await get_detachment_verses(db, outcome_worry, limit=5)
 
         # Build Gita context for the prompt (internal use only)
         if verse_results:
@@ -139,7 +247,7 @@ async def detach_from_outcome(
                     if principle:
                         gita_context += f"Principle: {principle}\n"
 
-        logger.info(f"Viyoga - Found {len(verse_results)} Gita verses for outcome detachment")
+        logger.info(f"Viyoga - Found {len(verse_results)} karma yoga verses for outcome detachment")
         logger.debug(f"Gita context built: {gita_context[:200]}...")
     except Exception as e:
         logger.error(f"Error fetching Gita verses for Viyoga: {e}")
