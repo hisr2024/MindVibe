@@ -507,6 +507,20 @@ async def main(use_api: bool = False, use_chapters: bool = False) -> int:
             await conn.run_sync(Base.metadata.create_all)
         print("✅ Tables created/verified\n")
 
+        # Verify database schema before seeding
+        print("🔍 Verifying database schema...")
+        # Import here to avoid circular imports
+        sys.path.insert(0, str(Path(__file__).parent))
+        try:
+            from verify_db_schema import verify_schema
+            if not await verify_schema():
+                print("❌ Schema verification failed. Run migrations first:")
+                print("   psql $DATABASE_URL < migrations/20251206_add_transliteration_to_gita_verses.sql")
+                return 1
+        except ImportError:
+            print("⚠️  Could not import verify_db_schema, skipping schema check")
+        print("✅ Schema verification passed\n")
+
         total_seeded = 0
         total_skipped = 0
         total_failed = 0
