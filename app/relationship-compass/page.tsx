@@ -162,7 +162,7 @@ Tone: short, clear sentences; calm; secular; never shaming.`
                   disabled={!conflict.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02]"
                 >
-                  {loading ? 'Balancing guidance...' : 'Guide me with Relationship Compass'}
+                  {loading ? <span>Balancing guidance...</span> : <span>Guide me with Relationship Compass</span>}
                 </button>
                 <Link
                   href="/#kiaan-chat"
@@ -172,7 +172,7 @@ Tone: short, clear sentences; calm; secular; never shaming.`
                 </Link>
               </div>
 
-              {error && <p className="mt-3 text-sm text-orange-200">{error}</p>}
+              {error && <p className="mt-3 text-sm text-orange-200"><span>{error}</span></p>}
             </div>
 
             {/* Response */}

@@ -155,13 +155,13 @@ export default function KarmaFootprintClient() {
                       className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
                       aria-label={loading ? 'Analyzing...' : 'Analyze my day'}
                     >
-                      {loading ? 'Analyzing...' : 'Analyze my day'}
+                      {loading ? <span>Analyzing...</span> : <span>Analyze my day</span>}
                     </button>
                   </div>
 
                   {error && (
                     <p className="mt-3 text-sm text-orange-200" role="alert">
-                      {error}
+                      <span>{error}</span>
                     </p>
                   )}
                 </div>

@@ -432,7 +432,7 @@ export default function KarmaResetPage() {
             {/* Error display */}
             {error && (
               <div className="rounded-lg bg-red-500/10 border border-red-400/30 p-3 text-sm text-red-200" role="alert">
-                {error}
+                <span>{error}</span>
               </div>
             )}
 
@@ -443,7 +443,7 @@ export default function KarmaResetPage() {
               className="w-full px-5 py-4 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 transition hover:scale-[1.02]"
               aria-label={loading ? 'Starting reset...' : 'Begin Reset Ritual'}
             >
-              {loading ? 'Starting reset...' : 'Begin Reset Ritual'}
+              {loading ? <span>Starting reset...</span> : <span>Begin Reset Ritual</span>}
             </button>
           </section>
         )}
@@ -473,14 +473,14 @@ export default function KarmaResetPage() {
                   }`}
                   aria-pressed={soundEnabled}
                 >
-                  {soundEnabled ? '🔔 Sound on' : '🔕 Sound muted'}
+                  {soundEnabled ? <span>🔔 Sound on</span> : <span>🔕 Sound muted</span>}
                 </button>
                 <button
                   onClick={startBreathingCycle}
                   disabled={isBreathing}
                   className="rounded-full bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-4 py-2 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60"
                 >
-                  {isBreathing ? 'Guiding breaths…' : 'Restart 4-Breath Reset'}
+                  {isBreathing ? <span>Guiding breaths…</span> : <span>Restart 4-Breath Reset</span>}
                 </button>
               </div>
             </div>
@@ -499,9 +499,9 @@ export default function KarmaResetPage() {
                 <div className="absolute inset-2 rounded-full border border-orange-400/30" />
               </div>
               <div className="mt-4 space-y-1">
-                <div className="text-xl font-semibold text-orange-50">{isBreathing ? currentBreathPhase?.label : 'Ready'}</div>
+                <div className="text-xl font-semibold text-orange-50">{isBreathing ? <span>{currentBreathPhase?.label}</span> : <span>Ready</span>}</div>
                 <div className="text-sm text-orange-100/70">
-                  {isBreathing ? currentBreathPhase?.instruction : 'Inhale 4s → Hold 1s → Exhale 5s • Repeat 4x'}
+                  {isBreathing ? <span>{currentBreathPhase?.instruction}</span> : <span>Inhale 4s → Hold 1s → Exhale 5s • Repeat 4x</span>}
                 </div>
               </div>
             </div>
@@ -630,7 +630,7 @@ export default function KarmaResetPage() {
                       : 'bg-orange-500/20 text-orange-50 hover:bg-orange-500/30 border border-orange-400/25'
                   }`}
                 >
-                  {journalSaved ? '✓ Saved to Journal' : '📓 Save to Journal'}
+                  {journalSaved ? <span>✓ Saved to Journal</span> : <span>📓 Save to Journal</span>}
                 </button>
                 <Link
                   href="/?openChat=true"

@@ -52,11 +52,11 @@ export function CheckoutButton({
         size="lg"
         className="w-full"
       >
-        {loading ? 'Processing...' : `Start 15-day free trial of ${tierName}`}
+        {loading ? <span>Processing...</span> : <span>Start 15-day free trial of {tierName}</span>}
       </Button>
       
       {error && (
-        <p className="mt-2 text-xs text-red-400 text-center">{error}</p>
+        <p className="mt-2 text-xs text-red-400 text-center"><span>{error}</span></p>
       )}
       
       <p className="mt-2 text-xs text-orange-100/50 text-center">

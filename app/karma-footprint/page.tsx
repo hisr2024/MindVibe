@@ -249,13 +249,13 @@ Respond using the four-part format with brief, grounded insights.`
                   disabled={!action.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02]"
                 >
-                  {loading ? 'Analyzing...' : 'Analyze Footprint'}
+                  {loading ? <span>Analyzing...</span> : <span>Analyze Footprint</span>}
                 </button>
               </div>
 
               {error && (
                 <p className="mt-3 text-sm text-orange-200" role="alert">
-                  {error}
+                  <span>{error}</span>
                 </p>
               )}
             </div>

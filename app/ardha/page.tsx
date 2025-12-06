@@ -159,11 +159,11 @@ Boundaries:
                   disabled={!thought.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02]"
                 >
-                  {loading ? 'Ardha is reflecting...' : 'Reframe with Ardha'}
+                  {loading ? <span>Ardha is reflecting...</span> : <span>Reframe with Ardha</span>}
                 </button>
               </div>
 
-              {error && <p className="mt-3 text-sm text-orange-200">{error}</p>}
+              {error && <p className="mt-3 text-sm text-orange-200"><span>{error}</span></p>}
             </div>
 
             {/* Response */}

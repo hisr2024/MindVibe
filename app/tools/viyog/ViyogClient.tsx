@@ -167,13 +167,13 @@ Boundaries:
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
                   aria-label={loading ? 'Processing...' : 'Shift with Viyog'}
                 >
-                  {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
+                  {loading ? <span>Viyog is centering...</span> : <span>Shift with Viyog</span>}
                 </button>
               </div>
 
               {error && (
                 <p className="mt-3 text-sm text-orange-200" role="alert">
-                  {error}
+                  <span>{error}</span>
                 </p>
               )}
             </div>

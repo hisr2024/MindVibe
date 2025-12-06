@@ -226,7 +226,7 @@ export default function Chat() {
           disabled={!input.trim() || loading}
           className="rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Sending...' : 'Send'}
+          {loading ? <span>Sending...</span> : <span>Send</span>}
         </button>
       </div>
       <p className="text-xs text-orange-100/70">We do not store chats long-term; avoid crisis information and call local services in emergencies.</p>

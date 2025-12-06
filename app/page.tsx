@@ -458,10 +458,10 @@ function ArdhaReframer() {
                 disabled={!thought.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Reflecting...' : 'Reframe'}
+              {loading ? <span>Reflecting...</span> : <span>Reframe</span>}
             </button>
           </div>
-            {error && <p className="text-sm mv-panel-title">{error}</p>}
+            {error && <p className="text-sm mv-panel-title"><span>{error}</span></p>}
           </div>
 
           <div className="space-y-3 rounded-2xl border p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]" style={{ background: 'var(--mv-surface-subtle)', borderColor: 'var(--mv-border)' }}>
@@ -562,10 +562,10 @@ function ViyogDetachmentCoach() {
                 disabled={!concern.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Centering...' : 'Shift'}
+              {loading ? <span>Centering...</span> : <span>Shift</span>}
             </button>
           </div>
-            {error && <p className="text-sm mv-panel-title">{error}</p>}
+            {error && <p className="text-sm mv-panel-title"><span>{error}</span></p>}
           </div>
 
           <div className="space-y-3 rounded-2xl border p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]" style={{ background: 'var(--mv-surface-subtle)', borderColor: 'var(--mv-border)' }}>
@@ -680,7 +680,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
               disabled={!conflict.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Balancing guidance...' : 'Guide me with Relationship Compass'}
+              {loading ? <span>Balancing guidance...</span> : <span>Guide me with Relationship Compass</span>}
             </button>
             <button
               onClick={() => handoffPrompt && onSelectPrompt(handoffPrompt)}
@@ -693,7 +693,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
               Output format: acknowledge, separate ego, name values, right action, detach, add compassion, suggest phrasing, then one next step.
             </div>
         </div>
-        {error && <p className="text-sm text-orange-200">{error}</p>}
+        {error && <p className="text-sm text-orange-200"><span>{error}</span></p>}
 
           {result && (
             <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
