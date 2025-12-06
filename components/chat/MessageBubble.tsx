@@ -10,6 +10,8 @@ interface MessageBubbleProps {
   status?: 'error'
   onSaveToJournal?: (text: string) => void
   summary?: string
+  gitaPowered?: boolean  // New prop to indicate Gita-powered response
+  verseReference?: string  // New prop for verse chapter reference (e.g., "Ch. 2-6")
 }
 
 function buildSummary(text: string) {
@@ -21,10 +23,11 @@ function buildSummary(text: string) {
   return selected.length > 280 ? `${selected.slice(0, 277)}...` : selected
 }
 
-export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary }: MessageBubbleProps) {
+export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference }: MessageBubbleProps) {
   const router = useRouter()
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
+  const [showVerseHover, setShowVerseHover] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -58,6 +61,37 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         <span suppressHydrationWarning>
           {timestamp ? new Date(timestamp).toLocaleTimeString() : ''}
         </span>
+        
+        {/* Gita Wisdom Badge for assistant messages */}
+        {sender === 'assistant' && gitaPowered && !status && (
+          <div className="relative">
+            <div
+              className="flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-orange-300 border border-orange-400/30 cursor-help"
+              onMouseEnter={() => setShowVerseHover(true)}
+              onMouseLeave={() => setShowVerseHover(false)}
+              role="tooltip"
+              aria-label="This response is rooted in Bhagavad Gita wisdom"
+            >
+              <span className="text-xs">🕉️</span>
+              <span>Gita Wisdom</span>
+            </div>
+            
+            {/* Hover tooltip for verse reference */}
+            {showVerseHover && (
+              <div className="absolute left-0 top-full mt-1 z-10 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-[11px] text-orange-50 shadow-lg border border-orange-500/30">
+                <div className="font-semibold text-orange-300 mb-0.5">Rooted in Ancient Wisdom</div>
+                <div className="text-orange-100/70">
+                  {verseReference 
+                    ? `Drawing from Bhagavad Gita ${verseReference}` 
+                    : 'Based on 700 verses of timeless teaching'}
+                </div>
+                <div className="mt-1 pt-1 border-t border-orange-500/20 text-orange-200/60 text-[10px]">
+                  Every KIAAN response is validated for authenticity
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       <div
@@ -89,6 +123,19 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               {condensedSummary}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Learn More About Gita link */}
+      {sender === 'assistant' && gitaPowered && !status && (
+        <div className="flex items-center gap-3">
+          <a
+            href="/gita-wisdom"
+            className="text-[11px] text-orange-300/70 hover:text-orange-200 transition-colors underline decoration-dotted underline-offset-2"
+            aria-label="Learn more about the Bhagavad Gita wisdom engine"
+          >
+            Learn More About Gita Wisdom →
+          </a>
         </div>
       )}
 
