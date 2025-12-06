@@ -24,8 +24,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'Manrope', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
         mvGradientSunrise: 'linear-gradient(135deg, #ff7a3c 0%, #ff9f52 50%, #ffd36f 100%)',
