@@ -41,6 +41,20 @@ client = OpenAI(api_key=api_key) if api_key else None
 
 router = APIRouter(prefix="/api", tags=["guidance"])
 
+# Karma Reset: Specialized verse mapping by repair type
+KARMA_RESET_VERSE_MAPPING = {
+    "apology": [(11, 44), (12, 13), (12, 14), (12, 15), (16, 2), (16, 3), (18, 66)],
+    "clarification": [(4, 7), (13, 7), (13, 8), (13, 11), (17, 15), (18, 20)],
+    "calm_followup": [(2, 56), (2, 57), (6, 5), (6, 6), (12, 13), (12, 14), (12, 15)],
+}
+
+# Karma Reset: Theme mapping by repair type
+KARMA_RESET_THEME_MAPPING = {
+    "apology": "compassion",
+    "clarification": "truthfulness",
+    "calm_followup": "equanimity",
+}
+
 
 KIAAN_WEEKLY_PROMPT = """
 KIAAN – WEEKLY GUIDANCE ENGINE
@@ -404,21 +418,12 @@ async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happen
     """
     Get specialized Gita verses for Karma Reset based on repair type.
 
-    Key verses by repair type:
-    - apology: 11.44 (seeking forgiveness), 12.13-14 (compassion), 16.2-3 (virtues), 18.66 (surrender)
-    - clarification: 4.7 (restoration of dharma), 13.7-11 (humility, truthfulness), 17.15 (truthful speech)
-    - calm_followup: 2.56-57 (equanimity), 6.5-6 (self-elevation), 12.13-15 (peaceful qualities)
+    Uses module-level KARMA_RESET_VERSE_MAPPING and KARMA_RESET_THEME_MAPPING.
     """
     kb = WisdomKnowledgeBase()
 
-    # Key verses by repair type
-    key_verses_by_type = {
-        "apology": [(11, 44), (12, 13), (12, 14), (12, 15), (16, 2), (16, 3), (18, 66)],
-        "clarification": [(4, 7), (13, 7), (13, 8), (13, 11), (17, 15), (18, 20)],
-        "calm_followup": [(2, 56), (2, 57), (6, 5), (6, 6), (12, 13), (12, 14), (12, 15)],
-    }
-
-    key_verses = key_verses_by_type.get(repair_type, key_verses_by_type["apology"])
+    # Get key verses for this repair type
+    key_verses = KARMA_RESET_VERSE_MAPPING.get(repair_type, KARMA_RESET_VERSE_MAPPING["apology"])
 
     key_verse_results = []
     for chapter, verse_num in key_verses:
@@ -433,9 +438,8 @@ async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happen
         except Exception as e:
             logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
 
-    # Theme search
-    theme_mapping = {"apology": "compassion", "clarification": "truthfulness", "calm_followup": "equanimity"}
-    theme = theme_mapping.get(repair_type, "compassion")
+    # Theme search using module-level mapping
+    theme = KARMA_RESET_THEME_MAPPING.get(repair_type, "compassion")
 
     theme_search_results = []
     try:

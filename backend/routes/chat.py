@@ -127,7 +127,7 @@ class KIAAN:
             verse_results = []
             if self.gita_kb and db:
                 try:
-                    # Enhanced verse search with fallback
+                    # Fetch up to 7 verses for selection, top 5 will be used in context
                     verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=7)
 
                     # Add fallback expansion if results are insufficient or low quality
@@ -144,6 +144,7 @@ class KIAAN:
                     if needs_fallback:
                         verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
 
+                    # Build context from top 5 verses (function default limit=5)
                     gita_context = self._build_gita_context(verse_results)
 
                     # Enhanced logging with verse IDs

@@ -38,6 +38,17 @@ openai_client = OpenAI(api_key=api_key) if api_key else None
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
 SESSION_TIMEOUT_SECONDS = int(os.getenv("EMOTIONAL_RESET_SESSION_TIMEOUT", "1800"))
 
+# Emotional Reset: Specialized emotion-to-verse mapping
+EMOTION_VERSE_MAPPING = {
+    "anxious": [(2, 47), (2, 48), (6, 5), (6, 35)],
+    "stressed": [(2, 14), (2, 15), (6, 13), (6, 17)],
+    "sad": [(2, 22), (2, 23), (15, 7), (12, 13)],
+    "angry": [(16, 1), (16, 2), (16, 3), (2, 56)],
+    "overwhelmed": [(2, 40), (2, 50), (18, 58), (6, 25)],
+    "hopeless": [(4, 36), (4, 38), (9, 2), (18, 66)],
+    "confused": [(4, 34), (5, 15), (5, 16), (18, 63)],
+}
+
 
 def get_verse_identifier(verse) -> str:
     """
@@ -453,23 +464,12 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         themes = assessment.get("themes", [])
         emotions = assessment.get("emotions", [])
 
-        # Specialized emotion-to-verse mapping
-        emotion_verse_mapping = {
-            "anxious": [(2, 47), (2, 48), (6, 5), (6, 35)],
-            "stressed": [(2, 14), (2, 15), (6, 13), (6, 17)],
-            "sad": [(2, 22), (2, 23), (15, 7), (12, 13)],
-            "angry": [(16, 1), (16, 2), (16, 3), (2, 56)],
-            "overwhelmed": [(2, 40), (2, 50), (18, 58), (6, 25)],
-            "hopeless": [(4, 36), (4, 38), (9, 2), (18, 66)],
-            "confused": [(4, 34), (5, 15), (5, 16), (18, 63)],
-        }
-
-        # Get specialized verses first
+        # Get specialized verses first using module-level mapping
         key_verse_results = []
         primary_emotion = emotions[0] if emotions else None
 
-        if primary_emotion and primary_emotion in emotion_verse_mapping:
-            for chapter, verse_num in emotion_verse_mapping[primary_emotion][:3]:
+        if primary_emotion and primary_emotion in EMOTION_VERSE_MAPPING:
+            for chapter, verse_num in EMOTION_VERSE_MAPPING[primary_emotion][:3]:
                 try:
                     verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
                     if verse:
