@@ -253,6 +253,9 @@ def build_gita_context_comprehensive(verse_results: list, limit: int = 7) -> str
     Returns:
         Rich context string with guidelines (NEVER cite sources in response)
     """
+    # Maximum length for teaching text to include in context
+    MAX_TEACHING_LENGTH = 300
+    
     if not verse_results:
         return """FALLBACK WISDOM (no specific verses found):
 Apply universal Gita principles:
@@ -292,7 +295,8 @@ RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any script
             context_parts.append(f"WISDOM #{i} (relevance: {score:.2f}):")
             
             if english:
-                context_parts.append(f"Teaching: {english[:300]}")
+                # Truncate teaching to reasonable length for context
+                context_parts.append(f"Teaching: {english[:MAX_TEACHING_LENGTH]}")
             
             if principle:
                 context_parts.append(f"Principle: {principle}")

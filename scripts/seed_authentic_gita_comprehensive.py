@@ -57,9 +57,8 @@ class GitaValidator:
         if not text or not text.strip():
             return False
         
-        # Check if at least some characters are in Devanagari range
-        devanagari_chars = [c for c in text if '\u0900' <= c <= '\u097F']
-        return len(devanagari_chars) > 0
+        # Check if at least some characters are in Devanagari range (use generator for efficiency)
+        return any('\u0900' <= c <= '\u097F' for c in text)
     
     @staticmethod
     def validate_iast(text: str) -> bool:
@@ -416,8 +415,17 @@ async def main():
         print(f"❌ ERROR: Data file not found at {DATA_FILE}")
         return
     
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        verses = json.load(f)
+    try:
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            verses = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"❌ ERROR: Invalid JSON format in {DATA_FILE}")
+        print(f"   Details: {e}")
+        return
+    except Exception as e:
+        print(f"❌ ERROR: Failed to load data file")
+        print(f"   Details: {e}")
+        return
     
     print(f"✅ Loaded {len(verses)} verses")
     

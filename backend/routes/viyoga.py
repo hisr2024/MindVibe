@@ -35,6 +35,11 @@ DEFAULT_GITA_PRINCIPLES = "Apply universal principles of nishkama karma (desirel
 
 router = APIRouter(prefix="/api/viyoga", tags=["viyoga"])
 
+# Verse scoring constants for prioritization
+PRIORITY_VERSE_SCORE = 0.95  # For verse 2.47 (most famous karma yoga verse)
+KEY_VERSE_SCORE = 0.9        # For other important karma yoga verses
+THEME_VERSE_SCORE = 0.75     # For thematically relevant verses
+
 
 async def get_detachment_verses(db: AsyncSession, concern: str, limit: int = 5) -> list[dict[str, Any]]:
     """
@@ -82,8 +87,8 @@ async def get_detachment_verses(db: AsyncSession, concern: str, limit: int = 5) 
         try:
             verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
             if verse:
-                # Higher score for the most important verses
-                score = 0.95 if verse_num == 47 and chapter == 2 else 0.9
+                # Higher score for the most important verse (2.47)
+                score = PRIORITY_VERSE_SCORE if verse_num == 47 and chapter == 2 else KEY_VERSE_SCORE
                 key_verse_results.append({
                     "verse": verse,
                     "score": score,
@@ -116,7 +121,7 @@ async def get_detachment_verses(db: AsyncSession, concern: str, limit: int = 5) 
                 for verse in results:
                     application_search_results.append({
                         "verse": verse,
-                        "score": 0.75,
+                        "score": THEME_VERSE_SCORE,
                         "sanitized_text": kb.sanitize_text(verse.english)
                     })
             except Exception as e:

@@ -35,6 +35,10 @@ DEFAULT_GITA_PRINCIPLES = "Apply universal principles of sthitaprajna (stability
 
 router = APIRouter(prefix="/api/ardha", tags=["ardha"])
 
+# Sthitaprajna section constants
+STHITAPRAJNA_START = 54  # Chapter 2, verse 54 - beginning of sthitaprajna (steady wisdom) teaching
+STHITAPRAJNA_END = 72    # Chapter 2, verse 72 - end of sthitaprajna section
+
 
 async def get_reframing_verses(db: AsyncSession, negative_thought: str, limit: int = 5) -> list[dict[str, Any]]:
     """
@@ -66,7 +70,7 @@ async def get_reframing_verses(db: AsyncSession, negative_thought: str, limit: i
     sthitaprajna_verses = []
     try:
         # Get verses from Chapter 2, verses 54-72 (sthitaprajna section)
-        for verse_num in range(54, 73):
+        for verse_num in range(STHITAPRAJNA_START, STHITAPRAJNA_END + 1):
             verse = await GitaService.get_verse_by_reference(db, chapter=2, verse=verse_num)
             if verse:
                 sthitaprajna_verses.append({
