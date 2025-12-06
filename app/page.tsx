@@ -249,16 +249,72 @@ export default function Home() {
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
-        <MoodTracker />
+        <section className="grid gap-3 md:grid-cols-3" aria-label="Core daily actions">
+          <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)]">
+            <p className="text-xs text-orange-100/70">Talk to KIAAN</p>
+            <h2 className="text-lg font-semibold text-orange-50">Instant guidance</h2>
+            <p className="mt-1 text-sm text-orange-100/80">Jump into a focused conversation or send a saved quick prompt.</p>
+            <button
+              onClick={() => scrollToSection('kiaan-chat')}
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+            >
+              Open Chat
+              <span aria-hidden>→</span>
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-teal-400/15 bg-white/5 p-4 shadow-[0_14px_60px_rgba(34,197,235,0.12)]">
+            <p className="text-xs text-white/60">Mood Check-In</p>
+            <h2 className="text-lg font-semibold text-white">Spot your state</h2>
+            <p className="mt-1 text-sm text-white/70">Log how you feel and get a micro-response instantly.</p>
+            <button
+              onClick={() => scrollToSection('mood-check')}
+              className="mt-3 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Start check-in
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)]">
+            <p className="text-xs text-amber-100/80">Journal</p>
+            <h2 className="text-lg font-semibold text-amber-50">Sacred Reflections</h2>
+            <p className="mt-1 text-sm text-amber-100/80">Move to the dedicated space when you want to write or review entries.</p>
+            <Link
+              href="/sacred-reflections"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-200/40"
+            >
+              Go to Journal
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </section>
+
+        <section id="mood-check">
+          <MoodTracker />
+        </section>
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
-        <ArdhaReframer />
-        <ViyogDetachmentCoach />
-        <RelationshipCompass onSelectPrompt={setChatPrefill} />
-        <GrowthJourney />
         <DailyWisdom onChatClick={setChatPrefill} />
         <PublicChatRooms />
-        <Journal />
+        <section
+          id="journal-section"
+          className="rounded-3xl border border-amber-300/15 bg-white/5 p-5 shadow-[0_18px_80px_rgba(251,191,36,0.12)]"
+        >
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs text-amber-100/70">Journal</p>
+              <h2 className="text-xl font-semibold text-amber-50">Keep reflections in one calm place</h2>
+              <p className="text-sm text-amber-100/80">Open Sacred Reflections to write, revisit, or continue your practice.</p>
+            </div>
+            <Link
+              href="/sacred-reflections"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-200/40"
+            >
+              Open Journal
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </section>
 
         <section className="bg-[#0b0b0f] border border-orange-500/15 rounded-3xl p-5 md:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-3">
           <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
