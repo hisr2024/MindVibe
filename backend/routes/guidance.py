@@ -458,7 +458,7 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
         reset_guidance=reset_guidance,
         raw_text=raw_text,
         model=model_name,
-        provider="openai",
+        provider="kiaan",
     )
 
 
