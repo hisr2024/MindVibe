@@ -447,6 +447,42 @@ if compliance_routers_loaded:
 else:
     print("❌ [ERROR] No Compliance routers were loaded")
 
+# Load Wellness Tools routers
+print("\n[Wellness Tools] Attempting to import wellness tool routers...")
+wellness_tools_loaded = []
+try:
+    from backend.routes.karma_reset import router as karma_reset_router
+    app.include_router(karma_reset_router)
+    wellness_tools_loaded.append("karma_reset")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
+
+try:
+    from backend.routes.viyog import router as viyog_router
+    app.include_router(viyog_router)
+    wellness_tools_loaded.append("viyog")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Viyog router: {e}")
+
+try:
+    from backend.routes.relationship_compass import router as relationship_compass_router
+    app.include_router(relationship_compass_router)
+    wellness_tools_loaded.append("relationship_compass")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Relationship Compass router: {e}")
+
+try:
+    from backend.routes.ardha import router as ardha_router
+    app.include_router(ardha_router)
+    wellness_tools_loaded.append("ardha")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Ardha router: {e}")
+
+if wellness_tools_loaded:
+    print(f"✅ [SUCCESS] Wellness Tools routers loaded: {', '.join(wellness_tools_loaded)}")
+else:
+    print("❌ [ERROR] No Wellness Tools routers were loaded")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
