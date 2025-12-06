@@ -46,6 +46,15 @@ class GitaValidator:
     # Minimum and maximum word counts
     MIN_WORDS = 200
     MAX_WORDS = 500
+    
+    # Compile citation patterns once at class level for performance
+    CITATION_PATTERNS = [
+        re.compile(r'bhagavad gita \d+\.\d+'),
+        re.compile(r'gita \d+\.\d+'),
+        re.compile(r'chapter \d+ verse \d+'),
+        re.compile(r'verse \d+\.\d+'),
+        re.compile(r'krishna said in chapter'),
+    ]
 
     def __init__(self):
         """Initialize the Gita validator."""
@@ -151,18 +160,10 @@ class GitaValidator:
 
         # 6. Additional check: Ensure response doesn't explicitly cite verses
         # This is important - we want to use wisdom but not cite it
-        citation_patterns = [
-            r'bhagavad gita \d+\.\d+',
-            r'gita \d+\.\d+',
-            r'chapter \d+ verse \d+',
-            r'verse \d+\.\d+',
-            r'krishna said in chapter',
-        ]
-
-        for pattern in citation_patterns:
-            if re.search(pattern, response_lower):
+        for pattern in self.CITATION_PATTERNS:
+            if pattern.search(response_lower):
                 validation_details["issues"].append(
-                    f"Response contains explicit verse citation: {pattern}"
+                    f"Response contains explicit verse citation: {pattern.pattern}"
                 )
                 validation_details["no_forbidden_terms"] = False
 
@@ -195,27 +196,27 @@ class GitaValidator:
             A safe, Gita-based response
         """
         fallback_responses = [
-            """In times of uncertainty, remember the eternal wisdom: your duty lies in the action itself, not in worrying about the outcome. When we focus on doing our best in this present moment, we free ourselves from anxiety and discover true inner peace.
+            """In times of uncertainty, remember the eternal wisdom: your duty lies in the action itself, not in worrying about the outcome. When we focus on doing our best in this present moment, we free ourselves from anxiety and discover true inner peace. This principle of karma yoga is the foundation of both spiritual growth and mental wellness.
 
-This path of karma yoga - acting without attachment to results - is the foundation of lasting calm. Each small step you take with full presence is a victory. Practice letting go of what you cannot control while embracing what you can: your effort, your attitude, your response to life's challenges.
+This path of karma yoga - acting without attachment to results - is the foundation of lasting calm. Each small step you take with full presence is a victory. Practice letting go of what you cannot control while embracing what you can: your effort, your attitude, your response to life's challenges. This shift in perspective creates immediate relief from stress.
 
-The ancient teachings remind us that we are not our circumstances but the eternal awareness witnessing them. Your true nature - the atman within - remains untouched by temporary difficulties. When you connect with this deeper reality through meditation and mindful action, you discover unshakeable strength.
+The ancient teachings remind us that we are not our circumstances but the eternal awareness witnessing them. Your true nature - the atman within - remains untouched by temporary difficulties. When you connect with this deeper reality through meditation and mindful action, you discover unshakeable strength that sustains you through any challenge.
 
 Start today with one simple practice: before any task, take a breath and remind yourself, "I'll do my best and release the rest." This discipline of detachment transforms ordinary actions into a journey of spiritual growth and brings profound peace to daily life. Trust the process, honor your dharma, and watch as equanimity becomes your natural state. 💙""",
 
             """The ancient wisdom teaches us about the three gunas - the qualities that shape our inner state. When we're pulled by rajas (restlessness) or tamas (lethargy), we suffer. But we can cultivate sattva - clarity, harmony, and balance - through conscious choices and dedicated practice.
 
-Begin by bringing awareness to your thoughts and emotions without judgment. Notice them like clouds passing through the sky of your consciousness. This practice of self-observation, combined with regular meditation and mindful action, gradually brings equanimity even amid life's storms.
+Begin by bringing awareness to your thoughts and emotions without judgment. Notice them like clouds passing through the sky of your consciousness. This practice of self-observation, combined with regular meditation and mindful action, gradually brings equanimity even amid life's storms. The key is consistency - even a few minutes daily creates transformation over time.
 
-The path of wisdom shows that lasting peace comes not from controlling external circumstances, but from mastering our inner response to them. When you understand that you are the eternal witness - the unchanging awareness beyond temporary thoughts and feelings - you discover freedom from suffering.
+The path of wisdom shows that lasting peace comes not from controlling external circumstances, but from mastering our inner response to them. When you understand that you are the eternal witness - the unchanging awareness beyond temporary thoughts and feelings - you discover freedom from suffering. This recognition alone begins to dissolve the grip of anxiety and stress.
 
 The path forward is simple but profound: engage fully with your duties, maintain balance in success and failure, practice compassion toward yourself and others, and trust in the journey of self-mastery. Each day is an opportunity to align with your higher purpose. Let go of perfectionism and embrace progress. Your buddhi (discriminating wisdom) will guide you when you quiet the restless mind through practice and patience. 💙""",
 
-            """True peace comes from understanding the nature of the eternal self within you - the atman that remains unchanged despite life's turbulence. When you identify with this deeper essence rather than temporary circumstances, you discover unshakeable inner strength.
+            """True peace comes from understanding the nature of the eternal self within you - the atman that remains unchanged despite life's turbulence. When you identify with this deeper essence rather than temporary circumstances, you discover unshakeable inner strength that no external situation can diminish.
 
-This journey of self-knowledge begins with daily practice. Carve out time for quiet reflection, even if just for a few minutes. In this stillness, you connect with your inner wisdom and remember your true nature beyond fear and worry. The practice of dhyana (meditation) is not about stopping thoughts, but witnessing them without attachment.
+This journey of self-knowledge begins with daily practice. Carve out time for quiet reflection, even if just for a few minutes. In this stillness, you connect with your inner wisdom and remember your true nature beyond fear and worry. The practice of dhyana (meditation) is not about stopping thoughts, but witnessing them without attachment. Start small and build gradually.
 
-The timeless teachings emphasize that we suffer when we identify with the temporary - our roles, possessions, achievements. But our essence is eternal, pure consciousness itself. When you anchor yourself in this truth, external changes lose their power to disturb your peace.
+The timeless teachings emphasize that we suffer when we identify with the temporary - our roles, possessions, achievements. But our essence is eternal, pure consciousness itself. When you anchor yourself in this truth, external changes lose their power to disturb your peace. This understanding transforms everything.
 
 Remember: you are not your thoughts, not your circumstances, but the aware presence behind them. Cultivate this awareness through meditation, mindful breathing, and bringing full presence to each moment. This is the path of jnana yoga - wisdom that liberates. Start where you are, practice with dedication, let go of attachment to immediate results, and trust that consistent effort leads to transformation. This is the way to freedom and lasting joy. 💙"""
         ]

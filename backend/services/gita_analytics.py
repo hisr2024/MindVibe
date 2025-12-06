@@ -19,9 +19,15 @@ logger = logging.getLogger(__name__)
 
 
 class GitaAnalyticsService:
-    """Service for tracking and analyzing Gita verse usage."""
+    """Service for tracking and analyzing Gita verse usage.
+    
+    Note: Uses class-level storage for analytics data that persists across
+    instances. This is intentional - all instances share the same analytics.
+    For production, consider migrating to Redis or database storage.
+    Use reset_analytics(confirm=True) to clear data between test runs.
+    """
 
-    # In-memory cache for verse usage (in production, use Redis or database)
+    # In-memory cache for verse usage (shared across all instances)
     _verse_usage: dict[str, list[datetime]] = defaultdict(list)
     _theme_usage: Counter = Counter()
     _validation_stats: dict[str, int] = defaultdict(int)

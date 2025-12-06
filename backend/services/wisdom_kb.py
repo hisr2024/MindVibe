@@ -190,6 +190,7 @@ class WisdomKnowledgeBase:
         """
         from sqlalchemy import text
 
+        from backend.models import GitaVerse
 
         # Total count
         result = await db.execute(text("SELECT COUNT(*) FROM gita_verses"))

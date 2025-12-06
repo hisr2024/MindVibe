@@ -130,7 +130,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       {sender === 'assistant' && gitaPowered && !status && (
         <div className="flex items-center gap-3">
           <a
-            href="/gita-wisdom"
+            href="https://github.com/hisr2024/MindVibe/blob/main/docs/KIAAN_WISDOM_ENGINE.md"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[11px] text-orange-300/70 hover:text-orange-200 transition-colors underline decoration-dotted underline-offset-2"
             aria-label="Learn more about the Bhagavad Gita wisdom engine"
           >
