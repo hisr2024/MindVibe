@@ -507,6 +507,24 @@ async def main(use_api: bool = False, use_chapters: bool = False) -> int:
             await conn.run_sync(Base.metadata.create_all)
         print("✅ Tables created/verified\n")
 
+        # Verify database schema before seeding
+        print("🔍 Verifying database schema...")
+        async with engine.begin() as conn:
+            # Check if transliteration column exists
+            result = await conn.execute(text("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'gita_verses'
+                AND column_name = 'transliteration'
+            """))
+            
+            if not result.fetchone():
+                print("❌ Schema verification failed: missing 'transliteration' column")
+                print("   Run migration first:")
+                print("   psql $DATABASE_URL < migrations/20251206_add_transliteration_to_gita_verses.sql")
+                return 1
+        print("✅ Schema verification passed\n")
+
         total_seeded = 0
         total_skipped = 0
         total_failed = 0
