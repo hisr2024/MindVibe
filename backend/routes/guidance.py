@@ -19,8 +19,12 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from openai import APIError, AuthenticationError, BadRequestError, OpenAI, RateLimitError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.deps import get_db
+from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 logger = logging.getLogger(__name__)
 
@@ -373,7 +377,10 @@ async def auth_copy(payload: Dict[str, Any]) -> EngineResult:
 
 
 @router.post("/karma-reset/generate")
-async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
+async def generate_karma_reset(
+    payload: Dict[str, Any],
+    db: AsyncSession = Depends(get_db)
+) -> EngineResult:
     """Generate structured Karma Reset guidance as a crisp 4-part plan.
 
     Expects payload with:
@@ -395,6 +402,116 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
     }
     repair_type = payload.get("repair_type", "apology")
     repair_type = repair_type_map.get(repair_type, repair_type)
+    
+    # Extract situation context for Gita verse search
+    what_happened = payload.get("what_happened", "")
+    
+    # Build search query based on repair type
+    search_queries = {
+        "apology": "forgiveness humility acknowledging mistakes karma duty",
+        "clarification": "truth clear communication understanding dharma",
+        "calm_followup": "equanimity peace emotional balance self-control"
+    }
+    
+    query = f"{what_happened} {search_queries.get(repair_type, 'karma dharma action')}"
+    
+    # Search relevant Gita verses
+    gita_kb = WisdomKnowledgeBase()
+    verse_results = []
+    gita_context = ""
+    
+    try:
+        verse_results = await gita_kb.search_relevant_verses(
+            db=db, 
+            query=query, 
+            limit=5
+        )
+        
+        # Build Gita context for the prompt
+        if verse_results:
+            for v in verse_results:
+                verse_obj = v.get("verse")
+                if verse_obj:
+                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_obj.verse_number}:\n{verse_obj.english}\n"
+                    # Use principle if available, otherwise use context
+                    principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
+                    if principle:
+                        gita_context += f"Principle: {principle}\n"
+        
+        logger.info(f"Karma Reset - Found {len(verse_results)} Gita verses for query: {query[:50]}")
+        logger.debug(f"Gita context built: {gita_context[:200]}...")
+    except Exception as e:
+        logger.error(f"Error fetching Gita verses for Karma Reset: {e}")
+        gita_context = ""
+    
+    # Use default principles if no Gita context was built
+    if not gita_context:
+        gita_context = "Apply universal principles of dharma (duty), karma (action), and kshama (forgiveness)."
+    
+    # Update the system prompt to include Gita wisdom
+    KARMA_RESET_WITH_GITA_PROMPT = f"""
+KARMA RESET ENGINE - Unified 4-Part Reset Plan (Powered by Bhagavad Gita)
+
+You are KIAAN, providing a crisp 4-part karma reset plan rooted in the wisdom 
+of the Bhagavad Gita's 700 verses.
+
+GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite directly):
+{gita_context}
+
+CRITICAL RULES - BREVITY IS ESSENTIAL:
+- Keep each field to 1-2 SHORT sentences MAXIMUM
+- Apply Gita wisdom naturally without mentioning verse numbers
+- Present wisdom as universal life principles
+- Be warm, gentle, calm, and actionable
+
+The 4-part plan you generate:
+1. breathing_line: One grounding line about taking four slow breaths before responding
+2. ripple_summary: One line summarizing what happened and who felt the impact
+3. repair_action: One line describing the repair action based on repair type
+4. forward_intention: One line describing how to show up next time
+
+Repair types and guidance:
+- "apology": Offer a sincere apology that stays brief and grounded
+- "clarification": Gently clarify what you meant and invite understanding
+- "calm_followup": Return with a warm note that re-centers the conversation
+
+Crisis detection:
+If the situation describes harm, abuse, or severe distress, respond with:
+- breathing_line: "Please take a moment to breathe and find safety first."
+- ripple_summary: "A difficult moment that may need professional support."
+- repair_action: "Your safety and wellbeing come first - please seek support."
+- forward_intention: "You deserve care and support. Reach out: 988 (Crisis Line)."
+
+Return ONLY this JSON structure:
+{{
+  "breathing_line": "<one grounding line, e.g., 'Take four slow breaths and soften your shoulders.'>",
+  "ripple_summary": "<one line summarizing what happened + impact>",
+  "repair_action": "<one line describing the action based on repair type>",
+  "forward_intention": "<one line describing the forward-looking intention>"
+}}
+
+Examples:
+{{
+  "breathing_line": "Take four slow breaths before you respond.",
+  "ripple_summary": "You raised your tone during the discussion, and your teammate felt dismissed.",
+  "repair_action": "Acknowledge the moment with a brief, honest apology.",
+  "forward_intention": "Show up with patience in your next interaction."
+}}
+
+{{
+  "breathing_line": "Ground yourself. This moment will pass.",
+  "ripple_summary": "You sent a message in frustration, and your friend felt hurt.",
+  "repair_action": "Clarify your intention gently so they feel understood.",
+  "forward_intention": "Lead with clarity and kindness."
+}}
+
+{{
+  "breathing_line": "Breathe deeply. You can reset this.",
+  "ripple_summary": "A sharp comment landed harshly on your colleague.",
+  "repair_action": "Send a warm follow-up note to re-center the conversation.",
+  "forward_intention": "Return to conversations with a calmer presence."
+}}
+"""
 
     # Normalize the payload for the model
     normalized_payload = {
@@ -405,7 +522,7 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
     }
 
     parsed, raw_text = await _generate_response(
-        system_prompt=KARMA_RESET_PROMPT,
+        system_prompt=KARMA_RESET_WITH_GITA_PROMPT,
         user_payload=normalized_payload,
         expect_json=True,
         temperature=0.4,
@@ -456,6 +573,7 @@ async def generate_karma_reset(payload: Dict[str, Any]) -> EngineResult:
     return EngineResult(
         status="success" if parsed else "partial_success",
         reset_guidance=reset_guidance,
+        gita_verses_used=len(verse_results),  # For debugging/logging
         raw_text=raw_text,
         model=model_name,
         provider="kiaan",
