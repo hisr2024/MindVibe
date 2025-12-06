@@ -447,6 +447,15 @@ if compliance_routers_loaded:
 else:
     print("❌ [ERROR] No Compliance routers were loaded")
 
+# Load Karma Reset router (Viyog, Relationship Compass, Ardha use KIAAN's wisdom system)
+print("\n[Karma Reset] Attempting to import Karma Reset router...")
+try:
+    from backend.routes.karma_reset import router as karma_reset_router
+    app.include_router(karma_reset_router)
+    print("✅ [SUCCESS] Karma Reset router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
