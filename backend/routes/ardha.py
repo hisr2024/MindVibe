@@ -36,6 +36,101 @@ DEFAULT_GITA_PRINCIPLES = "Apply universal principles of sthitaprajna (stability
 router = APIRouter(prefix="/api/ardha", tags=["ardha"])
 
 
+async def get_reframing_verses(db: AsyncSession, negative_thought: str, limit: int = 5) -> list[dict[str, Any]]:
+    """
+    Get sthitaprajna (steady wisdom) verses for cognitive reframing.
+    
+    Focuses on verses about equanimity, emotional regulation, and mental stability,
+    particularly from Chapter 2:54-72 (sthitaprajna section).
+    
+    Key verses:
+    - 2.56: Unaffected by adversity, free from cravings
+    - 2.57: Without attachment, balanced in joy and sorrow
+    - 2.62-63: Chain of desire leading to loss of wisdom
+    - 6.5: Elevate yourself by your own mind
+    - Others from equanimity and self-mastery themes
+    
+    Args:
+        db: Database session
+        negative_thought: The negative thought to reframe
+        limit: Maximum number of verses to return (default 5)
+        
+    Returns:
+        List of relevant verse results with scores
+    """
+    from backend.services.gita_service import GitaService
+    
+    kb = WisdomKnowledgeBase()
+    
+    # Priority 1: Try to get specific sthitaprajna verses (2.54-2.72)
+    sthitaprajna_verses = []
+    try:
+        # Get verses from Chapter 2, verses 54-72 (sthitaprajna section)
+        for verse_num in range(54, 73):
+            verse = await GitaService.get_verse_by_reference(db, chapter=2, verse=verse_num)
+            if verse:
+                sthitaprajna_verses.append({
+                    "verse": verse,
+                    "score": 0.9,  # High priority for these specific verses
+                    "sanitized_text": kb.sanitize_text(verse.english)
+                })
+    except Exception as e:
+        logger.warning(f"Could not fetch sthitaprajna verses: {e}")
+    
+    # Priority 2: Get key individual verses for equanimity
+    key_verses = [
+        (2, 56), (2, 57), (2, 62), (2, 63),  # Sthitaprajna core
+        (6, 5), (6, 6),  # Self-elevation
+        (2, 14), (2, 15),  # Enduring dualities
+        (12, 13), (12, 14), (12, 15),  # Devotion and equanimity
+    ]
+    
+    key_verse_results = []
+    for chapter, verse_num in key_verses:
+        try:
+            verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+            if verse:
+                key_verse_results.append({
+                    "verse": verse,
+                    "score": 0.85,
+                    "sanitized_text": kb.sanitize_text(verse.english)
+                })
+        except Exception as e:
+            logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
+    
+    # Priority 3: Search by theme for additional context
+    theme_search_results = []
+    try:
+        # Search for equanimity and mind-control themes
+        search_query = f"{negative_thought} equanimity mind stability discernment balance"
+        theme_search_results = await kb.search_relevant_verses_full_db(
+            db=db,
+            query=search_query,
+            theme="equanimity",
+            limit=3
+        )
+    except Exception as e:
+        logger.debug(f"Theme search failed: {e}")
+    
+    # Combine all sources, prioritizing sthitaprajna verses
+    all_results = sthitaprajna_verses[:3] + key_verse_results[:5] + theme_search_results
+    
+    # Remove duplicates (by verse_id)
+    seen_ids = set()
+    unique_results = []
+    for result in all_results:
+        verse = result.get("verse")
+        if verse:
+            verse_id = f"{verse.chapter}.{verse.verse}"
+            if verse_id not in seen_ids:
+                seen_ids.add(verse_id)
+                unique_results.append(result)
+    
+    # Sort by score and return top N
+    unique_results.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return unique_results[:limit]
+
+
 async def _generate_response(
     *,
     system_prompt: str,
@@ -112,17 +207,13 @@ async def reframe_thought(
     # Search query focusing on equanimity, clarity, and self-mastery
     search_query = f"{negative_thought} equanimity clarity mind stability self-knowledge detachment"
 
-    # Search relevant Gita verses
-    gita_kb = WisdomKnowledgeBase()
+    # Get sthitaprajna verses for cognitive reframing
     verse_results = []
     gita_context = ""
 
     try:
-        verse_results = await gita_kb.search_relevant_verses(
-            db=db,
-            query=search_query,
-            limit=5
-        )
+        # Use dedicated function for sthitaprajna verses
+        verse_results = await get_reframing_verses(db, negative_thought, limit=5)
 
         # Build Gita context for the prompt (internal use only)
         if verse_results:
@@ -139,7 +230,7 @@ async def reframe_thought(
                     if principle:
                         gita_context += f"Principle: {principle}\n"
 
-        logger.info(f"Ardha - Found {len(verse_results)} Gita verses for thought reframing")
+        logger.info(f"Ardha - Found {len(verse_results)} sthitaprajna verses for thought reframing")
         logger.debug(f"Gita context built: {gita_context[:200]}...")
     except Exception as e:
         logger.error(f"Error fetching Gita verses for Ardha: {e}")

@@ -232,20 +232,101 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
             return "I'm here for you. Let's try again. 💙"
 
     def _build_gita_context(self, verse_results: list) -> str:
-        if not verse_results:
-            return "Apply: Dharma (duty), Karma Yoga (action without attachment), Equanimity (balance), Self-mastery, Inner peace"
+        """Build rich Gita context from search results (legacy method for compatibility)."""
+        return build_gita_context_comprehensive(verse_results)
 
-        context_parts = []
-        for result in verse_results[:3]:
-            verse = result.get("verse")
-            if verse:
-                if hasattr(verse, 'english') and verse.english:
-                    context_parts.append(f"Wisdom: {verse.english}")
-                if hasattr(verse, 'theme') and verse.theme:
-                    context_parts.append(f"Theme: {verse.theme}")
-                context_parts.append("---")
 
-        return "\n".join(context_parts) if context_parts else "Focus on duty, detachment, inner peace."
+def build_gita_context_comprehensive(verse_results: list, limit: int = 7) -> str:
+    """
+    Build comprehensive Gita context from all 700 verses search results.
+    
+    This function creates rich context for KIAAN responses by extracting:
+    - Core teachings from verses
+    - Principles and themes
+    - Mental health applications
+    - Response guidelines
+    
+    Args:
+        verse_results: List of verse search results with scores
+        limit: Maximum number of verses to include (default 7)
+        
+    Returns:
+        Rich context string with guidelines (NEVER cite sources in response)
+    """
+    if not verse_results:
+        return """FALLBACK WISDOM (no specific verses found):
+Apply universal Gita principles:
+- Dharma (righteous duty) - Do what's right, not what's easy
+- Karma Yoga (action without attachment) - Focus on effort, not results
+- Equanimity (samatva) - Stay balanced in success and failure
+- Self-mastery (atma-vashya) - Control the mind, not external events
+- Inner peace (shanti) - Find calm within, regardless of outside chaos
+
+RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any scripture. Present wisdom as universal life principles."""
+
+    context_parts = [
+        "RELEVANT GITA WISDOM (use internally, NEVER cite in response):",
+        ""
+    ]
+    
+    # Process top verses up to limit
+    top_verses = verse_results[:limit]
+    
+    for i, result in enumerate(top_verses, 1):
+        verse = result.get("verse")
+        score = result.get("score", 0.0)
+        
+        if verse:
+            # Extract verse data
+            english = getattr(verse, 'english', '') if hasattr(verse, 'english') else verse.get('english', '')
+            principle = getattr(verse, 'principle', '') if hasattr(verse, 'principle') else verse.get('context', '')
+            theme = getattr(verse, 'theme', '') if hasattr(verse, 'theme') else verse.get('theme', '')
+            
+            # Extract mental health applications
+            mh_apps = None
+            if hasattr(verse, 'mental_health_applications'):
+                mh_apps = verse.mental_health_applications
+            elif isinstance(verse, dict):
+                mh_apps = verse.get('mental_health_applications')
+            
+            context_parts.append(f"WISDOM #{i} (relevance: {score:.2f}):")
+            
+            if english:
+                context_parts.append(f"Teaching: {english[:300]}")
+            
+            if principle:
+                context_parts.append(f"Principle: {principle}")
+            
+            if theme:
+                # Format theme to be more readable
+                formatted_theme = theme.replace('_', ' ').title()
+                context_parts.append(f"Theme: {formatted_theme}")
+            
+            if mh_apps:
+                if isinstance(mh_apps, list):
+                    apps_str = ", ".join(mh_apps[:3])  # First 3 applications
+                    context_parts.append(f"Applications: {apps_str}")
+            
+            context_parts.append("")  # Blank line between verses
+    
+    # Add synthesis guidelines
+    context_parts.extend([
+        "---",
+        "SYNTHESIS GUIDELINES:",
+        "1. Identify the core principle across these verses",
+        "2. Find the practical application to user's situation",
+        "3. Present wisdom naturally without citing sources",
+        "4. Use Sanskrit terms (dharma, karma, atman) to add depth",
+        "5. Make ancient wisdom feel immediately relevant to modern life",
+        "",
+        "FORBIDDEN IN RESPONSE:",
+        "❌ Never say 'Bhagavad Gita', 'Gita', 'verse', 'chapter', or cite numbers",
+        "❌ Never say 'Krishna', 'Arjuna', or reference the dialogue",
+        "❌ Never say 'according to scripture' or 'the text says'",
+        "✅ Instead, say 'ancient wisdom teaches', 'timeless principle', 'eternal truth'",
+    ])
+    
+    return "\n".join(context_parts)
 
 
 kiaan = KIAAN()
