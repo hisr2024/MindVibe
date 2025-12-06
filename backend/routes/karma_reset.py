@@ -1,15 +1,26 @@
-"""Karma Reset API - Dedicated endpoint for karma reset guidance"""
+"""Karma Reset API - Production-ready endpoint with comprehensive error handling"""
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, text
+from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+from typing import Optional
 import os
+import json
+import uuid
+import logging
 from openai import OpenAI
 
 from backend.deps import get_db
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/karma-reset", tags=["karma-reset"])
+
+# ==================== REQUEST/RESPONSE MODELS ====================
 
 class KarmaResetRequest(BaseModel):
     # Support both naming conventions from frontend
@@ -27,128 +38,222 @@ class KarmaResetRequest(BaseModel):
 
 class KarmaResetResponse(BaseModel):
     reset_guidance: dict
+    _meta: Optional[dict] = None
 
-# Initialize OpenAI client
+# ==================== FALLBACK RESPONSES ====================
+
+FALLBACK_GUIDANCE = {
+    "apologize": {
+        "breathingLine": "Take four slow breaths. Let each exhale soften the moment.",
+        "rippleSummary": "You experienced a moment that affected someone you care about.",
+        "repairAction": "Offer a sincere apology that acknowledges the moment with genuine care.",
+        "forwardIntention": "Move forward with intention to communicate with kindness."
+    },
+    "clarify": {
+        "breathingLine": "Breathe deeply. Clear communication begins with inner calm.",
+        "rippleSummary": "A misunderstanding created distance between you and another.",
+        "repairAction": "Gently clarify your intention and invite understanding.",
+        "forwardIntention": "Speak with clarity and compassion in future interactions."
+    },
+    "self-forgive": {
+        "breathingLine": "Breathe in self-compassion. Breathe out self-judgment.",
+        "rippleSummary": "You are holding yourself to impossible standards.",
+        "repairAction": "Release self-blame and choose kindness toward yourself.",
+        "forwardIntention": "Practice self-compassion as you would show others."
+    }
+}
+
+def get_fallback_guidance(repair_type: str) -> dict:
+    """Return fallback guidance if OpenAI fails"""
+    repair = repair_type.lower().replace("_", "-").replace(" ", "-")
+    if repair in FALLBACK_GUIDANCE:
+        return FALLBACK_GUIDANCE[repair]
+    return FALLBACK_GUIDANCE["apologize"]
+
+# ==================== OPENAI CLIENT ====================
+
 client = None
 ready = False
 openai_key = os.getenv("OPENAI_API_KEY")
+
 if openai_key and openai_key != "your-api-key-here":
     try:
         client = OpenAI(api_key=openai_key)
         ready = True
-    except Exception:
-        pass
+        logger.info("Karma Reset: OpenAI client initialized successfully")
+    except Exception as e:
+        logger.error(f"Karma Reset: Failed to initialize OpenAI client: {str(e)}")
+        ready = False
+else:
+    logger.warning("Karma Reset: OPENAI_API_KEY not configured")
+
+# ==================== ENDPOINTS ====================
 
 @router.post("/generate", response_model=KarmaResetResponse)
 async def generate_karma_reset(
     request: KarmaResetRequest
-    # db: AsyncSession = Depends(get_db)  # Reserved for future database logging
 ) -> KarmaResetResponse:
     """Generate karma reset guidance based on situation and repair choice."""
     
-    if not ready or not client:
-        raise HTTPException(
-            status_code=503,
-            detail="Karma Reset service unavailable. API key not configured."
-        )
+    request_id = str(uuid.uuid4())[:8]
+    start_time = datetime.now()
     
-    # Use whichever field was provided
+    # Extract request data
     situation = request.situation or request.whatHappened or "A brief misstep"
     feeling = request.feeling or request.whoFeltRipple or "Someone I care about"
     repair = request.repair or request.repairType or "Apologize"
     
-    # Build context-aware prompt
+    logger.info(f"[{request_id}] Karma Reset request started", extra={
+        "request_id": request_id,
+        "situation_length": len(situation),
+        "repair_type": repair
+    })
+    
+    # If OpenAI not available, use fallback immediately
+    if not ready or not client:
+        logger.warning(f"[{request_id}] Using fallback response (OpenAI unavailable)")
+        
+        elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+        
+        return KarmaResetResponse(
+            reset_guidance=get_fallback_guidance(repair),
+            _meta={
+                "request_id": request_id,
+                "processing_time_ms": elapsed_ms,
+                "fallback_used": True
+            }
+        )
+    
+    # Build prompt for OpenAI
     system_prompt = f"""You are Karma Reset, a compassionate guide for healing relational harm.
 
 User situation: "{situation}"
 Who felt impact: "{feeling}"
 Repair choice: "{repair}"
 
-Your role:
-- Provide a 4-part karma reset ritual (Pause, Ripple, Repair, Intention)
-- Each part: 20-40 seconds of guided reflection
-- Tone: warm, grounded, secular, non-judgmental
-- No therapy/medical advice, just guided reflection
+Provide a 4-part karma reset ritual response in JSON format with these exact keys:
+- breathingLine: 1-2 sentences for centering breath (20-40 seconds)
+- rippleSummary: 1-2 sentences acknowledging the impact
+- repairAction: 1-2 sentences guiding the {repair.lower()} action
+- forwardIntention: 1-2 sentences for future intention
 
-Repair meanings:
-- Apologize: Take responsibility for tone or action
-- Clarify: Address misunderstanding with honesty
-- Self-Forgive: Release self-blame while learning
+Tone: warm, grounded, secular, non-judgmental. No therapy/medical advice.
 
-Format your response as:
-1. **Pause** (breathe and center)
-2. **Ripple** (acknowledge the impact)
-3. **Repair** (guided {repair.lower()} action)
-4. **Intention** (reset for future)
-
-End with a short mantra for moving forward.
+Example format:
+{{
+  "breathingLine": "Take four slow breaths...",
+  "rippleSummary": "Your words affected...",
+  "repairAction": "Consider reaching out...",
+  "forwardIntention": "Move forward with..."
+}}
 """
-
+    
     try:
+        # Call OpenAI with structured output
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": "Guide me through the karma reset ritual in 4 parts: breathing, ripple, repair, and intention. Keep each part to 1-2 sentences."}
+                {"role": "user", "content": "Generate the karma reset guidance in JSON format with the 4 keys: breathingLine, rippleSummary, repairAction, forwardIntention."}
             ],
             temperature=0.7,
-            max_tokens=600
+            max_tokens=600,
+            response_format={"type": "json_object"}
         )
         
-        guidance_text = response.choices[0].message.content or ""
+        guidance_text = response.choices[0].message.content or "{}"
         
-        # Helper function to extract content after a header
-        def extract_section_content(lines, keywords, start_markers):
-            """Extract content after finding a section header."""
-            for i, line in enumerate(lines):
-                lower_line = line.lower()
-                # Check if this line contains any of the keywords or starts with a marker
-                if any(kw in lower_line for kw in keywords) or any(line.startswith(m) for m in start_markers):
-                    # Return the next non-header line as content
-                    next_line = lines[i+1] if i+1 < len(lines) else line
-                    if not any(next_line.startswith(m) for m in ['1.', '2.', '3.', '4.', '**']):
-                        return next_line
-                    return line.replace('**', '').strip()
-            return ""
+        # Parse JSON response
+        try:
+            guidance_data = json.loads(guidance_text)
+            
+            # Validate all required keys exist
+            required_keys = ["breathingLine", "rippleSummary", "repairAction", "forwardIntention"]
+            if not all(key in guidance_data for key in required_keys):
+                logger.warning(f"[{request_id}] Missing keys in OpenAI response, using fallback")
+                guidance_data = get_fallback_guidance(repair)
+            
+            # Validate values are non-empty
+            if not all(len(str(guidance_data.get(key, ""))) > 5 for key in required_keys):
+                logger.warning(f"[{request_id}] Empty values in OpenAI response, using fallback")
+                guidance_data = get_fallback_guidance(repair)
+                
+        except json.JSONDecodeError as parse_error:
+            logger.error(f"[{request_id}] JSON parse error: {str(parse_error)}, using fallback")
+            guidance_data = get_fallback_guidance(repair)
         
-        # Parse the response into structured parts
-        lines = [line.strip() for line in guidance_text.split('\n') if line.strip()]
+        elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
         
-        breathing_line = extract_section_content(lines, ['pause', 'breathe'], ['1.'])
-        ripple_summary = extract_section_content(lines, ['ripple'], ['2.'])
-        repair_action = extract_section_content(lines, ['repair'], ['3.'])
-        forward_intention = extract_section_content(lines, ['intention'], ['4.'])
-        
-        # Fallback: if parsing failed, use generic text
-        if not breathing_line:
-            breathing_line = "Take four slow breaths; let each exhale soften the moment."
-        if not ripple_summary:
-            ripple_summary = f"Acknowledge how your actions affected {feeling}."
-        if not repair_action:
-            repair_action = f"Consider how to {repair.lower()} with genuine intention."
-        if not forward_intention:
-            forward_intention = "Set an intention to move forward with awareness and care."
+        logger.info(f"[{request_id}] Karma Reset completed successfully in {elapsed_ms}ms")
         
         return KarmaResetResponse(
-            reset_guidance={
-                "breathingLine": breathing_line,
-                "rippleSummary": ripple_summary,
-                "repairAction": repair_action,
-                "forwardIntention": forward_intention
+            reset_guidance=guidance_data,
+            _meta={
+                "request_id": request_id,
+                "processing_time_ms": elapsed_ms,
+                "model_used": "gpt-4"
             }
         )
         
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to generate karma reset: {str(e)}"
+        elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+        
+        logger.error(f"[{request_id}] OpenAI error: {str(e)}, using fallback", exc_info=True)
+        
+        # Return fallback instead of failing
+        return KarmaResetResponse(
+            reset_guidance=get_fallback_guidance(repair),
+            _meta={
+                "request_id": request_id,
+                "processing_time_ms": elapsed_ms,
+                "fallback_used": True,
+                "error": str(e)
+            }
         )
 
 @router.get("/health")
-async def health_check():
-    """Check if Karma Reset service is available."""
-    return {
-        "status": "healthy" if ready else "degraded",
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """Comprehensive health check with diagnostics"""
+    health = {
+        "status": "healthy",
         "service": "Karma Reset",
-        "openai_configured": ready
+        "checks": {
+            "openai_configured": False,
+            "openai_key_valid": False,
+            "database_connected": False
+        },
+        "errors": []
     }
+    
+    # Check OpenAI configuration
+    if openai_key and openai_key != "your-api-key-here":
+        health["checks"]["openai_configured"] = True
+        
+        # Test API key validity
+        if client:
+            try:
+                test_response = client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[{"role": "user", "content": "test"}],
+                    max_tokens=5
+                )
+                health["checks"]["openai_key_valid"] = True
+            except Exception as e:
+                health["errors"].append(f"OpenAI API error: {str(e)}")
+                health["status"] = "degraded"
+        else:
+            health["errors"].append("OpenAI client not initialized")
+            health["status"] = "degraded"
+    else:
+        health["errors"].append("OPENAI_API_KEY not configured")
+        health["status"] = "degraded"
+    
+    # Check database connectivity
+    try:
+        await db.execute(text("SELECT 1"))
+        health["checks"]["database_connected"] = True
+    except Exception as e:
+        health["errors"].append(f"Database error: {str(e)}")
+        health["status"] = "degraded"
+    
+    return health
