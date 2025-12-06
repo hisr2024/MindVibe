@@ -1,27 +1,29 @@
 """KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v13.0) - Krishna's Blessing"""
 
 import html
-import os
 import logging
+import os
 import uuid
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import Any
+
+from fastapi import APIRouter, Depends, Request
+from openai import (
+    OpenAI,
+)
 from pydantic import BaseModel, Field, field_validator
-from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from openai import OpenAI, AuthenticationError, BadRequestError, RateLimitError, APIError
 
 from backend.deps import get_db
-from backend.middleware.rate_limiter import limiter, CHAT_RATE_LIMIT
+from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 
 # Import subscription/quota services - optional for backwards compatibility
 try:
+    from backend.middleware.feature_access import get_current_user_id
     from backend.services.subscription_service import (
         check_kiaan_quota,
-        increment_kiaan_usage,
         get_or_create_free_subscription,
+        increment_kiaan_usage,
     )
-    from backend.middleware.feature_access import get_current_user_id
     SUBSCRIPTION_ENABLED = True
 except ImportError:
     SUBSCRIPTION_ENABLED = False
@@ -78,14 +80,14 @@ def sanitize_input(text: str) -> str:
     # HTML escape to prevent XSS - this converts < > & " ' to their HTML entities
     # After this, <script> becomes &lt;script&gt; and cannot be executed
     text = html.escape(text)
-    
+
     return text.strip()
 
 
 class ChatMessage(BaseModel):
     """Chat message model with validation."""
     message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
-    
+
     @field_validator('message')
     @classmethod
     def validate_message(cls, v: str) -> str:
@@ -129,7 +131,7 @@ class KIAAN:
                     verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=7)
                     gita_context = self._build_gita_context(verse_results)
                     logger.info(f"✅ Found {len(verse_results)} relevant Gita verses")
-                    
+
                     # Track verse usage in analytics
                     if self.gita_analytics:
                         for result in verse_results[:3]:  # Track top 3 used verses
@@ -194,18 +196,18 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
                 temperature=0.7,
                 max_tokens=500,
             )
-            
+
             content = response.choices[0].message.content
             if not content:
                 content = "I'm here for you. Let's try again. 💙"
-            
+
             # Validate response if validator is available
             if self.gita_validator:
                 is_valid, validation_details = self.gita_validator.validate_response(
-                    content, 
+                    content,
                     verse_context=verse_results
                 )
-                
+
                 # Track validation in analytics
                 if self.gita_analytics:
                     if not is_valid and validation_details.get("issues"):
@@ -213,15 +215,15 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
                         self.gita_analytics.track_validation_result(False, primary_issue)
                     else:
                         self.gita_analytics.track_validation_result(True)
-                
+
                 # If validation fails, use fallback
                 if not is_valid:
                     logger.warning(f"Response validation failed: {validation_details.get('issues')}")
                     content = self.gita_validator.get_fallback_response(user_message)
                     logger.info("✅ Using validated Gita-rooted fallback response")
-            
+
             return content
-            
+
         except Exception as e:
             logger.error(f"Error: {type(e).__name__}: {e}")
             # Use validated fallback on any error
@@ -232,7 +234,7 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
     def _build_gita_context(self, verse_results: list) -> str:
         if not verse_results:
             return "Apply: Dharma (duty), Karma Yoga (action without attachment), Equanimity (balance), Self-mastery, Inner peace"
-            
+
         context_parts = []
         for result in verse_results[:3]:
             verse = result.get("verse")
@@ -242,7 +244,7 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
                 if hasattr(verse, 'theme') and verse.theme:
                     context_parts.append(f"Theme: {verse.theme}")
                 context_parts.append("---")
-        
+
         return "\n".join(context_parts) if context_parts else "Focus on duty, detachment, inner peace."
 
 
@@ -251,7 +253,7 @@ kiaan = KIAAN()
 
 @router.post("/start")
 @limiter.limit(CHAT_RATE_LIMIT)
-async def start_session(request: Request) -> Dict[str, Any]:
+async def start_session(request: Request) -> dict[str, Any]:
     return {
         "session_id": str(uuid.uuid4()),
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
@@ -263,26 +265,26 @@ async def start_session(request: Request) -> Dict[str, Any]:
 
 @router.post("/message")
 @limiter.limit(CHAT_RATE_LIMIT)
-async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     try:
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
-        
+
         # Quota tracking for subscription system
-        user_id: Optional[str] = None
-        quota_info: Optional[Dict[str, Any]] = None
-        
+        user_id: str | None = None
+        quota_info: dict[str, Any] | None = None
+
         if SUBSCRIPTION_ENABLED:
             try:
                 user_id = await get_current_user_id(request)
-                
+
                 # Ensure user has a subscription (auto-assigns free tier)
                 await get_or_create_free_subscription(db, user_id)
-                
+
                 # Check quota before processing
                 has_quota, usage_count, usage_limit = await check_kiaan_quota(db, user_id)
-                
+
                 if not has_quota:
                     return {
                         "status": "error",
@@ -293,7 +295,7 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
                         "usage_limit": usage_limit,
                         "upgrade_url": "/subscription/upgrade",
                     }
-                
+
                 quota_info = {
                     "usage_count": usage_count + 1,  # Will be incremented after response
                     "usage_limit": usage_limit,
@@ -302,18 +304,18 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             except Exception as quota_error:
                 # Log but don't block - graceful degradation
                 logger.warning(f"Quota check failed, allowing request: {quota_error}")
-        
+
         # Message is already sanitized by the ChatMessage validator
         response = await kiaan.generate_response_with_gita(message, db)
-        
+
         # Increment usage after successful response
         if SUBSCRIPTION_ENABLED and user_id is not None:
             try:
                 await increment_kiaan_usage(db, user_id)
             except Exception as usage_error:
                 logger.warning(f"Failed to increment usage: {usage_error}")
-        
-        result: Dict[str, Any] = {
+
+        result: dict[str, Any] = {
             "status": "success",
             "response": response,
             "bot": "KIAAN",
@@ -321,11 +323,11 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "model": "GPT-4",
             "gita_powered": True
         }
-        
+
         # Include quota info if available
         if quota_info:
             result["quota"] = quota_info
-        
+
         return result
     except Exception as e:
         logger.error(f"Error in send_message: {e}")
@@ -333,17 +335,17 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
 
 
 @router.get("/health")
-async def health() -> Dict[str, Any]:
+async def health() -> dict[str, Any]:
     return {
-        "status": "healthy" if ready else "error", 
-        "bot": "KIAAN", 
+        "status": "healthy" if ready else "error",
+        "bot": "KIAAN",
         "version": "13.0",
         "gita_kb_loaded": gita_kb is not None
     }
 
 
 @router.get("/about")
-async def about() -> Dict[str, Any]:
+async def about() -> dict[str, Any]:
     return {
         "name": "KIAAN",
         "version": "13.0",

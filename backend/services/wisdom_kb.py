@@ -190,7 +190,6 @@ class WisdomKnowledgeBase:
         """
         from sqlalchemy import text
 
-        from backend.models import GitaVerse
 
         # Total count
         result = await db.execute(text("SELECT COUNT(*) FROM gita_verses"))
@@ -292,65 +291,65 @@ class WisdomKnowledgeBase:
             "stress": ["action", "work", "balance", "equanimity", "mindfulness"],
             "stressed": ["action", "work", "balance", "equanimity", "mindfulness"],
             "overwhelmed": ["peace", "balance", "meditation", "surrender", "breath"],
-            
+
             # Fear and courage
             "fear": ["courage", "strength", "trust", "faith", "inner_power"],
             "afraid": ["courage", "strength", "trust", "faith", "inner_power"],
             "scared": ["courage", "strength", "trust", "faith", "protection"],
             "panic": ["equanimity", "breath", "grounding", "peace", "control"],
-            
+
             # Sadness and depression
             "depression": ["hope", "light", "purpose", "self_compassion", "renewal"],
             "depressed": ["hope", "light", "purpose", "self_compassion", "renewal"],
             "sad": ["hope", "compassion", "acceptance", "healing"],
             "grief": ["compassion", "acceptance", "healing", "wisdom", "eternal"],
             "hopeless": ["hope", "purpose", "meaning", "light", "faith"],
-            
+
             # Anger and frustration
             "anger": ["control", "peace", "patience", "equanimity", "restraint"],
             "angry": ["control", "peace", "patience", "equanimity", "restraint"],
             "frustrated": ["patience", "acceptance", "equanimity", "balance"],
             "irritated": ["peace", "patience", "mindfulness", "awareness"],
             "rage": ["control", "peace", "self_mastery", "restraint"],
-            
+
             # Loneliness and connection
             "lonely": ["connection", "devotion", "love", "inner_self", "unity"],
             "alone": ["inner_self", "connection", "wholeness", "devotion"],
             "isolated": ["connection", "unity", "love", "compassion"],
-            
+
             # Purpose and meaning
             "purpose": ["duty", "action", "meaning", "dharma", "calling"],
             "meaning": ["purpose", "duty", "dharma", "wisdom", "understanding"],
             "lost": ["direction", "purpose", "wisdom", "clarity", "guidance"],
             "confused": ["knowledge", "wisdom", "clarity", "understanding", "discernment"],
             "direction": ["purpose", "duty", "path", "guidance", "clarity"],
-            
+
             # Self-worth and confidence
             "confidence": ["self_empowerment", "strength", "inner_power", "courage"],
             "worth": ["self_compassion", "value", "essence", "inner_self"],
             "inadequate": ["self_compassion", "worthiness", "acceptance", "growth"],
             "failure": ["learning", "growth", "resilience", "perseverance", "detachment"],
-            
+
             # Change and uncertainty
             "change": ["acceptance", "adaptation", "flow", "impermanence", "trust"],
             "uncertain": ["trust", "faith", "equanimity", "surrender", "acceptance"],
             "transition": ["adaptation", "change", "growth", "resilience"],
-            
+
             # Control and letting go
             "control": ["surrender", "letting_go", "acceptance", "detachment", "trust"],
             "perfectionism": ["acceptance", "balance", "self_compassion", "letting_go"],
             "obsessive": ["balance", "detachment", "mindfulness", "peace"],
-            
+
             # Relationships
             "relationship": ["compassion", "love", "understanding", "forgiveness", "harmony"],
             "conflict": ["peace", "understanding", "compassion", "patience", "wisdom"],
             "forgiveness": ["compassion", "letting_go", "peace", "healing", "love"],
-            
+
             # Work and duty
             "work": ["duty", "action", "balance", "purpose", "karma_yoga"],
             "career": ["duty", "purpose", "action", "dharma", "excellence"],
             "burnout": ["balance", "rest", "self_care", "boundaries", "renew"],
-            
+
             # Inner peace and meditation
             "peace": ["meditation", "stillness", "equanimity", "balance", "calm"],
             "calm": ["peace", "meditation", "breath", "stillness", "centeredness"],

@@ -6,11 +6,11 @@ of all 700 verses and provide insights for continuous improvement.
 """
 
 import logging
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-from collections import defaultdict, Counter
+from typing import Any
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import GitaVerse
@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 class GitaAnalyticsService:
     """Service for tracking and analyzing Gita verse usage."""
-    
+
     # In-memory cache for verse usage (in production, use Redis or database)
-    _verse_usage: Dict[str, List[datetime]] = defaultdict(list)
+    _verse_usage: dict[str, list[datetime]] = defaultdict(list)
     _theme_usage: Counter = Counter()
-    _validation_stats: Dict[str, int] = defaultdict(int)
-    
+    _validation_stats: dict[str, int] = defaultdict(int)
+
     @classmethod
-    def track_verse_usage(cls, verse_id: str, theme: Optional[str] = None) -> None:
+    def track_verse_usage(cls, verse_id: str, theme: str | None = None) -> None:
         """
         Track that a verse was used in a response.
         
@@ -36,14 +36,14 @@ class GitaAnalyticsService:
             theme: Optional theme of the verse
         """
         cls._verse_usage[verse_id].append(datetime.utcnow())
-        
+
         if theme:
             cls._theme_usage[theme] += 1
-        
+
         logger.debug(f"📊 Tracked verse usage: {verse_id} (theme: {theme})")
-    
+
     @classmethod
-    def track_validation_result(cls, is_valid: bool, reason: Optional[str] = None) -> None:
+    def track_validation_result(cls, is_valid: bool, reason: str | None = None) -> None:
         """
         Track validation results for analytics.
         
@@ -57,11 +57,11 @@ class GitaAnalyticsService:
             cls._validation_stats["failed"] += 1
             if reason:
                 cls._validation_stats[f"failed_reason:{reason}"] += 1
-        
+
         cls._validation_stats["total"] += 1
-    
+
     @classmethod
-    def get_most_used_verses(cls, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_most_used_verses(cls, limit: int = 10) -> list[dict[str, Any]]:
         """
         Get the most frequently used verses.
         
@@ -72,23 +72,23 @@ class GitaAnalyticsService:
             List of dicts with verse_id and usage_count
         """
         verse_counts = {
-            verse_id: len(timestamps) 
+            verse_id: len(timestamps)
             for verse_id, timestamps in cls._verse_usage.items()
         }
-        
+
         sorted_verses = sorted(
-            verse_counts.items(), 
-            key=lambda x: x[1], 
+            verse_counts.items(),
+            key=lambda x: x[1],
             reverse=True
         )
-        
+
         return [
             {"verse_id": verse_id, "usage_count": count}
             for verse_id, count in sorted_verses[:limit]
         ]
-    
+
     @classmethod
-    def get_theme_usage_stats(cls) -> Dict[str, int]:
+    def get_theme_usage_stats(cls) -> dict[str, int]:
         """
         Get theme usage statistics.
         
@@ -96,9 +96,9 @@ class GitaAnalyticsService:
             Dict mapping theme names to usage counts
         """
         return dict(cls._theme_usage)
-    
+
     @classmethod
-    def get_validation_stats(cls) -> Dict[str, Any]:
+    def get_validation_stats(cls) -> dict[str, Any]:
         """
         Get validation statistics.
         
@@ -108,16 +108,16 @@ class GitaAnalyticsService:
         total = cls._validation_stats.get("total", 0)
         passed = cls._validation_stats.get("passed", 0)
         failed = cls._validation_stats.get("failed", 0)
-        
+
         pass_rate = (passed / total * 100) if total > 0 else 0.0
-        
+
         # Get failure reasons
         failure_reasons = {
             key.replace("failed_reason:", ""): count
             for key, count in cls._validation_stats.items()
             if key.startswith("failed_reason:")
         }
-        
+
         return {
             "total_validations": total,
             "passed": passed,
@@ -125,9 +125,9 @@ class GitaAnalyticsService:
             "pass_rate_percent": round(pass_rate, 2),
             "failure_reasons": failure_reasons
         }
-    
+
     @classmethod
-    async def calculate_verse_coverage(cls, db: AsyncSession) -> Dict[str, Any]:
+    async def calculate_verse_coverage(cls, db: AsyncSession) -> dict[str, Any]:
         """
         Calculate what percentage of the 700 verses have been used.
         
@@ -140,14 +140,14 @@ class GitaAnalyticsService:
         # Get total verses in database
         result = await db.execute(select(func.count(GitaVerse.id)))
         total_verses = result.scalar() or 0
-        
+
         # Count unique verses used
         unique_verses_used = len(cls._verse_usage)
-        
+
         coverage_percent = (
             (unique_verses_used / total_verses * 100) if total_verses > 0 else 0.0
         )
-        
+
         return {
             "total_verses_in_db": total_verses,
             "unique_verses_used": unique_verses_used,
@@ -155,13 +155,13 @@ class GitaAnalyticsService:
             "expected_total": 700,
             "is_complete_db": total_verses >= 700
         }
-    
+
     @classmethod
     def get_verse_usage_frequency(
-        cls, 
+        cls,
         verse_id: str,
         days: int = 30
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Get usage frequency for a specific verse.
         
@@ -179,13 +179,13 @@ class GitaAnalyticsService:
                 "recent_uses": 0,
                 "last_used": None
             }
-        
+
         timestamps = cls._verse_usage[verse_id]
         cutoff_date = datetime.utcnow() - timedelta(days=days)
-        
+
         recent_uses = sum(1 for ts in timestamps if ts >= cutoff_date)
         last_used = max(timestamps) if timestamps else None
-        
+
         return {
             "verse_id": verse_id,
             "total_uses": len(timestamps),
@@ -193,13 +193,13 @@ class GitaAnalyticsService:
             "last_used": last_used.isoformat() if last_used else None,
             "days_analyzed": days
         }
-    
+
     @classmethod
     async def get_underutilized_verses(
-        cls, 
+        cls,
         db: AsyncSession,
         min_usage: int = 1
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Get verses that are underutilized.
         
@@ -215,22 +215,22 @@ class GitaAnalyticsService:
             select(GitaVerse.chapter, GitaVerse.verse)
         )
         all_verses = result.all()
-        
+
         underutilized = []
         for chapter, verse_num in all_verses:
             verse_id = f"{chapter}.{verse_num}"
             usage_count = len(cls._verse_usage.get(verse_id, []))
-            
+
             if usage_count < min_usage:
                 underutilized.append(verse_id)
-        
+
         return underutilized
-    
+
     @classmethod
     async def generate_analytics_report(
-        cls, 
+        cls,
         db: AsyncSession
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate a comprehensive analytics report.
         
@@ -245,11 +245,11 @@ class GitaAnalyticsService:
         most_used = cls.get_most_used_verses(limit=10)
         theme_stats = cls.get_theme_usage_stats()
         underutilized = await cls.get_underutilized_verses(db, min_usage=1)
-        
+
         # Calculate theme diversity
         total_theme_uses = sum(theme_stats.values())
         theme_diversity = len(theme_stats)
-        
+
         return {
             "generated_at": datetime.utcnow().isoformat(),
             "verse_coverage": coverage,
@@ -268,14 +268,14 @@ class GitaAnalyticsService:
                 coverage, validation_stats, theme_diversity
             )
         }
-    
+
     @classmethod
     def _generate_recommendations(
         cls,
-        coverage: Dict[str, Any],
-        validation_stats: Dict[str, Any],
+        coverage: dict[str, Any],
+        validation_stats: dict[str, Any],
         theme_diversity: int
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Generate recommendations based on analytics.
         
@@ -288,7 +288,7 @@ class GitaAnalyticsService:
             List of recommendation strings
         """
         recommendations = []
-        
+
         # Coverage recommendations
         coverage_pct = coverage.get("coverage_percent", 0)
         if coverage_pct < 25:
@@ -303,7 +303,7 @@ class GitaAnalyticsService:
             recommendations.append(
                 "✅ Good verse coverage (>50%). Maintain diverse selection."
             )
-        
+
         # Validation recommendations
         pass_rate = validation_stats.get("pass_rate_percent", 0)
         if pass_rate < 80:
@@ -318,7 +318,7 @@ class GitaAnalyticsService:
             recommendations.append(
                 f"✅ Excellent validation pass rate ({pass_rate}%)."
             )
-        
+
         # Theme diversity recommendations
         if theme_diversity < 10:
             recommendations.append(
@@ -332,9 +332,9 @@ class GitaAnalyticsService:
             recommendations.append(
                 "✅ Good theme diversity across multiple topics."
             )
-        
+
         return recommendations
-    
+
     @classmethod
     def reset_analytics(cls, confirm: bool = False) -> None:
         """
@@ -346,9 +346,9 @@ class GitaAnalyticsService:
         if not confirm:
             logger.warning("Reset analytics called without confirmation")
             return
-        
+
         cls._verse_usage.clear()
         cls._theme_usage.clear()
         cls._validation_stats.clear()
-        
+
         logger.info("📊 Analytics data reset successfully")
