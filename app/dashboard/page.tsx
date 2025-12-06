@@ -1,8 +1,9 @@
 import DashboardClient from './DashboardClient'
 
 export const metadata = {
-  title: 'Dashboard | MindVibe',
-  description: 'Access MindVibe tools including secure journaling and guided chat from one dashboard.'
+  title: 'MindVibe Dashboard | KIAAN — MindVibe Companion',
+  description:
+    'MindVibe Dashboard: your control center with 16 integrated tools. Launch guided chat, capture private notes, and explore every tool with KIAAN — crisp, calm guidance.'
 }
 
 export default function DashboardPage() {
