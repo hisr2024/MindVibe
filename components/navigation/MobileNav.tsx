@@ -34,7 +34,7 @@ const defaultTabs: NavTab[] = [
   },
   {
     id: 'journal',
-    label: 'Journal',
+    label: 'Sacred Reflections',
     href: '/sacred-reflections',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -93,7 +93,7 @@ const defaultTabs: NavTab[] = [
  * MobileNav component for bottom tab navigation on mobile devices.
  *
  * Features:
- * - 6 tabs: Chat, Journal, Home, Wisdom, Tools, Profile
+ * - 6 tabs: Chat, Sacred Reflections, Home, Wisdom, Tools, Profile
  * - Icon + label for each tab
  * - Active state indicator
  * - Touch-friendly (min 44x44px touch targets)

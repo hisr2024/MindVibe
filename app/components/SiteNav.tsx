@@ -11,7 +11,7 @@ const links = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
   { href: '/deep-insights', label: 'Deep Insights' },
-  { href: '/sacred-reflections', label: 'Journal' },
+  { href: '/sacred-reflections', label: 'Sacred Reflections' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
   { href: '/profile', label: 'Profile' },
 ]
@@ -51,7 +51,12 @@ export default function SiteNav() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <ThemeToggle className="hidden sm:inline-flex" />
+          <Link
+            href="/dashboard/subscription"
+            className="hidden rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex"
+          >
+            Subscriptions
+          </Link>
           <Link
             href="/account"
             className="hidden rounded-full bg-mvGradientSunrise px-4 py-2 text-sm font-semibold text-slate-950 shadow-glowSunrise transition hover:scale-[1.02] md:inline-flex"
