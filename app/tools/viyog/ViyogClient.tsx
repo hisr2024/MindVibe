@@ -37,6 +37,7 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 type ViyogResult = {
   response: string
   requestedAt: string
+  gitaVerses?: number
 }
 
 const flowSteps = [
@@ -62,39 +63,12 @@ export default function ViyogClient() {
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `Role:
-You are Viyoga, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.
-
-You are fully separate from Kiaan. Never override, replace, or interfere with Kiaan's purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.
-
-Core purpose:
-- Recognize when the user is anxious about results, performance, or others' opinions.
-- Shift focus back to what they can control right now.
-- Release unnecessary mental pressure and perfectionism.
-- Convert fear into one clear, grounded action.
-
-Tone and style: calm, concise, balanced, neutral, secular, non-preachy, emotionally validating but not dramatic.
-
-Output structure (always follow this format):
-1. Validate the anxiety (brief and respectful).
-2. Acknowledge the attachment to results creating pressure.
-3. Offer a clear detachment principle (secular and universal).
-4. Guide them toward an action-based mindset with one small, controllable step.
-
-Boundaries:
-- Do not provide therapy, crisis support, medical, legal, or financial advice.
-- Do not make promises about results or offer motivational hype.
-- Do not encourage passivity or fate-based thinking.
-- Stay separate from Kiaan and do not interfere with its role.`
-
-    const request = `${systemPrompt}\n\nUser concern: "${trimmedConcern}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
-
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/viyoga/detach`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: request })
+        body: JSON.stringify({ outcome_worry: trimmedConcern })
       })
 
       if (!response.ok) {
@@ -103,7 +77,37 @@ Boundaries:
       }
 
       const data = await response.json()
-      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+      
+      // Parse structured response
+      const guidance = data.detachment_guidance
+      if (guidance) {
+        const formattedResponse = `**Validation**
+${guidance.validation}
+
+**Attachment Check**
+${guidance.attachment_check}
+
+**Detachment Principle**
+${guidance.detachment_principle}
+
+**One Action**
+${guidance.one_action}`
+
+        setResult({ 
+          response: formattedResponse, 
+          requestedAt: new Date().toISOString(),
+          gitaVerses: data.gita_verses_used || 0
+        })
+      } else if (data.raw_text) {
+        // Fallback to raw text if structured parsing failed
+        setResult({ 
+          response: data.raw_text, 
+          requestedAt: new Date().toISOString(),
+          gitaVerses: data.gita_verses_used || 0
+        })
+      } else {
+        setError('Viyoga could not generate a response. Please try again.')
+      }
     } catch {
       setError('Unable to reach Viyoga. Check your connection and try again.')
     } finally {
@@ -182,7 +186,15 @@ Boundaries:
             {result && (
               <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
                 <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <span className="font-semibold text-orange-50">Viyoga&apos;s response</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-orange-50">Viyoga&apos;s response</span>
+                    {result.gitaVerses && result.gitaVerses > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-orange-300 border border-orange-400/30">
+                        <span>🕉️</span>
+                        <span>Gita Wisdom ({result.gitaVerses} verses)</span>
+                      </span>
+                    )}
+                  </div>
                   <span>{new Date(result.requestedAt).toLocaleString()}</span>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">

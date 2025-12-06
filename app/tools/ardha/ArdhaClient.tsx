@@ -37,6 +37,7 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 type ArdhaResult = {
   response: string
   requestedAt: string
+  gitaVerses?: number
 }
 
 const pillars = [
@@ -63,42 +64,12 @@ export default function ArdhaClient() {
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `Role:
-You are Ardha, the Reframing Assistant—a calm, wise, ancient wisdom-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.
-
-You stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan's core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using ancient wisdom principles. Your job is complementary, not overlapping.
-
-Core Behavior:
-- Identify the negative belief or emotional distortion the user expresses.
-- Acknowledge their feeling with compassion (never invalidate).
-- Apply ancient wisdom principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).
-- Generate a clear, modern, emotionally intelligent reframe.
-- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.
-- Never offer spiritual authority—only perspective reshaping.
-- No judgment, no moralizing, no sermons.
-- Reframe in simple, conversational, modern English.
-
-Output Format:
-When the user shares a negative thought, respond with:
-1. Recognition (validate the feeling)
-2. Deep Insight (the principle being applied)
-3. Reframe (positive but realistic)
-4. Small Action Step (something within their control)
-
-Boundaries:
-- You are NOT a therapist.
-- You do NOT give medical, legal, or crisis advice.
-- You do NOT contradict Kiaan.
-- You ONLY transform the user's thought into a healthier, clearer version.`
-
-    const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
-
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await fetch(`${apiUrl}/api/ardha/reframe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: request })
+        body: JSON.stringify({ negative_thought: trimmedThought })
       })
 
       if (!response.ok) {
@@ -107,7 +78,37 @@ Boundaries:
       }
 
       const data = await response.json()
-      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+      
+      // Parse structured response
+      const guidance = data.reframe_guidance
+      if (guidance) {
+        const formattedResponse = `**Recognition**
+${guidance.recognition}
+
+**Deep Insight**
+${guidance.deep_insight}
+
+**Reframe**
+${guidance.reframe}
+
+**Small Action Step**
+${guidance.small_action_step}`
+
+        setResult({ 
+          response: formattedResponse, 
+          requestedAt: new Date().toISOString(),
+          gitaVerses: data.gita_verses_used || 0
+        })
+      } else if (data.raw_text) {
+        // Fallback to raw text if structured parsing failed
+        setResult({ 
+          response: data.raw_text, 
+          requestedAt: new Date().toISOString(),
+          gitaVerses: data.gita_verses_used || 0
+        })
+      } else {
+        setError('Ardha could not generate a response. Please try again.')
+      }
     } catch {
       setError('Unable to reach Ardha. Check your connection and try again.')
     } finally {
@@ -186,7 +187,15 @@ Boundaries:
             {result && (
               <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
                 <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <span className="font-semibold text-orange-50">Ardha&apos;s response</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-orange-50">Ardha&apos;s response</span>
+                    {result.gitaVerses && result.gitaVerses > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-orange-300 border border-orange-400/30">
+                        <span>🕉️</span>
+                        <span>Gita Wisdom ({result.gitaVerses} verses)</span>
+                      </span>
+                    )}
+                  </div>
                   <span>{new Date(result.requestedAt).toLocaleString()}</span>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
