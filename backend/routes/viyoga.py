@@ -30,6 +30,9 @@ api_key = os.getenv("OPENAI_API_KEY", "").strip()
 model_name = os.getenv("GUIDANCE_MODEL", "gpt-4o-mini")
 client = OpenAI(api_key=api_key) if api_key else None
 
+# Default Gita principles when verse search fails
+DEFAULT_GITA_PRINCIPLES = "Apply universal principles of nishkama karma (desireless action), vairagya (detachment), and samatva (equanimity in success and failure)."
+
 router = APIRouter(prefix="/api/viyoga", tags=["viyoga"])
 
 
@@ -127,9 +130,11 @@ async def detach_from_outcome(
                 verse_obj = v.get("verse")
                 if verse_obj:
                     # Handle both verse_number (WisdomVerse, _GitaVerseWrapper) and verse (GitaVerse) attributes
+                    # This fallback pattern matches the existing pattern in guidance.py for compatibility
                     verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
                     gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
                     # Use principle if available, otherwise use context
+                    # This fallback ensures we get the best available explanatory text
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
                         gita_context += f"Principle: {principle}\n"
@@ -142,7 +147,7 @@ async def detach_from_outcome(
 
     # Use default principles if no Gita context was built
     if not gita_context:
-        gita_context = "Apply universal principles of nishkama karma (actionless action), vairagya (detachment), and samatva (equanimity in success and failure)."
+        gita_context = DEFAULT_GITA_PRINCIPLES
 
     # System prompt with Gita wisdom integration
     VIYOGA_WITH_GITA_PROMPT = f"""
