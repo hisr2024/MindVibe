@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, type CSSProperties, type ReactElement } from 'react'
+import { useState, useEffect, useRef, useCallback, type CSSProperties, type ReactElement } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
@@ -812,6 +812,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [loading, setLoading] = useState(false)
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const clarityInitialState: ClaritySession = {
@@ -827,12 +829,43 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [claritySession, setClaritySession] = useState<ClaritySession>(clarityInitialState)
   const [clarityLog, setClarityLog] = useState<ClarityEvaluation | null>(null)
 
+  // Check for reduced motion preference
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      setPrefersReducedMotion(mediaQuery.matches)
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+      mediaQuery.addEventListener('change', handler)
+      return () => mediaQuery.removeEventListener('change', handler)
+    }
+  }, [])
+
+  // Auto-scroll to bottom when at bottom and messages change
+  useEffect(() => {
+    if (isAtBottom) {
+      const container = messageListRef.current
+      if (!container) return
+      container.scrollTo({ top: container.scrollHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+    }
+  }, [messages, isAtBottom, prefersReducedMotion])
+
+  // Detect scroll position to manage auto-scroll behavior
+  const handleScroll = useCallback(() => {
     const container = messageListRef.current
     if (!container) return
 
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [messages])
+    const threshold = 40
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < threshold
+    setIsAtBottom(isNearBottom)
+  }, [])
+
+  // Scroll to bottom function
+  const scrollToBottom = useCallback(() => {
+    const container = messageListRef.current
+    if (!container) return
+    container.scrollTo({ top: container.scrollHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+  }, [prefersReducedMotion])
 
   useEffect(() => {
     if (!promptMotion) return
@@ -929,6 +962,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
 
     setPromptMotion(true)
+    setIsAtBottom(true)
     await deliverMessage(trimmed)
   }
 
@@ -939,6 +973,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   async function sendPendingNow() {
     if (!claritySession.pendingMessage) return
     setPromptMotion(true)
+    setIsAtBottom(true)
     await deliverMessage(claritySession.pendingMessage)
     setClaritySession(clarityInitialState)
   }
@@ -947,6 +982,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     if (claritySession.pendingMessage) {
       if (claritySession.source === 'auto') {
         setPromptMotion(true)
+        setIsAtBottom(true)
         await deliverMessage(claritySession.pendingMessage)
       } else {
         setInput(claritySession.pendingMessage)
@@ -1231,10 +1267,12 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
             autoHide={false}
             scrollableNodeProps={{
               ref: messageListRef,
+              onScroll: handleScroll,
               tabIndex: 0,
               'aria-label': 'Conversation with Kiaan',
+              'aria-live': 'polite',
               className:
-                'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none',
+                'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
             }}
             className="mv-energy-scrollbar"
           >
@@ -1288,6 +1326,20 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               )}
             </div>
           </SimpleBar>
+
+          {/* Floating Jump to Latest button */}
+          {!isAtBottom && messages.length > 0 && (
+            <button
+              onClick={() => {
+                setIsAtBottom(true)
+                scrollToBottom()
+              }}
+              className="absolute bottom-4 right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105 animate-fadeIn"
+              aria-label="Jump to latest message"
+            >
+              ↓ Jump to Latest
+            </button>
+          )}
         </div>
 
       <div className="flex gap-3 relative flex-col sm:flex-row">
