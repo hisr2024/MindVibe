@@ -8,9 +8,9 @@ import { MindVibeLockup } from '@/components/branding'
 
 const links = [
   { href: '/', label: 'Home' },
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
   { href: '/deep-insights', label: 'Deep Insights' },
-  { href: '/relationship-compass', label: 'Relationship Compass' },
   { href: '/sacred-reflections', label: 'Journal' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
   { href: '/profile', label: 'Profile' },
