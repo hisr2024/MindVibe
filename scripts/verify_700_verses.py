@@ -50,6 +50,10 @@ EXPECTED_COUNTS = {
 
 TOTAL_EXPECTED = 700
 
+# Quality thresholds for verification
+MIN_MENTAL_HEALTH_TAG_COVERAGE = 0.70  # 70% of verses should have mental health tags
+MIN_EMBEDDING_COVERAGE = 0.90  # 90% of verses should have embeddings
+
 # Key verses that must be present with proper content
 KEY_VERSES = [
     (2, 47),  # Karmanye Vadhikaraste - most famous verse
@@ -269,9 +273,9 @@ async def verify_database() -> tuple[bool, list[str]]:
             )
             tagged_count = result.scalar() or 0
             tag_percentage = (tagged_count / total) * 100 if total > 0 else 0
-            status = "✅" if tagged_count >= total * 0.7 else "⚠️"
+            status = "✅" if tagged_count >= total * MIN_MENTAL_HEALTH_TAG_COVERAGE else "⚠️"
             print(f"  {tagged_count}/{total} {status}")
-            if tagged_count < total * 0.7:
+            if tagged_count < total * MIN_MENTAL_HEALTH_TAG_COVERAGE:
                 warnings.append(f"Only {tagged_count} verses have mental health tags ({tag_percentage:.1f}%)")
 
             # Check embeddings
@@ -280,7 +284,7 @@ async def verify_database() -> tuple[bool, list[str]]:
                 text("SELECT COUNT(*) FROM gita_verses WHERE embedding IS NOT NULL")
             )
             embedding_count = result.scalar() or 0
-            status = "✅" if embedding_count >= total * 0.9 else "⚠️"
+            status = "✅" if embedding_count >= total * MIN_EMBEDDING_COVERAGE else "⚠️"
             print(f"  {embedding_count}/{total} {status}")
 
         await engine.dispose()
