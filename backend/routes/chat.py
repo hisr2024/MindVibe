@@ -130,15 +130,19 @@ class KIAAN:
                     # Enhanced verse search with fallback
                     verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=7)
 
-                    # Add fallback expansion if results are insufficient
+                    # Add fallback expansion if results are insufficient or low quality
+                    needs_fallback = False
                     if verse_results and len(verse_results) < 3:
                         logger.info(f"Only {len(verse_results)} verses found, expanding search")
-                        verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
+                        needs_fallback = True
                     elif verse_results:
-                        top_score = verse_results[0].get("score", 0) if verse_results else 0
+                        top_score = verse_results[0].get("score", 0)
                         if top_score < 0.3:
                             logger.info(f"Top verse score low ({top_score:.3f}), trying fallback")
-                            verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
+                            needs_fallback = True
+
+                    if needs_fallback:
+                        verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
 
                     gita_context = self._build_gita_context(verse_results)
 

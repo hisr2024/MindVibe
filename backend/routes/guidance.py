@@ -30,6 +30,7 @@ from openai import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
+from backend.services.gita_service import GitaService
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 logger = logging.getLogger(__name__)
@@ -382,6 +383,23 @@ async def auth_copy(payload: dict[str, Any]) -> EngineResult:
     )
 
 
+def get_verse_identifier(verse) -> str:
+    """
+    Extract verse identifier consistently across different verse objects.
+
+    Args:
+        verse: Verse object (GitaVerse, WisdomVerse, or _GitaVerseWrapper)
+
+    Returns:
+        String verse identifier in format "chapter.verse"
+    """
+    chapter = getattr(verse, 'chapter', None)
+    verse_num = getattr(verse, 'verse_number', None) or getattr(verse, 'verse', None)
+    if chapter and verse_num:
+        return f"{chapter}.{verse_num}"
+    return ""
+
+
 async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happened: str, limit: int = 5) -> list[dict[str, Any]]:
     """
     Get specialized Gita verses for Karma Reset based on repair type.
@@ -391,8 +409,6 @@ async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happen
     - clarification: 4.7 (restoration of dharma), 13.7-11 (humility, truthfulness), 17.15 (truthful speech)
     - calm_followup: 2.56-57 (equanimity), 6.5-6 (self-elevation), 12.13-15 (peaceful qualities)
     """
-    from backend.services.gita_service import GitaService
-
     kb = WisdomKnowledgeBase()
 
     # Key verses by repair type
@@ -435,8 +451,8 @@ async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happen
     for result in all_results:
         verse = result.get("verse")
         if verse:
-            verse_id = f"{verse.chapter}.{verse.verse}"
-            if verse_id not in seen_ids:
+            verse_id = get_verse_identifier(verse)
+            if verse_id and verse_id not in seen_ids:
                 seen_ids.add(verse_id)
                 unique_results.append(result)
 
@@ -486,8 +502,8 @@ async def generate_karma_reset(
             for v in verse_results:
                 verse_obj = v.get("verse")
                 if verse_obj:
-                    verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
-                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
+                    verse_id = get_verse_identifier(verse_obj)
+                    gita_context += f"\n{verse_id}:\n{verse_obj.english}\n"
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
                         gita_context += f"Principle: {principle}\n"

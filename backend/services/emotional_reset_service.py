@@ -24,6 +24,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import EmotionalResetSession, WisdomVerse
+from backend.services.gita_service import GitaService
 from backend.services.safety_validator import SafetyValidator
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
@@ -36,6 +37,23 @@ openai_client = OpenAI(api_key=api_key) if api_key else None
 # Rate limiting constants
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
 SESSION_TIMEOUT_SECONDS = int(os.getenv("EMOTIONAL_RESET_SESSION_TIMEOUT", "1800"))
+
+
+def get_verse_identifier(verse) -> str:
+    """
+    Extract verse identifier consistently across different verse objects.
+
+    Args:
+        verse: Verse object (GitaVerse, WisdomVerse, or _GitaVerseWrapper)
+
+    Returns:
+        String verse identifier in format "chapter.verse"
+    """
+    chapter = getattr(verse, 'chapter', None)
+    verse_num = getattr(verse, 'verse_number', None) or getattr(verse, 'verse', None)
+    if chapter and verse_num:
+        return f"{chapter}.{verse_num}"
+    return ""
 
 
 class EmotionalResetService:
@@ -451,8 +469,6 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         primary_emotion = emotions[0] if emotions else None
 
         if primary_emotion and primary_emotion in emotion_verse_mapping:
-            from backend.services.gita_service import GitaService
-
             for chapter, verse_num in emotion_verse_mapping[primary_emotion][:3]:
                 try:
                     verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
@@ -471,8 +487,8 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         unique_verses = []
         for result in all_verse_results:
             verse = result["verse"]
-            verse_id = f"{verse.chapter}.{getattr(verse, 'verse_number', getattr(verse, 'verse', ''))}"
-            if verse_id not in seen_ids:
+            verse_id = get_verse_identifier(verse)
+            if verse_id and verse_id not in seen_ids:
                 seen_ids.add(verse_id)
                 unique_verses.append(result)
 
