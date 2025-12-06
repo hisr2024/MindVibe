@@ -14,7 +14,7 @@ export function ToolsDashboardSection() {
           href="/dashboard"
           className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-white/10 px-4 py-2 text-xs font-semibold text-orange-50 shadow-lg shadow-orange-500/15 transition hover:border-orange-300/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/60 focus:ring-offset-2 focus:ring-offset-[#0b0b0f]"
         >
-          Open full view
+          Return to home
           <span aria-hidden>→</span>
         </Link>
       </div>

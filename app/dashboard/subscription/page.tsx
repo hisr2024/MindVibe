@@ -73,9 +73,11 @@ export default function SubscriptionDashboardPage() {
       {/* Header */}
       <div className="mb-8 rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-6 shadow-[0_18px_70px_rgba(46,160,255,0.14)] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <KiaanLogo size="md" className="shrink-0" />
-        <div>
+        <div className="space-y-1">
           <h1 className="text-3xl font-bold text-orange-50 mb-1">Subscription</h1>
-          <p className="text-orange-100/75">Manage your plan and track your usage with the MindVibe Companion by your side.</p>
+          <p className="text-orange-100/75 max-w-3xl">
+            Manage your plan and track your usage with the MindVibe Companion by your side. Everything you need to stay on top of your membership is organized below.
+          </p>
         </div>
       </div>
 
