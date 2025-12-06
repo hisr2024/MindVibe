@@ -25,3 +25,15 @@ Use these text prompts with Stable Diffusion or Midjourney. Keep outputs vector-
 1. "Equilateral triangle UI with glowing vertices, soft energy beams circulating, teal/blue/rose color mapping, minimal futuristic wellbeing app"
 2. "Meditative triangle navigation, pulsing nodes and shimmer trails, neutral dark canvas, gentle gradient glows, high-end UX concept"
 3. "Breath-like rings at top vertex, focused beam along left edge, heart bloom on right vertex, ambient resonance ripple, vector UI"
+
+## Ardha Logo (Static & Animated)
+1. "Minimal logo of a rising half-moon merged with a lotus outline, liquid gradient teal to electric purple, soft glow, clean rounded sans lettering 'ardha', futuristic wellness aesthetic, white background"
+2. "Animate a logo of a half-moon merging with a lotus: gentle breathing pulse, gradient teal→electric purple shimmer, smooth loop, subtle glow, clean sans 'ardha' under mark"
+
+## Vyoga Logo (Static & Animated)
+1. "Logo: two curved ribbons forming a 'V' inside a partial circle, hot magenta and cobalt with neon lime accent, bold geometric sans 'vyoga', energetic and modern"
+2. "Animate two ribbons unfurling into a circle then folding into a 'V'; neon lime sweep highlight; looped, fast-cut motion graphics, magenta+cobalt palette"
+
+## Relationship Compass Logo (Static & Animated)
+1. "Logo of a compass dial with a heart-shaped needle, concentric signal rings, gradient coral→amber→violet, friendly humanist sans text 'relationship compass', clean white backdrop"
+2. "Animate a heart-shaped compass needle softly pivoting as concentric rings pulse outward; sunset gradient coral→amber→violet; smooth loop; minimal, modern"
