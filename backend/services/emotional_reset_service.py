@@ -423,42 +423,75 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
     ) -> list[dict[str, str]]:
         """
         Generate wisdom insights based on assessment (Step 5).
-
+        Enhanced to use 5 verses and return top 3 insights.
+        
         Args:
             db: Database session
             assessment: Assessment data from Step 2
-
+        
         Returns:
-            List of 1-2 wisdom insights (no citations)
+            List of top 3 wisdom insights (no citations)
         """
         themes = assessment.get("themes", [])
         emotions = assessment.get("emotions", [])
-
-        # Search for relevant verses
+        
+        # Specialized emotion-to-verse mapping
+        emotion_verse_mapping = {
+            "anxious": [(2, 47), (2, 48), (6, 5), (6, 35)],
+            "stressed": [(2, 14), (2, 15), (6, 13), (6, 17)],
+            "sad": [(2, 22), (2, 23), (15, 7), (12, 13)],
+            "angry": [(16, 1), (16, 2), (16, 3), (2, 56)],
+            "overwhelmed": [(2, 40), (2, 50), (18, 58), (6, 25)],
+            "hopeless": [(4, 36), (4, 38), (9, 2), (18, 66)],
+            "confused": [(4, 34), (5, 15), (5, 16), (18, 63)],
+        }
+        
+        # Get specialized verses first
+        key_verse_results = []
+        primary_emotion = emotions[0] if emotions else None
+        
+        if primary_emotion and primary_emotion in emotion_verse_mapping:
+            from backend.services.gita_service import GitaService
+            
+            for chapter, verse_num in emotion_verse_mapping[primary_emotion][:3]:
+                try:
+                    verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+                    if verse:
+                        key_verse_results.append({"verse": verse, "score": 0.9})
+                except Exception as e:
+                    logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
+        
+        # Search for additional verses (increased from 3 to 5)
         search_query = " ".join(themes + emotions)
-        verse_results = await self.wisdom_kb.search_relevant_verses(
-            db=db,
-            query=search_query,
-            limit=3,
-        )
-
+        verse_results = await self.wisdom_kb.search_relevant_verses(db=db, query=search_query, limit=5)
+        
+        # Combine and deduplicate
+        all_verse_results = key_verse_results + verse_results
+        seen_ids = set()
+        unique_verses = []
+        for result in all_verse_results:
+            verse = result["verse"]
+            verse_id = f"{verse.chapter}.{getattr(verse, 'verse_number', getattr(verse, 'verse', ''))}"
+            if verse_id not in seen_ids:
+                seen_ids.add(verse_id)
+                unique_verses.append(result)
+        
         insights = []
-
-        if verse_results:
-            for result in verse_results[:2]:
+        if unique_verses:
+            # Return top 3 insights (increased from 2)
+            for result in unique_verses[:3]:
                 verse = result["verse"]
-                # Format without citations
                 sanitized = self.wisdom_kb.sanitize_text(verse.english)
                 if sanitized:
                     insights.append({
                         "wisdom": sanitized,
                         "application": self._create_application(verse, emotions),
                     })
-
+        
         # Fallback if no verses found
         if not insights:
             insights = self._get_fallback_wisdom(emotions)
-
+        
         return insights
 
     def _create_application(self, _verse: WisdomVerse, emotions: list[str]) -> str:

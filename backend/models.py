@@ -515,6 +515,23 @@ class GitaVerseKeyword(Base):
         TIMESTAMP(timezone=True), server_default=func.now()
     )
 
+
+class GitaVerseUsage(Base):
+    """Track Gita verse usage across tools."""
+    
+    __tablename__ = "gita_verse_usage"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    verse_id: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    tool_name: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    context: Mapped[str | None] = mapped_column(Text, nullable=True)
+    user_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    used_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+    effectiveness_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
 class Session(Base):
     __tablename__ = "sessions"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)

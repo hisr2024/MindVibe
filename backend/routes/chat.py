@@ -127,10 +127,24 @@ class KIAAN:
             verse_results = []
             if self.gita_kb and db:
                 try:
-                    # Increased from 5 to 7 for better verse coverage
+                    # Enhanced verse search with fallback
                     verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=7)
+                    
+                    # Add fallback expansion if results are insufficient
+                    if verse_results and len(verse_results) < 3:
+                        logger.info(f"Only {len(verse_results)} verses found, expanding search")
+                        verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
+                    elif verse_results:
+                        top_score = verse_results[0].get("score", 0) if verse_results else 0
+                        if top_score < 0.3:
+                            logger.info(f"Top verse score low ({top_score:.3f}), trying fallback")
+                            verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
+                    
                     gita_context = self._build_gita_context(verse_results)
-                    logger.info(f"✅ Found {len(verse_results)} relevant Gita verses")
+                    
+                    # Enhanced logging with verse IDs
+                    top_score = verse_results[0].get("score", 0) if verse_results else 0
+                    logger.info(f"✅ Found {len(verse_results)} verses with top score: {top_score:.3f}")
 
                     # Track verse usage in analytics
                     if self.gita_analytics:
@@ -236,7 +250,7 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
         return build_gita_context_comprehensive(verse_results)
 
 
-def build_gita_context_comprehensive(verse_results: list, limit: int = 7) -> str:
+def build_gita_context_comprehensive(verse_results: list, limit: int = 5) -> str:
     """
     Build comprehensive Gita context from all 700 verses search results.
     
@@ -248,7 +262,7 @@ def build_gita_context_comprehensive(verse_results: list, limit: int = 7) -> str
     
     Args:
         verse_results: List of verse search results with scores
-        limit: Maximum number of verses to include (default 7)
+        limit: Maximum number of verses to include (default 5 for richer context)
         
     Returns:
         Rich context string with guidelines (NEVER cite sources in response)

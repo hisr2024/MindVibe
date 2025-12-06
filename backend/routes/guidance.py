@@ -376,6 +376,68 @@ async def auth_copy(payload: Dict[str, Any]) -> EngineResult:
     )
 
 
+async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happened: str, limit: int = 5) -> list[dict[str, Any]]:
+    """
+    Get specialized Gita verses for Karma Reset based on repair type.
+    
+    Key verses by repair type:
+    - apology: 11.44 (seeking forgiveness), 12.13-14 (compassion), 16.2-3 (virtues), 18.66 (surrender)
+    - clarification: 4.7 (restoration of dharma), 13.7-11 (humility, truthfulness), 17.15 (truthful speech)
+    - calm_followup: 2.56-57 (equanimity), 6.5-6 (self-elevation), 12.13-15 (peaceful qualities)
+    """
+    from backend.services.gita_service import GitaService
+    
+    kb = WisdomKnowledgeBase()
+    
+    # Key verses by repair type
+    key_verses_by_type = {
+        "apology": [(11, 44), (12, 13), (12, 14), (12, 15), (16, 2), (16, 3), (18, 66)],
+        "clarification": [(4, 7), (13, 7), (13, 8), (13, 11), (17, 15), (18, 20)],
+        "calm_followup": [(2, 56), (2, 57), (6, 5), (6, 6), (12, 13), (12, 14), (12, 15)],
+    }
+    
+    key_verses = key_verses_by_type.get(repair_type, key_verses_by_type["apology"])
+    
+    key_verse_results = []
+    for chapter, verse_num in key_verses:
+        try:
+            verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+            if verse:
+                key_verse_results.append({
+                    "verse": verse,
+                    "score": 0.9,
+                    "sanitized_text": kb.sanitize_text(verse.english)
+                })
+        except Exception as e:
+            logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
+    
+    # Theme search
+    theme_mapping = {"apology": "compassion", "clarification": "truthfulness", "calm_followup": "equanimity"}
+    theme = theme_mapping.get(repair_type, "compassion")
+    
+    theme_search_results = []
+    try:
+        search_query = f"{what_happened} {theme} forgiveness understanding balance"
+        theme_search_results = await kb.search_relevant_verses_full_db(db=db, query=search_query, theme=theme, limit=3)
+    except Exception as e:
+        logger.debug(f"Theme search failed: {e}")
+    
+    # Combine and deduplicate
+    all_results = key_verse_results[:6] + theme_search_results
+    seen_ids = set()
+    unique_results = []
+    for result in all_results:
+        verse = result.get("verse")
+        if verse:
+            verse_id = f"{verse.chapter}.{verse.verse}"
+            if verse_id not in seen_ids:
+                seen_ids.add(verse_id)
+                unique_results.append(result)
+    
+    unique_results.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return unique_results[:limit]
+
+
 @router.post("/karma-reset/generate")
 async def generate_karma_reset(
     payload: Dict[str, Any],
@@ -406,42 +468,25 @@ async def generate_karma_reset(
     # Extract situation context for Gita verse search
     what_happened = payload.get("what_happened", "")
     
-    # Build search query based on repair type
-    search_queries = {
-        "apology": "forgiveness humility acknowledging mistakes karma duty",
-        "clarification": "truth clear communication understanding dharma",
-        "calm_followup": "equanimity peace emotional balance self-control"
-    }
-    
-    query = f"{what_happened} {search_queries.get(repair_type, 'karma dharma action')}"
-    
-    # Search relevant Gita verses
-    gita_kb = WisdomKnowledgeBase()
     verse_results = []
     gita_context = ""
     
     try:
-        verse_results = await gita_kb.search_relevant_verses(
-            db=db, 
-            query=query, 
-            limit=5
-        )
+        # Use specialized Karma Reset verse function
+        verse_results = await get_karma_reset_verses(db=db, repair_type=repair_type, what_happened=what_happened, limit=5)
         
-        # Build Gita context for the prompt
+        # Build Gita context
         if verse_results:
             for v in verse_results:
                 verse_obj = v.get("verse")
                 if verse_obj:
-                    # Handle both verse_number (WisdomVerse, _GitaVerseWrapper) and verse (GitaVerse) attributes
                     verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
                     gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
-                    # Use principle if available, otherwise use context
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
                         gita_context += f"Principle: {principle}\n"
         
-        logger.info(f"Karma Reset - Found {len(verse_results)} Gita verses for query: {query[:50]}")
-        logger.debug(f"Gita context built: {gita_context[:200]}...")
+        logger.info(f"Karma Reset - Found {len(verse_results)} specialized verses for {repair_type}")
     except Exception as e:
         logger.error(f"Error fetching Gita verses for Karma Reset: {e}")
         gita_context = ""
