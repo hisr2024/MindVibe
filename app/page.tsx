@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, type CSSProperties, type ReactElement } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
-import { GrowthJourney } from '@/components/GrowthJourney'
+import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 import SimpleBar from 'simplebar-react'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
@@ -191,6 +191,24 @@ const RELATIONAL_TRIGGER_PATTERNS = [
   'Admissions of feeling defensive, judged, or misunderstood with someone specific.'
 ]
 
+const GUIDANCE_MODE_DESCRIPTIONS: Record<GuidanceMode, { title: string; description: string }> = {
+  'inner-peace': {
+    title: 'Inner Peace',
+    description:
+      'Find stillness through breath-focused exercises and gentle grounding techniques. Perfect for moments when you need to calm your mind and reconnect with tranquility.'
+  },
+  'mind-control': {
+    title: 'Mind Control',
+    description:
+      'Develop focused clarity through structured mindfulness practices. Ideal for decision-making, concentration, and maintaining mental discipline.'
+  },
+  'self-kindness': {
+    title: 'Self Kindness',
+    description:
+      'Cultivate compassion for yourself through warm, supportive exercises. Essential for healing, self-acceptance, and nurturing your emotional well-being.'
+  }
+}
+
 type ClaritySession = {
   active: boolean
   started: boolean
@@ -204,6 +222,7 @@ type ClaritySession = {
 
 export default function Home() {
   const [chatPrefill, setChatPrefill] = useState<string | null>(null)
+  const [selectedGuidanceMode, setSelectedGuidanceMode] = useState<GuidanceMode | null>(null)
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -221,28 +240,57 @@ export default function Home() {
           <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 md:p-10 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur">
             <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
             <div className="absolute left-4 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
-            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-              <div className="space-y-3">
+            <div className="grid items-start gap-8 lg:grid-cols-[1.1fr,1fr]">
+              <div className="space-y-4">
                 <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
                 <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">A premium, animated companion shaped by Krishna&apos;s flute and peacock feather — always calm, always modern.</p>
+                <div className="flex gap-2 flex-wrap">
+                  <TokenCard label="Inner Peace" note="Gentle breath and soft focus" tone="teal" icon={<SunriseIcon />} />
+                  <TokenCard label="Mind Control" note="Steady steps, one thought at a time" tone="blue" icon={<MindWaveIcon />} />
+                  <TokenCard label="Self Kindness" note="You are welcome here" tone="lilac" icon={<HeartBreezeIcon />} />
+                </div>
               </div>
-              <div className="flex gap-2 flex-wrap justify-center">
-                <TokenCard label="Inner Peace" note="Gentle breath and soft focus" tone="teal" icon={<SunriseIcon />} />
-                <TokenCard label="Mind Control" note="Steady steps, one thought at a time" tone="blue" icon={<MindWaveIcon />} />
-                <TokenCard label="Self Kindness" note="You are welcome here" tone="lilac" icon={<HeartBreezeIcon />} />
+
+              <div className="relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-5 shadow-[0_18px_70px_rgba(255,147,71,0.16)]">
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 via-[#ff9933]/5 to-orange-300/10" />
+                <div className="relative space-y-3">
+                  <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Guidance modes</p>
+                  <h3 className="text-2xl font-semibold text-orange-50">Triangle of Flowing Energy</h3>
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+                    <TriangleOfEnergy
+                      selectedMode={selectedGuidanceMode}
+                      onSelectMode={setSelectedGuidanceMode}
+                      size={240}
+                    />
+                    <div className="flex-1 space-y-2">
+                      {selectedGuidanceMode ? (
+                        <div className="rounded-xl border border-orange-400/25 bg-black/40 p-3">
+                          <h4 className="text-base font-semibold text-orange-50 flex items-center gap-2">
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  selectedGuidanceMode === 'inner-peace'
+                                    ? '#4fd1c5'
+                                    : selectedGuidanceMode === 'mind-control'
+                                      ? '#3b82f6'
+                                      : '#ec4899'
+                              }}
+                            />
+                            {GUIDANCE_MODE_DESCRIPTIONS[selectedGuidanceMode].title}
+                          </h4>
+                          <p className="mt-1 text-sm text-orange-100/80">
+                            {GUIDANCE_MODE_DESCRIPTIONS[selectedGuidanceMode].description}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-orange-100/75">Tap a mode to explore how KIAAN guides your state.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href="/wisdom-rooms"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition w-full sm:w-auto text-center"
-            >
-              Wisdom Chat Rooms
-            </Link>
-            <div className="px-3 py-2 rounded-xl border border-orange-400/30 text-xs text-orange-100/80 bg-black/40 w-full sm:w-auto text-center">
-              Multiple guidance rooms in one tap
-            </div>
-          </div>
         </header>
 
         <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
@@ -294,8 +342,6 @@ export default function Home() {
         </section>
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
-        <DailyWisdom onChatClick={setChatPrefill} />
-        <PublicChatRooms />
         <section
           id="journal-section"
           className="rounded-3xl border border-amber-300/15 bg-white/5 p-5 shadow-[0_18px_80px_rgba(251,191,36,0.12)]"
@@ -1352,115 +1398,6 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
             <div className="text-[11px] text-emerald-50/70 mt-1 leading-snug">{s.query}</div>
           </button>
         ))}
-      </div>
-    </section>
-  )
-}
-
-function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void }) {
-  const [saved, setSaved] = useState(false)
-  const wisdom = {
-    text: "The key to peace lies not in controlling outcomes, but in mastering your response. Focus your energy on doing your best without attachment to results, and discover true freedom.",
-    principle: "Action without Attachment"
-  }
-
-  return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f0d0c] via-[#140f0c] to-[#0c0a0a] border border-orange-400/15 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.16)]">
-      <div className="absolute -right-6 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ffb347]/20 to-transparent blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#2b1a13]/50 via-orange-500/15 to-transparent blur-3xl" />
-      <div className="relative flex justify-between mb-4 items-start gap-3">
-        <div className="flex gap-2 items-center">
-          <span className="text-3xl">💎</span>
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Today's Wisdom</h2>
-        </div>
-        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
-      </div>
-
-      <blockquote className="relative text-lg text-orange-50 mb-4 italic leading-relaxed bg-white/5 border border-orange-200/15 rounded-2xl p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
-        “{wisdom.text}”
-      </blockquote>
-
-      <p className="text-sm text-orange-100/80 mb-4">✨ Principle: {wisdom.principle}</p>
-
-      <div className="flex gap-3 flex-wrap">
-        <button
-          className="px-4 py-2 bg-gradient-to-r from-orange-400 to-[#ffb347] text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-orange-500/20 hover:scale-105 transition"
-          onClick={() => {
-            onChatClick(`I'd like to talk about today's wisdom: "${wisdom.text}"`)
-            document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }}
-        >
-          💬 Chat about this
-        </button>
-        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">
-          {saved ? '⭐ Saved' : '☆ Save'}
-        </button>
-        <button className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">📤 Share</button>
-      </div>
-    </section>
-  )
-}
-
-type RoomSummary = { id: string; slug: string; name: string; theme: string; active_count?: number }
-
-function PublicChatRooms() {
-  const [rooms, setRooms] = useState<RoomSummary[]>([])
-  const [alert, setAlert] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function loadRooms() {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/rooms`)
-        if (!response.ok) throw new Error('Unable to load rooms')
-        const data = await response.json()
-        setRooms(data)
-      } catch (error) {
-        console.error(error)
-        setRooms([
-          { id: 'grounding', slug: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
-          { id: 'gratitude', slug: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
-          { id: 'courage', slug: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' }
-        ])
-        setAlert('Showing cached rooms while the live service reconnects.')
-      }
-    }
-
-    loadRooms()
-  }, [])
-
-  return (
-    <section id="wisdom-chat-rooms" className="bg-[#0c0c10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 md:p-8 space-y-4 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <p className="text-sm text-orange-100/80">Community Rooms</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Wisdom Chat Rooms</h2>
-          <p className="text-sm text-orange-100/70">Move seamlessly into multiple calm rooms. Positive, helpful exchanges only—foul language in any language is blocked.</p>
-        </div>
-        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {rooms.map(room => (
-              <span key={room.id} className="px-4 py-2 rounded-2xl border border-orange-200/10 text-orange-50 bg-white/5 inline-flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-400" />
-                <span>{room.name}</span>
-                <span className="text-[11px] text-orange-100/80">{room.active_count ?? 0} active</span>
-              </span>
-            ))}
-          </div>
-          {alert && <p className="text-xs text-orange-200">{alert}</p>}
-        </div>
-        <div className="flex flex-col gap-3 items-start">
-          <p className="text-orange-100/80 text-sm">Hop into a room to experience the new real-time chat with server-side safety filters.</p>
-          <Link
-            href="/wisdom-rooms"
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold text-slate-950 shadow-lg shadow-orange-500/20"
-          >
-            Open live chat rooms
-          </Link>
-        </div>
       </div>
     </section>
   )
