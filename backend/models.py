@@ -1,9 +1,23 @@
 from __future__ import annotations
+
 import datetime
 import enum
 import uuid
 from decimal import Decimal
-from sqlalchemy import Boolean, JSON, TIMESTAMP, ForeignKey, Integer, String, Text, func, Numeric, Enum, UniqueConstraint
+
+from sqlalchemy import (
+    JSON,
+    TIMESTAMP,
+    Boolean,
+    Enum,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -518,9 +532,9 @@ class GitaVerseKeyword(Base):
 
 class GitaVerseUsage(Base):
     """Track Gita verse usage across tools."""
-    
+
     __tablename__ = "gita_verse_usage"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     verse_id: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
     tool_name: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
@@ -587,7 +601,7 @@ class RefreshToken(Base):
 class SubscriptionPlan(Base):
     """Defines available subscription plans/tiers."""
     __tablename__ = "subscription_plans"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tier: Mapped[SubscriptionTier] = mapped_column(
         Enum(SubscriptionTier, native_enum=False, length=32), unique=True, index=True
@@ -614,7 +628,7 @@ class SubscriptionPlan(Base):
 class UserSubscription(SoftDeleteMixin, Base):
     """Tracks a user's active subscription."""
     __tablename__ = "user_subscriptions"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
@@ -643,15 +657,15 @@ class UserSubscription(SoftDeleteMixin, Base):
     updated_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
-    
+
     # Relationships
-    plan: Mapped["SubscriptionPlan"] = relationship("SubscriptionPlan", lazy="joined")
+    plan: Mapped[SubscriptionPlan] = relationship("SubscriptionPlan", lazy="joined")
 
 
 class UsageTracking(Base):
     """Tracks feature usage (e.g., KIAAN questions) per user per month."""
     __tablename__ = "usage_tracking"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
@@ -674,7 +688,7 @@ class UsageTracking(Base):
 class Payment(SoftDeleteMixin, Base):
     """Records payment transactions."""
     __tablename__ = "payments"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
@@ -1339,10 +1353,10 @@ class ChatRoom(Base):
         TIMESTAMP(timezone=True), server_default=func.now()
     )
 
-    participants: Mapped[list["RoomParticipant"]] = relationship(
+    participants: Mapped[list[RoomParticipant]] = relationship(
         "RoomParticipant", back_populates="room", cascade="all, delete-orphan"
     )
-    messages: Mapped[list["ChatMessage"]] = relationship(
+    messages: Mapped[list[ChatMessage]] = relationship(
         "ChatMessage", back_populates="room", cascade="all, delete-orphan"
     )
 
@@ -1392,11 +1406,11 @@ class ChatMessage(Base):
 
 class EmotionalResetSession(SoftDeleteMixin, Base):
     """Tracks user emotional reset sessions with the 7-step guided flow.
-    
+
     Supports both authenticated and anonymous users:
     - Authenticated users: user_id is their actual user ID from users table
     - Anonymous users: user_id follows pattern "anon-{12-char-hex}"
-    
+
     Note: Foreign key constraint removed to support anonymous users.
     For authenticated users, application-level validation is performed via
     get_current_user() dependency which verifies the user exists.

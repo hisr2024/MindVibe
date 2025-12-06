@@ -424,17 +424,17 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         """
         Generate wisdom insights based on assessment (Step 5).
         Enhanced to use 5 verses and return top 3 insights.
-        
+
         Args:
             db: Database session
             assessment: Assessment data from Step 2
-        
+
         Returns:
             List of top 3 wisdom insights (no citations)
         """
         themes = assessment.get("themes", [])
         emotions = assessment.get("emotions", [])
-        
+
         # Specialized emotion-to-verse mapping
         emotion_verse_mapping = {
             "anxious": [(2, 47), (2, 48), (6, 5), (6, 35)],
@@ -445,14 +445,14 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
             "hopeless": [(4, 36), (4, 38), (9, 2), (18, 66)],
             "confused": [(4, 34), (5, 15), (5, 16), (18, 63)],
         }
-        
+
         # Get specialized verses first
         key_verse_results = []
         primary_emotion = emotions[0] if emotions else None
-        
+
         if primary_emotion and primary_emotion in emotion_verse_mapping:
             from backend.services.gita_service import GitaService
-            
+
             for chapter, verse_num in emotion_verse_mapping[primary_emotion][:3]:
                 try:
                     verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
@@ -460,11 +460,11 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
                         key_verse_results.append({"verse": verse, "score": 0.9})
                 except Exception as e:
                     logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
-        
+
         # Search for additional verses (increased from 3 to 5)
         search_query = " ".join(themes + emotions)
         verse_results = await self.wisdom_kb.search_relevant_verses(db=db, query=search_query, limit=5)
-        
+
         # Combine and deduplicate
         all_verse_results = key_verse_results + verse_results
         seen_ids = set()
@@ -475,7 +475,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
             if verse_id not in seen_ids:
                 seen_ids.add(verse_id)
                 unique_verses.append(result)
-        
+
         insights = []
         if unique_verses:
             # Return top 3 insights (increased from 2)
@@ -487,11 +487,11 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
                         "wisdom": sanitized,
                         "application": self._create_application(verse, emotions),
                     })
-        
+
         # Fallback if no verses found
         if not insights:
             insights = self._get_fallback_wisdom(emotions)
-        
+
         return insights
 
     def _create_application(self, _verse: WisdomVerse, emotions: list[str]) -> str:

@@ -67,13 +67,13 @@ except Exception as e:
 
 def sanitize_input(text: str) -> str:
     """Sanitize user input to prevent XSS attacks.
-    
+
     Note: SQL injection is already handled by the ORM (SQLAlchemy).
     This function focuses on XSS prevention as a defense-in-depth measure.
-    
+
     Args:
         text: The raw user input.
-        
+
     Returns:
         str: Sanitized text safe for processing.
     """
@@ -129,7 +129,7 @@ class KIAAN:
                 try:
                     # Enhanced verse search with fallback
                     verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=7)
-                    
+
                     # Add fallback expansion if results are insufficient
                     if verse_results and len(verse_results) < 3:
                         logger.info(f"Only {len(verse_results)} verses found, expanding search")
@@ -139,9 +139,9 @@ class KIAAN:
                         if top_score < 0.3:
                             logger.info(f"Top verse score low ({top_score:.3f}), trying fallback")
                             verse_results = await self.gita_kb.search_with_fallback(db=db, query=user_message, limit=7)
-                    
+
                     gita_context = self._build_gita_context(verse_results)
-                    
+
                     # Enhanced logging with verse IDs
                     top_score = verse_results[0].get("score", 0) if verse_results else 0
                     logger.info(f"✅ Found {len(verse_results)} verses with top score: {top_score:.3f}")
@@ -253,23 +253,23 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
 def build_gita_context_comprehensive(verse_results: list, limit: int = 5) -> str:
     """
     Build comprehensive Gita context from all 700 verses search results.
-    
+
     This function creates rich context for KIAAN responses by extracting:
     - Core teachings from verses
     - Principles and themes
     - Mental health applications
     - Response guidelines
-    
+
     Args:
         verse_results: List of verse search results with scores
         limit: Maximum number of verses to include (default 5 for richer context)
-        
+
     Returns:
         Rich context string with guidelines (NEVER cite sources in response)
     """
     # Maximum length for teaching text to include in context
     MAX_TEACHING_LENGTH = 300
-    
+
     if not verse_results:
         return """FALLBACK WISDOM (no specific verses found):
 Apply universal Gita principles:
@@ -285,48 +285,47 @@ RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any script
         "RELEVANT GITA WISDOM (use internally, NEVER cite in response):",
         ""
     ]
-    
+
     # Process top verses up to limit
     top_verses = verse_results[:limit]
-    
+
     for i, result in enumerate(top_verses, 1):
         verse = result.get("verse")
         score = result.get("score", 0.0)
-        
+
         if verse:
             # Extract verse data
             english = getattr(verse, 'english', '') if hasattr(verse, 'english') else verse.get('english', '')
             principle = getattr(verse, 'principle', '') if hasattr(verse, 'principle') else verse.get('context', '')
             theme = getattr(verse, 'theme', '') if hasattr(verse, 'theme') else verse.get('theme', '')
-            
+
             # Extract mental health applications
             mh_apps = None
             if hasattr(verse, 'mental_health_applications'):
                 mh_apps = verse.mental_health_applications
             elif isinstance(verse, dict):
                 mh_apps = verse.get('mental_health_applications')
-            
+
             context_parts.append(f"WISDOM #{i} (relevance: {score:.2f}):")
-            
+
             if english:
                 # Truncate teaching to reasonable length for context
                 context_parts.append(f"Teaching: {english[:MAX_TEACHING_LENGTH]}")
-            
+
             if principle:
                 context_parts.append(f"Principle: {principle}")
-            
+
             if theme:
                 # Format theme to be more readable
                 formatted_theme = theme.replace('_', ' ').title()
                 context_parts.append(f"Theme: {formatted_theme}")
-            
-            if mh_apps:
-                if isinstance(mh_apps, list):
-                    apps_str = ", ".join(mh_apps[:3])  # First 3 applications
-                    context_parts.append(f"Applications: {apps_str}")
-            
+
+            if mh_apps and isinstance(mh_apps, list):
+                apps_str = ", ".join(mh_apps[:3])  # First 3 applications
+                context_parts.append(f"Applications: {apps_str}")
+
             context_parts.append("")  # Blank line between verses
-    
+
     # Add synthesis guidelines
     context_parts.extend([
         "---",
@@ -343,7 +342,7 @@ RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any script
         "❌ Never say 'according to scripture' or 'the text says'",
         "✅ Instead, say 'ancient wisdom teaches', 'timeless principle', 'eternal truth'",
     ])
-    
+
     return "\n".join(context_parts)
 
 
