@@ -34,7 +34,7 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
           </Badge>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="rounded-xl bg-black/30 border border-orange-500/15 p-3">
             <p className="text-xs text-orange-100/60 mb-1">Billing Cycle</p>
             <p className="text-sm font-semibold text-orange-50">
@@ -59,18 +59,18 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           {subscription.tierId === 'free' ? (
-            <Button onClick={onUpgrade} variant="primary" size="md" className="flex-1">
+            <Button onClick={onUpgrade} variant="primary" size="md" className="w-full sm:flex-1">
               Upgrade Plan
             </Button>
           ) : (
             <>
-              <Button onClick={onManage} variant="secondary" size="md" className="flex-1">
+              <Button onClick={onManage} variant="secondary" size="md" className="w-full sm:flex-1">
                 Manage Subscription
               </Button>
               {subscription.tierId !== 'enterprise' && (
-                <Button onClick={onUpgrade} variant="outline" size="md">
+                <Button onClick={onUpgrade} variant="outline" size="md" className="w-full sm:w-auto">
                   Upgrade
                 </Button>
               )}
