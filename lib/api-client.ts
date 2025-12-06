@@ -64,7 +64,8 @@ export async function apiCall(
     return response
   } catch (error) {
     // Handle network errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError) {
+      // Network errors are typically TypeErrors from fetch
       throw new APIError(
         'Cannot connect to KIAAN. Please check your internet connection and ensure the backend server is running.'
       )
@@ -137,10 +138,13 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof APIError) {
     // Check for connection-related errors
     if (error.message.includes('connect') || error.message.includes('network')) {
-      return `Cannot reach KIAAN. Please check:
-• Your internet connection
-• Backend server is running
-• API URL is correctly configured`
+      const messages = [
+        'Cannot reach KIAAN. Please check:',
+        '• Your internet connection',
+        '• Backend server is running',
+        '• API URL is correctly configured'
+      ]
+      return messages.join('\n')
     }
 
     // Return the error message directly for API errors
