@@ -25,7 +25,8 @@ export default function DashboardClient() {
           <div className="relative space-y-6">
             <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-orange-500/20 bg-black/40 px-4 py-3 shadow-[0_14px_60px_rgba(46,160,255,0.18)]">
               <KiaanLogo size="md" className="shrink-0" />
-              <div>
+              <div className="space-y-1">
+                <p className="text-[13px] font-semibold uppercase tracking-[0.22em] text-orange-50">KIAAN</p>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-200">MindVibe Companion</p>
                 <p className="text-sm text-orange-100/85">KIAAN — Crisp, calm guidance.</p>
               </div>
