@@ -432,7 +432,9 @@ async def generate_karma_reset(
             for v in verse_results:
                 verse_obj = v.get("verse")
                 if verse_obj:
-                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_obj.verse_number}:\n{verse_obj.english}\n"
+                    # Handle both verse_number (WisdomVerse, _GitaVerseWrapper) and verse (GitaVerse) attributes
+                    verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
+                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
                     # Use principle if available, otherwise use context
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
@@ -573,7 +575,7 @@ Examples:
     return EngineResult(
         status="success" if parsed else "partial_success",
         reset_guidance=reset_guidance,
-        gita_verses_used=len(verse_results),  # For debugging/logging
+        gita_verses_used=len(verse_results),  # Debug field: count of Gita verses used in guidance
         raw_text=raw_text,
         model=model_name,
         provider="kiaan",
