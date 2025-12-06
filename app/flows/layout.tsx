@@ -7,7 +7,6 @@ const flowLinks = [
   { href: '/flows/kiaan', label: 'Talk to KIAAN' },
   { href: '/flows/ardha', label: 'Ardha reframing' },
   { href: '/flows/viyog', label: 'Outcome reset' },
-  { href: '/flows/karma-reset', label: 'Karma reset' },
   { href: '/flows/wisdom', label: 'Today’s wisdom' },
   { href: '/flows/journal', label: 'Private journal' },
 ]

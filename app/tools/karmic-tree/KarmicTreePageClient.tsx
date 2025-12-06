@@ -70,10 +70,10 @@ export default function KarmicTreePageClient() {
                 Karma Footprint
               </Link>
               <Link
-                href="/tools/karma-reset"
+                href="/tools/emotional-reset"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
               >
-                Karma Reset Ritual
+                Emotional Reset
               </Link>
               <Link
                 href="/dashboard"

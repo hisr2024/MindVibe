@@ -90,12 +90,6 @@ export default function EmotionalResetClient() {
             <h3 className="text-sm font-semibold text-orange-50 mb-3">Related Tools</h3>
             <div className="flex flex-wrap gap-2">
               <Link
-                href="/tools/karma-reset"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
-              >
-                Karma Reset Ritual
-              </Link>
-              <Link
                 href="/tools/viyog"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
               >

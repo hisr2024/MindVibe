@@ -337,10 +337,10 @@ Respond using the four-part format with brief, grounded insights.`
               <h4 className="text-xs font-semibold text-orange-50 mb-3">Related Tools</h4>
               <div className="space-y-2">
                 <Link
-                  href="/karma-reset"
+                  href="/emotional-reset"
                   className="flex items-center gap-2 text-sm text-orange-100/80 hover:text-orange-50 transition"
                 >
-                  <span>🔧</span> Karma Reset Ritual
+                  <span>💫</span> Emotional Reset
                 </Link>
                 <Link
                   href="/karmic-tree"
