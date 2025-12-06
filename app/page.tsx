@@ -829,6 +829,9 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [claritySession, setClaritySession] = useState<ClaritySession>(clarityInitialState)
   const [clarityLog, setClarityLog] = useState<ClarityEvaluation | null>(null)
 
+  // Scroll threshold constant for detecting if user is at bottom
+  const SCROLL_THRESHOLD = 40
+
   // Check for reduced motion preference
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -838,6 +841,16 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
       mediaQuery.addEventListener('change', handler)
       return () => mediaQuery.removeEventListener('change', handler)
     }
+  }, [])
+
+  // Initialize scroll position state on mount
+  useEffect(() => {
+    const container = messageListRef.current
+    if (!container) return
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < SCROLL_THRESHOLD
+    setIsAtBottom(isNearBottom)
   }, [])
 
   // Auto-scroll to bottom when at bottom and messages change
@@ -854,9 +867,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     const container = messageListRef.current
     if (!container) return
 
-    const threshold = 40
     const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < threshold
+      container.scrollHeight - container.scrollTop - container.clientHeight < SCROLL_THRESHOLD
     setIsAtBottom(isNearBottom)
   }, [])
 
@@ -865,6 +877,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     const container = messageListRef.current
     if (!container) return
     container.scrollTo({ top: container.scrollHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+    // Update state after scroll completes
+    setTimeout(() => setIsAtBottom(true), prefersReducedMotion ? 0 : 300)
   }, [prefersReducedMotion])
 
   useEffect(() => {
@@ -1330,10 +1344,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           {/* Floating Jump to Latest button */}
           {!isAtBottom && messages.length > 0 && (
             <button
-              onClick={() => {
-                setIsAtBottom(true)
-                scrollToBottom()
-              }}
+              onClick={scrollToBottom}
               className="absolute bottom-4 right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105 animate-fadeIn"
               aria-label="Jump to latest message"
             >
