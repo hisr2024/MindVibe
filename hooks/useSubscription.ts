@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { apiFetch } from '@/lib/api'
 
 export interface Subscription {
   id: string
@@ -21,6 +22,101 @@ interface UseSubscriptionResult {
 
 const SUBSCRIPTION_STORAGE_KEY = 'mindvibe_subscription'
 
+interface ApiSubscriptionPlan {
+  id: number | string
+  tier: string
+  name: string
+  description?: string | null
+  price_monthly?: number | string | null
+  price_yearly?: number | string | null
+}
+
+interface ApiSubscription {
+  id: number | string
+  plan: ApiSubscriptionPlan
+  status?: string
+  current_period_end?: string | null
+  cancel_at_period_end?: boolean
+}
+
+function getDefaultSubscription(): Subscription {
+  return {
+    id: 'free-default',
+    tierId: 'free',
+    tierName: 'Free',
+    status: 'active',
+    currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    cancelAtPeriodEnd: false,
+    isYearly: false,
+  }
+}
+
+function persistSubscription(subscription: Subscription) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(SUBSCRIPTION_STORAGE_KEY, JSON.stringify(subscription))
+}
+
+function getCachedSubscription(): Subscription {
+  if (typeof window === 'undefined') return getDefaultSubscription()
+
+  const stored = localStorage.getItem(SUBSCRIPTION_STORAGE_KEY)
+  if (!stored) return getDefaultSubscription()
+
+  try {
+    return JSON.parse(stored) as Subscription
+  } catch (error) {
+    console.warn('Failed to parse cached subscription', error)
+    return getDefaultSubscription()
+  }
+}
+
+async function fetchSubscriptionFromApi(): Promise<Subscription> {
+  const response = await apiFetch('/api/subscriptions/current', {
+    method: 'GET',
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch subscription from API')
+  }
+
+  const data = (await response.json()) as ApiSubscription
+
+  const currentPeriodEnd = data.current_period_end
+    ? new Date(data.current_period_end).toISOString()
+    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+  const subscription: Subscription = {
+    id: String(data.id ?? 'free-default'),
+    tierId: data.plan?.tier ?? 'free',
+    tierName: data.plan?.name ?? 'Free',
+    status: (data.status as Subscription['status']) ?? 'active',
+    currentPeriodEnd,
+    cancelAtPeriodEnd: Boolean(data.cancel_at_period_end),
+    isYearly: Boolean(data.plan?.price_yearly && !data.plan?.price_monthly),
+  }
+
+  persistSubscription(subscription)
+  return subscription
+}
+
+export async function cancelSubscription(): Promise<void> {
+  const response = await apiFetch('/api/subscriptions/cancel', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ cancel_immediately: false }),
+  })
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}))
+    const message =
+      (errorBody && errorBody.message) ||
+      (typeof errorBody === 'string' ? errorBody : 'Failed to cancel subscription')
+    throw new Error(message)
+  }
+}
+
 export function useSubscription(): UseSubscriptionResult {
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [loading, setLoading] = useState(true)
@@ -31,26 +127,12 @@ export function useSubscription(): UseSubscriptionResult {
     setError(null)
 
     try {
-      // In a real app, this would be an API call
-      // For now, we'll use localStorage to simulate
-      const stored = localStorage.getItem(SUBSCRIPTION_STORAGE_KEY)
-      
-      if (stored) {
-        setSubscription(JSON.parse(stored))
-      } else {
-        // Default to free tier
-        const freeTier: Subscription = {
-          id: 'free-default',
-          tierId: 'free',
-          tierName: 'Free',
-          status: 'active',
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          cancelAtPeriodEnd: false,
-          isYearly: false,
-        }
-        setSubscription(freeTier)
-      }
+      const latest = await fetchSubscriptionFromApi()
+      setSubscription(latest)
     } catch (err) {
+      console.warn('Falling back to cached subscription', err)
+      const cached = getCachedSubscription()
+      setSubscription(cached)
       setError(err instanceof Error ? err.message : 'Failed to load subscription')
     } finally {
       setLoading(false)
@@ -59,6 +141,23 @@ export function useSubscription(): UseSubscriptionResult {
 
   useEffect(() => {
     fetchSubscription()
+  }, [fetchSubscription])
+
+  useEffect(() => {
+    const handleUpdate = () => fetchSubscription()
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === SUBSCRIPTION_STORAGE_KEY) {
+        fetchSubscription()
+      }
+    }
+
+    window.addEventListener('subscription-updated', handleUpdate)
+    window.addEventListener('storage', handleStorage)
+
+    return () => {
+      window.removeEventListener('subscription-updated', handleUpdate)
+      window.removeEventListener('storage', handleStorage)
+    }
   }, [fetchSubscription])
 
   return {
@@ -70,7 +169,8 @@ export function useSubscription(): UseSubscriptionResult {
 }
 
 export function updateSubscription(subscription: Subscription) {
-  localStorage.setItem(SUBSCRIPTION_STORAGE_KEY, JSON.stringify(subscription))
+  const merged = { ...getCachedSubscription(), ...subscription }
+  persistSubscription(merged)
   window.dispatchEvent(new Event('subscription-updated'))
 }
 
