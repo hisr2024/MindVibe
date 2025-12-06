@@ -22,7 +22,7 @@ const mainNavLinks = [
   { href: '/deep-insights', label: 'Deep Insights' },
   { href: '/ardha', label: 'Ardha' },
   { href: '/viyog', label: 'Vyyoga' },
-  { href: '/sacred-reflections', label: 'Journal' },
+  { href: '/sacred-reflections', label: 'Sacred Reflections' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
   { href: '/profile', label: 'Profile' },
 ]
@@ -32,7 +32,7 @@ const mainNavLinks = [
  *
  * Features:
  * - MindVibe logo (preserved, unaltered)
- * - Main nav links: Chat, Journal, Wisdom, Insights
+ * - Main nav links: Chat, Sacred Reflections, Wisdom, Insights
  * - Tools dropdown menu with all guidance engines
  * - User profile dropdown
  * - Proper active state indicators
@@ -90,7 +90,12 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3">
-          <ThemeToggle className="hidden sm:inline-flex" />
+          <Link
+            href="/dashboard/subscription"
+            className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+          >
+            Subscriptions
+          </Link>
           <Link
             href="/profile"
             className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
