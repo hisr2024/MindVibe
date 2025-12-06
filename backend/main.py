@@ -456,6 +456,24 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
 
+# Load Ardha router
+print("\n[Ardha] Attempting to import Ardha router...")
+try:
+    from backend.routes.ardha import router as ardha_router
+    app.include_router(ardha_router)
+    print("✅ [SUCCESS] Ardha router loaded with Gita integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Ardha router: {e}")
+
+# Load Viyoga router
+print("\n[Viyoga] Attempting to import Viyoga router...")
+try:
+    from backend.routes.viyoga import router as viyoga_router
+    app.include_router(viyoga_router)
+    print("✅ [SUCCESS] Viyoga router loaded with Gita integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")

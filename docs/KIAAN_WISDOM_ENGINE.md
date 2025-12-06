@@ -408,6 +408,49 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 | 12.13-14 | Compassion and contentment | Relationships, self-compassion |
 | 18.66 | Surrender and trust | Letting go, anxiety |
 
+## Integration with Ardha and Viyoga
+
+### Ardha Reframing Engine
+
+Ardha now uses the complete 700-verse Gita database to provide cognitive reframing rooted in ancient wisdom:
+
+- **Search Strategy**: Matches negative thought patterns to relevant Gita verses on equanimity, clarity, self-knowledge
+- **Key Verses**: Chapters 2, 3, 6 (stability of mind, detachment, self-mastery)
+- **Output Format**: Recognition → Deep Insight → Reframe → Action Step
+- **API Endpoint**: `POST /api/ardha/reframe`
+- **Gita Wisdom**: Internally searches 5 relevant verses and integrates principles naturally without citations
+- **Terminology**: Uses sthitaprajna (stability of mind), viveka (discrimination), samatva (equanimity), buddhi (discernment)
+
+### Viyoga Detachment Coach
+
+Viyoga uses the complete Gita database to address outcome anxiety through Karma Yoga principles:
+
+- **Search Strategy**: Matches outcome worries to verses on nishkama karma, detachment, equanimity
+- **Key Verses**: Chapters 2, 3, 4, 5 (action without attachment, karma yoga)
+- **Output Format**: Validation → Attachment Check → Detachment Principle → One Action
+- **API Endpoint**: `POST /api/viyoga/detach`
+- **Gita Wisdom**: Internally searches 5 relevant verses focused on karma yoga and detachment
+- **Terminology**: Uses nishkama karma (desireless action), vairagya (detachment), samatva (equanimity), dharma (duty)
+
+### Unified Wisdom Architecture
+
+All MindVibe guidance tools now share the same wisdom foundation:
+
+| Tool | Purpose | Gita Integration | Verse Focus |
+|------|---------|------------------|-------------|
+| **KIAAN** | General wellness companion | ✅ Full 700 verses | All chapters, contextual |
+| **Ardha** | Cognitive reframing | ✅ Full 700 verses | Ch 2, 3, 6 (clarity, detachment) |
+| **Viyoga** | Outcome anxiety | ✅ Full 700 verses | Ch 2-5 (karma yoga) |
+| **Relationship Compass** | Conflict resolution | ✅ Full 700 verses | Ch 2, 12 (forgiveness, duty) |
+
+**Common Design Patterns:**
+- All tools use `WisdomKnowledgeBase.search_relevant_verses()` for verse retrieval
+- Gita context is built internally and NEVER exposed to users with verse citations
+- Wisdom is presented as universal, timeless principles
+- Natural use of Sanskrit terminology without religious framing
+- Structured JSON responses with consistent 4-part guidance formats
+- `gita_verses_used` count included in all API responses for debugging
+
 ## Validation System
 
 KIAAN v13.0 includes a comprehensive validation system to ensure all responses are authentically rooted in Gita wisdom.
