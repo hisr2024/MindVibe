@@ -17,7 +17,7 @@ const steps = [
     title: 'Reasoning prompts',
     detail: 'Surface the reasoning and closing choices without changing how KIAAN evaluates risk.',
     anchor: '/#kiaan-chat',
-    chips: ['Reversible', 'No new state', 'Gita-aligned language']
+    chips: ['Reversible', 'No new state', 'Ancient wisdom-aligned language']
   }
 ]
 

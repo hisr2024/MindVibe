@@ -21,8 +21,8 @@ const features = [
   },
   {
     title: 'Reframing assistants',
-    description: 'Ardha and Viyog are presented separately so their voices stay complementary and do not override KIAAN.',
-    highlights: ['Gita-aligned reframes', 'Detachment coaching', 'Supportive boundaries'],
+    description: 'Ardha and Viyoga are presented separately so their voices stay complementary and do not override KIAAN.',
+    highlights: ['Ancient wisdom-aligned reframes', 'Detachment coaching', 'Supportive boundaries'],
     href: '/kiaan/relationships'
   },
   {

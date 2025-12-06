@@ -1,7 +1,7 @@
 const pillars = [
   'Validate the feeling without dilution.',
   'Spot the distortion before offering the shift.',
-  'Use Gita-aligned calm insight, not sermons.',
+  'Use ancient-wisdom-aligned calm insight, not sermons.',
   'Close with one doable action inside the user’s control.',
 ]
 
@@ -10,7 +10,7 @@ export default function ArdhaFlow() {
     <section className="space-y-6 rounded-3xl border border-orange-500/15 bg-black/50 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Page 4</p>
-        <h2 className="text-2xl font-semibold text-orange-50">Gita-aligned reframing</h2>
+        <h2 className="text-2xl font-semibold text-orange-50">Ancient wisdom-aligned reframing</h2>
         <p className="text-sm text-orange-100/80">Meet Ardha: The Reframing Assistant.</p>
       </header>
 

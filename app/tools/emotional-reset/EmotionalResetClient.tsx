@@ -25,8 +25,8 @@ export default function EmotionalResetClient() {
         <FadeIn>
           <ToolHeader
             icon="💫"
-            title="Emotional Reset"
-            subtitle="A calming 7-step flow to process emotions, find inner peace, and reset your mental state with timeless Gita wisdom."
+          title="Emotional Reset"
+          subtitle="A calming 7-step flow to process emotions, find inner peace, and reset your mental state with timeless ancient wisdom."
             backLink={{ label: 'Back to dashboard', href: '/dashboard' }}
           />
         </FadeIn>
@@ -93,7 +93,7 @@ export default function EmotionalResetClient() {
                 href="/tools/viyog"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
               >
-                Viyog - Detachment Coach
+                Viyoga - Detachment Coach
               </Link>
               <Link
                 href="/emotional-reset"

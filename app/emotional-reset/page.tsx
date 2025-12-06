@@ -30,7 +30,7 @@ export default function EmotionalResetPage() {
                   Emotional Reset
                 </h1>
                 <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-                  A calming 7-step flow to process emotions, find inner peace, and reset your mental state with timeless Gita wisdom.
+                  A calming 7-step flow to process emotions, find inner peace, and reset your mental state with timeless ancient wisdom.
                 </p>
               </div>
               <div className="flex flex-col gap-2">

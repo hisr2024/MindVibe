@@ -266,7 +266,7 @@ export default function SacredReflectionsPage() {
       const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${sanitizedBody}` })
+        body: JSON.stringify({ message: `Please offer a supportive Ancient Wisdom-inspired reflection on this private journal entry: ${sanitizedBody}` })
       })
 
       if (response.ok) {

@@ -21,7 +21,7 @@ const mainNavLinks = [
   { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
   { href: '/deep-insights', label: 'Deep Insights' },
   { href: '/ardha', label: 'Ardha' },
-  { href: '/viyog', label: 'Vyyoga' },
+  { href: '/viyog', label: 'Viyoga' },
   { href: '/sacred-reflections', label: 'Sacred Reflections' },
   { href: '/karmic-tree', label: 'Karmic Tree' },
   { href: '/profile', label: 'Profile' },

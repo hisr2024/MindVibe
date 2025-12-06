@@ -8,7 +8,7 @@ const featureCards = [
   {
     title: 'KIAAN Emotional Reset',
     summary: '7-step guided wellness',
-    detail: 'Process emotions, find calm, and reset your mental state with Gita wisdom in a guided 7-step flow with breathing exercises.',
+    detail: 'Process emotions, find calm, and reset your mental state with ancient wisdom in a guided 7-step flow with breathing exercises.',
     icon: '🕉️',
     videoPlaceholder: '🧘',
     featured: true,
@@ -16,7 +16,7 @@ const featureCards = [
   {
     title: 'KIAAN Wisdom',
     summary: 'Warm, grounded guidance',
-    detail: 'Built-in clarity pauses and relationship support help you navigate difficult moments with equanimity. Powered by timeless wisdom from the Bhagavad Gita.',
+    detail: 'Built-in clarity pauses and relationship support help you navigate difficult moments with equanimity. Powered by timeless ancient wisdom.',
     icon: '💬',
     videoPlaceholder: '🎬',
   },
@@ -67,11 +67,11 @@ const howItWorks = [
 
 // Flow pages for exploring different features
 const flowPages = [
-  { href: '/emotional-reset', title: 'Emotional Reset', detail: '7-step guided wellness flow with Gita wisdom' },
+  { href: '/emotional-reset', title: 'Emotional Reset', detail: '7-step guided wellness flow with ancient wisdom' },
   { href: '/flows/check-in', title: 'State check-in', detail: 'Quick mood capture with empathetic responses' },
   { href: '/flows/kiaan', title: 'Talk to KIAAN', detail: 'Chat with clarity pause watch' },
   { href: '/flows/ardha', title: 'Ardha reframing', detail: 'Reframes with validation and steps' },
-  { href: '/flows/viyog', title: 'Viyog outcome reducer', detail: 'Detachment coaching' },
+  { href: '/flows/viyog', title: 'Viyoga outcome reducer', detail: 'Detachment coaching' },
   { href: '/flows/journal', title: 'Private journal', detail: 'AES-GCM encrypted storage' },
 ]
 
