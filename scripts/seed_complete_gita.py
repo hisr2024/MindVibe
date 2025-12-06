@@ -509,16 +509,20 @@ async def main(use_api: bool = False, use_chapters: bool = False) -> int:
 
         # Verify database schema before seeding
         print("🔍 Verifying database schema...")
-        # Import here to avoid circular imports
-        sys.path.insert(0, str(Path(__file__).parent))
-        try:
-            from verify_db_schema import verify_schema
-            if not await verify_schema():
-                print("❌ Schema verification failed. Run migrations first:")
+        async with engine.begin() as conn:
+            # Check if transliteration column exists
+            result = await conn.execute(text("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'gita_verses'
+                AND column_name = 'transliteration'
+            """))
+            
+            if not result.fetchone():
+                print("❌ Schema verification failed: missing 'transliteration' column")
+                print("   Run migration first:")
                 print("   psql $DATABASE_URL < migrations/20251206_add_transliteration_to_gita_verses.sql")
                 return 1
-        except ImportError:
-            print("⚠️  Could not import verify_db_schema, skipping schema check")
         print("✅ Schema verification passed\n")
 
         total_seeded = 0

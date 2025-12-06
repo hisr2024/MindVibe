@@ -82,6 +82,14 @@ async def verify_schema() -> bool:
                 'primary_domain', 'secondary_domains', 'created_at', 'updated_at'
             ]
             
+            # Migration mapping for missing columns
+            MIGRATION_MAP = {
+                'transliteration': '20251206_add_transliteration_to_gita_verses.sql',
+                'mental_health_applications': '20251207_add_mental_health_tags_to_gita.sql',
+                'primary_domain': '20251207_add_wisdom_verse_domains.sql',
+                'secondary_domains': '20251207_add_wisdom_verse_domains.sql',
+            }
+            
             # Check for missing columns
             missing = [col for col in expected if col not in columns]
             
@@ -89,12 +97,17 @@ async def verify_schema() -> bool:
                 print("❌ Missing columns in gita_verses table:")
                 for col in missing:
                     print(f"   - {col}")
-                print("\n📋 Required migration:")
-                if 'transliteration' in missing:
-                    print("   psql $DATABASE_URL < migrations/20251206_add_transliteration_to_gita_verses.sql")
-                if 'mental_health_applications' in missing or 'primary_domain' in missing:
-                    print("   psql $DATABASE_URL < migrations/20251207_add_mental_health_tags_to_gita.sql")
-                    print("   psql $DATABASE_URL < migrations/20251207_add_wisdom_verse_domains.sql")
+                
+                # Determine required migrations
+                required_migrations = set()
+                for col in missing:
+                    if col in MIGRATION_MAP:
+                        required_migrations.add(MIGRATION_MAP[col])
+                
+                if required_migrations:
+                    print("\n📋 Required migrations:")
+                    for migration in sorted(required_migrations):
+                        print(f"   psql $DATABASE_URL < migrations/{migration}")
                 return False
             
             # Display found columns
