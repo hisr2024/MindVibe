@@ -15,10 +15,16 @@ export interface DesktopNavProps {
 
 // Main navigation links
 const mainNavLinks = [
-  { href: '/kiaan', label: 'Chat' },
+  { href: '/', label: 'Home' },
+  { href: '/kiaan', label: 'KIAAN Chat' },
+  { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
+  { href: '/deep-insights', label: 'Deep Insights' },
+  { href: '/ardha', label: 'Ardha' },
+  { href: '/viyog', label: 'Vyyoga' },
+  { href: '/relationship-compass', label: 'Relationship Compass' },
   { href: '/sacred-reflections', label: 'Journal' },
-  { href: '/wisdom-rooms', label: 'Wisdom' },
-  { href: '/dashboard', label: 'Insights' },
+  { href: '/karmic-tree', label: 'Karmic Tree' },
+  { href: '/profile', label: 'Profile' },
 ]
 
 /**
