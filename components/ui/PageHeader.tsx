@@ -47,18 +47,18 @@ export function PageHeader({
   }
 
   return (
-    <header className={`mb-6 ${className}`}>
+    <header className={`mb-6 sm:mb-8 ${className}`}>
       {/* Breadcrumbs */}
       {breadcrumbs && <div className="mb-3">{breadcrumbs}</div>}
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           {/* Back button */}
           {showBackButton && (
             <button
               type="button"
               onClick={handleBack}
-              className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-800/70 bg-white/5 text-slate-100 transition hover:border-white/30 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 focus:ring-offset-slate-950"
               aria-label="Go back"
             >
               <svg
@@ -79,15 +79,12 @@ export function PageHeader({
             </button>
           )}
 
-          <div>
-            <h1
-              className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] text-gray-900"
-              style={{ fontFamily: '"SF Pro Display", "Inter", sans-serif' }}
-            >
+          <div className="flex flex-col gap-1">
+            <h1 className="text-balance text-left font-semibold text-slate-50">
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-1 text-[15px] leading-[1.6] text-gray-500">
+              <p className="text-pretty text-sm leading-relaxed text-slate-300 sm:text-base">
                 {subtitle}
               </p>
             )}
@@ -96,7 +93,7 @@ export function PageHeader({
 
         {/* Action buttons */}
         {actions && (
-          <div className="flex shrink-0 items-center gap-2">{actions}</div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">{actions}</div>
         )}
       </div>
     </header>
