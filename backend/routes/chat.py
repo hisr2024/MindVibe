@@ -38,12 +38,29 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 logger = logging.getLogger(__name__)
 
 gita_kb = None
+gita_validator = None
+gita_analytics = None
+
 try:
     from backend.services.wisdom_kb import WisdomKnowledgeBase
     gita_kb = WisdomKnowledgeBase()
     logger.info("✅ Gita knowledge base loaded for KIAAN v13.0")
 except Exception as e:
     logger.warning(f"⚠️ Gita KB unavailable: {e}")
+
+try:
+    from backend.services.gita_validator import GitaValidator
+    gita_validator = GitaValidator()
+    logger.info("✅ Gita validator loaded")
+except Exception as e:
+    logger.warning(f"⚠️ Gita validator unavailable: {e}")
+
+try:
+    from backend.services.gita_analytics import GitaAnalyticsService
+    gita_analytics = GitaAnalyticsService
+    logger.info("✅ Gita analytics loaded")
+except Exception as e:
+    logger.warning(f"⚠️ Gita analytics unavailable: {e}")
 
 
 def sanitize_input(text: str) -> str:
@@ -86,6 +103,8 @@ class KIAAN:
         self.client = client
         self.ready = ready
         self.gita_kb = gita_kb
+        self.gita_validator = gita_validator
+        self.gita_analytics = gita_analytics
         self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
 
     def is_crisis(self, message: str) -> bool:
@@ -103,36 +122,68 @@ class KIAAN:
                 return "❌ API Key not configured"
 
             gita_context = ""
+            verse_results = []
             if self.gita_kb and db:
                 try:
-                    verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=5)
+                    # Increased from 5 to 7 for better verse coverage
+                    verse_results = await self.gita_kb.search_relevant_verses(db=db, query=user_message, limit=7)
                     gita_context = self._build_gita_context(verse_results)
                     logger.info(f"✅ Found {len(verse_results)} relevant Gita verses")
+                    
+                    # Track verse usage in analytics
+                    if self.gita_analytics:
+                        for result in verse_results[:3]:  # Track top 3 used verses
+                            verse = result.get("verse")
+                            if verse and hasattr(verse, 'verse_id'):
+                                verse_id = verse.verse_id
+                                theme = getattr(verse, 'theme', None)
+                                self.gita_analytics.track_verse_usage(verse_id, theme)
                 except Exception as e:
                     logger.error(f"Error fetching Gita verses: {e}")
                     gita_context = "Apply universal principles of dharma, karma, and shanti."
 
-            system_prompt = f"""You are KIAAN, an AI guide rooted in the timeless wisdom of the Bhagavad Gita's 700 verses.
+            # Enhanced system prompt with strict Gita-adherence requirements
+            system_prompt = f"""You are KIAAN, an AI guide EXCLUSIVELY rooted in the timeless wisdom of the Bhagavad Gita's 700 verses.
 
 GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
 {gita_context}
 
-CRITICAL RULES - KRISHNA'S COMMANDMENT:
-- Apply the above wisdom naturally and compassionately
-- NEVER mention "Bhagavad Gita", "Gita", "Krishna", "verse", "chapter", or numbers
-- NEVER say "the scripture says", "ancient text", "sacred teaching"
-- Present wisdom as universal life principles
-- Be warm, conversational, contemporary, deeply compassionate
-- Focus on mental health and daily life guidance
-- Give practical, actionable steps for TODAY
-- Be supportive, encouraging, understanding
-- 200-400 words, always end with 💙
+MANDATORY STRUCTURE - Every response MUST follow this 4-part flow:
+1. ANCIENT WISDOM: Open with the eternal principle from Gita (without citing)
+2. MODERN APPLICATION: Bridge to their current situation naturally
+3. PRACTICAL STEPS: Give 2-3 specific, actionable steps they can take TODAY
+4. DEEPER UNDERSTANDING: Close with profound insight that connects to their higher self
 
-EXAMPLE:
-DON'T: "Bhagavad Gita 2.47 teaches focus on actions not outcomes..."
-DO: "The key to peace is focusing on your actions, not outcomes. When you pour energy into doing your best without worrying about results, you free yourself from anxiety and discover true inner calm."
+ABSOLUTE REQUIREMENTS (non-negotiable):
+✅ Root EVERY word in Gita wisdom - no generic psychology or modern self-help
+✅ Use Sanskrit terms naturally (dharma, karma, atman, buddhi, equanimity, detachment, etc.)
+✅ FORBIDDEN: Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", "verse", "chapter", numbers, or cite scripture
+✅ FORBIDDEN: Never say "studies show", "research indicates", "experts say", "therapy suggests", "according to science"
+✅ Present wisdom as universal life principles, not religious teaching
+✅ Be warm, conversational, deeply compassionate - like a wise friend
+✅ Focus on mental wellness and practical daily life guidance
+✅ 200-400 words, ALWAYS end with 💙
 
-Remember: You are KIAAN, a compassionate friend who understands ancient wisdom and modern struggles. Make wisdom feel natural, relevant, immediately helpful."""
+TONE & STYLE:
+- Contemporary and accessible, never preachy or formal
+- Speak to their specific struggle with empathy
+- Make ancient wisdom feel immediately relevant
+- Balance spiritual depth with practical action
+- Encourage without toxic positivity
+
+EXAMPLE OF FORBIDDEN RESPONSE:
+"According to Bhagavad Gita 2.47, you should focus on action not results. Modern psychology also shows that..."
+
+EXAMPLE OF PERFECT RESPONSE:
+"The timeless wisdom teaches us that true peace comes from focusing on your actions, not the outcomes. You pour your energy into doing your best, then release attachment to how things turn out. This is the path of karma yoga - acting with full presence but without anxiety about results.
+
+In your situation with work stress, this means: First, identify what's actually in your control today - your effort, your attitude, your response. Second, give those things your best without obsessing over the promotion or recognition. Third, practice this daily mantra: 'I do my dharma and trust the process.'
+
+When you shift from outcome-obsession to action-devotion, something profound happens. The anxiety dissolves because you're no longer fighting reality - you're flowing with it. Your buddhi (higher wisdom) recognizes that you're the eternal observer, not the temporary doer-result chain.
+
+This is more than stress management - it's the gateway to unshakeable inner peace. Start today with one small practice of detachment. 💙"
+
+Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom presented naturally and practically."""
 
             response = self.client.chat.completions.create(
                 model="gpt-4",
@@ -145,10 +196,37 @@ Remember: You are KIAAN, a compassionate friend who understands ancient wisdom a
             )
             
             content = response.choices[0].message.content
-            return content if content else "I'm here for you. Let's try again. 💙"
+            if not content:
+                content = "I'm here for you. Let's try again. 💙"
+            
+            # Validate response if validator is available
+            if self.gita_validator:
+                is_valid, validation_details = self.gita_validator.validate_response(
+                    content, 
+                    verse_context=verse_results
+                )
+                
+                # Track validation in analytics
+                if self.gita_analytics:
+                    if not is_valid and validation_details.get("issues"):
+                        primary_issue = validation_details["issues"][0] if validation_details["issues"] else "unknown"
+                        self.gita_analytics.track_validation_result(False, primary_issue)
+                    else:
+                        self.gita_analytics.track_validation_result(True)
+                
+                # If validation fails, use fallback
+                if not is_valid:
+                    logger.warning(f"Response validation failed: {validation_details.get('issues')}")
+                    content = self.gita_validator.get_fallback_response(user_message)
+                    logger.info("✅ Using validated Gita-rooted fallback response")
+            
+            return content
             
         except Exception as e:
             logger.error(f"Error: {type(e).__name__}: {e}")
+            # Use validated fallback on any error
+            if self.gita_validator:
+                return self.gita_validator.get_fallback_response(user_message)
             return "I'm here for you. Let's try again. 💙"
 
     def _build_gita_context(self, verse_results: list) -> str:

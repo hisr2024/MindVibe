@@ -273,6 +273,7 @@ class WisdomKnowledgeBase:
     def _extract_themes(self, query: str) -> list[str]:
         """
         Extract relevant themes from a query for expanded search.
+        Enhanced emotion-to-theme mapping for better verse coverage.
 
         Args:
             query: Search query text
@@ -282,17 +283,79 @@ class WisdomKnowledgeBase:
         """
         query_lower = query.lower()
 
-        # Theme keyword mapping
+        # Enhanced emotion-to-theme mapping with Gita principles
         theme_mapping = {
-            "anxiety": ["emotional", "stress", "fear"],
-            "stress": ["action", "work", "balance"],
-            "depression": ["grief", "despair", "hope"],
-            "anger": ["control", "peace", "patience"],
-            "fear": ["courage", "strength", "trust"],
-            "lonely": ["connection", "devotion", "love"],
-            "purpose": ["duty", "action", "meaning"],
-            "confused": ["knowledge", "wisdom", "clarity"],
-            "overwhelmed": ["peace", "balance", "meditation"],
+            # Anxiety and stress
+            "anxiety": ["equanimity", "peace", "balance", "detachment", "surrender"],
+            "anxious": ["equanimity", "peace", "balance", "detachment", "surrender"],
+            "worry": ["equanimity", "trust", "letting_go", "peace"],
+            "stress": ["action", "work", "balance", "equanimity", "mindfulness"],
+            "stressed": ["action", "work", "balance", "equanimity", "mindfulness"],
+            "overwhelmed": ["peace", "balance", "meditation", "surrender", "breath"],
+            
+            # Fear and courage
+            "fear": ["courage", "strength", "trust", "faith", "inner_power"],
+            "afraid": ["courage", "strength", "trust", "faith", "inner_power"],
+            "scared": ["courage", "strength", "trust", "faith", "protection"],
+            "panic": ["equanimity", "breath", "grounding", "peace", "control"],
+            
+            # Sadness and depression
+            "depression": ["hope", "light", "purpose", "self_compassion", "renewal"],
+            "depressed": ["hope", "light", "purpose", "self_compassion", "renewal"],
+            "sad": ["hope", "compassion", "acceptance", "healing"],
+            "grief": ["compassion", "acceptance", "healing", "wisdom", "eternal"],
+            "hopeless": ["hope", "purpose", "meaning", "light", "faith"],
+            
+            # Anger and frustration
+            "anger": ["control", "peace", "patience", "equanimity", "restraint"],
+            "angry": ["control", "peace", "patience", "equanimity", "restraint"],
+            "frustrated": ["patience", "acceptance", "equanimity", "balance"],
+            "irritated": ["peace", "patience", "mindfulness", "awareness"],
+            "rage": ["control", "peace", "self_mastery", "restraint"],
+            
+            # Loneliness and connection
+            "lonely": ["connection", "devotion", "love", "inner_self", "unity"],
+            "alone": ["inner_self", "connection", "wholeness", "devotion"],
+            "isolated": ["connection", "unity", "love", "compassion"],
+            
+            # Purpose and meaning
+            "purpose": ["duty", "action", "meaning", "dharma", "calling"],
+            "meaning": ["purpose", "duty", "dharma", "wisdom", "understanding"],
+            "lost": ["direction", "purpose", "wisdom", "clarity", "guidance"],
+            "confused": ["knowledge", "wisdom", "clarity", "understanding", "discernment"],
+            "direction": ["purpose", "duty", "path", "guidance", "clarity"],
+            
+            # Self-worth and confidence
+            "confidence": ["self_empowerment", "strength", "inner_power", "courage"],
+            "worth": ["self_compassion", "value", "essence", "inner_self"],
+            "inadequate": ["self_compassion", "worthiness", "acceptance", "growth"],
+            "failure": ["learning", "growth", "resilience", "perseverance", "detachment"],
+            
+            # Change and uncertainty
+            "change": ["acceptance", "adaptation", "flow", "impermanence", "trust"],
+            "uncertain": ["trust", "faith", "equanimity", "surrender", "acceptance"],
+            "transition": ["adaptation", "change", "growth", "resilience"],
+            
+            # Control and letting go
+            "control": ["surrender", "letting_go", "acceptance", "detachment", "trust"],
+            "perfectionism": ["acceptance", "balance", "self_compassion", "letting_go"],
+            "obsessive": ["balance", "detachment", "mindfulness", "peace"],
+            
+            # Relationships
+            "relationship": ["compassion", "love", "understanding", "forgiveness", "harmony"],
+            "conflict": ["peace", "understanding", "compassion", "patience", "wisdom"],
+            "forgiveness": ["compassion", "letting_go", "peace", "healing", "love"],
+            
+            # Work and duty
+            "work": ["duty", "action", "balance", "purpose", "karma_yoga"],
+            "career": ["duty", "purpose", "action", "dharma", "excellence"],
+            "burnout": ["balance", "rest", "self_care", "boundaries", "renew"],
+            
+            # Inner peace and meditation
+            "peace": ["meditation", "stillness", "equanimity", "balance", "calm"],
+            "calm": ["peace", "meditation", "breath", "stillness", "centeredness"],
+            "meditation": ["stillness", "awareness", "presence", "peace", "inner_self"],
+            "mindfulness": ["awareness", "presence", "attention", "breath", "now"],
         }
 
         themes = []
@@ -300,7 +363,7 @@ class WisdomKnowledgeBase:
             if keyword in query_lower:
                 themes.extend(related_themes)
 
-        return list(set(themes))[:3]  # Return up to 3 unique themes
+        return list(set(themes))[:5]  # Return up to 5 unique themes for better coverage
 
 
     async def search_relevant_verses_full_db(
