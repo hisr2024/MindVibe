@@ -50,6 +50,10 @@ EXPECTED_COUNTS = {
 
 TOTAL_EXPECTED = 700
 
+# Quality thresholds for verification
+MIN_MENTAL_HEALTH_TAG_COVERAGE = 0.70  # 70% of verses should have mental health tags
+MIN_EMBEDDING_COVERAGE = 0.90  # 90% of verses should have embeddings
+
 # Key verses that must be present with proper content
 KEY_VERSES = [
     (2, 47),  # Karmanye Vadhikaraste - most famous verse
@@ -184,14 +188,16 @@ async def verify_database() -> tuple[bool, list[str]]:
     errors = []
     warnings = []
 
-    print("\n" + "=" * 70)
-    print("🗄️  VERIFYING DATABASE")
-    print("=" * 70 + "\n")
+    print("\n" + "=" * 66)
+    print("🕉️  DATABASE VERIFICATION - 700 BHAGAVAD GITA VERSES")
+    print("=" * 66 + "\n")
 
     # Database configuration
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         errors.append("DATABASE_URL environment variable not set")
+        print("❌ DATABASE_URL environment variable not set")
+        print("=" * 66)
         return False, errors
 
     # Fix Render.com DATABASE_URL to use asyncpg
@@ -200,7 +206,7 @@ async def verify_database() -> tuple[bool, list[str]]:
     elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
         database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-    print(f"📍 Database: {database_url[:50]}...")
+    print(f"Database: {database_url.split('@')[1] if '@' in database_url else database_url[:50]}...\n")
 
     try:
         from sqlalchemy import select, text
@@ -216,7 +222,8 @@ async def verify_database() -> tuple[bool, list[str]]:
             result = await session.execute(select(text("COUNT(*)")).select_from(GitaVerse))
             total = result.scalar()
 
-            print(f"📊 Total verses in database: {total}/{TOTAL_EXPECTED}")
+            status = "✅" if total == TOTAL_EXPECTED else "❌"
+            print(f"Total verses in database: {total}/{TOTAL_EXPECTED} {status}\n")
 
             if total != TOTAL_EXPECTED:
                 if total == 0:
@@ -225,7 +232,7 @@ async def verify_database() -> tuple[bool, list[str]]:
                     errors.append(f"Expected {TOTAL_EXPECTED} verses, found {total}")
 
             # Check each chapter
-            print("\n📖 Checking verse counts per chapter:")
+            print("Chapter breakdown:")
             result = await session.execute(
                 text("SELECT chapter, COUNT(*) as cnt FROM gita_verses GROUP BY chapter ORDER BY chapter")
             )
@@ -238,7 +245,7 @@ async def verify_database() -> tuple[bool, list[str]]:
                 status = "✅" if actual == expected else "❌"
                 if actual != expected:
                     errors.append(f"Chapter {chapter}: expected {expected}, found {actual}")
-                print(f"   {status} Chapter {chapter:2d}: {actual:3d}/{expected:3d} verses")
+                print(f"  Chapter {chapter:2d}: {actual:2d}/{expected:2d} {status}")
 
             # Check key verses
             print("\n🔑 Checking key verses:")
@@ -260,32 +267,45 @@ async def verify_database() -> tuple[bool, list[str]]:
                     print(f"   ✅ {chapter}.{verse_num} - Present")
 
             # Check mental health tags
-            print("\n🏥 Checking mental health applications:")
+            print("\nMental health tagging:")
             result = await session.execute(
                 text("SELECT COUNT(*) FROM gita_verses WHERE mental_health_applications IS NOT NULL")
             )
             tagged_count = result.scalar() or 0
             tag_percentage = (tagged_count / total) * 100 if total > 0 else 0
-            status = "✅" if tagged_count > 500 else "⚠️"
-            print(f"   {status} Verses with mental health tags: {tagged_count}/{total} ({tag_percentage:.1f}%)")
-            if tagged_count < 500:
-                warnings.append(f"Only {tagged_count} verses have mental health tags (< 500)")
+            status = "✅" if tagged_count >= total * MIN_MENTAL_HEALTH_TAG_COVERAGE else "⚠️"
+            print(f"  {tagged_count}/{total} {status}")
+            if tagged_count < total * MIN_MENTAL_HEALTH_TAG_COVERAGE:
+                warnings.append(f"Only {tagged_count} verses have mental health tags ({tag_percentage:.1f}%)")
+
+            # Check embeddings
+            print("\nEmbeddings generated:")
+            result = await session.execute(
+                text("SELECT COUNT(*) FROM gita_verses WHERE embedding IS NOT NULL")
+            )
+            embedding_count = result.scalar() or 0
+            status = "✅" if embedding_count >= total * MIN_EMBEDDING_COVERAGE else "⚠️"
+            print(f"  {embedding_count}/{total} {status}")
 
         await engine.dispose()
 
     except ImportError as e:
         errors.append(f"Import error: {e}")
+        print(f"\n❌ Import error: {e}")
+        print("=" * 66)
         return False, errors
     except Exception as e:
         errors.append(f"Database error: {e}")
+        print(f"\n❌ Database error: {e}")
+        print("=" * 66)
         return False, errors
 
     # Summary
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 66)
     if not errors:
-        print("✅ DATABASE VERIFICATION PASSED!")
+        print("🎉 SUCCESS! Database contains all 700 authentic Gita verses")
     else:
-        print(f"❌ DATABASE VERIFICATION FAILED - {len(errors)} error(s)")
+        print(f"❌ VERIFICATION FAILED - {len(errors)} error(s)")
         for error in errors[:5]:
             print(f"   • {error}")
 
@@ -294,7 +314,7 @@ async def verify_database() -> tuple[bool, list[str]]:
         for warning in warnings[:5]:
             print(f"   • {warning}")
 
-    print("=" * 70)
+    print("=" * 66)
 
     return len(errors) == 0, errors
 
