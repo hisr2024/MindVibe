@@ -9,10 +9,16 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from openai import APIError, AuthenticationError, BadRequestError, OpenAI, RateLimitError
+from openai import (
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    OpenAI,
+    RateLimitError,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
@@ -30,11 +36,11 @@ router = APIRouter(prefix="/api/viyoga", tags=["viyoga"])
 async def _generate_response(
     *,
     system_prompt: str,
-    user_payload: Dict[str, Any],
+    user_payload: dict[str, Any],
     expect_json: bool,
     temperature: float = 0.4,
     max_tokens: int = 500,
-) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
+) -> tuple[dict[str, Any] | None, str | None]:
     """Generate OpenAI response with error handling."""
     if not client:
         logger.error("Viyoga engine unavailable: missing OpenAI API key")
@@ -67,7 +73,7 @@ async def _generate_response(
         raise HTTPException(status_code=500, detail="Unexpected error generating response") from exc
 
     raw_text = completion.choices[0].message.content if completion.choices else None
-    parsed: Optional[Dict[str, Any]] = None
+    parsed: dict[str, Any] | None = None
 
     if expect_json and raw_text:
         try:
@@ -80,14 +86,14 @@ async def _generate_response(
 
 @router.post("/detach")
 async def detach_from_outcome(
-    payload: Dict[str, Any],
+    payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate detachment guidance rooted in Bhagavad Gita karma yoga principles.
-    
+
     Expects payload with:
     - outcome_worry: The outcome anxiety or result-focused concern
-    
+
     Returns structured JSON with:
     - validation: Recognition of the anxiety
     - attachment_check: Identification of attachment to results
@@ -96,25 +102,25 @@ async def detach_from_outcome(
     - gita_verses_used: Count of verses used for context
     """
     outcome_worry = payload.get("outcome_worry", "")
-    
+
     if not outcome_worry.strip():
         raise HTTPException(status_code=400, detail="outcome_worry is required")
-    
+
     # Search query focusing on nishkama karma, detachment, and equanimity
     search_query = f"{outcome_worry} karma yoga nishkama karma detachment equanimity action duty results"
-    
+
     # Search relevant Gita verses
     gita_kb = WisdomKnowledgeBase()
     verse_results = []
     gita_context = ""
-    
+
     try:
         verse_results = await gita_kb.search_relevant_verses(
             db=db,
             query=search_query,
             limit=5
         )
-        
+
         # Build Gita context for the prompt (internal use only)
         if verse_results:
             for v in verse_results:
@@ -127,17 +133,17 @@ async def detach_from_outcome(
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
                         gita_context += f"Principle: {principle}\n"
-        
+
         logger.info(f"Viyoga - Found {len(verse_results)} Gita verses for outcome detachment")
         logger.debug(f"Gita context built: {gita_context[:200]}...")
     except Exception as e:
         logger.error(f"Error fetching Gita verses for Viyoga: {e}")
         gita_context = ""
-    
+
     # Use default principles if no Gita context was built
     if not gita_context:
         gita_context = "Apply universal principles of nishkama karma (actionless action), vairagya (detachment), and samatva (equanimity in success and failure)."
-    
+
     # System prompt with Gita wisdom integration
     VIYOGA_WITH_GITA_PROMPT = f"""
 VIYOGA DETACHMENT COACH - Powered by Bhagavad Gita Karma Yoga
@@ -209,20 +215,20 @@ BOUNDARIES:
     )
 
     # Extract fields from response
-    response_data: Optional[Dict[str, str]] = None
+    response_data: dict[str, str] | None = None
     if parsed:
         validation = parsed.get("validation", "")
         attachment_check = parsed.get("attachment_check", "")
         detachment_principle = parsed.get("detachment_principle", "")
         one_action = parsed.get("one_action", "")
-        
+
         response_data = {
             "validation": validation,
             "attachment_check": attachment_check,
             "detachment_principle": detachment_principle,
             "one_action": one_action,
         }
-    
+
     return {
         "status": "success" if parsed else "partial_success",
         "detachment_guidance": response_data,

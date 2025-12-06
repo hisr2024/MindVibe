@@ -9,10 +9,16 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from openai import APIError, AuthenticationError, BadRequestError, OpenAI, RateLimitError
+from openai import (
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    OpenAI,
+    RateLimitError,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
@@ -30,11 +36,11 @@ router = APIRouter(prefix="/api/ardha", tags=["ardha"])
 async def _generate_response(
     *,
     system_prompt: str,
-    user_payload: Dict[str, Any],
+    user_payload: dict[str, Any],
     expect_json: bool,
     temperature: float = 0.4,
     max_tokens: int = 500,
-) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
+) -> tuple[dict[str, Any] | None, str | None]:
     """Generate OpenAI response with error handling."""
     if not client:
         logger.error("Ardha engine unavailable: missing OpenAI API key")
@@ -67,7 +73,7 @@ async def _generate_response(
         raise HTTPException(status_code=500, detail="Unexpected error generating response") from exc
 
     raw_text = completion.choices[0].message.content if completion.choices else None
-    parsed: Optional[Dict[str, Any]] = None
+    parsed: dict[str, Any] | None = None
 
     if expect_json and raw_text:
         try:
@@ -80,14 +86,14 @@ async def _generate_response(
 
 @router.post("/reframe")
 async def reframe_thought(
-    payload: Dict[str, Any],
+    payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate cognitive reframing guidance rooted in Bhagavad Gita wisdom.
-    
+
     Expects payload with:
     - negative_thought: The negative or distressing thought to reframe
-    
+
     Returns structured JSON with:
     - recognition: Validation of the feeling
     - deep_insight: The wisdom principle being applied
@@ -96,25 +102,25 @@ async def reframe_thought(
     - gita_verses_used: Count of verses used for context
     """
     negative_thought = payload.get("negative_thought", "")
-    
+
     if not negative_thought.strip():
         raise HTTPException(status_code=400, detail="negative_thought is required")
-    
+
     # Search query focusing on equanimity, clarity, and self-mastery
     search_query = f"{negative_thought} equanimity clarity mind stability self-knowledge detachment"
-    
+
     # Search relevant Gita verses
     gita_kb = WisdomKnowledgeBase()
     verse_results = []
     gita_context = ""
-    
+
     try:
         verse_results = await gita_kb.search_relevant_verses(
             db=db,
             query=search_query,
             limit=5
         )
-        
+
         # Build Gita context for the prompt (internal use only)
         if verse_results:
             for v in verse_results:
@@ -127,17 +133,17 @@ async def reframe_thought(
                     principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
                     if principle:
                         gita_context += f"Principle: {principle}\n"
-        
+
         logger.info(f"Ardha - Found {len(verse_results)} Gita verses for thought reframing")
         logger.debug(f"Gita context built: {gita_context[:200]}...")
     except Exception as e:
         logger.error(f"Error fetching Gita verses for Ardha: {e}")
         gita_context = ""
-    
+
     # Use default principles if no Gita context was built
     if not gita_context:
         gita_context = "Apply universal principles of sthitaprajna (stability of mind), viveka (discrimination), and samatva (equanimity)."
-    
+
     # System prompt with Gita wisdom integration
     ARDHA_WITH_GITA_PROMPT = f"""
 ARDHA REFRAMING ENGINE - Powered by Bhagavad Gita Wisdom
@@ -151,7 +157,7 @@ GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite verse numbers):
 CRITICAL RULES:
 - Apply Gita wisdom naturally as universal life principles
 - NEVER mention "Bhagavad Gita", "Chapter X.Y", "verse numbers", "Krishna", or "Arjuna"
-- Use Gita terminology naturally: dharma (duty), karma (action), buddhi (discernment), 
+- Use Gita terminology naturally: dharma (duty), karma (action), buddhi (discernment),
   viveka (discrimination), samatva (equanimity), vairagya (detachment), sthitaprajna (stability of mind)
 - NO citations like "studies show" or "research indicates"
 - Keep tone warm, grounded, non-preachy, and emotionally validating
@@ -201,20 +207,20 @@ BOUNDARIES:
     )
 
     # Extract fields from response
-    response_data: Optional[Dict[str, str]] = None
+    response_data: dict[str, str] | None = None
     if parsed:
         recognition = parsed.get("recognition", "")
         deep_insight = parsed.get("deep_insight", "")
         reframe = parsed.get("reframe", "")
         small_action_step = parsed.get("small_action_step", "")
-        
+
         response_data = {
             "recognition": recognition,
             "deep_insight": deep_insight,
             "reframe": reframe,
             "small_action_step": small_action_step,
         }
-    
+
     return {
         "status": "success" if parsed else "partial_success",
         "reframe_guidance": response_data,
