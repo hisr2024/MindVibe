@@ -18,3 +18,4 @@ export {
   type CurrencyConfig,
 } from './useCurrency'
 export { useLanguage, LanguageProvider, LANGUAGES, type Language, type LanguageConfig } from './useLanguage'
+export { useSmartScroll } from './useSmartScroll'

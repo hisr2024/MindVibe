@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import SimpleBar from 'simplebar-react'
 import { MessageBubble } from './MessageBubble'
 import { KiaanLogo } from '@/components/branding'
+import { useSmartScroll } from '@/hooks/useSmartScroll'
 
 export interface Message {
   id: string
@@ -30,15 +31,14 @@ export function KiaanChat({
   className = '',
 }: KiaanChatProps) {
   const [inputText, setInputText] = useState('')
-  const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const [isAtBottom, setIsAtBottom] = useState(true)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [userHasScrolledUp, setUserHasScrolledUp] = useState(false)
-  const [pendingAutoScroll, setPendingAutoScroll] = useState(false)
   const [confirmingClear, setConfirmingClear] = useState(false)
   const [clearedUntil, setClearedUntil] = useState(0)
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const previousMessageCountRef = useRef(messages.length)
+
+  // Use smart scroll hook for better UX
+  const visibleMessages = messages.slice(clearedUntil)
+  const { scrollRef, messagesEndRef, hasNewMessage, scrollToBottom } = useSmartScroll(visibleMessages.length)
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -51,80 +51,16 @@ export function KiaanChat({
     }
   }, [])
 
-  // Auto-scroll to bottom when allowed
-  const scrollToBottom = useCallback(() => {
-    const container = messagesContainerRef.current
-    if (!container) return
-
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: prefersReducedMotion ? 'auto' : 'smooth'
-    })
-  }, [prefersReducedMotion])
-
-  useEffect(() => {
-    const previousCount = previousMessageCountRef.current
-    const hasNewMessage = messages.length > previousCount
-    const latestMessage = messages[messages.length - 1]
-
-    if (hasNewMessage && latestMessage) {
-      const allowSnap = pendingAutoScroll || !userHasScrolledUp || latestMessage.sender === 'user'
-
-      if (allowSnap) {
-        scrollToBottom()
-        setIsAtBottom(true)
-        setUserHasScrolledUp(false)
-      }
-
-      if (pendingAutoScroll && latestMessage.sender === 'assistant') {
-        setPendingAutoScroll(false)
-      }
-    }
-
-    previousMessageCountRef.current = messages.length
-  }, [messages, pendingAutoScroll, scrollToBottom, userHasScrolledUp])
-
-  // Detect scroll position to manage auto-scroll behavior
-  const handleScroll = useCallback(() => {
-    const container = messagesContainerRef.current
-    if (!container) return
-
-    const threshold = 40
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      threshold
-    setIsAtBottom(isNearBottom)
-    setUserHasScrolledUp(!isNearBottom)
-    if (!isNearBottom && pendingAutoScroll) {
-      setPendingAutoScroll(false)
-    }
-  }, [pendingAutoScroll])
-
-  // Initialize scroll position state on mount
-  useEffect(() => {
-    const container = messagesContainerRef.current
-    if (!container) return
-
-    const threshold = 40
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      threshold
-    setIsAtBottom(isNearBottom)
-  }, [])
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputText.trim() && onSendMessage) {
       onSendMessage(inputText.trim())
       setInputText('')
-      setIsAtBottom(true)
-      setUserHasScrolledUp(false)
-      setPendingAutoScroll(true)
     }
   }
 
   const startScroll = (direction: 'up' | 'down') => {
-    const container = messagesContainerRef.current
+    const container = scrollRef.current
     if (!container) return
 
     const delta = direction === 'up' ? -28 : 28
@@ -155,8 +91,6 @@ export function KiaanChat({
     }
   }, [])
 
-  const visibleMessages = messages.slice(clearedUntil)
-
   return (
     <div
       className={`relative flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 ${className}`}
@@ -184,8 +118,6 @@ export function KiaanChat({
                 onClick={() => {
                   setClearedUntil(messages.length)
                   setConfirmingClear(false)
-                  setIsAtBottom(true)
-                  setUserHasScrolledUp(false)
                   scrollToBottom()
                 }}
                 className="rounded-full bg-gradient-to-r from-orange-400 via-[#ff9933] to-orange-200 px-2.5 py-1 text-[11px] font-semibold text-slate-950 shadow-md shadow-orange-500/30"
@@ -209,8 +141,7 @@ export function KiaanChat({
         <SimpleBar
           autoHide={false}
           scrollableNodeProps={{
-            ref: messagesContainerRef,
-            onScroll: handleScroll,
+            ref: scrollRef,
             tabIndex: 0,
             role: 'log',
             'aria-label': 'Chat messages',
@@ -264,6 +195,9 @@ export function KiaanChat({
                 <span className="sr-only">KIAAN is typing...</span>
               </div>
             )}
+
+            {/* Invisible element at the end for scrolling */}
+            <div ref={messagesEndRef} />
           </div>
         </SimpleBar>
 
@@ -298,13 +232,9 @@ export function KiaanChat({
       </div>
 
       {/* Floating Jump to Latest button */}
-      {!isAtBottom && messages.length > 0 && (
+      {hasNewMessage && visibleMessages.length > 0 && (
         <button
-          onClick={() => {
-            setIsAtBottom(true)
-            scrollToBottom()
-            setUserHasScrolledUp(false)
-          }}
+          onClick={scrollToBottom}
           className="absolute bottom-[116px] right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105"
           aria-label="Jump to latest message"
         >

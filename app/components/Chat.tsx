@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import SimpleBar from 'simplebar-react'
 import { MessageBubble } from '@/components/chat'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
+import { useSmartScroll } from '@/hooks/useSmartScroll'
 
 type Message = {
   sender: 'user' | 'assistant'
@@ -22,11 +23,10 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const listRef = useRef<HTMLDivElement | null>(null)
   const [savedNotification, setSavedNotification] = useState<string | null>(null)
-  const [hasNewAnswer, setHasNewAnswer] = useState(false)
-  const [isAtBottom, setIsAtBottom] = useState(true)
-  const [canScrollUp, setCanScrollUp] = useState(false)
+
+  // Use smart scroll hook for better UX
+  const { scrollRef, messagesEndRef, hasNewMessage, scrollToBottom } = useSmartScroll(messages.length)
 
   async function sendMessage(text?: string) {
     const content = (text ?? input).trim()
@@ -50,7 +50,6 @@ export default function Chat() {
         timestamp: new Date().toISOString()
       }
       setMessages(prev => [...prev, assistant])
-      setHasNewAnswer(true)
     } catch (error) {
       const assistant: Message = {
         sender: 'assistant',
@@ -59,44 +58,9 @@ export default function Chat() {
         status: 'error'
       }
       setMessages(prev => [...prev, assistant])
-      setHasNewAnswer(true)
     } finally {
       setLoading(false)
     }
-  }
-
-  function handleScroll() {
-    const container = listRef.current
-    if (!container) return
-
-    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
-    const atBottom = distanceFromBottom < 48
-    setIsAtBottom(atBottom)
-    setCanScrollUp(container.scrollTop > 12)
-
-    if (atBottom) {
-      setHasNewAnswer(false)
-    }
-  }
-
-  useEffect(() => {
-    handleScroll()
-  }, [messages])
-
-  function scrollByAmount(amount: number) {
-    const container = listRef.current
-    if (!container) return
-
-    container.scrollBy({ top: amount, behavior: 'smooth' })
-  }
-
-  function scrollToLatest() {
-    const container = listRef.current
-    if (!container) return
-
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-    setHasNewAnswer(false)
-    setIsAtBottom(true)
   }
 
   function handleSaveToJournal(text: string) {
@@ -149,8 +113,7 @@ export default function Chat() {
         <SimpleBar
           autoHide={false}
           scrollableNodeProps={{
-            ref: listRef,
-            onScroll: handleScroll,
+            ref: scrollRef,
             role: 'log',
             'aria-live': 'polite',
             'aria-label': 'Conversation history',
@@ -175,34 +138,20 @@ export default function Chat() {
                 />
               ))}
             </div>
+            {/* Invisible element at the end for scrolling */}
+            <div ref={messagesEndRef} />
           </div>
         </SimpleBar>
 
         <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-3">
           <div className="pointer-events-auto flex flex-col gap-2 text-xs font-semibold text-orange-50">
-            <button
-              type="button"
-              onClick={() => scrollByAmount(-200)}
-              disabled={!canScrollUp}
-              className="rounded-xl border border-orange-500/30 bg-slate-900/80 px-3 py-2 shadow-lg shadow-orange-500/15 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Scroll up
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollByAmount(200)}
-              disabled={isAtBottom}
-              className="rounded-xl border border-orange-500/30 bg-slate-900/80 px-3 py-2 shadow-lg shadow-orange-500/15 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Scroll down
-            </button>
-            {hasNewAnswer && !isAtBottom && (
+            {hasNewMessage && (
               <button
                 type="button"
-                onClick={scrollToLatest}
+                onClick={scrollToBottom}
                 className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-slate-950 shadow-lg shadow-orange-500/35 transition hover:scale-[1.02]"
               >
-                Show latest answer
+                ↓ Jump to Latest
               </button>
             )}
           </div>
