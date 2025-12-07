@@ -4,13 +4,6 @@ import SiteNav from './components/SiteNav'
 import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-})
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -34,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased font-sans">
+    <html lang="en">
+      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
         <Providers>
           <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
             <div className="flex-1">

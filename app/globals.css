@@ -9,7 +9,7 @@
   --color-background: #0b0b0f;
   --color-foreground: #f8fafc;
   --color-surface: #0f1624;
-  --font-sans: 'Inter', 'SF Pro Text', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --text-h1: clamp(2rem, 3vw + 1rem, 2.6rem);
   --text-h2: clamp(1.6rem, 2vw + 1rem, 2.1rem);
   --text-h3: clamp(1.3rem, 1vw + 1rem, 1.6rem);
@@ -786,4 +786,9 @@ html.light .subscription-scroll::-webkit-scrollbar-thumb:hover {
 
 [lang="zh"] {
   font-family: 'Noto Sans SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+}
+
+/* System font stack for better compatibility */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
