@@ -15,5 +15,5 @@
 - Daily refresh via cron
 
 ## Metrics
-- Average response time: -80%
+- Average response time: 80% reduction (improved by 80%)
 - Cache hit rate target: >70%
