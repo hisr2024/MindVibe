@@ -1,10 +1,10 @@
-from fastapi import FastAPI, HTTPException, Header
-from fastapi.middleware.cors import CORSMiddleware
-import httpx
+import asyncio
 import os
 from datetime import datetime
-import asyncio
-from typing import Optional
+
+import httpx
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="MindVibe Mobile BFF", version="1.0.0")
 
@@ -23,7 +23,7 @@ async def health_check():
     return {"status": "healthy", "service": "mobile-bff", "timestamp": datetime.now().isoformat()}
 
 @app.get("/mobile/v1/chat/history")
-async def get_chat_history(authorization: Optional[str] = Header(None), limit: int = 50):
+async def get_chat_history(authorization: str | None = Header(None), limit: int = 50):
     if not authorization:
         raise HTTPException(401, "Authorization required")
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -34,10 +34,10 @@ async def get_chat_history(authorization: Optional[str] = Header(None), limit: i
             messages = data.get("messages", [])
             return {"messages": messages[-limit:], "total_count": len(messages), "has_more": len(messages) > limit}
         except httpx.HTTPStatusError as e:
-            raise HTTPException(e.response.status_code, str(e))
+            raise HTTPException(e.response.status_code, str(e)) from e
 
 @app.get("/mobile/v1/dashboard")
-async def get_dashboard(authorization: Optional[str] = Header(None)):
+async def get_dashboard(authorization: str | None = Header(None)):
     if not authorization:
         raise HTTPException(401, "Authorization required")
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -52,7 +52,7 @@ async def get_dashboard(authorization: Optional[str] = Header(None)):
         return {"moods": moods, "journal": journal, "synced_at": datetime.now().isoformat()}
 
 @app.post("/mobile/v1/chat")
-async def send_chat(message: dict, authorization: Optional[str] = Header(None)):
+async def send_chat(message: dict, authorization: str | None = Header(None)):
     if not authorization:
         raise HTTPException(401, "Authorization required")
     async with httpx.AsyncClient(timeout=30.0) as client:
