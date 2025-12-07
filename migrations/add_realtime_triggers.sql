@@ -3,7 +3,7 @@
 CREATE OR REPLACE FUNCTION notify_mood_event()
 RETURNS TRIGGER AS $$
 BEGIN
-    PERFORM pg_notify('mood_events', json_build_object('event_type', 'mood_logged', 'user_id', NEW.user_id, 'mood_score', NEW.mood_score, 'timestamp', NEW.created_at)::text);
+    PERFORM pg_notify('mood_events', json_build_object('event_type', 'mood_logged', 'user_id', NEW.user_id, 'mood_score', NEW.score, 'timestamp', NEW.at)::text);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
