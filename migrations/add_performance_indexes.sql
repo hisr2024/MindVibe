@@ -9,6 +9,8 @@ CREATE INDEX IF NOT EXISTS idx_journal_user_created ON journal_entries(user_id, 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_gita_chapter_verse ON gita_verses(chapter, verse);
 
+-- Covering index with INCLUDE clause (PostgreSQL-specific feature)
+-- This includes additional columns in the index for index-only scans
 CREATE INDEX IF NOT EXISTS idx_moods_user_recent_covering 
     ON moods(user_id, at DESC) 
     INCLUDE (score, tags);

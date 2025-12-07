@@ -35,6 +35,7 @@ class TestCacheManager:
                 "redis://localhost:6379", 
                 decode_responses=True
             )
+            mock_client.ping.assert_called_once()
             assert cache.client == mock_client
 
     @pytest.mark.asyncio
@@ -111,4 +112,29 @@ class TestCacheManager:
             result = await cache.get("test_key")
             
             mock_redis.from_url.assert_called_once()
+            mock_client.ping.assert_called_once()
             assert cache.client == mock_client
+
+    @pytest.mark.asyncio
+    async def test_get_with_invalid_json(self):
+        """Test CacheManager get method with invalid JSON."""
+        cache = CacheManager()
+        cache.client = AsyncMock()
+        cache.client.get.return_value = 'invalid json{'
+        
+        result = await cache.get("test_key")
+        
+        # Should return None when JSON decode fails
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_set_with_non_serializable_value(self):
+        """Test CacheManager set method with non-serializable value."""
+        cache = CacheManager()
+        cache.client = AsyncMock()
+        
+        # Try to set a non-serializable object
+        non_serializable = object()
+        
+        with pytest.raises((TypeError, ValueError)):
+            await cache.set("test_key", non_serializable)
