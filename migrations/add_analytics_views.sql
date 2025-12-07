@@ -1,5 +1,3 @@
--- MATERIALIZED VIEWS FOR ANALYTICS (READ-ONLY)
-
 CREATE MATERIALIZED VIEW IF NOT EXISTS mood_analytics AS
 SELECT 
     user_id,
@@ -13,7 +11,6 @@ FROM moods
 WHERE deleted_at IS NULL
 GROUP BY user_id, DATE(at);
 
--- Create unique index for concurrent refresh
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mood_analytics_user_date_unique ON mood_analytics(user_id, date);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS usage_analytics AS
@@ -31,10 +28,8 @@ LEFT JOIN chat_messages c ON u.id = c.user_id
 WHERE u.deleted_at IS NULL
 GROUP BY u.id;
 
--- Create unique index for concurrent refresh
 CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_analytics_user_unique ON usage_analytics(user_id);
 
--- Refresh function (run via cron)
 CREATE OR REPLACE FUNCTION refresh_analytics_views()
 RETURNS void AS $$
 BEGIN

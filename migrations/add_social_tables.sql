@@ -1,5 +1,3 @@
--- NEW TABLES FOR SOCIAL FEATURES
-
 CREATE TABLE IF NOT EXISTS user_connections (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -56,5 +54,3 @@ CREATE TABLE IF NOT EXISTS community_posts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_community_posts_created ON community_posts(created_at DESC);
-
--- NO CHANGES TO: users, moods, journal_entries, chat_messages, gita_verses
