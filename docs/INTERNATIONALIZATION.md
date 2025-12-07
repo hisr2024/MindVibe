@@ -240,3 +240,183 @@ For translation-related issues:
 2. Review existing translation files for examples
 3. Open an issue on GitHub with the `i18n` label
 4. Contact the maintainers for complex translation questions
+
+## Using Translations in Components
+
+### Client Components
+
+Use the `useTranslation` hook in client components:
+
+```typescript
+'use client';
+
+import { useTranslation } from '@/hooks/useTranslation';
+
+export function MyComponent() {
+  const { t, locale, isLoading } = useTranslation();
+
+  if (isLoading) {
+    return <div>Loading translations...</div>;
+  }
+
+  return (
+    <div>
+      <h1>{t('kiaan', 'welcome.title')}</h1>
+      <p>{t('kiaan', 'welcome.subtitle')}</p>
+      <button>{t('common', 'buttons.submit')}</button>
+      
+      {/* With parameters */}
+      <p>{t('dashboard', 'stats.streakDays', { count: 5 })}</p>
+    </div>
+  );
+}
+```
+
+### Translation Key Structure
+
+Access nested keys using dot notation:
+
+```typescript
+// For this JSON structure:
+{
+  "kiaan": {
+    "chat": {
+      "placeholder": "Type your message..."
+    }
+  }
+}
+
+// Use:
+t('kiaan', 'chat.placeholder')
+```
+
+### Parameter Interpolation
+
+Use curly braces in translation strings for dynamic values:
+
+```json
+{
+  "moodCheck": {
+    "logged": "Logged: {mood}"
+  }
+}
+```
+
+```typescript
+t('kiaan', 'moodCheck.logged', { mood: 'Happy' })
+// Output: "Logged: Happy"
+```
+
+### Loading States
+
+The hook provides an `isLoading` state for better UX:
+
+```typescript
+const { t, isLoading } = useTranslation();
+
+if (isLoading) {
+  return <LoadingSpinner />;
+}
+
+return <TranslatedContent />;
+```
+
+### Current Locale
+
+Access the current locale:
+
+```typescript
+const { locale } = useTranslation();
+
+// Use for conditional rendering
+if (locale === 'ar') {
+  // RTL-specific layout
+}
+```
+
+## Example: Translating a Button
+
+Before (hardcoded):
+```typescript
+<button>Save</button>
+```
+
+After (translated):
+```typescript
+'use client';
+
+import { useTranslation } from '@/hooks/useTranslation';
+
+export function SaveButton() {
+  const { t } = useTranslation();
+  
+  return (
+    <button>{t('common', 'buttons.save')}</button>
+  );
+}
+```
+
+## Example: Translating KIAAN Chat Interface
+
+```typescript
+'use client';
+
+import { useTranslation } from '@/hooks/useTranslation';
+
+export function KiaanChat() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h2>{t('kiaan', 'chat.title')}</h2>
+      <p>{t('kiaan', 'chat.subtitle')}</p>
+      <input 
+        placeholder={t('kiaan', 'chat.placeholder')}
+      />
+      <button>{t('kiaan', 'chat.send')}</button>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+1. **Always use the hook**: Don't import JSON files directly
+2. **Keep keys semantic**: Use descriptive key names like `kiaan.chat.send` not `btn1`
+3. **Handle loading states**: Show loading indicators while translations load
+4. **Test all languages**: Switch between languages to verify translations display correctly
+5. **Keep translations short**: UI space is limited, especially in mobile views
+6. **Use parameters**: For dynamic content like names, counts, dates
+7. **Consistent tone**: Maintain KIAAN's calm, supportive voice across languages
+
+## Common Pitfalls
+
+❌ **Don't**: Hardcode text in components
+```typescript
+<button>Submit</button>
+```
+
+✅ **Do**: Use translation keys
+```typescript
+<button>{t('common', 'buttons.submit')}</button>
+```
+
+❌ **Don't**: Import translations directly
+```typescript
+import messages from '@/locales/en/common.json';
+```
+
+✅ **Do**: Use the useTranslation hook
+```typescript
+const { t } = useTranslation();
+```
+
+❌ **Don't**: Forget about RTL languages
+```typescript
+<div className="text-left">Content</div>
+```
+
+✅ **Do**: Use RTL-aware classes or check locale
+```typescript
+<div className={locale === 'ar' ? 'text-right' : 'text-left'}>Content</div>
+```
