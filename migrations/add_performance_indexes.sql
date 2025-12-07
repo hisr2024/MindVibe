@@ -18,7 +18,3 @@ CREATE INDEX IF NOT EXISTS idx_gita_chapter_verse ON gita_verses(chapter, verse)
 CREATE INDEX IF NOT EXISTS idx_moods_user_recent_covering 
     ON moods(user_id, at DESC) 
     INCLUDE (score, tags);
-
-VACUUM ANALYZE moods;
-VACUUM ANALYZE chat_messages;
-VACUUM ANALYZE journal_entries;
