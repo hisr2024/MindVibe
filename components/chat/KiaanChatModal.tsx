@@ -37,17 +37,26 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
     setIsLoading(true)
 
     try {
-      // Call existing KIAAN API endpoint - NO CHANGES TO BACKEND
+      // Use KIAAN's existing chat endpoint
       const response = await fetch('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input }),
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          message: input
+        }),
         credentials: 'include'
       })
 
-      if (!response.ok) throw new Error('Chat failed')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || errorData.response || 'Chat request failed')
+      }
 
       const data = await response.json()
+      
+      // Handle KIAAN response format
       const aiMessage: Message = { 
         id: crypto.randomUUID(),
         sender: 'assistant', 
@@ -60,7 +69,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
       setMessages(prev => [...prev, { 
         id: crypto.randomUUID(),
         sender: 'assistant', 
-        text: 'I apologize, I encountered an error. Please try again.', 
+        text: 'Unable to connect to KIAAN. Please try again or use the main chat page at /kiaan.',
         timestamp: new Date().toISOString()
       }])
     } finally {
