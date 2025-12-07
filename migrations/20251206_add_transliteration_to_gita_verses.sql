@@ -25,11 +25,11 @@ BEGIN
         -- Table exists, add column if it doesn't exist
         -- Using ALTER TABLE with IF NOT EXISTS is more idiomatic
         ALTER TABLE gita_verses ADD COLUMN IF NOT EXISTS transliteration TEXT;
-        RAISE NOTICE 'Migration completed: ensured transliteration column exists in gita_verses table';
+        RAISE NOTICE 'Migration completed: transliteration column ensured in gita_verses';
     ELSE
         -- Table doesn't exist yet - this is expected on fresh deployments
         -- The table will be created by migration 20251109_add_gita_wisdom_database.sql
         -- which already includes the transliteration column
-        RAISE NOTICE 'Table gita_verses does not exist yet - skipping migration (table will be created by 20251109_add_gita_wisdom_database.sql with transliteration column)';
+        RAISE NOTICE 'Skipping: gita_verses table not found (will be created by 20251109)';
     END IF;
 END $$;
