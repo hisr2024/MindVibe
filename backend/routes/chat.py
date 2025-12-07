@@ -16,6 +16,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 
+# TEMPORARILY DISABLED: Subscription system until plans are seeded
+# TODO: Re-enable after running subscription plan seeding script
+# See: scripts/seed_subscription_plans.py
+SUBSCRIPTION_ENABLED = False
+
 # Import subscription/quota services - optional for backwards compatibility
 try:
     from backend.middleware.feature_access import get_current_user_id
@@ -24,7 +29,7 @@ try:
         get_or_create_free_subscription,
         increment_kiaan_usage,
     )
-    SUBSCRIPTION_ENABLED = True
+    # SUBSCRIPTION_ENABLED = True  # Disabled temporarily
 except ImportError:
     SUBSCRIPTION_ENABLED = False
 
