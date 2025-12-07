@@ -83,8 +83,8 @@ async def verify_schema() -> bool:
             ]
             
             # Migration mapping for missing columns
+            # Note: transliteration is included in base migration 20251109_add_gita_wisdom_database.sql
             MIGRATION_MAP = {
-                'transliteration': '20251206_add_transliteration_to_gita_verses.sql',
                 'mental_health_applications': '20251207_add_mental_health_tags_to_gita.sql',
                 'primary_domain': '20251207_add_wisdom_verse_domains.sql',
                 'secondary_domains': '20251207_add_wisdom_verse_domains.sql',

@@ -520,8 +520,8 @@ async def main(use_api: bool = False, use_chapters: bool = False) -> int:
             
             if not result.fetchone():
                 print("❌ Schema verification failed: missing 'transliteration' column")
-                print("   Run migration first:")
-                print("   psql $DATABASE_URL < migrations/20251206_add_transliteration_to_gita_verses.sql")
+                print("   Run base migration first:")
+                print("   psql $DATABASE_URL < migrations/20251109_add_gita_wisdom_database.sql")
                 return 1
         print("✅ Schema verification passed\n")
 
