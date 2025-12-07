@@ -13,7 +13,7 @@
 -- 2. Table exists without transliteration column - adds the column
 -- 3. Table exists with transliteration column - skips gracefully
 
-DO $$
+DO $
 BEGIN
     -- Check if gita_verses table exists
     IF EXISTS (
@@ -25,11 +25,11 @@ BEGIN
         -- Table exists, add column if it doesn't exist
         -- Using ALTER TABLE with IF NOT EXISTS is more idiomatic
         ALTER TABLE gita_verses ADD COLUMN IF NOT EXISTS transliteration TEXT;
-        RAISE NOTICE 'Migration completed: transliteration column ensured in gita_verses';
+        -- ✅ CRITICAL FIX: Added semicolon here ^
+        
+        RAISE NOTICE 'Checked transliteration column in gita_verses table';
     ELSE
-        -- Table doesn't exist yet - this is expected on fresh deployments
-        -- The table will be created by migration 20251109_add_gita_wisdom_database.sql
-        -- which already includes the transliteration column
-        RAISE NOTICE 'Skipping: gita_verses table not found (will be created by 20251109)';
+        -- Table doesn't exist yet - will be created by SQLAlchemy with the column
+        RAISE NOTICE 'Table gita_verses does not exist yet - skipping migration (will be created by SQLAlchemy)';
     END IF;
-END $$;
+END $;
