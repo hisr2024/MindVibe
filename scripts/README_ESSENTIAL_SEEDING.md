@@ -12,7 +12,7 @@ Seeds the critical tables needed for KIAAN chat to function properly.
    - Free: 10 KIAAN questions/month, $0/month
    - Basic: 50 questions/month, $9/month
    - Premium: 200 questions/month, $19/month
-   - Enterprise: Unlimited, $99/month
+   - Enterprise: Unlimited (-1), $99/month
 
 2. **Wisdom Verses** (7 curated verses)
    - BG 2.47: Action without attachment (anxiety management)

@@ -50,6 +50,9 @@ elif DATABASE_URL.startswith("postgresql://") and "asyncpg" not in DATABASE_URL:
 engine = create_async_engine(DATABASE_URL, echo=False)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
+# Constants
+UNLIMITED_QUESTIONS = -1  # -1 indicates unlimited quota
+
 
 # ============================================================================
 # SUBSCRIPTION PLANS DATA
@@ -142,7 +145,7 @@ SUBSCRIPTION_PLANS = [
             "team_management": True,
             "custom_integrations": True,
         },
-        "kiaan_questions_monthly": 999999,  # Effectively unlimited
+        "kiaan_questions_monthly": UNLIMITED_QUESTIONS,
         "encrypted_journal": True,
         "data_retention_days": 730,
         "is_active": True,
@@ -414,7 +417,9 @@ async def main() -> None:
     print("=" * 70)
     print("Seeding Essential Database Tables for KIAAN")
     print("=" * 70)
-    print(f"\nDatabase: {DATABASE_URL.split('@')[-1]}")
+    # Extract and display only the host/database portion without credentials
+    db_info = DATABASE_URL.split("@")[-1] if "@" in DATABASE_URL else "local"
+    print(f"\nDatabase: {db_info}")
 
     try:
         # Create tables if they don't exist
