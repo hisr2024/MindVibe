@@ -1,164 +1,170 @@
-# Bhagavad Gita Seeding Script
+# Bhagavad Gita Database Seeding
 
 ## Overview
 
-The `seed_authentic_gita_comprehensive.py` script provides production-ready seeding of all 700 authentic Bhagavad Gita verses into the database.
+Scripts for seeding, verifying, and managing Bhagavad Gita verses in the database.
 
-## Features
+## Quick Start
 
-- ✅ **Validation**: Comprehensive validation before insertion
-  - Devanagari character validation for Sanskrit text
-  - IAST transliteration validation
-  - Verse structure and required fields check
-  - Chapter distribution verification
-  - Total count verification (700 verses)
-
-- ✅ **Duplicate Prevention**: Checks for existing verses before insertion
-- ✅ **Batch Processing**: Commits every 50 verses for efficiency
-- ✅ **Error Recovery**: Continues processing even if individual verses fail
-- ✅ **Progress Reporting**: Real-time progress updates with emojis
-- ✅ **Database Verification**: Post-seeding verification of all data
-
-## Prerequisites
-
-- PostgreSQL database (local or Render.com)
-- Data file: `data/gita/gita_verses_complete.json` (700 verses)
-- Python packages: `sqlalchemy`, `asyncpg`
-
-## Usage
-
-### Local Database
+### Production Deployment (Render.com)
 
 ```bash
-# Use default local database
-python scripts/seed_authentic_gita_comprehensive.py
+# 1. Verify current state
+python scripts/verify_db_tables.py
+
+# 2. Seed all 700 verses
+python scripts/seed_gita_robust.py
+
+# 3. Verify completion
+python scripts/verify_db_tables.py
 ```
 
-### Production Database (Render.com)
+---
 
+## Available Scripts
+
+### ⭐ `seed_gita_robust.py` (RECOMMENDED)
+
+**Production-ready seeding with robust error handling.**
+
+#### Why Use This?
+Solves common Render.com deployment issues:
+- ❌ **Old problem**: First error aborts transaction, all 700 verses fail
+- ✅ **Solution**: Each verse has its own transaction (isolated failures)
+
+- ❌ **Old problem**: Re-running script fails on existing verses
+- ✅ **Solution**: Checks for duplicates, idempotent operation
+
+- ❌ **Old problem**: Generic errors, hard to debug
+- ✅ **Solution**: Detailed logging shows exactly which verses fail
+
+#### Features
+- ✅ Individual transaction per verse (no cascade failures)
+- ✅ Duplicate checking (safe to run multiple times)
+- ✅ Continues on errors (doesn't stop at first failure)
+- ✅ Real-time progress with chapter completion
+- ✅ Efficient database-level counting
+
+#### Usage
 ```bash
-# Set DATABASE_URL environment variable
-DATABASE_URL=<your-render-db-url> python scripts/seed_authentic_gita_comprehensive.py
+DATABASE_URL=<your-db-url> python scripts/seed_gita_robust.py
 ```
 
-The script automatically handles Render.com's `postgres://` to `postgresql+asyncpg://` conversion.
+#### Expected Output
+```
+======================================================================
+🕉️  ROBUST GITA VERSE SEEDING
+======================================================================
+Database: postgresql+asyncpg://...
 
-## Data Structure
+📖 Loaded 700 verses from JSON
 
-Each verse includes:
+🌱 Seeding verses...
+
+   Progress: 50 verses seeded...
+   ✅ Chapter 1 complete
+   Progress: 100 verses seeded...
+   ✅ Chapter 2 complete
+   ...
+   ✅ Chapter 18 complete
+
+======================================================================
+📊 SEEDING SUMMARY
+======================================================================
+   ✅ Seeded: 700
+   ⏭️  Skipped: 0
+   ❌ Failed: 0
+   📊 Total: 700/700
+
+✅ Total verses in database: 700/700
+🎉 SUCCESS! All 700 Gita verses are now in the database!
+======================================================================
+```
+
+---
+
+### `verify_db_tables.py`
+
+**Diagnostic tool to inspect database schema and verse counts.**
+
+#### Features
+- Lists all database tables
+- Shows gita_verses table structure
+- Counts verses by chapter
+
+#### Usage
+```bash
+DATABASE_URL=<your-db-url> python scripts/verify_db_tables.py
+```
+
+#### Example Output
+```
+======================================================================
+📋 DATABASE TABLES
+======================================================================
+   ✅ gita_chapters
+   ✅ gita_verses
+   ✅ users
+   ...
+
+======================================================================
+🔍 GITA_VERSES TABLE STRUCTURE
+======================================================================
+   id                             integer              NOT NULL
+   chapter                        integer              NOT NULL
+   verse                          integer              NOT NULL
+   sanskrit                       text                 NOT NULL
+   transliteration                text                 NULL
+   hindi                          text                 NOT NULL
+   english                        text                 NOT NULL
+   ...
+
+📊 Current verse count: 700/700
+```
+
+---
+
+### `reset_gita_verses.py`
+
+**⚠️ Delete all verses (testing/development only).**
+
+#### Usage
+```bash
+DATABASE_URL=<your-db-url> python scripts/reset_gita_verses.py
+```
+
+Prompts for confirmation:
+```
+⚠️  WARNING: This will delete all Gita verses!
+Type 'DELETE' to confirm: DELETE
+✅ All verses deleted
+```
+
+---
+
+## Data Source
+
+**File**: `data/gita/gita_verses_complete.json`
+
+Contains all 700 authentic Bhagavad Gita verses with:
 - `chapter`: Chapter number (1-18)
-- `verse`: Verse number within chapter
-- `sanskrit`: Original Sanskrit text (Devanagari)
-- `transliteration`: IAST transliteration (optional)
+- `verse`: Verse number
+- `sanskrit`: Original Devanagari text
+- `transliteration`: IAST transliteration
 - `hindi`: Hindi translation
 - `english`: English translation
-- `principle`: Core teaching/principle
-- `theme`: Thematic categorization
-- `mental_health_applications`: List of mental health tags
+- `word_meanings`: Word-by-word meanings (JSON)
+- `principle`: Core teaching
+- `theme`: Thematic category
+- `mental_health_applications`: Mental health tags
 - `primary_domain`: Primary emotional domain
-- `secondary_domains`: Secondary domains
+- `secondary_domains`: Secondary domains (array)
 
-## Expected Output
-
-### Validation Phase
-```
-============================================================
-🔍 VALIDATION PHASE
-============================================================
-
-📊 Total verses: 700
-✅ Total count correct: 700
-
-📚 Validating chapter distribution...
-✅ Chapter distribution correct
-
-🔎 Validating verse structures...
-✅ All 700 verse structures valid
-
-🔤 Sampling Sanskrit and transliteration...
-✅ Sanskrit validation: 10/10 samples have Devanagari
-✅ Transliteration validation: 10/10 samples have IAST
-```
-
-### Seeding Phase
-```
-============================================================
-💾 SEEDING PHASE
-============================================================
-
-Connecting to database...
-✅ Database connection established
-
-🌱 Seeding 700 verses...
-📦 Batch size: 50 verses
-
-✅ Seeded 50/700 verses (7.1%)
-✅ Seeded 100/700 verses (14.3%)
-...
-✅ Seeded 700/700 verses (100.0%)
-
-✅ Seeding complete!
-   📊 Seeded: 700
-   ⏭️  Skipped: 0
-   ❌ Errors: 0
-```
-
-### Verification Phase
-```
-============================================================
-✅ VERIFICATION PHASE
-============================================================
-
-📊 Total verses in database: 700
-
-✅ Chapter  1:  47/ 47 verses
-✅ Chapter  2:  72/ 72 verses
-✅ Chapter  3:  43/ 43 verses
-...
-✅ Chapter 18:  78/ 78 verses
-
-🏷️  Verses with mental health tags: 700
-
-🎉 SUCCESS! All 700 verses in database!
-```
-
-## Error Handling
-
-The script handles errors gracefully:
-
-1. **Missing Data File**: Displays clear error and exits
-2. **Invalid JSON**: Shows JSON parsing error details
-3. **Database Connection Issues**: Reports connection errors
-4. **Individual Verse Errors**: Logs error but continues with remaining verses
-5. **Duplicate Verses**: Skips silently (idempotent operation)
-
-## Idempotency
-
-The script is safe to run multiple times:
-- Checks for existing verses before inserting
-- Skips duplicates without errors
-- Only adds new verses if database is incomplete
-
-## Integration with KIAAN Ecosystem
-
-After seeding, the verses are available to:
-
-1. **KIAAN Chat** (`/api/chat/message`)
-   - Searches top 7 relevant verses
-   - Builds comprehensive context
-   - Never cites sources in responses
-
-2. **Ardha Reframing** (`/api/ardha/reframe`)
-   - Uses sthitaprajna verses (Chapter 2:54-72)
-   - Focuses on equanimity and mental stability
-   - Key verses: 2.56, 2.57, 2.62-63, 6.5
-
-3. **Viyoga Detachment** (`/api/viyoga/detach`)
-   - Uses karma yoga verses
-   - Prioritizes verse 2.47 (most famous)
-   - Other key verses: 2.48, 3.19, 4.20, 5.10, 18.66
+---
 
 ## Canonical Verse Counts
+
+All 18 chapters, 700 total verses:
 
 | Chapter | Verses | Theme |
 |---------|--------|-------|
@@ -182,31 +188,59 @@ After seeding, the verses are available to:
 | 18 | 78 | Liberation & Renunciation |
 | **Total** | **700** | |
 
+---
+
 ## Troubleshooting
 
 ### Database Connection Error
 ```
 ❌ ERROR: Database connection failed
 ```
-**Solution**: Check DATABASE_URL environment variable and database status
+**Solution**: Check `DATABASE_URL` environment variable
 
-### Validation Failed
+### Verse Already Exists (Not an Error!)
 ```
-❌ VALIDATION FAILED!
-   - Incorrect total count: 650 (expected 700)
+⏭️  Skipped: 700
 ```
-**Solution**: Verify data file has all 700 verses
+**This is normal** - script is idempotent, safe to re-run
 
-### Verse Already Exists
+### Partial Success
 ```
-⏭️  Skipped 2.47 (already exists)
+⚠️  Partial success: 650/700 verses in database
 ```
-**Solution**: This is normal - script is idempotent
+**Solution**: Re-run the script, it will only insert missing verses
 
-## Support
+---
 
-For issues or questions:
-1. Check data file exists: `data/gita/gita_verses_complete.json`
-2. Verify database connection
-3. Check logs for specific error messages
-4. Ensure all 700 verses are in the data file
+## Integration with KIAAN
+
+After seeding, verses are available to:
+
+### KIAAN Chat (`/api/chat/message`)
+- Searches top 7 relevant verses
+- Builds comprehensive wisdom context
+- Never cites sources in responses
+
+### Ardha Reframing (`/api/ardha/reframe`)
+- Uses sthitaprajna verses (Chapter 2:54-72)
+- Focuses on equanimity and mental stability
+- Key verses: 2.56, 2.57, 2.62-63, 6.5
+
+### Viyoga Detachment (`/api/viyoga/detach`)
+- Uses karma yoga verses
+- Prioritizes verse 2.47 (most famous)
+- Key verses: 2.48, 3.19, 4.20, 5.10, 18.66
+
+---
+
+## Legacy Scripts
+
+### `seed_authentic_gita_comprehensive.py`
+Original seeding script with comprehensive validation.
+
+### Other Scripts
+- `seed_complete_gita.py`
+- `seed_gita_from_json.py`
+- `seed_gita_wisdom.py`
+
+See `README_SEEDING_OLD.md` for legacy documentation.
