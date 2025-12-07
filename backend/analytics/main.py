@@ -35,7 +35,15 @@ async def get_mood_trends(user_id: str, days: int = 30, db: AsyncSession = Depen
         "start_date": datetime.now() - timedelta(days=days)
     })
 
-    trends = [{"date": str(r.date), "avg_mood": float(r.avg_mood), "entries": r.entries, "volatility": float(r.volatility or 0)} for r in result]
+    trends = []
+    for r in result:
+        trends.append({
+            "date": str(r.date),
+            "avg_mood": float(r.avg_mood),
+            "entries": r.entries,
+            "volatility": float(r.volatility or 0)
+        })
+
     return {"trends": trends, "period_days": days}
 
 @app.get("/analytics/v1/usage-stats")

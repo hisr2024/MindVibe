@@ -12,7 +12,11 @@ class MoodPredictor:
             return {"predictions": [], "confidence": "low", "message": "Insufficient data"}
 
         # Prepare data
-        dates = np.array([datetime.fromisoformat(m['date']).timestamp() for m in mood_data]).reshape(-1, 1)
+        try:
+            dates = np.array([datetime.fromisoformat(m['date']).timestamp() for m in mood_data]).reshape(-1, 1)
+        except (ValueError, KeyError) as e:
+            return {"predictions": [], "confidence": "low", "message": f"Invalid data format: {e}"}
+
         scores = np.array([m['avg_mood'] for m in mood_data])
 
         # Train model
@@ -24,11 +28,16 @@ class MoodPredictor:
         future_timestamps = np.array([d.timestamp() for d in future_dates]).reshape(-1, 1)
         predictions = model.predict(future_timestamps)
 
+        # Both arrays are guaranteed to be same length (7)
+        result_predictions = []
+        for i in range(len(future_dates)):
+            result_predictions.append({
+                "date": str(future_dates[i].date()),
+                "predicted_mood": max(1, min(10, float(predictions[i])))
+            })
+
         return {
-            "predictions": [
-                {"date": str(d.date()), "predicted_mood": max(1, min(10, float(p)))}
-                for d, p in zip(future_dates, predictions, strict=False)
-            ],
+            "predictions": result_predictions,
             "confidence": "medium" if len(mood_data) > 14 else "low",
             "r_squared": float(model.score(dates, scores))
         }
