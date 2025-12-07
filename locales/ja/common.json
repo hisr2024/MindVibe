@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "メンタルヘルスアプリ"
+  },
+  "buttons": {
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "next": "次へ",
+    "previous": "前へ",
+    "confirm": "確認",
+    "back": "戻る",
+    "continue": "続ける",
+    "learnMore": "詳細を見る",
+    "getStarted": "始める",
+    "tryNow": "今すぐ試す"
+  },
+  "status": {
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "saved": "保存済み",
+    "error": "エラー",
+    "success": "成功",
+    "processing": "処理中..."
+  },
+  "common": {
+    "hello": "こんにちは",
+    "welcome": "ようこそ",
+    "goodbye": "さようなら",
+    "thankyou": "ありがとう",
+    "yes": "はい",
+    "no": "いいえ",
+    "or": "または",
+    "and": "と",
+    "optional": "任意",
+    "required": "必須"
+  },
+  "privacy": {
+    "encrypted": "暗号化済み",
+    "private": "プライベート",
+    "secure": "安全",
+    "localOnly": "ローカルのみ",
+    "offlineReady": "オフライン対応"
+  }
+}

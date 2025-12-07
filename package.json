@@ -33,15 +33,16 @@
     "date-fns": "^2.30.0",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.25",
-    "simplebar": "^6.3.0",
-    "simplebar-react": "^2.4.3",
     "jspdf": "^2.5.2",
     "next": "16.0.7",
+    "next-intl": "^4.5.8",
     "papaparse": "^5.5.3",
     "react": "^18.3.1",
     "react-confetti": "^6.4.0",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.4",
+    "simplebar": "^6.3.0",
+    "simplebar-react": "^2.4.3",
     "typescript": "^5.9.3"
   },
   "devDependencies": {

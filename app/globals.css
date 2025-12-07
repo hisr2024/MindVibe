@@ -702,3 +702,88 @@ html.light .subscription-scroll::-webkit-scrollbar-thumb:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* RTL Support for Arabic and other RTL languages */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* RTL margins and padding */
+[dir="rtl"] .ml-auto {
+  margin-left: initial;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: initial;
+  margin-left: auto;
+}
+
+/* RTL flex direction */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* RTL border radius */
+[dir="rtl"] .rounded-l {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: var(--tw-rounded);
+  border-bottom-right-radius: var(--tw-rounded);
+}
+
+[dir="rtl"] .rounded-r {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: var(--tw-rounded);
+  border-bottom-left-radius: var(--tw-rounded);
+}
+
+/* RTL specific chat bubbles */
+[dir="rtl"] .chat-bubble-user {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="rtl"] .chat-bubble-assistant {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+/* RTL icons that should flip */
+[dir="rtl"] .icon-arrow,
+[dir="rtl"] .icon-chevron,
+[dir="rtl"] .icon-nav {
+  transform: scaleX(-1);
+}
+
+/* Ensure Arabic fonts render properly */
+[lang="ar"] {
+  font-family: 'Cairo', 'Noto Sans Arabic', 'Arial', sans-serif;
+  letter-spacing: normal;
+}
+
+/* Better text rendering for all languages */
+[lang="hi"] {
+  font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif;
+}
+
+[lang="ja"] {
+  font-family: 'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif;
+}
+
+[lang="zh"] {
+  font-family: 'Noto Sans SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+}
