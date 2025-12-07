@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "تطبيق الصحة النفسية"
+  },
+  "buttons": {
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "next": "التالي",
+    "previous": "السابق",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "continue": "متابعة",
+    "learnMore": "معرفة المزيد",
+    "getStarted": "ابدأ الآن",
+    "tryNow": "جرب الآن"
+  },
+  "status": {
+    "loading": "جار التحميل...",
+    "saving": "جار الحفظ...",
+    "saved": "تم الحفظ",
+    "error": "خطأ",
+    "success": "نجح",
+    "processing": "جار المعالجة..."
+  },
+  "common": {
+    "hello": "مرحبا",
+    "welcome": "أهلا وسهلا",
+    "goodbye": "وداعا",
+    "thankyou": "شكرا",
+    "yes": "نعم",
+    "no": "لا",
+    "or": "أو",
+    "and": "و",
+    "optional": "اختياري",
+    "required": "مطلوب"
+  },
+  "privacy": {
+    "encrypted": "مشفر",
+    "private": "خاص",
+    "secure": "آمن",
+    "localOnly": "محلي فقط",
+    "offlineReady": "جاهز دون اتصال"
+  }
+}

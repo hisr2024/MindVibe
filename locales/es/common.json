@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Aplicación de Salud Mental"
+  },
+  "buttons": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "learnMore": "Más información",
+    "getStarted": "Comenzar",
+    "tryNow": "Probar ahora"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "error": "Error",
+    "success": "Éxito",
+    "processing": "Procesando..."
+  },
+  "common": {
+    "hello": "Hola",
+    "welcome": "Bienvenido",
+    "goodbye": "Adiós",
+    "thankyou": "Gracias",
+    "yes": "Sí",
+    "no": "No",
+    "or": "o",
+    "and": "y",
+    "optional": "Opcional",
+    "required": "Requerido"
+  },
+  "privacy": {
+    "encrypted": "Encriptado",
+    "private": "Privado",
+    "secure": "Seguro",
+    "localOnly": "Solo local",
+    "offlineReady": "Listo sin conexión"
+  }
+}

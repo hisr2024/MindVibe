@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "माइंडवाइब",
+    "tagline": "मानसिक स्वास्थ्य ऐप"
+  },
+  "buttons": {
+    "submit": "जमा करें",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "close": "बंद करें",
+    "next": "अगला",
+    "previous": "पिछला",
+    "confirm": "पुष्टि करें",
+    "back": "वापस",
+    "continue": "जारी रखें",
+    "learnMore": "और जानें",
+    "getStarted": "शुरू करें",
+    "tryNow": "अभी आज़माएं"
+  },
+  "status": {
+    "loading": "लोड हो रहा है...",
+    "saving": "सहेजा जा रहा है...",
+    "saved": "सहेजा गया",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "processing": "प्रसंस्करण..."
+  },
+  "common": {
+    "hello": "नमस्ते",
+    "welcome": "स्वागत है",
+    "goodbye": "अलविदा",
+    "thankyou": "धन्यवाद",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "or": "या",
+    "and": "और",
+    "optional": "वैकल्पिक",
+    "required": "आवश्यक"
+  },
+  "privacy": {
+    "encrypted": "एन्क्रिप्टेड",
+    "private": "निजी",
+    "secure": "सुरक्षित",
+    "localOnly": "केवल स्थानीय",
+    "offlineReady": "ऑफ़लाइन-तैयार"
+  }
+}
