@@ -3,11 +3,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { Modal, Button } from '@/components/ui'
 import type { Message } from './KiaanChat'
+import { CORE_TOOLS } from '@/lib/constants/tools'
 
 interface KiaanChatModalProps {
   isOpen: boolean
   onClose: () => void
 }
+
+// Get KIAAN tool configuration for consistent routing
+const kiaanTool = CORE_TOOLS.find(tool => tool.id === 'kiaan')
+const KIAAN_PAGE_URL = kiaanTool?.href || '/kiaan'
 
 export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([])
@@ -69,7 +74,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
       setMessages(prev => [...prev, { 
         id: crypto.randomUUID(),
         sender: 'assistant', 
-        text: 'Unable to connect to KIAAN. Please try again or use the main chat page at /kiaan.',
+        text: `Unable to connect to KIAAN. Please try again or use the main chat page at ${KIAAN_PAGE_URL}.`,
         timestamp: new Date().toISOString()
       }])
     } finally {

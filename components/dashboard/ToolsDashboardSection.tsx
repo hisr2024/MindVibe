@@ -1,6 +1,12 @@
 import Link from 'next/link'
 import { TOOLS_BY_CATEGORY } from '@/lib/constants/tools'
 
+/**
+ * ToolsDashboardSection component displays all MindVibe tools in a categorized grid.
+ * 
+ * Note: KIAAN navigation changed from modal to direct page navigation (/kiaan).
+ * All tools now use standard Link navigation for consistency.
+ */
 export function ToolsDashboardSection() {
   return (
     <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-6 shadow-[0_25px_90px_rgba(255,147,71,0.16)]">
