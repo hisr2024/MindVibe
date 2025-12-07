@@ -3,31 +3,41 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from enum import Enum
 
 app = FastAPI(title="MindVibe Social", version="1.0.0")
 
-from backend.deps import get_db
+from backend.deps import get_db, get_current_user
+
+class VisibilityEnum(str, Enum):
+    public = "public"
+    friends = "friends"
+    private = "private"
+
+class ActionEnum(str, Enum):
+    accept = "accept"
+    reject = "reject"
 
 class ConnectionRequest(BaseModel):
     friend_id: int
 
 class GroupMeditation(BaseModel):
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     scheduled_at: datetime
 
 class WisdomShare(BaseModel):
     gita_verse_id: int
-    share_text: Optional[str]
-    visibility: str = "friends"
+    share_text: Optional[str] = None
+    visibility: VisibilityEnum = VisibilityEnum.friends
 
 @app.get("/social/health")
 async def health():
     return {"status": "healthy", "service": "social", "timestamp": datetime.now().isoformat()}
 
 @app.post("/social/v1/connections")
-async def send_friend_request(request: ConnectionRequest, current_user_id: int, db: AsyncSession = Depends(get_db)):
+async def send_friend_request(request: ConnectionRequest, current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Send friend connection request"""
     # Check friend exists (read-only from existing users table)
     check_user = text("SELECT id FROM users WHERE id = :friend_id")
@@ -53,7 +63,7 @@ async def send_friend_request(request: ConnectionRequest, current_user_id: int, 
     return {"status": "request_sent", "connection_id": result.scalar()}
 
 @app.get("/social/v1/connections")
-async def get_connections(current_user_id: int, status: str = "accepted", db: AsyncSession = Depends(get_db)):
+async def get_connections(status: str = "accepted", current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Get user's connections"""
     query = text("""
         SELECT uc.id, uc.friend_id, uc.status, uc.created_at, u.username, u.email
@@ -68,12 +78,9 @@ async def get_connections(current_user_id: int, status: str = "accepted", db: As
     return {"connections": connections}
 
 @app.put("/social/v1/connections/{connection_id}")
-async def update_connection(connection_id: int, action: str, current_user_id: int, db: AsyncSession = Depends(get_db)):
+async def update_connection(connection_id: int, action: ActionEnum, current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Accept or reject friend request"""
-    if action not in ["accept", "reject"]:
-        raise HTTPException(400, "Invalid action")
-    
-    new_status = "accepted" if action == "accept" else "rejected"
+    new_status = "accepted" if action == ActionEnum.accept else "rejected"
     update = text("""
         UPDATE user_connections 
         SET status = :status 
@@ -89,7 +96,7 @@ async def update_connection(connection_id: int, action: str, current_user_id: in
     return {"status": new_status}
 
 @app.post("/social/v1/groups")
-async def create_group_meditation(group: GroupMeditation, current_user_id: int, db: AsyncSession = Depends(get_db)):
+async def create_group_meditation(group: GroupMeditation, current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Create group meditation session"""
     insert = text("""
         INSERT INTO group_meditations (name, description, created_by, scheduled_at, created_at)
@@ -114,7 +121,7 @@ async def create_group_meditation(group: GroupMeditation, current_user_id: int, 
     return {"group_id": group_id, "status": "created"}
 
 @app.get("/social/v1/groups")
-async def get_groups(current_user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_groups(current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Get user's group meditations"""
     query = text("""
         SELECT g.id, g.name, g.description, g.scheduled_at, g.created_at, u.username as creator
@@ -130,7 +137,7 @@ async def get_groups(current_user_id: int, db: AsyncSession = Depends(get_db)):
     return {"groups": groups}
 
 @app.post("/social/v1/groups/{group_id}/join")
-async def join_group(group_id: int, current_user_id: int, db: AsyncSession = Depends(get_db)):
+async def join_group(group_id: int, current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Join group meditation"""
     # Check group exists
     check = text("SELECT id FROM group_meditations WHERE id = :group_id")
@@ -146,7 +153,7 @@ async def join_group(group_id: int, current_user_id: int, db: AsyncSession = Dep
     return {"status": "joined"}
 
 @app.post("/social/v1/wisdom-share")
-async def share_wisdom(wisdom: WisdomShare, current_user_id: int, db: AsyncSession = Depends(get_db)):
+async def share_wisdom(wisdom: WisdomShare, current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Share Gita verse with community"""
     # Check verse exists (read-only from existing table)
     check = text("SELECT id FROM gita_verses WHERE id = :verse_id")
@@ -164,14 +171,14 @@ async def share_wisdom(wisdom: WisdomShare, current_user_id: int, db: AsyncSessi
         "user_id": current_user_id,
         "verse_id": wisdom.gita_verse_id,
         "text": wisdom.share_text,
-        "visibility": wisdom.visibility
+        "visibility": wisdom.visibility.value
     })
     await db.commit()
     
     return {"share_id": result.scalar(), "status": "shared"}
 
 @app.get("/social/v1/wisdom-feed")
-async def get_wisdom_feed(current_user_id: int, limit: int = 20, db: AsyncSession = Depends(get_db)):
+async def get_wisdom_feed(limit: int = 20, current_user_id: str = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Get wisdom shares from friends"""
     query = text("""
         SELECT ws.id, ws.share_text, ws.created_at, u.username, gv.verse_text, gv.chapter, gv.verse_number
