@@ -10,7 +10,7 @@ import os
 import sys
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
 # Add project root to path
@@ -124,27 +124,34 @@ async def seed_all_verses():
     
     print("🌱 Seeding verses...\n")
     
-    async with async_session() as session:
-        for i, verse_data in enumerate(verses, 1):
-            chapter = verse_data.get("chapter")
-            verse_num = verse_data.get("verse")
-            
+    current_chapter = 0
+    for i, verse_data in enumerate(verses, 1):
+        chapter = verse_data.get("chapter")
+        verse_num = verse_data.get("verse")
+        
+        # Create new session for each verse to avoid long-lived transactions
+        async with async_session() as session:
             success, message = await seed_verse(session, verse_data)
-            
-            if success:
-                if "skipped" in message:
-                    skipped += 1
-                else:
-                    seeded += 1
-                    if seeded % 50 == 0:
-                        print(f"   Progress: {seeded} verses seeded...")
+        
+        if success:
+            if "skipped" in message:
+                skipped += 1
             else:
-                failed += 1
-                print(f"   {message}")
-            
-            # Progress indicator every chapter
-            if verse_num == 1 and seeded > 0:
-                print(f"   ✅ Chapter {chapter-1} complete")
+                seeded += 1
+                if seeded % 50 == 0:
+                    print(f"   Progress: {seeded} verses seeded...")
+        else:
+            failed += 1
+            print(f"   {message}")
+        
+        # Progress indicator when chapter changes
+        if chapter != current_chapter and current_chapter > 0:
+            print(f"   ✅ Chapter {current_chapter} complete")
+        current_chapter = chapter
+    
+    # Mark final chapter as complete
+    if current_chapter > 0:
+        print(f"   ✅ Chapter {current_chapter} complete")
     
     # Final summary
     print("\n" + "=" * 70)
@@ -158,8 +165,8 @@ async def seed_all_verses():
     
     # Verify final count
     async with async_session() as session:
-        result = await session.execute(select(GitaVerse))
-        total_in_db = len(result.scalars().all())
+        result = await session.execute(select(func.count(GitaVerse.id)))
+        total_in_db = result.scalar()
         print(f"✅ Total verses in database: {total_in_db}/700")
     
     if total_in_db == 700:
