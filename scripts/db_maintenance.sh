@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Database Maintenance Script
 # Run this manually or via cron for database optimization
 
