@@ -47,8 +47,24 @@ async def get_dashboard(authorization: str | None = Header(None)):
             client.get(f"{KIAAN_API_BASE}/api/journal", headers=headers),
         ]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        moods = results[0].json().get("moods", [])[:7] if not isinstance(results[0], Exception) else []
-        journal = results[1].json().get("entries", [])[:5] if not isinstance(results[1], Exception) else []
+        # Safely extract data from responses, handling both exceptions and failed responses
+        moods = []
+        journal = []
+
+        if not isinstance(results[0], Exception):
+            try:
+                results[0].raise_for_status()
+                moods = results[0].json().get("moods", [])[:7]
+            except (httpx.HTTPStatusError, ValueError):
+                pass  # Return empty array on error
+
+        if not isinstance(results[1], Exception):
+            try:
+                results[1].raise_for_status()
+                journal = results[1].json().get("entries", [])[:5]
+            except (httpx.HTTPStatusError, ValueError):
+                pass  # Return empty array on error
+
         return {"moods": moods, "journal": journal, "synced_at": datetime.now().isoformat()}
 
 @app.post("/mobile/v1/chat")
@@ -56,6 +72,11 @@ async def send_chat(message: dict, authorization: str | None = Header(None)):
     if not authorization:
         raise HTTPException(401, "Authorization required")
     async with httpx.AsyncClient(timeout=30.0) as client:
-        r = await client.post(f"{KIAAN_API_BASE}/api/chat", headers={"Authorization": authorization}, json=message)
-        r.raise_for_status()
-        return r.json()
+        try:
+            r = await client.post(f"{KIAAN_API_BASE}/api/chat", headers={"Authorization": authorization}, json=message)
+            r.raise_for_status()
+            return r.json()
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(e.response.status_code, str(e)) from e
+        except httpx.RequestError as e:
+            raise HTTPException(503, f"Service unavailable: {str(e)}") from e
