@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Modal, Button } from '@/components/ui'
-
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
+import type { Message } from './KiaanChat'
 
 interface KiaanChatModalProps {
   isOpen: boolean
@@ -31,7 +26,12 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
 
-    const userMessage: Message = { role: 'user', content: input, timestamp: new Date() }
+    const userMessage: Message = { 
+      id: crypto.randomUUID(), 
+      sender: 'user', 
+      text: input, 
+      timestamp: new Date().toISOString() 
+    }
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
@@ -49,17 +49,19 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
 
       const data = await response.json()
       const aiMessage: Message = { 
-        role: 'assistant', 
-        content: data.response || data.message || 'I apologize, I encountered an error. Please try again.', 
-        timestamp: new Date() 
+        id: crypto.randomUUID(),
+        sender: 'assistant', 
+        text: data.response || data.message || 'I apologize, I encountered an error. Please try again.', 
+        timestamp: new Date().toISOString()
       }
       setMessages(prev => [...prev, aiMessage])
     } catch (error) {
       console.error('Chat error:', error)
       setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'I apologize, I encountered an error. Please try again.', 
-        timestamp: new Date() 
+        id: crypto.randomUUID(),
+        sender: 'assistant', 
+        text: 'I apologize, I encountered an error. Please try again.', 
+        timestamp: new Date().toISOString()
       }])
     } finally {
       setIsLoading(false)
@@ -74,25 +76,25 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   }
 
   return (
-    <Modal open={isOpen} onClose={onClose} size="xl" title="KIAAN Chat">
-      <div className="flex flex-col h-[600px]">
+    <Modal open={isOpen} onClose={onClose} size="2xl" title="KIAAN Chat">
+      <div className="flex flex-col h-[min(600px,70vh)]">
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-slate-400 py-12">
               <h3 className="text-lg font-semibold text-slate-200 mb-2">Welcome to KIAAN</h3>
-              <p className="text-sm">Share what&apos;s on your mind. I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.</p>
+              <p className="text-sm">Share what's on your mind. I'm here to offer warm, grounded guidance rooted in timeless wisdom.</p>
             </div>
           )}
           
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                msg.role === 'user' 
+                msg.sender === 'user' 
                   ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white' 
                   : 'bg-slate-800 text-slate-100'
               }`}>
-                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
               </div>
             </div>
           ))}
