@@ -56,6 +56,8 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "tests/conftest.py" = ["E402"]
 # Backend main can have module-level imports not at top (after app creation)
 "backend/main.py" = ["E402"]
+# Backend analytics can have module-level imports not at top (after app creation)
+"backend/analytics/main.py" = ["E402"]
 # Backend routes can have unused arguments (FastAPI dependency injection)
 "backend/routes/**/*.py" = ["ARG001"]
 # Backend services can have imports not at top (conditional imports)
