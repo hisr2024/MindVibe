@@ -11,7 +11,7 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 # Run VACUUM ANALYZE on critical tables
-psql $DATABASE_URL <<EOF
+psql "$DATABASE_URL" <<EOF
 VACUUM ANALYZE moods;
 VACUUM ANALYZE chat_messages;
 VACUUM ANALYZE journal_entries;
