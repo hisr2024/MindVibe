@@ -17,7 +17,7 @@ export interface DesktopNavProps {
 const mainNavLinks = [
   { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/kiaan', label: 'KIAAN Chat' },
+  { href: '/#kiaan-chat', label: 'KIAAN Chat' },
   { href: '/wisdom-rooms', label: 'Wisdom Rooms' },
   { href: '/deep-insights', label: 'Deep Insights' },
   { href: '/ardha', label: 'Ardha' },
