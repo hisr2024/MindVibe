@@ -42,7 +42,7 @@ export default function KarmicTreePageClient() {
               title="Chat with KIAAN"
               description="Have a guided conversation to earn achievements."
               ctaLabel="Open Chat"
-              href="/kiaan"
+              href="/#kiaan-chat"
               gradient="from-blue-500/10 to-purple-500/10"
             />
           </div>
