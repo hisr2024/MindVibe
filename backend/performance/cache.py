@@ -36,7 +36,7 @@ class CacheManager:
         try:
             serialized = json.dumps(value)
             await self.client.setex(key, ttl or self.default_ttl, serialized)
-        except (TypeError, ValueError) as e:
+        except TypeError as e:
             logger.error(f"Failed to JSON serialize value for key {key}: {e}")
             raise
     

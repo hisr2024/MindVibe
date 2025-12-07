@@ -5,14 +5,14 @@ RETURNS TABLE(date DATE, avg_mood NUMERIC, entry_count BIGINT) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
-        DATE(at),
+        date_trunc('day', at)::date,
         ROUND(AVG(score)::numeric, 2),
         COUNT(*)
     FROM moods
     WHERE user_id = p_user_id 
-    AND at >= CURRENT_DATE - p_days * INTERVAL '1 day'
-    GROUP BY DATE(at)
-    ORDER BY DATE(at) DESC;
+    AND at >= date_trunc('day', CURRENT_TIMESTAMP) - (p_days || ' days')::interval
+    GROUP BY date_trunc('day', at)
+    ORDER BY date_trunc('day', at) DESC;
 END;
 $$ LANGUAGE plpgsql STABLE;
 

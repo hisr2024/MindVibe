@@ -136,5 +136,5 @@ class TestCacheManager:
         # Try to set a non-serializable object
         non_serializable = object()
         
-        with pytest.raises((TypeError, ValueError)):
+        with pytest.raises(TypeError):
             await cache.set("test_key", non_serializable)
