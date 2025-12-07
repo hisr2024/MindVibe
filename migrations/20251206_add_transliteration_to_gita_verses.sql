@@ -2,38 +2,34 @@
 -- Date: 2025-12-06
 -- Description: Adds missing transliteration column for production database schema alignment
 -- This migration is idempotent and safe to run on both empty and existing databases
+--
+-- Note: The gita_verses table is created by migration 20251109_add_gita_wisdom_database.sql
+-- with the transliteration column already included. This migration exists to handle legacy
+-- databases that were created before that migration included the transliteration column,
+-- or databases where the column was manually removed.
+--
+-- This migration safely handles three scenarios:
+-- 1. Fresh database (table doesn't exist yet) - skips gracefully
+-- 2. Table exists without transliteration column - adds the column
+-- 3. Table exists with transliteration column - skips gracefully
 
--- Add transliteration column if it doesn't exist
--- Using DO block for conditional column addition
 DO $$
 BEGIN
-    -- Check if column exists before adding
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'gita_verses'
-        AND column_name = 'transliteration'
-    ) THEN
-        ALTER TABLE gita_verses
-        ADD COLUMN transliteration TEXT;
-        
-        RAISE NOTICE 'Added transliteration column to gita_verses table';
-    ELSE
-        RAISE NOTICE 'Column transliteration already exists in gita_verses table';
-    END IF;
-END $$;
-
--- Verify the column exists
-DO $$
-BEGIN
+    -- Check if gita_verses table exists
     IF EXISTS (
         SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'gita_verses'
-        AND column_name = 'transliteration'
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'gita_verses'
     ) THEN
-        RAISE NOTICE 'Migration completed successfully: transliteration column is present';
+        -- Table exists, add column if it doesn't exist
+        -- Using ALTER TABLE with IF NOT EXISTS is more idiomatic
+        ALTER TABLE gita_verses ADD COLUMN IF NOT EXISTS transliteration TEXT;
+        RAISE NOTICE 'Migration completed: transliteration column ensured in gita_verses';
     ELSE
-        RAISE EXCEPTION 'Migration failed: transliteration column not found';
+        -- Table doesn't exist yet - this is expected on fresh deployments
+        -- The table will be created by migration 20251109_add_gita_wisdom_database.sql
+        -- which already includes the transliteration column
+        RAISE NOTICE 'Skipping: gita_verses table not found (will be created by 20251109)';
     END IF;
 END $$;
