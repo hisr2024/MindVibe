@@ -45,4 +45,7 @@ class CacheManager:
             await self.connect()
         await self.client.delete(key)
 
+# Global singleton instance for convenience
+# Note: For production use with multiple workers, consider using dependency injection
+# or a factory pattern to manage cache instances per worker/request context
 cache = CacheManager()

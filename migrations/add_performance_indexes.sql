@@ -1,6 +1,8 @@
 -- Performance indexes (no schema changes)
 
+-- Composite indexes for time-based queries
 CREATE INDEX IF NOT EXISTS idx_moods_user_created ON moods(user_id, at DESC);
+-- Index for score-based queries and filtering (different from covering index below)
 CREATE INDEX IF NOT EXISTS idx_moods_user_score ON moods(user_id, score);
 
 CREATE INDEX IF NOT EXISTS idx_chat_user_created ON chat_messages(user_id, created_at DESC);
