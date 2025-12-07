@@ -1,5 +1,3 @@
--- Optimized functions
-
 CREATE OR REPLACE FUNCTION get_mood_trend(p_user_id VARCHAR(255), p_days INTEGER DEFAULT 7)
 RETURNS TABLE(date DATE, avg_mood NUMERIC, entry_count BIGINT) AS $$
 BEGIN
