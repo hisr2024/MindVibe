@@ -1,11 +1,11 @@
 -- Migration: Add analytics_events table for lightweight event tracking
 -- Purpose: Track user events and application metrics without affecting performance
--- Date: 2024-12-08
+-- Date: 2025-12-08
 
 CREATE TABLE IF NOT EXISTS analytics_events (
     id SERIAL PRIMARY KEY,
     event_type VARCHAR(100) NOT NULL,
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    user_id VARCHAR(255) REFERENCES users(id) ON DELETE SET NULL,
     metadata JSONB,
     created_at TIMESTAMP DEFAULT NOW()
 );

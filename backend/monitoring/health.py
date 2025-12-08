@@ -89,6 +89,12 @@ async def get_metrics(db: AsyncSession = Depends(get_db)):
     )
     total_moods_24h = total_moods_result.scalar()
     
+    # Calculate average messages per user
+    if active_users_24h > 0:
+        avg_per_user = round(total_messages_24h / active_users_24h, 2)
+    else:
+        avg_per_user = 0.0
+    
     return {
         "timestamp": now.isoformat(),
         "users": {
@@ -97,7 +103,7 @@ async def get_metrics(db: AsyncSession = Depends(get_db)):
         },
         "messages": {
             "total_24h": total_messages_24h,
-            "avg_per_user": round(total_messages_24h / max(active_users_24h, 1), 2)
+            "avg_per_user": avg_per_user
         },
         "moods": {
             "total_24h": total_moods_24h

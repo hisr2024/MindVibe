@@ -2,7 +2,7 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import json
 
@@ -16,7 +16,7 @@ class SimpleAnalytics:
     async def track_event(
         db: AsyncSession,
         event_type: str,
-        user_id: int = None,
+        user_id: str = None,
         metadata: dict = None
     ):
         """Track simple events without heavy overhead."""
@@ -42,15 +42,18 @@ class SimpleAnalytics:
     @staticmethod
     async def get_daily_stats(db: AsyncSession, days: int = 7):
         """Get daily statistics."""
+        # Calculate the cutoff date in Python to avoid SQL parameter issues
+        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        
         result = await db.execute(text("""
             SELECT 
                 DATE(created_at) as date,
                 event_type,
                 COUNT(*) as count
             FROM analytics_events
-            WHERE created_at >= NOW() - INTERVAL ':days days'
+            WHERE created_at >= :cutoff_date
             GROUP BY DATE(created_at), event_type
             ORDER BY date DESC
-        """), {"days": days})
+        """), {"cutoff_date": cutoff_date})
         
         return result.fetchall()
