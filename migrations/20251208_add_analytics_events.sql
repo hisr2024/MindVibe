@@ -27,3 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_analytics_user ON analytics_events(user_id, creat
 CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at DESC);
 
 COMMENT ON TABLE analytics_events IS 'Lightweight analytics tracking for monitoring user activity and system events';
+COMMENT ON COLUMN analytics_events.event_type IS 'Type of event being tracked (e.g., chat_message_sent, mood_logged, journal_entry_created)';
+COMMENT ON COLUMN analytics_events.user_id IS 'Reference to the user who triggered the event (nullable for anonymous or system events)';
+COMMENT ON COLUMN analytics_events.metadata IS 'Additional event metadata and context stored as JSON';
+COMMENT ON COLUMN analytics_events.created_at IS 'Timestamp when the event was recorded';
