@@ -32,10 +32,16 @@ END $$;
 
 DO $$
 BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users') THEN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+    ) THEN
         IF NOT EXISTS (
             SELECT 1 FROM information_schema.table_constraints 
-            WHERE constraint_name = 'fk_analytics_user'
+            WHERE table_schema = 'public'
+            AND table_name = 'analytics_events'
+            AND constraint_name = 'fk_analytics_user'
         ) THEN
             ALTER TABLE analytics_events 
             ADD CONSTRAINT fk_analytics_user 
