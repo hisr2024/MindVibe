@@ -36,6 +36,7 @@ from backend.core import migrations as migrations_module
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
+from backend.middleware.logging_middleware import RequestLoggingMiddleware
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
@@ -128,6 +129,9 @@ app = FastAPI(
 
 # Add security headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Add request logging middleware
+app.add_middleware(RequestLoggingMiddleware)
 
 # Configure rate limiter
 app.state.limiter = limiter
@@ -255,6 +259,17 @@ try:
     print("✅ [SUCCESS] Chat rooms router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load chat rooms router: {e}")
+
+# Load Monitoring router
+print("\n[Monitoring] Loading monitoring and observability router...")
+try:
+    from backend.monitoring.health import router as monitoring_router
+    app.include_router(monitoring_router)
+    print("✅ [SUCCESS] Monitoring router loaded")
+    print("   • GET    /api/monitoring/health/detailed - Detailed health check")
+    print("   • GET    /api/monitoring/metrics - Application metrics")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Monitoring router: {e}")
 
 # Load Gita API router
 print("\n[Gita API] Attempting to import Gita API router...")
