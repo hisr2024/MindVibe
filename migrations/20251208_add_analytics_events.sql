@@ -22,9 +22,9 @@ BEGIN
     END IF;
 END $$;
 
-CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics_events(event_type, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_analytics_user ON analytics_events(user_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics_events(event_type, created_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_user ON analytics_events(user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at);
 
 COMMENT ON TABLE analytics_events IS 'Lightweight analytics tracking for monitoring user activity and system events';
 COMMENT ON COLUMN analytics_events.event_type IS 'Type of event being tracked (e.g., chat_message_sent, mood_logged, journal_entry_created)';
