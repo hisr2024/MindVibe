@@ -49,7 +49,7 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
     
     # System resources
     health_data["checks"]["system"] = {
-        "cpu_percent": psutil.cpu_percent(interval=1),
+        "cpu_percent": psutil.cpu_percent(interval=0.1),
         "memory_percent": psutil.virtual_memory().percent,
         "disk_percent": psutil.disk_usage('/').percent
     }

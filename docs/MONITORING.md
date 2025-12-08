@@ -19,7 +19,7 @@ Returns comprehensive health information including:
 ```json
 {
   "status": "healthy",
-  "timestamp": "2024-12-08T00:30:00.000Z",
+  "timestamp": "2025-12-08T00:30:00.000Z",
   "checks": {
     "database": {
       "status": "up",
@@ -54,7 +54,7 @@ Returns application usage metrics including:
 **Example Response:**
 ```json
 {
-  "timestamp": "2024-12-08T00:30:00.000Z",
+  "timestamp": "2025-12-08T00:30:00.000Z",
   "users": {
     "total": 1250,
     "active_24h": 342
