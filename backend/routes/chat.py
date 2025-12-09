@@ -37,7 +37,7 @@ except ImportError:
 MAX_MESSAGE_LENGTH = 2000
 
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
-client = OpenAI(api_key=api_key) if api_key else None
+client = OpenAI(api_key=api_key, timeout=30.0) if api_key else None
 ready = bool(api_key)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -236,6 +236,7 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
                 ],
                 temperature=0.7,
                 max_tokens=500,
+                timeout=30.0,  # Add 30 second timeout
             )
 
             content = response.choices[0].message.content
