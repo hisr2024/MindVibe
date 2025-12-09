@@ -23,7 +23,7 @@ export interface SynthesisCallbacks {
 export class SpeechSynthesisService {
   private synthesis: SpeechSynthesis | null = null
   private currentUtterance: SpeechSynthesisUtterance | null = null
-  private config: SynthesisConfig
+  private config: SynthesisConfig = {}
   private callbacks: SynthesisCallbacks = {}
   private preferredVoiceName: string | null = null
 
