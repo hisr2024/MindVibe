@@ -941,19 +941,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
   }
 
-      if (response.ok) {
-        const data = await response.json()
-        setMessages([...newMessages, { role: 'assistant', content: data.response }])
-      } else {
-        setMessages([...newMessages, { role: 'assistant', content: 'I\'m having trouble connecting. Please try again. 💙' }])
-      }
-    } catch {
-      setMessages([...newMessages, { role: 'assistant', content: 'Connection issue. I\'m here when you\'re ready. 💙' }])
-    } finally {
-      setLoading(false)
-    }
-  }
-
   function startClaritySession(
     evaluation: ClarityEvaluation,
     pendingMessage: string,
