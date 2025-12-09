@@ -23,14 +23,18 @@ export async function copyToClipboard(
   try {
     // Modern Clipboard API (preferred)
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-      onSuccess?.();
-      return true;
+      try {
+        await navigator.clipboard.writeText(text);
+        onSuccess?.();
+        return true;
+      } catch (clipboardError) {
+        // If clipboard API fails, try fallback
+        console.warn('Clipboard API failed, trying fallback:', clipboardError);
+      }
     }
 
-    // Fallback for older browsers
+    // Fallback for older browsers or when Clipboard API fails
     // Note: document.execCommand('copy') is deprecated but kept as fallback
-    // Consider using Clipboard API polyfill for better compatibility
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.style.position = 'fixed';
@@ -48,14 +52,15 @@ export async function copyToClipboard(
         onSuccess?.();
         return true;
       } else {
-        throw new Error('Failed to copy text');
+        throw new Error('execCommand copy failed');
       }
-    } catch (err) {
+    } catch (execError) {
       document.body.removeChild(textArea);
-      throw err;
+      throw execError;
     }
   } catch (error) {
     const err = error instanceof Error ? error : new Error('Copy failed');
+    console.error('Failed to copy to clipboard:', err);
     onError?.(err);
     return false;
   }

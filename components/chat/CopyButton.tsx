@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { copyToClipboard } from '@/utils/clipboard'
+import { isClipboardSupported } from '@/utils/browserSupport'
 
 interface CopyButtonProps {
   text: string
@@ -12,24 +13,57 @@ interface CopyButtonProps {
 export function CopyButton({ text, className = '', onCopy }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+
+  // Check if clipboard is supported
+  const clipboardSupported = isClipboardSupported()
 
   const handleCopy = async () => {
-    const success = await copyToClipboard(text, {
-      onSuccess: () => {
-        setCopied(true)
-        onCopy?.()
-        // Reset after 2 seconds
-        setTimeout(() => setCopied(false), 2000)
-      },
-      onError: () => {
-        setError(true)
-        setTimeout(() => setError(false), 2000)
-      },
-    })
-
-    if (!success) {
+    if (!clipboardSupported) {
+      setErrorMessage('Clipboard not supported in this browser')
       setError(true)
-      setTimeout(() => setError(false), 2000)
+      setTimeout(() => {
+        setError(false)
+        setErrorMessage('')
+      }, 3000)
+      return
+    }
+
+    try {
+      const success = await copyToClipboard(text, {
+        onSuccess: () => {
+          setCopied(true)
+          onCopy?.()
+          // Reset after 2 seconds
+          setTimeout(() => setCopied(false), 2000)
+        },
+        onError: (err) => {
+          const message = err.message || 'Failed to copy'
+          setErrorMessage(message)
+          setError(true)
+          setTimeout(() => {
+            setError(false)
+            setErrorMessage('')
+          }, 3000)
+        },
+      })
+
+      if (!success && !error) {
+        setErrorMessage('Copy failed')
+        setError(true)
+        setTimeout(() => {
+          setError(false)
+          setErrorMessage('')
+        }, 3000)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Copy failed'
+      setErrorMessage(message)
+      setError(true)
+      setTimeout(() => {
+        setError(false)
+        setErrorMessage('')
+      }, 3000)
     }
   }
 
@@ -99,10 +133,17 @@ export function CopyButton({ text, className = '', onCopy }: CopyButtonProps) {
 
       <span>{copied ? 'Copied!' : error ? 'Failed' : 'Copy'}</span>
 
-      {/* Tooltip */}
+      {/* Success Tooltip */}
       {copied && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-green-500/90 px-2 py-1 text-[10px] font-semibold text-white shadow-lg animate-fadeIn">
           Copied to clipboard!
+        </div>
+      )}
+
+      {/* Error Tooltip */}
+      {error && errorMessage && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-red-500/90 px-2 py-1 text-[10px] font-semibold text-white shadow-lg animate-fadeIn max-w-[200px] text-center">
+          {errorMessage}
         </div>
       )}
     </button>

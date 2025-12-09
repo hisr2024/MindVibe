@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechRecognitionService } from '@/utils/speech/recognition'
 import { isSpeechRecognitionSupported } from '@/utils/speech/languageMapping'
+import { canUseVoiceInput, isSecureContext, getBrowserName } from '@/utils/browserSupport'
 
 export interface UseVoiceInputOptions {
   language?: string
@@ -62,8 +63,26 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   }, [language])
 
   const startListening = useCallback(() => {
+    // Enhanced browser support checks
+    const voiceCheck = canUseVoiceInput()
+    if (!voiceCheck.available) {
+      const errorMsg = voiceCheck.reason || 'Voice input not available'
+      setError(errorMsg)
+      onError?.(errorMsg)
+      return
+    }
+
     if (!recognitionRef.current || !isSupported) {
-      const errorMsg = 'Speech recognition not supported in this browser'
+      const browserName = getBrowserName()
+      const errorMsg = `Speech recognition not supported in ${browserName}. Please use Chrome, Edge, or Safari.`
+      setError(errorMsg)
+      onError?.(errorMsg)
+      return
+    }
+
+    // Check if secure context (HTTPS or localhost)
+    if (!isSecureContext()) {
+      const errorMsg = 'Voice features require HTTPS or localhost. Please access this site securely.'
       setError(errorMsg)
       onError?.(errorMsg)
       return
@@ -92,10 +111,23 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         setInterimTranscript('')
       },
       onError: (err) => {
-        setError(err)
+        // Enhance error messages with more helpful guidance
+        let enhancedError = err
+        
+        if (err.includes('not-allowed') || err.includes('permission denied')) {
+          enhancedError = 'Microphone access denied. Please allow microphone permissions in your browser settings.'
+        } else if (err.includes('no-speech')) {
+          enhancedError = 'No speech detected. Please speak clearly and try again.'
+        } else if (err.includes('network')) {
+          enhancedError = 'Network error. Please check your internet connection.'
+        } else if (err.includes('audio-capture')) {
+          enhancedError = 'Microphone not found. Please check your microphone connection.'
+        }
+        
+        setError(enhancedError)
         setIsListening(false)
         setInterimTranscript('')
-        onError?.(err)
+        onError?.(enhancedError)
       },
     })
   }, [isSupported, onTranscript, onError])

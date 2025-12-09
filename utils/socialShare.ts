@@ -70,48 +70,63 @@ export function limitTextLength(text: string, platform: SharePlatform): string {
  * Share to WhatsApp
  */
 export function shareToWhatsApp(text: string, anonymize: boolean = false): void {
-  const formatted = formatShareContent(text, anonymize);
-  const limited = limitTextLength(formatted, 'whatsapp');
-  const encoded = encodeURIComponent(limited);
+  try {
+    const formatted = formatShareContent(text, anonymize);
+    const limited = limitTextLength(formatted, 'whatsapp');
+    const encoded = encodeURIComponent(limited);
 
-  // Detect if mobile or desktop
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
+    // Detect if mobile or desktop
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
-  const url = isMobile
-    ? `whatsapp://send?text=${encoded}`
-    : `https://web.whatsapp.com/send?text=${encoded}`;
+    const url = isMobile
+      ? `whatsapp://send?text=${encoded}`
+      : `https://web.whatsapp.com/send?text=${encoded}`;
 
-  window.open(url, '_blank');
+    window.open(url, '_blank');
+  } catch (error) {
+    console.error('Failed to share to WhatsApp:', error);
+    throw new Error('Failed to open WhatsApp. Please try again.');
+  }
 }
 
 /**
  * Share to Telegram
  */
 export function shareToTelegram(text: string, anonymize: boolean = false): void {
-  const formatted = formatShareContent(text, anonymize);
-  const limited = limitTextLength(formatted, 'telegram');
-  const encoded = encodeURIComponent(limited);
+  try {
+    const formatted = formatShareContent(text, anonymize);
+    const limited = limitTextLength(formatted, 'telegram');
+    const encoded = encodeURIComponent(limited);
 
-  const url = `https://t.me/share/url?text=${encoded}`;
-  window.open(url, '_blank');
+    const url = `https://t.me/share/url?text=${encoded}`;
+    window.open(url, '_blank');
+  } catch (error) {
+    console.error('Failed to share to Telegram:', error);
+    throw new Error('Failed to open Telegram. Please try again.');
+  }
 }
 
 /**
  * Share to Facebook
  */
 export function shareToFacebook(text: string, anonymize: boolean = false): void {
-  const formatted = formatShareContent(text, anonymize);
-  const limited = limitTextLength(formatted, 'facebook');
-  const encoded = encodeURIComponent(limited);
+  try {
+    const formatted = formatShareContent(text, anonymize);
+    const limited = limitTextLength(formatted, 'facebook');
+    const encoded = encodeURIComponent(limited);
 
-  // Use a safe base URL instead of current origin
-  const baseUrl = 'https://mindvibe.app';
-  
-  // Facebook Share Dialog
-  const url = `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=${encodeURIComponent(baseUrl)}`;
-  window.open(url, '_blank', 'width=600,height=400');
+    // Use a safe base URL instead of current origin
+    const baseUrl = 'https://mindvibe.app';
+    
+    // Facebook Share Dialog
+    const url = `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=${encodeURIComponent(baseUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  } catch (error) {
+    console.error('Failed to share to Facebook:', error);
+    throw new Error('Failed to open Facebook. Please try again.');
+  }
 }
 
 /**
@@ -134,31 +149,36 @@ export async function shareToInstagram(
 }
 
 /**
- * Generic share handler
+ * Generic share handler with comprehensive error handling
  */
 export async function shareContent(
   platform: SharePlatform,
   text: string,
   anonymize: boolean = false
-): Promise<boolean> {
+): Promise<{ success: boolean; error?: string }> {
   try {
     switch (platform) {
       case 'whatsapp':
         shareToWhatsApp(text, anonymize);
-        return true;
+        return { success: true };
       case 'telegram':
         shareToTelegram(text, anonymize);
-        return true;
+        return { success: true };
       case 'facebook':
         shareToFacebook(text, anonymize);
-        return true;
+        return { success: true };
       case 'instagram':
-        return await shareToInstagram(text, anonymize);
+        const instagramSuccess = await shareToInstagram(text, anonymize);
+        return {
+          success: instagramSuccess,
+          error: instagramSuccess ? undefined : 'Failed to copy text for Instagram. Please try again.'
+        };
       default:
-        return false;
+        return { success: false, error: 'Unsupported platform' };
     }
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to share content';
     console.error(`Failed to share to ${platform}:`, error);
-    return false;
+    return { success: false, error: errorMessage };
   }
 }
