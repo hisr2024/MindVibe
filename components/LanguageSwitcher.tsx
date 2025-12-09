@@ -12,6 +12,7 @@ const flagEmojis: Record<Locale, string> = {
   ja: '🇯🇵',
   zh: '🇨🇳',
   ar: '🇸🇦',
+  pt: '🇵🇹',
 };
 
 export function LanguageSwitcher() {
