@@ -918,7 +918,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setClaritySession(prev => ({ ...prev, active: false, completed: true, pendingMessage: null }))
   }, [claritySession])
 
-  async function deliverMessage(content: string) {
+    async function deliverMessage(content:  string) {
     const userMessage = { role: 'user' as const, content }
     const newMessages = [...messages, userMessage]
     setMessages(newMessages)
@@ -926,12 +926,20 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setLoading(true)
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content })
+      const response = await apiCall('/api/chat/message', {
+        method:  'POST',
+        body:  JSON.stringify({ message: content })
       })
+
+      const data = await response.json()
+      setMessages([...newMessages, { role: 'assistant', content: data.response }])
+    } catch (error) {
+      console.error('KIAAN connection error:', error)
+      setMessages([...newMessages, { role: 'assistant', content: 'Connection issue. I\'m here when you\'re ready. 💙' }])
+    } finally {
+      setLoading(false)
+    }
+  }
 
       if (response.ok) {
         const data = await response.json()
@@ -1573,7 +1581,7 @@ function Journal() {
     setGuidanceLoading(prev => ({ ...prev, [entry.id]: true }))
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: `Please offer a supportive Ancient Wisdom-inspired reflection on this private Sacred Reflections entry: ${entry.body}` })
