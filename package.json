@@ -33,7 +33,7 @@
     "date-fns": "^2.30.0",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.25",
-    "jspdf": "^2.5.2",
+    "jspdf": "^3.0.4",
     "next": "16.0.7",
     "next-intl": "^4.5.8",
     "papaparse": "^5.5.3",
