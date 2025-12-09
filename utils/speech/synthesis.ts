@@ -25,6 +25,7 @@ export class SpeechSynthesisService {
   private currentUtterance: SpeechSynthesisUtterance | null = null
   private config: SynthesisConfig
   private callbacks: SynthesisCallbacks = {}
+  private preferredVoiceName: string | null = null
 
   constructor(config: SynthesisConfig = {}) {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -60,6 +61,15 @@ export class SpeechSynthesisService {
     utterance.rate = this.config.rate ?? 1.0
     utterance.pitch = this.config.pitch ?? 1.0
     utterance.volume = this.config.volume ?? 1.0
+
+    // Apply preferred voice if set
+    if (this.preferredVoiceName && this.synthesis) {
+      const voices = this.synthesis.getVoices()
+      const voice = voices.find(v => v.name === this.preferredVoiceName)
+      if (voice) {
+        utterance.voice = voice
+      }
+    }
 
     utterance.onstart = () => {
       this.callbacks.onStart?.()
@@ -147,16 +157,16 @@ export class SpeechSynthesisService {
   }
 
   /**
-   * Set a specific voice by name
+   * Set a specific voice by name for future utterances
    */
   setVoice(voiceName: string): void {
-    if (!this.synthesis || !this.currentUtterance) return
+    if (!this.synthesis) return
     
     const voices = this.synthesis.getVoices()
     const voice = voices.find(v => v.name === voiceName)
     
-    if (voice && this.currentUtterance) {
-      this.currentUtterance.voice = voice
+    if (voice) {
+      this.preferredVoiceName = voiceName
     }
   }
 

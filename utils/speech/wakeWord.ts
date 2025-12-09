@@ -54,23 +54,12 @@ export class WakeWordDetector {
   }
 
   /**
-   * Start listening for wake word
+   * Callbacks for recognition
    */
-  start(): void {
-    if (!this.recognition) {
-      this.onError?.('Speech recognition not supported')
-      return
-    }
-
-    if (this.isActive) {
-      console.warn('Wake word detector already active')
-      return
-    }
-
-    this.isActive = true
-    this.recognition.start({
+  private getCallbacks() {
+    return {
       onResult: this.handleResult,
-      onError: (error) => {
+      onError: (error: string) => {
         this.onError?.(error)
         // Auto-restart on error (unless it's a permission issue)
         if (!error.includes('permission')) {
@@ -88,15 +77,30 @@ export class WakeWordDetector {
         if (this.isActive) {
           setTimeout(() => {
             if (this.isActive && this.recognition) {
-              this.recognition.start({
-                onResult: this.handleResult,
-                onError: this.onError,
-              })
+              this.recognition.start(this.getCallbacks())
             }
           }, 100)
         }
       },
-    })
+    }
+  }
+
+  /**
+   * Start listening for wake word
+   */
+  start(): void {
+    if (!this.recognition) {
+      this.onError?.('Speech recognition not supported')
+      return
+    }
+
+    if (this.isActive) {
+      console.warn('Wake word detector already active')
+      return
+    }
+
+    this.isActive = true
+    this.recognition.start(this.getCallbacks())
   }
 
   /**

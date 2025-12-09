@@ -202,7 +202,7 @@ export function HandsFreeSession({
         </div>
 
         {/* Instructions */}
-        <div className="text-center max-w-md">
+        <div className="text-center max-w-md" role="status" aria-live="polite">
           <p className="text-sm text-orange-100/70">
             You&apos;re in hands-free mode. Speak naturally and KIAAN will respond with voice.
           </p>
@@ -215,6 +215,7 @@ export function HandsFreeSession({
         <button
           onClick={onExit}
           className="rounded-full bg-gradient-to-r from-red-500 to-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-all hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50"
+          aria-label="Exit hands-free mode"
         >
           Exit Hands-Free Mode
         </button>

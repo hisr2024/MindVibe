@@ -28,7 +28,8 @@ export function WakeWordDetector({
       if (typeof Audio !== 'undefined') {
         try {
           // Simple beep using Web Audio API
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+          type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext }
+          const audioContext = new ((window as WebkitWindow).AudioContext || (window as WebkitWindow).webkitAudioContext!)()
           const oscillator = audioContext.createOscillator()
           const gainNode = audioContext.createGain()
           
