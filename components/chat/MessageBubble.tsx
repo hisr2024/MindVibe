@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { CopyButton } from './CopyButton'
 import { ShareButton } from './ShareButton'
+import { VoiceOutputButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 interface MessageBubbleProps {
   sender: 'user' | 'assistant'
@@ -30,6 +32,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
   const [showVerseHover, setShowVerseHover] = useState(false)
+  
+  // Get current language for voice features
+  const { language } = useLanguage()
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -143,7 +148,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         </div>
       )}
 
-      {/* Action buttons row - Copy, Share, and Save to Journal */}
+      {/* Action buttons row - Copy, Share, Voice Output, and Save to Journal */}
       {sender === 'assistant' && !status && (
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {/* Copy Button */}
@@ -151,6 +156,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
 
           {/* Share Button */}
           <ShareButton text={text} />
+          
+          {/* Voice Output Button */}
+          <VoiceOutputButton text={text} language={language} />
 
           {/* Send to Sacred Reflections button */}
           {onSaveToJournal && (
