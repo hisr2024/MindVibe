@@ -244,7 +244,7 @@ export default function Home() {
             <div className="grid items-start gap-8 lg:grid-cols-[1.1fr,1fr]">
               <div className="space-y-4">
                 <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
-                <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">A premium, animated companion shaped by Krishna&apos;s flute and peacock feather — always calm, always modern.</p>
+                <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">Your calm, privacy-first mental wellness companion powered by ancient wisdom.</p>
                 <div className="flex gap-2 flex-wrap">
                   <TokenCard label="Inner Peace" note="Gentle breath and soft focus" tone="teal" icon={<SunriseIcon />} />
                   <TokenCard label="Mind Control" note="Steady steps, one thought at a time" tone="blue" icon={<MindWaveIcon />} />
