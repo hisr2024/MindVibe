@@ -5,6 +5,8 @@ import SimpleBar from 'simplebar-react'
 import { MessageBubble } from './MessageBubble'
 import { KiaanLogo } from '@/components/branding'
 import { useSmartScroll } from '@/hooks/useSmartScroll'
+import { VoiceInputButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export interface Message {
   id: string
@@ -35,6 +37,9 @@ export function KiaanChat({
   const [confirmingClear, setConfirmingClear] = useState(false)
   const [clearedUntil, setClearedUntil] = useState(0)
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  
+  // Get current language for voice features
+  const { language } = useLanguage()
 
   // Use smart scroll hook for better UX
   const visibleMessages = messages.slice(clearedUntil)
@@ -253,6 +258,11 @@ export function KiaanChat({
             className="flex-1 rounded-2xl border border-orange-500/25 bg-slate-950/70 px-4 py-2.5 text-sm text-orange-50 outline-none focus:ring-2 focus:ring-orange-400/50 placeholder:text-orange-100/40"
             disabled={isLoading}
             aria-label="Type your message"
+          />
+          <VoiceInputButton
+            language={language}
+            onTranscript={(text) => setInputText(text)}
+            disabled={isLoading}
           />
           <button
             type="submit"

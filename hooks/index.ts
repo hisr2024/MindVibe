@@ -19,3 +19,6 @@ export {
 } from './useCurrency'
 export { useLanguage, LanguageProvider, LANGUAGES, type Language, type LanguageConfig } from './useLanguage'
 export { useSmartScroll } from './useSmartScroll'
+export { useVoiceInput, type UseVoiceInputOptions, type UseVoiceInputReturn } from './useVoiceInput'
+export { useVoiceOutput, type UseVoiceOutputOptions, type UseVoiceOutputReturn } from './useVoiceOutput'
+export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './useWakeWord'
