@@ -71,13 +71,6 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     }
   }, [language])
 
-  // Auto-start if enabled on mount
-  useEffect(() => {
-    if (enabled && isSupported && detectorRef.current && !isActive) {
-      start()
-    }
-  }, [enabled, isSupported])
-
   const start = useCallback(() => {
     if (!detectorRef.current || !isSupported) {
       const errorMsg = 'Wake word detection not supported in this browser'
@@ -105,6 +98,13 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
       start()
     }
   }, [isActive, start, stop])
+
+  // Auto-start if enabled on mount - moved after callback definitions
+  useEffect(() => {
+    if (enabled && isSupported && detectorRef.current && !isActive) {
+      start()
+    }
+  }, [enabled, isSupported, isActive, start])
 
   return {
     isActive,

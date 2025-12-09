@@ -18,6 +18,9 @@ export class WakeWordDetector {
   private wakeWords: string[]
   private onWakeWordDetected?: () => void
   private onError?: (error: string) => void
+  private retryCount = 0
+  private readonly maxRetries = 3
+  private restartTimeout: ReturnType<typeof setTimeout> | null = null
 
   constructor(config: WakeWordConfig = {}) {
     this.wakeWords = config.wakeWords || [
@@ -61,27 +64,46 @@ export class WakeWordDetector {
       onResult: this.handleResult,
       onError: (error: string) => {
         this.onError?.(error)
-        // Auto-restart on error (unless it's a permission issue)
-        if (!error.includes('permission')) {
-          setTimeout(() => {
+        // Auto-restart on error with exponential backoff (unless permission issue or max retries)
+        if (!error.includes('permission') && this.retryCount < this.maxRetries) {
+          this.retryCount++
+          const backoffDelay = Math.min(1000 * Math.pow(2, this.retryCount - 1), 8000)
+          
+          this.clearRestartTimeout()
+          this.restartTimeout = setTimeout(() => {
             if (this.isActive) {
               this.restart()
             }
-          }, 2000)
+          }, backoffDelay)
         } else {
           this.isActive = false
+          this.retryCount = 0
         }
       },
       onEnd: () => {
         // Auto-restart if still active (continuous listening)
         if (this.isActive) {
-          setTimeout(() => {
+          // Reset retry count on successful end
+          this.retryCount = 0
+          
+          this.clearRestartTimeout()
+          this.restartTimeout = setTimeout(() => {
             if (this.isActive && this.recognition) {
               this.recognition.start(this.getCallbacks())
             }
           }, 100)
         }
       },
+    }
+  }
+
+  /**
+   * Clear pending restart timeout
+   */
+  private clearRestartTimeout(): void {
+    if (this.restartTimeout) {
+      clearTimeout(this.restartTimeout)
+      this.restartTimeout = null
     }
   }
 
@@ -100,6 +122,7 @@ export class WakeWordDetector {
     }
 
     this.isActive = true
+    this.retryCount = 0
     this.recognition.start(this.getCallbacks())
   }
 
@@ -110,6 +133,8 @@ export class WakeWordDetector {
     if (!this.recognition) return
 
     this.isActive = false
+    this.retryCount = 0
+    this.clearRestartTimeout()
     this.recognition.stop()
   }
 
@@ -119,8 +144,11 @@ export class WakeWordDetector {
   private restart(): void {
     if (!this.recognition) return
 
+    // Clear any pending restart to prevent race conditions
+    this.clearRestartTimeout()
+    
     this.recognition.stop()
-    setTimeout(() => {
+    this.restartTimeout = setTimeout(() => {
       if (this.isActive) {
         this.start()
       }
@@ -152,6 +180,7 @@ export class WakeWordDetector {
    */
   destroy(): void {
     this.stop()
+    this.clearRestartTimeout()
     if (this.recognition) {
       this.recognition.destroy()
       this.recognition = null
