@@ -29,6 +29,8 @@ export async function copyToClipboard(
     }
 
     // Fallback for older browsers
+    // Note: document.execCommand('copy') is deprecated but kept as fallback
+    // Consider using Clipboard API polyfill for better compatibility
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.style.position = 'fixed';

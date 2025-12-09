@@ -432,7 +432,7 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
 
         # Message is already sanitized by the ChatMessage validator
         # Get language preference from the request
-        language = chat.language if hasattr(chat, 'language') and chat.language else None
+        language = chat.language
         response = await kiaan.generate_response_with_gita(message, db, language)
 
         # Increment usage after successful response

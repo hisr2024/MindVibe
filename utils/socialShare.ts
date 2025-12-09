@@ -12,15 +12,27 @@ export interface ShareOptions {
 
 /**
  * Sanitize content for sharing by removing sensitive markers
+ * Note: This is a basic implementation. For production use, consider:
+ * - NLP-based entity recognition
+ * - More comprehensive regex patterns
+ * - External anonymization services
  */
 export function sanitizeShareContent(text: string, anonymize: boolean = false): string {
   let sanitized = text.trim();
 
   // Remove potential sensitive markers or personal identifiers
-  // This is a basic implementation - extend as needed
   if (anonymize) {
-    // Remove common personal markers (very basic - enhance as needed)
+    // Remove common personal markers
     sanitized = sanitized.replace(/\b(my name is|i am|i'm)\s+\w+/gi, '[name removed]');
+    
+    // Remove email addresses
+    sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[email removed]');
+    
+    // Remove phone numbers (basic patterns)
+    sanitized = sanitized.replace(/\b(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[phone removed]');
+    
+    // Remove common age patterns
+    sanitized = sanitized.replace(/\b(i am|i'm|age)\s+\d{1,3}\s+(years old|year old|yo)\b/gi, '[age removed]');
   }
 
   return sanitized;
@@ -94,8 +106,11 @@ export function shareToFacebook(text: string, anonymize: boolean = false): void 
   const limited = limitTextLength(formatted, 'facebook');
   const encoded = encodeURIComponent(limited);
 
+  // Use a safe base URL instead of current origin
+  const baseUrl = 'https://mindvibe.app';
+  
   // Facebook Share Dialog
-  const url = `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=${encodeURIComponent(window.location.origin)}`;
+  const url = `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=${encodeURIComponent(baseUrl)}`;
   window.open(url, '_blank', 'width=600,height=400');
 }
 

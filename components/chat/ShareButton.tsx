@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { shareContent, type SharePlatform } from '@/utils/socialShare'
+import { Toast } from '@/components/Toast'
 
 interface ShareButtonProps {
   text: string
@@ -52,6 +53,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
   const [showWarning, setShowWarning] = useState(true)
   const [anonymize, setAnonymize] = useState(false)
   const [sharing, setSharing] = useState(false)
+  const [showToast, setShowToast] = useState(false)
 
   const handleShare = async (platform: SharePlatform) => {
     if (showWarning) {
@@ -63,7 +65,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
     const success = await shareContent(platform, text, anonymize)
 
     if (success && platform === 'instagram') {
-      alert('Text copied to clipboard! You can now paste it into Instagram.')
+      setShowToast(true)
     }
 
     setSharing(false)
@@ -234,6 +236,16 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
             )}
           </div>
         </div>
+      )}
+
+      {/* Toast notification for Instagram */}
+      {showToast && (
+        <Toast
+          message="Text copied to clipboard! You can now paste it into Instagram."
+          type="success"
+          duration={4000}
+          onClose={() => setShowToast(false)}
+        />
       )}
     </>
   )
