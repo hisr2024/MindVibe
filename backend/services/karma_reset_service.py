@@ -30,6 +30,10 @@ class KarmaResetService:
     without modifying any existing KIAAN services or data.
     """
     
+    # Input validation constants
+    MIN_SITUATION_LENGTH = 10
+    MAX_SITUATION_LENGTH = 200
+    
     # Map repair types to Gita themes for verse retrieval
     REPAIR_TYPE_THEMES = {
         "apology": ["forgiveness", "humility", "compassion"],
@@ -105,8 +109,8 @@ class KarmaResetService:
         query_parts = []
         
         # Add situation if provided
-        if situation and len(situation) > 10:
-            query_parts.append(situation[:200])  # Limit length
+        if situation and len(situation) > self.MIN_SITUATION_LENGTH:
+            query_parts.append(situation[:self.MAX_SITUATION_LENGTH])
         
         # Add repair-specific keywords
         if normalized_type == "apology":

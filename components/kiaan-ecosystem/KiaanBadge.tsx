@@ -41,7 +41,7 @@ export default function KiaanBadge({
         onMouseLeave={() => setShowTooltip(false)}
       >
         {/* KIAAN icon */}
-        <span className={iconColor}>🕉️</span>
+        <span className={iconColor} aria-label="KIAAN Wisdom Engine">🕉️</span>
         
         {/* Text */}
         <span>Powered by KIAAN</span>

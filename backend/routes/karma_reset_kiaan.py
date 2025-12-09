@@ -253,18 +253,28 @@ Example format:
             )
             
             guidance_text = response.choices[0].message.content or "{}"
-            guidance_data = json.loads(guidance_text)
             
-            # Validate required keys
-            required_keys = [
-                "breathingLine",
-                "rippleSummary",
-                "repairAction",
-                "forwardIntention"
-            ]
-            if not all(key in guidance_data for key in required_keys):
-                logger.warning(f"[{request_id}] Missing keys, using fallback")
+            # Parse JSON response with specific error handling
+            try:
+                guidance_data = json.loads(guidance_text)
+            except json.JSONDecodeError as parse_error:
+                logger.error(f"[{request_id}] JSON parse error: {str(parse_error)}")
                 guidance_data = None
+            except ValueError as value_error:
+                logger.error(f"[{request_id}] Invalid JSON value: {str(value_error)}")
+                guidance_data = None
+            
+            # Validate required keys if parsing succeeded
+            if guidance_data is not None:
+                required_keys = [
+                    "breathingLine",
+                    "rippleSummary",
+                    "repairAction",
+                    "forwardIntention"
+                ]
+                if not all(key in guidance_data for key in required_keys):
+                    logger.warning(f"[{request_id}] Missing keys, using fallback")
+                    guidance_data = None
             
         except Exception as e:
             logger.error(f"[{request_id}] OpenAI error: {str(e)}")

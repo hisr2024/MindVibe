@@ -21,6 +21,9 @@ interface ResetGuidance {
   forwardIntention: string
 }
 
+// Timing constants
+const BREATHING_DURATION_MS = 5000
+
 export default function KarmaResetClient() {
   const [currentStep, setCurrentStep] = useState<ResetStep>('input')
   const [situation, setSituation] = useState('')
@@ -59,7 +62,7 @@ export default function KarmaResetClient() {
       setCurrentStep('breathing')
       
       // Auto-advance to plan after breathing exercise
-      setTimeout(() => setCurrentStep('plan'), 5000)
+      setTimeout(() => setCurrentStep('plan'), BREATHING_DURATION_MS)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
