@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.2.1",
+    "@testing-library/react": "^16.3.0",
     "@types/dom-speech-recognition": "^0.0.7",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.0",
