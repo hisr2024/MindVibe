@@ -145,7 +145,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
 
       {/* Action buttons row - Copy, Share, and Save to Journal */}
       {sender === 'assistant' && !status && (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
           {/* Copy Button */}
           <CopyButton text={text} />
 
