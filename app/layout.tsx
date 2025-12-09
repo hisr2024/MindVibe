@@ -6,6 +6,7 @@ import { MobileNav } from '@/components/navigation'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
+import { ChatFooter } from '@/components/layout/ChatFooter'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -45,6 +46,7 @@ export default function RootLayout({
           </main>
           <SiteFooter />
           <MobileNav />
+          <ChatFooter />
         </Providers>
       </body>
     </html>

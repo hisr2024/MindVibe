@@ -17,7 +17,7 @@ const kiaanTool = CORE_TOOLS.find(tool => tool.id === 'kiaan')
 const KIAAN_PAGE_URL = kiaanTool?.href || '/kiaan'
 
 export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
-  const [messages, setMessages] = useState<Message[]>([])
+  const { messages: globalMessages, addMessage } = useChat()
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [voiceError, setVoiceError] = useState<string | null>(null)
@@ -53,7 +53,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
       text: input, 
       timestamp: new Date().toISOString() 
     }
-    setMessages(prev => [...prev, userMessage])
+    addMessage(userMessage)
     setInput('')
     setIsLoading(true)
 
@@ -84,15 +84,15 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
         text: data.response || data.message || 'I apologize, I encountered an error. Please try again.', 
         timestamp: new Date().toISOString()
       }
-      setMessages(prev => [...prev, aiMessage])
+      addMessage(aiMessage)
     } catch (error) {
       console.error('Chat error:', error)
-      setMessages(prev => [...prev, { 
+      addMessage({ 
         id: crypto.randomUUID(),
         sender: 'assistant', 
         text: `Unable to connect to KIAAN. Please try again or use the main chat page at ${KIAAN_PAGE_URL}.`,
         timestamp: new Date().toISOString()
-      }])
+      })
     } finally {
       setIsLoading(false)
     }
