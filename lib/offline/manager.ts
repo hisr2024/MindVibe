@@ -30,7 +30,6 @@ class OfflineManager {
     syncInProgress: false,
   }
   private maxRetries = 3
-  private retryDelay = 1000 // Start with 1 second
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -105,7 +104,7 @@ class OfflineManager {
   async queueOperation(operation: Omit<QueuedOperation, 'id' | 'timestamp' | 'retryCount'>): Promise<void> {
     const queuedOp: QueuedOperation = {
       ...operation,
-      id: `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `op_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       timestamp: Date.now(),
       retryCount: 0,
     }
@@ -120,8 +119,7 @@ class OfflineManager {
    */
   private async loadQueueFromStorage(): Promise<void> {
     try {
-      const queueStore = 'operationQueue'
-      const operations = await indexedDBManager.getAll<QueuedOperation>(queueStore)
+      const operations = await indexedDBManager.getAll<QueuedOperation>(STORES.OPERATION_QUEUE)
       this.state.queuedOperations = operations
     } catch (error) {
       console.error('Failed to load operation queue:', error)
@@ -134,12 +132,11 @@ class OfflineManager {
   private async saveQueueToStorage(): Promise<void> {
     try {
       // Clear existing queue first
-      const queueStore = 'operationQueue'
-      await indexedDBManager.clear(queueStore)
+      await indexedDBManager.clear(STORES.OPERATION_QUEUE)
       
       // Save all queued operations
       for (const operation of this.state.queuedOperations) {
-        await indexedDBManager.put(queueStore, operation)
+        await indexedDBManager.put(STORES.OPERATION_QUEUE, operation)
       }
     } catch (error) {
       console.error('Failed to save operation queue:', error)
@@ -224,7 +221,7 @@ class OfflineManager {
       )
       
       if (responses.length > 0) {
-        const cached = responses[0]
+        const cached = responses[0] as { timestamp: number; ttl: number; response: string }
         const now = Date.now()
         
         // Check if cache is still valid
@@ -246,7 +243,7 @@ class OfflineManager {
   async cacheResponse(key: string, response: unknown, ttl: number = 86400000): Promise<void> {
     try {
       await indexedDBManager.put(STORES.CACHED_RESPONSES, {
-        id: `cache_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `cache_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         key,
         response: JSON.stringify(response),
         timestamp: Date.now(),

@@ -14,6 +14,7 @@ export const STORES = {
   JOURNAL_ENTRIES: 'userJournalEntries',
   MOOD_CHECKINS: 'moodCheckIns',
   WISDOM_CACHE: 'wisdomCache',
+  OPERATION_QUEUE: 'operationQueue',
 } as const
 
 export interface ConversationEntry {
@@ -124,6 +125,11 @@ class IndexedDBManager {
           const wisdomStore = db.createObjectStore(STORES.WISDOM_CACHE, { keyPath: 'id' })
           wisdomStore.createIndex('type', 'type', { unique: false })
           wisdomStore.createIndex('timestamp', 'timestamp', { unique: false })
+        }
+
+        if (!db.objectStoreNames.contains(STORES.OPERATION_QUEUE)) {
+          const queueStore = db.createObjectStore(STORES.OPERATION_QUEUE, { keyPath: 'id' })
+          queueStore.createIndex('timestamp', 'timestamp', { unique: false })
         }
       }
     })
