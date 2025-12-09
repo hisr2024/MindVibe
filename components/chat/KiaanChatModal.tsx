@@ -22,6 +22,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [voiceError, setVoiceError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const voiceErrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Check if voice input is available
   const voiceAvailability = canUseVoiceInput()
@@ -33,6 +34,15 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Cleanup voice error timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (voiceErrorTimeoutRef.current) {
+        clearTimeout(voiceErrorTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
@@ -108,8 +118,15 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   // Handle voice errors
   const handleVoiceError = (error: string) => {
     setVoiceError(error)
-    // Clear error after 5 seconds
-    setTimeout(() => setVoiceError(null), 5000)
+    // Clear any existing timeout
+    if (voiceErrorTimeoutRef.current) {
+      clearTimeout(voiceErrorTimeoutRef.current)
+    }
+    // Set new timeout
+    voiceErrorTimeoutRef.current = setTimeout(() => {
+      setVoiceError(null)
+      voiceErrorTimeoutRef.current = null
+    }, 5000)
   }
 
   return (

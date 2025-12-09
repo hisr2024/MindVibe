@@ -18,14 +18,19 @@ export function CopyButton({ text, className = '', onCopy }: CopyButtonProps) {
   // Check if clipboard is supported
   const clipboardSupported = isClipboardSupported()
 
+  // Helper to show temporary error
+  const showTemporaryError = (message: string, duration = 3000) => {
+    setErrorMessage(message)
+    setError(true)
+    setTimeout(() => {
+      setError(false)
+      setErrorMessage('')
+    }, duration)
+  }
+
   const handleCopy = async () => {
     if (!clipboardSupported) {
-      setErrorMessage('Clipboard not supported in this browser')
-      setError(true)
-      setTimeout(() => {
-        setError(false)
-        setErrorMessage('')
-      }, 3000)
+      showTemporaryError('Clipboard not supported in this browser')
       return
     }
 
@@ -39,31 +44,16 @@ export function CopyButton({ text, className = '', onCopy }: CopyButtonProps) {
         },
         onError: (err) => {
           const message = err.message || 'Failed to copy'
-          setErrorMessage(message)
-          setError(true)
-          setTimeout(() => {
-            setError(false)
-            setErrorMessage('')
-          }, 3000)
+          showTemporaryError(message)
         },
       })
 
       if (!success && !error) {
-        setErrorMessage('Copy failed')
-        setError(true)
-        setTimeout(() => {
-          setError(false)
-          setErrorMessage('')
-        }, 3000)
+        showTemporaryError('Copy failed')
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Copy failed'
-      setErrorMessage(message)
-      setError(true)
-      setTimeout(() => {
-        setError(false)
-        setErrorMessage('')
-      }, 3000)
+      showTemporaryError(message)
     }
   }
 
