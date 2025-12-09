@@ -149,8 +149,10 @@ export class WakeWordDetector {
     
     this.recognition.stop()
     this.restartTimeout = setTimeout(() => {
-      if (this.isActive) {
-        this.start()
+      if (this.isActive && this.recognition) {
+        // Don't call start() to avoid resetting retry count
+        // Directly restart recognition with existing callbacks
+        this.recognition.start(this.getCallbacks())
       }
     }, 500)
   }

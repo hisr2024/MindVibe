@@ -25,45 +25,43 @@ export function WakeWordDetector({
     language,
     onWakeWordDetected: () => {
       // Play activation chime (optional audio feedback)
-      if (typeof Audio !== 'undefined') {
-        try {
-          // Simple beep using Web Audio API
-          type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext }
-          const windowWithAudio = window as WebkitWindow
-          const AudioContextConstructor = windowWithAudio.AudioContext || windowWithAudio.webkitAudioContext
-          
-          if (!AudioContextConstructor) {
-            console.debug('AudioContext not available')
-            onWakeWordDetected()
-            return
-          }
-          
-          const audioContext = new AudioContextConstructor()
-          const oscillator = audioContext.createOscillator()
-          const gainNode = audioContext.createGain()
-          
-          oscillator.connect(gainNode)
-          gainNode.connect(audioContext.destination)
-          
-          oscillator.frequency.value = 800
-          oscillator.type = 'sine'
-          
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
-          
-          oscillator.start(audioContext.currentTime)
-          oscillator.stop(audioContext.currentTime + 0.1)
-          
-          // Close audio context after sound completes to prevent resource leak
-          setTimeout(() => {
-            audioContext.close().catch(() => {
-              // Silent fail if already closed
-            })
-          }, 200)
-        } catch (error) {
-          // Silent fail for audio
-          console.debug('Audio feedback not available')
+      try {
+        // Simple beep using Web Audio API
+        type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext }
+        const windowWithAudio = window as WebkitWindow
+        const AudioContextConstructor = windowWithAudio.AudioContext || windowWithAudio.webkitAudioContext
+        
+        if (!AudioContextConstructor) {
+          console.debug('AudioContext not available')
+          onWakeWordDetected()
+          return
         }
+        
+        const audioContext = new AudioContextConstructor()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        
+        oscillator.frequency.value = 800
+        oscillator.type = 'sine'
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+        
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.1)
+        
+        // Close audio context after sound completes to prevent resource leak
+        setTimeout(() => {
+          audioContext.close().catch(() => {
+            // Silent fail if already closed
+          })
+        }, 200)
+      } catch (error) {
+        // Silent fail for audio
+        console.debug('Audio feedback not available')
       }
       
       onWakeWordDetected()
