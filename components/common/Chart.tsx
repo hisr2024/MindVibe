@@ -22,7 +22,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  type TooltipProps,
 } from 'recharts'
 import type { ChartTheme } from '@/types/analytics.types'
 import { DARK_CHART_THEME } from '@/types/analytics.types'
@@ -50,6 +49,21 @@ interface ChartProps {
   labelFormatter?: (label: string) => string
 }
 
+// Custom tooltip props interface for Recharts 3.x compatibility
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    value: number
+    name: string
+    color: string
+    dataKey: string
+    payload: any
+  }>
+  label?: string
+  formatter?: (value: number) => string
+  labelFormatter?: (label: string) => string
+}
+
 // Custom tooltip component
 function CustomTooltip({
   active,
@@ -57,10 +71,7 @@ function CustomTooltip({
   label,
   formatter,
   labelFormatter,
-}: TooltipProps<number, string> & {
-  formatter?: (value: number) => string
-  labelFormatter?: (label: string) => string
-}) {
+}: CustomTooltipProps) {
   if (!active || !payload || !payload.length) return null
 
   return (
