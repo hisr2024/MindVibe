@@ -471,6 +471,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
 
+# Load Karma Reset KIAAN Integration router (NEW - enhanced with KIAAN ecosystem)
+print("\n[Karma Reset KIAAN] Attempting to import Karma Reset KIAAN router...")
+try:
+    from backend.routes.karma_reset_kiaan import router as karma_reset_kiaan_router
+    app.include_router(karma_reset_kiaan_router)
+    print("✅ [SUCCESS] Karma Reset KIAAN router loaded (ecosystem enhanced)")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karma Reset KIAAN router: {e}")
+
 # Load Ardha router
 print("\n[Ardha] Attempting to import Ardha router...")
 try:
