@@ -22,6 +22,9 @@ export function sanitizeShareContent(text: string, anonymize: boolean = false): 
 
   // Remove potential sensitive markers or personal identifiers
   if (anonymize) {
+    // Remove common age patterns (do this before name patterns)
+    sanitized = sanitized.replace(/\b(i am|i'm|age)\s+\d{1,3}\s+(years old|year old|yo)\b/gi, '[age removed]');
+    
     // Remove common personal markers
     sanitized = sanitized.replace(/\b(my name is|i am|i'm)\s+\w+/gi, '[name removed]');
     
@@ -30,9 +33,6 @@ export function sanitizeShareContent(text: string, anonymize: boolean = false): 
     
     // Remove phone numbers (basic patterns)
     sanitized = sanitized.replace(/\b(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[phone removed]');
-    
-    // Remove common age patterns
-    sanitized = sanitized.replace(/\b(i am|i'm|age)\s+\d{1,3}\s+(years old|year old|yo)\b/gi, '[age removed]');
   }
 
   return sanitized;
