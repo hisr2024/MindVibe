@@ -123,7 +123,12 @@ export function HandsFreeSession({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="hands-free-title"
+    >
       <div className="relative flex flex-col items-center gap-6 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 shadow-2xl border border-orange-500/30">
         {/* Status indicator */}
         <div className="flex flex-col items-center gap-4">
@@ -151,7 +156,7 @@ export function HandsFreeSession({
                 <span className="absolute inset-0 rounded-full border-4 border-orange-400/50 animate-ping" />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-semibold text-orange-50">Listening...</div>
+                <div id="hands-free-title" className="text-2xl font-semibold text-orange-50">Listening...</div>
                 <div className="text-sm text-orange-200/70 mt-2">Speak your question</div>
               </div>
             </>
@@ -178,7 +183,7 @@ export function HandsFreeSession({
                 </svg>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-semibold text-orange-50">Speaking...</div>
+                <div id="hands-free-title" className="text-2xl font-semibold text-orange-50">Speaking...</div>
                 <div className="text-sm text-orange-200/70 mt-2">KIAAN is responding</div>
               </div>
             </>
@@ -190,7 +195,7 @@ export function HandsFreeSession({
                 <span className="text-4xl">💬</span>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-semibold text-orange-50">Processing...</div>
+                <div id="hands-free-title" className="text-2xl font-semibold text-orange-50">Processing...</div>
               </div>
             </>
           )}

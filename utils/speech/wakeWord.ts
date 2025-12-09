@@ -39,6 +39,21 @@ export class WakeWordDetector {
   }
 
   /**
+   * Handle speech result and check for wake word
+   */
+  private handleResult = (transcript: string, isFinal: boolean): void => {
+    const normalizedTranscript = transcript.toLowerCase().trim()
+    
+    const hasWakeWord = this.wakeWords.some(wakeWord => 
+      normalizedTranscript.includes(wakeWord)
+    )
+
+    if (hasWakeWord && isFinal) {
+      this.onWakeWordDetected?.()
+    }
+  }
+
+  /**
    * Start listening for wake word
    */
   start(): void {
@@ -54,19 +69,7 @@ export class WakeWordDetector {
 
     this.isActive = true
     this.recognition.start({
-      onResult: (transcript, isFinal) => {
-        // Check for wake word in transcript (case-insensitive)
-        const normalizedTranscript = transcript.toLowerCase().trim()
-        
-        const hasWakeWord = this.wakeWords.some(wakeWord => 
-          normalizedTranscript.includes(wakeWord)
-        )
-
-        if (hasWakeWord && isFinal) {
-          // Wake word detected!
-          this.onWakeWordDetected?.()
-        }
-      },
+      onResult: this.handleResult,
       onError: (error) => {
         this.onError?.(error)
         // Auto-restart on error (unless it's a permission issue)
@@ -86,15 +89,7 @@ export class WakeWordDetector {
           setTimeout(() => {
             if (this.isActive && this.recognition) {
               this.recognition.start({
-                onResult: (transcript, isFinal) => {
-                  const normalizedTranscript = transcript.toLowerCase().trim()
-                  const hasWakeWord = this.wakeWords.some(wakeWord => 
-                    normalizedTranscript.includes(wakeWord)
-                  )
-                  if (hasWakeWord && isFinal) {
-                    this.onWakeWordDetected?.()
-                  }
-                },
+                onResult: this.handleResult,
                 onError: this.onError,
               })
             }

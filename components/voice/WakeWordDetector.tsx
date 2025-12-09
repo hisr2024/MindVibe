@@ -43,6 +43,13 @@ export function WakeWordDetector({
           
           oscillator.start(audioContext.currentTime)
           oscillator.stop(audioContext.currentTime + 0.1)
+          
+          // Close audio context after sound completes to prevent resource leak
+          setTimeout(() => {
+            audioContext.close().catch(() => {
+              // Silent fail if already closed
+            })
+          }, 200)
         } catch (error) {
           // Silent fail for audio
           console.debug('Audio feedback not available')
