@@ -4,6 +4,8 @@ import SiteNav from './components/SiteNav'
 import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
+import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -30,6 +32,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
         <Providers>
+          <ServiceWorkerRegistration />
+          <OfflineStatusBanner />
           <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
             <div className="flex-1">
               <SiteNav />

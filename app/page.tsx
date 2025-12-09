@@ -5,6 +5,7 @@ import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 import SimpleBar from 'simplebar-react'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
+import { FeatureHighlights } from '@/components/FeatureHighlights'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -244,7 +245,7 @@ export default function Home() {
             <div className="grid items-start gap-8 lg:grid-cols-[1.1fr,1fr]">
               <div className="space-y-4">
                 <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
-                <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">A premium, animated companion shaped by Krishna&apos;s flute and peacock feather — always calm, always modern.</p>
+                <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">Your calm, privacy-first mental wellness companion powered by ancient wisdom.</p>
                 <div className="flex gap-2 flex-wrap">
                   <TokenCard label="Inner Peace" note="Gentle breath and soft focus" tone="teal" icon={<SunriseIcon />} />
                   <TokenCard label="Mind Control" note="Steady steps, one thought at a time" tone="blue" icon={<MindWaveIcon />} />
@@ -297,6 +298,8 @@ export default function Home() {
         <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
+
+        <FeatureHighlights />
 
         <section className="grid gap-3 md:grid-cols-3" aria-label="Core daily actions">
           <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)]">
