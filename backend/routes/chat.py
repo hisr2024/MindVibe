@@ -92,6 +92,7 @@ def sanitize_input(text: str) -> str:
 class ChatMessage(BaseModel):
     """Chat message model with validation."""
     message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    language: str | None = Field(None, description="User's preferred language (e.g., 'en', 'es', 'pt')")
 
     @field_validator('message')
     @classmethod
@@ -120,7 +121,7 @@ class KIAAN:
     def get_crisis_response(self) -> str:
         return "🆘 Please reach out for help RIGHT NOW\n\n📞 988 - Suicide & Crisis Lifeline (24/7)\n💬 Crisis Text: Text HOME to 741741\n🌍 findahelpline.com\n\nYou matter. Help is real. 💙"
 
-    async def generate_response_with_gita(self, user_message: str, db: AsyncSession) -> str:
+    async def generate_response_with_gita(self, user_message: str, db: AsyncSession, language: str | None = None) -> str:
         try:
             if self.is_crisis(user_message):
                 return self.get_crisis_response()
@@ -168,6 +169,22 @@ class KIAAN:
                     logger.error(f"Error fetching Gita verses: {e}")
                     gita_context = "Apply universal principles of dharma, karma, and shanti."
 
+            # Language instruction
+            language_instruction = ""
+            if language and language != "en":
+                language_map = {
+                    "es": "Spanish (Español)",
+                    "fr": "French (Français)",
+                    "de": "German (Deutsch)",
+                    "hi": "Hindi (हिन्दी)",
+                    "ar": "Arabic (العربية)",
+                    "zh": "Chinese (中文)",
+                    "ja": "Japanese (日本語)",
+                    "pt": "Portuguese (Português)"
+                }
+                lang_name = language_map.get(language, language)
+                language_instruction = f"\n\nLANGUAGE REQUIREMENT: Respond in {lang_name}. Maintain the same wisdom, warmth, and structure but in the user's preferred language."
+
             # Enhanced system prompt with strict Gita-adherence requirements
             system_prompt = f"""You are KIAAN, an AI guide EXCLUSIVELY rooted in the timeless wisdom of the Bhagavad Gita's 700 verses.
 
@@ -188,7 +205,7 @@ ABSOLUTE REQUIREMENTS (non-negotiable):
 ✅ Present wisdom as universal life principles, not religious teaching
 ✅ Be warm, conversational, deeply compassionate - like a wise friend
 ✅ Focus on mental wellness and practical daily life guidance
-✅ 200-400 words, ALWAYS end with 💙
+✅ 200-400 words, ALWAYS end with 💙{language_instruction}
 
 TONE & STYLE:
 - Contemporary and accessible, never preachy or formal
@@ -414,7 +431,9 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
                 logger.warning(f"Quota check failed, allowing request: {quota_error}")
 
         # Message is already sanitized by the ChatMessage validator
-        response = await kiaan.generate_response_with_gita(message, db)
+        # Get language preference from the request
+        language = chat.language if hasattr(chat, 'language') and chat.language else None
+        response = await kiaan.generate_response_with_gita(message, db, language)
 
         # Increment usage after successful response
         if SUBSCRIPTION_ENABLED and user_id is not None:

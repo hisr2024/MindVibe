@@ -1,0 +1,149 @@
+/**
+ * Social media sharing utilities
+ */
+
+export type SharePlatform = 'whatsapp' | 'telegram' | 'facebook' | 'instagram';
+
+export interface ShareOptions {
+  text: string;
+  url?: string;
+  anonymize?: boolean;
+}
+
+/**
+ * Sanitize content for sharing by removing sensitive markers
+ */
+export function sanitizeShareContent(text: string, anonymize: boolean = false): string {
+  let sanitized = text.trim();
+
+  // Remove potential sensitive markers or personal identifiers
+  // This is a basic implementation - extend as needed
+  if (anonymize) {
+    // Remove common personal markers (very basic - enhance as needed)
+    sanitized = sanitized.replace(/\b(my name is|i am|i'm)\s+\w+/gi, '[name removed]');
+  }
+
+  return sanitized;
+}
+
+/**
+ * Format content for sharing with MindVibe prefix
+ */
+export function formatShareContent(text: string, anonymize: boolean = false): string {
+  const sanitized = sanitizeShareContent(text, anonymize);
+  const prefix = 'Shared from MindVibe - KIAAN AI:\n\n';
+  const suffix = '\n\n💙 Discover mental wellness with KIAAN at mindvibe.app';
+
+  return `${prefix}${sanitized}${suffix}`;
+}
+
+/**
+ * Limit text to platform-specific character limits
+ */
+export function limitTextLength(text: string, platform: SharePlatform): string {
+  const limits: Record<SharePlatform, number> = {
+    whatsapp: 65536, // WhatsApp has a very high limit
+    telegram: 4096,
+    facebook: 63206,
+    instagram: 2200, // For caption
+  };
+
+  const limit = limits[platform];
+  if (text.length <= limit) return text;
+
+  return text.slice(0, limit - 3) + '...';
+}
+
+/**
+ * Share to WhatsApp
+ */
+export function shareToWhatsApp(text: string, anonymize: boolean = false): void {
+  const formatted = formatShareContent(text, anonymize);
+  const limited = limitTextLength(formatted, 'whatsapp');
+  const encoded = encodeURIComponent(limited);
+
+  // Detect if mobile or desktop
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
+  const url = isMobile
+    ? `whatsapp://send?text=${encoded}`
+    : `https://web.whatsapp.com/send?text=${encoded}`;
+
+  window.open(url, '_blank');
+}
+
+/**
+ * Share to Telegram
+ */
+export function shareToTelegram(text: string, anonymize: boolean = false): void {
+  const formatted = formatShareContent(text, anonymize);
+  const limited = limitTextLength(formatted, 'telegram');
+  const encoded = encodeURIComponent(limited);
+
+  const url = `https://t.me/share/url?text=${encoded}`;
+  window.open(url, '_blank');
+}
+
+/**
+ * Share to Facebook
+ */
+export function shareToFacebook(text: string, anonymize: boolean = false): void {
+  const formatted = formatShareContent(text, anonymize);
+  const limited = limitTextLength(formatted, 'facebook');
+  const encoded = encodeURIComponent(limited);
+
+  // Facebook Share Dialog
+  const url = `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=${encodeURIComponent(window.location.origin)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+}
+
+/**
+ * Copy to clipboard for Instagram (Instagram doesn't support direct text sharing)
+ */
+export async function shareToInstagram(
+  text: string,
+  anonymize: boolean = false
+): Promise<boolean> {
+  const formatted = formatShareContent(text, anonymize);
+  const limited = limitTextLength(formatted, 'instagram');
+
+  try {
+    await navigator.clipboard.writeText(limited);
+    return true;
+  } catch (error) {
+    console.error('Failed to copy for Instagram:', error);
+    return false;
+  }
+}
+
+/**
+ * Generic share handler
+ */
+export async function shareContent(
+  platform: SharePlatform,
+  text: string,
+  anonymize: boolean = false
+): Promise<boolean> {
+  try {
+    switch (platform) {
+      case 'whatsapp':
+        shareToWhatsApp(text, anonymize);
+        return true;
+      case 'telegram':
+        shareToTelegram(text, anonymize);
+        return true;
+      case 'facebook':
+        shareToFacebook(text, anonymize);
+        return true;
+      case 'instagram':
+        return await shareToInstagram(text, anonymize);
+      default:
+        return false;
+    }
+  } catch (error) {
+    console.error(`Failed to share to ${platform}:`, error);
+    return false;
+  }
+}

@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { CopyButton } from './CopyButton'
+import { ShareButton } from './ShareButton'
 
 interface MessageBubbleProps {
   sender: 'user' | 'assistant'
@@ -141,24 +143,35 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         </div>
       )}
 
-      {/* Send to Sacred Reflections button for assistant messages */}
-      {sender === 'assistant' && onSaveToJournal && !status && (
-        <button
-          onClick={handleSaveToJournal}
-          className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-200 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 hover:border-orange-500/40 rounded-xl animate-fadeIn focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${
-            prefersReducedMotion
-              ? ''
-              : 'transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(255,115,39,0.2)]'
-          }`}
-          aria-label="Send this response to Sacred Reflections"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          Send to Sacred Reflections
-        </button>
+      {/* Action buttons row - Copy, Share, and Save to Journal */}
+      {sender === 'assistant' && !status && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Copy Button */}
+          <CopyButton text={text} />
+
+          {/* Share Button */}
+          <ShareButton text={text} />
+
+          {/* Send to Sacred Reflections button */}
+          {onSaveToJournal && (
+            <button
+              onClick={handleSaveToJournal}
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-200 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 hover:border-orange-500/40 rounded-xl animate-fadeIn focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${
+                prefersReducedMotion
+                  ? ''
+                  : 'transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(255,115,39,0.2)]'
+              }`}
+              aria-label="Send this response to Sacred Reflections"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+              Send to Sacred Reflections
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

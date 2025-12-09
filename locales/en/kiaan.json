@@ -18,7 +18,17 @@
       "subtitle": "Share what's on your mind"
     },
     "disclaimer": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Send to Sacred Reflections"
+    "saveToJournal": "Send to Sacred Reflections",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyFailed": "Failed",
+    "share": "Share",
+    "shareVia": "Share via",
+    "privacyNotice": "Privacy Notice",
+    "shareWarning": "You are about to share mental health information. Please ensure you're comfortable sharing this content publicly.",
+    "anonymize": "Anonymize content (remove personal identifiers)",
+    "anonymized": "✓ Anonymized content",
+    "sharingOriginal": "Sharing original content"
   },
   "guidanceModes": {
     "title": "Guidance modes",
