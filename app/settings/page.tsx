@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { SettingsSection, SettingsItem, SettingsDivider, ToggleSwitch } from '@/components/settings'
 import { ThemeToggle, Button, Card, CardContent } from '@/components/ui'
+import { OfflineModeToggle } from '@/components/OfflineModeToggle'
+import { SyncStatusWidget } from '@/components/SyncStatusWidget'
 
 interface Settings {
   notifications: {
@@ -168,6 +170,14 @@ export default function SettingsPage() {
             onToggle={(v) => updateSetting('accessibility', 'highContrast', v)}
           />
         </SettingsItem>
+      </SettingsSection>
+
+      {/* Offline & Cache Management */}
+      <SettingsSection title="Offline & Cache" description="Manage offline access and cached data" className="mb-6">
+        <div className="space-y-4">
+          <OfflineModeToggle />
+          <SyncStatusWidget />
+        </div>
       </SettingsSection>
 
       {/* Data Management */}

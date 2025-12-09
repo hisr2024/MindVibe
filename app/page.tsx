@@ -5,6 +5,7 @@ import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 import SimpleBar from 'simplebar-react'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
+import { FeatureHighlights } from '@/components/FeatureHighlights'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -297,6 +298,8 @@ export default function Home() {
         <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
+
+        <FeatureHighlights />
 
         <section className="grid gap-3 md:grid-cols-3" aria-label="Core daily actions">
           <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)]">
