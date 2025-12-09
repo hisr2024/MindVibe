@@ -147,7 +147,7 @@ export default function AdminLogin() {
               disabled={loading}
               className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-amber-400 px-4 py-3 font-semibold text-slate-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? 'Signing in...' : mfaRequired ? 'Verify' : 'Sign In'}
+              {loading ? <span>Signing in...</span> : mfaRequired ? <span>Verify</span> : <span>Sign In</span>}
             </button>
           </form>
 

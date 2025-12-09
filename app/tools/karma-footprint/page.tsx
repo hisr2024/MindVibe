@@ -1,0 +1,11 @@
+import { Metadata } from 'next'
+import KarmaFootprintClient from './KarmaFootprintClient'
+
+export const metadata: Metadata = {
+  title: 'Karma Footprint Analyzer | MindVibe',
+  description: 'Reflect on your daily actions and visualize your karma footprint to cultivate mindful living.',
+}
+
+export default function KarmaFootprintPage() {
+  return <KarmaFootprintClient />
+}

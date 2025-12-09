@@ -1,0 +1,44 @@
+<svg width="320" height="220" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KIAAN — MindVibe Companion animated mark">
+  <defs>
+    <linearGradient id="resonance" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="45%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#6ad7ff" />
+    </linearGradient>
+    <linearGradient id="flute" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff7a3c" />
+      <stop offset="50%" stop-color="#ff9f52" />
+      <stop offset="100%" stop-color="#ffd36f" />
+    </linearGradient>
+    <radialGradient id="aura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(106, 215, 255, 0.45)" />
+      <stop offset="70%" stop-color="rgba(37, 99, 235, 0.15)" />
+      <stop offset="100%" stop-color="rgba(30, 58, 138, 0)" />
+    </radialGradient>
+  </defs>
+  <g filter="url(#shadow)">
+    <circle id="ripple" cx="160" cy="100" r="72" fill="url(#aura)">
+      <animate attributeName="r" values="72;86;72" dur="3.2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.45;0;0.45" dur="3.2s" repeatCount="indefinite" />
+    </circle>
+    <text x="50%" y="105" text-anchor="middle" fill="url(#resonance)" font-family="'Manrope', 'Inter', sans-serif" font-weight="800" font-size="44" letter-spacing="8">
+      <tspan>KI</tspan><tspan fill="url(#flute)">AA</tspan><tspan>N</tspan>
+    </text>
+    <line x1="86" y1="124" x2="234" y2="124" stroke="url(#flute)" stroke-width="5" stroke-linecap="round">
+      <animate attributeName="stroke-dasharray" values="12 240;240 12;12 240" dur="8s" repeatCount="indefinite" />
+    </line>
+    <g opacity="0.82">
+      <path d="M245 46 C250 60, 244 78, 236 92" stroke="url(#resonance)" stroke-width="3" stroke-linecap="round" fill="none">
+        <animate attributeName="stroke-dashoffset" values="14;-14;14" dur="3s" repeatCount="indefinite" />
+      </path>
+      <ellipse cx="238" cy="70" rx="12" ry="9" fill="url(#flute)">
+        <animate attributeName="transform" attributeType="XML" type="rotate" values="0 238 70;3 238 70;-3 238 70;0 238 70" dur="3s" repeatCount="indefinite" />
+      </ellipse>
+    </g>
+    <text x="50%" y="152" text-anchor="middle" fill="#e8edf5" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="16" letter-spacing="1.6">MindVibe Companion</text>
+    <text x="50%" y="174" text-anchor="middle" fill="#c2d9ff" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="12" letter-spacing="2">KIAAN — Crisp, calm guidance.</text>
+  </g>
+  <filter id="shadow" x="0" y="0" width="320" height="220" filterUnits="userSpaceOnUse">
+    <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="rgba(15,23,42,0.5)" />
+  </filter>
+</svg>

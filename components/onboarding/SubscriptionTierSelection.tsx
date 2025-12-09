@@ -116,12 +116,20 @@ export function SubscriptionTierSelection({
               </h3>
 
               {/* Price */}
-              <div className="flex items-baseline gap-1 mb-2">
+              <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-2xl font-bold text-orange-50">
-                  ${price === 0 ? '0' : monthlyEquiv}
+                  ${price === 0 ? '0' : price}
                 </span>
-                <span className="text-xs text-orange-100/60">/month</span>
+                <span className="text-xs text-orange-100/60">
+                  /{billingCycle === 'yearly' ? 'year' : 'month'}
+                </span>
               </div>
+
+              {billingCycle === 'yearly' && monthlyEquiv > 0 && (
+                <div className="text-[11px] text-orange-100/70 mb-1">
+                  ~${monthlyEquiv}/month when billed yearly
+                </div>
+              )}
 
               {/* Yearly savings badge */}
               {billingCycle === 'yearly' && savings > 0 && (
@@ -203,8 +211,7 @@ export function SubscriptionTierSelection({
 
       {/* Note */}
       <p className="text-center text-xs text-orange-100/50 mt-6">
-        You can upgrade or change your plan anytime. All plans include a 7-day
-        free trial.
+        You can upgrade or change your plan anytime. All paid plans include a 15-day free trial.
       </p>
     </div>
   )

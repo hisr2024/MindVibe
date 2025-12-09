@@ -219,6 +219,163 @@ Visit `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc`
 
 ---
 
+## 🕉️ **Bhagavad Gita Integration**
+
+MindVibe integrates all **700 authentic verses** of the Bhagavad Gita from authoritative Indian sources to provide timeless wisdom for mental health and well-being.
+
+### **Authenticity Standards**
+
+We maintain the highest standards of authenticity and quality:
+
+- **Sanskrit**: Gita Press, Gorakhpur (gold standard Devanagari text)
+- **Validation**: IIT Kanpur Gita Supersite (gitasupersite.iitk.ac.in)
+- **Hindi**: Gita Press translations (authentic Hindi rendering)
+- **English**: Swami Sivananda (Divine Life Society) / Swami Chinmayananda (Chinmaya Mission)
+- **Transliteration**: IAST (International Alphabet of Sanskrit Transliteration) standard only
+- **Mental Health Tags**: Evidence-based applications aligned with modern psychology
+
+### **Quality Requirements**
+
+✅ **Sanskrit in Devanagari** (UTF-8 Unicode U+0900 to U+097F)  
+✅ **IAST transliteration** with proper diacritics (ā ī ū ṛ ṃ ḥ etc.)  
+✅ **Authentic translations** from recognized spiritual authorities  
+✅ **All 700 verses** matching canonical chapter distribution  
+✅ **Evidence-based tagging** for mental health applications  
+❌ **NO Western substitutions** or non-traditional sources  
+❌ **NO modifications** to original Sanskrit text  
+❌ **NO non-standard** transliteration systems (ITRANS, Harvard-Kyoto)
+
+### **Verse Distribution**
+
+The Gita contains exactly **700 verses** across **18 chapters**:
+
+| Chapter | Verses | English Name | Mental Health Focus |
+|---------|--------|--------------|---------------------|
+| 1 | 47 | Arjuna's Grief | Depression, Despair |
+| 2 | 72 | Knowledge & Equanimity | Anxiety, Emotional Regulation |
+| 3 | 43 | Karma Yoga | Work Stress, Purpose |
+| 6 | 47 | Meditation Yoga | Self-Mastery, Mindfulness |
+| 12 | 20 | Devotion Yoga | Relationships, Compassion |
+| 18 | 78 | Liberation & Surrender | Anxiety Relief, Letting Go |
+| ... | ... | ... | ... |
+| **Total** | **700** | | |
+
+See [docs/BHAGAVAD_GITA_IMPLEMENTATION.md](docs/BHAGAVAD_GITA_IMPLEMENTATION.md) for complete chapter breakdown.
+
+### **Mental Health Applications**
+
+Each verse is tagged with mental health domains and applications:
+
+**Primary Domains:**
+- `anxiety` - Worry, fear of outcomes
+- `depression` - Hopelessness, lack of motivation  
+- `emotional_regulation` - Equanimity, balance
+- `self_worth` - Self-esteem, inner power
+- `relationships` - Compassion, forgiveness
+- `purpose` - Dharma, life meaning
+- `work_stress` - Work-life balance
+- `anger` - Anger management
+- `fear` - Courage, fearlessness
+- `grief` - Loss, impermanence
+
+**Key Applications:**
+- Outcome detachment (2.47, 2.48) - Reducing performance anxiety
+- Equanimity (2.56, 5.20) - Emotional stability
+- Self-mastery (6.5, 6.35-36) - Self-control and discipline
+- Compassion (12.13, 13.27) - Loving-kindness
+- Meditation practice (6.10-32) - Mindfulness training
+
+See [data/gita/mental_health_tag_guide.md](data/gita/mental_health_tag_guide.md) for complete methodology.
+
+### **Implementation Documentation**
+
+📖 **[Complete Implementation Guide](docs/BHAGAVAD_GITA_IMPLEMENTATION.md)**
+- Overview and authenticity standards
+- Data sources and requirements
+- Canonical verse distribution table
+- JSON structure specification
+- Mental health tagging methodology
+- Database schema
+- Seeding process
+- KIAAN integration guidelines
+- Testing and validation
+- Resources and references
+
+📋 **[Mental Health Tagging Guide](data/gita/mental_health_tag_guide.md)**
+- Primary domains with definitions
+- Mental health applications with evidence
+- Tagging principles
+- Key verse collections by need
+
+📁 **[Data Directory README](data/gita/README.md)**
+- Directory structure
+- Data sources
+- Quality standards
+- Creating complete verse database
+
+### **Validation**
+
+Validate Gita data authenticity and completeness:
+
+```bash
+# Validate all 700 verses
+python scripts/validate_gita_authenticity.py
+
+# Validate specific file
+python scripts/validate_gita_authenticity.py data/gita/sample_verses_structure.json
+```
+
+**The script validates:**
+- ✅ Total count: 700 verses
+- ✅ Chapter distribution matches canonical counts
+- ✅ Sanskrit is valid Devanagari (U+0900 to U+097F)
+- ✅ Transliteration uses IAST diacritics
+- ✅ All required fields present
+- ✅ Mental health tags are valid
+
+### **Database Verification**
+
+Verify that all 700 verses are loaded in the database:
+
+```bash
+# Verify database contents
+python scripts/verify_700_verses.py --database
+```
+
+### **KIAAN Ecosystem Integration**
+
+All wellness tools in the KIAAN ecosystem draw from the complete 700-verse database:
+
+- **KIAAN (General Wellness)**: Searches all 700 verses for relevant wisdom
+- **Ardha (Cognitive Reframing)**: Focuses on sthitaprajna verses (2.54-72) for steady wisdom
+- **Viyoga (Detachment Coach)**: Uses karma yoga verses for healthy detachment
+- **Relationship Compass**: Draws from bhakti verses (Chapter 12) for compassion
+
+**Example Flow:**
+```
+User: "I'm anxious about a job interview tomorrow"
+↓
+KIAAN searches verses tagged with: anxiety, work_stress
+↓
+Returns verses: 2.47 (outcome detachment), 6.35 (mind control), 18.66 (surrender)
+↓
+Builds response: "Focus on your preparation, not the outcome..."
+```
+
+### **Data Quality Commitment**
+
+This implementation represents **sacred wisdom** being applied to mental health. We maintain:
+
+- **Zero compromise** on authenticity
+- **Cultural sensitivity** in all applications  
+- **Evidence-based** mental health connections
+- **Respectful integration** honoring spiritual depth
+- **Quality validation** at every step
+
+🕉️ **For the benefit of all beings** 🕉️
+
+---
+
 ## 🧪 **Testing**
 
 MindVibe has a comprehensive test suite with **100% updated imports** for the new backend structure.

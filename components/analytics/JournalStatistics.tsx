@@ -119,7 +119,6 @@ export function JournalStatistics({
               dataKey="value"
               xAxisKey="name"
               height={200}
-              isDark={true}
               colors={sentimentColors}
               showTooltip={true}
               tooltipFormatter={(value) => `${value}%`}
@@ -157,7 +156,6 @@ export function JournalStatistics({
               dataKey="count"
               xAxisKey="name"
               height={200}
-              isDark={true}
               showGrid={false}
               showTooltip={true}
             />
@@ -181,7 +179,6 @@ export function JournalStatistics({
             dataKey="count"
             xAxisKey="month"
             height={150}
-            isDark={true}
             showGrid={true}
             showTooltip={true}
             tooltipFormatter={(value) => `${value} entries`}

@@ -1,0 +1,114 @@
+{
+  "common": {
+    "welcome": "Welcome to MindVibe",
+    "tagline": "Your mindful companion for inner peace",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "settings": "Settings",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  },
+  "pricing": {
+    "title": "Choose Your Path to Inner Peace",
+    "subtitle": "Every plan includes the same quality KIAAN guidance. Choose based on how often you'd like to connect.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "billedYearly": "when billed yearly",
+    "currentPlan": "Current Plan",
+    "getStartedFree": "Get Started Free",
+    "mostPopular": "Most Popular",
+    "comparePlans": "Compare Plans",
+    "kiaanQuestions": "KIAAN Questions",
+    "unlimited": "Unlimited",
+    "features": "Features",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "changePlan": {
+        "q": "Can I change my plan later?",
+        "a": "Yes! You can upgrade, downgrade, or cancel your plan at any time. Changes take effect immediately for upgrades, or at the end of your billing period for downgrades."
+      },
+      "quota": {
+        "q": "What happens when I exceed my question quota?",
+        "a": "You can still use all other features like journaling, mood tracking, and breathing exercises. Your quota resets at the start of each billing period."
+      },
+      "security": {
+        "q": "Is my data secure?",
+        "a": "Absolutely. Your journal entries are encrypted on your device. We never sell your data and maintain strict privacy standards."
+      },
+      "refund": {
+        "q": "Can I get a refund?",
+        "a": "We offer a 14-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund."
+      }
+    },
+    "promise": {
+      "title": "The KIAAN Promise",
+      "description": "Every user receives the same quality of guidance from KIAAN—the only difference is how many questions you can ask each month. We believe mental wellness should be accessible to everyone.",
+      "items": {
+        "quality": "Same AI quality for all tiers",
+        "noDegradation": "No feature degradation",
+        "privacy": "Your data stays private",
+        "cancel": "Cancel anytime"
+      }
+    }
+  },
+  "tiers": {
+    "free": {
+      "name": "Free",
+      "description": "Perfect for getting started with KIAAN",
+      "cta": "Get Started Free"
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Enhanced tools for deeper practice",
+      "cta": "Go Pro"
+    },
+    "premium": {
+      "name": "Premium",
+      "description": "Full access to all KIAAN features",
+      "cta": "Go Premium"
+    },
+    "executive": {
+      "name": "Executive",
+      "description": "Unlimited access for power users",
+      "cta": "Go Executive"
+    }
+  },
+  "chat": {
+    "title": "KIAAN",
+    "subtitle": "Your wisdom companion",
+    "placeholder": "Share what's on your mind...",
+    "send": "Send",
+    "sendToJournal": "Send to Journal",
+    "jumpToLatest": "Jump to Latest",
+    "welcome": {
+      "title": "Welcome to KIAAN",
+      "description": "Share what's on your mind. I'm here to offer warm, grounded guidance rooted in timeless wisdom."
+    },
+    "typing": "KIAAN is typing..."
+  },
+  "navigation": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "contact": "Contact",
+    "journal": "Journal",
+    "analytics": "Analytics"
+  },
+  "currency": {
+    "usd": "US Dollar",
+    "eur": "Euro",
+    "inr": "Indian Rupee"
+  }
+}

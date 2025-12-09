@@ -137,7 +137,6 @@ export function KIAANInsights({
               dataKey="messages"
               xAxisKey="name"
               height={180}
-              isDark={true}
               showGrid={false}
               showTooltip={true}
               colors={['#3b82f6']}

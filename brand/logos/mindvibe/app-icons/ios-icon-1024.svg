@@ -1,0 +1,38 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- iOS App Icon - 1024x1024 -->
+  <defs>
+    <linearGradient id="ios-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="50%" stop-color="#F7931E"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    <radialGradient id="ios-glow" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.35)"/>
+      <stop offset="70%" stop-color="rgba(255, 107, 53, 0.1)"/>
+      <stop offset="100%" stop-color="rgba(255, 107, 53, 0)"/>
+    </radialGradient>
+    <linearGradient id="ios-symbol" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+    <clipPath id="ios-clip">
+      <rect width="1024" height="1024" rx="224"/>
+    </clipPath>
+  </defs>
+  
+  <g clip-path="url(#ios-clip)">
+    <!-- Background Fill -->
+    <rect width="1024" height="1024" fill="url(#ios-gradient)"/>
+    
+    <!-- Inner Glow -->
+    <rect width="1024" height="1024" fill="url(#ios-glow)"/>
+    
+    <!-- M Letterform -->
+    <g transform="translate(512, 512)">
+      <path d="M-200 160V-110c0-16 10-28 24-28h72c10 0 18 4 22 12l82 128 82-128c4-8 12-12 22-12h72c14 0 24 12 24 28v270c0 16-10 28-24 28h-60c-14 0-24-12-24-28V80l-72 112c-8 14-28 14-36 0l-72-112v80c0 16-10 28-24 28h-60c-14 0-24-12-24-28z" fill="url(#ios-symbol)"/>
+    </g>
+    
+    <!-- Highlight -->
+    <path d="M256 360 C336 200, 688 200, 768 360" fill="none" stroke="rgba(255, 255, 255, 0.2)" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,22 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { BillingToggle, PricingCard, FeatureComparison, type PricingTier } from '@/components/pricing'
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
-const pricingTiers: PricingTier[] = [
+// Updated pricing tiers per requirements:
+// Pro: $5, Premium: $10, Executive: $15
+const createPricingTiers = (
+  currency: Currency,
+  formatPrice: (amount: number, options?: { showDecimals?: boolean }) => string,
+  getMonthlyPrice: (tierId: string) => number,
+  getYearlyPrice: (tierId: string) => number
+): PricingTier[] => [
   {
     id: 'free',
     name: 'Free',
     description: 'Perfect for getting started with KIAAN',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    kiaanQuota: 10,
+    kiaanQuota: 20,
     features: [
-      '10 KIAAN questions/month',
-      'Journal with encryption',
+      '20 KIAAN questions/month',
       'Mood tracking',
       'Daily wisdom',
       'Basic breathing exercises',
@@ -26,57 +33,73 @@ const pricingTiers: PricingTier[] = [
   {
     id: 'basic',
     name: 'Basic',
-    description: 'For regular mental wellness practice',
-    monthlyPrice: 9,
-    yearlyPrice: 89,
-    kiaanQuota: 50,
+    description: 'Build a steady practice with guided support',
+    monthlyPrice: getMonthlyPrice('basic'),
+    yearlyPrice: getYearlyPrice('basic'),
+    kiaanQuota: 75,
     features: [
-      '50 KIAAN questions/month',
+      '75 KIAAN questions/month',
       'All Free features',
-      'Ardha Reframing Assistant',
-      'Viyog Detachment Coach',
-      'Extended journal insights',
-      'Email support',
+      'Guided breathing sessions',
+      'Mood journaling prompts',
+      'Priority email support',
     ],
-    cta: 'Start Basic',
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    description: 'Enhanced tools for deeper practice',
+    monthlyPrice: getMonthlyPrice('pro'),
+    yearlyPrice: getYearlyPrice('pro'),
+    kiaanQuota: 150,
+    features: [
+      '150 KIAAN questions/month',
+      'All Free features',
+      'Journal with encryption',
+      'Ardha Reframing Assistant',
+      'Viyoga Detachment Coach',
+    ],
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
   },
   {
     id: 'premium',
     name: 'Premium',
     description: 'Full access to all KIAAN features',
-    monthlyPrice: 19,
-    yearlyPrice: 189,
-    kiaanQuota: 200,
+    monthlyPrice: getMonthlyPrice('premium'),
+    yearlyPrice: getYearlyPrice('premium'),
+    kiaanQuota: 300,
     highlighted: true,
     badge: 'Most Popular',
     features: [
-      '200 KIAAN questions/month',
-      'All Basic features',
+      '300 KIAAN questions/month',
+      'All Pro features',
       'Relationship Compass',
-      'Karma Reset Guide',
-      'Advanced mood analytics',
+      'Emotional Reset Guide',
       'Priority support',
-      'Custom breathing patterns',
+      'Advanced mood analytics',
     ],
-    cta: 'Go Premium',
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
+    id: 'executive',
+    name: 'Executive',
     description: 'Unlimited access for power users',
-    monthlyPrice: 49,
-    yearlyPrice: 490,
+    monthlyPrice: getMonthlyPrice('executive'),
+    yearlyPrice: getYearlyPrice('executive'),
     kiaanQuota: 'unlimited',
     features: [
       'Unlimited KIAAN questions',
       'All Premium features',
       'API access',
-      'Team management',
-      'Custom integrations',
       'Dedicated support',
       'SLA guarantee',
     ],
-    cta: 'Contact Sales',
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
   },
 ]
 
@@ -84,55 +107,318 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '10', basic: '50', premium: '200', enterprise: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', premium: 'Same for all', enterprise: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Monthly Questions', values: { free: '20', basic: '75', pro: '150', premium: '300', executive: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, basic: true, premium: true, enterprise: true } },
-      { name: 'Viyog Detachment', values: { free: false, basic: true, premium: true, enterprise: true } },
-      { name: 'Relationship Compass', values: { free: false, basic: false, premium: true, enterprise: true } },
-      { name: 'Karma Reset Guide', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'Ardha Reframing', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Viyoga Detachment', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Emotional Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Mood Tracking', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Daily Wisdom', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Advanced Analytics', values: { free: false, basic: false, premium: true, enterprise: true } },
-      { name: 'API Access', values: { free: false, basic: false, premium: false, enterprise: true } },
+      { name: 'Encrypted Journal', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Mood Tracking', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Daily Wisdom', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Advanced Analytics', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
+      { name: 'API Access', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, basic: true, premium: true, enterprise: true } },
-      { name: 'Email Support', values: { free: false, basic: true, premium: true, enterprise: true } },
-      { name: 'Priority Support', values: { free: false, basic: false, premium: true, enterprise: true } },
-      { name: 'Dedicated Support', values: { free: false, basic: false, premium: false, enterprise: true } },
+      { name: 'Community Access', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Email Support', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Priority Support', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Dedicated Support', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
     ],
   },
 ]
 
+// Currency Switcher Component
+function CurrencySwitcher({
+  currency,
+  onCurrencyChange,
+}: {
+  currency: Currency
+  onCurrencyChange: (currency: Currency) => void
+}) {
+  const currencies: Currency[] = ['USD', 'EUR', 'INR']
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const buttonRefs = useRef<Partial<Record<Currency, HTMLButtonElement | null>>>({})
+
+  useEffect(() => {
+    const activeButton = buttonRefs.current[currency]
+    activeButton?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [currency])
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = currencies.indexOf(currency)
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      const next = (currentIndex + 1) % currencies.length
+      onCurrencyChange(currencies[next])
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      const prev = (currentIndex - 1 + currencies.length) % currencies.length
+      onCurrencyChange(currencies[prev])
+    }
+  }
+
+  return (
+    <div className="w-full max-w-xl" aria-label="Currency selector">
+      <div
+        ref={scrollerRef}
+        className="flex gap-3 overflow-x-auto no-scrollbar rounded-2xl bg-orange-500/10 p-2 shadow-inner"
+        role="tablist"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        {currencies.map((curr) => (
+          <button
+            key={curr}
+            ref={(el) => {
+              buttonRefs.current[curr] = el
+            }}
+            role="tab"
+            aria-selected={currency === curr}
+            onClick={() => onCurrencyChange(curr)}
+            className={`flex min-w-[110px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
+              currency === curr
+                ? 'bg-gradient-to-r from-orange-400 via-amber-300 to-orange-200 text-slate-900 shadow-lg shadow-orange-500/30'
+                : 'bg-orange-500/10 text-orange-100/80 hover:bg-orange-500/20'
+            }`}
+          >
+            <span className="text-base">{CURRENCIES[curr].symbol}</span>
+            <span>{curr}</span>
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-center text-xs text-orange-100/70">Scroll or tap to choose your currency.</p>
+    </div>
+  )
+}
+
 export default function PricingPage() {
   const router = useRouter()
   const { subscription } = useSubscription()
+  const { currency, setCurrency, formatPrice, getMonthlyPrice, getYearlyPrice } = useCurrency()
   const [isYearly, setIsYearly] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
+  const [centeredCardIndex, setCenteredCardIndex] = useState(0)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const scrollRafRef = useRef<number>()
+  const scrollFadeTimeoutRef = useRef<NodeJS.Timeout>()
+  const snapTimeoutRef = useRef<NodeJS.Timeout>()
+  const isDraggingRef = useRef(false)
+  const lastDragXRef = useRef(0)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+
+  // Get pricing tiers with current currency
+  const pricingTiers = createPricingTiers(currency, formatPrice, getMonthlyPrice, getYearlyPrice)
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      setPrefersReducedMotion(mediaQuery.matches)
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+      mediaQuery.addEventListener('change', handler)
+      return () => mediaQuery.removeEventListener('change', handler)
+    }
+  }, [])
+
+  // Scroll-related logic for detecting centered card
+  const updateCenteredCard = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const cards = container.querySelectorAll('.pricing-card')
+    const containerRect = container.getBoundingClientRect()
+    const containerCenter = containerRect.left + containerRect.width / 2
+
+    let closestIndex = 0
+    let closestDistance = Infinity
+
+    cards.forEach((card, index) => {
+      const cardRect = card.getBoundingClientRect()
+      const cardCenter = cardRect.left + cardRect.width / 2
+      const distance = Math.abs(containerCenter - cardCenter)
+      
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestIndex = index
+      }
+    })
+
+    setCenteredCardIndex(closestIndex)
+  }, [])
+
+  const snapToClosestCard = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const cards = Array.from(container.querySelectorAll<HTMLElement>('.pricing-card'))
+    if (!cards.length) return
+
+    const containerCenter = container.scrollLeft + container.clientWidth / 2
+
+    let closestIndex = 0
+    let closestDistance = Number.POSITIVE_INFINITY
+
+    cards.forEach((card, index) => {
+      const cardCenter = card.offsetLeft + card.clientWidth / 2
+      const distance = Math.abs(containerCenter - cardCenter)
+
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestIndex = index
+      }
+    })
+
+    const targetCard = cards[closestIndex]
+    const targetCenter = targetCard.offsetLeft + targetCard.clientWidth / 2
+    const targetScrollLeft = targetCenter - container.clientWidth / 2
+
+    container.scrollTo({
+      left: targetScrollLeft,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    })
+  }, [prefersReducedMotion])
+
+  const handleActiveScroll = useCallback(() => {
+    setIsScrolling(true)
+    if (scrollFadeTimeoutRef.current) clearTimeout(scrollFadeTimeoutRef.current)
+    scrollFadeTimeoutRef.current = setTimeout(() => setIsScrolling(false), 900)
+
+    if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
+    snapTimeoutRef.current = setTimeout(() => snapToClosestCard(), 180)
+  }, [snapToClosestCard])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    // Initial check
+    updateCenteredCard()
+
+    // Listen for scroll
+    const onScroll = () => {
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current)
+      scrollRafRef.current = requestAnimationFrame(() => {
+        updateCenteredCard()
+        handleActiveScroll()
+      })
+    }
+
+    container.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', updateCenteredCard, { passive: true })
+
+    return () => {
+      container.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', updateCenteredCard)
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current)
+      if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
+      if (scrollFadeTimeoutRef.current) clearTimeout(scrollFadeTimeoutRef.current)
+    }
+  }, [handleActiveScroll, updateCenteredCard])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const handleWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        event.preventDefault()
+        container.scrollBy({ left: event.deltaY, behavior: 'auto' })
+      }
+
+      handleActiveScroll()
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+      isDraggingRef.current = true
+      lastDragXRef.current = event.clientX
+      container.setPointerCapture(event.pointerId)
+      container.style.scrollBehavior = 'auto'
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!isDraggingRef.current) return
+      event.preventDefault()
+      const deltaX = event.clientX - lastDragXRef.current
+      container.scrollLeft -= deltaX
+      lastDragXRef.current = event.clientX
+      handleActiveScroll()
+    }
+
+    const handlePointerUp = (event: PointerEvent) => {
+      if (!isDraggingRef.current) return
+      isDraggingRef.current = false
+      if (container.hasPointerCapture(event.pointerId)) {
+        container.releasePointerCapture(event.pointerId)
+      }
+      container.style.scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth'
+      snapToClosestCard()
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    container.addEventListener('pointerdown', handlePointerDown)
+    container.addEventListener('pointermove', handlePointerMove)
+    container.addEventListener('pointerup', handlePointerUp)
+    container.addEventListener('pointerleave', handlePointerUp)
+    container.addEventListener('pointercancel', handlePointerUp)
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel)
+      container.removeEventListener('pointerdown', handlePointerDown)
+      container.removeEventListener('pointermove', handlePointerMove)
+      container.removeEventListener('pointerup', handlePointerUp)
+      container.removeEventListener('pointerleave', handlePointerUp)
+      container.removeEventListener('pointercancel', handlePointerUp)
+    }
+  }, [handleActiveScroll, prefersReducedMotion, snapToClosestCard])
+
+  // Keyboard navigation for scroll container
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const cardWidth = 320 // Approximate card width + gap
+    
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault()
+        container.scrollBy({ left: -cardWidth, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+      case 'ArrowRight':
+        e.preventDefault()
+        container.scrollBy({ left: cardWidth, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+      case 'Home':
+        e.preventDefault()
+        container.scrollTo({ left: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+      case 'End':
+        e.preventDefault()
+        container.scrollTo({ left: container.scrollWidth, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+        break
+    }
+  }, [prefersReducedMotion])
 
   const handleSelectTier = async (tierId: string) => {
     if (tierId === 'free') {
       router.push('/dashboard')
-      return
-    }
-
-    if (tierId === 'enterprise') {
-      router.push('/contact')
       return
     }
 
@@ -145,30 +431,78 @@ export default function PricingPage() {
     }, 1000)
   }
 
+  // Format prices for display
+  const getFormattedPrice = (tierId: string, yearly: boolean) => {
+    if (tierId === 'free') return formatPrice(0)
+    const price = yearly ? getYearlyPrice(tierId) : getMonthlyPrice(tierId)
+    return formatPrice(price)
+  }
+
+  const getFormattedMonthlyEquivalent = (tierId: string) => {
+    if (tierId === 'free') return null
+    const yearlyPrice = getYearlyPrice(tierId)
+    const monthlyEquivalent = yearlyPrice / 12
+    return formatPrice(monthlyEquivalent)
+  }
+
   return (
-    <main className="mx-auto max-w-7xl px-4 py-12">
+    <main className="mx-auto max-w-6xl px-4 py-12">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-orange-50 mb-4">
           Choose Your Path to Inner Peace
         </h1>
         <p className="text-lg text-orange-100/70 max-w-2xl mx-auto mb-8">
-          Every plan includes the same quality KIAAN guidance. Choose based on how often you'd like to connect.
+          Every plan includes the same quality KIAAN guidance. Choose based on how often you&apos;d like to connect.
         </p>
-        <BillingToggle isYearly={isYearly} onToggle={setIsYearly} />
+        
+        {/* Currency Switcher + Billing Toggle */}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-4 w-full">
+            <CurrencySwitcher currency={currency} onCurrencyChange={setCurrency} />
+            <div className="w-full lg:w-auto">
+              <BillingToggle isYearly={isYearly} onToggle={setIsYearly} />
+            </div>
+          </div>
+          <p className="text-sm text-orange-100/70">
+            INR pricing is always 20% less than USD/EUR, with symbols updating instantly as you scroll.
+          </p>
+        </div>
       </div>
 
-      {/* Pricing Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        {pricingTiers.map((tier) => (
-          <PricingCard
+      {/* Scrollable Pricing Cards Container */}
+      <div
+        ref={scrollContainerRef}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label="Pricing plans carousel"
+        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 xl:grid-cols-3 ${
+          isScrolling ? 'scrolling' : ''
+        }`}
+        style={{
+          scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+          overflowX: 'auto',
+        }}
+      >
+        {pricingTiers.map((tier, index) => (
+          <div
             key={tier.id}
-            tier={tier}
-            isYearly={isYearly}
-            onSelect={handleSelectTier}
-            currentPlan={subscription?.tierId}
-            loading={loading === tier.id}
-          />
+            className="flex-shrink-0 w-full snap-center sm:snap-auto sm:w-full"
+          >
+            <PricingCard
+              tier={tier}
+              isYearly={isYearly}
+              onSelect={handleSelectTier}
+              currentPlan={subscription?.tierId}
+              loading={loading === tier.id}
+              formattedPrice={getFormattedPrice(tier.id, isYearly)}
+              formattedMonthlyEquivalent={isYearly ? getFormattedMonthlyEquivalent(tier.id) ?? undefined : undefined}
+              isCentered={index === centeredCardIndex}
+            />
+          </div>
         ))}
       </div>
 
@@ -239,7 +573,7 @@ export default function PricingPage() {
             },
             {
               q: 'Can I get a refund?',
-              a: "We offer a 14-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund.",
+              a: 'We offer a 14-day money-back guarantee for all paid plans. If you&apos;re not satisfied, contact us for a full refund.',
             },
           ].map((faq, i) => (
             <Card key={i} variant="bordered">

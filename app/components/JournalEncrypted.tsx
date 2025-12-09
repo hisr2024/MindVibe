@@ -31,7 +31,24 @@ function useLocalState<T>(key: string, initial: T) {
   return [val, setVal] as const
 }
 
-async function deriveKey(passphrase: string, salt: BufferSource) {
+function toArrayBuffer(source: BufferSource): ArrayBuffer {
+  if (source instanceof ArrayBuffer) return source
+
+  if (ArrayBuffer.isView(source)) {
+    const { buffer, byteOffset, byteLength } = source
+
+    if (buffer instanceof ArrayBuffer) {
+      return buffer.slice(byteOffset, byteOffset + byteLength)
+    }
+
+    return new Uint8Array(buffer, byteOffset, byteLength).slice().buffer
+  }
+
+  throw new Error('Unsupported buffer source')
+}
+
+async function deriveKey(passphrase: string, saltSource: BufferSource) {
+  const salt = toArrayBuffer(saltSource)
   const enc = new TextEncoder()
   const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey'])
   return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
@@ -121,7 +138,7 @@ export default function JournalEncrypted() {
   return (
     <main className="space-y-4 text-orange-50">
       <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">
-        <h2 className="text-lg font-semibold">Encrypted Journal</h2>
+        <h2 className="text-lg font-semibold">Encrypted Sacred Reflections</h2>
         <p className="text-sm text-orange-100/80">Protected with AES-GCM; your passphrase never leaves this device.</p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="text-sm text-orange-100/80">
@@ -131,7 +148,7 @@ export default function JournalEncrypted() {
               value={pass}
               onChange={e => setPass(e.target.value)}
               className="mt-1 block w-64 rounded-2xl border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
-              aria-label="Journal passphrase"
+              aria-label="Sacred Reflections passphrase"
             />
           </label>
           <div className="text-xs text-orange-100/70">Your passphrase is never stored.</div>

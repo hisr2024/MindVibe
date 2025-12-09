@@ -56,3 +56,4 @@ class MoodOut(BaseModel):
     tags: list[str] | None
     note: str | None
     at: str
+    kiaan_response: str | None = None

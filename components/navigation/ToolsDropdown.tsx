@@ -1,0 +1,191 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
+
+export interface ToolItem {
+  id: string
+  name: string
+  description: string
+  href: string
+  icon: React.ReactNode
+}
+
+export interface ToolCategory {
+  id: string
+  name: string
+  items: ToolItem[]
+}
+
+export interface ToolsDropdownProps {
+  /** Categories of tools to display (optional - uses defaults from constants) */
+  categories?: ToolCategory[]
+  /** Optional className for styling */
+  className?: string
+}
+
+/**
+ * ToolsDropdown component for organized display of guidance engines and karma tools.
+ *
+ * Features:
+ * - Clean categorization with icons
+ * - Keyboard navigation support
+ * - Focus trap when open
+ * - Click outside to close
+ * - MindVibe dark theme styling
+ */
+export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Close on escape key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false)
+        buttonRef.current?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
+  // Close when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
+  // Use provided categories or convert from TOOLS_BY_CATEGORY
+  const displayCategories: ToolCategory[] = categories || TOOLS_BY_CATEGORY.filter(
+    cat => cat.id === 'guidance' || cat.id === 'karma'
+  ).map(cat => ({
+    id: cat.id,
+    name: cat.name,
+    items: cat.tools.map((tool: ToolConfig) => ({
+      id: tool.id,
+      name: tool.title,
+      description: tool.description,
+      href: tool.href,
+      icon: <span className="text-base">{tool.icon}</span>,
+    })),
+  }))
+
+  return (
+    <div ref={dropdownRef} className={`relative ${className}`}>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+      >
+        Tools
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-orange-500/20 bg-[#0f0f14] shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+          role="menu"
+          aria-orientation="vertical"
+        >
+          <div className="p-2">
+            {displayCategories.map((category, categoryIndex) => (
+              <div key={category.id}>
+                {categoryIndex > 0 && (
+                  <div className="my-2 border-t border-white/5" />
+                )}
+                <div className="px-3 py-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-100/50">
+                    {category.name}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {category.items.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-start gap-3 rounded-lg px-3 py-2 transition hover:bg-white/5 focus:bg-white/5 focus:outline-none"
+                      role="menuitem"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20">
+                        {item.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium text-orange-50">
+                          {item.name}
+                        </div>
+                        <div className="text-xs text-orange-100/60">
+                          {item.description}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* About Tools Link */}
+            <div className="mt-2 border-t border-white/5 pt-2">
+              <Link
+                href="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-orange-100/70 transition hover:bg-white/5 hover:text-orange-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M3 9h18" />
+                  <path d="M9 21V9" />
+                </svg>
+                View All Tools
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default ToolsDropdown

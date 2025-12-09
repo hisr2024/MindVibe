@@ -1,0 +1,16 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Favicon 16x16 -->
+  <defs>
+    <linearGradient id="fav16-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="50%" stop-color="#F7931E"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Circle -->
+  <circle cx="8" cy="8" r="7" fill="url(#fav16-gradient)"/>
+  
+  <!-- Simplified M -->
+  <path d="M4 11V5c0-0.3 0.2-0.5 0.4-0.5h1.4c0.15 0 0.25 0.05 0.35 0.2L8 7.6l1.85-2.9c0.1-0.15 0.2-0.2 0.35-0.2h1.4c0.2 0 0.4 0.2 0.4 0.5v6c0 0.3-0.2 0.5-0.4 0.5h-1.2c-0.2 0-0.4-0.2-0.4-0.5v-3l-1.3 2c-0.15 0.25-0.55 0.25-0.7 0l-1.3-2v3c0 0.3-0.2 0.5-0.4 0.5h-1.2c-0.2 0-0.4-0.2-0.4-0.5z" fill="#1a1a1a"/>
+</svg>

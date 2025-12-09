@@ -1,6 +1,10 @@
 'use client'
-import { useState, useEffect, useRef, type ReactElement } from 'react'
+import { useState, useEffect, useRef, useCallback, type CSSProperties, type ReactElement } from 'react'
 import Link from 'next/link'
+import { KiaanLogo } from '@/src/components/KiaanLogo'
+import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
+import SimpleBar from 'simplebar-react'
+import { apiCall, getErrorMessage } from '@/lib/api-client'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -188,6 +192,24 @@ const RELATIONAL_TRIGGER_PATTERNS = [
   'Admissions of feeling defensive, judged, or misunderstood with someone specific.'
 ]
 
+const GUIDANCE_MODE_DESCRIPTIONS: Record<GuidanceMode, { title: string; description: string }> = {
+  'inner-peace': {
+    title: 'Inner Peace',
+    description:
+      'Find stillness through breath-focused exercises and gentle grounding techniques. Perfect for moments when you need to calm your mind and reconnect with tranquility.'
+  },
+  'mind-control': {
+    title: 'Mind Control',
+    description:
+      'Develop focused clarity through structured mindfulness practices. Ideal for decision-making, concentration, and maintaining mental discipline.'
+  },
+  'self-kindness': {
+    title: 'Self Kindness',
+    description:
+      'Cultivate compassion for yourself through warm, supportive exercises. Essential for healing, self-acceptance, and nurturing your emotional well-being.'
+  }
+}
+
 type ClaritySession = {
   active: boolean
   started: boolean
@@ -201,65 +223,145 @@ type ClaritySession = {
 
 export default function Home() {
   const [chatPrefill, setChatPrefill] = useState<string | null>(null)
+  const [selectedGuidanceMode, setSelectedGuidanceMode] = useState<GuidanceMode | null>(null)
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8 pb-28 mobile-safe-padding">
+    <main className="mv-page relative min-h-screen overflow-hidden p-4 md:p-8 pb-28 mobile-safe-padding">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/30 via-[#ff9933]/14 to-transparent blur-3xl" />
-        <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/20 via-orange-500/12 to-transparent blur-[120px]" />
-        <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-[#1f2937] via-[#ff9933]/12 to-transparent blur-[90px] animate-pulse" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.04),transparent_35%)]" />
+        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/25 via-[#ff9933]/14 to-transparent blur-3xl" />
+        <div className="absolute right-0 bottom-10 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/18 via-orange-500/10 to-transparent blur-[120px]" />
+        <div className="absolute left-1/4 top-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-[#1f2937]/70 via-[#ff9933]/10 to-transparent blur-[90px] animate-pulse" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.06),transparent_35%)]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto space-y-8">
-        <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 md:p-10 shadow-[0_30px_120px_rgba(255,115,39,0.18)]">
-          <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
-          <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <AnimatedKiaanLogo />
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/80">Inner Peace Companion</p>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-100 drop-shadow-[0_10px_40px_rgba(255,149,79,0.28)]">KIAAN</h1>
-                <p className="text-base sm:text-lg md:text-xl text-orange-100/90">Crisp, calm guidance.</p>
+        <div className="relative max-w-6xl mx-auto space-y-8">
+          <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 md:p-10 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur">
+            <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
+            <div className="absolute left-4 bottom-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
+            <div className="grid items-start gap-8 lg:grid-cols-[1.1fr,1fr]">
+              <div className="space-y-4">
+                <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
+                <p className="text-sm sm:text-base mv-panel-subtle max-w-xl">A premium, animated companion shaped by Krishna&apos;s flute and peacock feather — always calm, always modern.</p>
+                <div className="flex gap-2 flex-wrap">
+                  <TokenCard label="Inner Peace" note="Gentle breath and soft focus" tone="teal" icon={<SunriseIcon />} />
+                  <TokenCard label="Mind Control" note="Steady steps, one thought at a time" tone="blue" icon={<MindWaveIcon />} />
+                  <TokenCard label="Self Kindness" note="You are welcome here" tone="lilac" icon={<HeartBreezeIcon />} />
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-5 shadow-[0_18px_70px_rgba(255,147,71,0.16)]">
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 via-[#ff9933]/5 to-orange-300/10" />
+                <div className="relative space-y-3">
+                  <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Guidance modes</p>
+                  <h3 className="text-2xl font-semibold text-orange-50">Triangle of Flowing Energy</h3>
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+                    <TriangleOfEnergy
+                      selectedMode={selectedGuidanceMode}
+                      onSelectMode={setSelectedGuidanceMode}
+                      size={240}
+                    />
+                    <div className="flex-1 space-y-2">
+                      {selectedGuidanceMode ? (
+                        <div className="rounded-xl border border-orange-400/25 bg-black/40 p-3">
+                          <h4 className="text-base font-semibold text-orange-50 flex items-center gap-2">
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  selectedGuidanceMode === 'inner-peace'
+                                    ? '#4fd1c5'
+                                    : selectedGuidanceMode === 'mind-control'
+                                      ? '#3b82f6'
+                                      : '#ec4899'
+                              }}
+                            />
+                            {GUIDANCE_MODE_DESCRIPTIONS[selectedGuidanceMode].title}
+                          </h4>
+                          <p className="mt-1 text-sm text-orange-100/80">
+                            {GUIDANCE_MODE_DESCRIPTIONS[selectedGuidanceMode].description}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-orange-100/75">Tap a mode to explore how KIAAN guides your state.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex gap-2 flex-wrap justify-center">
-              <TokenCard label="Inner Peace" note="Gentle breath and soft focus" gradient="from-[#3b6f6b]/60 via-[#4f9088]/50 to-[#d6f3ec]/50" icon={<SunriseIcon />} />
-              <TokenCard label="Mind Control" note="Steady steps, one thought at a time" gradient="from-[#20324a]/60 via-[#405b75]/50 to-[#dbe7f6]/40" icon={<MindWaveIcon />} />
-              <TokenCard label="Self Kindness" note="You are welcome here" gradient="from-[#5a3f52]/60 via-[#7c5d73]/50 to-[#f3e6f0]/45" icon={<HeartBreezeIcon />} />
-            </div>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button
-              onClick={() => document.getElementById('wisdom-chat-rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition w-full sm:w-auto text-center"
-            >
-              Wisdom Chat Rooms
-            </button>
-            <div className="px-3 py-2 rounded-xl border border-orange-400/30 text-xs text-orange-100/80 bg-black/40 w-full sm:w-auto text-center">
-              Multiple guidance rooms in one tap
-            </div>
-          </div>
         </header>
 
         <div className="bg-orange-500/5 backdrop-blur border border-orange-500/20 rounded-2xl p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)]">
           <p className="text-sm text-orange-100/90">🔒 Conversations remain private • a warm, confidential refuge</p>
         </div>
 
-        <MoodTracker />
+        <section className="grid gap-3 md:grid-cols-3" aria-label="Core daily actions">
+          <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)]">
+            <p className="text-xs text-orange-100/70">Talk to KIAAN</p>
+            <h2 className="text-lg font-semibold text-orange-50">Instant guidance</h2>
+            <p className="mt-1 text-sm text-orange-100/80">Jump into a focused conversation or send a saved quick prompt.</p>
+            <button
+              onClick={() => scrollToSection('kiaan-chat')}
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+            >
+              Open Chat
+              <span aria-hidden>→</span>
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-teal-400/15 bg-white/5 p-4 shadow-[0_14px_60px_rgba(34,197,235,0.12)]">
+            <p className="text-xs text-white/60">Mood Check-In</p>
+            <h2 className="text-lg font-semibold text-white">Spot your state</h2>
+            <p className="mt-1 text-sm text-white/70">Log how you feel and get a micro-response instantly.</p>
+            <button
+              onClick={() => scrollToSection('mood-check')}
+              className="mt-3 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Start check-in
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)]">
+            <p className="text-xs text-amber-100/80">Journal</p>
+            <h2 className="text-lg font-semibold text-amber-50">Sacred Reflections</h2>
+            <p className="mt-1 text-sm text-amber-100/80">Move to the dedicated space when you want to write or review entries.</p>
+            <Link
+              href="/sacred-reflections"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-200/40"
+            >
+              Go to Journal
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </section>
+
+        <section id="mood-check">
+          <MoodTracker />
+        </section>
         <KIAANChat prefill={chatPrefill} onPrefillHandled={() => setChatPrefill(null)} />
         <QuickHelp onSelectPrompt={setChatPrefill} />
-        <ArdhaReframer />
-        <ViyogDetachmentCoach />
-        <RelationshipCompass onSelectPrompt={setChatPrefill} />
-        <ClarityPauseSuite />
-        <KarmaResetGuide onSelectPrompt={setChatPrefill} />
-        <DailyWisdom onChatClick={setChatPrefill} />
-        <PublicChatRooms />
-        <Journal />
+        <section
+          id="journal-section"
+          className="rounded-3xl border border-amber-300/15 bg-white/5 p-5 shadow-[0_18px_80px_rgba(251,191,36,0.12)]"
+        >
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs text-amber-100/70">Journal</p>
+              <h2 className="text-xl font-semibold text-amber-50">Keep reflections in one calm place</h2>
+              <p className="text-sm text-amber-100/80">Open Sacred Reflections to write, revisit, or continue your practice.</p>
+            </div>
+            <Link
+              href="/sacred-reflections"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-200/40"
+            >
+              Open Journal
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </section>
 
         <section className="bg-[#0b0b0f] border border-orange-500/15 rounded-3xl p-5 md:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-3">
           <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
@@ -270,7 +372,7 @@ export default function Home() {
 
         <MobileActionDock
           onChat={() => scrollToSection('kiaan-chat')}
-          onClarity={() => scrollToSection('clarity-suite')}
+          onClarity={() => scrollToSection('kiaan-chat')}
           onJournal={() => scrollToSection('journal-section')}
         />
       </div>
@@ -305,15 +407,13 @@ function ArdhaReframer() {
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `Role:\nYou are Ardha, the Reframing Assistant—a calm, wise, Gita-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.\n\nYou stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan’s core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using Gita principles. Your job is complementary, not overlapping.\n\nCore Behavior:\n- Identify the negative belief or emotional distortion the user expresses.\n- Acknowledge their feeling with compassion (never invalidate).\n- Apply Bhagavad Gita principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).\n- Generate a clear, modern, emotionally intelligent reframe.\n- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.\n- Never offer spiritual authority—only perspective reshaping.\n- No judgment, no moralizing, no sermons.\n- Reframe in simple, conversational, modern English.\n\nOutput Format:\nWhen the user shares a negative thought, respond with:\n1. Recognition (validate the feeling)\n2. Deep Insight (the principle being applied)\n3. Reframe (positive but realistic)\n4. Small Action Step (something within their control)\n\nBoundaries:\n- You are NOT a therapist.\n- You do NOT give medical, legal, or crisis advice.\n- You do NOT contradict Kiaan.\n- You ONLY transform the user’s thought into a healthier, clearer version.`
+    const systemPrompt = `Role:\nYou are Ardha, the Reframing Assistant—a calm, wise, ancient wisdom-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.\n\nYou stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan’s core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using ancient wisdom principles. Your job is complementary, not overlapping.\n\nCore Behavior:\n- Identify the negative belief or emotional distortion the user expresses.\n- Acknowledge their feeling with compassion (never invalidate).\n- Apply ancient wisdom principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).\n- Generate a clear, modern, emotionally intelligent reframe.\n- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.\n- Never offer spiritual authority—only perspective reshaping.\n- No judgment, no moralizing, no sermons.\n- Reframe in simple, conversational, modern English.\n\nOutput Format:\nWhen the user shares a negative thought, respond with:\n1. Recognition (validate the feeling)\n2. Deep Insight (the principle being applied)\n3. Reframe (positive but realistic)\n4. Small Action Step (something within their control)\n\nBoundaries:\n- You are NOT a therapist.\n- You do NOT give medical, legal, or crisis advice.\n- You do NOT contradict Kiaan.\n- You ONLY transform the user’s thought into a healthier, clearer version.`
 
     const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
@@ -324,68 +424,65 @@ function ArdhaReframer() {
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Ardha. Check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
   }
 
-  return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm text-orange-100/80">Gita-aligned reframing</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Ardha: The Reframing Assistant</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Ardha spots the distortion, validates the feeling, and reshapes it with grounded insight.</p>
+    return (
+      <section className="mv-surface-panel rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <p className="text-sm mv-panel-subtle">Ancient wisdom-aligned reframing</p>
+            <h2 className="text-2xl font-semibold mv-panel-title">Ardha: Reframing Assistant</h2>
+          </div>
+          <div className="mv-chip px-3 py-2 rounded-2xl text-xs">Local only</div>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-3">
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="ardha-input">Share the thought to reframe</label>
-          <textarea
-            id="ardha-input"
-            value={thought}
-            onChange={e => setThought(e.target.value)}
-            placeholder="Example: I keep messing up at work, maybe I’m just not cut out for this."
-            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={requestReframe}
-              disabled={!thought.trim() || loading}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-3">
+            <label className="block text-sm font-semibold mv-panel-title" htmlFor="ardha-input">Share the thought to reframe</label>
+            <textarea
+              id="ardha-input"
+              value={thought}
+              onChange={e => setThought(e.target.value)}
+              placeholder="Example: I keep messing up at work, maybe I’m just not cut out for this."
+              className="mv-input w-full min-h-[120px] rounded-2xl p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+            />
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={requestReframe}
+                disabled={!thought.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Ardha is reflecting...' : 'Reframe with Ardha'}
+              {loading ? <span>Reflecting...</span> : <span>Reframe</span>}
             </button>
-            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
-              Ardha replies with Recognition, Insight, Reframe, and one small action.
+          </div>
+            {error && <p className="text-sm mv-panel-title"><span>{error}</span></p>}
+          </div>
+
+          <div className="space-y-3 rounded-2xl border p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]" style={{ background: 'var(--mv-surface-subtle)', borderColor: 'var(--mv-border)' }}>
+            <h3 className="text-sm font-semibold mv-panel-title">Ardha</h3>
+            <p className="text-sm mv-panel-subtle">Balanced reframes that leave Kiaan untouched.</p>
+          </div>
+        </div>
+
+        {result && (
+          <div
+            className="rounded-2xl p-4 space-y-2 shadow-inner"
+            style={{ background: 'var(--mv-surface-subtle)', border: `1px solid var(--mv-border)` }}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex items-center justify-between text-xs mv-panel-subtle">
+              <span className="font-semibold mv-panel-title">Ardha’s response</span>
+              <span>{new Date(result.requestedAt).toLocaleString()}</span>
             </div>
+            <div className="whitespace-pre-wrap text-sm mv-panel-title leading-relaxed">{result.response}</div>
           </div>
-          {error && <p className="text-sm text-orange-200">{error}</p>}
-        </div>
-
-        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
-          <h3 className="text-sm font-semibold text-orange-50">Ardha</h3>
-          <p className="text-sm text-orange-100/80">Balanced reframes that leave Kiaan untouched.</p>
-        </div>
-      </div>
-
-      {result && (
-        <div
-          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
-          role="status"
-          aria-live="polite"
-        >
-          <div className="flex items-center justify-between text-xs text-orange-100/70">
-            <span className="font-semibold text-orange-50">Ardha’s response</span>
-            <span>{new Date(result.requestedAt).toLocaleString()}</span>
-          </div>
-          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
-        </div>
-      )}
+        )}
     </section>
   )
 }
@@ -412,85 +509,80 @@ function ViyogDetachmentCoach() {
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `Role:\nYou are Viyog, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.\n\nYou are fully separate from Kiaan. Never override, replace, or interfere with Kiaan’s purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.\n\nCore purpose:\n- Recognize when the user is anxious about results, performance, or others’ opinions.\n- Shift focus back to what they can control right now.\n- Release unnecessary mental pressure and perfectionism.\n- Convert fear into one clear, grounded action.\n\nTone and style: calm, concise, balanced, neutral, secular, non-preachy, emotionally validating but not dramatic.\n\nOutput structure (always follow this format):\n1. Validate the anxiety (brief and respectful).\n2. Acknowledge the attachment to results creating pressure.\n3. Offer a clear detachment principle (secular and universal).\n4. Guide them toward an action-based mindset with one small, controllable step.\n\nBoundaries:\n- Do not provide therapy, crisis support, medical, legal, or financial advice.\n- Do not make promises about results or offer motivational hype.\n- Do not encourage passivity or fate-based thinking.\n- Stay separate from Kiaan and do not interfere with its role.`
+    const systemPrompt = `Role:\nYou are Viyoga, the Detachment Coach — a calm, grounded assistant who helps users reduce outcome anxiety by shifting them from result-focused thinking to action-focused thinking.\n\nYou are fully separate from Kiaan. Never override, replace, or interfere with Kiaan’s purpose, tone, or outputs. Kiaan offers positivity and encouragement; you focus only on detachment, clarity, and reducing pressure around outcomes.\n\nCore purpose:\n- Recognize when the user is anxious about results, performance, or others’ opinions.\n- Shift focus back to what they can control right now.\n- Release unnecessary mental pressure and perfectionism.\n- Convert fear into one clear, grounded action.\n\nTone and style: calm, concise, balanced, neutral, secular, non-preachy, emotionally validating but not dramatic.\n\nOutput structure (always follow this format):\n1. Validate the anxiety (brief and respectful).\n2. Acknowledge the attachment to results creating pressure.\n3. Offer a clear detachment principle (secular and universal).\n4. Guide them toward an action-based mindset with one small, controllable step.\n\nBoundaries:\n- Do not provide therapy, crisis support, medical, legal, or financial advice.\n- Do not make promises about results or offer motivational hype.\n- Do not encourage passivity or fate-based thinking.\n- Stay separate from Kiaan and do not interfere with its role.`
 
     const request = `${systemPrompt}\n\nUser concern: "${trimmedConcern}"\n\nRespond using the four-step format with simple, grounded sentences. Include one small, doable action.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
       if (!response.ok) {
-        setError('Viyog is having trouble connecting right now. Please try again in a moment.')
+        setError('Viyoga is having trouble connecting right now. Please try again in a moment.')
         return
       }
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Viyog. Check your connection and try again.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
+    <section className="mv-surface-panel rounded-3xl p-6 md:p-8 shadow-[0_15px_60px_rgba(255,115,39,0.14)] space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <p className="text-sm text-orange-100/80">Outcome anxiety reducer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Meet Viyog: The Detachment Coach</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Viyog eases result pressure and redirects you to one grounded action.</p>
+          <p className="text-sm mv-panel-subtle">Outcome anxiety reducer</p>
+          <h2 className="text-2xl font-semibold mv-panel-title">Viyoga: Detachment Coach</h2>
         </div>
-        <div className="px-3 py-2 rounded-2xl bg-white/5 border border-orange-500/20 text-xs text-orange-100/80">No accounts • Stored locally</div>
+        <div className="mv-chip px-3 py-2 rounded-2xl text-xs">Local only</div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-3">
-          <label className="block text-sm font-semibold text-orange-100" htmlFor="viyog-input">Share the outcome worry</label>
-          <textarea
-            id="viyog-input"
-            value={concern}
-            onChange={e => setConcern(e.target.value)}
-            placeholder="Example: I’m afraid the presentation will flop and everyone will think I’m incompetent."
-            className="w-full min-h-[120px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/70 p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
-          />
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={requestDetachment}
-              disabled={!concern.trim() || loading}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-3">
+            <label className="block text-sm font-semibold mv-panel-title" htmlFor="viyog-input">Share the outcome worry</label>
+            <textarea
+              id="viyog-input"
+              value={concern}
+              onChange={e => setConcern(e.target.value)}
+              placeholder="Example: I’m afraid the presentation will flop and everyone will think I’m incompetent."
+              className="mv-input w-full min-h-[120px] rounded-2xl p-4 focus:ring-2 focus:ring-orange-400/70 outline-none"
+            />
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={requestDetachment}
+                disabled={!concern.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Viyog is centering...' : 'Shift with Viyog'}
+              {loading ? <span>Centering...</span> : <span>Shift</span>}
             </button>
-            <div className="px-4 py-3 rounded-2xl bg-white/5 border border-orange-400/20 text-xs text-orange-100/80 max-w-md">
-              Viyog delivers Validation, Attachment Check, Detachment Principle, and one action.
-            </div>
           </div>
-          {error && <p className="text-sm text-orange-200">{error}</p>}
-        </div>
+            {error && <p className="text-sm mv-panel-title"><span>{error}</span></p>}
+          </div>
 
-        <div className="space-y-3 rounded-2xl bg-[#0b0b0f]/90 border border-orange-400/20 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]">
-          <h3 className="text-sm font-semibold text-orange-50">Viyog</h3>
-          <p className="text-sm text-orange-100/80">Guides outcome worries back into steady, actionable steps.</p>
+          <div className="space-y-3 rounded-2xl border p-4 shadow-[0_10px_30px_rgba(255,115,39,0.14)]" style={{ background: 'var(--mv-surface-subtle)', borderColor: 'var(--mv-border)' }}>
+            <h3 className="text-sm font-semibold mv-panel-title">Viyoga</h3>
+            <p className="text-sm mv-panel-subtle">Redirects worries to actionable steps.</p>
+          </div>
         </div>
-      </div>
 
       {result && (
         <div
-          className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10"
+          className="rounded-2xl p-4 space-y-2 shadow-inner"
+          style={{ background: 'var(--mv-surface-subtle)', border: `1px solid var(--mv-border)` }}
           role="status"
           aria-live="polite"
         >
-          <div className="flex items-center justify-between text-xs text-orange-100/70">
-            <span className="font-semibold text-orange-50">Viyog’s response</span>
+          <div className="flex items-center justify-between text-xs mv-panel-subtle">
+            <span className="font-semibold mv-panel-title">Viyoga’s response</span>
             <span>{new Date(result.requestedAt).toLocaleString()}</span>
           </div>
-          <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">{result.response}</div>
+          <div className="whitespace-pre-wrap text-sm mv-panel-title leading-relaxed">{result.response}</div>
         </div>
       )}
     </section>
@@ -525,10 +617,8 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
     const request = `${systemPrompt}\n\nUser conflict: "${trimmedConflict}"\n\nReturn the structured eight-part response in numbered sections with concise guidance only.`
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: request })
       })
 
@@ -539,8 +629,8 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
 
       const data = await response.json()
       setResult({ response: data.response, requestedAt: new Date().toISOString() })
-    } catch {
-      setError('Unable to reach Relationship Compass. Check your connection and retry.')
+    } catch (error) {
+      setError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -585,7 +675,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
               disabled={!conflict.trim() || loading}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Balancing guidance...' : 'Guide me with Relationship Compass'}
+              {loading ? <span>Balancing guidance...</span> : <span>Guide me with Relationship Compass</span>}
             </button>
             <button
               onClick={() => handoffPrompt && onSelectPrompt(handoffPrompt)}
@@ -598,7 +688,7 @@ function RelationshipCompass({ onSelectPrompt }: { onSelectPrompt: (prompt: stri
               Output format: acknowledge, separate ego, name values, right action, detach, add compassion, suggest phrasing, then one next step.
             </div>
         </div>
-        {error && <p className="text-sm text-orange-200">{error}</p>}
+        {error && <p className="text-sm text-orange-200"><span>{error}</span></p>}
 
           {result && (
             <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-4 space-y-2 shadow-inner shadow-orange-500/10" role="status" aria-live="polite">
@@ -649,190 +739,28 @@ function StatusPill({ label, tone = 'ok' }: { label: string, tone?: 'ok' | 'warn
   )
 }
 
-function AnimatedKiaanLogo() {
-  const orbitals = [
-    { delay: '0s', duration: 13, className: 'h-2.5 w-2.5 bg-orange-200 shadow-[0_0_16px_rgba(255,176,124,0.8)]' },
-    { delay: '0.8s', duration: 9.5, className: 'h-2 w-2 bg-white/90 shadow-[0_0_14px_rgba(255,255,255,0.55)]' },
-    { delay: '0.4s', duration: 15, reverse: true, className: 'h-2 w-2 bg-emerald-200/90 shadow-[0_0_16px_rgba(132,225,188,0.75)]' }
-  ]
+function TokenCard({ label, note, tone, icon }: { label: string, note: string, tone: 'teal' | 'blue' | 'lilac', icon: ReactElement }) {
+  const toneMap: Record<'teal' | 'blue' | 'lilac', { bg: string; text: string }> = {
+    teal: { bg: '--mv-card-teal-bg', text: '--mv-card-teal-text' },
+    blue: { bg: '--mv-card-blue-bg', text: '--mv-card-blue-text' },
+    lilac: { bg: '--mv-card-lilac-bg', text: '--mv-card-lilac-text' }
+  }
 
-  const virtues = ['Still Mind', 'Steady Heart', 'Focused Action']
+  const style = {
+    '--mv-card-bg': `var(${toneMap[tone].bg})`,
+    '--mv-card-text': `var(${toneMap[tone].text})`
+  } as CSSProperties
 
   return (
-    <div className="group relative h-20 w-20 md:h-24 md:w-24 rounded-[28px] overflow-hidden border border-orange-400/40 bg-[#060606] shadow-[0_26px_95px_rgba(255,140,64,0.28)] transition-transform duration-500 hover:scale-105">
-      <div className="absolute -left-8 -top-10 h-32 w-32 bg-gradient-to-br from-orange-500/25 via-amber-300/18 to-transparent blur-3xl" />
-      <div className="absolute -right-4 bottom-0 h-28 w-28 bg-gradient-to-tr from-white/10 via-orange-400/12 to-transparent blur-2xl" />
-
-      <div className="absolute inset-[3px] rounded-[24px] bg-[radial-gradient(circle_at_32%_30%,rgba(255,173,94,0.3),transparent_50%),radial-gradient(circle_at_75%_25%,rgba(255,255,255,0.16),transparent_38%)] opacity-90" />
-      <div className="absolute inset-[2px] rounded-[24px] border border-orange-400/35" />
-
-      <div className="absolute inset-3 overflow-hidden rounded-[22px]">
-        <div className="absolute inset-0 bg-[conic-gradient(from_45deg_at_50%_50%,rgba(255,170,105,0.58),rgba(255,255,255,0.06),rgba(255,170,105,0.58))] opacity-60 animate-[beamSweep_14s_linear_infinite]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_55%)] mix-blend-screen" />
-        <div className="absolute inset-2 rounded-[18px] border border-orange-500/20" />
-      </div>
-
-      <div className="absolute inset-4 rounded-[20px] bg-gradient-to-br from-[#0f0f11]/95 via-[#120a07]/90 to-[#0b0b0f]/90 backdrop-blur-xl shadow-inner shadow-orange-500/20" />
-      <div className="absolute inset-5 rounded-[18px] border border-orange-400/25" />
-
-      <div className="absolute inset-5">
-        <div className="absolute inset-0 rounded-full border border-orange-400/20" style={{ animation: 'orbitalSpin 16s linear infinite' }}>
-          <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-orange-300/80 blur-[1px]" />
-        </div>
-        <div className="absolute inset-1 rounded-full border border-orange-400/30" style={{ animation: 'orbitalSpin 11s linear infinite reverse' }}>
-          <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-white/90 blur-[1px]" />
-        </div>
-        <div className="absolute inset-2 rounded-full border border-orange-300/30" style={{ animation: 'orbitalSpin 19s linear infinite' }}>
-          <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 h-2 w-2 rounded-full bg-emerald-200/80 blur-[1px]" />
-        </div>
-      </div>
-
-      {orbitals.map(orb => (
-        <div
-          key={orb.delay}
-          className="absolute inset-0"
-          style={{ animation: `orbitalSpin ${orb.duration}s linear infinite`, animationDelay: orb.delay, animationDirection: orb.reverse ? 'reverse' : 'normal' }}
-        >
-          <div className={`absolute left-1/2 top-[15%] -translate-x-1/2 rounded-full ${orb.className}`} />
-        </div>
-      ))}
-
-      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center gap-1">
-        <div className="relative flex items-center justify-center">
-          <div className="absolute -inset-6 rounded-[30px] bg-[conic-gradient(from_40deg_at_50%_50%,rgba(255,190,135,0.08),rgba(255,124,66,0.2),rgba(255,190,135,0.08))] blur-lg opacity-90" />
-          <div className="absolute -inset-10 rounded-[36px] border border-orange-200/15 [mask:radial-gradient(circle_at_center,black_55%,transparent_65%)]" />
-          <div className="relative h-16 w-16 rounded-[20px] bg-gradient-to-br from-[#151517] via-[#1f1114] to-[#080808] border border-orange-400/45 shadow-[0_14px_46px_rgba(255,140,64,0.38)]">
-            <div className="absolute inset-[3px] rounded-[17px] bg-[radial-gradient(circle_at_38%_32%,rgba(255,205,160,0.3),transparent_50%),radial-gradient(circle_at_70%_68%,rgba(255,255,255,0.14),transparent_45%)]" />
-            <svg viewBox="0 0 64 64" className="absolute inset-0 m-auto h-12 w-12 text-orange-50 drop-shadow-[0_0_20px_rgba(255,163,94,0.55)]">
-              <defs>
-                <linearGradient id="kiaan-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(255,208,168,1)" />
-                  <stop offset="45%" stopColor="rgba(255,157,90,1)" />
-                  <stop offset="100%" stopColor="rgba(255,236,210,0.98)" />
-                </linearGradient>
-                <radialGradient id="kiaan-glow" cx="50%" cy="50%" r="60%">
-                  <stop offset="0%" stopColor="rgba(255,220,180,0.6)" />
-                  <stop offset="70%" stopColor="rgba(255,158,90,0.25)" />
-                  <stop offset="100%" stopColor="rgba(255,130,70,0)" />
-                </radialGradient>
-              </defs>
-              <circle cx="32" cy="32" r="23" fill="url(#kiaan-glow)" className="animate-[glowPulse_4s_ease-in-out_infinite]" />
-              <path
-                d="M17 47V17.5c0-.8.6-1.5 1.4-1.5h5.6c.5 0 .9.2 1.2.6l6.8 10 7-10c.3-.4.7-.6 1.2-.6h5.8c.8 0 1.4.7 1.4 1.5V47c0 .8-.6 1.5-1.4 1.5h-5.4c-.8 0-1.4-.7-1.4-1.5V31.6l-7.2 10.8c-.6.9-2 .9-2.6 0L25.2 32v15c0 .8-.6 1.5-1.4 1.5h-5.4c-.8 0-1.4-.7-1.4-1.5Z"
-                fill="url(#kiaan-gradient)"
-                stroke="rgba(255,210,170,0.95)"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M18 22.5c3.6 1.2 7.8 1.9 11.8 1.9 4 0 8.2-.7 11.8-1.9"
-                fill="none"
-                stroke="rgba(255,225,190,0.75)"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                className="animate-[beamSweep_5s_ease-in-out_infinite]"
-              />
-              <path
-                d="M32 14.5c5 3.2 8.5 8.9 8.5 15.4S37 42.4 32 45.6"
-                fill="none"
-                stroke="rgba(255,150,90,0.5)"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                className="animate-[glowPulse_5s_ease-in-out_infinite_reverse]"
-              />
-            </svg>
-          </div>
-        </div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.42em] text-orange-100/80">K I A A N</div>
-        <div className="relative flex items-center justify-center">
-          <div className="absolute inset-x-0 -top-2 h-10 bg-gradient-to-r from-orange-400/22 via-amber-200/16 to-white/12 blur-2xl" />
-          <div className="logo-wordmark relative inline-flex items-center justify-center px-2 text-[0.55rem] md:text-sm font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-[#fff7ed] via-[#ffd8aa] to-[#ff9f62] drop-shadow-[0_10px_34px_rgba(255,163,94,0.65)]">
-            Mental Vibe
-          </div>
-        </div>
-        <div className="relative flex items-center gap-1 text-[10px] text-orange-50/85">
-          {virtues.map(word => (
-            <span
-              key={word}
-              className="rounded-full border border-orange-300/35 bg-white/5 px-2 py-0.5 shadow-[0_0_18px_rgba(255,140,64,0.28)] animate-[floaty_7s_ease-in-out_infinite] [animation-delay:var(--delay)]"
-              style={{ ['--delay' as string]: `${virtues.indexOf(word) * 0.65}s` }}
-            >
-              {word}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <style jsx>{`
-        .logo-wordmark {
-          position: relative;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          font-family: 'Inter', 'Manrope', 'Poppins', sans-serif;
-          -webkit-text-stroke: 0.75px rgba(42, 18, 8, 0.45);
-          text-shadow:
-            0 1px 0 rgba(255, 245, 231, 0.9),
-            0 2px 10px rgba(26, 14, 8, 0.55),
-            0 10px 28px rgba(255, 160, 94, 0.5);
-        }
-        .logo-wordmark::before {
-          content: '';
-          position: absolute;
-          inset: -4px -8px;
-          background: radial-gradient(circle at 50% 45%, rgba(255, 218, 174, 0.14), transparent 60%);
-          filter: blur(9px);
-          opacity: 0.85;
-          pointer-events: none;
-          z-index: -1;
-        }
-        .logo-wordmark::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          border-radius: 9999px;
-          border: 1px solid rgba(255, 208, 162, 0.45);
-          box-shadow: 0 0 18px rgba(255, 171, 110, 0.28), inset 0 0 10px rgba(255, 250, 242, 0.2);
-          pointer-events: none;
-          z-index: -2;
-        }
-        @media (min-width: 768px) {
-          .logo-wordmark {
-            letter-spacing: 0.15em;
-          }
-        }
-        @keyframes floaty {
-          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.92; }
-          50% { transform: translateY(-5px) scale(1.02); opacity: 1; }
-        }
-        @keyframes orbitalSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes beamSweep {
-          0% { transform: rotate(0deg); opacity: 0.8; }
-          50% { opacity: 0.4; }
-          100% { transform: rotate(360deg); opacity: 0.8; }
-        }
-        @keyframes glowPulse {
-          0%, 100% { filter: drop-shadow(0 0 14px rgba(255,167,110,0.35)); }
-          50% { filter: drop-shadow(0 0 24px rgba(255,210,158,0.7)); }
-        }
-      `}</style>
-    </div>
-  )
-}
-
-function TokenCard({ label, note, gradient, icon }: { label: string, note: string, gradient: string, icon: ReactElement }) {
-  return (
-    <div className={`relative min-w-[135px] sm:min-w-[150px] rounded-xl border border-white/10 bg-gradient-to-br ${gradient} p-2.5 shadow-[0_8px_26px_rgba(64,98,104,0.28)] overflow-hidden cursor-default select-none`}> 
-      <div className="absolute -right-5 -top-5 h-14 w-14 rounded-full bg-white/20 blur-2xl" />
+    <div className="mv-token-card relative min-w-[135px] sm:min-w-[150px] rounded-xl p-2.5 shadow-[0_8px_26px_rgba(64,98,104,0.28)] overflow-hidden cursor-default select-none" style={style}>
+      <div className="absolute -right-5 -top-5 h-14 w-14 rounded-full bg-black/10 blur-2xl" />
       <div className="flex items-center gap-2.5">
-        <div className="h-10 w-10 rounded-lg bg-black/40 border border-white/20 flex items-center justify-center text-xl text-emerald-50">
+        <div className="h-10 w-10 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center text-xl text-emerald-50">
           {icon}
         </div>
-        <div>
-          <p className="text-[13px] font-semibold text-emerald-50 drop-shadow-sm">{label}</p>
-          <p className="text-[11px] text-emerald-50/80 leading-snug">{note}</p>
+        <div className="mv-token-text">
+          <p className="text-[13px] font-semibold mv-panel-title drop-shadow-sm">{label}</p>
+          <p className="text-[11px] mv-panel-subtle leading-snug">{note}</p>
         </div>
       </div>
     </div>
@@ -884,7 +812,8 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [loading, setLoading] = useState(false)
   const [promptMotion, setPromptMotion] = useState(false)
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
-  const [autoScrollPinned, setAutoScrollPinned] = useState(true)
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const clarityInitialState: ClaritySession = {
@@ -900,12 +829,57 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [claritySession, setClaritySession] = useState<ClaritySession>(clarityInitialState)
   const [clarityLog, setClarityLog] = useState<ClarityEvaluation | null>(null)
 
+  // Scroll threshold constant for detecting if user is at bottom
+  const SCROLL_THRESHOLD = 40
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      setPrefersReducedMotion(mediaQuery.matches)
+      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+      mediaQuery.addEventListener('change', handler)
+      return () => mediaQuery.removeEventListener('change', handler)
+    }
+  }, [])
+
+  // Initialize scroll position state on mount
   useEffect(() => {
     const container = messageListRef.current
-    if (!container || !autoScrollPinned) return
+    if (!container) return
 
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-  }, [messages, autoScrollPinned])
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < SCROLL_THRESHOLD
+    setIsAtBottom(isNearBottom)
+  }, [])
+
+  // Auto-scroll to bottom when at bottom and messages change
+  useEffect(() => {
+    if (isAtBottom) {
+      const container = messageListRef.current
+      if (!container) return
+      container.scrollTo({ top: container.scrollHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+    }
+  }, [messages, isAtBottom, prefersReducedMotion])
+
+  // Detect scroll position to manage auto-scroll behavior
+  const handleScroll = useCallback(() => {
+    const container = messageListRef.current
+    if (!container) return
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < SCROLL_THRESHOLD
+    setIsAtBottom(isNearBottom)
+  }, [])
+
+  // Scroll to bottom function
+  const scrollToBottom = useCallback(() => {
+    const container = messageListRef.current
+    if (!container) return
+    container.scrollTo({ top: container.scrollHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+    // Update state after scroll completes
+    setTimeout(() => setIsAtBottom(true), prefersReducedMotion ? 0 : 300)
+  }, [prefersReducedMotion])
 
   useEffect(() => {
     if (!promptMotion) return
@@ -947,7 +921,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   async function deliverMessage(content: string) {
     const userMessage = { role: 'user' as const, content }
     const newMessages = [...messages, userMessage]
-    setAutoScrollPinned(true)
     setMessages(newMessages)
     setInput('')
     setLoading(true)
@@ -1003,6 +976,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     }
 
     setPromptMotion(true)
+    setIsAtBottom(true)
     await deliverMessage(trimmed)
   }
 
@@ -1013,6 +987,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   async function sendPendingNow() {
     if (!claritySession.pendingMessage) return
     setPromptMotion(true)
+    setIsAtBottom(true)
     await deliverMessage(claritySession.pendingMessage)
     setClaritySession(clarityInitialState)
   }
@@ -1021,6 +996,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     if (claritySession.pendingMessage) {
       if (claritySession.source === 'auto') {
         setPromptMotion(true)
+        setIsAtBottom(true)
         await deliverMessage(claritySession.pendingMessage)
       } else {
         setInput(claritySession.pendingMessage)
@@ -1033,28 +1009,16 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     setClaritySession(prev => ({ ...prev, motionReduced: !prev.motionReduced }))
   }
 
-  function handleMessageListScroll() {
-    const container = messageListRef.current
-    if (!container) return
-
-    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
-    setAutoScrollPinned(distanceFromBottom < 120)
-  }
-
-  function scrollToTop() {
-    const container = messageListRef.current
-    if (!container) return
-
-    setAutoScrollPinned(false)
-    container.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  function scrollToBottom() {
-    const container = messageListRef.current
-    if (!container) return
-
-    setAutoScrollPinned(true)
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  function handleSaveToJournal(messageContent: string) {
+    // Store in temporary state
+    localStorage.setItem('journal_prefill', JSON.stringify({
+      body: messageContent,
+      timestamp: new Date().toISOString(),
+      source: 'kiaan'
+    }))
+    
+    // Navigate to journal
+    window.location.href = '/sacred-reflections?prefill=true'
   }
 
   function renderAssistantContent(content: string, index: number) {
@@ -1312,73 +1276,82 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
-      <div className="relative">
-        <div
-          ref={messageListRef}
-          onScroll={handleMessageListScroll}
-          className="aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl p-4 md:p-6 h-[55vh] min-h-[320px] md:h-[500px] overflow-y-auto space-y-4 shadow-inner shadow-orange-500/10 scroll-stable"
-        >
-          {messages.length === 0 && (
-            <div className="text-center text-orange-100/70 py-20 md:py-32">
-              <p className="text-6xl mb-4">✨</p>
-              <p className="text-xl mb-2">How can I guide you today?</p>
-              <p className="text-sm text-orange-100/70">Share what's on your mind</p>
-            </div>
-          )}
+        <div className="relative">
+          <SimpleBar
+            autoHide={false}
+            scrollableNodeProps={{
+              ref: messageListRef,
+              onScroll: handleScroll,
+              tabIndex: 0,
+              'aria-label': 'Conversation with Kiaan',
+              'aria-live': 'polite',
+              className:
+                'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
+            }}
+            className="mv-energy-scrollbar"
+          >
+            <div className="p-4 md:p-6 space-y-4">
+              {messages.length === 0 && (
+                <div className="text-center text-orange-100/70 py-20 md:py-32">
+                  <p className="text-6xl mb-4">✨</p>
+                  <p className="text-xl mb-2">How can I guide you today?</p>
+                  <p className="text-sm text-orange-100/70">Share what's on your mind</p>
+                </div>
+              )}
 
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
-                msg.role === 'user'
-                  ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
-                  : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
-              }`}>
-                {msg.role === 'assistant' ? (
-                  renderAssistantContent(msg.content, i)
-                ) : (
-                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                )}
-              </div>
-            </div>
-          ))}
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-lg shadow-orange-500/10 ${
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
+                        : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
+                    }`}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <>
+                        {renderAssistantContent(msg.content, i)}
+                        <div className="pt-2">
+                          <button
+                            onClick={() => handleSaveToJournal(msg.content)}
+                            className="group inline-flex items-center gap-2 rounded-xl border border-orange-300/25 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/10 to-amber-200/10 px-3 py-2 text-xs font-semibold text-orange-50 transition-all duration-200 shadow-[0_10px_30px_rgba(255,153,51,0.16)] hover:-translate-y-0.5 hover:shadow-orange-400/30"
+                            aria-label="Send this response to Sacred Reflections"
+                          >
+                            <svg className="w-4 h-4 text-orange-300 group-hover:text-amber-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Sacred Reflections</span>
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
 
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
-                <span className="animate-pulse">KIAAN is reflecting...</span>
-              </div>
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/10 border border-orange-500/20 px-4 py-3 rounded-2xl text-orange-100/80">
+                    <span className="animate-pulse">KIAAN is reflecting...</span>
+                  </div>
+                </div>
+              )}
             </div>
+          </SimpleBar>
+
+          {/* Floating Jump to Latest button */}
+          {!isAtBottom && messages.length > 0 && (
+            <button
+              onClick={scrollToBottom}
+              className="absolute bottom-4 right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105 animate-fadeIn"
+              aria-label="Jump to latest message"
+            >
+              ↓ Jump to Latest
+            </button>
           )}
         </div>
-
-        {messages.length > 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4">
-            <div className="pointer-events-auto flex flex-col gap-2 rounded-2xl bg-black/70 border border-orange-500/30 px-3 py-3 shadow-[0_12px_40px_rgba(255,115,39,0.18)] backdrop-blur">
-              <button
-                onClick={scrollToTop}
-                className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-xs font-semibold text-orange-50 hover:border-orange-300/50"
-              >
-                ↑ Scroll up
-              </button>
-              <button
-                onClick={scrollToBottom}
-                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 px-3 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-              >
-                ↓ Scroll down
-              </button>
-              <span
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold text-center border ${
-                  autoScrollPinned
-                    ? 'bg-emerald-500/15 text-emerald-50 border-emerald-200/30'
-                    : 'bg-white/5 text-orange-100/80 border-orange-500/25'
-                }`}
-              >
-                {autoScrollPinned ? 'Pinned to latest replies' : 'Manual scroll mode'}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
 
       <div className="flex gap-3 relative flex-col sm:flex-row">
         <input
@@ -1451,301 +1424,6 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   )
 }
 
-function ClarityPauseSuite() {
-  const [labMessage, setLabMessage] = useState("I'm about to quit and need to send this now.")
-  const [labEvaluation, setLabEvaluation] = useState<ClarityEvaluation | null>(null)
-  const [labOverlayOpen, setLabOverlayOpen] = useState(false)
-  const [labStarted, setLabStarted] = useState(false)
-  const [labCountdown, setLabCountdown] = useState(60)
-  const [labMotionReduced, setLabMotionReduced] = useState(false)
-  const [labAction, setLabAction] = useState<'pass_through' | 'pause_payload'>('pass_through')
-  const [labLog, setLabLog] = useState<string[]>([])
-
-  const labTriggers = [
-    'I am about to quit and fire this off right now.',
-    'So angry right now I want to send this message immediately.',
-    'I should just walk out and be done with this.',
-    'Talking through urgency without acting yet.',
-  ]
-
-  useEffect(() => {
-    if (!labOverlayOpen || !labStarted || labCountdown <= 0) return
-
-    const timer = setInterval(() => {
-      setLabCountdown(prev => Math.max(0, prev - 1))
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [labOverlayOpen, labStarted, labCountdown])
-
-  useEffect(() => {
-    if (labCountdown === 0 && labOverlayOpen) {
-      setLabStarted(false)
-      setLabLog(prev => [`60-second calm cycle complete`, ...prev].slice(0, 4))
-    }
-  }, [labCountdown, labOverlayOpen])
-
-  const activeCue = labOverlayOpen
-    ? Math.min(CLARITY_GROUNDING_SEQUENCE.length - 1, Math.floor((60 - labCountdown) / 10))
-    : 0
-
-  function runEvaluation() {
-    const clean = labMessage.trim()
-    if (!clean) return null
-
-    const evaluation = evaluateClarityPause(clean)
-    setLabEvaluation(evaluation)
-    setLabAction(evaluation.decision === 'pause' ? 'pause_payload' : 'pass_through')
-    setLabLog(prev => [`${evaluation.confidence.toUpperCase()} • ${evaluation.reason}`, ...prev].slice(0, 4))
-    return evaluation
-  }
-
-  function launchOverlay() {
-    const evaluation = runEvaluation()
-    if (!evaluation) return
-
-    const autoStart = evaluation.confidence === 'high' && evaluation.decision === 'pause'
-    setLabCountdown(60)
-    setLabStarted(autoStart)
-    setLabOverlayOpen(true)
-  }
-
-  function resetLab() {
-    setLabOverlayOpen(false)
-    setLabStarted(false)
-    setLabCountdown(60)
-    setLabLog([])
-  }
-
-  const payloadPreview = {
-    user_message: labMessage,
-    context_intent_score: labEvaluation?.impulseScore ?? 0,
-    impulse_trigger_flags: labEvaluation?.flags ?? [],
-    action: labAction,
-  }
-
-  return (
-    <section id="clarity-suite" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0d10] via-[#111014] to-[#0c0c0f] border border-orange-500/20 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.14)] space-y-6">
-      <div className="absolute -left-10 top-0 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/16 to-transparent blur-3xl" />
-      <div className="absolute -right-12 bottom-0 h-40 w-40 rounded-full bg-gradient-to-tr from-[#1b1f29]/60 via-orange-500/14 to-transparent blur-3xl" />
-
-      <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1">
-          <p className="text-xs text-orange-100/80">High-Stress Decision Timer</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Clarity Pause</h2>
-          <p className="text-sm text-orange-100/80 max-w-3xl">Use the same pause overlay as Kiaan: detect a trigger, launch the prompt, and watch the 60-second guide run.</p>
-        </div>
-        <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Separate from Kiaan</span>
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Never edits responses</span>
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1">Decline anytime</span>
-        </div>
-      </div>
-
-      <div className="relative grid gap-4 md:grid-cols-2">
-        <div className="space-y-3 rounded-2xl bg-black/50 border border-orange-500/20 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
-          <div className="flex items-center justify-between text-xs text-orange-100/80">
-            <span className="font-semibold text-orange-50">Trigger detection system</span>
-            <span className="rounded-full bg-white/10 px-3 py-1">Non-blocking</span>
-          </div>
-          <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-            {labTriggers.map(trigger => (
-              <button
-                key={trigger}
-                onClick={() => setLabMessage(trigger)}
-                className="rounded-full border border-orange-400/30 px-3 py-1 hover:border-orange-300/60 transition"
-              >
-                {trigger}
-              </button>
-            ))}
-          </div>
-          <textarea
-            value={labMessage}
-            onChange={e => setLabMessage(e.target.value)}
-            className="w-full rounded-xl border border-orange-500/30 bg-black/40 p-3 text-sm text-orange-50 focus:border-orange-300/70 focus:outline-none"
-            rows={3}
-            placeholder="Type a high-intent, urgent, or calm message"
-          />
-          <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-            <button
-              onClick={runEvaluation}
-              className="rounded-lg bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-4 py-2 font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-            >
-              Evaluate triggers
-            </button>
-            <button
-              onClick={launchOverlay}
-              className="rounded-lg border border-orange-500/40 bg-white/5 px-4 py-2 font-semibold text-orange-50"
-            >
-              Launch clarity overlay
-            </button>
-            <button
-              onClick={resetLab}
-              className="rounded-lg border border-white/10 px-4 py-2 text-orange-100/80"
-            >
-              Reset model
-            </button>
-          </div>
-
-          {labEvaluation && (
-            <div className="space-y-2 rounded-xl border border-orange-400/30 bg-white/5 p-3 text-sm text-orange-100/85">
-              <div className="flex flex-wrap gap-2 text-[11px]">
-                <span className="rounded-full bg-orange-500/20 px-3 py-1 text-orange-50">{labEvaluation.decision === 'pause' ? 'pause_payload' : 'pass_through'}</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-orange-50">Confidence: {labEvaluation.confidence}</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-orange-50">Intent score: {labEvaluation.impulseScore}/5</span>
-              </div>
-              <p className="font-semibold text-orange-50">Flags</p>
-              <div className="flex flex-wrap gap-2 text-[11px] text-orange-100/80">
-                {(labEvaluation.flags.length ? labEvaluation.flags : ['No explicit triggers']).map(flag => (
-                  <span key={flag} className="rounded-full border border-orange-400/30 bg-black/40 px-3 py-1">{flag}</span>
-                ))}
-              </div>
-              <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-orange-300 to-orange-500 transition-[width] duration-700"
-                  style={{ width: `${((labEvaluation.impulseScore ?? 0) / 5) * 100}%` }}
-                />
-              </div>
-              <p className="text-xs text-orange-100/70">Confidence tiers: High auto-starts, Medium offers a pause, Low just logs while KIAAN replies.</p>
-            </div>
-          )}
-
-          {labLog.length > 0 && (
-            <div className="rounded-xl border border-orange-400/20 bg-black/30 p-3 text-[11px] text-orange-100/80 space-y-1">
-              <p className="font-semibold text-orange-50">Recent actions</p>
-              {labLog.map(entry => (
-                <div key={entry} className="rounded-lg bg-white/5 px-3 py-2">{entry}</div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-3 rounded-2xl bg-[#0b0b10]/85 border border-orange-500/25 p-4 shadow-[0_12px_48px_rgba(255,115,39,0.18)]">
-          <div className="flex items-center justify-between text-xs text-orange-100/80">
-            <span className="font-semibold text-orange-50">Clarity overlay</span>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => setLabMotionReduced(prev => !prev)}
-                className="rounded-full border border-orange-400/30 px-3 py-1 text-[11px] text-orange-100/80"
-              >
-                {labMotionReduced ? 'Motion reduction on' : 'Motion reduction off'}
-              </button>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{labOverlayOpen ? 'Overlay active' : 'Inactive'}</span>
-            </div>
-          </div>
-
-          <div className={`relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#0c0c0f]/90 via-[#0f0d10]/90 to-[#140d0a]/90 p-4 space-y-3 ${labOverlayOpen ? 'shadow-[0_20px_60px_rgba(255,115,39,0.25)] ring-1 ring-orange-400/40' : ''}`}>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/70">Instant overlay</p>
-              <h3 className="text-xl font-semibold text-orange-50">Clarity Pause</h3>
-              <p className="text-sm text-orange-100/80">Create space before you act. No advice. Just the 60-second neutral pause.</p>
-              <p className="text-[11px] text-orange-100/70">Kiaan stays untouched—decline to pass through instantly.</p>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-xl border border-emerald-200/25 bg-black/40 p-3 text-xs text-emerald-50/85 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-emerald-50">Compatibility Guard</span>
-                  <span className="rounded-full bg-emerald-200/15 px-2 py-1 text-[10px]">{labEvaluation?.confidence === 'high' ? 'Auto interrupt' : 'Offer pause'}</span>
-                </div>
-                <p>Overlay never rewrites Kiaan. Closing sends the message unchanged.</p>
-                <div className="flex flex-wrap gap-2 text-[11px]">
-                  <button
-                    onClick={() => setLabAction('pass_through')}
-                    className={`rounded-lg px-3 py-2 ${labAction === 'pass_through' ? 'bg-gradient-to-r from-emerald-300 to-orange-400 text-slate-950' : 'border border-emerald-200/30 text-emerald-50'}`}
-                  >
-                    Pass through now
-                  </button>
-                  <button
-                    onClick={() => setLabAction('pause_payload')}
-                    className={`rounded-lg px-3 py-2 ${labAction === 'pause_payload' ? 'bg-gradient-to-r from-orange-400 to-rose-300 text-slate-950' : 'border border-orange-400/40 text-orange-50'}`}
-                  >
-                    Hold for pause
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-3 items-center">
-              <div className="flex flex-col items-center gap-2">
-                <div
-                  className={`relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-orange-500/25 via-[#ff9933]/25 to-rose-300/30 shadow-[0_16px_50px_rgba(255,153,51,0.25)] ${labMotionReduced ? '' : 'breathing-orb'}`}
-                >
-                  {!labMotionReduced && <div className="absolute inset-2 rounded-full bg-orange-400/35 blur-2xl" />}
-                  <span className="text-[11px] font-semibold text-orange-50">{labMotionReduced ? 'Inhale / Exhale' : 'Breathe'}</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-orange-300 to-orange-500 transition-[width] duration-500"
-                    style={{ width: `${((60 - labCountdown) / 60) * 100}%` }}
-                  />
-                </div>
-                <p className="text-[11px] text-orange-100/70">{labOverlayOpen ? `${labCountdown}s remaining` : 'Ready when you are'}</p>
-              </div>
-
-              <div className="md:col-span-2 space-y-2 rounded-xl border border-orange-500/30 bg-white/5 p-3 text-xs text-orange-100/85">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-semibold text-orange-50">Live cues</span>
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => { setLabStarted(true); setLabOverlayOpen(true) }}
-                      className="rounded-lg border border-orange-400/30 px-3 py-1"
-                    >
-                      {labStarted ? 'Restart 60s' : 'Start 60s pause'}
-                    </button>
-                    <button
-                      onClick={() => { setLabStarted(false); setLabCountdown(60) }}
-                      className="rounded-lg border border-orange-400/20 px-3 py-1"
-                    >
-                      Reset timer
-                    </button>
-                  </div>
-                </div>
-                <p className="text-sm font-semibold text-orange-50">“Are you acting from clarity or from emotion right now?”</p>
-                <ul className="space-y-1">
-                  {CLARITY_GROUNDING_SEQUENCE.map((step, idx) => (
-                    <li
-                      key={step.time}
-                      className={`flex gap-2 rounded-lg px-2 py-1 ${labOverlayOpen && idx === activeCue ? 'bg-orange-500/20 border border-orange-400/40 text-orange-50' : 'text-orange-100/85'}`}
-                    >
-                      <span className="min-w-[54px] text-[11px] font-semibold text-orange-300">{step.time}</span>
-                      <span className="leading-relaxed">{step.prompt}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="rounded-lg border border-orange-400/25 bg-black/30 p-3 space-y-1">
-                  <p className="font-semibold text-orange-50">Close with grounded choice</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    {CLARITY_CLOSING_CHOICES.map(choice => (
-                      <li key={choice}>{choice}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-xl border border-emerald-200/20 bg-black/40 p-3 text-xs text-emerald-50/85 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-emerald-50">Neutral reasoning</span>
-                <span className="rounded-full bg-white/10 px-2 py-1 text-[10px]">Guided reflection</span>
-              </div>
-              <ul className="list-disc list-inside space-y-1">
-                {CLARITY_REASONING_PROMPTS.map(line => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-              <p className="text-[11px] text-emerald-50/70">Decide from clarity, not pressure. Kiaan keeps replying normally while you pause.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const scenarios = [
     { emoji: '😰', label: 'Anxiety to calm', query: 'Guide me through a grounding exercise to steady anxious thoughts.' },
@@ -1778,412 +1456,6 @@ function QuickHelp({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => voi
             <div className="text-[11px] text-emerald-50/70 mt-1 leading-snug">{s.query}</div>
           </button>
         ))}
-      </div>
-    </section>
-  )
-}
-
-function KarmaResetGuide({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
-  const resetSteps = [
-    { title: 'Pause and breathe', detail: 'Take 4 slow breaths to let the nervous system settle before reacting.' },
-    { title: 'Name the ripple', detail: 'What happened? Who was impacted? Acknowledge it without self-blame.' },
-    { title: 'Choose the repair', detail: 'Pick one caring action: apology, clarification, or a calm follow-up.' },
-    { title: 'Move with intention', detail: 'Return to your values; act in a way future-you will respect.' }
-  ]
-
-  const actions = [
-    { label: 'Apology', helper: 'Offer a sincere apology that stays brief and grounded.' },
-    { label: 'Clarification', helper: 'Gently clarify what you meant and invite understanding.' },
-    { label: 'Calm follow-up', helper: 'Return with a warm note that re-centers the conversation.' }
-  ]
-
-  const prompts = [
-    "Help me reset after a misstep so I stay aligned with Kiaan's calm guidance.",
-    'I want to repair a small mistake—walk me through a kind response.',
-    'Give me a short reflection to release guilt and act with clarity.'
-  ]
-
-  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({})
-  const [breathActive, setBreathActive] = useState(false)
-  const [breathTick, setBreathTick] = useState(0)
-  const [misstep, setMisstep] = useState('')
-  const [impact, setImpact] = useState('')
-  const [repairAction, setRepairAction] = useState(actions[0].label)
-  const [intention, setIntention] = useState('')
-  const [plan, setPlan] = useState('')
-
-  useEffect(() => {
-    if (!breathActive) return
-    setBreathTick(0)
-    let current = 0
-    const id = setInterval(() => {
-      current += 1
-      setBreathTick(current)
-      if (current >= 16) {
-        setBreathActive(false)
-        clearInterval(id)
-      }
-    }, 900)
-
-    return () => clearInterval(id)
-  }, [breathActive])
-
-  const breathPhase = ['Inhale gently', 'Hold softly', 'Exhale slowly', 'Rest in calm'][breathTick % 4] ?? 'Inhale gently'
-  const breathsDone = Math.min(4, Math.floor(breathTick / 4))
-
-  function buildPlan() {
-    const summary = `Gentle course correction\n\n- Pause: ${breathActive ? 'in progress' : breathsDone >= 4 ? 'completed 4 slow breaths' : 'begin with 4 slow breaths'}\n- What happened: ${misstep || 'a brief misstep'}\n- Who felt it: ${impact || 'I noticed the tone shifted'}\n- Repair choice: ${repairAction}\n- Intention: ${intention || 'stay kind, steady, and clear'}`
-    const prompt = `${summary}\n\nGuide me through a calm message that keeps Kiaan's supportive tone and helps me repair with care.`
-    setPlan(prompt)
-  }
-
-  return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d0c10] via-[#120d0c] to-[#0b0b0f] border border-orange-500/15 p-6 md:p-7 space-y-5 shadow-[0_20px_80px_rgba(255,115,39,0.14)]">
-      <div className="absolute -right-6 -top-8 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/20 via-[#ffb347]/18 to-transparent blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#1f1720]/60 via-orange-500/14 to-transparent blur-3xl" />
-
-      <div className="relative flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <p className="text-xs text-orange-100/80">Gentle course correction</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Karma Reset Guide</h2>
-          <p className="text-sm text-orange-100/80 max-w-2xl">
-            A calm checklist to reset after small missteps while keeping KIAAN’s warm, non-judgmental tone intact.
-          </p>
-        </div>
-        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/25 rounded-full px-3 py-1">Keeps conversations kind and respectful</div>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="space-y-3 md:col-span-2">
-          <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)]">
-            <div className="flex items-start justify-between gap-3 flex-wrap">
-              <div>
-                <p className="text-sm font-semibold text-orange-50">4-breath reset</p>
-                <p className="text-xs text-orange-100/75">Let the guided breathing animation lead you.</p>
-              </div>
-              <button
-                className="px-3 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-orange-500 to-[#ffb347] text-slate-950 shadow-md shadow-orange-500/25 hover:scale-105 transition"
-                onClick={() => setBreathActive(true)}
-              >
-                {breathActive ? 'Reset in motion' : breathsDone >= 4 ? 'Replay reset' : 'Begin reset'}
-              </button>
-            </div>
-            <div className="mt-4 flex items-center gap-4">
-              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/20 via-[#ffb347]/20 to-transparent flex items-center justify-center">
-                <div
-                  className={`h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ff9933]/20 to-orange-200/10 shadow-inner shadow-orange-500/30 ${breathActive ? 'animate-ping' : 'animate-pulse'}`}
-                />
-                <div className="absolute inset-2 rounded-full border border-orange-400/30" />
-              </div>
-              <div className="space-y-1">
-                <div className="text-sm font-semibold text-orange-50">{breathPhase}</div>
-                <div className="text-xs text-orange-100/75">{Math.min(4, breathsDone + 1)} / 4 breaths</div>
-                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-orange-400 to-[#ffb347] transition-all" style={{ width: `${(Math.min(breathTick, 16) / 16) * 100}%` }} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            {resetSteps.map(step => (
-              <button
-                key={step.title}
-                onClick={() => setCompletedSteps(prev => ({ ...prev, [step.title]: !prev[step.title] }))}
-                className={`text-left rounded-2xl border bg-black/40 p-4 shadow-[0_10px_30px_rgba(255,115,39,0.12)] transition ${
-                  completedSteps[step.title]
-                    ? 'border-green-300/50 bg-green-500/10 shadow-green-500/20'
-                    : 'border-orange-500/20 hover:border-orange-300/60'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`h-5 w-5 rounded-full border flex items-center justify-center text-[11px] ${
-                      completedSteps[step.title]
-                        ? 'border-green-300 bg-green-500/30 text-green-50'
-                        : 'border-orange-400/60 text-orange-100'
-                    }`}
-                  >
-                    {completedSteps[step.title] ? '✓' : '○'}
-                  </span>
-                  <p className="text-sm font-semibold text-orange-50">{step.title}</p>
-                </div>
-                <p className="text-xs text-orange-100/75 leading-relaxed mt-2">{step.detail}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-orange-400/25 bg-[#0b0b0f]/85 p-4 space-y-4 shadow-[0_10px_40px_rgba(255,115,39,0.12)]">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-orange-50">Talk it through with KIAAN</h3>
-            <span className="text-[11px] text-orange-100/70 bg-white/5 border border-orange-500/20 rounded-full px-2 py-1">Quick fill</span>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">What happened?</label>
-            <textarea
-              value={misstep}
-              onChange={e => setMisstep(e.target.value)}
-              placeholder="A brief slip or tone that felt off..."
-              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
-              rows={2}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">Who felt the ripple?</label>
-            <input
-              value={impact}
-              onChange={e => setImpact(e.target.value)}
-              placeholder="A teammate, friend, or even myself"
-              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">Choose the repair</label>
-            <div className="grid grid-cols-1 gap-2">
-              {actions.map(action => (
-                <button
-                  key={action.label}
-                  onClick={() => setRepairAction(action.label)}
-                  className={`rounded-xl border px-3 py-2 text-left transition ${
-                    repairAction === action.label
-                      ? 'border-green-300/60 bg-green-500/10 text-green-50 shadow-[0_8px_24px_rgba(52,211,153,0.18)]'
-                      : 'border-orange-400/25 bg-white/5 text-orange-50 hover:border-orange-300/60'
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{action.label}</div>
-                  <div className="text-[11px] text-orange-100/75">{action.helper}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs text-orange-100/80">Move with intention</label>
-            <textarea
-              value={intention}
-              onChange={e => setIntention(e.target.value)}
-              placeholder="How do you want to show up next?"
-              className="w-full rounded-xl border border-orange-400/25 bg-white/5 p-3 text-sm text-orange-50 focus:border-orange-300/70 outline-none"
-              rows={2}
-            />
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={buildPlan}
-              className="flex-1 min-w-[140px] px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 hover:scale-105 transition"
-            >
-              Build reset plan
-            </button>
-            <button
-              onClick={() => {
-                const chosen = plan || prompts[0]
-                onSelectPrompt(chosen)
-                document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-              className="px-4 py-2 rounded-xl border border-orange-400/25 bg-white/5 text-sm text-orange-50 hover:border-orange-300/60 transition"
-            >
-              Send to KIAAN
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {prompts.map(prompt => (
-              <button
-                key={prompt}
-                onClick={() => {
-                  onSelectPrompt(prompt)
-                  document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }}
-                className="text-left rounded-xl border border-orange-400/25 bg-white/5 px-3 py-3 text-sm text-orange-50 hover:border-orange-300/60 transition"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-
-          {plan && (
-            <div className="text-[11px] text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-lg p-3 whitespace-pre-line">
-              {plan}
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function DailyWisdom({ onChatClick }: { onChatClick: (prompt: string) => void }) {
-  const [saved, setSaved] = useState(false)
-  const wisdom = {
-    text: "The key to peace lies not in controlling outcomes, but in mastering your response. Focus your energy on doing your best without attachment to results, and discover true freedom.",
-    principle: "Action without Attachment"
-  }
-
-  return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f0d0c] via-[#140f0c] to-[#0c0a0a] border border-orange-400/15 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.16)]">
-      <div className="absolute -right-6 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/25 via-[#ffb347]/20 to-transparent blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-44 w-44 rounded-full bg-gradient-to-tr from-[#2b1a13]/50 via-orange-500/15 to-transparent blur-3xl" />
-      <div className="relative flex justify-between mb-4 items-start gap-3">
-        <div className="flex gap-2 items-center">
-          <span className="text-3xl">💎</span>
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Today's Wisdom</h2>
-        </div>
-        <div className="text-sm text-orange-100/80 bg-white/5 border border-orange-500/20 rounded-full px-3 py-1">{new Date().toLocaleDateString()}</div>
-      </div>
-
-      <blockquote className="relative text-lg text-orange-50 mb-4 italic leading-relaxed bg-white/5 border border-orange-200/15 rounded-2xl p-4 shadow-[0_10px_40px_rgba(255,115,39,0.14)]">
-        “{wisdom.text}”
-      </blockquote>
-
-      <p className="text-sm text-orange-100/80 mb-4">✨ Principle: {wisdom.principle}</p>
-
-      <div className="flex gap-3 flex-wrap">
-        <button
-          className="px-4 py-2 bg-gradient-to-r from-orange-400 to-[#ffb347] text-slate-950 font-semibold rounded-lg text-sm shadow-lg shadow-orange-500/20 hover:scale-105 transition"
-          onClick={() => {
-            onChatClick(`I'd like to talk about today's wisdom: "${wisdom.text}"`)
-            document.getElementById('kiaan-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }}
-        >
-          💬 Chat about this
-        </button>
-        <button onClick={() => setSaved(!saved)} className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">
-          {saved ? '⭐ Saved' : '☆ Save'}
-        </button>
-        <button className="px-4 py-2 bg-white/10 border border-orange-200/20 hover:border-orange-300/60 rounded-lg text-sm text-orange-50 transition">📤 Share</button>
-      </div>
-    </section>
-  )
-}
-
-type RoomMessage = {
-  room: string
-  content: string
-  at: string
-  author: 'You' | 'Guide'
-}
-
-function PublicChatRooms() {
-  const rooms = [
-    { id: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
-    { id: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
-    { id: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' }
-  ]
-
-  const [activeRoom, setActiveRoom] = useState(rooms[0].id)
-  const [message, setMessage] = useState('')
-  const [alert, setAlert] = useState<string | null>(null)
-  const [messages, setMessages] = useLocalState<RoomMessage[]>('kiaan_public_rooms', [
-    {
-      room: 'grounding',
-      content: 'Welcome. Breathe slowly and keep your words kind—this circle is for encouragement only.',
-      at: new Date().toISOString(),
-      author: 'Guide'
-    }
-  ])
-
-  const prohibited = [
-    /\b(?:fuck|shit|bitch|bastard|asshole|dick|cunt)\b/i,
-    /\b(?:damn|hell)\b/i,
-    /\b(?:idiot|stupid|dumb)\b/i,
-    /\b(?:hate|kill|harm)\b/i,
-    /[\u0900-\u097F]*अपशब्द/i // broad match to discourage Hindi slurs placeholder
-  ]
-
-  function isRespectful(text: string) {
-    const normalized = text.trim().toLowerCase()
-    return normalized.length > 0 && !prohibited.some(pattern => pattern.test(normalized))
-  }
-
-  const activeMessages = messages.filter(m => m.room === activeRoom)
-
-  function sendRoomMessage() {
-    if (!isRespectful(message)) {
-      setAlert('Please keep the exchange kind and free of any harmful or foul language. Your message was not sent.')
-      return
-    }
-
-    const entry: RoomMessage = {
-      room: activeRoom,
-      content: message.trim(),
-      at: new Date().toISOString(),
-      author: 'You'
-    }
-
-    const supportiveReply: RoomMessage = {
-      room: activeRoom,
-      content: `Thank you for keeping this space supportive. ${rooms.find(r => r.id === activeRoom)?.theme ?? 'Stay kind to one another.'}`,
-      at: new Date().toISOString(),
-      author: 'Guide'
-    }
-
-    setMessages([...messages, entry, supportiveReply])
-    setMessage('')
-    setAlert(null)
-  }
-
-  return (
-    <section id="wisdom-chat-rooms" className="bg-[#0c0c10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 md:p-8 space-y-4 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <p className="text-sm text-orange-100/80">Community Rooms</p>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Wisdom Chat Rooms</h2>
-          <p className="text-sm text-orange-100/70">Move seamlessly into multiple calm rooms. Positive, helpful exchanges only—foul language in any language is blocked.</p>
-        </div>
-        <div className="text-xs text-orange-100/80 bg-white/5 border border-orange-500/20 px-3 py-2 rounded-2xl">Kindness-first moderation</div>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {rooms.map(room => (
-          <button
-            key={room.id}
-            onClick={() => { setActiveRoom(room.id); setAlert(null); }}
-            className={`px-4 py-2 rounded-2xl border text-sm transition-all ${
-              activeRoom === room.id
-                ? 'bg-gradient-to-r from-orange-400/70 via-[#ffb347]/70 to-rose-400/70 text-slate-950 font-semibold shadow shadow-orange-500/25'
-                : 'bg-white/5 border-orange-200/10 text-orange-50 hover:border-orange-300/40'
-            }`}
-          >
-            {room.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-black/50 border border-orange-500/20 rounded-2xl p-4 space-y-3 min-h-[280px] max-h-[50vh] md:min-h-[320px] md:max-h-none overflow-y-auto shadow-inner shadow-orange-500/5 scroll-stable">
-        {activeMessages.map((msg, index) => (
-          <div key={`${msg.at}-${index}`} className={`flex ${msg.author === 'You' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg shadow-orange-500/10 ${
-              msg.author === 'You'
-                ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-rose-500/80 text-white'
-                : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
-            }`}>
-              <p className="font-semibold mb-1">{msg.author === 'You' ? 'You' : 'Community Guide'}</p>
-              <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.at).toLocaleTimeString()}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {alert && <p className="text-xs text-orange-200">{alert}</p>}
-
-      <div className="flex gap-3 flex-col sm:flex-row">
-        <input
-          type="text"
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-          onKeyPress={e => e.key === 'Enter' && sendRoomMessage()}
-          placeholder="Share something helpful for the room..."
-          className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50"
-        />
-        <button
-          onClick={sendRoomMessage}
-          disabled={!message.trim()}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20 w-full sm:w-auto"
-        >
-          Share warmly
-        </button>
       </div>
     </section>
   )
@@ -2238,7 +1510,7 @@ function Journal() {
           window.localStorage.removeItem('kiaan_journal_entries')
         }
       } catch {
-        if (!cancelled) setEncryptionMessage('Journal restored to a blank state because the saved copy could not be read securely.')
+        if (!cancelled) setEncryptionMessage('Sacred Reflections restored to a blank state because the saved copy could not be read securely.')
         if (!cancelled) setEntries([])
       } finally {
         if (!cancelled) setEncryptionReady(true)
@@ -2259,7 +1531,7 @@ function Journal() {
         window.localStorage.setItem(JOURNAL_ENTRY_STORAGE, encrypted)
         setEncryptionMessage(null)
       } catch {
-        setEncryptionMessage('Could not secure your journal locally. Please retry in a moment.')
+        setEncryptionMessage('Could not secure your Sacred Reflections locally. Please retry in a moment.')
       }
     })()
   }, [entries, encryptionReady])
@@ -2282,7 +1554,7 @@ function Journal() {
   function addEntry() {
     if (!body.trim()) return
     if (!encryptionReady) {
-      setEncryptionMessage('Preparing secure journal space. Please try adding your entry again in a few seconds.')
+      setEncryptionMessage('Preparing your Sacred Reflections space. Please try adding your entry again in a few seconds.')
       return
     }
     const entry: JournalEntry = {
@@ -2304,7 +1576,7 @@ function Journal() {
       const response = await fetch(`${apiUrl}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `Please offer a supportive Gita-inspired reflection on this private journal entry: ${entry.body}` })
+        body: JSON.stringify({ message: `Please offer a supportive Ancient Wisdom-inspired reflection on this private Sacred Reflections entry: ${entry.body}` })
       })
 
       if (response.ok) {
@@ -2339,7 +1611,7 @@ function Journal() {
   const assessment = (() => {
     if (weeklyEntries.length === 0) {
       return {
-        headline: 'KIAAN gently invites you to begin your journal practice this week.',
+        headline: 'KIAAN gently invites you to begin your Sacred Reflections practice this week.',
         guidance: [
           'Start with two or three lines on what felt peaceful or challenging today.',
           'Return here each evening; KIAAN will keep the space steady and private.',
@@ -2353,7 +1625,7 @@ function Journal() {
         headline: 'KIAAN notices some heavier moments this week and offers steady companionship.',
         guidance: [
           'Pair each entry with one small act of self-kindness to honor your effort.',
-          'Revisit a peaceful entry and let its lesson guide today’s choices, as the Gita teaches equanimity in action.',
+          'Revisit a peaceful entry and let its lesson guide today’s choices, as ancient wisdom teaches equanimity in action.',
           'Share one concern with KIAAN in the chat to receive a tailored practice for the coming days.'
         ]
       }
@@ -2374,7 +1646,7 @@ function Journal() {
       <div className="bg-[#0d0d10]/85 backdrop-blur border border-orange-500/15 rounded-3xl p-6 shadow-[0_15px_60px_rgba(255,115,39,0.14)]">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="text-sm text-orange-100/80">Private Journal</p>
+            <p className="text-sm text-orange-100/80">Sacred Reflections</p>
             <h2 className="text-2xl font-semibold bg-gradient-to-r from-orange-200 to-[#ffb347] bg-clip-text text-transparent">Sacred Reflections</h2>
             <p className="text-sm text-orange-100/70">Entries stay on your device and refresh the weekly guidance automatically.</p>
           </div>
@@ -2397,7 +1669,7 @@ function Journal() {
             </div>
           </div>
           {!encryptionReady && (
-            <p className="text-xs text-orange-200">Preparing secure journal space...</p>
+            <p className="text-xs text-orange-200">Preparing your Sacred Reflections space...</p>
           )}
           {encryptionMessage && (
             <p className="text-xs text-orange-200">{encryptionMessage}</p>
@@ -2442,7 +1714,7 @@ function Journal() {
               disabled={!body.trim()}
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 to-[#ffb347] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20 w-full sm:w-auto"
             >
-              Add Journal Entry
+              Add Reflection
             </button>
           </div>
 
@@ -2535,10 +1807,10 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
         </button>
         <button
           onClick={onJournal}
-          aria-label="Open journal"
+          aria-label="Open Sacred Reflections"
           className="flex-1 rounded-xl border border-orange-400/40 bg-black/40 px-4 py-3 text-base font-semibold text-orange-100 min-h-[52px]"
         >
-          Journal
+          Sacred Reflections
         </button>
       </div>
     </div>
@@ -2547,61 +1819,119 @@ function MobileActionDock({ onChat, onClarity, onJournal }: { onChat: () => void
 
 function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
+  const [kiaanResponse, setKiaanResponse] = useState<string>('')
+  
   const moods = [
+    // Positive moods
     { label: 'Peaceful', gradient: 'from-emerald-200 via-teal-300 to-cyan-200', beam: 'bg-emerald-100/70', halo: 'shadow-[0_0_50px_rgba(52,211,153,0.32)]', delay: '0s' },
-    { label: 'Happy', gradient: 'from-yellow-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_55px_rgba(252,211,77,0.35)]', delay: '0.08s' },
-    { label: 'Charged', gradient: 'from-orange-200 via-amber-300 to-yellow-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,146,60,0.34)]', delay: '0.24s' },
-    { label: 'Open', gradient: 'from-sky-200 via-cyan-200 to-emerald-200', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.32)]', delay: '0.32s' },
-    { label: 'Anger', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0.48s' },
-    { label: 'Sad', gradient: 'from-sky-300 via-blue-400 to-indigo-500', beam: 'bg-sky-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.35)]', delay: '0.56s' },
-    { label: 'Anxious', gradient: 'from-amber-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_45px_rgba(253,230,138,0.35)]', delay: '0.64s' },
-    { label: 'Worried', gradient: 'from-violet-300 via-purple-400 to-fuchsia-500', beam: 'bg-violet-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.32)]', delay: '0.72s' },
-    { label: 'Loneliness', gradient: 'from-cyan-200 via-blue-200 to-indigo-300', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(165,243,252,0.32)]', delay: '0.8s' },
-    { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.88s' },
+    { label: 'Happy', gradient: 'from-yellow-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_55px_rgba(252,211,77,0.35)]', delay: '0.05s' },
+    { label: 'Grateful', gradient: 'from-green-200 via-emerald-300 to-teal-200', beam: 'bg-green-100/70', halo: 'shadow-[0_0_50px_rgba(74,222,128,0.32)]', delay: '0.1s' },
+    { label: 'Charged', gradient: 'from-orange-200 via-amber-300 to-yellow-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,146,60,0.34)]', delay: '0.15s' },
+    { label: 'Open', gradient: 'from-sky-200 via-cyan-200 to-emerald-200', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.32)]', delay: '0.2s' },
+    { label: 'Determined', gradient: 'from-orange-300 via-red-400 to-rose-300', beam: 'bg-orange-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.34)]', delay: '0.25s' },
+    // Neutral moods
+    { label: 'Neutral', gradient: 'from-slate-200 via-gray-300 to-zinc-200', beam: 'bg-slate-100/70', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.3s' },
+    { label: 'Reflective', gradient: 'from-indigo-200 via-violet-300 to-purple-200', beam: 'bg-indigo-100/70', halo: 'shadow-[0_0_50px_rgba(165,180,252,0.32)]', delay: '0.35s' },
+    { label: 'Tender', gradient: 'from-pink-200 via-rose-300 to-red-200', beam: 'bg-pink-100/70', halo: 'shadow-[0_0_50px_rgba(251,207,232,0.32)]', delay: '0.4s' },
+    { label: 'Tired', gradient: 'from-blue-200 via-slate-300 to-gray-200', beam: 'bg-blue-100/60', halo: 'shadow-[0_0_45px_rgba(147,197,253,0.32)]', delay: '0.45s' },
+    // Challenging moods
+    { label: 'Anxious', gradient: 'from-amber-200 via-amber-300 to-orange-200', beam: 'bg-amber-100/70', halo: 'shadow-[0_0_45px_rgba(253,230,138,0.35)]', delay: '0.5s' },
+    { label: 'Worried', gradient: 'from-violet-300 via-purple-400 to-fuchsia-500', beam: 'bg-violet-100/70', halo: 'shadow-[0_0_50px_rgba(167,139,250,0.32)]', delay: '0.55s' },
+    { label: 'Heavy', gradient: 'from-slate-300 via-gray-400 to-zinc-400', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.35)]', delay: '0.6s' },
+    { label: 'Angry', gradient: 'from-rose-500 via-orange-500 to-amber-300', beam: 'bg-rose-100/70', halo: 'shadow-[0_0_55px_rgba(251,113,133,0.32)]', delay: '0.65s' },
+    { label: 'Sad', gradient: 'from-sky-300 via-blue-400 to-indigo-500', beam: 'bg-sky-100/70', halo: 'shadow-[0_0_50px_rgba(125,211,252,0.35)]', delay: '0.7s' },
+    { label: 'Loneliness', gradient: 'from-cyan-200 via-blue-200 to-indigo-300', beam: 'bg-cyan-100/70', halo: 'shadow-[0_0_50px_rgba(165,243,252,0.32)]', delay: '0.75s' },
+    { label: 'Depressed', gradient: 'from-slate-200 via-gray-400 to-neutral-600', beam: 'bg-slate-100/60', halo: 'shadow-[0_0_45px_rgba(148,163,184,0.32)]', delay: '0.8s' },
   ]
 
+  // Static micro-responses as specified in requirements
+  const moodResponses: Record<string, string> = {
+    'Peaceful': "I'm glad you're feeling calm — stay with that softness for a moment. 💙",
+    'Happy': "It's beautiful to see you feeling bright. Let that warmth stay with you. ✨",
+    'Neutral': "Steady is good. You're showing up, and that matters. 🌿",
+    'Charged': "That energy is powerful — channel it wisely. ⚡",
+    'Open': "Being open takes courage. I'm here to support you. 🌤️",
+    'Grateful': "Gratitude is a gift to yourself. Hold onto this feeling. 🙏",
+    'Reflective': "Reflection brings clarity. Take your time with what you're feeling. 🪞",
+    'Determined': "That fire in you is strong. Move forward with purpose. 🔥",
+    'Tender': "Tenderness is strength. Be gentle with yourself right now. 💙",
+    'Tired': "Rest is not weakness. Your body is telling you something important. 😴",
+    'Anxious': "That anxious feeling is tough — take a breath, I'm with you. 🌊",
+    'Heavy': "I'm sorry you're feeling low… you're not alone. I'm right here with you. 🌧️",
+    'Angry': "It's okay — anger means something important needs attention. I'm here beside you. 🔥",
+    'Worried': "Worry can feel overwhelming. Let's take this one step at a time together. 💭",
+    'Sad': "Sadness is heavy, but you're not alone right now. I'm here with you. 💙",
+    'Loneliness': "Loneliness is tough, but you're not alone right now. I'm here with you. 🤝",
+    'Depressed': "This weight is real, and it's hard. Please reach out — you don't have to carry this alone. 💙",
+  }
+
+  function handleMoodSelect(mood: string) {
+    setSelectedMood(mood)
+    setKiaanResponse(moodResponses[mood] || "I'm here with you. 💙")
+    
+    // Save mood check-in to localStorage for analytics
+    if (typeof window !== 'undefined') {
+      try {
+        const existing = localStorage.getItem('mood_check_ins')
+        const checkIns = existing ? JSON.parse(existing) : []
+        checkIns.push({
+          mood,
+          timestamp: new Date().toISOString()
+        })
+        // Keep only last 100 check-ins
+        const trimmed = checkIns.slice(-100)
+        localStorage.setItem('mood_check_ins', JSON.stringify(trimmed))
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }
+
   return (
-    <section className="bg-[#0d0d10]/85 border border-orange-500/15 rounded-3xl p-6 shadow-[0_16px_70px_rgba(255,115,39,0.12)] space-y-4">
+    <section className="mv-surface-panel rounded-3xl p-6 shadow-[0_16px_70px_rgba(255,115,39,0.12)] space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-orange-100/70">State check-in</p>
-          <h2 className="text-xl font-semibold text-orange-50">How are you feeling?</h2>
+          <p className="text-[11px] uppercase tracking-[0.18em] mv-panel-subtle">State check-in</p>
+          <h2 className="text-xl font-semibold mv-panel-title">How are you feeling?</h2>
         </div>
         {selectedMood && (
-          <span className="rounded-full border border-orange-400/40 bg-white/5 px-3 py-1 text-xs font-semibold text-orange-100 shadow-[0_0_25px_rgba(255,153,51,0.25)]">
+          <span className="mv-chip rounded-full px-3 py-1 text-xs font-semibold shadow-[0_0_25px_rgba(255,153,51,0.15)]">
             Logged: {selectedMood}
           </span>
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {moods.map(mood => {
-          const active = selectedMood === mood.label
-          return (
-            <button
-              key={mood.label}
-              onClick={() => setSelectedMood(mood.label)}
-              className={`group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-[#09090d]/85 text-left transition duration-300 ${
-                active
-                  ? 'ring-2 ring-orange-400/70 shadow-[0_24px_80px_rgba(255,115,39,0.28)] scale-[1.02]'
-                  : 'hover:-translate-y-1 hover:shadow-[0_18px_60px_rgba(255,115,39,0.18)]'
-              }`}
-              style={{ animationDelay: mood.delay }}
-            >
-              <div className={`absolute -inset-8 bg-gradient-to-br ${mood.gradient} opacity-20 blur-3xl`} />
-              <div className={`absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,200,150,0.25),transparent_46%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.16),transparent_42%)] animate-glowPulse`} />
-              <div className={`absolute inset-0 opacity-70 ${active ? 'animate-sheen' : ''}`}>
-                <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]" />
-              </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {moods.map(mood => {
+            const active = selectedMood === mood.label
+            const cardStyle: CSSProperties = {
+              animationDelay: mood.delay,
+              boxShadow: active ? '0 24px 80px rgba(217,119,6,0.25)' : undefined,
+              borderColor: active ? 'var(--mv-border-strong)' : undefined
+            }
+            return (
+              <button
+                key={mood.label}
+                onClick={() => handleMoodSelect(mood.label)}
+                className={`group relative overflow-hidden rounded-2xl mood-card border text-left transition duration-300 ${
+                  active ? 'scale-[1.02]' : 'hover:-translate-y-1'
+                }`}
+                style={cardStyle}
+              >
+                <div className={`absolute -inset-8 bg-gradient-to-br ${mood.gradient} opacity-20 blur-3xl`} />
+                <div className={`absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,200,150,0.25),transparent_46%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.16),transparent_42%)] animate-glowPulse`} />
+                <div className={`absolute inset-0 opacity-70 ${active ? 'animate-sheen' : ''}`}>
+                  <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]" />
+                </div>
 
-              <div className="relative flex items-center gap-4 p-4">
-                <div className="relative h-14 w-14 shrink-0">
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mood.gradient} opacity-80 blur-sm ${mood.halo}`} />
-                  <div className="absolute inset-1 rounded-2xl border border-white/10 bg-[#0b0b0f]/80 backdrop-blur" />
-                  <div className="absolute inset-2 rounded-xl border border-white/10" style={{ animation: 'spin 14s linear infinite' }} />
-                  <div className="absolute inset-2 rounded-xl bg-gradient-to-br from-white/8 via-transparent to-white/8" style={{ animation: 'spin 10s linear infinite reverse' }} />
-                  <div className="absolute inset-3 rounded-xl border border-white/10" />
-                  <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-white/5 via-transparent to-white/10 animate-glowPulse" />
+                <div className="relative z-[1] flex items-center gap-4 p-4">
+                  <div className="relative h-14 w-14 shrink-0">
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mood.gradient} opacity-80 blur-sm ${mood.halo}`} />
+                    <div className="absolute inset-1 rounded-2xl border border-white/10 bg-black/40 backdrop-blur" />
+                    <div className="absolute inset-2 rounded-xl border border-white/10" style={{ animation: 'spin 14s linear infinite' }} />
+                    <div className="absolute inset-2 rounded-xl bg-gradient-to-br from-white/8 via-transparent to-white/8" style={{ animation: 'spin 10s linear infinite reverse' }} />
+                    <div className="absolute inset-3 rounded-xl border border-white/10" />
+                    <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-white/5 via-transparent to-white/10 animate-glowPulse" />
                   <div className="absolute inset-0">
                     <span
                       className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[2px] animate-orbitTrail"
@@ -2623,7 +1953,7 @@ function MoodTracker() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold text-orange-50">{mood.label}</p>
+                  <p className="text-sm font-semibold mv-panel-title">{mood.label}</p>
                   <div className="flex items-center gap-1.5">
                     {[0, 1, 2].map(level => (
                       <span
@@ -2640,7 +1970,24 @@ function MoodTracker() {
         })}
       </div>
 
-      {selectedMood && <p className="text-center text-sm text-orange-300">✓ Mood captured</p>}
+      {/* KIAAN Micro-Response */}
+        {selectedMood && kiaanResponse && (
+          <div className="animate-fadeIn mt-4">
+            <div className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-amber-300/10 p-4 shadow-lg shadow-orange-500/10">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
+                  K
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs mv-panel-subtle mb-1">KIAAN</p>
+                  <p className="text-sm mv-panel-title leading-relaxed">
+                    {kiaanResponse}
+                  </p>
+                </div>
+              </div>
+            </div>
+        </div>
+      )}
 
       <style jsx>{`
         .animate-glowPulse { animation: glowPulse 6s ease-in-out infinite; }

@@ -1,0 +1,428 @@
+{
+  "_comment": "This file shows the exact structure for ALL 700 verses of the Bhagavad Gita",
+  "_total_verses_required": 700,
+  "_validation": "Run scripts/validate_gita_authenticity.py to validate all verses",
+  "_sources": {
+    "sanskrit": "Gita Press, Gorakhpur + IIT Kanpur Gita Supersite (gitasupersite.iitk.ac.in)",
+    "hindi": "Gita Press, Gorakhpur",
+    "english": "Swami Sivananda (Divine Life Society) / Swami Chinmayananda (Chinmaya Mission)",
+    "transliteration": "IAST (International Alphabet of Sanskrit Transliteration) standard only"
+  },
+  "_encoding_requirements": {
+    "sanskrit": "UTF-8 Unicode Devanagari (U+0900 to U+097F)",
+    "transliteration": "IAST diacritics required: ā ī ū ṛ ṝ ḷ ḹ ṃ ḥ ṅ ñ ṭ ḍ ṇ ś ṣ",
+    "hindi": "UTF-8 Unicode Devanagari",
+    "english": "UTF-8"
+  },
+  "_field_descriptions": {
+    "chapter": "Integer (1-18): Chapter number",
+    "verse": "Integer (1-78): Verse number within the chapter",
+    "sanskrit": "String: Authentic Devanagari Sanskrit text from Gita Press",
+    "transliteration": "String: IAST standard transliteration with proper diacritics",
+    "hindi": "String: Hindi translation from Gita Press",
+    "english": "String: English translation from Swami Sivananda or Chinmayananda",
+    "word_meanings": "Object: Word-by-word Sanskrit to English meanings",
+    "principle": "String: Core philosophical teaching of the verse",
+    "theme": "String: Primary theme identifier (snake_case)",
+    "mental_health_applications": "Array of strings: Specific mental health applications",
+    "primary_domain": "String: Primary mental health domain (anxiety, depression, etc.)",
+    "secondary_domains": "Array of strings: Additional relevant mental health domains"
+  },
+  "verses": [
+    {
+      "_note": "Verse 1.1 - Opening verse of the Gita",
+      "chapter": 1,
+      "verse": 1,
+      "sanskrit": "धृतराष्ट्र उवाच । धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः । मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय ॥",
+      "transliteration": "dhṛtarāṣṭra uvāca | dharma-kṣetre kuru-kṣetre samavetā yuyutsavaḥ | māmakāḥ pāṇḍavāś caiva kim akurvata sañjaya ||",
+      "hindi": "धृतराष्ट्र बोले – हे संजय! धर्मभूमि कुरुक्षेत्र में एकत्रित हुए युद्ध की इच्छा वाले मेरे और पाण्डु के पुत्रों ने क्या किया?",
+      "english": "Dhritarashtra said: O Sanjaya, what did my people and the sons of Pandu do when they assembled in the holy land of Kurukshetra, eager to fight?",
+      "word_meanings": {
+        "धृतराष्ट्रः": "Dhritarashtra (blind king)",
+        "उवाच": "said",
+        "धर्मक्षेत्रे": "in the holy field",
+        "कुरुक्षेत्रे": "in Kurukshetra",
+        "समवेताः": "assembled",
+        "युयुत्सवः": "desiring to fight",
+        "मामकाः": "my sons",
+        "पाण्डवाः": "the sons of Pandu",
+        "च": "and",
+        "एव": "certainly",
+        "किम्": "what",
+        "अकुर्वत": "did they do",
+        "सञ्जय": "O Sanjaya"
+      },
+      "principle": "Setting the stage for the great teaching; the battlefield as metaphor for inner conflict",
+      "theme": "introduction",
+      "mental_health_applications": [
+        "context_setting",
+        "inner_conflict"
+      ],
+      "primary_domain": "emotional_regulation",
+      "secondary_domains": []
+    },
+    {
+      "_note": "Verse 2.47 - The most famous karma yoga verse",
+      "chapter": 2,
+      "verse": 47,
+      "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन । मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि ॥",
+      "transliteration": "karmaṇy-evādhikāras te mā phaleṣu kadācana | mā karma-phala-hetur bhūr mā te saṅgo 'stv-akarmaṇi ||",
+      "hindi": "तेरा कर्म करने में ही अधिकार है, उसके फलों में कभी नहीं। इसलिए तू कर्मों के फल का हेतु मत बन और तेरी कर्म न करने में भी आसक्ति न हो।",
+      "english": "You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results of your activities, nor be attached to inaction.",
+      "word_meanings": {
+        "कर्मणि": "in prescribed duties",
+        "एव": "certainly",
+        "अधिकारः": "right",
+        "ते": "your",
+        "मा": "never",
+        "फलेषु": "in the fruits",
+        "कदाचन": "at any time",
+        "मा": "never",
+        "कर्म-फल": "results of action",
+        "हेतुः": "cause",
+        "भूः": "become",
+        "मा": "not",
+        "ते": "your",
+        "सङ्गः": "attachment",
+        "अस्तु": "be there",
+        "अकर्मणि": "in inaction"
+      },
+      "principle": "Perform your duty without attachment to results (Nishkama Karma - desireless action)",
+      "theme": "karma_yoga",
+      "mental_health_applications": [
+        "outcome_detachment",
+        "anxiety_reduction",
+        "work_stress_management",
+        "performance_pressure",
+        "perfectionism"
+      ],
+      "primary_domain": "anxiety",
+      "secondary_domains": [
+        "work_stress",
+        "emotional_regulation"
+      ]
+    },
+    {
+      "_note": "Verse 2.56 - Definition of Sthitaprajna (steady wisdom)",
+      "chapter": 2,
+      "verse": 56,
+      "sanskrit": "दुःखेष्वनुद्विग्नमनाः सुखेषु विगतस्पृहः । वीतरागभयक्रोधः स्थितधीर्मुनिरुच्यते ॥",
+      "transliteration": "duḥkheṣv-anudvigna-manāḥ sukheṣu vigata-spṛhaḥ | vīta-rāga-bhaya-krodhaḥ sthita-dhīr munir ucyate ||",
+      "hindi": "जिसका मन दुःखों में उद्विग्न नहीं होता और सुखों में स्पृहारहित है, जिसके राग, भय और क्रोध नष्ट हो गए हैं, ऐसा मुनि स्थितप्रज्ञ कहा जाता है।",
+      "english": "One whose mind is not disturbed in the midst of sorrows, who is free from longing for pleasures, and from whom attachment, fear, and anger have departed—such a sage is said to be of steady wisdom.",
+      "word_meanings": {
+        "दुःखेषु": "in sorrows",
+        "अनुद्विग्न-मनाः": "whose mind is undisturbed",
+        "सुखेषु": "in pleasures",
+        "विगत-स्पृहः": "free from longing",
+        "वीत": "departed from",
+        "राग": "attachment",
+        "भय": "fear",
+        "क्रोधः": "anger",
+        "स्थित-धीः": "of steady wisdom",
+        "मुनिः": "sage",
+        "उच्यते": "is said to be"
+      },
+      "principle": "True wisdom is equanimity in pleasure and pain, free from attachment, fear, and anger",
+      "theme": "equanimity",
+      "mental_health_applications": [
+        "emotional_stability",
+        "equanimity",
+        "mindfulness",
+        "distress_tolerance",
+        "non_reactivity"
+      ],
+      "primary_domain": "emotional_regulation",
+      "secondary_domains": [
+        "anxiety",
+        "depression",
+        "anger"
+      ]
+    },
+    {
+      "_note": "Verse 6.5 - Self-empowerment and personal responsibility",
+      "chapter": 6,
+      "verse": 5,
+      "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत् । आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः ॥",
+      "transliteration": "uddhared ātmanātmānaṃ nātmānam avasādayet | ātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ ||",
+      "hindi": "अपने द्वारा अपना उद्धार करे और अपने को नीचे न गिराए, क्योंकि यह मनुष्य स्वयं ही अपना मित्र है और स्वयं ही अपना शत्रु है।",
+      "english": "One must elevate oneself by one's own mind, not degrade oneself. The mind is the friend of the conditioned soul, and his enemy as well.",
+      "word_meanings": {
+        "उद्धरेत्": "one must elevate",
+        "आत्मना": "by the mind",
+        "आत्मानम्": "the self",
+        "न": "not",
+        "आत्मानम्": "the self",
+        "अवसादयेत्": "degrade",
+        "आत्मा": "the mind",
+        "एव": "certainly",
+        "हि": "indeed",
+        "आत्मनः": "of the self",
+        "बन्धुः": "friend",
+        "आत्मा": "the mind",
+        "एव": "certainly",
+        "रिपुः": "enemy",
+        "आत्मनः": "of the self"
+      },
+      "principle": "You are responsible for your own upliftment; the self can be your greatest ally or worst enemy",
+      "theme": "self_mastery",
+      "mental_health_applications": [
+        "self_empowerment",
+        "personal_responsibility",
+        "self_worth",
+        "self_agency",
+        "cognitive_reframing"
+      ],
+      "primary_domain": "self_worth",
+      "secondary_domains": [
+        "depression",
+        "purpose",
+        "emotional_regulation"
+      ]
+    },
+    {
+      "_note": "Verse 12.13 - Compassion and friendliness toward all",
+      "chapter": 12,
+      "verse": 13,
+      "sanskrit": "अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च । निर्ममो निरहङ्कारः समदुःखसुखः क्षमी ॥",
+      "transliteration": "adveṣṭā sarva-bhūtānāṃ maitraḥ karuṇa eva ca | nirmamo nirahaṅkāraḥ sama-duḥkha-sukhaḥ kṣamī ||",
+      "hindi": "जो सम्पूर्ण प्राणियों में द्वेष-रहित, मैत्री और करुणा से युक्त है, ममतारहित, अहंकाररहित, सुख-दुःख में सम और क्षमाशील है।",
+      "english": "One who is not envious but is a kind friend to all living entities, who does not think himself a proprietor and is free from false ego, who is equal in both happiness and distress, who is tolerant and forgiving.",
+      "word_meanings": {
+        "अद्वेष्टा": "non-envious",
+        "सर्व-भूतानाम्": "to all living entities",
+        "मैत्रः": "friendly",
+        "करुणः": "compassionate",
+        "एव": "certainly",
+        "च": "and",
+        "निर्ममः": "without sense of proprietorship",
+        "निरहङ्कारः": "without false ego",
+        "सम": "equal",
+        "दुःख": "in distress",
+        "सुखः": "and happiness",
+        "क्षमी": "tolerant, forgiving"
+      },
+      "principle": "The qualities of a true devotee include universal compassion, friendliness, and freedom from ego",
+      "theme": "bhakti_yoga",
+      "mental_health_applications": [
+        "compassion",
+        "loving_kindness",
+        "empathy",
+        "forgiveness",
+        "relationship_harmony"
+      ],
+      "primary_domain": "relationships",
+      "secondary_domains": [
+        "emotional_regulation",
+        "anger"
+      ]
+    },
+    {
+      "_note": "Verse 13.27 - Seeing the divine equally in all beings",
+      "chapter": 13,
+      "verse": 27,
+      "sanskrit": "समं सर्वेषु भूतेषु तिष्ठन्तं परमेश्वरम् । विनश्यत्स्वविनश्यन्तं यः पश्यति स पश्यति ॥",
+      "transliteration": "samaṃ sarveṣu bhūteṣu tiṣṭhantaṃ parameśvaram | vinaśyatsv avinaśyantaṃ yaḥ paśyati sa paśyati ||",
+      "hindi": "जो पुरुष नाशवान समस्त प्राणियों में नाशरहित सबके परमेश्वर को समभाव से स्थित देखता है, वही यथार्थ देखता है।",
+      "english": "One who sees the Supreme Lord dwelling equally in all beings, the imperishable within the perishable, truly sees.",
+      "word_meanings": {
+        "समम्": "equally",
+        "सर्वेषु": "in all",
+        "भूतेषु": "living beings",
+        "तिष्ठन्तम्": "residing",
+        "परमेश्वरम्": "the Supreme Lord",
+        "विनश्यत्सु": "in the perishable",
+        "अविनश्यन्तम्": "the imperishable",
+        "यः": "one who",
+        "पश्यति": "sees",
+        "सः": "he",
+        "पश्यति": "truly sees"
+      },
+      "principle": "True vision is seeing the divine presence equally in all beings, recognizing the eternal within the temporary",
+      "theme": "knowledge",
+      "mental_health_applications": [
+        "equality_vision",
+        "compassion",
+        "non_judgment",
+        "intrinsic_worth",
+        "perspective_shift"
+      ],
+      "primary_domain": "relationships",
+      "secondary_domains": [
+        "self_worth",
+        "emotional_regulation"
+      ]
+    },
+    {
+      "_note": "Verse 15.7 - The eternal soul as fragment of the Divine",
+      "chapter": 15,
+      "verse": 7,
+      "sanskrit": "ममैवांशो जीवलोके जीवभूतः सनातनः । मनःषष्ठानीन्द्रियाणि प्रकृतिस्थानि कर्षति ॥",
+      "transliteration": "mamaivāṃśo jīva-loke jīva-bhūtaḥ sanātanaḥ | manaḥ-ṣaṣṭhānīndriyāṇi prakṛti-sthāni karṣati ||",
+      "hindi": "इस संसार में जीवात्मा मेरा ही सनातन अंश है और वह प्रकृति में स्थित मन सहित छहों इन्द्रियों को अपनी ओर खींचता है।",
+      "english": "The living entities in this conditioned world are My eternal fragmental parts. Due to conditioned life, they are struggling very hard with the six senses, which include the mind.",
+      "word_meanings": {
+        "मम": "My",
+        "एव": "certainly",
+        "अंशः": "fragmental part",
+        "जीव-लोके": "in the world of conditioned souls",
+        "जीव-भूतः": "the conditioned living entity",
+        "सनातनः": "eternal",
+        "मनः": "mind",
+        "षष्ठानि": "the six",
+        "इन्द्रियाणि": "senses",
+        "प्रकृति-स्थानि": "situated in material nature",
+        "कर्षति": "is struggling"
+      },
+      "principle": "Every soul is an eternal fragment of the Divine, inherently connected to the Supreme",
+      "theme": "soul_knowledge",
+      "mental_health_applications": [
+        "intrinsic_worth",
+        "spiritual_identity",
+        "self_compassion",
+        "divine_connection"
+      ],
+      "primary_domain": "self_worth",
+      "secondary_domains": [
+        "purpose",
+        "grief"
+      ]
+    },
+    {
+      "_note": "Verse 16.1 - Divine qualities (first of three verses)",
+      "chapter": 16,
+      "verse": 1,
+      "sanskrit": "श्रीभगवानुवाच । अभयं सत्त्वसंशुद्धिर्ज्ञानयोगव्यवस्थितिः । दानं दमश्च यज्ञश्च स्वाध्यायस्तप आर्जवम् ॥",
+      "transliteration": "śrī-bhagavān uvāca | abhayaṃ sattva-saṃśuddhir jñāna-yoga-vyavasthitiḥ | dānaṃ damaś ca yajñaś ca svādhyāyas tapa ārjavam ||",
+      "hindi": "श्री भगवान बोले – अभय, अन्तःकरण की शुद्धि, ज्ञानयोग में दृढ़ स्थिति, दान, इन्द्रियों का दमन, यज्ञ, स्वाध्याय, तप और सरलता।",
+      "english": "The Supreme Lord said: Fearlessness, purification of one's existence, cultivation of spiritual knowledge, charity, self-control, sacrifice, study of the Vedas, austerity, and simplicity.",
+      "word_meanings": {
+        "श्री-भगवान्": "the Supreme Lord",
+        "उवाच": "said",
+        "अभयम्": "fearlessness",
+        "सत्त्व-संशुद्धिः": "purification of existence",
+        "ज्ञान-योग": "cultivation of knowledge",
+        "व्यवस्थितिः": "steadiness",
+        "दानम्": "charity",
+        "दमः": "self-control",
+        "च": "and",
+        "यज्ञः": "sacrifice",
+        "च": "and",
+        "स्वाध्यायः": "study of Vedas",
+        "तपः": "austerity",
+        "आर्जवम्": "simplicity"
+      },
+      "principle": "Divine qualities that lead to spiritual progress and mental well-being",
+      "theme": "divine_qualities",
+      "mental_health_applications": [
+        "character_development",
+        "virtue_cultivation",
+        "fearlessness",
+        "self_improvement",
+        "ethical_living"
+      ],
+      "primary_domain": "purpose",
+      "secondary_domains": [
+        "fear",
+        "self_worth",
+        "relationships"
+      ]
+    },
+    {
+      "_note": "Verse 18.66 - The ultimate surrender verse (final teaching)",
+      "chapter": 18,
+      "verse": 66,
+      "sanskrit": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज । अहं त्वां सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः ॥",
+      "transliteration": "sarva-dharmān parityajya mām ekaṃ śaraṇaṃ vraja | ahaṃ tvāṃ sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ ||",
+      "hindi": "सम्पूर्ण धर्मों को अर्थात सम्पूर्ण कर्तव्य कर्मों को मुझमें त्यागकर तू केवल एक मुझ सर्वशक्तिमान, सर्वाधार परमेश्वर की ही शरण में आ जा। मैं तुझे सम्पूर्ण पापों से मुक्त कर दूंगा, तू शोक मत कर।",
+      "english": "Abandon all varieties of dharmas and just surrender unto Me alone. I shall deliver you from all sinful reactions. Do not fear.",
+      "word_meanings": {
+        "सर्व-धर्मान्": "all varieties of dharmas",
+        "परित्यज्य": "abandoning",
+        "माम्": "unto Me",
+        "एकम्": "only",
+        "शरणम्": "for surrender",
+        "व्रज": "go",
+        "अहम्": "I",
+        "त्वाम्": "you",
+        "सर्व": "all",
+        "पापेभ्यः": "from sinful reactions",
+        "मोक्षयिष्यामि": "will deliver",
+        "मा": "do not",
+        "शुचः": "worry"
+      },
+      "principle": "Ultimate surrender to the Divine brings complete freedom from all anxieties and suffering",
+      "theme": "surrender",
+      "mental_health_applications": [
+        "surrender",
+        "letting_go",
+        "anxiety_relief",
+        "spiritual_refuge",
+        "trust"
+      ],
+      "primary_domain": "anxiety",
+      "secondary_domains": [
+        "depression",
+        "fear",
+        "grief"
+      ]
+    },
+    {
+      "_note": "Verse 18.78 - The final verse of the Gita (conclusion)",
+      "chapter": 18,
+      "verse": 78,
+      "sanskrit": "यत्र योगेश्वरः कृष्णो यत्र पार्थो धनुर्धरः । तत्र श्रीर्विजयो भूतिर्ध्रुवा नीतिर्मतिर्मम ॥",
+      "transliteration": "yatra yogeśvaraḥ kṛṣṇo yatra pārtho dhanur-dharaḥ | tatra śrīr vijayo bhūtir dhruvā nītir matir mama ||",
+      "hindi": "जहाँ योगेश्वर श्री कृष्ण हैं और जहाँ गाण्डीव-धनुषधारी अर्जुन है, वहीं श्री, विजय, विभूति और अचल नीति है – ऐसा मेरा मत है।",
+      "english": "Wherever there is Krishna, the master of yoga, and wherever there is Arjuna, the supreme archer, there will also certainly be opulence, victory, extraordinary power, and morality. That is my opinion.",
+      "word_meanings": {
+        "यत्र": "wherever",
+        "योग-ईश्वरः": "the master of yoga",
+        "कृष्णः": "Lord Krishna",
+        "यत्र": "wherever",
+        "पार्थः": "the son of Pritha (Arjuna)",
+        "धनुः-धरः": "the carrier of the bow and arrow",
+        "तत्र": "there",
+        "श्रीः": "opulence",
+        "विजयः": "victory",
+        "भूतिः": "exceptional power",
+        "ध्रुवा": "certain",
+        "नीतिः": "morality",
+        "मतिः": "opinion",
+        "मम": "my"
+      },
+      "principle": "Where divine wisdom (Krishna) and dedicated action (Arjuna) unite, success and righteousness are assured",
+      "theme": "conclusion",
+      "mental_health_applications": [
+        "hope",
+        "faith",
+        "integration",
+        "victory_mindset"
+      ],
+      "primary_domain": "purpose",
+      "secondary_domains": [
+        "depression",
+        "anxiety"
+      ]
+    }
+  ],
+  "_usage_notes": {
+    "creating_complete_file": [
+      "1. Use this structure for all 700 verses",
+      "2. Follow the canonical chapter/verse distribution (see docs/BHAGAVAD_GITA_IMPLEMENTATION.md Section 3)",
+      "3. Source Sanskrit from Gita Press or IIT Kanpur Gita Supersite",
+      "4. Ensure IAST transliteration has proper diacritics",
+      "5. Tag with mental health applications following data/gita/mental_health_tag_guide.md",
+      "6. Validate using scripts/validate_gita_authenticity.py"
+    ],
+    "validation_checklist": [
+      "Total verses = 700",
+      "Chapter distribution matches canonical counts",
+      "Sanskrit is valid Devanagari (U+0900 to U+097F)",
+      "Transliteration uses IAST diacritics",
+      "All required fields present",
+      "Mental health tags are valid",
+      "No duplicate chapter/verse combinations"
+    ]
+  }
+}

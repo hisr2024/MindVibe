@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "description": "Motion primitives for the MindVibe + KIAAN system.",
+    "accessibility": "Respect prefers-reduced-motion and provide static fallbacks."
+  },
+  "timing": {
+    "breath": 8000,
+    "halo": 2600,
+    "shimmer": 1400,
+    "ripple": 3200,
+    "focus": 900
+  },
+  "easings": {
+    "soft": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "empathic": "cubic-bezier(0.35, 0, 0.15, 1)",
+    "pulse": "cubic-bezier(0.32, 0, 0.12, 1)",
+    "linear": "linear"
+  },
+  "curves": {
+    "featherSway": "cubic-bezier(0.36, 0.02, 0.22, 1)",
+    "energyLoop": "cubic-bezier(0.42, 0, 0.12, 1)",
+    "ripples": "cubic-bezier(0.3, 0, 0.1, 1)"
+  }
+}

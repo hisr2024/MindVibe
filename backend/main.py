@@ -30,11 +30,35 @@ from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy import text
 
+from backend.core import migrations as migrations_module
 from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
+from backend.middleware.logging_middleware import RequestLoggingMiddleware
 from backend.models import Base
+
+# Get allowed origins from environment variable or use defaults
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "https://mind-vibe-universal.vercel.app,http://localhost:3000,http://localhost:3001"
+    ).split(",")
+]
+
+# Explicitly list allowed headers (wildcards don't work with credentials: 'include')
+ALLOWED_HEADERS = [
+    "content-type",
+    "authorization",
+    "accept",
+    "origin",
+    "user-agent",
+    "x-requested-with",
+    "x-csrf-token",
+    "cache-control",
+]
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
@@ -51,30 +75,47 @@ elif DATABASE_URL.startswith("postgresql://"):
 
 
 def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
-    """Build asyncpg connect args to honor sslmode/ssl query params.
+    """Build asyncpg connect args to honor sslmode/ssl query params. 
 
-    Render Postgres instances require TLS by default. When using asyncpg, the
+    Render Postgres instances require TLS by default.  When using asyncpg, the
     ``sslmode=require`` query parameter from the connection string is ignored
-    unless we translate it into the ``ssl`` flag expected by asyncpg. This
+    unless we translate it into the ``ssl`` flag expected by asyncpg.  This
     helper preserves explicit ``sslmode``/``ssl`` values while defaulting to a
-    secure connection when SSL is required.
+    secure connection when SSL is required. 
     """
+    import ssl as ssl_module
+    from urllib.parse import parse_qs, urlparse
 
     parsed = urlparse(db_url)
     query_params = parse_qs(parsed.query)
 
     ssl_pref = os.getenv("DB_SSL_MODE") or query_params.get("sslmode", [None])[0] or query_params.get("ssl", [None])[0]
+    
+    # Default to require SSL for Render
     if not ssl_pref:
-        return {}
-
+        ssl_pref = "require"
+    
     ssl_pref = ssl_pref.lower()
-    if ssl_pref in {"require", "required", "verify-ca", "verify-full", "true", "1"}:
-        return {"ssl": ssl.create_default_context()}
+    
+    if ssl_pref in {"require", "required"}:
+        # Create SSL context that doesn't verify certificates (for Render)
+        ssl_context = ssl_module.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl_module.CERT_NONE
+        return {"ssl": ssl_context}
+    
+    if ssl_pref in {"verify-ca", "verify-full", "true", "1"}:
+        # Full verification
+        return {"ssl": ssl_module.create_default_context()}
+    
     if ssl_pref in {"disable", "false", "0"}:
         return {"ssl": False}
 
-    # Fallback to enabling SSL for unrecognized but present values
-    return {"ssl": ssl.create_default_context()}
+    # Fallback: enable SSL without verification for Render compatibility
+    ssl_context = ssl_module.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl_module.CERT_NONE
+    return {"ssl": ssl_context}
 
 
 engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args_for_ssl(DATABASE_URL))
@@ -89,46 +130,59 @@ app = FastAPI(
 # Add security headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
 
+# Add request logging middleware
+app.add_middleware(RequestLoggingMiddleware)
+
 # Configure rate limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=ALLOWED_HEADERS,
     expose_headers=["*"],
     max_age=3600,
 )
 
 @app.middleware("http")
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
+    origin = request.headers.get("origin")
+
+    # Check if origin is allowed
+    if origin and origin in ALLOWED_ORIGINS:
+        allowed_origin = origin
+    else:
+        # Fallback to first allowed origin (for non-browser clients)
+        allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "*"
+
     if request.method == "OPTIONS":
         return JSONResponse(
             content={"status": "ok"},
             headers={
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": allowed_origin,
+                "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
             },
         )
+
     response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Origin"] = allowed_origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = ", ".join(ALLOWED_HEADERS)
     return response
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
     try:
+        # Step 1: Run SQL migrations
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
-            if migration_result.applied:
+            if migration_result. applied:
                 print(f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}")
             else:
                 print("ℹ️ No new SQL migrations to apply")
@@ -139,8 +193,34 @@ async def startup():
                 print(f"   Pending: {', '.join(migration_result.pending)}")
             else:
                 print("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
+
+        # Step 2: Run manual Python migrations
+        print("\n🔧 Running manual migrations...")
+        try:
+            from backend.core.manual_migrations import run_manual_migrations
+            manual_results = await run_manual_migrations(engine)
+            for migration_name, result in manual_results.items():
+                status_icon = "✅" if result['success'] else "⚠️"
+                print(f"{status_icon} {migration_name}: {result['message']}")
+        except Exception as manual_error:
+            print(f"⚠️ Manual migrations had issues: {manual_error}")
+            # Don't fail startup - manual migrations are supplementary
+
+        # Step 3: Ensure ORM tables exist (standard SQLAlchemy approach)
+        print("\n🔧 Ensuring ORM tables exist...")
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            
+        print("✅ Database schema ready")
+        
     except Exception as exc:
-        print(f"❌ [MIGRATIONS] Failed to apply SQL migrations: {exc}")
+        failed_meta = migrations_module. LATEST_MIGRATION_RESULT
+        if failed_meta and failed_meta.failed_file:
+            print("❌ [MIGRATIONS] Context for the failure:")
+            print(f"   File: {failed_meta.failed_file}")
+            if failed_meta. failed_statement:
+                print(f"   Statement: {failed_meta.failed_statement}")
+        print(f"❌ [MIGRATIONS] Failed to apply migrations: {exc}")
         raise
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
@@ -149,18 +229,18 @@ kiaan_router_loaded = False
 try:
     from backend.routes.chat import router as chat_router
     print("✅ [SUCCESS] Chat router imported successfully")
-    
+
     print("[2/3] Attempting to include router in FastAPI app...")
     app.include_router(chat_router)
     print("✅ [SUCCESS] Chat router included in FastAPI app")
-    
+
     kiaan_router_loaded = True
     print("[3/3] KIAAN Router Status: ✅ OPERATIONAL")
     print("✅ Endpoints now available:")
     print("   • POST   /api/chat/message - KIAAN chat endpoint")
     print("   • GET    /api/chat/health - Health check")
     print("   • GET    /api/chat/about - KIAAN information")
-    
+
 except ImportError as e:
     print(f"❌ [IMPORT ERROR] Failed to import chat router:")
     print(f"   Error: {e}")
@@ -171,6 +251,25 @@ except Exception as e:
     print(f"   Error Type: {type(e).__name__}")
     print(f"   Error Message: {e}")
     traceback.print_exc(file=sys.stdout)
+
+print("\n[Chat Rooms] Loading real-time rooms router...")
+try:
+    from backend.routes.chat_rooms import router as chat_rooms_router
+    app.include_router(chat_rooms_router)
+    print("✅ [SUCCESS] Chat rooms router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load chat rooms router: {e}")
+
+# Load Monitoring router
+print("\n[Monitoring] Loading monitoring and observability router...")
+try:
+    from backend.monitoring.health import router as monitoring_router
+    app.include_router(monitoring_router)
+    print("✅ [SUCCESS] Monitoring router loaded")
+    print("   • GET    /api/monitoring/health/detailed - Detailed health check")
+    print("   • GET    /api/monitoring/metrics - Application metrics")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Monitoring router: {e}")
 
 # Load Gita API router
 print("\n[Gita API] Attempting to import Gita API router...")
@@ -226,6 +325,16 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Guidance router: {e}")
 
+# Load Karmic Tree gamification router
+print("\n[Karmic Tree] Attempting to import Karmic Tree router...")
+try:
+    from backend.routes.karmic_tree import router as karmic_tree_router
+
+    app.include_router(karmic_tree_router, prefix="/api")
+    print("✅ [SUCCESS] Karmic Tree router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karmic Tree router: {e}")
+
 # Load Subscriptions router
 print("\n[Subscriptions] Attempting to import Subscriptions router...")
 try:
@@ -234,6 +343,24 @@ try:
     print("✅ [SUCCESS] Subscriptions router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
+
+# Load Emotional Reset router
+print("\n[Emotional Reset] Attempting to import Emotional Reset router...")
+try:
+    from backend.routes.emotional_reset import router as emotional_reset_router
+    app.include_router(emotional_reset_router)
+    print("✅ [SUCCESS] Emotional Reset router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Emotional Reset router: {e}")
+
+# Load Karmic Tree Analytics router
+print("\n[Karmic Tree] Attempting to import Karmic Tree Analytics router...")
+try:
+    from backend.routes.analytics.karmic_tree import router as karmic_tree_router
+    app.include_router(karmic_tree_router, prefix="/api/analytics")
+    print("✅ [SUCCESS] Karmic Tree Analytics router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karmic Tree Analytics router: {e}")
 
 # Load Admin routers
 print("\n[Admin] Attempting to import Admin routers...")
@@ -334,6 +461,33 @@ if compliance_routers_loaded:
     print(f"✅ [SUCCESS] Compliance routers loaded: {', '.join(compliance_routers_loaded)}")
 else:
     print("❌ [ERROR] No Compliance routers were loaded")
+
+# Load Karma Reset router (Viyog, Relationship Compass, Ardha use KIAAN's wisdom system)
+print("\n[Karma Reset] Attempting to import Karma Reset router...")
+try:
+    from backend.routes.karma_reset import router as karma_reset_router
+    app.include_router(karma_reset_router)
+    print("✅ [SUCCESS] Karma Reset router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
+
+# Load Ardha router
+print("\n[Ardha] Attempting to import Ardha router...")
+try:
+    from backend.routes.ardha import router as ardha_router
+    app.include_router(ardha_router)
+    print("✅ [SUCCESS] Ardha router loaded with Gita integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Ardha router: {e}")
+
+# Load Viyoga router
+print("\n[Viyoga] Attempting to import Viyoga router...")
+try:
+    from backend.routes.viyoga import router as viyoga_router
+    app.include_router(viyoga_router)
+    print("✅ [SUCCESS] Viyoga router loaded with Gita integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")

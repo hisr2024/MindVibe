@@ -1,12 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MindVibe icon">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="KIAAN MindVibe Companion icon">
   <defs>
-    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
-      <stop offset="0%" stop-color="#f97316" />
-      <stop offset="50%" stop-color="#fb923c" />
-      <stop offset="100%" stop-color="#fde68a" />
+    <linearGradient id="flute" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d6a240" />
+      <stop offset="45%" stop-color="#f5c56a" />
+      <stop offset="100%" stop-color="#c0c7d4" />
     </linearGradient>
+    <linearGradient id="kArmIcon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f8fbff" />
+      <stop offset="100%" stop-color="#d2dae7" />
+    </linearGradient>
+    <linearGradient id="featherIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12c8c7" />
+      <stop offset="45%" stop-color="#1ca3e0" />
+      <stop offset="78%" stop-color="#7ad6ff" />
+      <stop offset="100%" stop-color="#c5b7ff" />
+    </linearGradient>
+    <radialGradient id="auraIcon" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="rgba(106,215,255,0.35)" />
+      <stop offset="60%" stop-color="rgba(37,99,235,0.16)" />
+      <stop offset="100%" stop-color="rgba(6,9,18,0)" />
+    </radialGradient>
   </defs>
-  <rect width="256" height="256" rx="48" fill="#050509" />
-  <rect x="18" y="18" width="220" height="220" rx="44" fill="url(#g)" opacity="0.12" />
-  <path fill="#fefefe" d="M70 182V74h22l20 49 20-49h22v108h-19v-67l-17 44h-12l-17-44v67H70zm118 0V74h22v108h-22z" />
+  <rect width="256" height="256" rx="48" fill="#07080d" />
+  <rect x="8" y="8" width="240" height="240" rx="44" fill="#0d101a" />
+  <circle cx="128" cy="136" r="88" fill="url(#auraIcon)" />
+  <circle cx="128" cy="136" r="76" stroke="url(#featherIcon)" stroke-width="2.5" opacity="0.35" />
+  <line x1="102" y1="66" x2="102" y2="206" stroke="url(#flute)" stroke-width="14" stroke-linecap="round" />
+  <g fill="#0b1020" opacity="0.82">
+    <circle cx="102" cy="110" r="3" />
+    <circle cx="102" cy="142" r="3" />
+    <circle cx="102" cy="174" r="3" />
+  </g>
+  <path d="M112 142 L180 90" stroke="url(#kArmIcon)" stroke-width="14" stroke-linecap="round" />
+  <path d="M112 150 L182 198" stroke="url(#kArmIcon)" stroke-width="14" stroke-linecap="round" />
+  <path d="M158 66 C190 60 212 82 206 114 C200 144 170 170 140 182" fill="url(#featherIcon)" stroke="rgba(27,86,152,0.5)" stroke-width="2" filter="drop-shadow(0 8px 22px rgba(32,120,190,0.32))" />
+  <path d="M168 74 C174 90 166 116 150 142" stroke="#f4f9ff" stroke-width="2" stroke-linecap="round" opacity="0.9" />
 </svg>

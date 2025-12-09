@@ -65,7 +65,7 @@ export function KiaanQuotaCard({
               className="mb-4"
             />
 
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
               <div className="rounded-xl bg-black/30 border border-orange-500/15 p-3 text-center">
                 <p className="text-xs text-orange-100/60 mb-1">Used</p>
                 <p className="text-lg font-bold text-orange-50">{used}</p>

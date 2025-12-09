@@ -1,9 +1,9 @@
+'use client'
+
 /**
  * Dynamic Onboarding Step Page
  * Handles step-by-step onboarding flow with URL routing
  */
-
-'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
@@ -198,7 +198,7 @@ export default function OnboardingStepPage() {
 
   const handleStartChat = () => {
     handleComplete()
-    router.push('/kiaan')
+    router.push('/#kiaan-chat')
   }
 
   const handleGoToDashboard = () => {

@@ -1,0 +1,114 @@
+{
+  "common": {
+    "welcome": "Willkommen bei MindVibe",
+    "tagline": "Ihr achtsamer Begleiter für inneren Frieden",
+    "getStarted": "Loslegen",
+    "learnMore": "Mehr erfahren",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "signOut": "Abmelden",
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "dashboard": "Dashboard",
+    "language": "Sprache",
+    "theme": "Design",
+    "dark": "Dunkel",
+    "light": "Hell",
+    "system": "System"
+  },
+  "pricing": {
+    "title": "Wählen Sie Ihren Weg zum inneren Frieden",
+    "subtitle": "Jeder Plan bietet die gleiche Qualität der KIAAN-Beratung. Wählen Sie nach Ihren Verbindungswünschen.",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "save": "Sparen",
+    "perMonth": "/Monat",
+    "perYear": "/Jahr",
+    "billedYearly": "bei jährlicher Abrechnung",
+    "currentPlan": "Aktueller Plan",
+    "getStartedFree": "Kostenlos starten",
+    "mostPopular": "Beliebteste",
+    "comparePlans": "Pläne vergleichen",
+    "kiaanQuestions": "KIAAN Fragen",
+    "unlimited": "Unbegrenzt",
+    "features": "Funktionen",
+    "faq": {
+      "title": "Häufig gestellte Fragen",
+      "changePlan": {
+        "q": "Kann ich meinen Plan später ändern?",
+        "a": "Ja! Sie können jederzeit upgraden, downgraden oder kündigen. Upgrades werden sofort wirksam, Downgrades am Ende Ihres Abrechnungszeitraums."
+      },
+      "quota": {
+        "q": "Was passiert, wenn ich mein Fragenkontingent überschreite?",
+        "a": "Sie können weiterhin alle anderen Funktionen wie Tagebuch, Stimmungstracking und Atemübungen nutzen. Ihr Kontingent wird zu Beginn jedes Abrechnungszeitraums zurückgesetzt."
+      },
+      "security": {
+        "q": "Sind meine Daten sicher?",
+        "a": "Absolut. Ihre Tagebucheinträge werden auf Ihrem Gerät verschlüsselt. Wir verkaufen niemals Ihre Daten und halten strenge Datenschutzstandards ein."
+      },
+      "refund": {
+        "q": "Kann ich eine Rückerstattung erhalten?",
+        "a": "Wir bieten eine 14-tägige Geld-zurück-Garantie für alle kostenpflichtigen Pläne. Wenn Sie nicht zufrieden sind, kontaktieren Sie uns für eine vollständige Rückerstattung."
+      }
+    },
+    "promise": {
+      "title": "Das KIAAN Versprechen",
+      "description": "Jeder Benutzer erhält die gleiche Qualität der Beratung von KIAAN – der einzige Unterschied ist, wie viele Fragen Sie pro Monat stellen können. Wir glauben, dass mentale Wellness für jeden zugänglich sein sollte.",
+      "items": {
+        "quality": "Gleiche KI-Qualität für alle Stufen",
+        "noDegradation": "Keine Funktionseinschränkungen",
+        "privacy": "Ihre Daten bleiben privat",
+        "cancel": "Jederzeit kündbar"
+      }
+    }
+  },
+  "tiers": {
+    "free": {
+      "name": "Kostenlos",
+      "description": "Perfekt für den Einstieg mit KIAAN",
+      "cta": "Kostenlos starten"
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Erweiterte Werkzeuge für tiefere Praxis",
+      "cta": "Pro wählen"
+    },
+    "premium": {
+      "name": "Premium",
+      "description": "Voller Zugang zu allen KIAAN-Funktionen",
+      "cta": "Premium wählen"
+    },
+    "executive": {
+      "name": "Executive",
+      "description": "Unbegrenzter Zugang für Power-User",
+      "cta": "Executive wählen"
+    }
+  },
+  "chat": {
+    "title": "KIAAN",
+    "subtitle": "Ihr Weisheitsbegleiter",
+    "placeholder": "Teilen Sie, was Sie beschäftigt...",
+    "send": "Senden",
+    "sendToJournal": "Ins Tagebuch speichern",
+    "jumpToLatest": "Zum Neuesten",
+    "welcome": {
+      "title": "Willkommen bei KIAAN",
+      "description": "Teilen Sie, was Sie beschäftigt. Ich biete warme, fundierte Beratung basierend auf zeitloser Weisheit."
+    },
+    "typing": "KIAAN schreibt..."
+  },
+  "navigation": {
+    "home": "Startseite",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "journal": "Tagebuch",
+    "analytics": "Analysen"
+  },
+  "currency": {
+    "usd": "US-Dollar",
+    "eur": "Euro",
+    "inr": "Indische Rupie"
+  }
+}

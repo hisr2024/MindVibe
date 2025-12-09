@@ -1,0 +1,12 @@
+<svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wordmark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff7a3c" />
+      <stop offset="50%" stop-color="#ff9f52" />
+      <stop offset="100%" stop-color="#ffd36f" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" rx="32" fill="#0b0b0f" />
+  <text x="50%" y="110" text-anchor="middle" fill="url(#wordmark)" font-family="'Manrope','Inter',sans-serif" font-weight="800" font-size="96" letter-spacing="6">MindVibe</text>
+  <text x="50%" y="145" text-anchor="middle" fill="#f9fafb" font-family="'Inter','Manrope',sans-serif" font-weight="600" font-size="20" letter-spacing="3">MindVibe Companion</text>
+</svg>
