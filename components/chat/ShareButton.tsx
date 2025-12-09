@@ -62,10 +62,13 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
     }
 
     setSharing(true)
-    const success = await shareContent(platform, text, anonymize)
+    const result = await shareContent(platform, text, anonymize)
 
-    if (success && platform === 'instagram') {
+    if (result.success && platform === 'instagram') {
       setShowToast(true)
+    } else if (!result.success && result.error) {
+      // Log error for debugging, could also show toast notification
+      console.error(`Share failed: ${result.error}`)
     }
 
     setSharing(false)
