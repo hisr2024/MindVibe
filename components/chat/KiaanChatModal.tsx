@@ -6,6 +6,7 @@ import { VoiceInputButton } from '@/components/voice/VoiceInputButton'
 import type { Message } from './KiaanChat'
 import { CORE_TOOLS } from '@/lib/constants/tools'
 import { canUseVoiceInput } from '@/utils/browserSupport'
+import { useChat } from '@/lib/ChatContext'
 
 interface KiaanChatModalProps {
   isOpen: boolean
@@ -33,7 +34,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [globalMessages])
 
   // Cleanup voice error timeout on unmount
   useEffect(() => {
@@ -134,14 +135,14 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
       <div className="flex flex-col h-[min(600px,70vh)]">
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-          {messages.length === 0 && (
+          {globalMessages.length === 0 && (
             <div className="text-center text-slate-400 py-12">
               <h3 className="text-lg font-semibold text-slate-200 mb-2">Welcome to KIAAN</h3>
               <p className="text-sm">Share what's on your mind. I'm here to offer warm, grounded guidance rooted in timeless wisdom.</p>
             </div>
           )}
           
-          {messages.map((msg) => (
+          {globalMessages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                 msg.sender === 'user' 

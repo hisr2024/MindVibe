@@ -18,7 +18,7 @@ export function ChatFooter() {
 
   return (
     <>
-      {/* Fixed Footer Chat Button */}
+      {/* Fixed Footer Chat Button - Hidden on mobile to avoid overlap with MobileNav */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -26,7 +26,7 @@ export function ChatFooter() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            className="fixed bottom-6 right-6 z-40 md:bottom-8 md:right-8"
+            className="fixed bottom-6 right-6 z-40 hidden md:block md:bottom-8 md:right-8"
           >
             <button
               onClick={() => setIsOpen(true)}
