@@ -77,18 +77,25 @@ export function ChatFooter() {
     }
   }, [globalMessages, isOpen])
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'error'>('connected')
+  const [retryAttempt, setRetryAttempt] = useState(0)
+  const MAX_RETRIES = 2
+
+  const sendMessageWithRetry = async (messageText: string, attemptCount = 0) => {
+    setIsLoading(true)
+    setConnectionStatus('connecting')
 
     const userMessage: ChatMessage = {
       id: generateId(),
       sender: 'user',
-      text: input,
+      text: messageText,
       timestamp: new Date().toISOString(),
     }
-    addMessage(userMessage)
-    setInput('')
-    setIsLoading(true)
+    
+    // Only add user message on first attempt
+    if (attemptCount === 0) {
+      addMessage(userMessage)
+    }
 
     try {
       // Use KIAAN's existing chat endpoint
@@ -98,7 +105,7 @@ export function ChatFooter() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: input,
+          message: messageText,
         }),
         credentials: 'include',
       })
@@ -118,18 +125,47 @@ export function ChatFooter() {
         timestamp: new Date().toISOString(),
       }
       addMessage(aiMessage)
+      setConnectionStatus('connected')
+      setRetryAttempt(0)
     } catch (error) {
       console.error('Chat error:', error)
-      addMessage({
-        id: generateId(),
-        sender: 'assistant',
-        text: 'Unable to connect to KIAAN. Please try again or visit the main chat page at /kiaan.',
-        timestamp: new Date().toISOString(),
-        status: 'error',
-      })
+      
+      // Retry logic
+      if (attemptCount < MAX_RETRIES) {
+        setRetryAttempt(attemptCount + 1)
+        addMessage({
+          id: generateId(),
+          sender: 'assistant',
+          text: `Connection interrupted. Retrying... (${attemptCount + 1}/${MAX_RETRIES})`,
+          timestamp: new Date().toISOString(),
+          status: 'error',
+        })
+        
+        // Retry after a short delay
+        setTimeout(() => {
+          sendMessageWithRetry(messageText, attemptCount + 1)
+        }, 2000)
+      } else {
+        // Final failure
+        setConnectionStatus('error')
+        addMessage({
+          id: generateId(),
+          sender: 'assistant',
+          text: 'Unable to connect to KIAAN. Please try again or visit the main chat page for a better experience.',
+          timestamp: new Date().toISOString(),
+          status: 'error',
+        })
+      }
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const sendMessage = () => {
+    if (!input.trim() || isLoading) return
+    const messageText = input
+    setInput('')
+    sendMessageWithRetry(messageText)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -221,19 +257,48 @@ export function ChatFooter() {
                     K
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-orange-50">Chat with KIAAN</h3>
-                    <p className="text-[10px] text-orange-100/60">Your AI wellness companion</p>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-orange-50">Chat with KIAAN</h3>
+                      {connectionStatus === 'connected' && (
+                        <span className="flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                      )}
+                      {connectionStatus === 'connecting' && (
+                        <span className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                      )}
+                      {connectionStatus === 'error' && (
+                        <span className="h-2 w-2 rounded-full bg-red-500"></span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-orange-100/60">
+                      {connectionStatus === 'connected' && 'Online'}
+                      {connectionStatus === 'connecting' && 'Connecting...'}
+                      {connectionStatus === 'error' && 'Connection issues'}
+                    </p>
                   </div>
                 </div>
-                <button
-                  onClick={toggleOpen}
-                  className="rounded-lg p-1.5 text-orange-100/60 hover:bg-orange-500/10 hover:text-orange-50 transition-colors"
-                  aria-label="Minimize chat"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                  {connectionStatus === 'error' && (
+                    <a
+                      href="/kiaan/chat"
+                      className="text-xs text-orange-300 hover:text-orange-100 underline"
+                      title="Open main chat page"
+                    >
+                      Full Chat
+                    </a>
+                  )}
+                  <button
+                    onClick={toggleOpen}
+                    className="rounded-lg p-1.5 text-orange-100/60 hover:bg-orange-500/10 hover:text-orange-50 transition-colors"
+                    aria-label="Minimize chat"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               {/* Messages Area */}
@@ -303,7 +368,7 @@ export function ChatFooter() {
                     maxLength={2000}
                   />
                   <button
-                    onClick={sendMessage}
+                    onClick={() => sendMessage()}
                     disabled={!input.trim() || isLoading}
                     className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     aria-label="Send message"

@@ -5,6 +5,7 @@ import { KiaanLogo } from '@/src/components/KiaanLogo';
 import { EcosystemIntro } from '@/components/home/EcosystemIntro';
 import { MinimalFeatures } from '@/components/home/MinimalFeatures';
 import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
+import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
 
 /**
  * Redesigned Home Page
@@ -64,6 +65,81 @@ export default function Home() {
 
         {/* Ecosystem Introduction */}
         <EcosystemIntro />
+
+        {/* MULTI-PAGE COMPANION - KIAAN Experience Hub */}
+        <section className="space-y-6">
+          {/* Section Header */}
+          <div className="text-center space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Multi-Page Companion</p>
+            <h2 className="text-2xl font-bold text-orange-50">KIAAN Experience Hub</h2>
+          </div>
+
+          {/* Flowing Energy Triangle */}
+          <FlowingEnergyTriangle />
+
+          {/* Navigation Grid */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link
+              href="/kiaan/features"
+              className="group relative overflow-hidden rounded-2xl border border-teal-400/20 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 p-6 transition-all hover:-translate-y-1 hover:border-teal-400/40 hover:shadow-2xl hover:shadow-teal-500/20"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="relative space-y-3">
+                <div className="flex items-center justify-center">
+                  <span className="text-5xl" role="img" aria-label="Features">🎯</span>
+                </div>
+                <h3 className="text-center text-xl font-semibold text-teal-50">Features</h3>
+                <p className="text-center text-sm text-teal-100/80 leading-relaxed">
+                  Explore KIAAN's complete feature set, organized and accessible
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm font-semibold text-teal-300">
+                  View Features
+                  <span aria-hidden>→</span>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/kiaan/rooms"
+              className="group relative overflow-hidden rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 p-6 transition-all hover:-translate-y-1 hover:border-blue-400/40 hover:shadow-2xl hover:shadow-blue-500/20"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="relative space-y-3">
+                <div className="flex items-center justify-center">
+                  <span className="text-5xl" role="img" aria-label="Rooms">🏛️</span>
+                </div>
+                <h3 className="text-center text-xl font-semibold text-blue-50">Rooms</h3>
+                <p className="text-center text-sm text-blue-100/80 leading-relaxed">
+                  Dedicated spaces for reflection, wisdom, and focused guidance
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm font-semibold text-blue-300">
+                  Enter Rooms
+                  <span aria-hidden>→</span>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/kiaan/clarity"
+              className="group relative overflow-hidden rounded-2xl border border-pink-400/20 bg-gradient-to-br from-pink-500/10 to-rose-500/10 p-6 transition-all hover:-translate-y-1 hover:border-pink-400/40 hover:shadow-2xl hover:shadow-pink-500/20"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="relative space-y-3">
+                <div className="flex items-center justify-center">
+                  <span className="text-5xl" role="img" aria-label="Clarity Pause">🧘</span>
+                </div>
+                <h3 className="text-center text-xl font-semibold text-pink-50">Clarity Pause</h3>
+                <p className="text-center text-sm text-pink-100/80 leading-relaxed">
+                  Take a moment to reset, reflect, and regain clarity
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm font-semibold text-pink-300">
+                  Begin Pause
+                  <span aria-hidden>→</span>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </section>
 
         {/* Minimal Features */}
         <MinimalFeatures />
