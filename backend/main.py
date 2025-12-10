@@ -480,6 +480,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Reset KIAAN router: {e}")
 
+# Load Progress Reset router (User data reset with comprehensive error handling)
+print("\n[Progress Reset] Attempting to import Progress Reset router...")
+try:
+    from backend.routes.progress_reset import router as progress_reset_router
+    app.include_router(progress_reset_router, prefix="/api")
+    print("✅ [SUCCESS] Progress Reset router loaded (with transaction rollback)")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Progress Reset router: {e}")
+
 # Load Ardha router
 print("\n[Ardha] Attempting to import Ardha router...")
 try:
