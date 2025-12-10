@@ -11,7 +11,7 @@ const generateId = (): string => {
     return crypto.randomUUID()
   }
   // Fallback: timestamp + random string
-  return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
 }
 
 export function ChatFooter() {
