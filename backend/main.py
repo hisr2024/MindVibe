@@ -507,6 +507,33 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
 
+# Load Daily Analysis router
+print("\n[Daily Analysis] Attempting to import Daily Analysis router...")
+try:
+    from backend.routes.daily_analysis import router as daily_analysis_router
+    app.include_router(daily_analysis_router)
+    print("✅ [SUCCESS] Daily Analysis router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Daily Analysis router: {e}")
+
+# Load Sacred Reflections router
+print("\n[Sacred Reflections] Attempting to import Sacred Reflections router...")
+try:
+    from backend.routes.sacred_reflections import router as sacred_reflections_router
+    app.include_router(sacred_reflections_router)
+    print("✅ [SUCCESS] Sacred Reflections router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Sacred Reflections router: {e}")
+
+# Load Weekly Assessment router
+print("\n[Weekly Assessment] Attempting to import Weekly Assessment router...")
+try:
+    from backend.routes.weekly_assessment import router as weekly_assessment_router
+    app.include_router(weekly_assessment_router)
+    print("✅ [SUCCESS] Weekly Assessment router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Weekly Assessment router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
