@@ -1,42 +1,162 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { KiaanChatModal } from '@/components/chat/KiaanChatModal'
 import { useChat } from '@/lib/ChatContext'
+import type { Message } from '@/components/chat/KiaanChat'
 
 export function ChatFooter() {
-  const { isOpen, setIsOpen } = useChat()
+  const { messages: globalMessages, addMessage } = useChat()
+  const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
     setMounted(true)
+    // Load saved open state from localStorage
+    const savedState = localStorage.getItem('kiaan-footer-open')
+    if (savedState === 'true') {
+      setIsOpen(true)
+    }
   }, [])
+
+  // Save open state to localStorage
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('kiaan-footer-open', isOpen.toString())
+    }
+  }, [isOpen, mounted])
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [globalMessages])
+
+  // Focus input when opened
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isOpen])
+
+  // Track unread messages when minimized
+  useEffect(() => {
+    if (!isOpen && globalMessages.length > 0) {
+      const lastMessage = globalMessages[globalMessages.length - 1]
+      if (lastMessage.sender === 'assistant') {
+        setUnreadCount(prev => prev + 1)
+      }
+    } else if (isOpen) {
+      setUnreadCount(0)
+    }
+  }, [globalMessages, isOpen])
+
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return
+
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      sender: 'user',
+      text: input,
+      timestamp: new Date().toISOString(),
+    }
+    addMessage(userMessage)
+    setInput('')
+    setIsLoading(true)
+
+    try {
+      // Use KIAAN's existing chat endpoint
+      const response = await fetch('/api/chat/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+        }),
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || errorData.response || 'Chat request failed')
+      }
+
+      const data = await response.json()
+
+      // Handle KIAAN response format
+      const aiMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: 'assistant',
+        text: data.response || data.message || 'I apologize, I encountered an error. Please try again.',
+        timestamp: new Date().toISOString(),
+      }
+      addMessage(aiMessage)
+    } catch (error) {
+      console.error('Chat error:', error)
+      addMessage({
+        id: crypto.randomUUID(),
+        sender: 'assistant',
+        text: 'Unable to connect to KIAAN. Please try again or visit the main chat page at /kiaan.',
+        timestamp: new Date().toISOString(),
+        status: 'error',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+
+  const toggleOpen = () => {
+    setIsOpen(!isOpen)
+    if (!isOpen) {
+      setUnreadCount(0)
+    }
+  }
 
   if (!mounted) return null
 
   return (
     <>
-      {/* Fixed Footer Chat Button - Hidden on mobile to avoid overlap with MobileNav */}
+      {/* Minimized Chat Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            className="fixed bottom-6 right-6 z-40 hidden md:block md:bottom-8 md:right-8"
+            className="fixed bottom-6 right-6 z-[9999] md:bottom-8 md:right-8"
           >
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={toggleOpen}
               className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 shadow-lg shadow-orange-500/40 transition-all hover:scale-110 hover:shadow-xl hover:shadow-orange-500/60 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-950 md:h-16 md:w-16"
               aria-label="Open KIAAN chat"
               title="Chat with KIAAN"
             >
               {/* Pulsing background effect */}
               <span className="absolute inset-0 animate-ping rounded-full bg-orange-400 opacity-30" />
-              
+
+              {/* Notification badge for unread messages */}
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-lg">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+
               {/* Chat bubble icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -64,8 +184,124 @@ export function ChatFooter() {
         )}
       </AnimatePresence>
 
-      {/* Chat Modal */}
-      <KiaanChatModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      {/* Expanded Chat Interface */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 100, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 100, scale: 0.8 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="fixed bottom-6 right-6 z-[9999] w-[calc(100vw-48px)] md:w-[380px] md:bottom-8 md:right-8"
+          >
+            <div className="flex flex-col h-[80vh] md:h-[600px] rounded-2xl border border-orange-500/20 bg-slate-950/95 backdrop-blur-lg shadow-2xl shadow-orange-500/20 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
+                    K
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-orange-50">Chat with KIAAN</h3>
+                    <p className="text-[10px] text-orange-100/60">Your AI wellness companion</p>
+                  </div>
+                </div>
+                <button
+                  onClick={toggleOpen}
+                  className="rounded-lg p-1.5 text-orange-100/60 hover:bg-orange-500/10 hover:text-orange-50 transition-colors"
+                  aria-label="Minimize chat"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin scrollbar-thumb-orange-500/20 scrollbar-track-transparent">
+                {globalMessages.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-3xl">💬</span>
+                    </div>
+                    <h4 className="text-sm font-semibold text-orange-50 mb-2">Welcome to KIAAN</h4>
+                    <p className="text-xs text-orange-100/70 max-w-[260px] mx-auto">
+                      Share what&apos;s on your mind. I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.
+                    </p>
+                  </div>
+                )}
+
+                {globalMessages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                        msg.sender === 'user'
+                          ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'
+                          : msg.status === 'error'
+                          ? 'bg-red-500/10 border border-red-500/30 text-red-200'
+                          : 'bg-slate-800/80 text-slate-100 border border-orange-500/10'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                      <p className="text-[10px] opacity-60 mt-1" suppressHydrationWarning>
+                        {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Typing indicator */}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-slate-800/80 rounded-2xl px-4 py-3 border border-orange-500/10">
+                      <div className="flex items-center gap-2 text-slate-400 text-sm">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                        <span className="text-xs">KIAAN is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input Area */}
+              <div className="border-t border-orange-500/20 bg-slate-900/50 px-4 py-3">
+                <div className="flex items-end gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Share what's on your mind..."
+                    className="flex-1 bg-slate-800/80 text-slate-100 placeholder-slate-500 rounded-xl px-3 py-2 text-sm border border-orange-500/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-transparent"
+                    disabled={isLoading}
+                    maxLength={2000}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!input.trim() || isLoading}
+                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    aria-label="Send message"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-2">
+                  Press Enter to send • Powered by KIAAN AI 💙
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
