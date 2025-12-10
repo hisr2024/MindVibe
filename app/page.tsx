@@ -9,6 +9,7 @@ import { FeatureHighlights } from '@/components/FeatureHighlights'
 import { copyToClipboard } from '@/utils/clipboard'
 import { shareContent, type SharePlatform } from '@/utils/socialShare'
 import { saveSacredReflection } from '@/utils/sacredReflections'
+import { LanguageShowcase } from '@/components/home/LanguageShowcase'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -303,6 +304,8 @@ export default function Home() {
         </div>
 
         <FeatureHighlights />
+
+        <LanguageShowcase />
 
         <section className="grid gap-3 md:grid-cols-3" aria-label="Core daily actions">
           <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)]">

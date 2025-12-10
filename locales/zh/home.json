@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "您的心理健康AI伙伴",
+    "subtitle": "与KIAAN聊天，基于古老的《薄伽梵歌》智慧",
+    "ctaPrimary": "开始免费聊天",
+    "ctaSecondary": "探索工具"
+  },
+  "languageShowcase": {
+    "title": "支持您的语言",
+    "subtitle": "KIAAN会说您的语言。从8种以上语言中选择以获得个性化体验。",
+    "previewTitle": "{{language}}版KIAAN",
+    "previewDescription": "以您的母语体验正念指导，配合文化相关的智慧。",
+    "stats": {
+      "languages": "语言",
+      "verses": "已翻译经文",
+      "support": "全球支持"
+    }
+  },
+  "features": {
+    "title": "心理健康所需的一切",
+    "description": "通往内心平静之旅的综合工具"
+  }
+}

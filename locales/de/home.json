@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "Ihr KI-Begleiter für Mentales Wohlbefinden",
+    "subtitle": "Chatten Sie mit KIAAN, unterstützt durch die alte Weisheit der Bhagavad Gita",
+    "ctaPrimary": "Kostenlosen Chat Starten",
+    "ctaSecondary": "Werkzeuge Erkunden"
+  },
+  "languageShowcase": {
+    "title": "In Ihrer Sprache Verfügbar",
+    "subtitle": "KIAAN spricht Ihre Sprache. Wählen Sie aus über 8 Sprachen für eine personalisierte Erfahrung.",
+    "previewTitle": "KIAAN auf {{language}}",
+    "previewDescription": "Erleben Sie Achtsamkeitsführung in Ihrer Muttersprache mit kulturell relevanter Weisheit.",
+    "stats": {
+      "languages": "Sprachen",
+      "verses": "Übersetzte Verse",
+      "support": "Globaler Support"
+    }
+  },
+  "features": {
+    "title": "Alles, was Sie für Mentales Wohlbefinden Brauchen",
+    "description": "Umfassende Werkzeuge für Ihre Reise zum inneren Frieden"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "Your AI Companion for Mental Wellness",
+    "subtitle": "Chat with KIAAN, powered by ancient Bhagavad Gita wisdom",
+    "ctaPrimary": "Start Free Chat",
+    "ctaSecondary": "Explore Tools"
+  },
+  "languageShowcase": {
+    "title": "Available in Your Language",
+    "subtitle": "KIAAN speaks your language. Choose from 8+ languages for a personalized experience.",
+    "previewTitle": "KIAAN in {{language}}",
+    "previewDescription": "Experience mindfulness guidance in your native language with culturally relevant wisdom.",
+    "stats": {
+      "languages": "Languages",
+      "verses": "Translated Verses",
+      "support": "Global Support"
+    }
+  },
+  "features": {
+    "title": "Everything You Need for Mental Wellness",
+    "description": "Comprehensive tools for your journey to inner peace"
+  }
+}
