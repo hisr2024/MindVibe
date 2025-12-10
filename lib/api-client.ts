@@ -207,19 +207,22 @@ export function getErrorMessage(error: unknown): string {
  * @returns Brief error message suitable for UI display
  */
 export function getBriefErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    const msg = error.message
-    
-    // Check for specific HTTP status codes
-    if (msg.includes('405')) {
+  // For APIError, use the status code directly
+  if (error instanceof APIError) {
+    if (error.status === 405) {
       return 'This operation is not supported. Please try a different action.'
     }
-    if (msg.includes('404')) {
+    if (error.status === 404) {
       return 'Service not found. Please try again later.'
     }
-    if (msg.includes('503')) {
+    if (error.status === 503) {
       return 'Service temporarily unavailable. Please try again in a few moments.'
     }
+  }
+  
+  // For Error instances, check message content
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase()
     
     // Check for timeout
     if (msg.includes('timeout') || msg.includes('timed out')) {
@@ -232,7 +235,7 @@ export function getBriefErrorMessage(error: unknown): string {
     }
     
     // Return original message if no pattern matched
-    return msg
+    return error.message
   }
   
   return 'An error occurred'
