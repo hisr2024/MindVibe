@@ -200,3 +200,40 @@ export function getErrorMessage(error: unknown): string {
 
   return 'An unexpected error occurred. Please try again.'
 }
+
+/**
+ * Get a brief error message from an error object for inline display
+ * @param error Error object
+ * @returns Brief error message suitable for UI display
+ */
+export function getBriefErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    const msg = error.message
+    
+    // Check for specific HTTP status codes
+    if (msg.includes('405')) {
+      return 'Service temporarily unavailable. Our team has been notified.'
+    }
+    if (msg.includes('404')) {
+      return 'Endpoint not found. Please refresh the page.'
+    }
+    if (msg.includes('503')) {
+      return 'Service temporarily unavailable. Please try again.'
+    }
+    
+    // Check for timeout
+    if (msg.includes('timeout') || msg.includes('timed out')) {
+      return 'Request taking too long. Service may be busy.'
+    }
+    
+    // Check for network/connection
+    if (msg.includes('network') || msg.includes('connect')) {
+      return 'Cannot reach service. Check your internet connection.'
+    }
+    
+    // Return original message if no pattern matched
+    return msg
+  }
+  
+  return 'An error occurred'
+}

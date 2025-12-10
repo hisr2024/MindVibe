@@ -10,6 +10,7 @@
 import { useState, useEffect } from 'react'
 import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
+import { getBriefErrorMessage } from '@/lib/api-client'
 import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
@@ -41,10 +42,17 @@ export default function KarmaResetClient() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
+        // Add timeout to prevent hanging
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
         const response = await fetch('/api/karma-reset/kiaan/health', {
           method: 'GET',
           credentials: 'include',
+          signal: controller.signal,
         })
+        
+        clearTimeout(timeoutId)
         
         if (response.ok) {
           const data = await response.json()
@@ -96,21 +104,8 @@ export default function KarmaResetClient() {
       // Auto-advance to plan after breathing exercise
       setTimeout(() => setCurrentStep('plan'), BREATHING_DURATION_MS)
     } catch (err) {
-      // Get user-friendly error message
-      let errorMessage = 'An error occurred'
-      if (err instanceof Error) {
-        if (err.message.includes('405')) {
-          errorMessage = 'The Karma Reset service is temporarily unavailable. Our team has been notified.'
-        } else if (err.message.includes('404')) {
-          errorMessage = 'The Karma Reset endpoint could not be found. Please refresh the page.'
-        } else if (err.message.includes('timeout') || err.message.includes('timed out')) {
-          errorMessage = 'The request is taking too long. The service may be busy.'
-        } else if (err.message.includes('network') || err.message.includes('connect')) {
-          errorMessage = 'Cannot reach the Karma Reset service. Please check your internet connection.'
-        } else {
-          errorMessage = err.message
-        }
-      }
+      // Get user-friendly error message using shared utility
+      const errorMessage = getBriefErrorMessage(err) || 'An error occurred'
       
       // Retry logic
       if (attemptCount < MAX_RETRIES) {

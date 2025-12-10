@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChat } from '@/lib/ChatContext'
+import { getBriefErrorMessage } from '@/lib/api-client'
 import type { ChatMessage } from '@/lib/chatStorage'
 
 // Generate unique ID with fallback for environments without crypto.randomUUID
@@ -88,10 +89,17 @@ export function ChatFooter() {
 
     const checkHealth = async () => {
       try {
+        // Add timeout to prevent hanging
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
         const response = await fetch('/api/chat/health', {
           method: 'GET',
           credentials: 'include',
+          signal: controller.signal,
         })
+        
+        clearTimeout(timeoutId)
         
         if (response.ok) {
           const data = await response.json()
@@ -160,19 +168,8 @@ export function ChatFooter() {
     } catch (error) {
       console.error('Chat error:', error)
       
-      // Get user-friendly error message
-      let errorMessage = 'Unable to connect to KIAAN.'
-      if (error instanceof Error) {
-        if (error.message.includes('405')) {
-          errorMessage = 'The chat service is temporarily unavailable. Our team has been notified.'
-        } else if (error.message.includes('404')) {
-          errorMessage = 'The chat endpoint could not be found. Please refresh the page.'
-        } else if (error.message.includes('timeout') || error.message.includes('timed out')) {
-          errorMessage = 'The request is taking too long. KIAAN may be busy.'
-        } else if (error.message.includes('network') || error.message.includes('connect')) {
-          errorMessage = 'Cannot reach KIAAN. Please check your internet connection.'
-        }
-      }
+      // Get user-friendly error message using shared utility
+      const errorMessage = getBriefErrorMessage(error) || 'Unable to connect to KIAAN.'
       
       // Retry logic
       if (attemptCount < MAX_RETRIES) {
