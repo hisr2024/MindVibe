@@ -7,6 +7,7 @@ import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { ChatFooter } from '@/components/layout/ChatFooter'
+import { KiaanFooter } from '@/components/layout/KiaanFooter'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -47,6 +48,7 @@ export default function RootLayout({
           <SiteFooter />
           <MobileNav />
           <ChatFooter />
+          <KiaanFooter />
         </Providers>
       </body>
     </html>
