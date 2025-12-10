@@ -1,4 +1,4 @@
-export const locales = ['en', 'hi', 'es', 'fr', 'de', 'ja', 'zh', 'ar', 'pt'] as const;
+export const locales = ['en', 'hi', 'es', 'fr', 'de', 'pt', 'ja', 'zh-CN'] as const;
 export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = 'en';
@@ -9,10 +9,9 @@ export const localeNames: Record<Locale, string> = {
   es: 'Español',
   fr: 'Français',
   de: 'Deutsch',
-  ja: '日本語',
-  zh: '简体中文',
-  ar: 'العربية',
   pt: 'Português',
+  ja: '日本語',
+  'zh-CN': '简体中文',
 };
 
 export async function getMessages(locale: Locale) {
