@@ -10,8 +10,7 @@ const flagEmojis: Record<Locale, string> = {
   fr: '🇫🇷',
   de: '🇩🇪',
   ja: '🇯🇵',
-  zh: '🇨🇳',
-  ar: '🇸🇦',
+  'zh-CN': '🇨🇳',
   pt: '🇵🇹',
 };
 
@@ -58,7 +57,8 @@ export function LanguageSwitcher() {
   function updateHtmlLang(locale: Locale) {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
-      document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+      // No RTL needed as Arabic is removed from the 8 languages
+      document.documentElement.dir = 'ltr';
     }
   }
 
