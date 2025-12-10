@@ -103,8 +103,6 @@ export default function KarmaResetClient() {
           errorMessage = 'The Karma Reset service is temporarily unavailable. Our team has been notified.'
         } else if (err.message.includes('404')) {
           errorMessage = 'The Karma Reset endpoint could not be found. Please refresh the page.'
-        } else if (err.message.includes('CORS') || err.message.includes('cross-origin')) {
-          errorMessage = 'Connection blocked due to security settings.'
         } else if (err.message.includes('timeout') || err.message.includes('timed out')) {
           errorMessage = 'The request is taking too long. The service may be busy.'
         } else if (err.message.includes('network') || err.message.includes('connect')) {
@@ -187,9 +185,30 @@ export default function KarmaResetClient() {
           <div className="lg:col-span-3">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                💚 Karma Reset
-              </h1>
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+                  💚 Karma Reset
+                </h1>
+                {/* Connection status indicator */}
+                {backendHealthy !== null && (
+                  <span className="flex items-center gap-2 text-xs">
+                    {backendHealthy ? (
+                      <>
+                        <span className="flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        <span className="text-green-600 dark:text-green-400">Connected</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
+                        <span className="text-yellow-600 dark:text-yellow-400">Offline (using fallback)</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">
                 A compassionate ritual to acknowledge impact, repair harm, and move forward with wisdom.
               </p>

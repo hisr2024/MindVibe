@@ -167,8 +167,6 @@ export function ChatFooter() {
           errorMessage = 'The chat service is temporarily unavailable. Our team has been notified.'
         } else if (error.message.includes('404')) {
           errorMessage = 'The chat endpoint could not be found. Please refresh the page.'
-        } else if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
-          errorMessage = 'Connection blocked due to security settings. Please try again later.'
         } else if (error.message.includes('timeout') || error.message.includes('timed out')) {
           errorMessage = 'The request is taking too long. KIAAN may be busy.'
         } else if (error.message.includes('network') || error.message.includes('connect')) {

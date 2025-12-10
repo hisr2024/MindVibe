@@ -76,8 +76,6 @@ export async function apiCall(
         errorMessage = 'Endpoint not found. Please check the API configuration.'
       } else if (response.status === 503) {
         errorMessage = 'Service temporarily unavailable. Please try again later.'
-      } else if (response.status === 0) {
-        errorMessage = 'CORS error or network failure. Cannot reach the backend.'
       }
       
       throw new APIError(
@@ -92,14 +90,9 @@ export async function apiCall(
     // Handle network errors
     if (error instanceof TypeError) {
       // Network errors are typically TypeErrors from fetch
-      // Check for CORS-specific errors
-      if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
-        throw new APIError(
-          'CORS error: The backend server is not allowing requests from this origin. Please check CORS configuration.'
-        )
-      }
+      // This could be CORS, network failure, or connection issues
       throw new APIError(
-        'Cannot connect to KIAAN. Please check your internet connection and ensure the backend server is running.'
+        'Cannot connect to KIAAN. Please check your internet connection and ensure the backend server is running. This could also be a CORS configuration issue.'
       )
     }
 
@@ -181,18 +174,8 @@ export function getErrorMessage(error: unknown): string {
       return 'The service is temporarily unavailable. Please try again in a few moments.'
     }
     
-    // Check for CORS errors
-    if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
-      const messages = [
-        'Cannot reach KIAAN due to configuration issues.',
-        '• This is a technical problem on our end',
-        '• Please try again later or contact support',
-      ]
-      return messages.join('\n')
-    }
-    
-    // Check for connection-related errors
-    if (error.message.includes('connect') || error.message.includes('network')) {
+    // Check for connection-related errors (includes CORS as a possibility)
+    if (error.message.includes('connect') || error.message.includes('network') || error.message.includes('CORS')) {
       const messages = [
         'Cannot reach KIAAN. Please check:',
         '• Your internet connection',
