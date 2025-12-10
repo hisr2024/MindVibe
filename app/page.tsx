@@ -1033,7 +1033,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
 
   // Copy message handler
   async function handleCopyMessage(content: string) {
-    const success = await copyToClipboard(content, {
+    await copyToClipboard(content, {
       onSuccess: () => showToast('Copied to clipboard! ✨'),
       onError: () => showToast('Failed to copy. Please try again.')
     })
@@ -1084,7 +1084,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               {view === 'summary' ? summary : content}
             </p>
           </div>
-          {view === 'detailed' && summary !== content && (
+          {view === 'detailed' && content.length > 220 && (
             <div className="bg-white/5 border border-orange-200/20 rounded-lg p-2 text-[11px] text-orange-50/70 leading-relaxed">
               <span className="font-semibold text-orange-50">Summary view: </span>{summary}
             </div>

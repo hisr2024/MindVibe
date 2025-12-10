@@ -61,6 +61,8 @@ export async function saveSacredReflection(
   source: 'kiaan' | 'user' = 'kiaan'
 ): Promise<boolean> {
   try {
+    if (typeof window === 'undefined') return false
+    
     const reflections = await getSacredReflections()
     
     const newReflection: SacredReflection = {
@@ -90,6 +92,8 @@ export async function saveSacredReflection(
  */
 export async function getSacredReflections(): Promise<SacredReflection[]> {
   try {
+    if (typeof window === 'undefined') return []
+    
     const stored = localStorage.getItem(SACRED_REFLECTIONS_KEY)
     if (!stored) return []
     
@@ -108,6 +112,8 @@ export async function getSacredReflections(): Promise<SacredReflection[]> {
  */
 export async function deleteSacredReflection(id: string): Promise<boolean> {
   try {
+    if (typeof window === 'undefined') return false
+    
     const reflections = await getSacredReflections()
     const filtered = reflections.filter(r => r.id !== id)
     
@@ -125,5 +131,7 @@ export async function deleteSacredReflection(id: string): Promise<boolean> {
  * Clear all Sacred Reflections
  */
 export function clearSacredReflections(): void {
-  localStorage.removeItem(SACRED_REFLECTIONS_KEY)
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(SACRED_REFLECTIONS_KEY)
+  }
 }
