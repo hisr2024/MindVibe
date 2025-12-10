@@ -23,6 +23,7 @@ interface KiaanChatProps {
   onSaveToJournal?: (text: string) => void
   isLoading?: boolean
   className?: string
+  viewMode?: 'detailed' | 'summary'
 }
 
 export function KiaanChat({
@@ -31,6 +32,7 @@ export function KiaanChat({
   onSaveToJournal,
   isLoading = false,
   className = '',
+  viewMode = 'detailed',
 }: KiaanChatProps) {
   const [inputText, setInputText] = useState('')
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
@@ -182,6 +184,7 @@ export function KiaanChat({
                   status={message.status}
                   summary={message.summary}
                   onSaveToJournal={message.sender === 'assistant' ? onSaveToJournal : undefined}
+                  viewMode={viewMode}
                 />
               ))
             )}

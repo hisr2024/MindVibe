@@ -16,6 +16,7 @@ interface MessageBubbleProps {
   summary?: string
   gitaPowered?: boolean  // New prop to indicate Gita-powered response
   verseReference?: string  // New prop for verse chapter reference (e.g., "Ch. 2-6")
+  viewMode?: 'detailed' | 'summary'
 }
 
 function buildSummary(text: string) {
@@ -27,7 +28,7 @@ function buildSummary(text: string) {
   return selected.length > 280 ? `${selected.slice(0, 277)}...` : selected
 }
 
-export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference }: MessageBubbleProps) {
+export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference, viewMode = 'detailed' }: MessageBubbleProps) {
   const router = useRouter()
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
@@ -45,6 +46,11 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       return () => mediaQuery.removeEventListener('change', handler)
     }
   }, [])
+  
+  // Respect viewMode prop - if summary mode, use summary; if detailed mode, use full text
+  useEffect(() => {
+    setShowSummary(viewMode === 'summary')
+  }, [viewMode])
   
   const handleSaveToJournal = () => {
     if (onSaveToJournal) {

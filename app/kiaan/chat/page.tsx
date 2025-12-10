@@ -12,6 +12,7 @@ import Link from 'next/link';
 export default function KiaanChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('detailed');
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -188,28 +189,55 @@ export default function KiaanChatPage() {
 
       {/* Message Actions - Only show when there are KIAAN responses */}
       {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
-        <div className="flex items-center justify-end gap-2 rounded-2xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)] backdrop-blur">
-          <button
-            onClick={() => handleCopyResponse(messages[messages.length - 1].text)}
-            className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
-            title="Copy last response"
-          >
-            📋 Copy
-          </button>
-          <button
-            onClick={() => handleShareResponse(messages[messages.length - 1].text)}
-            className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
-            title="Share response"
-          >
-            📤 Share
-          </button>
-          <button
-            onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
-            className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105"
-            title="Send to Sacred Reflections"
-          >
-            ✨ Send to Sacred Reflections
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)] backdrop-blur">
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-1 rounded-lg border border-orange-500/20 bg-white/5 p-1">
+            <button
+              onClick={() => setViewMode('detailed')}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                viewMode === 'detailed'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
+                  : 'text-orange-100/70 hover:text-orange-50'
+              }`}
+            >
+              Detailed
+            </button>
+            <button
+              onClick={() => setViewMode('summary')}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                viewMode === 'summary'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
+                  : 'text-orange-100/70 hover:text-orange-50'
+              }`}
+            >
+              Summary
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleCopyResponse(messages[messages.length - 1].text)}
+              className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
+              title="Copy last response"
+            >
+              📋 Copy
+            </button>
+            <button
+              onClick={() => handleShareResponse(messages[messages.length - 1].text)}
+              className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
+              title="Share response"
+            >
+              📤 Share
+            </button>
+            <button
+              onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
+              className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105"
+              title="Send to Sacred Reflections"
+            >
+              ✨ Send to Sacred Reflections
+            </button>
+          </div>
         </div>
       )}
 
@@ -220,6 +248,7 @@ export default function KiaanChatPage() {
           onSendMessage={handleSendMessage}
           onSaveToJournal={handleSaveToJournal}
           isLoading={isLoading}
+          viewMode={viewMode}
         />
       </div>
 

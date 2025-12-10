@@ -440,7 +440,21 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             # Extract primary language code (e.g., 'en' from 'en-US,en;q=0.9')
             language = accept_language.split(',')[0].split('-')[0].split(';')[0].strip()
         
-        response = await kiaan.generate_response_with_gita(message, db, language)
+        # Use KIAAN core service for consistent ecosystem-wide wisdom
+        from backend.services.kiaan_core import kiaan_core
+        
+        kiaan_result = await kiaan_core.get_kiaan_response(
+            message=message,
+            user_id=user_id,
+            db=db,
+            context="general"
+        )
+        
+        response = kiaan_result["response"]
+        
+        # Log validation results
+        if not kiaan_result["validation"]["valid"]:
+            logger.warning(f"KIAAN response validation issues: {kiaan_result['validation']['errors']}")
 
         # Increment usage after successful response
         if SUBSCRIPTION_ENABLED and user_id is not None:
@@ -455,7 +469,9 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "bot": "KIAAN",
             "version": "13.0",
             "model": "GPT-4",
-            "gita_powered": True
+            "gita_powered": True,
+            "verses_used": kiaan_result.get("verses_used", []),
+            "validation": kiaan_result.get("validation", {})
         }
 
         # Include quota info if available
