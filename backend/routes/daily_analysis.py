@@ -248,7 +248,7 @@ async def _generate_daily_analysis(
         select(UserEmotionalLog)
         .where(
             UserEmotionalLog.user_id == user_id,
-            func.date(UserEmotionalLog.log_date) == analysis_date,
+            UserEmotionalLog.log_date == analysis_date,
         )
         .order_by(UserEmotionalLog.created_at)
     )

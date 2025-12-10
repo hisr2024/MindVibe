@@ -1,5 +1,5 @@
 -- Migration: Add KIAAN user journey tracking tables
--- Date: 2024-12-10
+-- Date: 2025-12-10
 -- Description: Creates tables for daily analysis, weekly assessments, sacred reflections, and user progress tracking
 
 -- Create user_emotional_logs table for daily emotional check-ins

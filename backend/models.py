@@ -9,6 +9,7 @@ from sqlalchemy import (
     JSON,
     TIMESTAMP,
     Boolean,
+    Date,
     Enum,
     ForeignKey,
     Integer,
@@ -24,6 +25,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class SubscriptionTier(str, enum.Enum):
     """Subscription tier levels."""
+
     FREE = "free"
     BASIC = "basic"
     PREMIUM = "premium"
@@ -32,6 +34,7 @@ class SubscriptionTier(str, enum.Enum):
 
 class SubscriptionStatus(str, enum.Enum):
     """Status of a user's subscription."""
+
     ACTIVE = "active"
     PAST_DUE = "past_due"
     CANCELED = "canceled"
@@ -41,6 +44,7 @@ class SubscriptionStatus(str, enum.Enum):
 
 class PaymentStatus(str, enum.Enum):
     """Status of a payment."""
+
     PENDING = "pending"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
@@ -74,6 +78,7 @@ class UnlockableType(str, enum.Enum):
     BADGE = "BADGE"
     BOOST = "BOOST"
 
+
 class SoftDeleteMixin:
     deleted_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, default=None
@@ -88,6 +93,7 @@ class SoftDeleteMixin:
     @classmethod
     def not_deleted(cls, query):
         return query.filter(cls.deleted_at.is_(None))
+
 
 class Base(DeclarativeBase):
     pass
@@ -230,9 +236,13 @@ class UserProgress(SoftDeleteMixin, Base):
 
 class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
-    id: Mapped[str] = mapped_column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(
+        String(255), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     auth_uid: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    email: Mapped[str] = mapped_column(String(256), unique=True, index=True, nullable=True)
+    email: Mapped[str] = mapped_column(
+        String(256), unique=True, index=True, nullable=True
+    )
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="en")
     two_factor_secret: Mapped[str | None] = mapped_column(
@@ -277,6 +287,7 @@ class UserProfile(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
+
 class Mood(SoftDeleteMixin, Base):
     __tablename__ = "moods"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -289,6 +300,7 @@ class Mood(SoftDeleteMixin, Base):
     at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
+
 
 class EncryptedBlob(SoftDeleteMixin, Base):
     __tablename__ = "journal_blobs"
@@ -307,7 +319,9 @@ class JournalEntry(SoftDeleteMixin, Base):
 
     __tablename__ = "journal_entries"
 
-    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
@@ -316,7 +330,9 @@ class JournalEntry(SoftDeleteMixin, Base):
     encryption_meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     mood_labels: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     tag_labels: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    client_updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True))
+    client_updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True)
+    )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
@@ -347,7 +363,9 @@ class JournalEntryTag(Base):
     __tablename__ = "journal_entry_tags"
 
     entry_id: Mapped[str] = mapped_column(
-        String(64), ForeignKey("journal_entries.id", ondelete="CASCADE"), primary_key=True
+        String(64),
+        ForeignKey("journal_entries.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     tag_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("journal_tags.id", ondelete="CASCADE"), primary_key=True
@@ -372,7 +390,9 @@ class JournalVersion(Base):
     version: Mapped[int] = mapped_column(Integer)
     encrypted_content: Mapped[dict] = mapped_column(JSON)
     encryption_meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    client_updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True))
+    client_updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True)
+    )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
@@ -395,6 +415,7 @@ class JournalSearchIndex(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True), server_default=func.now()
     )
 
+
 class ContentPack(SoftDeleteMixin, Base):
     __tablename__ = "content_packs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -403,6 +424,7 @@ class ContentPack(SoftDeleteMixin, Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
+
 
 class WisdomVerse(SoftDeleteMixin, Base):
     __tablename__ = "wisdom_verses"
@@ -418,11 +440,14 @@ class WisdomVerse(SoftDeleteMixin, Base):
     mental_health_applications: Mapped[dict] = mapped_column(JSON)
     embedding: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     # Domain tagging for psychological categorization
-    primary_domain: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    primary_domain: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
     secondary_domains: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
+
 
 class GitaChapter(Base):
     __tablename__ = "gita_chapters"
@@ -440,6 +465,7 @@ class GitaChapter(Base):
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
+
 class GitaSource(Base):
     __tablename__ = "gita_sources"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -450,6 +476,7 @@ class GitaSource(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
+
 
 class GitaVerse(Base):
     __tablename__ = "gita_verses"
@@ -489,6 +516,7 @@ class GitaVerse(Base):
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
 
+
 class GitaModernContext(Base):
     __tablename__ = "gita_modern_contexts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -498,13 +526,16 @@ class GitaModernContext(Base):
     application_area: Mapped[str] = mapped_column(String(256), index=True)
     description: Mapped[str] = mapped_column(Text)
     examples: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    mental_health_benefits: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    mental_health_benefits: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
+
 
 class GitaKeyword(Base):
     __tablename__ = "gita_keywords"
@@ -515,6 +546,7 @@ class GitaKeyword(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
+
 
 class GitaVerseKeyword(Base):
     __tablename__ = "gita_verse_keywords"
@@ -567,6 +599,7 @@ class Session(Base):
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
+
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
@@ -598,8 +631,10 @@ class RefreshToken(Base):
 # Subscription System Models
 # =============================================================================
 
+
 class SubscriptionPlan(Base):
     """Defines available subscription plans/tiers."""
+
     __tablename__ = "subscription_plans"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -610,8 +645,12 @@ class SubscriptionPlan(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price_monthly: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     price_yearly: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
-    stripe_price_id_monthly: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    stripe_price_id_yearly: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    stripe_price_id_monthly: Mapped[str | None] = mapped_column(
+        String(128), nullable=True
+    )
+    stripe_price_id_yearly: Mapped[str | None] = mapped_column(
+        String(128), nullable=True
+    )
     features: Mapped[dict] = mapped_column(JSON, default=dict)
     kiaan_questions_monthly: Mapped[int] = mapped_column(Integer, default=10)
     encrypted_journal: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -627,6 +666,7 @@ class SubscriptionPlan(Base):
 
 class UserSubscription(SoftDeleteMixin, Base):
     """Tracks a user's active subscription."""
+
     __tablename__ = "user_subscriptions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -637,10 +677,16 @@ class UserSubscription(SoftDeleteMixin, Base):
         Integer, ForeignKey("subscription_plans.id", ondelete="RESTRICT"), index=True
     )
     status: Mapped[SubscriptionStatus] = mapped_column(
-        Enum(SubscriptionStatus, native_enum=False, length=32), default=SubscriptionStatus.ACTIVE, index=True
+        Enum(SubscriptionStatus, native_enum=False, length=32),
+        default=SubscriptionStatus.ACTIVE,
+        index=True,
     )
-    stripe_customer_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
-    stripe_subscription_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    stripe_customer_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    stripe_subscription_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
     current_period_start: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
@@ -664,13 +710,16 @@ class UserSubscription(SoftDeleteMixin, Base):
 
 class UsageTracking(Base):
     """Tracks feature usage (e.g., KIAAN questions) per user per month."""
+
     __tablename__ = "usage_tracking"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    feature: Mapped[str] = mapped_column(String(64), index=True)  # e.g., "kiaan_questions"
+    feature: Mapped[str] = mapped_column(
+        String(64), index=True
+    )  # e.g., "kiaan_questions"
     period_start: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), index=True
     )
@@ -687,6 +736,7 @@ class UsageTracking(Base):
 
 class Payment(SoftDeleteMixin, Base):
     """Records payment transactions."""
+
     __tablename__ = "payments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -694,16 +744,23 @@ class Payment(SoftDeleteMixin, Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     subscription_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("user_subscriptions.id", ondelete="SET NULL"), nullable=True, index=True
+        Integer,
+        ForeignKey("user_subscriptions.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     stripe_payment_intent_id: Mapped[str | None] = mapped_column(
         String(128), nullable=True, unique=True, index=True
     )
-    stripe_invoice_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    stripe_invoice_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     currency: Mapped[str] = mapped_column(String(3), default="usd")
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus, native_enum=False, length=32), default=PaymentStatus.PENDING, index=True
+        Enum(PaymentStatus, native_enum=False, length=32),
+        default=PaymentStatus.PENDING,
+        index=True,
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -718,8 +775,10 @@ class Payment(SoftDeleteMixin, Base):
 # Enterprise Admin System Models
 # =============================================================================
 
+
 class AdminRole(str, enum.Enum):
     """Admin role levels with hierarchical permissions."""
+
     SUPER_ADMIN = "super_admin"  # Full system access
     ADMIN = "admin"  # Most admin capabilities
     MODERATOR = "moderator"  # Content moderation
@@ -729,6 +788,7 @@ class AdminRole(str, enum.Enum):
 
 class AdminPermission(str, enum.Enum):
     """Granular permissions for RBAC."""
+
     # User Management
     USERS_VIEW = "users:view"
     USERS_EDIT = "users:edit"
@@ -809,6 +869,7 @@ ROLE_PERMISSIONS: dict[AdminRole, list[AdminPermission]] = {
 
 class AdminAuditAction(str, enum.Enum):
     """Types of admin audit log actions."""
+
     # Authentication
     LOGIN = "login"
     LOGOUT = "logout"
@@ -850,6 +911,7 @@ class AdminAuditAction(str, enum.Enum):
 
 class ModerationStatus(str, enum.Enum):
     """Status of flagged content moderation."""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -857,6 +919,7 @@ class ModerationStatus(str, enum.Enum):
 
 class AnnouncementType(str, enum.Enum):
     """Type of announcement display."""
+
     BANNER = "banner"
     MODAL = "modal"
     TOAST = "toast"
@@ -865,6 +928,7 @@ class AnnouncementType(str, enum.Enum):
 
 class ABTestStatus(str, enum.Enum):
     """Status of an A/B test."""
+
     DRAFT = "draft"
     RUNNING = "running"
     PAUSED = "paused"
@@ -873,6 +937,7 @@ class ABTestStatus(str, enum.Enum):
 
 class AdminUser(SoftDeleteMixin, Base):
     """Admin users with MFA and role-based access."""
+
     __tablename__ = "admin_users"
 
     id: Mapped[str] = mapped_column(
@@ -884,7 +949,7 @@ class AdminUser(SoftDeleteMixin, Base):
     role: Mapped[AdminRole] = mapped_column(
         Enum(AdminRole, native_enum=False, length=32),
         default=AdminRole.SUPPORT,
-        index=True
+        index=True,
     )
     # MFA - Required for admin login
     mfa_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -912,6 +977,7 @@ class AdminUser(SoftDeleteMixin, Base):
 
 class AdminPermissionAssignment(Base):
     """Additional permission assignments beyond role defaults."""
+
     __tablename__ = "admin_permission_assignments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -921,7 +987,9 @@ class AdminPermissionAssignment(Base):
     permission: Mapped[AdminPermission] = mapped_column(
         Enum(AdminPermission, native_enum=False, length=64)
     )
-    granted: Mapped[bool] = mapped_column(Boolean, default=True)  # True=grant, False=revoke
+    granted: Mapped[bool] = mapped_column(
+        Boolean, default=True
+    )  # True=grant, False=revoke
     granted_by: Mapped[str | None] = mapped_column(
         String(255), ForeignKey("admin_users.id", ondelete="SET NULL"), nullable=True
     )
@@ -932,6 +1000,7 @@ class AdminPermissionAssignment(Base):
 
 class AdminSession(Base):
     """Admin session tracking with expiration."""
+
     __tablename__ = "admin_sessions"
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
@@ -954,18 +1023,25 @@ class AdminSession(Base):
 
 class AdminAuditLog(Base):
     """Immutable audit log for all admin actions."""
+
     __tablename__ = "admin_audit_logs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     admin_id: Mapped[str | None] = mapped_column(
-        String(255), ForeignKey("admin_users.id", ondelete="SET NULL"),
-        nullable=True, index=True
+        String(255),
+        ForeignKey("admin_users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     action: Mapped[AdminAuditAction] = mapped_column(
         Enum(AdminAuditAction, native_enum=False, length=64), index=True
     )
-    resource_type: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
-    resource_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    resource_type: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
+    resource_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True, index=True
+    )
     details: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
@@ -976,6 +1052,7 @@ class AdminAuditLog(Base):
 
 class FeatureFlag(SoftDeleteMixin, Base):
     """Feature flags for gradual rollout and targeting."""
+
     __tablename__ = "feature_flags"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1003,13 +1080,15 @@ class FeatureFlag(SoftDeleteMixin, Base):
 
 class Announcement(SoftDeleteMixin, Base):
     """System announcements with targeting and scheduling."""
+
     __tablename__ = "announcements"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(256))
     content: Mapped[str] = mapped_column(Text)
     type: Mapped[AnnouncementType] = mapped_column(
-        Enum(AnnouncementType, native_enum=False, length=32), default=AnnouncementType.BANNER
+        Enum(AnnouncementType, native_enum=False, length=32),
+        default=AnnouncementType.BANNER,
     )
     # Targeting
     target_tiers: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
@@ -1037,6 +1116,7 @@ class Announcement(SoftDeleteMixin, Base):
 
 class ABTest(SoftDeleteMixin, Base):
     """A/B testing experiments."""
+
     __tablename__ = "ab_tests"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1050,7 +1130,7 @@ class ABTest(SoftDeleteMixin, Base):
     status: Mapped[ABTestStatus] = mapped_column(
         Enum(ABTestStatus, native_enum=False, length=32),
         default=ABTestStatus.DRAFT,
-        index=True
+        index=True,
     )
     # Targeting
     target_tiers: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
@@ -1075,6 +1155,7 @@ class ABTest(SoftDeleteMixin, Base):
 
 class ABTestAssignment(Base):
     """Tracks user assignments to A/B test variants."""
+
     __tablename__ = "ab_test_assignments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1090,6 +1171,7 @@ class ABTestAssignment(Base):
 
 class ABTestConversion(Base):
     """Tracks conversion events for A/B tests."""
+
     __tablename__ = "ab_test_conversions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1107,10 +1189,13 @@ class ABTestConversion(Base):
 
 class FlaggedContent(SoftDeleteMixin, Base):
     """Content moderation queue."""
+
     __tablename__ = "flagged_content"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    content_type: Mapped[str] = mapped_column(String(64), index=True)  # journal, feedback, etc.
+    content_type: Mapped[str] = mapped_column(
+        String(64), index=True
+    )  # journal, feedback, etc.
     content_id: Mapped[str] = mapped_column(String(255), index=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
@@ -1121,7 +1206,7 @@ class FlaggedContent(SoftDeleteMixin, Base):
     status: Mapped[ModerationStatus] = mapped_column(
         Enum(ModerationStatus, native_enum=False, length=32),
         default=ModerationStatus.PENDING,
-        index=True
+        index=True,
     )
     moderated_by: Mapped[str | None] = mapped_column(
         String(255), ForeignKey("admin_users.id", ondelete="SET NULL"), nullable=True
@@ -1138,6 +1223,7 @@ class FlaggedContent(SoftDeleteMixin, Base):
 
 class KiaanUsageAnalytics(Base):
     """Aggregated KIAAN usage analytics (read-only for admin)."""
+
     __tablename__ = "kiaan_usage_analytics"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1163,8 +1249,10 @@ class KiaanUsageAnalytics(Base):
 # Compliance & GDPR Models
 # =============================================================================
 
+
 class ConsentType(str, enum.Enum):
     """Types of consent."""
+
     PRIVACY_POLICY = "privacy_policy"
     TERMS_OF_SERVICE = "terms_of_service"
     MARKETING = "marketing"
@@ -1175,6 +1263,7 @@ class ConsentType(str, enum.Enum):
 
 class DataExportStatus(str, enum.Enum):
     """Status of a data export request."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -1184,6 +1273,7 @@ class DataExportStatus(str, enum.Enum):
 
 class DeletionRequestStatus(str, enum.Enum):
     """Status of an account deletion request."""
+
     PENDING = "pending"
     GRACE_PERIOD = "grace_period"
     PROCESSING = "processing"
@@ -1193,6 +1283,7 @@ class DeletionRequestStatus(str, enum.Enum):
 
 class UserConsent(Base):
     """Tracks user consent preferences for GDPR compliance."""
+
     __tablename__ = "user_consents"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1222,14 +1313,20 @@ class UserConsent(Base):
 
 class CookiePreference(Base):
     """Stores user cookie preferences."""
+
     __tablename__ = "cookie_preferences"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str | None] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True
+        String(255),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
     )
     # For anonymous users
-    anonymous_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    anonymous_id: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
     # Cookie categories
     necessary: Mapped[bool] = mapped_column(Boolean, default=True)  # Always required
     analytics: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -1248,6 +1345,7 @@ class CookiePreference(Base):
 
 class DataExportRequest(Base):
     """Tracks GDPR data export requests."""
+
     __tablename__ = "data_export_requests"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1257,10 +1355,12 @@ class DataExportRequest(Base):
     status: Mapped[DataExportStatus] = mapped_column(
         Enum(DataExportStatus, native_enum=False, length=32),
         default=DataExportStatus.PENDING,
-        index=True
+        index=True,
     )
     format: Mapped[str] = mapped_column(String(16), default="json")  # json, csv, zip
-    download_token: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True)
+    download_token: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, unique=True
+    )
     download_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     file_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
     file_size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -1279,6 +1379,7 @@ class DataExportRequest(Base):
 
 class DeletionRequest(Base):
     """Tracks account deletion requests with grace period."""
+
     __tablename__ = "deletion_requests"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1288,7 +1389,7 @@ class DeletionRequest(Base):
     status: Mapped[DeletionRequestStatus] = mapped_column(
         Enum(DeletionRequestStatus, native_enum=False, length=32),
         default=DeletionRequestStatus.PENDING,
-        index=True
+        index=True,
     )
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Grace period (default 30 days)
@@ -1318,12 +1419,15 @@ class DeletionRequest(Base):
 
 class ComplianceAuditLog(Base):
     """Audit log for compliance-related actions (separate from admin audit logs)."""
+
     __tablename__ = "compliance_audit_logs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str | None] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True, index=True
+        String(255),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     action: Mapped[str] = mapped_column(String(64), index=True)
     resource_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -1331,7 +1435,9 @@ class ComplianceAuditLog(Base):
     details: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
-    severity: Mapped[str] = mapped_column(String(16), default="info")  # info, warning, critical
+    severity: Mapped[str] = mapped_column(
+        String(16), default="info"
+    )  # info, warning, critical
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
@@ -1422,7 +1528,8 @@ class EmotionalResetSession(SoftDeleteMixin, Base):
         String(64), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        String(255), index=True
+        String(255),
+        index=True,
         # Note: No FK constraint - supports anonymous users (anon-{uuid})
         # Authenticated user IDs are validated at the application layer
     )
@@ -1437,8 +1544,10 @@ class EmotionalResetSession(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True), nullable=True
     )
     journal_entry_id: Mapped[str | None] = mapped_column(
-        String(64), ForeignKey("journal_entries.id", ondelete="SET NULL"),
-        nullable=True, index=True
+        String(64),
+        ForeignKey("journal_entries.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
@@ -1450,6 +1559,7 @@ class EmotionalResetSession(SoftDeleteMixin, Base):
 
 class UserEmotionalLog(Base):
     """Daily emotional check-ins and logs for users."""
+
     __tablename__ = "user_emotional_logs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1457,7 +1567,7 @@ class UserEmotionalLog(Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     log_date: Mapped[datetime.date] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.current_date()
+        Date, server_default=func.current_date(), index=True
     )
     emotional_state: Mapped[str] = mapped_column(String(50), index=True)
     intensity: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -1474,6 +1584,7 @@ class UserEmotionalLog(Base):
 
 class UserDailyAnalysis(Base):
     """Automated daily mental health analysis and insights."""
+
     __tablename__ = "user_daily_analysis"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1481,7 +1592,7 @@ class UserDailyAnalysis(Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     analysis_date: Mapped[datetime.date] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.current_date(), index=True
+        Date, server_default=func.current_date(), index=True
     )
     emotional_summary: Mapped[str] = mapped_column(Text)
     recommended_verses: Mapped[list] = mapped_column(JSON)
@@ -1496,22 +1607,21 @@ class UserDailyAnalysis(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint('user_id', 'analysis_date', name='uq_user_daily_analysis'),
+        UniqueConstraint("user_id", "analysis_date", name="uq_user_daily_analysis"),
     )
 
 
 class UserWeeklyReflection(Base):
     """Weekly sacred reflections and deep-dive assessments."""
+
     __tablename__ = "user_weekly_reflections"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    week_start_date: Mapped[datetime.date] = mapped_column(
-        TIMESTAMP(timezone=True), index=True
-    )
-    week_end_date: Mapped[datetime.date] = mapped_column(TIMESTAMP(timezone=True))
+    week_start_date: Mapped[datetime.date] = mapped_column(Date, index=True)
+    week_end_date: Mapped[datetime.date] = mapped_column(Date)
     reflection_type: Mapped[str] = mapped_column(
         String(50), default="sacred_reflection"
     )
@@ -1530,12 +1640,15 @@ class UserWeeklyReflection(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint('user_id', 'week_start_date', name='uq_user_weekly_reflection'),
+        UniqueConstraint(
+            "user_id", "week_start_date", name="uq_user_weekly_reflection"
+        ),
     )
 
 
 class UserAssessment(Base):
     """Structured weekly mental health assessments with Gita wisdom."""
+
     __tablename__ = "user_assessments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1543,7 +1656,7 @@ class UserAssessment(Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     assessment_date: Mapped[datetime.date] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.current_date(), index=True
+        Date, server_default=func.current_date(), index=True
     )
     assessment_type: Mapped[str] = mapped_column(
         String(50), default="weekly", index=True
@@ -1564,6 +1677,7 @@ class UserAssessment(Base):
 
 class UserVerseBookmark(Base):
     """User-saved Gita verses with personal notes."""
+
     __tablename__ = "user_verses_bookmarked"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1581,12 +1695,13 @@ class UserVerseBookmark(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint('user_id', 'verse_id', name='uq_user_verse_bookmark'),
+        UniqueConstraint("user_id", "verse_id", name="uq_user_verse_bookmark"),
     )
 
 
 class UserJourneyProgress(Base):
     """Track user progress through KIAAN modules and journeys."""
+
     __tablename__ = "user_journey_progress"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1611,5 +1726,5 @@ class UserJourneyProgress(Base):
     achievements: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (
-        UniqueConstraint('user_id', 'module_name', name='uq_user_journey_progress'),
+        UniqueConstraint("user_id", "module_name", name="uq_user_journey_progress"),
     )

@@ -305,7 +305,7 @@ def _calculate_scores(responses: dict[str, Any]) -> dict[str, Any]:
     if "purpose_meaning" in responses:
         scores["purpose_score"] = responses["purpose_meaning"]
 
-    # Calculate overall score (average of all scale responses)
+    # Calculate overall score (average of all scale responses, 0-100 scale)
     scale_scores = [
         responses.get("emotional_state", 5),
         10 - responses.get("stress_level", 5),
@@ -313,7 +313,7 @@ def _calculate_scores(responses: dict[str, Any]) -> dict[str, Any]:
         responses.get("social_connection", 5),
         responses.get("purpose_meaning", 5),
     ]
-    scores["overall_score"] = round(sum(scale_scores) / len(scale_scores) * 10)
+    scores["overall_score"] = round((sum(scale_scores) / len(scale_scores)) * 10)
 
     return scores
 
