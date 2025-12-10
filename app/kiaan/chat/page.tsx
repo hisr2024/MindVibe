@@ -1,18 +1,42 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import Link from 'next/link';
 
 /**
  * Dedicated KIAAN Chat Page
- * Full-featured chat interface moved from home page
+ * Full-featured chat interface with mood context support
  */
 export default function KiaanChatPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('detailed');
+
+  // Handle mood context from Quick Check-in
+  useEffect(() => {
+    const mood = searchParams?.get('mood');
+    const message = searchParams?.get('message');
+    
+    if (mood && message) {
+      // Add a welcome message with mood context
+      const welcomeMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: 'assistant',
+        text: `I see you're feeling ${mood}. I'm here to support you. Let's explore this together. 💙`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages([welcomeMessage]);
+      
+      // Auto-send the mood message
+      setTimeout(() => {
+        handleSendMessage(decodeURIComponent(message));
+      }, 1000);
+    }
+  }, [searchParams]);
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
