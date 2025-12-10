@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { KiaanLogo } from '@/src/components/KiaanLogo';
-import { EcosystemIntro } from '@/components/home/EcosystemIntro';
 import { MinimalFeatures } from '@/components/home/MinimalFeatures';
 import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
 import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
 
 /**
  * Redesigned Home Page
- * - Ecosystem introduction
+ * - Minimal authentic introduction
  * - Minimal 3 feature cards
- * - Small stone mood check-in
+ * - Colored stone mood check-in
  * - KIAAN Chat moved to /kiaan/chat
+ * - Flowing energy triangle
  */
 export default function Home() {
   return (
@@ -63,8 +63,46 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Ecosystem Introduction */}
-        <EcosystemIntro />
+        {/* Minimalistic Introduction */}
+        <section className="space-y-6 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur">
+          <div className="space-y-3 text-center">
+            <h2 className="text-2xl font-light text-orange-50 md:text-3xl">
+              Welcome to MindVibe
+            </h2>
+            <p className="mx-auto max-w-2xl text-base text-orange-100/80">
+              Your journey to mental wellness, guided by ancient wisdom and modern understanding
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/kiaan/chat"
+              className="interactive-link group rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-amber-500/10 px-6 py-3 text-sm font-semibold text-orange-50 transition-all hover:scale-105 hover:border-orange-400/50 hover:bg-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30"
+            >
+              <span className="flex items-center gap-2">
+                Start Chat
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+              </span>
+            </Link>
+            <Link
+              href="/dashboard"
+              className="interactive-link group rounded-2xl border border-teal-400/30 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 px-6 py-3 text-sm font-semibold text-teal-50 transition-all hover:scale-105 hover:border-teal-400/50 hover:bg-teal-500/20 hover:shadow-lg hover:shadow-teal-500/30"
+            >
+              <span className="flex items-center gap-2">
+                Explore Tools
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+              </span>
+            </Link>
+            <Link
+              href="/sacred-reflections"
+              className="interactive-link group rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 px-6 py-3 text-sm font-semibold text-blue-50 transition-all hover:scale-105 hover:border-blue-400/50 hover:bg-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
+            >
+              <span className="flex items-center gap-2">
+                Learn More
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+              </span>
+            </Link>
+          </div>
+        </section>
 
         {/* MULTI-PAGE COMPANION - KIAAN Experience Hub */}
         <section className="space-y-6">

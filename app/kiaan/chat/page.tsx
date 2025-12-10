@@ -5,6 +5,8 @@ import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import Link from 'next/link';
 
+type ViewMode = 'detailed' | 'summary';
+
 /**
  * Dedicated KIAAN Chat Page
  * Full-featured chat interface moved from home page
@@ -12,6 +14,7 @@ import Link from 'next/link';
 export default function KiaanChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('detailed');
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -80,6 +83,33 @@ export default function KiaanChatPage() {
       console.error('Failed to save to journal:', error);
     }
   }, []);
+
+  const handleCopyResponse = useCallback((text: string) => {
+    if (typeof window === 'undefined') return;
+    
+    navigator.clipboard.writeText(text).then(() => {
+      // Show a brief success message (could be enhanced with a toast notification)
+      console.log('Copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+    });
+  }, []);
+
+  const handleShareResponse = useCallback((text: string) => {
+    if (typeof window === 'undefined') return;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'KIAAN Response',
+        text: text,
+      }).catch(err => {
+        console.error('Failed to share:', err);
+      });
+    } else {
+      // Fallback - copy to clipboard
+      handleCopyResponse(text);
+    }
+  }, [handleCopyResponse]);
 
   // Quick response prompts
   const quickResponses = [
@@ -159,6 +189,61 @@ export default function KiaanChatPage() {
         </div>
       )}
 
+      {/* View Toggle & Actions - Only show when there are messages */}
+      {messages.length > 0 && (
+        <div className="flex items-center justify-between rounded-2xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)] backdrop-blur">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setViewMode('detailed')}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                viewMode === 'detailed'
+                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                  : 'bg-white/5 text-orange-100/70 hover:bg-white/10 hover:text-orange-50'
+              }`}
+            >
+              Detailed View
+            </button>
+            <button
+              onClick={() => setViewMode('summary')}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                viewMode === 'summary'
+                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                  : 'bg-white/5 text-orange-100/70 hover:bg-white/10 hover:text-orange-50'
+              }`}
+            >
+              Summary
+            </button>
+          </div>
+          <div className="flex gap-2">
+            {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
+              <>
+                <button
+                  onClick={() => handleCopyResponse(messages[messages.length - 1].text)}
+                  className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
+                  title="Copy last response"
+                >
+                  📋 Copy
+                </button>
+                <button
+                  onClick={() => handleShareResponse(messages[messages.length - 1].text)}
+                  className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
+                  title="Share response"
+                >
+                  📤 Share
+                </button>
+                <button
+                  onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
+                  className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105"
+                  title="Send to Sacred Reflections"
+                >
+                  ✨ Send to Sacred Reflections
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Chat Interface */}
       <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-6">
         <KiaanChat
@@ -167,6 +252,26 @@ export default function KiaanChatPage() {
           onSaveToJournal={handleSaveToJournal}
           isLoading={isLoading}
         />
+      </div>
+
+      {/* Quick Responses Below Chat - Always visible */}
+      <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] backdrop-blur">
+        <h2 className="text-lg font-semibold text-orange-50">Quick Responses</h2>
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+          {quickResponses.map((response) => (
+            <button
+              key={response.id}
+              onClick={() => handleQuickResponse(response.prompt)}
+              className="group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-left transition-all hover:border-orange-400/40 hover:bg-white/10 hover:shadow-lg hover:shadow-orange-500/20"
+            >
+              <div className="flex flex-col gap-2">
+                <span className="text-2xl">{response.emoji}</span>
+                <span className="text-sm font-semibold text-orange-50">{response.text}</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Helper Links */}
