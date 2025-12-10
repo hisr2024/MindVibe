@@ -139,8 +139,10 @@ class KIAANCore:
             for result in verse_results:
                 verse = result.get("verse")
                 if verse:
+                    chapter = getattr(verse, 'chapter', '')
+                    verse_num = getattr(verse, 'verse', '')
                     formatted_verses.append({
-                        "verse_id": f"{verse.chapter}.{verse.verse}" if hasattr(verse, 'chapter') else "",
+                        "verse_id": f"{chapter}.{verse_num}" if chapter and verse_num else "",
                         "english": getattr(verse, 'english', ''),
                         "principle": getattr(verse, 'principle', ''),
                         "theme": getattr(verse, 'theme', ''),
@@ -161,7 +163,7 @@ class KIAANCore:
             fallback_verses = []
             
             for chapter, verse_num in fallback_refs:
-                verse = await self.gita_service.get_verse_by_reference(db, chapter, verse_num)
+                verse = await GitaService.get_verse_by_reference(db, chapter, verse_num)
                 if verse:
                     fallback_verses.append({
                         "verse_id": f"{verse.chapter}.{verse.verse}",
@@ -195,8 +197,13 @@ Apply universal Gita principles:
             context_parts.append(f"WISDOM #{i} (relevance: {verse.get('score', 0):.2f}):")
             
             if verse.get('english'):
-                # Truncate to 300 chars
-                context_parts.append(f"Teaching: {verse['english'][:300]}")
+                # Truncate at word boundary to avoid cutting mid-word
+                english_text = verse['english']
+                if len(english_text) > 300:
+                    truncated = english_text[:297].rsplit(' ', 1)[0] + '...'
+                    context_parts.append(f"Teaching: {truncated}")
+                else:
+                    context_parts.append(f"Teaching: {english_text}")
             
             if verse.get('principle'):
                 context_parts.append(f"Principle: {verse['principle']}")
@@ -342,6 +349,10 @@ CONTEXT: This is weekly reflection feedback. Offer deeper wisdom about their gro
         context: str
     ) -> str:
         """Retry with stricter prompt when validation fails."""
+        if not self.ready or not self.client:
+            logger.error("KIAAN Core: OpenAI client not ready for retry")
+            return self._get_emergency_fallback(context)
+        
         wisdom_context = self._build_verse_context(verses)
         
         # Build stricter prompt that addresses the errors
