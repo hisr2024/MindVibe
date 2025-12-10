@@ -305,7 +305,7 @@ class TestKarmaResetKiaanIntegration:
     async def test_kiaan_karma_reset_meta_information(
         self, test_client: AsyncClient, test_db: AsyncSession
     ):
-        """Test that _meta information is included and accurate."""
+        """Test that meta information is included and accurate."""
         response = await test_client.post(
             "/api/karma-reset/kiaan/generate",
             json={
