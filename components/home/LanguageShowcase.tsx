@@ -33,14 +33,15 @@ export function LanguageShowcase() {
       // Dispatch event for other components
       window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale: langCode } }))
       
-      // Reload page to apply translations
+      // Reload page to apply translations (required for next-intl to update server-side rendered content)
       setTimeout(() => {
         window.location.reload()
       }, 300)
     }
   }
 
-  // Translations object - will be replaced with actual i18n later
+  // Translations object - temporary inline translations for showcase section
+  // TODO: Replace with proper i18n hook once next-intl is fully integrated
   const translations: Record<string, { title: string; subtitle: string }> = {
     en: {
       title: 'Available in Your Language',
@@ -82,6 +83,57 @@ export function LanguageShowcase() {
 
   const currentTranslation = translations[currentLocale] || translations.en
 
+  // Helper function to get translated stat labels
+  const getStatLabel = (key: 'languages' | 'verses' | 'support'): string => {
+    const labels: Record<string, Record<string, string>> = {
+      languages: {
+        en: 'Languages',
+        hi: 'भाषाएँ',
+        es: 'Idiomas',
+        fr: 'Langues',
+        de: 'Sprachen',
+        pt: 'Idiomas',
+        ja: '言語',
+        zh: '语言',
+      },
+      verses: {
+        en: 'Translated Verses',
+        hi: 'अनुवादित श्लोक',
+        es: 'Versos Traducidos',
+        fr: 'Versets Traduits',
+        de: 'Übersetzte Verse',
+        pt: 'Versos Traduzidos',
+        ja: '翻訳された詩',
+        zh: '已翻译经文',
+      },
+      support: {
+        en: 'Global Support',
+        hi: 'वैश्विक सहायता',
+        es: 'Soporte Global',
+        fr: 'Support Mondial',
+        de: 'Globaler Support',
+        pt: 'Suporte Global',
+        ja: 'グローバルサポート',
+        zh: '全球支持',
+      },
+    }
+    return labels[key][currentLocale] || labels[key].en
+  }
+
+  const getInfoText = (): string => {
+    const texts: Record<string, string> = {
+      en: 'Language selection is saved locally and applied automatically on your next visit.',
+      hi: 'भाषा चयन स्थानीय रूप से सहेजा जाता है और आपके अगले दौरे पर स्वचालित रूप से लागू होता है।',
+      es: 'La selección de idioma se guarda localmente y se aplica automáticamente en tu próxima visita.',
+      fr: 'La sélection de langue est enregistrée localement et appliquée automatiquement lors de votre prochaine visite.',
+      de: 'Die Sprachauswahl wird lokal gespeichert und bei Ihrem nächsten Besuch automatisch angewendet.',
+      pt: 'A seleção de idioma é salva localmente e aplicada automaticamente na sua próxima visita.',
+      ja: '言語選択はローカルに保存され、次回の訪問時に自動的に適用されます。',
+      zh: '语言选择保存在本地，下次访问时自动应用。',
+    }
+    return texts[currentLocale] || texts.en
+  }
+
   return (
     <section className="py-16 px-4 relative">
       <div className="absolute inset-0 pointer-events-none">
@@ -100,7 +152,7 @@ export function LanguageShowcase() {
           </p>
         </div>
 
-        {/* Language Grid */}
+        {/* Language Grid - Excluding Arabic for now as RTL layout requires additional UI adjustments */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-12">
           {LANGUAGES.filter(lang => lang.code !== 'ar').map((lang) => (
             <button
@@ -144,7 +196,7 @@ export function LanguageShowcase() {
               8+
             </div>
             <div className="text-xs md:text-sm text-orange-100/60 mt-1">
-              {currentLocale === 'hi' ? 'भाषाएँ' : currentLocale === 'es' ? 'Idiomas' : currentLocale === 'fr' ? 'Langues' : currentLocale === 'de' ? 'Sprachen' : currentLocale === 'pt' ? 'Idiomas' : currentLocale === 'ja' ? '言語' : currentLocale === 'zh' ? '语言' : 'Languages'}
+              {getStatLabel('languages')}
             </div>
           </div>
           <div className="text-center p-4 rounded-2xl bg-white/5 border border-orange-500/20 backdrop-blur">
@@ -152,7 +204,7 @@ export function LanguageShowcase() {
               700+
             </div>
             <div className="text-xs md:text-sm text-orange-100/60 mt-1">
-              {currentLocale === 'hi' ? 'अनुवादित श्लोक' : currentLocale === 'es' ? 'Versos Traducidos' : currentLocale === 'fr' ? 'Versets Traduits' : currentLocale === 'de' ? 'Übersetzte Verse' : currentLocale === 'pt' ? 'Versos Traduzidos' : currentLocale === 'ja' ? '翻訳された詩' : currentLocale === 'zh' ? '已翻译经文' : 'Translated Verses'}
+              {getStatLabel('verses')}
             </div>
           </div>
           <div className="text-center p-4 rounded-2xl bg-white/5 border border-orange-500/20 backdrop-blur">
@@ -160,7 +212,7 @@ export function LanguageShowcase() {
               24/7
             </div>
             <div className="text-xs md:text-sm text-orange-100/60 mt-1">
-              {currentLocale === 'hi' ? 'वैश्विक सहायता' : currentLocale === 'es' ? 'Soporte Global' : currentLocale === 'fr' ? 'Support Mondial' : currentLocale === 'de' ? 'Globaler Support' : currentLocale === 'pt' ? 'Suporte Global' : currentLocale === 'ja' ? 'グローバルサポート' : currentLocale === 'zh' ? '全球支持' : 'Global Support'}
+              {getStatLabel('support')}
             </div>
           </div>
         </div>
@@ -168,21 +220,7 @@ export function LanguageShowcase() {
         {/* Informational note */}
         <div className="mt-8 text-center">
           <p className="text-xs text-orange-100/50 max-w-2xl mx-auto">
-            {currentLocale === 'hi' 
-              ? 'भाषा चयन स्थानीय रूप से सहेजा जाता है और आपके अगले दौरे पर स्वचालित रूप से लागू होता है।' 
-              : currentLocale === 'es'
-              ? 'La selección de idioma se guarda localmente y se aplica automáticamente en tu próxima visita.'
-              : currentLocale === 'fr'
-              ? 'La sélection de langue est enregistrée localement et appliquée automatiquement lors de votre prochaine visite.'
-              : currentLocale === 'de'
-              ? 'Die Sprachauswahl wird lokal gespeichert und bei Ihrem nächsten Besuch automatisch angewendet.'
-              : currentLocale === 'pt'
-              ? 'A seleção de idioma é salva localmente e aplicada automaticamente na sua próxima visita.'
-              : currentLocale === 'ja'
-              ? '言語選択はローカルに保存され、次回の訪問時に自動的に適用されます。'
-              : currentLocale === 'zh'
-              ? '语言选择保存在本地，下次访问时自动应用。'
-              : 'Language selection is saved locally and applied automatically on your next visit.'}
+            {getInfoText()}
           </p>
         </div>
       </div>
