@@ -14,17 +14,17 @@ const guidanceModeInfo: Record<GuidanceMode, { title: string; description: strin
   'inner-peace': {
     title: 'Inner Peace',
     description: 'Find stillness through breath-focused exercises and gentle grounding techniques. Perfect for moments when you need to calm your mind and reconnect with tranquility.',
-    link: '/kiaan/features#inner-peace'
+    link: '/kiaan/chat'
   },
   'mind-control': {
     title: 'Mind Control',
     description: 'Develop focused clarity through structured mindfulness practices. Ideal for decision-making, concentration, and maintaining mental discipline.',
-    link: '/kiaan/features#mind-control'
+    link: '/kiaan/chat'
   },
   'self-kindness': {
     title: 'Self Kindness',
     description: 'Cultivate compassion for yourself through warm, supportive exercises. Essential for healing, self-acceptance, and nurturing your emotional well-being.',
-    link: '/kiaan/features#self-kindness'
+    link: '/kiaan/chat'
   }
 }
 
@@ -36,7 +36,7 @@ export function FlowingEnergyTriangle() {
       {/* Header */}
       <div className="space-y-3 text-center">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
-          KIAAN Experience Hub
+          KIAAN Guidance Modes
         </h2>
         <p className="mx-auto max-w-2xl text-base text-orange-100/80 md:text-lg">
           Three interconnected paths to wellness, flowing together in harmony
@@ -93,10 +93,10 @@ export function FlowingEnergyTriangle() {
           {/* Quick Access */}
           <div className="pt-2">
             <Link
-              href="/kiaan"
+              href="/kiaan/chat"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition-all hover:scale-105"
             >
-              Explore Full KIAAN Hub
+              Talk to KIAAN
               <span aria-hidden>→</span>
             </Link>
           </div>
