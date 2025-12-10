@@ -20,6 +20,14 @@ export interface APICallOptions extends RequestInit {
 }
 
 /**
+ * Get current locale from localStorage
+ */
+export function getCurrentLocale(): string {
+  if (typeof window === 'undefined') return 'en';
+  return localStorage.getItem('preferredLocale') || 'en';
+}
+
+/**
  * Make an API call with proper error handling
  * @param endpoint API endpoint (e.g., '/api/chat/message')
  * @param options Request options
@@ -33,9 +41,13 @@ export async function apiCall(
   const url = `${API_BASE_URL}${endpoint}`
   const { timeout = 30000, ...fetchOptions } = options
 
+  // Get current language preference
+  const locale = getCurrentLocale();
+
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': locale,
       ...options.headers,
     },
     ...fetchOptions,

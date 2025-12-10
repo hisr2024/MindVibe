@@ -432,8 +432,14 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
                 logger.warning(f"Quota check failed, allowing request: {quota_error}")
 
         # Message is already sanitized by the ChatMessage validator
-        # Get language preference from the request
+        # Get language preference from the request body or Accept-Language header
         language = chat.language
+        if not language:
+            # Try to get from Accept-Language header
+            accept_language = request.headers.get('Accept-Language', 'en')
+            # Extract primary language code (e.g., 'en' from 'en-US,en;q=0.9')
+            language = accept_language.split(',')[0].split('-')[0].split(';')[0].strip()
+        
         response = await kiaan.generate_response_with_gita(message, db, language)
 
         # Increment usage after successful response

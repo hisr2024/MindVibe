@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react'
 
-export type Language = 'en' | 'de' | 'es' | 'fr' | 'hi' | 'ar' | 'zh-CN'
+export type Language = 'en' | 'hi' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
 
 export interface LanguageConfig {
   code: Language
@@ -13,11 +13,12 @@ export interface LanguageConfig {
 
 export const LANGUAGES: Record<Language, LanguageConfig> = {
   en: { code: 'en', name: 'English', nativeName: 'English', dir: 'ltr' },
-  de: { code: 'de', name: 'German', nativeName: 'Deutsch', dir: 'ltr' },
+  hi: { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
   es: { code: 'es', name: 'Spanish', nativeName: 'Español', dir: 'ltr' },
   fr: { code: 'fr', name: 'French', nativeName: 'Français', dir: 'ltr' },
-  hi: { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
-  ar: { code: 'ar', name: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+  de: { code: 'de', name: 'German', nativeName: 'Deutsch', dir: 'ltr' },
+  pt: { code: 'pt', name: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
+  ja: { code: 'ja', name: 'Japanese', nativeName: '日本語', dir: 'ltr' },
   'zh-CN': { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文', dir: 'ltr' },
 }
 
@@ -50,11 +51,12 @@ function detectLanguageFromLocale(): Language {
   
   // Direct matches
   if (locale === 'zh-CN' || locale === 'zh-Hans') return 'zh-CN'
-  if (langCode === 'de') return 'de'
+  if (langCode === 'hi') return 'hi'
   if (langCode === 'es') return 'es'
   if (langCode === 'fr') return 'fr'
-  if (langCode === 'hi') return 'hi'
-  if (langCode === 'ar') return 'ar'
+  if (langCode === 'de') return 'de'
+  if (langCode === 'pt') return 'pt'
+  if (langCode === 'ja') return 'ja'
   
   return 'en'
 }

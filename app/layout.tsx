@@ -3,7 +3,7 @@ import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { ChatFooter } from '@/components/layout/ChatFooter'
@@ -39,7 +39,7 @@ export default function RootLayout({
             <div className="flex-1">
               <SiteNav />
             </div>
-            <LanguageSwitcher />
+            <MinimalLanguageSelector />
           </div>
           <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-24 pt-8 sm:px-6 md:pb-0 lg:px-8 lg:pt-16">
             {children}
