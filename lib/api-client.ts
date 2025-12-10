@@ -92,7 +92,7 @@ export async function apiCall(
       // Network errors are typically TypeErrors from fetch
       // This could be CORS, network failure, or connection issues
       throw new APIError(
-        'Cannot connect to KIAAN. Please check your internet connection and ensure the backend server is running. This could also be a CORS configuration issue.'
+        'Cannot connect to KIAAN. Please check your internet connection or try again in a few moments.'
       )
     }
 
@@ -163,7 +163,7 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof APIError) {
     // Check for specific error codes
     if (error.status === 405) {
-      return 'This feature is not available right now. Our team has been notified.'
+      return 'This operation is not supported. Please try a different action.'
     }
     
     if (error.status === 404) {
@@ -177,10 +177,10 @@ export function getErrorMessage(error: unknown): string {
     // Check for connection-related errors (includes CORS as a possibility)
     if (error.message.includes('connect') || error.message.includes('network') || error.message.includes('CORS')) {
       const messages = [
-        'Cannot reach KIAAN. Please check:',
-        '• Your internet connection',
-        '• Try refreshing the page',
-        '• If the problem persists, the service may be temporarily down',
+        'Cannot reach KIAAN.',
+        '• Check your internet connection',
+        '• Try again in a few moments',
+        '• If the problem persists, the service may be down',
       ]
       return messages.join('\n')
     }
@@ -212,23 +212,23 @@ export function getBriefErrorMessage(error: unknown): string {
     
     // Check for specific HTTP status codes
     if (msg.includes('405')) {
-      return 'Service temporarily unavailable. Our team has been notified.'
+      return 'This operation is not supported. Please try a different action.'
     }
     if (msg.includes('404')) {
-      return 'Endpoint not found. Please refresh the page.'
+      return 'Service not found. Please try again later.'
     }
     if (msg.includes('503')) {
-      return 'Service temporarily unavailable. Please try again.'
+      return 'Service temporarily unavailable. Please try again in a few moments.'
     }
     
     // Check for timeout
     if (msg.includes('timeout') || msg.includes('timed out')) {
-      return 'Request taking too long. Service may be busy.'
+      return 'Request taking too long. Service may be busy. Please try again.'
     }
     
     // Check for network/connection
     if (msg.includes('network') || msg.includes('connect')) {
-      return 'Cannot reach service. Check your internet connection.'
+      return 'Cannot reach service. Please check your connection and try again.'
     }
     
     // Return original message if no pattern matched
