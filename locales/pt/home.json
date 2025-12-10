@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "Seu Companheiro de IA para Bem-estar Mental",
+    "subtitle": "Converse com KIAAN, alimentado pela sabedoria antiga do Bhagavad Gita",
+    "ctaPrimary": "Iniciar Chat Grátis",
+    "ctaSecondary": "Explorar Ferramentas"
+  },
+  "languageShowcase": {
+    "title": "Disponível no Seu Idioma",
+    "subtitle": "KIAAN fala sua língua. Escolha entre mais de 8 idiomas para uma experiência personalizada.",
+    "previewTitle": "KIAAN em {{language}}",
+    "previewDescription": "Experimente orientação de atenção plena em seu idioma nativo com sabedoria culturalmente relevante.",
+    "stats": {
+      "languages": "Idiomas",
+      "verses": "Versos Traduzidos",
+      "support": "Suporte Global"
+    }
+  },
+  "features": {
+    "title": "Tudo o que Você Precisa para Bem-estar Mental",
+    "description": "Ferramentas abrangentes para sua jornada rumo à paz interior"
+  }
+}
