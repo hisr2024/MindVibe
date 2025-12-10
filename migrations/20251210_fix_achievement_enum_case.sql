@@ -130,9 +130,40 @@ ALTER TABLE unlockables DROP COLUMN kind_temp;
 -- Step 5: Set NOT NULL constraints (if they were originally NOT NULL)
 -- ==============================================================================
 
--- Note: Only set NOT NULL if the original schema had these constraints
--- Check your models.py to confirm
+-- Verify no NULL values exist before applying NOT NULL constraints
+-- This prevents migration failure if there are unexpected NULL values
+DO $$
+DECLARE
+    null_count INTEGER;
+BEGIN
+    -- Check for NULL values in achievements.category
+    SELECT COUNT(*) INTO null_count FROM achievements WHERE category IS NULL;
+    IF null_count > 0 THEN
+        RAISE EXCEPTION 'Found % NULL values in achievements.category - cannot apply NOT NULL constraint', null_count;
+    END IF;
+    
+    -- Check for NULL values in achievements.rarity
+    SELECT COUNT(*) INTO null_count FROM achievements WHERE rarity IS NULL;
+    IF null_count > 0 THEN
+        RAISE EXCEPTION 'Found % NULL values in achievements.rarity - cannot apply NOT NULL constraint', null_count;
+    END IF;
+    
+    -- Check for NULL values in unlockables.rarity
+    SELECT COUNT(*) INTO null_count FROM unlockables WHERE rarity IS NULL;
+    IF null_count > 0 THEN
+        RAISE EXCEPTION 'Found % NULL values in unlockables.rarity - cannot apply NOT NULL constraint', null_count;
+    END IF;
+    
+    -- Check for NULL values in unlockables.kind
+    SELECT COUNT(*) INTO null_count FROM unlockables WHERE kind IS NULL;
+    IF null_count > 0 THEN
+        RAISE EXCEPTION 'Found % NULL values in unlockables.kind - cannot apply NOT NULL constraint', null_count;
+    END IF;
+    
+    RAISE NOTICE 'Validation passed: No NULL values found in any enum columns';
+END $$;
 
+-- Apply NOT NULL constraints (original schema requires these)
 ALTER TABLE achievements ALTER COLUMN category SET NOT NULL;
 ALTER TABLE achievements ALTER COLUMN rarity SET NOT NULL;
 ALTER TABLE unlockables ALTER COLUMN rarity SET NOT NULL;
@@ -158,12 +189,16 @@ BEGIN
     SELECT COUNT(*) INTO unlockable_count FROM unlockables;
     RAISE NOTICE 'Total unlockables after migration: %', unlockable_count;
     
-    -- Sample values to verify uppercase conversion
-    SELECT category::text INTO category_sample FROM achievements LIMIT 1;
-    RAISE NOTICE 'Sample category value: %', category_sample;
-    
-    SELECT rarity::text INTO rarity_sample FROM achievements LIMIT 1;
-    RAISE NOTICE 'Sample rarity value: %', rarity_sample;
+    -- Sample values to verify uppercase conversion (only if records exist)
+    IF achievement_count > 0 THEN
+        SELECT category::text INTO category_sample FROM achievements LIMIT 1;
+        RAISE NOTICE 'Sample category value: %', category_sample;
+        
+        SELECT rarity::text INTO rarity_sample FROM achievements LIMIT 1;
+        RAISE NOTICE 'Sample rarity value: %', rarity_sample;
+    ELSE
+        RAISE NOTICE 'No achievements found - skipping sample verification';
+    END IF;
     
     -- Log success
     RAISE NOTICE 'Achievement enum case migration completed successfully';
