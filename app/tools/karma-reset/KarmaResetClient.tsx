@@ -33,11 +33,16 @@ export default function KarmaResetClient() {
   const [resetGuidance, setResetGuidance] = useState<ResetGuidance | null>(null)
   const [kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
+  const MAX_RETRIES = 2
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, isRetry = false) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
+    if (!isRetry) {
+      setError(null)
+      setRetryCount(0)
+    }
 
     try {
       const response = await fetch('/api/karma-reset/kiaan/generate', {
@@ -50,10 +55,13 @@ export default function KarmaResetClient() {
           feeling: whoFelt,
           repair_type: repairType,
         }),
+        credentials: 'include',
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate reset guidance')
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.detail || errorData.message || 'Failed to generate reset guidance'
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -64,10 +72,58 @@ export default function KarmaResetClient() {
       // Auto-advance to plan after breathing exercise
       setTimeout(() => setCurrentStep('plan'), BREATHING_DURATION_MS)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      
+      // Retry logic
+      if (retryCount < MAX_RETRIES) {
+        setRetryCount(prev => prev + 1)
+        setError(`${errorMessage}. Retrying... (Attempt ${retryCount + 1}/${MAX_RETRIES})`)
+        
+        // Retry after a short delay
+        setTimeout(() => {
+          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+          handleSubmit(fakeEvent, true)
+        }, 1500)
+      } else {
+        // Show user-friendly error with fallback guidance
+        setError(
+          `Unable to connect to the guidance service. ${errorMessage}. ` +
+          'Please check your connection and try again, or use the fallback guidance below.'
+        )
+        
+        // Set fallback guidance
+        const fallbackGuidance = getFallbackGuidance(repairType)
+        setResetGuidance(fallbackGuidance)
+        setCurrentStep('breathing')
+        setTimeout(() => setCurrentStep('plan'), BREATHING_DURATION_MS)
+      }
     } finally {
       setLoading(false)
     }
+  }
+
+  const getFallbackGuidance = (repair: 'apology' | 'clarification' | 'calm_followup'): ResetGuidance => {
+    const fallbacks = {
+      apology: {
+        breathingLine: "Take four slow breaths. Let each exhale soften the moment.",
+        rippleSummary: "You experienced a moment that affected someone you care about.",
+        repairAction: "Offer a sincere apology that acknowledges the moment with genuine care.",
+        forwardIntention: "Move forward with intention to communicate with kindness."
+      },
+      clarification: {
+        breathingLine: "Breathe deeply. Clear communication begins with inner calm.",
+        rippleSummary: "A misunderstanding created distance between you and another.",
+        repairAction: "Gently clarify your intention and invite understanding.",
+        forwardIntention: "Speak with clarity and compassion in future interactions."
+      },
+      calm_followup: {
+        breathingLine: "Take a centering breath. Calm begins within.",
+        rippleSummary: "A tense moment left residue in your connection.",
+        repairAction: "Return with warmth and re-center the conversation.",
+        forwardIntention: "Practice responding with patience and presence."
+      }
+    }
+    return fallbacks[repair] || fallbacks.apology
   }
 
   const resetForm = () => {
@@ -197,8 +253,19 @@ export default function KarmaResetClient() {
 
                   {/* Error message */}
                   {error && (
-                    <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200">
-                      {error}
+                    <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                      <div className="flex items-start gap-3">
+                        <span className="text-red-600 dark:text-red-400 text-xl">⚠️</span>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-red-800 dark:text-red-200 mb-1">Connection Issue</h4>
+                          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                          {retryCount >= MAX_RETRIES && (
+                            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                              💙 Don't worry - we've prepared fallback guidance for you below.
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 
