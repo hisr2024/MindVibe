@@ -1,4 +1,5 @@
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
@@ -47,6 +48,7 @@ export default function RootLayout({
           <SiteFooter />
           <MobileNav />
           <ChatFooter />
+          <Analytics />
         </Providers>
       </body>
     </html>
