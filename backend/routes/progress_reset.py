@@ -13,7 +13,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -112,9 +112,8 @@ async def reset_user_progress(
         try:
             # Count achievements before reset
             achievement_count = await db.scalar(
-                select(UserAchievement)
+                select(func.count(UserAchievement.id))
                 .where(UserAchievement.user_id == user_id)
-                .with_only_columns(UserAchievement.id)
             )
             reset_details["achievements_reset"] = achievement_count or 0
             
@@ -141,9 +140,8 @@ async def reset_user_progress(
         try:
             # Count unlockables before reset
             unlockable_count = await db.scalar(
-                select(UserUnlockable)
+                select(func.count(UserUnlockable.id))
                 .where(UserUnlockable.user_id == user_id)
-                .with_only_columns(UserUnlockable.id)
             )
             reset_details["unlockables_reset"] = unlockable_count or 0
             
@@ -275,16 +273,14 @@ async def preview_reset(
     try:
         # Count achievements
         achievement_count = await db.scalar(
-            select(UserAchievement)
+            select(func.count(UserAchievement.id))
             .where(UserAchievement.user_id == user_id)
-            .with_only_columns(UserAchievement.id)
         )
         
         # Count unlockables
         unlockable_count = await db.scalar(
-            select(UserUnlockable)
+            select(func.count(UserUnlockable.id))
             .where(UserUnlockable.user_id == user_id)
-            .with_only_columns(UserUnlockable.id)
         )
         
         # Get current progress
