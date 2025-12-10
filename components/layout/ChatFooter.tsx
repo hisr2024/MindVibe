@@ -3,7 +3,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChat } from '@/lib/ChatContext'
-import type { Message } from '@/components/chat/KiaanChat'
+import type { ChatMessage } from '@/lib/chatStorage'
+
+// Generate unique ID with fallback for environments without crypto.randomUUID
+const generateId = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  // Fallback: timestamp + random string
+  return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+}
 
 export function ChatFooter() {
   const { messages: globalMessages, addMessage } = useChat()
@@ -18,17 +27,27 @@ export function ChatFooter() {
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
     setMounted(true)
-    // Load saved open state from localStorage
-    const savedState = localStorage.getItem('kiaan-footer-open')
-    if (savedState === 'true') {
-      setIsOpen(true)
+    // Load saved open state from localStorage (with SSR safety check)
+    if (typeof window !== 'undefined') {
+      try {
+        const savedState = localStorage.getItem('kiaan-footer-open')
+        if (savedState === 'true') {
+          setIsOpen(true)
+        }
+      } catch (error) {
+        console.error('Failed to load footer state from localStorage:', error)
+      }
     }
   }, [])
 
   // Save open state to localStorage
   useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('kiaan-footer-open', isOpen.toString())
+    if (mounted && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('kiaan-footer-open', isOpen.toString())
+      } catch (error) {
+        console.error('Failed to save footer state to localStorage:', error)
+      }
     }
   }, [isOpen, mounted])
 
@@ -61,8 +80,8 @@ export function ChatFooter() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
 
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
+    const userMessage: ChatMessage = {
+      id: generateId(),
       sender: 'user',
       text: input,
       timestamp: new Date().toISOString(),
@@ -92,8 +111,8 @@ export function ChatFooter() {
       const data = await response.json()
 
       // Handle KIAAN response format
-      const aiMessage: Message = {
-        id: crypto.randomUUID(),
+      const aiMessage: ChatMessage = {
+        id: generateId(),
         sender: 'assistant',
         text: data.response || data.message || 'I apologize, I encountered an error. Please try again.',
         timestamp: new Date().toISOString(),
@@ -102,7 +121,7 @@ export function ChatFooter() {
     } catch (error) {
       console.error('Chat error:', error)
       addMessage({
-        id: crypto.randomUUID(),
+        id: generateId(),
         sender: 'assistant',
         text: 'Unable to connect to KIAAN. Please try again or visit the main chat page at /kiaan.',
         timestamp: new Date().toISOString(),
@@ -226,7 +245,7 @@ export function ChatFooter() {
                     </div>
                     <h4 className="text-sm font-semibold text-orange-50 mb-2">Welcome to KIAAN</h4>
                     <p className="text-xs text-orange-100/70 max-w-[260px] mx-auto">
-                      Share what&apos;s on your mind. I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.
+                      Share what's on your mind. I'm here to offer warm, grounded guidance rooted in timeless wisdom.
                     </p>
                   </div>
                 )}
