@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import Link from 'next/link';
 
 /**
- * Dedicated KIAAN Chat Page
+ * Dedicated KIAAN Chat Page - Inner Component
  * Full-featured chat interface with mood context support
  */
-export default function KiaanChatPage() {
+function KiaanChatPageInner() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -346,5 +346,24 @@ export default function KiaanChatPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+/**
+ * KIAAN Chat Page with Suspense boundary
+ * Wraps the main component to handle useSearchParams properly
+ */
+export default function KiaanChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
+          <p className="text-orange-100">Loading KIAAN Chat...</p>
+        </div>
+      </div>
+    }>
+      <KiaanChatPageInner />
+    </Suspense>
   );
 }
