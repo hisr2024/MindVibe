@@ -56,6 +56,11 @@ interface StateCheckInProps {
   className?: string
 }
 
+// Constants
+const INTENSITY_PERCENTAGE_MULTIPLIER = 10
+const MIN_INTENSITY = 1
+const MAX_INTENSITY = 10
+
 export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProps) {
   const [selectedState, setSelectedState] = useState<EmotionalState | null>(null)
   const [intensity, setIntensity] = useState(5)
@@ -164,12 +169,12 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-orange-100/70">Intensity</span>
-              <span className="font-semibold text-orange-50">{intensity}/10</span>
+              <span className="font-semibold text-orange-50">{intensity}/{MAX_INTENSITY}</span>
             </div>
             <input
               type="range"
-              min="1"
-              max="10"
+              min={MIN_INTENSITY}
+              max={MAX_INTENSITY}
               value={intensity}
               onChange={(e) => {
                 const newIntensity = parseInt(e.target.value)
@@ -180,7 +185,7 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
               }}
               className="w-full h-2 rounded-full appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, ${selectedState.color} 0%, ${selectedState.color} ${intensity * 10}%, rgba(255, 255, 255, 0.1) ${intensity * 10}%, rgba(255, 255, 255, 0.1) 100%)`,
+                background: `linear-gradient(to right, ${selectedState.color} 0%, ${selectedState.color} ${intensity * INTENSITY_PERCENTAGE_MULTIPLIER}%, rgba(255, 255, 255, 0.1) ${intensity * INTENSITY_PERCENTAGE_MULTIPLIER}%, rgba(255, 255, 255, 0.1) 100%)`,
               }}
             />
             <div className="flex justify-between text-xs text-orange-100/60">
@@ -191,7 +196,7 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
 
           {/* Energy Bar Visualization */}
           <div className="mt-4 flex gap-1">
-            {Array.from({ length: 10 }).map((_, i) => (
+            {Array.from({ length: MAX_INTENSITY }).map((_, i) => (
               <div
                 key={i}
                 className="flex-1 h-8 rounded transition-all duration-300"

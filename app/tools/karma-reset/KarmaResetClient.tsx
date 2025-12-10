@@ -36,10 +36,9 @@ export default function KarmaResetClient() {
   const [retryCount, setRetryCount] = useState(0)
   const MAX_RETRIES = 2
 
-  const handleSubmit = async (e: React.FormEvent, isRetry = false) => {
-    e.preventDefault()
+  const submitKarmaReset = async (attemptCount = 0) => {
     setLoading(true)
-    if (!isRetry) {
+    if (attemptCount === 0) {
       setError(null)
       setRetryCount(0)
     }
@@ -75,14 +74,13 @@ export default function KarmaResetClient() {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred'
       
       // Retry logic
-      if (retryCount < MAX_RETRIES) {
-        setRetryCount(prev => prev + 1)
-        setError(`${errorMessage}. Retrying... (Attempt ${retryCount + 1}/${MAX_RETRIES})`)
+      if (attemptCount < MAX_RETRIES) {
+        setRetryCount(attemptCount + 1)
+        setError(`${errorMessage}. Retrying... (Attempt ${attemptCount + 1}/${MAX_RETRIES})`)
         
         // Retry after a short delay
         setTimeout(() => {
-          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
-          handleSubmit(fakeEvent, true)
+          submitKarmaReset(attemptCount + 1)
         }, 1500)
       } else {
         // Show user-friendly error with fallback guidance
@@ -100,6 +98,11 @@ export default function KarmaResetClient() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    submitKarmaReset()
   }
 
   const getFallbackGuidance = (repair: 'apology' | 'clarification' | 'calm_followup'): ResetGuidance => {

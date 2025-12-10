@@ -81,20 +81,21 @@ export function ChatFooter() {
   const [retryAttempt, setRetryAttempt] = useState(0)
   const MAX_RETRIES = 2
 
-  const sendMessage = async (attemptCount = 0) => {
-    if (!input.trim() || isLoading) return
+  const sendMessageWithRetry = async (messageText: string, attemptCount = 0) => {
+    setIsLoading(true)
+    setConnectionStatus('connecting')
 
-    const messageText = input
     const userMessage: ChatMessage = {
       id: generateId(),
       sender: 'user',
       text: messageText,
       timestamp: new Date().toISOString(),
     }
-    addMessage(userMessage)
-    setInput('')
-    setIsLoading(true)
-    setConnectionStatus('connecting')
+    
+    // Only add user message on first attempt
+    if (attemptCount === 0) {
+      addMessage(userMessage)
+    }
 
     try {
       // Use KIAAN's existing chat endpoint
@@ -142,8 +143,7 @@ export function ChatFooter() {
         
         // Retry after a short delay
         setTimeout(() => {
-          // Re-add the user message and retry
-          sendMessage(attemptCount + 1)
+          sendMessageWithRetry(messageText, attemptCount + 1)
         }, 2000)
       } else {
         // Final failure
@@ -159,6 +159,13 @@ export function ChatFooter() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const sendMessage = () => {
+    if (!input.trim() || isLoading) return
+    const messageText = input
+    setInput('')
+    sendMessageWithRetry(messageText)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
