@@ -74,7 +74,7 @@ class KarmaResetKiaanResponse(BaseModel):
     
     reset_guidance: dict = Field(description="4-part reset guidance")
     kiaan_metadata: KiaanMetadata = Field(description="KIAAN ecosystem metadata")
-    _meta: Optional[dict] = Field(None, description="Request metadata")
+    meta: Optional[dict] = Field(None, description="Request metadata")
 
 
 # ==================== FALLBACK RESPONSES ====================
@@ -325,7 +325,7 @@ Example format:
     return KarmaResetKiaanResponse(
         reset_guidance=guidance_data,
         kiaan_metadata=kiaan_metadata,
-        _meta={
+        meta={
             "request_id": request_id,
             "processing_time_ms": elapsed_ms,
             "model_used": "gpt-4" if ready else "fallback",

@@ -61,7 +61,7 @@ class TestKarmaResetKiaanIntegration:
         # Verify basic structure
         assert "reset_guidance" in data
         assert "kiaan_metadata" in data
-        assert "_meta" in data
+        assert "meta" in data
 
         # Verify metadata fields
         metadata = data["kiaan_metadata"]
@@ -318,7 +318,7 @@ class TestKarmaResetKiaanIntegration:
         assert response.status_code == 200
         data = response.json()
 
-        meta = data["_meta"]
+        meta = data["meta"]
         
         # Meta fields
         assert "request_id" in meta
