@@ -143,7 +143,7 @@ ALTER TABLE unlockables ALTER COLUMN kind SET NOT NULL;
 -- ==============================================================================
 
 -- Verify the migration was successful
-DO $
+DO $$
 DECLARE
     achievement_count INTEGER;
     unlockable_count INTEGER;
@@ -167,4 +167,4 @@ BEGIN
     
     -- Log success
     RAISE NOTICE 'Achievement enum case migration completed successfully';
-END $;
+END $$;
