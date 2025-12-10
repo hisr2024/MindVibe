@@ -11,23 +11,26 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_current_user_optional, get_db
-from backend.models import UserWeeklyReflection, UserDailyAnalysis, GitaVerse
+from backend.models import UserDailyAnalysis, UserWeeklyReflection
 from backend.services.gita_service import GitaService
 from backend.services.kiaan_core import KIAANCore
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/kiaan/sacred-reflections", tags=["kiaan", "sacred-reflections"])
+router = APIRouter(
+    prefix="/api/kiaan/sacred-reflections", tags=["kiaan", "sacred-reflections"]
+)
 
 kiaan_core = KIAANCore()
 
 
 class SacredReflectionResponse(BaseModel):
     """Response model for sacred reflection."""
+
     week_start_date: date
     week_end_date: date
     emotional_journey_summary: str
@@ -42,6 +45,7 @@ class SacredReflectionResponse(BaseModel):
 
 class ReflectionRequest(BaseModel):
     """Request model for generating sacred reflection."""
+
     week_start_date: date | None = Field(
         default=None, description="Start of week (defaults to current week)"
     )
@@ -57,7 +61,7 @@ async def get_current_week_reflection(
 ) -> SacredReflectionResponse:
     """
     Get sacred reflection for the current week.
-    
+
     If reflection doesn't exist, generates it automatically based on
     daily analyses and emotional logs from the week.
     """
@@ -66,31 +70,30 @@ async def get_current_week_reflection(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required for sacred reflections",
         )
-    
+
     # Get current week start (Monday)
     today = date.today()
     week_start = today - timedelta(days=today.weekday())
     week_end = week_start + timedelta(days=6)
-    
+
     # Check if reflection exists for current week
     result = await db.execute(
-        select(UserWeeklyReflection)
-        .where(
+        select(UserWeeklyReflection).where(
             UserWeeklyReflection.user_id == user_id,
-            UserWeeklyReflection.week_start_date == week_start
+            UserWeeklyReflection.week_start_date == week_start,
         )
     )
     reflection = result.scalar_one_or_none()
-    
+
     if not reflection:
         # Generate new reflection
         reflection = await _generate_sacred_reflection(
             db, user_id, week_start, week_end
         )
-    
+
     # Fetch full verse details
     verse_details = await _fetch_verse_details(db, reflection.verses_explored or [])
-    
+
     return SacredReflectionResponse(
         week_start_date=reflection.week_start_date,
         week_end_date=reflection.week_end_date,
@@ -113,7 +116,7 @@ async def get_reflection_history(
 ) -> list[SacredReflectionResponse]:
     """
     Get sacred reflection history for the past N weeks.
-    
+
     Args:
         weeks: Number of weeks to retrieve (1-12, default 4)
     """
@@ -122,19 +125,19 @@ async def get_reflection_history(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required for reflection history",
         )
-    
+
     cutoff_date = date.today() - timedelta(weeks=weeks)
-    
+
     result = await db.execute(
         select(UserWeeklyReflection)
         .where(
             UserWeeklyReflection.user_id == user_id,
-            UserWeeklyReflection.week_start_date >= cutoff_date
+            UserWeeklyReflection.week_start_date >= cutoff_date,
         )
         .order_by(UserWeeklyReflection.week_start_date.desc())
     )
     reflections = result.scalars().all()
-    
+
     response_list = []
     for reflection in reflections:
         verse_details = await _fetch_verse_details(db, reflection.verses_explored or [])
@@ -152,7 +155,7 @@ async def get_reflection_history(
                 created_at=reflection.created_at,
             )
         )
-    
+
     return response_list
 
 
@@ -164,7 +167,7 @@ async def generate_reflection(
 ) -> SacredReflectionResponse:
     """
     Generate sacred reflection for a specific week.
-    
+
     This endpoint allows creating reflection for the current week
     or regenerating for past weeks.
     """
@@ -173,39 +176,38 @@ async def generate_reflection(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required to generate reflection",
         )
-    
+
     # Determine week dates
     if request.week_start_date:
         week_start = request.week_start_date
     else:
         today = date.today()
         week_start = today - timedelta(days=today.weekday())
-    
+
     week_end = week_start + timedelta(days=6)
-    
+
     # Check if reflection already exists
     result = await db.execute(
-        select(UserWeeklyReflection)
-        .where(
+        select(UserWeeklyReflection).where(
             UserWeeklyReflection.user_id == user_id,
-            UserWeeklyReflection.week_start_date == week_start
+            UserWeeklyReflection.week_start_date == week_start,
         )
     )
     existing = result.scalar_one_or_none()
-    
+
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Reflection already exists for week starting {week_start}",
         )
-    
+
     # Generate new reflection
     reflection = await _generate_sacred_reflection(
         db, user_id, week_start, week_end, request.gratitude_items
     )
-    
+
     verse_details = await _fetch_verse_details(db, reflection.verses_explored or [])
-    
+
     return SacredReflectionResponse(
         week_start_date=reflection.week_start_date,
         week_end_date=reflection.week_end_date,
@@ -229,14 +231,14 @@ async def _generate_sacred_reflection(
 ) -> UserWeeklyReflection:
     """
     Internal function to generate sacred reflection based on weekly data.
-    
+
     Args:
         db: Database session
         user_id: User ID
         week_start: Week start date
         week_end: Week end date
         gratitude_items: Optional gratitude items from user
-        
+
     Returns:
         UserWeeklyReflection object
     """
@@ -246,19 +248,19 @@ async def _generate_sacred_reflection(
         .where(
             UserDailyAnalysis.user_id == user_id,
             UserDailyAnalysis.analysis_date >= week_start,
-            UserDailyAnalysis.analysis_date <= week_end
+            UserDailyAnalysis.analysis_date <= week_end,
         )
         .order_by(UserDailyAnalysis.analysis_date)
     )
     daily_analyses = result.scalars().all()
-    
+
     # Calculate overall wellbeing score
     if daily_analyses:
         scores = [a.overall_mood_score for a in daily_analyses if a.overall_mood_score]
         overall_wellbeing_score = round(sum(scores) / len(scores)) if scores else None
     else:
         overall_wellbeing_score = None
-    
+
     # Build emotional journey summary
     if daily_analyses:
         emotional_journey_summary = (
@@ -271,29 +273,28 @@ async def _generate_sacred_reflection(
             "This week offers an opportunity for deeper self-reflection. "
             "Consider starting daily emotional check-ins to track your journey."
         )
-    
+
     # Collect unique verses from daily analyses
     verse_refs = set()
     for analysis in daily_analyses:
         for verse in analysis.recommended_verses or []:
-            if isinstance(verse, dict) and 'chapter' in verse and 'verse' in verse:
-                verse_refs.add((verse['chapter'], verse['verse']))
-    
-    verses_explored = [
-        {'chapter': ch, 'verse': v} for ch, v in sorted(verse_refs)
-    ][:5]  # Limit to 5 most relevant
-    
+            if isinstance(verse, dict) and "chapter" in verse and "verse" in verse:
+                verse_refs.add((verse["chapter"], verse["verse"]))
+
+    verses_explored = [{"chapter": ch, "verse": v} for ch, v in sorted(verse_refs)][
+        :5
+    ]  # Limit to 5 most relevant
+
     # Generate key insights using KIAAN
-    context_message = f"Weekly reflection for {week_start} to {week_end}. {emotional_journey_summary}"
-    
+    context_message = (
+        f"Weekly reflection for {week_start} to {week_end}. {emotional_journey_summary}"
+    )
+
     try:
         kiaan_response = await kiaan_core.get_kiaan_response(
-            message=context_message,
-            user_id=user_id,
-            db=db,
-            context="sacred_reflection"
+            message=context_message, user_id=user_id, db=db, context="sacred_reflection"
         )
-        
+
         key_insights = [
             kiaan_response.get("response", ""),
             "Your consistent engagement with self-reflection is a powerful practice.",
@@ -305,20 +306,22 @@ async def _generate_sacred_reflection(
             "This week was an opportunity for growth and self-discovery.",
             "Continue to cultivate awareness and compassion for yourself.",
         ]
-    
+
     # Define milestones and growth areas
     milestones_achieved = []
     if len(daily_analyses) >= 3:
-        milestones_achieved.append("Maintained consistent emotional awareness this week")
+        milestones_achieved.append(
+            "Maintained consistent emotional awareness this week"
+        )
     if overall_wellbeing_score and overall_wellbeing_score >= 7:
         milestones_achieved.append("Achieved positive overall wellbeing score")
-    
+
     areas_for_growth = [
         "Deepen your mindfulness practice",
         "Explore more Gita verses relevant to your situation",
         "Practice self-compassion daily",
     ]
-    
+
     # Create reflection record
     reflection = UserWeeklyReflection(
         user_id=user_id,
@@ -332,32 +335,37 @@ async def _generate_sacred_reflection(
         gratitude_items=gratitude_items or [],
         overall_wellbeing_score=overall_wellbeing_score,
     )
-    
+
     db.add(reflection)
     await db.commit()
     await db.refresh(reflection)
-    
+
     return reflection
 
 
 async def _fetch_verse_details(
-    db: AsyncSession,
-    verse_refs: list[dict[str, int]]
+    db: AsyncSession, verse_refs: list[dict[str, int]]
 ) -> list[dict[str, Any]]:
     """Fetch full details for verse references."""
     verse_details = []
     for verse_ref in verse_refs:
-        if isinstance(verse_ref, dict) and 'chapter' in verse_ref and 'verse' in verse_ref:
+        if (
+            isinstance(verse_ref, dict)
+            and "chapter" in verse_ref
+            and "verse" in verse_ref
+        ):
             verse = await GitaService.get_verse_by_reference(
-                db, verse_ref['chapter'], verse_ref['verse']
+                db, verse_ref["chapter"], verse_ref["verse"]
             )
             if verse:
-                verse_details.append({
-                    'chapter': verse.chapter,
-                    'verse': verse.verse,
-                    'english': verse.english,
-                    'sanskrit': verse.sanskrit,
-                    'theme': verse.theme,
-                    'principle': verse.principle,
-                })
+                verse_details.append(
+                    {
+                        "chapter": verse.chapter,
+                        "verse": verse.verse,
+                        "english": verse.english,
+                        "sanskrit": verse.sanskrit,
+                        "theme": verse.theme,
+                        "principle": verse.principle,
+                    }
+                )
     return verse_details
