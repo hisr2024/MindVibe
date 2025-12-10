@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
 import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
@@ -34,7 +34,32 @@ export default function KarmaResetClient() {
   const [kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const MAX_RETRIES = 2
+
+  // Health check on mount
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const response = await fetch('/api/karma-reset/kiaan/health', {
+          method: 'GET',
+          credentials: 'include',
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setBackendHealthy(data.status === 'healthy')
+        } else {
+          setBackendHealthy(false)
+        }
+      } catch (error) {
+        console.error('Karma Reset health check failed:', error)
+        setBackendHealthy(false)
+      }
+    }
+
+    checkHealth()
+  }, [])
 
   const submitKarmaReset = async (attemptCount = 0) => {
     setLoading(true)
@@ -71,7 +96,23 @@ export default function KarmaResetClient() {
       // Auto-advance to plan after breathing exercise
       setTimeout(() => setCurrentStep('plan'), BREATHING_DURATION_MS)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      // Get user-friendly error message
+      let errorMessage = 'An error occurred'
+      if (err instanceof Error) {
+        if (err.message.includes('405')) {
+          errorMessage = 'The Karma Reset service is temporarily unavailable. Our team has been notified.'
+        } else if (err.message.includes('404')) {
+          errorMessage = 'The Karma Reset endpoint could not be found. Please refresh the page.'
+        } else if (err.message.includes('CORS') || err.message.includes('cross-origin')) {
+          errorMessage = 'Connection blocked due to security settings.'
+        } else if (err.message.includes('timeout') || err.message.includes('timed out')) {
+          errorMessage = 'The request is taking too long. The service may be busy.'
+        } else if (err.message.includes('network') || err.message.includes('connect')) {
+          errorMessage = 'Cannot reach the Karma Reset service. Please check your internet connection.'
+        } else {
+          errorMessage = err.message
+        }
+      }
       
       // Retry logic
       if (attemptCount < MAX_RETRIES) {
@@ -85,8 +126,7 @@ export default function KarmaResetClient() {
       } else {
         // Show user-friendly error with fallback guidance
         setError(
-          `Unable to connect to the guidance service. ${errorMessage}. ` +
-          'Please check your connection and try again, or use the fallback guidance below.'
+          `${errorMessage} We've provided fallback guidance below, or you can try again later.`
         )
         
         // Set fallback guidance

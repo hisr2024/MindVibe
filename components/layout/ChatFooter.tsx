@@ -79,7 +79,37 @@ export function ChatFooter() {
 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'error'>('connected')
   const [retryAttempt, setRetryAttempt] = useState(0)
+  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const MAX_RETRIES = 2
+
+  // Health check on mount
+  useEffect(() => {
+    if (!mounted) return
+
+    const checkHealth = async () => {
+      try {
+        const response = await fetch('/api/chat/health', {
+          method: 'GET',
+          credentials: 'include',
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setBackendHealthy(data.status === 'healthy')
+          setConnectionStatus('connected')
+        } else {
+          setBackendHealthy(false)
+          setConnectionStatus('error')
+        }
+      } catch (error) {
+        console.error('Health check failed:', error)
+        setBackendHealthy(false)
+        setConnectionStatus('error')
+      }
+    }
+
+    checkHealth()
+  }, [mounted])
 
   const sendMessageWithRetry = async (messageText: string, attemptCount = 0) => {
     setIsLoading(true)
@@ -130,6 +160,22 @@ export function ChatFooter() {
     } catch (error) {
       console.error('Chat error:', error)
       
+      // Get user-friendly error message
+      let errorMessage = 'Unable to connect to KIAAN.'
+      if (error instanceof Error) {
+        if (error.message.includes('405')) {
+          errorMessage = 'The chat service is temporarily unavailable. Our team has been notified.'
+        } else if (error.message.includes('404')) {
+          errorMessage = 'The chat endpoint could not be found. Please refresh the page.'
+        } else if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
+          errorMessage = 'Connection blocked due to security settings. Please try again later.'
+        } else if (error.message.includes('timeout') || error.message.includes('timed out')) {
+          errorMessage = 'The request is taking too long. KIAAN may be busy.'
+        } else if (error.message.includes('network') || error.message.includes('connect')) {
+          errorMessage = 'Cannot reach KIAAN. Please check your internet connection.'
+        }
+      }
+      
       // Retry logic
       if (attemptCount < MAX_RETRIES) {
         setRetryAttempt(attemptCount + 1)
@@ -146,12 +192,12 @@ export function ChatFooter() {
           sendMessageWithRetry(messageText, attemptCount + 1)
         }, 2000)
       } else {
-        // Final failure
+        // Final failure - use the specific error message
         setConnectionStatus('error')
         addMessage({
           id: generateId(),
           sender: 'assistant',
-          text: 'Unable to connect to KIAAN. Please try again or visit the main chat page for a better experience.',
+          text: `${errorMessage} Please visit the main chat page for a better experience, or try again later.`,
           timestamp: new Date().toISOString(),
           status: 'error',
         })

@@ -66,8 +66,22 @@ export async function apiCall(
     clearTimeout(timeoutId)
 
     if (!response.ok) {
+      // Enhanced error detection
+      let errorMessage = `API Error: ${response.status} ${response.statusText}`
+      
+      // Detect specific error scenarios
+      if (response.status === 405) {
+        errorMessage = 'Method not allowed. The endpoint may not be properly configured.'
+      } else if (response.status === 404) {
+        errorMessage = 'Endpoint not found. Please check the API configuration.'
+      } else if (response.status === 503) {
+        errorMessage = 'Service temporarily unavailable. Please try again later.'
+      } else if (response.status === 0) {
+        errorMessage = 'CORS error or network failure. Cannot reach the backend.'
+      }
+      
       throw new APIError(
-        `API Error: ${response.status} ${response.statusText}`,
+        errorMessage,
         response.status,
         response.statusText
       )
@@ -78,6 +92,12 @@ export async function apiCall(
     // Handle network errors
     if (error instanceof TypeError) {
       // Network errors are typically TypeErrors from fetch
+      // Check for CORS-specific errors
+      if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
+        throw new APIError(
+          'CORS error: The backend server is not allowing requests from this origin. Please check CORS configuration.'
+        )
+      }
       throw new APIError(
         'Cannot connect to KIAAN. Please check your internet connection and ensure the backend server is running.'
       )
@@ -85,7 +105,7 @@ export async function apiCall(
 
     // Handle timeout errors
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new APIError('Request timed out. Please try again.')
+      throw new APIError('Request timed out after 30 seconds. The server may be overloaded or unreachable.')
     }
 
     // Re-throw APIError as-is
@@ -148,18 +168,46 @@ export async function apiCallWithRetry(
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof APIError) {
+    // Check for specific error codes
+    if (error.status === 405) {
+      return 'This feature is not available right now. Our team has been notified.'
+    }
+    
+    if (error.status === 404) {
+      return 'The requested service could not be found. Please try again later.'
+    }
+    
+    if (error.status === 503) {
+      return 'The service is temporarily unavailable. Please try again in a few moments.'
+    }
+    
+    // Check for CORS errors
+    if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
+      const messages = [
+        'Cannot reach KIAAN due to configuration issues.',
+        '• This is a technical problem on our end',
+        '• Please try again later or contact support',
+      ]
+      return messages.join('\n')
+    }
+    
     // Check for connection-related errors
     if (error.message.includes('connect') || error.message.includes('network')) {
       const messages = [
         'Cannot reach KIAAN. Please check:',
         '• Your internet connection',
-        '• Backend server is running',
-        '• API URL is correctly configured'
+        '• Try refreshing the page',
+        '• If the problem persists, the service may be temporarily down',
       ]
       return messages.join('\n')
     }
+    
+    // Check for timeout errors
+    if (error.message.includes('timed out') || error.message.includes('timeout')) {
+      return 'The request is taking longer than expected. The service may be busy. Please try again.'
+    }
 
-    // Return the error message directly for API errors
+    // Return the error message directly for other API errors
     return error.message
   }
 
