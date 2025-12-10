@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from typing import Iterable
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db, get_user_id
+
+logger = logging.getLogger(__name__)
 from backend.models import (
     Achievement,
     AchievementCategory,
@@ -150,39 +154,87 @@ def _progress_value_for_category(category: AchievementCategory, counts: Activity
 
 
 async def ensure_seed_data(db: AsyncSession) -> dict[str, Achievement]:
-    existing = await db.execute(select(Achievement))
-    achievement_map = {ach.key: ach for ach in existing.scalars().all()}
+    """
+    Ensure default achievements and unlockables are seeded in the database.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Dictionary mapping achievement keys to Achievement objects
+        
+    Raises:
+        HTTPException: If there's an error with enum values or database operations
+    """
+    try:
+        existing = await db.execute(select(Achievement))
+        achievement_map = {ach.key: ach for ach in existing.scalars().all()}
 
-    for payload in DEFAULT_ACHIEVEMENTS:
-        if payload["key"] in achievement_map:
-            continue
-        achievement = Achievement(**payload)
-        db.add(achievement)
-        achievement_map[payload["key"]] = achievement
+        for payload in DEFAULT_ACHIEVEMENTS:
+            if payload["key"] in achievement_map:
+                continue
+            try:
+                achievement = Achievement(**payload)
+                db.add(achievement)
+                achievement_map[payload["key"]] = achievement
+            except (ValueError, LookupError) as e:
+                logger.error(
+                    f"Error creating achievement '{payload['key']}': {str(e)}. "
+                    f"Category: {payload.get('category')}, Rarity: {payload.get('rarity')}"
+                )
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Achievement enum error: {str(e)}. Please check database enum definitions."
+                )
 
-    await db.flush()
-    # Refresh with IDs for unlockable wiring
-    refreshed = await db.execute(select(Achievement))
-    achievement_map = {ach.key: ach for ach in refreshed.scalars().all()}
+        await db.flush()
+        # Refresh with IDs for unlockable wiring
+        refreshed = await db.execute(select(Achievement))
+        achievement_map = {ach.key: ach for ach in refreshed.scalars().all()}
 
-    for unlock_payload in DEFAULT_UNLOCKABLES:
-        exists = await db.scalar(
-            select(Unlockable).where(Unlockable.key == unlock_payload["key"])
+        for unlock_payload in DEFAULT_UNLOCKABLES:
+            exists = await db.scalar(
+                select(Unlockable).where(Unlockable.key == unlock_payload["key"])
+            )
+            if exists:
+                continue
+            payload = unlock_payload.copy()
+            requirement_key = payload.pop("required_key", None)
+            required_achievement_id = None
+            if requirement_key and requirement_key in achievement_map:
+                required_achievement_id = achievement_map[requirement_key].id
+            try:
+                unlockable = Unlockable(
+                    **payload, required_achievement_id=required_achievement_id
+                )
+                db.add(unlockable)
+            except (ValueError, LookupError) as e:
+                logger.error(
+                    f"Error creating unlockable '{unlock_payload['key']}': {str(e)}. "
+                    f"Kind: {payload.get('kind')}, Rarity: {payload.get('rarity')}"
+                )
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Unlockable enum error: {str(e)}. Please check database enum definitions."
+                )
+
+        await db.flush()
+        return achievement_map
+        
+    except HTTPException:
+        raise
+    except SQLAlchemyError as e:
+        logger.error(f"Database error in ensure_seed_data: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error while seeding achievement data: {str(e)}"
         )
-        if exists:
-            continue
-        payload = unlock_payload.copy()
-        requirement_key = payload.pop("required_key", None)
-        required_achievement_id = None
-        if requirement_key and requirement_key in achievement_map:
-            required_achievement_id = achievement_map[requirement_key].id
-        unlockable = Unlockable(
-            **payload, required_achievement_id=required_achievement_id
+    except Exception as e:
+        logger.error(f"Unexpected error in ensure_seed_data: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error in achievement system: {str(e)}"
         )
-        db.add(unlockable)
-
-    await db.flush()
-    return achievement_map
 
 
 async def get_activity_counts(db: AsyncSession, user_id: str) -> ActivityCounts:
@@ -348,56 +400,102 @@ async def _build_achievement_payload(
 async def get_progress(
     db: AsyncSession = Depends(get_db), user_id: str = Depends(get_user_id)
 ) -> ProgressResponse:
-    achievements_map = await ensure_seed_data(db)
-    counts = await get_activity_counts(db, user_id)
+    """
+    Get user's karmic tree progress, achievements, and unlockables.
+    
+    Includes comprehensive error handling for enum mismatches and database errors.
+    """
+    try:
+        achievements_map = await ensure_seed_data(db)
+        counts = await get_activity_counts(db, user_id)
 
-    progress = await sync_user_progress(db, user_id, counts)
+        progress = await sync_user_progress(db, user_id, counts)
 
-    achievement_rows = list(achievements_map.values())
-    notifications = await update_user_achievements(db, user_id, achievement_rows, counts)
+        achievement_rows = list(achievements_map.values())
+        notifications = await update_user_achievements(db, user_id, achievement_rows, counts)
 
-    user_progress_rows = await db.execute(
-        select(UserAchievement).where(UserAchievement.user_id == user_id)
-    )
-    user_progress_map = {ua.achievement_id: ua for ua in user_progress_rows.scalars().all()}
-    unlockables = await sync_unlockables(db, user_id, user_progress_map)
+        user_progress_rows = await db.execute(
+            select(UserAchievement).where(UserAchievement.user_id == user_id)
+        )
+        user_progress_map = {ua.achievement_id: ua for ua in user_progress_rows.scalars().all()}
+        unlockables = await sync_unlockables(db, user_id, user_progress_map)
 
-    next_level_xp = (progress.level + 1) * 120
-    progress_percent = min(100.0, (progress.xp / next_level_xp) * 100)
+        next_level_xp = (progress.level + 1) * 120
+        progress_percent = min(100.0, (progress.xp / next_level_xp) * 100)
 
-    achievement_payloads = await _build_achievement_payload(
-        achievement_rows, user_progress_map, counts
-    )
-    await db.commit()
+        achievement_payloads = await _build_achievement_payload(
+            achievement_rows, user_progress_map, counts
+        )
+        await db.commit()
 
-    return ProgressResponse(
-        level=progress.level,
-        xp=progress.xp,
-        next_level_xp=next_level_xp,
-        progress_percent=round(progress_percent, 2),
-        tree_stage=progress.current_stage or _stage_from_level(progress.level),
-        activity=counts,
-        achievements=achievement_payloads,
-        unlockables=unlockables,
-        notifications=notifications,
-    )
+        return ProgressResponse(
+            level=progress.level,
+            xp=progress.xp,
+            next_level_xp=next_level_xp,
+            progress_percent=round(progress_percent, 2),
+            tree_stage=progress.current_stage or _stage_from_level(progress.level),
+            activity=counts,
+            achievements=achievement_payloads,
+            unlockables=unlockables,
+            notifications=notifications,
+        )
+    except HTTPException:
+        await db.rollback()
+        raise
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"Database error in get_progress for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Database error while fetching progress data"
+        )
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Unexpected error in get_progress for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while fetching progress"
+        )
 
 
 @router.get("/achievements", response_model=list[AchievementProgress])
 async def list_achievements(
     db: AsyncSession = Depends(get_db), user_id: str = Depends(get_user_id)
 ) -> list[AchievementProgress]:
-    achievements_map = await ensure_seed_data(db)
-    counts = await get_activity_counts(db, user_id)
-    user_progress_rows = await db.execute(
-        select(UserAchievement).where(UserAchievement.user_id == user_id)
-    )
-    user_progress_map = {ua.achievement_id: ua for ua in user_progress_rows.scalars().all()}
-    payloads = await _build_achievement_payload(
-        list(achievements_map.values()), user_progress_map, counts
-    )
-    await db.commit()
-    return payloads
+    """
+    List all achievements and user progress.
+    
+    Includes comprehensive error handling for enum mismatches and database errors.
+    """
+    try:
+        achievements_map = await ensure_seed_data(db)
+        counts = await get_activity_counts(db, user_id)
+        user_progress_rows = await db.execute(
+            select(UserAchievement).where(UserAchievement.user_id == user_id)
+        )
+        user_progress_map = {ua.achievement_id: ua for ua in user_progress_rows.scalars().all()}
+        payloads = await _build_achievement_payload(
+            list(achievements_map.values()), user_progress_map, counts
+        )
+        await db.commit()
+        return payloads
+    except HTTPException:
+        await db.rollback()
+        raise
+    except SQLAlchemyError as e:
+        await db.rollback()
+        logger.error(f"Database error in list_achievements for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Database error while fetching achievements"
+        )
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Unexpected error in list_achievements for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while fetching achievements"
+        )
 
 
 @router.post("/unlock", response_model=UnlockableOut)

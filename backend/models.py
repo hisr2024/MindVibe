@@ -50,29 +50,29 @@ class PaymentStatus(str, enum.Enum):
 class AchievementCategory(str, enum.Enum):
     """Activity category that drives achievement progress."""
 
-    MOOD = "mood"
-    JOURNAL = "journal"
-    CHAT = "chat"
-    STREAK = "streak"
-    WELLNESS = "wellness"
+    MOOD = "MOOD"
+    JOURNAL = "JOURNAL"
+    CHAT = "CHAT"
+    STREAK = "STREAK"
+    WELLNESS = "WELLNESS"
 
 
 class AchievementRarity(str, enum.Enum):
     """Rarity tiers for badges and unlockables."""
 
-    COMMON = "common"
-    RARE = "rare"
-    EPIC = "epic"
-    LEGENDARY = "legendary"
+    COMMON = "COMMON"
+    RARE = "RARE"
+    EPIC = "EPIC"
+    LEGENDARY = "LEGENDARY"
 
 
 class UnlockableType(str, enum.Enum):
     """Unlockable reward types available in the Karmic Tree."""
 
-    THEME = "theme"
-    PROMPT = "prompt"
-    BADGE = "badge"
-    BOOST = "boost"
+    THEME = "THEME"
+    PROMPT = "PROMPT"
+    BADGE = "BADGE"
+    BOOST = "BOOST"
 
 class SoftDeleteMixin:
     deleted_at: Mapped[datetime.datetime | None] = mapped_column(
