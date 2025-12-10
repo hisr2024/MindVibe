@@ -6,6 +6,9 @@ import { TriangleOfEnergy, type GuidanceMode } from '@/components/guidance'
 import SimpleBar from 'simplebar-react'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { FeatureHighlights } from '@/components/FeatureHighlights'
+import { copyToClipboard } from '@/utils/clipboard'
+import { shareContent, type SharePlatform } from '@/utils/socialShare'
+import { saveSacredReflection } from '@/utils/sacredReflections'
 
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
@@ -817,6 +820,9 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
   const [detailViews, setDetailViews] = useState<Record<number, 'summary' | 'detailed'>>({})
   const [isAtBottom, setIsAtBottom] = useState(true)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [toast, setToast] = useState<{message: string, visible: boolean}>({message: '', visible: false})
+  const [shareModal, setShareModal] = useState<{visible: boolean, content: string}>({visible: false, content: ''})
+  const [globalViewMode, setGlobalViewMode] = useState<'summary' | 'detailed'>('summary')
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const clarityInitialState: ClaritySession = {
@@ -1019,47 +1025,109 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
     window.location.href = '/sacred-reflections?prefill=true'
   }
 
+  // Toast notification helper
+  function showToast(message: string) {
+    setToast({message, visible: true})
+    setTimeout(() => setToast({message: '', visible: false}), 3000)
+  }
+
+  // Copy message handler
+  async function handleCopyMessage(content: string) {
+    await copyToClipboard(content, {
+      onSuccess: () => showToast('Copied to clipboard! ✨'),
+      onError: () => showToast('Failed to copy. Please try again.')
+    })
+  }
+
+  // Share message handler
+  function handleShareMessage(content: string) {
+    setShareModal({visible: true, content})
+  }
+
+  // Execute share to platform
+  async function executeShare(platform: SharePlatform, anonymize: boolean) {
+    const result = await shareContent(platform, shareModal.content, anonymize)
+    
+    if (result.success) {
+      if (platform === 'instagram') {
+        showToast('Text copied! Open Instagram and paste. 📋')
+      } else {
+        showToast(`Shared to ${platform}! 🎉`)
+      }
+      setShareModal({visible: false, content: ''})
+    } else {
+      showToast(result.error || 'Failed to share. Please try again.')
+    }
+  }
+
+  // Save to Sacred Reflections handler
+  async function handleSaveToSacredReflections(content: string) {
+    const success = await saveSacredReflection(content, 'kiaan')
+    
+    if (success) {
+      showToast('Added to Sacred Reflections ✨')
+    } else {
+      showToast('Failed to save. Please try again.')
+    }
+  }
+
   function renderAssistantContent(content: string, index: number) {
-    const view = detailViews[index] ?? 'summary'
+    const view = globalViewMode // Use global view mode instead of per-message
     const summary = summarizeContent(content)
 
     return (
       <div className="space-y-3">
-        <div className="flex gap-2 text-[11px] text-orange-100/70 font-semibold">
-          <button
-            className={`px-3 py-1 rounded-full border transition ${
-              view === 'summary'
-                ? 'border-orange-300/60 bg-orange-400/20 text-orange-50 shadow-[0_6px_20px_rgba(255,179,71,0.25)]'
-                : 'border-orange-200/15 hover:border-orange-300/40'
-            }`}
-            onClick={() => setDetailViews(prev => ({ ...prev, [index]: 'summary' }))}
-          >
-            summary
-          </button>
-          <button
-            className={`px-3 py-1 rounded-full border transition ${
-              view === 'detailed'
-                ? 'border-orange-300/60 bg-orange-400/20 text-orange-50 shadow-[0_6px_20px_rgba(255,179,71,0.25)]'
-                : 'border-orange-200/15 hover:border-orange-300/40'
-            }`}
-            onClick={() => setDetailViews(prev => ({ ...prev, [index]: 'detailed' }))}
-          >
-            detailed view
-          </button>
-        </div>
-
+        {/* Message content */}
         <div className="space-y-2">
-          <div className="text-xs tracking-wide text-orange-200/70 font-semibold">{view === 'summary' ? 'summary' : 'detailed explanation'}</div>
-          {view === 'detailed' && (
-            <div className="bg-white/5 border border-orange-200/20 rounded-lg p-3 text-[12px] text-orange-50/80 leading-relaxed">
-              <span className="font-semibold text-orange-50">Quick summary:</span> {summary}
-            </div>
-          )}
           <div className="bg-black/40 border border-orange-200/15 rounded-xl p-3 backdrop-blur-sm">
             <p className="whitespace-pre-wrap leading-relaxed text-sm text-orange-50/90">
               {view === 'summary' ? summary : content}
             </p>
           </div>
+          {view === 'detailed' && content.length > 220 && (
+            <div className="bg-white/5 border border-orange-200/20 rounded-lg p-2 text-[11px] text-orange-50/70 leading-relaxed">
+              <span className="font-semibold text-orange-50">Summary view: </span>{summary}
+            </div>
+          )}
+        </div>
+
+        {/* Action buttons row */}
+        <div className="flex flex-wrap gap-2">
+          {/* Copy Button */}
+          <button
+            onClick={() => handleCopyMessage(content)}
+            className="group inline-flex items-center gap-1.5 rounded-lg border border-orange-300/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-100 transition-all duration-200 hover:bg-orange-500/20 hover:border-orange-300/40 hover:shadow-sm"
+            aria-label="Copy message"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>Copy</span>
+          </button>
+
+          {/* Share Button */}
+          <button
+            onClick={() => handleShareMessage(content)}
+            className="group inline-flex items-center gap-1.5 rounded-lg border border-orange-300/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-100 transition-all duration-200 hover:bg-orange-500/20 hover:border-orange-300/40 hover:shadow-sm"
+            aria-label="Share message"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span>Share</span>
+          </button>
+
+          {/* Sacred Reflections Button */}
+          <button
+            onClick={() => handleSaveToSacredReflections(content)}
+            className="group inline-flex items-center gap-1.5 rounded-lg border border-amber-300/25 bg-amber-500/10 px-2.5 py-1.5 text-xs font-medium text-amber-100 transition-all duration-200 hover:bg-amber-500/20 hover:border-amber-300/40 hover:shadow-sm"
+            aria-label="Save to Sacred Reflections"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            <span>Sacred</span>
+          </button>
         </div>
       </div>
     )
@@ -1076,6 +1144,42 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
       id="kiaan-chat"
       className={`relative overflow-hidden bg-[#0b0b0f]/90 backdrop-blur-xl border border-orange-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-[0_20px_80px_rgba(255,115,39,0.18)] transition-all duration-500 ${promptMotion ? 'animate-chat-wobble ring-1 ring-orange-200/35 shadow-[0_25px_90px_rgba(255,156,89,0.32)]' : ''}`}
     >
+      {/* Ancient India Background Animations - Subtle & Non-distracting */}
+      <div className="pointer-events-none absolute inset-0 opacity-30">
+        {/* Chakra Symbol Animation */}
+        <div className="ancient-chakra absolute left-10 top-20 h-32 w-32">
+          <svg viewBox="0 0 100 100" className="h-full w-full opacity-20">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#ff9159" strokeWidth="2" />
+            <circle cx="50" cy="50" r="35" fill="none" stroke="#ffd070" strokeWidth="1.5" />
+            <circle cx="50" cy="50" r="25" fill="none" stroke="#ff9159" strokeWidth="1" />
+            <circle cx="50" cy="50" r="15" fill="none" stroke="#ffd070" strokeWidth="1.5" />
+            <circle cx="50" cy="50" r="5" fill="#ff9159" opacity="0.5" />
+          </svg>
+        </div>
+        
+        {/* Sun Rays Animation */}
+        <div className="ancient-sun absolute right-20 top-10 h-40 w-40">
+          <svg viewBox="0 0 100 100" className="h-full w-full opacity-15">
+            <circle cx="50" cy="50" r="20" fill="#ffd070" opacity="0.4" />
+            {[...Array(12)].map((_, i) => (
+              <line
+                key={i}
+                x1="50"
+                y1="50"
+                x2="50"
+                y2="10"
+                stroke="#ff9159"
+                strokeWidth="1.5"
+                transform={`rotate(${i * 30} 50 50)`}
+                opacity="0.6"
+              />
+            ))}
+          </svg>
+        </div>
+        
+        {/* Moon Glow Animation */}
+        <div className="ancient-moon absolute right-1/4 bottom-20 h-24 w-24 rounded-full bg-gradient-to-br from-slate-100/10 to-slate-300/10" />
+      </div>
       {claritySession.active && claritySession.evaluation && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -1274,6 +1378,43 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
         <span className="hidden sm:inline text-orange-100/70">Your questions animate into focus—answers remain unchanged.</span>
       </div>
 
+      {/* Prominent Summary/Detailed Toggle - HIGH PRIORITY */}
+      {messages.some(m => m.role === 'assistant') && (
+        <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-400/30 rounded-2xl px-4 py-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span className="text-sm font-semibold text-orange-50">View Mode</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setGlobalViewMode('summary')}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                globalViewMode === 'summary'
+                  ? 'bg-gradient-to-r from-orange-400 via-orange-300 to-amber-300 text-slate-950 shadow-lg shadow-orange-500/30'
+                  : 'border border-orange-400/30 text-orange-100 hover:bg-orange-500/20'
+              }`}
+              aria-label="Toggle to summary view"
+            >
+              📝 Summary
+            </button>
+            <button
+              onClick={() => setGlobalViewMode('detailed')}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                globalViewMode === 'detailed'
+                  ? 'bg-gradient-to-r from-orange-400 via-orange-300 to-amber-300 text-slate-950 shadow-lg shadow-orange-500/30'
+                  : 'border border-orange-400/30 text-orange-100 hover:bg-orange-500/20'
+              }`}
+              aria-label="Toggle to detailed view"
+            >
+              📖 Detailed
+            </button>
+          </div>
+        </div>
+      )}
+
         <div className="relative">
           <SimpleBar
             autoHide={false}
@@ -1284,7 +1425,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
               'aria-label': 'Conversation with Kiaan',
               'aria-live': 'polite',
               className:
-                'aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
+                'chat-messages aurora-pane relative bg-black/50 border border-orange-500/20 rounded-2xl h-[55vh] min-h-[320px] md:h-[500px] scroll-stable smooth-touch-scroll focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
             }}
             className="mv-energy-scrollbar"
           >
@@ -1307,21 +1448,7 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
                     }`}
                   >
                     {msg.role === 'assistant' ? (
-                      <>
-                        {renderAssistantContent(msg.content, i)}
-                        <div className="pt-2">
-                          <button
-                            onClick={() => handleSaveToJournal(msg.content)}
-                            className="group inline-flex items-center gap-2 rounded-xl border border-orange-300/25 bg-gradient-to-r from-orange-500/10 via-[#ffb347]/10 to-amber-200/10 px-3 py-2 text-xs font-semibold text-orange-50 transition-all duration-200 shadow-[0_10px_30px_rgba(255,153,51,0.16)] hover:-translate-y-0.5 hover:shadow-orange-400/30"
-                            aria-label="Send this response to Sacred Reflections"
-                          >
-                            <svg className="w-4 h-4 text-orange-300 group-hover:text-amber-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                            <span className="bg-gradient-to-r from-orange-200 to-amber-200 bg-clip-text text-transparent">Send to Sacred Reflections</span>
-                          </button>
-                        </div>
-                      </>
+                      renderAssistantContent(msg.content, i)
                     ) : (
                       <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                     )}
@@ -1418,6 +1545,96 @@ function KIAANChat({ prefill, onPrefillHandled }: KIAANChatProps) {
           <span className="text-[11px] text-orange-100/70">KIAAN never blocks your message—decline the overlay anytime.</span>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.visible && (
+        <div className="fixed bottom-24 right-6 z-50 animate-fadeIn">
+          <div className="rounded-xl border border-orange-400/40 bg-gradient-to-r from-orange-500/95 to-amber-500/95 px-4 py-3 shadow-2xl shadow-orange-500/40 backdrop-blur">
+            <p className="text-sm font-semibold text-white">{toast.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {shareModal.visible && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShareModal({visible: false, content: ''})} />
+          <div className="relative z-10 w-full max-w-md space-y-4 rounded-2xl border border-orange-500/30 bg-[#0b0b0f]/98 p-6 shadow-2xl shadow-orange-500/30">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-orange-50">Share KIAAN's Wisdom</h3>
+                <p className="text-sm text-orange-100/70 mt-1">Choose a platform to share</p>
+              </div>
+              <button
+                onClick={() => setShareModal({visible: false, content: ''})}
+                className="rounded-lg p-1 hover:bg-white/10 transition"
+                aria-label="Close share modal"
+              >
+                <svg className="w-5 h-5 text-orange-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Privacy Warning */}
+            <div className="rounded-lg border border-amber-400/30 bg-amber-500/10 p-3">
+              <div className="flex items-start gap-2">
+                <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <p className="text-xs font-semibold text-amber-100">Privacy Notice</p>
+                  <p className="text-xs text-amber-100/80 mt-1">Content will be shared publicly. Consider anonymizing before sharing.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Share Options */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => executeShare('whatsapp', true)}
+                className="flex flex-col items-center gap-2 rounded-xl border border-green-400/30 bg-green-500/10 p-4 hover:bg-green-500/20 transition"
+              >
+                <span className="text-2xl">💬</span>
+                <span className="text-sm font-semibold text-green-100">WhatsApp</span>
+              </button>
+              
+              <button
+                onClick={() => executeShare('telegram', true)}
+                className="flex flex-col items-center gap-2 rounded-xl border border-blue-400/30 bg-blue-500/10 p-4 hover:bg-blue-500/20 transition"
+              >
+                <span className="text-2xl">✈️</span>
+                <span className="text-sm font-semibold text-blue-100">Telegram</span>
+              </button>
+              
+              <button
+                onClick={() => executeShare('facebook', true)}
+                className="flex flex-col items-center gap-2 rounded-xl border border-indigo-400/30 bg-indigo-500/10 p-4 hover:bg-indigo-500/20 transition"
+              >
+                <span className="text-2xl">📘</span>
+                <span className="text-sm font-semibold text-indigo-100">Facebook</span>
+              </button>
+              
+              <button
+                onClick={() => executeShare('instagram', true)}
+                className="flex flex-col items-center gap-2 rounded-xl border border-pink-400/30 bg-pink-500/10 p-4 hover:bg-pink-500/20 transition"
+              >
+                <span className="text-2xl">📸</span>
+                <span className="text-sm font-semibold text-pink-100">Instagram</span>
+              </button>
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={() => setShareModal({visible: false, content: ''})}
+                className="text-xs text-orange-100/70 hover:text-orange-100 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
