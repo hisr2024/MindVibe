@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ToolsSheet } from './ToolsSheet'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export interface NavTab {
   id: string
@@ -18,6 +19,16 @@ export interface MobileNavProps {
   tabs?: NavTab[]
   /** Optional className for styling */
   className?: string
+}
+
+// Translation key mapping for tab labels (constant)
+const TAB_TRANSLATION_KEYS: Record<string, string> = {
+  'kiaan-chat': 'navigation.mobileNav.chat',
+  'home': 'navigation.mainNav.home',
+  'journal': 'navigation.mobileNav.journal',
+  'wisdom': 'navigation.features.wisdomRooms',
+  'tools': 'common.buttons.tools',
+  'profile': 'navigation.mainNav.profile',
 }
 
 // Default navigation tabs
@@ -105,6 +116,14 @@ const defaultTabs: NavTab[] = [
 export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps) {
   const pathname = usePathname()
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
+  const { t } = useLanguage()
+
+  // Get translated label for tab
+  const getTabLabel = useMemo(() => {
+    return (tabId: string, defaultLabel: string): string => {
+      return TAB_TRANSLATION_KEYS[tabId] ? t(TAB_TRANSLATION_KEYS[tabId], defaultLabel) : defaultLabel
+    }
+  }, [t])
 
   return (
     <>
@@ -143,7 +162,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                       toolsSheetOpen ? 'font-semibold' : ''
                     }`}
                   >
-                    {tab.label}
+                    {getTabLabel(tab.id, tab.label)}
                   </span>
                 </button>
               )
@@ -172,7 +191,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     isActive ? 'font-semibold' : ''
                   }`}
                 >
-                  {tab.label}
+                  {getTabLabel(tab.id, tab.label)}
                 </span>
               </Link>
             )

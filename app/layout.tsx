@@ -8,6 +8,7 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { ChatFooter } from '@/components/layout/ChatFooter'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
+import { ClientLayout } from './ClientLayout'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -43,23 +44,25 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
-        <Providers>
-          <ServiceWorkerRegistration />
-          <OfflineStatusBanner />
-          <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
-            <div className="flex-1">
-              <SiteNav />
+        <ClientLayout>
+          <Providers>
+            <ServiceWorkerRegistration />
+            <OfflineStatusBanner />
+            <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
+              <div className="flex-1">
+                <SiteNav />
+              </div>
+              <MinimalLanguageSelector />
             </div>
-            <MinimalLanguageSelector />
-          </div>
-          <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-24 pt-8 sm:px-6 md:pb-0 lg:px-8 lg:pt-16">
-            {children}
-          </main>
-          <SiteFooter />
-          <MobileNav />
-          <ChatFooter />
-          <KiaanFooter />
-        </Providers>
+            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-24 pt-8 sm:px-6 md:pb-0 lg:px-8 lg:pt-16">
+              {children}
+            </main>
+            <SiteFooter />
+            <MobileNav />
+            <ChatFooter />
+            <KiaanFooter />
+          </Providers>
+        </ClientLayout>
       </body>
     </html>
   )

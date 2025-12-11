@@ -7,6 +7,7 @@ import { MinimalFeatures } from '@/components/home/MinimalFeatures';
 import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
 import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
 import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector';
+import { useLanguage } from '@/hooks/useLanguage';
 
 /**
  * Redesigned Home Page
@@ -17,6 +18,20 @@ import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector';
  * - Flowing energy triangle
  */
 export default function Home() {
+  const { t, isInitialized } = useLanguage();
+
+  // Show loading state while translations load
+  if (!isInitialized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
+          <p className="text-orange-100">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden p-4 pb-28 md:p-8">
       {/* Language Selector - Fixed Top Right */}
@@ -44,7 +59,7 @@ export default function Home() {
               <InnerPeaceLogo size={100} className="drop-shadow-[0_12px_55px_rgba(139,92,246,0.25)]" />
             </div>
             <p className="mx-auto max-w-xl text-sm text-orange-100/80 sm:text-base">
-              Your calm, privacy-first mental wellness companion powered by ancient wisdom
+              {t('home.hero.tagline', 'Your calm, privacy-first mental wellness companion powered by ancient wisdom')}
             </p>
             
             {/* Quick Actions */}
@@ -53,14 +68,14 @@ export default function Home() {
                 href="/kiaan/chat"
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition-all hover:scale-105"
               >
-                Talk to KIAAN
+                {t('home.hero.ctaPrimary', 'Talk to KIAAN')}
                 <span aria-hidden>→</span>
               </Link>
               <Link
                 href="/sacred-reflections"
                 className="inline-flex items-center gap-2 rounded-xl border border-orange-500/30 bg-white/5 px-5 py-3 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
               >
-                Sacred Reflections
+                {t('home.hero.ctaSecondary', 'Sacred Reflections')}
               </Link>
             </div>
           </div>
@@ -69,7 +84,7 @@ export default function Home() {
         {/* Privacy Notice */}
         <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4 text-center shadow-[0_10px_50px_rgba(255,115,39,0.18)] backdrop-blur">
           <p className="text-sm text-orange-100/90">
-            🔒 Conversations remain private • a warm, confidential refuge
+            {t('home.hero.privacy', '🔒 Conversations remain private • a warm, confidential refuge')}
           </p>
         </div>
 
@@ -77,7 +92,7 @@ export default function Home() {
         <section className="space-y-6 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur">
           <div className="space-y-3 text-center">
             <h2 className="text-2xl font-light text-orange-50 md:text-3xl">
-              Welcome to MindVibe
+              {t('common.app.name', 'Welcome to MindVibe')}
             </h2>
             <p className="mx-auto max-w-2xl text-base text-orange-100/80">
               Your journey to mental wellness, guided by ancient wisdom and modern understanding
@@ -126,13 +141,13 @@ export default function Home() {
             href="/kiaan/chat"
             className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)] transition-all hover:border-orange-500/40 hover:shadow-[0_20px_80px_rgba(255,147,71,0.24)]"
           >
-            <p className="text-xs text-orange-100/70">Talk to KIAAN</p>
-            <h2 className="text-lg font-semibold text-orange-50">Instant guidance</h2>
+            <p className="text-xs text-orange-100/70">{t('home.quickAccess.kiaan.title', 'Talk to KIAAN')}</p>
+            <h2 className="text-lg font-semibold text-orange-50">{t('home.quickAccess.kiaan.subtitle', 'Instant guidance')}</h2>
             <p className="mt-1 text-sm text-orange-100/80">
-              Jump into a focused conversation for mental wellness support
+              {t('home.quickAccess.kiaan.description', 'Jump into a focused conversation for mental wellness support')}
             </p>
             <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-orange-300">
-              Open Chat
+              {t('home.quickAccess.kiaan.cta', 'Open Chat')}
               <span aria-hidden>→</span>
             </div>
           </Link>
@@ -141,13 +156,13 @@ export default function Home() {
             href="/dashboard"
             className="rounded-2xl border border-teal-400/15 bg-white/5 p-4 shadow-[0_14px_60px_rgba(34,197,235,0.12)] transition-all hover:border-teal-400/30 hover:shadow-[0_20px_80px_rgba(34,197,235,0.18)]"
           >
-            <p className="text-xs text-white/60">Progress Tracking</p>
-            <h2 className="text-lg font-semibold text-white">Dashboard</h2>
+            <p className="text-xs text-white/60">{t('home.quickAccess.dashboard.title', 'Progress Tracking')}</p>
+            <h2 className="text-lg font-semibold text-white">{t('home.quickAccess.dashboard.subtitle', 'Dashboard')}</h2>
             <p className="mt-1 text-sm text-white/70">
-              View insights from your mood check-ins and journal entries
+              {t('home.quickAccess.dashboard.description', 'View insights from your mood check-ins and journal entries')}
             </p>
             <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-teal-300">
-              View Dashboard
+              {t('home.quickAccess.dashboard.cta', 'View Dashboard')}
               <span aria-hidden>→</span>
             </div>
           </Link>
@@ -156,13 +171,13 @@ export default function Home() {
             href="/emotional-reset"
             className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)] transition-all hover:border-amber-300/40 hover:shadow-[0_20px_80px_rgba(251,191,36,0.24)]"
           >
-            <p className="text-xs text-amber-100/80">Quick Reset</p>
-            <h2 className="text-lg font-semibold text-amber-50">Emotional Reset</h2>
+            <p className="text-xs text-amber-100/80">{t('home.quickAccess.emotionalReset.title', 'Quick Reset')}</p>
+            <h2 className="text-lg font-semibold text-amber-50">{t('home.quickAccess.emotionalReset.subtitle', 'Emotional Reset')}</h2>
             <p className="mt-1 text-sm text-amber-100/80">
-              Guided exercises to reset your emotional state instantly
+              {t('home.quickAccess.emotionalReset.description', 'Guided exercises to reset your emotional state instantly')}
             </p>
             <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-amber-300">
-              Try Reset
+              {t('home.quickAccess.emotionalReset.cta', 'Try Reset')}
               <span aria-hidden>→</span>
             </div>
           </Link>
@@ -170,9 +185,9 @@ export default function Home() {
 
         {/* Disclaimer */}
         <section className="space-y-3 rounded-3xl border border-orange-500/15 bg-[#0b0b0f] p-5 shadow-[0_20px_80px_rgba(255,115,39,0.12)] md:p-6">
-          <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
+          <h2 className="text-lg font-semibold text-orange-100">{t('home.disclaimer.title', 'Disclaimer')}</h2>
           <p className="text-sm leading-relaxed text-orange-100/80">
-            KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.
+            {t('home.disclaimer.text', "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.")}
           </p>
         </section>
       </div>
