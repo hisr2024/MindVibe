@@ -157,6 +157,7 @@ export function AnimatedPeaceLogo() {
               fill="#FFF"
               textAnchor="middle"
               dominantBaseline="middle"
+              aria-label="Om symbol"
               animate={{
                 opacity: [0.8, 1, 0.8],
               }}

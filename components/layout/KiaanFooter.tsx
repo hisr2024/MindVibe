@@ -49,9 +49,18 @@ export function KiaanFooter() {
     const messageText = text || inputValue.trim();
     if (!messageText) return;
 
+    // Generate UUID with fallback for browser compatibility
+    const generateId = () => {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      // Fallback for older browsers
+      return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    };
+
     // Add user message
     const userMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       sender: 'user',
       text: messageText,
       timestamp: new Date().toISOString(),
@@ -75,7 +84,7 @@ export function KiaanFooter() {
       
       // Add assistant message
       const assistantMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         sender: 'assistant',
         text: data.response || "I'm here for you. Let's try again. 💙",
         timestamp: new Date().toISOString(),
@@ -87,7 +96,7 @@ export function KiaanFooter() {
       
       // Add error message
       const errorMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         sender: 'assistant',
         text: getErrorMessage(error),
         timestamp: new Date().toISOString(),

@@ -10,6 +10,10 @@ from typing import Iterable
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+# Statement preview and error display constants
+STATEMENT_PREVIEW_LENGTH = 200
+ERROR_STATEMENT_LENGTH = 100
+
 MIGRATIONS_PATH = Path(__file__).resolve().parents[2] / "migrations"
 
 
@@ -225,14 +229,14 @@ async def apply_sql_migrations(engine: AsyncEngine) -> MigrationResult:
                     _record_result(result)
                     print("❌ [MIGRATIONS] Error executing SQL statement")
                     print(f"   File: {path.name}")
-                    print(f"   Statement preview: {statement[:200]}...")
+                    print(f"   Statement preview: {statement[:STATEMENT_PREVIEW_LENGTH]}...")
                     print(f"   Error type: {type(exc).__name__}")
                     print(f"   Error details: {str(exc)}")
                     print(f"   Current revision: {result.current_revision}")
                     print("\n💡 Tip: If tables already exist, ensure the migration is idempotent")
                     print("   with 'DROP TABLE IF EXISTS ... CASCADE' statements.\n")
                     raise RuntimeError(
-                        f"{path.name} failed while running statement: {statement[:100]}... | Error: {str(exc)}"
+                        f"{path.name} failed while running statement: {statement[:ERROR_STATEMENT_LENGTH]}... | Error: {str(exc)}"
                     ) from exc
             await conn.execute(
                 text("INSERT INTO schema_migrations (filename) VALUES (:filename)"),

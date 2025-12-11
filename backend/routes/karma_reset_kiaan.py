@@ -426,6 +426,9 @@ async def reset_user_journey(
     
     try:
         # Step 1: Count and delete records
+        # Note: Using raw SQL with parametrized queries for tables not in ORM models
+        # These tables are defined only in migrations, not in models.py
+        # Parametrized queries (:user_id) prevent SQL injection
         logger.info(f"[{request_id}] Deleting user journey data...")
         
         # Delete emotional logs
