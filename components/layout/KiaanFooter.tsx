@@ -1,194 +1,282 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiCall, getErrorMessage } from '@/lib/api-client';
 
 /**
- * KIAAN Footer Component
- * Persistent footer across KIAAN ecosystem with quick access to all modules
+ * KIAAN Footer with Expandable Chat Interface
+ * Global footer component accessible from all pages
+ * Full KIAAN chat functionality with expandable/collapsible interface
  */
 
-interface KiaanModule {
+interface Message {
   id: string;
-  label: string;
-  href: string;
-  icon: string;
-  color: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  status?: 'error';
 }
-
-const kiaanModules: KiaanModule[] = [
-  {
-    id: 'chat',
-    label: 'Chat',
-    href: '/kiaan/chat',
-    icon: '💬',
-    color: 'from-orange-500 to-amber-500'
-  },
-  {
-    id: 'ardha',
-    label: 'Ardha',
-    href: '/ardha',
-    icon: '🧘',
-    color: 'from-teal-500 to-emerald-500'
-  },
-  {
-    id: 'viyoga',
-    label: 'Viyoga',
-    href: '/viyog',
-    icon: '💔',
-    color: 'from-blue-500 to-indigo-500'
-  },
-  {
-    id: 'emotional-reset',
-    label: 'Reset',
-    href: '/emotional-reset',
-    icon: '🔄',
-    color: 'from-pink-500 to-rose-500'
-  },
-  {
-    id: 'karma-reset',
-    label: 'Karma',
-    href: '/karma-footprint',
-    icon: '⚖️',
-    color: 'from-purple-500 to-violet-500'
-  },
-  {
-    id: 'daily-analysis',
-    label: 'Daily',
-    href: '/kiaan/daily-analysis',
-    icon: '📊',
-    color: 'from-cyan-500 to-blue-500'
-  },
-  {
-    id: 'reflections',
-    label: 'Reflections',
-    href: '/sacred-reflections',
-    icon: '📖',
-    color: 'from-amber-500 to-orange-500'
-  },
-];
 
 export function KiaanFooter() {
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [mounted, setMounted] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Only render on KIAAN-related pages
-  const shouldShow = pathname?.startsWith('/kiaan') || 
-                     pathname?.startsWith('/ardha') || 
-                     pathname?.startsWith('/viyog') ||
-                     pathname?.startsWith('/emotional-reset') ||
-                     pathname?.startsWith('/karma-footprint') ||
-                     pathname?.startsWith('/sacred-reflections');
+  // Don't show on the dedicated KIAAN chat page to avoid duplication
+  const shouldHide = pathname === '/kiaan/chat';
 
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (isExpanded && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isExpanded]);
 
-  // Auto-hide on scroll down, show on scroll up
+  // Focus input when expanded
   useEffect(() => {
-    if (!mounted) return;
+    if (isExpanded && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isExpanded]);
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY < lastScrollY || currentScrollY < 50) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      }
-      
-      setLastScrollY(currentScrollY);
+  const handleSendMessage = useCallback(async (text?: string) => {
+    const messageText = text || inputValue.trim();
+    if (!messageText) return;
+
+    // Add user message
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      sender: 'user',
+      text: messageText,
+      timestamp: new Date().toISOString(),
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, mounted]);
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
 
-  if (!mounted || !shouldShow) return null;
+    try {
+      const response = await apiCall('/api/chat/message', {
+        method: 'POST',
+        body: JSON.stringify({ message: messageText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from KIAAN');
+      }
+
+      const data = await response.json();
+      
+      // Add assistant message
+      const assistantMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: 'assistant',
+        text: data.response || "I'm here for you. Let's try again. 💙",
+        timestamp: new Date().toISOString(),
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('KIAAN chat error:', error);
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: 'assistant',
+        text: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+        status: 'error',
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [inputValue]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const quickPrompts = [
+    { emoji: '😰', text: 'Calm anxiety', prompt: "I'm feeling anxious and need help finding calm." },
+    { emoji: '💔', text: 'Heavy heart', prompt: 'My heart feels heavy today. I need support.' },
+    { emoji: '🧭', text: 'Find clarity', prompt: 'I need clarity on a situation.' },
+    { emoji: '🕊️', text: 'Find peace', prompt: 'I need to find quiet peace within myself.' },
+  ];
+
+  if (shouldHide) return null;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.footer
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 z-40 hidden md:block"
-        >
-          <div className="mx-auto max-w-6xl px-4 pb-4">
-            <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-orange-500/10">
-              <div className="flex items-center justify-between px-6 py-4">
-                {/* KIAAN Branding */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-300 shadow-lg">
-                    <span className="text-sm font-bold text-slate-900">K</span>
-                  </div>
+    <div className="fixed bottom-0 right-0 z-50 p-4 md:p-6">
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="mb-4 w-[380px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900/98 via-slate-900/95 to-slate-900/98 shadow-2xl shadow-orange-500/20 backdrop-blur-xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-300">
+                  <span className="text-sm font-bold text-slate-900">K</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-orange-50">KIAAN Chat</h3>
+                  <p className="text-xs text-orange-100/60">Your Guide to Inner Peace</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="rounded-lg p-1.5 text-orange-100/60 hover:bg-white/10 hover:text-orange-50 transition-colors"
+                aria-label="Minimize chat"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div className="max-h-[400px] min-h-[300px] overflow-y-auto p-4 space-y-3">
+              {messages.length === 0 ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="text-4xl">🕉️</div>
                   <div>
-                    <h3 className="text-sm font-semibold text-orange-50">KIAAN Ecosystem</h3>
-                    <p className="text-xs text-orange-100/60">Quick access to all modules</p>
+                    <p className="text-sm text-orange-100/80">Welcome to KIAAN Chat</p>
+                    <p className="text-xs text-orange-100/60 mt-1">How can I support you today?</p>
+                  </div>
+                  
+                  {/* Quick prompts */}
+                  <div className="grid grid-cols-2 gap-2 pt-4">
+                    {quickPrompts.map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendMessage(prompt.prompt)}
+                        className="rounded-xl border border-orange-500/20 bg-white/5 p-3 text-left transition-all hover:border-orange-400/40 hover:bg-white/10"
+                      >
+                        <div className="text-lg mb-1">{prompt.emoji}</div>
+                        <div className="text-xs font-medium text-orange-50">{prompt.text}</div>
+                      </button>
+                    ))}
                   </div>
                 </div>
-
-                {/* Module Quick Access */}
-                <div className="flex items-center gap-2">
-                  {kiaanModules.map((module) => {
-                    const isActive = pathname === module.href || pathname?.startsWith(module.href + '/');
-                    
-                    return (
-                      <Link
-                        key={module.id}
-                        href={module.href}
-                        className={`group relative flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-all ${
-                          isActive
-                            ? 'bg-white/10 shadow-lg'
-                            : 'hover:bg-white/5'
-                        }`}
-                        title={module.label}
-                      >
-                        <span className="text-lg" role="img" aria-label={module.label}>
-                          {module.icon}
-                        </span>
-                        <span className={`text-[10px] font-medium ${
-                          isActive ? 'text-orange-50' : 'text-orange-100/70 group-hover:text-orange-50'
-                        }`}>
-                          {module.label}
-                        </span>
-                        
-                        {/* Active indicator */}
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeModule"
-                            className={`absolute -bottom-1 left-1/2 h-1 w-8 -translate-x-1/2 rounded-full bg-gradient-to-r ${module.color}`}
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                          />
-                        )}
-                      </Link>
-                    );
-                  })}
+              ) : (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-4 py-2 ${
+                        message.sender === 'user'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                          : message.status === 'error'
+                          ? 'bg-red-500/20 border border-red-500/30 text-red-100'
+                          : 'bg-white/10 text-orange-50'
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                      <p className="text-[10px] mt-1 opacity-60">
+                        {new Date(message.timestamp).toLocaleTimeString([], { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+              
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="rounded-2xl bg-white/10 px-4 py-3">
+                    <div className="flex gap-1">
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-orange-400" style={{ animationDelay: '0ms' }} />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-orange-400" style={{ animationDelay: '150ms' }} />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-orange-400" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
                 </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
 
-                {/* Toggle Button */}
+            {/* Input */}
+            <div className="border-t border-orange-500/20 bg-white/5 p-3">
+              <div className="flex gap-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message..."
+                  disabled={isLoading}
+                  className="flex-1 rounded-xl border border-orange-500/30 bg-white/10 px-4 py-2 text-sm text-orange-50 placeholder:text-orange-100/40 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/30 disabled:opacity-50"
+                />
                 <button
-                  onClick={() => setIsVisible(false)}
-                  className="rounded-lg p-2 text-orange-100/60 hover:bg-white/5 hover:text-orange-50 transition-all"
-                  aria-label="Hide footer"
-                  title="Hide footer (will reappear on scroll)"
+                  onClick={() => handleSendMessage()}
+                  disabled={!inputValue.trim() || isLoading}
+                  className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
+                  Send
                 </button>
               </div>
             </div>
-          </div>
-        </motion.footer>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toggle Button */}
+      <motion.button
+        onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl shadow-orange-500/40 transition-shadow hover:shadow-orange-500/60"
+        aria-label={isExpanded ? 'Close KIAAN chat' : 'Open KIAAN chat'}
+      >
+        <AnimatePresence mode="wait">
+          {isExpanded ? (
+            <motion.svg
+              key="close"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              className="h-6 w-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </motion.svg>
+          ) : (
+            <motion.div
+              key="open"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              className="text-2xl"
+            >
+              🕉️
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
+    </div>
   );
 }
 
