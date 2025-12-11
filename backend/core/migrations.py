@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -79,8 +79,49 @@ def _should_skip_file(path: Path, dialect: str) -> bool:
     return dialect != "postgresql" and marker in path.read_text().lower()
 
 
+def _strip_comments(sql_text: str) -> str:
+    """Remove SQL comments (-- and /* */) from the text."""
+    result = []
+    lines = sql_text.split('\n')
+    in_block_comment = False
+
+    for line in lines:
+        if in_block_comment:
+            if '*/' in line:
+                in_block_comment = False
+                # Keep text after the closing block comment
+                line = line.split('*/', 1)[1]
+            else:
+                continue  # Skip lines inside block comment
+
+        # Check for block comment start
+        if '/*' in line:
+            before_comment = line.split('/*', 1)[0]
+            # Check if block comment closes on the same line
+            if '*/' in line:
+                after_comment = line.split('*/', 1)[1]
+                line = before_comment + after_comment
+            else:
+                in_block_comment = True
+                line = before_comment
+
+        # Remove line comments
+        if '--' in line:
+            line = line.split('--', 1)[0]
+
+        # Keep the line if it has content after stripping
+        stripped_line = line.strip()
+        if stripped_line:
+            result.append(stripped_line)
+
+    return '\n'.join(result)
+
+
 def _statements(sql_text: str) -> Iterable[str]:
     """Yield SQL statements while respecting dollar-quoted blocks."""
+
+    # CRITICAL FIX: Strip all comments first to avoid asyncpg errors
+    sql_text = _strip_comments(sql_text)
 
     statements: list[str] = []
     current: list[str] = []
