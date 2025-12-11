@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ToolsSheet } from './ToolsSheet'
@@ -19,6 +19,16 @@ export interface MobileNavProps {
   tabs?: NavTab[]
   /** Optional className for styling */
   className?: string
+}
+
+// Translation key mapping for tab labels (constant)
+const TAB_TRANSLATION_KEYS: Record<string, string> = {
+  'kiaan-chat': 'navigation.mobileNav.chat',
+  'home': 'navigation.mainNav.home',
+  'journal': 'navigation.mobileNav.journal',
+  'wisdom': 'navigation.features.wisdomRooms',
+  'tools': 'common.buttons.tools',
+  'profile': 'navigation.mainNav.profile',
 }
 
 // Default navigation tabs
@@ -108,19 +118,12 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
   const { t } = useLanguage()
 
-  // Translation map for tab labels
-  const getTabLabel = (tabId: string, defaultLabel: string): string => {
-    const translationKeys: Record<string, string> = {
-      'kiaan-chat': 'navigation.mobileNav.chat',
-      'home': 'navigation.mainNav.home',
-      'journal': 'navigation.mobileNav.journal',
-      'wisdom': 'navigation.features.wisdomRooms',
-      'tools': 'common.buttons.tools',
-      'profile': 'navigation.mainNav.profile',
+  // Get translated label for tab
+  const getTabLabel = useMemo(() => {
+    return (tabId: string, defaultLabel: string): string => {
+      return TAB_TRANSLATION_KEYS[tabId] ? t(TAB_TRANSLATION_KEYS[tabId], defaultLabel) : defaultLabel
     }
-    
-    return translationKeys[tabId] ? t(translationKeys[tabId], defaultLabel) : defaultLabel
-  }
+  }, [t])
 
   return (
     <>

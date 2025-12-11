@@ -190,7 +190,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('localeChanged', handleLocaleChange)
   }, [setLanguage])
 
-
   // Translation function
   const t = useCallback((key: string, fallback?: string): string => {
     const value = getNestedValue(translations, key)
