@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, Suspense, lazy } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import { useHapticFeedback, useStreamingText } from '@/hooks';
 import { springConfigs } from '@/lib/animations/spring-configs';
 import { useLanguage } from '@/hooks/useLanguage';
+
+// Lazy load the 3D logo for better performance
+const LivingKiaanLogo = lazy(() => import('@/components/logos/LivingKiaanLogo'));
 
 /**
  * KIAAN Footer with Expandable Chat Interface
@@ -362,7 +365,7 @@ export function KiaanFooter() {
             ease: 'easeInOut',
           },
         }}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl shadow-orange-500/40 transition-shadow hover:shadow-orange-500/60"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl shadow-orange-500/40 transition-shadow hover:shadow-orange-500/60 overflow-hidden"
         aria-label={isExpanded ? 'Close KIAAN chat' : 'Open KIAAN chat'}
       >
         <AnimatePresence mode="wait">
@@ -372,7 +375,7 @@ export function KiaanFooter() {
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
-              className="h-6 w-6 text-white"
+              className="h-6 w-6 text-white z-10"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -385,9 +388,16 @@ export function KiaanFooter() {
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
-              className="text-2xl"
+              className="w-full h-full"
             >
-              🕉️
+              <Suspense fallback={<span className="text-2xl">🕉️</span>}>
+                <LivingKiaanLogo 
+                  size={56} 
+                  emotionalState={isLoading ? 'thinking' : 'peaceful'} 
+                  interactive={false}
+                  showAura={false}
+                />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>
