@@ -100,7 +100,7 @@ export function KiaanLogo({
                   : undefined
               }
             >
-              KIAAN — Crisp, calm guidance.
+              Your Guide to Inner Peace
             </motion.span>
           </>
         )}
