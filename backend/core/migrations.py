@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -84,7 +84,7 @@ def _strip_comments(sql_text: str) -> str:
     result = []
     lines = sql_text.split('\n')
     in_block_comment = False
-    
+
     for line in lines:
         if in_block_comment:
             if '*/' in line:
@@ -93,7 +93,7 @@ def _strip_comments(sql_text: str) -> str:
                 line = line.split('*/', 1)[1] if '*/' in line else ''
             else:
                 continue  # Skip lines inside block comment
-        
+
         # Check for block comment start
         if '/*' in line:
             before_comment = line.split('/*', 1)[0]
@@ -101,22 +101,22 @@ def _strip_comments(sql_text: str) -> str:
             if '*/' not in line:
                 in_block_comment = True
             line = before_comment + after_comment
-        
+
         # Remove line comments
         if '--' in line:
             line = line.split('--', 1)[0]
-        
+
         # Keep the line if it has content after stripping
         stripped_line = line.strip()
         if stripped_line:
             result.append(stripped_line)
-    
+
     return '\n'.join(result)
 
 
 def _statements(sql_text: str) -> Iterable[str]:
     """Yield SQL statements while respecting dollar-quoted blocks."""
-    
+
     # CRITICAL FIX: Strip all comments first to avoid asyncpg errors
     sql_text = _strip_comments(sql_text)
 

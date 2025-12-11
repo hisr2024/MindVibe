@@ -1,7 +1,6 @@
 """Unit tests for the migration module's SQL parsing functionality."""
 
-import pytest
-from backend.core.migrations import _strip_comments, _statements
+from backend.core.migrations import _statements, _strip_comments
 
 
 class TestStripComments:
