@@ -31,7 +31,7 @@
     "axios": "^1.7.9",
     "bcryptjs": "file:vendor/bcryptjs",
     "canvas-confetti": "^1.9.4",
-    "date-fns": "^2.30.0",
+    "date-fns": "^4.1.0",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.25",
     "jspdf": "^3.0.4",
