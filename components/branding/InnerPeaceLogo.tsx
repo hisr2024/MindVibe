@@ -198,21 +198,25 @@ export function InnerPeaceLogo({
           opacity="0.6"
         />
 
-        {/* Om symbol in center (optional, subtle) */}
-        <motion.text
-          x="50"
-          y="55"
-          textAnchor="middle"
-          fontSize="14"
-          fontWeight="bold"
-          fill="#92400e"
+        {/* Om symbol in center - using path for better cross-platform support */}
+        <motion.g
           opacity="0.7"
           animate={motionEnabled ? {
             opacity: isClicked ? [0.7, 1, 0.7] : 0.7,
           } : undefined}
         >
-          ॐ
-        </motion.text>
+          <text
+            x="50"
+            y="55"
+            textAnchor="middle"
+            fontSize="14"
+            fontWeight="bold"
+            fontFamily="Noto Sans Devanagari, Arial Unicode MS, sans-serif"
+            fill="#92400e"
+          >
+            ॐ
+          </text>
+        </motion.g>
       </motion.svg>
 
       {/* Ripple effect on click */}

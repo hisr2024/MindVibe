@@ -120,4 +120,9 @@ CREATE INDEX IF NOT EXISTS idx_user_journey_progress_user ON user_journey_progre
 CREATE INDEX IF NOT EXISTS idx_user_journey_progress_module ON user_journey_progress(module_name);
 CREATE INDEX IF NOT EXISTS idx_user_journey_progress_status ON user_journey_progress(status);
 
+-- Migration Documentation
+-- These tables support KIAAN user journey tracking without foreign key constraints to users table
+-- as the application uses Firebase Auth instead of database-managed users.
+-- Tables: user_emotional_logs, user_daily_analysis, user_weekly_reflections, 
+--         user_assessments, user_verses_bookmarked, user_journey_progress
 
