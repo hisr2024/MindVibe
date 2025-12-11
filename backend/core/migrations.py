@@ -225,10 +225,14 @@ async def apply_sql_migrations(engine: AsyncEngine) -> MigrationResult:
                     _record_result(result)
                     print("❌ [MIGRATIONS] Error executing SQL statement")
                     print(f"   File: {path.name}")
-                    print(f"   Statement: {statement}")
+                    print(f"   Statement preview: {statement[:200]}...")
+                    print(f"   Error type: {type(exc).__name__}")
+                    print(f"   Error details: {str(exc)}")
                     print(f"   Current revision: {result.current_revision}")
+                    print("\n💡 Tip: If tables already exist, ensure the migration is idempotent")
+                    print("   with 'DROP TABLE IF EXISTS ... CASCADE' statements.\n")
                     raise RuntimeError(
-                        f"{path.name} failed while running: {statement}"
+                        f"{path.name} failed while running statement: {statement[:100]}... | Error: {str(exc)}"
                     ) from exc
             await conn.execute(
                 text("INSERT INTO schema_migrations (filename) VALUES (:filename)"),

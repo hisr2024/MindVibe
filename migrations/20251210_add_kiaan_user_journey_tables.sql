@@ -2,6 +2,14 @@
 -- Date: 2025-12-10
 -- Description: Creates tables for daily analysis, weekly assessments, sacred reflections, and user progress tracking
 
+-- Drop existing tables if they exist (for idempotent migrations)
+DROP TABLE IF EXISTS user_journey_progress CASCADE;
+DROP TABLE IF EXISTS user_verses_bookmarked CASCADE;
+DROP TABLE IF EXISTS user_assessments CASCADE;
+DROP TABLE IF EXISTS user_weekly_reflections CASCADE;
+DROP TABLE IF EXISTS user_daily_analysis CASCADE;
+DROP TABLE IF EXISTS user_emotional_logs CASCADE;
+
 -- Create user_emotional_logs table for daily emotional check-ins
 CREATE TABLE IF NOT EXISTS user_emotional_logs (
     id SERIAL PRIMARY KEY,
