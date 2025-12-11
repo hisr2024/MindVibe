@@ -34,10 +34,10 @@ export function usePrefersReducedMotion() {
 }
 
 // Helper to get safe animation values based on reduced motion preference
-export function getSafeAnimation(
+export function getSafeAnimation<T>(
   reducedMotion: boolean,
-  fullAnimation: any,
-  reducedAnimation: any = {}
-) {
+  fullAnimation: T,
+  reducedAnimation: Partial<T> = {}
+): T | Partial<T> {
   return reducedMotion ? reducedAnimation : fullAnimation;
 }

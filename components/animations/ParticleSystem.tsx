@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { hexWithOpacity } from '@/lib/animations/color-utils';
 
 interface Particle {
   x: number;
@@ -87,9 +88,7 @@ export function ParticleSystem({
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `${particle.color}${Math.floor(opacity * 255)
-          .toString(16)
-          .padStart(2, '0')}`;
+        ctx.fillStyle = hexWithOpacity(particle.color, opacity);
         ctx.fill();
 
         return true;

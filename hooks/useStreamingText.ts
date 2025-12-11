@@ -53,7 +53,23 @@ export function useStreamingText(fullText: string, options: UseStreamingTextOpti
   };
 }
 
-// Alternative: Character-by-character streaming function
+/**
+ * Alternative streaming function (for advanced use cases)
+ * 
+ * Character-by-character streaming function that can be used
+ * for custom implementations where you need more control over
+ * the streaming process.
+ * 
+ * @example
+ * ```tsx
+ * const controller = new AbortController();
+ * await streamText(
+ *   "Hello World",
+ *   (chunk) => setDisplayText(chunk),
+ *   { speed: 30, signal: controller.signal }
+ * );
+ * ```
+ */
 export async function streamText(
   text: string,
   callback: (chunk: string) => void,

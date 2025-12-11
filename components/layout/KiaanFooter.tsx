@@ -33,6 +33,9 @@ export function KiaanFooter() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { triggerHaptic } = useHapticFeedback();
 
+  // Animation timing constant
+  const STREAMING_SPEED_MS_PER_CHAR = 20;
+
   // Don't show on the dedicated KIAAN chat page to avoid duplication
   const shouldHide = pathname === '/kiaan/chat';
 
@@ -114,7 +117,7 @@ export function KiaanFooter() {
           )
         );
         triggerHaptic('success');
-      }, data.response.length * 20); // Simulate streaming based on text length
+      }, data.response.length * STREAMING_SPEED_MS_PER_CHAR); // Simulate streaming based on text length
 
     } catch (error) {
       console.error('KIAAN chat error:', error);
