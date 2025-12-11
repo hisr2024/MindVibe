@@ -24,3 +24,4 @@ export { useVoiceOutput, type UseVoiceOutputOptions, type UseVoiceOutputReturn }
 export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './useWakeWord'
 export { useHapticFeedback } from './useHapticFeedback'
 export { useStreamingText, streamText } from './useStreamingText'
+export { usePrefersReducedMotion, getSafeAnimation } from './usePrefersReducedMotion'
