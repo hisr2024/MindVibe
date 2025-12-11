@@ -54,7 +54,7 @@ export function FeatureHighlights() {
           </div>
           <h3 className="mb-2 text-lg font-semibold text-emerald-50">Offline Access</h3>
           <p className="mb-4 text-sm text-emerald-100/70">
-            Access conversations and Gita verses offline. Auto-syncs when you&apos;re back online.
+            Access conversations and wisdom verses offline. Auto-syncs when you&apos;re back online.
           </p>
           <div className="flex items-center gap-2 text-xs text-emerald-300/80">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">

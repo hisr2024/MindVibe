@@ -50,7 +50,7 @@ export function OfflineModeToggle() {
               <p className="font-medium text-slate-200">{stats.conversationCount}</p>
             </div>
             <div>
-              <p className="text-slate-400">Gita Verses</p>
+              <p className="text-slate-400">Wisdom Verses</p>
               <p className="font-medium text-slate-200">{stats.versesCount}</p>
             </div>
             <div>
