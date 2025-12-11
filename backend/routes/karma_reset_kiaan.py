@@ -21,7 +21,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db
+from backend.deps import get_db, get_user_id
 from backend.services.karma_reset_service import KarmaResetService
 
 # Configure logging
@@ -343,3 +343,233 @@ async def kiaan_health_check():
         "openai_ready": ready,
         "version": "1.0.0"
     }
+
+
+# ==================== JOURNEY RESET ENDPOINT ====================
+
+class JourneyResetRequest(BaseModel):
+    """Request model for journey reset with KIAAN guidance."""
+    
+    confirm: bool = Field(description="Confirmation to proceed with reset")
+    reason: str = Field(
+        default="Fresh start",
+        max_length=500,
+        description="Reason for journey reset"
+    )
+
+
+class JourneyResetResponse(BaseModel):
+    """Response model for journey reset."""
+    
+    success: bool = Field(description="Whether reset was successful")
+    message: str = Field(description="Human-readable message")
+    kiaan_wisdom: dict = Field(description="KIAAN wisdom for fresh start")
+    details: dict = Field(description="What was reset")
+    timestamp: str = Field(description="When reset occurred")
+
+
+@router.post("/journey-reset", response_model=JourneyResetResponse)
+async def reset_user_journey(
+    request: JourneyResetRequest,
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_user_id)
+) -> JourneyResetResponse:
+    """
+    Reset user's KIAAN journey data with wisdom-based fresh start guidance.
+    
+    This endpoint resets:
+    - User emotional logs
+    - Daily analysis records
+    - Weekly reflections
+    - Assessments
+    - Journey progress tracking
+    
+    And generates KIAAN wisdom for a fresh start.
+    
+    Args:
+        request: Reset confirmation and reason
+        db: Database session
+        user_id: Current user ID from auth
+        
+    Returns:
+        JourneyResetResponse with KIAAN wisdom and reset details
+        
+    Raises:
+        HTTPException: If reset fails or confirmation not provided
+    """
+    from sqlalchemy import delete, func, select, text
+    from datetime import datetime
+    
+    request_id = str(uuid.uuid4())[:8]
+    start_time = datetime.now()
+    
+    logger.info(
+        f"[{request_id}] Journey reset requested by user {user_id}",
+        extra={"user_id": user_id, "reason": request.reason}
+    )
+    
+    # Require explicit confirmation
+    if not request.confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="Journey reset confirmation required. Set 'confirm' to true."
+        )
+    
+    reset_details = {
+        "emotional_logs_deleted": 0,
+        "daily_analyses_deleted": 0,
+        "weekly_reflections_deleted": 0,
+        "assessments_deleted": 0,
+        "journey_progress_deleted": 0,
+        "verses_bookmarked_deleted": 0
+    }
+    
+    try:
+        # Step 1: Count and delete records
+        # Note: Using raw SQL with parametrized queries for tables not in ORM models
+        # These tables are defined only in migrations, not in models.py
+        # Parametrized queries (:user_id) prevent SQL injection
+        logger.info(f"[{request_id}] Deleting user journey data...")
+        
+        # Delete emotional logs
+        result = await db.execute(
+            text("DELETE FROM user_emotional_logs WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        reset_details["emotional_logs_deleted"] = result.rowcount
+        
+        # Delete daily analysis
+        result = await db.execute(
+            text("DELETE FROM user_daily_analysis WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        reset_details["daily_analyses_deleted"] = result.rowcount
+        
+        # Delete weekly reflections
+        result = await db.execute(
+            text("DELETE FROM user_weekly_reflections WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        reset_details["weekly_reflections_deleted"] = result.rowcount
+        
+        # Delete assessments
+        result = await db.execute(
+            text("DELETE FROM user_assessments WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        reset_details["assessments_deleted"] = result.rowcount
+        
+        # Delete journey progress
+        result = await db.execute(
+            text("DELETE FROM user_journey_progress WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        reset_details["journey_progress_deleted"] = result.rowcount
+        
+        # Delete bookmarked verses
+        result = await db.execute(
+            text("DELETE FROM user_verses_bookmarked WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        reset_details["verses_bookmarked_deleted"] = result.rowcount
+        
+        # Commit deletions
+        await db.commit()
+        
+        logger.info(
+            f"[{request_id}] Journey data deleted successfully",
+            extra=reset_details
+        )
+        
+        # Step 2: Generate KIAAN wisdom for fresh start
+        kiaan_wisdom = {}
+        
+        if ready and client:
+            try:
+                # Get verses about new beginnings
+                verse_results = await karma_reset_service.get_reset_verses(
+                    db=db,
+                    repair_type="self-forgive",  # Self-compassion for fresh start
+                    situation="Beginning anew with fresh perspective",
+                    limit=3
+                )
+                
+                wisdom_context = karma_reset_service.build_gita_context(
+                    verse_results=verse_results,
+                    repair_type="fresh_start"
+                )
+                
+                # Generate fresh start wisdom
+                prompt = f"""You are KIAAN, an ancient wisdom guide. A user has reset their journey to begin anew.
+
+Reason: "{request.reason}"
+
+{wisdom_context}
+
+Provide encouraging wisdom for their fresh start in JSON format with these keys:
+- breathingLine: 1-2 sentences for centering
+- acknowledgment: Acknowledge their courage to begin anew
+- wisdom: Ancient wisdom for new beginnings
+- intention: Forward-looking intention setting
+
+Tone: warm, encouraging, wisdom-based, non-judgmental.
+"""
+                
+                response = client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": prompt},
+                        {"role": "user", "content": "Generate fresh start wisdom in JSON."}
+                    ],
+                    temperature=0.8,
+                    max_tokens=500,
+                    response_format={"type": "json_object"}
+                )
+                
+                wisdom_text = response.choices[0].message.content or "{}"
+                kiaan_wisdom = json.loads(wisdom_text)
+                
+            except Exception as e:
+                logger.error(f"[{request_id}] Error generating KIAAN wisdom: {str(e)}")
+                # Fallback wisdom
+                kiaan_wisdom = {
+                    "breathingLine": "Take a deep breath. This moment marks a fresh beginning.",
+                    "acknowledgment": "You've chosen to begin anew. This takes courage and self-awareness.",
+                    "wisdom": "Every ending holds the seed of a new beginning. Your journey continues with renewed clarity.",
+                    "intention": "Move forward with openness, ready to embrace each moment with fresh eyes."
+                }
+        else:
+            # Fallback when OpenAI not available
+            kiaan_wisdom = {
+                "breathingLine": "Take a deep breath. This moment marks a fresh beginning.",
+                "acknowledgment": "You've chosen to begin anew. This takes courage and self-awareness.",
+                "wisdom": "Every ending holds the seed of a new beginning. Your journey continues with renewed clarity.",
+                "intention": "Move forward with openness, ready to embrace each moment with fresh eyes."
+            }
+        
+        elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+        
+        logger.info(
+            f"[{request_id}] Journey reset completed in {elapsed_ms}ms",
+            extra={"total_deleted": sum(reset_details.values())}
+        )
+        
+        return JourneyResetResponse(
+            success=True,
+            message="Your journey has been reset. Begin anew with KIAAN's wisdom.",
+            kiaan_wisdom=kiaan_wisdom,
+            details=reset_details,
+            timestamp=datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        # Rollback on error
+        await db.rollback()
+        logger.error(
+            f"[{request_id}] Journey reset failed: {str(e)}",
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Journey reset failed: {str(e)}"
+        )
