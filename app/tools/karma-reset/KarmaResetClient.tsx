@@ -7,9 +7,10 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
+import { getBriefErrorMessage } from '@/lib/api-client'
 import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
@@ -34,7 +35,39 @@ export default function KarmaResetClient() {
   const [kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const MAX_RETRIES = 2
+
+  // Health check on mount
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        // Add timeout to prevent hanging
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+        const response = await fetch('/api/karma-reset/kiaan/health', {
+          method: 'GET',
+          credentials: 'include',
+          signal: controller.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (response.ok) {
+          const data = await response.json()
+          setBackendHealthy(data.status === 'healthy')
+        } else {
+          setBackendHealthy(false)
+        }
+      } catch (error) {
+        console.error('Karma Reset health check failed:', error)
+        setBackendHealthy(false)
+      }
+    }
+
+    checkHealth()
+  }, [])
 
   const submitKarmaReset = async (attemptCount = 0) => {
     setLoading(true)
@@ -71,7 +104,8 @@ export default function KarmaResetClient() {
       // Auto-advance to plan after breathing exercise
       setTimeout(() => setCurrentStep('plan'), BREATHING_DURATION_MS)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      // Get user-friendly error message using shared utility
+      const errorMessage = getBriefErrorMessage(err) || 'An error occurred'
       
       // Retry logic
       if (attemptCount < MAX_RETRIES) {
@@ -85,8 +119,7 @@ export default function KarmaResetClient() {
       } else {
         // Show user-friendly error with fallback guidance
         setError(
-          `Unable to connect to the guidance service. ${errorMessage}. ` +
-          'Please check your connection and try again, or use the fallback guidance below.'
+          `${errorMessage} We've provided fallback guidance below, or you can try again later.`
         )
         
         // Set fallback guidance
@@ -147,9 +180,30 @@ export default function KarmaResetClient() {
           <div className="lg:col-span-3">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                💚 Karma Reset
-              </h1>
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+                  💚 Karma Reset
+                </h1>
+                {/* Connection status indicator */}
+                {backendHealthy !== null && (
+                  <span className="flex items-center gap-2 text-xs">
+                    {backendHealthy ? (
+                      <>
+                        <span className="flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        <span className="text-green-600 dark:text-green-400">Connected</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
+                        <span className="text-yellow-600 dark:text-yellow-400">Offline (using fallback)</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">
                 A compassionate ritual to acknowledge impact, repair harm, and move forward with wisdom.
               </p>

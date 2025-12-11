@@ -66,8 +66,20 @@ export async function apiCall(
     clearTimeout(timeoutId)
 
     if (!response.ok) {
+      // Enhanced error detection
+      let errorMessage = `API Error: ${response.status} ${response.statusText}`
+      
+      // Detect specific error scenarios
+      if (response.status === 405) {
+        errorMessage = 'Method not allowed. The endpoint may not be properly configured.'
+      } else if (response.status === 404) {
+        errorMessage = 'Endpoint not found. Please check the API configuration.'
+      } else if (response.status === 503) {
+        errorMessage = 'Service temporarily unavailable. Please try again later.'
+      }
+      
       throw new APIError(
-        `API Error: ${response.status} ${response.statusText}`,
+        errorMessage,
         response.status,
         response.statusText
       )
@@ -77,15 +89,15 @@ export async function apiCall(
   } catch (error) {
     // Handle network errors
     if (error instanceof TypeError) {
-      // Network errors are typically TypeErrors from fetch
+      // TypeError from fetch typically indicates network failures (e.g., no internet, DNS failure, connection refused)
       throw new APIError(
-        'Cannot connect to KIAAN. Please check your internet connection and ensure the backend server is running.'
+        'Cannot connect to KIAAN. Please check your internet connection or try again in a few moments.'
       )
     }
 
     // Handle timeout errors
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new APIError('Request timed out. Please try again.')
+      throw new APIError('Request timed out after 30 seconds. The server may be overloaded or unreachable.')
     }
 
     // Re-throw APIError as-is
@@ -148,18 +160,36 @@ export async function apiCallWithRetry(
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof APIError) {
+    // Check for specific error codes
+    if (error.status === 405) {
+      return 'This operation is not supported. Please try a different action.'
+    }
+    
+    if (error.status === 404) {
+      return 'The requested service could not be found. Please try again later.'
+    }
+    
+    if (error.status === 503) {
+      return 'The service is temporarily unavailable. Please try again in a few moments.'
+    }
+    
     // Check for connection-related errors
     if (error.message.includes('connect') || error.message.includes('network')) {
       const messages = [
-        'Cannot reach KIAAN. Please check:',
-        '• Your internet connection',
-        '• Backend server is running',
-        '• API URL is correctly configured'
+        'Cannot reach KIAAN.',
+        '• Check your internet connection',
+        '• Try again in a few moments',
+        '• If the problem persists, the service may be down',
       ]
       return messages.join('\n')
     }
+    
+    // Check for timeout errors
+    if (error.message.includes('timed out') || error.message.includes('timeout')) {
+      return 'The request is taking longer than expected. The service may be busy. Please try again.'
+    }
 
-    // Return the error message directly for API errors
+    // Return the error message directly for other API errors
     return error.message
   }
 
@@ -168,4 +198,44 @@ export function getErrorMessage(error: unknown): string {
   }
 
   return 'An unexpected error occurred. Please try again.'
+}
+
+/**
+ * Get a brief error message from an error object for inline display
+ * @param error Error object
+ * @returns Brief error message suitable for UI display
+ */
+export function getBriefErrorMessage(error: unknown): string {
+  // For APIError, use the status code directly
+  if (error instanceof APIError) {
+    if (error.status === 405) {
+      return 'This operation is not supported. Please try a different action.'
+    }
+    if (error.status === 404) {
+      return 'Service not found. Please try again later.'
+    }
+    if (error.status === 503) {
+      return 'Service temporarily unavailable. Please try again in a few moments.'
+    }
+  }
+  
+  // For Error instances, check message content
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase()
+    
+    // Check for timeout
+    if (msg.includes('timeout') || msg.includes('timed out')) {
+      return 'Request taking too long. Service may be busy. Please try again.'
+    }
+    
+    // Check for network/connection
+    if (msg.includes('network') || msg.includes('connect')) {
+      return 'Cannot reach service. Please check your connection and try again.'
+    }
+    
+    // Return original message if no pattern matched
+    return error.message
+  }
+  
+  return 'An error occurred'
 }

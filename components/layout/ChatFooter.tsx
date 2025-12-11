@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChat } from '@/lib/ChatContext'
+import { getBriefErrorMessage } from '@/lib/api-client'
 import type { ChatMessage } from '@/lib/chatStorage'
 
 // Generate unique ID with fallback for environments without crypto.randomUUID
@@ -79,7 +80,44 @@ export function ChatFooter() {
 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'error'>('connected')
   const [retryAttempt, setRetryAttempt] = useState(0)
+  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const MAX_RETRIES = 2
+
+  // Health check on mount
+  useEffect(() => {
+    if (!mounted) return
+
+    const checkHealth = async () => {
+      try {
+        // Add timeout to prevent hanging
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+        const response = await fetch('/api/chat/health', {
+          method: 'GET',
+          credentials: 'include',
+          signal: controller.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (response.ok) {
+          const data = await response.json()
+          setBackendHealthy(data.status === 'healthy')
+          setConnectionStatus('connected')
+        } else {
+          setBackendHealthy(false)
+          setConnectionStatus('error')
+        }
+      } catch (error) {
+        console.error('Health check failed:', error)
+        setBackendHealthy(false)
+        setConnectionStatus('error')
+      }
+    }
+
+    checkHealth()
+  }, [mounted])
 
   const sendMessageWithRetry = async (messageText: string, attemptCount = 0) => {
     setIsLoading(true)
@@ -130,6 +168,9 @@ export function ChatFooter() {
     } catch (error) {
       console.error('Chat error:', error)
       
+      // Get user-friendly error message using shared utility
+      const errorMessage = getBriefErrorMessage(error) || 'Unable to connect to KIAAN.'
+      
       // Retry logic
       if (attemptCount < MAX_RETRIES) {
         setRetryAttempt(attemptCount + 1)
@@ -146,12 +187,12 @@ export function ChatFooter() {
           sendMessageWithRetry(messageText, attemptCount + 1)
         }, 2000)
       } else {
-        // Final failure
+        // Final failure - use the specific error message
         setConnectionStatus('error')
         addMessage({
           id: generateId(),
           sender: 'assistant',
-          text: 'Unable to connect to KIAAN. Please try again or visit the main chat page for a better experience.',
+          text: `${errorMessage} Please visit the main chat page for a better experience, or try again later.`,
           timestamp: new Date().toISOString(),
           status: 'error',
         })
