@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, easeInOut, easeOut } from 'framer-motion';
 import { useState } from 'react';
 
 interface InnerPeaceLogoProps {
@@ -41,7 +41,7 @@ export function InnerPeaceLogo({
   const breathingTransition = {
     duration: isClicked ? 2 : 4,
     repeat: isClicked ? 0 : Infinity,
-    ease: 'easeInOut',
+    ease: easeInOut,
   };
 
   // Glow effect
@@ -55,7 +55,7 @@ export function InnerPeaceLogo({
   const glowTransition = {
     duration: isHovered ? 2 : 3,
     repeat: Infinity,
-    ease: 'easeInOut',
+    ease: easeInOut,
   };
 
   return (
@@ -149,7 +149,7 @@ export function InnerPeaceLogo({
                   ? `rotate(${angle} 50 50) translate(0 -24)`
                   : `rotate(${angle} 50 50) translate(0 -22)`,
               } : undefined}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 2, repeat: Infinity, ease: easeInOut }}
             />
           ))}
         </g>
@@ -172,7 +172,7 @@ export function InnerPeaceLogo({
                   ? `rotate(${angle} 50 50) translate(0 -20)`
                   : `rotate(${angle} 50 50) translate(0 -18)`,
               } : undefined}
-              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: easeInOut, delay: 0.2 }}
             />
           ))}
         </g>
@@ -186,7 +186,7 @@ export function InnerPeaceLogo({
           animate={motionEnabled ? {
             r: isClicked ? [12, 16, 12] : [12, 13, 12],
           } : undefined}
-          transition={{ duration: isClicked ? 2 : 3, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: isClicked ? 2 : 3, repeat: Infinity, ease: easeInOut }}
         />
 
         {/* Inner highlight */}
@@ -225,7 +225,7 @@ export function InnerPeaceLogo({
           className="absolute inset-0 rounded-full border-2 border-sky-300"
           initial={{ scale: 1, opacity: 0.6 }}
           animate={{ scale: 2, opacity: 0 }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
+          transition={{ duration: 1.5, ease: easeOut }}
         />
       )}
 
