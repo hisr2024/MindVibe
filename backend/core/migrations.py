@@ -90,17 +90,20 @@ def _strip_comments(sql_text: str) -> str:
             if '*/' in line:
                 in_block_comment = False
                 # Keep text after the closing block comment
-                line = line.split('*/', 1)[1] if '*/' in line else ''
+                line = line.split('*/', 1)[1]
             else:
                 continue  # Skip lines inside block comment
 
         # Check for block comment start
         if '/*' in line:
             before_comment = line.split('/*', 1)[0]
-            after_comment = line.split('*/', 1)[1] if '*/' in line else ''
-            if '*/' not in line:
+            # Check if block comment closes on the same line
+            if '*/' in line:
+                after_comment = line.split('*/', 1)[1]
+                line = before_comment + after_comment
+            else:
                 in_block_comment = True
-            line = before_comment + after_comment
+                line = before_comment
 
         # Remove line comments
         if '--' in line:

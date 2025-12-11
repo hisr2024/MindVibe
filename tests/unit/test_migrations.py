@@ -19,8 +19,10 @@ SELECT * FROM users;
 -- Another comment
 SELECT * FROM posts;"""
         result = _strip_comments(sql)
-        assert "-- Comment" not in result
-        assert "-- Another" not in result
+        # Verify comments are removed
+        assert "Comment at the start" not in result
+        assert "Another comment" not in result
+        # Verify SQL is preserved
         assert "SELECT * FROM users;" in result
         assert "SELECT * FROM posts;" in result
 
