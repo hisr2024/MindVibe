@@ -70,14 +70,15 @@ CREATE TABLE IF NOT EXISTS user_assessments (
     assessment_date DATE NOT NULL DEFAULT CURRENT_DATE,
     assessment_type VARCHAR(50) NOT NULL DEFAULT 'weekly',
     questions_responses JSONB NOT NULL DEFAULT '{}'::jsonb,
-    calculated_scores JSONB DEFAULT '{}'::jsonb,
-    recommended_focus_areas JSONB DEFAULT '[]'::jsonb,
-    personalized_verses JSONB DEFAULT '[]'::jsonb,
-    overall_score INTEGER CHECK (overall_score >= 0 AND overall_score <= 100),
+    scores JSONB DEFAULT '{}'::jsonb,
+    recommended_actions JSONB DEFAULT '[]'::jsonb,
+    gita_verse_recommendations JSONB DEFAULT '[]'::jsonb,
+    overall_score INTEGER CHECK (overall_score >= 1 AND overall_score <= 100),
     completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(user_id, assessment_date, assessment_type)
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_assessments_user ON user_assessments(user_id);
@@ -88,13 +89,15 @@ CREATE INDEX IF NOT EXISTS idx_user_assessments_type ON user_assessments(assessm
 CREATE TABLE IF NOT EXISTS user_verses_bookmarked (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
-    verse_id INTEGER NOT NULL,
-    bookmark_reason VARCHAR(255),
+    verse_id VARCHAR(100) NOT NULL,
     personal_notes TEXT,
-    tags JSONB DEFAULT '[]'::jsonb,
+    emotional_context VARCHAR(100),
+    bookmarked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_viewed_at TIMESTAMP WITH TIME ZONE,
+    times_revisited INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (verse_id) REFERENCES gita_verses(id) ON DELETE CASCADE,
     UNIQUE(user_id, verse_id)
 );
 
