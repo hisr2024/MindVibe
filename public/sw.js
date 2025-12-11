@@ -23,7 +23,7 @@ const CACHEABLE_API_ROUTES = [
 
 // Cache duration in milliseconds
 const CACHE_DURATION = {
-  CRITICAL: 365 * 24 * 60 * 60 * 1000, // 1 year for Gita verses
+  CRITICAL: 365 * 24 * 60 * 60 * 1000, // 1 year for wisdom verses
   HIGH: 30 * 24 * 60 * 60 * 1000, // 30 days for conversations
   MEDIUM: 7 * 24 * 60 * 60 * 1000, // 7 days for responses
   LOW: 24 * 60 * 60 * 1000, // 24 hours for UI preferences

@@ -75,7 +75,7 @@ export default function KiaanBadge({
               <div>
                 <div className="font-semibold mb-1">KIAAN Wisdom Engine</div>
                 <div className="text-gray-300">
-                  Ancient wisdom from the Bhagavad Gita, adapted for modern life.
+                  Ancient wisdom adapted for modern life.
                 </div>
               </div>
               

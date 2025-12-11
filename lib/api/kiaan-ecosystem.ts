@@ -14,7 +14,7 @@ export const KIAAN_TOOLS: KiaanTool[] = [
   {
     id: 'kiaan-chat',
     name: 'KIAAN Chat',
-    description: 'AI companion powered by Bhagavad Gita wisdom',
+    description: 'AI companion powered by Ancient Wisdom',
     category: 'wisdom',
     endpoint: '/api/chat/message',
     route: '/chat',

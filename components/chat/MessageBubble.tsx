@@ -14,7 +14,7 @@ interface MessageBubbleProps {
   status?: 'error'
   onSaveToJournal?: (text: string) => void
   summary?: string
-  gitaPowered?: boolean  // New prop to indicate Gita-powered response
+  gitaPowered?: boolean  // New prop to indicate wisdom-powered response
   verseReference?: string  // New prop for verse chapter reference (e.g., "Ch. 2-6")
   viewMode?: 'detailed' | 'summary'
 }
@@ -75,7 +75,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
           {timestamp ? new Date(timestamp).toLocaleTimeString() : ''}
         </span>
         
-        {/* Gita Wisdom Badge for assistant messages */}
+        {/* Ancient Wisdom Badge for assistant messages */}
         {sender === 'assistant' && gitaPowered && !status && (
           <div className="relative">
             <div
@@ -83,10 +83,10 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               onMouseEnter={() => setShowVerseHover(true)}
               onMouseLeave={() => setShowVerseHover(false)}
               role="tooltip"
-              aria-label="This response is rooted in Bhagavad Gita wisdom"
+              aria-label="This response is rooted in Ancient Wisdom"
             >
               <span className="text-xs">🕉️</span>
-              <span>Gita Wisdom</span>
+              <span>Ancient Wisdom</span>
             </div>
             
             {/* Hover tooltip for verse reference */}
@@ -95,8 +95,8 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
                 <div className="font-semibold text-orange-300 mb-0.5">Rooted in Ancient Wisdom</div>
                 <div className="text-orange-100/70">
                   {verseReference 
-                    ? `Drawing from Bhagavad Gita ${verseReference}` 
-                    : 'Based on 700 verses of timeless teaching'}
+                    ? `Drawing from verse ${verseReference}` 
+                    : 'Based on timeless teachings'}
                 </div>
                 <div className="mt-1 pt-1 border-t border-orange-500/20 text-orange-200/60 text-[10px]">
                   Every KIAAN response is validated for authenticity
@@ -139,7 +139,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         </div>
       )}
 
-      {/* Learn More About Gita link */}
+      {/* Learn More About Ancient Wisdom link */}
       {sender === 'assistant' && gitaPowered && !status && (
         <div className="flex items-center gap-3">
           <a
@@ -147,9 +147,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
             target="_blank"
             rel="noopener noreferrer"
             className="text-[11px] text-orange-300/70 hover:text-orange-200 transition-colors underline decoration-dotted underline-offset-2"
-            aria-label="Learn more about the Bhagavad Gita wisdom engine"
+            aria-label="Learn more about the Ancient Wisdom engine"
           >
-            Learn More About Gita Wisdom →
+            Learn More About Ancient Wisdom →
           </a>
         </div>
       )}
