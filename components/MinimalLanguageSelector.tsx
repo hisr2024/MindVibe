@@ -1,12 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { locales, localeNames, type Locale, defaultLocale } from '@/i18n';
 import { springConfigs } from '@/lib/animations/spring-configs';
-
-// Lazy load the 3D globe logo
-const LanguageGlobeLogo = lazy(() => import('@/components/logos/LanguageGlobeLogo'));
 
 const flagEmojis: Record<Locale, string> = {
   en: '🇬🇧',
@@ -101,7 +98,7 @@ export function MinimalLanguageSelector() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Minimalist Globe Icon Button with 3D Logo */}
+      {/* Minimalist Globe Icon Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
@@ -109,27 +106,23 @@ export function MinimalLanguageSelector() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={springConfigs.smooth}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/30 bg-white/5 text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-400/50 overflow-hidden"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/30 bg-white/5 text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-400/50"
         aria-label="Select language"
         aria-expanded={isOpen}
         aria-haspopup="true"
         title={localeNames[currentLocale]}
       >
-        <Suspense fallback={
-          <motion.span 
-            className="text-xl" 
-            role="img" 
-            aria-label="Language"
-            animate={{
-              rotate: isOpen ? 180 : 0,
-            }}
-            transition={springConfigs.smooth}
-          >
-            🌐
-          </motion.span>
-        }>
-          <LanguageGlobeLogo size={40} />
-        </Suspense>
+        <motion.span 
+          className="text-xl" 
+          role="img" 
+          aria-label="Language"
+          animate={{
+            rotate: isOpen ? 180 : 0,
+          }}
+          transition={springConfigs.smooth}
+        >
+          🌐
+        </motion.span>
       </motion.button>
 
       <AnimatePresence>

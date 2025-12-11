@@ -28,9 +28,6 @@
     "@radix-ui/react-hover-card": "^1.1.15",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@react-three/drei": "^9.96.0",
-    "@react-three/fiber": "^8.15.12",
-    "@react-three/postprocessing": "^2.16.0",
     "axios": "^1.7.9",
     "bcryptjs": "file:vendor/bcryptjs",
     "canvas-confetti": "^1.9.4",
@@ -50,7 +47,6 @@
     "recharts": "^2.15.4",
     "simplebar": "^6.3.0",
     "simplebar-react": "^2.4.3",
-    "three": "^0.161.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
