@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import { useHapticFeedback, useStreamingText } from '@/hooks';
 import { springConfigs } from '@/lib/animations/spring-configs';
+import { useLanguage } from '@/hooks/useLanguage';
 
 /**
  * KIAAN Footer with Expandable Chat Interface
@@ -24,6 +25,7 @@ interface Message {
 
 export function KiaanFooter() {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -224,8 +226,8 @@ export function KiaanFooter() {
                   <span className="text-sm font-bold text-slate-900">K</span>
                 </motion.div>
                 <div>
-                  <h3 className="text-sm font-semibold text-orange-50">KIAAN Chat</h3>
-                  <p className="text-xs text-orange-100/60">Your Guide to Inner Peace</p>
+                  <h3 className="text-sm font-semibold text-orange-50">{t('kiaan.chat.title', 'KIAAN Chat')}</h3>
+                  <p className="text-xs text-orange-100/60">{t('kiaan.welcome.subtitle', 'Your Guide to Inner Peace')}</p>
                 </div>
               </div>
               <button
@@ -245,8 +247,8 @@ export function KiaanFooter() {
                 <div className="text-center py-8 space-y-4">
                   <div className="text-4xl">🕉️</div>
                   <div>
-                    <p className="text-sm text-orange-100/80">Welcome to KIAAN Chat</p>
-                    <p className="text-xs text-orange-100/60 mt-1">How can I support you today?</p>
+                    <p className="text-sm text-orange-100/80">{t('kiaan.welcome.title', 'Welcome to KIAAN Chat')}</p>
+                    <p className="text-xs text-orange-100/60 mt-1">{t('kiaan.chat.emptyState.subtitle', 'How can I support you today?')}</p>
                   </div>
                   
                   {/* Quick prompts */}
@@ -321,7 +323,7 @@ export function KiaanFooter() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type your message..."
+                  placeholder={t('kiaan.chat.placeholder', 'Type your message...')}
                   disabled={isLoading}
                   className="flex-1 rounded-xl border border-orange-500/30 bg-white/10 px-4 py-2 text-sm text-orange-50 placeholder:text-orange-100/40 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/30 disabled:opacity-50"
                 />
@@ -330,7 +332,7 @@ export function KiaanFooter() {
                   disabled={!inputValue.trim() || isLoading}
                   className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  Send
+                  {t('kiaan.chat.send', 'Send')}
                 </button>
               </div>
             </div>

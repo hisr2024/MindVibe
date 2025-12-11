@@ -83,11 +83,10 @@ export function MinimalLanguageSelector() {
     updateHtmlLang(newLocale);
     setIsOpen(false);
 
-    // Trigger a custom event that components can listen to
+    // Trigger a custom event that LanguageProvider listens to
     window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale: newLocale } }));
     
-    // Reload page to apply new translations
-    window.location.reload();
+    // No need to reload - React will handle the re-render
   }
 
   function handleKeyDown(event: React.KeyboardEvent, locale: Locale) {

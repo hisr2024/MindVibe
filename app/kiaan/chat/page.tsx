@@ -5,12 +5,14 @@ import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import Link from 'next/link';
+import { useLanguage } from '@/hooks/useLanguage';
 
 /**
  * Dedicated KIAAN Chat Page - Inner Component
  * Full-featured chat interface with mood context support
  */
 function KiaanChatPageInner() {
+  const { t, isInitialized } = useLanguage();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -161,23 +163,23 @@ function KiaanChatPageInner() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
-              Talk to KIAAN
+              {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
             <p className="mt-2 text-sm text-orange-100/80 md:text-base">
-              Your calm, privacy-first mental wellness companion powered by ancient wisdom
+              {t('kiaan.chat.subtitle', 'Your calm, privacy-first mental wellness companion powered by ancient wisdom')}
             </p>
           </div>
           <Link
             href="/"
             className="rounded-xl border border-orange-500/30 bg-white/5 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
           >
-            ← Home
+            ← {t('navigation.mainNav.home', 'Home')}
           </Link>
         </div>
 
         <div className="flex items-center gap-2 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 text-sm text-orange-100/80">
           <span className="text-lg">🔒</span>
-          <span>Conversations remain private • a warm, confidential refuge</span>
+          <span>{t('home.hero.privacy', 'Conversations remain private • a warm, confidential refuge')}</span>
         </div>
       </div>
 

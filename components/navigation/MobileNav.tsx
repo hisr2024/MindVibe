@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ToolsSheet } from './ToolsSheet'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export interface NavTab {
   id: string
@@ -105,6 +106,21 @@ const defaultTabs: NavTab[] = [
 export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps) {
   const pathname = usePathname()
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
+  const { t } = useLanguage()
+
+  // Translation map for tab labels
+  const getTabLabel = (tabId: string, defaultLabel: string): string => {
+    const translationKeys: Record<string, string> = {
+      'kiaan-chat': 'navigation.mobileNav.chat',
+      'home': 'navigation.mainNav.home',
+      'journal': 'navigation.mobileNav.journal',
+      'wisdom': 'navigation.features.wisdomRooms',
+      'tools': 'common.buttons.tools',
+      'profile': 'navigation.mainNav.profile',
+    }
+    
+    return translationKeys[tabId] ? t(translationKeys[tabId], defaultLabel) : defaultLabel
+  }
 
   return (
     <>
@@ -143,7 +159,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                       toolsSheetOpen ? 'font-semibold' : ''
                     }`}
                   >
-                    {tab.label}
+                    {getTabLabel(tab.id, tab.label)}
                   </span>
                 </button>
               )
@@ -172,7 +188,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     isActive ? 'font-semibold' : ''
                   }`}
                 >
-                  {tab.label}
+                  {getTabLabel(tab.id, tab.label)}
                 </span>
               </Link>
             )
