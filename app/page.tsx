@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, lazy } from 'react';
 import { KiaanLogo } from '@/src/components/KiaanLogo';
 import { InnerPeaceLogo } from '@/components/branding';
 import { MinimalFeatures } from '@/components/home/MinimalFeatures';
@@ -10,9 +9,6 @@ import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
 import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector';
 import { useLanguage } from '@/hooks/useLanguage';
 
-// Lazy load the 3D logo for better performance
-const LivingKiaanLogo = lazy(() => import('@/components/logos/LivingKiaanLogo'));
-
 /**
  * Redesigned Home Page
  * - Minimal authentic introduction
@@ -20,7 +16,6 @@ const LivingKiaanLogo = lazy(() => import('@/components/logos/LivingKiaanLogo'))
  * - Colored stone mood check-in
  * - KIAAN Chat moved to /kiaan/chat
  * - Flowing energy triangle
- * - Floating 3D KIAAN logo in hero
  */
 export default function Home() {
   const { t, isInitialized } = useLanguage();
@@ -57,13 +52,6 @@ export default function Home() {
         <header className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-10">
           <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
           <div className="absolute bottom-4 left-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
-          
-          {/* Floating 3D KIAAN Logo - Top Right Corner */}
-          <div className="absolute top-4 right-4 z-10 hidden md:block">
-            <Suspense fallback={<div className="w-32 h-32 flex items-center justify-center text-5xl">🕉️</div>}>
-              <LivingKiaanLogo size={120} emotionalState="peaceful" interactive showAura />
-            </Suspense>
-          </div>
           
           <div className="relative flex flex-col items-center justify-center space-y-4 text-center">
             <div className="flex flex-wrap items-center justify-center gap-6">
