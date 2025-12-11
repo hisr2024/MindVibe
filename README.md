@@ -17,7 +17,7 @@ MindVibe is a comprehensive mental health platform that provides:
 - 📝 **Encrypted Journal** - Private, secure journaling
 - 🌍 **Universal Wisdom** - Ancient teachings without religious terminology
 - 🔒 **Privacy-First** - End-to-end encryption for sensitive data
-- 🌐 **Multi-Language** - 17 languages including English, Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Sanskrit, Spanish, French, German, Portuguese, Japanese, and Chinese
+- 🌐 **Multi-Language** - Support for 17 languages (see full list below)
 
 ---
 
