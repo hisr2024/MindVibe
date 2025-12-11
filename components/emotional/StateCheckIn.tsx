@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { MoodParticles } from './MoodParticles'
+import { AnimatedIntensitySlider } from './AnimatedIntensitySlider'
+import { StateGlowEffect } from './StateGlowEffect'
+import { useHapticFeedback } from '@/hooks'
 
 /**
  * State Check-In Component
@@ -65,9 +69,26 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
   const [selectedState, setSelectedState] = useState<EmotionalState | null>(null)
   const [intensity, setIntensity] = useState(5)
   const [hoveredState, setHoveredState] = useState<string | null>(null)
+  const [particleTrigger, setParticleTrigger] = useState<{ id: string; origin: { x: number; y: number } } | null>(null)
+  const { triggerHaptic } = useHapticFeedback()
 
-  const handleStateClick = (state: EmotionalState) => {
+  const handleStateClick = (state: EmotionalState, event: React.MouseEvent) => {
     setSelectedState(state)
+    triggerHaptic('medium')
+    
+    // Trigger particle effect at click position
+    const rect = event.currentTarget.getBoundingClientRect()
+    setParticleTrigger({
+      id: `${state.id}-${Date.now()}`,
+      origin: {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      },
+    })
+    
+    // Clear particle trigger after animation
+    setTimeout(() => setParticleTrigger(null), 100)
+    
     if (onStateSelect) {
       onStateSelect(state, intensity)
     }
@@ -165,49 +186,30 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
             </button>
           </div>
 
-          {/* Energy Bar */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-orange-100/70">Intensity</span>
-              <span className="font-semibold text-orange-50">{intensity}/{MAX_INTENSITY}</span>
-            </div>
-            <input
-              type="range"
-              min={MIN_INTENSITY}
-              max={MAX_INTENSITY}
-              value={intensity}
-              onChange={(e) => {
-                const newIntensity = parseInt(e.target.value)
-                setIntensity(newIntensity)
-                if (onStateSelect) {
-                  onStateSelect(selectedState, newIntensity)
-                }
-              }}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, ${selectedState.color} 0%, ${selectedState.color} ${intensity * INTENSITY_PERCENTAGE_MULTIPLIER}%, rgba(255, 255, 255, 0.1) ${intensity * INTENSITY_PERCENTAGE_MULTIPLIER}%, rgba(255, 255, 255, 0.1) 100%)`,
-              }}
-            />
-            <div className="flex justify-between text-xs text-orange-100/60">
-              <span>Subtle</span>
-              <span>Intense</span>
-            </div>
-          </div>
-
-          {/* Energy Bar Visualization */}
-          <div className="mt-4 flex gap-1">
-            {Array.from({ length: MAX_INTENSITY }).map((_, i) => (
-              <div
-                key={i}
-                className="flex-1 h-8 rounded transition-all duration-300"
-                style={{
-                  backgroundColor: i < intensity ? selectedState.color : 'rgba(255, 255, 255, 0.1)',
-                  boxShadow: i < intensity ? `0 0 8px ${selectedState.glowColor}` : 'none',
-                }}
-              />
-            ))}
-          </div>
+          {/* Animated Intensity Slider */}
+          <AnimatedIntensitySlider
+            value={intensity}
+            onChange={(newIntensity) => {
+              setIntensity(newIntensity)
+              if (onStateSelect) {
+                onStateSelect(selectedState, newIntensity)
+              }
+            }}
+            color={selectedState.color}
+            glowColor={selectedState.glowColor}
+          />
         </motion.div>
+      )}
+
+      {/* Particle effect overlay */}
+      {particleTrigger && selectedState && (
+        <div className="fixed inset-0 pointer-events-none z-50">
+          <MoodParticles
+            color={selectedState.color}
+            trigger={!!particleTrigger}
+            origin={particleTrigger.origin}
+          />
+        </div>
       )}
     </div>
   )
@@ -218,41 +220,34 @@ interface StateCircleProps {
   isSelected: boolean
   isHovered: boolean
   onHover: (stateId: string | null) => void
-  onClick: (state: EmotionalState) => void
+  onClick: (state: EmotionalState, event: React.MouseEvent) => void
 }
 
 function StateCircle({ state, isSelected, isHovered, onHover, onClick }: StateCircleProps) {
   return (
     <motion.button
-      onClick={() => onClick(state)}
+      onClick={(e) => onClick(state, e)}
       onMouseEnter={() => onHover(state.id)}
       onMouseLeave={() => onHover(null)}
-      whileHover={{ scale: 1.1 }}
+      whileHover={{ scale: 1.1, z: 20 }}
       whileTap={{ scale: 0.95 }}
       className="relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-400/50"
       style={{
         backgroundColor: isSelected || isHovered ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+        perspective: '1000px',
       }}
     >
-      {/* Glowing Circle */}
+      {/* Glowing Circle with 3D effect */}
       <div
         className="relative flex items-center justify-center transition-all duration-300"
         style={{
           filter: isSelected || isHovered ? `drop-shadow(0 0 12px ${state.glowColor})` : 'none',
+          transform: isHovered ? 'translateZ(10px)' : 'translateZ(0)',
+          transformStyle: 'preserve-3d',
         }}
       >
-        {/* Outer glow ring */}
-        {(isSelected || isHovered) && (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.6 }}
-            className="absolute inset-0 rounded-full"
-            style={{
-              backgroundColor: state.color,
-              filter: 'blur(8px)',
-            }}
-          />
-        )}
+        {/* Glow effect */}
+        <StateGlowEffect state={state} isActive={isSelected || isHovered} />
         
         {/* Main circle */}
         <div
@@ -261,6 +256,7 @@ function StateCircle({ state, isSelected, isHovered, onHover, onClick }: StateCi
             backgroundColor: state.color,
             borderColor: isSelected ? 'rgba(255, 255, 255, 0.4)' : 'transparent',
             boxShadow: isSelected ? `0 0 20px ${state.glowColor}` : isHovered ? `0 0 12px ${state.glowColor}` : 'none',
+            transform: isSelected ? 'scale(1.1)' : 'scale(1)',
           }}
         >
           {state.emoji}

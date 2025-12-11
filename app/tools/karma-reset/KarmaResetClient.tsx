@@ -8,10 +8,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
+import { BreathingOrb } from '@/components/animations/BreathingOrb'
+import { ConfettiEffect } from '@/components/animations/ConfettiEffect'
 import { getBriefErrorMessage } from '@/lib/api-client'
 import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
+import { springConfigs } from '@/lib/animations/spring-configs'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
 
@@ -36,6 +40,7 @@ export default function KarmaResetClient() {
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
   const MAX_RETRIES = 2
 
   // Health check on mount
@@ -170,6 +175,11 @@ export default function KarmaResetClient() {
     setResetGuidance(null)
     setKiaanMetadata(null)
     setError(null)
+    setShowConfetti(false)
+  }
+
+  const handleComplete = () => {
+    setShowConfetti(true)
   }
 
   return (
@@ -181,9 +191,27 @@ export default function KarmaResetClient() {
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-3">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                  💚 Karma Reset
-                </h1>
+                <motion.h1 
+                  className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={springConfigs.smooth}
+                >
+                  <motion.span
+                    animate={{
+                      scale: [1, 1.08, 1],
+                      rotate: [0, 3, -3, 0],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    💚
+                  </motion.span>
+                  Karma Reset
+                </motion.h1>
                 {/* Connection status indicator */}
                 {backendHealthy !== null && (
                   <span className="flex items-center gap-2 text-xs">
@@ -340,26 +368,45 @@ export default function KarmaResetClient() {
 
             {/* Breathing Step */}
             {currentStep === 'breathing' && resetGuidance && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 text-center">
-                <div className="text-6xl mb-6 animate-pulse">🧘</div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              <motion.div 
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={springConfigs.smooth}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
                   Pause & Breathe
                 </h2>
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-8">
                   {resetGuidance.breathingLine}
                 </p>
-                <button
-                  onClick={() => setCurrentStep('plan')}
-                  className="mt-8 px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors"
-                >
-                  Continue to Plan
-                </button>
-              </div>
+                
+                <BreathingOrb
+                  size={250}
+                  color="#a855f7"
+                  pattern="4-7-8"
+                  className="my-8"
+                />
+                
+                <div className="text-center mt-8">
+                  <button
+                    onClick={() => setCurrentStep('plan')}
+                    className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors"
+                  >
+                    Continue to Plan
+                  </button>
+                </div>
+              </motion.div>
             )}
 
             {/* Plan Step */}
             {currentStep === 'plan' && resetGuidance && (
-              <div className="space-y-6">
+              <motion.div 
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={springConfigs.smooth}
+              >
                 <ResetPlanCard
                   plan={{
                     pauseAndBreathe: resetGuidance.breathingLine,
@@ -370,8 +417,19 @@ export default function KarmaResetClient() {
                   animated={true}
                 />
                 
+                {/* Confetti Effect */}
+                <ConfettiEffect trigger={showConfetti} />
+                
                 {/* Actions */}
                 <div className="flex gap-4 justify-center">
+                  <motion.button
+                    onClick={handleComplete}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold transition-all shadow-lg"
+                  >
+                    ✨ Complete Reset
+                  </motion.button>
                   <button
                     onClick={resetForm}
                     className="px-6 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold transition-colors"
@@ -379,7 +437,7 @@ export default function KarmaResetClient() {
                     Start New Reset
                   </button>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
 

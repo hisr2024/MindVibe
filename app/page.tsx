@@ -6,6 +6,7 @@ import { InnerPeaceLogo } from '@/components/branding';
 import { MinimalFeatures } from '@/components/home/MinimalFeatures';
 import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
 import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
+import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector';
 
 /**
  * Redesigned Home Page
@@ -18,6 +19,11 @@ import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden p-4 pb-28 md:p-8">
+      {/* Language Selector - Fixed Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <MinimalLanguageSelector />
+      </div>
+
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/25 via-[#ff9933]/14 to-transparent blur-3xl" />

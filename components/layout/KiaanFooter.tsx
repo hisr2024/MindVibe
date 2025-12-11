@@ -4,6 +4,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
+import { useHapticFeedback, useStreamingText } from '@/hooks';
+import { springConfigs } from '@/lib/animations/spring-configs';
 
 /**
  * KIAAN Footer with Expandable Chat Interface
@@ -17,6 +19,7 @@ interface Message {
   text: string;
   timestamp: string;
   status?: 'error';
+  isStreaming?: boolean;
 }
 
 export function KiaanFooter() {
@@ -25,8 +28,10 @@ export function KiaanFooter() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { triggerHaptic } = useHapticFeedback();
 
   // Don't show on the dedicated KIAAN chat page to avoid duplication
   const shouldHide = pathname === '/kiaan/chat';
@@ -48,6 +53,9 @@ export function KiaanFooter() {
   const handleSendMessage = useCallback(async (text?: string) => {
     const messageText = text || inputValue.trim();
     if (!messageText) return;
+
+    // Haptic feedback on send
+    triggerHaptic('light');
 
     // Generate UUID with fallback for browser compatibility
     const generateId = () => {
@@ -81,16 +89,33 @@ export function KiaanFooter() {
       }
 
       const data = await response.json();
+      const assistantMessageId = generateId();
       
-      // Add assistant message
+      // Add assistant message with streaming flag
       const assistantMessage: Message = {
-        id: generateId(),
+        id: assistantMessageId,
         sender: 'assistant',
         text: data.response || "I'm here for you. Let's try again. 💙",
         timestamp: new Date().toISOString(),
+        isStreaming: true,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      setStreamingMessageId(assistantMessageId);
+
+      // Complete streaming after a brief moment
+      setTimeout(() => {
+        setStreamingMessageId(null);
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === assistantMessageId 
+              ? { ...msg, isStreaming: false }
+              : msg
+          )
+        );
+        triggerHaptic('success');
+      }, data.response.length * 20); // Simulate streaming based on text length
+
     } catch (error) {
       console.error('KIAAN chat error:', error);
       
@@ -104,10 +129,11 @@ export function KiaanFooter() {
       };
 
       setMessages(prev => [...prev, errorMessage]);
+      triggerHaptic('error');
     } finally {
       setIsLoading(false);
     }
-  }, [inputValue]);
+  }, [inputValue, triggerHaptic]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -125,23 +151,75 @@ export function KiaanFooter() {
 
   if (shouldHide) return null;
 
+  // Enhanced footer animation variants
+  const footerVariants = {
+    collapsed: { 
+      height: 56, 
+      opacity: 0.95, 
+      y: 0,
+      transition: springConfigs.smooth 
+    },
+    expanded: { 
+      height: 480, 
+      opacity: 1, 
+      y: 0,
+      transition: springConfigs.smooth 
+    },
+  };
+
+  // Avatar animation states
+  const avatarVariants = {
+    idle: {
+      scale: [1, 1.05, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
+    },
+    thinking: {
+      scale: [1, 1.1, 1],
+      boxShadow: [
+        '0 0 20px rgba(255, 115, 39, 0.4)',
+        '0 0 40px rgba(255, 115, 39, 0.6)',
+        '0 0 20px rgba(255, 115, 39, 0.4)',
+      ],
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
+    },
+    celebrating: {
+      rotate: [0, -10, 10, -10, 10, 0],
+      scale: [1, 1.2, 1],
+      transition: {
+        duration: 0.6,
+      },
+    },
+  };
+
   return (
     <div className="fixed bottom-0 right-0 z-50 p-4 md:p-6">
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            variants={footerVariants}
+            initial="collapsed"
+            animate="expanded"
+            exit="collapsed"
             className="mb-4 w-[380px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900/98 via-slate-900/95 to-slate-900/98 shadow-2xl shadow-orange-500/20 backdrop-blur-xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-300">
+                <motion.div 
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-300"
+                  variants={avatarVariants}
+                  animate={isLoading ? 'thinking' : 'idle'}
+                >
                   <span className="text-sm font-bold text-slate-900">K</span>
-                </div>
+                </motion.div>
                 <div>
                   <h3 className="text-sm font-semibold text-orange-50">KIAAN Chat</h3>
                   <p className="text-xs text-orange-100/60">Your Guide to Inner Peace</p>
@@ -184,9 +262,12 @@ export function KiaanFooter() {
                 </div>
               ) : (
                 messages.map((message) => (
-                  <div
+                  <motion.div
                     key={message.id}
                     className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    initial={{ opacity: 0, x: message.sender === 'user' ? 20 : -20, y: 10 }}
+                    animate={{ opacity: 1, x: 0, y: 0 }}
+                    transition={springConfigs.smooth}
                   >
                     <div
                       className={`max-w-[85%] rounded-2xl px-4 py-2 ${
@@ -197,7 +278,11 @@ export function KiaanFooter() {
                           : 'bg-white/10 text-orange-50'
                       }`}
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                      {message.isStreaming && message.sender === 'assistant' ? (
+                        <StreamingText text={message.text} />
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                      )}
                       <p className="text-[10px] mt-1 opacity-60">
                         {new Date(message.timestamp).toLocaleTimeString([], { 
                           hour: '2-digit', 
@@ -205,7 +290,7 @@ export function KiaanFooter() {
                         })}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               )}
               
@@ -252,9 +337,26 @@ export function KiaanFooter() {
 
       {/* Toggle Button */}
       <motion.button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          setIsExpanded(!isExpanded);
+          triggerHaptic('medium');
+        }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
+        animate={isExpanded ? {} : { 
+          boxShadow: [
+            '0 20px 60px rgba(255, 115, 39, 0.4)',
+            '0 20px 80px rgba(255, 115, 39, 0.6)',
+            '0 20px 60px rgba(255, 115, 39, 0.4)',
+          ],
+        }}
+        transition={{
+          boxShadow: {
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+        }}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl shadow-orange-500/40 transition-shadow hover:shadow-orange-500/60"
         aria-label={isExpanded ? 'Close KIAAN chat' : 'Open KIAAN chat'}
       >
@@ -286,6 +388,18 @@ export function KiaanFooter() {
         </AnimatePresence>
       </motion.button>
     </div>
+  );
+}
+
+// Streaming Text Component for typing effect
+function StreamingText({ text }: { text: string }) {
+  const { displayedText } = useStreamingText(text, { speed: 40 });
+  
+  return (
+    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+      {displayedText}
+      <span className="inline-block w-0.5 h-4 ml-1 bg-current animate-pulse" />
+    </p>
   );
 }
 
