@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo, Suspense } from 'react';
+import { useRef, useMemo, Suspense, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -88,7 +88,7 @@ function TorusLogo({ config, interactive, showAura }: {
   const torusRef = useRef<THREE.Mesh>(null);
   const sphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
 
   useFrame(({ clock }) => {
     if (torusRef.current && sphereRef.current && groupRef.current) {

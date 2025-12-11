@@ -24,12 +24,14 @@ interface BreathingOrbProps {
 
 type BreathPhase = 'inhale' | 'hold' | 'exhale';
 
+type EasingType = 'easeIn' | 'easeOut' | 'linear' | 'easeInOut';
+
 interface PhaseConfig {
   duration: number;
   label: string;
   emoji: string;
   scale: number;
-  easing: string;
+  easing: EasingType;
 }
 
 const phaseConfigs: Record<BreathPhase, PhaseConfig> = {
@@ -240,7 +242,7 @@ export function BreathingOrb({
                 }}
                 transition={{
                   duration: config.duration,
-                  ease: config.easing as any,
+                  ease: config.easing,
                 }}
                 key={`${phase}-${count}`}
               >

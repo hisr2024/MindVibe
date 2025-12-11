@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, Suspense } from 'react';
+import { useRef, Suspense, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -39,7 +39,7 @@ function Globe({ hovered }: { hovered: boolean }) {
   });
 
   // Generate simple continent-like patterns
-  const continents = React.useMemo(() => {
+  const continents = useMemo(() => {
     const temp = [];
     for (let i = 0; i < 20; i++) {
       const phi = Math.acos(-1 + (2 * i) / 20);
@@ -127,7 +127,7 @@ export function LanguageGlobeLogo({
   size = 32, 
   className = '' 
 }: LanguageGlobeLogoProps) {
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const prefersReducedMotion = 
     typeof window !== 'undefined' && 

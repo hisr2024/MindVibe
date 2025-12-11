@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, Suspense } from 'react';
+import { useRef, Suspense, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -143,7 +143,7 @@ export function JournalLogo3D({
   size = 40, 
   className = '' 
 }: JournalLogo3DProps) {
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const prefersReducedMotion = 
     typeof window !== 'undefined' && 
