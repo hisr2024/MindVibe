@@ -89,8 +89,7 @@ export async function apiCall(
   } catch (error) {
     // Handle network errors
     if (error instanceof TypeError) {
-      // Network errors are typically TypeErrors from fetch
-      // This could be CORS, network failure, or connection issues
+      // TypeError from fetch typically indicates network failures (e.g., no internet, DNS failure, connection refused)
       throw new APIError(
         'Cannot connect to KIAAN. Please check your internet connection or try again in a few moments.'
       )
@@ -174,8 +173,8 @@ export function getErrorMessage(error: unknown): string {
       return 'The service is temporarily unavailable. Please try again in a few moments.'
     }
     
-    // Check for connection-related errors (includes CORS as a possibility)
-    if (error.message.includes('connect') || error.message.includes('network') || error.message.includes('CORS')) {
+    // Check for connection-related errors
+    if (error.message.includes('connect') || error.message.includes('network')) {
       const messages = [
         'Cannot reach KIAAN.',
         '• Check your internet connection',
