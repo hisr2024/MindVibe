@@ -32,17 +32,17 @@ export default function Home() {
           <div className="absolute right-6 top-6 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/40 via-[#ffb347]/30 to-transparent blur-2xl" />
           <div className="absolute bottom-4 left-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
           
-          <div className="relative space-y-4">
-            <div className="flex items-center gap-6">
+          <div className="relative flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="flex flex-wrap items-center justify-center gap-6">
               <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
               <InnerPeaceLogo size={100} className="drop-shadow-[0_12px_55px_rgba(139,92,246,0.25)]" />
             </div>
-            <p className="max-w-xl text-sm text-orange-100/80 sm:text-base">
+            <p className="mx-auto max-w-xl text-sm text-orange-100/80 sm:text-base">
               Your calm, privacy-first mental wellness companion powered by ancient wisdom
             </p>
             
             {/* Quick Actions */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               <Link
                 href="/kiaan/chat"
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition-all hover:scale-105"

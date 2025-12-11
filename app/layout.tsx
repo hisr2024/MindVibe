@@ -15,6 +15,16 @@ export const metadata = {
   metadataBase: new URL('https://mindvibe.app'),
   themeColor: '#0b0b0f',
   manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MindVibe',
+  },
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png', sizes: '512x512' },

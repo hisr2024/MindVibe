@@ -2,7 +2,7 @@
  * Karma Reset Tool Page with KIAAN Integration
  * 
  * A compassionate guide for healing relational harm, powered by
- * KIAAN Wisdom Engine and Bhagavad Gita principles.
+ * KIAAN Wisdom Engine and Ancient Wisdom principles.
  */
 
 import { Metadata } from 'next'
