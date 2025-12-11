@@ -6,12 +6,21 @@ import { locales, localeNames, type Locale, defaultLocale } from '@/i18n';
 const flagEmojis: Record<Locale, string> = {
   en: '🇬🇧',
   hi: '🇮🇳',
+  ta: '🇮🇳',
+  te: '🇮🇳',
+  bn: '🇮🇳',
+  mr: '🇮🇳',
+  gu: '🇮🇳',
+  kn: '🇮🇳',
+  ml: '🇮🇳',
+  pa: '🇮🇳',
+  sa: '🇮🇳',
   es: '🇪🇸',
   fr: '🇫🇷',
   de: '🇩🇪',
+  pt: '🇵🇹',
   ja: '🇯🇵',
   'zh-CN': '🇨🇳',
-  pt: '🇵🇹',
 };
 
 export function LanguageSwitcher() {

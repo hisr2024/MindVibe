@@ -13,8 +13,7 @@ CREATE TABLE IF NOT EXISTS user_emotional_logs (
     notes TEXT,
     verse_ids JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    updated_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_emotional_logs_user ON user_emotional_logs(user_id);
@@ -33,7 +32,6 @@ CREATE TABLE IF NOT EXISTS user_daily_analysis (
     overall_mood_score INTEGER CHECK (overall_mood_score >= 1 AND overall_mood_score <= 10),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, analysis_date)
 );
 
@@ -56,7 +54,6 @@ CREATE TABLE IF NOT EXISTS user_weekly_reflections (
     overall_wellbeing_score INTEGER CHECK (overall_wellbeing_score >= 1 AND overall_wellbeing_score <= 10),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, week_start_date)
 );
 
@@ -77,7 +74,6 @@ CREATE TABLE IF NOT EXISTS user_assessments (
     completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, assessment_date, assessment_type)
 );
 
@@ -97,7 +93,6 @@ CREATE TABLE IF NOT EXISTS user_verses_bookmarked (
     times_revisited INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, verse_id)
 );
 
@@ -118,7 +113,6 @@ CREATE TABLE IF NOT EXISTS user_journey_progress (
     completed_at TIMESTAMP WITH TIME ZONE,
     status VARCHAR(50) DEFAULT 'in_progress',
     achievements JSONB DEFAULT '[]'::jsonb,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, module_name)
 );
 
@@ -126,10 +120,9 @@ CREATE INDEX IF NOT EXISTS idx_user_journey_progress_user ON user_journey_progre
 CREATE INDEX IF NOT EXISTS idx_user_journey_progress_module ON user_journey_progress(module_name);
 CREATE INDEX IF NOT EXISTS idx_user_journey_progress_status ON user_journey_progress(status);
 
--- Add comments for documentation
-COMMENT ON TABLE user_emotional_logs IS 'Daily emotional check-ins and logs for users';
-COMMENT ON TABLE user_daily_analysis IS 'Automated daily mental health analysis and insights';
-COMMENT ON TABLE user_weekly_reflections IS 'Weekly sacred reflections and deep-dive assessments';
-COMMENT ON TABLE user_assessments IS 'Structured weekly mental health assessments with Gita wisdom';
-COMMENT ON TABLE user_verses_bookmarked IS 'User-saved Gita verses with personal notes';
-COMMENT ON TABLE user_journey_progress IS 'Track user progress through KIAAN modules and journeys';
+-- Migration Documentation
+-- These tables support KIAAN user journey tracking without foreign key constraints to users table
+-- as the application uses Firebase Auth instead of database-managed users.
+-- Tables: user_emotional_logs, user_daily_analysis, user_weekly_reflections, 
+--         user_assessments, user_verses_bookmarked, user_journey_progress
+

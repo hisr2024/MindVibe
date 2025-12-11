@@ -21,7 +21,7 @@ font-family: 'Manrope', 'Outfit', system-ui, sans-serif;
 ### Wordmarks
 - **MindVibe**: Inter or custom variant, 700 weight, +0.02em tracking; gradient fill `Orange–Gold`.
 - **KIAAN**: Manrope uppercase, 700 weight, +0.12–0.15em tracking; gradient fill `Teal → Gold`, metallic shimmer allowed for animation.
-- **Micro-tagline**: 12–14px Inter Medium, +0.06–0.08em tracking: “KIAAN — Crisp, calm guidance.”
+- **Micro-tagline**: 12–14px Inter Medium, +0.06–0.08em tracking: “Your Guide to Inner Peace”
 
 ---
 

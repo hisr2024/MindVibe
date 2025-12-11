@@ -1,0 +1,32 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back",
+  "analytics": {
+    "title": "Analytics",
+    "overview": "Overview",
+    "insights": "Insights",
+    "trends": "Trends",
+    "weeklyProgress": "Weekly Progress",
+    "monthlyProgress": "Monthly Progress"
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "editProfile": "Edit Profile",
+    "updateProfile": "Update Profile",
+    "accountInfo": "Account Information"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plan": "Current Plan",
+    "upgrade": "Upgrade",
+    "manage": "Manage Subscription",
+    "billing": "Billing"
+  },
+  "stats": {
+    "journalEntries": "Journal Entries",
+    "chatSessions": "Chat Sessions",
+    "moodCheckins": "Mood Check-ins",
+    "streakDays": "Day Streak"
+  }
+}

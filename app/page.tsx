@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { KiaanLogo } from '@/src/components/KiaanLogo';
+import { InnerPeaceLogo } from '@/components/branding';
 import { MinimalFeatures } from '@/components/home/MinimalFeatures';
 import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
 import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
@@ -32,7 +33,10 @@ export default function Home() {
           <div className="absolute bottom-4 left-4 h-32 w-32 rounded-full bg-gradient-to-tr from-sky-400/20 via-emerald-300/12 to-transparent blur-3xl" />
           
           <div className="relative space-y-4">
-            <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
+            <div className="flex items-center gap-6">
+              <KiaanLogo size="lg" className="drop-shadow-[0_12px_55px_rgba(46,160,255,0.25)]" />
+              <InnerPeaceLogo size={100} className="drop-shadow-[0_12px_55px_rgba(139,92,246,0.25)]" />
+            </div>
             <p className="max-w-xl text-sm text-orange-100/80 sm:text-base">
               Your calm, privacy-first mental wellness companion powered by ancient wisdom
             </p>
