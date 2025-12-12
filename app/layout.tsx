@@ -9,6 +9,7 @@ import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { ChatFooter } from '@/components/layout/ChatFooter'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -61,6 +62,7 @@ export default function RootLayout({
             <MobileNav />
             <ChatFooter />
             <KiaanFooter />
+            <SpeedInsights />
           </Providers>
         </ClientLayout>
       </body>
