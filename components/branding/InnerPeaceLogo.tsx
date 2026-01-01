@@ -129,6 +129,15 @@ export function InnerPeaceLogo({
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
+          
+          {/* Glow filter for Om symbol */}
+          <filter id="om-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
 
         {/* Bottom layer petals (5 petals) */}
@@ -192,19 +201,64 @@ export function InnerPeaceLogo({
           opacity="0.6"
         />
 
-        {/* Om symbol in center - using path for better cross-platform support 
-            Path structure: Main curve + inner details + vertical stem + bottom curve
-            Note: Uses (50,50) centered coordinates in standard viewBox space */}
-        <motion.path
-          d="M50 45 Q48 43 46 44 Q44 45 44 47 Q44 49 46 50 Q48 51 50 50 Q52 51 54 50 Q56 49 56 47 Q56 45 54 44 Q52 43 50 45 M47 48 Q47 49 48 50 Q49 51 50 51 Q51 51 52 50 Q53 49 53 48 M50 52 L50 57 M48 57 Q48 58 50 58 Q52 58 52 57"
-          fill="#92400e"
-          opacity="0.7"
+        {/* Om symbol (ॐ) in center - Enhanced authentic Devanagari design
+            Larger and more visible in the lotus center
+            Uses (50,50) as center in standard viewBox space */}
+        <motion.g
+          animate={motionEnabled ? {
+            opacity: isClicked ? [1, 1, 1] : [0.95, 1, 0.95],
+            scale: isClicked ? [1, 1.15, 1] : [1, 1.03, 1],
+          } : undefined}
+          transition={motionEnabled ? {
+            duration: isClicked ? 1.5 : 3,
+            repeat: Infinity,
+            ease: easeInOut,
+          } : undefined}
+          style={{ transformOrigin: '50px 50px' }}
           aria-label="Om symbol"
           role="img"
-          animate={motionEnabled ? {
-            opacity: isClicked ? [0.7, 1, 0.7] : 0.7,
-          } : undefined}
-        />
+          filter="url(#om-glow)"
+        >
+          {/* Main "3" shape - the characteristic curve of Om */}
+          <path
+            d="M43 49 Q43 44 47 43.5 Q51 43 53 46 Q54.5 48 54.5 51 Q54.5 54 52 55.5 Q49.5 56.5 47 55.5 L47 54 Q49 55 51 54 Q52.5 53 52.5 51 Q52.5 49 51 47.5 Q49.5 46 47 46 Q44 46 44 49 L44 51"
+            fill="#7c2d12"
+            stroke="#92400e"
+            strokeWidth="0.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          
+          {/* Top curve (horizontal line with curve) */}
+          <path
+            d="M46.5 42.5 Q49 41 52 42.5 Q53 43.2 53 44.2"
+            fill="none"
+            stroke="#7c2d12"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+          
+          {/* Chandrabindu (dot above) - signature element */}
+          <circle cx="50" cy="39.5" r="1.3" fill="#7c2d12" stroke="#92400e" strokeWidth="0.3" />
+          
+          {/* Right side extended curve */}
+          <path
+            d="M54.5 48 Q56.5 48 57.5 50 Q58 51.5 58 53 Q58 55 56 56 Q54 57 52 56"
+            fill="none"
+            stroke="#7c2d12"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          
+          {/* Bottom left decorative curve */}
+          <path
+            d="M43.5 52 Q41.5 53 41.5 55.5 Q41.5 57.5 43 58.5 Q44.5 59 46.5 58.5"
+            fill="none"
+            stroke="#7c2d12"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+        </motion.g>
       </motion.svg>
 
       {/* Ripple effect on click */}

@@ -148,23 +148,63 @@ export function AnimatedPeaceLogo() {
               />
             ))}
 
-            {/* Om symbol in center
-                Path structure: Main upper curve + inner dot details + vertical stem + bottom curve
-                Note: Uses (0,0) centered coordinates due to parent g transform="translate(50, 50)" */}
-            <motion.path
-              d="M0 -5 Q-2 -7 -4 -6 Q-6 -5 -6 -3 Q-6 -1 -4 0 Q-2 1 0 0 Q2 1 4 0 Q6 -1 6 -3 Q6 -5 4 -6 Q2 -7 0 -5 M-3 -2 Q-3 -1 -2 0 Q-1 1 0 1 Q1 1 2 0 Q3 -1 3 -2 M0 2 L0 7 M-2 7 Q-2 8 0 8 Q2 8 2 7"
-              fill="#FFF"
-              aria-label="Om symbol"
-              role="img"
+            {/* Om symbol (ॐ) in center - Enhanced authentic Devanagari design
+                Larger and more visible in the lotus center
+                Uses (0,0) centered coordinates due to parent g transform="translate(50, 50)" */}
+            <motion.g
               animate={{
-                opacity: [0.8, 1, 0.8],
+                opacity: [0.9, 1, 0.9],
+                scale: [1, 1.08, 1],
               }}
               transition={{
                 duration: 3,
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
-            />
+              aria-label="Om symbol"
+              role="img"
+              filter="url(#om-glow)"
+            >
+              {/* Main "3" shape - the characteristic curve of Om */}
+              <path
+                d="M-7 -1 Q-7 -6 -2 -6.5 Q2 -7 4 -4 Q5.5 -2 5.5 1 Q5.5 4 3 5.5 Q0.5 6.5 -2 5.5 L-2 4 Q0 5 2 4 Q3.5 3 3.5 1 Q3.5 -1 2 -2.5 Q0.5 -4 -2 -4 Q-5 -4 -5 -1 L-5 1"
+                fill="#FFFFFF"
+                stroke="#f9a8d4"
+                strokeWidth="0.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              
+              {/* Top curve (horizontal line with curve) */}
+              <path
+                d="M-3.5 -7.5 Q-1 -9 2 -7.5 Q3 -6.8 3 -5.8"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              
+              {/* Chandrabindu (dot above) - signature element */}
+              <circle cx="0" cy="-10.5" r="1.3" fill="#FFFFFF" stroke="#f9a8d4" strokeWidth="0.3" />
+              
+              {/* Right side extended curve */}
+              <path
+                d="M5.5 -2 Q7.5 -2 8.5 0 Q9 1.5 9 3 Q9 5 7 6 Q5 7 3 6"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+              
+              {/* Bottom left decorative curve */}
+              <path
+                d="M-5.5 2 Q-7.5 3 -7.5 5.5 Q-7.5 7.5 -6 8.5 Q-4.5 9 -2.5 8.5"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+            </motion.g>
           </g>
 
           {/* Gradient definitions */}
@@ -190,6 +230,15 @@ export function AnimatedPeaceLogo() {
               <stop offset="0%" stopColor="#fda4af" />
               <stop offset="100%" stopColor="#f472b6" />
             </linearGradient>
+            
+            {/* Glow filter for Om symbol */}
+            <filter id="om-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
         </svg>
       </motion.div>
