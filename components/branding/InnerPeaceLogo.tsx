@@ -81,9 +81,9 @@ export function InnerPeaceLogo({
         <svg width={size} height={size} viewBox="0 0 100 100" className="absolute inset-0">
           <defs>
             <radialGradient id="peace-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#a78bfa" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#c084fc" stopOpacity="0" />
+              <stop offset="0%" stopColor="#f9a8d4" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#fb7185" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#fda4af" stopOpacity="0" />
             </radialGradient>
           </defs>
           <circle cx="50" cy="50" r="48" fill="url(#peace-glow)" />
@@ -102,14 +102,14 @@ export function InnerPeaceLogo({
         transition={motionEnabled ? breathingTransition : undefined}
       >
         <defs>
-          {/* Gradients for lotus petals */}
+          {/* Gradients for lotus petals - Updated to pink/rose colors */}
           <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#e0f2fe" />
-            <stop offset="100%" stopColor="#bae6fd" />
+            <stop offset="0%" stopColor="#fce7f3" />
+            <stop offset="100%" stopColor="#fbcfe8" />
           </linearGradient>
           <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ddd6fe" />
-            <stop offset="100%" stopColor="#c4b5fd" />
+            <stop offset="0%" stopColor="#fda4af" />
+            <stop offset="100%" stopColor="#fb7185" />
           </linearGradient>
           <linearGradient id="center-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#fef3c7" />
@@ -216,7 +216,7 @@ export function InnerPeaceLogo({
       {/* Ripple effect on click */}
       {isClicked && motionEnabled && (
         <motion.div
-          className="absolute inset-0 rounded-full border-2 border-sky-300"
+          className="absolute inset-0 rounded-full border-2 border-pink-300"
           initial={{ scale: 1, opacity: 0.6 }}
           animate={{ scale: 2, opacity: 0 }}
           transition={{ duration: 1.5, ease: easeOut }}

@@ -18,42 +18,42 @@ export function MinimalMoodCheckIn() {
   const moodStones = [
     { 
       label: 'Peaceful', 
-      emoji: '🙏', 
+      emoji: '🧘', 
       color: 'from-emerald-400 to-teal-400', 
       response: 'Beautiful calm. Stay with it. 💙',
       glowColor: 'rgba(52, 211, 153, 0.4)'
     },
     { 
       label: 'Happy', 
-      emoji: '😊', 
+      emoji: '🌟', 
       color: 'from-yellow-400 to-amber-400', 
       response: 'Let that warmth stay with you. ✨',
       glowColor: 'rgba(251, 191, 36, 0.4)'
     },
     { 
       label: 'Neutral', 
-      emoji: '😐', 
+      emoji: '🌿', 
       color: 'from-slate-400 to-gray-400', 
       response: 'Steady is good. You\'re showing up. 🌿',
       glowColor: 'rgba(148, 163, 184, 0.4)'
     },
     { 
       label: 'Tired', 
-      emoji: '😴', 
+      emoji: '🌙', 
       color: 'from-blue-400 to-indigo-400', 
       response: 'Rest is not weakness. 💙',
       glowColor: 'rgba(96, 165, 250, 0.4)'
     },
     { 
       label: 'Anxious', 
-      emoji: '😰', 
+      emoji: '🌊', 
       color: 'from-amber-400 to-orange-400', 
       response: 'Take a breath. I\'m with you. 🌊',
       glowColor: 'rgba(251, 146, 60, 0.4)'
     },
     { 
       label: 'Heavy', 
-      emoji: '🌧️', 
+      emoji: '☁️', 
       color: 'from-slate-500 to-gray-500', 
       response: 'You\'re not alone. I\'m here. 💙',
       glowColor: 'rgba(100, 116, 139, 0.4)'
