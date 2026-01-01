@@ -145,9 +145,6 @@ export function InnerPeaceLogo({
               transform={`rotate(${angle} 50 50) translate(0 -22)`}
               animate={motionEnabled ? {
                 opacity: isHovered ? [0.9, 1, 0.9] : 0.9,
-                transform: isHovered 
-                  ? `rotate(${angle} 50 50) translate(0 -24)`
-                  : `rotate(${angle} 50 50) translate(0 -22)`,
               } : undefined}
               transition={{ duration: 2, repeat: Infinity, ease: easeInOut }}
             />
@@ -168,9 +165,6 @@ export function InnerPeaceLogo({
               transform={`rotate(${angle} 50 50) translate(0 -18)`}
               animate={motionEnabled ? {
                 opacity: isHovered ? [0.95, 1, 0.95] : 0.95,
-                transform: isHovered 
-                  ? `rotate(${angle} 50 50) translate(0 -20)`
-                  : `rotate(${angle} 50 50) translate(0 -18)`,
               } : undefined}
               transition={{ duration: 2.5, repeat: Infinity, ease: easeInOut, delay: 0.2 }}
             />
