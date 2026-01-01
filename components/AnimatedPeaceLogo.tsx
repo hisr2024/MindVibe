@@ -163,16 +163,8 @@ export function AnimatedPeaceLogo() {
               }}
               aria-label="Om symbol"
               role="img"
+              filter="url(#om-glow)"
             >
-              {/* Outer glow for better visibility */}
-              <g opacity="0.6" filter="url(#om-glow)">
-                <path
-                  d="M-8 0 Q-8 -6 -3 -7 Q1 -8 4 -5 Q6 -3 6 0 Q6 3 4 5 Q1 7 -3 6 Q-5 5 -6 3"
-                  fill="#fda4af"
-                  stroke="none"
-                />
-              </g>
-              
               {/* Main "3" shape - the characteristic curve of Om */}
               <path
                 d="M-7 -1 Q-7 -6 -2 -6.5 Q2 -7 4 -4 Q5.5 -2 5.5 1 Q5.5 4 3 5.5 Q0.5 6.5 -2 5.5 L-2 4 Q0 5 2 4 Q3.5 3 3.5 1 Q3.5 -1 2 -2.5 Q0.5 -4 -2 -4 Q-5 -4 -5 -1 L-5 1"
@@ -239,10 +231,13 @@ export function AnimatedPeaceLogo() {
               <stop offset="100%" stopColor="#f472b6" />
             </linearGradient>
             
-            {/* Glow filter for Om symbol visibility */}
+            {/* Glow filter for Om symbol */}
             <filter id="om-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
-              <feColorMatrix type="saturate" values="2"/>
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
             </filter>
           </defs>
         </svg>

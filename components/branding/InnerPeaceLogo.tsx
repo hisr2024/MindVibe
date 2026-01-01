@@ -130,10 +130,13 @@ export function InnerPeaceLogo({
             </feMerge>
           </filter>
           
-          {/* Shadow for Om symbol */}
-          <filter id="om-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-            <feColorMatrix type="saturate" values="1.5"/>
+          {/* Glow filter for Om symbol */}
+          <filter id="om-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
           </filter>
         </defs>
 
@@ -214,19 +217,8 @@ export function InnerPeaceLogo({
           style={{ transformOrigin: '50px 50px' }}
           aria-label="Om symbol"
           role="img"
+          filter="url(#om-glow)"
         >
-          {/* Outer glow for depth */}
-          <g opacity="0.4">
-            <ellipse
-              cx="50"
-              cy="50"
-              rx="10"
-              ry="12"
-              fill="#fbbf24"
-              filter="url(#om-shadow)"
-            />
-          </g>
-          
           {/* Main "3" shape - the characteristic curve of Om */}
           <path
             d="M43 49 Q43 44 47 43.5 Q51 43 53 46 Q54.5 48 54.5 51 Q54.5 54 52 55.5 Q49.5 56.5 47 55.5 L47 54 Q49 55 51 54 Q52.5 53 52.5 51 Q52.5 49 51 47.5 Q49.5 46 47 46 Q44 46 44 49 L44 51"
