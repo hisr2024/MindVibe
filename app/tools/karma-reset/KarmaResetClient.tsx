@@ -183,8 +183,15 @@ export default function KarmaResetClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-gray-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white">
+      {/* Background gradients */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/25 via-[#ff9933]/14 to-transparent blur-3xl" />
+        <div className="absolute bottom-10 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/18 via-orange-500/10 to-transparent blur-[120px]" />
+        <div className="absolute left-1/4 top-1/3 h-56 w-56 animate-pulse rounded-full bg-gradient-to-br from-[#1f2937]/70 via-[#ff9933]/10 to-transparent blur-[90px]" />
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main content area */}
           <div className="lg:col-span-3">
@@ -192,7 +199,7 @@ export default function KarmaResetClient() {
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-3">
                 <motion.h1 
-                  className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                  className="text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent flex items-center gap-2"
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={springConfigs.smooth}
@@ -221,18 +228,18 @@ export default function KarmaResetClient() {
                           <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        <span className="text-green-600 dark:text-green-400">Connected</span>
+                        <span className="text-green-400">Connected</span>
                       </>
                     ) : (
                       <>
                         <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
-                        <span className="text-yellow-600 dark:text-yellow-400">Offline (using fallback)</span>
+                        <span className="text-yellow-400">Offline (using fallback)</span>
                       </>
                     )}
                   </span>
                 )}
               </div>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">
+              <p className="text-lg text-orange-100/80 mb-4">
                 A compassionate ritual to acknowledge impact, repair harm, and move forward with wisdom.
               </p>
               
@@ -249,18 +256,18 @@ export default function KarmaResetClient() {
 
             {/* Input Form */}
             {currentStep === 'input' && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+              <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Situation */}
                   <div>
-                    <label htmlFor="situation" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    <label htmlFor="situation" className="block text-sm font-medium text-orange-50 mb-2">
                       What happened?
                     </label>
                     <textarea
                       id="situation"
                       value={situation}
                       onChange={(e) => setSituation(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 rounded-lg border border-orange-500/30 bg-white/5 text-orange-50 placeholder:text-orange-100/40 focus:ring-2 focus:ring-orange-400/50 focus:border-transparent resize-none"
                       rows={4}
                       placeholder="Describe what happened briefly..."
                       required
@@ -269,7 +276,7 @@ export default function KarmaResetClient() {
 
                   {/* Who felt it */}
                   <div>
-                    <label htmlFor="whoFelt" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    <label htmlFor="whoFelt" className="block text-sm font-medium text-orange-50 mb-2">
                       Who felt the ripple?
                     </label>
                     <input
@@ -277,7 +284,7 @@ export default function KarmaResetClient() {
                       type="text"
                       value={whoFelt}
                       onChange={(e) => setWhoFelt(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-3 rounded-lg border border-orange-500/30 bg-white/5 text-orange-50 placeholder:text-orange-100/40 focus:ring-2 focus:ring-orange-400/50 focus:border-transparent"
                       placeholder="e.g., My friend, My partner, A colleague"
                       required
                     />
@@ -285,52 +292,52 @@ export default function KarmaResetClient() {
 
                   {/* Repair type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
+                    <label className="block text-sm font-medium text-orange-50 mb-3">
                       How would you like to repair?
                     </label>
                     <div className="space-y-3">
-                      <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                      <label className="flex items-start gap-3 p-4 rounded-lg border border-orange-500/20 bg-white/5 cursor-pointer hover:border-orange-400/40 hover:bg-white/10 transition-all">
                         <input
                           type="radio"
                           name="repairType"
                           value="apology"
                           checked={repairType === 'apology'}
                           onChange={(e) => setRepairType(e.target.value as any)}
-                          className="mt-1"
+                          className="mt-1 accent-orange-500"
                         />
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">💚 Apology</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Offer a sincere apology that stays brief and grounded</div>
+                          <div className="font-medium text-orange-50">💚 Apology</div>
+                          <div className="text-sm text-orange-100/70">Offer a sincere apology that stays brief and grounded</div>
                         </div>
                       </label>
                       
-                      <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                      <label className="flex items-start gap-3 p-4 rounded-lg border border-orange-500/20 bg-white/5 cursor-pointer hover:border-orange-400/40 hover:bg-white/10 transition-all">
                         <input
                           type="radio"
                           name="repairType"
                           value="clarification"
                           checked={repairType === 'clarification'}
                           onChange={(e) => setRepairType(e.target.value as any)}
-                          className="mt-1"
+                          className="mt-1 accent-orange-500"
                         />
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">💬 Clarification</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Gently clarify what you meant and invite understanding</div>
+                          <div className="font-medium text-orange-50">💬 Clarification</div>
+                          <div className="text-sm text-orange-100/70">Gently clarify what you meant and invite understanding</div>
                         </div>
                       </label>
                       
-                      <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                      <label className="flex items-start gap-3 p-4 rounded-lg border border-orange-500/20 bg-white/5 cursor-pointer hover:border-orange-400/40 hover:bg-white/10 transition-all">
                         <input
                           type="radio"
                           name="repairType"
                           value="calm_followup"
                           checked={repairType === 'calm_followup'}
                           onChange={(e) => setRepairType(e.target.value as any)}
-                          className="mt-1"
+                          className="mt-1 accent-orange-500"
                         />
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">🕊️ Calm Follow-up</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Return with a warm note that re-centers the conversation</div>
+                          <div className="font-medium text-orange-50">🕊️ Calm Follow-up</div>
+                          <div className="text-sm text-orange-100/70">Return with a warm note that re-centers the conversation</div>
                         </div>
                       </label>
                     </div>
@@ -338,14 +345,14 @@ export default function KarmaResetClient() {
 
                   {/* Error message */}
                   {error && (
-                    <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
                       <div className="flex items-start gap-3">
-                        <span className="text-red-600 dark:text-red-400 text-xl">⚠️</span>
+                        <span className="text-red-400 text-xl">⚠️</span>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-red-800 dark:text-red-200 mb-1">Connection Issue</h4>
-                          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                          <h4 className="font-semibold text-red-300 mb-1">Connection Issue</h4>
+                          <p className="text-sm text-red-200/80">{error}</p>
                           {retryCount >= MAX_RETRIES && (
-                            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                            <p className="text-sm text-red-200/70 mt-2">
                               💙 Don't worry - we've prepared fallback guidance for you below.
                             </p>
                           )}
@@ -358,7 +365,7 @@ export default function KarmaResetClient() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 px-6 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-semibold text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 hover:from-orange-600 hover:via-[#ff8820] hover:to-orange-400 disabled:from-gray-500 disabled:via-gray-600 disabled:to-gray-500 text-slate-950 font-semibold text-lg transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-[1.02]"
                   >
                     {loading ? 'Generating wisdom...' : 'Generate Reset Guidance'}
                   </button>
@@ -369,21 +376,21 @@ export default function KarmaResetClient() {
             {/* Breathing Step */}
             {currentStep === 'breathing' && resetGuidance && (
               <motion.div 
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700"
+                className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={springConfigs.smooth}
               >
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+                <h2 className="text-2xl font-bold text-orange-50 mb-6 text-center">
                   Pause & Breathe
                 </h2>
-                <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-8">
+                <p className="text-lg text-orange-100/80 text-center mb-8">
                   {resetGuidance.breathingLine}
                 </p>
                 
                 <BreathingOrb
                   size={250}
-                  color="#a855f7"
+                  color="#ff9933"
                   pattern="4-7-8"
                   className="my-8"
                 />
@@ -391,7 +398,7 @@ export default function KarmaResetClient() {
                 <div className="text-center mt-8">
                   <button
                     onClick={() => setCurrentStep('plan')}
-                    className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 hover:from-orange-600 hover:via-[#ff8820] hover:to-orange-400 text-slate-950 font-semibold transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-[1.02]"
                   >
                     Continue to Plan
                   </button>
@@ -421,18 +428,18 @@ export default function KarmaResetClient() {
                 <ConfettiEffect trigger={showConfetti} />
                 
                 {/* Actions */}
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-4 justify-center flex-wrap">
                   <motion.button
                     onClick={handleComplete}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold transition-all shadow-lg"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 hover:from-orange-600 hover:via-[#ff8820] hover:to-orange-400 text-slate-950 font-semibold transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/40"
                   >
                     ✨ Complete Reset
                   </motion.button>
                   <button
                     onClick={resetForm}
-                    className="px-6 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold transition-colors"
+                    className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-orange-500/30 hover:border-orange-400/50 text-orange-50 font-semibold transition-all duration-200"
                   >
                     Start New Reset
                   </button>
