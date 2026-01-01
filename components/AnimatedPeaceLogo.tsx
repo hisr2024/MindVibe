@@ -148,11 +148,13 @@ export function AnimatedPeaceLogo() {
               />
             ))}
 
-            {/* Om symbol in center */}
+            {/* Om symbol in center
+                Path structure: Main upper curve + inner dot details + vertical stem + bottom curve */}
             <motion.path
               d="M0 -5 Q-2 -7 -4 -6 Q-6 -5 -6 -3 Q-6 -1 -4 0 Q-2 1 0 0 Q2 1 4 0 Q6 -1 6 -3 Q6 -5 4 -6 Q2 -7 0 -5 M-3 -2 Q-3 -1 -2 0 Q-1 1 0 1 Q1 1 2 0 Q3 -1 3 -2 M0 2 L0 7 M-2 7 Q-2 8 0 8 Q2 8 2 7"
               fill="#FFF"
               aria-label="Om symbol"
+              role="img"
               animate={{
                 opacity: [0.8, 1, 0.8],
               }}

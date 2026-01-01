@@ -198,11 +198,14 @@ export function InnerPeaceLogo({
           opacity="0.6"
         />
 
-        {/* Om symbol in center - using path for better cross-platform support */}
+        {/* Om symbol in center - using path for better cross-platform support 
+            Path structure: Main curve + inner details + vertical stem + bottom curve */}
         <motion.path
           d="M50 45 Q48 43 46 44 Q44 45 44 47 Q44 49 46 50 Q48 51 50 50 Q52 51 54 50 Q56 49 56 47 Q56 45 54 44 Q52 43 50 45 M47 48 Q47 49 48 50 Q49 51 50 51 Q51 51 52 50 Q53 49 53 48 M50 52 L50 57 M48 57 Q48 58 50 58 Q52 58 52 57"
           fill="#92400e"
           opacity="0.7"
+          aria-label="Om symbol"
+          role="img"
           animate={motionEnabled ? {
             opacity: isClicked ? [0.7, 1, 0.7] : 0.7,
           } : undefined}
