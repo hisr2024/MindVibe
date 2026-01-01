@@ -30,7 +30,7 @@ export function AnimatedPeaceLogo() {
           initial={{ scale: 1, opacity: 0.6 }}
           animate={{ scale: 2.5, opacity: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="absolute inset-0 rounded-full border-2 border-orange-400"
+          className="absolute inset-0 rounded-full border-2 border-pink-400"
           style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
         />
       )}
@@ -52,7 +52,7 @@ export function AnimatedPeaceLogo() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400 to-amber-300 blur-xl"
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-400 to-rose-300 blur-xl"
         />
 
         {/* Main SVG Logo */}
@@ -170,25 +170,25 @@ export function AnimatedPeaceLogo() {
           {/* Gradient definitions */}
           <defs>
             <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#fb923c" stopOpacity="0.8" />
-              <stop offset="50%" stopColor="#fdba74" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#fb923c" stopOpacity="0.8" />
+              <stop offset="0%" stopColor="#f472b6" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#fb7185" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#f472b6" stopOpacity="0.8" />
             </linearGradient>
 
             <radialGradient id="gradient2" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="100%" stopColor="#f59e0b" />
+              <stop offset="0%" stopColor="#fda4af" />
+              <stop offset="100%" stopColor="#fb7185" />
             </radialGradient>
 
             <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#fb923c" />
-              <stop offset="50%" stopColor="#fdba74" />
-              <stop offset="100%" stopColor="#fbbf24" />
+              <stop offset="0%" stopColor="#f472b6" />
+              <stop offset="50%" stopColor="#fb7185" />
+              <stop offset="100%" stopColor="#fda4af" />
             </linearGradient>
 
             <linearGradient id="gradient4" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#fdba74" />
-              <stop offset="100%" stopColor="#fb923c" />
+              <stop offset="0%" stopColor="#fda4af" />
+              <stop offset="100%" stopColor="#f472b6" />
             </linearGradient>
           </defs>
         </svg>
