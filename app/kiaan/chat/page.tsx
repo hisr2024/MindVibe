@@ -278,26 +278,6 @@ function KiaanChatPageInner() {
         />
       </div>
 
-      {/* Quick Responses Below Chat - Always visible */}
-      <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] backdrop-blur">
-        <h2 className="text-lg font-semibold text-orange-50">Quick Responses</h2>
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-          {quickResponses.map((response) => (
-            <button
-              key={response.id}
-              onClick={() => handleQuickResponse(response.prompt)}
-              className="group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-left transition-all hover:border-orange-400/40 hover:bg-white/10 hover:shadow-lg hover:shadow-orange-500/20"
-            >
-              <div className="flex flex-col gap-2">
-                <span className="text-2xl">{response.emoji}</span>
-                <span className="text-sm font-semibold text-orange-50">{response.text}</span>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Helper Links */}
       <div className="grid gap-4 md:grid-cols-3">
         <Link
