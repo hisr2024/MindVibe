@@ -21,7 +21,7 @@ interface LanguageSettingsProps {
 export function LanguageSettings({ onClose, className = '' }: LanguageSettingsProps) {
   const { language, setLanguage } = useLanguage();
   
-  const [selectedLanguage, setSelectedLanguage] = useState(language);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(language);
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
