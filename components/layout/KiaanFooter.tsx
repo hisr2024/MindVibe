@@ -25,7 +25,7 @@ interface Message {
 
 export function KiaanFooter() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -86,7 +86,10 @@ export function KiaanFooter() {
     try {
       const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        body: JSON.stringify({ message: messageText }),
+        body: JSON.stringify({ 
+          message: messageText,
+          language: language || 'en' 
+        }),
       });
 
       if (!response.ok) {
