@@ -103,8 +103,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Load translations for a language
   const loadTranslations = useCallback(async (lang: Language) => {
+    console.log(`[useLanguage] Loading translations for: ${lang}`)
+
     // Check cache first
     if (translationCache.has(lang)) {
+      console.log(`[useLanguage] Using cached translations for: ${lang}`)
       setTranslations(translationCache.get(lang)!)
       return
     }
@@ -113,22 +116,32 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       // Load all translation files and merge them
       const files = ['common', 'home', 'kiaan', 'navigation', 'dashboard', 'features', 'errors']
       const results = await Promise.allSettled(
-        files.map(file => fetch(`/locales/${lang}/${file}.json`).then(r => r.ok ? r.json() : {}))
+        files.map(file => fetch(`/locales/${lang}/${file}.json`).then(r => {
+          if (!r.ok) {
+            console.warn(`[useLanguage] Failed to fetch /locales/${lang}/${file}.json - Status: ${r.status}`)
+            return {}
+          }
+          return r.json()
+        }))
       )
-      
+
       // Merge all translation files into one object
       const merged: TranslationObject = {}
       results.forEach((result, index) => {
         if (result.status === 'fulfilled') {
           const fileName = files[index]
           merged[fileName] = result.value
+          console.log(`[useLanguage] Loaded ${fileName} for ${lang}:`, Object.keys(result.value).length > 0 ? 'OK' : 'EMPTY')
+        } else {
+          console.warn(`[useLanguage] Failed to load ${files[index]} for ${lang}:`, result.reason)
         }
       })
-      
+
+      console.log(`[useLanguage] Translation keys loaded for ${lang}:`, Object.keys(merged))
       translationCache.set(lang, merged)
       setTranslations(merged)
-    } catch {
-      console.warn(`Failed to load translations for ${lang}, using fallback`)
+    } catch (error) {
+      console.error(`[useLanguage] Error loading translations for ${lang}:`, error)
       // Fallback to English
       if (lang !== 'en') {
         await loadTranslations('en')

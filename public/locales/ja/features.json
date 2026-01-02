@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Reframing Assistant",
+    "subtitle": "Ancient wisdom-aligned reframing",
+    "description": "Balanced reframes that leave Kiaan untouched.",
+    "placeholder": "Example: I keep messing up at work, maybe I'm just not cut out for this.",
+    "button": "Reframe",
+    "buttonLoading": "Reflecting...",
+    "label": "Share the thought to reframe",
+    "response": "Ardha's response",
+    "error": "Ardha is having trouble connecting right now. Please try again in a moment.",
+    "badge": "Local only"
+  },
+  "viyog": {
+    "title": "Viyoga: Detachment Coach",
+    "subtitle": "Outcome anxiety reducer",
+    "description": "Redirects worries to actionable steps.",
+    "placeholder": "Example: I'm afraid the presentation will flop and everyone will think I'm incompetent.",
+    "button": "Shift",
+    "buttonLoading": "Centering...",
+    "label": "Share the outcome worry",
+    "response": "Viyoga's response",
+    "error": "Viyoga is having trouble connecting right now. Please try again in a moment.",
+    "badge": "Local only"
+  },
+  "relationshipCompass": {
+    "title": "Relationship Compass",
+    "subtitle": "Dharma Compass for Relationships",
+    "description": "Calm, secular conflict guidance that keeps KIAAN intact—right action, ego detachment, clear wording.",
+    "placeholder": "Example: My partner feels I don't listen, and I keep getting defensive when they bring it up.",
+    "button": "Guide me with Relationship Compass",
+    "buttonLoading": "Balancing guidance...",
+    "sendToKiaan": "Send context to KIAAN",
+    "label": "Describe the conflict",
+    "response": "Relationship Compass response",
+    "error": "Relationship Compass is unavailable right now. Please try again shortly.",
+    "badges": {
+      "neutral": "Neutral and grounded",
+      "intact": "Keeps Kiaan intact"
+    },
+    "outputFormat": "Output format: acknowledge, separate ego, name values, right action, detach, add compassion, suggest phrasing, then one next step."
+  },
+  "sacredReflections": {
+    "title": "Sacred Reflections",
+    "subtitle": "Journal",
+    "description": "Entries stay on your device and refresh the weekly guidance automatically.",
+    "openJournal": "Open Journal",
+    "goToJournal": "Go to Journal",
+    "keepInOnePlace": "Keep reflections in one calm place",
+    "openSacredReflections": "Open Sacred Reflections to write, revisit, or continue your practice.",
+    "writePrompt": "Write freely. Only you can see this.",
+    "titlePlaceholder": "Title (optional)",
+    "addReflection": "Add Reflection",
+    "recentEntries": "Recent entries",
+    "noEntries": "No entries yet. Your reflections will appear here.",
+    "weeklyEntries": "Weekly entries: {count}",
+    "weeklyAssessment": "Weekly Assessment",
+    "mostPresentMood": "Most present mood: {mood}",
+    "positiveMoments": "Positive moments logged",
+    "challengingDays": "Tender/Challenging days",
+    "kiaanGuidance": "KIAAN's gentle guidance",
+    "getKiaanOpinion": "Get KIAAN's opinion",
+    "kiaanReading": "KIAAN is reading...",
+    "todaysTone": "Today's tone",
+    "security": {
+      "encrypted": "Fully encrypted on your device",
+      "description": "Entries are sealed locally with AES-GCM before saving. Only this browser can decrypt them.",
+      "status": {
+        "ready": "AES-GCM secured locally",
+        "preparing": "Preparing encryption lock",
+        "offline": "Offline mode: stored on this device",
+        "online": "Offline-ready: saves on device"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Footprint",
+    "description": "Track your positive actions and their ripple effects"
+  },
+  "karmicTree": {
+    "title": "Karmic Tree",
+    "description": "Visualize your growth and spiritual journey"
+  },
+  "emotionalReset": {
+    "title": "Emotional Reset",
+    "description": "Quick exercises to reset your emotional state"
+  },
+  "deepInsights": {
+    "title": "Deep Insights",
+    "description": "Gain profound understanding of your patterns"
+  },
+  "wisdomRooms": {
+    "title": "Wisdom Rooms",
+    "description": "Explore ancient wisdom in modern context"
+  }
+}

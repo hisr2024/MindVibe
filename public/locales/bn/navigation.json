@@ -1,0 +1,41 @@
+{
+  "mainNav": {
+    "home": "হোম",
+    "dashboard": "ড্যাশবোর্ড",
+    "features": "বৈশিষ্ট্যসমূহ",
+    "about": "সম্পর্কে",
+    "contact": "যোগাযোগ",
+    "pricing": "মূল্য",
+    "profile": "প্রোফাইল",
+    "settings": "সেটিংস"
+  },
+  "features": {
+    "kiaan": "কিয়ান",
+    "ardha": "অর্ধ",
+    "viyog": "বিয়োগ",
+    "relationshipCompass": "সম্পর্ক কম্পাস",
+    "sacredReflections": "পবিত্র প্রতিফলন",
+    "karmaFootprint": "কর্ম পদচিহ্ন",
+    "karmicTree": "কর্ম বৃক্ষ",
+    "emotionalReset": "আবেগিক রিসেট",
+    "deepInsights": "গভীর অন্তর্দৃষ্টি",
+    "wisdomRooms": "জ্ঞান কক্ষ"
+  },
+  "actions": {
+    "openChat": "চ্যাট খুলুন",
+    "startCheckin": "চেক-ইন শুরু করুন",
+    "instantGuidance": "তাত্ক্ষণিক নির্দেশনা",
+    "spotYourState": "আপনার অবস্থা চিহ্নিত করুন"
+  },
+  "mobileNav": {
+    "chat": "চ্যাট",
+    "pause": "বিরতি",
+    "journal": "পবিত্র প্রতিফলন"
+  },
+  "footer": {
+    "allRightsReserved": "সমস্ত অধিকার সংরক্ষিত",
+    "privacy": "গোপনীয়তা নীতি",
+    "terms": "সেবার শর্তাবলী",
+    "support": "সহায়তা"
+  }
+}

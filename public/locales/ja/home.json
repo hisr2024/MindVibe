@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "メンタルウェルネスのためのAIコンパニオン",
+    "subtitle": "古代バガヴァッド・ギーターの知恵に基づくKIAANとチャット",
+    "ctaPrimary": "無料チャットを開始",
+    "ctaSecondary": "ツールを探索"
+  },
+  "languageShowcase": {
+    "title": "あなたの言語で利用可能",
+    "subtitle": "KIAANはあなたの言語を話します。パーソナライズされた体験のために8以上の言語から選択してください。",
+    "previewTitle": "{{language}}のKIAAN",
+    "previewDescription": "文化的に関連する知恵とともに、母国語でマインドフルネスガイダンスを体験してください。",
+    "stats": {
+      "languages": "言語",
+      "verses": "翻訳された詩",
+      "support": "グローバルサポート"
+    }
+  },
+  "features": {
+    "title": "メンタルウェルネスに必要なすべて",
+    "description": "内なる平和への旅のための包括的なツール"
+  }
+}

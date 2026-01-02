@@ -1,114 +1,50 @@
 {
-  "common": {
-    "welcome": "Bienvenue sur MindVibe",
-    "tagline": "Votre compagnon attentif pour la paix intérieure",
-    "getStarted": "Commencer",
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Application de santé mentale"
+  },
+  "buttons": {
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "continue": "Continuer",
     "learnMore": "En savoir plus",
-    "signIn": "Se connecter",
-    "signUp": "S'inscrire",
-    "signOut": "Se déconnecter",
-    "settings": "Paramètres",
-    "profile": "Profil",
-    "dashboard": "Tableau de bord",
-    "language": "Langue",
-    "theme": "Thème",
-    "dark": "Sombre",
-    "light": "Clair",
-    "system": "Système"
+    "getStarted": "Commencer",
+    "tryNow": "Essayez maintenant",
+    "tools": "Outils"
   },
-  "pricing": {
-    "title": "Choisissez votre chemin vers la paix intérieure",
-    "subtitle": "Chaque plan offre la même qualité d'orientation KIAAN. Choisissez selon la fréquence à laquelle vous souhaitez vous connecter.",
-    "monthly": "Mensuel",
-    "yearly": "Annuel",
-    "save": "Économisez",
-    "perMonth": "/mois",
-    "perYear": "/an",
-    "billedYearly": "facturé annuellement",
-    "currentPlan": "Plan actuel",
-    "getStartedFree": "Commencer gratuitement",
-    "mostPopular": "Le plus populaire",
-    "comparePlans": "Comparer les plans",
-    "kiaanQuestions": "Questions KIAAN",
-    "unlimited": "Illimité",
-    "features": "Fonctionnalités",
-    "faq": {
-      "title": "Questions fréquemment posées",
-      "changePlan": {
-        "q": "Puis-je changer mon plan plus tard ?",
-        "a": "Oui ! Vous pouvez mettre à niveau, rétrograder ou annuler votre plan à tout moment. Les mises à niveau prennent effet immédiatement, les rétrogradations à la fin de votre période de facturation."
-      },
-      "quota": {
-        "q": "Que se passe-t-il quand je dépasse mon quota de questions ?",
-        "a": "Vous pouvez toujours utiliser toutes les autres fonctionnalités comme le journal, le suivi de l'humeur et les exercices de respiration. Votre quota se réinitialise au début de chaque période de facturation."
-      },
-      "security": {
-        "q": "Mes données sont-elles sécurisées ?",
-        "a": "Absolument. Vos entrées de journal sont cryptées sur votre appareil. Nous ne vendons jamais vos données et maintenons des normes de confidentialité strictes."
-      },
-      "refund": {
-        "q": "Puis-je obtenir un remboursement ?",
-        "a": "Nous offrons une garantie de remboursement de 14 jours pour tous les plans payants. Si vous n'êtes pas satisfait, contactez-nous pour un remboursement complet."
-      }
-    },
-    "promise": {
-      "title": "La promesse KIAAN",
-      "description": "Chaque utilisateur reçoit la même qualité d'orientation de KIAAN—la seule différence est le nombre de questions que vous pouvez poser chaque mois. Nous croyons que le bien-être mental devrait être accessible à tous.",
-      "items": {
-        "quality": "Même qualité d'IA pour tous les niveaux",
-        "noDegradation": "Pas de dégradation des fonctionnalités",
-        "privacy": "Vos données restent privées",
-        "cancel": "Annulez à tout moment"
-      }
-    }
+  "status": {
+    "loading": "Chargement...",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré",
+    "error": "Erreur",
+    "success": "Succès",
+    "processing": "Traitement..."
   },
-  "tiers": {
-    "free": {
-      "name": "Gratuit",
-      "description": "Parfait pour commencer avec KIAAN",
-      "cta": "Commencer gratuitement"
-    },
-    "pro": {
-      "name": "Pro",
-      "description": "Outils améliorés pour une pratique plus profonde",
-      "cta": "Choisir Pro"
-    },
-    "premium": {
-      "name": "Premium",
-      "description": "Accès complet à toutes les fonctionnalités KIAAN",
-      "cta": "Choisir Premium"
-    },
-    "executive": {
-      "name": "Executive",
-      "description": "Accès illimité pour les utilisateurs avancés",
-      "cta": "Choisir Executive"
-    }
+  "common": {
+    "hello": "Bonjour",
+    "welcome": "Bienvenue",
+    "goodbye": "Au revoir",
+    "thankyou": "Merci",
+    "yes": "Oui",
+    "no": "Non",
+    "or": "ou",
+    "and": "et",
+    "optional": "Optionnel",
+    "required": "Requis"
   },
-  "chat": {
-    "title": "KIAAN",
-    "subtitle": "Votre compagnon de sagesse",
-    "placeholder": "Partagez ce qui vous préoccupe...",
-    "send": "Envoyer",
-    "sendToJournal": "Enregistrer dans le journal",
-    "jumpToLatest": "Aller au plus récent",
-    "welcome": {
-      "title": "Bienvenue sur KIAAN",
-      "description": "Partagez ce qui vous préoccupe. Je suis là pour offrir des conseils chaleureux et ancrés dans une sagesse intemporelle."
-    },
-    "typing": "KIAAN écrit..."
-  },
-  "navigation": {
-    "home": "Accueil",
-    "features": "Fonctionnalités",
-    "pricing": "Tarifs",
-    "about": "À propos",
-    "contact": "Contact",
-    "journal": "Journal",
-    "analytics": "Analyses"
-  },
-  "currency": {
-    "usd": "Dollar américain",
-    "eur": "Euro",
-    "inr": "Roupie indienne"
+  "privacy": {
+    "encrypted": "Chiffré",
+    "private": "Privé",
+    "secure": "Sécurisé",
+    "localOnly": "Local seulement",
+    "offlineReady": "Prêt hors ligne"
   }
 }
