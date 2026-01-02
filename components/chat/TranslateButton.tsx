@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
+import { getTranslationService } from '@/services/TranslationService'
 
 interface TranslateButtonProps {
   text: string
-  onTranslate?: (translatedText: string) => void
+  onTranslate?: (translatedText: string, isTranslated: boolean) => void
   className?: string
 }
 
@@ -13,9 +14,12 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
   const { language, config } = useLanguage()
   const [isTranslating, setIsTranslating] = useState(false)
   const [isTranslated, setIsTranslated] = useState(false)
+  const [translatedText, setTranslatedText] = useState<string | null>(null)
   const [error, setError] = useState(false)
 
-  const handleTranslate = async () => {
+  const translationService = getTranslationService()
+
+  const handleTranslate = useCallback(async () => {
     // If already in English, no need to translate
     if (language === 'en') {
       setError(true)
@@ -23,24 +27,39 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
       return
     }
 
+    // If already translated, toggle back to original
+    if (isTranslated) {
+      setIsTranslated(false)
+      onTranslate?.(text, false)
+      return
+    }
+
     setIsTranslating(true)
+    setError(false)
+
     try {
-      // For now, this is a placeholder for actual translation
-      // In production, this would call a translation API
-      // The translation would be handled by the backend or a translation service
+      const result = await translationService.translate({
+        text,
+        targetLang: language,
+        sourceLang: 'en'
+      })
 
-      // Simulate translation delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      setIsTranslated(!isTranslated)
-      onTranslate?.(text)
+      if (result.success && result.translatedText) {
+        setTranslatedText(result.translatedText)
+        setIsTranslated(true)
+        onTranslate?.(result.translatedText, true)
+      } else {
+        setError(true)
+        setTimeout(() => setError(false), 2000)
+      }
     } catch (err) {
+      console.error('Translation error:', err)
       setError(true)
       setTimeout(() => setError(false), 2000)
     } finally {
       setIsTranslating(false)
     }
-  }
+  }, [language, text, isTranslated, translationService, onTranslate])
 
   return (
     <button
