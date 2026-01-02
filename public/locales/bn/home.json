@@ -1,11 +1,11 @@
 {
   "hero": {
-    "title": "Your AI Companion for Mental Wellness",
-    "subtitle": "Chat with KIAAN, powered by Ancient Wisdom",
-    "tagline": "Your calm, privacy-first mental wellness companion powered by ancient wisdom",
-    "ctaPrimary": "Talk to KIAAN",
-    "ctaSecondary": "Sacred Reflections",
-    "privacy": "Conversations remain private • a warm, confidential refuge"
+    "title": "মানসিক সুস্থতার জন্য আপনার এআই সঙ্গী",
+    "subtitle": "প্রাচীন জ্ঞান দ্বারা চালিত KIAAN এর সাথে চ্যাট করুন",
+    "tagline": "প্রাচীন জ্ঞান দ্বারা চালিত আপনার শান্ত, গোপনীয়তা-প্রথম মানসিক সুস্থতা সঙ্গী",
+    "ctaPrimary": "KIAAN এর সাথে কথা বলুন",
+    "ctaSecondary": "পবিত্র প্রতিফলন",
+    "privacy": "কথোপকথন ব্যক্তিগত থাকে • একটি উষ্ণ, গোপনীয় আশ্রয়"
   },
   "ecosystem": {
     "title": "The MindVibe Ecosystem",
@@ -68,26 +68,26 @@
   },
   "quickAccess": {
     "kiaan": {
-      "title": "Talk to KIAAN",
-      "subtitle": "Instant guidance",
-      "description": "Jump into a focused conversation for mental wellness support",
-      "cta": "Open Chat"
+      "title": "KIAAN এর সাথে কথা বলুন",
+      "subtitle": "তাত্ক্ষণিক নির্দেশনা",
+      "description": "মানসিক সুস্থতা সহায়তার জন্য একটি ফোকাসড কথোপকথনে ঝাঁপ দিন",
+      "cta": "চ্যাট খুলুন"
     },
     "dashboard": {
-      "title": "Progress Tracking",
-      "subtitle": "Dashboard",
-      "description": "View insights from your mood check-ins and journal entries",
-      "cta": "View Dashboard"
+      "title": "অগ্রগতি ট্র্যাকিং",
+      "subtitle": "ড্যাশবোর্ড",
+      "description": "আপনার মেজাজ চেক-ইন এবং জার্নাল এন্ট্রি থেকে অন্তর্দৃষ্টি দেখুন",
+      "cta": "ড্যাশবোর্ড দেখুন"
     },
     "emotionalReset": {
-      "title": "Quick Reset",
-      "subtitle": "Emotional Reset",
-      "description": "Guided exercises to reset your emotional state instantly",
-      "cta": "Try Reset"
+      "title": "দ্রুত রিসেট",
+      "subtitle": "আবেগিক রিসেট",
+      "description": "আপনার আবেগিক অবস্থা তাত্ক্ষণিকভাবে রিসেট করতে গাইডেড ব্যায়াম",
+      "cta": "রিসেট চেষ্টা করুন"
     }
   },
   "disclaimer": {
-    "title": "Disclaimer",
-    "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+    "title": "দাবিত্যাগ",
+    "text": "KIAAN জ্ঞান ঐতিহ্য দ্বারা অনুপ্রাণিত সহায়ক প্রতিফলন শেয়ার করে। এই কথোপকথন এবং ব্যায়াম চিকিৎসা পরামর্শ নয়। আপনি যদি গুরুতর উদ্বেগের সম্মুখীন হন বা অনিরাপদ বোধ করেন, অনুগ্রহ করে অবিলম্বে আপনার দেশের জরুরি চিকিৎসা সেবা বা একজন লাইসেন্সপ্রাপ্ত পেশাদারের সাথে যোগাযোগ করুন।"
   }
 }

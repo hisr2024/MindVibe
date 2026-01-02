@@ -1,49 +1,50 @@
 {
   "app": {
-    "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "name": "মাইন্ডভাইব",
+    "tagline": "মানসিক স্বাস্থ্য অ্যাপ"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "জমা দিন",
+    "cancel": "বাতিল করুন",
+    "save": "সংরক্ষণ করুন",
+    "delete": "মুছুন",
+    "edit": "সম্পাদনা করুন",
+    "close": "বন্ধ করুন",
+    "next": "পরবর্তী",
+    "previous": "পূর্ববর্তী",
+    "confirm": "নিশ্চিত করুন",
+    "back": "পেছনে",
+    "continue": "চালিয়ে যান",
+    "learnMore": "আরও জানুন",
+    "getStarted": "শুরু করুন",
+    "tryNow": "এখনই চেষ্টা করুন",
+    "tools": "সরঞ্জাম"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "লোড হচ্ছে...",
+    "saving": "সংরক্ষণ করা হচ্ছে...",
+    "saved": "সংরক্ষিত",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "processing": "প্রক্রিয়াকরণ..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "হ্যালো",
+    "welcome": "স্বাগতম",
+    "goodbye": "বিদায়",
+    "thankyou": "ধন্যবাদ",
+    "yes": "হ্যাঁ",
+    "no": "না",
+    "or": "অথবা",
+    "and": "এবং",
+    "optional": "ঐচ্ছিক",
+    "required": "আবশ্যক"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "এনক্রিপ্টেড",
+    "private": "ব্যক্তিগত",
+    "secure": "সুরক্ষিত",
+    "localOnly": "শুধুমাত্র স্থানীয়",
+    "offlineReady": "অফলাইন-প্রস্তুত"
   }
 }
