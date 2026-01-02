@@ -1,41 +1,51 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "Início",
+    "dashboard": "Painel",
+    "features": "Recursos",
+    "about": "Sobre",
+    "contact": "Contato",
+    "pricing": "Assinaturas",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "account": "Acesso à conta",
+    "theme": "Tema"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "Bússola de relacionamento",
+    "sacredReflections": "Reflexões sagradas",
+    "karmaFootprint": "Pegada kármica",
+    "karmicTree": "Árvore kármica",
+    "emotionalReset": "Reset emocional",
+    "deepInsights": "Insights profundos",
+    "wisdomRooms": "Salas de sabedoria"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "Abrir chat",
+    "startCheckin": "Iniciar check-in",
+    "instantGuidance": "Orientação instantânea",
+    "spotYourState": "Identifique seu estado",
+    "menu": "Menu",
+    "toggleMenu": "Alternar menu de navegação"
   },
   "mobileNav": {
     "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "pause": "Pausar",
+    "journal": "Reflexões sagradas"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "Todos os direitos reservados",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "support": "Suporte",
+    "explore": "Explorar",
+    "safety": "Segurança",
+    "description": "Projetado para suporte de saúde mental calmo e focado em privacidade. Construído com foco em acessibilidade WCAG, criptografia e experiência suave.",
+    "emailUs": "Envie-nos um e-mail",
+    "encryptedJournals": "Diários criptografados",
+    "noTracking": "Sem anúncios de rastreamento"
   }
 }

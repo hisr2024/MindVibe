@@ -15,9 +15,10 @@
     "confirm": "Confirmar",
     "back": "Atrás",
     "continue": "Continuar",
-    "learnMore": "Más información",
+    "learnMore": "Aprender más",
     "getStarted": "Comenzar",
-    "tryNow": "Probar ahora"
+    "tryNow": "Probar ahora",
+    "tools": "Herramientas"
   },
   "status": {
     "loading": "Cargando...",
@@ -41,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "Encriptado",
-    "private": "Privado",
+    "private": "Diseño privado",
     "secure": "Seguro",
     "localOnly": "Solo local",
     "offlineReady": "Listo sin conexión"
