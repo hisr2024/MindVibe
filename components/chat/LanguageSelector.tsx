@@ -8,7 +8,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useLanguage, type Language } from '@/hooks/useLanguage';
 import { localeNames } from '@/i18n';
 
 interface LanguageSelectorProps {

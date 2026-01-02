@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Skip middleware for static files, API routes, and special Next.js paths
+  // Skip proxy for static files, API routes, and special Next.js paths
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
@@ -27,5 +27,3 @@ export const config = {
     '/((?!_next|api|_vercel|.*\\..*).*)',
   ],
 };
-
-
