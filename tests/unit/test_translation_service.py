@@ -86,10 +86,10 @@ class TestTranslationService:
         text = "Hello world"
         expected_translation = "Hola mundo"
         
-        # Mock the translator
+        # Mock the translator with async mock
         mock_result = Mock()
         mock_result.text = expected_translation
-        service.translator.translate = Mock(return_value=mock_result)
+        service.translator.translate = AsyncMock(return_value=mock_result)
         
         result = await service.translate_text(text, 'es')
         
@@ -105,10 +105,10 @@ class TestTranslationService:
         text = "Hello world"
         expected_translation = "Hola mundo"
         
-        # Mock the translator
+        # Mock the translator with async mock
         mock_result = Mock()
         mock_result.text = expected_translation
-        service.translator.translate = Mock(return_value=mock_result)
+        service.translator.translate = AsyncMock(return_value=mock_result)
         
         # First call should use translator
         result1 = await service.translate_text(text, 'es')
@@ -127,8 +127,8 @@ class TestTranslationService:
         """Test error handling when translation fails"""
         text = "Hello world"
         
-        # Mock translator to raise an exception
-        service.translator.translate = Mock(side_effect=Exception("Translation API error"))
+        # Mock translator to raise an exception with async mock
+        service.translator.translate = AsyncMock(side_effect=Exception("Translation API error"))
         
         result = await service.translate_text(text, 'es')
         
@@ -142,10 +142,10 @@ class TestTranslationService:
         response = "I'm here to help you with your mental wellness journey."
         expected_translation = "Estoy aquí para ayudarte con tu viaje de bienestar mental."
         
-        # Mock the translator
+        # Mock the translator with async mock
         mock_result = Mock()
         mock_result.text = expected_translation
-        service.translator.translate = Mock(return_value=mock_result)
+        service.translator.translate = AsyncMock(return_value=mock_result)
         
         result = await service.translate_chat_response(response, 'es')
         
@@ -193,7 +193,7 @@ class TestTranslationService:
         for lang in languages:
             mock_result = Mock()
             mock_result.text = translations[lang]
-            service.translator.translate = Mock(return_value=mock_result)
+            service.translator.translate = AsyncMock(return_value=mock_result)
             
             result = await service.translate_text(text, lang)
             
