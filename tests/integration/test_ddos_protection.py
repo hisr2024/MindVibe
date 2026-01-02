@@ -10,6 +10,7 @@ Tests coverage:
 - Allowlist/blocklist functionality
 """
 
+import asyncio
 import pytest
 import time
 from unittest.mock import Mock, AsyncMock
@@ -197,8 +198,6 @@ async def test_connection_tracking(middleware, mock_call_next):
     async def slow_call_next(request):
         await asyncio.sleep(0.1)
         return Response(content="OK", status_code=200)
-    
-    import asyncio
     
     # Start multiple concurrent requests
     tasks = [
