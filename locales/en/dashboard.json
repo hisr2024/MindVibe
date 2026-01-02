@@ -36,23 +36,23 @@
       "title": "Ardha",
       "description": "Situational guidance"
     },
-    "relationship": {
+    "relationship-compass": {
       "title": "Relationship Compass",
       "description": "Relationship guidance"
     },
-    "emotional": {
+    "emotional-reset": {
       "title": "Emotional Reset",
       "description": "Quick emotional balance"
     },
-    "footprint": {
+    "karma-footprint": {
       "title": "Karma Footprint",
       "description": "Track your actions"
     },
-    "tree": {
+    "karmic-tree": {
       "title": "Karmic Tree",
       "description": "Visualize your journey"
     },
-    "reset": {
+    "karma-reset": {
       "title": "Karma Reset",
       "description": "Start fresh"
     },

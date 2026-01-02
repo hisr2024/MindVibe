@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ThemeToggle } from '@/components/ui'
 import { MindVibeLockup } from '@/components/branding'
@@ -14,7 +14,7 @@ export default function SiteNav() {
   const [open, setOpen] = useState(false)
   const { t } = useLanguage()
 
-  const links = [
+  const links = useMemo(() => [
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN Chat'), highlight: true },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
@@ -22,7 +22,7 @@ export default function SiteNav() {
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
-  ]
+  ], [t])
 
   return (
     <motion.header 

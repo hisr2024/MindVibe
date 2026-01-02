@@ -36,23 +36,23 @@
       "title": "Ardha",
       "description": "स्थितिगत मार्गदर्शन"
     },
-    "relationship": {
+    "relationship-compass": {
       "title": "संबंध दिशा-सूचक",
       "description": "संबंध मार्गदर्शन"
     },
-    "emotional": {
+    "emotional-reset": {
       "title": "भावनात्मक रीसेट",
       "description": "त्वरित भावनात्मक संतुलन"
     },
-    "footprint": {
+    "karma-footprint": {
       "title": "कर्म पदचिह्न",
       "description": "अपने कार्यों को ट्रैक करें"
     },
-    "tree": {
+    "karmic-tree": {
       "title": "कर्म वृक्ष",
       "description": "अपनी यात्रा को देखें"
     },
-    "reset": {
+    "karma-reset": {
       "title": "कर्म रीसेट",
       "description": "नई शुरुआत करें"
     },
