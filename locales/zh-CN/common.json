@@ -17,7 +17,8 @@
     "continue": "继续",
     "learnMore": "了解更多",
     "getStarted": "开始",
-    "tryNow": "立即试用"
+    "tryNow": "立即尝试",
+    "tools": "工具"
   },
   "status": {
     "loading": "加载中...",
@@ -41,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "已加密",
-    "private": "私密",
+    "private": "隐私设计",
     "secure": "安全",
     "localOnly": "仅本地",
     "offlineReady": "离线就绪"

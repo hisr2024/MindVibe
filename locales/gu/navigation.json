@@ -1,41 +1,51 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "હોમ",
+    "dashboard": "ડેશબોર્ડ",
+    "features": "લક્ષણો",
+    "about": "વિશે",
+    "contact": "સંપર્ક",
+    "pricing": "સબ્સ્ક્રિપ્શન્સ",
+    "profile": "પ્રોફાઇલ",
+    "settings": "સેટિંગ્સ",
+    "account": "એકાઉન્ટ એક્સેસ",
+    "theme": "થીમ"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "સંબંધ હોકાયંત્ર",
+    "sacredReflections": "પવિત્ર પ્રતિબિંબ",
+    "karmaFootprint": "કર્મ પદચિહ્ન",
+    "karmicTree": "કાર્મિક વૃક્ષ",
+    "emotionalReset": "ભાવનાત્મક રીસેટ",
+    "deepInsights": "ઊંડી આંતરદૃષ્ટિ",
+    "wisdomRooms": "જ્ઞાન રૂમ્સ"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "ચેટ ખોલો",
+    "startCheckin": "ચેક-ઇન શરૂ કરો",
+    "instantGuidance": "તાત્કાલિક માર્ગદર્શન",
+    "spotYourState": "તમારી સ્થિતિ શોધો",
+    "menu": "મેનુ",
+    "toggleMenu": "નેવિગેશન મેનુ ટૉગલ કરો"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "ચેટ",
+    "pause": "વિરામ",
+    "journal": "પવિત્ર પ્રતિબિંબ"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "બધા અધિકારો અનામત",
+    "privacy": "ગોપનીયતા નીતિ",
+    "terms": "સેવાની શરતો",
+    "support": "સપોર્ટ",
+    "explore": "અન્વેષણ કરો",
+    "safety": "સલામતી",
+    "description": "શાંત, ગોપનીયતા-પ્રથમ માનસિક સ્વાસ્થ્ય સહાયતા માટે રચાયેલ. WCAG ઍક્સેસિબિલિટી, એન્ક્રિપ્શન અને નમ્ર અનુભવ પર ધ્યાન કેન્દ્રિત કરીને બનાવેલ.",
+    "emailUs": "અમને ઇમેઇલ કરો",
+    "encryptedJournals": "એન્ક્રિપ્ટેડ જર્નલ્સ",
+    "noTracking": "કોઈ ટ્રેકિંગ જાહેરાતો નથી"
   }
 }

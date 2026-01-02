@@ -1,49 +1,50 @@
 {
   "app": {
     "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "tagline": "માનસિક સ્વાસ્થ્ય એપ"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "સબમિટ કરો",
+    "cancel": "રદ કરો",
+    "save": "સાચવો",
+    "delete": "કાઢી નાખો",
+    "edit": "સંપાદિત કરો",
+    "close": "બંધ કરો",
+    "next": "આગળ",
+    "previous": "પાછળ",
+    "confirm": "પુષ્ટિ કરો",
+    "back": "પાછા",
+    "continue": "ચાલુ રાખો",
+    "learnMore": "વધુ જાણો",
+    "getStarted": "પ્રારંભ કરો",
+    "tryNow": "હમણાં પ્રયાસ કરો",
+    "tools": "સાધનો"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "લોડ કરી રહ્યું છે...",
+    "saving": "સાચવી રહ્યું છે...",
+    "saved": "સાચવ્યું",
+    "error": "ભૂલ",
+    "success": "સફળતા",
+    "processing": "પ્રક્રિયા કરી રહ્યું છે..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "નમસ્તે",
+    "welcome": "સ્વાગત છે",
+    "goodbye": "વિદાય",
+    "thankyou": "આભાર",
+    "yes": "હા",
+    "no": "ના",
+    "or": "અથવા",
+    "and": "અને",
+    "optional": "વૈકલ્પિક",
+    "required": "જરૂરી"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "એન્ક્રિપ્ટેડ",
+    "private": "ખાનગી ડિઝાઇન",
+    "secure": "સુરક્ષિત",
+    "localOnly": "માત્ર સ્થાનિક",
+    "offlineReady": "ઓફલાઇન-તૈયાર"
   }
 }

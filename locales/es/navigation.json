@@ -1,14 +1,14 @@
 {
   "mainNav": {
     "home": "Inicio",
-    "dashboard": "Panel de control",
+    "dashboard": "Tablero",
     "features": "Características",
     "about": "Acerca de",
     "contact": "Contacto",
     "pricing": "Suscripciones",
     "profile": "Perfil",
     "settings": "Configuración",
-    "account": "Acceso a la cuenta",
+    "account": "Acceso a cuenta",
     "theme": "Tema"
   },
   "features": {
@@ -20,7 +20,7 @@
     "karmaFootprint": "Huella de karma",
     "karmicTree": "Árbol kármico",
     "emotionalReset": "Reinicio emocional",
-    "deepInsights": "Conocimientos profundos",
+    "deepInsights": "Perspectivas profundas",
     "wisdomRooms": "Salas de sabiduría"
   },
   "actions": {
@@ -43,9 +43,9 @@
     "support": "Soporte",
     "explore": "Explorar",
     "safety": "Seguridad",
-    "description": "Diseñado para apoyo de salud mental tranquilo y privado. Construido con enfoque en accesibilidad WCAG, encriptación y experiencia amable.",
+    "description": "Diseñado para soporte de salud mental tranquilo y centrado en la privacidad. Construido con enfoque en accesibilidad WCAG, encriptación y experiencia suave.",
     "emailUs": "Envíanos un correo",
     "encryptedJournals": "Diarios encriptados",
-    "noTracking": "Sin anuncios de rastreo"
+    "noTracking": "Sin anuncios de seguimiento"
   }
 }

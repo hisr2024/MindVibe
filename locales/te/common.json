@@ -1,49 +1,50 @@
 {
   "app": {
     "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "tagline": "మానసిక ఆరోగ్య యాప్"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "సమర్పించండి",
+    "cancel": "రద్దు చేయండి",
+    "save": "సేవ్ చేయండి",
+    "delete": "తొలగించండి",
+    "edit": "సవరించండి",
+    "close": "మూసివేయండి",
+    "next": "తదుపరి",
+    "previous": "మునుపటి",
+    "confirm": "నిర్ధారించండి",
+    "back": "వెనుకకు",
+    "continue": "కొనసాగించండి",
+    "learnMore": "మరింత తెలుసుకోండి",
+    "getStarted": "ప్రారంభించండి",
+    "tryNow": "ఇప్పుడు ప్రయత్నించండి",
+    "tools": "సాధనాలు"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "లోడ్ అవుతోంది...",
+    "saving": "సేవ్ చేస్తోంది...",
+    "saved": "సేవ్ చేయబడింది",
+    "error": "లోపం",
+    "success": "విజయం",
+    "processing": "ప్రాసెస్ చేస్తోంది..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "నమస్కారం",
+    "welcome": "స్వాగతం",
+    "goodbye": "వీడ్కోలు",
+    "thankyou": "ధన్యవాదాలు",
+    "yes": "అవును",
+    "no": "కాదు",
+    "or": "లేదా",
+    "and": "మరియు",
+    "optional": "ఐచ్ఛికం",
+    "required": "అవసరం"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "ఎన్‌క్రిప్ట్ చేయబడింది",
+    "private": "ప్రైవేట్ డిజైన్",
+    "secure": "సురక్షితం",
+    "localOnly": "స్థానికంగా మాత్రమే",
+    "offlineReady": "ఆఫ్‌లైన్-సిద్ధం"
   }
 }
