@@ -13,7 +13,7 @@ import { LanguageSelector } from '@/components/chat/LanguageSelector';
  * Full-featured chat interface with mood context support
  */
 function KiaanChatPageInner() {
-  const { t, isInitialized } = useLanguage();
+  const { t, isInitialized, language } = useLanguage();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +58,10 @@ function KiaanChatPageInner() {
     try {
       const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        body: JSON.stringify({ message: text.trim() }),
+        body: JSON.stringify({ 
+          message: text.trim(),
+          language: language || 'en'
+        }),
       });
 
       if (!response.ok) {
@@ -92,7 +95,7 @@ function KiaanChatPageInner() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [language]);
 
   const handleSaveToJournal = useCallback(async (text: string) => {
     if (typeof window === 'undefined') return;
