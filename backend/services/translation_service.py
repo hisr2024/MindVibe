@@ -137,13 +137,8 @@ class TranslationService:
             return self.cache[cache_key]
         
         try:
-            # Translate using Google Translate (run in executor to avoid blocking)
-            import asyncio
-            loop = asyncio.get_event_loop()
-            result = await loop.run_in_executor(
-                None,
-                lambda: self.translator.translate(text, src=source_lang, dest=target_lang)
-            )
+            # Translate using Google Translate (now natively async in v4.0.2+)
+            result = await self.translator.translate(text, src=source_lang, dest=target_lang)
             
             translation_result = {
                 'translated_text': result.text,
