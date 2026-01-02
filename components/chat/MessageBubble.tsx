@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { CopyButton } from './CopyButton'
 import { ShareButton } from './ShareButton'
+import { TranslateButton } from './TranslateButton'
 import { VoiceOutputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 
@@ -139,22 +140,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         </div>
       )}
 
-      {/* Learn More About Ancient Wisdom link */}
-      {sender === 'assistant' && gitaPowered && !status && (
-        <div className="flex items-center gap-3">
-          <a
-            href="https://github.com/hisr2024/MindVibe/blob/main/docs/KIAAN_WISDOM_ENGINE.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] text-orange-300/70 hover:text-orange-200 transition-colors underline decoration-dotted underline-offset-2"
-            aria-label="Learn more about the Ancient Wisdom engine"
-          >
-            Learn More About Ancient Wisdom →
-          </a>
-        </div>
-      )}
-
-      {/* Action buttons row - Copy, Share, Voice Output, and Save to Journal */}
+      {/* Action buttons row - Copy, Share, Translate, Voice Output, and Save to Journal */}
       {sender === 'assistant' && !status && (
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {/* Copy Button */}
@@ -162,7 +148,10 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
 
           {/* Share Button */}
           <ShareButton text={text} />
-          
+
+          {/* Translate Button */}
+          <TranslateButton text={text} />
+
           {/* Voice Output Button */}
           <VoiceOutputButton text={text} language={language} />
 
