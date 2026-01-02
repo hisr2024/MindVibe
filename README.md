@@ -18,6 +18,37 @@ MindVibe is a comprehensive mental health platform that provides:
 - 🌍 **Universal Wisdom** - Ancient teachings without religious terminology
 - 🔒 **Privacy-First** - End-to-end encryption for sensitive data
 - 🌐 **Multi-Language** - Support for 17 languages (see full list below)
+- 📱 **Native Mobile Apps** - Android (Kotlin + Jetpack Compose) and iOS (Swift + SwiftUI)
+
+---
+
+## 📱 **Mobile Apps**
+
+MindVibe now supports native mobile applications for both Android and iOS platforms!
+
+### Android App
+- **Technology**: Kotlin with Jetpack Compose
+- **Architecture**: MVVM + Clean Architecture
+- **Design**: Material Design 3
+- **Min SDK**: Android 7.0 (API 24)
+- **Status**: Infrastructure ready, development in progress
+
+### iOS App
+- **Technology**: Swift with SwiftUI
+- **Architecture**: MVVM + Combine
+- **Design**: Human Interface Guidelines
+- **Min iOS**: iOS 15.0
+- **Status**: Infrastructure ready, development in progress
+
+### Mobile Features
+- ✅ Full KIAAN integration with multi-language support
+- ✅ Offline-first mood tracking
+- ✅ End-to-end encrypted journal
+- ✅ Native Bhagavad Gita reader
+- ✅ Push notifications for wellness reminders
+- ✅ Biometric authentication (Face ID/Touch ID)
+
+📚 **See [Mobile README](mobile/README.md) for setup instructions and documentation.**
 
 ---
 
@@ -76,6 +107,11 @@ MindVibe/
 │   │   ├── wisdom_kb.py      # Wisdom knowledge base
 │   │   └── pipeline/         # Content transformation
 │   └── models/                # Additional model definitions
+├── mobile/                     # Native Mobile Apps (NEW!)
+│   ├── android/               # Android app (Kotlin + Jetpack Compose)
+│   ├── ios/                   # iOS app (Swift + SwiftUI)
+│   ├── shared/                # Shared resources and documentation
+│   └── docs/                  # Mobile-specific documentation
 ├── tests/                     # Pytest test suite
 │   ├── conftest.py           # Test fixtures
 │   ├── unit/                 # Unit tests
@@ -736,7 +772,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 - [ ] Frontend reorganization (`frontend/src/` structure)
 - [ ] CI/CD pipeline (GitHub Actions)
 - [ ] Comprehensive security audit
-- [ ] Mobile app (React Native)
+- [x] Mobile infrastructure (Android + iOS native apps)
 - [ ] Real-time features (WebSockets)
 - [ ] Advanced analytics dashboard
 
