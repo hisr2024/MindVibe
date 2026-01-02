@@ -534,6 +534,19 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Weekly Assessment router: {e}")
 
+# Load Translation router
+print("\n[Translation] Attempting to import Translation router...")
+try:
+    from backend.routes.translation import router as translation_router
+    app.include_router(translation_router)
+    print("✅ [SUCCESS] Translation router loaded")
+    print("   • POST   /api/translation/translate - Translate text")
+    print("   • POST   /api/translation/preferences - Update language preferences")
+    print("   • GET    /api/translation/preferences - Get language preferences")
+    print("   • GET    /api/translation/languages - Get supported languages")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Translation router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
