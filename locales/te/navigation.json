@@ -1,41 +1,51 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "హోమ్",
+    "dashboard": "డాష్‌బోర్డ్",
+    "features": "ఫీచర్లు",
+    "about": "గురించి",
+    "contact": "సంప్రదించండి",
+    "pricing": "సభ్యత్వాలు",
+    "profile": "ప్రొఫైల్",
+    "settings": "సెట్టింగ్‌లు",
+    "account": "ఖాతా యాక్సెస్",
+    "theme": "థీమ్"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "సంబంధ దిక్సూచి",
+    "sacredReflections": "పవిత్ర ప్రతిబింబాలు",
+    "karmaFootprint": "కర్మ పాదముద్ర",
+    "karmicTree": "కర్మ వృక్షం",
+    "emotionalReset": "భావోద్వేగ రీసెట్",
+    "deepInsights": "లోతైన అంతర్దృష్టి",
+    "wisdomRooms": "జ్ఞాన గదులు"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "చాట్ తెరవండి",
+    "startCheckin": "చెక్-ఇన్ ప్రారంభించండి",
+    "instantGuidance": "తక్షణ మార్గదర్శకత్వం",
+    "spotYourState": "మీ స్థితిని గుర్తించండి",
+    "menu": "మెనూ",
+    "toggleMenu": "నావిగేషన్ మెనూను టోగుల్ చేయండి"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "చాట్",
+    "pause": "పాజ్",
+    "journal": "పవిత్ర ప్రతిబింబాలు"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "అన్ని హక్కులు రిజర్వు చేయబడ్డాయి",
+    "privacy": "గోప్యతా విధానం",
+    "terms": "సేవా నిబంధనలు",
+    "support": "మద్దతు",
+    "explore": "అన్వేషించండి",
+    "safety": "భద్రత",
+    "description": "ప్రశాంతత, గోప్యత-మొదటి మానసిక ఆరోగ్య మద్దతు కోసం రూపొందించబడింది. WCAG యాక్సెసిబిలిటీ, ఎన్‌క్రిప్షన్ మరియు సున్నితమైన అనుభవంపై దృష్టి సారించి నిర్మించబడింది.",
+    "emailUs": "మాకు ఇమెయిల్ చేయండి",
+    "encryptedJournals": "ఎన్‌క్రిప్ట్ చేయబడిన జర్నల్‌లు",
+    "noTracking": "ట్రాకింగ్ ప్రకటనలు లేవు"
   }
 }

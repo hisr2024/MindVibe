@@ -1,41 +1,51 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "முகப்பு",
+    "dashboard": "டாஷ்போர்டு",
+    "features": "அம்சங்கள்",
+    "about": "பற்றி",
+    "contact": "தொடர்பு",
+    "pricing": "சந்தாக்கள்",
+    "profile": "சுயவிவரம்",
+    "settings": "அமைப்புகள்",
+    "account": "கணக்கு அணுகல்",
+    "theme": "தீம்"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "உறவு திசைகாட்டி",
+    "sacredReflections": "புனித சிந்தனைகள்",
+    "karmaFootprint": "கர்மா பாதம்",
+    "karmicTree": "கர்ம மரம்",
+    "emotionalReset": "உணர்ச்சி மீட்டமைப்பு",
+    "deepInsights": "ஆழ்ந்த நுண்ணறிவு",
+    "wisdomRooms": "ஞான அறைகள்"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "அரட்டையைத் திற",
+    "startCheckin": "செக்-இன் தொடங்கு",
+    "instantGuidance": "உடனடி வழிகாட்டுதல்",
+    "spotYourState": "உங்கள் நிலையைக் கண்டறியவும்",
+    "menu": "மெனு",
+    "toggleMenu": "வழிசெலுத்தல் மெனுவை மாற்று"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "அரட்டை",
+    "pause": "இடைநிறுத்து",
+    "journal": "புனித சிந்தனைகள்"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை",
+    "privacy": "தனியுரிமைக் கொள்கை",
+    "terms": "சேவை விதிமுறைகள்",
+    "support": "ஆதரவு",
+    "explore": "ஆராயவும்",
+    "safety": "பாதுகாப்பு",
+    "description": "அமைதி, தனியுரிமை-முதல் மன ஆரோக்கிய ஆதரவுக்காக வடிவமைக்கப்பட்டது. WCAG அணுகல், என்க்ரிப்ஷன் மற்றும் மென்மையான அனுபவம் மீது கவனம் செலுத்தி கட்டப்பட்டது.",
+    "emailUs": "எங்களுக்கு மின்னஞ்சல் அனுப்புங்கள்",
+    "encryptedJournals": "என்க்ரிப்ட் செய்யப்பட்ட பத்திரிகைகள்",
+    "noTracking": "கண்காணிப்பு விளம்பரங்கள் இல்லை"
   }
 }
