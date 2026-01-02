@@ -6,14 +6,14 @@ import { useState, useCallback } from 'react'
 import { ChatMessage, TranslationInfo } from '@/types/chat'
 import { useLanguage } from './useLanguage'
 
-interface UseTranslationOptions {
+interface UseChatTranslationOptions {
   /**
    * Default preference for showing original vs translated text
    */
   defaultShowOriginal?: boolean
 }
 
-export function useTranslation(options: UseTranslationOptions = {}) {
+export function useChatTranslation(options: UseChatTranslationOptions = {}) {
   const { defaultShowOriginal = false } = options
   const { language } = useLanguage()
   

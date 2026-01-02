@@ -7,7 +7,7 @@ import { apiCall, getErrorMessage } from '@/lib/api-client';
 import { useHapticFeedback, useStreamingText } from '@/hooks';
 import { springConfigs } from '@/lib/animations/spring-configs';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useChatTranslation } from '@/hooks/useChatTranslation';
 import { ChatMessage, ChatAPIResponse } from '@/types/chat';
 import { TranslationToggle } from '@/components/chat/TranslationToggle';
 
@@ -20,7 +20,7 @@ import { TranslationToggle } from '@/components/chat/TranslationToggle';
 export function KiaanFooter() {
   const pathname = usePathname();
   const { t, language } = useLanguage();
-  const { showOriginal, toggleOriginal, getDisplayText, shouldShowToggle } = useTranslation();
+  const { showOriginal, toggleOriginal, getDisplayText, shouldShowToggle } = useChatTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
