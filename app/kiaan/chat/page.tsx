@@ -6,6 +6,7 @@ import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage } from '@/lib/api-client';
 import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
+import { LanguageSelector } from '@/components/chat/LanguageSelector';
 
 /**
  * Dedicated KIAAN Chat Page - Inner Component
@@ -160,8 +161,8 @@ function KiaanChatPageInner() {
     <main className="mx-auto max-w-5xl space-y-6 p-4 pb-28 md:p-8">
       {/* Header */}
       <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-8">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
               {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
@@ -169,12 +170,16 @@ function KiaanChatPageInner() {
               {t('kiaan.chat.subtitle', 'Your calm, privacy-first mental wellness companion powered by ancient wisdom')}
             </p>
           </div>
-          <Link
-            href="/"
-            className="rounded-xl border border-orange-500/30 bg-white/5 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
-          >
-            ← {t('navigation.mainNav.home', 'Home')}
-          </Link>
+          <div className="flex items-center gap-2">
+            {/* Language Selector */}
+            <LanguageSelector compact />
+            <Link
+              href="/"
+              className="rounded-xl border border-orange-500/30 bg-white/5 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
+            >
+              ← {t('navigation.mainNav.home', 'Home')}
+            </Link>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 text-sm text-orange-100/80">
