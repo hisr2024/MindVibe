@@ -34,7 +34,7 @@ export function LanguageSelector({
   });
 
   const handleLanguageSelect = (langCode: string) => {
-    setLanguage(langCode);
+    setLanguage(langCode as Language);
     onLanguageChange?.(langCode);
     setIsOpen(false);
     setSearchQuery('');
