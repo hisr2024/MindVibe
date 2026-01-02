@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useLanguage, type Language } from '@/hooks/useLanguage';
 import { SUPPORTED_LANGUAGES, getLanguagesByRegion } from '@/config/translation';
 
 interface LanguageSettingsProps {
@@ -57,7 +57,7 @@ export function LanguageSettings({ onClose, className = '' }: LanguageSettingsPr
       }
 
       // Update language context
-      setLanguage(selectedLanguage);
+      setLanguage(selectedLanguage as Language);
 
       // Optionally save to backend API
       try {
