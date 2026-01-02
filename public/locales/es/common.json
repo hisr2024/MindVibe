@@ -15,9 +15,10 @@
     "confirm": "Confirmar",
     "back": "Atrás",
     "continue": "Continuar",
-    "learnMore": "Más información",
+    "learnMore": "Aprende más",
     "getStarted": "Comenzar",
-    "tryNow": "Probar ahora"
+    "tryNow": "Pruébalo ahora",
+    "tools": "Herramientas"
   },
   "status": {
     "loading": "Cargando...",

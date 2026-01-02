@@ -1,49 +1,50 @@
 {
   "app": {
-    "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "name": "मैण्ड्वैब्",
+    "tagline": "मानसिकस्वास्थ्यसाधनम्"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "प्रस्तुतीकरोतु",
+    "cancel": "रद्दीकरोतु",
+    "save": "रक्षतु",
+    "delete": "मार्जयतु",
+    "edit": "सम्पादयतु",
+    "close": "बध्नातु",
+    "next": "अग्रे",
+    "previous": "पूर्वम्",
+    "confirm": "पुष्टीकरोतु",
+    "back": "पश्चात्",
+    "continue": "चालयतु",
+    "learnMore": "अधिकं जानातु",
+    "getStarted": "आरभताम्",
+    "tryNow": "इदानीं प्रयत्नं करोतु",
+    "tools": "साधनानि"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "लोड्यते...",
+    "saving": "रक्ष्यते...",
+    "saved": "रक्षितम्",
+    "error": "दोषः",
+    "success": "सिद्धिः",
+    "processing": "प्रक्रियाकरणं भवति..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "नमस्ते",
+    "welcome": "स्वागतम्",
+    "goodbye": "पुनर्दर्शनाय",
+    "thankyou": "धन्यवादः",
+    "yes": "आम्",
+    "no": "न",
+    "or": "वा",
+    "and": "च",
+    "optional": "वैकल्पिकम्",
+    "required": "आवश्यकम्"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "कूटीकृतम्",
+    "private": "गोपनीयम्",
+    "secure": "सुरक्षितम्",
+    "localOnly": "स्थानीयमेव",
+    "offlineReady": "अनलाइन-सिद्धम्"
   }
 }

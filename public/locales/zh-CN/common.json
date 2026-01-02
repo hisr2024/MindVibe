@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "MindVibe",
+    "name": "心灵共振",
     "tagline": "心理健康应用"
   },
   "buttons": {
@@ -10,14 +10,15 @@
     "delete": "删除",
     "edit": "编辑",
     "close": "关闭",
-    "next": "下一步",
-    "previous": "上一步",
+    "next": "下一个",
+    "previous": "上一个",
     "confirm": "确认",
     "back": "返回",
     "continue": "继续",
     "learnMore": "了解更多",
     "getStarted": "开始",
-    "tryNow": "立即试用"
+    "tryNow": "立即尝试",
+    "tools": "工具"
   },
   "status": {
     "loading": "加载中...",
@@ -37,10 +38,10 @@
     "or": "或",
     "and": "和",
     "optional": "可选",
-    "required": "必填"
+    "required": "必需"
   },
   "privacy": {
-    "encrypted": "已加密",
+    "encrypted": "加密",
     "private": "私密",
     "secure": "安全",
     "localOnly": "仅本地",

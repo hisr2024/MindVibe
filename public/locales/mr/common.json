@@ -1,49 +1,50 @@
 {
   "app": {
-    "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "name": "माइंडव्हायब",
+    "tagline": "मानसिक आरोग्य अॅप"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "सबमिट करा",
+    "cancel": "रद्द करा",
+    "save": "जतन करा",
+    "delete": "हटवा",
+    "edit": "संपादित करा",
+    "close": "बंद करा",
+    "next": "पुढे",
+    "previous": "मागे",
+    "confirm": "पुष्टी करा",
+    "back": "मागे",
+    "continue": "सुरू ठेवा",
+    "learnMore": "अधिक जाणून घ्या",
+    "getStarted": "सुरुवात करा",
+    "tryNow": "आता प्रयत्न करा",
+    "tools": "साधने"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "लोड होत आहे...",
+    "saving": "जतन होत आहे...",
+    "saved": "जतन केले",
+    "error": "त्रुटी",
+    "success": "यश",
+    "processing": "प्रक्रिया करत आहे..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "नमस्कार",
+    "welcome": "स्वागत",
+    "goodbye": "अलविदा",
+    "thankyou": "धन्यवाद",
+    "yes": "होय",
+    "no": "नाही",
+    "or": "किंवा",
+    "and": "आणि",
+    "optional": "ऐच्छिक",
+    "required": "आवश्यक"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "एन्क्रिप्टेड",
+    "private": "खाजगी",
+    "secure": "सुरक्षित",
+    "localOnly": "फक्त स्थानिक",
+    "offlineReady": "ऑफलाइन-तयार"
   }
 }

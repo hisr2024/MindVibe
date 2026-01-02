@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "MindVibe",
-    "tagline": "Application de Santé Mentale"
+    "tagline": "Application de santé mentale"
   },
   "buttons": {
     "submit": "Soumettre",
@@ -17,7 +17,8 @@
     "continue": "Continuer",
     "learnMore": "En savoir plus",
     "getStarted": "Commencer",
-    "tryNow": "Essayer maintenant"
+    "tryNow": "Essayez maintenant",
+    "tools": "Outils"
   },
   "status": {
     "loading": "Chargement...",
@@ -43,7 +44,7 @@
     "encrypted": "Chiffré",
     "private": "Privé",
     "secure": "Sécurisé",
-    "localOnly": "Local uniquement",
+    "localOnly": "Local seulement",
     "offlineReady": "Prêt hors ligne"
   }
 }

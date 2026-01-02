@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "MindVibe",
-    "tagline": "App de Saúde Mental"
+    "tagline": "Aplicativo de Saúde Mental"
   },
   "buttons": {
     "submit": "Enviar",
@@ -15,9 +15,10 @@
     "confirm": "Confirmar",
     "back": "Voltar",
     "continue": "Continuar",
-    "learnMore": "Saiba Mais",
+    "learnMore": "Saiba mais",
     "getStarted": "Começar",
-    "tryNow": "Experimentar Agora"
+    "tryNow": "Experimente agora",
+    "tools": "Ferramentas"
   },
   "status": {
     "loading": "Carregando...",
@@ -30,7 +31,7 @@
   "common": {
     "hello": "Olá",
     "welcome": "Bem-vindo",
-    "goodbye": "Até logo",
+    "goodbye": "Adeus",
     "thankyou": "Obrigado",
     "yes": "Sim",
     "no": "Não",
@@ -44,6 +45,6 @@
     "private": "Privado",
     "secure": "Seguro",
     "localOnly": "Apenas local",
-    "offlineReady": "Pronto para uso offline"
+    "offlineReady": "Pronto offline"
   }
 }

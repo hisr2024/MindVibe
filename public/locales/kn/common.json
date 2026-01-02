@@ -1,49 +1,50 @@
 {
   "app": {
-    "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "name": "ಮೈಂಡ್‌ವೈಬ್",
+    "tagline": "ಮಾನಸಿಕ ಆರೋಗ್ಯ ಅಪ್ಲಿಕೇಶನ್"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "ಸಲ್ಲಿಸಿ",
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "save": "ಉಳಿಸಿ",
+    "delete": "ಅಳಿಸಿ",
+    "edit": "ಸಂಪಾದಿಸಿ",
+    "close": "ಮುಚ್ಚಿ",
+    "next": "ಮುಂದೆ",
+    "previous": "ಹಿಂದಿನ",
+    "confirm": "ದೃಢೀಕರಿಸಿ",
+    "back": "ಹಿಂದೆ",
+    "continue": "ಮುಂದುವರಿಸಿ",
+    "learnMore": "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ",
+    "getStarted": "ಪ್ರಾರಂಭಿಸಿ",
+    "tryNow": "ಈಗ ಪ್ರಯತ್ನಿಸಿ",
+    "tools": "ಸಾಧನಗಳು"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ...",
+    "saved": "ಉಳಿಸಲಾಗಿದೆ",
+    "error": "ದೋಷ",
+    "success": "ಯಶಸ್ಸು",
+    "processing": "ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "ನಮಸ್ಕಾರ",
+    "welcome": "ಸ್ವಾಗತ",
+    "goodbye": "ವಿದಾಯ",
+    "thankyou": "ಧನ್ಯವಾದಗಳು",
+    "yes": "ಹೌದು",
+    "no": "ಇಲ್ಲ",
+    "or": "ಅಥವಾ",
+    "and": "ಮತ್ತು",
+    "optional": "ಐಚ್ಛಿಕ",
+    "required": "ಅಗತ್ಯವಿದೆ"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "ಎನ್‌ಕ್ರಿಪ್ಟೆಡ್",
+    "private": "ಖಾಸಗಿ",
+    "secure": "ಸುರಕ್ಷಿತ",
+    "localOnly": "ಸ್ಥಳೀಯವಾಗಿ ಮಾತ್ರ",
+    "offlineReady": "ಆಫ್‌ಲೈನ್-ಸಿದ್ಧ"
   }
 }

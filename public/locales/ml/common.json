@@ -1,49 +1,50 @@
 {
   "app": {
-    "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "name": "മൈൻഡ്‌വൈബ്",
+    "tagline": "മാനസികാരോഗ്യ ആപ്പ്"
   },
   "buttons": {
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous",
-    "confirm": "Confirm",
-    "back": "Back",
-    "continue": "Continue",
-    "learnMore": "Learn More",
-    "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "submit": "സമർപ്പിക്കുക",
+    "cancel": "റദ്ദാക്കുക",
+    "save": "സേവ് ചെയ്യുക",
+    "delete": "ഇല്ലാതാക്കുക",
+    "edit": "എഡിറ്റ് ചെയ്യുക",
+    "close": "അടയ്ക്കുക",
+    "next": "അടുത്തത്",
+    "previous": "മുമ്പത്തെത്",
+    "confirm": "സ്ഥിരീകരിക്കുക",
+    "back": "മടങ്ങുക",
+    "continue": "തുടരുക",
+    "learnMore": "കൂടുതൽ അറിയുക",
+    "getStarted": "ആരംഭിക്കുക",
+    "tryNow": "ഇപ്പോൾ പരീക്ഷിക്കുക",
+    "tools": "ഉപകരണങ്ങൾ"
   },
   "status": {
-    "loading": "Loading...",
-    "saving": "Saving...",
-    "saved": "Saved",
-    "error": "Error",
-    "success": "Success",
-    "processing": "Processing..."
+    "loading": "ലോഡ് ചെയ്യുന്നു...",
+    "saving": "സേവ് ചെയ്യുന്നു...",
+    "saved": "സേവ് ചെയ്തു",
+    "error": "പിശക്",
+    "success": "വിജയം",
+    "processing": "പ്രോസസ്സ് ചെയ്യുന്നു..."
   },
   "common": {
-    "hello": "Hello",
-    "welcome": "Welcome",
-    "goodbye": "Goodbye",
-    "thankyou": "Thank you",
-    "yes": "Yes",
-    "no": "No",
-    "or": "or",
-    "and": "and",
-    "optional": "Optional",
-    "required": "Required"
+    "hello": "ഹലോ",
+    "welcome": "സ്വാഗതം",
+    "goodbye": "വിട",
+    "thankyou": "നന്ദി",
+    "yes": "അതെ",
+    "no": "ഇല്ല",
+    "or": "അല്ലെങ്കിൽ",
+    "and": "ഒപ്പം",
+    "optional": "ഓപ്ഷണൽ",
+    "required": "ആവശ്യമാണ്"
   },
   "privacy": {
-    "encrypted": "Encrypted",
-    "private": "Private",
-    "secure": "Secure",
-    "localOnly": "Local only",
-    "offlineReady": "Offline-ready"
+    "encrypted": "എൻക്രിപ്റ്റ് ചെയ്തത്",
+    "private": "സ്വകാര്യം",
+    "secure": "സുരക്ഷിതം",
+    "localOnly": "പ്രാദേശികമായി മാത്രം",
+    "offlineReady": "ഓഫ്‌ലൈൻ-തയ്യാർ"
   }
 }
