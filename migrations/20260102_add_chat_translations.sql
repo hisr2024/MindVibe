@@ -27,10 +27,7 @@ CREATE TABLE IF NOT EXISTS chat_translations (
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP WITH TIME ZONE,
-    
-    -- Indexes for efficient lookups
-    CONSTRAINT chat_translations_pkey PRIMARY KEY (id)
+    deleted_at TIMESTAMP WITH TIME ZONE
 );
 
 -- Create indexes

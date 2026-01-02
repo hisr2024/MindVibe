@@ -5,6 +5,7 @@
 import { useState, useCallback } from 'react'
 import { ChatMessage, TranslationInfo } from '@/types/chat'
 import { useLanguage } from './useLanguage'
+import { DEFAULT_LANGUAGE } from '@/lib/constants/languages'
 
 interface UseChatTranslationOptions {
   /**
@@ -48,7 +49,7 @@ export function useChatTranslation(options: UseChatTranslationOptions = {}) {
       message.translation &&
       message.translation.success &&
       message.translation.translated_text &&
-      message.translation.target_language !== 'en'
+      message.translation.target_language !== DEFAULT_LANGUAGE
     )
   }, [])
   
@@ -66,7 +67,7 @@ export function useChatTranslation(options: UseChatTranslationOptions = {}) {
    * Check if translation toggle should be shown
    */
   const shouldShowToggle = useCallback((message: ChatMessage): boolean => {
-    return language !== 'en' && hasTranslation(message)
+    return language !== DEFAULT_LANGUAGE && hasTranslation(message)
   }, [language, hasTranslation])
   
   return {

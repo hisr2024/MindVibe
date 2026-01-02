@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
+import { DEFAULT_LANGUAGE } from '@/lib/constants/languages'
 
 interface TranslationToggleProps {
   showOriginal: boolean
@@ -24,8 +25,8 @@ export function TranslationToggle({
 }: TranslationToggleProps) {
   const { language } = useLanguage()
 
-  // Don't show toggle if language is English or no translation available
-  if (language === 'en' || !hasTranslation) {
+  // Don't show toggle if language is default or no translation available
+  if (language === DEFAULT_LANGUAGE || !hasTranslation) {
     return null
   }
 
@@ -121,7 +122,7 @@ export function TranslationToggle({
 export function TranslationBadge({ isTranslated }: { isTranslated: boolean }) {
   const { language } = useLanguage()
 
-  if (language === 'en' || !isTranslated) {
+  if (language === DEFAULT_LANGUAGE || !isTranslated) {
     return null
   }
 
