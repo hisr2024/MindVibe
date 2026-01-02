@@ -306,7 +306,9 @@ describe('useLanguage Hook', () => {
 
       // Should use cached translations, not make new fetch calls for English
       const finalCallCount = (global.fetch as any).mock.calls.length;
-      expect(finalCallCount).toBeLessThan(initialCallCount + 14); // 7 files * 2 languages
+      // Should not make excessive new calls (allowing some for Hindi fetch)
+      const maxExpectedCalls = initialCallCount + 10; // Reasonable buffer for Hindi translations
+      expect(finalCallCount).toBeLessThan(maxExpectedCalls);
     });
   });
 
