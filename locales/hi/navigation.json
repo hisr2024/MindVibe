@@ -1,41 +1,51 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "होम",
+    "dashboard": "डैशबोर्ड",
+    "features": "सुविधाएँ",
+    "about": "परिचय",
+    "contact": "संपर्क",
+    "pricing": "सदस्यता",
+    "profile": "प्रोफ़ाइल",
+    "settings": "सेटिंग्स",
+    "account": "खाता पहुंच",
+    "theme": "थीम"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "संबंध दिशा-सूचक",
+    "sacredReflections": "पवित्र चिंतन",
+    "karmaFootprint": "कर्म पदचिह्न",
+    "karmicTree": "कर्म वृक्ष",
+    "emotionalReset": "भावनात्मक रीसेट",
+    "deepInsights": "गहरी अंतर्दृष्टि",
+    "wisdomRooms": "ज्ञान कक्ष"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "चैट खोलें",
+    "startCheckin": "चेक-इन शुरू करें",
+    "instantGuidance": "तत्काल मार्गदर्शन",
+    "spotYourState": "अपनी स्थिति पहचानें",
+    "menu": "मेनू",
+    "toggleMenu": "नेविगेशन मेनू टॉगल करें"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "चैट",
+    "pause": "विराम",
+    "journal": "पवित्र चिंतन"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "सर्वाधिकार सुरक्षित",
+    "privacy": "गोपनीयता नीति",
+    "terms": "सेवा की शर्तें",
+    "support": "समर्थन",
+    "explore": "अन्वेषण करें",
+    "safety": "सुरक्षा",
+    "description": "शांत, गोपनीयता-प्रथम मानसिक स्वास्थ्य समर्थन के लिए डिज़ाइन किया गया। WCAG पहुंच, एन्क्रिप्शन और कोमल अनुभव पर ध्यान केंद्रित करके निर्मित।",
+    "emailUs": "हमें ईमेल करें",
+    "encryptedJournals": "एन्क्रिप्टेड जर्नल",
+    "noTracking": "कोई ट्रैकिंग विज्ञापन नहीं"
   }
 }
