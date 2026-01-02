@@ -7,6 +7,7 @@ import { ShareButton } from './ShareButton'
 import { TranslateButton } from './TranslateButton'
 import { VoiceOutputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useMessageTranslation } from '@/hooks/useMessageTranslation'
 
 interface MessageBubbleProps {
   sender: 'user' | 'assistant'
@@ -18,6 +19,8 @@ interface MessageBubbleProps {
   gitaPowered?: boolean  // New prop to indicate wisdom-powered response
   verseReference?: string  // New prop for verse chapter reference (e.g., "Ch. 2-6")
   viewMode?: 'detailed' | 'summary'
+  messageId?: string  // Unique message ID for translation tracking
+  autoTranslate?: boolean  // Whether to auto-translate this message
 }
 
 function buildSummary(text: string) {
@@ -29,7 +32,7 @@ function buildSummary(text: string) {
   return selected.length > 280 ? `${selected.slice(0, 277)}...` : selected
 }
 
-export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference, viewMode = 'detailed' }: MessageBubbleProps) {
+export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference, viewMode = 'detailed', messageId, autoTranslate = false }: MessageBubbleProps) {
   const router = useRouter()
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
@@ -37,6 +40,23 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
   
   // Get current language for voice features
   const { language } = useLanguage()
+  
+  // Use translation hook for assistant messages
+  const {
+    translatedText,
+    isTranslating,
+    error: translationError,
+    isTranslated,
+    toggleTranslation
+  } = useMessageTranslation({
+    messageId: messageId || `msg-${timestamp}`,
+    originalText: text,
+    sourceLang: 'en',
+    autoTranslate: sender === 'assistant' && autoTranslate
+  })
+  
+  // Determine which text to display
+  const displayText = translatedText || text
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -115,9 +135,32 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
             : status === 'error'
               ? 'border border-red-500/40 bg-red-500/10 text-red-50'
               : 'bg-white/5 text-orange-50 border border-orange-500/15'
-        }`}
+        } ${isTranslated ? 'border-l-2 border-l-blue-400/50' : ''}`}
       >
-        {text || ''}
+        {displayText || ''}
+        
+        {/* Translation indicator */}
+        {isTranslated && translatedText && (
+          <div className="mt-2 pt-2 border-t border-orange-500/20">
+            <span className="text-xs text-blue-300/80 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M2 12h20"></path>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              Translated
+            </span>
+          </div>
+        )}
+        
+        {/* Translation error */}
+        {translationError && (
+          <div className="mt-2 pt-2 border-t border-red-500/20">
+            <span className="text-xs text-red-300/80">
+              Translation unavailable
+            </span>
+          </div>
+        )}
       </div>
 
       {showSummaryToggle && (
@@ -149,8 +192,33 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
           {/* Share Button */}
           <ShareButton text={text} />
 
-          {/* Translate Button */}
-          <TranslateButton text={text} />
+          {/* Translate Button - Enhanced */}
+          <button
+            onClick={toggleTranslation}
+            disabled={isTranslating || language === 'en'}
+            className={`flex items-center gap-1.5 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isTranslated ? 'border-blue-400/40 bg-blue-500/10' : ''
+            }`}
+            aria-label={isTranslated ? 'Show original' : 'Translate message'}
+            title={isTranslated ? 'Show original' : 'Translate message'}
+          >
+            {isTranslating ? (
+              <svg className="animate-spin h-3.5 w-3.5 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isTranslated ? 'text-blue-400' : 'text-orange-400'}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M2 12h20"></path>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                {isTranslated && <path d="m9 12 2 2 4-4" stroke="currentColor" strokeWidth="2.5"></path>}
+              </svg>
+            )}
+            <span>
+              {isTranslating ? 'Translating...' : isTranslated ? 'Original' : 'Translate'}
+            </span>
+          </button>
 
           {/* Voice Output Button */}
           <VoiceOutputButton text={text} language={language} />
