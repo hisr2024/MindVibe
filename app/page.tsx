@@ -131,7 +131,7 @@ export default function Home() {
             >
               <Link href="/kiaan/chat">
                 <motion.div
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 "
                   whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(251, 146, 60, 0.4)' }}
                   whileTap={{ scale: 0.95 }}
                   transition={springConfigs.snappy}
@@ -148,7 +148,7 @@ export default function Home() {
               </Link>
               <Link href="/sacred-reflections">
                 <motion.div
-                  className="inline-flex items-center gap-2 rounded-xl border border-orange-500/30 bg-white/5 px-5 py-3 text-sm font-semibold text-orange-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-orange-500/30 bg-white/5 px-5 py-3 text-sm font-semibold text-orange-50 "
                   whileHover={{ 
                     scale: 1.05, 
                     borderColor: 'rgba(251, 146, 60, 0.5)',
@@ -195,7 +195,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/kiaan/chat">
               <motion.div
-                className="interactive-link group rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-amber-500/10 px-6 py-3 text-sm font-semibold text-orange-50 cursor-pointer"
+                className="interactive-link group rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-amber-500/10 px-6 py-3 text-sm font-semibold text-orange-50 "
                 whileHover={{ 
                   scale: 1.05, 
                   borderColor: 'rgba(251, 146, 60, 0.5)',
@@ -218,7 +218,7 @@ export default function Home() {
             </Link>
             <Link href="/dashboard">
               <motion.div
-                className="interactive-link group rounded-2xl border border-teal-400/30 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 px-6 py-3 text-sm font-semibold text-teal-50 cursor-pointer"
+                className="interactive-link group rounded-2xl border border-teal-400/30 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 px-6 py-3 text-sm font-semibold text-teal-50 "
                 whileHover={{ 
                   scale: 1.05, 
                   borderColor: 'rgba(45, 212, 191, 0.5)',
@@ -241,7 +241,7 @@ export default function Home() {
             </Link>
             <Link href="/sacred-reflections">
               <motion.div
-                className="interactive-link group rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 px-6 py-3 text-sm font-semibold text-blue-50 cursor-pointer"
+                className="interactive-link group rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 px-6 py-3 text-sm font-semibold text-blue-50 "
                 whileHover={{ 
                   scale: 1.05, 
                   borderColor: 'rgba(96, 165, 250, 0.5)',
@@ -293,7 +293,7 @@ export default function Home() {
           >
             <Link href="/kiaan/chat">
               <motion.div
-                className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)] cursor-pointer"
+                className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)] "
                 whileHover={{ 
                   y: -4,
                   borderColor: 'rgba(251, 146, 60, 0.4)',
@@ -325,7 +325,7 @@ export default function Home() {
           >
             <Link href="/dashboard">
               <motion.div
-                className="rounded-2xl border border-teal-400/15 bg-white/5 p-4 shadow-[0_14px_60px_rgba(34,197,235,0.12)] cursor-pointer"
+                className="rounded-2xl border border-teal-400/15 bg-white/5 p-4 shadow-[0_14px_60px_rgba(34,197,235,0.12)] "
                 whileHover={{ 
                   y: -4,
                   borderColor: 'rgba(45, 212, 191, 0.3)',
@@ -357,7 +357,7 @@ export default function Home() {
           >
             <Link href="/emotional-reset">
               <motion.div
-                className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)] cursor-pointer"
+                className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)] "
                 whileHover={{ 
                   y: -4,
                   borderColor: 'rgba(252, 211, 77, 0.4)',

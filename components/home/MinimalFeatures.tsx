@@ -121,7 +121,7 @@ export function MinimalFeatures() {
               <div className="flex justify-center">
                 <Link href={feature.link}>
                   <motion.div
-                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-orange-50 cursor-pointer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-orange-50 "
                     whileHover={{ 
                       scale: 1.05, 
                       backgroundColor: 'rgba(255, 255, 255, 0.2)',
