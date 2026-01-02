@@ -46,7 +46,7 @@ const LANGUAGE_PATTERNS = {
   gu: {
     name: 'Gujarati',
     chars: /[\u0A80-\u0AFF]/,
-    commonWords: ['આ', 'તે', 'આ', 'તે', 'શું', 'કેમ', 'ક્યાં', 'કોણ']
+    commonWords: ['આ', 'તે', 'શું', 'કેમ', 'ક્યાં', 'કોણ']
   },
   kn: {
     name: 'Kannada',

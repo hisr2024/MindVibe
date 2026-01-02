@@ -179,7 +179,7 @@ class MultilingualCacheService:
             stmt = select(ChatTranslation).where(
                 ChatTranslation.original_text == message,
                 ChatTranslation.target_language == language,
-                ChatTranslation.translation_success == True,
+                ChatTranslation.translation_success.is_(True),
                 ChatTranslation.deleted_at.is_(None)
             ).limit(1)
             
@@ -230,8 +230,13 @@ class MultilingualCacheService:
             existing = result.scalar_one_or_none()
             
             if not existing:
+                # Generate unique message ID using full hash
+                message_hash = hashlib.sha256(
+                    f"{message}:{language}:{datetime.utcnow().isoformat()}".encode()
+                ).hexdigest()
+                
                 translation = ChatTranslation(
-                    message_id=hashlib.sha256(message.encode()).hexdigest()[:32],
+                    message_id=message_hash,
                     original_text=message,
                     original_language='en',
                     translated_text=response,
