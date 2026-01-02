@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Next.js Proxy (formerly Middleware)
+ * 
+ * This proxy handles request processing before pages are rendered.
+ * Currently configured to pass through all requests, as locale handling
+ * is done client-side via the LanguageProvider.
+ * 
+ * Future uses could include:
+ * - Request authentication/authorization
+ * - Request logging
+ * - A/B testing routing
+ * - Server-side locale detection
+ */
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -17,7 +30,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Just pass through - locale handling is done client-side
+  // Pass through all other requests - locale handling is done client-side
   return NextResponse.next();
 }
 
