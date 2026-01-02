@@ -9,6 +9,7 @@ import os
 import time
 
 from backend.deps import get_db
+from backend.middleware.circuit_breaker import get_all_circuit_breakers
 
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
@@ -107,5 +108,36 @@ async def get_metrics(db: AsyncSession = Depends(get_db)):
         },
         "moods": {
             "total_24h": total_moods_24h
+        }
+    }
+
+
+@router.get("/security/status")
+async def security_status():
+    """Get security and DDoS protection status."""
+    
+    # Get circuit breaker stats
+    circuit_breakers = get_all_circuit_breakers()
+    
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "ddos_protection": {
+            "enabled": True,
+            "max_requests_per_minute": 100,
+            "max_connections_per_ip": 10,
+            "max_request_size_mb": 10,
+        },
+        "circuit_breakers": circuit_breakers,
+        "rate_limiting": {
+            "enabled": True,
+            "auth_limit": "5/minute",
+            "chat_limit": "30/minute",
+            "wisdom_limit": "60/minute",
+        },
+        "security_headers": {
+            "hsts": True,
+            "csp": True,
+            "xss_protection": True,
+            "frame_options": True,
         }
     }

@@ -37,6 +37,7 @@ from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
 from backend.middleware.logging_middleware import RequestLoggingMiddleware
+from backend.middleware.ddos_protection import DDoSProtectionMiddleware
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
@@ -125,6 +126,16 @@ app = FastAPI(
     title="MindVibe API",
     version="1.0.0",
     description="AI Mental Wellness Coach Backend",
+)
+
+# Add DDoS protection middleware (first line of defense)
+app.add_middleware(
+    DDoSProtectionMiddleware,
+    enabled=True,
+    max_requests=100,  # 100 requests per minute
+    time_window=60,
+    max_connections=10,  # 10 concurrent connections per IP
+    max_request_size=10 * 1024 * 1024,  # 10MB
 )
 
 # Add security headers middleware
