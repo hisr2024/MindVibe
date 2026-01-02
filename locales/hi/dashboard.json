@@ -1,6 +1,79 @@
 {
   "title": "डैशबोर्ड",
   "welcome": "वापसी पर स्वागत है",
+  "subtitle": "MindVibe उपकरण",
+  "allTools": "एक ही स्थान पर सभी उपकरण",
+  "returnHome": "होम पर लौटें",
+  "toolsCount": "उपकरण",
+  "categories": {
+    "core": "मुख्य उपकरण",
+    "guidance": "मार्गदर्शन इंजन",
+    "karma": "कर्म उपकरण",
+    "quick": "त्वरित पहुंच"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN चैट",
+      "description": "AI मानसिक स्वास्थ्य साथी"
+    },
+    "journal": {
+      "title": "निजी जर्नल",
+      "description": "एन्क्रिप्टेड जर्नलिंग"
+    },
+    "wisdom": {
+      "title": "ज्ञान कक्ष",
+      "description": "प्राचीन ज्ञान"
+    },
+    "insights": {
+      "title": "मूड अंतर्दृष्टि",
+      "description": "भावनात्मक पैटर्न"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "परिणाम चिंता निवारक"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "स्थितिगत मार्गदर्शन"
+    },
+    "relationship": {
+      "title": "संबंध दिशा-सूचक",
+      "description": "संबंध मार्गदर्शन"
+    },
+    "emotional": {
+      "title": "भावनात्मक रीसेट",
+      "description": "त्वरित भावनात्मक संतुलन"
+    },
+    "footprint": {
+      "title": "कर्म पदचिह्न",
+      "description": "अपने कार्यों को ट्रैक करें"
+    },
+    "tree": {
+      "title": "कर्म वृक्ष",
+      "description": "अपनी यात्रा को देखें"
+    },
+    "reset": {
+      "title": "कर्म रीसेट",
+      "description": "नई शुरुआत करें"
+    },
+    "reflections": {
+      "title": "पवित्र चिंतन",
+      "description": "दैनिक जर्नलिंग"
+    },
+    "deep": {
+      "title": "गहरी अंतर्दृष्टि",
+      "description": "उन्नत विश्लेषण"
+    },
+    "analytics": {
+      "title": "विश्लेषण",
+      "description": "अपनी प्रगति ट्रैक करें"
+    }
+  },
+  "badges": {
+    "new": "नया",
+    "premium": "प्रीमियम",
+    "beta": "बीटा"
+  },
   "analytics": {
     "title": "विश्लेषण",
     "overview": "सारांश",

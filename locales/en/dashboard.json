@@ -1,6 +1,79 @@
 {
   "title": "Dashboard",
   "welcome": "Welcome back",
+  "subtitle": "MindVibe tools",
+  "allTools": "All tools in one place",
+  "returnHome": "Return to home",
+  "toolsCount": "tools",
+  "categories": {
+    "core": "Core Tools",
+    "guidance": "Guidance Engines",
+    "karma": "Karma Tools",
+    "quick": "Quick Access"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Chat",
+      "description": "AI mental health companion"
+    },
+    "journal": {
+      "title": "Private Journal",
+      "description": "Encrypted journaling"
+    },
+    "wisdom": {
+      "title": "Wisdom Rooms",
+      "description": "Ancient wisdom"
+    },
+    "insights": {
+      "title": "Mood Insights",
+      "description": "Emotional patterns"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Outcome anxiety reducer"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Situational guidance"
+    },
+    "relationship": {
+      "title": "Relationship Compass",
+      "description": "Relationship guidance"
+    },
+    "emotional": {
+      "title": "Emotional Reset",
+      "description": "Quick emotional balance"
+    },
+    "footprint": {
+      "title": "Karma Footprint",
+      "description": "Track your actions"
+    },
+    "tree": {
+      "title": "Karmic Tree",
+      "description": "Visualize your journey"
+    },
+    "reset": {
+      "title": "Karma Reset",
+      "description": "Start fresh"
+    },
+    "reflections": {
+      "title": "Sacred Reflections",
+      "description": "Daily journaling"
+    },
+    "deep": {
+      "title": "Deep Insights",
+      "description": "Advanced analytics"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "Track your progress"
+    }
+  },
+  "badges": {
+    "new": "new",
+    "premium": "premium",
+    "beta": "beta"
+  },
   "analytics": {
     "title": "Analytics",
     "overview": "Overview",
