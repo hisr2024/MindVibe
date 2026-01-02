@@ -456,6 +456,25 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         if not kiaan_result["validation"]["valid"]:
             logger.warning(f"KIAAN response validation issues: {kiaan_result['validation']['errors']}")
 
+        # Translate response if requested language is not English
+        translation_result = None
+        if language and language != 'en':
+            try:
+                from backend.middleware.translation import translation_middleware
+                
+                translation_result = await translation_middleware.translate_response(
+                    response=response,
+                    target_lang=language,
+                    db=db,
+                    user_id=user_id,
+                    session_id=request.headers.get('X-Session-ID')
+                )
+                
+                logger.info(f"Translation to {language}: {'success' if translation_result['success'] else 'failed'}")
+            except Exception as translation_error:
+                logger.error(f"Translation error: {translation_error}")
+                # Continue with original response if translation fails
+
         # Increment usage after successful response
         if SUBSCRIPTION_ENABLED and user_id is not None:
             try:
@@ -471,8 +490,22 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "model": "GPT-4",
             "gita_powered": True,
             "verses_used": kiaan_result.get("verses_used", []),
-            "validation": kiaan_result.get("validation", {})
+            "validation": kiaan_result.get("validation", {}),
+            "language": language or "en"
         }
+
+        # Include translation info if available
+        if translation_result:
+            result["translation"] = {
+                "original_text": translation_result.get("original_text"),
+                "translated_text": translation_result.get("translated_text"),
+                "target_language": translation_result.get("target_language"),
+                "success": translation_result.get("success", False),
+                "cached": translation_result.get("cached", False)
+            }
+            # Use translated response by default
+            if translation_result.get("success"):
+                result["response"] = translation_result.get("translated_text", response)
 
         # Include quota info if available
         if quota_info:

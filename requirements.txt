@@ -45,3 +45,7 @@ numpy>=1.24.0,<2.0.0
 
 # Monitoring & Observability
 psutil>=5.9.0,<6.0.0
+
+# Translation Services
+google-cloud-translate>=3.11.0,<4.0.0
+googletrans==4.0.0rc1

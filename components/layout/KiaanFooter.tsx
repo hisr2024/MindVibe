@@ -7,6 +7,9 @@ import { apiCall, getErrorMessage } from '@/lib/api-client';
 import { useHapticFeedback, useStreamingText } from '@/hooks';
 import { springConfigs } from '@/lib/animations/spring-configs';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useChatTranslation } from '@/hooks/useChatTranslation';
+import { ChatMessage, ChatAPIResponse } from '@/types/chat';
+import { TranslationToggle } from '@/components/chat/TranslationToggle';
 
 /**
  * KIAAN Footer with Expandable Chat Interface
@@ -14,20 +17,12 @@ import { useLanguage } from '@/hooks/useLanguage';
  * Full KIAAN chat functionality with expandable/collapsible interface
  */
 
-interface Message {
-  id: string;
-  sender: 'user' | 'assistant';
-  text: string;
-  timestamp: string;
-  status?: 'error';
-  isStreaming?: boolean;
-}
-
 export function KiaanFooter() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { showOriginal, toggleOriginal, getDisplayText, shouldShowToggle } = useChatTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
@@ -72,7 +67,7 @@ export function KiaanFooter() {
     };
 
     // Add user message
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       id: generateId(),
       sender: 'user',
       text: messageText,
@@ -86,23 +81,28 @@ export function KiaanFooter() {
     try {
       const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        body: JSON.stringify({ message: messageText }),
+        body: JSON.stringify({ 
+          message: messageText,
+          language: language || 'en' 
+        }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to get response from KIAAN');
       }
 
-      const data = await response.json();
+      const data: ChatAPIResponse = await response.json();
       const assistantMessageId = generateId();
       
-      // Add assistant message with streaming flag
-      const assistantMessage: Message = {
+      // Add assistant message with streaming flag and translation info
+      const assistantMessage: ChatMessage = {
         id: assistantMessageId,
         sender: 'assistant',
         text: data.response || "I'm here for you. Let's try again. 💙",
         timestamp: new Date().toISOString(),
         isStreaming: true,
+        translation: data.translation,
+        language: data.language || language || 'en'
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -125,7 +125,7 @@ export function KiaanFooter() {
       console.error('KIAAN chat error:', error);
       
       // Add error message
-      const errorMessage: Message = {
+      const errorMessage: ChatMessage = {
         id: generateId(),
         sender: 'assistant',
         text: getErrorMessage(error),
@@ -266,37 +266,52 @@ export function KiaanFooter() {
                   </div>
                 </div>
               ) : (
-                messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    initial={{ opacity: 0, x: message.sender === 'user' ? 20 : -20, y: 10 }}
-                    animate={{ opacity: 1, x: 0, y: 0 }}
-                    transition={springConfigs.smooth}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                        message.sender === 'user'
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
-                          : message.status === 'error'
-                          ? 'bg-red-500/20 border border-red-500/30 text-red-100'
-                          : 'bg-white/10 text-orange-50'
-                      }`}
+                <>
+                  {messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      className="space-y-1"
+                      initial={{ opacity: 0, x: message.sender === 'user' ? 20 : -20, y: 10 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={springConfigs.smooth}
                     >
-                      {message.isStreaming && message.sender === 'assistant' ? (
-                        <StreamingText text={message.text} />
-                      ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                      <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div
+                          className={`max-w-[85%] rounded-2xl px-4 py-2 ${
+                            message.sender === 'user'
+                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                              : message.status === 'error'
+                              ? 'bg-red-500/20 border border-red-500/30 text-red-100'
+                              : 'bg-white/10 text-orange-50'
+                          }`}
+                        >
+                          {message.isStreaming && message.sender === 'assistant' ? (
+                            <StreamingText text={getDisplayText(message)} />
+                          ) : (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{getDisplayText(message)}</p>
+                          )}
+                          <p className="text-[10px] mt-1 opacity-60">
+                            {new Date(message.timestamp).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Show translation toggle for assistant messages with translations */}
+                      {message.sender === 'assistant' && shouldShowToggle(message) && (
+                        <div className="flex justify-start pl-2">
+                          <TranslationToggle
+                            showOriginal={showOriginal}
+                            onToggle={toggleOriginal}
+                            hasTranslation={true}
+                            className="scale-90"
+                          />
+                        </div>
                       )}
-                      <p className="text-[10px] mt-1 opacity-60">
-                        {new Date(message.timestamp).toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))
+                    </motion.div>
+                  ))}
+                </>
               )}
               
               {isLoading && (
