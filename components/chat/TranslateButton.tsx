@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
 import { getTranslationService } from '@/services/TranslationService'
 
@@ -17,7 +17,8 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
   const [translatedText, setTranslatedText] = useState<string | null>(null)
   const [error, setError] = useState(false)
 
-  const translationService = getTranslationService()
+  // Memoize translation service to avoid recreating on every render
+  const translationService = useMemo(() => getTranslationService(), [])
 
   const handleTranslate = useCallback(async () => {
     // If already in English, no need to translate
@@ -59,7 +60,7 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
     } finally {
       setIsTranslating(false)
     }
-  }, [language, text, isTranslated, translationService, onTranslate])
+  }, [language, text, isTranslated, onTranslate])
 
   return (
     <button

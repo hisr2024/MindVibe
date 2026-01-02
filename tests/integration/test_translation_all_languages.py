@@ -6,6 +6,7 @@ This test suite validates translation functionality across all 17 supported lang
 - Spanish (es), French (fr), German (de), Portuguese (pt), Japanese (ja), Chinese (zh-CN)
 """
 
+import asyncio
 import pytest
 from unittest.mock import Mock, patch
 from backend.services.translation_service import TranslationService, SUPPORTED_LANGUAGES
@@ -222,8 +223,6 @@ class TestAllLanguagesTranslation:
     @pytest.mark.asyncio
     async def test_concurrent_translations(self, service):
         """Test handling multiple translation requests concurrently"""
-        import asyncio
-        
         text = "Peace and harmony"
         languages = ['hi', 'es', 'fr', 'de', 'ja']
         
