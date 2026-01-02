@@ -1,114 +1,49 @@
 {
-  "common": {
-    "welcome": "欢迎来到 MindVibe",
-    "tagline": "您实现内心平静的正念伙伴",
-    "getStarted": "开始使用",
+  "app": {
+    "name": "MindVibe",
+    "tagline": "心理健康应用"
+  },
+  "buttons": {
+    "submit": "提交",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "next": "下一步",
+    "previous": "上一步",
+    "confirm": "确认",
+    "back": "返回",
+    "continue": "继续",
     "learnMore": "了解更多",
-    "signIn": "登录",
-    "signUp": "注册",
-    "signOut": "退出",
-    "settings": "设置",
-    "profile": "个人资料",
-    "dashboard": "仪表板",
-    "language": "语言",
-    "theme": "主题",
-    "dark": "深色",
-    "light": "浅色",
-    "system": "系统"
+    "getStarted": "开始",
+    "tryNow": "立即试用"
   },
-  "pricing": {
-    "title": "选择您通往内心平静的道路",
-    "subtitle": "每个计划都包含相同质量的 KIAAN 指导。根据您想要连接的频率进行选择。",
-    "monthly": "月付",
-    "yearly": "年付",
-    "save": "节省",
-    "perMonth": "/月",
-    "perYear": "/年",
-    "billedYearly": "按年计费",
-    "currentPlan": "当前计划",
-    "getStartedFree": "免费开始",
-    "mostPopular": "最受欢迎",
-    "comparePlans": "比较计划",
-    "kiaanQuestions": "KIAAN 问题",
-    "unlimited": "无限制",
-    "features": "功能",
-    "faq": {
-      "title": "常见问题",
-      "changePlan": {
-        "q": "我可以稍后更改计划吗？",
-        "a": "是的！您可以随时升级、降级或取消计划。升级立即生效，降级在您的计费周期结束时生效。"
-      },
-      "quota": {
-        "q": "当我超过问题配额时会发生什么？",
-        "a": "您仍然可以使用所有其他功能，如日记、情绪追踪和呼吸练习。您的配额会在每个计费周期开始时重置。"
-      },
-      "security": {
-        "q": "我的数据安全吗？",
-        "a": "绝对安全。您的日记条目在您的设备上加密。我们从不出售您的数据，并保持严格的隐私标准。"
-      },
-      "refund": {
-        "q": "我可以获得退款吗？",
-        "a": "我们为所有付费计划提供 14 天退款保证。如果您不满意，请联系我们获得全额退款。"
-      }
-    },
-    "promise": {
-      "title": "KIAAN 的承诺",
-      "description": "每位用户都能从 KIAAN 获得相同质量的指导——唯一的区别是您每月可以提问的数量。我们相信心理健康应该人人可及。",
-      "items": {
-        "quality": "所有级别相同的 AI 质量",
-        "noDegradation": "功能不降级",
-        "privacy": "您的数据保持私密",
-        "cancel": "随时取消"
-      }
-    }
+  "status": {
+    "loading": "加载中...",
+    "saving": "保存中...",
+    "saved": "已保存",
+    "error": "错误",
+    "success": "成功",
+    "processing": "处理中..."
   },
-  "tiers": {
-    "free": {
-      "name": "免费",
-      "description": "非常适合开始使用 KIAAN",
-      "cta": "免费开始"
-    },
-    "pro": {
-      "name": "专业版",
-      "description": "用于更深入练习的增强工具",
-      "cta": "选择专业版"
-    },
-    "premium": {
-      "name": "高级版",
-      "description": "完全访问所有 KIAAN 功能",
-      "cta": "选择高级版"
-    },
-    "executive": {
-      "name": "企业版",
-      "description": "为高级用户提供无限访问",
-      "cta": "选择企业版"
-    }
+  "common": {
+    "hello": "你好",
+    "welcome": "欢迎",
+    "goodbye": "再见",
+    "thankyou": "谢谢",
+    "yes": "是",
+    "no": "否",
+    "or": "或",
+    "and": "和",
+    "optional": "可选",
+    "required": "必填"
   },
-  "chat": {
-    "title": "KIAAN",
-    "subtitle": "您的智慧伙伴",
-    "placeholder": "分享您的想法...",
-    "send": "发送",
-    "sendToJournal": "保存到日记",
-    "jumpToLatest": "跳转到最新",
-    "welcome": {
-      "title": "欢迎来到 KIAAN",
-      "description": "分享您的想法。我在这里提供根植于永恒智慧的温暖、扎实的指导。"
-    },
-    "typing": "KIAAN 正在输入..."
-  },
-  "navigation": {
-    "home": "首页",
-    "features": "功能",
-    "pricing": "定价",
-    "about": "关于我们",
-    "contact": "联系我们",
-    "journal": "日记",
-    "analytics": "分析"
-  },
-  "currency": {
-    "usd": "美元",
-    "eur": "欧元",
-    "inr": "印度卢比"
+  "privacy": {
+    "encrypted": "已加密",
+    "private": "私密",
+    "secure": "安全",
+    "localOnly": "仅本地",
+    "offlineReady": "离线就绪"
   }
 }

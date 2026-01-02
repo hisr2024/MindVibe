@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "title": "Tu Compañero de IA para el Bienestar Mental",
+    "subtitle": "Chatea con KIAAN, impulsado por la Sabiduría Antigua",
+    "tagline": "Tu compañero de bienestar mental tranquilo y privado, impulsado por sabiduría antigua",
+    "ctaPrimary": "Hablar con KIAAN",
+    "ctaSecondary": "Reflexiones Sagradas",
+    "privacy": "Las conversaciones permanecen privadas • un refugio cálido y confidencial"
+  },
+  "ecosystem": {
+    "title": "El Ecosistema MindVibe",
+    "subtitle": "Un enfoque holístico para el bienestar mental, arraigado en sabiduría antigua y prácticas modernas",
+    "pillars": {
+      "innerPeace": {
+        "title": "Paz Interior",
+        "description": "Encuentra quietud a través de ejercicios centrados en la respiración y técnicas suaves de conexión a tierra."
+      },
+      "mindControl": {
+        "title": "Control Mental",
+        "description": "Desarrolla claridad enfocada a través de prácticas estructuradas de mindfulness."
+      },
+      "selfKindness": {
+        "title": "Amor Propio",
+        "description": "Cultiva compasión hacia ti mismo a través de ejercicios cálidos y de apoyo."
+      }
+    },
+    "footer": "Cada pilar trabaja junto para crear un enfoque equilibrado y sostenible del bienestar mental"
+  },
+  "features": {
+    "title": "Características Clave",
+    "subtitle": "Herramientas que priorizan la privacidad diseñadas para tu viaje de bienestar mental",
+    "voice": {
+      "title": "Guía por Voz",
+      "description": "Habla naturalmente con KIAAN usando entrada de voz para una experiencia más personal.",
+      "cta": "Probar Chat de Voz"
+    },
+    "offline": {
+      "title": "Listo sin Conexión",
+      "description": "Accede a tu diario, estados de ánimo y reflexiones en cualquier momento, incluso sin internet.",
+      "cta": "Comenzar a Escribir"
+    },
+    "reset": {
+      "title": "Reinicio Emocional",
+      "description": "Ejercicios rápidos para reiniciar tu estado emocional y encontrar calma instantánea.",
+      "cta": "Probar Reinicio"
+    }
+  },
+  "moodCheckIn": {
+    "title": "¿Cómo te sientes?",
+    "subtitle": "Registro Rápido",
+    "helper": "Toca una piedra para registrar tu estado de ánimo • Privado y solo local",
+    "moods": {
+      "peaceful": "Pacífico",
+      "happy": "Feliz",
+      "neutral": "Neutral",
+      "tired": "Cansado",
+      "anxious": "Ansioso",
+      "heavy": "Pesado"
+    },
+    "responses": {
+      "peaceful": "Hermosa calma. Quédate con ella. 💙",
+      "happy": "Deja que ese calor permanezca contigo. ✨",
+      "neutral": "Estar estable es bueno. Estás presente. 🌿",
+      "tired": "El descanso no es debilidad. 💙",
+      "anxious": "Respira hondo. Estoy contigo. 🌊",
+      "heavy": "No estás solo. Estoy aquí. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Hablar con KIAAN",
+      "subtitle": "Guía instantánea",
+      "description": "Entra en una conversación enfocada para apoyo en bienestar mental",
+      "cta": "Abrir Chat"
+    },
+    "dashboard": {
+      "title": "Seguimiento de Progreso",
+      "subtitle": "Panel",
+      "description": "Ver información de tus registros de ánimo y entradas de diario",
+      "cta": "Ver Panel"
+    },
+    "emotionalReset": {
+      "title": "Reinicio Rápido",
+      "subtitle": "Reinicio Emocional",
+      "description": "Ejercicios guiados para reiniciar tu estado emocional al instante",
+      "cta": "Probar Reinicio"
+    }
+  },
+  "disclaimer": {
+    "title": "Descargo de Responsabilidad",
+    "text": "KIAAN comparte reflexiones de apoyo inspiradas en tradiciones de sabiduría. Estas conversaciones y ejercicios no son consejo médico. Si enfrentas preocupaciones serias o te sientes inseguro, por favor contacta los servicios médicos de emergencia de tu país o un profesional licenciado de inmediato."
+  }
+}
