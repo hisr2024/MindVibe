@@ -1,67 +1,109 @@
 /**
- * MindVibe Service Worker
- * Handles offline caching with cache-first, network-fallback strategy
+ * MindVibe Service Worker (Quantum Coherence v14.0)
+ *
+ * Quantum Coherence Enhancements:
+ * - Multi-tier caching strategy (static, dynamic, API, images)
+ * - Intelligent cache trimming to prevent bloat
+ * - Background sync for failed requests
+ * - Push notifications support
+ * - Comprehensive offline fallbacks
+ *
+ * Quantum Analogy: The service worker maintains coherent state even when
+ * the network connection is lost (decoherence), ensuring uninterrupted user experience.
  */
 
-const CACHE_VERSION = 'v1'
-const CACHE_NAME = `mindvibe-cache-${CACHE_VERSION}`
+const CACHE_VERSION = 'mindvibe-v14.0-quantum';
+const CACHE_STATIC = `${CACHE_VERSION}-static`;
+const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
+const CACHE_API = `${CACHE_VERSION}-api`;
+const CACHE_IMAGES = `${CACHE_VERSION}-images`;
 
-// Resources to cache immediately
-const STATIC_CACHE = [
+// Assets to cache immediately on install
+const STATIC_ASSETS = [
   '/',
+  '/offline',
   '/manifest.json',
   '/kiaan-logo.svg',
   '/mindvibe-logo.svg',
-]
+  '/favicon.ico',
+];
 
-// API endpoints that should be cached
-const CACHEABLE_API_ROUTES = [
+// API endpoints to cache (for offline access)
+const CACHEABLE_API_ENDPOINTS = [
+  '/api/chat/about',
+  '/api/chat/health',
   '/api/gita/verses',
   '/api/wisdom',
-  '/api/kiaan/chat',
-]
+  '/api/kiaan',
+];
 
-// Cache duration in milliseconds
+// Maximum cache sizes (to prevent excessive storage use)
+const MAX_CACHE_SIZE = {
+  dynamic: 50,  // 50 dynamic pages
+  api: 100,     // 100 API responses
+  images: 100   // 100 images
+};
+
+// Cache duration in milliseconds (Quantum Coherence: optimized TTLs)
 const CACHE_DURATION = {
-  CRITICAL: 365 * 24 * 60 * 60 * 1000, // 1 year for wisdom verses
-  HIGH: 30 * 24 * 60 * 60 * 1000, // 30 days for conversations
-  MEDIUM: 7 * 24 * 60 * 60 * 1000, // 7 days for responses
-  LOW: 24 * 60 * 60 * 1000, // 24 hours for UI preferences
-}
+  static: 30 * 24 * 60 * 60 * 1000,   // 30 days
+  dynamic: 7 * 24 * 60 * 60 * 1000,   // 7 days
+  api: 1 * 60 * 60 * 1000,            // 1 hour (synced with Redis)
+  images: 30 * 24 * 60 * 60 * 1000,   // 30 days
+  verses: 365 * 24 * 60 * 60 * 1000,  // 1 year for Gita verses
+};
 
+/**
+ * Install event - cache static assets
+ */
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...')
-  
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching static resources')
-      return cache.addAll(STATIC_CACHE)
-    })
-  )
-  
-  // Force the waiting service worker to become the active service worker
-  self.skipWaiting()
-})
+  console.log('[SW] Installing service worker...', CACHE_VERSION);
 
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...')
-  
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cacheName)
-            return caches.delete(cacheName)
-          }
-        })
-      )
-    })
-  )
-  
-  // Take control of all pages immediately
-  return self.clients.claim()
-})
+    caches.open(CACHE_STATIC)
+      .then((cache) => {
+        console.log('[SW] Caching static assets');
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => {
+        console.log('[SW] Installation complete');
+        return self.skipWaiting(); // Activate immediately
+      })
+      .catch((error) => {
+        console.error('[SW] Installation failed:', error);
+      })
+  );
+});
+
+/**
+ * Activate event - clean up old caches
+ */
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker...', CACHE_VERSION);
+
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((cacheName) => {
+              // Delete old cache versions
+              return cacheName.startsWith('mindvibe-') && cacheName !== CACHE_STATIC &&
+                     cacheName !== CACHE_DYNAMIC && cacheName !== CACHE_API &&
+                     cacheName !== CACHE_IMAGES;
+            })
+            .map((cacheName) => {
+              console.log('[SW] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            })
+        );
+      })
+      .then(() => {
+        console.log('[SW] Activation complete');
+        return self.clients.claim(); // Take control immediately
+      })
+  );
+});
 
 self.addEventListener('fetch', (event) => {
   const { request } = event

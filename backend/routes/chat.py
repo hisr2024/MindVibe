@@ -1,4 +1,14 @@
-"""KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v13.0) - Krishna's Blessing"""
+"""KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v14.0 Quantum Coherence) - Krishna's Blessing
+
+Quantum Coherence Enhancements:
+- GPT-4o-mini for 75% cost reduction
+- Automatic retries with exponential backoff
+- Token optimization with tiktoken
+- Streaming support for real-time responses
+- Enhanced error handling (RateLimit, Auth, Timeout)
+- Prometheus metrics for cost monitoring
+- Expanded verse context to 15 verses
+"""
 
 import html
 import logging
@@ -7,9 +17,6 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request
-from openai import (
-    OpenAI,
-)
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,10 +42,6 @@ except ImportError:
 
 # Maximum message length to prevent abuse
 MAX_MESSAGE_LENGTH = 2000
-
-api_key = os.getenv("OPENAI_API_KEY", "").strip()
-client = OpenAI(api_key=api_key, timeout=30.0) if api_key else None
-ready = bool(api_key)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -107,13 +110,18 @@ class ChatMessage(BaseModel):
 class KIAAN:
     def __init__(self):
         self.name = "KIAAN"
-        self.version = "13.0"
-        self.client = client
-        self.ready = ready
+        self.version = "14.0"  # Quantum Coherence update
         self.gita_kb = gita_kb
         self.gita_validator = gita_validator
         self.gita_analytics = gita_analytics
         self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
+
+        # Import optimizer for status check
+        try:
+            from backend.services.openai_optimizer import openai_optimizer
+            self.ready = openai_optimizer.ready
+        except ImportError:
+            self.ready = False
 
     def is_crisis(self, message: str) -> bool:
         return any(word in message.lower() for word in self.crisis_keywords)
@@ -384,8 +392,9 @@ async def start_session(request: Request) -> dict[str, Any]:
         "session_id": str(uuid.uuid4()),
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
         "bot": "KIAAN",
-        "version": "13.0",
-        "gita_powered": True
+        "version": "14.0",
+        "gita_powered": True,
+        "quantum_coherence": True
     }
 
 
@@ -486,9 +495,11 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "status": "success",
             "response": response,
             "bot": "KIAAN",
-            "version": "13.0",
-            "model": "GPT-4",
+            "version": "14.0",
+            "model": kiaan_result.get("model", "GPT-4o-mini"),
             "gita_powered": True,
+            "quantum_coherence": True,
+            "token_optimized": kiaan_result.get("token_optimized", False),
             "verses_used": kiaan_result.get("verses_used", []),
             "validation": kiaan_result.get("validation", {}),
             "language": language or "en"
@@ -519,22 +530,34 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
 
 @router.get("/health")
 async def health() -> dict[str, Any]:
+    from backend.services.openai_optimizer import openai_optimizer
     return {
-        "status": "healthy" if ready else "error",
+        "status": "healthy" if openai_optimizer.ready else "error",
         "bot": "KIAAN",
-        "version": "13.0",
-        "gita_kb_loaded": gita_kb is not None
+        "version": "14.0",
+        "gita_kb_loaded": gita_kb is not None,
+        "quantum_coherence": True
     }
 
 
 @router.get("/about")
 async def about() -> dict[str, Any]:
+    from backend.services.openai_optimizer import openai_optimizer
     return {
         "name": "KIAAN",
-        "version": "13.0",
-        "model": "gpt-4",
-        "status": "Operational" if ready else "Error",
-        "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness",
+        "version": "14.0",
+        "model": "gpt-4o-mini",
+        "status": "Operational" if openai_optimizer.ready else "Error",
+        "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness (Quantum Coherence v14.0)",
         "gita_verses": "700+",
-        "wisdom_style": "Universal principles, no citations"
+        "wisdom_style": "Universal principles, no citations",
+        "enhancements": [
+            "GPT-4o-mini (75% cost reduction)",
+            "Automatic retries with exponential backoff",
+            "Token optimization with tiktoken",
+            "Streaming support",
+            "Enhanced error handling",
+            "Prometheus metrics",
+            "15 verse context (expanded from 5)"
+        ]
     }

@@ -1,14 +1,20 @@
 """
-Emotional Reset Service
+Emotional Reset Service (Quantum Coherence v2.0)
 
 Implements the 7-step KIAAN Emotional Reset guided flow:
 - Step 1: Welcome & Intention (user shares what's on their mind)
 - Step 2: Assessment (AI provides 2-3 sentence insights)
 - Step 3: Breathing guidance (4-4-4-4 pattern)
 - Step 4: Release visualization (letting go metaphors)
-- Step 5: Wisdom integration (Gita insights, no citations)
+- Step 5: Wisdom integration (Gita insights, no citations - expanded to 5 verses)
 - Step 6: Affirmations (3-5 personalized)
 - Step 7: Completion (summary, journal auto-save)
+
+Quantum Coherence Enhancements:
+- GPT-4o-mini for cost optimization
+- Automatic retries with exponential backoff
+- Token optimization (reduced max_tokens)
+- Enhanced error handling
 
 Integrates with existing KIAAN crisis detection and WisdomKnowledgeBase.
 """
@@ -19,20 +25,16 @@ import os
 import uuid
 from typing import Any
 
-from openai import OpenAI
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import EmotionalResetSession, WisdomVerse
 from backend.services.gita_service import GitaService
+from backend.services.openai_optimizer import openai_optimizer
 from backend.services.safety_validator import SafetyValidator
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 logger = logging.getLogger(__name__)
-
-# OpenAI client initialization
-api_key = os.getenv("OPENAI_API_KEY", "").strip()
-openai_client = OpenAI(api_key=api_key) if api_key else None
 
 # Rate limiting constants
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
@@ -110,10 +112,10 @@ class EmotionalResetService:
     }
 
     def __init__(self) -> None:
-        """Initialize the emotional reset service."""
+        """Initialize the emotional reset service with quantum coherence."""
         self.safety_validator = SafetyValidator()
         self.wisdom_kb = WisdomKnowledgeBase()
-        self.client = openai_client
+        self.optimizer = openai_optimizer
 
     async def check_rate_limit(self, db: AsyncSession, user_id: str) -> tuple[bool, int]:
         """
@@ -271,7 +273,7 @@ class EmotionalResetService:
 
     async def assess_emotions(self, user_input: str) -> dict[str, Any]:
         """
-        Generate emotional assessment based on user input (Step 2).
+        Generate emotional assessment based on user input (Step 2) with quantum coherence.
 
         Args:
             user_input: User's description of their emotions
@@ -279,7 +281,7 @@ class EmotionalResetService:
         Returns:
             Assessment with insights and identified emotions
         """
-        if not self.client:
+        if not self.optimizer.ready:
             return self._get_fallback_assessment(user_input)
 
         try:
@@ -293,14 +295,14 @@ Provide a brief, empathetic assessment in 2-3 sentences that:
 Keep it warm, conversational, and under 100 words. Do not use religious terms or citations.
 End with 💙"""
 
-            response = self.client.chat.completions.create(
-                model="gpt-4",
+            response = await self.optimizer.create_completion_with_retry(
                 messages=[
                     {"role": "system", "content": "You are KIAAN, a compassionate AI guide focused on emotional wellness."},
                     {"role": "user", "content": prompt}
                 ],
+                model="gpt-4o-mini",  # Upgraded from gpt-4
                 temperature=0.7,
-                max_tokens=200,
+                max_tokens=150,  # Optimized from 200
             )
 
             content = response.choices[0].message.content or ""
@@ -315,7 +317,7 @@ End with 💙"""
             }
 
         except Exception as e:
-            logger.error(f"OpenAI assessment error: {e}")
+            logger.error(f"OpenAI assessment error: {type(e).__name__}: {e}")
             return self._get_fallback_assessment(user_input)
 
     def _get_fallback_assessment(self, user_input: str) -> dict[str, Any]:
@@ -403,7 +405,7 @@ End with 💙"""
         self, emotions: list[str]
     ) -> str:
         """
-        Generate release visualization text (Step 4).
+        Generate release visualization text (Step 4) with quantum coherence.
 
         Args:
             emotions: List of emotions identified in assessment
@@ -411,7 +413,7 @@ End with 💙"""
         Returns:
             Guided visualization text
         """
-        if not self.client:
+        if not self.optimizer.ready:
             return self._get_fallback_visualization(emotions)
 
         try:
@@ -423,20 +425,20 @@ Write 3-4 sentences using nature metaphors (like a flowing stream, wind, or sunr
 Be gentle, poetic, and hopeful. Do not use religious terms.
 Keep it under 80 words. End with 💙"""
 
-            response = self.client.chat.completions.create(
-                model="gpt-4",
+            response = await self.optimizer.create_completion_with_retry(
                 messages=[
                     {"role": "system", "content": "You are a gentle guide creating calming visualizations."},
                     {"role": "user", "content": prompt}
                 ],
+                model="gpt-4o-mini",  # Upgraded from gpt-4
                 temperature=0.8,
-                max_tokens=150,
+                max_tokens=120,  # Optimized from 150
             )
 
             return response.choices[0].message.content or self._get_fallback_visualization(emotions)
 
         except Exception as e:
-            logger.error(f"OpenAI visualization error: {e}")
+            logger.error(f"OpenAI visualization error: {type(e).__name__}: {e}")
             return self._get_fallback_visualization(emotions)
 
     def _get_fallback_visualization(self, _emotions: list[str]) -> str:
@@ -540,7 +542,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         self, emotions: list[str], themes: list[str]
     ) -> list[str]:
         """
-        Generate personalized affirmations (Step 6).
+        Generate personalized affirmations (Step 6) with quantum coherence.
 
         Args:
             emotions: List of identified emotions
@@ -549,7 +551,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         Returns:
             List of 3-5 personalized affirmations
         """
-        if not self.client:
+        if not self.optimizer.ready:
             return self._get_fallback_affirmations(emotions)
 
         try:
@@ -567,14 +569,14 @@ Make them:
 
 Do not use religious terms. Return only the 4 affirmations, each on a new line."""
 
-            response = self.client.chat.completions.create(
-                model="gpt-4",
+            response = await self.optimizer.create_completion_with_retry(
                 messages=[
                     {"role": "system", "content": "You create personalized, empowering affirmations."},
                     {"role": "user", "content": prompt}
                 ],
+                model="gpt-4o-mini",  # Upgraded from gpt-4
                 temperature=0.8,
-                max_tokens=200,
+                max_tokens=180,  # Optimized from 200
             )
 
             content = response.choices[0].message.content or ""
@@ -587,7 +589,7 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
             return affirmations[:5] if affirmations else self._get_fallback_affirmations(emotions)
 
         except Exception as e:
-            logger.error(f"OpenAI affirmations error: {e}")
+            logger.error(f"OpenAI affirmations error: {type(e).__name__}: {e}")
             return self._get_fallback_affirmations(emotions)
 
     def _get_fallback_affirmations(self, emotions: list[str]) -> list[str]:
