@@ -541,6 +541,102 @@ Current test coverage includes:
 - ✅ Business logic services (Chatbot, WisdomKB)
 - ✅ API endpoints (all 8 routers)
 - ✅ Text sanitization & transformation
+- ✅ OpenAI Optimizer (unit tests)
+- ✅ KIAAN Core (unit tests)
+- ✅ Multilingual flow (integration tests)
+- ✅ Load testing with Locust
+
+### **New: Advanced Testing Suite**
+
+```bash
+# Unit tests for OpenAI Optimizer
+pytest tests/unit/test_openai_optimizer.py -v
+
+# Unit tests for KIAAN Core
+pytest tests/unit/test_kiaan_core.py -v
+
+# Integration tests for multilingual support
+pytest tests/integration/test_multilingual_flow.py -v
+
+# Load testing (requires Locust)
+pip install locust
+locust -f tests/load/test_api_performance.py --host=http://localhost:8000
+
+# Run with 100 concurrent users for 5 minutes
+locust -f tests/load/test_api_performance.py --host=http://localhost:8000 --headless --users 100 --spawn-rate 10 --run-time 5m
+```
+
+---
+
+## 🧠 **RAG & Fine-tuning**
+
+MindVibe now includes advanced AI capabilities for semantic search and model optimization.
+
+### RAG (Retrieval Augmented Generation)
+
+Semantic verse search using OpenAI embeddings and PostgreSQL pgvector:
+
+```bash
+# 1. Install pgvector extension in PostgreSQL
+docker exec -it mindvibe-db psql -U mindvibe -d mindvibe -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# 2. Run database migrations
+alembic upgrade head
+
+# 3. Generate embeddings for all verses (one-time operation)
+python scripts/embed_verses.py
+```
+
+**Features:**
+- ✅ Text-embedding-3-small model (1536 dimensions)
+- ✅ Cosine similarity search with pgvector
+- ✅ Hybrid search (semantic + keyword)
+- ✅ Automatic fallback to keyword search
+- ✅ Cost: ~$0.02 per 1M tokens
+
+### Fine-tuning Pipeline
+
+Create a custom GPT-4o-mini model trained on Gita wisdom:
+
+```bash
+# 1. Prepare training data (expand TRAINING_EXAMPLES to 200-500)
+# Edit scripts/finetune_gita_examples.py
+
+# 2. Create and submit fine-tuning job
+python scripts/finetune_gita_examples.py
+
+# 3. Check job status
+python scripts/finetune_gita_examples.py --check <job_id>
+
+# 4. Update .env with fine-tuned model
+OPENAI_FINETUNED_MODEL=ft:gpt-4o-mini-2024-07-18:your-org:kiaan:abc123
+
+# 5. Restart backend to use fine-tuned model
+```
+
+**Benefits:**
+- ✅ More authentic Gita-based responses
+- ✅ Better adherence to KIAAN principles
+- ✅ Reduced prompt engineering overhead
+- ✅ Improved response consistency
+
+### Verification Script
+
+Verify 100% Quantum Coherence implementation:
+
+```bash
+# Run verification script
+./scripts/verify_quantum_coherence.sh
+```
+
+This checks:
+- ✅ Python imports (tenacity, tiktoken, openai)
+- ✅ Next.js i18n configuration
+- ✅ Test file existence
+- ✅ RAG service implementation
+- ✅ Fine-tuning pipeline
+- ✅ Critical service files
+- ✅ Dependencies in requirements.txt
 - ✅ Authentication flows
 - ✅ Encryption/decryption
 
