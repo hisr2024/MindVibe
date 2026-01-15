@@ -2,12 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Internationalization (i18n) - Server-side routing for 17 languages
-  i18n: {
-    locales: ['en', 'hi', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'sa', 'es', 'fr', 'de', 'pt', 'ja', 'zh-CN'],
-    defaultLocale: 'en',
-    localeDetection: true,
-  },
+  // REMOVED: i18n config - App Router doesn't support Pages Router i18n pattern
+  // Using custom client-side i18n with LanguageProvider instead
 
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
@@ -23,6 +19,15 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com',
   },
+
+  // Output configuration for production
+  output: 'standalone',
+
+  // Disable x-powered-by header
+  poweredByHeader: false,
+
+  // Enable SWC minification
+  swcMinify: true,
 
   async headers() {
     return [
