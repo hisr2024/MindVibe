@@ -115,7 +115,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Handle API requests with cache-first strategy
-  if (CACHEABLE_API_ROUTES.some((route) => url.pathname.startsWith(route))) {
+  if (CACHEABLE_API_ENDPOINTS.some((route) => url.pathname.startsWith(route))) {
     event.respondWith(handleAPIRequest(request))
     return
   }
@@ -139,11 +139,11 @@ async function handleAPIRequest(request) {
       const age = now - cachedDate
       
       // Determine cache duration based on endpoint
-      let maxAge = CACHE_DURATION.MEDIUM
+      let maxAge = CACHE_DURATION.api
       if (request.url.includes('/gita/verses')) {
-        maxAge = CACHE_DURATION.CRITICAL
+        maxAge = CACHE_DURATION.verses
       } else if (request.url.includes('/chat')) {
-        maxAge = CACHE_DURATION.HIGH
+        maxAge = CACHE_DURATION.api
       }
       
       if (age < maxAge) {
@@ -155,13 +155,13 @@ async function handleAPIRequest(request) {
     // Try network
     console.log('[Service Worker] Fetching from network:', request.url)
     const networkResponse = await fetch(request)
-    
+
     // Cache successful responses
     if (networkResponse && networkResponse.status === 200) {
-      const cache = await caches.open(CACHE_NAME)
+      const cache = await caches.open(CACHE_API)
       cache.put(request, networkResponse.clone())
     }
-    
+
     return networkResponse
   } catch (error) {
     console.error('[Service Worker] Network fetch failed:', error)
@@ -200,13 +200,13 @@ async function handleStaticRequest(request) {
 
     // Try network
     const networkResponse = await fetch(request)
-    
+
     // Cache successful responses
     if (networkResponse && networkResponse.status === 200) {
-      const cache = await caches.open(CACHE_NAME)
+      const cache = await caches.open(CACHE_DYNAMIC)
       cache.put(request, networkResponse.clone())
     }
-    
+
     return networkResponse
   } catch (error) {
     // Return cached response if available
@@ -259,7 +259,7 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CACHE_URLS') {
     const urls = event.data.urls
     event.waitUntil(
-      caches.open(CACHE_NAME).then((cache) => {
+      caches.open(CACHE_DYNAMIC).then((cache) => {
         return cache.addAll(urls)
       })
     )
@@ -267,8 +267,19 @@ self.addEventListener('message', (event) => {
   
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
-      caches.delete(CACHE_NAME).then(() => {
-        return caches.open(CACHE_NAME)
+      Promise.all([
+        caches.delete(CACHE_STATIC),
+        caches.delete(CACHE_DYNAMIC),
+        caches.delete(CACHE_API),
+        caches.delete(CACHE_IMAGES)
+      ]).then(() => {
+        // Recreate empty caches
+        return Promise.all([
+          caches.open(CACHE_STATIC),
+          caches.open(CACHE_DYNAMIC),
+          caches.open(CACHE_API),
+          caches.open(CACHE_IMAGES)
+        ])
       })
     )
   }
