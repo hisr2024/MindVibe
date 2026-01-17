@@ -568,6 +568,23 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Translation router: {e}")
 
+# Load Wisdom Journey router (Quantum Enhancement #1)
+print("\n[Wisdom Journey] Attempting to import Wisdom Journey router...")
+try:
+    from backend.routes.wisdom_journey import router as wisdom_journey_router
+    app.include_router(wisdom_journey_router)
+    print("✅ [SUCCESS] Wisdom Journey router loaded (Quantum Enhancement)")
+    print("   • POST   /api/wisdom-journey/generate - Generate personalized journey")
+    print("   • GET    /api/wisdom-journey/active - Get active journey")
+    print("   • GET    /api/wisdom-journey/{id} - Get journey details")
+    print("   • POST   /api/wisdom-journey/{id}/progress - Mark step complete")
+    print("   • PUT    /api/wisdom-journey/{id}/pause - Pause journey")
+    print("   • PUT    /api/wisdom-journey/{id}/resume - Resume journey")
+    print("   • DELETE /api/wisdom-journey/{id} - Delete journey")
+    print("   • GET    /api/wisdom-journey/recommendations/list - Get recommendations")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Wisdom Journey router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
