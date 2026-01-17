@@ -16,8 +16,8 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useOfflineMode } from '@/lib/offline/hooks/useOfflineMode'
-import { db } from '@/lib/offline/indexedDB'
+import { useOfflineMode } from '@/hooks/useOfflineMode'
+import { indexedDBManager, STORES } from '@/lib/offline/indexedDB'
 import { AlertCircle, Book, BookOpen, Cloud, CloudOff, Heart, Loader2, Search } from 'lucide-react'
 
 interface Verse {
@@ -87,15 +87,15 @@ export function OfflineVerseReader({
 
     try {
       // Load verses from IndexedDB cache
-      const cachedVerses = await db.getAll('gitaVerses')
+      const cachedVerses = await indexedDBManager.getAll<Verse>(STORES.GITA_VERSES)
 
       // Filter by chapter
       const chapterVerses = cachedVerses.filter(
-        (v: any) => v.chapter === selectedChapter
+        (v) => v.chapter === selectedChapter
       )
 
       // Sort by verse number
-      chapterVerses.sort((a: any, b: any) => a.verse - b.verse)
+      chapterVerses.sort((a, b) => a.verse - b.verse)
 
       setVerses(chapterVerses)
       setFilteredVerses(chapterVerses)

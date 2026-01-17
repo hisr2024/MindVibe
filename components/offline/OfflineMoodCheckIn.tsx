@@ -15,7 +15,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useOfflineMode } from '@/lib/offline/hooks/useOfflineMode'
+import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { apiFetch } from '@/lib/api'
 import { AlertCircle, CheckCircle2, Cloud, CloudOff, Loader2 } from 'lucide-react'
 
@@ -152,13 +152,7 @@ export function OfflineMoodCheckIn({
   }
 
   const queueOffline = async (moodData: MoodData) => {
-    await queueOperation({
-      endpoint: '/api/moods',
-      method: 'POST',
-      body: moodData,
-      entityType: 'mood',
-      userId
-    })
+    await queueOperation('POST', '/api/moods', moodData)
 
     setSaveStatus('queued')
     resetForm()
