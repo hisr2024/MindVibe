@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback } from 'react'
-import { useOfflineMode } from '@/lib/offline/hooks/useOfflineMode'
+import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { apiFetch } from '@/lib/api'
 
 export type FormStatus = 'idle' | 'saving' | 'success' | 'error' | 'queued'
@@ -105,16 +105,12 @@ export function useOfflineForm<T = any>(options: OfflineFormOptions) {
   )
 
   const queueForOffline = async (submitOptions: OfflineFormSubmitOptions) => {
-    const { endpoint, method, data: formData, entityType, entityId } = submitOptions
+    const { endpoint, method, data: formData } = submitOptions
 
-    await queueOperation({
-      endpoint,
-      method,
-      body: formData,
-      entityType,
-      entityId,
-      userId
-    })
+    // Convert PATCH to PUT for offline queue
+    const queueMethod = method === 'PATCH' ? 'PUT' : method
+
+    await queueOperation(queueMethod as 'POST' | 'PUT' | 'DELETE', endpoint, formData)
 
     setStatus('queued')
   }
