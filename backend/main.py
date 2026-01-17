@@ -597,6 +597,23 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Sync router: {e}")
 
+# Load Voice router (Quantum Enhancement #3)
+print("\n[Voice] Attempting to import Voice router...")
+try:
+    from backend.routes.voice import router as voice_router
+    app.include_router(voice_router)
+    print("✅ [SUCCESS] Voice router loaded (Quantum Enhancement #3 - Multilingual Voice)")
+    print("   • POST   /api/voice/synthesize - Synthesize text to speech")
+    print("   • POST   /api/voice/verse/{id} - Get verse audio")
+    print("   • POST   /api/voice/message - Synthesize KIAAN message")
+    print("   • POST   /api/voice/meditation - Synthesize meditation audio")
+    print("   • POST   /api/voice/batch-download - Batch download verses")
+    print("   • GET    /api/voice/settings - Get voice preferences")
+    print("   • PUT    /api/voice/settings - Update voice preferences")
+    print("   • GET    /api/voice/supported-languages - List supported languages")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Voice router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
