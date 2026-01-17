@@ -1,0 +1,51 @@
+{
+  "mainNav": {
+    "home": "首页",
+    "dashboard": "仪表板",
+    "features": "功能",
+    "about": "关于",
+    "contact": "联系",
+    "pricing": "订阅",
+    "profile": "个人资料",
+    "settings": "设置",
+    "account": "账户访问",
+    "theme": "主题"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "关系指南针",
+    "sacredReflections": "神圣反思",
+    "karmaFootprint": "业力足迹",
+    "karmicTree": "业力树",
+    "emotionalReset": "情绪重置",
+    "deepInsights": "深入洞察",
+    "wisdomRooms": "智慧之室"
+  },
+  "actions": {
+    "openChat": "打开聊天",
+    "startCheckin": "开始签到",
+    "instantGuidance": "即时指导",
+    "spotYourState": "识别您的状态",
+    "menu": "菜单",
+    "toggleMenu": "切换导航菜单"
+  },
+  "mobileNav": {
+    "chat": "聊天",
+    "pause": "暂停",
+    "journal": "神圣反思"
+  },
+  "footer": {
+    "allRightsReserved": "版权所有",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "support": "支持",
+    "explore": "探索",
+    "safety": "安全",
+    "description": "为平静、隐私优先的心理健康支持而设计。以WCAG可访问性、加密和温和体验为重点构建。",
+    "emailUs": "发送电子邮件",
+    "encryptedJournals": "加密日记",
+    "noTracking": "无跟踪广告"
+  }
+}

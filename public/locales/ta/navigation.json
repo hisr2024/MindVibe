@@ -1,0 +1,41 @@
+{
+  "mainNav": {
+    "home": "முகப்பு",
+    "dashboard": "டாஷ்போர்டு",
+    "features": "அம்சங்கள்",
+    "about": "பற்றி",
+    "contact": "தொடர்பு",
+    "pricing": "விலை",
+    "profile": "சுயவிவரம்",
+    "settings": "அமைப்புகள்"
+  },
+  "features": {
+    "kiaan": "கியான்",
+    "ardha": "அர்த்",
+    "viyog": "வியோக",
+    "relationshipCompass": "உறவு திசைகாட்டி",
+    "sacredReflections": "புனித பிரதிபலிப்புகள்",
+    "karmaFootprint": "கர்ம தடம்",
+    "karmicTree": "கர்ம மரம்",
+    "emotionalReset": "உணர்ச்சி மீட்டமைப்பு",
+    "deepInsights": "ஆழமான நுண்ணறிவுகள்",
+    "wisdomRooms": "ஞான அறைகள்"
+  },
+  "actions": {
+    "openChat": "அரட்டையைத் திற",
+    "startCheckin": "சரிபார்ப்பைத் தொடங்கவும்",
+    "instantGuidance": "உடனடி வழிகாட்டுதல்",
+    "spotYourState": "உங்கள் நிலையைக் கண்டறியுங்கள்"
+  },
+  "mobileNav": {
+    "chat": "அரட்டை",
+    "pause": "இடைநிறுத்தம்",
+    "journal": "புனித பிரதிபலிப்புகள்"
+  },
+  "footer": {
+    "allRightsReserved": "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை",
+    "privacy": "தனியுரிமைக் கொள்கை",
+    "terms": "சேவை விதிமுறைகள்",
+    "support": "ஆதரவு"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "mainNav": {
+    "home": "मुख्यपृष्ठ",
+    "dashboard": "डॅशबोर्ड",
+    "features": "वैशिष्ट्ये",
+    "about": "बद्दल",
+    "contact": "संपर्क",
+    "pricing": "सदस्यता",
+    "profile": "प्रोफाइल",
+    "settings": "सेटिंग्ज",
+    "account": "खाते प्रवेश",
+    "theme": "थीम"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "नाते कंपास",
+    "sacredReflections": "पवित्र प्रतिबिंब",
+    "karmaFootprint": "कर्म पदचिन्ह",
+    "karmicTree": "कर्म वृक्ष",
+    "emotionalReset": "भावनिक रीसेट",
+    "deepInsights": "सखोल अंतर्दृष्टी",
+    "wisdomRooms": "ज्ञान खोल्या"
+  },
+  "actions": {
+    "openChat": "चॅट उघडा",
+    "startCheckin": "चेक-इन सुरू करा",
+    "instantGuidance": "त्वरित मार्गदर्शन",
+    "spotYourState": "तुमची स्थिती ओळखा",
+    "menu": "मेनू",
+    "toggleMenu": "नेव्हिगेशन मेनू टॉगल करा"
+  },
+  "mobileNav": {
+    "chat": "चॅट",
+    "pause": "विराम",
+    "journal": "पवित्र प्रतिबिंब"
+  },
+  "footer": {
+    "allRightsReserved": "सर्व हक्क राखीव",
+    "privacy": "गोपनीयता धोरण",
+    "terms": "सेवा अटी",
+    "support": "समर्थन",
+    "explore": "एक्सप्लोर करा",
+    "safety": "सुरक्षा",
+    "description": "शांत, गोपनीयता-प्रथम मानसिक आरोग्य समर्थनासाठी डिझाइन केलेले. WCAG प्रवेशयोग्यता, एन्क्रिप्शन आणि सौम्य अनुभवावर लक्ष केंद्रित करून तयार केले.",
+    "emailUs": "आम्हाला ईमेल करा",
+    "encryptedJournals": "एन्क्रिप्टेड जर्नल्स",
+    "noTracking": "कोणतेही ट्रॅकिंग जाहिराती नाहीत"
+  }
+}

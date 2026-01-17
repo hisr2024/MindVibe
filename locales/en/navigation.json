@@ -5,9 +5,11 @@
     "features": "Features",
     "about": "About",
     "contact": "Contact",
-    "pricing": "Pricing",
+    "pricing": "Subscriptions",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "account": "Account Access",
+    "theme": "Theme"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -25,7 +27,9 @@
     "openChat": "Open Chat",
     "startCheckin": "Start check-in",
     "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "spotYourState": "Spot your state",
+    "menu": "Menu",
+    "toggleMenu": "Toggle navigation menu"
   },
   "mobileNav": {
     "chat": "Chat",
@@ -36,6 +40,12 @@
     "allRightsReserved": "All rights reserved",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "support": "Support"
+    "support": "Support",
+    "explore": "Explore",
+    "safety": "Safety",
+    "description": "Designed for calm, privacy-first mental health support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.",
+    "emailUs": "Email us",
+    "encryptedJournals": "Encrypted journals",
+    "noTracking": "No tracking ads"
   }
 }

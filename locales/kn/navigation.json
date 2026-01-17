@@ -1,0 +1,51 @@
+{
+  "mainNav": {
+    "home": "ಮುಖಪುಟ",
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "features": "ವೈಶಿಷ್ಟ್ಯಗಳು",
+    "about": "ಬಗ್ಗೆ",
+    "contact": "ಸಂಪರ್ಕ",
+    "pricing": "ಚಂದಾದಾರಿಕೆಗಳು",
+    "profile": "ಪ್ರೊಫೈಲ್",
+    "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "account": "ಖಾತೆ ಪ್ರವೇಶ",
+    "theme": "ಥೀಮ್"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "ಸಂಬಂಧ ದಿಕ್ಸೂಚಿ",
+    "sacredReflections": "ಪವಿತ್ರ ಪ್ರತಿಬಿಂಬಗಳು",
+    "karmaFootprint": "ಕರ್ಮ ಪಾದಚಿಹ್ನೆ",
+    "karmicTree": "ಕಾರ್ಮಿಕ ಮರ",
+    "emotionalReset": "ಭಾವನಾತ್ಮಕ ಮರುಹೊಂದಿಕೆ",
+    "deepInsights": "ಆಳವಾದ ಒಳನೋಟಗಳು",
+    "wisdomRooms": "ಜ್ಞಾನ ಕೊಠಡಿಗಳು"
+  },
+  "actions": {
+    "openChat": "ಚಾಟ್ ತೆರೆಯಿರಿ",
+    "startCheckin": "ಚೆಕ್-ಇನ್ ಪ್ರಾರಂಭಿಸಿ",
+    "instantGuidance": "ತತ್ಕ್ಷಣ ಮಾರ್ಗದರ್ಶನ",
+    "spotYourState": "ನಿಮ್ಮ ಸ್ಥಿತಿಯನ್ನು ಗುರುತಿಸಿ",
+    "menu": "ಮೆನು",
+    "toggleMenu": "ನ್ಯಾವಿಗೇಶನ್ ಮೆನು ಟೊಗಲ್ ಮಾಡಿ"
+  },
+  "mobileNav": {
+    "chat": "ಚಾಟ್",
+    "pause": "ವಿರಾಮ",
+    "journal": "ಪವಿತ್ರ ಪ್ರತಿಬಿಂಬಗಳು"
+  },
+  "footer": {
+    "allRightsReserved": "ಎಲ್ಲಾ ಹಕ್ಕುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+    "privacy": "ಗೋಪ್ಯತಾ ನೀತಿ",
+    "terms": "ಸೇವಾ ನಿಯಮಗಳು",
+    "support": "ಬೆಂಬಲ",
+    "explore": "ಅನ್ವೇಷಿಸಿ",
+    "safety": "ಸುರಕ್ಷತೆ",
+    "description": "ಶಾಂತ, ಗೋಪ್ಯತೆ-ಮೊದಲ ಮಾನಸಿಕ ಆರೋಗ್ಯ ಬೆಂಬಲಕ್ಕಾಗಿ ವಿನ್ಯಾಸಗೊಳಿಸಲಾಗಿದೆ. WCAG ಪ್ರವೇಶ್ಯತೆ, ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಮತ್ತು ಸೌಮ್ಯ ಅನುಭವದ ಮೇಲೆ ಗಮನಹರಿಸಿ ನಿರ್ಮಿಸಲಾಗಿದೆ.",
+    "emailUs": "ನಮಗೆ ಇಮೇಲ್ ಮಾಡಿ",
+    "encryptedJournals": "ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಜರ್ನಲ್‌ಗಳು",
+    "noTracking": "ಯಾವುದೇ ಟ್ರ್ಯಾಕಿಂಗ್ ಜಾಹೀರಾತುಗಳಿಲ್ಲ"
+  }
+}

@@ -17,7 +17,8 @@
     "continue": "Continue",
     "learnMore": "Learn More",
     "getStarted": "Get Started",
-    "tryNow": "Try Now"
+    "tryNow": "Try Now",
+    "tools": "Tools"
   },
   "status": {
     "loading": "Loading...",
@@ -41,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "Encrypted",
-    "private": "Private",
+    "private": "Private by design",
     "secure": "Secure",
     "localOnly": "Local only",
     "offlineReady": "Offline-ready"

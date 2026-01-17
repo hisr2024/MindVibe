@@ -1,0 +1,60 @@
+<resources>
+    <!-- ऐप का नाम -->
+    <string name="app_name">माइंडवाइब</string>
+    
+    <!-- सामान्य -->
+    <string name="ok">ठीक है</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="retry">पुनः प्रयास करें</string>
+    <string name="loading">लोड हो रहा है…</string>
+    <string name="error">त्रुटि</string>
+    
+    <!-- प्रमाणीकरण -->
+    <string name="login">लॉगिन</string>
+    <string name="signup">साइन अप</string>
+    <string name="logout">लॉगआउट</string>
+    <string name="email">ईमेल</string>
+    <string name="password">पासवर्ड</string>
+    <string name="forgot_password">पासवर्ड भूल गए?</string>
+    
+    <!-- नेविगेशन -->
+    <string name="nav_dashboard">डैशबोर्ड</string>
+    <string name="nav_chat">चैट</string>
+    <string name="nav_mood">मूड</string>
+    <string name="nav_journal">डायरी</string>
+    <string name="nav_gita">ज्ञान</string>
+    <string name="nav_profile">प्रोफ़ाइल</string>
+    
+    <!-- KIAAN -->
+    <string name="kiaan_title">किआन</string>
+    <string name="kiaan_subtitle">आपका एआई मानसिक स्वास्थ्य साथी</string>
+    <string name="type_message">अपना संदेश टाइप करें…</string>
+    <string name="send">भेजें</string>
+    
+    <!-- मूड -->
+    <string name="mood_tracking">मूड ट्रैकिंग</string>
+    <string name="how_are_you_feeling">आप कैसा महसूस कर रहे हैं?</string>
+    <string name="add_mood">मूड जोड़ें</string>
+    
+    <!-- डायरी -->
+    <string name="journal_title">डायरी</string>
+    <string name="new_entry">नई प्रविष्टि</string>
+    <string name="encrypted_note">आपकी प्रविष्टियाँ एन्क्रिप्टेड हैं</string>
+    
+    <!-- गीता -->
+    <string name="gita_title">भगवद गीता</string>
+    <string name="verses">श्लोक</string>
+    <string name="chapters">अध्याय</string>
+    
+    <!-- त्रुटियाँ -->
+    <string name="error_network">नेटवर्क त्रुटि। कृपया अपना कनेक्शन जाँचें।</string>
+    <string name="error_generic">कुछ गलत हो गया। कृपया पुनः प्रयास करें।</string>
+    <string name="error_auth">प्रमाणीकरण विफल। कृपया फिर से लॉगिन करें।</string>
+    
+    <!-- सेटिंग्स -->
+    <string name="settings">सेटिंग्स</string>
+    <string name="language">भाषा</string>
+    <string name="theme">थीम</string>
+    <string name="privacy">गोपनीयता</string>
+    <string name="about">के बारे में</string>
+</resources>

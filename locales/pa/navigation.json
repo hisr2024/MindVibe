@@ -1,0 +1,51 @@
+{
+  "mainNav": {
+    "home": "ਘਰ",
+    "dashboard": "ਡੈਸ਼ਬੋਰਡ",
+    "features": "ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ",
+    "about": "ਬਾਰੇ",
+    "contact": "ਸੰਪਰਕ",
+    "pricing": "ਸਬਸਕ੍ਰਿਪਸ਼ਨ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ",
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "account": "ਖਾਤਾ ਪਹੁੰਚ",
+    "theme": "ਥੀਮ"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "ਰਿਸ਼ਤਾ ਕੰਪਾਸ",
+    "sacredReflections": "ਪਵਿੱਤਰ ਪ੍ਰਤੀਬਿੰਬ",
+    "karmaFootprint": "ਕਰਮ ਪੈਰਾਂ ਦੇ ਨਿਸ਼ਾਨ",
+    "karmicTree": "ਕਾਰਮਿਕ ਰੁੱਖ",
+    "emotionalReset": "ਭਾਵਨਾਤਮਕ ਰੀਸੈੱਟ",
+    "deepInsights": "ਡੂੰਘੀਆਂ ਸਮਝਾਂ",
+    "wisdomRooms": "ਸਿਆਣਪ ਕਮਰੇ"
+  },
+  "actions": {
+    "openChat": "ਚੈਟ ਖੋਲ੍ਹੋ",
+    "startCheckin": "ਚੈੱਕ-ਇਨ ਸ਼ੁਰੂ ਕਰੋ",
+    "instantGuidance": "ਤੁਰੰਤ ਮਾਰਗਦਰਸ਼ਨ",
+    "spotYourState": "ਆਪਣੀ ਸਥਿਤੀ ਦਾ ਪਤਾ ਲਗਾਓ",
+    "menu": "ਮੀਨੂ",
+    "toggleMenu": "ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ ਟੌਗਲ ਕਰੋ"
+  },
+  "mobileNav": {
+    "chat": "ਚੈਟ",
+    "pause": "ਰੋਕੋ",
+    "journal": "ਪਵਿੱਤਰ ਪ੍ਰਤੀਬਿੰਬ"
+  },
+  "footer": {
+    "allRightsReserved": "ਸਾਰੇ ਅਧਿਕਾਰ ਰਾਖਵੇਂ",
+    "privacy": "ਗੋਪਨੀਯਤਾ ਨੀਤੀ",
+    "terms": "ਸੇਵਾ ਦੀਆਂ ਸ਼ਰਤਾਂ",
+    "support": "ਸਹਾਇਤਾ",
+    "explore": "ਖੋਜੋ",
+    "safety": "ਸੁਰੱਖਿਆ",
+    "description": "ਸ਼ਾਂਤ, ਗੋਪਨੀਯਤਾ-ਪਹਿਲ ਮਾਨਸਿਕ ਸਿਹਤ ਸਹਾਇਤਾ ਲਈ ਤਿਆਰ. WCAG ਪਹੁੰਚਯੋਗਤਾ, ਏਨਕ੍ਰਿਪਸ਼ਨ ਅਤੇ ਕੋਮਲ ਅਨੁਭਵ ਤੇ ਫੋਕਸ ਨਾਲ ਬਣਾਇਆ.",
+    "emailUs": "ਸਾਨੂੰ ਈਮੇਲ ਕਰੋ",
+    "encryptedJournals": "ਇਨਕ੍ਰਿਪਟਡ ਜਰਨਲ",
+    "noTracking": "ਕੋਈ ਟਰੈਕਿੰਗ ਇਸ਼ਤਿਹਾਰ ਨਹੀਂ"
+  }
+}

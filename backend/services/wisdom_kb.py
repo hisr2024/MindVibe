@@ -589,18 +589,21 @@ class _GitaVerseWrapper:
 
     def __init__(self, verse_dict: dict[str, Any]) -> None:
         self._data = verse_dict
-        self.verse_id = verse_dict.get("verse_id", "")
+        self. verse_id = verse_dict. get("verse_id", "")
         self.chapter = verse_dict.get("chapter", 0)
         self.verse_number = verse_dict.get("verse_number", 0)
-        self.theme = verse_dict.get("theme", "")
-        self.english = verse_dict.get("english", "")
-        self.hindi = verse_dict.get("hindi", "")
+        self.theme = verse_dict. get("theme", "")
+        self.english = verse_dict. get("english", "")
+        self.hindi = verse_dict. get("hindi", "")
         self.sanskrit = verse_dict.get("sanskrit", "")
         self.context = verse_dict.get("context", "")
         self.mental_health_applications = verse_dict.get("mental_health_applications", [])
         self.primary_domain = verse_dict.get("primary_domain")
         self.secondary_domains = verse_dict.get("secondary_domains", [])
-
+    
+    def get(self, key: str, default: Any = None) -> Any:
+        """Allow dict-like access to underlying data."""
+        return self._data.get(key, default)
 
 # Alias for backward compatibility
 WisdomKB = WisdomKnowledgeBase

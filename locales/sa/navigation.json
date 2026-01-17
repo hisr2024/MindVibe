@@ -1,0 +1,51 @@
+{
+  "mainNav": {
+    "home": "गृहम्",
+    "dashboard": "डैशबोर्ड",
+    "features": "विशेषताः",
+    "about": "विषये",
+    "contact": "सम्पर्कः",
+    "pricing": "सदस्यताः",
+    "profile": "प्रोफाइल",
+    "settings": "सेटिंग्ज",
+    "account": "लेखा प्रवेशः",
+    "theme": "विषयः"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "सम्बन्ध दिशासूचकः",
+    "sacredReflections": "पवित्र चिन्तनानि",
+    "karmaFootprint": "कर्म पदचिह्नम्",
+    "karmicTree": "कार्मिक वृक्षः",
+    "emotionalReset": "भावात्मक पुनः",
+    "deepInsights": "गभीर अन्तर्दृष्टयः",
+    "wisdomRooms": "प्रज्ञा कक्षाः"
+  },
+  "actions": {
+    "openChat": "संवादं खोलयतु",
+    "startCheckin": "चेक-इन् आरभताम्",
+    "instantGuidance": "तत्काल मार्गदर्शनम्",
+    "spotYourState": "स्वस्थितिं पश्यतु",
+    "menu": "सूची",
+    "toggleMenu": "नौचालन सूचिं परिवर्तयतु"
+  },
+  "mobileNav": {
+    "chat": "संवादः",
+    "pause": "विरामः",
+    "journal": "पवित्र चिन्तनानि"
+  },
+  "footer": {
+    "allRightsReserved": "सर्वाधिकाराः रक्षिताः",
+    "privacy": "गोपनीयता नीतिः",
+    "terms": "सेवा शर्ताः",
+    "support": "समर्थनम्",
+    "explore": "अन्वेषणम्",
+    "safety": "सुरक्षा",
+    "description": "शान्त, गोपनीयता-प्रथम मानसिक स्वास्थ्य समर्थनार्थं रचितम्। WCAG सुगम्यता, कूटन तथा कोमल अनुभवे ध्यानम् केन्द्रितम्।",
+    "emailUs": "अस्मभ्यम् ईमेल प्रेषयतु",
+    "encryptedJournals": "कूटितानि पत्रिकाणि",
+    "noTracking": "अनुगमन विज्ञापनानि नास्ति"
+  }
+}

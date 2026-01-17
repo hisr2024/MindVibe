@@ -15,7 +15,7 @@ const features = [
   {
     icon: '🧘',
     label: 'Calm Guidance',
-    description: 'Gita-inspired wisdom',
+    description: 'Ancient wisdom',
   },
   {
     icon: '📔',
@@ -67,7 +67,7 @@ export function WelcomeScreen({ className = '' }: WelcomeScreenProps) {
 
       {/* Welcome text */}
       <motion.p variants={itemVariants} className="text-sm text-orange-100/70 mb-8">
-        KIAAN is here to offer gentle, Gita-inspired guidance for your mental
+        KIAAN is here to offer gentle guidance inspired by ancient wisdom for your mental
         wellness journey. Your conversations and journal entries stay private,
         encrypted on your device.
       </motion.p>

@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  // REMOVED: i18n config - App Router doesn't support Pages Router i18n pattern
+  // Using custom client-side i18n with LanguageProvider instead
+
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
@@ -16,6 +19,15 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com',
   },
+
+  // Output configuration for production
+  output: 'standalone',
+
+  // Disable x-powered-by header
+  poweredByHeader: false,
+
+  // Enable SWC minification
+  swcMinify: true,
 
   async headers() {
     return [
@@ -53,7 +65,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: `${apiUrl}/:path*`,
+          destination: `${apiUrl}/api/:path*`,
         },
       ],
     };

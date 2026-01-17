@@ -17,7 +17,8 @@
     "continue": "जारी रखें",
     "learnMore": "और जानें",
     "getStarted": "शुरू करें",
-    "tryNow": "अभी आज़माएं"
+    "tryNow": "अभी आज़माएं",
+    "tools": "उपकरण"
   },
   "status": {
     "loading": "लोड हो रहा है...",
@@ -41,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "एन्क्रिप्टेड",
-    "private": "निजी",
+    "private": "निजी डिज़ाइन द्वारा",
     "secure": "सुरक्षित",
     "localOnly": "केवल स्थानीय",
     "offlineReady": "ऑफ़लाइन-तैयार"

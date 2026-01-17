@@ -53,3 +53,18 @@ __pycache__/
 .coverage
 coverage.xml
 htmlcov/
+
+# Mobile (Android & iOS)
+# See mobile/.gitignore for detailed mobile-specific ignores
+mobile/android/build/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/**/*.iml
+mobile/ios/DerivedData/
+mobile/ios/Pods/
+mobile/ios/**/*.xcworkspace
+!mobile/ios/**/*.xcworkspace/contents.xcworkspacedata
+*.apk
+*.aar
+*.ipa
+*.dSYM.zip

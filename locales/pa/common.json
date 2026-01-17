@@ -1,0 +1,50 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "ਮਾਨਸਿਕ ਸਿਹਤ ਐਪ"
+  },
+  "buttons": {
+    "submit": "ਜਮ੍ਹਾਂ ਕਰੋ",
+    "cancel": "ਰੱਦ ਕਰੋ",
+    "save": "ਸੇਵ ਕਰੋ",
+    "delete": "ਮਿਟਾਓ",
+    "edit": "ਸੰਪਾਦਿਤ ਕਰੋ",
+    "close": "ਬੰਦ ਕਰੋ",
+    "next": "ਅਗਲਾ",
+    "previous": "ਪਿਛਲਾ",
+    "confirm": "ਪੁਸ਼ਟੀ ਕਰੋ",
+    "back": "ਪਿੱਛੇ",
+    "continue": "ਜਾਰੀ ਰੱਖੋ",
+    "learnMore": "ਹੋਰ ਜਾਣੋ",
+    "getStarted": "ਸ਼ੁਰੂ ਕਰੋ",
+    "tryNow": "ਹੁਣ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "tools": "ਸਾਧਨ"
+  },
+  "status": {
+    "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    "saving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...",
+    "saved": "ਸੇਵ ਕੀਤਾ",
+    "error": "ਗਲਤੀ",
+    "success": "ਸਫਲਤਾ",
+    "processing": "ਪ੍ਰਕ੍ਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."
+  },
+  "common": {
+    "hello": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ",
+    "welcome": "ਸਵਾਗਤ ਹੈ",
+    "goodbye": "ਅਲਵਿਦਾ",
+    "thankyou": "ਧੰਨਵਾਦ",
+    "yes": "ਹਾਂ",
+    "no": "ਨਹੀਂ",
+    "or": "ਜਾਂ",
+    "and": "ਅਤੇ",
+    "optional": "ਵਿਕਲਪਿਕ",
+    "required": "ਲੋੜੀਂਦਾ"
+  },
+  "privacy": {
+    "encrypted": "ਇਨਕ੍ਰਿਪਟਡ",
+    "private": "ਨਿੱਜੀ ਡਿਜ਼ਾਈਨ",
+    "secure": "ਸੁਰੱਖਿਅਤ",
+    "localOnly": "ਕੇਵਲ ਸਥਾਨਕ",
+    "offlineReady": "ਆਫਲਾਈਨ-ਤਿਆਰ"
+  }
+}

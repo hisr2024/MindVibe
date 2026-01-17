@@ -1,0 +1,32 @@
+{
+  "title": "डैशबोर्ड",
+  "welcome": "वापसी पर स्वागत है",
+  "analytics": {
+    "title": "विश्लेषण",
+    "overview": "सारांश",
+    "insights": "अंतर्दृष्टि",
+    "trends": "रुझान",
+    "weeklyProgress": "साप्ताहिक प्रगति",
+    "monthlyProgress": "मासिक प्रगति"
+  },
+  "profile": {
+    "title": "प्रोफ़ाइल",
+    "settings": "सेटिंग्स",
+    "editProfile": "प्रोफ़ाइल संपादित करें",
+    "updateProfile": "प्रोफ़ाइल अपडेट करें",
+    "accountInfo": "खाता जानकारी"
+  },
+  "subscription": {
+    "title": "सदस्यता",
+    "plan": "वर्तमान योजना",
+    "upgrade": "अपग्रेड",
+    "manage": "सदस्यता प्रबंधित करें",
+    "billing": "बिलिंग"
+  },
+  "stats": {
+    "journalEntries": "जर्नल प्रविष्टियां",
+    "chatSessions": "चैट सत्र",
+    "moodCheckins": "मूड चेक-इन",
+    "streakDays": "दिन स्ट्रीक"
+  }
+}

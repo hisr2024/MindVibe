@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "title": "Your AI Companion for Mental Wellness",
+    "subtitle": "Chat with KIAAN, powered by Ancient Wisdom",
+    "tagline": "Your calm, privacy-first mental wellness companion powered by ancient wisdom",
+    "ctaPrimary": "Talk to KIAAN",
+    "ctaSecondary": "Sacred Reflections",
+    "privacy": "Conversations remain private • a warm, confidential refuge"
+  },
+  "ecosystem": {
+    "title": "The MindVibe Ecosystem",
+    "subtitle": "A holistic approach to mental wellness, rooted in ancient wisdom and modern practices",
+    "pillars": {
+      "innerPeace": {
+        "title": "Inner Peace",
+        "description": "Find stillness through breath-focused exercises and gentle grounding techniques."
+      },
+      "mindControl": {
+        "title": "Mind Control",
+        "description": "Develop focused clarity through structured mindfulness practices."
+      },
+      "selfKindness": {
+        "title": "Self Kindness",
+        "description": "Cultivate compassion for yourself through warm, supportive exercises."
+      }
+    },
+    "footer": "Each pillar works together to create a balanced, sustainable approach to mental wellness"
+  },
+  "features": {
+    "title": "Key Features",
+    "subtitle": "Privacy-first tools designed for your mental wellness journey",
+    "voice": {
+      "title": "Voice Guidance",
+      "description": "Talk naturally with KIAAN using voice input for a more personal experience.",
+      "cta": "Try Voice Chat"
+    },
+    "offline": {
+      "title": "Offline Ready",
+      "description": "Access your journal, moods, and reflections anytime, even without internet.",
+      "cta": "Start Journaling"
+    },
+    "reset": {
+      "title": "Emotional Reset",
+      "description": "Quick exercises to reset your emotional state and find instant calm.",
+      "cta": "Try Reset"
+    }
+  },
+  "moodCheckIn": {
+    "title": "How are you feeling?",
+    "subtitle": "Quick Check-In",
+    "helper": "Tap a stone to log your mood • Private & local only",
+    "moods": {
+      "peaceful": "Peaceful",
+      "happy": "Happy",
+      "neutral": "Neutral",
+      "tired": "Tired",
+      "anxious": "Anxious",
+      "heavy": "Heavy"
+    },
+    "responses": {
+      "peaceful": "Beautiful calm. Stay with it. 💙",
+      "happy": "Let that warmth stay with you. ✨",
+      "neutral": "Steady is good. You're showing up. 🌿",
+      "tired": "Rest is not weakness. 💙",
+      "anxious": "Take a breath. I'm with you. 🌊",
+      "heavy": "You're not alone. I'm here. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Talk to KIAAN",
+      "subtitle": "Instant guidance",
+      "description": "Jump into a focused conversation for mental wellness support",
+      "cta": "Open Chat"
+    },
+    "dashboard": {
+      "title": "Progress Tracking",
+      "subtitle": "Dashboard",
+      "description": "View insights from your mood check-ins and journal entries",
+      "cta": "View Dashboard"
+    },
+    "emotionalReset": {
+      "title": "Quick Reset",
+      "subtitle": "Emotional Reset",
+      "description": "Guided exercises to reset your emotional state instantly",
+      "cta": "Try Reset"
+    }
+  },
+  "disclaimer": {
+    "title": "Disclaimer",
+    "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  }
+}

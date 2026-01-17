@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "Votre Compagnon IA pour le Bien-être Mental",
+    "subtitle": "Chattez avec KIAAN, alimenté par la Sagesse Ancienne",
+    "ctaPrimary": "Commencer le Chat Gratuit",
+    "ctaSecondary": "Explorer les Outils"
+  },
+  "languageShowcase": {
+    "title": "Disponible dans Votre Langue",
+    "subtitle": "KIAAN parle votre langue. Choisissez parmi plus de 8 langues pour une expérience personnalisée.",
+    "previewTitle": "KIAAN en {{language}}",
+    "previewDescription": "Découvrez des conseils de pleine conscience dans votre langue maternelle avec une sagesse culturellement pertinente.",
+    "stats": {
+      "languages": "Langues",
+      "verses": "Versets Traduits",
+      "support": "Support Mondial"
+    }
+  },
+  "features": {
+    "title": "Tout ce dont Vous Avez Besoin pour le Bien-être Mental",
+    "description": "Des outils complets pour votre voyage vers la paix intérieure"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "मानसिक आरोग्य अॅप"
+  },
+  "buttons": {
+    "submit": "सबमिट करा",
+    "cancel": "रद्द करा",
+    "save": "जतन करा",
+    "delete": "हटवा",
+    "edit": "संपादित करा",
+    "close": "बंद करा",
+    "next": "पुढे",
+    "previous": "मागे",
+    "confirm": "पुष्टी करा",
+    "back": "परत",
+    "continue": "सुरू ठेवा",
+    "learnMore": "अधिक जाणून घ्या",
+    "getStarted": "सुरुवात करा",
+    "tryNow": "आता प्रयत्न करा",
+    "tools": "साधने"
+  },
+  "status": {
+    "loading": "लोड करत आहे...",
+    "saving": "जतन करत आहे...",
+    "saved": "जतन केले",
+    "error": "त्रुटी",
+    "success": "यश",
+    "processing": "प्रक्रिया करत आहे..."
+  },
+  "common": {
+    "hello": "नमस्कार",
+    "welcome": "स्वागत आहे",
+    "goodbye": "निरोप",
+    "thankyou": "धन्यवाद",
+    "yes": "होय",
+    "no": "नाही",
+    "or": "किंवा",
+    "and": "आणि",
+    "optional": "ऐच्छिक",
+    "required": "आवश्यक"
+  },
+  "privacy": {
+    "encrypted": "एन्क्रिप्टेड",
+    "private": "खाजगी डिझाइन",
+    "secure": "सुरक्षित",
+    "localOnly": "केवळ स्थानिक",
+    "offlineReady": "ऑफलाइन-तयार"
+  }
+}

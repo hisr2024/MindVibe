@@ -61,7 +61,7 @@ Each theme uses soft falloffs and gentle glow; prefer radial overlays at 20–30
 - **Primary**: Inter (body, UI, captions) — clean, approachable, highly legible.
 - **Secondary**: Manrope (display, hero, emphasis) — rounded geometry for softness.
 - **Wordmarks**: Custom letterspacing; MindVibe +0.02em, KIAAN +0.12–0.15em uppercase.
-- **Micro-tagline**: “KIAAN — Crisp, calm guidance.” sits beneath the lockup at 12–14px, 0.06–0.08em tracking.
+- **Micro-tagline**: “Your Guide to Inner Peace” sits beneath the lockup at 12–14px, 0.06–0.08em tracking.
 - Tone: sincere, reassuring, concise. Avoid jargon or clinical language.
 
 ---

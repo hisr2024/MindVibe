@@ -1,0 +1,129 @@
+{
+  "welcome": {
+    "title": "Welcome to KIAAN",
+    "subtitle": "A premium, animated companion shaped by Krishna's flute and peacock feather — always calm, always modern.",
+    "description": "Calm, privacy-first mental health companion with journaling, guided chats, and dashboards."
+  },
+  "chat": {
+    "title": "Talk to KIAAN",
+    "subtitle": "Gentle guidance with an ember glow",
+    "placeholder": "Type your message...",
+    "send": "Send",
+    "thinking": "KIAAN is reflecting...",
+    "connectionStatus": "Private, steady connection",
+    "connectionDesc": "Your questions animate into focus—answers remain unchanged.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "How can I guide you today?",
+      "subtitle": "Share what's on your mind"
+    },
+    "disclaimer": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
+    "saveToJournal": "Send to Sacred Reflections",
+    "copy": "复制",
+    "copied": "已复制！",
+    "copyFailed": "失败",
+    "share": "分享",
+    "shareVia": "分享至",
+    "privacyNotice": "隐私声明",
+    "shareWarning": "您即将分享心理健康信息。请确保您愿意公开分享此内容。",
+    "anonymize": "匿名内容（删除个人标识符）",
+    "anonymized": "✓ 匿名内容",
+    "sharingOriginal": "分享原始内容"
+  },
+  "guidanceModes": {
+    "title": "Guidance modes",
+    "subtitle": "Triangle of Flowing Energy",
+    "selectPrompt": "Tap a mode to explore how KIAAN guides your state.",
+    "innerPeace": {
+      "title": "Inner Peace",
+      "description": "Find stillness through breath-focused exercises and gentle grounding techniques. Perfect for moments when you need to calm your mind and reconnect with tranquility.",
+      "note": "Gentle breath and soft focus"
+    },
+    "mindControl": {
+      "title": "Mind Control",
+      "description": "Develop focused clarity through structured mindfulness practices. Ideal for decision-making, concentration, and maintaining mental discipline.",
+      "note": "Steady steps, one thought at a time"
+    },
+    "selfKindness": {
+      "title": "Self Kindness",
+      "description": "Cultivate compassion for yourself through warm, supportive exercises. Essential for healing, self-acceptance, and nurturing your emotional well-being.",
+      "note": "You are welcome here"
+    }
+  },
+  "clarityPause": {
+    "title": "Clarity Pause",
+    "subtitle": "Create space before you act.",
+    "description": "No advice. Just space to decide from clarity.",
+    "note": "KIAAN stays untouched—decline to pass through instantly.",
+    "closeOverlay": "Close overlay",
+    "sendNow": "Send now (bypass pause)",
+    "startPause": "Pause for 60 seconds",
+    "deliverToKiaan": "Deliver to KIAAN now",
+    "keepGrounding": "Keep 60s grounding",
+    "question": "Are you acting from clarity or from emotion right now?",
+    "countdown": "{seconds}s remaining",
+    "ready": "Ready when you are"
+  },
+  "moodCheck": {
+    "title": "How are you feeling?",
+    "subtitle": "State check-in",
+    "logged": "Logged: {mood}",
+    "responses": {
+      "peaceful": "I'm glad you're feeling calm — stay with that softness for a moment. 💙",
+      "happy": "It's beautiful to see you feeling bright. Let that warmth stay with you. ✨",
+      "neutral": "Steady is good. You're showing up, and that matters. 🌿",
+      "charged": "That energy is powerful — channel it wisely. ⚡",
+      "open": "Being open takes courage. I'm here to support you. 🌤️",
+      "grateful": "Gratitude is a gift to yourself. Hold onto this feeling. 🙏",
+      "reflective": "Reflection brings clarity. Take your time with what you're feeling. 🪞",
+      "determined": "That fire in you is strong. Move forward with purpose. 🔥",
+      "tender": "Tenderness is strength. Be gentle with yourself right now. 💙",
+      "tired": "Rest is not weakness. Your body is telling you something important. 😴",
+      "anxious": "That anxious feeling is tough — take a breath, I'm with you. 🌊",
+      "heavy": "I'm sorry you're feeling low… you're not alone. I'm right here with you. 🌧️",
+      "angry": "It's okay — anger means something important needs attention. I'm here beside you. 🔥",
+      "worried": "Worry can feel overwhelming. Let's take this one step at a time together. 💭",
+      "sad": "Sadness is heavy, but you're not alone right now. I'm here with you. 💙",
+      "lonely": "Loneliness is tough, but you're not alone right now. I'm here with you. 🤝",
+      "depressed": "This weight is real, and it's hard. Please reach out — you don't have to carry this alone. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Quick Responses",
+    "subtitle": "Polished prompts that auto-fill KIAAN for you",
+    "scenarios": {
+      "anxiety": {
+        "label": "Anxiety to calm",
+        "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
+      },
+      "heavy": {
+        "label": "Heart feels heavy",
+        "prompt": "I need gentle words to lift my mood and remind me of my strengths."
+      },
+      "anger": {
+        "label": "Cooling anger",
+        "prompt": "Help me cool down my anger and respond with more patience."
+      },
+      "clarity": {
+        "label": "Clarity check",
+        "prompt": "Can you help me see the pros and cons before I decide on something important?"
+      },
+      "work": {
+        "label": "Work balance",
+        "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
+      },
+      "relationships": {
+        "label": "Tender relationships",
+        "prompt": "How can I handle a tough conversation with care and honesty?"
+      },
+      "purpose": {
+        "label": "Purpose pulse",
+        "prompt": "I want a short reflection to reconnect with my purpose and direction."
+      },
+      "peace": {
+        "label": "Quiet peace",
+        "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      }
+    }
+  }
+}

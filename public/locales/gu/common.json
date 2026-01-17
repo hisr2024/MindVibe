@@ -1,0 +1,50 @@
+{
+  "app": {
+    "name": "માઇન્ડવાઇબ",
+    "tagline": "માનસિક સ્વાસ્થ્ય એપ"
+  },
+  "buttons": {
+    "submit": "સબમિટ કરો",
+    "cancel": "રદ કરો",
+    "save": "સાચવો",
+    "delete": "કાઢી નાખો",
+    "edit": "સંપાદિત કરો",
+    "close": "બંધ કરો",
+    "next": "આગળ",
+    "previous": "પાછળ",
+    "confirm": "પુષ્ટિ કરો",
+    "back": "પાછળ",
+    "continue": "ચાલુ રાખો",
+    "learnMore": "વધુ જાણો",
+    "getStarted": "શરૂ કરો",
+    "tryNow": "હમણાં પ્રયાસ કરો",
+    "tools": "સાધનો"
+  },
+  "status": {
+    "loading": "લોડ થઈ રહ્યું છે...",
+    "saving": "સાચવી રહ્યા છીએ...",
+    "saved": "સાચવ્યું",
+    "error": "ભૂલ",
+    "success": "સફળતા",
+    "processing": "પ્રક્રિયા કરી રહ્યા છીએ..."
+  },
+  "common": {
+    "hello": "નમસ્તે",
+    "welcome": "સ્વાગત",
+    "goodbye": "અલવિદા",
+    "thankyou": "આભાર",
+    "yes": "હા",
+    "no": "ના",
+    "or": "અથવા",
+    "and": "અને",
+    "optional": "વૈકલ્પિક",
+    "required": "જરૂરી"
+  },
+  "privacy": {
+    "encrypted": "એન્ક્રિપ્ટેડ",
+    "private": "ખાનગી",
+    "secure": "સુરક્ષિત",
+    "localOnly": "માત્ર સ્થાનિક",
+    "offlineReady": "ઑફલાઇન-તૈયાર"
+  }
+}

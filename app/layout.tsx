@@ -3,7 +3,12 @@ import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector'
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
+import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
+import { ChatFooter } from '@/components/layout/ChatFooter'
+import { KiaanFooter } from '@/components/layout/KiaanFooter'
+import { ClientLayout } from './ClientLayout'
 
 export const metadata = {
   title: 'MindVibe - Mental Health App',
@@ -11,6 +16,16 @@ export const metadata = {
   metadataBase: new URL('https://mindvibe.app'),
   themeColor: '#0b0b0f',
   manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MindVibe',
+  },
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png', sizes: '512x512' },
@@ -29,19 +44,25 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
-        <Providers>
-          <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
-            <div className="flex-1">
-              <SiteNav />
+        <ClientLayout>
+          <Providers>
+            <ServiceWorkerRegistration />
+            <OfflineStatusBanner />
+            <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
+              <div className="flex-1">
+                <SiteNav />
+              </div>
+              <MinimalLanguageSelector />
             </div>
-            <LanguageSwitcher />
-          </div>
-          <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-24 pt-8 sm:px-6 md:pb-0 lg:px-8 lg:pt-16">
-            {children}
-          </main>
-          <SiteFooter />
-          <MobileNav />
-        </Providers>
+            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-24 pt-8 sm:px-6 md:pb-0 lg:px-8 lg:pt-16">
+              {children}
+            </main>
+            <SiteFooter />
+            <MobileNav />
+            <ChatFooter />
+            <KiaanFooter />
+          </Providers>
+        </ClientLayout>
       </body>
     </html>
   )

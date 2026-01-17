@@ -1,0 +1,129 @@
+{
+  "welcome": {
+    "title": "Bem-vindo ao KIAAN",
+    "subtitle": "Um companheiro premium e animado moldado pela flauta e pena de pavão de Krishna — sempre calmo, sempre moderno.",
+    "description": "Companheiro de saúde mental calmo e focado na privacidade com diário, chats guiados e painéis."
+  },
+  "chat": {
+    "title": "Fale com KIAAN",
+    "subtitle": "Orientação gentil com um brilho quente",
+    "placeholder": "Digite sua mensagem...",
+    "send": "Enviar",
+    "thinking": "KIAAN está refletindo...",
+    "connectionStatus": "Conexão privada e estável",
+    "connectionDesc": "Suas perguntas ganham foco—as respostas permanecem inalteradas.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Como posso guiá-lo hoje?",
+      "subtitle": "Compartilhe o que está em sua mente"
+    },
+    "disclaimer": "KIAAN compartilha reflexões de apoio inspiradas em tradições de sabedoria. Essas conversas e exercícios não são aconselhamento médico. Se você estiver enfrentando preocupações sérias ou se sentir inseguro, entre em contato com os serviços médicos de emergência do seu país ou um profissional licenciado imediatamente.",
+    "saveToJournal": "Enviar para Reflexões Sagradas",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "copyFailed": "Falhou",
+    "share": "Compartilhar",
+    "shareVia": "Compartilhar via",
+    "privacyNotice": "Aviso de Privacidade",
+    "shareWarning": "Você está prestes a compartilhar informações de saúde mental. Certifique-se de que está confortável em compartilhar este conteúdo publicamente.",
+    "anonymize": "Anonimizar conteúdo (remover identificadores pessoais)",
+    "anonymized": "✓ Conteúdo anonimizado",
+    "sharingOriginal": "Compartilhando conteúdo original"
+  },
+  "guidanceModes": {
+    "title": "Modos de orientação",
+    "subtitle": "Triângulo de Energia Fluente",
+    "selectPrompt": "Toque em um modo para explorar como o KIAAN orienta seu estado.",
+    "innerPeace": {
+      "title": "Paz Interior",
+      "description": "Encontre quietude através de exercícios focados na respiração e técnicas suaves de ancoragem. Perfeito para momentos em que você precisa acalmar sua mente e se reconectar com a tranquilidade.",
+      "note": "Respiração gentil e foco suave"
+    },
+    "mindControl": {
+      "title": "Controle da Mente",
+      "description": "Desenvolva clareza focada através de práticas estruturadas de atenção plena. Ideal para tomada de decisões, concentração e manutenção da disciplina mental.",
+      "note": "Passos firmes, um pensamento de cada vez"
+    },
+    "selfKindness": {
+      "title": "Autocuidado",
+      "description": "Cultive compaixão por si mesmo através de exercícios calorosos e de apoio. Essencial para cura, autoaceitação e nutrir seu bem-estar emocional.",
+      "note": "Você é bem-vindo aqui"
+    }
+  },
+  "clarityPause": {
+    "title": "Pausa de Clareza",
+    "subtitle": "Crie espaço antes de agir.",
+    "description": "Sem conselhos. Apenas espaço para decidir com clareza.",
+    "note": "KIAAN permanece intocado—recuse para passar instantaneamente.",
+    "closeOverlay": "Fechar sobreposição",
+    "sendNow": "Enviar agora (ignorar pausa)",
+    "startPause": "Pausar por 60 segundos",
+    "deliverToKiaan": "Entregar ao KIAAN agora",
+    "keepGrounding": "Manter ancoragem de 60s",
+    "question": "Você está agindo com clareza ou emoção agora?",
+    "countdown": "{seconds}s restantes",
+    "ready": "Pronto quando você estiver"
+  },
+  "moodCheck": {
+    "title": "Como você está se sentindo?",
+    "subtitle": "Verificação de estado",
+    "logged": "Registrado: {mood}",
+    "responses": {
+      "peaceful": "Fico feliz que você esteja se sentindo calmo — fique com essa suavidade por um momento. 💙",
+      "happy": "É lindo ver você se sentindo radiante. Deixe esse calor ficar com você. ✨",
+      "neutral": "Estável é bom. Você está se apresentando, e isso importa. 🌿",
+      "charged": "Essa energia é poderosa — canalize-a com sabedoria. ⚡",
+      "open": "Estar aberto exige coragem. Estou aqui para apoiá-lo. 🌤️",
+      "grateful": "Gratidão é um presente para si mesmo. Mantenha esse sentimento. 🙏",
+      "reflective": "A reflexão traz clareza. Leve seu tempo com o que está sentindo. 🪞",
+      "determined": "Esse fogo em você é forte. Avance com propósito. 🔥",
+      "tender": "Ternura é força. Seja gentil consigo mesmo agora. 💙",
+      "tired": "Descanso não é fraqueza. Seu corpo está dizendo algo importante. 😴",
+      "anxious": "Essa sensação de ansiedade é difícil — respire fundo, estou com você. 🌊",
+      "heavy": "Sinto muito que você esteja se sentindo deprimido… você não está sozinho. Estou bem aqui com você. 🌧️",
+      "angry": "Está tudo bem — raiva significa que algo importante precisa de atenção. Estou aqui ao seu lado. 🔥",
+      "worried": "Preocupação pode ser avassaladora. Vamos fazer isso passo a passo juntos. 💭",
+      "sad": "Tristeza é pesada, mas você não está sozinho agora. Estou aqui com você. 💙",
+      "lonely": "Solidão é difícil, mas você não está sozinho agora. Estou aqui com você. 🤝",
+      "depressed": "Esse peso é real e é difícil. Por favor, procure ajuda — você não precisa carregar isso sozinho. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Respostas Rápidas",
+    "subtitle": "Prompts polidos que preenchem automaticamente o KIAAN para você",
+    "scenarios": {
+      "anxiety": {
+        "label": "Ansiedade para calma",
+        "prompt": "Guie-me através de um exercício de ancoragem para estabilizar pensamentos ansiosos."
+      },
+      "heavy": {
+        "label": "Coração pesado",
+        "prompt": "Preciso de palavras gentis para elevar meu humor e me lembrar de minhas forças."
+      },
+      "anger": {
+        "label": "Acalmando a raiva",
+        "prompt": "Ajude-me a esfriar minha raiva e responder com mais paciência."
+      },
+      "clarity": {
+        "label": "Verificação de clareza",
+        "prompt": "Você pode me ajudar a ver os prós e contras antes de decidir algo importante?"
+      },
+      "work": {
+        "label": "Equilíbrio no trabalho",
+        "prompt": "O trabalho parece avassalador—guie-me através de uma reinicialização rápida para recuperar o foco."
+      },
+      "relationships": {
+        "label": "Relacionamentos delicados",
+        "prompt": "Como posso lidar com uma conversa difícil com cuidado e honestidade?"
+      },
+      "purpose": {
+        "label": "Pulso de propósito",
+        "prompt": "Quero uma breve reflexão para me reconectar com meu propósito e direção."
+      },
+      "peace": {
+        "label": "Paz tranquila",
+        "prompt": "Conduza-me em um momento consciente breve para que eu possa me sentir em paz novamente."
+      }
+    }
+  }
+}

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react'
 
-export type Language = 'en' | 'de' | 'es' | 'fr' | 'hi' | 'ar' | 'zh-CN'
+// Align with all 17 languages from i18n.ts
+export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
 
 export interface LanguageConfig {
   code: Language
@@ -13,15 +14,26 @@ export interface LanguageConfig {
 
 export const LANGUAGES: Record<Language, LanguageConfig> = {
   en: { code: 'en', name: 'English', nativeName: 'English', dir: 'ltr' },
-  de: { code: 'de', name: 'German', nativeName: 'Deutsch', dir: 'ltr' },
+  hi: { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
+  ta: { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', dir: 'ltr' },
+  te: { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', dir: 'ltr' },
+  bn: { code: 'bn', name: 'Bengali', nativeName: 'বাংলা', dir: 'ltr' },
+  mr: { code: 'mr', name: 'Marathi', nativeName: 'मराठी', dir: 'ltr' },
+  gu: { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી', dir: 'ltr' },
+  kn: { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ', dir: 'ltr' },
+  ml: { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', dir: 'ltr' },
+  pa: { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', dir: 'ltr' },
+  sa: { code: 'sa', name: 'Sanskrit', nativeName: 'संस्कृत', dir: 'ltr' },
   es: { code: 'es', name: 'Spanish', nativeName: 'Español', dir: 'ltr' },
   fr: { code: 'fr', name: 'French', nativeName: 'Français', dir: 'ltr' },
-  hi: { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
-  ar: { code: 'ar', name: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+  de: { code: 'de', name: 'German', nativeName: 'Deutsch', dir: 'ltr' },
+  pt: { code: 'pt', name: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
+  ja: { code: 'ja', name: 'Japanese', nativeName: '日本語', dir: 'ltr' },
   'zh-CN': { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文', dir: 'ltr' },
 }
 
-const STORAGE_KEY = 'mindvibe_language'
+// Use same storage key as MinimalLanguageSelector for consistency
+const STORAGE_KEY = 'preferredLocale'
 
 // Simple translation type - using interface for recursive type
 interface TranslationObject {
@@ -50,11 +62,21 @@ function detectLanguageFromLocale(): Language {
   
   // Direct matches
   if (locale === 'zh-CN' || locale === 'zh-Hans') return 'zh-CN'
-  if (langCode === 'de') return 'de'
+  if (langCode === 'hi') return 'hi'
+  if (langCode === 'ta') return 'ta'
+  if (langCode === 'te') return 'te'
+  if (langCode === 'bn') return 'bn'
+  if (langCode === 'mr') return 'mr'
+  if (langCode === 'gu') return 'gu'
+  if (langCode === 'kn') return 'kn'
+  if (langCode === 'ml') return 'ml'
+  if (langCode === 'pa') return 'pa'
+  if (langCode === 'sa') return 'sa'
   if (langCode === 'es') return 'es'
   if (langCode === 'fr') return 'fr'
-  if (langCode === 'hi') return 'hi'
-  if (langCode === 'ar') return 'ar'
+  if (langCode === 'de') return 'de'
+  if (langCode === 'pt') return 'pt'
+  if (langCode === 'ja') return 'ja'
   
   return 'en'
 }
@@ -81,21 +103,45 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Load translations for a language
   const loadTranslations = useCallback(async (lang: Language) => {
+    console.log(`[useLanguage] Loading translations for: ${lang}`)
+
     // Check cache first
     if (translationCache.has(lang)) {
+      console.log(`[useLanguage] Using cached translations for: ${lang}`)
       setTranslations(translationCache.get(lang)!)
       return
     }
 
     try {
-      const response = await fetch(`/locales/${lang}/common.json`)
-      if (response.ok) {
-        const data = await response.json() as TranslationObject
-        translationCache.set(lang, data)
-        setTranslations(data)
-      }
-    } catch {
-      console.warn(`Failed to load translations for ${lang}, using fallback`)
+      // Load all translation files and merge them
+      const files = ['common', 'home', 'kiaan', 'navigation', 'dashboard', 'features', 'errors']
+      const results = await Promise.allSettled(
+        files.map(file => fetch(`/locales/${lang}/${file}.json`).then(r => {
+          if (!r.ok) {
+            console.warn(`[useLanguage] Failed to fetch /locales/${lang}/${file}.json - Status: ${r.status}`)
+            return {}
+          }
+          return r.json()
+        }))
+      )
+
+      // Merge all translation files into one object
+      const merged: TranslationObject = {}
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const fileName = files[index]
+          merged[fileName] = result.value
+          console.log(`[useLanguage] Loaded ${fileName} for ${lang}:`, Object.keys(result.value).length > 0 ? 'OK' : 'EMPTY')
+        } else {
+          console.warn(`[useLanguage] Failed to load ${files[index]} for ${lang}:`, result.reason)
+        }
+      })
+
+      console.log(`[useLanguage] Translation keys loaded for ${lang}:`, Object.keys(merged))
+      translationCache.set(lang, merged)
+      setTranslations(merged)
+    } catch (error) {
+      console.error(`[useLanguage] Error loading translations for ${lang}:`, error)
       // Fallback to English
       if (lang !== 'en') {
         await loadTranslations('en')
@@ -142,6 +188,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.body.appendChild(announcement)
     setTimeout(() => announcement.remove(), 1000)
   }, [loadTranslations])
+
+  // Listen for locale changes from MinimalLanguageSelector
+  useEffect(() => {
+    const handleLocaleChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ locale: Language }>
+      const newLocale = customEvent.detail.locale
+      if (newLocale && LANGUAGES[newLocale]) {
+        setLanguage(newLocale)
+      }
+    }
+    
+    window.addEventListener('localeChanged', handleLocaleChange)
+    return () => window.removeEventListener('localeChanged', handleLocaleChange)
+  }, [setLanguage])
 
   // Translation function
   const t = useCallback((key: string, fallback?: string): string => {

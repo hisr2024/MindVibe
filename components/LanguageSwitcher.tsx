@@ -6,12 +6,21 @@ import { locales, localeNames, type Locale, defaultLocale } from '@/i18n';
 const flagEmojis: Record<Locale, string> = {
   en: '🇬🇧',
   hi: '🇮🇳',
+  ta: '🇮🇳',
+  te: '🇮🇳',
+  bn: '🇮🇳',
+  mr: '🇮🇳',
+  gu: '🇮🇳',
+  kn: '🇮🇳',
+  ml: '🇮🇳',
+  pa: '🇮🇳',
+  sa: '🇮🇳',
   es: '🇪🇸',
   fr: '🇫🇷',
   de: '🇩🇪',
+  pt: '🇵🇹',
   ja: '🇯🇵',
-  zh: '🇨🇳',
-  ar: '🇸🇦',
+  'zh-CN': '🇨🇳',
 };
 
 export function LanguageSwitcher() {
@@ -57,7 +66,8 @@ export function LanguageSwitcher() {
   function updateHtmlLang(locale: Locale) {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
-      document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+      // No RTL needed as Arabic is removed from the 8 languages
+      document.documentElement.dir = 'ltr';
     }
   }
 

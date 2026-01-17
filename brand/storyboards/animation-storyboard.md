@@ -18,7 +18,7 @@ Frame-accurate guides for the MindVibe and KIAAN identity animations. All timing
 | 6 | 1400–1700ms | Flute underline/K stem | Slide in + shimmer pass | Shimmer duration 1200ms overlaps |
 | 7 | 1700–2000ms | Wordmark “KIAAN” | Slide left→center, opacity 0→100% | Embossed gradient |
 | 8 | 1800–2200ms | Subtitle | Fade in “MindVibe Companion” | 85% opacity |
-| 9 | 2000–2400ms | Micro-tagline | Fade in “KIAAN — Crisp, calm guidance.” | 70% opacity, 0.06em tracking |
+| 9 | 2000–2400ms | Micro-tagline | Fade in “Your Guide to Inner Peace” | 70% opacity, 0.06em tracking |
 | 10 | 2400ms+ | Idle | Feather sway loop, shimmer every 8s, ripple 3s | Reduced-motion: static frame |
 
 **Camera & Glow**: Keep camera locked; apply subtle vignette. Long-exposure trail on shimmer (220ms falloff).

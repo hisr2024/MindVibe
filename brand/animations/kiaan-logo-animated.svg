@@ -36,7 +36,7 @@
       </ellipse>
     </g>
     <text x="50%" y="152" text-anchor="middle" fill="#e8edf5" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="16" letter-spacing="1.6">MindVibe Companion</text>
-    <text x="50%" y="174" text-anchor="middle" fill="#c2d9ff" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="12" letter-spacing="2">KIAAN — Crisp, calm guidance.</text>
+    <text x="50%" y="174" text-anchor="middle" fill="#c2d9ff" font-family="'Inter', 'Manrope', sans-serif" font-weight="600" font-size="12" letter-spacing="2">Your Guide to Inner Peace</text>
   </g>
   <filter id="shadow" x="0" y="0" width="320" height="220" filterUnits="userSpaceOnUse">
     <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="rgba(15,23,42,0.5)" />

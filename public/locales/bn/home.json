@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "title": "মানসিক সুস্থতার জন্য আপনার এআই সঙ্গী",
+    "subtitle": "প্রাচীন জ্ঞান দ্বারা চালিত KIAAN এর সাথে চ্যাট করুন",
+    "tagline": "প্রাচীন জ্ঞান দ্বারা চালিত আপনার শান্ত, গোপনীয়তা-প্রথম মানসিক সুস্থতা সঙ্গী",
+    "ctaPrimary": "KIAAN এর সাথে কথা বলুন",
+    "ctaSecondary": "পবিত্র প্রতিফলন",
+    "privacy": "কথোপকথন ব্যক্তিগত থাকে • একটি উষ্ণ, গোপনীয় আশ্রয়"
+  },
+  "ecosystem": {
+    "title": "The MindVibe Ecosystem",
+    "subtitle": "A holistic approach to mental wellness, rooted in ancient wisdom and modern practices",
+    "pillars": {
+      "innerPeace": {
+        "title": "Inner Peace",
+        "description": "Find stillness through breath-focused exercises and gentle grounding techniques."
+      },
+      "mindControl": {
+        "title": "Mind Control",
+        "description": "Develop focused clarity through structured mindfulness practices."
+      },
+      "selfKindness": {
+        "title": "Self Kindness",
+        "description": "Cultivate compassion for yourself through warm, supportive exercises."
+      }
+    },
+    "footer": "Each pillar works together to create a balanced, sustainable approach to mental wellness"
+  },
+  "features": {
+    "title": "Key Features",
+    "subtitle": "Privacy-first tools designed for your mental wellness journey",
+    "voice": {
+      "title": "Voice Guidance",
+      "description": "Talk naturally with KIAAN using voice input for a more personal experience.",
+      "cta": "Try Voice Chat"
+    },
+    "offline": {
+      "title": "Offline Ready",
+      "description": "Access your journal, moods, and reflections anytime, even without internet.",
+      "cta": "Start Journaling"
+    },
+    "reset": {
+      "title": "Emotional Reset",
+      "description": "Quick exercises to reset your emotional state and find instant calm.",
+      "cta": "Try Reset"
+    }
+  },
+  "moodCheckIn": {
+    "title": "How are you feeling?",
+    "subtitle": "Quick Check-In",
+    "helper": "Tap a stone to log your mood • Private & local only",
+    "moods": {
+      "peaceful": "Peaceful",
+      "happy": "Happy",
+      "neutral": "Neutral",
+      "tired": "Tired",
+      "anxious": "Anxious",
+      "heavy": "Heavy"
+    },
+    "responses": {
+      "peaceful": "Beautiful calm. Stay with it. 💙",
+      "happy": "Let that warmth stay with you. ✨",
+      "neutral": "Steady is good. You're showing up. 🌿",
+      "tired": "Rest is not weakness. 💙",
+      "anxious": "Take a breath. I'm with you. 🌊",
+      "heavy": "You're not alone. I'm here. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "KIAAN এর সাথে কথা বলুন",
+      "subtitle": "তাত্ক্ষণিক নির্দেশনা",
+      "description": "মানসিক সুস্থতা সহায়তার জন্য একটি ফোকাসড কথোপকথনে ঝাঁপ দিন",
+      "cta": "চ্যাট খুলুন"
+    },
+    "dashboard": {
+      "title": "অগ্রগতি ট্র্যাকিং",
+      "subtitle": "ড্যাশবোর্ড",
+      "description": "আপনার মেজাজ চেক-ইন এবং জার্নাল এন্ট্রি থেকে অন্তর্দৃষ্টি দেখুন",
+      "cta": "ড্যাশবোর্ড দেখুন"
+    },
+    "emotionalReset": {
+      "title": "দ্রুত রিসেট",
+      "subtitle": "আবেগিক রিসেট",
+      "description": "আপনার আবেগিক অবস্থা তাত্ক্ষণিকভাবে রিসেট করতে গাইডেড ব্যায়াম",
+      "cta": "রিসেট চেষ্টা করুন"
+    }
+  },
+  "disclaimer": {
+    "title": "দাবিত্যাগ",
+    "text": "KIAAN জ্ঞান ঐতিহ্য দ্বারা অনুপ্রাণিত সহায়ক প্রতিফলন শেয়ার করে। এই কথোপকথন এবং ব্যায়াম চিকিৎসা পরামর্শ নয়। আপনি যদি গুরুতর উদ্বেগের সম্মুখীন হন বা অনিরাপদ বোধ করেন, অনুগ্রহ করে অবিলম্বে আপনার দেশের জরুরি চিকিৎসা সেবা বা একজন লাইসেন্সপ্রাপ্ত পেশাদারের সাথে যোগাযোগ করুন।"
+  }
+}

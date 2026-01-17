@@ -39,7 +39,7 @@ MindVibe motion is subtle, therapeutic, and performance-focused. It favors soft 
 - **Flute shimmer**: 1200ms pass, triggers on hover or every 8s; shimmer gradient travels left→right with 0.6→1→0.6 opacity.
 - **Feather sway**: 4000ms loop, ±2° rotation, `--ease-meditation`, `transform-origin: center bottom`; add 6–10 light particles at 20% opacity drifting upward.
 - **Energy ripple**: 3000ms concentric ripple (scale 1→1.12→1), opacity 0.35→0.1; runs behind the lockup.
-- **Final lockup**: “KIAAN” embossed gradient, subtitle **MindVibe Companion**, tagline “KIAAN — Crisp, calm guidance.” at 70–80% opacity.
+- **Final lockup**: “KIAAN” embossed gradient, subtitle **MindVibe Companion**, tagline “Your Guide to Inner Peace” at 70–80% opacity.
 
 ### MindVibe Badge Icon
 - **Ripple**: 2500ms loop, `--ease-meditation`; ring radius +3% then return; opacity 0.2→0.35→0.2.

@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "MindVibe",
-    "tagline": "Mental Health App"
+    "tagline": "Psychische Gesundheits-App"
   },
   "buttons": {
     "submit": "Absenden",
@@ -16,8 +16,9 @@
     "back": "Zurück",
     "continue": "Fortfahren",
     "learnMore": "Mehr erfahren",
-    "getStarted": "Loslegen",
-    "tryNow": "Jetzt ausprobieren"
+    "getStarted": "Beginnen",
+    "tryNow": "Jetzt versuchen",
+    "tools": "Werkzeuge"
   },
   "status": {
     "loading": "Wird geladen...",
@@ -41,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "Verschlüsselt",
-    "private": "Privat",
+    "private": "Privates Design",
     "secure": "Sicher",
     "localOnly": "Nur lokal",
     "offlineReady": "Offline-bereit"

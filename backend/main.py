@@ -37,6 +37,7 @@ from backend.core.migrations import apply_sql_migrations, get_migration_status
 from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
 from backend.middleware.logging_middleware import RequestLoggingMiddleware
+from backend.middleware.ddos_protection import DDoSProtectionMiddleware
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
@@ -125,6 +126,16 @@ app = FastAPI(
     title="MindVibe API",
     version="1.0.0",
     description="AI Mental Wellness Coach Backend",
+)
+
+# Add DDoS protection middleware (first line of defense)
+app.add_middleware(
+    DDoSProtectionMiddleware,
+    enabled=True,
+    max_requests=100,  # 100 requests per minute
+    time_window=60,
+    max_connections=10,  # 10 concurrent connections per IP
+    max_request_size=10 * 1024 * 1024,  # 10MB
 )
 
 # Add security headers middleware
@@ -471,6 +482,24 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
 
+# Load Karma Reset KIAAN Integration router (NEW - enhanced with KIAAN ecosystem)
+print("\n[Karma Reset KIAAN] Attempting to import Karma Reset KIAAN router...")
+try:
+    from backend.routes.karma_reset_kiaan import router as karma_reset_kiaan_router
+    app.include_router(karma_reset_kiaan_router)
+    print("✅ [SUCCESS] Karma Reset KIAAN router loaded (ecosystem enhanced)")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Karma Reset KIAAN router: {e}")
+
+# Load Progress Reset router (User data reset with comprehensive error handling)
+print("\n[Progress Reset] Attempting to import Progress Reset router...")
+try:
+    from backend.routes.progress_reset import router as progress_reset_router
+    app.include_router(progress_reset_router, prefix="/api")
+    print("✅ [SUCCESS] Progress Reset router loaded (with transaction rollback)")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Progress Reset router: {e}")
+
 # Load Ardha router
 print("\n[Ardha] Attempting to import Ardha router...")
 try:
@@ -488,6 +517,46 @@ try:
     print("✅ [SUCCESS] Viyoga router loaded with Gita integration")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
+
+# Load Daily Analysis router
+print("\n[Daily Analysis] Attempting to import Daily Analysis router...")
+try:
+    from backend.routes.daily_analysis import router as daily_analysis_router
+    app.include_router(daily_analysis_router)
+    print("✅ [SUCCESS] Daily Analysis router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Daily Analysis router: {e}")
+
+# Load Sacred Reflections router
+print("\n[Sacred Reflections] Attempting to import Sacred Reflections router...")
+try:
+    from backend.routes.sacred_reflections import router as sacred_reflections_router
+    app.include_router(sacred_reflections_router)
+    print("✅ [SUCCESS] Sacred Reflections router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Sacred Reflections router: {e}")
+
+# Load Weekly Assessment router
+print("\n[Weekly Assessment] Attempting to import Weekly Assessment router...")
+try:
+    from backend.routes.weekly_assessment import router as weekly_assessment_router
+    app.include_router(weekly_assessment_router)
+    print("✅ [SUCCESS] Weekly Assessment router loaded")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Weekly Assessment router: {e}")
+
+# Load Translation router
+print("\n[Translation] Attempting to import Translation router...")
+try:
+    from backend.routes.translation import router as translation_router
+    app.include_router(translation_router)
+    print("✅ [SUCCESS] Translation router loaded")
+    print("   • POST   /api/translation/translate - Translate text")
+    print("   • POST   /api/translation/preferences - Update language preferences")
+    print("   • GET    /api/translation/preferences - Get language preferences")
+    print("   • GET    /api/translation/languages - Get supported languages")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Translation router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")

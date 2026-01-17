@@ -43,7 +43,7 @@ export function EmotionalResetCard({
           </div>
         </div>
         <p className="text-sm text-orange-100/80 mb-4">
-          Process emotions, find calm, and reset your mental state with Gita wisdom in a guided 7-step flow.
+          Process emotions, find calm, and reset your mental state with ancient wisdom in a guided 7-step flow.
         </p>
         <Link
           href="/emotional-reset"
@@ -72,7 +72,7 @@ export function EmotionalResetCard({
         </div>
       </div>
       <p className="text-xs text-orange-100/80">
-        Process emotions, find calm, and reset your mental state with Gita wisdom.
+        Process emotions, find calm, and reset your mental state with ancient wisdom.
       </p>
     </Link>
   )

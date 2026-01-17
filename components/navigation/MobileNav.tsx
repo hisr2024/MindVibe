@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ToolsSheet } from './ToolsSheet'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export interface NavTab {
   id: string
@@ -20,25 +21,27 @@ export interface MobileNavProps {
   className?: string
 }
 
+// Translation key mapping for tab labels (constant)
+const TAB_TRANSLATION_KEYS: Record<string, string> = {
+  'kiaan-chat': 'navigation.mobileNav.chat',
+  'home': 'navigation.mainNav.home',
+  'journal': 'navigation.mobileNav.journal',
+  'wisdom': 'navigation.features.wisdomRooms',
+  'tools': 'common.buttons.tools',
+  'profile': 'navigation.mainNav.profile',
+}
+
 // Default navigation tabs
 const defaultTabs: NavTab[] = [
   {
-    id: 'chat',
-    label: 'Chat',
-    href: '/#kiaan-chat',
+    id: 'kiaan-chat',
+    label: 'KIAAN Chat',
+    href: '/kiaan/chat',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'journal',
-    label: 'Sacred Reflections',
-    href: '/sacred-reflections',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+        <circle cx="9" cy="10" r="1" fill="currentColor" />
+        <circle cx="15" cy="10" r="1" fill="currentColor" />
       </svg>
     ),
   },
@@ -50,6 +53,16 @@ const defaultTabs: NavTab[] = [
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
+  },
+  {
+    id: 'journal',
+    label: 'Sacred Reflections',
+    href: '/sacred-reflections',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
       </svg>
     ),
   },
@@ -103,6 +116,14 @@ const defaultTabs: NavTab[] = [
 export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps) {
   const pathname = usePathname()
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
+  const { t } = useLanguage()
+
+  // Get translated label for tab
+  const getTabLabel = useMemo(() => {
+    return (tabId: string, defaultLabel: string): string => {
+      return TAB_TRANSLATION_KEYS[tabId] ? t(TAB_TRANSLATION_KEYS[tabId], defaultLabel) : defaultLabel
+    }
+  }, [t])
 
   return (
     <>
@@ -141,7 +162,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                       toolsSheetOpen ? 'font-semibold' : ''
                     }`}
                   >
-                    {tab.label}
+                    {getTabLabel(tab.id, tab.label)}
                   </span>
                 </button>
               )
@@ -170,7 +191,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     isActive ? 'font-semibold' : ''
                   }`}
                 >
-                  {tab.label}
+                  {getTabLabel(tab.id, tab.label)}
                 </span>
               </Link>
             )
