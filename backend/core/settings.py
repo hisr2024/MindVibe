@@ -2,6 +2,7 @@
 
 import os
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -12,10 +13,29 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     REFRESH_TOKEN_LENGTH: int = 32
     REFRESH_TOKEN_ENABLE_BODY_RETURN: bool = False
-    
+
     # Security
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+
+    @field_validator("SECRET_KEY")
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
+        """Ensure SECRET_KEY is not using default value in production."""
+        if os.getenv("ENVIRONMENT") == "production":
+            if v == "dev-secret-key-change-in-production" or len(v) < 32:
+                raise ValueError(
+                    "SECRET_KEY must be set to a secure random value in production. "
+                    "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(64))'"
+                )
+        elif v == "dev-secret-key-change-in-production":
+            import warnings
+            warnings.warn(
+                "Using default SECRET_KEY. This is only safe for development. "
+                "Set a secure SECRET_KEY for production.",
+                UserWarning
+            )
+        return v
     
     # Session settings
     SESSION_EXPIRE_DAYS: int = 7

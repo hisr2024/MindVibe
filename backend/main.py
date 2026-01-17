@@ -76,47 +76,57 @@ elif DATABASE_URL.startswith("postgresql://"):
 
 
 def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
-    """Build asyncpg connect args to honor sslmode/ssl query params. 
+    """Build asyncpg connect args to honor sslmode/ssl query params.
 
     Render Postgres instances require TLS by default.  When using asyncpg, the
     ``sslmode=require`` query parameter from the connection string is ignored
     unless we translate it into the ``ssl`` flag expected by asyncpg.  This
     helper preserves explicit ``sslmode``/``ssl`` values while defaulting to a
-    secure connection when SSL is required. 
+    secure connection with full certificate verification.
+
+    Security Note: By default, this uses verify-full mode with certificate
+    verification enabled. Only use require-no-verify for development or when
+    connecting to databases with self-signed certificates.
     """
     import ssl as ssl_module
     from urllib.parse import parse_qs, urlparse
+    import logging
 
+    logger = logging.getLogger(__name__)
     parsed = urlparse(db_url)
     query_params = parse_qs(parsed.query)
 
     ssl_pref = os.getenv("DB_SSL_MODE") or query_params.get("sslmode", [None])[0] or query_params.get("ssl", [None])[0]
-    
-    # Default to require SSL for Render
+
+    # Default to verify-full for maximum security
     if not ssl_pref:
-        ssl_pref = "require"
-    
+        ssl_pref = "verify-full"
+
     ssl_pref = ssl_pref.lower()
-    
-    if ssl_pref in {"require", "required"}:
-        # Create SSL context that doesn't verify certificates (for Render)
+
+    # Full verification (RECOMMENDED for production)
+    if ssl_pref in {"verify-ca", "verify-full", "true", "1"}:
+        return {"ssl": ssl_module.create_default_context()}
+
+    # Require SSL but don't verify certificates (INSECURE - use only if needed)
+    if ssl_pref in {"require-no-verify", "require", "required"}:
+        logger.warning(
+            "Database SSL certificate verification is DISABLED. "
+            "This is insecure and should only be used for development. "
+            "For production, use DB_SSL_MODE=verify-full"
+        )
         ssl_context = ssl_module.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl_module.CERT_NONE
         return {"ssl": ssl_context}
-    
-    if ssl_pref in {"verify-ca", "verify-full", "true", "1"}:
-        # Full verification
-        return {"ssl": ssl_module.create_default_context()}
-    
+
+    # Disable SSL (NOT RECOMMENDED)
     if ssl_pref in {"disable", "false", "0"}:
+        logger.warning("Database SSL is DISABLED. This is not recommended for production.")
         return {"ssl": False}
 
-    # Fallback: enable SSL without verification for Render compatibility
-    ssl_context = ssl_module.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl_module.CERT_NONE
-    return {"ssl": ssl_context}
+    # Fallback to full verification
+    return {"ssl": ssl_module.create_default_context()}
 
 
 engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args_for_ssl(DATABASE_URL))

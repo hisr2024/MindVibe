@@ -19,7 +19,7 @@ import logging
 import os
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from openai import (
     APIError,
     AuthenticationError,
@@ -27,9 +27,11 @@ from openai import (
     OpenAI,
     RateLimitError,
 )
+from pydantic import BaseModel, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
+from backend.middleware.rate_limiter import limiter
 from backend.services.gita_service import GitaService
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
@@ -40,6 +42,27 @@ model_name = os.getenv("GUIDANCE_MODEL", "gpt-4o-mini")
 client = OpenAI(api_key=api_key) if api_key else None
 
 router = APIRouter(prefix="/api", tags=["guidance"])
+
+
+class FlexiblePayload(BaseModel):
+    """Flexible payload schema with size validation for guidance endpoints."""
+
+    data: dict[str, Any]
+
+    @field_validator("data")
+    @classmethod
+    def validate_payload_size(cls, v: dict[str, Any]) -> dict[str, Any]:
+        """Validate payload size to prevent abuse."""
+        # Convert to JSON string to check size
+        json_str = json.dumps(v)
+        max_size = 50000  # 50KB limit for guidance payloads
+        if len(json_str.encode("utf-8")) > max_size:
+            raise ValueError(f"Payload exceeds maximum size of {max_size} bytes")
+        return v
+
+
+# Rate limit for guidance endpoints (AI-intensive operations)
+GUIDANCE_RATE_LIMIT = "10/minute"
 
 # Karma Reset: Specialized verse mapping by repair type
 KARMA_RESET_VERSE_MAPPING = {
@@ -304,7 +327,13 @@ async def _generate_response(
 
 
 @router.post("/kiaan/weekly-guidance")
-async def generate_weekly_guidance(payload: dict[str, Any]) -> EngineResult:
+@limiter.limit(GUIDANCE_RATE_LIMIT)
+async def generate_weekly_guidance(request: Request, payload: dict[str, Any]) -> EngineResult:
+    """Generate weekly guidance with rate limiting."""
+    # Validate payload size to prevent abuse
+    json_str = json.dumps(payload)
+    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+        raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
     parsed, raw_text = await _generate_response(
         system_prompt=KIAAN_WEEKLY_PROMPT,
         user_payload=payload,
@@ -322,7 +351,13 @@ async def generate_weekly_guidance(payload: dict[str, Any]) -> EngineResult:
 
 
 @router.post("/journal/reflect")
-async def reflect_journal_entry(payload: dict[str, Any]) -> EngineResult:
+@limiter.limit(GUIDANCE_RATE_LIMIT)
+async def reflect_journal_entry(request: Request, payload: dict[str, Any]) -> EngineResult:
+    """Reflect on journal entry with rate limiting."""
+    # Validate payload size to prevent abuse
+    json_str = json.dumps(payload)
+    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+        raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
     parsed, raw_text = await _generate_response(
         system_prompt=JOURNAL_REFLECTION_PROMPT,
         user_payload=payload,
@@ -341,7 +376,13 @@ async def reflect_journal_entry(payload: dict[str, Any]) -> EngineResult:
 
 
 @router.post("/journal/weekly-evaluation")
-async def weekly_evaluation(payload: dict[str, Any]) -> EngineResult:
+@limiter.limit(GUIDANCE_RATE_LIMIT)
+async def weekly_evaluation(request: Request, payload: dict[str, Any]) -> EngineResult:
+    """Evaluate weekly journal with rate limiting."""
+    # Validate payload size to prevent abuse
+    json_str = json.dumps(payload)
+    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+        raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
     parsed, raw_text = await _generate_response(
         system_prompt=WEEKLY_EVALUATION_PROMPT,
         user_payload=payload,
@@ -360,7 +401,13 @@ async def weekly_evaluation(payload: dict[str, Any]) -> EngineResult:
 
 
 @router.post("/profile/build")
-async def build_profile(payload: dict[str, Any]) -> EngineResult:
+@limiter.limit(GUIDANCE_RATE_LIMIT)
+async def build_profile(request: Request, payload: dict[str, Any]) -> EngineResult:
+    """Build user profile with rate limiting."""
+    # Validate payload size to prevent abuse
+    json_str = json.dumps(payload)
+    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+        raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
     parsed, raw_text = await _generate_response(
         system_prompt=PROFILE_BUILDER_PROMPT,
         user_payload=payload,
@@ -379,7 +426,13 @@ async def build_profile(payload: dict[str, Any]) -> EngineResult:
 
 
 @router.post("/auth/copy")
-async def auth_copy(payload: dict[str, Any]) -> EngineResult:
+@limiter.limit(GUIDANCE_RATE_LIMIT)
+async def auth_copy(request: Request, payload: dict[str, Any]) -> EngineResult:
+    """Generate auth copy with rate limiting."""
+    # Validate payload size to prevent abuse
+    json_str = json.dumps(payload)
+    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+        raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
     parsed, raw_text = await _generate_response(
         system_prompt=AUTH_COPY_PROMPT,
         user_payload=payload,
