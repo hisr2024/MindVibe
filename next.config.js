@@ -26,9 +26,6 @@ const nextConfig = {
   // Disable x-powered-by header
   poweredByHeader: false,
 
-  // Enable SWC minification
-  swcMinify: true,
-
   async headers() {
     return [
       {
