@@ -23,10 +23,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 
-# TEMPORARILY DISABLED: Subscription system until plans are seeded
-# TODO: Re-enable after running subscription plan seeding script
-# See: scripts/seed_subscription_plans.py
-SUBSCRIPTION_ENABLED = False
+# Subscription system enabled - plans are seeded via migration
+# See: migrations/20251202_add_subscription_system.sql
+SUBSCRIPTION_ENABLED = True
 
 # Import subscription/quota services - optional for backwards compatibility
 try:
@@ -36,9 +35,12 @@ try:
         get_or_create_free_subscription,
         increment_kiaan_usage,
     )
-    # SUBSCRIPTION_ENABLED = True  # Disabled temporarily
 except ImportError:
     SUBSCRIPTION_ENABLED = False
+    import logging
+    logging.getLogger(__name__).warning(
+        "Subscription services not available - check_kiaan_quota and related functions will be disabled"
+    )
 
 # Maximum message length to prevent abuse
 MAX_MESSAGE_LENGTH = 2000
