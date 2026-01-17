@@ -585,6 +585,18 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Wisdom Journey router: {e}")
 
+# Load Sync router (Quantum Enhancement #2)
+print("\n[Sync] Attempting to import Sync router...")
+try:
+    from backend.routes.sync import router as sync_router
+    app.include_router(sync_router)
+    print("✅ [SUCCESS] Sync router loaded (Quantum Enhancement #2 - Offline-First)")
+    print("   • POST   /api/sync/batch - Batch sync offline operations")
+    print("   • POST   /api/sync/pull - Pull server-side changes")
+    print("   • GET    /api/sync/status - Sync status and health check")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Sync router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")
