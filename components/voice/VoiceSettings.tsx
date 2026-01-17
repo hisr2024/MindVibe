@@ -12,7 +12,7 @@
 
 import { useState, useEffect } from 'react'
 import { Volume2, Download, Settings as SettingsIcon, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
-import voiceService, { VoiceSettings, SupportedLanguage } from '@/services/voiceService'
+import voiceService, { type VoiceSettings, type SupportedLanguage } from '@/services/voiceService'
 
 interface VoiceSettingsProps {
   userId: string

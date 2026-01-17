@@ -31,6 +31,8 @@ interface UseVoiceReturn {
   duration: number
   currentTime: number
   volume: number
+  loadAndPlay: (synthesizeOptions: SynthesizeOptions) => Promise<void>
+  loadFromUrl: (url: string) => Promise<void>
 }
 
 export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
@@ -215,8 +217,8 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
     currentTime,
     volume,
     // Additional methods for loading audio
-    loadAndPlay: loadAndPlay as any,
-    loadFromUrl: loadFromUrl as any
+    loadAndPlay,
+    loadFromUrl
   }
 }
 
