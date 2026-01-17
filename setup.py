@@ -11,7 +11,7 @@ setup(
         "python-jose[cryptography]>=3.3.0,<4.0.0",
         "passlib[bcrypt]>=1.7.4,<2.0.0",
         "python-multipart>=0.0.5,<0.0.22",
-        "uvicorn>=0.22.0,<0.39.0",
+        "uvicorn>=0.22.0,<0.41.0",
         "python-dotenv>=1.0.0,<2.0.0",
         "openai>=0.27.0,<3.0.0",
         "numpy>=1.24.0,<3.0.0",

@@ -1,6 +1,6 @@
 # FastAPI & Web
 fastapi>=0.100.0,<1.0.0
-uvicorn>=0.22.0,<0.39.0
+uvicorn>=0.22.0,<0.41.0
 python-multipart>=0.0.5,<0.0.22
 httpx>=0.27.0
 websockets>=12.0
