@@ -392,3 +392,341 @@ async def export_analytics_data(
         "message": f"Export initiated in {format} format",
         "dataTypes": dataTypes
     }
+
+
+# ============================================================================
+# QUANTUM ENHANCEMENT #6: ADVANCED ANALYTICS
+# ============================================================================
+
+@router.get("/advanced/mood-predictions")
+async def get_mood_predictions(
+    forecast_days: int = Query(7, ge=1, le=14, description="Number of days to forecast")
+):
+    """
+    Get AI-powered mood predictions with confidence intervals.
+
+    Quantum Enhancement #6: Advanced Analytics Dashboard
+    """
+    from backend.services.analytics_ml_service import AnalyticsMLService, MoodDataPoint
+
+    # Mock data for demonstration (replace with actual database query)
+    ml_service = AnalyticsMLService()
+
+    # Generate sample mood data
+    mood_data = []
+    base_date = datetime.now() - timedelta(days=30)
+    for i in range(30):
+        mood_data.append(MoodDataPoint(
+            date=base_date + timedelta(days=i),
+            score=6.0 + (i * 0.05),  # Gradually improving
+            tags=["work", "stress"] if i % 5 == 0 else []
+        ))
+
+    predictions = ml_service.predict_mood(mood_data, forecast_days)
+
+    return {
+        "forecast_days": forecast_days,
+        "predictions": [
+            {
+                "date": p.date.isoformat(),
+                "predicted_score": p.predicted_score,
+                "confidence_low": p.confidence_low,
+                "confidence_high": p.confidence_high,
+                "confidence_level": p.confidence_level
+            }
+            for p in predictions
+        ],
+        "model_info": {
+            "type": "time_series_forecast",
+            "training_data_points": len(mood_data),
+            "last_updated": datetime.now().isoformat()
+        }
+    }
+
+
+@router.get("/advanced/wellness-score")
+async def get_wellness_score():
+    """
+    Get comprehensive wellness score (0-100) with component breakdown.
+
+    Quantum Enhancement #6: Advanced Analytics Dashboard
+    """
+    from backend.services.wellness_score_service import WellnessScoreService
+
+    wellness_service = WellnessScoreService()
+
+    # Mock data (replace with actual database queries)
+    mood_data = [
+        {"score": 7.5, "at": (datetime.now() - timedelta(days=i)).isoformat()}
+        for i in range(30)
+    ]
+
+    journal_data = [
+        {"created_at": (datetime.now() - timedelta(days=i*3)).isoformat()}
+        for i in range(10)
+    ]
+
+    verse_interactions = [
+        {"timestamp": (datetime.now() - timedelta(days=i*2)).isoformat()}
+        for i in range(15)
+    ]
+
+    kiaan_conversations = [
+        {"created_at": (datetime.now() - timedelta(days=i*7)).isoformat()}
+        for i in range(4)
+    ]
+
+    breakdown = wellness_service.calculate_wellness_score(
+        mood_data, journal_data, verse_interactions, kiaan_conversations
+    )
+
+    return {
+        "total_score": breakdown.total_score,
+        "level": breakdown.level,
+        "level_description": breakdown.level_description,
+        "components": {
+            "mood_stability": {
+                "score": breakdown.mood_stability_score,
+                "weight": "35%",
+                "description": "Consistency and positivity of mood"
+            },
+            "engagement": {
+                "score": breakdown.engagement_score,
+                "weight": "25%",
+                "description": "Active use of app features"
+            },
+            "consistency": {
+                "score": breakdown.consistency_score,
+                "weight": "20%",
+                "description": "Regular check-ins and streaks"
+            },
+            "growth": {
+                "score": breakdown.growth_score,
+                "weight": "20%",
+                "description": "Improvement trajectory over time"
+            }
+        },
+        "recommendations": breakdown.recommendations,
+        "calculated_at": datetime.now().isoformat()
+    }
+
+
+@router.get("/advanced/ai-insights")
+async def get_ai_insights():
+    """
+    Get AI-powered personalized insights based on user data.
+
+    Quantum Enhancement #6: Advanced Analytics Dashboard
+    """
+    from backend.services.insight_generator_service import InsightGeneratorService
+
+    insight_service = InsightGeneratorService()
+
+    # Mock data (replace with actual database queries)
+    mood_data = [
+        {"score": 7.0 + (i * 0.1), "at": (datetime.now() - timedelta(days=i)).isoformat(), "tags": {"tags": ["work", "stress"]}}
+        for i in range(7)
+    ]
+
+    journal_data = [
+        {"created_at": (datetime.now() - timedelta(days=i*2)).isoformat()}
+        for i in range(3)
+    ]
+
+    verse_interactions = [
+        {"timestamp": (datetime.now() - timedelta(days=i)).isoformat()}
+        for i in range(5)
+    ]
+
+    wellness_score = 75.0
+    trend_analysis = {"trend_direction": "improving"}
+
+    weekly_insight = insight_service.generate_weekly_insight(
+        mood_data, journal_data, verse_interactions,
+        wellness_score, trend_analysis
+    )
+
+    mood_insight = insight_service.generate_mood_insight(
+        mood_average=7.3,
+        trend="improving",
+        volatility=1.2,
+        patterns={}
+    )
+
+    growth_insight = insight_service.generate_growth_insight(
+        current_period_avg=7.5,
+        previous_period_avg=6.8,
+        streak_days=7
+    )
+
+    return {
+        "insights": [
+            {
+                "type": "weekly_summary",
+                "title": "Your Week in Review",
+                "content": weekly_insight,
+                "priority": "high",
+                "icon": "🌟"
+            },
+            {
+                "type": "mood_pattern",
+                "title": "Mood Patterns",
+                "content": mood_insight,
+                "priority": "medium",
+                "icon": "📊"
+            },
+            {
+                "type": "growth_trajectory",
+                "title": "Growth & Progress",
+                "content": growth_insight,
+                "priority": "medium",
+                "icon": "🌱"
+            }
+        ],
+        "generated_at": datetime.now().isoformat(),
+        "ai_powered": insight_service.openai_available
+    }
+
+
+@router.get("/advanced/risk-assessment")
+async def get_risk_assessment():
+    """
+    Get mental health risk assessment score (0-100).
+    Lower is better.
+
+    Quantum Enhancement #6: Advanced Analytics Dashboard
+    """
+    from backend.services.analytics_ml_service import AnalyticsMLService, MoodDataPoint
+
+    ml_service = AnalyticsMLService()
+
+    # Mock data (replace with actual database query)
+    mood_data = []
+    base_date = datetime.now() - timedelta(days=30)
+    for i in range(30):
+        mood_data.append(MoodDataPoint(
+            date=base_date + timedelta(days=i),
+            score=6.5 + ((i % 7) * 0.3),  # Variable scores
+            tags=["stress"] if i % 5 == 0 else []
+        ))
+
+    risk_assessment = ml_service.calculate_risk_score(mood_data)
+
+    return {
+        "risk_score": risk_assessment["score"],
+        "risk_level": risk_assessment["level"],
+        "description": risk_assessment["description"],
+        "factors": risk_assessment["factors"],
+        "recommendations": [
+            "Continue daily mood tracking for better insights",
+            "Consider journaling when you notice stress patterns",
+            "Explore meditation verses if anxiety increases"
+        ] if risk_assessment["level"] == "medium" else [
+            "Maintain your current wellness practices",
+            "Your patterns indicate stable mental health"
+        ],
+        "assessed_at": datetime.now().isoformat()
+    }
+
+
+@router.get("/advanced/pattern-analysis")
+async def get_pattern_analysis():
+    """
+    Get behavioral pattern analysis (weekly patterns, tag correlations).
+
+    Quantum Enhancement #6: Advanced Analytics Dashboard
+    """
+    from backend.services.analytics_ml_service import AnalyticsMLService, MoodDataPoint
+
+    ml_service = AnalyticsMLService()
+
+    # Mock data (replace with actual database query)
+    mood_data = []
+    base_date = datetime.now() - timedelta(days=60)
+    for i in range(60):
+        day_of_week = (base_date + timedelta(days=i)).weekday()
+        # Simulate "Monday blues" pattern
+        score = 7.0 if day_of_week > 0 else 5.5
+
+        mood_data.append(MoodDataPoint(
+            date=base_date + timedelta(days=i),
+            score=score + (i * 0.02),
+            tags=["work", "stress"] if day_of_week == 0 else ["gratitude"]
+        ))
+
+    patterns = ml_service.detect_patterns(mood_data)
+
+    return {
+        "patterns": patterns,
+        "insights": [
+            {
+                "type": "weekly_pattern",
+                "title": "Weekly Rhythm",
+                "description": "Your mood follows a predictable weekly pattern. Lowest on Mondays, highest on Fridays."
+            },
+            {
+                "type": "tag_correlation",
+                "title": "Emotional Triggers",
+                "description": "Tags like 'work' and 'stress' correlate with lower moods, while 'gratitude' correlates with higher moods."
+            }
+        ],
+        "analyzed_at": datetime.now().isoformat()
+    }
+
+
+@router.get("/advanced/trend-analysis")
+async def get_advanced_trend_analysis(
+    lookback_days: int = Query(90, ge=30, le=365, description="Days to analyze")
+):
+    """
+    Get comprehensive trend analysis with anomaly detection.
+
+    Quantum Enhancement #6: Advanced Analytics Dashboard
+    """
+    from backend.services.analytics_ml_service import AnalyticsMLService, MoodDataPoint
+
+    ml_service = AnalyticsMLService()
+
+    # Mock data (replace with actual database query)
+    mood_data = []
+    base_date = datetime.now() - timedelta(days=lookback_days)
+    for i in range(lookback_days):
+        # Simulate improving trend with some noise
+        base_score = 6.0 + (i * 0.02)
+        noise = (i % 7) * 0.3
+
+        # Add an anomaly at day 45
+        if i == 45:
+            score = 2.5  # Sudden drop
+        else:
+            score = base_score + noise
+
+        mood_data.append(MoodDataPoint(
+            date=base_date + timedelta(days=i),
+            score=min(10.0, max(1.0, score)),
+            tags=[]
+        ))
+
+    trend_analysis = ml_service.analyze_mood_trends(mood_data, lookback_days)
+
+    return {
+        "trend": {
+            "direction": trend_analysis.trend_direction,
+            "strength": trend_analysis.trend_strength,
+            "description": f"Your mood is {trend_analysis.trend_direction} with {int(trend_analysis.trend_strength * 100)}% confidence"
+        },
+        "moving_averages": {
+            "7_day": trend_analysis.moving_avg_7d,
+            "30_day": trend_analysis.moving_avg_30d
+        },
+        "volatility": {
+            "score": trend_analysis.volatility,
+            "interpretation": "high" if trend_analysis.volatility > 2.0 else "moderate" if trend_analysis.volatility > 1.0 else "low"
+        },
+        "anomalies": trend_analysis.anomalies,
+        "analysis_period": {
+            "days": lookback_days,
+            "start_date": base_date.isoformat(),
+            "end_date": datetime.now().isoformat()
+        }
+    }
