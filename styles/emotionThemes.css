@@ -1,0 +1,303 @@
+/**
+ * Emotion-Driven Theme System - Global Styles
+ *
+ * CSS custom properties and animations for emotion-based UI theming.
+ * Applied dynamically via useEmotionTheme hook.
+ *
+ * Quantum Enhancement #4: Emotion-Driven UI Themes
+ */
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES (Set by useEmotionTheme hook)
+   ============================================================ */
+
+:root {
+  /* Default theme (balanced) */
+  --emotion-primary: #8B7355;
+  --emotion-secondary: #A0937D;
+  --emotion-background: #FAF8F3;
+  --emotion-text: #3E3E3E;
+  --emotion-accent: #C9B8A0;
+
+  /* Gradients */
+  --emotion-gradient: linear-gradient(135deg, #8B7355 0%, #A0937D 100%);
+  --emotion-card-gradient: linear-gradient(180deg, rgba(139, 115, 85, 0.05) 0%, rgba(160, 147, 125, 0.09) 100%);
+
+  /* Effects */
+  --emotion-particle-color: rgba(139, 115, 85, 0.2);
+  --emotion-shadow: rgba(139, 115, 85, 0.15);
+  --emotion-border: rgba(139, 115, 85, 0.15);
+  --emotion-blur: 16px;
+  --emotion-animation-speed: 0.8;
+
+  /* Transition timing */
+  --emotion-transition-fast: 300ms;
+  --emotion-transition-medium: 800ms;
+  --emotion-transition-slow: 1500ms;
+}
+
+/* ============================================================
+   SMOOTH TRANSITIONS
+   ============================================================ */
+
+/* Root element transitions */
+:root {
+  transition:
+    background-color var(--emotion-transition-slow) ease,
+    color var(--emotion-transition-slow) ease;
+}
+
+/* Global transitions for all elements */
+* {
+  transition:
+    background-color var(--emotion-transition-medium) ease,
+    color var(--emotion-transition-medium) ease,
+    border-color var(--emotion-transition-medium) ease,
+    box-shadow var(--emotion-transition-medium) ease;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   EMOTION-AWARE COMPONENTS
+   ============================================================ */
+
+/* Cards with emotion gradient */
+.emotion-card {
+  background: var(--emotion-card-gradient);
+  border: 1px solid var(--emotion-border);
+  box-shadow: 0 4px 24px var(--emotion-shadow);
+}
+
+/* Buttons with emotion colors */
+.emotion-button {
+  background: var(--emotion-primary);
+  color: var(--emotion-background);
+  border: 2px solid var(--emotion-primary);
+}
+
+.emotion-button:hover {
+  background: var(--emotion-secondary);
+  border-color: var(--emotion-secondary);
+}
+
+/* Text with emotion accent */
+.emotion-accent-text {
+  color: var(--emotion-primary);
+}
+
+/* Borders */
+.emotion-border {
+  border-color: var(--emotion-border);
+}
+
+/* ============================================================
+   BACKGROUND ANIMATIONS
+   ============================================================ */
+
+/* Gentle Flow (Calm) */
+@keyframes gentle-flow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(10px, -10px) scale(1.05);
+  }
+  50% {
+    transform: translate(-5px, 10px) scale(0.95);
+  }
+  75% {
+    transform: translate(-10px, -5px) scale(1.02);
+  }
+}
+
+.animation-gentle-flow {
+  animation: gentle-flow calc(20s / var(--emotion-animation-speed)) ease-in-out infinite;
+}
+
+/* Dynamic Pulse (Energized) */
+@keyframes dynamic-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.animation-dynamic-pulse {
+  animation: dynamic-pulse calc(2s / var(--emotion-animation-speed)) ease-in-out infinite;
+}
+
+/* Slow Drift (Melancholic) */
+@keyframes slow-drift {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-8px) translateX(4px);
+  }
+  50% {
+    transform: translateY(-12px) translateX(-4px);
+  }
+  75% {
+    transform: translateY(-6px) translateX(2px);
+  }
+}
+
+.animation-slow-drift {
+  animation: slow-drift calc(30s / var(--emotion-animation-speed)) ease-in-out infinite;
+}
+
+/* Steady Breathe (Anxious) */
+@keyframes steady-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+.animation-steady-breathe {
+  animation: steady-breathe calc(4s / var(--emotion-animation-speed)) ease-in-out infinite;
+}
+
+/* Subtle Wave (Balanced) */
+@keyframes subtle-wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animation-subtle-wave {
+  animation: subtle-wave calc(3s / var(--emotion-animation-speed)) ease-in-out infinite;
+}
+
+/* ============================================================
+   PARTICLE SYSTEM BASE
+   ============================================================ */
+
+.emotion-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.emotion-particle {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--emotion-particle-color);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ============================================================
+   EMOTION-SPECIFIC OVERRIDES
+   ============================================================ */
+
+/* Calm theme - Extra smooth */
+[data-emotion="calm"] * {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Energized theme - Faster transitions */
+[data-emotion="energized"] * {
+  transition-duration: calc(var(--emotion-transition-medium) * 0.7);
+}
+
+/* Melancholic theme - Slower, gentler */
+[data-emotion="melancholic"] * {
+  transition-duration: calc(var(--emotion-transition-medium) * 1.3);
+  transition-timing-function: cubic-bezier(0.25, 0, 0.15, 1);
+}
+
+/* Anxious theme - Steady, grounding */
+[data-emotion="anxious"] * {
+  transition-timing-function: linear;
+}
+
+/* Balanced theme - Standard easing */
+[data-emotion="balanced"] * {
+  transition-timing-function: ease;
+}
+
+/* ============================================================
+   ACCESSIBILITY: HIGH CONTRAST MODE
+   ============================================================ */
+
+@media (prefers-contrast: high) {
+  :root {
+    --emotion-background: #FFFFFF;
+    --emotion-text: #000000;
+    --emotion-border: rgba(0, 0, 0, 0.5);
+    --emotion-shadow: rgba(0, 0, 0, 0.3);
+  }
+
+  .emotion-card {
+    border-width: 2px;
+  }
+
+  .emotion-button {
+    border-width: 3px;
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+  /* Disable all animations and effects for printing */
+  :root,
+  * {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+
+  .emotion-particles {
+    display: none;
+  }
+
+  /* Use high contrast for readability */
+  :root {
+    --emotion-background: #FFFFFF;
+    --emotion-text: #000000;
+    --emotion-border: #000000;
+  }
+}
+
+/* ============================================================
+   DARK MODE SUPPORT
+   ============================================================ */
+
+/* Note: Emotion themes are designed for light backgrounds.
+   Dark mode can be added as a separate toggle that works
+   alongside emotion themes. For now, we maintain light themes
+   with emotion-specific colors. */
+
+@media (prefers-color-scheme: dark) {
+  /* Optional: Adjust theme colors for dark mode preference
+     This is a placeholder - full dark mode support would
+     require separate theme definitions */
+}
