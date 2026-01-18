@@ -453,12 +453,13 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         
         # Use KIAAN core service for consistent ecosystem-wide wisdom
         from backend.services.kiaan_core import kiaan_core
-        
+
         kiaan_result = await kiaan_core.get_kiaan_response(
             message=message,
             user_id=user_id,
             db=db,
-            context="general"
+            context="general",
+            language=language  # Pass language for direct response generation
         )
         
         response = kiaan_result["response"]

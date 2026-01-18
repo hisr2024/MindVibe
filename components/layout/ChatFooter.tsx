@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useChat } from '@/lib/ChatContext'
 import { getBriefErrorMessage } from '@/lib/api-client'
 import type { ChatMessage } from '@/lib/chatStorage'
+import { useLanguage } from '@/hooks/useLanguage'
 
 // Generate unique ID with fallback for environments without crypto.randomUUID
 const generateId = (): string => {
@@ -17,6 +18,7 @@ const generateId = (): string => {
 
 export function ChatFooter() {
   const { messages: globalMessages, addMessage } = useChat()
+  const { language } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [input, setInput] = useState('')
@@ -141,9 +143,11 @@ export function ChatFooter() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Language': language || 'en',
         },
         body: JSON.stringify({
           message: messageText,
+          language: language || 'en',
         }),
         credentials: 'include',
       })

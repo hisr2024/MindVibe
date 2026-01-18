@@ -138,7 +138,7 @@ export function KiaanFooter() {
     } finally {
       setIsLoading(false);
     }
-  }, [inputValue, triggerHaptic]);
+  }, [inputValue, triggerHaptic, language]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -158,17 +158,17 @@ export function KiaanFooter() {
 
   // Enhanced footer animation variants
   const footerVariants = {
-    collapsed: { 
-      height: 56, 
-      opacity: 0.95, 
+    collapsed: {
+      height: 56,
+      opacity: 0.95,
       y: 0,
-      transition: springConfigs.smooth 
+      transition: springConfigs.smooth
     },
-    expanded: { 
-      height: 480, 
-      opacity: 1, 
+    expanded: {
+      height: 'auto',
+      opacity: 1,
       y: 0,
-      transition: springConfigs.smooth 
+      transition: springConfigs.smooth
     },
   };
 
@@ -205,7 +205,7 @@ export function KiaanFooter() {
   };
 
   return (
-    <div className="fixed bottom-20 right-0 z-[55] p-4 md:bottom-0 md:p-6">
+    <div className="fixed bottom-[76px] right-2 z-[45] p-2 md:bottom-4 md:right-4 md:p-0">
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -213,7 +213,7 @@ export function KiaanFooter() {
             initial="collapsed"
             animate="expanded"
             exit="collapsed"
-            className="mb-4 w-[380px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900/98 via-slate-900/95 to-slate-900/98 shadow-2xl shadow-orange-500/20 backdrop-blur-xl"
+            className="mb-4 w-[340px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-180px)] overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900/98 via-slate-900/95 to-slate-900/98 shadow-2xl shadow-orange-500/20 backdrop-blur-xl md:w-[380px] md:max-h-[500px]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
@@ -242,7 +242,7 @@ export function KiaanFooter() {
             </div>
 
             {/* Messages */}
-            <div className="max-h-[400px] min-h-[300px] overflow-y-auto p-4 space-y-3">
+            <div className="max-h-[calc(100vh-320px)] min-h-[200px] overflow-y-auto p-4 space-y-3 md:max-h-[360px] md:min-h-[280px]">
               {messages.length === 0 ? (
                 <div className="text-center py-8 space-y-4">
                   <div className="text-4xl">🕉️</div>
