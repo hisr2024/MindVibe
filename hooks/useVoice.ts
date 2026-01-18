@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import voiceService, { SynthesizeOptions } from '@/services/voiceService'
+import voiceService, { type SynthesizeOptions } from '@/services/voiceService'
 
 interface UseVoiceOptions {
   userId: string
