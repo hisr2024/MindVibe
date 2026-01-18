@@ -1,4 +1,5 @@
 import './globals.css'
+import type { Viewport } from 'next'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
@@ -9,17 +10,18 @@ import { ChatFooter } from '@/components/layout/ChatFooter'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#0b0b0f',
+}
+
 export const metadata = {
   title: 'MindVibe - Mental Health App',
   description: 'Calm, privacy-first mental health companion with journaling, guided chats, and dashboards.',
   metadataBase: new URL('https://mindvibe.app'),
-  themeColor: '#0b0b0f',
   manifest: '/manifest.json',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
