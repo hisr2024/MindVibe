@@ -209,7 +209,8 @@ export function KiaanChat({
           </div>
         </SimpleBar>
 
-        <div className="pointer-events-none absolute inset-y-6 right-1 flex flex-col items-center justify-between gap-3 md:right-2">
+        {/* Compact scroll controls - positioned together near the response */}
+        <div className="pointer-events-none absolute top-4 right-1 flex flex-col items-center gap-1 md:right-2">
           <button
             type="button"
             onMouseDown={() => startScroll('up')}
@@ -218,7 +219,7 @@ export function KiaanChat({
             onTouchStart={() => startScroll('up')}
             onTouchEnd={stopScroll}
             onTouchCancel={stopScroll}
-            className="pointer-events-auto h-12 w-12 rounded-2xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400"
+            className="pointer-events-auto h-10 w-10 rounded-xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400 transition-all text-sm font-semibold"
             aria-label="Scroll up"
           >
             ↑
@@ -231,7 +232,7 @@ export function KiaanChat({
             onTouchStart={() => startScroll('down')}
             onTouchEnd={stopScroll}
             onTouchCancel={stopScroll}
-            className="pointer-events-auto h-12 w-12 rounded-2xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400"
+            className="pointer-events-auto h-10 w-10 rounded-xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400 transition-all text-sm font-semibold"
             aria-label="Scroll down"
           >
             ↓
