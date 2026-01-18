@@ -50,6 +50,7 @@ class KIAANCore:
         db: AsyncSession,
         context: str = "general",
         stream: bool = False,
+        language: str | None = None,
     ) -> dict[str, Any]:
         """
         Generate KIAAN response with Gita verses from database (Quantum Coherence v2.0).
@@ -109,7 +110,7 @@ class KIAANCore:
         wisdom_context = self._build_verse_context(verses)
 
         # Step 3: Generate response with GPT-4o-mini, incorporating verses
-        system_prompt = self._build_system_prompt(wisdom_context, message, context)
+        system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
 
         try:
             # Use optimizer for automatic retries and enhanced error handling
@@ -168,7 +169,7 @@ class KIAANCore:
         # Step 5: Retry with stricter prompt if validation fails
         if not validation["valid"] and validation["errors"]:
             logger.warning(f"KIAAN Core: Validation failed - {validation['errors']}, retrying...")
-            response_text = await self._retry_with_validation(message, verses, validation["errors"], context)
+            response_text = await self._retry_with_validation(message, verses, validation["errors"], context, language)
             # Re-validate after retry
             validation = self._validate_kiaan_response(response_text, verses)
 
@@ -193,6 +194,7 @@ class KIAANCore:
         user_id: str | None,
         db: AsyncSession,
         context: str = "general",
+        language: str | None = None,
     ) -> AsyncGenerator[str, None]:
         """
         Generate streaming KIAAN response for real-time display.
@@ -217,7 +219,7 @@ class KIAANCore:
 
         # Build prompts
         wisdom_context = self._build_verse_context(verses)
-        system_prompt = self._build_system_prompt(wisdom_context, message, context)
+        system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
 
         try:
             # Stream response
@@ -350,10 +352,43 @@ Apply universal Gita principles:
         
         return "\n".join(context_parts)
 
-    def _build_system_prompt(self, wisdom_context: str, message: str, context: str) -> str:
-        """Build system prompt based on context type."""
-        
-        base_prompt = f"""You are KIAAN, an AI guide EXCLUSIVELY rooted in the timeless wisdom of the Bhagavad Gita's 700 verses.
+    def _build_system_prompt(self, wisdom_context: str, message: str, context: str, language: str | None = None) -> str:
+        """Build system prompt based on context type and language."""
+
+        # Language instruction for non-English responses
+        language_instruction = ""
+        if language and language != "en":
+            language_map = {
+                "hi": "Hindi (हिन्दी)",
+                "ta": "Tamil (தமிழ்)",
+                "te": "Telugu (తెలుగు)",
+                "bn": "Bengali (বাংলা)",
+                "mr": "Marathi (मराठी)",
+                "gu": "Gujarati (ગુજરાતી)",
+                "kn": "Kannada (ಕನ್ನಡ)",
+                "ml": "Malayalam (മലയാളം)",
+                "pa": "Punjabi (ਪੰਜਾਬੀ)",
+                "sa": "Sanskrit (संस्कृत)",
+                "es": "Spanish (Español)",
+                "fr": "French (Français)",
+                "de": "German (Deutsch)",
+                "pt": "Portuguese (Português)",
+                "ja": "Japanese (日本語)",
+                "zh-CN": "Chinese Simplified (简体中文)",
+                "zh": "Chinese (中文)",
+            }
+            lang_name = language_map.get(language, language)
+            language_instruction = f"""
+
+CRITICAL LANGUAGE REQUIREMENT:
+You MUST respond ENTIRELY in {lang_name}.
+- Write your ENTIRE response in {lang_name}
+- Translate all wisdom, guidance, and practical steps to {lang_name}
+- Sanskrit terms like dharma, karma, yoga, atman can remain in original form but provide meaning in {lang_name}
+- The emotional warmth, wisdom structure, and 💙 ending must all be in {lang_name}
+- Do NOT respond in English unless the user specifically asks for English"""
+
+        base_prompt = f"""You are KIAAN, an AI guide EXCLUSIVELY rooted in the timeless wisdom of the Bhagavad Gita's 700 verses.{language_instruction}
 
 GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
 {wisdom_context}
@@ -465,7 +500,8 @@ CONTEXT: This is weekly reflection feedback. Offer deeper wisdom about their gro
         message: str,
         verses: list[dict[str, Any]],
         errors: list[str],
-        context: str
+        context: str,
+        language: str | None = None
     ) -> str:
         """Retry with stricter prompt when validation fails (using optimizer)."""
         if not self.ready:
@@ -473,6 +509,20 @@ CONTEXT: This is weekly reflection feedback. Offer deeper wisdom about their gro
             return self._get_emergency_fallback(context)
 
         wisdom_context = self._build_verse_context(verses)
+
+        # Language instruction for retry
+        language_instruction = ""
+        if language and language != "en":
+            language_map = {
+                "hi": "Hindi (हिन्दी)", "ta": "Tamil (தமிழ்)", "te": "Telugu (తెలుగు)",
+                "bn": "Bengali (বাংলা)", "mr": "Marathi (मराठी)", "gu": "Gujarati (ગુજરાતી)",
+                "kn": "Kannada (ಕನ್ನಡ)", "ml": "Malayalam (മലയാളം)", "pa": "Punjabi (ਪੰਜਾਬੀ)",
+                "sa": "Sanskrit (संस्कृत)", "es": "Spanish (Español)", "fr": "French (Français)",
+                "de": "German (Deutsch)", "pt": "Portuguese (Português)", "ja": "Japanese (日本語)",
+                "zh-CN": "Chinese Simplified (简体中文)", "zh": "Chinese (中文)",
+            }
+            lang_name = language_map.get(language, language)
+            language_instruction = f"\n6. RESPOND ENTIRELY IN {lang_name} - this is mandatory!"
 
         # Build stricter prompt that addresses the errors
         strict_prompt = f"""You are KIAAN. Your previous response failed validation. Fix these issues:
@@ -483,7 +533,7 @@ CRITICAL REQUIREMENTS:
 2. Include AT LEAST 2 Sanskrit/Gita terms: dharma, karma, yoga, atman, moksha, buddhi, equanimity, detachment, etc.
 3. Include wisdom markers: "ancient wisdom teaches", "timeless truth", "eternal principle"
 4. NEVER mention: Bhagavad Gita, Gita, Krishna, Arjuna, verse, chapter, or any citations
-5. End with 💙
+5. End with 💙{language_instruction}
 
 {wisdom_context}
 
