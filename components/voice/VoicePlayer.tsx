@@ -13,7 +13,7 @@
 import { useEffect, useState } from 'react'
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Loader2 } from 'lucide-react'
 import { useVoice } from '@/hooks/useVoice'
-import { SynthesizeOptions } from '@/services/voiceService'
+import type { SynthesizeOptions } from '@/services/voiceService'
 
 interface VoicePlayerProps {
   userId: string
