@@ -16,6 +16,7 @@
 
 import { useState, useEffect } from 'react'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
+import { useEmotionThemeContext } from '@/components/emotions/EmotionThemeProvider'
 import { apiFetch } from '@/lib/api'
 import { AlertCircle, CheckCircle2, Cloud, CloudOff, Loader2 } from 'lucide-react'
 
@@ -70,6 +71,9 @@ export function OfflineMoodCheckIn({
     queueCount,
     syncInProgress
   } = useOfflineMode()
+
+  // Emotion theme context for dynamic UI
+  const { updateFromMood } = useEmotionThemeContext()
 
   // Auto-hide KIAAN response after 4 seconds
   useEffect(() => {
@@ -127,6 +131,9 @@ export function OfflineMoodCheckIn({
           const data = await response.json()
           setSaveStatus('success')
 
+          // Update emotion theme based on mood
+          updateFromMood(moodData)
+
           if (onMoodSaved && data.id) {
             onMoodSaved(data.id.toString())
           }
@@ -153,6 +160,9 @@ export function OfflineMoodCheckIn({
 
   const queueOffline = async (moodData: MoodData) => {
     await queueOperation('POST', '/api/moods', moodData)
+
+    // Update emotion theme even when offline
+    updateFromMood(moodData)
 
     setSaveStatus('queued')
     resetForm()
