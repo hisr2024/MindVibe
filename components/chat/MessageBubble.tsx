@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { CopyButton } from './CopyButton'
 import { ShareButton } from './ShareButton'
-import { TranslateButton } from './TranslateButton'
 import { VoiceOutputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useMessageTranslation } from '@/hooks/useMessageTranslation'
@@ -191,34 +190,6 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
 
           {/* Share Button */}
           <ShareButton text={text} />
-
-          {/* Translate Button - Enhanced */}
-          <button
-            onClick={toggleTranslation}
-            disabled={isTranslating || language === 'en'}
-            className={`flex items-center gap-1.5 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
-              isTranslated ? 'border-blue-400/40 bg-blue-500/10' : ''
-            }`}
-            aria-label={isTranslated ? 'Show original' : 'Translate message'}
-            title={isTranslated ? 'Show original' : 'Translate message'}
-          >
-            {isTranslating ? (
-              <svg className="animate-spin h-3.5 w-3.5 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isTranslated ? 'text-blue-400' : 'text-orange-400'}>
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M2 12h20"></path>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                {isTranslated && <path d="m9 12 2 2 4-4" stroke="currentColor" strokeWidth="2.5"></path>}
-              </svg>
-            )}
-            <span>
-              {isTranslating ? 'Translating...' : isTranslated ? 'Original' : 'Translate'}
-            </span>
-          </button>
 
           {/* Voice Output Button */}
           <VoiceOutputButton text={text} language={language} />
