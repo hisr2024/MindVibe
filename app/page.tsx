@@ -45,9 +45,9 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden p-4 pb-28 md:p-8">
-      {/* Language Selector - Fixed Top Right */}
-      <div className="fixed top-4 right-4 z-50">
+    <main className="relative min-h-screen overflow-hidden">
+      {/* Language Selector - Fixed Top Right, positioned to avoid nav overlap */}
+      <div className="fixed top-3 right-3 z-50 md:top-4 md:right-4">
         <MinimalLanguageSelector />
       </div>
 

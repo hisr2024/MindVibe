@@ -3,7 +3,6 @@ import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
-import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { ChatFooter } from '@/components/layout/ChatFooter'
@@ -48,17 +47,19 @@ export default function RootLayout({
           <Providers>
             <ServiceWorkerRegistration />
             <OfflineStatusBanner />
-            <div className="flex items-center justify-between px-4 pt-4 sm:px-6 lg:px-8">
-              <div className="flex-1">
-                <SiteNav />
-              </div>
-              <MinimalLanguageSelector />
-            </div>
-            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-24 pt-8 sm:px-6 md:pb-0 lg:px-8 lg:pt-16">
+            {/* Fixed header navigation */}
+            <SiteNav />
+            {/* Main content with proper spacing for fixed header and mobile nav */}
+            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-32 pt-20 sm:px-6 md:pb-8 lg:px-8 lg:pt-24">
               {children}
             </main>
-            <SiteFooter />
+            {/* Footer - hidden on mobile due to MobileNav */}
+            <div className="hidden md:block">
+              <SiteFooter />
+            </div>
+            {/* Mobile bottom navigation */}
             <MobileNav />
+            {/* Floating chat widget */}
             <ChatFooter />
             <KiaanFooter />
           </Providers>
