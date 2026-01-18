@@ -1,23 +1,107 @@
 {
   "hero": {
-    "title": "Ihr KI-Begleiter für Mentales Wohlbefinden",
-    "subtitle": "Chatten Sie mit KIAAN, unterstützt durch Alte Weisheit",
-    "ctaPrimary": "Kostenlosen Chat Starten",
-    "ctaSecondary": "Werkzeuge Erkunden"
+    "title": "Dein KI-Begleiter für mentales Wohlbefinden",
+    "subtitle": "Chatte mit KIAAN, unterstützt durch alte Weisheit",
+    "tagline": "Dein ruhiger, datenschutzorientierter Begleiter für mentales Wohlbefinden, inspiriert von alter Weisheit",
+    "ctaPrimary": "Mit KIAAN sprechen",
+    "ctaSecondary": "Heilige Reflexionen",
+    "privacy": "Gespräche bleiben privat • ein warmer, vertraulicher Rückzugsort"
+  },
+  "ecosystem": {
+    "title": "Das MindVibe-Ökosystem",
+    "subtitle": "Ein ganzheitlicher Ansatz für mentales Wohlbefinden, verwurzelt in alter Weisheit und modernen Praktiken",
+    "pillars": {
+      "innerPeace": {
+        "title": "Innerer Frieden",
+        "description": "Finde Stille durch atemfokussierte Übungen und sanfte Erdungstechniken."
+      },
+      "mindControl": {
+        "title": "Gedankenkontrolle",
+        "description": "Entwickle fokussierte Klarheit durch strukturierte Achtsamkeitspraktiken."
+      },
+      "selfKindness": {
+        "title": "Selbstfreundlichkeit",
+        "description": "Kultiviere Mitgefühl für dich selbst durch warme, unterstützende Übungen."
+      }
+    },
+    "footer": "Jede Säule arbeitet zusammen, um einen ausgewogenen, nachhaltigen Ansatz für mentales Wohlbefinden zu schaffen"
+  },
+  "features": {
+    "title": "Hauptfunktionen",
+    "subtitle": "Datenschutzorientierte Werkzeuge für deine Reise zum mentalen Wohlbefinden",
+    "voice": {
+      "title": "Sprachführung",
+      "description": "Sprich natürlich mit KIAAN per Spracheingabe für ein persönlicheres Erlebnis.",
+      "cta": "Sprach-Chat ausprobieren"
+    },
+    "offline": {
+      "title": "Offline-bereit",
+      "description": "Greife jederzeit auf dein Tagebuch, Stimmungen und Reflexionen zu, auch ohne Internet.",
+      "cta": "Journaling starten"
+    },
+    "reset": {
+      "title": "Emotionaler Reset",
+      "description": "Schnelle Übungen zum Zurücksetzen deines emotionalen Zustands und zum sofortigen Finden von Ruhe.",
+      "cta": "Reset ausprobieren"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Wie fühlst du dich?",
+    "subtitle": "Schneller Check-in",
+    "helper": "Tippe auf einen Stein, um deine Stimmung zu erfassen • Privat & nur lokal",
+    "helperText": "Tippe auf einen Stein, um deine Stimmung zu erfassen • Führt dich zum KIAAN Chat für Unterstützung",
+    "openingChat": "KIAAN Chat wird geöffnet...",
+    "selectMood": "Auswählen",
+    "moods": {
+      "peaceful": "Friedlich",
+      "happy": "Glücklich",
+      "neutral": "Neutral",
+      "tired": "Müde",
+      "anxious": "Ängstlich",
+      "heavy": "Schwer"
+    },
+    "responses": {
+      "peaceful": "Schöne Ruhe. Bleibe dabei. 💙",
+      "happy": "Lass diese Wärme bei dir bleiben. ✨",
+      "neutral": "Stetig ist gut. Du zeigst dich. 🌿",
+      "tired": "Ruhe ist keine Schwäche. 💙",
+      "anxious": "Atme tief. Ich bin bei dir. 🌊",
+      "heavy": "Du bist nicht allein. Ich bin hier. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Mit KIAAN sprechen",
+      "subtitle": "Sofortige Führung",
+      "description": "Springe in ein fokussiertes Gespräch für Unterstützung beim mentalen Wohlbefinden",
+      "cta": "Chat öffnen"
+    },
+    "dashboard": {
+      "title": "Fortschrittsverfolgung",
+      "subtitle": "Dashboard",
+      "description": "Sieh Einblicke aus deinen Stimmungs-Check-ins und Tagebucheinträgen",
+      "cta": "Dashboard anzeigen"
+    },
+    "emotionalReset": {
+      "title": "Schneller Reset",
+      "subtitle": "Emotionaler Reset",
+      "description": "Geführte Übungen zum sofortigen Zurücksetzen deines emotionalen Zustands",
+      "cta": "Reset ausprobieren"
+    }
+  },
+  "disclaimer": {
+    "title": "Haftungsausschluss",
+    "text": "KIAAN teilt unterstützende Reflexionen, inspiriert von Weisheitstraditionen. Diese Gespräche und Übungen sind kein medizinischer Rat. Wenn du ernsthafte Bedenken hast oder dich unsicher fühlst, wende dich bitte an den Notdienst deines Landes oder einen zugelassenen Fachmann."
   },
   "languageShowcase": {
-    "title": "In Ihrer Sprache Verfügbar",
-    "subtitle": "KIAAN spricht Ihre Sprache. Wählen Sie aus über 8 Sprachen für eine personalisierte Erfahrung.",
+    "title": "In deiner Sprache verfügbar",
+    "subtitle": "KIAAN spricht deine Sprache. Wähle aus über 17 Sprachen für ein personalisiertes Erlebnis.",
     "previewTitle": "KIAAN auf {{language}}",
-    "previewDescription": "Erleben Sie Achtsamkeitsführung in Ihrer Muttersprache mit kulturell relevanter Weisheit.",
+    "previewDescription": "Erlebe Achtsamkeitsführung in deiner Muttersprache mit kulturell relevanter Weisheit.",
     "stats": {
       "languages": "Sprachen",
       "verses": "Übersetzte Verse",
       "support": "Globaler Support"
     }
-  },
-  "features": {
-    "title": "Alles, was Sie für Mentales Wohlbefinden Brauchen",
-    "description": "Umfassende Werkzeuge für Ihre Reise zum inneren Frieden"
   }
 }

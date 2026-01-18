@@ -191,36 +191,6 @@ function KiaanChatPageInner() {
         </div>
       </div>
 
-      {/* Quick Responses */}
-      {messages.length === 0 && (
-        <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] backdrop-blur">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-orange-50">Quick Responses</h2>
-            <button
-              onClick={handleClarityPause}
-              className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-105"
-            >
-              🧘 Clarity Pause
-            </button>
-          </div>
-          <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-            {quickResponses.map((response) => (
-              <button
-                key={response.id}
-                onClick={() => handleQuickResponse(response.prompt)}
-                className="group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-left transition-all hover:border-orange-400/40 hover:bg-white/10 hover:shadow-lg hover:shadow-orange-500/20"
-              >
-                <div className="flex flex-col gap-2">
-                  <span className="text-2xl">{response.emoji}</span>
-                  <span className="text-sm font-semibold text-orange-50">{response.text}</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Message Actions - Only show when there are KIAAN responses */}
       {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)] backdrop-blur">
@@ -285,6 +255,36 @@ function KiaanChatPageInner() {
           viewMode={viewMode}
         />
       </div>
+
+      {/* Quick Responses - Below KIAAN Chat */}
+      {messages.length === 0 && (
+        <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] backdrop-blur">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-orange-50">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
+            <button
+              onClick={handleClarityPause}
+              className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-105"
+            >
+              🧘 {t('kiaan.clarityPause.title', 'Clarity Pause')}
+            </button>
+          </div>
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+            {quickResponses.map((response) => (
+              <button
+                key={response.id}
+                onClick={() => handleQuickResponse(response.prompt)}
+                className="group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-left transition-all hover:border-orange-400/40 hover:bg-white/10 hover:shadow-lg hover:shadow-orange-500/20"
+              >
+                <div className="flex flex-col gap-2">
+                  <span className="text-2xl">{response.emoji}</span>
+                  <span className="text-sm font-semibold text-orange-50">{t(`kiaan.quickPrompts.scenarios.${response.id}.label`, response.text)}</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Helper Links */}
       <div className="grid gap-4 md:grid-cols-3">
