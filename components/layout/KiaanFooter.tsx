@@ -205,7 +205,7 @@ export function KiaanFooter() {
   };
 
   return (
-    <div className="fixed bottom-0 right-0 z-50 p-4 md:p-6">
+    <div className="fixed bottom-20 right-0 z-[55] p-4 md:bottom-0 md:p-6">
       <AnimatePresence>
         {isExpanded && (
           <motion.div

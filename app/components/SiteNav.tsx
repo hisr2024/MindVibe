@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ThemeToggle } from '@/components/ui'
 import { MindVibeLockup } from '@/components/branding'
@@ -13,6 +13,23 @@ export default function SiteNav() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const { t } = useLanguage()
+
+  // Close menu when route changes
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
 
   const links = useMemo(() => [
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
@@ -25,13 +42,13 @@ export default function SiteNav() {
   ], [t])
 
   return (
-    <motion.header 
-      className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[var(--brand-surface)]/95 shadow-lg shadow-black/20 backdrop-blur-xl"
+    <motion.header
+      className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-[var(--brand-surface)]/95 shadow-lg shadow-black/20 backdrop-blur-xl"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={springConfigs.smooth}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 pr-16 md:pr-4">
         <Link
           href="/"
           className="flex items-center gap-3 text-slate-100 transition hover:text-white"
@@ -105,78 +122,133 @@ export default function SiteNav() {
           </Link>
           <motion.button
             onClick={() => setOpen(value => !value)}
-            className="inline-flex items-center justify-center rounded-full border border-white/10 px-3 py-2 text-white/80 md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 md:hidden"
             aria-expanded={open}
             aria-label={t('navigation.actions.toggleMenu', 'Toggle navigation menu')}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
             whileTap={{ scale: 0.95 }}
           >
-            <span className="text-sm font-semibold">{t('navigation.actions.menu', 'Menu')}</span>
+            <motion.svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              animate={{ rotate: open ? 90 : 0 }}
+              transition={springConfigs.snappy}
+            >
+              {open ? (
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="8" x2="20" y2="8" />
+                  <line x1="4" y1="16" x2="20" y2="16" />
+                </>
+              )}
+            </motion.svg>
           </motion.button>
         </div>
       </div>
 
       <AnimatePresence>
         {open && (
-          <motion.div 
-            className="border-t border-white/5 bg-slate-950/95 px-4 py-3 md:hidden" 
-            aria-label="Mobile navigation"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={springConfigs.smooth}
-          >
-            <motion.div 
-              className="flex flex-col gap-2"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.05,
-                  },
-                },
-              }}
-              initial="hidden"
-              animate="visible"
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              className="fixed inset-0 top-[60px] z-30 bg-black/60 backdrop-blur-sm md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+              aria-hidden="true"
+            />
+            {/* Mobile menu */}
+            <motion.div
+              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-white/10 bg-slate-950/98 px-4 py-4 backdrop-blur-xl md:hidden"
+              aria-label="Mobile navigation"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={springConfigs.smooth}
             >
-              {links.map(link => {
-                const active = pathname === link.href
-                return (
-                  <motion.div
-                    key={link.href}
-                    variants={animationVariants.slideUp}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className={`block rounded-xl px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-mv.ocean focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                        active ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/5'
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                )
-              })}
-              <motion.div 
-                className="flex items-center justify-between rounded-xl px-3 py-2"
-                variants={animationVariants.slideUp}
+              <motion.nav
+                className="flex flex-col gap-1"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.04,
+                    },
+                  },
+                }}
+                initial="hidden"
+                animate="visible"
               >
-                <span className="text-sm text-white/80">{t('navigation.mainNav.theme', 'Theme')}</span>
-                <ThemeToggle />
-              </motion.div>
-              <motion.div variants={animationVariants.slideUp}>
-                <Link
-                  href="/account"
-                  onClick={() => setOpen(false)}
-                  className="block rounded-full bg-mvGradientSunrise px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-glowSunrise"
+                {links.map(link => {
+                  const active = pathname === link.href
+                  const isHighlight = 'highlight' in link && link.highlight
+                  return (
+                    <motion.div
+                      key={link.href}
+                      variants={animationVariants.slideUp}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={() => setOpen(false)}
+                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                          active
+                            ? isHighlight
+                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
+                              : 'bg-white/10 text-white'
+                            : isHighlight
+                            ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-100 hover:from-orange-500/30 hover:to-amber-500/30'
+                            : 'text-white/80 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        {link.label}
+                        {isHighlight && !active && (
+                          <span className="ml-auto rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-300">
+                            AI
+                          </span>
+                        )}
+                      </Link>
+                    </motion.div>
+                  )
+                })}
+
+                <motion.div
+                  className="my-2 border-t border-white/10"
+                  variants={animationVariants.slideUp}
+                />
+
+                <motion.div
+                  className="flex min-h-[48px] items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+                  variants={animationVariants.slideUp}
                 >
-                  {t('navigation.mainNav.account', 'Account Access')}
-                </Link>
-              </motion.div>
+                  <span className="text-base font-medium text-white/80">{t('navigation.mainNav.theme', 'Theme')}</span>
+                  <ThemeToggle />
+                </motion.div>
+
+                <motion.div variants={animationVariants.slideUp} className="mt-2">
+                  <Link
+                    href="/account"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-[48px] items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition-all hover:shadow-xl"
+                  >
+                    {t('navigation.mainNav.account', 'Account Access')}
+                  </Link>
+                </motion.div>
+              </motion.nav>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.header>

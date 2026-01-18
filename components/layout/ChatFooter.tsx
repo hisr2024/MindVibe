@@ -227,7 +227,7 @@ export function ChatFooter() {
 
   return (
     <>
-      {/* Minimized Chat Button */}
+      {/* Minimized Chat Button - hidden on mobile (KiaanFooter shows there instead) */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -235,7 +235,7 @@ export function ChatFooter() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            className="fixed bottom-6 right-6 z-[9999] md:bottom-8 md:right-8"
+            className="fixed bottom-8 right-8 z-[60] hidden md:block"
           >
             <button
               onClick={toggleOpen}
@@ -280,7 +280,7 @@ export function ChatFooter() {
         )}
       </AnimatePresence>
 
-      {/* Expanded Chat Interface */}
+      {/* Expanded Chat Interface - desktop only */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -288,9 +288,9 @@ export function ChatFooter() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 right-6 z-[9999] w-[calc(100vw-48px)] md:w-[380px] md:bottom-8 md:right-8"
+            className="fixed bottom-8 right-8 z-[60] hidden w-[380px] md:block"
           >
-            <div className="flex flex-col h-[80vh] md:h-[600px] rounded-2xl border border-orange-500/20 bg-slate-950/95 backdrop-blur-lg shadow-2xl shadow-orange-500/20 overflow-hidden">
+            <div className="flex flex-col h-[60vh] max-h-[500px] md:h-[600px] md:max-h-none rounded-2xl border border-orange-500/20 bg-slate-950/95 backdrop-blur-lg shadow-2xl shadow-orange-500/20 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
                 <div className="flex items-center gap-2">

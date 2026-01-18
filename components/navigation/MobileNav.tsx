@@ -128,13 +128,14 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
   return (
     <>
       <nav
-        className={`fixed inset-x-0 bottom-0 z-50 border-t border-orange-500/20 bg-[#0b0b0f]/95 backdrop-blur-xl md:hidden ${className}`}
+        className={`fixed inset-x-0 bottom-0 z-50 border-t border-orange-500/20 bg-[#0b0b0f]/98 backdrop-blur-xl md:hidden ${className}`}
         aria-label="Mobile navigation"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        <div className="flex items-center justify-around">
+        <div className="flex items-stretch justify-around px-1">
           {tabs.map((tab) => {
             const isActive = tab.href !== '#' && (pathname === tab.href || pathname.startsWith(`${tab.href}/`))
-            
+
             // Tools button opens sheet instead of navigating
             if (tab.isToolsButton) {
               return (
@@ -142,24 +143,24 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   key={tab.id}
                   type="button"
                   onClick={() => setToolsSheetOpen(true)}
-                  className={`flex min-h-[60px] min-w-[60px] flex-1 flex-col items-center justify-center gap-0.5 py-2 transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${
+                  className={`flex min-h-[64px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 active:scale-95 ${
                     toolsSheetOpen
                       ? 'text-orange-400'
-                      : 'text-white/60 hover:text-white/80'
+                      : 'text-white/60 hover:text-white/80 active:text-orange-300'
                   }`}
                   aria-expanded={toolsSheetOpen}
                   aria-haspopup="dialog"
                 >
                   <span
-                    className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                      toolsSheetOpen ? 'bg-orange-500/20' : ''
+                    className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200 ${
+                      toolsSheetOpen ? 'bg-orange-500/25 scale-110' : 'hover:bg-white/5'
                     }`}
                   >
                     {tab.icon}
                   </span>
                   <span
-                    className={`text-[10px] font-medium ${
-                      toolsSheetOpen ? 'font-semibold' : ''
+                    className={`text-[11px] leading-tight ${
+                      toolsSheetOpen ? 'font-semibold text-orange-400' : 'font-medium'
                     }`}
                   >
                     {getTabLabel(tab.id, tab.label)}
@@ -172,33 +173,34 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`flex min-h-[60px] min-w-[60px] flex-1 flex-col items-center justify-center gap-0.5 py-2 transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${
+                className={`relative flex min-h-[64px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 active:scale-95 ${
                   isActive
                     ? 'text-orange-400'
-                    : 'text-white/60 hover:text-white/80'
+                    : 'text-white/60 hover:text-white/80 active:text-orange-300'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                    isActive ? 'bg-orange-500/20' : ''
+                  className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200 ${
+                    isActive ? 'bg-orange-500/25 scale-110' : 'hover:bg-white/5'
                   }`}
                 >
                   {tab.icon}
                 </span>
                 <span
-                  className={`text-[10px] font-medium ${
-                    isActive ? 'font-semibold' : ''
+                  className={`text-[11px] leading-tight ${
+                    isActive ? 'font-semibold text-orange-400' : 'font-medium'
                   }`}
                 >
                   {getTabLabel(tab.id, tab.label)}
                 </span>
+                {isActive && (
+                  <span className="absolute bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400" />
+                )}
               </Link>
             )
           })}
         </div>
-        {/* Safe area padding for devices with home indicator */}
-        <div className="bg-[#0b0b0f]/95 pb-[env(safe-area-inset-bottom)]" />
       </nav>
 
       {/* Tools Bottom Sheet */}

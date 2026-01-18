@@ -333,6 +333,15 @@ html.light [class*="bg-slate-950"] {
   animation: calmBreath 10s ease-in-out infinite;
 }
 
+/* =====================================================
+   Z-INDEX LAYER SYSTEM
+   - z-10: Content overlays (tooltips, popovers)
+   - z-30: Backdrop overlays
+   - z-40: Fixed header navigation (SiteNav)
+   - z-50: Mobile bottom navigation, Language selector
+   - z-60: Floating widgets (ChatFooter, modals)
+   ===================================================== */
+
 .mobile-safe-area {
   padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
 }
@@ -355,6 +364,49 @@ html.light [class*="bg-slate-950"] {
     padding-right: 0px;
     padding-bottom: 0px;
   }
+}
+
+/* Mobile-friendly touch targets */
+@media (max-width: 768px) {
+  /* Ensure minimum touch target size */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent text selection on interactive elements */
+  button,
+  a,
+  [role="button"],
+  nav {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth momentum scrolling */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Prevent layout shift from scrollbar */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Better focus states for accessibility */
+:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.7);
+  outline-offset: 2px;
+}
+
+/* Hide focus ring for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .arrow-track {
