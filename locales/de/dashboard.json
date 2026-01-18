@@ -1,32 +1,113 @@
 {
   "title": "Dashboard",
-  "welcome": "Welcome back",
+  "allTools": "Alle Werkzeuge an einem Ort",
+  "subtitle": "MindVibe Werkzeuge",
+  "returnHome": "Zur Startseite",
+  "toolsCount": "Werkzeuge",
+  "welcome": "Willkommen zurück",
+  "categories": {
+    "core": "Kern-Werkzeuge",
+    "guidance": "Führungs-Engines",
+    "karma": "Karma & Wachstum",
+    "quick": "Schnellzugriff"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Chat",
+      "description": "KI-Begleiter für psychische Gesundheit"
+    },
+    "journal": {
+      "title": "Privates Tagebuch",
+      "description": "Verschlüsseltes Journaling"
+    },
+    "viyoga": {
+      "title": "Viyoga",
+      "description": "Ergebnis-Angst-Reduzierer"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Alte Weisheit neu formuliert"
+    },
+    "relationshipCompass": {
+      "title": "Beziehungskompass",
+      "description": "Ruhige Konfliktführung"
+    },
+    "sacredReflections": {
+      "title": "Heilige Reflexionen",
+      "description": "Spirituelles Journaling"
+    },
+    "karmicTree": {
+      "title": "Karmischer Baum",
+      "description": "Visuelles Fortschrittstracking"
+    },
+    "karmaFootprint": {
+      "title": "Karma-Fußabdruck",
+      "description": "Tägliche Handlungsreflexion"
+    },
+    "karmaReset": {
+      "title": "Karma-Reset",
+      "description": "Beziehungsschaden heilen"
+    },
+    "emotionalReset": {
+      "title": "Emotionaler Reset",
+      "description": "7-Schritte geführte Verarbeitung"
+    },
+    "profile": {
+      "title": "Profil & Einstellungen",
+      "description": "Benutzereinstellungen"
+    },
+    "subscription": {
+      "title": "Abonnement",
+      "description": "Deinen Plan verwalten"
+    },
+    "about": {
+      "title": "Über MindVibe",
+      "description": "Plattform-Informationen"
+    },
+    "analytics": {
+      "title": "Analyse-Dashboard",
+      "description": "Nutzungseinblicke"
+    },
+    "wisdomRooms": {
+      "title": "Weisheitsräume",
+      "description": "Alte Weisheit erkunden"
+    },
+    "moodInsights": {
+      "title": "Stimmungseinblicke",
+      "description": "Emotionale Muster"
+    }
+  },
+  "badges": {
+    "new": "Neu",
+    "premium": "Premium",
+    "beta": "Beta"
+  },
   "analytics": {
-    "title": "Analytics",
-    "overview": "Overview",
-    "insights": "Insights",
+    "title": "Analyse",
+    "overview": "Übersicht",
+    "insights": "Einblicke",
     "trends": "Trends",
-    "weeklyProgress": "Weekly Progress",
-    "monthlyProgress": "Monthly Progress"
+    "weeklyProgress": "Wöchentlicher Fortschritt",
+    "monthlyProgress": "Monatlicher Fortschritt"
   },
   "profile": {
-    "title": "Profile",
-    "settings": "Settings",
-    "editProfile": "Edit Profile",
-    "updateProfile": "Update Profile",
-    "accountInfo": "Account Information"
+    "title": "Profil",
+    "settings": "Einstellungen",
+    "editProfile": "Profil bearbeiten",
+    "updateProfile": "Profil aktualisieren",
+    "accountInfo": "Kontoinformationen"
   },
   "subscription": {
-    "title": "Subscription",
-    "plan": "Current Plan",
+    "title": "Abonnement",
+    "plan": "Aktueller Plan",
     "upgrade": "Upgrade",
-    "manage": "Manage Subscription",
-    "billing": "Billing"
+    "manage": "Abonnement verwalten",
+    "billing": "Abrechnung"
   },
   "stats": {
-    "journalEntries": "Journal Entries",
-    "chatSessions": "Chat Sessions",
-    "moodCheckins": "Mood Check-ins",
-    "streakDays": "Day Streak"
+    "journalEntries": "Tagebucheinträge",
+    "chatSessions": "Chat-Sitzungen",
+    "moodCheckins": "Stimmungs-Check-ins",
+    "streakDays": "Tage-Streak"
   }
 }

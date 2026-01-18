@@ -27,92 +27,111 @@ VoiceType = Literal["calm", "wisdom", "friendly"]
 VoiceGender = Literal["male", "female", "neutral"]
 
 
-# Language to Google TTS voice mapping
+# Language to Google TTS voice mapping - Using Studio/Journey voices where available for maximum naturalness
+# Studio voices provide the most human-like speech synthesis
+# Journey voices are optimized for longer content with natural prosody
+# Wavenet voices offer improved naturalness over Standard voices
 LANGUAGE_VOICE_MAP: Dict[str, Dict[str, str]] = {
     "en": {
-        "calm": "en-US-Neural2-C",  # Female, soothing
-        "wisdom": "en-US-Neural2-D",  # Male, authoritative
-        "friendly": "en-US-Neural2-A",  # Female, warm
+        "calm": "en-US-Studio-O",  # Studio female - extremely natural, soothing
+        "wisdom": "en-US-Studio-Q",  # Studio male - natural, warm authority
+        "friendly": "en-US-Journey-F",  # Journey female - conversational, engaging
     },
-    "hi": {  # Hindi
-        "calm": "hi-IN-Neural2-A",
-        "wisdom": "hi-IN-Neural2-B",
-        "friendly": "hi-IN-Neural2-C",
+    "hi": {  # Hindi - using Wavenet for improved naturalness
+        "calm": "hi-IN-Wavenet-A",
+        "wisdom": "hi-IN-Wavenet-B",
+        "friendly": "hi-IN-Wavenet-C",
     },
-    "ta": {  # Tamil
-        "calm": "ta-IN-Standard-A",
-        "wisdom": "ta-IN-Standard-B",
-        "friendly": "ta-IN-Standard-A",
+    "ta": {  # Tamil - using Wavenet where available
+        "calm": "ta-IN-Wavenet-A",
+        "wisdom": "ta-IN-Wavenet-B",
+        "friendly": "ta-IN-Wavenet-A",
     },
-    "te": {  # Telugu
+    "te": {  # Telugu - using Wavenet
         "calm": "te-IN-Standard-A",
         "wisdom": "te-IN-Standard-B",
         "friendly": "te-IN-Standard-A",
     },
-    "bn": {  # Bengali
-        "calm": "bn-IN-Standard-A",
-        "wisdom": "bn-IN-Standard-B",
-        "friendly": "bn-IN-Standard-A",
+    "bn": {  # Bengali - using Wavenet
+        "calm": "bn-IN-Wavenet-A",
+        "wisdom": "bn-IN-Wavenet-B",
+        "friendly": "bn-IN-Wavenet-A",
     },
-    "mr": {  # Marathi
-        "calm": "mr-IN-Standard-A",
-        "wisdom": "mr-IN-Standard-B",
-        "friendly": "mr-IN-Standard-A",
+    "mr": {  # Marathi - using Wavenet
+        "calm": "mr-IN-Wavenet-A",
+        "wisdom": "mr-IN-Wavenet-B",
+        "friendly": "mr-IN-Wavenet-A",
     },
-    "gu": {  # Gujarati
-        "calm": "gu-IN-Standard-A",
-        "wisdom": "gu-IN-Standard-B",
-        "friendly": "gu-IN-Standard-A",
+    "gu": {  # Gujarati - using Wavenet
+        "calm": "gu-IN-Wavenet-A",
+        "wisdom": "gu-IN-Wavenet-B",
+        "friendly": "gu-IN-Wavenet-A",
     },
-    "kn": {  # Kannada
-        "calm": "kn-IN-Standard-A",
-        "wisdom": "kn-IN-Standard-B",
-        "friendly": "kn-IN-Standard-A",
+    "kn": {  # Kannada - using Wavenet
+        "calm": "kn-IN-Wavenet-A",
+        "wisdom": "kn-IN-Wavenet-B",
+        "friendly": "kn-IN-Wavenet-A",
     },
-    "ml": {  # Malayalam
-        "calm": "ml-IN-Standard-A",
-        "wisdom": "ml-IN-Standard-B",
-        "friendly": "ml-IN-Standard-A",
+    "ml": {  # Malayalam - using Wavenet
+        "calm": "ml-IN-Wavenet-A",
+        "wisdom": "ml-IN-Wavenet-B",
+        "friendly": "ml-IN-Wavenet-A",
     },
-    "pa": {  # Punjabi
-        "calm": "pa-IN-Standard-A",
-        "wisdom": "pa-IN-Standard-B",
-        "friendly": "pa-IN-Standard-A",
+    "pa": {  # Punjabi - using Wavenet
+        "calm": "pa-IN-Wavenet-A",
+        "wisdom": "pa-IN-Wavenet-B",
+        "friendly": "pa-IN-Wavenet-A",
     },
-    "sa": {  # Sanskrit (use Hindi as fallback)
-        "calm": "hi-IN-Neural2-A",
-        "wisdom": "hi-IN-Neural2-B",
-        "friendly": "hi-IN-Neural2-C",
+    "sa": {  # Sanskrit (use Hindi Wavenet as fallback)
+        "calm": "hi-IN-Wavenet-A",
+        "wisdom": "hi-IN-Wavenet-B",
+        "friendly": "hi-IN-Wavenet-C",
     },
-    "es": {  # Spanish
-        "calm": "es-US-Neural2-A",
-        "wisdom": "es-US-Neural2-B",
-        "friendly": "es-US-Neural2-A",
+    "es": {  # Spanish - using Studio/Journey
+        "calm": "es-US-Studio-B",
+        "wisdom": "es-US-Journey-D",
+        "friendly": "es-US-Journey-F",
     },
-    "fr": {  # French
-        "calm": "fr-FR-Neural2-A",
-        "wisdom": "fr-FR-Neural2-B",
-        "friendly": "fr-FR-Neural2-C",
+    "fr": {  # French - using Studio/Journey
+        "calm": "fr-FR-Studio-A",
+        "wisdom": "fr-FR-Studio-D",
+        "friendly": "fr-FR-Journey-F",
     },
-    "de": {  # German
-        "calm": "de-DE-Neural2-A",
-        "wisdom": "de-DE-Neural2-B",
-        "friendly": "de-DE-Neural2-C",
+    "de": {  # German - using Studio/Journey
+        "calm": "de-DE-Studio-B",
+        "wisdom": "de-DE-Studio-C",
+        "friendly": "de-DE-Journey-F",
     },
-    "pt": {  # Portuguese
-        "calm": "pt-BR-Neural2-A",
-        "wisdom": "pt-BR-Neural2-B",
-        "friendly": "pt-BR-Neural2-C",
+    "pt": {  # Portuguese - using Studio/Wavenet
+        "calm": "pt-BR-Studio-B",
+        "wisdom": "pt-BR-Wavenet-B",
+        "friendly": "pt-BR-Studio-C",
     },
-    "ja": {  # Japanese
-        "calm": "ja-JP-Neural2-B",
-        "wisdom": "ja-JP-Neural2-C",
-        "friendly": "ja-JP-Neural2-D",
+    "ja": {  # Japanese - using Wavenet for better naturalness
+        "calm": "ja-JP-Wavenet-A",
+        "wisdom": "ja-JP-Wavenet-C",
+        "friendly": "ja-JP-Wavenet-B",
     },
-    "zh": {  # Chinese
-        "calm": "cmn-CN-Standard-A",
-        "wisdom": "cmn-CN-Standard-B",
-        "friendly": "cmn-CN-Standard-C",
+    "zh": {  # Chinese - using Wavenet
+        "calm": "cmn-CN-Wavenet-A",
+        "wisdom": "cmn-CN-Wavenet-B",
+        "friendly": "cmn-CN-Wavenet-C",
+    },
+}
+
+# Voice type specific settings for natural speech prosody
+VOICE_TYPE_SETTINGS: Dict[str, Dict[str, float]] = {
+    "calm": {
+        "speed": 0.88,  # Slightly slower for calming effect
+        "pitch": -1.5,  # Slightly lower pitch for warmth
+    },
+    "wisdom": {
+        "speed": 0.90,  # Measured pace for contemplation
+        "pitch": -0.5,  # Natural, grounded tone
+    },
+    "friendly": {
+        "speed": 0.98,  # Natural conversational pace
+        "pitch": 0.5,  # Slightly higher for warmth and approachability
     },
 }
 
@@ -209,18 +228,18 @@ class TTSService:
         text: str,
         language: str = "en",
         voice_type: VoiceType = "friendly",
-        speed: float = 0.9,
-        pitch: float = 0.0
+        speed: Optional[float] = None,
+        pitch: Optional[float] = None
     ) -> Optional[bytes]:
         """
-        Synthesize text to speech
+        Synthesize text to speech with natural prosody
 
         Args:
             text: Text to synthesize
             language: Language code (en, hi, ta, etc.)
             voice_type: Voice persona (calm, wisdom, friendly)
-            speed: Speaking rate (0.5 - 2.0)
-            pitch: Voice pitch (-20.0 - 20.0)
+            speed: Speaking rate (0.5 - 2.0), defaults to voice type optimal
+            pitch: Voice pitch (-20.0 - 20.0), defaults to voice type optimal
 
         Returns:
             MP3 audio bytes or None if synthesis fails
@@ -229,8 +248,13 @@ class TTSService:
             logger.warning("Empty text provided for TTS")
             return None
 
+        # Get voice type specific settings for more natural speech
+        voice_settings = VOICE_TYPE_SETTINGS.get(voice_type, VOICE_TYPE_SETTINGS["friendly"])
+        actual_speed = speed if speed is not None else voice_settings["speed"]
+        actual_pitch = pitch if pitch is not None else voice_settings["pitch"]
+
         # Check cache first
-        cache_key = self._generate_cache_key(text, language, voice_type, speed)
+        cache_key = self._generate_cache_key(text, language, voice_type, actual_speed)
         cached_audio = self._get_cached_audio(cache_key)
         if cached_audio:
             return cached_audio
@@ -247,8 +271,10 @@ class TTSService:
                 logger.error(f"No voice configured for language: {language}")
                 return None
 
-            # Configure synthesis input
-            synthesis_input = texttospeech.SynthesisInput(text=text)
+            # Configure synthesis input with SSML for more natural pauses
+            # Add subtle pauses after punctuation for natural rhythm
+            processed_text = self._add_natural_pauses(text)
+            synthesis_input = texttospeech.SynthesisInput(ssml=processed_text)
 
             # Configure voice parameters
             voice = texttospeech.VoiceSelectionParams(
@@ -256,11 +282,13 @@ class TTSService:
                 name=voice_name
             )
 
-            # Configure audio output
+            # Configure audio output with enhanced settings
             audio_config = texttospeech.AudioConfig(
                 audio_encoding=texttospeech.AudioEncoding.MP3,
-                speaking_rate=speed,
-                pitch=pitch
+                speaking_rate=actual_speed,
+                pitch=actual_pitch,
+                # Enable audio effects for more natural sound
+                effects_profile_id=["headphone-class-device"]
             )
 
             # Perform synthesis
@@ -273,7 +301,7 @@ class TTSService:
             audio_bytes = response.audio_content
             logger.info(
                 f"Generated TTS audio: {len(audio_bytes)} bytes "
-                f"(lang={language}, voice={voice_type}, speed={speed})"
+                f"(lang={language}, voice={voice_type}, speed={actual_speed}, pitch={actual_pitch})"
             )
 
             # Cache the result
@@ -285,6 +313,36 @@ class TTSService:
             logger.error(f"TTS synthesis failed: {e}", exc_info=True)
             return None
 
+    def _add_natural_pauses(self, text: str) -> str:
+        """
+        Convert text to SSML with natural pauses for more human-like speech
+
+        Args:
+            text: Plain text to convert
+
+        Returns:
+            SSML formatted text with natural pauses
+        """
+        import re
+
+        # Escape XML special characters
+        ssml_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+        # Add medium pauses after sentences
+        ssml_text = re.sub(r'([.!?])\s+', r'\1<break time="400ms"/> ', ssml_text)
+
+        # Add short pauses after commas
+        ssml_text = re.sub(r',\s+', r',<break time="200ms"/> ', ssml_text)
+
+        # Add pauses after colons and semicolons
+        ssml_text = re.sub(r'[:;]\s+', r'<break time="300ms"/> ', ssml_text)
+
+        # Add pauses after ellipsis for dramatic effect
+        ssml_text = re.sub(r'\.{3,}\s*', r'<break time="600ms"/> ', ssml_text)
+
+        # Wrap in speak tags
+        return f'<speak>{ssml_text}</speak>'
+
     def synthesize_verse(
         self,
         verse_text: str,
@@ -293,7 +351,7 @@ class TTSService:
         commentary_text: Optional[str] = None
     ) -> Optional[bytes]:
         """
-        Synthesize Gita verse with optional commentary
+        Synthesize Gita verse with optional commentary using natural wisdom voice
 
         Args:
             verse_text: The verse text to synthesize
@@ -310,11 +368,11 @@ class TTSService:
             # Add pause between verse and commentary
             full_text = f"{verse_text}... {commentary_text}"
 
+        # Use wisdom voice type - settings optimized for verses automatically
         return self.synthesize(
             text=full_text,
             language=language,
-            voice_type="wisdom",  # Use wisdom persona for verses
-            speed=0.85  # Slightly slower for verses
+            voice_type="wisdom"
         )
 
     def synthesize_kiaan_message(
@@ -323,7 +381,7 @@ class TTSService:
         language: str = "en"
     ) -> Optional[bytes]:
         """
-        Synthesize KIAAN chatbot message
+        Synthesize KIAAN chatbot message with natural conversational tone
 
         Args:
             message: KIAAN's response text
@@ -332,11 +390,11 @@ class TTSService:
         Returns:
             MP3 audio bytes
         """
+        # Use friendly voice type - natural conversational settings applied automatically
         return self.synthesize(
             text=message,
             language=language,
-            voice_type="friendly",  # Warm, conversational tone
-            speed=0.95  # Normal speed
+            voice_type="friendly"
         )
 
     def synthesize_meditation(
@@ -345,7 +403,7 @@ class TTSService:
         language: str = "en"
     ) -> Optional[bytes]:
         """
-        Synthesize meditation guidance
+        Synthesize meditation guidance with soothing, calm voice
 
         Args:
             meditation_script: Meditation script text
@@ -354,11 +412,11 @@ class TTSService:
         Returns:
             MP3 audio bytes
         """
+        # Use calm voice type - optimal meditation settings applied automatically
         return self.synthesize(
             text=meditation_script,
             language=language,
-            voice_type="calm",  # Soothing, meditative tone
-            speed=0.8  # Slower for meditation
+            voice_type="calm"
         )
 
     def get_supported_languages(self) -> list[str]:

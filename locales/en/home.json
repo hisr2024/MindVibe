@@ -49,6 +49,9 @@
     "title": "How are you feeling?",
     "subtitle": "Quick Check-In",
     "helper": "Tap a stone to log your mood • Private & local only",
+    "helperText": "Tap a stone to log your mood • Takes you to KIAAN Chat for support",
+    "openingChat": "Opening KIAAN Chat...",
+    "selectMood": "Select",
     "moods": {
       "peaceful": "Peaceful",
       "happy": "Happy",

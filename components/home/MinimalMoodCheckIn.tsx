@@ -3,65 +3,74 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/hooks/useLanguage';
 
 /**
  * Enhanced Minimal Mood Check-In Component
  * Beautiful animations, glassmorphism, and KIAAN integration
+ * Now with full i18n support for all mood labels and responses
  */
 export function MinimalMoodCheckIn() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [showResponse, setShowResponse] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
 
-  // Compact mood stones with enhanced visuals
+  // Compact mood stones with enhanced visuals - using translation keys
   const moodStones = [
-    { 
-      label: 'Peaceful', 
-      emoji: '🧘', 
-      color: 'from-emerald-400 to-teal-400', 
-      response: 'Beautiful calm. Stay with it. 💙',
+    {
+      id: 'peaceful',
+      label: t('home.moodCheckIn.moods.peaceful', 'Peaceful'),
+      emoji: '🧘',
+      color: 'from-emerald-400 to-teal-400',
+      response: t('kiaan.moodCheck.responses.peaceful', 'Beautiful calm. Stay with it. 💙'),
       glowColor: 'rgba(52, 211, 153, 0.4)'
     },
-    { 
-      label: 'Happy', 
-      emoji: '🌟', 
-      color: 'from-yellow-400 to-amber-400', 
-      response: 'Let that warmth stay with you. ✨',
+    {
+      id: 'happy',
+      label: t('home.moodCheckIn.moods.happy', 'Happy'),
+      emoji: '🌟',
+      color: 'from-yellow-400 to-amber-400',
+      response: t('kiaan.moodCheck.responses.happy', 'Let that warmth stay with you. ✨'),
       glowColor: 'rgba(251, 191, 36, 0.4)'
     },
-    { 
-      label: 'Neutral', 
-      emoji: '🌿', 
-      color: 'from-slate-400 to-gray-400', 
-      response: 'Steady is good. You\'re showing up. 🌿',
+    {
+      id: 'neutral',
+      label: t('home.moodCheckIn.moods.neutral', 'Neutral'),
+      emoji: '🌿',
+      color: 'from-slate-400 to-gray-400',
+      response: t('kiaan.moodCheck.responses.neutral', 'Steady is good. You\'re showing up. 🌿'),
       glowColor: 'rgba(148, 163, 184, 0.4)'
     },
-    { 
-      label: 'Tired', 
-      emoji: '🌙', 
-      color: 'from-blue-400 to-indigo-400', 
-      response: 'Rest is not weakness. 💙',
+    {
+      id: 'tired',
+      label: t('home.moodCheckIn.moods.tired', 'Tired'),
+      emoji: '🌙',
+      color: 'from-blue-400 to-indigo-400',
+      response: t('kiaan.moodCheck.responses.tired', 'Rest is not weakness. 💙'),
       glowColor: 'rgba(96, 165, 250, 0.4)'
     },
-    { 
-      label: 'Anxious', 
-      emoji: '🌊', 
-      color: 'from-amber-400 to-orange-400', 
-      response: 'Take a breath. I\'m with you. 🌊',
+    {
+      id: 'anxious',
+      label: t('home.moodCheckIn.moods.anxious', 'Anxious'),
+      emoji: '🌊',
+      color: 'from-amber-400 to-orange-400',
+      response: t('kiaan.moodCheck.responses.anxious', 'Take a breath. I\'m with you. 🌊'),
       glowColor: 'rgba(251, 146, 60, 0.4)'
     },
-    { 
-      label: 'Heavy', 
-      emoji: '☁️', 
-      color: 'from-slate-500 to-gray-500', 
-      response: 'You\'re not alone. I\'m here. 💙',
+    {
+      id: 'heavy',
+      label: t('home.moodCheckIn.moods.heavy', 'Heavy'),
+      emoji: '☁️',
+      color: 'from-slate-500 to-gray-500',
+      response: t('kiaan.moodCheck.responses.heavy', 'You\'re not alone. I\'m here. 💙'),
       glowColor: 'rgba(100, 116, 139, 0.4)'
     },
   ];
 
   const handleMoodSelect = async (mood: typeof moodStones[0]) => {
-    setSelectedMood(mood.label);
+    setSelectedMood(mood.id);
     setShowResponse(true);
 
     // Save to localStorage for tracking
@@ -70,7 +79,7 @@ export function MinimalMoodCheckIn() {
         const existing = localStorage.getItem('mood_check_ins');
         const checkIns = existing ? JSON.parse(existing) : [];
         checkIns.push({
-          mood: mood.label,
+          mood: mood.id,
           emoji: mood.emoji,
           timestamp: new Date().toISOString(),
         });
@@ -86,12 +95,12 @@ export function MinimalMoodCheckIn() {
     setTimeout(() => {
       setIsNavigating(true);
       // Navigate to KIAAN Chat with mood context
-      const moodPrompt = encodeURIComponent(`I'm feeling ${mood.label.toLowerCase()} right now.`);
-      router.push(`/kiaan/chat?mood=${mood.label.toLowerCase()}&message=${moodPrompt}`);
+      const moodPrompt = encodeURIComponent(`I'm feeling ${mood.id} right now.`);
+      router.push(`/kiaan/chat?mood=${mood.id}&message=${moodPrompt}`);
     }, 3000);
   };
 
-  const selectedMoodData = moodStones.find(m => m.label === selectedMood);
+  const selectedMoodData = moodStones.find(m => m.id === selectedMood);
 
   return (
     <motion.section
@@ -101,40 +110,40 @@ export function MinimalMoodCheckIn() {
       className="space-y-4 rounded-2xl border border-orange-500/20 bg-gradient-to-br from-slate-900/40 via-slate-900/30 to-slate-900/40 backdrop-blur-xl p-5 shadow-[0_16px_70px_rgba(255,115,39,0.12)]"
     >
       <div className="text-center">
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
           className="text-xs uppercase tracking-wider text-orange-100/70"
         >
-          Quick Check-In
+          {t('home.moodCheckIn.subtitle', 'Quick Check-In')}
         </motion.p>
-        <motion.h3 
+        <motion.h3
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="mt-1 text-xl font-semibold text-orange-50"
         >
-          How are you feeling?
+          {t('kiaan.moodCheck.title', 'How are you feeling?')}
         </motion.h3>
       </div>
 
       {/* Stone Grid - Compact Layout with Staggered Animation */}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
         {moodStones.map((mood, index) => {
-          const isSelected = selectedMood === mood.label;
+          const isSelected = selectedMood === mood.id;
           return (
             <motion.button
-              key={mood.label}
+              key={mood.id}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
+              transition={{
                 delay: index * 0.1,
                 type: 'spring',
                 stiffness: 260,
                 damping: 20
               }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.1,
                 rotate: [0, -5, 5, -5, 0],
                 transition: { duration: 0.4 }
@@ -143,33 +152,33 @@ export function MinimalMoodCheckIn() {
               onClick={() => !isNavigating && handleMoodSelect(mood)}
               disabled={isNavigating}
               className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-300 ${
-                isSelected 
-                  ? 'scale-105 shadow-2xl ring-2 ring-orange-400/60' 
+                isSelected
+                  ? 'scale-105 shadow-2xl ring-2 ring-orange-400/60'
                   : 'hover:shadow-xl'
               }`}
-              aria-label={`Select ${mood.label} mood`}
+              aria-label={`${t('home.moodCheckIn.selectMood', 'Select')} ${mood.label}`}
               style={{
                 boxShadow: isSelected ? `0 20px 60px ${mood.glowColor}` : undefined
               }}
             >
               {/* Glassmorphism Stone background */}
-              <motion.div 
+              <motion.div
                 className={`absolute inset-0 bg-gradient-to-br ${mood.color} opacity-80`}
                 animate={isSelected ? { opacity: 1 } : { opacity: 0.8 }}
               />
-              
+
               {/* Animated shine overlay */}
-              <motion.div 
+              <motion.div
                 className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent"
                 animate={!isSelected ? {
                   opacity: [0.3, 0.5, 0.3],
                   transition: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                 } : { opacity: 0.5 }}
               />
-              
+
               {/* Texture overlay */}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_60%)]" />
-              
+
               {/* Stone border with shimmer */}
               <div className="absolute inset-0 rounded-2xl border border-white/30" />
 
@@ -185,9 +194,9 @@ export function MinimalMoodCheckIn() {
 
               {/* Content */}
               <div className="relative flex flex-col items-center gap-2">
-                <motion.span 
-                  className="text-2xl sm:text-3xl" 
-                  role="img" 
+                <motion.span
+                  className="text-2xl sm:text-3xl"
+                  role="img"
                   aria-label={mood.label}
                   animate={isSelected ? {
                     scale: [1, 1.2, 1],
@@ -253,7 +262,7 @@ export function MinimalMoodCheckIn() {
             className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-amber-300/10 backdrop-blur-sm p-4 shadow-lg"
           >
             <div className="flex items-start gap-3">
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1, rotate: [0, 360] }}
                 transition={{ type: 'spring', stiffness: 200, damping: 15 }}
@@ -263,7 +272,7 @@ export function MinimalMoodCheckIn() {
               </motion.div>
               <div className="flex-1">
                 <p className="mb-1 text-xs text-orange-100/70">KIAAN</p>
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
@@ -277,7 +286,7 @@ export function MinimalMoodCheckIn() {
                     animate={{ opacity: 1 }}
                     className="mt-2 text-xs text-orange-200/80"
                   >
-                    Opening KIAAN Chat...
+                    {t('home.moodCheckIn.openingChat', 'Opening KIAAN Chat...')}
                   </motion.p>
                 )}
               </div>
@@ -287,14 +296,14 @@ export function MinimalMoodCheckIn() {
       </AnimatePresence>
 
       {/* Helper text */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
         className="text-center"
       >
         <p className="text-xs text-orange-100/60">
-          Tap a stone to log your mood • Takes you to KIAAN Chat for support
+          {t('home.moodCheckIn.helperText', 'Tap a stone to log your mood • Takes you to KIAAN Chat for support')}
         </p>
       </motion.div>
     </motion.section>

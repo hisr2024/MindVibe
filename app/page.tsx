@@ -82,7 +82,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.06),transparent_35%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl space-y-8 pb-24 md:pb-8">
+      <div className="relative mx-auto max-w-6xl space-y-8 pb-36 md:pb-16">
         {/* Hero Header */}
         <motion.header 
           className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-10"

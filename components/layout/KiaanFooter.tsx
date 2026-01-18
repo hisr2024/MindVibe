@@ -148,10 +148,10 @@ export function KiaanFooter() {
   };
 
   const quickPrompts = [
-    { emoji: '😰', text: 'Calm anxiety', prompt: "I'm feeling anxious and need help finding calm." },
-    { emoji: '💔', text: 'Heavy heart', prompt: 'My heart feels heavy today. I need support.' },
-    { emoji: '🧭', text: 'Find clarity', prompt: 'I need clarity on a situation.' },
-    { emoji: '🕊️', text: 'Find peace', prompt: 'I need to find quiet peace within myself.' },
+    { id: 'anxiety', emoji: '😰', text: t('kiaan.quickPrompts.scenarios.anxiety.label', 'Calm anxiety'), prompt: t('kiaan.quickPrompts.scenarios.anxiety.prompt', "I'm feeling anxious and need help finding calm.") },
+    { id: 'heavy', emoji: '💔', text: t('kiaan.quickPrompts.scenarios.heavy.label', 'Heavy heart'), prompt: t('kiaan.quickPrompts.scenarios.heavy.prompt', 'My heart feels heavy today. I need support.') },
+    { id: 'clarity', emoji: '🧭', text: t('kiaan.quickPrompts.scenarios.clarity.label', 'Find clarity'), prompt: t('kiaan.quickPrompts.scenarios.clarity.prompt', 'I need clarity on a situation.') },
+    { id: 'peace', emoji: '🕊️', text: t('kiaan.quickPrompts.scenarios.peace.label', 'Find peace'), prompt: t('kiaan.quickPrompts.scenarios.peace.prompt', 'I need to find quiet peace within myself.') },
   ];
 
   if (shouldHide) return null;
