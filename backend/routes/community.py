@@ -448,7 +448,7 @@ async def create_post(
             'success': False,
             'moderation': moderation_report.dict(),
             'crisis_detected': True,
-            'crisis_resources': get_crisis_resources(),
+            'crisis_resources': await get_crisis_resources(),
             'message': 'Crisis keywords detected. Please reach out for immediate support.'
         }
 
