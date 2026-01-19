@@ -1,8 +1,8 @@
 /**
  * MindVibe Tool Configuration
  *
- * Configuration data for all 16 tools in the MindVibe ecosystem.
- * Organized by category: Core, Guidance, Karma, and Quick Access.
+ * Configuration data for all tools in the MindVibe ecosystem.
+ * Organized by category: Core, Community & Insights, Guidance, Karma, and Quick Access.
  */
 
 export type ToolBadge = 'new' | 'premium' | 'beta'
@@ -60,6 +60,39 @@ export const CORE_TOOLS: ToolConfig[] = [
     description: 'Emotional patterns',
     gradient: 'from-teal-400/30 to-cyan-400/30',
     href: '/dashboard/analytics',
+  },
+]
+
+/**
+ * Community & Insights Tools - Social features and advanced analytics
+ */
+export const COMMUNITY_TOOLS: ToolConfig[] = [
+  {
+    id: 'community-circles',
+    icon: '🤝',
+    title: 'Community Circles',
+    description: 'Anonymous peer support',
+    gradient: 'from-pink-400/30 to-rose-400/30',
+    href: '/community',
+    badge: 'new',
+  },
+  {
+    id: 'ai-insights',
+    icon: '🧠',
+    title: 'AI Insights',
+    description: 'Predictive wellness AI',
+    gradient: 'from-purple-400/30 to-pink-400/30',
+    href: '/analytics',
+    badge: 'new',
+  },
+  {
+    id: 'emotion-themes',
+    icon: '🎨',
+    title: 'Emotion Themes',
+    description: 'Mood-adaptive interface',
+    gradient: 'from-indigo-400/30 to-purple-400/30',
+    href: '/settings#themes',
+    badge: 'new',
   },
 ]
 
@@ -190,6 +223,11 @@ export const TOOLS_BY_CATEGORY: ToolCategory[] = [
     tools: CORE_TOOLS,
   },
   {
+    id: 'community',
+    name: 'Community & Insights',
+    tools: COMMUNITY_TOOLS,
+  },
+  {
     id: 'guidance',
     name: 'Guidance Engines',
     tools: GUIDANCE_TOOLS,
@@ -207,10 +245,11 @@ export const TOOLS_BY_CATEGORY: ToolCategory[] = [
 ]
 
 /**
- * All 16 tools as a flat array
+ * All tools as a flat array
  */
 export const ALL_TOOLS: ToolConfig[] = [
   ...CORE_TOOLS,
+  ...COMMUNITY_TOOLS,
   ...GUIDANCE_TOOLS,
   ...KARMA_TOOLS,
   ...QUICK_ACCESS_TOOLS,
