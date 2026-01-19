@@ -59,7 +59,7 @@
     "@types/dom-speech-recognition": "^0.0.7",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.0",
-    "@types/papaparse": "^5.5.1",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
