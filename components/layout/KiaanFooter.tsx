@@ -205,7 +205,7 @@ export function KiaanFooter() {
   };
 
   return (
-    <div className="fixed bottom-[76px] right-2 z-[45] p-2 md:bottom-4 md:right-4 md:p-0">
+    <div className="fixed bottom-[76px] right-2 z-[60] p-2 md:bottom-8 md:right-8 md:p-0">
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -213,7 +213,7 @@ export function KiaanFooter() {
             initial="collapsed"
             animate="expanded"
             exit="collapsed"
-            className="mb-4 w-[340px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-180px)] overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900/98 via-slate-900/95 to-slate-900/98 shadow-2xl shadow-orange-500/20 backdrop-blur-xl md:w-[380px] md:max-h-[500px]"
+            className="mb-4 w-[340px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-180px)] overflow-hidden rounded-3xl border border-orange-500/30 bg-gradient-to-br from-slate-900/98 via-slate-900/95 to-slate-900/98 shadow-2xl shadow-orange-500/30 backdrop-blur-xl md:w-[420px] md:max-h-[560px] md:rounded-[2rem]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
@@ -242,7 +242,7 @@ export function KiaanFooter() {
             </div>
 
             {/* Messages */}
-            <div className="max-h-[calc(100vh-320px)] min-h-[200px] overflow-y-auto p-4 space-y-3 md:max-h-[360px] md:min-h-[280px]">
+            <div className="max-h-[calc(100vh-320px)] min-h-[200px] overflow-y-auto p-4 space-y-3 md:max-h-[420px] md:min-h-[320px] scrollbar-thin scrollbar-thumb-orange-500/20 scrollbar-track-transparent">
               {messages.length === 0 ? (
                 <div className="text-center py-8 space-y-4">
                   <div className="text-4xl">🕉️</div>
@@ -355,15 +355,15 @@ export function KiaanFooter() {
         )}
       </AnimatePresence>
 
-      {/* Toggle Button */}
+      {/* Toggle Button - OM Icon */}
       <motion.button
         onClick={() => {
           setIsExpanded(!isExpanded);
           triggerHaptic('medium');
         }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        animate={isExpanded ? {} : { 
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        animate={isExpanded ? {} : {
           boxShadow: [
             '0 20px 60px rgba(255, 115, 39, 0.4)',
             '0 20px 80px rgba(255, 115, 39, 0.6)',
@@ -377,7 +377,7 @@ export function KiaanFooter() {
             ease: 'easeInOut',
           },
         }}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl shadow-orange-500/40 transition-shadow hover:shadow-orange-500/60"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 shadow-2xl shadow-orange-500/50 transition-all hover:shadow-orange-500/70 md:h-16 md:w-16"
         aria-label={isExpanded ? 'Close KIAAN chat' : 'Open KIAAN chat'}
       >
         <AnimatePresence mode="wait">
@@ -387,7 +387,7 @@ export function KiaanFooter() {
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
-              className="h-6 w-6 text-white"
+              className="h-6 w-6 text-white md:h-7 md:w-7"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -400,7 +400,7 @@ export function KiaanFooter() {
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
-              className="text-2xl"
+              className="text-2xl md:text-3xl"
             >
               🕉️
             </motion.div>

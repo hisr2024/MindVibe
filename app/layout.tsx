@@ -6,7 +6,6 @@ import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
-import { ChatFooter } from '@/components/layout/ChatFooter'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
 
@@ -61,8 +60,7 @@ export default function RootLayout({
             </div>
             {/* Mobile bottom navigation */}
             <MobileNav />
-            {/* Floating chat widget */}
-            <ChatFooter />
+            {/* OM floating chat widget - unified for mobile and desktop */}
             <KiaanFooter />
           </Providers>
         </ClientLayout>
