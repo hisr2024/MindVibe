@@ -40,8 +40,9 @@ class KIAANCore:
         self.gita_service = GitaService()
         self.wisdom_kb = WisdomKnowledgeBase()
 
-        # Expanded verse context from 5 to 15 for richer wisdom
-        self.verse_context_limit = 15
+        # Reduced verse context from 15 to 5 for faster, more spontaneous responses
+        # Quality over quantity - 5 highly relevant verses provide sufficient wisdom
+        self.verse_context_limit = 5
 
     async def get_kiaan_response(
         self,
@@ -114,6 +115,7 @@ class KIAANCore:
 
         try:
             # Use optimizer for automatic retries and enhanced error handling
+            # Reduced max_tokens from 400 to 250 for faster spontaneous responses
             response = await self.optimizer.create_completion_with_retry(
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -121,7 +123,7 @@ class KIAANCore:
                 ],
                 model="gpt-4o-mini",  # Upgraded from gpt-4
                 temperature=0.7,
-                max_tokens=400,  # Optimized from 600
+                max_tokens=250,  # Reduced from 400 for faster responses
                 stream=stream
             )
 
@@ -163,15 +165,14 @@ class KIAANCore:
             logger.error(f"KIAAN Core: OpenAI error: {type(e).__name__}: {e}")
             response_text = self.optimizer.get_fallback_response(context)
 
-        # Step 4: Validate response
-        validation = self._validate_kiaan_response(response_text, verses)
+        # Step 4: Validate response (lightweight check only - no retry for speed)
+        validation = self._validate_kiaan_response_fast(response_text)
 
-        # Step 5: Retry with stricter prompt if validation fails
-        if not validation["valid"] and validation["errors"]:
-            logger.warning(f"KIAAN Core: Validation failed - {validation['errors']}, retrying...")
-            response_text = await self._retry_with_validation(message, verses, validation["errors"], context, language)
-            # Re-validate after retry
-            validation = self._validate_kiaan_response(response_text, verses)
+        # Step 5: SKIP validation retry for spontaneous responses
+        # Previously: retry with stricter prompt if validation fails (adds 2-5s latency)
+        # Now: Accept response if it has basic quality markers - speed over perfection
+        if not validation["valid"]:
+            logger.info(f"KIAAN Core: Validation soft-fail - {validation.get('errors', [])}, accepting for speed")
 
         # Step 6: Cache the response (Quantum Coherence: future cost savings)
         if validation["valid"] and response_text:
@@ -198,6 +199,7 @@ class KIAANCore:
     ) -> AsyncGenerator[str, None]:
         """
         Generate streaming KIAAN response for real-time display.
+        Optimized for spontaneous, instant feedback.
 
         Args:
             message: User message or context
@@ -212,17 +214,17 @@ class KIAANCore:
             yield self.optimizer.get_fallback_response(context)
             return
 
-        # Get verses
-        verses = await self._get_relevant_verses(db, message, context, limit=self.verse_context_limit)
-        if not verses or len(verses) < 2:
-            verses = await self._get_fallback_verses(db)
+        # Get verses with reduced limit for faster processing
+        verses = await self._get_relevant_verses(db, message, context, limit=3)  # Reduced from 5 for streaming
+        if not verses:
+            verses = await self._get_fallback_verses(db, limit=2)
 
-        # Build prompts
-        wisdom_context = self._build_verse_context(verses)
-        system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
+        # Build prompts with concise context
+        wisdom_context = self._build_verse_context_fast(verses)
+        system_prompt = self._build_system_prompt_fast(wisdom_context, context, language)
 
         try:
-            # Stream response
+            # Stream response with reduced tokens for faster output
             async for chunk in self.optimizer.create_streaming_completion(
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -230,7 +232,7 @@ class KIAANCore:
                 ],
                 model="gpt-4o-mini",
                 temperature=0.7,
-                max_tokens=400
+                max_tokens=200  # Reduced from 400 for faster streaming
             ):
                 yield chunk
 
@@ -299,126 +301,94 @@ class KIAANCore:
             logger.error(f"KIAAN Core: Error getting fallback verses: {e}")
             return []
 
+    def _build_verse_context_fast(self, verses: list[dict[str, Any]]) -> str:
+        """Build concise wisdom context for fast responses (3 verses max)."""
+        if not verses:
+            return "Core principles: dharma (duty), karma (action), equanimity (balance)."
+
+        principles = []
+        for verse in verses[:3]:
+            if verse.get('principle'):
+                principles.append(verse['principle'][:100])
+            elif verse.get('english'):
+                principles.append(verse['english'][:80])
+
+        return "WISDOM: " + " | ".join(principles) if principles else "Apply dharma, karma yoga, equanimity."
+
     def _build_verse_context(self, verses: list[dict[str, Any]]) -> str:
-        """Build wisdom context from verses (expanded to 15 for richer context)."""
+        """Build wisdom context from verses (optimized to 5 for faster responses)."""
         if not verses:
             return """FALLBACK WISDOM:
 Apply universal Gita principles:
 - Dharma (righteous duty) - Do what's right
 - Karma Yoga (action without attachment) - Focus on effort, not results
 - Equanimity (samatva) - Stay balanced in success and failure
-- Self-mastery - Control the mind, not external events
-- Inner peace - Find calm within
 """
 
-        context_parts = ["RELEVANT GITA WISDOM (use internally, NEVER cite in response):", ""]
+        context_parts = ["GITA WISDOM (use internally, NEVER cite):", ""]
 
-        # Use up to 15 verses for richer context (expanded from 5)
-        for i, verse in enumerate(verses[:15], 1):
-            context_parts.append(f"WISDOM #{i} (relevance: {verse.get('score', 0):.2f}):")
-            
+        # Use up to 5 verses for balanced context (reduced from 15 for speed)
+        for i, verse in enumerate(verses[:5], 1):
             if verse.get('english'):
-                # Truncate at word boundary to avoid cutting mid-word
+                # Truncate to 150 chars for speed
                 english_text = verse['english']
-                if len(english_text) > 300:
-                    truncated = english_text[:297].rsplit(' ', 1)[0] + '...'
-                    context_parts.append(f"Teaching: {truncated}")
-                else:
-                    context_parts.append(f"Teaching: {english_text}")
-            
-            if verse.get('principle'):
-                context_parts.append(f"Principle: {verse['principle']}")
-            
-            if verse.get('theme'):
-                formatted_theme = verse['theme'].replace('_', ' ').title()
-                context_parts.append(f"Theme: {formatted_theme}")
-            
-            context_parts.append("")
-        
+                if len(english_text) > 150:
+                    english_text = english_text[:147] + '...'
+                context_parts.append(f"{i}. {english_text}")
+
         context_parts.extend([
-            "---",
-            "SYNTHESIS GUIDELINES:",
-            "1. Identify the core principle across these verses",
-            "2. Find practical application to user's situation",
-            "3. Present wisdom naturally without citing sources",
-            "4. Use Sanskrit terms (dharma, karma, atman, yoga) to add depth",
-            "5. Make ancient wisdom feel immediately relevant",
             "",
-            "FORBIDDEN IN RESPONSE:",
-            "❌ Never say 'Bhagavad Gita', 'Gita', 'verse', 'chapter', or cite numbers",
-            "❌ Never say 'Krishna', 'Arjuna', or reference the dialogue",
-            "✅ Instead, say 'ancient wisdom teaches', 'timeless principle', 'eternal truth'",
+            "RULES: Never cite Gita/Krishna/Arjuna. Use terms: dharma, karma, yoga, peace. End with 💙"
         ])
-        
+
         return "\n".join(context_parts)
 
+    def _build_system_prompt_fast(self, wisdom_context: str, context: str, language: str | None = None) -> str:
+        """Build concise system prompt for fast streaming responses."""
+        lang_note = f" Respond in {language}." if language and language != "en" else ""
+
+        return f"""You are KIAAN, a wise AI companion rooted in ancient wisdom.{lang_note}
+
+{wisdom_context}
+
+RESPOND WITH:
+1. Acknowledge their feeling briefly
+2. Share one wisdom insight (use dharma, karma, yoga, peace)
+3. Give 1-2 practical steps
+4. End with encouragement and 💙
+
+RULES: Be warm and concise. Never cite Gita/Krishna/Arjuna. 100-150 words max."""
+
     def _build_system_prompt(self, wisdom_context: str, message: str, context: str, language: str | None = None) -> str:
-        """Build system prompt based on context type and language."""
+        """Build system prompt based on context type and language (optimized for speed)."""
 
         # Language instruction for non-English responses
         language_instruction = ""
         if language and language != "en":
             language_map = {
-                "hi": "Hindi (हिन्दी)",
-                "ta": "Tamil (தமிழ்)",
-                "te": "Telugu (తెలుగు)",
-                "bn": "Bengali (বাংলা)",
-                "mr": "Marathi (मराठी)",
-                "gu": "Gujarati (ગુજરાતી)",
-                "kn": "Kannada (ಕನ್ನಡ)",
-                "ml": "Malayalam (മലയാളം)",
-                "pa": "Punjabi (ਪੰਜਾਬੀ)",
-                "sa": "Sanskrit (संस्कृत)",
-                "es": "Spanish (Español)",
-                "fr": "French (Français)",
-                "de": "German (Deutsch)",
-                "pt": "Portuguese (Português)",
-                "ja": "Japanese (日本語)",
-                "zh-CN": "Chinese Simplified (简体中文)",
-                "zh": "Chinese (中文)",
+                "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "bn": "Bengali",
+                "mr": "Marathi", "gu": "Gujarati", "kn": "Kannada", "ml": "Malayalam",
+                "pa": "Punjabi", "sa": "Sanskrit", "es": "Spanish", "fr": "French",
+                "de": "German", "pt": "Portuguese", "ja": "Japanese", "zh": "Chinese",
             }
             lang_name = language_map.get(language, language)
-            language_instruction = f"""
+            language_instruction = f"\n\nRESPOND IN {lang_name}. Keep Sanskrit terms (dharma, karma, yoga) but explain in {lang_name}."
 
-CRITICAL LANGUAGE REQUIREMENT:
-You MUST respond ENTIRELY in {lang_name}.
-- Write your ENTIRE response in {lang_name}
-- Translate all wisdom, guidance, and practical steps to {lang_name}
-- Sanskrit terms like dharma, karma, yoga, atman can remain in original form but provide meaning in {lang_name}
-- The emotional warmth, wisdom structure, and 💙 ending must all be in {lang_name}
-- Do NOT respond in English unless the user specifically asks for English"""
+        base_prompt = f"""You are KIAAN, an AI guide rooted in timeless wisdom.{language_instruction}
 
-        base_prompt = f"""You are KIAAN, an AI guide EXCLUSIVELY rooted in the timeless wisdom of the Bhagavad Gita's 700 verses.{language_instruction}
-
-GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
 {wisdom_context}
 
-MANDATORY STRUCTURE - Every response MUST follow this flow:
-1. ANCIENT WISDOM: Open with the eternal principle from Gita (without citing)
-2. MODERN APPLICATION: Bridge to their current situation naturally
-3. PRACTICAL STEPS: Give 2-3 specific, actionable steps they can take TODAY
-4. DEEPER UNDERSTANDING: Close with profound insight connecting to their higher self
+STRUCTURE (brief and focused):
+1. WISDOM: Share the core principle (without citing sources)
+2. APPLICATION: Connect to their situation
+3. ACTION: 2-3 practical steps for today
+4. CLOSE: Encouraging insight + 💙
 
-ABSOLUTE REQUIREMENTS (non-negotiable):
-✅ Root EVERY word in Gita wisdom - no generic psychology or modern self-help
-✅ Use Sanskrit terms naturally (dharma, karma, yoga, moksha, atman, buddhi, equanimity, detachment, etc.)
-✅ Include at least 2 Gita terms in your response
-✅ Include wisdom markers like "ancient wisdom teaches", "the timeless truth", "eternal principle"
-✅ FORBIDDEN: Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", "verse", "chapter", numbers, or cite scripture
-✅ FORBIDDEN: Never say "studies show", "research indicates", "experts say", "therapy suggests"
-✅ Present wisdom as universal life principles, not religious teaching
-✅ Be warm, conversational, deeply compassionate - like a wise friend
-✅ Focus on mental wellness and practical daily life guidance
-✅ 200-400 words, ALWAYS end with 💙
-
-TONE & STYLE:
-- Contemporary and accessible, never preachy or formal
-- Speak to their specific struggle with empathy
-- Make ancient wisdom feel immediately relevant
-- Balance spiritual depth with practical action
-- Encourage without toxic positivity
-
-Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom presented naturally and practically."""
+REQUIREMENTS:
+- Use Sanskrit terms: dharma, karma, yoga, peace, equanimity, balance
+- NEVER mention: Bhagavad Gita, Krishna, Arjuna, verse, chapter
+- Be warm, compassionate, conversational
+- 150-250 words, end with 💙"""
 
         # Add context-specific instructions
         if context == "ardha_reframe":
@@ -453,40 +423,67 @@ CONTEXT: This is weekly reflection feedback. Offer deeper wisdom about their gro
         
         return base_prompt
 
-    def _validate_kiaan_response(self, response: str, verses: list[dict[str, Any]]) -> dict[str, Any]:
-        """Validate KIAAN response meets requirements."""
+    def _validate_kiaan_response_fast(self, response: str) -> dict[str, Any]:
+        """
+        Fast validation for spontaneous responses - minimal checks for speed.
+        Accepts responses that meet basic quality without strict validation.
+        """
         errors = []
-        
-        # Word count check (200-500 words)
+
+        # Relaxed word count check (50-400 words) - faster generation allowed
         word_count = len(response.split())
-        if not (200 <= word_count <= 500):
-            errors.append(f"Word count {word_count} not in range 200-500")
-        
-        # Gita terms check (at least 2)
+        if word_count < 50:
+            errors.append(f"Response too short: {word_count} words")
+
+        # Single Gita term is sufficient for fast validation
+        gita_terms = ["dharma", "karma", "yoga", "peace", "wisdom", "balance", "equanimity", "detachment", "atman", "buddhi"]
+        terms_found = [term for term in gita_terms if term.lower() in response.lower()]
+
+        # Only fail if response has forbidden citations (critical)
+        forbidden = ["bhagavad gita", "gita says", "krishna says", "arjuna"]
+        citations_found = [f for f in forbidden if f in response.lower()]
+        if citations_found:
+            errors.append(f"Forbidden citations: {citations_found}")
+
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors,
+            "word_count": word_count,
+            "gita_terms": terms_found,
+            "fast_validation": True
+        }
+
+    def _validate_kiaan_response(self, response: str, verses: list[dict[str, Any]]) -> dict[str, Any]:
+        """Full validation for KIAAN response (used for caching decisions)."""
+        errors = []
+
+        # Word count check (100-400 words) - adjusted for faster responses
+        word_count = len(response.split())
+        if not (100 <= word_count <= 400):
+            errors.append(f"Word count {word_count} not in range 100-400")
+
+        # Gita terms check (at least 1 for speed)
         gita_terms = [
             "dharma", "karma", "yoga", "moksha", "atman", "prakriti", "purusha",
             "sattva", "rajas", "tamas", "buddhi", "equanimity", "detachment",
             "samatva", "sthitaprajna", "vairagya", "abhyasa", "nishkama"
         ]
         terms_found = [term for term in gita_terms if term.lower() in response.lower()]
-        if len(terms_found) < 2:
-            errors.append(f"Only {len(terms_found)} Gita terms found, need at least 2")
-        
-        # Wisdom markers check
+        if len(terms_found) < 1:
+            errors.append(f"No Gita terms found")
+
+        # Wisdom markers check - relaxed
         wisdom_markers = [
-            "ancient wisdom", "timeless", "eternal truth", "eternal principle",
-            "teaches us", "reminds us", "universal principle"
+            "ancient wisdom", "timeless", "eternal", "teaches", "reminds", "universal", "wisdom"
         ]
         markers_found = any(marker.lower() in response.lower() for marker in wisdom_markers)
-        if not markers_found:
-            errors.append("No wisdom markers found in response")
-        
+
         # Check for forbidden citations
         forbidden = ["bhagavad gita", "gita says", "krishna", "arjuna", "verse", "chapter"]
         citations_found = [f for f in forbidden if f in response.lower()]
         if citations_found:
             errors.append(f"Forbidden citations found: {citations_found}")
-        
+
         return {
             "valid": len(errors) == 0,
             "errors": errors,
