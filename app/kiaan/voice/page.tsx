@@ -1,0 +1,716 @@
+'use client'
+
+/**
+ * KIAAN Elite Voice AI Page
+ *
+ * Siri/Alexa-class voice interface with:
+ * - Wake word detection ("Hey KIAAN")
+ * - Real-time speech-to-text
+ * - Offline-capable AI responses
+ * - Neural text-to-speech
+ * - Beautiful animated visualizations
+ *
+ * Best-in-class voice experience for Gita wisdom.
+ */
+
+import { useState, useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
+import { useLanguage } from '@/hooks/useLanguage'
+import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { useWakeWord } from '@/hooks/useWakeWord'
+
+// Types
+type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+  isOffline?: boolean
+}
+
+/**
+ * Elite Voice Page Component
+ */
+export default function EliteVoicePage() {
+  // State
+  const [state, setState] = useState<VoiceState>('idle')
+  const [transcript, setTranscript] = useState('')
+  const [interimTranscript, setInterimTranscript] = useState('')
+  const [response, setResponse] = useState('')
+  const [isOnline, setIsOnline] = useState(true)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [wakeWordEnabled, setWakeWordEnabled] = useState(false)
+  const [servicesReady, setServicesReady] = useState(false)
+
+  // Refs
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const synthesisRef = useRef<SpeechSynthesis | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Hooks
+  const { t, language } = useLanguage()
+
+  // Voice input hook
+  const {
+    isListening,
+    transcript: voiceTranscript,
+    interimTranscript: voiceInterim,
+    isSupported: voiceSupported,
+    error: voiceError,
+    startListening,
+    stopListening,
+    resetTranscript
+  } = useVoiceInput({
+    language: language || 'en',
+    onTranscript: (text, isFinal) => {
+      if (isFinal) {
+        setTranscript(text)
+        handleUserQuery(text)
+      } else {
+        setInterimTranscript(text)
+      }
+    },
+    onError: (err) => {
+      setError(err)
+      setState('error')
+    }
+  })
+
+  // Wake word hook
+  const {
+    isActive: wakeWordActive,
+    isSupported: wakeWordSupported,
+    error: wakeWordError,
+    start: startWakeWord,
+    stop: stopWakeWord
+  } = useWakeWord({
+    language: language || 'en',
+    onWakeWordDetected: handleWakeWordDetected,
+    onError: (err) => {
+      console.warn('Wake word error:', err)
+    }
+  })
+
+  // Initialize services
+  useEffect(() => {
+    // Check online status
+    setIsOnline(navigator.onLine)
+    window.addEventListener('online', () => setIsOnline(true))
+    window.addEventListener('offline', () => setIsOnline(false))
+
+    // Initialize speech synthesis
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      synthesisRef.current = window.speechSynthesis
+    }
+
+    // Mark services as ready
+    setServicesReady(true)
+
+    return () => {
+      window.removeEventListener('online', () => setIsOnline(true))
+      window.removeEventListener('offline', () => setIsOnline(false))
+    }
+  }, [])
+
+  // Auto-scroll messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Handle wake word detection
+  function handleWakeWordDetected() {
+    // Play activation sound
+    playActivationSound()
+
+    // Haptic feedback
+    if ('vibrate' in navigator) {
+      navigator.vibrate([50, 100, 50])
+    }
+
+    // Start listening
+    setState('listening')
+    resetTranscript()
+    startListening()
+  }
+
+  // Play activation sound
+  function playActivationSound() {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioContextClass) return
+
+      const ctx = new AudioContextClass()
+      const oscillator = ctx.createOscillator()
+      const gain = ctx.createGain()
+
+      oscillator.connect(gain)
+      gain.connect(ctx.destination)
+
+      oscillator.frequency.value = 800
+      oscillator.type = 'sine'
+
+      gain.gain.setValueAtTime(0.3, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15)
+
+      oscillator.start(ctx.currentTime)
+      oscillator.stop(ctx.currentTime + 0.15)
+
+      setTimeout(() => ctx.close(), 200)
+    } catch (e) {
+      // Silent fail
+    }
+  }
+
+  // Handle user query
+  async function handleUserQuery(query: string) {
+    if (!query.trim()) {
+      setState(wakeWordEnabled ? 'wakeword' : 'idle')
+      return
+    }
+
+    // Add user message
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: query,
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, userMessage])
+
+    // Start thinking
+    setState('thinking')
+    setTranscript('')
+    setInterimTranscript('')
+
+    try {
+      let responseText: string
+
+      if (isOnline) {
+        // Online: use API
+        const res = await fetch('/api/voice/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query,
+            language: language || 'en',
+            history: messages.slice(-6)
+          })
+        })
+
+        if (!res.ok) {
+          throw new Error('API request failed')
+        }
+
+        const data = await res.json()
+        responseText = data.response || "I'm here for you. Let's try again."
+      } else {
+        // Offline: use local templates
+        responseText = await generateOfflineResponse(query)
+      }
+
+      // Add assistant message
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: responseText,
+        timestamp: new Date(),
+        isOffline: !isOnline
+      }
+      setMessages(prev => [...prev, assistantMessage])
+      setResponse(responseText)
+
+      // Speak response
+      await speakResponse(responseText)
+
+    } catch (err) {
+      console.error('Query error:', err)
+
+      // Fallback response
+      const fallbackResponse = "I'm here with you. Could you try asking that again?"
+      const errorMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: fallbackResponse,
+        timestamp: new Date(),
+        isOffline: true
+      }
+      setMessages(prev => [...prev, errorMessage])
+
+      await speakResponse(fallbackResponse)
+    }
+  }
+
+  // Generate offline response (simplified version)
+  async function generateOfflineResponse(query: string): Promise<string> {
+    // Simple concern detection
+    const queryLower = query.toLowerCase()
+
+    if (queryLower.includes('anxious') || queryLower.includes('worried') || queryLower.includes('nervous')) {
+      return "I hear your anxiety. Ancient wisdom teaches us that peace comes from focusing on what you can control - your actions - not the outcomes you fear. Take a moment to breathe deeply. First, take four slow breaths. Then, focus on what's actually in your control right now. Finally, take one small action toward what matters. What feels most urgent to address?"
+    }
+
+    if (queryLower.includes('stressed') || queryLower.includes('overwhelmed')) {
+      return "I sense you're feeling overwhelmed. The Gita reminds us that when you try to do everything at once, you do nothing well. Your path forward is singular focus. First, identify the one thing that matters most right now. Then, let go of attachment to everything else temporarily. Finally, give that one thing your full attention. What's the most important thing you could focus on?"
+    }
+
+    if (queryLower.includes('sad') || queryLower.includes('depressed') || queryLower.includes('hopeless')) {
+      return "I hear the heaviness in your words. When life feels dark, it's hard to see the light within you - but it's there. The ancient wisdom teaches that feelings are transient, like clouds passing through the sky. First, acknowledge what you're feeling without judgment. Then, do one small act of self-care - even opening a window counts. Finally, remember that you've survived every difficult moment before. How long have you been feeling this way?"
+    }
+
+    if (queryLower.includes('angry') || queryLower.includes('frustrated') || queryLower.includes('mad')) {
+      return "I can feel the intensity of what you're experiencing. Anger often protects something vulnerable underneath. The Gita teaches that from attachment, desire is born, and from desire, anger arises. First, count slowly to ten, feeling your breath. Then, ask yourself what you're really protecting - what feels threatened? Finally, consider: what outcome do you actually want here? What happened that triggered this?"
+    }
+
+    if (queryLower.includes('afraid') || queryLower.includes('scared') || queryLower.includes('fear')) {
+      return "Fear is a natural response, trying to protect you. But sometimes it protects us from what we actually need to face. The Gita says: Do not fear. Abandon all varieties of duty and just surrender unto Me. I shall deliver you. First, name your fear specifically - vague fears are larger than specific ones. Then, ask: what's the worst case, and could I survive it? Finally, take one tiny step toward what scares you. What specifically are you most afraid of?"
+    }
+
+    if (queryLower.includes('purpose') || queryLower.includes('meaning') || queryLower.includes('lost')) {
+      return "The search for meaning is one of life's most important journeys. The Gita teaches that you must elevate yourself by your own mind. First, write down ten things that bring you joy, no matter how small. Then, reflect on moments when you felt most alive - what do they have in common? Finally, try something new this week. Purpose often hides in unexplored territory. What activities make you lose track of time?"
+    }
+
+    // Default response
+    return "Thank you for sharing what's on your mind. Ancient wisdom teaches that all challenges contain the seeds of growth. First, take a few moments to breathe and center yourself. Then, focus on what's in your control and release what isn't. Finally, take one small action toward what matters to you. What would be most helpful for you right now?"
+  }
+
+  // Speak response using TTS
+  async function speakResponse(text: string): Promise<void> {
+    setState('speaking')
+
+    return new Promise((resolve) => {
+      if (!synthesisRef.current) {
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        resolve()
+        return
+      }
+
+      // Process text for natural speech
+      const processedText = text
+        .replace(/\.\s+/g, '. ... ')
+        .replace(/\?\s+/g, '? ... ')
+        .replace(/First,/g, '... First, ...')
+        .replace(/Then,/g, '... Then, ...')
+        .replace(/Finally,/g, '... Finally, ...')
+
+      const utterance = new SpeechSynthesisUtterance(processedText)
+      utterance.lang = language || 'en-US'
+      utterance.rate = 0.95
+      utterance.pitch = 1.0
+      utterance.volume = 1.0
+
+      // Select voice
+      const voices = synthesisRef.current.getVoices()
+      const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
+      if (langVoices.length > 0) {
+        // Prefer local/enhanced voices
+        const localVoice = langVoices.find(v => v.localService)
+        utterance.voice = localVoice || langVoices[0]
+      }
+
+      utterance.onend = () => {
+        setResponse('')
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+
+        // Auto-resume listening in hands-free mode
+        if (wakeWordEnabled) {
+          setTimeout(() => {
+            setState('listening')
+            startListening()
+          }, 1000)
+        }
+
+        resolve()
+      }
+
+      utterance.onerror = () => {
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        resolve()
+      }
+
+      synthesisRef.current.speak(utterance)
+    })
+  }
+
+  // Stop speaking
+  function stopSpeaking() {
+    if (synthesisRef.current) {
+      synthesisRef.current.cancel()
+    }
+    setState(wakeWordEnabled ? 'wakeword' : 'idle')
+  }
+
+  // Toggle wake word detection
+  function toggleWakeWord() {
+    if (wakeWordEnabled) {
+      stopWakeWord()
+      setWakeWordEnabled(false)
+      setState('idle')
+    } else {
+      startWakeWord()
+      setWakeWordEnabled(true)
+      setState('wakeword')
+    }
+  }
+
+  // Manual activation
+  function activateManually() {
+    handleWakeWordDetected()
+  }
+
+  // Clear conversation
+  function clearConversation() {
+    setMessages([])
+    setTranscript('')
+    setInterimTranscript('')
+    setResponse('')
+    setError(null)
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/kiaan/chat"
+              className="rounded-xl border border-orange-500/30 bg-white/5 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
+            >
+              Text Chat
+            </Link>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              KIAAN Voice
+            </h1>
+          </div>
+
+          {/* Status Indicators */}
+          <div className="flex items-center gap-3">
+            {/* Online/Offline */}
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+              isOnline
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-amber-500/20 text-amber-400'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                isOnline ? 'bg-emerald-400' : 'bg-amber-400'
+              } animate-pulse`} />
+              <span className="text-sm font-medium">
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+
+            {/* Wake Word Toggle */}
+            <button
+              onClick={toggleWakeWord}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                wakeWordEnabled
+                  ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
+                  : 'bg-white/5 text-orange-100/60 border border-white/10'
+              }`}
+            >
+              <span>{wakeWordEnabled ? '👂' : '🔇'}</span>
+              <span className="text-sm font-medium">
+                {wakeWordEnabled ? 'Wake Word On' : 'Wake Word Off'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Voice Interface */}
+      <div className="container mx-auto px-4 pb-8">
+        <div className="max-w-4xl mx-auto">
+
+          {/* Central Voice Visual */}
+          <div className="relative h-[400px] flex items-center justify-center">
+            <VoiceVisualizer state={state} />
+          </div>
+
+          {/* State Label & Transcript */}
+          <div className="text-center mb-8">
+            <StateLabel state={state} />
+
+            {/* Live Transcript */}
+            {(interimTranscript || voiceInterim) && state === 'listening' && (
+              <div className="mt-4 text-orange-200/80 text-lg animate-pulse">
+                {interimTranscript || voiceInterim}...
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="mt-4 px-4 py-2 rounded-lg bg-red-500/20 text-red-300 text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* Manual Controls */}
+          <div className="flex justify-center gap-4 mb-8">
+            {state === 'idle' && !wakeWordEnabled && (
+              <button
+                onClick={activateManually}
+                disabled={!voiceSupported}
+                className="px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+              >
+                Tap to Speak
+              </button>
+            )}
+
+            {state === 'wakeword' && (
+              <button
+                onClick={activateManually}
+                className="px-8 py-4 rounded-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-slate-900 font-bold text-lg shadow-lg shadow-orange-500/20 transition-all hover:scale-105"
+              >
+                Or Tap to Speak
+              </button>
+            )}
+
+            {state === 'listening' && (
+              <button
+                onClick={stopListening}
+                className="px-8 py-4 rounded-full bg-red-500 text-white font-bold text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
+              >
+                Done Speaking
+              </button>
+            )}
+
+            {state === 'speaking' && (
+              <button
+                onClick={stopSpeaking}
+                className="px-8 py-4 rounded-full bg-red-500 text-white font-bold text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
+              >
+                Stop
+              </button>
+            )}
+          </div>
+
+          {/* Conversation History */}
+          {messages.length > 0 && (
+            <div className="rounded-3xl border border-orange-500/20 bg-slate-900/50 backdrop-blur-sm p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-orange-100">Conversation</h2>
+                <button
+                  onClick={clearConversation}
+                  className="text-sm text-orange-300/60 hover:text-orange-300 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+
+              <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                {messages.map((msg) => (
+                  <MessageBubble key={msg.id} message={msg} />
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div className="text-center text-orange-100/50 text-sm">
+            {wakeWordEnabled ? (
+              <p>Say &quot;Hey KIAAN&quot; or tap the button to start</p>
+            ) : (
+              <p>Tap the button above to speak to KIAAN</p>
+            )}
+            <p className="mt-1">KIAAN uses ancient Gita wisdom to guide you</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+/**
+ * Voice Visualizer Component
+ */
+function VoiceVisualizer({ state }: { state: VoiceState }) {
+  return (
+    <div className="relative">
+      {state === 'idle' && <IdleAnimation />}
+      {state === 'wakeword' && <WakeWordAnimation />}
+      {state === 'listening' && <ListeningAnimation />}
+      {state === 'thinking' && <ThinkingAnimation />}
+      {state === 'speaking' && <SpeakingAnimation />}
+      {state === 'error' && <ErrorAnimation />}
+    </div>
+  )
+}
+
+function IdleAnimation() {
+  return (
+    <div className="relative w-64 h-64">
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-800/50 to-slate-700/50 flex items-center justify-center">
+        <span className="text-6xl opacity-50">🕉️</span>
+      </div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-300/50 text-sm">
+        Tap to begin
+      </div>
+    </div>
+  )
+}
+
+function WakeWordAnimation() {
+  return (
+    <div className="relative w-64 h-64">
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-orange-500/20 animate-pulse" />
+      <div className="absolute inset-8 rounded-full bg-gradient-to-br from-purple-500/30 to-orange-500/30 animate-pulse delay-300" />
+      <div className="absolute inset-16 rounded-full bg-gradient-to-br from-purple-500/40 to-orange-500/40 flex items-center justify-center">
+        <span className="text-6xl">👂</span>
+      </div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-300 text-sm animate-pulse">
+        Say &quot;Hey KIAAN&quot;
+      </div>
+    </div>
+  )
+}
+
+function ListeningAnimation() {
+  return (
+    <div className="relative w-64 h-64">
+      <div className="absolute inset-0 rounded-full bg-orange-500/10 animate-ping" />
+      <div className="absolute inset-4 rounded-full bg-orange-500/20 animate-ping delay-200" />
+      <div className="absolute inset-8 rounded-full bg-orange-500/30 animate-ping delay-400" />
+      <div className="absolute inset-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/50">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-slate-900"
+        >
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <line x1="12" x2="12" y1="19" y2="22" />
+        </svg>
+      </div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-50 text-lg font-semibold">
+        Listening...
+      </div>
+    </div>
+  )
+}
+
+function ThinkingAnimation() {
+  return (
+    <div className="relative w-64 h-64">
+      <svg className="w-full h-full animate-spin" style={{ animationDuration: '3s' }} viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="url(#thinkingGradient)"
+          strokeWidth="2"
+          strokeDasharray="10 5"
+        />
+        <defs>
+          <linearGradient id="thinkingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fb923c" />
+            <stop offset="50%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#f59e0b" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-6xl animate-pulse">🕉️</span>
+      </div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-50 text-lg font-semibold">
+        Finding wisdom...
+      </div>
+    </div>
+  )
+}
+
+function SpeakingAnimation() {
+  return (
+    <div className="relative w-64 h-64 flex items-center justify-center">
+      <div className="flex items-end gap-1.5 h-32">
+        {[...Array(7)].map((_, i) => (
+          <div
+            key={i}
+            className="w-4 bg-gradient-to-t from-orange-500 to-amber-400 rounded-full animate-audio-wave"
+            style={{
+              height: `${Math.random() * 60 + 40}%`,
+              animationDelay: `${i * 0.1}s`,
+              animationDuration: '0.8s'
+            }}
+          />
+        ))}
+      </div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-50 text-lg font-semibold">
+        KIAAN is speaking...
+      </div>
+    </div>
+  )
+}
+
+function ErrorAnimation() {
+  return (
+    <div className="relative w-64 h-64">
+      <div className="absolute inset-0 rounded-full bg-red-500/20 flex items-center justify-center">
+        <span className="text-6xl">⚠️</span>
+      </div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-red-400 text-sm">
+        Something went wrong
+      </div>
+    </div>
+  )
+}
+
+/**
+ * State Label Component
+ */
+function StateLabel({ state }: { state: VoiceState }) {
+  const labels: Record<VoiceState, { title: string; subtitle: string }> = {
+    idle: { title: 'Ready', subtitle: 'Tap to speak' },
+    wakeword: { title: 'Listening', subtitle: 'Say "Hey KIAAN"' },
+    listening: { title: 'Listening', subtitle: 'Speak naturally' },
+    thinking: { title: 'Contemplating', subtitle: 'Finding wisdom...' },
+    speaking: { title: 'Speaking', subtitle: 'KIAAN is responding' },
+    error: { title: 'Error', subtitle: 'Please try again' }
+  }
+
+  const { title, subtitle } = labels[state]
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-orange-50">{title}</h2>
+      <p className="text-orange-200/70 mt-1">{subtitle}</p>
+    </div>
+  )
+}
+
+/**
+ * Message Bubble Component
+ */
+function MessageBubble({ message }: { message: Message }) {
+  const isUser = message.role === 'user'
+
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+          isUser
+            ? 'bg-orange-500/20 text-orange-50 rounded-br-md'
+            : 'bg-slate-800/80 text-slate-100 rounded-bl-md'
+        }`}
+      >
+        <p className="text-sm leading-relaxed">{message.content}</p>
+        <div className="flex items-center gap-2 mt-2 text-xs opacity-50">
+          <span>{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          {message.isOffline && <span>(offline)</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
