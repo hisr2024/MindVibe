@@ -614,6 +614,24 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Voice router: {e}")
 
+# Load Divine Consciousness router (Sacred Atmosphere Enhancement)
+print("\n[Divine Consciousness] Attempting to import Divine Consciousness router...")
+try:
+    from backend.routes.divine_consciousness import router as divine_consciousness_router
+    app.include_router(divine_consciousness_router, prefix="/api")
+    print("✅ [SUCCESS] Divine Consciousness router loaded (Sacred Atmosphere)")
+    print("   • GET    /api/divine/atmosphere - Get sacred atmosphere")
+    print("   • GET    /api/divine/breathing/{pattern} - Get breathing exercise")
+    print("   • GET    /api/divine/meditation/{type} - Get micro-meditation")
+    print("   • POST   /api/divine/mood-response - Get sacred mood response")
+    print("   • GET    /api/divine/reminder - Get divine reminder")
+    print("   • GET    /api/divine/affirmation - Get divine affirmation")
+    print("   • GET    /api/divine/greeting - Get time-appropriate greeting")
+    print("   • GET    /api/divine/sacred-pause - Get sacred pause")
+    print("   • GET    /api/divine/check-in - Get divine check-in")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Divine Consciousness router: {e}")
+
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 print("="*80 + "\n")

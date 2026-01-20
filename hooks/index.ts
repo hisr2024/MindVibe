@@ -25,3 +25,4 @@ export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './
 export { useHapticFeedback } from './useHapticFeedback'
 export { useStreamingText, streamText } from './useStreamingText'
 export { usePrefersReducedMotion, getSafeAnimation } from './usePrefersReducedMotion'
+export { useDivineContent } from './useDivineContent'
