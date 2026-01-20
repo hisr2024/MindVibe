@@ -372,32 +372,32 @@ export default function EliteVoicePage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       {/* Header */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/kiaan/chat"
-              className="rounded-xl border border-orange-500/30 bg-white/5 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
+              className="rounded-xl border border-orange-500/30 bg-white/5 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
             >
               Text Chat
             </Link>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
               KIAAN Voice
             </h1>
           </div>
 
           {/* Status Indicators */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
             {/* Online/Offline */}
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+            <div className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full ${
               isOnline
                 ? 'bg-emerald-500/20 text-emerald-400'
                 : 'bg-amber-500/20 text-amber-400'
             }`}>
-              <div className={`w-2 h-2 rounded-full ${
+              <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                 isOnline ? 'bg-emerald-400' : 'bg-amber-400'
               } animate-pulse`} />
-              <span className="text-sm font-medium">
+              <span className="text-xs sm:text-sm font-medium">
                 {isOnline ? 'Online' : 'Offline'}
               </span>
             </div>
@@ -405,15 +405,16 @@ export default function EliteVoicePage() {
             {/* Wake Word Toggle */}
             <button
               onClick={toggleWakeWord}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
                 wakeWordEnabled
                   ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
                   : 'bg-white/5 text-orange-100/60 border border-white/10'
               }`}
             >
-              <span>{wakeWordEnabled ? '👂' : '🔇'}</span>
-              <span className="text-sm font-medium">
-                {wakeWordEnabled ? 'Wake Word On' : 'Wake Word Off'}
+              <span className="text-sm sm:text-base">{wakeWordEnabled ? '👂' : '🔇'}</span>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="hidden sm:inline">{wakeWordEnabled ? 'Wake Word On' : 'Wake Word Off'}</span>
+                <span className="sm:hidden">{wakeWordEnabled ? 'On' : 'Off'}</span>
               </span>
             </button>
           </div>
@@ -425,7 +426,7 @@ export default function EliteVoicePage() {
         <div className="max-w-4xl mx-auto">
 
           {/* Central Voice Visual */}
-          <div className="relative h-[400px] flex items-center justify-center">
+          <div className="relative h-[280px] sm:h-[320px] md:h-[400px] flex items-center justify-center">
             <VoiceVisualizer state={state} />
           </div>
 
@@ -449,12 +450,12 @@ export default function EliteVoicePage() {
           </div>
 
           {/* Manual Controls */}
-          <div className="flex justify-center gap-4 mb-8">
+          <div className="flex justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
             {state === 'idle' && !wakeWordEnabled && (
               <button
                 onClick={activateManually}
                 disabled={!voiceSupported}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
               >
                 Tap to Speak
               </button>
@@ -463,7 +464,7 @@ export default function EliteVoicePage() {
             {state === 'wakeword' && (
               <button
                 onClick={activateManually}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-slate-900 font-bold text-lg shadow-lg shadow-orange-500/20 transition-all hover:scale-105"
+                className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/20 transition-all hover:scale-105"
               >
                 Or Tap to Speak
               </button>
@@ -472,7 +473,7 @@ export default function EliteVoicePage() {
             {state === 'listening' && (
               <button
                 onClick={stopListening}
-                className="px-8 py-4 rounded-full bg-red-500 text-white font-bold text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
+                className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
                 Done Speaking
               </button>
@@ -481,7 +482,7 @@ export default function EliteVoicePage() {
             {state === 'speaking' && (
               <button
                 onClick={stopSpeaking}
-                className="px-8 py-4 rounded-full bg-red-500 text-white font-bold text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
+                className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
                 Stop
               </button>
@@ -490,18 +491,18 @@ export default function EliteVoicePage() {
 
           {/* Conversation History */}
           {messages.length > 0 && (
-            <div className="rounded-3xl border border-orange-500/20 bg-slate-900/50 backdrop-blur-sm p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-orange-100">Conversation</h2>
+            <div className="rounded-2xl sm:rounded-3xl border border-orange-500/20 bg-slate-900/50 backdrop-blur-sm p-4 sm:p-6 mb-4 sm:mb-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h2 className="text-base sm:text-lg font-semibold text-orange-100">Conversation</h2>
                 <button
                   onClick={clearConversation}
-                  className="text-sm text-orange-300/60 hover:text-orange-300 transition-colors"
+                  className="text-xs sm:text-sm text-orange-300/60 hover:text-orange-300 transition-colors"
                 >
                   Clear
                 </button>
               </div>
 
-              <div className="space-y-4 max-h-[400px] overflow-y-auto">
+              <div className="space-y-3 sm:space-y-4 max-h-[250px] sm:max-h-[350px] md:max-h-[400px] overflow-y-auto">
                 {messages.map((msg) => (
                   <MessageBubble key={msg.id} message={msg} />
                 ))}
@@ -511,7 +512,7 @@ export default function EliteVoicePage() {
           )}
 
           {/* Instructions */}
-          <div className="text-center text-orange-100/50 text-sm">
+          <div className="text-center text-orange-100/50 text-xs sm:text-sm px-4">
             {wakeWordEnabled ? (
               <p>Say &quot;Hey KIAAN&quot; or tap the button to start</p>
             ) : (
@@ -543,11 +544,11 @@ function VoiceVisualizer({ state }: { state: VoiceState }) {
 
 function IdleAnimation() {
   return (
-    <div className="relative w-64 h-64">
+    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64">
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-800/50 to-slate-700/50 flex items-center justify-center">
-        <span className="text-6xl opacity-50">🕉️</span>
+        <span className="text-4xl sm:text-5xl md:text-6xl opacity-50">🕉️</span>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-300/50 text-sm">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-6 sm:mt-8 text-orange-300/50 text-xs sm:text-sm">
         Tap to begin
       </div>
     </div>
@@ -556,13 +557,13 @@ function IdleAnimation() {
 
 function WakeWordAnimation() {
   return (
-    <div className="relative w-64 h-64">
+    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64">
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-orange-500/20 animate-pulse" />
-      <div className="absolute inset-8 rounded-full bg-gradient-to-br from-purple-500/30 to-orange-500/30 animate-pulse delay-300" />
-      <div className="absolute inset-16 rounded-full bg-gradient-to-br from-purple-500/40 to-orange-500/40 flex items-center justify-center">
-        <span className="text-6xl">👂</span>
+      <div className="absolute inset-6 sm:inset-8 rounded-full bg-gradient-to-br from-purple-500/30 to-orange-500/30 animate-pulse delay-300" />
+      <div className="absolute inset-12 sm:inset-16 rounded-full bg-gradient-to-br from-purple-500/40 to-orange-500/40 flex items-center justify-center">
+        <span className="text-4xl sm:text-5xl md:text-6xl">👂</span>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-300 text-sm animate-pulse">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-6 sm:mt-8 text-orange-300 text-xs sm:text-sm animate-pulse">
         Say &quot;Hey KIAAN&quot;
       </div>
     </div>
@@ -571,29 +572,27 @@ function WakeWordAnimation() {
 
 function ListeningAnimation() {
   return (
-    <div className="relative w-64 h-64">
+    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64">
       <div className="absolute inset-0 rounded-full bg-orange-500/10 animate-ping" />
-      <div className="absolute inset-4 rounded-full bg-orange-500/20 animate-ping delay-200" />
-      <div className="absolute inset-8 rounded-full bg-orange-500/30 animate-ping delay-400" />
-      <div className="absolute inset-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/50">
+      <div className="absolute inset-2 sm:inset-4 rounded-full bg-orange-500/20 animate-ping delay-200" />
+      <div className="absolute inset-4 sm:inset-8 rounded-full bg-orange-500/30 animate-ping delay-400" />
+      <div className="absolute inset-10 sm:inset-12 md:inset-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/50">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="64"
-          height="64"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-slate-900"
+          className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-slate-900"
         >
           <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
           <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
           <line x1="12" x2="12" y1="19" y2="22" />
         </svg>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-50 text-lg font-semibold">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-6 sm:mt-8 text-orange-50 text-sm sm:text-base md:text-lg font-semibold">
         Listening...
       </div>
     </div>
@@ -602,7 +601,7 @@ function ListeningAnimation() {
 
 function ThinkingAnimation() {
   return (
-    <div className="relative w-64 h-64">
+    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64">
       <svg className="w-full h-full animate-spin" style={{ animationDuration: '3s' }} viewBox="0 0 100 100">
         <circle
           cx="50"
@@ -622,9 +621,9 @@ function ThinkingAnimation() {
         </defs>
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-6xl animate-pulse">🕉️</span>
+        <span className="text-4xl sm:text-5xl md:text-6xl animate-pulse">🕉️</span>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-50 text-lg font-semibold">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-6 sm:mt-8 text-orange-50 text-sm sm:text-base md:text-lg font-semibold">
         Finding wisdom...
       </div>
     </div>
@@ -633,12 +632,12 @@ function ThinkingAnimation() {
 
 function SpeakingAnimation() {
   return (
-    <div className="relative w-64 h-64 flex items-center justify-center">
-      <div className="flex items-end gap-1.5 h-32">
+    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64 flex items-center justify-center">
+      <div className="flex items-end gap-1 sm:gap-1.5 h-20 sm:h-24 md:h-32">
         {[...Array(7)].map((_, i) => (
           <div
             key={i}
-            className="w-4 bg-gradient-to-t from-orange-500 to-amber-400 rounded-full animate-audio-wave"
+            className="w-2.5 sm:w-3 md:w-4 bg-gradient-to-t from-orange-500 to-amber-400 rounded-full animate-audio-wave"
             style={{
               height: `${Math.random() * 60 + 40}%`,
               animationDelay: `${i * 0.1}s`,
@@ -647,7 +646,7 @@ function SpeakingAnimation() {
           />
         ))}
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-orange-50 text-lg font-semibold">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-6 sm:mt-8 text-orange-50 text-sm sm:text-base md:text-lg font-semibold">
         KIAAN is speaking...
       </div>
     </div>
@@ -656,11 +655,11 @@ function SpeakingAnimation() {
 
 function ErrorAnimation() {
   return (
-    <div className="relative w-64 h-64">
+    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64">
       <div className="absolute inset-0 rounded-full bg-red-500/20 flex items-center justify-center">
-        <span className="text-6xl">⚠️</span>
+        <span className="text-4xl sm:text-5xl md:text-6xl">⚠️</span>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-8 text-red-400 text-sm">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-6 sm:mt-8 text-red-400 text-xs sm:text-sm">
         Something went wrong
       </div>
     </div>
@@ -684,8 +683,8 @@ function StateLabel({ state }: { state: VoiceState }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-orange-50">{title}</h2>
-      <p className="text-orange-200/70 mt-1">{subtitle}</p>
+      <h2 className="text-xl sm:text-2xl font-bold text-orange-50">{title}</h2>
+      <p className="text-orange-200/70 mt-1 text-sm sm:text-base">{subtitle}</p>
     </div>
   )
 }
