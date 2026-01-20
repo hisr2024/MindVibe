@@ -439,3 +439,106 @@ async def clear_voice_cache(
         "status": "success",
         "message": "Voice cache cleared"
     }
+
+
+# ===== Elite Voice Query Endpoint =====
+
+class VoiceQueryRequest(BaseModel):
+    """Request for voice-based KIAAN query"""
+    query: str = Field(..., min_length=1, max_length=2000, description="User's voice query")
+    language: str = Field("en", description="Language code")
+    history: List[dict] = Field(default_factory=list, description="Recent conversation history")
+
+
+class VoiceQueryResponse(BaseModel):
+    """Response for voice query"""
+    response: str = Field(..., description="KIAAN's response")
+    verses: List[dict] = Field(default_factory=list, description="Related Gita verses")
+    concern: str = Field("general", description="Detected concern")
+    confidence: float = Field(0.0, description="Concern detection confidence")
+
+
+@router.post("/query", response_model=VoiceQueryResponse)
+async def process_voice_query(
+    payload: VoiceQueryRequest,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> VoiceQueryResponse:
+    """
+    Process a voice query and return KIAAN's response
+
+    Elite voice AI endpoint that:
+    - Detects user concerns (anxiety, stress, etc.)
+    - Finds relevant Gita verses
+    - Generates compassionate, wisdom-based response
+    - Optimized for voice interaction (<300ms target)
+
+    Used by the KIAAN Voice UI for real-time conversations.
+    """
+    import time
+    start_time = time.time()
+
+    logger.info(f"Voice query from user {user_id}: {payload.query[:50]}...")
+
+    try:
+        # Import KIAAN Core service for response generation
+        from backend.services.kiaan_core import KIAANCore
+
+        # Initialize KIAAN Core
+        kiaan = KIAANCore()
+
+        # Build conversation history context
+        history_context = ""
+        if payload.history:
+            for msg in payload.history[-4:]:  # Last 4 messages for context
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                history_context += f"{role.capitalize()}: {content}\n"
+
+        # Combine query with history context
+        full_message = payload.query
+        if history_context:
+            full_message = f"Previous conversation:\n{history_context}\n\nCurrent question: {payload.query}"
+
+        # Get KIAAN response with verse references
+        kiaan_result = await kiaan.get_kiaan_response(
+            message=full_message,
+            user_id=user_id,
+            db=db,
+            context="voice_assistant",
+            stream=False,
+            language=payload.language
+        )
+
+        response_time = time.time() - start_time
+        logger.info(f"Voice query processed in {response_time:.3f}s")
+
+        # Extract verses used for response
+        verses_used = kiaan_result.get("verses_used", [])
+        verses_data = [
+            {
+                "id": v.get("id", ""),
+                "chapter": v.get("chapter", 0),
+                "verse": v.get("verse", 0),
+                "text": v.get("text", "")
+            }
+            for v in verses_used
+        ] if verses_used else []
+
+        return VoiceQueryResponse(
+            response=kiaan_result.get("response", "I'm here for you. How can I help?"),
+            verses=verses_data,
+            concern=kiaan_result.get("context", "general"),
+            confidence=0.8 if kiaan_result.get("validation", {}).get("valid", False) else 0.5
+        )
+
+    except Exception as e:
+        logger.error(f"Voice query error: {e}")
+
+        # Fallback response
+        return VoiceQueryResponse(
+            response="I'm here with you. Could you try asking that again? I want to understand and support you better.",
+            verses=[],
+            concern="general",
+            confidence=0.0
+        )
