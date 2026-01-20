@@ -1,22 +1,23 @@
-"""KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v14.0 Quantum Coherence) - Krishna's Blessing
+"""KIAAN - Ultimate Bhagavad Gita Wisdom Engine (v15.0 Spontaneous Response) - Krishna's Blessing
 
-Quantum Coherence Enhancements:
-- GPT-4o-mini for 75% cost reduction
-- Automatic retries with exponential backoff
-- Token optimization with tiktoken
-- Streaming support for real-time responses
-- Enhanced error handling (RateLimit, Auth, Timeout)
-- Prometheus metrics for cost monitoring
-- Expanded verse context to 15 verses
+Spontaneous Response Enhancements (v15.0):
+- Streaming endpoint for instant response display
+- Reduced timeout (30s → 12s) for faster failure detection
+- Reduced retries (4 → 2) for faster error handling
+- Reduced verse context (15 → 5) for faster processing
+- Reduced max tokens (400 → 250) for faster generation
+- Skip validation retry for immediate responses
+- Optimized prompts for concise, focused wisdom
 """
 
 import html
 import logging
 import os
 import uuid
-from typing import Any
+from typing import Any, AsyncGenerator
 
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -112,7 +113,7 @@ class ChatMessage(BaseModel):
 class KIAAN:
     def __init__(self):
         self.name = "KIAAN"
-        self.version = "14.0"  # Quantum Coherence update
+        self.version = "15.0"  # Spontaneous Response update
         self.gita_kb = gita_kb
         self.gita_validator = gita_validator
         self.gita_analytics = gita_analytics
@@ -394,10 +395,70 @@ async def start_session(request: Request) -> dict[str, Any]:
         "session_id": str(uuid.uuid4()),
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
         "bot": "KIAAN",
-        "version": "14.0",
+        "version": "15.0",
         "gita_powered": True,
-        "quantum_coherence": True
+        "spontaneous_response": True
     }
+
+
+@router.post("/message/stream")
+@limiter.limit(CHAT_RATE_LIMIT)
+async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)):
+    """
+    Streaming endpoint for instant KIAAN responses.
+    Returns Server-Sent Events (SSE) for real-time response display.
+    """
+    async def generate_stream() -> AsyncGenerator[str, None]:
+        try:
+            message = chat.message.strip()
+            if not message:
+                yield f"data: What's on your mind? 💙\n\n"
+                yield "data: [DONE]\n\n"
+                return
+
+            # Check for crisis keywords
+            crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
+            if any(word in message.lower() for word in crisis_keywords):
+                yield f"data: 🆘 Please reach out for help RIGHT NOW\\n\\n📞 988 - Suicide & Crisis Lifeline (24/7)\\n💬 Crisis Text: Text HOME to 741741\\n🌍 findahelpline.com\\n\\nYou matter. Help is real. 💙\n\n"
+                yield "data: [DONE]\n\n"
+                return
+
+            # Get language from request
+            language = chat.language
+            if not language:
+                accept_language = request.headers.get('Accept-Language', 'en')
+                language = accept_language.split(',')[0].split('-')[0].split(';')[0].strip()
+
+            # Use KIAAN core streaming service
+            from backend.services.kiaan_core import kiaan_core
+
+            async for chunk in kiaan_core.get_kiaan_response_streaming(
+                message=message,
+                user_id=None,  # Streaming doesn't track quota for speed
+                db=db,
+                context="general",
+                language=language
+            ):
+                # Escape newlines for SSE format
+                escaped_chunk = chunk.replace('\n', '\\n')
+                yield f"data: {escaped_chunk}\n\n"
+
+            yield "data: [DONE]\n\n"
+
+        except Exception as e:
+            logger.error(f"Streaming error: {e}")
+            yield f"data: I'm here for you. Let's try again. 💙\n\n"
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        }
+    )
 
 
 @router.post("/message")
@@ -498,7 +559,7 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "status": "success",
             "response": response,
             "bot": "KIAAN",
-            "version": "14.0",
+            "version": "15.0",
             "model": kiaan_result.get("model", "GPT-4o-mini"),
             "gita_powered": True,
             "quantum_coherence": True,
@@ -537,7 +598,7 @@ async def health() -> dict[str, Any]:
     return {
         "status": "healthy" if openai_optimizer.ready else "error",
         "bot": "KIAAN",
-        "version": "14.0",
+        "version": "15.0",
         "gita_kb_loaded": gita_kb is not None,
         "quantum_coherence": True
     }
@@ -548,7 +609,7 @@ async def about() -> dict[str, Any]:
     from backend.services.openai_optimizer import openai_optimizer
     return {
         "name": "KIAAN",
-        "version": "14.0",
+        "version": "15.0",
         "model": "gpt-4o-mini",
         "status": "Operational" if openai_optimizer.ready else "Error",
         "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness (Quantum Coherence v14.0)",

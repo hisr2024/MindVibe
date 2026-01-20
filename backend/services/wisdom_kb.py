@@ -376,9 +376,7 @@ class WisdomKnowledgeBase:
     ) -> list[dict[str, Any]]:
         """
         Search for verses relevant to a query across the full 700+ verse database.
-
-        This method uses GitaService to search the complete Gita database with
-        mental health tag boosting for better relevance.
+        OPTIMIZED: Uses keyword pre-filtering to reduce similarity computations.
 
         Args:
             db: Database session
@@ -392,60 +390,95 @@ class WisdomKnowledgeBase:
         """
         # Get verses (filtered or all)
         if theme:
-            # Filter by theme using GitaService
             gita_verses = await GitaService.search_verses_by_theme(db, theme)
             verses = [GitaService.convert_to_wisdom_verse_format(gv) for gv in gita_verses]
         elif application:
-            # Filter by application using GitaService
             gita_verses = await GitaService.search_by_mental_health_application(db, application)
             verses = [GitaService.convert_to_wisdom_verse_format(gv) for gv in gita_verses]
         else:
-            # Get all verses from cache
             verses = await self.get_all_verses(db)
 
         if not verses:
             return []
 
-        # Extract keywords from query for tag matching
-        query_keywords = set(query.lower().split())
+        # OPTIMIZATION: Extract keywords for pre-filtering (skip small words)
+        query_lower = query.lower()
+        query_keywords = {w for w in query_lower.split() if len(w) > 3}
 
-        # Compute similarity scores for each verse
-        verse_scores: list[dict[str, Any]] = []
+        # OPTIMIZATION: Pre-filter verses that contain any query keyword
+        # This reduces the number of expensive similarity computations
+        candidate_verses = []
+        fallback_verses = []
+
         for verse in verses:
-            # Compare query against english text and context
+            english_text = verse.get("english", "").lower()
+            theme_text = verse.get("theme", "").lower().replace("_", " ")
+            principle_text = verse.get("principle", "").lower() if verse.get("principle") else ""
+
+            # Check for keyword match (fast string contains check)
+            has_keyword_match = any(
+                kw in english_text or kw in theme_text or kw in principle_text
+                for kw in query_keywords
+            )
+
+            if has_keyword_match:
+                candidate_verses.append(verse)
+            elif len(fallback_verses) < 50:  # Keep some fallbacks
+                fallback_verses.append(verse)
+
+        # Use candidates if we have enough, otherwise add fallbacks
+        search_verses = candidate_verses if len(candidate_verses) >= limit else candidate_verses + fallback_verses[:limit]
+
+        # OPTIMIZATION: Limit similarity computation to top candidates
+        max_candidates = min(len(search_verses), 100)  # Cap at 100 for speed
+        search_verses = search_verses[:max_candidates]
+
+        # Compute similarity scores
+        verse_scores: list[dict[str, Any]] = []
+        for verse in search_verses:
             english_text = verse.get("english", "")
             context_text = verse.get("context", "")
 
-            english_score = self.compute_text_similarity(query, english_text)
-            context_score = self.compute_text_similarity(query, context_text)
+            # Quick similarity check (lighter than full SequenceMatcher)
+            english_score = self._quick_similarity(query_lower, english_text.lower())
+            context_score = self._quick_similarity(query_lower, context_text.lower()) if context_text else 0
 
-            # Use the max score as base
             base_score = max(english_score, context_score)
 
-            # Apply tag boost if query matches mental health applications
+            # Tag boost for mental health applications
             tag_boost = 0.0
             mental_health_apps = verse.get("mental_health_applications", [])
             if mental_health_apps:
                 for app in mental_health_apps:
-                    # Check if any keyword from query is in the application tag
                     app_words = set(app.lower().replace("_", " ").split())
                     if query_keywords & app_words:
                         tag_boost = self.TAG_BOOST
                         break
 
-            final_score = base_score + tag_boost
-
             verse_scores.append({
                 "verse": verse,
-                "score": final_score,
+                "score": base_score + tag_boost,
                 "sanitized_text": self.sanitize_text(english_text),
             })
 
-        # Sort by score descending
+        # Sort by score descending and return top results
         verse_scores.sort(key=lambda x: float(x["score"]), reverse=True)
-
-        # Return top N results
         return verse_scores[:limit]
+
+    def _quick_similarity(self, query: str, text: str) -> float:
+        """Fast keyword-based similarity score (faster than SequenceMatcher)."""
+        if not query or not text:
+            return 0.0
+
+        query_words = set(query.split())
+        text_words = set(text.split())
+
+        if not query_words:
+            return 0.0
+
+        # Count matching words
+        matches = len(query_words & text_words)
+        return matches / len(query_words) if query_words else 0.0
 
     @staticmethod
     async def search_relevant_verses(

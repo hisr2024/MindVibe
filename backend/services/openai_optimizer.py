@@ -69,7 +69,7 @@ COST_PER_1M_COMPLETION_TOKENS = 0.60  # $0.60 per 1M completion tokens
 # Token limits for GPT-4o-mini
 MAX_CONTEXT_TOKENS = 128000  # 128K context window
 SAFE_MAX_TOKENS = 120000  # Leave buffer for safety
-OPTIMIZED_MAX_COMPLETION_TOKENS = 400  # Reduced from 600
+OPTIMIZED_MAX_COMPLETION_TOKENS = 250  # Reduced from 400 for faster spontaneous responses
 
 # Encoding for token counting
 TOKEN_ENCODING = "cl100k_base"  # GPT-4o uses cl100k_base encoding
@@ -86,7 +86,8 @@ class OpenAIOptimizer:
     def __init__(self):
         """Initialize the optimizer with API key and metrics."""
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        self.client = OpenAI(api_key=api_key, timeout=30.0) if api_key else None
+        # Reduced timeout from 30s to 12s for faster failure detection and spontaneous responses
+        self.client = OpenAI(api_key=api_key, timeout=12.0) if api_key else None
         self.ready = bool(api_key)
 
         # Initialize tiktoken encoding
@@ -246,8 +247,8 @@ class OpenAIOptimizer:
 
     @retry(
         retry=retry_if_exception_type((RateLimitError, APIConnectionError, APITimeoutError)),
-        wait=wait_exponential(multiplier=1, min=2, max=30),
-        stop=stop_after_attempt(4),
+        wait=wait_exponential(multiplier=1, min=1, max=8),  # Reduced from min=2, max=30 for faster retries
+        stop=stop_after_attempt(2),  # Reduced from 4 to 2 for faster failure handling
         reraise=True
     )
     async def create_completion_with_retry(

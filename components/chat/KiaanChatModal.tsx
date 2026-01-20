@@ -48,52 +48,122 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
 
-    const userMessage: Message = { 
-      id: crypto.randomUUID(), 
-      sender: 'user', 
-      text: input, 
-      timestamp: new Date().toISOString() 
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      sender: 'user',
+      text: input,
+      timestamp: new Date().toISOString()
     }
     addMessage(userMessage)
+    const messageText = input
     setInput('')
     setIsLoading(true)
 
+    // Create placeholder for streaming response
+    const responseId = crypto.randomUUID()
+    let streamedText = ''
+
     try {
-      // Use KIAAN's existing chat endpoint
-      const response = await fetch('/api/chat/message', {
+      // Use streaming endpoint for instant responses
+      const response = await fetch('/api/chat/message/stream', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          message: input
+        body: JSON.stringify({
+          message: messageText
         }),
         credentials: 'include'
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || errorData.response || 'Chat request failed')
+        throw new Error('Streaming request failed')
       }
 
-      const data = await response.json()
-      
-      // Handle KIAAN response format
-      const aiMessage: Message = { 
-        id: crypto.randomUUID(),
-        sender: 'assistant', 
-        text: data.response || data.message || 'I apologize, I encountered an error. Please try again.', 
+      // Add placeholder message for streaming
+      const placeholderMessage: Message = {
+        id: responseId,
+        sender: 'assistant',
+        text: '',
         timestamp: new Date().toISOString()
       }
-      addMessage(aiMessage)
+      addMessage(placeholderMessage)
+      setIsLoading(false) // Stop loading animation, show streaming text
+
+      // Process Server-Sent Events stream
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value)
+          const lines = chunk.split('\n')
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6)
+              if (data === '[DONE]') break
+
+              // Unescape newlines from SSE format
+              const text = data.replace(/\\n/g, '\n')
+              streamedText += text
+
+              // Update the message in place for live streaming effect
+              addMessage({
+                id: responseId,
+                sender: 'assistant',
+                text: streamedText,
+                timestamp: new Date().toISOString()
+              })
+            }
+          }
+        }
+      }
+
+      // Final update if text is empty
+      if (!streamedText.trim()) {
+        addMessage({
+          id: responseId,
+          sender: 'assistant',
+          text: 'I\'m here for you. Let\'s try again. 💙',
+          timestamp: new Date().toISOString()
+        })
+      }
+
     } catch (error) {
       console.error('Chat error:', error)
-      addMessage({ 
-        id: crypto.randomUUID(),
-        sender: 'assistant', 
-        text: `Unable to connect to KIAAN. Please try again or use the main chat page at ${KIAAN_PAGE_URL}.`,
-        timestamp: new Date().toISOString()
-      })
+
+      // Fallback to non-streaming endpoint
+      try {
+        const fallbackResponse = await fetch('/api/chat/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: messageText }),
+          credentials: 'include'
+        })
+
+        if (fallbackResponse.ok) {
+          const data = await fallbackResponse.json()
+          addMessage({
+            id: responseId || crypto.randomUUID(),
+            sender: 'assistant',
+            text: data.response || data.message || 'I\'m here for you. Let\'s try again. 💙',
+            timestamp: new Date().toISOString()
+          })
+        } else {
+          throw new Error('Fallback failed')
+        }
+      } catch {
+        addMessage({
+          id: crypto.randomUUID(),
+          sender: 'assistant',
+          text: `Unable to connect to KIAAN. Please try again or use the main chat page at ${KIAAN_PAGE_URL}.`,
+          timestamp: new Date().toISOString()
+        })
+      }
     } finally {
       setIsLoading(false)
     }
