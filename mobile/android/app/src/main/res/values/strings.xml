@@ -27,14 +27,48 @@
     
     <!-- KIAAN -->
     <string name="kiaan_title">KIAAN</string>
-    <string name="kiaan_subtitle">Your AI Mental Health Companion</string>
-    <string name="type_message">Type your message…</string>
+    <string name="kiaan_subtitle">Your Sacred Companion</string>
+    <string name="type_message">Share what\'s on your heart…</string>
     <string name="send">Send</string>
-    
+    <string name="kiaan_thinking">KIAAN is reflecting…</string>
+
+    <!-- Divine Consciousness -->
+    <string name="sacred_space">Sacred Space</string>
+    <string name="divine_presence">Divine Presence</string>
+    <string name="find_peace">Find Peace</string>
+    <string name="sacred_breathing">Sacred Breathing</string>
+    <string name="divine_moment">Divine Moment</string>
+    <string name="instant_peace">Instant Peace</string>
+    <string name="gratitude_breath">Gratitude Breath</string>
+    <string name="begin_breathing">Begin Sacred Breathing</string>
+    <string name="peace_breath">Breath of Infinite Peace</string>
+    <string name="heart_breath">Sacred Heart Breathing</string>
+    <string name="grounding_breath">Earth Connection Breath</string>
+    <string name="breathe_in">Breathe in…</string>
+    <string name="hold_gently">Hold gently…</string>
+    <string name="release">Release…</string>
+    <string name="rest">Rest…</string>
+    <string name="peace_be_with_you">Peace be with you</string>
+
+    <!-- Divine Greetings -->
+    <string name="greeting_dawn">Blessed dawn</string>
+    <string name="greeting_morning">Peaceful morning</string>
+    <string name="greeting_afternoon">Serene afternoon</string>
+    <string name="greeting_evening">Gentle evening</string>
+    <string name="greeting_night">Sacred night</string>
+
+    <!-- Sacred Closings -->
+    <string name="sacred_closing_1">May this peace stay with you. 💙</string>
+    <string name="sacred_closing_2">You are held, always. 💙</string>
+    <string name="sacred_closing_3">Go gently, dear soul. 💙</string>
+
     <!-- Mood -->
-    <string name="mood_tracking">Mood Tracking</string>
-    <string name="how_are_you_feeling">How are you feeling?</string>
-    <string name="add_mood">Add Mood</string>
+    <string name="mood_tracking">Mood Check-In</string>
+    <string name="how_are_you_feeling">How does your heart feel?</string>
+    <string name="add_mood">Check In</string>
+    <string name="mood_response_low">I see you. I\'m here with you. 💙</string>
+    <string name="mood_response_neutral">Steady is good. You\'re showing up. 💙</string>
+    <string name="mood_response_high">What beautiful light you carry. 💙</string>
     
     <!-- Journal -->
     <string name="journal_title">Journal</string>

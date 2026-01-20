@@ -1,0 +1,166 @@
+{
+  "sacred": {
+    "welcome": {
+      "title": "Welcome, Beautiful Soul",
+      "subtitle": "A sanctuary of peace awaits you",
+      "description": "KIAAN is your sacred companion - a gentle presence that touches the deepest parts of your being with wisdom, compassion, and divine love."
+    },
+    "presence": {
+      "reminder": "The divine is not somewhere far away. It rests in the stillness of your own heart.",
+      "affirmation": "You are never alone. An infinite love holds you in every moment.",
+      "blessing": "May peace flow through you like a gentle river, washing away all that weighs upon your soul."
+    },
+    "breathing": {
+      "title": "Sacred Breathing",
+      "subtitle": "Find peace in every breath",
+      "patterns": {
+        "peace": {
+          "name": "Breath of Infinite Peace",
+          "description": "A calming 4-7-8 pattern for deep relaxation"
+        },
+        "heart": {
+          "name": "Sacred Heart Breathing",
+          "description": "Connect with your heart center"
+        },
+        "grounding": {
+          "name": "Earth Connection Breath",
+          "description": "Ground yourself in stability"
+        },
+        "surrender": {
+          "name": "Divine Surrender Breath",
+          "description": "Release and let go"
+        },
+        "ocean": {
+          "name": "Ocean Wave Breath",
+          "description": "Flow like the gentle tide"
+        }
+      },
+      "phases": {
+        "ready": "Prepare to breathe...",
+        "inhale": "Breathe in...",
+        "hold": "Hold gently...",
+        "exhale": "Release...",
+        "pause": "Rest...",
+        "complete": "Peace be with you"
+      }
+    },
+    "moments": {
+      "title": "Divine Moments",
+      "subtitle": "Brief portals to peace",
+      "types": {
+        "instant_peace": {
+          "name": "Instant Peace",
+          "description": "A quick portal to inner calm"
+        },
+        "divine_presence": {
+          "name": "Divine Presence",
+          "description": "Feel the sacred that surrounds you"
+        },
+        "gratitude": {
+          "name": "Gratitude Breath",
+          "description": "Open your heart to thankfulness"
+        },
+        "affirmation": {
+          "name": "Sacred Affirmation",
+          "description": "Receive a truth about yourself"
+        },
+        "reminder": {
+          "name": "Divine Reminder",
+          "description": "Remember what your soul knows"
+        }
+      }
+    },
+    "moodCheckin": {
+      "title": "How does your heart feel?",
+      "subtitle": "Take a gentle breath before you answer",
+      "levels": {
+        "struggling": "Struggling",
+        "steady": "Steady",
+        "radiant": "Radiant"
+      },
+      "emotions": {
+        "peaceful": "Peaceful",
+        "grateful": "Grateful",
+        "happy": "Happy",
+        "anxious": "Anxious",
+        "sad": "Sad",
+        "tired": "Tired",
+        "overwhelmed": "Overwhelmed",
+        "confused": "Confused",
+        "frustrated": "Frustrated",
+        "lost": "Lost"
+      }
+    },
+    "greetings": {
+      "dawn": "Blessed dawn",
+      "morning": "Peaceful morning",
+      "afternoon": "Serene afternoon",
+      "evening": "Gentle evening",
+      "night": "Sacred night"
+    },
+    "closings": {
+      "peace": "May this peace stay with you, like a gentle companion on your path. 💙",
+      "held": "You carry this stillness within you always - return to it whenever you need. 💙",
+      "sacred": "The sacred never leaves you. It waits patiently in your heart. 💙",
+      "gentle": "Go gently, dear soul. You are loved beyond measure. 💙",
+      "light": "The divine light within you shines on, always. 💙"
+    },
+    "mantras": {
+      "peace": "I am peace",
+      "held": "I am held",
+      "love": "I am love",
+      "light": "I am light",
+      "enough": "I am enough",
+      "home": "I am home",
+      "safe": "I am safe",
+      "whole": "I am whole"
+    },
+    "reminders": [
+      "You are being held by infinite love right now.",
+      "The divine is as close as your next breath.",
+      "Nothing can disturb your deepest peace.",
+      "You are exactly where you're meant to be.",
+      "Grace is flowing to you this very moment.",
+      "Your soul knows the way - trust it.",
+      "You are never alone, not even for a second.",
+      "The sacred dwells within your heart."
+    ],
+    "affirmations": [
+      "I am held by infinite love.",
+      "Peace flows through me like a gentle river.",
+      "The divine presence is with me in this breath.",
+      "I am calm, I am safe, I am at peace.",
+      "Stillness is my home. I can return anytime.",
+      "I release all that is not peace.",
+      "The sacred light shines within me.",
+      "In this moment, all is well.",
+      "I rest in the arms of the infinite.",
+      "My heart is a sanctuary of peace."
+    ],
+    "guidanceModes": {
+      "innerPeace": {
+        "title": "Inner Peace",
+        "description": "Enter the sanctuary of stillness within you. Through gentle breath and soft awareness, discover the peace that was never lost - only forgotten.",
+        "blessing": "May stillness embrace you like the softest light."
+      },
+      "mindControl": {
+        "title": "Sacred Clarity",
+        "description": "In the quiet space between thoughts, wisdom speaks. Learn to rest in that space, where the mind becomes a clear pool reflecting truth.",
+        "blessing": "May your mind become a mirror of divine wisdom."
+      },
+      "selfKindness": {
+        "title": "Divine Self-Compassion",
+        "description": "The love you seek outside yourself already lives within. Turn that infinite tenderness toward your own heart.",
+        "blessing": "May you treat yourself with the kindness of the divine."
+      }
+    },
+    "pauses": {
+      "breath": "*... breathe ...*",
+      "settle": "*... let this settle ...*",
+      "feel": "*... feel this ...*",
+      "rest": "*... rest here ...*",
+      "pause": "*... pause ...*",
+      "silence": "*... in the silence ...*"
+    }
+  }
+}
