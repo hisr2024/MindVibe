@@ -45,6 +45,10 @@ export default function EliteVoicePage() {
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false)
   const [servicesReady, setServicesReady] = useState(false)
 
+  // Microphone permission state
+  const [micPermission, setMicPermission] = useState<'prompt' | 'granted' | 'denied' | 'unsupported' | 'checking'>('checking')
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false)
+
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthesisRef = useRef<SpeechSynthesis | null>(null)
@@ -94,24 +98,105 @@ export default function EliteVoicePage() {
     }
   })
 
+  // Check microphone permission status
+  async function checkMicrophonePermission() {
+    try {
+      // Check if mediaDevices API is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setMicPermission('unsupported')
+        return
+      }
+
+      // Check permission status using Permissions API if available
+      if (navigator.permissions && navigator.permissions.query) {
+        try {
+          const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+          setMicPermission(result.state as 'prompt' | 'granted' | 'denied')
+
+          // Listen for permission changes
+          result.onchange = () => {
+            setMicPermission(result.state as 'prompt' | 'granted' | 'denied')
+          }
+        } catch {
+          // Permissions API not supported for microphone, default to prompt
+          setMicPermission('prompt')
+        }
+      } else {
+        // Permissions API not available, default to prompt
+        setMicPermission('prompt')
+      }
+    } catch {
+      setMicPermission('prompt')
+    }
+  }
+
+  // Request microphone permission - returns true if granted
+  async function requestMicrophonePermission(): Promise<boolean> {
+    setIsRequestingPermission(true)
+    setError(null)
+
+    try {
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      })
+
+      // Permission granted - stop the stream immediately (we just needed permission)
+      stream.getTracks().forEach(track => track.stop())
+      setMicPermission('granted')
+
+      // Play success sound
+      playActivationSound()
+
+      return true
+
+    } catch (err: any) {
+      console.error('Microphone permission error:', err)
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicPermission('denied')
+        setError('Microphone access denied. Please enable it in your browser settings.')
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setMicPermission('unsupported')
+        setError('No microphone found. Please connect a microphone and try again.')
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setError('Microphone is in use by another application. Please close other apps using the microphone.')
+      } else {
+        setError('Could not access microphone. Please check your device settings.')
+      }
+      return false
+    } finally {
+      setIsRequestingPermission(false)
+    }
+  }
+
   // Initialize services
   useEffect(() => {
     // Check online status
     setIsOnline(navigator.onLine)
-    window.addEventListener('online', () => setIsOnline(true))
-    window.addEventListener('offline', () => setIsOnline(false))
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
 
     // Initialize speech synthesis
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       synthesisRef.current = window.speechSynthesis
     }
 
+    // Check microphone permission
+    checkMicrophonePermission()
+
     // Mark services as ready
     setServicesReady(true)
 
     return () => {
-      window.removeEventListener('online', () => setIsOnline(true))
-      window.removeEventListener('offline', () => setIsOnline(false))
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
     }
   }, [])
 
@@ -343,12 +428,19 @@ export default function EliteVoicePage() {
   }
 
   // Toggle wake word detection
-  function toggleWakeWord() {
+  async function toggleWakeWord() {
     if (wakeWordEnabled) {
       stopWakeWord()
       setWakeWordEnabled(false)
       setState('idle')
     } else {
+      // Check permission first
+      if (micPermission !== 'granted') {
+        const granted = await requestMicrophonePermission()
+        if (!granted) {
+          return
+        }
+      }
       startWakeWord()
       setWakeWordEnabled(true)
       setState('wakeword')
@@ -356,7 +448,14 @@ export default function EliteVoicePage() {
   }
 
   // Manual activation
-  function activateManually() {
+  async function activateManually() {
+    // Check permission first
+    if (micPermission !== 'granted') {
+      const granted = await requestMicrophonePermission()
+      if (!granted) {
+        return
+      }
+    }
     handleWakeWordDetected()
   }
 
@@ -421,6 +520,142 @@ export default function EliteVoicePage() {
         </div>
       </div>
 
+      {/* Microphone Permission Request */}
+      {micPermission !== 'granted' && micPermission !== 'checking' && (
+        <div className="container mx-auto px-4 pb-6">
+          <div className="max-w-2xl mx-auto">
+            <div className={`rounded-2xl border p-6 sm:p-8 text-center ${
+              micPermission === 'denied'
+                ? 'border-red-500/30 bg-red-500/10'
+                : micPermission === 'unsupported'
+                ? 'border-amber-500/30 bg-amber-500/10'
+                : 'border-orange-500/30 bg-orange-500/10'
+            }`}>
+              {/* Icon */}
+              <div className="flex justify-center mb-4">
+                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center ${
+                  micPermission === 'denied'
+                    ? 'bg-red-500/20'
+                    : micPermission === 'unsupported'
+                    ? 'bg-amber-500/20'
+                    : 'bg-orange-500/20'
+                }`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`w-8 h-8 sm:w-10 sm:h-10 ${
+                      micPermission === 'denied'
+                        ? 'text-red-400'
+                        : micPermission === 'unsupported'
+                        ? 'text-amber-400'
+                        : 'text-orange-400'
+                    }`}
+                  >
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" x2="12" y1="19" y2="22" />
+                    {micPermission === 'denied' && (
+                      <line x1="4" x2="20" y1="4" y2="20" className="text-red-400" />
+                    )}
+                  </svg>
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${
+                micPermission === 'denied'
+                  ? 'text-red-100'
+                  : micPermission === 'unsupported'
+                  ? 'text-amber-100'
+                  : 'text-orange-100'
+              }`}>
+                {micPermission === 'denied'
+                  ? 'Microphone Access Denied'
+                  : micPermission === 'unsupported'
+                  ? 'Microphone Not Available'
+                  : 'Enable Microphone Access'}
+              </h2>
+
+              {/* Description */}
+              <p className={`text-sm sm:text-base mb-6 ${
+                micPermission === 'denied'
+                  ? 'text-red-200/80'
+                  : micPermission === 'unsupported'
+                  ? 'text-amber-200/80'
+                  : 'text-orange-200/80'
+              }`}>
+                {micPermission === 'denied'
+                  ? 'Please enable microphone access in your browser settings to use voice features.'
+                  : micPermission === 'unsupported'
+                  ? 'Your device does not support microphone access or no microphone was found.'
+                  : 'KIAAN needs access to your microphone to listen and respond to your voice.'}
+              </p>
+
+              {/* Action Button */}
+              {micPermission === 'prompt' && (
+                <button
+                  onClick={requestMicrophonePermission}
+                  disabled={isRequestingPermission}
+                  className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                >
+                  {isRequestingPermission ? (
+                    <>
+                      <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Requesting...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        <line x1="12" x2="12" y1="19" y2="22" />
+                      </svg>
+                      Allow Microphone Access
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Settings Instructions for Denied */}
+              {micPermission === 'denied' && (
+                <div className="mt-4 text-left bg-slate-900/50 rounded-xl p-4">
+                  <p className="text-sm text-orange-100 font-medium mb-2">How to enable:</p>
+                  <ul className="text-xs sm:text-sm text-orange-200/70 space-y-1">
+                    <li>• <strong>Chrome/Edge:</strong> Click the lock icon in the address bar → Site settings → Microphone → Allow</li>
+                    <li>• <strong>Safari:</strong> Safari menu → Settings → Websites → Microphone → Allow</li>
+                    <li>• <strong>Firefox:</strong> Click the lock icon → Clear permissions → Refresh and try again</li>
+                    <li>• <strong>Mobile:</strong> Go to Settings → Browser → Microphone → Enable</li>
+                  </ul>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-4 py-2 rounded-lg bg-orange-500/20 text-orange-300 text-sm font-medium hover:bg-orange-500/30 transition-colors"
+                  >
+                    Refresh Page
+                  </button>
+                </div>
+              )}
+
+              {/* Privacy Note */}
+              <div className="mt-6 flex items-center justify-center gap-2 text-xs sm:text-sm text-orange-200/50">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Your voice is processed privately and never stored without consent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Voice Interface */}
       <div className="container mx-auto px-4 pb-8">
         <div className="max-w-4xl mx-auto">
@@ -454,10 +689,10 @@ export default function EliteVoicePage() {
             {state === 'idle' && !wakeWordEnabled && (
               <button
                 onClick={activateManually}
-                disabled={!voiceSupported}
+                disabled={!voiceSupported || micPermission === 'unsupported'}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
               >
-                Tap to Speak
+                {micPermission === 'granted' ? 'Tap to Speak' : micPermission === 'checking' ? 'Loading...' : 'Enable Microphone & Speak'}
               </button>
             )}
 
