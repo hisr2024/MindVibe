@@ -8,6 +8,7 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -62,6 +63,7 @@ export default function RootLayout({
             <MobileNav />
             {/* OM floating chat widget - unified for mobile and desktop */}
             <KiaanFooter />
+            <SpeedInsights />
           </Providers>
         </ClientLayout>
       </body>
