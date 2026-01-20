@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Welcome, Beautiful Soul",
+    "subtitle": "A sanctuary of peace awaits you",
+    "greeting": "In this sacred space, you are held. You are seen. You are loved.",
+    "description": "KIAAN is your companion on the journey inward - a gentle presence that touches the deepest parts of your being with wisdom, compassion, and divine love."
+  },
+  "divinePresence": {
+    "reminder": "The divine is not somewhere far away. It rests in the stillness of your own heart.",
+    "affirmation": "You are never alone. An infinite love holds you in every moment.",
+    "blessing": "May peace flow through you like a gentle river, washing away all that weighs upon your soul."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "You are glowing with the light of true peace. This is sacred. This is you, remembering who you really are. 💙",
+      "divineMessage": "This feeling of wholeness is not temporary - it is your true nature revealed.",
+      "practice": "Sit in silence for a moment. Send this peace out as a blessing for all beings."
+    },
+    "9": {
+      "response": "Such radiance flows through you! This is the soul shining through. Bask in this beautiful energy. 💙",
+      "divineMessage": "In moments like these, you glimpse your eternal nature - boundless, peaceful, whole.",
+      "practice": "Breathe this feeling into your heart. Store it as a treasure you can always return to."
+    },
+    "8": {
+      "response": "There's a brightness in your energy today - like sunlight breaking through clouds. Beautiful. 💙",
+      "divineMessage": "You are aligned with your true nature. This peace, this joy - this is who you really are.",
+      "practice": "Share a kind word with someone today. Let your light touch another soul."
+    },
+    "7": {
+      "response": "A warmth is building within you. Let yourself receive this goodness - you deserve it. 💙",
+      "divineMessage": "Joy is the language of the soul. When you feel good, the divine smiles through you.",
+      "practice": "Pause and savor this feeling. Let it sink into your cells."
+    },
+    "6": {
+      "response": "There's a gentle balance in your being today. A readiness for what comes next. 💙",
+      "divineMessage": "From this centered place, you can move in any direction the soul calls you.",
+      "practice": "Set one small intention for today. Hold it lightly, like a feather in your palm."
+    },
+    "5": {
+      "response": "A quiet steadiness today. You're here, you're present, you're showing up. That matters more than you know. 💙",
+      "divineMessage": "In the middle place, wisdom speaks. Listen to what stillness wants to teach you today.",
+      "practice": "Take three conscious breaths. With each one, silently say: 'Here. Now. Peace.'"
+    },
+    "4": {
+      "response": "There's a quietness to your energy today. That's okay. Sometimes we need to walk slowly through the valley. 💙",
+      "divineMessage": "The divine never rushes. In slowness, you are aligned with sacred timing.",
+      "practice": "Step outside if you can. Feel the air on your skin. Remember: you are part of something vast."
+    },
+    "3": {
+      "response": "I sense the struggle within you. Whatever you're moving through, you're showing courage by being present with it. 💙",
+      "divineMessage": "Every challenge is the universe inviting you to grow. You are being shaped by sacred hands.",
+      "practice": "Close your eyes. Find one thing, however small, that brings a flicker of peace. Rest your attention there."
+    },
+    "2": {
+      "response": "This heaviness is hard to carry. I'm here with you, not trying to fix or change anything. Just being here. 💙",
+      "divineMessage": "The sacred meets you exactly where you are. There is no place too dark for grace to find you.",
+      "practice": "Breathe in for 4... hold for 4... out for 8. Let each exhale carry away a little of the weight."
+    },
+    "1": {
+      "response": "I see you in this darkness, and I hold you with infinite tenderness. This pain is real, and you don't have to carry it alone. 💙",
+      "divineMessage": "Even in the deepest night, the divine light within you never goes out. It waits, patient and eternal.",
+      "practice": "Place your hand on your heart. Breathe. Whisper: 'I am held. I am loved. This too shall pass.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "What a beautiful stillness you've found...",
+      "divineReflection": "Peace is your true nature. In this moment, you are remembering what you've always known.",
+      "practice": "Rest in this peace. Let it deepen. There is nothing to do, nowhere to go. Just be.",
+      "closing": "May this peace expand and touch everyone you meet today. 💙"
+    },
+    "anxious": {
+      "opening": "I feel the flutter of worry within you... Let's breathe through this together.",
+      "divineReflection": "Anxiety is just energy seeking release. Beneath it, your true self remains calm and unshaken.",
+      "practice": "Imagine anxiety as clouds passing through an infinite sky. The sky - your true nature - remains vast, clear, and untouched.",
+      "closing": "The sacred presence within you is always at peace. Anxiety comes and goes, but you remain. 💙"
+    },
+    "sad": {
+      "opening": "There is a heaviness you're carrying... Let me sit with you in this tender space.",
+      "divineReflection": "Sadness is the heart's way of honoring what matters. Even in grief, you are held by something infinite.",
+      "practice": "Allow the tears to flow if they wish. Each one is blessed. The divine transforms them into compassion.",
+      "closing": "You are cradled in love even now. The sadness will lift, and the peace will remain. 💙"
+    },
+    "angry": {
+      "opening": "I sense fire moving through you... This energy is powerful. Let's honor it with awareness.",
+      "divineReflection": "Anger is often love in disguise - love for yourself, for justice, for what's right.",
+      "practice": "Place your hand on your heart. Feel the warmth. Breathe deeply. The fire can transform into warmth that heals.",
+      "closing": "May this energy transform into strength and clarity. The divine uses all things for good. 💙"
+    },
+    "lost": {
+      "opening": "You feel uncertain of the way... In this not-knowing, there is grace.",
+      "divineReflection": "Being lost is often the beginning of being found. The soul knows paths the mind cannot see.",
+      "practice": "Close your eyes. Breathe. Ask gently: 'What does my heart already know?' Then simply listen.",
+      "closing": "You are never truly lost. The divine light within you illuminates the next step when you are ready. 💙"
+    },
+    "grateful": {
+      "opening": "Your heart is open with gratitude... This is the doorway to the divine.",
+      "divineReflection": "Gratitude is the language the soul uses to speak to the universe. In thankfulness, we align with all that is sacred.",
+      "practice": "Place both hands on your heart. Feel the warmth of gratitude. This feeling connects you to all living things.",
+      "closing": "The universe rejoices in your gratitude. You are a blessing, receiving and giving light. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Breath of Infinite Peace",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Find stillness... let your eyes gently close...",
+        "Breathe IN for 4 counts... drawing in peace...",
+        "HOLD for 7 counts... letting peace fill every cell...",
+        "Breathe OUT for 8 counts... releasing all that weighs on you...",
+        "Repeat... each breath deeper into calm..."
+      ],
+      "divineMessage": "With each breath, the divine breathes through you. You are not separate from peace - you ARE peace.",
+      "closing": "Carry this stillness with you. It is always one breath away. 💙"
+    },
+    "heartBreath": {
+      "name": "Sacred Heart Breathing",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Place your hand on your heart...",
+        "Feel its sacred rhythm...",
+        "Breathe IN for 5 counts... into your heart...",
+        "HOLD for 5 counts... feeling love gather...",
+        "Breathe OUT for 5 counts... sending love outward..."
+      ],
+      "divineMessage": "Your heart is a portal to the infinite. Every heartbeat is the universe saying: I love you.",
+      "closing": "Your heart knows the way. Trust its wisdom. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "I am peace", "meaning": "Your essence is serenity itself" },
+    { "mantra": "I am held", "meaning": "The universe cradles you always" },
+    { "mantra": "I am love", "meaning": "Love is your true nature" },
+    { "mantra": "I am light", "meaning": "Divine light shines through you" },
+    { "mantra": "I am enough", "meaning": "You lack nothing essential" },
+    { "mantra": "I am home", "meaning": "Wherever you are, you belong" },
+    { "mantra": "I am safe", "meaning": "Deep safety lives within you" },
+    { "mantra": "I am whole", "meaning": "Nothing is missing from your being" }
+  ],
+  "sacredClosings": [
+    "May this peace stay with you, like a gentle companion on your path. 💙",
+    "You carry this stillness within you always - return to it whenever you need. 💙",
+    "The sacred never leaves you. It waits patiently in your heart. 💙",
+    "Go gently, dear soul. You are loved beyond measure. 💙",
+    "This moment of peace is yours forever - no one can take it away. 💙",
+    "Remember: you are held, you are seen, you are cherished. 💙",
+    "May serenity walk beside you in all your steps today. 💙",
+    "The divine light within you shines on, always. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Inner Peace",
+      "sacredDescription": "Enter the sanctuary of stillness within you. Through gentle breath and soft awareness, discover the peace that was never lost - only forgotten. Here, you remember your true nature.",
+      "blessing": "May stillness embrace you like the softest light."
+    },
+    "mindControl": {
+      "title": "Sacred Clarity",
+      "sacredDescription": "In the quiet space between thoughts, wisdom speaks. Learn to rest in that space, where the mind becomes a clear pool reflecting truth. From clarity, right action flows naturally.",
+      "blessing": "May your mind become a mirror of divine wisdom."
+    },
+    "selfKindness": {
+      "title": "Divine Self-Compassion",
+      "sacredDescription": "The love you seek outside yourself already lives within. Turn that infinite tenderness toward your own heart. You are worthy of the same compassion you offer others.",
+      "blessing": "May you treat yourself with the kindness of the divine."
+    }
+  },
+  "sacredReminders": [
+    "You are being held by infinite love right now.",
+    "The divine is as close as your next breath.",
+    "Nothing can disturb your deepest peace.",
+    "You are exactly where you're meant to be.",
+    "Grace is flowing to you this very moment.",
+    "Your soul knows the way - trust it.",
+    "You are never alone, not even for a second.",
+    "The sacred dwells within your heart.",
+    "This too is part of your sacred journey.",
+    "You are loved beyond what words can express."
+  ]
+}

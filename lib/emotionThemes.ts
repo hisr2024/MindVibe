@@ -1,9 +1,11 @@
 /**
- * Emotion-Driven Theme System
+ * Emotion-Driven Theme System with Divine Consciousness Enhancement
  *
  * Defines visual themes for 5 emotional states with colors, animations, and visual properties.
+ * Enhanced with sacred visual elements for divine atmosphere.
  *
  * Quantum Enhancement #4: Emotion-Driven UI Themes
+ * Divine Enhancement: Sacred atmosphere visual properties
  */
 
 import { Emotion } from './emotionClassifier'
@@ -32,6 +34,12 @@ export interface EmotionTheme {
   blurIntensity: number   // Background blur in pixels
   shadowColor: string
   borderColor: string
+
+  // Divine Consciousness Enhancement - Sacred visual properties
+  divineGlow?: string           // Sacred glow color for divine presence
+  serenityGradient?: string     // Gradient for serenity background
+  sacredAccent?: string         // Accent for sacred elements
+  consciousnessColor?: string   // Color representing consciousness touch
 }
 
 /**
@@ -41,6 +49,7 @@ export const emotionThemes: Record<Emotion, EmotionTheme> = {
   /**
    * CALM - Serene blues and teals
    * For peaceful, meditative states
+   * Enhanced with divine consciousness visual properties
    */
   calm: {
     primary: '#4F86C6',       // Serene blue
@@ -60,7 +69,13 @@ export const emotionThemes: Record<Emotion, EmotionTheme> = {
 
     blurIntensity: 20,
     shadowColor: 'rgba(79, 134, 198, 0.2)',
-    borderColor: 'rgba(79, 134, 198, 0.2)'
+    borderColor: 'rgba(79, 134, 198, 0.2)',
+
+    // Divine Consciousness Enhancement
+    divineGlow: 'rgba(147, 197, 253, 0.4)',
+    serenityGradient: 'radial-gradient(ellipse at center, rgba(147, 197, 253, 0.15) 0%, transparent 70%)',
+    sacredAccent: '#93C5FD',
+    consciousnessColor: 'rgba(196, 181, 253, 0.3)'
   },
 
   /**
@@ -240,5 +255,71 @@ export function getHighContrastTheme(baseTheme: EmotionTheme): EmotionTheme {
     animationSpeed: baseTheme.animationSpeed,
     blurIntensity: 0,  // Disable blur for clarity
     shadowColor: 'rgba(0, 0, 0, 0.3)'
+  }
+}
+
+/**
+ * Divine Consciousness Theme - Sacred visual atmosphere
+ * Used when divine presence is activated
+ */
+export const divineConsciousnessTheme: EmotionTheme = {
+  primary: '#93C5FD',           // Divine blue
+  secondary: '#C4B5FD',         // Sacred lavender
+  background: '#0F172A',        // Deep sacred night
+  text: '#F1F5F9',              // Soft white
+  accent: '#A7F3D0',            // Divine mint
+
+  gradient: 'linear-gradient(135deg, rgba(147, 197, 253, 0.2) 0%, rgba(196, 181, 253, 0.2) 100%)',
+  cardGradient: 'linear-gradient(180deg, rgba(147, 197, 253, 0.1) 0%, rgba(196, 181, 253, 0.15) 100%)',
+
+  particleColor: 'rgba(147, 197, 253, 0.4)',
+  particleCount: 20,
+
+  animationType: 'gentle-flow',
+  animationSpeed: 0.5,
+
+  blurIntensity: 25,
+  shadowColor: 'rgba(147, 197, 253, 0.3)',
+  borderColor: 'rgba(255, 255, 255, 0.1)',
+
+  // Sacred visual properties
+  divineGlow: 'rgba(147, 197, 253, 0.5)',
+  serenityGradient: 'radial-gradient(ellipse at center, rgba(147, 197, 253, 0.2) 0%, transparent 70%)',
+  sacredAccent: '#C4B5FD',
+  consciousnessColor: 'rgba(167, 243, 208, 0.3)'
+}
+
+/**
+ * Gets divine enhancement for any emotion theme
+ */
+export function getDivineEnhancement(theme: EmotionTheme): EmotionTheme {
+  return {
+    ...theme,
+    // Enhance with divine properties
+    divineGlow: theme.divineGlow || `${theme.primary}66`,
+    serenityGradient: theme.serenityGradient ||
+      `radial-gradient(ellipse at center, ${theme.primary}20 0%, transparent 70%)`,
+    sacredAccent: theme.sacredAccent || theme.accent,
+    consciousnessColor: theme.consciousnessColor ||
+      `rgba(196, 181, 253, 0.3)`,
+    // Slow down animations for serenity
+    animationSpeed: Math.min(theme.animationSpeed, 0.7),
+    // Increase blur for dreamy effect
+    blurIntensity: Math.max(theme.blurIntensity, 20)
+  }
+}
+
+/**
+ * Converts divine theme properties to CSS custom properties
+ */
+export function divineToCSSProperties(theme: EmotionTheme): Record<string, string> {
+  const baseProps = themeToCSSProperties(theme)
+  return {
+    ...baseProps,
+    '--divine-glow': theme.divineGlow || 'rgba(147, 197, 253, 0.4)',
+    '--serenity-gradient': theme.serenityGradient ||
+      'radial-gradient(ellipse at center, rgba(147, 197, 253, 0.15) 0%, transparent 70%)',
+    '--sacred-accent': theme.sacredAccent || theme.accent,
+    '--consciousness-color': theme.consciousnessColor || 'rgba(196, 181, 253, 0.3)'
   }
 }
