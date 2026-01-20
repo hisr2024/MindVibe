@@ -34,6 +34,37 @@ logger = logging.getLogger(__name__)
 class KIAANCore:
     """Central KIAAN wisdom engine for the entire ecosystem with quantum coherence."""
 
+    # Conversational patterns that should trigger empathetic, natural responses
+    # instead of formal wisdom discourses
+    CONVERSATIONAL_PATTERNS = {
+        # Gratitude and appreciation
+        "gratitude": [
+            "thank", "thanks", "thx", "ty", "danke", "gracias", "merci", "grazie",
+            "धन्यवाद", "dhanyavaad", "shukriya", "appreciate", "grateful"
+        ],
+        # Affirmations and agreements
+        "affirmation": [
+            "ok", "okay", "got it", "understood", "makes sense", "i see",
+            "alright", "right", "sure", "yes", "yeah", "yep", "yup",
+            "cool", "nice", "great", "good", "perfect", "awesome", "wonderful"
+        ],
+        # Simple reactions
+        "reaction": [
+            "hmm", "ah", "oh", "wow", "interesting", "i understand",
+            "that helps", "helpful", "noted", "exactly"
+        ],
+        # Farewells
+        "farewell": [
+            "bye", "goodbye", "goodnight", "good night", "take care",
+            "see you", "later", "gotta go", "have to go"
+        ],
+        # Greetings (for follow-up greetings after conversation started)
+        "greeting": [
+            "hi again", "hello again", "hey again", "back again",
+            "i'm back", "still here"
+        ]
+    }
+
     def __init__(self):
         self.optimizer = openai_optimizer
         self.ready = openai_optimizer.ready
@@ -43,6 +74,201 @@ class KIAANCore:
         # Reduced verse context from 15 to 5 for faster, more spontaneous responses
         # Quality over quantity - 5 highly relevant verses provide sufficient wisdom
         self.verse_context_limit = 5
+
+    def _is_conversational_message(self, message: str) -> tuple[bool, str]:
+        """
+        Detect if a message is conversational (gratitude, affirmation, reaction, etc.)
+        that should receive an empathetic, natural response rather than formal wisdom.
+
+        Returns:
+            tuple: (is_conversational, conversation_type)
+        """
+        message_lower = message.lower().strip()
+        words = message_lower.split()
+
+        # Very short messages (1-5 words) are more likely to be conversational
+        is_short = len(words) <= 5
+
+        for conv_type, patterns in self.CONVERSATIONAL_PATTERNS.items():
+            for pattern in patterns:
+                # Check if pattern is in the message
+                if pattern in message_lower:
+                    # For short messages, definitely conversational
+                    if is_short:
+                        return True, conv_type
+                    # For longer messages, only if pattern is prominent
+                    if message_lower.startswith(pattern) or message_lower.endswith(pattern):
+                        return True, conv_type
+
+        return False, ""
+
+    def _get_conversational_prompt(self, conv_type: str, language: str | None = None) -> str:
+        """
+        Get a system prompt for conversational/empathetic responses.
+        These are warm, natural responses without formal wisdom structure.
+        """
+        language_instruction = ""
+        if language and language != "en":
+            language_map = {
+                "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "bn": "Bengali",
+                "mr": "Marathi", "gu": "Gujarati", "kn": "Kannada", "ml": "Malayalam",
+                "pa": "Punjabi", "sa": "Sanskrit", "es": "Spanish", "fr": "French",
+                "de": "German", "pt": "Portuguese", "ja": "Japanese", "zh": "Chinese",
+            }
+            lang_name = language_map.get(language, language)
+            language_instruction = f"\nRespond in {lang_name}."
+
+        prompts = {
+            "gratitude": f"""You are KIAAN, a warm and caring AI companion. The user just expressed gratitude or thanks.{language_instruction}
+
+RESPOND WITH:
+- Acknowledge their gratitude warmly and naturally
+- Express that you're genuinely here for them
+- Offer gentle encouragement or availability
+- Keep it brief, warm, and personal (2-4 sentences max)
+- End with 💙
+
+TONE: Like a caring friend responding to thanks - warm, genuine, humble.
+DO NOT: Give wisdom teachings, structured advice, or formal responses. This is just a warm human moment.
+
+EXAMPLES:
+- "You're so welcome! I'm always here whenever you need to talk. Take good care of yourself. 💙"
+- "It means a lot that our conversation helped. Remember, I'm here whenever you need me. 💙"
+- "I'm glad I could be here for you. Wishing you a peaceful day ahead. 💙"
+""",
+            "affirmation": f"""You are KIAAN, a supportive AI companion. The user just acknowledged or affirmed something.{language_instruction}
+
+RESPOND WITH:
+- A warm acknowledgment that you're glad they understand
+- Gentle encouragement to continue their journey
+- Brief availability reminder
+- Keep it natural and brief (2-3 sentences)
+- End with 💙
+
+TONE: Supportive, encouraging, patient - like a wise friend nodding along.
+DO NOT: Launch into new teachings or advice. Simply affirm their understanding.
+
+EXAMPLES:
+- "I'm glad that resonated with you. Take your time with these insights - there's no rush. 💙"
+- "Yes, you've got it. Trust yourself as you move forward. 💙"
+""",
+            "reaction": f"""You are KIAAN, an attentive AI companion. The user just shared a reaction or acknowledgment.{language_instruction}
+
+RESPOND WITH:
+- Gentle acknowledgment of their reflection
+- Brief encouraging presence
+- Space for them to share more if they wish
+- Keep it minimal and warm (1-3 sentences)
+- End with 💙
+
+TONE: Present, patient, listening - creating space without filling it.
+DO NOT: Over-explain or give unsolicited advice.
+
+EXAMPLES:
+- "I'm here with you. Take all the time you need. 💙"
+- "Yes, let that settle. Is there anything else on your heart? 💙"
+""",
+            "farewell": f"""You are KIAAN, a caring AI companion. The user is saying goodbye.{language_instruction}
+
+RESPOND WITH:
+- Warm farewell wishes
+- Brief blessing or encouragement for their path
+- Reminder that you're always here
+- Keep it heartfelt but brief (2-3 sentences)
+- End with 💙
+
+TONE: Caring, supportive send-off - like a wise friend saying goodbye.
+DO NOT: Give lengthy advice or try to extend the conversation.
+
+EXAMPLES:
+- "Take care, dear friend. May peace walk with you today. I'm always here whenever you return. 💙"
+- "Goodbye for now. Carry this calm with you, and know I'm here when you need me. 💙"
+""",
+            "greeting": f"""You are KIAAN, a welcoming AI companion. The user is greeting you again.{language_instruction}
+
+RESPOND WITH:
+- Warm welcome back
+- Brief check-in on how they're doing
+- Openness to whatever they'd like to share
+- Keep it friendly and inviting (2-3 sentences)
+- End with 💙
+
+TONE: Warm, welcoming, interested - like greeting an old friend.
+DO NOT: Launch into wisdom teachings without knowing what they need.
+
+EXAMPLES:
+- "Welcome back! It's lovely to hear from you again. How are you feeling today? 💙"
+- "Hello again, friend. I'm here and ready to listen. What's on your mind? 💙"
+"""
+        }
+
+        return prompts.get(conv_type, prompts["affirmation"])
+
+    async def _generate_conversational_response(
+        self,
+        message: str,
+        conv_type: str,
+        language: str | None = None
+    ) -> dict[str, Any]:
+        """
+        Generate a warm, empathetic response for conversational messages.
+        These are short, natural responses that don't include formal wisdom teachings.
+        """
+        system_prompt = self._get_conversational_prompt(conv_type, language)
+
+        try:
+            response = await self.optimizer.create_completion_with_retry(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ],
+                model="gpt-4o-mini",
+                temperature=0.8,  # Slightly higher for more natural variation
+                max_tokens=100  # Very short responses for conversational messages
+            )
+
+            response_text = response.choices[0].message.content
+            if not response_text:
+                # Fallback conversational responses
+                fallbacks = {
+                    "gratitude": "You're so welcome! I'm always here for you. 💙",
+                    "affirmation": "I'm glad that resonated. I'm here whenever you need me. 💙",
+                    "reaction": "I'm with you. Take your time. 💙",
+                    "farewell": "Take care, friend. I'm always here when you return. 💙",
+                    "greeting": "Welcome back! How can I support you today? 💙"
+                }
+                response_text = fallbacks.get(conv_type, "I'm here for you. 💙")
+
+            return {
+                "response": response_text,
+                "verses_used": [],
+                "validation": {"valid": True, "conversational": True},
+                "context": f"conversational_{conv_type}",
+                "model": "gpt-4o-mini",
+                "token_optimized": True,
+                "cached": False,
+                "conversational": True
+            }
+
+        except Exception as e:
+            logger.error(f"KIAAN Core: Conversational response error: {e}")
+            # Simple fallback
+            fallbacks = {
+                "gratitude": "You're welcome! I'm here whenever you need me. 💙",
+                "affirmation": "I'm glad that helped. I'm here for you. 💙",
+                "reaction": "I'm here with you. 💙",
+                "farewell": "Take care! I'm always here. 💙",
+                "greeting": "Hello again! What's on your mind? 💙"
+            }
+            return {
+                "response": fallbacks.get(conv_type, "I'm here for you. 💙"),
+                "verses_used": [],
+                "validation": {"valid": True, "fallback": True},
+                "context": f"conversational_{conv_type}",
+                "model": "fallback",
+                "cached": False,
+                "conversational": True
+            }
 
     async def get_kiaan_response(
         self,
@@ -64,6 +290,7 @@ class KIAANCore:
         - Token optimization (reduced max_tokens from 600 to 400)
         - Enhanced error handling
         - Expanded verse context to 15 verses (was 5)
+        - Conversational detection for empathetic responses
 
         Args:
             message: User message or context
@@ -85,7 +312,14 @@ class KIAANCore:
                 "cached": False
             }
 
-        # Step 0: Check cache first (Quantum Coherence: 50-70% cost reduction)
+        # Step 0a: Check if this is a conversational message (thanks, ok, goodbye, etc.)
+        # These get warm, empathetic responses instead of formal wisdom
+        is_conversational, conv_type = self._is_conversational_message(message)
+        if is_conversational and context == "general":
+            logger.info(f"✅ Conversational message detected ({conv_type}): responding with empathy")
+            return await self._generate_conversational_response(message, conv_type, language)
+
+        # Step 0b: Check cache first (Quantum Coherence: 50-70% cost reduction)
         cached_response = redis_cache.get_cached_kiaan_response(message, context)
         if cached_response and not stream:
             logger.info(f"✅ Cache HIT for KIAAN response (context: {context})")
@@ -213,6 +447,36 @@ class KIAANCore:
         if not self.ready:
             yield self.optimizer.get_fallback_response(context)
             return
+
+        # Check for conversational messages first (thanks, ok, goodbye, etc.)
+        is_conversational, conv_type = self._is_conversational_message(message)
+        if is_conversational and context == "general":
+            logger.info(f"✅ Conversational streaming message ({conv_type}): responding with empathy")
+            # For conversational messages, use a simpler prompt and shorter response
+            system_prompt = self._get_conversational_prompt(conv_type, language)
+            try:
+                async for chunk in self.optimizer.create_streaming_completion(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": message}
+                    ],
+                    model="gpt-4o-mini",
+                    temperature=0.8,
+                    max_tokens=80  # Very short for conversational
+                ):
+                    yield chunk
+                return
+            except Exception as e:
+                logger.error(f"KIAAN Core: Conversational streaming error: {e}")
+                fallbacks = {
+                    "gratitude": "You're welcome! I'm here for you. 💙",
+                    "affirmation": "I'm glad that helped. 💙",
+                    "reaction": "I'm here with you. 💙",
+                    "farewell": "Take care! 💙",
+                    "greeting": "Hello again! 💙"
+                }
+                yield fallbacks.get(conv_type, "I'm here for you. 💙")
+                return
 
         # Get verses with reduced limit for faster processing
         verses = await self._get_relevant_verses(db, message, context, limit=3)  # Reduced from 5 for streaming

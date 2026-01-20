@@ -100,7 +100,7 @@ export function KiaanChat({
 
   return (
     <div
-      className={`relative flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 ${className}`}
+      className={`relative flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 h-[500px] max-h-[calc(100vh-350px)] min-h-[350px] ${className}`}
     >
       {/* Chat Header */}
       <div className="flex items-center gap-3 border-b border-orange-500/15 px-4 py-3">
@@ -144,7 +144,7 @@ export function KiaanChat({
       </div>
 
       {/* Scrollable Messages Container */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 overflow-hidden">
         <SimpleBar
           autoHide={false}
           scrollableNodeProps={{
@@ -155,13 +155,13 @@ export function KiaanChat({
             'aria-live': 'polite',
             className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
             style: {
-              maxHeight: 'calc(100vh - 300px)',
-              minHeight: '300px',
+              height: '100%',
+              maxHeight: '100%',
               scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
               paddingRight: '0.25rem'
             }
           }}
-          className="mv-energy-scrollbar flex-1 pr-3 md:pr-5"
+          className="mv-energy-scrollbar h-full pr-3 md:pr-5"
         >
           <div className="px-4 pr-6 md:pr-10 py-4 space-y-4">
             {visibleMessages.length === 0 ? (
