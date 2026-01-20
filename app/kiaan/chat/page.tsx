@@ -174,6 +174,15 @@ function KiaanChatPageInner() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Voice Mode Toggle */}
+            <Link
+              href="/kiaan/voice"
+              className="flex items-center gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:from-orange-500/20 hover:to-amber-500/20"
+              title="Switch to Voice Mode"
+            >
+              <span className="text-lg">🎙️</span>
+              <span className="hidden sm:inline">{t('kiaan.voice.switch', 'Voice Mode')}</span>
+            </Link>
             {/* Language Selector */}
             <LanguageSelector compact />
             <Link

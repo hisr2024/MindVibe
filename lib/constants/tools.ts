@@ -38,6 +38,15 @@ export const CORE_TOOLS: ToolConfig[] = [
     href: '/#kiaan-chat',
   },
   {
+    id: 'kiaan-voice',
+    icon: '🎙️',
+    title: 'KIAAN Voice',
+    description: 'Voice-activated wisdom guide',
+    gradient: 'from-orange-400/30 to-amber-400/30',
+    href: '/kiaan/voice',
+    badge: 'new',
+  },
+  {
     id: 'journal',
     icon: '📝',
     title: 'Private Journal',
