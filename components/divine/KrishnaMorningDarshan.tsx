@@ -9,11 +9,43 @@
  * - Relevant Gita verse spoken as Krishna's direct guidance
  *
  * "Dear child, I see your heart. I walk beside you today."
+ *
+ * FIXES APPLIED:
+ * - Reduced animation intensity to prevent flickering
+ * - Added will-change hints for GPU acceleration
+ * - Stabilized decorative element positioning
+ * - Added loading state for smoother transitions
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, EmotionalState } from '@/contexts/DivineConsciousnessContext';
+
+// Memoized decorative element to prevent re-renders
+const DecorativeFlute = memo(() => (
+  <motion.div
+    className="absolute top-4 right-4 text-3xl sm:text-4xl opacity-20 pointer-events-none select-none will-change-transform"
+    animate={{ rotate: [0, 3, 0, -3, 0] }}
+    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+    style={{ transform: 'translateZ(0)' }}
+  >
+    🪈
+  </motion.div>
+));
+DecorativeFlute.displayName = 'DecorativeFlute';
+
+// Memoized peacock feather accent
+const DecorativePeacock = memo(() => (
+  <motion.div
+    className="absolute bottom-4 left-4 text-2xl sm:text-3xl opacity-15 pointer-events-none select-none will-change-transform"
+    animate={{ y: [0, -3, 0] }}
+    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+    style={{ transform: 'translateZ(0)' }}
+  >
+    🦚
+  </motion.div>
+));
+DecorativePeacock.displayName = 'DecorativePeacock';
 
 interface KrishnaMorningDarshanProps {
   userName?: string;
@@ -126,64 +158,69 @@ export function KrishnaMorningDarshan({
   const { actions } = useDivineConsciousness();
   const [phase, setPhase] = useState<'entering' | 'greeting' | 'message' | 'verse' | 'closing'>('entering');
   const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_DARSHANS>('morning');
+  const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    // Determine time of day
+  // Determine time of day once on mount - memoized
+  const initialTimeOfDay = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour >= 4 && hour < 7) setTimeOfDay('dawn');
-    else if (hour >= 7 && hour < 12) setTimeOfDay('morning');
-    else if (hour >= 12 && hour < 17) setTimeOfDay('afternoon');
-    else if (hour >= 17 && hour < 21) setTimeOfDay('evening');
-    else setTimeOfDay('night');
-
-    // Auto-progress through phases
-    const timers = [
-      setTimeout(() => setPhase('greeting'), 1500),
-      setTimeout(() => setPhase('message'), 4000),
-      setTimeout(() => setPhase('verse'), 9000),
-      setTimeout(() => setPhase('closing'), 15000),
-    ];
-
-    return () => timers.forEach(clearTimeout);
+    if (hour >= 4 && hour < 7) return 'dawn';
+    if (hour >= 7 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
   }, []);
 
-  const darshan = TIME_DARSHANS[timeOfDay];
-  const moodData = lastMood ? MOOD_MESSAGES[lastMood] : DEFAULT_MESSAGE;
+  useEffect(() => {
+    setTimeOfDay(initialTimeOfDay);
+    // Small delay to ensure smooth initial render
+    const readyTimer = setTimeout(() => setIsReady(true), 100);
+
+    // Auto-progress through phases with slightly longer delays for smoother transitions
+    const timers = [
+      setTimeout(() => setPhase('greeting'), 1800),
+      setTimeout(() => setPhase('message'), 4500),
+      setTimeout(() => setPhase('verse'), 10000),
+      setTimeout(() => setPhase('closing'), 16000),
+    ];
+
+    return () => {
+      clearTimeout(readyTimer);
+      timers.forEach(clearTimeout);
+    };
+  }, [initialTimeOfDay]);
+
+  // Memoize darshan and moodData
+  const darshan = useMemo(() => TIME_DARSHANS[timeOfDay], [timeOfDay]);
+  const moodData = useMemo(() => lastMood ? MOOD_MESSAGES[lastMood] : DEFAULT_MESSAGE, [lastMood]);
+
+  // Show loading placeholder until ready
+  if (!isReady) {
+    return (
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-amber-500/20 p-8 ${className}`}>
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
-      className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-amber-500/20 p-8 ${className}`}
-      initial={{ opacity: 0, scale: 0.95 }}
+      className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-amber-500/20 p-6 sm:p-8 ${className}`}
+      initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      style={{ transform: 'translateZ(0)' }}
     >
-      {/* Divine glow effect */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-radial from-amber-400/10 via-transparent to-transparent"
-        animate={{
-          opacity: [0.3, 0.6, 0.3],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{ duration: 4, repeat: Infinity }}
+      {/* Divine glow effect - reduced intensity to prevent flickering */}
+      <div
+        className="absolute inset-0 bg-gradient-radial from-amber-400/8 via-transparent to-transparent pointer-events-none"
+        style={{ animation: 'pulse 6s ease-in-out infinite', opacity: 0.4 }}
       />
 
-      {/* Krishna's flute decorative element */}
-      <motion.div
-        className="absolute top-4 right-4 text-4xl opacity-30"
-        animate={{ rotate: [0, 5, 0, -5, 0] }}
-        transition={{ duration: 6, repeat: Infinity }}
-      >
-        🪈
-      </motion.div>
-
-      {/* Peacock feather accent */}
-      <motion.div
-        className="absolute bottom-4 left-4 text-3xl opacity-20"
-        animate={{ y: [0, -5, 0] }}
-        transition={{ duration: 3, repeat: Infinity }}
-      >
-        🦚
-      </motion.div>
+      {/* Memoized decorative elements to prevent re-renders */}
+      <DecorativeFlute />
+      <DecorativePeacock />
 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
@@ -191,22 +228,24 @@ export function KrishnaMorningDarshan({
           {phase === 'entering' && (
             <motion.div
               key="entering"
-              className="text-center py-8"
-              initial={{ opacity: 0, y: 20 }}
+              className="text-center py-6 sm:py-8"
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <motion.span
-                className="text-6xl block mb-4"
+                className="text-5xl sm:text-6xl block mb-4 will-change-transform"
                 animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 1, 0.5],
+                  scale: [1, 1.08, 1],
+                  opacity: [0.7, 1, 0.7],
                 }}
-                transition={{ duration: 2, repeat: Infinity }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transform: 'translateZ(0)' }}
               >
                 {darshan.icon}
               </motion.span>
-              <p className="text-amber-200/70 italic">{darshan.atmosphere}</p>
+              <p className="text-amber-200/70 italic text-sm sm:text-base px-4">{darshan.atmosphere}</p>
             </motion.div>
           )}
 
@@ -214,16 +253,17 @@ export function KrishnaMorningDarshan({
           {phase === 'greeting' && (
             <motion.div
               key="greeting"
-              className="text-center py-6"
-              initial={{ opacity: 0, y: 20 }}
+              className="text-center py-5 sm:py-6"
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <motion.span className="text-5xl block mb-4">{darshan.icon}</motion.span>
-              <h2 className="text-2xl font-light text-amber-100 mb-2">
+              <span className="text-4xl sm:text-5xl block mb-4">{darshan.icon}</span>
+              <h2 className="text-xl sm:text-2xl font-light text-amber-100 mb-2 px-2">
                 {darshan.greeting}{userName ? `, ${userName}` : ''}
               </h2>
-              <p className="text-amber-200/80 max-w-md mx-auto">
+              <p className="text-amber-200/80 max-w-md mx-auto text-sm sm:text-base px-4">
                 {darshan.blessing}
               </p>
             </motion.div>
@@ -233,30 +273,27 @@ export function KrishnaMorningDarshan({
           {phase === 'message' && (
             <motion.div
               key="message"
-              className="py-6"
-              initial={{ opacity: 0, y: 20 }}
+              className="py-5 sm:py-6"
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <div className="flex items-start gap-4">
-                <motion.div
-                  className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30"
-                  animate={{
-                    boxShadow: [
-                      '0 0 20px rgba(251, 191, 36, 0.3)',
-                      '0 0 40px rgba(251, 191, 36, 0.5)',
-                      '0 0 20px rgba(251, 191, 36, 0.3)',
-                    ],
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg"
+                  style={{
+                    boxShadow: '0 0 25px rgba(251, 191, 36, 0.35)',
+                    animation: 'glow 3s ease-in-out infinite'
                   }}
-                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <span className="text-2xl">🙏</span>
-                </motion.div>
-                <div>
+                  <span className="text-xl sm:text-2xl">🙏</span>
+                </div>
+                <div className="flex-1 min-w-0">
                   <p className="text-xs text-amber-400/60 uppercase tracking-wider mb-2">
                     Krishna speaks to you...
                   </p>
-                  <p className="text-amber-100/90 text-lg leading-relaxed italic">
+                  <p className="text-amber-100/90 text-base sm:text-lg leading-relaxed italic">
                     "{moodData.message}"
                   </p>
                 </div>
@@ -268,19 +305,20 @@ export function KrishnaMorningDarshan({
           {phase === 'verse' && (
             <motion.div
               key="verse"
-              className="py-6"
-              initial={{ opacity: 0, y: 20 }}
+              className="py-5 sm:py-6"
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <div className="bg-amber-950/50 border border-amber-500/20 rounded-2xl p-6">
+              <div className="bg-amber-950/50 border border-amber-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
                 <p className="text-xs text-amber-400/60 uppercase tracking-wider mb-3">
                   Divine Wisdom for You Today
                 </p>
-                <p className="text-amber-100/80 italic mb-4 leading-relaxed">
+                <p className="text-amber-100/80 italic mb-4 leading-relaxed text-sm sm:text-base">
                   "{moodData.verse}"
                 </p>
-                <p className="text-amber-400/70 text-sm text-right">
+                <p className="text-amber-400/70 text-xs sm:text-sm text-right">
                   - {moodData.reference}
                 </p>
               </div>
@@ -291,33 +329,33 @@ export function KrishnaMorningDarshan({
           {phase === 'closing' && (
             <motion.div
               key="closing"
-              className="text-center py-6"
-              initial={{ opacity: 0, y: 20 }}
+              className="text-center py-5 sm:py-6"
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <motion.div
-                className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center"
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.8, 1, 0.8],
+              <div
+                className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center will-change-transform"
+                style={{
+                  animation: 'heartbeat 3s ease-in-out infinite',
+                  transform: 'translateZ(0)'
                 }}
-                transition={{ duration: 3, repeat: Infinity }}
               >
-                <span className="text-4xl">💙</span>
-              </motion.div>
-              <p className="text-amber-100/90 text-lg mb-4">
+                <span className="text-3xl sm:text-4xl">💙</span>
+              </div>
+              <p className="text-amber-100/90 text-base sm:text-lg mb-4 px-2">
                 Go in peace, beloved one.
               </p>
-              <p className="text-amber-200/60 text-sm italic max-w-sm mx-auto">
+              <p className="text-amber-200/60 text-xs sm:text-sm italic max-w-sm mx-auto px-4">
                 "I am always with you. In every thought, every breath, every heartbeat - there I am. You are never alone."
               </p>
 
               {onComplete && (
                 <motion.button
                   onClick={onComplete}
-                  className="mt-6 px-6 py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/30 rounded-xl text-amber-100 transition-all"
+                  className="mt-5 sm:mt-6 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 active:from-amber-500/40 active:to-orange-500/40 border border-amber-500/30 rounded-xl text-amber-100 text-sm sm:text-base transition-all"
                   whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   Begin My Day with Krishna
                 </motion.button>
@@ -327,16 +365,19 @@ export function KrishnaMorningDarshan({
         </AnimatePresence>
       </div>
 
-      {/* Phase indicator dots */}
-      <div className="flex justify-center gap-2 mt-6">
-        {['entering', 'greeting', 'message', 'verse', 'closing'].map((p, i) => (
-          <motion.div
+      {/* Phase indicator dots - using CSS animations to prevent JS overhead */}
+      <div className="flex justify-center gap-2 mt-5 sm:mt-6">
+        {['entering', 'greeting', 'message', 'verse', 'closing'].map((p) => (
+          <div
             key={p}
-            className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-              phase === p ? 'bg-amber-400' : 'bg-amber-400/20'
+            className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              phase === p
+                ? 'bg-amber-400 scale-125'
+                : 'bg-amber-400/25 scale-100'
             }`}
-            animate={phase === p ? { scale: [1, 1.3, 1] } : {}}
-            transition={{ duration: 1, repeat: Infinity }}
+            style={{
+              animation: phase === p ? 'dotPulse 2s ease-in-out infinite' : 'none'
+            }}
           />
         ))}
       </div>
