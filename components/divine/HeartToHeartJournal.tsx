@@ -169,29 +169,7 @@ export function HeartToHeartJournal({
   };
 
   if (!isActive) {
-    return (
-      <motion.button
-        onClick={() => {
-          setIsActive(true);
-          actions.enterSacredMode();
-        }}
-        className={`flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-pink-500/20 to-rose-500/20 hover:from-pink-500/30 hover:to-rose-500/30 border border-pink-500/30 rounded-2xl transition-all ${className}`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <motion.span
-          className="text-2xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          💙
-        </motion.span>
-        <div className="text-left">
-          <span className="text-pink-100 font-medium block">Heart-to-Heart with Krishna</span>
-          <span className="text-pink-200/60 text-xs">Write a letter to the Divine</span>
-        </div>
-      </motion.button>
-    );
+    return null;
   }
 
   return (

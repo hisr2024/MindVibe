@@ -161,26 +161,7 @@ export function DivineProtectionShield({
   }, [onClose]);
 
   if (!isActive) {
-    return (
-      <motion.button
-        onClick={activateShield}
-        className={`flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/30 rounded-2xl transition-all ${className}`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <motion.span
-          className="text-2xl"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        >
-          ☸️
-        </motion.span>
-        <div className="text-left">
-          <span className="text-amber-100 font-medium block">Divine Protection Shield</span>
-          <span className="text-amber-200/60 text-xs">Activate Krishna's protection</span>
-        </div>
-      </motion.button>
-    );
+    return null;
   }
 
   return (
