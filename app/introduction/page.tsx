@@ -235,71 +235,92 @@ export default function IntroductionPage() {
             />
           </motion.section>
 
-          {/* ==================== PRIMARY ACTIONS - Mobile First ==================== */}
+          {/* ==================== PRIMARY ACTION - Talk to KIAAN ==================== */}
 
-          {/* Top Actions Row - Full width cards on mobile */}
           <section className="mb-6 sm:mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
-              {/* Talk to KIAAN - Primary CTA */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+            {/* Talk to KIAAN - Primary CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Link
+                href="/kiaan"
+                className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-orange-900/50 to-amber-900/50 border border-orange-500/30 rounded-2xl hover:border-orange-500/50 transition-all active:scale-[0.98] group"
               >
-                <Link
-                  href="/kiaan"
-                  className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-orange-900/50 to-amber-900/50 border border-orange-500/30 rounded-2xl hover:border-orange-500/50 transition-all active:scale-[0.98] group"
+                <motion.div
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0"
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(251, 146, 60, 0.3)',
+                      '0 0 35px rgba(251, 146, 60, 0.5)',
+                      '0 0 20px rgba(251, 146, 60, 0.3)',
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <motion.div
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0"
-                    animate={{
-                      boxShadow: [
-                        '0 0 20px rgba(251, 146, 60, 0.3)',
-                        '0 0 35px rgba(251, 146, 60, 0.5)',
-                        '0 0 20px rgba(251, 146, 60, 0.3)',
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <span className="text-xl sm:text-2xl font-bold text-slate-900">K</span>
-                  </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-orange-100 font-semibold text-base sm:text-lg">Talk to KIAAN</h3>
-                    <p className="text-orange-200/60 text-xs sm:text-sm truncate">Divine wisdom & guidance</p>
-                  </div>
-                  <div className="text-orange-300/50 group-hover:text-orange-300 transition-colors flex-shrink-0">
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </Link>
-              </motion.div>
-
-              {/* Heart-to-Heart Journal */}
-              <motion.button
-                onClick={openHeartJournal}
-                className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-pink-500/30 rounded-2xl hover:border-pink-500/50 transition-all active:scale-[0.98] group w-full text-left"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
-                style={{ transform: 'translateZ(0)' }}
-              >
-                <div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 flex items-center justify-center flex-shrink-0 divine-heartbeat"
-                >
-                  <span className="text-2xl sm:text-3xl">💙</span>
-                </div>
+                  <span className="text-xl sm:text-2xl font-bold text-slate-900">K</span>
+                </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-pink-100 font-semibold text-base sm:text-lg">Heart-to-Heart</h3>
-                  <p className="text-pink-200/60 text-xs sm:text-sm truncate">Write to Krishna</p>
+                  <h3 className="text-orange-100 font-semibold text-base sm:text-lg">Talk to KIAAN</h3>
+                  <p className="text-orange-200/60 text-xs sm:text-sm truncate">Divine wisdom & guidance</p>
                 </div>
-                <div className="text-pink-300/50 group-hover:text-pink-300 transition-colors flex-shrink-0">
+                <div className="text-orange-300/50 group-hover:text-orange-300 transition-colors flex-shrink-0">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
+              </Link>
+            </motion.div>
+          </section>
+
+          {/* ==================== SYMMETRIC DIVINE FEATURES ==================== */}
+          {/* Divine Protection Shield (Left) & Heart-to-Heart with Krishna (Right) */}
+
+          <section className="mb-6 sm:mb-8">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+
+              {/* LEFT BRICK - Divine Protection Shield */}
+              <motion.button
+                onClick={openProtectionShield}
+                className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-amber-500/30 rounded-2xl hover:border-amber-500/50 transition-all active:scale-[0.98] group text-center"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
+                style={{ transform: 'translateZ(0)' }}
+              >
+                <div
+                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center animate-spin-slow"
+                  style={{ animationDuration: '12s' }}
+                >
+                  <span className="text-3xl sm:text-4xl">☸️</span>
+                </div>
+                <div className="w-full">
+                  <h3 className="text-amber-100 font-semibold text-sm sm:text-base md:text-lg">Divine Protection Shield</h3>
+                  <p className="text-amber-200/60 text-xs sm:text-sm mt-1">Activate Krishna's protection</p>
+                </div>
               </motion.button>
+
+              {/* RIGHT BRICK - Heart-to-Heart with Krishna */}
+              <motion.button
+                onClick={openHeartJournal}
+                className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-pink-500/30 rounded-2xl hover:border-pink-500/50 transition-all active:scale-[0.98] group text-center"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
+                style={{ transform: 'translateZ(0)' }}
+              >
+                <div
+                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 flex items-center justify-center divine-heartbeat"
+                >
+                  <span className="text-3xl sm:text-4xl">💙</span>
+                </div>
+                <div className="w-full">
+                  <h3 className="text-pink-100 font-semibold text-sm sm:text-base md:text-lg">Heart-to-Heart with Krishna</h3>
+                  <p className="text-pink-200/60 text-xs sm:text-sm mt-1">Write a letter to the Divine</p>
+                </div>
+              </motion.button>
+
             </div>
           </section>
 
@@ -341,7 +362,7 @@ export default function IntroductionPage() {
                 </motion.div>
               </div>
 
-              {/* Column 2: Sakha Mode & Protection */}
+              {/* Column 2: Sakha Mode */}
               <div className="space-y-4 sm:space-y-5">
                 {/* Sakha Mode Card */}
                 <motion.div
@@ -351,32 +372,6 @@ export default function IntroductionPage() {
                 >
                   <SakhaModeCard />
                 </motion.div>
-
-                {/* Divine Protection Shield */}
-                <motion.button
-                  onClick={openProtectionShield}
-                  className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-amber-500/30 rounded-2xl hover:border-amber-500/50 transition-all active:scale-[0.98] group text-left"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.55, duration: 0.4, ease: "easeOut" }}
-                  style={{ transform: 'translateZ(0)' }}
-                >
-                  <div
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center flex-shrink-0 animate-spin-slow"
-                    style={{ animationDuration: '12s' }}
-                  >
-                    <span className="text-2xl sm:text-3xl">☸️</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-amber-100 font-semibold text-base sm:text-lg">Divine Protection</h3>
-                    <p className="text-amber-200/60 text-xs sm:text-sm">Sudarshana Chakra Shield</p>
-                  </div>
-                  <div className="text-amber-300/50 group-hover:text-amber-300 transition-colors flex-shrink-0">
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </motion.button>
               </div>
 
               {/* Column 3: Navigation & Quick Access */}
