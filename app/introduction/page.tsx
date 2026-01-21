@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DivineGreeting,
@@ -17,6 +17,71 @@ import {
 import { DivineConsciousnessProvider } from '@/contexts/DivineConsciousnessContext'
 import Link from 'next/link'
 
+// Animation variants for consistent motion
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4, ease: "easeOut" }
+};
+
+// Memoized feature card to prevent re-renders
+const FeatureCard = memo(({
+  href,
+  icon,
+  iconAnimation,
+  title,
+  subtitle,
+  gradient,
+  borderColor,
+  textColor,
+  delay = 0,
+  onClick,
+}: {
+  href?: string;
+  icon: React.ReactNode;
+  iconAnimation?: Record<string, unknown>;
+  title: string;
+  subtitle: string;
+  gradient: string;
+  borderColor: string;
+  textColor: string;
+  delay?: number;
+  onClick?: () => void;
+}) => {
+  const content = (
+    <motion.div
+      className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 ${gradient} border ${borderColor} rounded-2xl hover:border-opacity-70 transition-all active:scale-[0.98] group w-full text-left`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4, ease: "easeOut" }}
+      style={{ transform: 'translateZ(0)' }}
+    >
+      <div
+        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full ${gradient.replace('50', '30')} flex items-center justify-center flex-shrink-0`}
+        style={iconAnimation}
+      >
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className={`${textColor} font-semibold text-base sm:text-lg`}>{title}</h3>
+        <p className={`${textColor.replace('100', '200')}/60 text-xs sm:text-sm truncate`}>{subtitle}</p>
+      </div>
+      <div className={`${textColor.replace('100', '300')}/50 group-hover:${textColor.replace('100', '300')} transition-colors flex-shrink-0`}>
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
+    </motion.div>
+  );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  return <button onClick={onClick} className="w-full">{content}</button>;
+});
+FeatureCard.displayName = 'FeatureCard';
+
 /**
  * Introduction Page - Divine Krishna Features
  *
@@ -32,27 +97,43 @@ export default function IntroductionPage() {
   const [showProtectionShield, setShowProtectionShield] = useState(false)
   const [showHeartJournal, setShowHeartJournal] = useState(false)
   const [hasSeenDarshan, setHasSeenDarshan] = useState(false)
+  const [isPageReady, setIsPageReady] = useState(false)
 
   // Check if user has seen today's darshan
   useEffect(() => {
+    // Small delay to ensure smooth page load
+    const readyTimer = setTimeout(() => setIsPageReady(true), 100);
+
     const today = new Date().toDateString()
     const lastDarshanDate = localStorage.getItem('lastDarshanDate')
 
     if (lastDarshanDate !== today) {
       const timer = setTimeout(() => {
         setShowMorningDarshan(true)
-      }, 1500)
-      return () => clearTimeout(timer)
+      }, 1800) // Slightly longer delay for smoother appearance
+      return () => {
+        clearTimeout(timer)
+        clearTimeout(readyTimer)
+      }
     } else {
       setHasSeenDarshan(true)
     }
+
+    return () => clearTimeout(readyTimer)
   }, [])
 
-  const completeDarshan = () => {
+  // Memoized handlers to prevent recreation
+  const completeDarshan = useCallback(() => {
     setShowMorningDarshan(false)
     setHasSeenDarshan(true)
     localStorage.setItem('lastDarshanDate', new Date().toDateString())
-  }
+  }, [])
+
+  const openProtectionShield = useCallback(() => setShowProtectionShield(true), [])
+  const closeProtectionShield = useCallback(() => setShowProtectionShield(false), [])
+  const openHeartJournal = useCallback(() => setShowHeartJournal(true), [])
+  const closeHeartJournal = useCallback(() => setShowHeartJournal(false), [])
+  const openMorningDarshan = useCallback(() => setShowMorningDarshan(true), [])
 
   return (
     <DivineConsciousnessProvider>
@@ -63,47 +144,55 @@ export default function IntroductionPage() {
           {/* ==================== MODALS ==================== */}
 
           {/* Morning Darshan Modal - Full screen on mobile */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {showMorningDarshan && (
               <motion.div
-                className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md"
+                className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <KrishnaMorningDarshan
-                  onComplete={completeDarshan}
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   className="max-w-lg w-full max-h-[90vh] overflow-y-auto"
-                />
+                >
+                  <KrishnaMorningDarshan
+                    onComplete={completeDarshan}
+                  />
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
 
           <DivineProtectionShield
             isOpen={showProtectionShield}
-            onClose={() => setShowProtectionShield(false)}
+            onClose={closeProtectionShield}
           />
 
           <HeartToHeartJournal
             isOpen={showHeartJournal}
-            onClose={() => setShowHeartJournal(false)}
+            onClose={closeHeartJournal}
           />
 
           {/* ==================== HERO SECTION ==================== */}
 
           <motion.section
             className="text-center py-6 sm:py-8 md:py-10 lg:py-12"
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            {/* Animated Icon - Scales with screen */}
-            <motion.div
-              className="text-5xl sm:text-6xl md:text-7xl mb-3 sm:mb-4"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 3, repeat: Infinity }}
+            {/* Animated Icon - Scales with screen, reduced animation intensity */}
+            <div
+              className="text-5xl sm:text-6xl md:text-7xl mb-3 sm:mb-4 divine-pulse"
+              style={{ transform: 'translateZ(0)' }}
             >
               🙏
-            </motion.div>
+            </div>
 
             {/* Title - Responsive typography */}
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white/90 mb-2 sm:mb-3 px-2">
@@ -111,18 +200,19 @@ export default function IntroductionPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-white/60 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4">
+            <p className="text-white/60 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
               Experience the loving guidance of Krishna. You are never alone on this journey.
             </p>
 
             {/* Morning Darshan Button - Mobile friendly */}
             {hasSeenDarshan && (
               <motion.button
-                onClick={() => setShowMorningDarshan(true)}
-                className="mt-4 sm:mt-6 inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/30 rounded-full text-amber-200 text-sm sm:text-base transition-all active:scale-95"
+                onClick={openMorningDarshan}
+                className="mt-5 sm:mt-6 inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 active:from-amber-500/40 active:to-orange-500/40 border border-amber-500/30 rounded-full text-amber-200 text-sm sm:text-base transition-all active:scale-95"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+                style={{ transform: 'translateZ(0)' }}
               >
                 <span>🌅</span>
                 <span>Receive Krishna's Darshan</span>
@@ -188,19 +278,18 @@ export default function IntroductionPage() {
 
               {/* Heart-to-Heart Journal */}
               <motion.button
-                onClick={() => setShowHeartJournal(true)}
+                onClick={openHeartJournal}
                 className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-pink-500/30 rounded-2xl hover:border-pink-500/50 transition-all active:scale-[0.98] group w-full text-left"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
+                transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
+                style={{ transform: 'translateZ(0)' }}
               >
-                <motion.div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 flex items-center justify-center flex-shrink-0"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
+                <div
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 flex items-center justify-center flex-shrink-0 divine-heartbeat"
                 >
                   <span className="text-2xl sm:text-3xl">💙</span>
-                </motion.div>
+                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-pink-100 font-semibold text-base sm:text-lg">Heart-to-Heart</h3>
                   <p className="text-pink-200/60 text-xs sm:text-sm truncate">Write to Krishna</p>
@@ -265,19 +354,19 @@ export default function IntroductionPage() {
 
                 {/* Divine Protection Shield */}
                 <motion.button
-                  onClick={() => setShowProtectionShield(true)}
+                  onClick={openProtectionShield}
                   className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-amber-500/30 rounded-2xl hover:border-amber-500/50 transition-all active:scale-[0.98] group text-left"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.55 }}
+                  transition={{ delay: 0.55, duration: 0.4, ease: "easeOut" }}
+                  style={{ transform: 'translateZ(0)' }}
                 >
-                  <motion.div
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center flex-shrink-0"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  <div
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center flex-shrink-0 animate-spin-slow"
+                    style={{ animationDuration: '12s' }}
                   >
                     <span className="text-2xl sm:text-3xl">☸️</span>
-                  </motion.div>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-amber-100 font-semibold text-base sm:text-lg">Divine Protection</h3>
                     <p className="text-amber-200/60 text-xs sm:text-sm">Sudarshana Chakra Shield</p>

@@ -10,7 +10,7 @@
  * - Responsive to emotional states
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, EmotionalState } from '@/contexts/DivineConsciousnessContext';
 
@@ -86,37 +86,51 @@ const EMOTION_PALETTES: Record<EmotionalState, { primary: string; secondary: str
   },
 };
 
-// Floating particle component
-const SacredParticle = ({ delay, palette }: { delay: number; palette: typeof EMOTION_PALETTES.peaceful }) => {
-  const startX = Math.random() * 100;
-  const duration = 15 + Math.random() * 20;
+// Pre-calculated particle configurations to avoid recalculation
+const PARTICLE_CONFIGS = Array.from({ length: 25 }, (_, i) => ({
+  id: i,
+  startX: (i * 4 + 5) % 100, // Distributed positions
+  width: 4 + (i % 3) * 2,
+  height: 4 + (i % 3) * 2,
+  blurRadius: 10 + (i % 3) * 5,
+  duration: 15 + (i % 5) * 4,
+  xOffset: Math.sin(i * 0.5) * 40,
+}));
 
+// Memoized particle component - uses CSS animations for better performance
+const SacredParticle = memo(({ config, palette, delay }: {
+  config: typeof PARTICLE_CONFIGS[number];
+  palette: typeof EMOTION_PALETTES.peaceful;
+  delay: number;
+}) => {
   return (
     <motion.div
-      className="absolute rounded-full pointer-events-none"
+      className="absolute rounded-full pointer-events-none will-change-transform"
       style={{
-        width: 4 + Math.random() * 6,
-        height: 4 + Math.random() * 6,
+        width: config.width,
+        height: config.height,
         background: palette.glow,
-        boxShadow: `0 0 ${10 + Math.random() * 15}px ${palette.glow}`,
-        left: `${startX}%`,
+        boxShadow: `0 0 ${config.blurRadius}px ${palette.glow}`,
+        left: `${config.startX}%`,
         bottom: '-5%',
+        transform: 'translateZ(0)',
       }}
       initial={{ y: 0, opacity: 0 }}
       animate={{
-        y: [0, -window.innerHeight * 1.2],
+        y: [0, '-120vh'], // Use vh units instead of window.innerHeight
         opacity: [0, 0.6, 0.8, 0.6, 0],
-        x: [0, Math.sin(Math.random() * Math.PI) * 50, 0],
+        x: [0, config.xOffset, 0],
       }}
       transition={{
-        duration,
+        duration: config.duration,
         delay,
         repeat: Infinity,
         ease: "linear",
       }}
     />
   );
-};
+});
+SacredParticle.displayName = 'SacredParticle';
 
 // Divine light ray component
 const DivineLight = ({ palette }: { palette: typeof EMOTION_PALETTES.peaceful }) => {
@@ -184,11 +198,21 @@ export function SerenityBackground({
   showDivineLight = true,
   className = '',
 }: SerenityBackgroundProps) {
-  const { state } = useDivineConsciousness();
+  // Safe context access with error handling
+  let contextState: ReturnType<typeof useDivineConsciousness>['state'] | null = null;
+
+  try {
+    const context = useDivineConsciousness();
+    contextState = context.state;
+  } catch {
+    // Context not available - use defaults
+  }
+
   const [mounted, setMounted] = useState(false);
 
-  const currentEmotion = emotion || state.currentEmotion || 'peaceful';
+  const currentEmotion = emotion || contextState?.currentEmotion || 'peaceful';
   const palette = EMOTION_PALETTES[currentEmotion];
+  const isDivinePresenceActive = contextState?.divinePresenceActive ?? false;
 
   // Number of particles based on intensity
   const particleCount = useMemo(() => {
@@ -248,17 +272,18 @@ export function SerenityBackground({
 
       {/* Divine light effect */}
       <AnimatePresence>
-        {showDivineLight && state.divinePresenceActive && (
+        {showDivineLight && isDivinePresenceActive && (
           <DivineLight palette={palette} />
         )}
       </AnimatePresence>
 
-      {/* Sacred particles */}
+      {/* Sacred particles - using pre-calculated configs */}
       {showParticles && (
         <div className="absolute inset-0">
-          {[...Array(particleCount)].map((_, i) => (
+          {PARTICLE_CONFIGS.slice(0, particleCount).map((config, i) => (
             <SacredParticle
-              key={i}
+              key={config.id}
+              config={config}
               delay={i * (20 / particleCount)}
               palette={palette}
             />

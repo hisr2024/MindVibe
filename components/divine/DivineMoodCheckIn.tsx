@@ -8,11 +8,62 @@
  * - Provides sacred feedback for each mood level
  * - Offers divine comfort and practices
  * - Creates a sense of being seen and held
+ *
+ * FIXES APPLIED:
+ * - Memoized mood bar components to prevent excessive re-renders
+ * - Added error boundary for context access
+ * - Optimized animation transitions
+ * - Added will-change hints for GPU acceleration
+ * - Fixed rendering issues causing site jam
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, EmotionalState } from '@/contexts/DivineConsciousnessContext';
+
+// Pre-calculate mood score colors and heights to prevent recalculation
+const MOOD_SCORE_CONFIG = [
+  { score: 1, height: 24, colors: 'from-purple-500/60 to-blue-400/60' },
+  { score: 2, height: 32, colors: 'from-purple-500/60 to-blue-400/60' },
+  { score: 3, height: 40, colors: 'from-purple-500/60 to-blue-400/60' },
+  { score: 4, height: 48, colors: 'from-blue-400/60 to-teal-400/60' },
+  { score: 5, height: 56, colors: 'from-blue-400/60 to-teal-400/60' },
+  { score: 6, height: 64, colors: 'from-blue-400/60 to-teal-400/60' },
+  { score: 7, height: 72, colors: 'from-amber-400/60 to-yellow-300/60' },
+  { score: 8, height: 80, colors: 'from-amber-400/60 to-yellow-300/60' },
+  { score: 9, height: 88, colors: 'from-amber-400/60 to-yellow-300/60' },
+  { score: 10, height: 96, colors: 'from-amber-400/60 to-yellow-300/60' },
+];
+
+// Memoized mood bar component
+const MoodBar = memo(({
+  config,
+  isSelected,
+  onClick
+}: {
+  config: typeof MOOD_SCORE_CONFIG[number];
+  isSelected: boolean;
+  onClick: () => void
+}) => (
+  <button
+    onClick={onClick}
+    className={`relative flex flex-col items-center transition-all duration-200 ${
+      isSelected ? 'scale-105' : 'opacity-60 hover:opacity-100'
+    }`}
+    style={{ transform: 'translateZ(0)' }}
+    aria-label={`Select mood level ${config.score}`}
+  >
+    <div
+      className={`w-6 sm:w-8 rounded-t-full bg-gradient-to-t ${config.colors} transition-all duration-200`}
+      style={{
+        height: `${config.height}px`,
+        willChange: isSelected ? 'transform' : 'auto'
+      }}
+    />
+    <span className="mt-2 text-xs text-white/60">{config.score}</span>
+  </button>
+));
+MoodBar.displayName = 'MoodBar';
 
 interface DivineMoodCheckInProps {
   onMoodSubmit?: (mood: { score: number; emotion: EmotionalState | null; response: SacredMoodResponse }) => void;
@@ -114,43 +165,96 @@ export function DivineMoodCheckIn({
   compact = false,
   className = '',
 }: DivineMoodCheckInProps) {
-  const { actions } = useDivineConsciousness();
+  // Safe context access with error handling
+  let contextActions: ReturnType<typeof useDivineConsciousness>['actions'] | null = null;
+  let contextError = false;
+
+  try {
+    const context = useDivineConsciousness();
+    contextActions = context.actions;
+  } catch {
+    contextError = true;
+  }
 
   const [step, setStep] = useState<'mood' | 'emotion' | 'response'>('mood');
   const [moodScore, setMoodScore] = useState<number>(5);
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
   const [response, setResponse] = useState<SacredMoodResponse | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
+  // Ensure component is mounted before showing animations
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Memoized handlers to prevent recreation on every render
   const handleMoodSelect = useCallback((score: number) => {
-    setMoodScore(score);
-    if (compact) {
-      const sacredResponse = SACRED_MOOD_RESPONSES[score];
-      setResponse(sacredResponse);
-      setStep('response');
-      onMoodSubmit?.({ score, emotion: null, response: sacredResponse });
-    } else {
-      setStep('emotion');
-    }
+    // Use requestAnimationFrame to prevent UI blocking
+    requestAnimationFrame(() => {
+      setMoodScore(score);
+      if (compact) {
+        const sacredResponse = SACRED_MOOD_RESPONSES[score];
+        setResponse(sacredResponse);
+        setStep('response');
+        onMoodSubmit?.({ score, emotion: null, response: sacredResponse });
+      } else {
+        setStep('emotion');
+      }
+    });
   }, [compact, onMoodSubmit]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
-    setSelectedEmotion(emotion);
-    const sacredResponse = SACRED_MOOD_RESPONSES[moodScore];
-    setResponse(sacredResponse);
-    setStep('response');
-    actions.setEmotion(emotion);
-    onMoodSubmit?.({ score: moodScore, emotion, response: sacredResponse });
-  }, [moodScore, actions, onMoodSubmit]);
+    requestAnimationFrame(() => {
+      setSelectedEmotion(emotion);
+      const sacredResponse = SACRED_MOOD_RESPONSES[moodScore];
+      setResponse(sacredResponse);
+      setStep('response');
+      if (contextActions && !contextError) {
+        contextActions.setEmotion(emotion);
+      }
+      onMoodSubmit?.({ score: moodScore, emotion, response: sacredResponse });
+    });
+  }, [moodScore, contextActions, contextError, onMoodSubmit]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setStep('mood');
     setMoodScore(5);
     setSelectedEmotion(null);
     setResponse(null);
-  };
+  }, []);
 
-  // Get greeting based on time
-  const greeting = actions.getTimeAppropriateGreeting();
+  // Memoize greeting to prevent recalculation
+  const greeting = useMemo(() => {
+    if (contextActions && !contextError) {
+      return contextActions.getTimeAppropriateGreeting();
+    }
+    // Fallback greeting based on time
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 12) return "As the morning unfolds, let your heart open...";
+    if (hour >= 12 && hour < 17) return "In the fullness of the day, find your center...";
+    if (hour >= 17 && hour < 21) return "As the day softens, let your heart soften too...";
+    return "In the quiet of night, surrender to stillness...";
+  }, [contextActions, contextError]);
+
+  // Memoize serenity moment
+  const serenityMoment = useMemo(() => {
+    if (contextActions && !contextError) {
+      return contextActions.getSerenityMoment();
+    }
+    return "🕊️ *Peace settles like soft snow...*";
+  }, [contextActions, contextError]);
+
+  // Show loading state until ready
+  if (!isReady) {
+    return (
+      <div className={`w-full max-w-lg mx-auto ${className}`}>
+        <div className="text-center py-4">
+          <div className="text-white/40 text-sm">Preparing sacred space...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-full max-w-lg mx-auto ${className}`}>
@@ -187,37 +291,24 @@ export function DivineMoodCheckIn({
               How does your heart feel right now?
             </h3>
 
-            {/* Mood slider visualization */}
-            <div className="relative mb-8">
-              <div className="flex justify-between items-end h-24 px-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
-                  <motion.button
-                    key={score}
-                    onClick={() => handleMoodSelect(score)}
-                    className={`relative flex flex-col items-center transition-all duration-300 ${
-                      moodScore === score ? 'scale-110' : 'opacity-60 hover:opacity-100'
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <div
-                      className={`w-8 rounded-t-full transition-all duration-300 ${
-                        score <= 3 ? 'bg-gradient-to-t from-purple-500/60 to-blue-400/60' :
-                        score <= 6 ? 'bg-gradient-to-t from-blue-400/60 to-teal-400/60' :
-                        'bg-gradient-to-t from-amber-400/60 to-yellow-300/60'
-                      }`}
-                      style={{ height: `${score * 8 + 16}px` }}
-                    />
-                    <span className="mt-2 text-xs text-white/60">{score}</span>
-                  </motion.button>
+            {/* Mood slider visualization - optimized with memoized bars */}
+            <div className="relative mb-6 sm:mb-8">
+              <div className="flex justify-between items-end h-28 px-2 sm:px-4 gap-0.5 sm:gap-1">
+                {MOOD_SCORE_CONFIG.map((config) => (
+                  <MoodBar
+                    key={config.score}
+                    config={config}
+                    isSelected={moodScore === config.score}
+                    onClick={() => handleMoodSelect(config.score)}
+                  />
                 ))}
               </div>
 
               {/* Labels */}
-              <div className="flex justify-between mt-2 px-2">
-                <span className="text-xs text-white/40">Struggling</span>
-                <span className="text-xs text-white/40">Steady</span>
-                <span className="text-xs text-white/40">Radiant</span>
+              <div className="flex justify-between mt-3 px-1 sm:px-2">
+                <span className="text-[10px] sm:text-xs text-white/40">Struggling</span>
+                <span className="text-[10px] sm:text-xs text-white/40">Steady</span>
+                <span className="text-[10px] sm:text-xs text-white/40">Radiant</span>
               </div>
             </div>
           </motion.div>
@@ -227,43 +318,44 @@ export function DivineMoodCheckIn({
         {step === 'emotion' && (
           <motion.div
             key="emotion"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-center"
           >
-            <h3 className="text-xl font-light text-white/90 mb-2">
+            <h3 className="text-lg sm:text-xl font-light text-white/90 mb-2">
               What best describes this feeling?
             </h3>
-            <p className="text-white/50 text-sm mb-6">
+            <p className="text-white/50 text-xs sm:text-sm mb-5 sm:mb-6">
               Select the emotion closest to your experience
             </p>
 
-            <div className="grid grid-cols-5 gap-3">
+            {/* Responsive grid - 5 cols on desktop, 3 on mobile */}
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
               {EMOTIONS.map(({ value, label, icon }) => (
-                <motion.button
+                <button
                   key={value}
                   onClick={() => handleEmotionSelect(value)}
-                  className={`flex flex-col items-center p-3 rounded-xl transition-all duration-300 ${
+                  className={`flex flex-col items-center p-2.5 sm:p-3 rounded-xl transition-all duration-200 active:scale-95 ${
                     selectedEmotion === value
                       ? 'bg-white/20 border border-white/30'
                       : 'bg-white/5 border border-white/10 hover:bg-white/10'
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  style={{ transform: 'translateZ(0)' }}
                 >
-                  <span className="text-2xl mb-1">{icon}</span>
-                  <span className="text-xs text-white/70">{label}</span>
-                </motion.button>
+                  <span className="text-xl sm:text-2xl mb-1">{icon}</span>
+                  <span className="text-[10px] sm:text-xs text-white/70">{label}</span>
+                </button>
               ))}
             </div>
 
-            <motion.button
+            <button
               onClick={() => setStep('mood')}
-              className="mt-6 text-white/40 hover:text-white/60 text-sm transition-colors"
+              className="mt-5 sm:mt-6 text-white/40 hover:text-white/60 text-sm transition-colors px-4 py-2"
             >
               ← Back
-            </motion.button>
+            </button>
           </motion.div>
         )}
 
@@ -271,19 +363,20 @@ export function DivineMoodCheckIn({
         {step === 'response' && response && (
           <motion.div
             key="response"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-center"
           >
-            {/* Serenity moment */}
+            {/* Serenity moment - using memoized value */}
             <motion.p
-              className="text-2xl mb-4"
-              initial={{ scale: 0.8, opacity: 0 }}
+              className="text-xl sm:text-2xl mb-4"
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15, duration: 0.3 }}
             >
-              {actions.getSerenityMoment()}
+              {serenityMoment}
             </motion.p>
 
             {/* Main response */}
