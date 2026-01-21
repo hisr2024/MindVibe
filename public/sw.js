@@ -12,7 +12,7 @@
  * the network connection is lost (decoherence), ensuring uninterrupted user experience.
  */
 
-const CACHE_VERSION = 'mindvibe-v14.0-quantum';
+const CACHE_VERSION = 'mindvibe-v14.1-quantum';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
@@ -64,11 +64,16 @@ const CACHE_DURATION = {
  */
 async function cacheAsset(cache, url) {
   try {
-    const response = await fetch(url, { cache: 'no-cache' });
-    if (response.ok) {
+    const response = await fetch(url, { cache: 'no-cache', redirect: 'follow' });
+    // Don't cache redirected responses - they cause issues
+    if (response.ok && !response.redirected) {
       await cache.put(url, response);
       console.log('[SW] Cached:', url);
       return true;
+    }
+    if (response.redirected) {
+      console.warn('[SW] Skipping redirect response:', url);
+      return false;
     }
     console.warn('[SW] Failed to cache (non-ok response):', url, response.status);
     return false;
@@ -156,6 +161,17 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  // Skip cross-origin requests to avoid redirect issues
+  if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // Skip navigation requests that might redirect (let browser handle them)
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigationRequest(request))
+    return
+  }
+
   // Handle API requests with cache-first strategy
   if (CACHEABLE_API_ENDPOINTS.some((route) => url.pathname.startsWith(route))) {
     event.respondWith(handleAPIRequest(request))
@@ -198,8 +214,8 @@ async function handleAPIRequest(request) {
     console.log('[Service Worker] Fetching from network:', request.url)
     const networkResponse = await fetch(request)
 
-    // Cache successful responses
-    if (networkResponse && networkResponse.status === 200) {
+    // Only cache successful, non-redirected responses
+    if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
       const cache = await caches.open(CACHE_API)
       cache.put(request, networkResponse.clone())
     }
@@ -230,6 +246,45 @@ async function handleAPIRequest(request) {
 }
 
 /**
+ * Handle navigation requests (page loads) - network first to avoid redirect issues
+ */
+async function handleNavigationRequest(request) {
+  try {
+    // Always try network first for navigation to handle redirects properly
+    const networkResponse = await fetch(request)
+
+    // Don't cache redirected responses or non-ok responses
+    if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
+      const cache = await caches.open(CACHE_DYNAMIC)
+      cache.put(request, networkResponse.clone())
+    }
+
+    return networkResponse
+  } catch (error) {
+    console.log('[Service Worker] Navigation fetch failed, trying cache:', request.url)
+
+    // Try cache on network failure
+    const cachedResponse = await caches.match(request)
+    if (cachedResponse) {
+      return cachedResponse
+    }
+
+    // Try offline page
+    const offlineResponse = await caches.match('/offline')
+    if (offlineResponse) {
+      return offlineResponse
+    }
+
+    // Final fallback
+    return new Response('Offline - Please check your connection', {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'text/html' }
+    })
+  }
+}
+
+/**
  * Handle static resource requests
  */
 async function handleStaticRequest(request) {
@@ -243,8 +298,8 @@ async function handleStaticRequest(request) {
     // Try network
     const networkResponse = await fetch(request)
 
-    // Cache successful responses
-    if (networkResponse && networkResponse.status === 200) {
+    // Only cache successful, non-redirected responses
+    if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
       const cache = await caches.open(CACHE_DYNAMIC)
       cache.put(request, networkResponse.clone())
     }
@@ -256,7 +311,7 @@ async function handleStaticRequest(request) {
     if (cachedResponse) {
       return cachedResponse
     }
-    
+
     // Return offline page or error
     return new Response('Offline', {
       status: 503,
