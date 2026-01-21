@@ -162,7 +162,7 @@ export default function SiteNav() {
           <>
             {/* Backdrop overlay */}
             <motion.div
-              className="fixed inset-0 top-[60px] z-30 bg-black/60 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 top-[60px] z-30 bg-black/75 backdrop-blur-sm md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -171,7 +171,7 @@ export default function SiteNav() {
             />
             {/* Mobile menu */}
             <motion.div
-              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-white/10 bg-slate-950/98 px-4 py-4 backdrop-blur-xl md:hidden"
+              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-white/10 bg-slate-950 px-4 py-4 shadow-xl md:hidden"
               aria-label="Mobile navigation"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
