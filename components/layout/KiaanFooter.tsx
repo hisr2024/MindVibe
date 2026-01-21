@@ -205,7 +205,7 @@ export function KiaanFooter() {
   };
 
   return (
-    <div className="fixed bottom-[76px] right-2 z-[60] p-2 md:bottom-8 md:right-8 md:p-0">
+    <div className="fixed bottom-[88px] right-3 z-[60] p-2 md:bottom-8 md:right-8 md:p-0">
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -365,9 +365,9 @@ export function KiaanFooter() {
         whileTap={{ scale: 0.92 }}
         animate={isExpanded ? {} : {
           boxShadow: [
-            '0 20px 60px rgba(255, 115, 39, 0.4)',
-            '0 20px 80px rgba(255, 115, 39, 0.6)',
-            '0 20px 60px rgba(255, 115, 39, 0.4)',
+            '0 8px 30px rgba(255, 115, 39, 0.35)',
+            '0 12px 40px rgba(255, 115, 39, 0.5)',
+            '0 8px 30px rgba(255, 115, 39, 0.35)',
           ],
         }}
         transition={{
@@ -377,7 +377,7 @@ export function KiaanFooter() {
             ease: 'easeInOut',
           },
         }}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 shadow-2xl shadow-orange-500/50 transition-all hover:shadow-orange-500/70 md:h-16 md:w-16"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 shadow-lg shadow-orange-500/40 transition-all hover:shadow-xl hover:shadow-orange-500/50 md:h-16 md:w-16"
         aria-label={isExpanded ? 'Close KIAAN chat' : 'Open KIAAN chat'}
       >
         <AnimatePresence mode="wait">
