@@ -32,6 +32,7 @@ export default function SiteNav() {
   }, [open])
 
   const links = useMemo(() => [
+    { href: '/introduction', label: t('navigation.mainNav.introduction', 'Introduction'), divine: true },
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN Chat'), highlight: true },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
@@ -67,6 +68,7 @@ export default function SiteNav() {
           {links.map((link, index) => {
             const active = pathname === link.href || pathname.startsWith(link.href + '/')
             const isHighlight = 'highlight' in link && link.highlight
+            const isDivine = 'divine' in link && link.divine
             return (
               <motion.div
                 key={link.href}
@@ -78,9 +80,13 @@ export default function SiteNav() {
                   href={link.href}
                   className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
                     active
-                      ? isHighlight
+                      ? isDivine
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/30'
+                        : isHighlight
                         ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30'
                         : 'bg-white/10 text-white shadow-glowSunrise'
+                      : isDivine
+                      ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-200 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30'
                       : isHighlight
                       ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-white hover:from-orange-500 hover:to-amber-500 shadow-md shadow-orange-500/20'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
@@ -89,8 +95,9 @@ export default function SiteNav() {
                   <motion.span
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="block"
+                    className="block flex items-center gap-1"
                   >
+                    {isDivine && <span className="text-xs">🙏</span>}
                     {link.label}
                   </motion.span>
                 </Link>
@@ -195,6 +202,7 @@ export default function SiteNav() {
                 {links.map(link => {
                   const active = pathname === link.href
                   const isHighlight = 'highlight' in link && link.highlight
+                  const isDivine = 'divine' in link && link.divine
                   return (
                     <motion.div
                       key={link.href}
@@ -205,15 +213,25 @@ export default function SiteNav() {
                         onClick={() => setOpen(false)}
                         className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
                           active
-                            ? isHighlight
+                            ? isDivine
+                              ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/20'
+                              : isHighlight
                               ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
                               : 'bg-white/10 text-white'
+                            : isDivine
+                            ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-100 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30'
                             : isHighlight
                             ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-100 hover:from-orange-500/30 hover:to-amber-500/30'
                             : 'text-white/80 hover:bg-white/5 hover:text-white'
                         }`}
                       >
+                        {isDivine && <span className="mr-2">🙏</span>}
                         {link.label}
+                        {isDivine && !active && (
+                          <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
+                            Divine
+                          </span>
+                        )}
                         {isHighlight && !active && (
                           <span className="ml-auto rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-300">
                             AI
