@@ -19,12 +19,17 @@ const CACHE_API = `${CACHE_VERSION}-api`;
 const CACHE_IMAGES = `${CACHE_VERSION}-images`;
 
 // Assets to cache immediately on install
+// Only include assets that are guaranteed to exist
 const STATIC_ASSETS = [
-  '/',
-  '/offline',
   '/manifest.json',
   '/kiaan-logo.svg',
   '/mindvibe-logo.svg',
+];
+
+// Optional assets to attempt caching (won't fail install if missing)
+const OPTIONAL_ASSETS = [
+  '/',
+  '/offline',
   '/favicon.ico',
 ];
 
@@ -54,24 +59,61 @@ const CACHE_DURATION = {
 };
 
 /**
+ * Cache a single asset with error handling
+ * Returns true if cached successfully, false otherwise
+ */
+async function cacheAsset(cache, url) {
+  try {
+    const response = await fetch(url, { cache: 'no-cache' });
+    if (response.ok) {
+      await cache.put(url, response);
+      console.log('[SW] Cached:', url);
+      return true;
+    }
+    console.warn('[SW] Failed to cache (non-ok response):', url, response.status);
+    return false;
+  } catch (error) {
+    console.warn('[SW] Failed to cache:', url, error.message);
+    return false;
+  }
+}
+
+/**
  * Install event - cache static assets
  */
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...', CACHE_VERSION);
 
   event.waitUntil(
-    caches.open(CACHE_STATIC)
-      .then((cache) => {
+    (async () => {
+      try {
+        const cache = await caches.open(CACHE_STATIC);
         console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
+
+        // Cache required assets (fail gracefully for each)
+        const staticResults = await Promise.allSettled(
+          STATIC_ASSETS.map(url => cacheAsset(cache, url))
+        );
+
+        // Cache optional assets (don't block on failures)
+        const optionalResults = await Promise.allSettled(
+          OPTIONAL_ASSETS.map(url => cacheAsset(cache, url))
+        );
+
+        const staticSuccessCount = staticResults.filter(r => r.status === 'fulfilled' && r.value).length;
+        const optionalSuccessCount = optionalResults.filter(r => r.status === 'fulfilled' && r.value).length;
+
+        console.log(`[SW] Cached ${staticSuccessCount}/${STATIC_ASSETS.length} static assets`);
+        console.log(`[SW] Cached ${optionalSuccessCount}/${OPTIONAL_ASSETS.length} optional assets`);
         console.log('[SW] Installation complete');
+
         return self.skipWaiting(); // Activate immediately
-      })
-      .catch((error) => {
-        console.error('[SW] Installation failed:', error);
-      })
+      } catch (error) {
+        console.error('[SW] Installation error:', error);
+        // Still skip waiting to allow the SW to activate
+        return self.skipWaiting();
+      }
+    })()
   );
 });
 
@@ -259,9 +301,11 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CACHE_URLS') {
     const urls = event.data.urls
     event.waitUntil(
-      caches.open(CACHE_DYNAMIC).then((cache) => {
-        return cache.addAll(urls)
-      })
+      (async () => {
+        const cache = await caches.open(CACHE_DYNAMIC);
+        // Cache each URL individually to prevent single failures from blocking all
+        await Promise.allSettled(urls.map(url => cacheAsset(cache, url)));
+      })()
     )
   }
   
