@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Emotion, classifyEmotion, MoodData } from '@/lib/emotionClassifier'
 import {
   EmotionTheme,
@@ -226,6 +226,13 @@ export function useCurrentEmotionTheme(): {
 } {
   const [emotion, setEmotion] = useState<Emotion>('balanced')
   const [theme, setTheme] = useState<EmotionTheme>(getEmotionTheme('balanced'))
+  // Use ref to track current emotion without causing effect re-runs
+  const emotionRef = useRef<Emotion>(emotion)
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    emotionRef.current = emotion
+  }, [emotion])
 
   useEffect(() => {
     // Read from data attribute
@@ -238,7 +245,8 @@ export function useCurrentEmotionTheme(): {
     // Watch for changes
     const observer = new MutationObserver(() => {
       const newEmotion = document.documentElement.getAttribute('data-emotion') as Emotion
-      if (newEmotion && newEmotion !== emotion) {
+      // Use ref to compare, avoiding infinite loop
+      if (newEmotion && newEmotion !== emotionRef.current) {
         setEmotion(newEmotion)
         setTheme(getEmotionTheme(newEmotion))
       }
@@ -250,7 +258,7 @@ export function useCurrentEmotionTheme(): {
     })
 
     return () => observer.disconnect()
-  }, [emotion])
+  }, []) // Empty dependency array - only run on mount
 
   return { emotion, theme }
 }

@@ -10,7 +10,7 @@
  * - Sacred sound integration ready
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, BreathingPattern, SacredBreathingExercise } from '@/contexts/DivineConsciousnessContext';
 
@@ -63,6 +63,9 @@ export function SacredBreathing({
   const [currentCycle, setCurrentCycle] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [currentInstruction, setCurrentInstruction] = useState(0);
+
+  // Ref to hold the latest transitionPhase callback to avoid effect re-runs
+  const transitionPhaseRef = useRef<() => void>(() => {});
 
   // Load exercise on mount or pattern change
   useEffect(() => {
@@ -136,7 +139,12 @@ export function SacredBreathing({
     });
   }, [exercise, currentCycle, cycles, onComplete, onPhaseChange]);
 
-  // Countdown timer
+  // Keep ref in sync with the latest callback
+  useEffect(() => {
+    transitionPhaseRef.current = transitionPhase;
+  }, [transitionPhase]);
+
+  // Countdown timer - use ref to avoid re-triggering on transitionPhase changes
   useEffect(() => {
     if (!isActive || phase === 'ready' || phase === 'complete') return;
 
@@ -146,9 +154,9 @@ export function SacredBreathing({
       }, 1000);
       return () => clearTimeout(timer);
     } else {
-      transitionPhase();
+      transitionPhaseRef.current();
     }
-  }, [isActive, phase, countdown, transitionPhase]);
+  }, [isActive, phase, countdown]);
 
   // Update instruction index during exercise
   useEffect(() => {
