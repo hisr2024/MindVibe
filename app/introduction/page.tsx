@@ -324,6 +324,26 @@ export default function IntroductionPage() {
             </div>
           </section>
 
+          {/* ==================== MOOD CHECK-IN SECTION ==================== */}
+
+          <section className="mb-6 sm:mb-8">
+            <motion.div
+              className="bg-gradient-to-br from-slate-900/80 to-indigo-900/50 border border-indigo-500/20 rounded-2xl p-5 sm:p-6 md:p-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="flex items-center justify-center gap-3 mb-4 sm:mb-5">
+                <span className="text-2xl sm:text-3xl">💙</span>
+                <div className="text-center">
+                  <h3 className="text-white/90 font-medium text-base sm:text-lg">How is your heart?</h3>
+                  <p className="text-white/50 text-xs sm:text-sm">Share your feelings with Krishna</p>
+                </div>
+              </div>
+              <DivineMoodCheckIn compact={true} />
+            </motion.div>
+          </section>
+
           {/* ==================== MAIN FEATURES GRID ==================== */}
 
           <section className="mb-6 sm:mb-8">
@@ -344,22 +364,6 @@ export default function IntroductionPage() {
                   />
                 </motion.div>
 
-                {/* Divine Mood Check-In */}
-                <motion.div
-                  className="bg-gradient-to-br from-slate-900/80 to-indigo-900/50 border border-indigo-500/20 rounded-2xl p-4 sm:p-5 md:p-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45 }}
-                >
-                  <div className="flex items-center gap-3 mb-3 sm:mb-4">
-                    <span className="text-xl sm:text-2xl">💙</span>
-                    <div>
-                      <h3 className="text-white/90 font-medium text-sm sm:text-base">How is your heart?</h3>
-                      <p className="text-white/50 text-xs">Share your feelings with Krishna</p>
-                    </div>
-                  </div>
-                  <DivineMoodCheckIn compact={true} />
-                </motion.div>
               </div>
 
               {/* Column 2: Sakha Mode */}
