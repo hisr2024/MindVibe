@@ -51,6 +51,23 @@ export function BreathingAnimation({
   const animationRef = useRef<number | null>(null)
   const lastTimeRef = useRef<number>(0)
   const phaseStartTimeRef = useRef<number>(0)
+  // Use refs to avoid recreating the animate callback on every phase change
+  const currentPhaseRef = useRef<Phase>(currentPhase)
+  const isActiveRef = useRef(isActive)
+  const isPausedRef = useRef(isPaused)
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    currentPhaseRef.current = currentPhase
+  }, [currentPhase])
+
+  useEffect(() => {
+    isActiveRef.current = isActive
+  }, [isActive])
+
+  useEffect(() => {
+    isPausedRef.current = isPaused
+  }, [isPaused])
 
   // Calculate total cycle duration
   const cycleDuration = pattern.inhale + pattern.hold_in + pattern.exhale + pattern.hold_out
@@ -75,9 +92,9 @@ export function BreathingAnimation({
     }
   }
 
-  // Animation loop
+  // Animation loop - using refs to avoid unnecessary callback recreations
   const animate = useCallback((timestamp: number) => {
-    if (!isActive || isPaused) return
+    if (!isActiveRef.current || isPausedRef.current) return
 
     if (!lastTimeRef.current) {
       lastTimeRef.current = timestamp
@@ -99,15 +116,15 @@ export function BreathingAnimation({
       return newElapsed
     })
 
-    // Update phase progress
+    // Update phase progress - use ref to get current phase
     const phaseElapsed = (timestamp - phaseStartTimeRef.current) / 1000
-    const phaseDuration = getPhaseDuration(currentPhase)
+    const phaseDuration = getPhaseDuration(currentPhaseRef.current)
     const progress = Math.min(phaseElapsed / phaseDuration, 1)
     setPhaseProgress(progress)
 
     // Check if phase is complete
     if (progress >= 1) {
-      const nextPhase = getNextPhase(currentPhase)
+      const nextPhase = getNextPhase(currentPhaseRef.current)
       setCurrentPhase(nextPhase)
       phaseStartTimeRef.current = timestamp
       setPhaseProgress(0)
@@ -119,7 +136,7 @@ export function BreathingAnimation({
     }
 
     animationRef.current = requestAnimationFrame(animate)
-  }, [isActive, isPaused, currentPhase, getPhaseDuration, durationSeconds, narration.length, onComplete])
+  }, [getPhaseDuration, durationSeconds, narration.length, onComplete])
 
   // Start/stop animation
   useEffect(() => {

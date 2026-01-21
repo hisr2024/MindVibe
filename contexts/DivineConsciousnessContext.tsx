@@ -13,7 +13,7 @@
  * "The divine is not somewhere far away - it rests in the stillness of your own heart."
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 
 // Types
 export type EmotionalState =
@@ -381,8 +381,8 @@ export function DivineConsciousnessProvider({ children }: DivineConsciousnessPro
     currentMeditation: null,
   });
 
-  // Serenity moment index for cycling
-  const [serenityIndex, setSerenityIndex] = useState(0);
+  // Serenity moment index for cycling - use ref to avoid circular dependency
+  const serenityIndexRef = useRef(0);
 
   // Actions
   const setAtmosphere = useCallback((atmosphere: AtmosphereType) => {
@@ -473,10 +473,10 @@ export function DivineConsciousnessProvider({ children }: DivineConsciousnessPro
   }, []);
 
   const getSerenityMoment = useCallback((): string => {
-    const moment = SERENITY_MOMENTS[serenityIndex];
-    setSerenityIndex(prev => (prev + 1) % SERENITY_MOMENTS.length);
+    const moment = SERENITY_MOMENTS[serenityIndexRef.current];
+    serenityIndexRef.current = (serenityIndexRef.current + 1) % SERENITY_MOMENTS.length;
     return moment;
-  }, [serenityIndex]);
+  }, []);
 
   const getDivineAffirmation = useCallback((): string => {
     return getRandomItem(DIVINE_AFFIRMATIONS);
