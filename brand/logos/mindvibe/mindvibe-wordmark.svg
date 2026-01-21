@@ -1,12 +1,46 @@
-<svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="100" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="wordmark" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#ff7a3c" />
-      <stop offset="50%" stop-color="#ff9f52" />
-      <stop offset="100%" stop-color="#ffd36f" />
+    <!-- Divine Sunrise Gradient for Text -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="40%" stop-color="#F7931E"/>
+      <stop offset="70%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FFD700"/>
     </linearGradient>
+
+    <!-- Subtle glow filter -->
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="800" height="200" rx="32" fill="#0b0b0f" />
-  <text x="50%" y="110" text-anchor="middle" fill="url(#wordmark)" font-family="'Manrope','Inter',sans-serif" font-weight="800" font-size="96" letter-spacing="6">MindVibe</text>
-  <text x="50%" y="145" text-anchor="middle" fill="#f9fafb" font-family="'Inter','Manrope',sans-serif" font-weight="600" font-size="20" letter-spacing="3">MindVibe Companion</text>
+
+  <!-- MindVibe Wordmark -->
+  <text x="200" y="58"
+        font-family="Manrope, system-ui, sans-serif"
+        font-size="48"
+        font-weight="700"
+        fill="url(#textGradient)"
+        text-anchor="middle"
+        letter-spacing="0.02em"
+        filter="url(#textGlow)">
+    MindVibe
+  </text>
+
+  <!-- Tagline -->
+  <text x="200" y="82"
+        font-family="Inter, system-ui, sans-serif"
+        font-size="14"
+        font-weight="400"
+        fill="#A8A8B3"
+        text-anchor="middle"
+        letter-spacing="0.08em">
+    Your Guide to Inner Peace
+  </text>
+
+  <!-- Decorative lotus accent under the text -->
+  <path d="M170 90 Q200 96, 230 90" stroke="url(#textGradient)" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/>
 </svg>

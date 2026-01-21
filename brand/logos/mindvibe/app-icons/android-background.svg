@@ -1,21 +1,25 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Android Adaptive Icon - Background Layer -->
+  <!-- Android Adaptive Icon - Background Layer - Divine Dark Theme -->
   <defs>
-    <linearGradient id="android-bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF6B35"/>
-      <stop offset="50%" stop-color="#F7931E"/>
-      <stop offset="100%" stop-color="#FFD700"/>
-    </linearGradient>
-    <radialGradient id="android-bg-glow" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
-      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.4)"/>
-      <stop offset="70%" stop-color="rgba(255, 107, 53, 0.15)"/>
+    <radialGradient id="android-bg-aura" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1A1520"/>
+      <stop offset="50%" stop-color="#0F1219"/>
+      <stop offset="100%" stop-color="#0B0B0F"/>
+    </radialGradient>
+    <radialGradient id="android-bg-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.15)"/>
+      <stop offset="50%" stop-color="rgba(255, 147, 89, 0.08)"/>
       <stop offset="100%" stop-color="rgba(255, 107, 53, 0)"/>
     </radialGradient>
   </defs>
-  
-  <!-- Full background -->
-  <rect width="512" height="512" fill="url(#android-bg-gradient)"/>
-  
-  <!-- Inner Glow -->
+
+  <!-- Deep dark background -->
+  <rect width="512" height="512" fill="url(#android-bg-aura)"/>
+
+  <!-- Subtle divine glow in center -->
   <rect width="512" height="512" fill="url(#android-bg-glow)"/>
+
+  <!-- Meditation ring accents -->
+  <circle cx="256" cy="256" r="180" stroke="rgba(255, 183, 71, 0.1)" stroke-width="1" fill="none"/>
+  <circle cx="256" cy="256" r="220" stroke="rgba(255, 183, 71, 0.05)" stroke-width="1" fill="none"/>
 </svg>
