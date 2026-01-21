@@ -1,21 +1,143 @@
 <svg width="512" height="512" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="sunrise" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff7a3c" />
-      <stop offset="50%" stop-color="#ff9f52" />
-      <stop offset="100%" stop-color="#ffd36f" />
+    <!-- Divine Sunrise Gradient -->
+    <linearGradient id="divineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="35%" stop-color="#F7931E"/>
+      <stop offset="70%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FFD700"/>
     </linearGradient>
-    <radialGradient id="halo" cx="30%" cy="30%" r="80%">
-      <stop offset="0%" stop-color="rgba(255, 147, 89, 0.36)" />
-      <stop offset="60%" stop-color="rgba(255, 208, 112, 0.14)" />
-      <stop offset="100%" stop-color="rgba(255, 147, 89, 0)" />
+
+    <!-- Inner Light Radial Glow -->
+    <radialGradient id="innerLight" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFEF0"/>
+      <stop offset="40%" stop-color="#FFE4B5"/>
+      <stop offset="100%" stop-color="#FFD700"/>
     </radialGradient>
+
+    <!-- Divine Halo Glow -->
+    <radialGradient id="divineHalo" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.5)"/>
+      <stop offset="50%" stop-color="rgba(255, 183, 71, 0.25)"/>
+      <stop offset="100%" stop-color="rgba(255, 147, 89, 0)"/>
+    </radialGradient>
+
+    <!-- Outer Aura -->
+    <radialGradient id="outerAura" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="rgba(255, 211, 111, 0.2)"/>
+      <stop offset="60%" stop-color="rgba(255, 147, 89, 0.08)"/>
+      <stop offset="100%" stop-color="rgba(11, 11, 15, 0)"/>
+    </radialGradient>
+
+    <!-- Petal Gradient -->
+    <linearGradient id="petalGold" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#F7931E"/>
+      <stop offset="50%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+
+    <!-- Filter for soft glow -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="innerGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="256" height="256" rx="56" fill="#0b0b0f" />
-  <rect x="14" y="14" width="228" height="228" rx="48" fill="#0f1624" />
-  <rect x="24" y="24" width="208" height="208" rx="44" fill="url(#halo)" />
-  <rect x="36" y="36" width="184" height="184" rx="40" fill="url(#sunrise)" />
-  <rect x="48" y="48" width="160" height="160" rx="36" fill="rgba(255,255,255,0.08)" />
-  <path d="M72 184V96c0-4.4 3.4-8 7.8-8h17.2c2.8 0 5.3 1.4 6.7 3.8l18.3 31 18.3-31c1.4-2.4 3.9-3.8 6.7-3.8H166c4.4 0 7.8 3.6 7.8 8v88c0 4.4-3.4 8-7.8 8h-16.3c-4.4 0-7.8-3.6-7.8-8v-47l-14.8 23.6c-2.5 4-8.4 4-10.9 0L102 137v47c0 4.4-3.4 8-7.8 8H79.8c-4.4 0-7.8-3.6-7.8-8Z" fill="#f9fafb" />
-  <path d="M64 102c14.4-17.2 38.2-28 64-28 26 0 49.6 10.8 64.2 28" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity="0.26" />
+
+  <!-- Background -->
+  <rect width="256" height="256" rx="56" fill="#0B0B0F"/>
+  <rect x="8" y="8" width="240" height="240" rx="50" fill="#0F1219"/>
+
+  <!-- Divine Aura Background -->
+  <circle cx="128" cy="128" r="100" fill="url(#outerAura)"/>
+
+  <!-- Sacred Circle (Meditation Ring) -->
+  <circle cx="128" cy="128" r="72" stroke="url(#divineGradient)" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <circle cx="128" cy="128" r="85" stroke="url(#divineGradient)" stroke-width="0.8" fill="none" opacity="0.15"/>
+
+  <!-- Divine Halo Behind Lotus -->
+  <circle cx="128" cy="128" r="60" fill="url(#divineHalo)" filter="url(#innerGlow)"/>
+
+  <!-- LOTUS FLOWER - Symbol of Divine Awakening -->
+  <!-- Central lotus forms an abstract "M" shape through its petals -->
+
+  <!-- Back Petals (forming the outer M wings) -->
+  <path d="M128 58
+           C138 68, 148 85, 148 105
+           C148 115, 140 125, 128 128
+           C116 125, 108 115, 108 105
+           C108 85, 118 68, 128 58Z"
+        fill="url(#petalGold)" opacity="0.9" filter="url(#softGlow)"/>
+
+  <!-- Left Wing Petal -->
+  <path d="M68 120
+           C78 110, 95 105, 115 108
+           C120 112, 124 118, 126 125
+           C118 130, 105 132, 90 128
+           C75 124, 65 122, 68 120Z"
+        fill="url(#divineGradient)" opacity="0.85"/>
+
+  <!-- Right Wing Petal -->
+  <path d="M188 120
+           C178 110, 161 105, 141 108
+           C136 112, 132 118, 130 125
+           C138 130, 151 132, 166 128
+           C181 124, 191 122, 188 120Z"
+        fill="url(#divineGradient)" opacity="0.85"/>
+
+  <!-- Lower Left Petal -->
+  <path d="M78 155
+           C88 148, 105 145, 120 150
+           C124 156, 126 164, 126 172
+           C118 175, 100 172, 88 165
+           C76 158, 72 156, 78 155Z"
+        fill="url(#petalGold)" opacity="0.75"/>
+
+  <!-- Lower Right Petal -->
+  <path d="M178 155
+           C168 148, 151 145, 136 150
+           C132 156, 130 164, 130 172
+           C138 175, 156 172, 168 165
+           C180 158, 184 156, 178 155Z"
+        fill="url(#petalGold)" opacity="0.75"/>
+
+  <!-- Center Petal (the peak of the M) -->
+  <path d="M128 88
+           C135 95, 140 108, 140 120
+           C140 130, 135 138, 128 142
+           C121 138, 116 130, 116 120
+           C116 108, 121 95, 128 88Z"
+        fill="url(#innerLight)" filter="url(#softGlow)"/>
+
+  <!-- Inner Divine Light Core -->
+  <ellipse cx="128" cy="118" rx="12" ry="14" fill="url(#innerLight)" opacity="0.95"/>
+  <ellipse cx="128" cy="116" rx="6" ry="8" fill="#FFFEF5" opacity="0.9"/>
+
+  <!-- Light Rays Emanating (Divine Energy) -->
+  <g opacity="0.4" stroke="#FFD700" stroke-width="1" stroke-linecap="round">
+    <line x1="128" y1="75" x2="128" y2="65"/>
+    <line x1="150" y1="82" x2="158" y2="74"/>
+    <line x1="106" y1="82" x2="98" y2="74"/>
+    <line x1="165" y1="100" x2="175" y2="96"/>
+    <line x1="91" y1="100" x2="81" y2="96"/>
+  </g>
+
+  <!-- Subtle sparkles -->
+  <circle cx="155" cy="90" r="1.5" fill="#FFE4B5" opacity="0.8"/>
+  <circle cx="101" cy="90" r="1.5" fill="#FFE4B5" opacity="0.8"/>
+  <circle cx="128" cy="68" r="2" fill="#FFFEF5" opacity="0.9"/>
+
+  <!-- Bottom accent (like lotus seat/base) -->
+  <path d="M100 178 Q128 188, 156 178" stroke="url(#divineGradient)" stroke-width="2" fill="none" opacity="0.5" stroke-linecap="round"/>
+  <path d="M108 185 Q128 193, 148 185" stroke="url(#divineGradient)" stroke-width="1.5" fill="none" opacity="0.3" stroke-linecap="round"/>
 </svg>
