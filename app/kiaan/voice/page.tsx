@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useWakeWord } from '@/hooks/useWakeWord'
+import { getBrowserName, isSecureContext, isSpeechRecognitionSupported } from '@/utils/browserSupport'
 
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
@@ -48,6 +49,14 @@ export default function EliteVoicePage() {
   // Microphone permission state
   const [micPermission, setMicPermission] = useState<'prompt' | 'granted' | 'denied' | 'unsupported' | 'checking'>('checking')
   const [isRequestingPermission, setIsRequestingPermission] = useState(false)
+
+  // Browser diagnostics
+  const [browserInfo, setBrowserInfo] = useState<{
+    name: string
+    isSecure: boolean
+    hasSpeechRecognition: boolean
+    hasMediaDevices: boolean
+  } | null>(null)
 
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -187,6 +196,14 @@ export default function EliteVoicePage() {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       synthesisRef.current = window.speechSynthesis
     }
+
+    // Gather browser diagnostics
+    setBrowserInfo({
+      name: getBrowserName(),
+      isSecure: isSecureContext(),
+      hasSpeechRecognition: isSpeechRecognitionSupported(),
+      hasMediaDevices: typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
+    })
 
     // Check microphone permission
     checkMicrophonePermission()
@@ -640,6 +657,58 @@ export default function EliteVoicePage() {
                   >
                     Refresh Page
                   </button>
+                </div>
+              )}
+
+              {/* Browser Diagnostics */}
+              {browserInfo && (
+                <div className="mt-4 text-left bg-slate-900/50 rounded-xl p-4">
+                  <p className="text-sm text-orange-100 font-medium mb-2">System Check:</p>
+                  <ul className="text-xs sm:text-sm space-y-1">
+                    <li className="flex items-center gap-2">
+                      <span className={browserInfo.name !== 'Firefox' ? 'text-emerald-400' : 'text-amber-400'}>
+                        {browserInfo.name !== 'Firefox' ? '✓' : '⚠'}
+                      </span>
+                      <span className="text-orange-200/70">
+                        Browser: <strong>{browserInfo.name}</strong>
+                        {browserInfo.name === 'Firefox' && ' (Voice recognition limited)'}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className={browserInfo.isSecure ? 'text-emerald-400' : 'text-red-400'}>
+                        {browserInfo.isSecure ? '✓' : '✗'}
+                      </span>
+                      <span className="text-orange-200/70">
+                        Secure Context (HTTPS): <strong>{browserInfo.isSecure ? 'Yes' : 'No - Required!'}</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className={browserInfo.hasSpeechRecognition ? 'text-emerald-400' : 'text-red-400'}>
+                        {browserInfo.hasSpeechRecognition ? '✓' : '✗'}
+                      </span>
+                      <span className="text-orange-200/70">
+                        Speech Recognition: <strong>{browserInfo.hasSpeechRecognition ? 'Supported' : 'Not Supported'}</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className={browserInfo.hasMediaDevices ? 'text-emerald-400' : 'text-red-400'}>
+                        {browserInfo.hasMediaDevices ? '✓' : '✗'}
+                      </span>
+                      <span className="text-orange-200/70">
+                        Microphone API: <strong>{browserInfo.hasMediaDevices ? 'Available' : 'Not Available'}</strong>
+                      </span>
+                    </li>
+                  </ul>
+                  {!browserInfo.isSecure && (
+                    <p className="mt-3 text-xs text-red-300 bg-red-500/10 rounded p-2">
+                      Voice features require HTTPS. Please access the site via https:// or use localhost for development.
+                    </p>
+                  )}
+                  {!browserInfo.hasSpeechRecognition && (
+                    <p className="mt-3 text-xs text-amber-300 bg-amber-500/10 rounded p-2">
+                      Please use Chrome, Edge, or Safari for full voice support. Firefox has limited speech recognition.
+                    </p>
+                  )}
                 </div>
               )}
 
