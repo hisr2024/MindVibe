@@ -31,6 +31,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
 
   // Main navigation links with translations
   const mainNavLinks = useMemo(() => [
+    { href: '/introduction', label: t('navigation.mainNav.introduction', 'Introduction'), divine: true },
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN Chat') },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
@@ -73,16 +74,22 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
         >
           {mainNavLinks.map((link) => {
             const active = pathname === link.href
+            const isDivine = 'divine' in link && link.divine
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-1 ${
                   active
-                    ? 'bg-white/10 text-white shadow-lg shadow-orange-500/20'
+                    ? isDivine
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/20'
+                      : 'bg-white/10 text-white shadow-lg shadow-orange-500/20'
+                    : isDivine
+                    ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-200 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30'
                     : 'text-white/70 hover:bg-white/5 hover:text-white'
                 }`}
               >
+                {isDivine && <span className="text-xs">🙏</span>}
                 {link.label}
               </Link>
             )

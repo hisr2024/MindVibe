@@ -23,6 +23,7 @@ export interface MobileNavProps {
 
 // Translation key mapping for tab labels (constant)
 const TAB_TRANSLATION_KEYS: Record<string, string> = {
+  'introduction': 'navigation.mainNav.introduction',
   'kiaan-chat': 'navigation.mobileNav.chat',
   'home': 'navigation.mainNav.home',
   'journal': 'navigation.mobileNav.journal',
@@ -33,6 +34,14 @@ const TAB_TRANSLATION_KEYS: Record<string, string> = {
 
 // Default navigation tabs
 const defaultTabs: NavTab[] = [
+  {
+    id: 'introduction',
+    label: 'Introduction',
+    href: '/introduction',
+    icon: (
+      <span className="text-lg">🙏</span>
+    ),
+  },
   {
     id: 'kiaan-chat',
     label: 'KIAAN Chat',
