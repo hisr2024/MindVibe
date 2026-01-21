@@ -257,7 +257,7 @@ export function DivineMoodCheckIn({
   }
 
   return (
-    <div className={`w-full max-w-lg mx-auto ${className}`}>
+    <div className={`w-full mx-auto ${className}`}>
       <AnimatePresence mode="wait">
         {/* Step 1: Mood Score */}
         {step === 'mood' && (
@@ -292,8 +292,8 @@ export function DivineMoodCheckIn({
             </h3>
 
             {/* Mood slider visualization - optimized with memoized bars */}
-            <div className="relative mb-6 sm:mb-8">
-              <div className="flex justify-between items-end h-28 px-2 sm:px-4 gap-0.5 sm:gap-1">
+            <div className="relative mb-6 sm:mb-8 flex flex-col items-center">
+              <div className="flex justify-center items-end h-28 gap-2 sm:gap-3 w-full max-w-md mx-auto">
                 {MOOD_SCORE_CONFIG.map((config) => (
                   <MoodBar
                     key={config.score}
@@ -305,7 +305,7 @@ export function DivineMoodCheckIn({
               </div>
 
               {/* Labels */}
-              <div className="flex justify-between mt-3 px-1 sm:px-2">
+              <div className="flex justify-between mt-3 w-full max-w-md mx-auto px-2">
                 <span className="text-[10px] sm:text-xs text-white/40">Struggling</span>
                 <span className="text-[10px] sm:text-xs text-white/40">Steady</span>
                 <span className="text-[10px] sm:text-xs text-white/40">Radiant</span>

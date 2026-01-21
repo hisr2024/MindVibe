@@ -12,6 +12,7 @@ export interface NavTab {
   href: string
   icon: React.ReactNode
   isToolsButton?: boolean
+  isHighlighted?: boolean
 }
 
 export interface MobileNavProps {
@@ -43,18 +44,6 @@ const defaultTabs: NavTab[] = [
     ),
   },
   {
-    id: 'kiaan-chat',
-    label: 'KIAAN Chat',
-    href: '/kiaan/chat',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        <circle cx="9" cy="10" r="1" fill="currentColor" />
-        <circle cx="15" cy="10" r="1" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
     id: 'home',
     label: 'Home',
     href: '/dashboard',
@@ -63,6 +52,15 @@ const defaultTabs: NavTab[] = [
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
       </svg>
+    ),
+  },
+  {
+    id: 'kiaan-chat',
+    label: 'KIAAN',
+    href: '/kiaan/chat',
+    isHighlighted: true,
+    icon: (
+      <span className="text-lg font-bold">K</span>
     ),
   },
   {
@@ -175,6 +173,40 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     {getTabLabel(tab.id, tab.label)}
                   </span>
                 </button>
+              )
+            }
+
+            // Special styling for KIAAN (highlighted tab)
+            if (tab.isHighlighted) {
+              return (
+                <Link
+                  key={tab.id}
+                  href={tab.href}
+                  className={`relative flex min-h-[64px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 active:scale-95 ${
+                    isActive
+                      ? 'text-white'
+                      : 'text-white/80 hover:text-white active:text-white'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30 transition-all duration-200 ${
+                      isActive ? 'scale-110 shadow-orange-500/50' : 'hover:scale-105'
+                    }`}
+                  >
+                    {tab.icon}
+                  </span>
+                  <span
+                    className={`text-[11px] leading-tight font-semibold ${
+                      isActive ? 'text-orange-400' : 'text-orange-300'
+                    }`}
+                  >
+                    {getTabLabel(tab.id, tab.label)}
+                  </span>
+                  {isActive && (
+                    <span className="absolute bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400" />
+                  )}
+                </Link>
               )
             }
 
