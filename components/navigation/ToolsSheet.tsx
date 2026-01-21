@@ -52,7 +52,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -67,7 +67,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
       >
         {/* Handle bar */}
         <div className="flex justify-center py-3">
-          <div className="h-1 w-10 rounded-full bg-white/20" />
+          <div className="h-1 w-10 rounded-full bg-white/40" />
         </div>
 
         {/* Header */}
@@ -109,7 +109,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                     key={tool.id}
                     href={tool.href}
                     onClick={onClose}
-                    className="flex items-center gap-3 rounded-xl border border-orange-500/15 bg-black/30 p-3 transition-all duration-200 hover:border-orange-400/40 hover:bg-black/50 active:scale-[0.98]"
+                    className="flex items-center gap-3 rounded-xl border border-orange-500/25 bg-[#0f0f14] p-3 transition-all duration-200 hover:border-orange-400/50 hover:bg-[#141419] active:scale-[0.98]"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 text-lg">
                       {tool.icon}

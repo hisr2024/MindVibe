@@ -128,7 +128,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
   return (
     <>
       <nav
-        className={`fixed inset-x-0 bottom-0 z-50 border-t border-orange-500/20 bg-[#0b0b0f]/98 backdrop-blur-xl md:hidden ${className}`}
+        className={`fixed inset-x-0 bottom-0 z-50 border-t border-orange-500/30 bg-[#0b0b0f] shadow-[0_-4px_20px_rgba(0,0,0,0.5)] md:hidden ${className}`}
         aria-label="Mobile navigation"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
