@@ -88,10 +88,10 @@ export async function getAnalyticsOverview(
     console.warn('Failed to fetch analytics overview:', error)
   }
 
-  // Return mock data as fallback
-  const mockData = getMockOverviewMetrics()
-  setCached(cacheKey, mockData)
-  return mockData
+  // Return honest empty state as fallback (no fake data)
+  const emptyData = getEmptyOverviewMetrics()
+  setCached(cacheKey, emptyData)
+  return emptyData
 }
 
 /**
@@ -121,9 +121,10 @@ export async function getMoodTrends(
     console.warn('Failed to fetch mood trends:', error)
   }
 
-  const mockData = getMockMoodTrends(period)
-  setCached(cacheKey, mockData)
-  return mockData
+  // Return honest empty state as fallback (no fake data)
+  const emptyData = getEmptyMoodTrends(period)
+  setCached(cacheKey, emptyData)
+  return emptyData
 }
 
 /**
@@ -152,9 +153,10 @@ export async function getJournalStatistics(
     console.warn('Failed to fetch journal statistics:', error)
   }
 
-  const mockData = getMockJournalStatistics()
-  setCached(cacheKey, mockData)
-  return mockData
+  // Return honest empty state as fallback (no fake data)
+  const emptyData = getEmptyJournalStatistics()
+  setCached(cacheKey, emptyData)
+  return emptyData
 }
 
 /**
@@ -183,9 +185,10 @@ export async function getKIAANInsights(
     console.warn('Failed to fetch KIAAN insights:', error)
   }
 
-  const mockData = getMockKIAANInsights()
-  setCached(cacheKey, mockData)
-  return mockData
+  // Return honest empty state as fallback (no fake data)
+  const emptyData = getEmptyKIAANInsights()
+  setCached(cacheKey, emptyData)
+  return emptyData
 }
 
 /**
@@ -216,9 +219,10 @@ export async function getWeeklySummary(
     console.warn('Failed to fetch weekly summary:', error)
   }
 
-  const mockData = getMockWeeklySummary()
-  setCached(cacheKey, mockData)
-  return mockData
+  // Return null when no data available (no fake data)
+  const emptyData = getEmptyWeeklySummary()
+  if (emptyData) setCached(cacheKey, emptyData)
+  return emptyData
 }
 
 /**
@@ -245,9 +249,10 @@ export async function getAchievements(userId: string): Promise<Achievement[]> {
     console.warn('Failed to fetch achievements:', error)
   }
 
-  const mockData = getMockAchievements()
-  setCached(cacheKey, mockData)
-  return mockData
+  // Return empty array - achievements are earned through genuine use
+  const emptyData = getEmptyAchievements()
+  setCached(cacheKey, emptyData)
+  return emptyData
 }
 
 /**
@@ -317,204 +322,99 @@ export function clearAnalyticsCache(): void {
 }
 
 // ============================================
-// Mock Data Functions (fallback for demo)
+// Empty State Functions (honest defaults when no data)
 // ============================================
 
-function getMockOverviewMetrics(): OverviewMetrics {
+/**
+ * Returns honest empty state for overview metrics
+ * No fake data - only real user data from API
+ */
+function getEmptyOverviewMetrics(): OverviewMetrics {
   return {
-    totalEntries: 42,
-    totalWords: 12450,
-    avgWordsPerEntry: 296,
-    currentStreak: 7,
-    longestStreak: 14,
-    avgMoodScore: 7.2,
-    moodTrend: 'up',
-    kiaanConversations: 28,
-    kiaanMessages: 156,
-    lastActivityDate: new Date().toISOString(),
+    totalEntries: 0,
+    totalWords: 0,
+    avgWordsPerEntry: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    avgMoodScore: 0,
+    moodTrend: 'stable',
+    kiaanConversations: 0,
+    kiaanMessages: 0,
+    lastActivityDate: null as unknown as string,
   }
 }
 
-function getMockMoodTrends(period: AnalyticsPeriod): MoodTrendData {
-  const dataPoints = period === 'daily' ? 7 : period === 'weekly' ? 4 : 12
-  const data = Array.from({ length: dataPoints }, (_, i) => {
-    const date = new Date()
-    date.setDate(date.getDate() - (dataPoints - 1 - i) * (period === 'daily' ? 1 : 7))
-    return {
-      date: date.toISOString().split('T')[0],
-      score: 5 + Math.random() * 4,
-      label: ['😊', '😌', '😐', '😔', '😊'][Math.floor(Math.random() * 5)],
-    }
-  })
-
+/**
+ * Returns honest empty state for mood trends
+ * No fake data - only real user data from API
+ */
+function getEmptyMoodTrends(period: AnalyticsPeriod): MoodTrendData {
   return {
     period,
-    data,
-    averageScore: 7.2,
-    highestScore: 9,
-    lowestScore: 5,
-    trend: 'improving',
-    changePercentage: 8.5,
+    data: [],
+    averageScore: 0,
+    highestScore: 0,
+    lowestScore: 0,
+    trend: 'stable',
+    changePercentage: 0,
   }
 }
 
-function getMockJournalStatistics(): JournalStatistics {
+/**
+ * Returns honest empty state for journal statistics
+ * No fake data - only real user data from API
+ */
+function getEmptyJournalStatistics(): JournalStatistics {
   return {
-    totalEntries: 42,
-    totalWords: 12450,
-    avgWordsPerEntry: 296,
-    currentStreak: 7,
-    longestStreak: 14,
+    totalEntries: 0,
+    totalWords: 0,
+    avgWordsPerEntry: 0,
+    currentStreak: 0,
+    longestStreak: 0,
     sentimentDistribution: {
-      positive: 45,
-      neutral: 35,
-      negative: 15,
-      mixed: 5,
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      mixed: 0,
     },
-    topTags: [
-      { tag: 'gratitude', count: 15, percentage: 35 },
-      { tag: 'work', count: 12, percentage: 28 },
-      { tag: 'family', count: 8, percentage: 19 },
-      { tag: 'health', count: 5, percentage: 12 },
-      { tag: 'goals', count: 2, percentage: 6 },
-    ],
-    writingTimeDistribution: [
-      { hour: 8, dayOfWeek: 1, count: 5 },
-      { hour: 21, dayOfWeek: 1, count: 8 },
-      { hour: 8, dayOfWeek: 2, count: 3 },
-      { hour: 22, dayOfWeek: 3, count: 6 },
-    ],
-    entriesByMonth: [
-      { month: 'Jan', count: 8 },
-      { month: 'Feb', count: 10 },
-      { month: 'Mar', count: 12 },
-      { month: 'Apr', count: 12 },
-    ],
-    avgEntriesPerWeek: 3.5,
+    topTags: [],
+    writingTimeDistribution: [],
+    entriesByMonth: [],
+    avgEntriesPerWeek: 0,
   }
 }
 
-function getMockKIAANInsights(): KIAANInsightData {
+/**
+ * Returns honest empty state for KIAAN insights
+ * No fake data - only real user data from API
+ */
+function getEmptyKIAANInsights(): KIAANInsightData {
   return {
-    totalConversations: 28,
-    totalMessages: 156,
-    avgMessagesPerConversation: 5.6,
-    avgResponseTime: 1.2,
-    topTopics: [
-      { tag: 'stress', count: 12, percentage: 30 },
-      { tag: 'relationships', count: 8, percentage: 20 },
-      { tag: 'work', count: 7, percentage: 17 },
-      { tag: 'mindfulness', count: 6, percentage: 15 },
-      { tag: 'sleep', count: 5, percentage: 13 },
-    ],
-    engagementLevel: 'high',
-    usageByHour: Array.from({ length: 24 }, (_, hour) => ({
-      hour,
-      messageCount: Math.floor(Math.random() * 10) + (hour >= 8 && hour <= 22 ? 5 : 0),
-    })),
-    usageByDay: [
-      { dayOfWeek: 0, dayName: 'Sun', messageCount: 18 },
-      { dayOfWeek: 1, dayName: 'Mon', messageCount: 24 },
-      { dayOfWeek: 2, dayName: 'Tue', messageCount: 22 },
-      { dayOfWeek: 3, dayName: 'Wed', messageCount: 28 },
-      { dayOfWeek: 4, dayName: 'Thu', messageCount: 20 },
-      { dayOfWeek: 5, dayName: 'Fri', messageCount: 26 },
-      { dayOfWeek: 6, dayName: 'Sat', messageCount: 18 },
-    ],
+    totalConversations: 0,
+    totalMessages: 0,
+    avgMessagesPerConversation: 0,
+    avgResponseTime: 0,
+    topTopics: [],
+    engagementLevel: 'low',
+    usageByHour: [],
+    usageByDay: [],
     recentConversations: [],
-    streakDays: 7,
+    streakDays: 0,
   }
 }
 
-function getMockWeeklySummary(): WeeklySummaryData {
-  const weekStart = new Date()
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-  const weekEnd = new Date(weekStart)
-  weekEnd.setDate(weekEnd.getDate() + 6)
-
-  return {
-    weekStart: weekStart.toISOString().split('T')[0],
-    weekEnd: weekEnd.toISOString().split('T')[0],
-    moodSummary: {
-      avgScore: 7.5,
-      trend: 'up',
-      bestDay: 'Wednesday',
-      challengingDay: 'Monday',
-    },
-    journalSummary: {
-      entriesCount: 5,
-      totalWords: 1450,
-      topTopics: ['gratitude', 'work', 'family'],
-    },
-    kiaanSummary: {
-      conversationCount: 4,
-      messageCount: 24,
-      topTopics: ['stress management', 'mindfulness'],
-    },
-    insights: [
-      {
-        type: 'mood',
-        title: 'Positive Trend',
-        description: 'Your mood has improved 15% compared to last week!',
-        icon: '📈',
-      },
-      {
-        type: 'journal',
-        title: 'Consistent Writer',
-        description: 'You maintained your 7-day writing streak.',
-        icon: '✍️',
-      },
-    ],
-    achievements: [],
-    highlightQuote:
-      'The mind is everything. What you think, you become. - Buddha',
-    comparisonToPreviousWeek: {
-      moodChange: 15,
-      entriesChange: 10,
-      kiaanChange: -5,
-    },
-  }
+/**
+ * Returns null for weekly summary when no data
+ * No fake data - only real user data from API
+ */
+function getEmptyWeeklySummary(): WeeklySummaryData | null {
+  return null
 }
 
-function getMockAchievements(): Achievement[] {
-  return [
-    {
-      id: 'first_entry',
-      name: 'First Steps',
-      description: 'Write your first journal entry',
-      icon: '📝',
-      earnedAt: new Date().toISOString(),
-      category: 'journal',
-      rarity: 'common',
-    },
-    {
-      id: 'week_streak',
-      name: 'Week Warrior',
-      description: 'Maintain a 7-day writing streak',
-      icon: '🔥',
-      earnedAt: new Date().toISOString(),
-      category: 'streak',
-      rarity: 'uncommon',
-    },
-    {
-      id: 'kiaan_explorer',
-      name: 'KIAAN Explorer',
-      description: 'Have 10 conversations with KIAAN',
-      icon: '💬',
-      progress: 8,
-      target: 10,
-      category: 'kiaan',
-      rarity: 'uncommon',
-    },
-    {
-      id: 'mood_master',
-      name: 'Mood Master',
-      description: 'Track your mood for 30 days',
-      icon: '😊',
-      progress: 21,
-      target: 30,
-      category: 'mood',
-      rarity: 'rare',
-    },
-  ]
+/**
+ * Returns empty achievements array
+ * No fake data - achievements are earned through genuine use
+ */
+function getEmptyAchievements(): Achievement[] {
+  return []
 }
