@@ -269,7 +269,7 @@ export function KiaanFooter() {
   if (shouldHide) return null;
 
   return (
-    <div className="fixed bottom-[88px] right-3 z-[60] p-2 md:bottom-8 md:right-8 md:p-0">
+    <div className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-3 z-[60] p-2 md:bottom-8 md:right-8 md:p-0">
       <AnimatePresence mode="wait">
         {isExpanded && (
           <motion.div
