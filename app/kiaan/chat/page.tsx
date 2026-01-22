@@ -69,13 +69,14 @@ function KiaanChatPageInner() {
       }
 
       const data = await response.json();
-      
-      // Add assistant message
+
+      // Add assistant message with AI-generated summary
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         sender: 'assistant',
         text: data.response || "I'm here for you. Let's try again. 💙",
         timestamp: new Date().toISOString(),
+        summary: data.summary || undefined, // AI-generated summary from backend
       };
 
       setMessages(prev => [...prev, assistantMessage]);

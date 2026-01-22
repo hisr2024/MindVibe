@@ -555,9 +555,31 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             except Exception as usage_error:
                 logger.warning(f"Failed to increment usage: {usage_error}")
 
+        # Generate AI-powered summary for elaborate responses
+        # Skip summary generation for conversational responses (short/simple)
+        summary_result = None
+        is_conversational = kiaan_result.get("conversational", False)
+        word_count = len(response.split())
+
+        if not is_conversational and word_count > 60:
+            try:
+                from backend.services.summary_generator import summary_generator
+
+                summary_result = await summary_generator.generate_summary(
+                    full_response=response,
+                    user_message=message,
+                    language=language,
+                    context="general"
+                )
+                logger.info(f"Summary generated: {summary_result.get('word_count', 0)} words, cached={summary_result.get('cached', False)}")
+            except Exception as summary_error:
+                logger.warning(f"Summary generation failed: {summary_error}")
+                # Continue without summary - not critical
+
         result: dict[str, Any] = {
             "status": "success",
             "response": response,
+            "summary": summary_result.get("summary") if summary_result and summary_result.get("success") else None,
             "bot": "KIAAN",
             "version": "15.0",
             "model": kiaan_result.get("model", "GPT-4o-mini"),

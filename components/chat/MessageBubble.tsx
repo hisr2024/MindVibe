@@ -22,13 +22,47 @@ interface MessageBubbleProps {
   autoTranslate?: boolean  // Whether to auto-translate this message
 }
 
+/**
+ * Build a fallback summary when AI-generated summary is not available.
+ * Extracts key sentences containing wisdom markers for a meaningful summary.
+ */
 function buildSummary(text: string) {
-  const normalized = text.replace(/\s+/g, ' ').trim()
+  const normalized = text.replace(/\s+/g, ' ').replace(/\*[^*]*\*/g, '').trim()
   if (!normalized) return ''
 
-  const sentences = normalized.split(/(?<=[.!?])\s+/)
-  const selected = sentences.slice(0, 3).join(' ')
-  return selected.length > 280 ? `${selected.slice(0, 277)}...` : selected
+  const sentences = normalized.split(/(?<=[.!?])\s+/).filter(s => s.length > 20)
+
+  // Look for sentences with wisdom or action markers for better summaries
+  const wisdomMarkers = ['dharma', 'karma', 'peace', 'wisdom', 'breath', 'trust', 'heart', 'soul', 'stillness']
+  const actionMarkers = ['step', 'practice', 'try', 'begin', 'start', 'remember', 'focus', 'take']
+
+  const wisdomSentence = sentences.find(s => wisdomMarkers.some(m => s.toLowerCase().includes(m)))
+  const actionSentence = sentences.find(s => actionMarkers.some(m => s.toLowerCase().includes(m)))
+
+  // Build a meaningful summary from wisdom + action sentences
+  let summary = ''
+  if (wisdomSentence) summary = wisdomSentence
+  if (actionSentence && actionSentence !== wisdomSentence) {
+    summary = summary ? `${summary} ${actionSentence}` : actionSentence
+  }
+
+  // Fallback to first substantive sentences if no markers found
+  if (!summary) {
+    const selected = sentences.slice(0, 2).join(' ')
+    summary = selected
+  }
+
+  // Truncate if too long
+  if (summary.length > 350) {
+    summary = summary.slice(0, 340) + '...'
+  }
+
+  // Ensure it ends with blue heart
+  if (!summary.endsWith('💙') && !summary.endsWith('...')) {
+    summary = summary.replace(/[.!?]?$/, '') + ' 💙'
+  }
+
+  return summary
 }
 
 export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference, viewMode = 'detailed', messageId, autoTranslate = false }: MessageBubbleProps) {
@@ -84,7 +118,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
     }
   }
 
+  // Use AI-generated summary if available, fallback to built summary
   const condensedSummary = summary || buildSummary(text)
+  const isAISummary = Boolean(summary)
   const showSummaryToggle = sender === 'assistant' && condensedSummary && condensedSummary !== text
 
   return (
@@ -163,20 +199,42 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       </div>
 
       {showSummaryToggle && (
-        <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-3 space-y-2 text-[13px] text-orange-50/85">
+        <div className={`rounded-2xl border ${isAISummary ? 'border-teal-500/30 bg-gradient-to-br from-teal-950/40 to-black/40' : 'border-orange-500/20 bg-black/40'} p-3 space-y-2 text-[13px] text-orange-50/85`}>
           <div className="flex items-center justify-between gap-3">
-            <div className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">Summary view</div>
+            <div className="flex items-center gap-2">
+              {isAISummary && (
+                <span className="flex items-center gap-1 rounded-full bg-teal-500/20 px-2 py-0.5 text-[10px] font-semibold text-teal-300 border border-teal-400/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
+                  AI Summary
+                </span>
+              )}
+              <div className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">
+                {isAISummary ? 'Key Insights' : 'Quick View'}
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => setShowSummary(!showSummary)}
-              className="rounded-full border border-orange-500/30 px-3 py-1 text-[11px] font-semibold text-orange-50 transition hover:border-orange-300/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400"
+              className={`rounded-full border ${isAISummary ? 'border-teal-500/40 hover:border-teal-400/60' : 'border-orange-500/30 hover:border-orange-300/60'} px-3 py-1 text-[11px] font-semibold text-orange-50 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400`}
             >
               {showSummary ? 'Hide' : 'Show'}
             </button>
           </div>
           {showSummary && (
-            <div className="rounded-xl bg-white/5 p-3 text-sm leading-relaxed text-orange-50/90">
+            <div className={`rounded-xl ${isAISummary ? 'bg-teal-900/20 border border-teal-500/10' : 'bg-white/5'} p-3 text-sm leading-relaxed text-orange-50/90`}>
               {condensedSummary}
+              {isAISummary && (
+                <div className="mt-2 pt-2 border-t border-teal-500/10 text-[10px] text-teal-300/60 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  Intelligently summarized from the full response
+                </div>
+              )}
             </div>
           )}
         </div>
