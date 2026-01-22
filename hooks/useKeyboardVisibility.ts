@@ -47,7 +47,7 @@ export function useKeyboardVisibility(options: UseKeyboardVisibilityOptions = {}
     if (typeof window === 'undefined') return
 
     // Use visualViewport API if available (more accurate)
-    const viewportHeight = typeof visualViewport !== 'undefined'
+    const viewportHeight = typeof visualViewport !== 'undefined' && visualViewport !== null
       ? visualViewport.height
       : window.innerHeight
 
@@ -125,7 +125,7 @@ export function useKeyboardVisibility(options: UseKeyboardVisibilityOptions = {}
     initialHeightRef.current = window.innerHeight
 
     // Use visualViewport API if available
-    if (typeof visualViewport !== 'undefined') {
+    if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
       visualViewport.addEventListener('resize', handleViewportResize)
     } else {
       window.addEventListener('resize', handleViewportResize)
@@ -136,7 +136,7 @@ export function useKeyboardVisibility(options: UseKeyboardVisibilityOptions = {}
     document.addEventListener('focusout', handleBlur)
 
     return () => {
-      if (typeof visualViewport !== 'undefined') {
+      if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
         visualViewport.removeEventListener('resize', handleViewportResize)
       } else {
         window.removeEventListener('resize', handleViewportResize)
