@@ -21,6 +21,13 @@
  * - VoiceAnalytics: Real-time metrics and monitoring
  */
 
+// Type imports for function signatures
+import type { NeuralWakeWordEngine } from './NeuralWakeWordEngine'
+import type { OnDeviceWhisperSTT } from './OnDeviceWhisperSTT'
+import type { VoiceAnalytics } from './VoiceAnalytics'
+import type { VectorConversationMemory } from './VectorConversationMemory'
+import type { LanguageConfig } from './UnifiedLanguageSupport'
+
 // ============ Core Services ============
 
 export {
