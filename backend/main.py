@@ -546,6 +546,20 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Sacred Reflections router: {e}")
 
+# Load Quantum Dive router
+print("\n[Quantum Dive] Attempting to import Quantum Dive router...")
+try:
+    from backend.routes.quantum_dive import router as quantum_dive_router
+    app.include_router(quantum_dive_router)
+    print("✅ [SUCCESS] Quantum Dive router loaded (Multi-dimensional consciousness analysis)")
+    print("   • POST   /api/kiaan/quantum-dive/analyze - Full quantum dive analysis")
+    print("   • GET    /api/kiaan/quantum-dive/quick - Quick quantum dive")
+    print("   • POST   /api/kiaan/quantum-dive/layer/{layer} - Deep dive into specific layer")
+    print("   • GET    /api/kiaan/quantum-dive/voice-summary - Voice-optimized summary")
+    print("   • GET    /api/kiaan/quantum-dive/history - Analysis history")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Quantum Dive router: {e}")
+
 # Load Weekly Assessment router
 print("\n[Weekly Assessment] Attempting to import Weekly Assessment router...")
 try:
