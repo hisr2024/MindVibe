@@ -21,7 +21,7 @@ const sheetVariants = {
     y: '100%',
     opacity: 0.5,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 40,
     }
@@ -30,7 +30,7 @@ const sheetVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 300,
       damping: 30,
     }
@@ -65,7 +65,7 @@ const itemVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 350,
       damping: 25,
     }

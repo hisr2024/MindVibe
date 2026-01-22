@@ -124,7 +124,7 @@ const activeIndicatorVariants = {
     scaleX: 1,
     opacity: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 25,
     }
@@ -145,7 +145,7 @@ const iconGlowVariants = {
     scale: 1.1,
     boxShadow: '0 0 20px rgba(255, 145, 89, 0.4)',
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 300,
       damping: 20,
     }

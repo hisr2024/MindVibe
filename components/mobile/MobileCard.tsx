@@ -68,7 +68,7 @@ export const MobileCard = forwardRef<HTMLDivElement, MobileCardProps>(
         scale: 1.01,
         y: -2,
         transition: {
-          type: 'spring',
+          type: 'spring' as const,
           stiffness: 400,
           damping: 25,
         },
@@ -77,7 +77,7 @@ export const MobileCard = forwardRef<HTMLDivElement, MobileCardProps>(
         scale: 0.97,
         y: 0,
         transition: {
-          type: 'spring',
+          type: 'spring' as const,
           stiffness: 500,
           damping: 30,
         },
