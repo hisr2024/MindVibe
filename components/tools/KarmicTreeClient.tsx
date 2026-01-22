@@ -292,7 +292,7 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
       </div>
 
       {/* Notifications */}
-      {(progress.notifications.length > 0 || error) && (
+      {((progress.notifications?.length ?? 0) > 0 || error) && (
         <div className="grid gap-3">
           {error && (
             <div className="flex items-center justify-between rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
@@ -300,7 +300,7 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
               <span className="text-xs uppercase tracking-wide text-white/70">info</span>
             </div>
           )}
-          {progress.notifications.map((note, idx) => (
+          {progress.notifications?.map((note, idx) => (
             <div
               key={idx}
               className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm ${
@@ -324,7 +324,7 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
         <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
           <h3 className="text-lg font-semibold text-orange-50 mb-4">Achievements</h3>
           <div className="space-y-3">
-            {progress.achievements.map(achievement => (
+            {progress.achievements?.map(achievement => (
               <div
                 key={achievement.key}
                 className="flex items-start gap-3 rounded-xl border border-orange-500/15 bg-black/30 p-3"
@@ -350,7 +350,7 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
         <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
           <h3 className="text-lg font-semibold text-orange-50 mb-4">Unlockables</h3>
           <div className="space-y-3">
-            {progress.unlockables.map(unlockable => (
+            {progress.unlockables?.map(unlockable => (
               <div
                 key={unlockable.key}
                 className="rounded-xl border border-orange-500/15 bg-black/30 p-3"

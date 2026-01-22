@@ -178,7 +178,7 @@ export interface DailyAnalysisData {
  */
 export interface QuantumDiveConfig {
   // Analysis depth
-  depth: 'quick' | 'standard' | 'deep' | 'transcendent'
+  depth?: 'quick' | 'standard' | 'deep' | 'transcendent'
 
   // Focus areas
   focusLayers?: ConsciousnessLayer[]
