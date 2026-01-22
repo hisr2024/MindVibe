@@ -156,6 +156,36 @@ export {
   type HealthMetrics
 } from './VoiceAnalytics'
 
+// Quantum Dive Engine
+export {
+  QuantumDiveEngine,
+  quantumDiveEngine,
+  createQuantumDiveEngine,
+  type QuantumDiveConfig,
+  type QuantumDiveInput,
+  type QuantumDiveAnalysis,
+  type QuantumState,
+  type QuantumInsight,
+  type WisdomRecommendation,
+  type PracticeRecommendation,
+  type ConsciousnessLayer,
+  type TemporalPattern,
+  type WeeklyReflectionData,
+  type DailyAnalysisData
+} from './QuantumDiveEngine'
+
+// Quantum Dive Orchestrator
+export {
+  QuantumDiveOrchestrator,
+  quantumDiveOrchestrator,
+  createQuantumDiveOrchestrator,
+  type QuantumDiveOrchestratorConfig,
+  type QuantumDiveSession,
+  type QuantumDiveStage,
+  type VoiceNarration,
+  type UserResponse
+} from './QuantumDiveOrchestrator'
+
 // ============ Initialization ============
 
 /**
