@@ -218,7 +218,7 @@ export const QUICK_ACCESS_TOOLS: ToolConfig[] = [
     title: 'Sacred Reflections',
     description: 'Spiritual journaling',
     gradient: 'from-purple-400/30 to-indigo-400/30',
-    href: '/sacred-reflections', // Same page as Private Journal - spiritual/encrypted journaling
+    href: '/sacred-reflections#spiritual', // Distinct href for spiritual journaling view
   },
 ]
 
