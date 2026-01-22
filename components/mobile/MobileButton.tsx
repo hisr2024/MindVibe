@@ -1,11 +1,10 @@
 'use client'
 
-import { forwardRef, ReactNode, ButtonHTMLAttributes } from 'react'
-import { motion, MotionProps } from 'framer-motion'
+import { forwardRef, ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
-export interface MobileButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+export interface MobileButtonProps {
   children: ReactNode
   /** Button variant */
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success'
@@ -23,6 +22,14 @@ export interface MobileButtonProps
   noHaptic?: boolean
   /** Additional CSS classes */
   className?: string
+  /** Disabled state */
+  disabled?: boolean
+  /** Click handler */
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  /** Button type */
+  type?: 'button' | 'submit' | 'reset'
+  /** Aria label */
+  'aria-label'?: string
 }
 
 // Animation variants for different button states
@@ -53,7 +60,7 @@ const spinnerVariants = {
     transition: {
       duration: 0.8,
       repeat: Infinity,
-      ease: 'linear',
+      ease: 'linear' as const,
     },
   },
 }
@@ -83,7 +90,8 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
       className = '',
       disabled,
       onClick,
-      ...props
+      type = 'button',
+      'aria-label': ariaLabel,
     },
     ref
   ) {
@@ -142,6 +150,7 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
     return (
       <motion.button
         ref={ref}
+        type={type}
         variants={buttonVariants}
         initial="rest"
         whileHover={!isDisabled ? 'hover' : undefined}
@@ -157,7 +166,7 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
         `.trim()}
         disabled={isDisabled}
         onClick={handleClick}
-        {...props}
+        aria-label={ariaLabel}
       >
         {loading ? (
           <>
@@ -199,8 +208,7 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
 /**
  * MobileIconButton - Circular icon-only button
  */
-export interface MobileIconButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+export interface MobileIconButtonProps {
   icon: ReactNode
   /** Button variant */
   variant?: 'primary' | 'secondary' | 'ghost'
@@ -212,6 +220,12 @@ export interface MobileIconButtonProps
   noHaptic?: boolean
   /** Additional CSS classes */
   className?: string
+  /** Disabled state */
+  disabled?: boolean
+  /** Click handler */
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  /** Button type */
+  type?: 'button' | 'submit' | 'reset'
 }
 
 export const MobileIconButton = forwardRef<HTMLButtonElement, MobileIconButtonProps>(
@@ -224,7 +238,8 @@ export const MobileIconButton = forwardRef<HTMLButtonElement, MobileIconButtonPr
       className = '',
       disabled,
       onClick,
-      ...props
+      type = 'button',
+      'aria-label': ariaLabel,
     },
     ref
   ) {
@@ -254,6 +269,7 @@ export const MobileIconButton = forwardRef<HTMLButtonElement, MobileIconButtonPr
     return (
       <motion.button
         ref={ref}
+        type={type}
         variants={buttonVariants}
         initial="rest"
         whileHover={!disabled ? 'hover' : undefined}
@@ -268,7 +284,7 @@ export const MobileIconButton = forwardRef<HTMLButtonElement, MobileIconButtonPr
         `.trim()}
         disabled={disabled}
         onClick={handleClick}
-        {...props}
+        aria-label={ariaLabel}
       >
         {icon}
       </motion.button>
