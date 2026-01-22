@@ -86,10 +86,10 @@ export class VoiceActivityDetector {
     confidence: 0
   }
 
-  // Buffers for analysis
-  private timeData: Float32Array = new Float32Array(0)
-  private freqData: Float32Array = new Float32Array(0)
-  private previousFreqData: Float32Array = new Float32Array(0)
+  // Buffers for analysis - explicitly typed for Web Audio API compatibility
+  private timeData: Float32Array<ArrayBuffer> = new Float32Array(0) as Float32Array<ArrayBuffer>
+  private freqData: Float32Array<ArrayBuffer> = new Float32Array(0) as Float32Array<ArrayBuffer>
+  private previousFreqData: Float32Array<ArrayBuffer> = new Float32Array(0) as Float32Array<ArrayBuffer>
   private levelHistory: number[] = []
 
   // Timing
@@ -156,10 +156,10 @@ export class VoiceActivityDetector {
       this.source = this.audioContext.createMediaStreamSource(this.mediaStream)
       this.source.connect(this.analyser)
 
-      // Initialize buffers
-      this.timeData = new Float32Array(this.analyser.fftSize)
-      this.freqData = new Float32Array(this.analyser.frequencyBinCount)
-      this.previousFreqData = new Float32Array(this.analyser.frequencyBinCount)
+      // Initialize buffers with explicit ArrayBuffer type for Web Audio API
+      this.timeData = new Float32Array(this.analyser.fftSize) as Float32Array<ArrayBuffer>
+      this.freqData = new Float32Array(this.analyser.frequencyBinCount) as Float32Array<ArrayBuffer>
+      this.previousFreqData = new Float32Array(this.analyser.frequencyBinCount) as Float32Array<ArrayBuffer>
 
       // Start processing
       this.state.isActive = true

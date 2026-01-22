@@ -344,8 +344,8 @@ export class EmotionAwareVoice {
     }
 
     const bufferLength = this.analyser.frequencyBinCount
-    const timeData = new Float32Array(bufferLength)
-    const freqData = new Float32Array(bufferLength)
+    const timeData = new Float32Array(bufferLength) as Float32Array<ArrayBuffer>
+    const freqData = new Float32Array(bufferLength) as Float32Array<ArrayBuffer>
 
     this.analyser.getFloatTimeDomainData(timeData)
     this.analyser.getFloatFrequencyData(freqData)
