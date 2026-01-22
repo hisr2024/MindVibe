@@ -32,7 +32,7 @@ const panelVariants = {
     scale: 0.95,
     y: 20,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 35,
     }
@@ -43,7 +43,7 @@ const panelVariants = {
     scale: 1,
     y: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 300,
       damping: 28,
     }
@@ -58,7 +58,7 @@ const messageVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 350,
       damping: 25,
     }

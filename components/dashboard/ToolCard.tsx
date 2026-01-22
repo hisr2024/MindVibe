@@ -35,7 +35,7 @@ const cardVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 350,
       damping: 25,
       delay: delay * 0.05,
@@ -45,7 +45,7 @@ const cardVariants = {
     y: -3,
     scale: 1.01,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 20,
     },
@@ -54,7 +54,7 @@ const cardVariants = {
     scale: 0.97,
     y: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 500,
       damping: 25,
     },
@@ -68,7 +68,7 @@ const iconVariants = {
     scale: 1.12,
     rotate: [0, -3, 3, 0],
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 15,
     },
@@ -82,7 +82,7 @@ const badgeVariants = {
   hover: {
     scale: 1.05,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 500,
       damping: 20,
     },
