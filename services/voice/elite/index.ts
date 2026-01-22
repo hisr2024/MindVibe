@@ -25,6 +25,11 @@
  * - BreathSyncEngine: Voice-breathing synchronization
  * - AmbientSoundscapeEngine: Immersive layered audio environments
  * - QuantumVoiceCommands: Hands-free voice control during sessions
+ * - SpatialAudioEngine: 3D immersive sound positioning with HRTF
+ * - SleepInductionEngine: Gradual sleep guidance with voice fading
+ * - VoicePersonalizationEngine: Adaptive user preference learning
+ * - DailyCheckInEngine: Morning & evening wellness check-ins
+ * - GuidedAffirmationEngine: Personalized positive affirmations
  */
 
 // Type imports for function signatures
@@ -262,6 +267,93 @@ export {
   type CommandContext,
   type CommandResponse
 } from './QuantumVoiceCommands'
+
+// Spatial Audio Engine
+export {
+  SpatialAudioEngine,
+  spatialAudioEngine,
+  getSpatialAudioEngine,
+  createSpatialAudioEngine,
+  CHAKRA_POSITIONS,
+  LAYER_POSITIONS,
+  ROOM_PRESETS,
+  SPATIAL_SCENES,
+  type SpatialPosition,
+  type MovementPath,
+  type SpatialSource,
+  type RoomPreset,
+  type SpatialScene,
+  type SpatialAudioState,
+  type SpatialAudioConfig
+} from './SpatialAudioEngine'
+
+// Sleep Induction Engine
+export {
+  SleepInductionEngine,
+  sleepInductionEngine,
+  getSleepInductionEngine,
+  createSleepInductionEngine,
+  SLEEP_CONTENT,
+  WAKE_UP_NARRATIONS,
+  type SleepSessionType,
+  type SleepPhase,
+  type SleepSessionConfig,
+  type SleepContent,
+  type SleepNarration,
+  type SleepInductionState,
+  type SleepInductionConfig
+} from './SleepInductionEngine'
+
+// Voice Personalization Engine
+export {
+  VoicePersonalizationEngine,
+  voicePersonalizationEngine,
+  getVoicePersonalizationEngine,
+  createVoicePersonalizationEngine,
+  type VoicePreferences,
+  type TimePreferences,
+  type ContentPreferences,
+  type InteractionHistory,
+  type UserFeedback,
+  type UserVoiceProfile,
+  type PersonalizationState,
+  type PersonalizationSuggestion
+} from './VoicePersonalizationEngine'
+
+// Daily Check-In Engine
+export {
+  DailyCheckInEngine,
+  dailyCheckInEngine,
+  getDailyCheckInEngine,
+  createDailyCheckInEngine,
+  CHECK_IN_FLOWS,
+  type CheckInType,
+  type MoodLevel,
+  type EnergyLevel,
+  type SleepQuality,
+  type CheckInQuestion,
+  type CheckInResponse,
+  type CheckInRecord,
+  type CheckInFlow,
+  type DailyInsights,
+  type CheckInState,
+  type CheckInConfig
+} from './DailyCheckInEngine'
+
+// Guided Affirmation Engine
+export {
+  GuidedAffirmationEngine,
+  guidedAffirmationEngine,
+  getGuidedAffirmationEngine,
+  createGuidedAffirmationEngine,
+  AFFIRMATIONS,
+  AFFIRMATION_SETS,
+  type AffirmationCategory,
+  type Affirmation,
+  type AffirmationSet,
+  type AffirmationPreferences,
+  type AffirmationState
+} from './GuidedAffirmationEngine'
 
 // ============ Initialization ============
 
