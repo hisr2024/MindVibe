@@ -109,7 +109,7 @@ export function getVisualViewportSize(): { width: number; height: number } {
   if (typeof window === 'undefined') {
     return { width: 0, height: 0 }
   }
-  if (typeof visualViewport !== 'undefined') {
+  if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
     return {
       width: visualViewport.width,
       height: visualViewport.height,

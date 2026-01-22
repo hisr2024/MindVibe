@@ -60,7 +60,7 @@ const fabVariants = {
       damping: 20,
     },
   },
-}
+} as const
 
 export const MobileActionButton = forwardRef<HTMLButtonElement, MobileActionButtonProps>(
   function MobileActionButton(

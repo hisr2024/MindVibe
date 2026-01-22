@@ -66,7 +66,7 @@ const sheetVariants = {
       stiffness: 300,
     },
   },
-}
+} as const
 
 const backdropVariants = {
   hidden: { opacity: 0 },
@@ -74,7 +74,7 @@ const backdropVariants = {
     opacity: 1,
     transition: { duration: 0.2 },
   },
-}
+} as const
 
 export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetProps>(
   function MobileBottomSheet(

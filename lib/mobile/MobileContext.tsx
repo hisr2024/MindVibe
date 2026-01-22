@@ -232,7 +232,7 @@ export function MobileOptimizationProvider({ children }: MobileProviderProps) {
 
     // Handle keyboard on mobile
     const handleViewportResize = () => {
-      if (typeof visualViewport !== 'undefined') {
+      if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
         const viewportHeight = visualViewport.height
         const windowHeight = window.innerHeight
         const keyboardH = windowHeight - viewportHeight
@@ -262,7 +262,7 @@ export function MobileOptimizationProvider({ children }: MobileProviderProps) {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    if (typeof visualViewport !== 'undefined') {
+    if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
       visualViewport.addEventListener('resize', handleViewportResize)
     }
 
@@ -272,7 +272,7 @@ export function MobileOptimizationProvider({ children }: MobileProviderProps) {
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
-      if (typeof visualViewport !== 'undefined') {
+      if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
         visualViewport.removeEventListener('resize', handleViewportResize)
       }
     }
