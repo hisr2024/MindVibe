@@ -17,7 +17,7 @@ const containerVariants = {
       delayChildren: 0.1,
     },
   },
-}
+} as const
 
 const itemVariants = {
   hidden: { opacity: 0, y: 15, scale: 0.97 },
@@ -26,7 +26,7 @@ const itemVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 350,
       damping: 25,
     },
@@ -40,7 +40,7 @@ const quickActionVariants = {
     scale: 1.02,
     y: -2,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 20,
     },
@@ -48,7 +48,7 @@ const quickActionVariants = {
   tap: {
     scale: 0.96,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 500,
       damping: 25,
     },
