@@ -19,6 +19,12 @@
  * - OnDeviceWhisperSTT: Offline speech-to-text
  * - VectorConversationMemory: Semantic memory with embeddings
  * - VoiceAnalytics: Real-time metrics and monitoring
+ *
+ * Quantum Dive Voice Enhancements:
+ * - BinauraBeatsEngine: Brainwave entrainment with binaural beats
+ * - BreathSyncEngine: Voice-breathing synchronization
+ * - AmbientSoundscapeEngine: Immersive layered audio environments
+ * - QuantumVoiceCommands: Hands-free voice control during sessions
  */
 
 // Type imports for function signatures
@@ -185,6 +191,77 @@ export {
   type VoiceNarration,
   type UserResponse
 } from './QuantumDiveOrchestrator'
+
+// ============ Quantum Dive Voice Enhancements ============
+
+// Binaural Beats Engine
+export {
+  BinauraBeatsEngine,
+  binauraBeatsEngine,
+  getBinauraBeatsEngine,
+  createBinauraBeatsEngine,
+  BRAINWAVE_RANGES,
+  SOLFEGGIO_FREQUENCIES,
+  LAYER_AUDIO_CONFIGS,
+  BINAURAL_PRESETS,
+  type BrainwaveState,
+  type BinauralBeatConfig,
+  type LayerAudioConfig,
+  type BinauraBeatsState,
+  type BinauraPreset
+} from './BinauraBeatsEngine'
+
+// Breath Sync Engine
+export {
+  BreathSyncEngine,
+  breathSyncEngine,
+  getBreathSyncEngine,
+  createBreathSyncEngine,
+  BREATHING_PATTERNS,
+  LAYER_BREATH_PATTERNS,
+  type BreathPhase,
+  type BreathingPatternType,
+  type BreathingPattern,
+  type BreathSyncState,
+  type BreathSyncConfig,
+  type BreathVoiceCue
+} from './BreathSyncEngine'
+
+// Ambient Soundscape Engine
+export {
+  AmbientSoundscapeEngine,
+  ambientSoundscapeEngine,
+  getAmbientSoundscapeEngine,
+  createAmbientSoundscapeEngine,
+  SOUND_CONFIGS,
+  LAYER_SOUNDSCAPES,
+  SOUNDSCAPE_PRESETS,
+  type SoundscapeCategory,
+  type SoundType,
+  type SoundConfig,
+  type SoundscapePreset,
+  type AmbientSoundscapeState,
+  type AmbientSoundscapeConfig
+} from './AmbientSoundscapeEngine'
+
+// Quantum Voice Commands
+export {
+  QuantumVoiceCommands,
+  quantumVoiceCommands,
+  getQuantumVoiceCommands,
+  createQuantumVoiceCommands,
+  VOICE_COMMANDS,
+  LAYER_ALIASES,
+  PATTERN_ALIASES,
+  type CommandCategory,
+  type VoiceCommand,
+  type RecognizedCommand,
+  type VoiceCommandsState,
+  type VoiceCommandsConfig,
+  type CommandHandler,
+  type CommandContext,
+  type CommandResponse
+} from './QuantumVoiceCommands'
 
 // ============ Initialization ============
 
