@@ -1708,3 +1708,375 @@ html.light .swipe-indicator:active {
     animation: none !important;
   }
 }
+
+/* =====================================================
+   SUPER MOBILE FRIENDLY - ADVANCED OPTIMIZATIONS
+   Premium mobile experience enhancements
+   ===================================================== */
+
+/* Mobile viewport fixes for iOS */
+@supports (-webkit-touch-callout: none) {
+  .mobile-viewport-fix {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Prevent overscroll bounce on iOS while allowing scrollable areas */
+html {
+  overscroll-behavior: none;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+/* Allow overscroll in scrollable containers */
+.scroll-container,
+.overflow-y-auto,
+.overflow-auto {
+  overscroll-behavior: contain;
+}
+
+/* Mobile-optimized text rendering */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent text selection on UI elements */
+.no-select,
+button,
+nav,
+[role="button"],
+.mobile-nav,
+.mobile-tab-bar {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection on content */
+.selectable,
+p,
+article,
+.prose {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Optimize touch scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-optimized images */
+img {
+  content-visibility: auto;
+}
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated,
+.mobile-card-interactive,
+.mobile-btn-primary,
+.mobile-btn-secondary,
+.mobile-fab {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Remove GPU acceleration after interaction */
+.gpu-accelerated:not(:hover):not(:active),
+.mobile-card-interactive:not(:hover):not(:active) {
+  will-change: auto;
+}
+
+/* Safe area padding utilities */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+.safe-area-all {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Content container with bottom nav spacing */
+.mobile-content {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Snap scrolling for carousels and horizontal lists */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  scroll-padding: 16px;
+}
+
+.snap-x > * {
+  scroll-snap-align: start;
+}
+
+.snap-y {
+  scroll-snap-type: y mandatory;
+  scroll-padding: 16px;
+}
+
+.snap-y > * {
+  scroll-snap-align: start;
+}
+
+/* Mobile-optimized cards with depth */
+.mobile-card-depth {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-card-depth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.mobile-card-depth:active {
+  transform: scale(0.98) translateZ(-10px);
+}
+
+/* Touch highlight removal for iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Restore touch highlight for links/buttons that need it */
+a:not(.no-highlight),
+button:not(.no-highlight) {
+  -webkit-tap-highlight-color: rgba(255, 145, 89, 0.1);
+}
+
+/* Fluid typography for mobile */
+.fluid-text-sm {
+  font-size: clamp(0.75rem, 2vw + 0.5rem, 0.875rem);
+}
+
+.fluid-text-base {
+  font-size: clamp(0.875rem, 2vw + 0.5rem, 1rem);
+}
+
+.fluid-text-lg {
+  font-size: clamp(1rem, 2.5vw + 0.5rem, 1.125rem);
+}
+
+.fluid-text-xl {
+  font-size: clamp(1.125rem, 3vw + 0.5rem, 1.25rem);
+}
+
+.fluid-text-2xl {
+  font-size: clamp(1.25rem, 4vw + 0.5rem, 1.5rem);
+}
+
+.fluid-text-3xl {
+  font-size: clamp(1.5rem, 5vw + 0.5rem, 1.875rem);
+}
+
+/* Optimize layout shifts */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+/* Mobile loading states */
+.mobile-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: mobile-loading-sweep 1.5s ease-in-out infinite;
+}
+
+@keyframes mobile-loading-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Haptic feedback visual indicator */
+.haptic-feedback {
+  position: relative;
+}
+
+.haptic-feedback::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 145, 89, 0.3) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.haptic-feedback:active::after {
+  opacity: 1;
+}
+
+/* Network status indicator */
+.offline-indicator {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f97316, #ef4444);
+  background-size: 200% 100%;
+  animation: offline-gradient 2s linear infinite;
+  z-index: 9999;
+}
+
+@keyframes offline-gradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Mobile keyboard handling */
+.keyboard-visible .mobile-nav,
+.keyboard-visible .mobile-fab {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* iOS-style momentum scrolling container */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Inertia scrolling for lists */
+.inertia-scroll {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 16px;
+  scroll-padding-bottom: 88px;
+}
+
+/* Mobile media queries for fine-tuned responsiveness */
+@media (max-width: 359px) {
+  /* Extra small phones (iPhone SE, etc.) */
+  .xs-text-sm { font-size: 0.875rem; }
+  .xs-p-2 { padding: 0.5rem; }
+  .xs-gap-2 { gap: 0.5rem; }
+}
+
+/* Landscape mobile adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-hide {
+    display: none !important;
+  }
+
+  .landscape-compact {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .mobile-nav {
+    height: 56px;
+  }
+}
+
+/* Dark mode optimizations for OLED screens */
+@media (prefers-color-scheme: dark) {
+  .oled-black {
+    background-color: #000000;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-card,
+  .mobile-button {
+    border-width: 2px;
+  }
+
+  .text-slate-400,
+  .text-slate-500 {
+    color: #94a3b8 !important;
+  }
+}
+
+/* Print styles for mobile */
+@media print {
+  .mobile-nav,
+  .mobile-fab,
+  .mobile-header {
+    display: none !important;
+  }
+
+  .mobile-content {
+    padding-bottom: 0;
+  }
+}
+
+/* Performance: Reduce animations on low-end devices */
+@media (prefers-reduced-motion: reduce), (update: slow) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
