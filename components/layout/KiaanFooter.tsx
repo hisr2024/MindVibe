@@ -72,7 +72,7 @@ const avatarVariants = {
     transition: {
       duration: 2.5,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: 'easeInOut' as const,
     },
   },
   thinking: {
@@ -85,7 +85,7 @@ const avatarVariants = {
     transition: {
       duration: 1.2,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: 'easeInOut' as const,
     },
   },
 };
