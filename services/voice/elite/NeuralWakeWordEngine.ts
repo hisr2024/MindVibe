@@ -736,7 +736,7 @@ export class NeuralWakeWordEngine {
   static isSupported(): boolean {
     return !!(
       typeof window !== 'undefined' &&
-      navigator.mediaDevices?.getUserMedia &&
+      typeof navigator?.mediaDevices?.getUserMedia === 'function' &&
       (window.AudioContext || (window as any).webkitAudioContext)
     )
   }
