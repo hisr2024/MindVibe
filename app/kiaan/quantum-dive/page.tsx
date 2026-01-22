@@ -697,7 +697,7 @@ export default function QuantumDivePage() {
                 </button>
               )}
 
-              {stage !== 'ready' && stage !== 'complete' && (
+              {stage !== 'complete' && (
                 <button
                   onClick={resetDive}
                   className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white/60 hover:text-white rounded-lg transition-all"
