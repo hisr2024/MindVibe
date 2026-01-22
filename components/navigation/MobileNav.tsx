@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ToolsSheet } from './ToolsSheet'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 export interface NavTab {
   id: string
@@ -109,21 +111,63 @@ const defaultTabs: NavTab[] = [
   },
 ]
 
+// Animation variants for polished interactions
+const navItemVariants = {
+  rest: { scale: 1 },
+  pressed: { scale: 0.92 },
+  hover: { scale: 1.02 },
+}
+
+const activeIndicatorVariants = {
+  initial: { scaleX: 0, opacity: 0 },
+  animate: {
+    scaleX: 1,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 400,
+      damping: 25,
+    }
+  },
+  exit: {
+    scaleX: 0,
+    opacity: 0,
+    transition: { duration: 0.15 }
+  },
+}
+
+const iconGlowVariants = {
+  inactive: {
+    scale: 1,
+    boxShadow: '0 0 0 rgba(255, 145, 89, 0)',
+  },
+  active: {
+    scale: 1.1,
+    boxShadow: '0 0 20px rgba(255, 145, 89, 0.4)',
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 20,
+    }
+  },
+}
+
 /**
  * MobileNav component for bottom tab navigation on mobile devices.
  *
  * Features:
- * - 6 tabs: Chat, Sacred Reflections, Home, Wisdom, Tools, Profile
- * - Icon + label for each tab
- * - Active state indicator
+ * - Premium polished animations with Framer Motion
+ * - Haptic feedback on interactions
+ * - Smooth spring-based transitions
+ * - Active state with glow effects
  * - Touch-friendly (min 44x44px touch targets)
- * - Fixed to bottom of viewport
- * - Tools tab opens bottom sheet with all tools
+ * - Fixed to bottom of viewport with safe area support
  */
 export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps) {
   const pathname = usePathname()
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
   const { t } = useLanguage()
+  const { triggerHaptic } = useHapticFeedback()
 
   // Get translated label for tab
   const getTabLabel = useMemo(() => {
@@ -132,117 +176,221 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
     }
   }, [t])
 
+  // Handle tab press with haptic feedback
+  const handleTabPress = useCallback((isActive: boolean) => {
+    if (!isActive) {
+      triggerHaptic('light')
+    }
+  }, [triggerHaptic])
+
+  // Handle tools button press
+  const handleToolsPress = useCallback(() => {
+    triggerHaptic('medium')
+    setToolsSheetOpen(true)
+  }, [triggerHaptic])
+
   return (
     <>
-      <nav
-        className={`fixed inset-x-0 bottom-0 z-50 border-t border-orange-500/30 bg-[#0b0b0f] shadow-[0_-4px_20px_rgba(0,0,0,0.5)] md:hidden ${className}`}
+      <motion.nav
+        className={`fixed inset-x-0 bottom-0 z-50 md:hidden ${className}`}
         aria-label="Mobile navigation"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+          delay: 0.1,
+        }}
       >
-        <div className="flex items-stretch justify-around px-1">
-          {tabs.map((tab) => {
-            const isActive = tab.href !== '#' && (pathname === tab.href || pathname.startsWith(`${tab.href}/`))
+        {/* Gradient fade overlay for content behind nav */}
+        <div className="absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-[#0b0b0f] to-transparent pointer-events-none" />
 
-            // Tools button opens sheet instead of navigating
-            if (tab.isToolsButton) {
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setToolsSheetOpen(true)}
-                  className={`flex min-h-[64px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 active:scale-95 ${
-                    toolsSheetOpen
-                      ? 'text-orange-400'
-                      : 'text-white/60 hover:text-white/80 active:text-orange-300'
-                  }`}
-                  aria-expanded={toolsSheetOpen}
-                  aria-haspopup="dialog"
-                >
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200 ${
-                      toolsSheetOpen ? 'bg-orange-500/25 scale-110' : 'hover:bg-white/5'
-                    }`}
-                  >
-                    {tab.icon}
-                  </span>
-                  <span
-                    className={`text-[11px] leading-tight ${
-                      toolsSheetOpen ? 'font-semibold text-orange-400' : 'font-medium'
-                    }`}
-                  >
-                    {getTabLabel(tab.id, tab.label)}
-                  </span>
-                </button>
-              )
-            }
+        {/* Main nav container with glass effect */}
+        <div
+          className="relative border-t border-orange-500/20 bg-[#0b0b0f]/95 backdrop-blur-xl shadow-mobile-nav"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          {/* Subtle top glow line */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
 
-            // Special styling for KIAAN (highlighted tab)
-            if (tab.isHighlighted) {
+          <div className="flex items-stretch justify-around px-1">
+            {tabs.map((tab) => {
+              const isActive = tab.href !== '#' && (pathname === tab.href || pathname.startsWith(`${tab.href}/`))
+
+              // Tools button opens sheet instead of navigating
+              if (tab.isToolsButton) {
+                return (
+                  <motion.button
+                    key={tab.id}
+                    type="button"
+                    onClick={handleToolsPress}
+                    variants={navItemVariants}
+                    initial="rest"
+                    whileTap="pressed"
+                    whileHover="hover"
+                    className={`relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 ${
+                      toolsSheetOpen
+                        ? 'text-orange-400'
+                        : 'text-white/60'
+                    }`}
+                    aria-expanded={toolsSheetOpen}
+                    aria-haspopup="dialog"
+                  >
+                    <motion.span
+                      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-200 ${
+                        toolsSheetOpen ? 'bg-orange-500/20' : ''
+                      }`}
+                      variants={iconGlowVariants}
+                      animate={toolsSheetOpen ? 'active' : 'inactive'}
+                    >
+                      {tab.icon}
+                    </motion.span>
+                    <span
+                      className={`text-[10px] leading-tight tracking-wide ${
+                        toolsSheetOpen ? 'font-semibold text-orange-400' : 'font-medium'
+                      }`}
+                    >
+                      {getTabLabel(tab.id, tab.label)}
+                    </span>
+                  </motion.button>
+                )
+              }
+
+              // Special styling for KIAAN (highlighted tab)
+              if (tab.isHighlighted) {
+                return (
+                  <Link
+                    key={tab.id}
+                    href={tab.href}
+                    onClick={() => handleTabPress(isActive)}
+                    className="relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <motion.div
+                      variants={navItemVariants}
+                      initial="rest"
+                      whileTap="pressed"
+                      whileHover="hover"
+                      className="flex flex-col items-center gap-1"
+                    >
+                      {/* Highlighted KIAAN button with pulsing glow */}
+                      <motion.span
+                        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 text-white shadow-lg"
+                        animate={{
+                          boxShadow: isActive
+                            ? [
+                                '0 4px 20px rgba(255, 145, 89, 0.5)',
+                                '0 4px 30px rgba(255, 145, 89, 0.7)',
+                                '0 4px 20px rgba(255, 145, 89, 0.5)',
+                              ]
+                            : '0 4px 16px rgba(255, 145, 89, 0.4)',
+                          scale: isActive ? 1.05 : 1,
+                        }}
+                        transition={{
+                          boxShadow: {
+                            duration: 2,
+                            repeat: isActive ? Infinity : 0,
+                            ease: 'easeInOut',
+                          },
+                          scale: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 20,
+                          },
+                        }}
+                      >
+                        {/* Inner ring glow */}
+                        <motion.span
+                          className="absolute inset-0 rounded-full"
+                          animate={{
+                            boxShadow: isActive
+                              ? 'inset 0 0 12px rgba(255, 255, 255, 0.3)'
+                              : 'inset 0 0 8px rgba(255, 255, 255, 0.2)',
+                          }}
+                        />
+                        {tab.icon}
+                      </motion.span>
+                      <span
+                        className={`text-[10px] leading-tight tracking-wide font-semibold ${
+                          isActive ? 'text-orange-400' : 'text-orange-300/80'
+                        }`}
+                      >
+                        {getTabLabel(tab.id, tab.label)}
+                      </span>
+                    </motion.div>
+
+                    {/* Active indicator dot */}
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.span
+                          className="absolute bottom-1 left-1/2 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 shadow-[0_0_8px_rgba(255,145,89,0.6)]"
+                          initial={{ scale: 0, x: '-50%' }}
+                          animate={{ scale: 1, x: '-50%' }}
+                          exit={{ scale: 0, x: '-50%' }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </Link>
+                )
+              }
+
+              // Regular tab item
               return (
                 <Link
                   key={tab.id}
                   href={tab.href}
-                  className={`relative flex min-h-[64px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 active:scale-95 ${
-                    isActive
-                      ? 'text-white'
-                      : 'text-white/80 hover:text-white active:text-white'
-                  }`}
+                  onClick={() => handleTabPress(isActive)}
+                  className="relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30 transition-all duration-200 ${
-                      isActive ? 'scale-110 shadow-orange-500/50' : 'hover:scale-105'
-                    }`}
+                  <motion.div
+                    variants={navItemVariants}
+                    initial="rest"
+                    whileTap="pressed"
+                    whileHover="hover"
+                    className="flex flex-col items-center gap-1"
                   >
-                    {tab.icon}
-                  </span>
-                  <span
-                    className={`text-[11px] leading-tight font-semibold ${
-                      isActive ? 'text-orange-400' : 'text-orange-300'
-                    }`}
-                  >
-                    {getTabLabel(tab.id, tab.label)}
-                  </span>
-                  {isActive && (
-                    <span className="absolute bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400" />
-                  )}
+                    <motion.span
+                      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-200 ${
+                        isActive ? 'text-orange-400' : 'text-white/60'
+                      }`}
+                      variants={iconGlowVariants}
+                      animate={isActive ? 'active' : 'inactive'}
+                      style={{
+                        backgroundColor: isActive ? 'rgba(255, 145, 89, 0.15)' : 'transparent',
+                      }}
+                    >
+                      {tab.icon}
+                    </motion.span>
+                    <span
+                      className={`text-[10px] leading-tight tracking-wide ${
+                        isActive ? 'font-semibold text-orange-400' : 'font-medium text-white/60'
+                      }`}
+                    >
+                      {getTabLabel(tab.id, tab.label)}
+                    </span>
+                  </motion.div>
+
+                  {/* Active indicator bar */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.span
+                        className="absolute bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 shadow-[0_0_10px_rgba(255,145,89,0.5)]"
+                        variants={activeIndicatorVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                      />
+                    )}
+                  </AnimatePresence>
                 </Link>
               )
-            }
-
-            return (
-              <Link
-                key={tab.id}
-                href={tab.href}
-                className={`relative flex min-h-[64px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 active:scale-95 ${
-                  isActive
-                    ? 'text-orange-400'
-                    : 'text-white/60 hover:text-white/80 active:text-orange-300'
-                }`}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200 ${
-                    isActive ? 'bg-orange-500/25 scale-110' : 'hover:bg-white/5'
-                  }`}
-                >
-                  {tab.icon}
-                </span>
-                <span
-                  className={`text-[11px] leading-tight ${
-                    isActive ? 'font-semibold text-orange-400' : 'font-medium'
-                  }`}
-                >
-                  {getTabLabel(tab.id, tab.label)}
-                </span>
-                {isActive && (
-                  <span className="absolute bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400" />
-                )}
-              </Link>
-            )
-          })}
+            })}
+          </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Tools Bottom Sheet */}
       <ToolsSheet isOpen={toolsSheetOpen} onClose={() => setToolsSheetOpen(false)} />
