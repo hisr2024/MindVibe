@@ -16,6 +16,7 @@ export { DivineMoodCheckIn } from './DivineMoodCheckIn';
 export { SacredMessage } from './SacredMessage';
 export { DivineGreeting } from './DivineGreeting';
 export { SacredDashboardWidget } from './SacredDashboardWidget';
+export { NamasteIcon } from './NamasteIcon';
 
 // ========================================
 // Krishna Divine Presence Features

@@ -13,6 +13,7 @@ import {
   SakhaModeProvider,
   SacredDashboardWidget,
   DivineMoodCheckIn,
+  NamasteIcon,
 } from '@/components/divine'
 import { DivineConsciousnessProvider } from '@/contexts/DivineConsciousnessContext'
 import Link from 'next/link'
@@ -186,12 +187,9 @@ export default function IntroductionPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            {/* Animated Icon - Scales with screen, reduced animation intensity */}
-            <div
-              className="text-5xl sm:text-6xl md:text-7xl mb-3 sm:mb-4 divine-pulse"
-              style={{ transform: 'translateZ(0)' }}
-            >
-              🙏
+            {/* Professionally Polished Namaste Icon */}
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <NamasteIcon size="xl" animated={true} showGlow={true} />
             </div>
 
             {/* Title - Responsive typography */}
