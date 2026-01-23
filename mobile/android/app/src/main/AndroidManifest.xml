@@ -8,6 +8,17 @@
     <!-- Biometric authentication -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
+    <!-- Audio/Microphone permissions for voice features -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Camera permission for video features (optional) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Feature declarations (not required but recommended) -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
         android:name=".MindVibeApplication"
         android:allowBackup="false"

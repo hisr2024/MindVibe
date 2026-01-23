@@ -1,6 +1,8 @@
 'use client'
 
 import { type ReactNode, useEffect, useRef, useState, useCallback } from 'react'
+import { Portal } from './Portal'
+import { lockBodyScroll, unlockBodyScroll } from '@/lib/mobile/bodyScrollLock'
 
 interface ModalProps {
   open: boolean
@@ -10,6 +12,8 @@ interface ModalProps {
   children: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   closeOnOutsideClick?: boolean
+  /** Z-index for the modal (default: 70 per z-index system) */
+  zIndex?: number
 }
 
 const sizeStyles = {
@@ -28,25 +32,28 @@ export function Modal({
   children,
   size = 'md',
   closeOnOutsideClick = true,
+  zIndex = 70,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
+  // Handle visibility and body scroll lock
   useEffect(() => {
     if (open) {
       setIsVisible(true)
-      document.body.style.overflow = 'hidden'
+      lockBodyScroll()
     } else {
       const timer = setTimeout(() => setIsVisible(false), 200)
-      document.body.style.overflow = ''
+      unlockBodyScroll()
       return () => clearTimeout(timer)
     }
     return () => {
-      document.body.style.overflow = ''
+      unlockBodyScroll()
     }
   }, [open])
 
+  // Handle escape key
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       onClose()
@@ -60,6 +67,7 @@ export function Modal({
     }
   }, [open, handleKeyDown])
 
+  // Handle outside click
   const handleOverlayClick = (event: React.MouseEvent) => {
     if (closeOnOutsideClick && event.target === overlayRef.current) {
       onClose()
@@ -69,61 +77,76 @@ export function Modal({
   if (!isVisible) return null
 
   return (
-    <div
-      ref={overlayRef}
-      onClick={handleOverlayClick}
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${
-        open ? 'opacity-100' : 'opacity-0'
-      }`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
-      aria-describedby={description ? 'modal-description' : undefined}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-
-      {/* Content */}
+    <Portal>
       <div
-        ref={contentRef}
-        className={`relative w-full ${sizeStyles[size]} rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] shadow-[0_24px_100px_rgba(255,115,39,0.2)] transition-transform duration-200 ${
-          open ? 'scale-100' : 'scale-95'
+        ref={overlayRef}
+        onClick={handleOverlayClick}
+        className={`overlay-modal transition-opacity duration-200 ${
+          open ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{ zIndex }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-describedby={description ? 'modal-description' : undefined}
       >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-orange-100/70 transition hover:bg-orange-500/10 hover:text-orange-50"
-          aria-label="Close modal"
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          style={{
+            WebkitBackdropFilter: 'blur(8px)',
+            backdropFilter: 'blur(8px)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Content */}
+        <div
+          ref={contentRef}
+          className={`relative w-full ${sizeStyles[size]} rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] shadow-[0_24px_100px_rgba(255,115,39,0.2)] transition-transform duration-200 ${
+            open ? 'scale-100' : 'scale-95'
+          }`}
+          style={{
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 rounded-lg p-1.5 text-orange-100/70 transition hover:bg-orange-500/10 hover:text-orange-50"
+            aria-label="Close modal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
 
-        {/* Header */}
-        {(title || description) && (
-          <div className="p-6 pb-0">
-            {title && (
-              <h2 id="modal-title" className="text-xl font-semibold text-orange-50 pr-8">
-                {title}
-              </h2>
-            )}
-            {description && (
-              <p id="modal-description" className="mt-2 text-sm text-orange-100/70">
-                {description}
-              </p>
-            )}
+          {/* Header */}
+          {(title || description) && (
+            <div className="p-6 pb-0">
+              {title && (
+                <h2 id="modal-title" className="text-xl font-semibold text-orange-50 pr-8">
+                  {title}
+                </h2>
+              )}
+              {description && (
+                <p id="modal-description" className="mt-2 text-sm text-orange-100/70">
+                  {description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Body */}
+          <div className="p-6">
+            {children}
           </div>
-        )}
-
-        {/* Body */}
-        <div className="p-6">
-          {children}
         </div>
       </div>
-    </div>
+    </Portal>
   )
 }
 

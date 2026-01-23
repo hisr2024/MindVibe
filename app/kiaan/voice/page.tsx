@@ -136,23 +136,35 @@ export default function EliteVoicePage() {
         try {
           const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
 
-          // Don't trust 'granted' - always verify with actual test
+          // Trust the Permissions API state - it's reliable
+          // 'granted' means permission was previously given
+          // 'prompt' means we need to ask
+          // 'denied' means user blocked it
           if (result.state === 'denied') {
             setMicPermission('denied')
+          } else if (result.state === 'granted') {
+            // Permission already granted - user can start speaking immediately
+            setMicPermission('granted')
           } else {
-            // For 'granted' or 'prompt', set to 'prompt' to force fresh permission request
-            // This ensures we don't have stale permission state
+            // 'prompt' - we need to request permission
             setMicPermission('prompt')
           }
 
-          // Listen for permission changes
-          result.onchange = () => {
+          // Listen for permission changes (e.g., user revokes in browser settings)
+          const handlePermissionChange = () => {
             if (result.state === 'denied') {
               setMicPermission('denied')
+            } else if (result.state === 'granted') {
+              setMicPermission('granted')
             } else {
               setMicPermission('prompt')
             }
           }
+          result.addEventListener('change', handlePermissionChange)
+
+          // Note: We don't clean up the listener here since this is
+          // a page-level permission check. The listener will be cleaned
+          // up when the page unmounts naturally.
         } catch {
           // Permissions API not supported for microphone, default to prompt
           setMicPermission('prompt')
