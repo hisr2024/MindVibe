@@ -12,6 +12,37 @@ export interface WakeWordConfig {
   onError?: (error: string) => void
 }
 
+// Default wake words - extensive list for better recognition
+export const DEFAULT_WAKE_WORDS = [
+  // Primary wake words
+  'hey kiaan',
+  'hey kian',
+  'hi kiaan',
+  'hi kian',
+  'ok kiaan',
+  'okay kiaan',
+  // MindVibe variations
+  'hey mindvibe',
+  'hi mindvibe',
+  'ok mindvibe',
+  'okay mindvibe',
+  // Cultural/spiritual variations
+  'namaste kiaan',
+  'namaste kian',
+  'om kiaan',
+  'om kian',
+  // Casual variations
+  'yo kiaan',
+  'yo kian',
+  'hello kiaan',
+  'hello kian',
+  // Assistant-style
+  'kiaan help',
+  'kian help',
+  'ask kiaan',
+  'ask kian',
+]
+
 export class WakeWordDetector {
   private recognition: SpeechRecognitionService | null = null
   private isActive = false
@@ -19,18 +50,13 @@ export class WakeWordDetector {
   private onWakeWordDetected?: () => void
   private onError?: (error: string) => void
   private retryCount = 0
-  private readonly maxRetries = 3
+  private readonly maxRetries = 5
   private restartTimeout: ReturnType<typeof setTimeout> | null = null
+  private lastDetectionTime = 0
+  private readonly detectionCooldown = 2000 // Prevent double-triggers
 
   constructor(config: WakeWordConfig = {}) {
-    this.wakeWords = config.wakeWords || [
-      'hey kiaan',
-      'hey kian',
-      'hi kiaan',
-      'hi kian',
-      'ok kiaan',
-      'okay kiaan',
-    ]
+    this.wakeWords = config.wakeWords || DEFAULT_WAKE_WORDS
     this.onWakeWordDetected = config.onWakeWordDetected
     this.onError = config.onError
 
@@ -43,17 +69,102 @@ export class WakeWordDetector {
 
   /**
    * Handle speech result and check for wake word
+   * Uses fuzzy matching for better recognition
    */
   private handleResult = (transcript: string, isFinal: boolean): void => {
     const normalizedTranscript = transcript.toLowerCase().trim()
-    
-    const hasWakeWord = this.wakeWords.some(wakeWord => 
-      normalizedTranscript.includes(wakeWord)
+
+    // Check for exact or fuzzy wake word match
+    const hasWakeWord = this.wakeWords.some(wakeWord =>
+      this.fuzzyMatch(normalizedTranscript, wakeWord)
     )
 
     if (hasWakeWord && isFinal) {
+      // Prevent double-triggers with cooldown
+      const now = Date.now()
+      if (now - this.lastDetectionTime < this.detectionCooldown) {
+        return
+      }
+      this.lastDetectionTime = now
       this.onWakeWordDetected?.()
     }
+  }
+
+  /**
+   * Fuzzy matching for wake words to handle speech recognition variations
+   */
+  private fuzzyMatch(transcript: string, wakeWord: string): boolean {
+    // Exact match
+    if (transcript.includes(wakeWord)) {
+      return true
+    }
+
+    // Handle common speech recognition errors
+    const variations: Record<string, string[]> = {
+      'kiaan': ['kion', 'keaan', 'kean', 'kyaan', 'kyan', 'khan', 'kiana'],
+      'mindvibe': ['mind vibe', 'mind5', 'mindfive', 'mindfi'],
+      'namaste': ['namastay', 'namasthe', 'namastey'],
+    }
+
+    // Check variations
+    for (const [word, alts] of Object.entries(variations)) {
+      if (wakeWord.includes(word)) {
+        for (const alt of alts) {
+          const altWakeWord = wakeWord.replace(word, alt)
+          if (transcript.includes(altWakeWord)) {
+            return true
+          }
+        }
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Classify error type for appropriate handling
+   */
+  private classifyError(error: string): 'recoverable' | 'permission' | 'fatal' {
+    const lowerError = error.toLowerCase()
+
+    if (lowerError.includes('permission') || lowerError.includes('not-allowed')) {
+      return 'permission'
+    }
+
+    if (lowerError.includes('no-speech') || lowerError.includes('network') || lowerError.includes('aborted')) {
+      return 'recoverable'
+    }
+
+    if (lowerError.includes('audio-capture') || lowerError.includes('not supported')) {
+      return 'fatal'
+    }
+
+    return 'recoverable'
+  }
+
+  /**
+   * Get user-friendly error message
+   */
+  private getErrorMessage(error: string): string {
+    const lowerError = error.toLowerCase()
+
+    if (lowerError.includes('no-speech')) {
+      return 'No speech detected. Wake word detection continues...'
+    }
+    if (lowerError.includes('network')) {
+      return 'Network issue detected. Retrying...'
+    }
+    if (lowerError.includes('permission') || lowerError.includes('not-allowed')) {
+      return 'Microphone permission denied. Please enable microphone access in browser settings.'
+    }
+    if (lowerError.includes('audio-capture')) {
+      return 'Microphone not available. Please check your microphone connection.'
+    }
+    if (lowerError.includes('aborted')) {
+      return 'Voice detection interrupted. Restarting...'
+    }
+
+    return `Voice detection error: ${error}`
   }
 
   /**
@@ -63,12 +174,26 @@ export class WakeWordDetector {
     return {
       onResult: this.handleResult,
       onError: (error: string) => {
-        this.onError?.(error)
-        // Auto-restart on error with exponential backoff (unless permission issue or max retries)
-        if (!error.includes('permission') && this.retryCount < this.maxRetries) {
+        const errorType = this.classifyError(error)
+        const friendlyMessage = this.getErrorMessage(error)
+
+        // Only notify user for non-recoverable or first-time errors
+        if (errorType !== 'recoverable' || this.retryCount === 0) {
+          this.onError?.(friendlyMessage)
+        }
+
+        // Handle based on error type
+        if (errorType === 'permission' || errorType === 'fatal') {
+          this.isActive = false
+          this.retryCount = 0
+          return
+        }
+
+        // Recoverable error - retry with exponential backoff
+        if (this.retryCount < this.maxRetries) {
           this.retryCount++
-          const backoffDelay = Math.min(1000 * Math.pow(2, this.retryCount - 1), 8000)
-          
+          const backoffDelay = Math.min(1000 * Math.pow(2, this.retryCount - 1), 16000)
+
           this.clearRestartTimeout()
           this.restartTimeout = setTimeout(() => {
             if (this.isActive) {
@@ -76,8 +201,10 @@ export class WakeWordDetector {
             }
           }, backoffDelay)
         } else {
+          // Max retries reached - stop and notify
           this.isActive = false
           this.retryCount = 0
+          this.onError?.('Wake word detection stopped after multiple failures. Tap to restart.')
         }
       },
       onEnd: () => {
@@ -85,7 +212,7 @@ export class WakeWordDetector {
         if (this.isActive) {
           // Reset retry count on successful end
           this.retryCount = 0
-          
+
           this.clearRestartTimeout()
           this.restartTimeout = setTimeout(() => {
             if (this.isActive && this.recognition) {
