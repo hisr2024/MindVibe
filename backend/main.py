@@ -456,6 +456,17 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Admin KIAAN Analytics router: {e}")
 
+try:
+    from backend.routes.admin.voice_analytics import router as admin_voice_analytics_router
+    app.include_router(admin_voice_analytics_router)
+    admin_routers_loaded.append("voice_analytics")
+    print("   • GET    /api/admin/voice/overview - Voice analytics overview")
+    print("   • GET    /api/admin/voice/trends - Voice usage trends")
+    print("   • GET    /api/admin/voice/quality - Voice quality metrics")
+    print("   • GET    /api/admin/voice/enhancements - Enhancement stats")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Admin Voice Analytics router: {e}")
+
 if admin_routers_loaded:
     print(f"✅ [SUCCESS] Admin routers loaded: {', '.join(admin_routers_loaded)}")
 else:
