@@ -50,26 +50,29 @@ export interface MobileBottomSheetProps {
 const sheetVariants = {
   hidden: {
     y: '100%',
-    opacity: 0.5,
     transition: {
       type: 'spring',
-      damping: 30,
-      stiffness: 300,
+      damping: 40,
+      stiffness: 500,
+      mass: 0.8,
     },
   },
   visible: {
     y: 0,
-    opacity: 1,
     transition: {
       type: 'spring',
-      damping: 30,
-      stiffness: 300,
+      damping: 35,
+      stiffness: 400,
+      mass: 0.8,
     },
   },
 } as const
 
 const backdropVariants = {
-  hidden: { opacity: 0 },
+  hidden: {
+    opacity: 0,
+    transition: { duration: 0.15 },
+  },
   visible: {
     opacity: 1,
     transition: { duration: 0.2 },
@@ -168,13 +171,28 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
       triggerHaptic('selection')
     }, [triggerHaptic])
 
-    // Lock body scroll when open
+    // Store original scroll position for restoration
+    const scrollYRef = useRef(0)
+
+    // Lock body scroll when open - using position fixed to prevent flicker
     useEffect(() => {
       if (isOpen) {
-        const originalStyle = document.body.style.overflow
+        scrollYRef.current = window.scrollY
+        document.body.style.position = 'fixed'
+        document.body.style.top = `-${scrollYRef.current}px`
+        document.body.style.left = '0'
+        document.body.style.right = '0'
         document.body.style.overflow = 'hidden'
         return () => {
-          document.body.style.overflow = originalStyle
+          document.body.style.position = ''
+          document.body.style.top = ''
+          document.body.style.left = ''
+          document.body.style.right = ''
+          document.body.style.overflow = ''
+          // Restore scroll position
+          if (scrollYRef.current > 0) {
+            window.scrollTo(0, scrollYRef.current)
+          }
         }
       }
     }, [isOpen])
@@ -199,10 +217,10 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
     }, [isOpen, dismissible, onClose])
 
     return (
-      <AnimatePresence>
+      <AnimatePresence mode="sync">
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop - hardware accelerated */}
             {showBackdrop && (
               <motion.div
                 variants={backdropVariants}
@@ -210,13 +228,17 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
                 animate="visible"
                 exit="hidden"
                 onClick={closeOnBackdropClick ? onClose : undefined}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-                style={{ zIndex: zIndex - 1 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm will-change-[opacity]"
+                style={{
+                  zIndex: zIndex - 1,
+                  WebkitBackfaceVisibility: 'hidden',
+                  backfaceVisibility: 'hidden',
+                }}
                 aria-hidden="true"
               />
             )}
 
-            {/* Sheet */}
+            {/* Sheet - hardware accelerated */}
             <motion.div
               ref={(node) => {
                 (sheetRef as React.MutableRefObject<HTMLDivElement | null>).current = node
@@ -229,20 +251,23 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
               exit="hidden"
               drag={dismissible || expandable ? 'y' : false}
               dragConstraints={{ top: expandable ? -100 : 0, bottom: 0 }}
-              dragElastic={{ top: 0.1, bottom: 0.5 }}
+              dragElastic={{ top: 0.1, bottom: 0.4 }}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               style={{
                 zIndex,
                 height: isExpanded ? '95vh' : getHeightValue(),
                 maxHeight: '95vh',
+                WebkitBackfaceVisibility: 'hidden',
+                backfaceVisibility: 'hidden',
+                transform: 'translateZ(0)',
               }}
               className={`
                 fixed bottom-0 left-0 right-0
                 rounded-t-[28px] overflow-hidden
                 bg-[#0f1624] border-t border-white/[0.08]
                 shadow-2xl shadow-black/40
-                flex flex-col
+                flex flex-col will-change-transform
                 ${isDragging ? 'cursor-grabbing' : ''}
                 ${className}
               `.trim()}

@@ -202,6 +202,11 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
           damping: 30,
           delay: 0.1,
         }}
+        style={{
+          WebkitBackfaceVisibility: 'hidden',
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+        }}
       >
         {/* Gradient fade overlay for content behind nav */}
         <div className="absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-[#0b0b0f] to-transparent pointer-events-none" />

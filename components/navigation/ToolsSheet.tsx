@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
@@ -15,59 +15,61 @@ export interface ToolsSheetProps {
   className?: string
 }
 
-// Animation variants for the sheet
+// Animation variants for the sheet - optimized for GPU acceleration
 const sheetVariants = {
   hidden: {
     y: '100%',
-    opacity: 0.5,
     transition: {
       type: 'spring' as const,
-      stiffness: 400,
+      stiffness: 500,
       damping: 40,
+      mass: 0.8,
     }
   },
   visible: {
     y: 0,
-    opacity: 1,
     transition: {
       type: 'spring' as const,
-      stiffness: 300,
-      damping: 30,
+      stiffness: 400,
+      damping: 35,
+      mass: 0.8,
     }
   },
 }
 
-// Animation variants for backdrop
+// Animation variants for backdrop - faster fade to prevent flicker
 const backdropVariants = {
-  hidden: { opacity: 0 },
+  hidden: {
+    opacity: 0,
+    transition: { duration: 0.15 }
+  },
   visible: {
     opacity: 1,
-    transition: { duration: 0.25 }
+    transition: { duration: 0.2 }
   },
 }
 
-// Stagger animation for tool items
+// Stagger animation for tool items - reduced delay for snappier feel
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.03,
-      delayChildren: 0.1,
+      staggerChildren: 0.025,
+      delayChildren: 0.05,
     }
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 15, scale: 0.95 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
       type: 'spring' as const,
-      stiffness: 350,
-      damping: 25,
+      stiffness: 400,
+      damping: 28,
     }
   },
 }
@@ -89,7 +91,10 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
   const [isDragging, setIsDragging] = useState(false)
   const { triggerHaptic } = useHapticFeedback()
 
-  // Close on escape key
+  // Store original scroll position and lock body scroll
+  const scrollYRef = useRef(0)
+
+  // Close on escape key and manage body scroll lock
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
@@ -99,13 +104,27 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
 
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown)
-      // Prevent body scroll when sheet is open
+      // Save scroll position and lock body scroll with position fixed to prevent flicker
+      scrollYRef.current = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollYRef.current}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
       document.body.style.overflow = 'hidden'
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
+      // Restore body scroll
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
+      // Restore scroll position
+      if (scrollYRef.current > 0) {
+        window.scrollTo(0, scrollYRef.current)
+      }
     }
   }, [isOpen, onClose])
 
@@ -129,24 +148,28 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
   }, [onClose, triggerHaptic])
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="sync">
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - z-[60] to be above mobile nav */}
           <motion.div
-            className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm will-change-[opacity]"
             variants={backdropVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
             onClick={onClose}
             aria-hidden="true"
+            style={{
+              WebkitBackfaceVisibility: 'hidden',
+              backfaceVisibility: 'hidden',
+            }}
           />
 
-          {/* Sheet */}
+          {/* Sheet - z-[61] to be above backdrop */}
           <motion.div
             ref={sheetRef}
-            className={`fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-hidden rounded-t-[28px] border-t border-orange-500/25 bg-gradient-to-b from-[#111118] to-[#0b0b0f] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] ${className}`}
+            className={`fixed inset-x-0 bottom-0 z-[61] max-h-[85vh] overflow-hidden rounded-t-[28px] border-t border-orange-500/25 bg-gradient-to-b from-[#111118] to-[#0b0b0f] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
             variants={sheetVariants}
             initial="hidden"
             animate="visible"
@@ -156,9 +179,14 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
             aria-label="Tools menu"
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={handleDragEnd}
+            style={{
+              WebkitBackfaceVisibility: 'hidden',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
+            }}
           >
             {/* Decorative top glow */}
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
@@ -209,12 +237,16 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
               </motion.button>
             </div>
 
-            {/* Scrollable content */}
+            {/* Scrollable content - hardware accelerated */}
             <motion.div
               className="overflow-y-auto overscroll-contain px-5 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-5 smooth-touch-scroll"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-y',
+              }}
             >
               {TOOLS_BY_CATEGORY.map((category, categoryIndex) => (
                 <motion.div
