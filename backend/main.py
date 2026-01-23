@@ -301,6 +301,23 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Gita API router: {e}")
 
+# Load Indian Gita Sources router (authentic Indian data sources)
+print("\n[Indian Gita Sources] Attempting to import Indian Gita Sources router...")
+try:
+    from backend.routes.indian_gita_sources import router as indian_gita_sources_router
+    app.include_router(indian_gita_sources_router)
+    print("✅ [SUCCESS] Indian Gita Sources router loaded")
+    print("   • GET    /api/gita-sources/teachings - Gita teachings for mental health")
+    print("   • GET    /api/gita-sources/yoga-paths - Four yoga paths from Gita")
+    print("   • GET    /api/gita-sources/meditation - Chapter 6 meditation techniques")
+    print("   • GET    /api/gita-sources/sthitaprajna - Qualities of steady wisdom (2.54-72)")
+    print("   • GET    /api/gita-sources/karma-yoga - Karma Yoga principles")
+    print("   • GET    /api/gita-sources/wisdom/{mood} - Quick wisdom for mood")
+    print("   • POST   /api/gita-sources/practice - Practice recommendation")
+    print("   • POST   /api/gita-sources/kiaan-wisdom - KIAAN integration endpoint")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Indian Gita Sources router: {e}")
+
 # Load Auth router
 print("\n[Auth] Attempting to import Auth router...")
 try:

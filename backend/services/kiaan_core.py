@@ -31,6 +31,9 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 # Divine Consciousness Integration for sacred atmosphere
 from backend.services.kiaan_divine_integration import kiaan_divine, get_divine_system_prompt
 
+# Indian Gita Sources - Authentic teachings from Bhagavad Gita
+from backend.services.indian_data_sources import indian_gita_sources
+
 logger = logging.getLogger(__name__)
 
 
@@ -74,9 +77,58 @@ class KIAANCore:
         self.gita_service = GitaService()
         self.wisdom_kb = WisdomKnowledgeBase()
 
+        # Indian Gita Sources - Authentic teachings and practices from Bhagavad Gita
+        self.gita_sources = indian_gita_sources
+
         # Reduced verse context from 15 to 5 for faster, more spontaneous responses
         # Quality over quantity - 5 highly relevant verses provide sufficient wisdom
         self.verse_context_limit = 5
+
+    def get_quick_gita_wisdom(self, mood: str) -> dict[str, Any]:
+        """
+        Get quick Gita-based wisdom for a given mood.
+
+        This provides instant wisdom with Sanskrit verses, meanings, practices,
+        and affirmations from authentic Bhagavad Gita teachings.
+
+        Args:
+            mood: User's current mood (anxious, sad, angry, stressed, etc.)
+
+        Returns:
+            Dictionary with verse, sanskrit, meaning, practice, and affirmation
+        """
+        return self.gita_sources.get_quick_gita_wisdom(mood)
+
+    async def get_gita_teaching_for_context(self, query: str, context: str = "general") -> dict[str, Any]:
+        """
+        Get relevant Gita teachings for KIAAN context enhancement.
+
+        This method retrieves authentic Gita-based content including:
+        - Core teachings with verse references
+        - Recommended practices (Karma/Jnana/Bhakti/Dhyana Yoga)
+        - Sthitaprajna qualities for mental health
+        - Karma Yoga principles
+
+        Args:
+            query: User query or emotional context
+            context: KIAAN context type (general, anxiety, stress, etc.)
+
+        Returns:
+            Dictionary with teachings, practices, and recommendations
+        """
+        return await self.gita_sources.get_wisdom_for_kiaan(query, context)
+
+    async def get_practice_recommendation(self, issue: str) -> dict[str, Any]:
+        """
+        Get Gita-based practice recommendation for a mental health issue.
+
+        Args:
+            issue: Mental health issue (anxiety, depression, stress, etc.)
+
+        Returns:
+            Recommended practice with key verse and immediate action
+        """
+        return await self.gita_sources.get_practice_for_issue(issue)
 
     def _is_conversational_message(self, message: str) -> tuple[bool, str]:
         """
