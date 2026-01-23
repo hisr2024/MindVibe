@@ -81,14 +81,14 @@ export default function SiteNav() {
                   className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
                     active
                       ? isDivine
-                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/30'
+                        ? 'border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20'
                         : isHighlight
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30'
+                        ? 'border-2 border-orange-500 text-orange-400 shadow-lg shadow-orange-500/20'
                         : 'bg-white/10 text-white shadow-glowSunrise'
                       : isDivine
-                      ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-200 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30'
+                      ? 'border border-amber-500/50 text-amber-300 hover:border-amber-400 hover:text-amber-200'
                       : isHighlight
-                      ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-white hover:from-orange-500 hover:to-amber-500 shadow-md shadow-orange-500/20'
+                      ? 'border border-orange-500/50 text-orange-400 hover:border-orange-400 hover:text-orange-300'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -214,14 +214,14 @@ export default function SiteNav() {
                         className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
                           active
                             ? isDivine
-                              ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/20'
+                              ? 'border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20'
                               : isHighlight
-                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
+                              ? 'border-2 border-orange-500 text-orange-400 shadow-lg shadow-orange-500/20'
                               : 'bg-white/10 text-white'
                             : isDivine
-                            ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-100 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30'
+                            ? 'border border-amber-500/50 text-amber-300 hover:border-amber-400 hover:text-amber-200'
                             : isHighlight
-                            ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-100 hover:from-orange-500/30 hover:to-amber-500/30'
+                            ? 'border border-orange-500/50 text-orange-400 hover:border-orange-400 hover:text-orange-300'
                             : 'text-white/80 hover:bg-white/5 hover:text-white'
                         }`}
                       >
