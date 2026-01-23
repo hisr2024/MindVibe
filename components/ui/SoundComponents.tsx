@@ -24,7 +24,11 @@
 import React, { forwardRef, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useAudio, type UISound } from '@/contexts/AudioContext'
-import { cn } from '@/lib/utils'
+
+// Simple utility for class name merging
+function cn(...classes: (string | boolean | undefined | null)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
 
 // ============ SoundButton ============
 
