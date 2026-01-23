@@ -16,6 +16,7 @@ import {
   NamasteIcon,
 } from '@/components/divine'
 import { DivineConsciousnessProvider } from '@/contexts/DivineConsciousnessContext'
+import { useAudio } from '@/contexts/AudioContext'
 import Link from 'next/link'
 
 // Animation variants for consistent motion
@@ -100,6 +101,9 @@ export default function IntroductionPage() {
   const [hasSeenDarshan, setHasSeenDarshan] = useState(false)
   const [isPageReady, setIsPageReady] = useState(false)
 
+  // Audio hook for sound effects
+  const { playSound, playOm, playSingingBowl, playChime, playBell } = useAudio()
+
   // Check if user has seen today's darshan
   useEffect(() => {
     // Small delay to ensure smooth page load
@@ -111,6 +115,7 @@ export default function IntroductionPage() {
     if (lastDarshanDate !== today) {
       const timer = setTimeout(() => {
         setShowMorningDarshan(true)
+        playOm()  // Play OM sound when darshan appears
       }, 1800) // Slightly longer delay for smoother appearance
       return () => {
         clearTimeout(timer)
@@ -121,20 +126,36 @@ export default function IntroductionPage() {
     }
 
     return () => clearTimeout(readyTimer)
-  }, [])
+  }, [playOm])
 
   // Memoized handlers to prevent recreation
   const completeDarshan = useCallback(() => {
     setShowMorningDarshan(false)
     setHasSeenDarshan(true)
     localStorage.setItem('lastDarshanDate', new Date().toDateString())
-  }, [])
+    playChime()  // Chime on darshan complete
+  }, [playChime])
 
-  const openProtectionShield = useCallback(() => setShowProtectionShield(true), [])
-  const closeProtectionShield = useCallback(() => setShowProtectionShield(false), [])
-  const openHeartJournal = useCallback(() => setShowHeartJournal(true), [])
-  const closeHeartJournal = useCallback(() => setShowHeartJournal(false), [])
-  const openMorningDarshan = useCallback(() => setShowMorningDarshan(true), [])
+  const openProtectionShield = useCallback(() => {
+    setShowProtectionShield(true)
+    playSingingBowl()  // Singing bowl for protection
+  }, [playSingingBowl])
+  const closeProtectionShield = useCallback(() => {
+    setShowProtectionShield(false)
+    playSound('close')
+  }, [playSound])
+  const openHeartJournal = useCallback(() => {
+    setShowHeartJournal(true)
+    playSound('open')
+  }, [playSound])
+  const closeHeartJournal = useCallback(() => {
+    setShowHeartJournal(false)
+    playSound('close')
+  }, [playSound])
+  const openMorningDarshan = useCallback(() => {
+    setShowMorningDarshan(true)
+    playBell()  // Bell for morning darshan
+  }, [playBell])
 
   return (
     <DivineConsciousnessProvider>

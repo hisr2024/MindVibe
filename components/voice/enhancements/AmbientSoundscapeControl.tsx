@@ -8,9 +8,11 @@
  * - Individual sound mixing
  * - Preset soundscapes
  * - Volume control for each layer
+ *
+ * NOW CONNECTED TO ACTUAL AUDIO ENGINE!
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Music,
@@ -30,6 +32,7 @@ import {
   Plus,
   X
 } from 'lucide-react'
+import { useAudio, type AmbientSoundscape } from '@/contexts/AudioContext'
 
 // ============ Types ============
 
@@ -225,6 +228,16 @@ function SoundMixerItem({
   )
 }
 
+// Map presets to audio manager soundscapes
+const PRESET_TO_AMBIENT: Record<string, AmbientSoundscape> = {
+  'Rainforest': 'forest',
+  'Temple Morning': 'temple',
+  'Ocean Night': 'ocean',
+  'Deep Meditation': 'tibetan',
+  'Cozy Fireplace': 'fire',
+  'Mountain Stream': 'river'
+}
+
 // ============ Component ============
 
 export function AmbientSoundscapeControl({
@@ -234,16 +247,36 @@ export function AmbientSoundscapeControl({
   compact = false,
   className = ''
 }: AmbientSoundscapeControlProps) {
+  // Connect to audio context
+  const { startAmbient, stopAmbient, setAmbientVolume, state: audioState, playSound } = useAudio()
+
   const [playing, setPlaying] = useState(isActive)
   const [activeSounds, setActiveSounds] = useState<ActiveSound[]>([])
   const [selectedCategory, setSelectedCategory] = useState<SoundCategory>('nature')
   const [masterVolume, setMasterVolume] = useState(0.7)
+  const [currentPreset, setCurrentPreset] = useState<string | null>(null)
 
-  const handleToggle = useCallback(() => {
+  // Sync with audio state
+  useEffect(() => {
+    setPlaying(audioState.ambientEnabled)
+  }, [audioState.ambientEnabled])
+
+  const handleToggle = useCallback(async () => {
     const newState = !playing
     setPlaying(newState)
+    playSound('click')
+
+    // ACTUALLY PLAY/STOP AMBIENT SOUNDS
+    if (newState) {
+      // Start with a default soundscape based on preset or nature
+      const soundscape = currentPreset ? PRESET_TO_AMBIENT[currentPreset] || 'nature' : 'nature'
+      await startAmbient(soundscape)
+    } else {
+      stopAmbient()
+    }
+
     onToggle?.(newState)
-  }, [playing, onToggle])
+  }, [playing, currentPreset, startAmbient, stopAmbient, playSound, onToggle])
 
   const handleSoundToggle = useCallback((soundType: SoundType) => {
     setActiveSounds(prev => {

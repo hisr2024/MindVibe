@@ -8,6 +8,8 @@
  * - Frequency visualization
  * - Volume control
  * - Layer-specific configurations
+ *
+ * NOW CONNECTED TO ACTUAL AUDIO ENGINE!
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -25,6 +27,7 @@ import {
   Eye
 } from 'lucide-react'
 import type { ConsciousnessLayer } from '@/services/voice/elite/QuantumDiveEngine'
+import { useAudio, type BrainwavePreset as AudioBrainwavePreset } from '@/contexts/AudioContext'
 
 // ============ Types ============
 
@@ -125,6 +128,16 @@ const LAYER_PRESETS: Record<ConsciousnessLayer, BrainwavePreset> = {
 
 // ============ Component ============
 
+// Map local preset names to audio manager preset names
+const PRESET_TO_AUDIO: Record<BrainwavePreset, AudioBrainwavePreset> = {
+  focus: 'focus',
+  meditation: 'meditation',
+  deep_sleep: 'deep_sleep',
+  creativity: 'creativity',
+  healing: 'healing',
+  custom: 'meditation'  // Default for custom
+}
+
 export function BinauraBeatsControl({
   isActive = false,
   onToggle,
@@ -134,6 +147,9 @@ export function BinauraBeatsControl({
   compact = false,
   className = ''
 }: BinauraBeatsControlProps) {
+  // Connect to audio context
+  const { startBinaural, stopBinaural, setBinauralVolume, state: audioState, playSound } = useAudio()
+
   const [playing, setPlaying] = useState(isActive)
   const [selectedPreset, setSelectedPreset] = useState<BrainwavePreset>(
     currentLayer ? LAYER_PRESETS[currentLayer] : 'meditation'
@@ -146,32 +162,63 @@ export function BinauraBeatsControl({
   // Update preset when layer changes
   useEffect(() => {
     if (currentLayer && LAYER_PRESETS[currentLayer]) {
-      setSelectedPreset(LAYER_PRESETS[currentLayer])
+      const newPreset = LAYER_PRESETS[currentLayer]
+      setSelectedPreset(newPreset)
+      // Auto-update binaural if playing
+      if (playing) {
+        startBinaural(PRESET_TO_AUDIO[newPreset])
+      }
     }
-  }, [currentLayer])
+  }, [currentLayer, playing, startBinaural])
 
   // Sync with external isActive prop
   useEffect(() => {
     setPlaying(isActive)
   }, [isActive])
 
-  const handleToggle = useCallback(() => {
+  // Sync with audio state
+  useEffect(() => {
+    setPlaying(audioState.binauralEnabled)
+  }, [audioState.binauralEnabled])
+
+  const handleToggle = useCallback(async () => {
     const newState = !playing
     setPlaying(newState)
-    onToggle?.(newState)
-  }, [playing, onToggle])
 
-  const handlePresetSelect = useCallback((preset: BrainwavePreset) => {
+    // ACTUALLY PLAY/STOP BINAURAL BEATS
+    if (newState) {
+      playSound('click')
+      await startBinaural(PRESET_TO_AUDIO[selectedPreset])
+    } else {
+      playSound('click')
+      stopBinaural()
+    }
+
+    onToggle?.(newState)
+  }, [playing, selectedPreset, startBinaural, stopBinaural, playSound, onToggle])
+
+  const handlePresetSelect = useCallback(async (preset: BrainwavePreset) => {
     setSelectedPreset(preset)
     setShowCustom(preset === 'custom')
+    playSound('select')
+
+    // If playing, switch to new preset immediately
+    if (playing) {
+      await startBinaural(PRESET_TO_AUDIO[preset])
+    }
+
     onPresetChange?.(preset)
-  }, [onPresetChange])
+  }, [playing, startBinaural, playSound, onPresetChange])
 
   const handleVolumeChange = useCallback((newVolume: number) => {
     setVolume(newVolume)
     setMuted(newVolume === 0)
+
+    // ACTUALLY CHANGE BINAURAL VOLUME
+    setBinauralVolume(newVolume)
+
     onVolumeChange?.(newVolume)
-  }, [onVolumeChange])
+  }, [setBinauralVolume, onVolumeChange])
 
   const currentPreset = PRESETS[selectedPreset]
   const displayFrequency = selectedPreset === 'custom' ? customFrequency : currentPreset.frequency

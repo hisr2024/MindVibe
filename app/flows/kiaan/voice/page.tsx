@@ -9,6 +9,7 @@
  * - Offline support indicators
  * - Quick enhancement toggles
  * - Haptic feedback support
+ * - SOUND EFFECTS for all interactions
  *
  * Mobile-optimized for touch interactions.
  */
@@ -17,6 +18,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { useAudio } from '@/contexts/AudioContext'
 
 type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error'
 
@@ -55,6 +57,16 @@ export default function MobileVoicePage() {
 
   const { t, language } = useLanguage()
 
+  // Audio hook for sound effects
+  const {
+    playSound,
+    playOm,
+    playSingingBowl,
+    startBinaural,
+    stopBinaural,
+    state: audioState
+  } = useAudio()
+
   // Voice input hook
   const {
     isListening,
@@ -68,6 +80,7 @@ export default function MobileVoicePage() {
     onTranscript: (text, isFinal) => {
       if (isFinal) {
         setTranscript(text)
+        playSound('complete')  // Sound when transcript finalized
         handleUserQuery(text)
       } else {
         setInterimTranscript(text)
@@ -76,6 +89,7 @@ export default function MobileVoicePage() {
     onError: (err) => {
       setError(err)
       setState('error')
+      playSound('error')  // Sound on error
     },
   })
 
