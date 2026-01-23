@@ -70,9 +70,10 @@ export function InnerPeaceLogo({
       role="button"
       tabIndex={0}
     >
-      {/* Outer glow rings */}
+      {/* Outer glow rings - contained with overflow hidden */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 overflow-hidden rounded-full"
+        style={{ isolation: 'isolate' }}
         variants={motionEnabled ? glowVariants : undefined}
         initial="initial"
         animate={motionEnabled ? 'animate' : undefined}
@@ -81,12 +82,12 @@ export function InnerPeaceLogo({
         <svg width={size} height={size} viewBox="0 0 100 100" className="absolute inset-0">
           <defs>
             <radialGradient id="peace-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#f9a8d4" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#fb7185" stopOpacity="0.3" />
+              <stop offset="0%" stopColor="#f9a8d4" stopOpacity="0.35" />
+              <stop offset="60%" stopColor="#fb7185" stopOpacity="0.2" />
               <stop offset="100%" stopColor="#fda4af" stopOpacity="0" />
             </radialGradient>
           </defs>
-          <circle cx="50" cy="50" r="48" fill="url(#peace-glow)" />
+          <circle cx="50" cy="50" r="46" fill="url(#peace-glow)" />
         </svg>
       </motion.div>
 
@@ -130,9 +131,9 @@ export function InnerPeaceLogo({
             </feMerge>
           </filter>
           
-          {/* Glow filter for Om symbol */}
-          <filter id="om-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="blur" />
+          {/* Glow filter for Om symbol - contained to prevent overlap */}
+          <filter id="om-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -180,94 +181,96 @@ export function InnerPeaceLogo({
           ))}
         </g>
 
-        {/* Center circle with subtle pulse */}
+        {/* Center circle with subtle pulse - base layer */}
         <motion.circle
           cx="50"
           cy="50"
-          r="12"
+          r="14"
           fill="url(#center-gradient)"
           animate={motionEnabled ? {
-            r: isClicked ? [12, 16, 12] : [12, 13, 12],
+            r: isClicked ? [14, 17, 14] : [14, 15, 14],
           } : undefined}
           transition={{ duration: isClicked ? 2 : 3, repeat: Infinity, ease: easeInOut }}
         />
 
-        {/* Inner highlight */}
+        {/* Inner highlight - positioned above center */}
         <circle
           cx="50"
-          cy="46"
-          r="6"
+          cy="45"
+          r="7"
           fill="white"
-          opacity="0.6"
+          opacity="0.5"
         />
 
-        {/* Om symbol (ॐ) in center - Enhanced authentic Devanagari design
-            Larger and more visible in the lotus center
-            Uses (50,50) as center in standard viewBox space */}
-        <motion.g
-          animate={motionEnabled ? {
-            opacity: isClicked ? [1, 1, 1] : [0.95, 1, 0.95],
-            scale: isClicked ? [1, 1.15, 1] : [1, 1.03, 1],
-          } : undefined}
-          transition={motionEnabled ? {
-            duration: isClicked ? 1.5 : 3,
-            repeat: Infinity,
-            ease: easeInOut,
-          } : undefined}
-          style={{ transformOrigin: '50px 50px' }}
-          aria-label="Om symbol"
-          role="img"
-          filter="url(#om-glow)"
-        >
-          {/* Main "3" shape - the characteristic curve of Om */}
-          <path
-            d="M43 49 Q43 44 47 43.5 Q51 43 53 46 Q54.5 48 54.5 51 Q54.5 54 52 55.5 Q49.5 56.5 47 55.5 L47 54 Q49 55 51 54 Q52.5 53 52.5 51 Q52.5 49 51 47.5 Q49.5 46 47 46 Q44 46 44 49 L44 51"
-            fill="#7c2d12"
-            stroke="#92400e"
-            strokeWidth="0.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          
-          {/* Top curve (horizontal line with curve) */}
-          <path
-            d="M46.5 42.5 Q49 41 52 42.5 Q53 43.2 53 44.2"
-            fill="none"
-            stroke="#7c2d12"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-          />
-          
-          {/* Chandrabindu (dot above) - signature element */}
-          <circle cx="50" cy="39.5" r="1.3" fill="#7c2d12" stroke="#92400e" strokeWidth="0.3" />
-          
-          {/* Right side extended curve */}
-          <path
-            d="M54.5 48 Q56.5 48 57.5 50 Q58 51.5 58 53 Q58 55 56 56 Q54 57 52 56"
-            fill="none"
-            stroke="#7c2d12"
-            strokeWidth="1"
-            strokeLinecap="round"
-          />
-          
-          {/* Bottom left decorative curve */}
-          <path
-            d="M43.5 52 Q41.5 53 41.5 55.5 Q41.5 57.5 43 58.5 Q44.5 59 46.5 58.5"
-            fill="none"
-            stroke="#7c2d12"
-            strokeWidth="1"
-            strokeLinecap="round"
-          />
-        </motion.g>
+        {/* Om symbol (ॐ) in center - Properly contained and scaled
+            Positioned with isolation to prevent overlap */}
+        <g style={{ isolation: 'isolate' }}>
+          <motion.g
+            animate={motionEnabled ? {
+              opacity: isClicked ? [1, 1, 1] : [0.9, 1, 0.9],
+              scale: isClicked ? [1, 1.1, 1] : [1, 1.02, 1],
+            } : undefined}
+            transition={motionEnabled ? {
+              duration: isClicked ? 1.5 : 3.5,
+              repeat: Infinity,
+              ease: easeInOut,
+            } : undefined}
+            style={{ transformOrigin: '50px 50px' }}
+            aria-label="Om symbol"
+            role="img"
+            filter="url(#om-glow)"
+          >
+            {/* Main "3" shape - scaled and centered properly */}
+            <path
+              d="M44 49.5 Q44 45 47.5 44.5 Q51 44 52.5 46.5 Q54 48.5 54 51 Q54 53.5 52 55 Q50 56 47.5 55 L47.5 53.5 Q49.5 54.5 51 53.5 Q52 52.5 52 51 Q52 49 50.5 47.5 Q49 46.5 47.5 46.5 Q45 46.5 45 49.5 L45 51"
+              fill="#92400e"
+              stroke="#7c2d12"
+              strokeWidth="0.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* Top curve (horizontal line with curve) */}
+            <path
+              d="M47 43.5 Q49.5 42 51.5 43.5 Q52.5 44 52.5 45"
+              fill="none"
+              stroke="#92400e"
+              strokeWidth="1"
+              strokeLinecap="round"
+            />
+
+            {/* Chandrabindu (dot above) - signature element */}
+            <circle cx="50" cy="41" r="1.2" fill="#92400e" stroke="#7c2d12" strokeWidth="0.2" />
+
+            {/* Right side extended curve - adjusted */}
+            <path
+              d="M54 49 Q55.5 49 56.5 50.5 Q57 52 57 53.5 Q57 55 55.5 56 Q54 56.5 52.5 56"
+              fill="none"
+              stroke="#92400e"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+            />
+
+            {/* Bottom left decorative curve - adjusted */}
+            <path
+              d="M44 52 Q42.5 53 42.5 55 Q42.5 56.5 44 57.5 Q45.5 58 47 57.5"
+              fill="none"
+              stroke="#92400e"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+            />
+          </motion.g>
+        </g>
       </motion.svg>
 
-      {/* Ripple effect on click */}
+      {/* Ripple effect on click - contained */}
       {isClicked && motionEnabled && (
         <motion.div
-          className="absolute inset-0 rounded-full border-2 border-pink-300"
-          initial={{ scale: 1, opacity: 0.6 }}
-          animate={{ scale: 2, opacity: 0 }}
-          transition={{ duration: 1.5, ease: easeOut }}
+          className="absolute inset-0 rounded-full border-2 border-pink-300 pointer-events-none"
+          style={{ zIndex: -1 }}
+          initial={{ scale: 1, opacity: 0.5 }}
+          animate={{ scale: 1.8, opacity: 0 }}
+          transition={{ duration: 1.2, ease: easeOut }}
         />
       )}
 
