@@ -1,19 +1,29 @@
 'use client'
 
-import { LanguageProvider } from '@/hooks/useLanguage'
 import { useEffect, useState } from 'react'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
-  
+
   useEffect(() => {
     setMounted(true)
   }, [])
-  
-  // Prevent hydration mismatch by not rendering until mounted
+
+  // Show a minimal loading state to prevent flicker during hydration
   if (!mounted) {
-    return null
+    return (
+      <div
+        className="min-h-screen bg-slate-950"
+        style={{
+          opacity: 0.99,
+          visibility: 'visible',
+        }}
+      >
+        {/* Invisible placeholder to prevent layout shift */}
+        <div className="sr-only">Loading...</div>
+      </div>
+    )
   }
-  
-  return <LanguageProvider>{children}</LanguageProvider>
+
+  return <>{children}</>
 }

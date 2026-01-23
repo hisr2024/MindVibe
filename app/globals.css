@@ -1446,35 +1446,65 @@ html.light .skeleton {
   min-height: 120px;
 }
 
-/* Bottom sheet animation */
+/* Bottom sheet animation - GPU accelerated */
 @keyframes bottomSheetSlideUp {
   from {
-    transform: translateY(100%);
-    opacity: 0.5;
+    transform: translateY(100%) translateZ(0);
   }
   to {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateY(0) translateZ(0);
   }
 }
 
 @keyframes bottomSheetSlideDown {
   from {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateY(0) translateZ(0);
   }
   to {
-    transform: translateY(100%);
-    opacity: 0;
+    transform: translateY(100%) translateZ(0);
   }
 }
 
 .bottom-sheet-enter {
-  animation: bottomSheetSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: bottomSheetSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .bottom-sheet-exit {
-  animation: bottomSheetSlideDown 0.25s ease-in forwards;
+  animation: bottomSheetSlideDown 0.2s ease-in forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Anti-flicker for overlays and modals */
+[role="dialog"],
+[aria-modal="true"] {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+/* Smooth overlay backdrop */
+.overlay-backdrop {
+  will-change: opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Prevent flicker on animated elements */
+.no-flicker {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-perspective: 1000;
+  perspective: 1000;
 }
 
 /* Mobile tab bar glow effect */
@@ -1719,6 +1749,41 @@ html.light .swipe-indicator:active {
   .mobile-viewport-fix {
     min-height: -webkit-fill-available;
   }
+
+  /* Fix iOS bounce/overscroll for fixed elements */
+  body.mobile-viewport-fix {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Allow main content to scroll */
+  body.mobile-viewport-fix > div {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Enhanced mobile viewport stability */
+.mobile-viewport-fix {
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Prevent visual viewport issues on mobile */
+  touch-action: manipulation;
+}
+
+/* Prevent content shift when body is locked */
+body[style*="position: fixed"] {
+  width: 100% !important;
+}
+
+/* Fix for iOS Safari address bar resize */
+@supports (height: 100dvh) {
+  .mobile-viewport-fix {
+    min-height: 100dvh;
+  }
 }
 
 /* Prevent overscroll bounce on iOS while allowing scrollable areas */
@@ -1830,6 +1895,22 @@ img {
 /* Content container with bottom nav spacing */
 .mobile-content {
   padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Main content area for mobile - ensures proper scrolling */
+.mobile-content-area {
+  -webkit-overflow-scrolling: touch;
+  /* Prevent content from being hidden behind fixed elements */
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .mobile-content-area {
+    /* Ensure content is scrollable even with fixed elements */
+    min-height: calc(100vh - 88px - env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Snap scrolling for carousels and horizontal lists */

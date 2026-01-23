@@ -12,7 +12,10 @@ import { ClientLayout } from './ClientLayout'
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
+  minimumScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
   themeColor: '#0b0b0f',
 }
 
@@ -42,7 +45,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
+      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
         <ClientLayout>
           <Providers>
             <ServiceWorkerRegistration />
@@ -50,7 +53,7 @@ export default function RootLayout({
             {/* Fixed header navigation */}
             <SiteNav />
             {/* Main content with proper spacing for fixed header and mobile nav */}
-            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-32 pt-20 sm:px-6 md:pb-8 lg:px-8 lg:pt-24">
+            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-32 pt-20 sm:px-6 md:pb-8 lg:px-8 lg:pt-24 mobile-content-area">
               {children}
             </main>
             {/* Footer - hidden on mobile due to MobileNav */}
