@@ -1,18 +1,30 @@
 /**
  * Unified Audio Manager for MindVibe
  *
- * Central hub for all audio functionality throughout the app:
+ * ॐ श्री गणेशाय नमः
+ *
+ * Central hub for all audio functionality based on Vedic wisdom:
  * - UI Sound Effects (clicks, toggles, notifications)
  * - Binaural Beats & Brainwave Entrainment
- * - Spatial 3D Audio
- * - Ambient Soundscapes
- * - Meditation & Healing Frequencies
+ * - Solfeggio Healing Frequencies (174-963 Hz)
+ * - Chakra Alignment Frequencies
+ * - Gita-Based Guna States (Sattva, Rajas, Tamas)
+ * - Activity Soundscapes (Sleep, Meditation, Reading, Focus, Listening)
+ * - Isochronic Tones for Enhanced Entrainment
+ * - Ambient Soundscapes (Nature, Temple, Cosmic)
  * - Breath-Synced Audio
+ *
+ * Based on Bhagavad Gita principles:
+ * - Chapter 6: Dhyana Yoga (Meditation)
+ * - Chapter 14: Gunatray Vibhag Yoga (Three Gunas)
+ * - Chapter 18: Moksha Sanyasa Yoga (Liberation)
  *
  * Usage:
  *   import { audioManager } from '@/utils/audio/AudioManager'
  *   audioManager.playUISound('click')
  *   audioManager.startBinauralBeats('meditation')
+ *   audioManager.startActivitySoundscape('sleep')
+ *   audioManager.playChakraFrequency('anahata')
  */
 
 // ============ Types ============
@@ -55,15 +67,60 @@ export type UISound =
   | 'singing_bowl'
 
 export type BrainwavePreset =
-  | 'focus'       // Beta 14-30 Hz
-  | 'relaxation'  // Alpha 8-14 Hz
-  | 'meditation'  // Theta 4-8 Hz
-  | 'deep_sleep'  // Delta 0.5-4 Hz
-  | 'creativity'  // Theta 6 Hz
-  | 'healing'     // Solfeggio 528 Hz
-  | 'grounding'   // Root 396 Hz
-  | 'clarity'     // Third Eye 852 Hz
-  | 'transcendence' // Crown 963 Hz
+  | 'focus'         // Beta 14-30 Hz - Karma Yoga (Action)
+  | 'relaxation'    // Alpha 8-14 Hz - Shanti (Peace)
+  | 'meditation'    // Theta 4-8 Hz - Dhyana Yoga
+  | 'deep_sleep'    // Delta 0.5-4 Hz - Yoga Nidra
+  | 'creativity'    // Theta 6 Hz - Shristi (Creation)
+  | 'healing'       // Solfeggio 528 Hz - Arogya (Health)
+  | 'grounding'     // Root 396 Hz - Muladhara
+  | 'clarity'       // Third Eye 852 Hz - Ajna
+  | 'transcendence' // Crown 963 Hz - Sahasrara
+  | 'sattva'        // Pure consciousness state
+  | 'rajas'         // Active energy state
+  | 'tamas'         // Deep rest state
+  | 'bhakti'        // Devotional heart-centered
+  | 'jnana'         // Wisdom/knowledge state
+  | 'karma'         // Action/focus state
+  | 'samadhi'       // Highest consciousness
+
+// Solfeggio Frequencies - Ancient sacred healing tones
+export type SolfeggioFrequency =
+  | 'ut_174'    // 174 Hz - Foundation, security
+  | 'ut_285'    // 285 Hz - Healing, transformation
+  | 'ut_396'    // 396 Hz - Liberation from fear (UT)
+  | 're_417'    // 417 Hz - Facilitating change (RE)
+  | 'mi_528'    // 528 Hz - DNA repair, miracles (MI)
+  | 'fa_639'    // 639 Hz - Connecting, relationships (FA)
+  | 'sol_741'   // 741 Hz - Expression, solutions (SOL)
+  | 'la_852'    // 852 Hz - Awakening intuition (LA)
+  | 'si_963'    // 963 Hz - Divine consciousness (SI)
+
+// Chakra System aligned with Vedic tradition
+export type ChakraFrequency =
+  | 'muladhara'     // Root - 396 Hz - Stability, grounding
+  | 'svadhisthana'  // Sacral - 417 Hz - Creativity, emotion
+  | 'manipura'      // Solar Plexus - 528 Hz - Power, will
+  | 'anahata'       // Heart - 639 Hz - Love, compassion (Krishna's teachings)
+  | 'vishuddha'     // Throat - 741 Hz - Truth, expression
+  | 'ajna'          // Third Eye - 852 Hz - Intuition, wisdom
+  | 'sahasrara'     // Crown - 963 Hz - Divine connection
+
+// Activity-based presets for daily life
+export type ActivitySoundscape =
+  | 'sleep'         // Deep restorative sleep (Tamas state)
+  | 'meditation'    // Deep meditation (Dhyana state)
+  | 'reading'       // Study & learning (Jnana state)
+  | 'focus'         // Work & concentration (Karma state)
+  | 'listening'     // Receptive awareness (Bhakti state)
+  | 'creativity'    // Creative flow (Shristi state)
+  | 'healing'       // Physical/emotional healing
+  | 'yoga'          // Yoga practice
+  | 'prayer'        // Devotional practice
+  | 'relaxation'    // Gentle unwinding
+
+// Gita-based Guna states (from Chapter 14)
+export type GunaState = 'sattva' | 'rajas' | 'tamas'
 
 export type AmbientSoundscape =
   | 'nature'
@@ -101,9 +158,14 @@ export interface AudioManagerState {
   binauralEnabled: boolean
   spatialEnabled: boolean
   ambientEnabled: boolean
+  activityEnabled: boolean
+  isochronicEnabled: boolean
   currentBrainwave: BrainwavePreset | null
   currentAmbient: AmbientSoundscape | null
   currentSpatialScene: SpatialScene | null
+  currentActivity: ActivitySoundscape | null
+  currentChakra: ChakraFrequency | null
+  currentGuna: GunaState | null
 }
 
 export interface AudioManagerConfig {
@@ -344,22 +406,549 @@ const UI_SOUNDS: Record<UISound, {
   }
 }
 
-// Brainwave configurations
+// ============ GITA-BASED FREQUENCY CONFIGURATIONS ============
+
+/**
+ * Brainwave Configurations
+ * Based on modern neuroscience + Vedic wisdom
+ *
+ * Bhagavad Gita References:
+ * - "योगस्थः कुरु कर्माणि" (BG 2.48) - Perform action in yoga
+ * - "समत्वं योग उच्यते" (BG 2.48) - Equanimity is yoga
+ */
 const BRAINWAVE_CONFIGS: Record<BrainwavePreset, {
   beatFrequency: number
   baseFrequency: number
   chakraFrequency?: number
+  solfeggioFrequency?: number
+  description: string
+  descriptionSanskrit?: string
+  gitaReference?: string
+}> = {
+  // Standard brainwave presets
+  focus: {
+    beatFrequency: 18,
+    baseFrequency: 200,
+    description: 'Beta waves for concentration',
+    descriptionSanskrit: 'एकाग्रता - Ekagrata (One-pointed focus)',
+    gitaReference: 'BG 6.12 - एकाग्रं मनः कृत्वा'
+  },
+  relaxation: {
+    beatFrequency: 10,
+    baseFrequency: 200,
+    description: 'Alpha waves for calm awareness',
+    descriptionSanskrit: 'शान्ति - Shanti (Peace)',
+    gitaReference: 'BG 2.66 - नास्ति बुद्धिरयुक्तस्य'
+  },
+  meditation: {
+    beatFrequency: 6,
+    baseFrequency: 200,
+    chakraFrequency: 528,
+    solfeggioFrequency: 528,
+    description: 'Theta waves for deep meditation',
+    descriptionSanskrit: 'ध्यान - Dhyana (Meditation)',
+    gitaReference: 'BG 6.10-13 - Dhyana Yoga'
+  },
+  deep_sleep: {
+    beatFrequency: 2,
+    baseFrequency: 100,
+    description: 'Delta waves for restorative sleep',
+    descriptionSanskrit: 'निद्रा - Nidra (Sleep)',
+    gitaReference: 'BG 6.17 - युक्तस्वप्नावबोधस्य'
+  },
+  creativity: {
+    beatFrequency: 6,
+    baseFrequency: 150,
+    solfeggioFrequency: 417,
+    description: 'Theta waves for inspiration',
+    descriptionSanskrit: 'सृष्टि - Shristi (Creation)',
+    gitaReference: 'BG 10.34 - कीर्तिः श्रीर्वाक्च नारीणाम्'
+  },
+  healing: {
+    beatFrequency: 8,
+    baseFrequency: 528,
+    chakraFrequency: 528,
+    solfeggioFrequency: 528,
+    description: 'Solfeggio 528 Hz for cellular repair',
+    descriptionSanskrit: 'आरोग्य - Arogya (Health)',
+    gitaReference: 'BG 6.17 - युक्ताहारविहारस्य'
+  },
+  grounding: {
+    beatFrequency: 10,
+    baseFrequency: 396,
+    chakraFrequency: 396,
+    solfeggioFrequency: 396,
+    description: 'Root chakra for stability',
+    descriptionSanskrit: 'मूलाधार - Muladhara (Root)',
+    gitaReference: 'BG 6.13 - समं कायशिरोग्रीवं'
+  },
+  clarity: {
+    beatFrequency: 6,
+    baseFrequency: 852,
+    chakraFrequency: 852,
+    solfeggioFrequency: 852,
+    description: 'Third eye for intuition',
+    descriptionSanskrit: 'आज्ञा - Ajna (Command/Wisdom)',
+    gitaReference: 'BG 5.16 - ज्ञानेन तु तदज्ञानं'
+  },
+  transcendence: {
+    beatFrequency: 2,
+    baseFrequency: 963,
+    chakraFrequency: 963,
+    solfeggioFrequency: 963,
+    description: 'Crown chakra for divine connection',
+    descriptionSanskrit: 'सहस्रार - Sahasrara (Thousand-petaled)',
+    gitaReference: 'BG 15.19 - ब्रह्म भूय गच्छति'
+  },
+
+  // Gita-based Guna States (Chapter 14)
+  sattva: {
+    beatFrequency: 8,
+    baseFrequency: 528,
+    chakraFrequency: 639,
+    solfeggioFrequency: 528,
+    description: 'Pure consciousness - clarity, wisdom, harmony',
+    descriptionSanskrit: 'सत्त्व - Sattva (Purity/Goodness)',
+    gitaReference: 'BG 14.6 - सत्त्वं निर्मलत्वात्'
+  },
+  rajas: {
+    beatFrequency: 15,
+    baseFrequency: 200,
+    chakraFrequency: 528,
+    description: 'Active energy - passion, desire, action',
+    descriptionSanskrit: 'रजस् - Rajas (Activity/Passion)',
+    gitaReference: 'BG 14.7 - रजो रागात्मकं विद्धि'
+  },
+  tamas: {
+    beatFrequency: 1,
+    baseFrequency: 100,
+    chakraFrequency: 396,
+    description: 'Deep rest - stillness, restoration, grounding',
+    descriptionSanskrit: 'तमस् - Tamas (Inertia/Rest)',
+    gitaReference: 'BG 14.8 - तमस्त्वज्ञानजं विद्धि'
+  },
+
+  // Gita Yoga Paths
+  bhakti: {
+    beatFrequency: 7,
+    baseFrequency: 639,
+    chakraFrequency: 639,
+    solfeggioFrequency: 639,
+    description: 'Devotional heart-centered awareness',
+    descriptionSanskrit: 'भक्ति - Bhakti (Devotion)',
+    gitaReference: 'BG 12.2 - मय्यावेश्य मनो ये मां'
+  },
+  jnana: {
+    beatFrequency: 10,
+    baseFrequency: 852,
+    chakraFrequency: 852,
+    solfeggioFrequency: 852,
+    description: 'Wisdom and knowledge state',
+    descriptionSanskrit: 'ज्ञान - Jnana (Knowledge)',
+    gitaReference: 'BG 4.33 - श्रेयान्द्रव्यमयाद्यज्ञात्'
+  },
+  karma: {
+    beatFrequency: 16,
+    baseFrequency: 200,
+    chakraFrequency: 528,
+    description: 'Focused action state',
+    descriptionSanskrit: 'कर्म - Karma (Action)',
+    gitaReference: 'BG 3.19 - असक्तो ह्याचरन्कर्म'
+  },
+  samadhi: {
+    beatFrequency: 0.5,
+    baseFrequency: 963,
+    chakraFrequency: 963,
+    solfeggioFrequency: 963,
+    description: 'Highest state of consciousness - unity',
+    descriptionSanskrit: 'समाधि - Samadhi (Complete absorption)',
+    gitaReference: 'BG 6.20 - यत्रोपरमते चित्तं'
+  }
+}
+
+/**
+ * Solfeggio Frequency Configurations
+ *
+ * Ancient sacred frequencies discovered in Gregorian chants
+ * Mathematically derived from sacred geometry patterns
+ * Each frequency has specific healing properties
+ */
+const SOLFEGGIO_CONFIGS: Record<SolfeggioFrequency, {
+  frequency: number
+  name: string
+  nameSanskrit: string
+  description: string
+  healingProperty: string
+  chakraAlignment: ChakraFrequency
+  color: string
+}> = {
+  ut_174: {
+    frequency: 174,
+    name: 'Foundation',
+    nameSanskrit: 'आधार - Adhara',
+    description: 'Lowest Solfeggio frequency - foundation of consciousness',
+    healingProperty: 'Reduces pain, gives sense of security, stabilizes the physical body',
+    chakraAlignment: 'muladhara',
+    color: '#FF0000'
+  },
+  ut_285: {
+    frequency: 285,
+    name: 'Quantum Cognition',
+    nameSanskrit: 'परिवर्तन - Parivartan',
+    description: 'Influences energy field and cellular regeneration',
+    healingProperty: 'Heals tissues, restructures damaged organs, promotes cell repair',
+    chakraAlignment: 'svadhisthana',
+    color: '#FF7F00'
+  },
+  ut_396: {
+    frequency: 396,
+    name: 'Liberation',
+    nameSanskrit: 'मुक्ति - Mukti',
+    description: 'UT - Liberating guilt and fear',
+    healingProperty: 'Releases fear, guilt, and negative beliefs; grounds energy',
+    chakraAlignment: 'muladhara',
+    color: '#FF0000'
+  },
+  re_417: {
+    frequency: 417,
+    name: 'Transformation',
+    nameSanskrit: 'रूपान्तर - Rupantar',
+    description: 'RE - Undoing situations and facilitating change',
+    healingProperty: 'Clears traumatic experiences, facilitates change, removes negativity',
+    chakraAlignment: 'svadhisthana',
+    color: '#FF7F00'
+  },
+  mi_528: {
+    frequency: 528,
+    name: 'Miracles',
+    nameSanskrit: 'चमत्कार - Chamatkar',
+    description: 'MI - Transformation and miracles (DNA repair)',
+    healingProperty: 'DNA repair, cellular healing, transformation, miracles',
+    chakraAlignment: 'manipura',
+    color: '#FFFF00'
+  },
+  fa_639: {
+    frequency: 639,
+    name: 'Connection',
+    nameSanskrit: 'संबंध - Sambandh',
+    description: 'FA - Connecting and relationships',
+    healingProperty: 'Enhances communication, understanding, tolerance, love',
+    chakraAlignment: 'anahata',
+    color: '#00FF00'
+  },
+  sol_741: {
+    frequency: 741,
+    name: 'Expression',
+    nameSanskrit: 'अभिव्यक्ति - Abhivyakti',
+    description: 'SOL - Awakening intuition and expression',
+    healingProperty: 'Solves problems, cleanses cells, self-expression',
+    chakraAlignment: 'vishuddha',
+    color: '#0000FF'
+  },
+  la_852: {
+    frequency: 852,
+    name: 'Intuition',
+    nameSanskrit: 'अंतर्ज्ञान - Antarjnana',
+    description: 'LA - Returning to spiritual order',
+    healingProperty: 'Awakens intuition, returns to spiritual order, inner strength',
+    chakraAlignment: 'ajna',
+    color: '#4B0082'
+  },
+  si_963: {
+    frequency: 963,
+    name: 'Divine',
+    nameSanskrit: 'दिव्य - Divya',
+    description: 'SI - Connection with divine consciousness',
+    healingProperty: 'Activates pineal gland, connects to source, divine consciousness',
+    chakraAlignment: 'sahasrara',
+    color: '#9400D3'
+  }
+}
+
+/**
+ * Chakra Frequency Configurations
+ *
+ * Based on traditional Tantra and Kundalini yoga
+ * Each chakra resonates with specific frequencies
+ *
+ * "कुण्डलिनी शक्ति" - The serpent power rises through chakras
+ */
+const CHAKRA_CONFIGS: Record<ChakraFrequency, {
+  frequency: number
+  binauralBeat: number
+  element: string
+  elementSanskrit: string
+  name: string
+  nameSanskrit: string
+  location: string
+  color: string
+  bija: string  // Seed mantra
+  qualities: string[]
+  gitaConnection: string
+}> = {
+  muladhara: {
+    frequency: 396,
+    binauralBeat: 8,
+    element: 'Earth',
+    elementSanskrit: 'पृथ्वी',
+    name: 'Root',
+    nameSanskrit: 'मूलाधार',
+    location: 'Base of spine',
+    color: '#FF0000',
+    bija: 'लं (LAM)',
+    qualities: ['Stability', 'Security', 'Grounding', 'Survival'],
+    gitaConnection: 'BG 6.13 - समं कायशिरोग्रीवं (steady body posture)'
+  },
+  svadhisthana: {
+    frequency: 417,
+    binauralBeat: 7,
+    element: 'Water',
+    elementSanskrit: 'जल',
+    name: 'Sacral',
+    nameSanskrit: 'स्वाधिष्ठान',
+    location: 'Below navel',
+    color: '#FF7F00',
+    bija: 'वं (VAM)',
+    qualities: ['Creativity', 'Emotion', 'Sexuality', 'Pleasure'],
+    gitaConnection: 'BG 7.11 - कामोऽस्मि (I am desire aligned with dharma)'
+  },
+  manipura: {
+    frequency: 528,
+    binauralBeat: 10,
+    element: 'Fire',
+    elementSanskrit: 'अग्नि',
+    name: 'Solar Plexus',
+    nameSanskrit: 'मणिपूर',
+    location: 'Above navel',
+    color: '#FFFF00',
+    bija: 'रं (RAM)',
+    qualities: ['Power', 'Will', 'Energy', 'Transformation'],
+    gitaConnection: 'BG 4.37 - ज्ञानाग्निः (fire of knowledge burns karma)'
+  },
+  anahata: {
+    frequency: 639,
+    binauralBeat: 6,
+    element: 'Air',
+    elementSanskrit: 'वायु',
+    name: 'Heart',
+    nameSanskrit: 'अनाहत',
+    location: 'Center of chest',
+    color: '#00FF00',
+    bija: 'यं (YAM)',
+    qualities: ['Love', 'Compassion', 'Empathy', 'Forgiveness'],
+    gitaConnection: 'BG 18.61 - ईश्वरः सर्वभूतानां हृद्देशे (Lord dwells in heart)'
+  },
+  vishuddha: {
+    frequency: 741,
+    binauralBeat: 12,
+    element: 'Ether/Space',
+    elementSanskrit: 'आकाश',
+    name: 'Throat',
+    nameSanskrit: 'विशुद्ध',
+    location: 'Throat',
+    color: '#0000FF',
+    bija: 'हं (HAM)',
+    qualities: ['Expression', 'Truth', 'Communication', 'Creativity'],
+    gitaConnection: 'BG 17.15 - अनुद्वेगकरं वाक्यं सत्यं (truthful, non-agitating speech)'
+  },
+  ajna: {
+    frequency: 852,
+    binauralBeat: 4,
+    element: 'Mind',
+    elementSanskrit: 'मनस्',
+    name: 'Third Eye',
+    nameSanskrit: 'आज्ञा',
+    location: 'Between eyebrows',
+    color: '#4B0082',
+    bija: 'ॐ (OM)',
+    qualities: ['Intuition', 'Wisdom', 'Insight', 'Vision'],
+    gitaConnection: 'BG 6.13 - संप्रेक्ष्य नासिकाग्रं (gaze at tip of nose/between brows)'
+  },
+  sahasrara: {
+    frequency: 963,
+    binauralBeat: 1,
+    element: 'Consciousness',
+    elementSanskrit: 'चैतन्य',
+    name: 'Crown',
+    nameSanskrit: 'सहस्रार',
+    location: 'Top of head',
+    color: '#9400D3',
+    bija: 'Silence/ॐ',
+    qualities: ['Divine connection', 'Enlightenment', 'Unity', 'Bliss'],
+    gitaConnection: 'BG 15.15 - वेदैश्च सर्वैरहमेव वेद्यो (I am to be known from all Vedas)'
+  }
+}
+
+/**
+ * Activity Soundscape Configurations
+ *
+ * Optimized frequencies for different daily activities
+ * Based on scientific research + Vedic wisdom
+ */
+const ACTIVITY_CONFIGS: Record<ActivitySoundscape, {
+  name: string
+  nameSanskrit: string
+  description: string
+  brainwaveTarget: string
+  primaryBeat: number
+  baseFrequency: number
+  solfeggioLayer?: number
+  chakraLayer?: number
+  ambientSoundscape?: AmbientSoundscape
+  duration?: string
+  gitaWisdom: string
+}> = {
+  sleep: {
+    name: 'Deep Sleep',
+    nameSanskrit: 'गहन निद्रा - Gahan Nidra',
+    description: 'Delta waves for deep restorative sleep',
+    brainwaveTarget: 'Delta (0.5-4 Hz)',
+    primaryBeat: 2,
+    baseFrequency: 100,
+    solfeggioLayer: 174,
+    chakraLayer: 396,
+    ambientSoundscape: 'night',
+    duration: '8 hours',
+    gitaWisdom: 'BG 6.17 - युक्तस्वप्नावबोधस्य योगो भवति दुःखहा (Yoga destroys sorrow for one of regulated sleep)'
+  },
+  meditation: {
+    name: 'Deep Meditation',
+    nameSanskrit: 'गहन ध्यान - Gahan Dhyana',
+    description: 'Theta waves for profound meditative states',
+    brainwaveTarget: 'Theta (4-8 Hz)',
+    primaryBeat: 6,
+    baseFrequency: 136.1,  // OM frequency
+    solfeggioLayer: 528,
+    chakraLayer: 639,
+    ambientSoundscape: 'temple',
+    duration: '20-60 minutes',
+    gitaWisdom: 'BG 6.10 - योगी युञ्जीत सततमात्मानं (The yogi should constantly practice)'
+  },
+  reading: {
+    name: 'Study & Learning',
+    nameSanskrit: 'अध्ययन - Adhyayan',
+    description: 'Alpha waves for enhanced comprehension and retention',
+    brainwaveTarget: 'Alpha (8-14 Hz)',
+    primaryBeat: 10,
+    baseFrequency: 200,
+    solfeggioLayer: 852,
+    chakraLayer: 852,
+    ambientSoundscape: 'forest',
+    duration: '1-3 hours',
+    gitaWisdom: 'BG 4.38 - न हि ज्ञानेन सदृशं पवित्रमिह विद्यते (Nothing purifies like knowledge)'
+  },
+  focus: {
+    name: 'Work & Concentration',
+    nameSanskrit: 'एकाग्रता - Ekagrata',
+    description: 'Beta waves for peak mental performance',
+    brainwaveTarget: 'Beta (14-30 Hz)',
+    primaryBeat: 16,
+    baseFrequency: 200,
+    solfeggioLayer: 741,
+    chakraLayer: 528,
+    ambientSoundscape: 'nature',
+    duration: '90 minutes (pomodoro)',
+    gitaWisdom: 'BG 2.48 - योगस्थः कुरु कर्माणि (Established in yoga, perform action)'
+  },
+  listening: {
+    name: 'Receptive Awareness',
+    nameSanskrit: 'ग्रहणशीलता - Grahanashilata',
+    description: 'Alpha-Theta border for deep listening and absorption',
+    brainwaveTarget: 'Alpha-Theta (7-8 Hz)',
+    primaryBeat: 7.5,
+    baseFrequency: 639,  // Heart frequency
+    solfeggioLayer: 639,
+    chakraLayer: 639,
+    ambientSoundscape: 'tibetan',
+    duration: 'Variable',
+    gitaWisdom: 'BG 18.70 - अध्येष्यते च य इमं (One who studies this sacred dialogue)'
+  },
+  creativity: {
+    name: 'Creative Flow',
+    nameSanskrit: 'सृजनात्मक प्रवाह - Srijanatmak Pravah',
+    description: 'Theta waves for accessing creative inspiration',
+    brainwaveTarget: 'Theta (4-8 Hz)',
+    primaryBeat: 6,
+    baseFrequency: 150,
+    solfeggioLayer: 417,
+    chakraLayer: 417,
+    ambientSoundscape: 'cosmic',
+    duration: 'Flow state duration',
+    gitaWisdom: 'BG 10.36 - द्यूतं छलयतामस्मि (I am the intelligence of the intelligent)'
+  },
+  healing: {
+    name: 'Healing Session',
+    nameSanskrit: 'उपचार - Upchar',
+    description: 'Solfeggio frequencies for physical and emotional healing',
+    brainwaveTarget: 'Alpha-Theta (6-10 Hz)',
+    primaryBeat: 8,
+    baseFrequency: 528,  // Miracle/DNA repair frequency
+    solfeggioLayer: 528,
+    chakraLayer: 528,
+    ambientSoundscape: 'tibetan',
+    duration: '30-60 minutes',
+    gitaWisdom: 'BG 6.17 - युक्ताहारविहारस्य (For one moderate in eating and recreation)'
+  },
+  yoga: {
+    name: 'Yoga Practice',
+    nameSanskrit: 'योगाभ्यास - Yogabhyas',
+    description: 'Balanced alpha waves for body-mind harmony',
+    brainwaveTarget: 'Alpha (8-12 Hz)',
+    primaryBeat: 10,
+    baseFrequency: 136.1,  // OM frequency
+    solfeggioLayer: 528,
+    chakraLayer: 528,
+    ambientSoundscape: 'temple',
+    duration: '45-90 minutes',
+    gitaWisdom: 'BG 6.46 - तपस्विभ्योऽधिको योगी (The yogi is greater than ascetics)'
+  },
+  prayer: {
+    name: 'Devotional Practice',
+    nameSanskrit: 'भक्ति साधना - Bhakti Sadhana',
+    description: 'Heart-centered frequencies for devotion',
+    brainwaveTarget: 'Alpha-Theta (6-8 Hz)',
+    primaryBeat: 7,
+    baseFrequency: 639,  // Heart connection
+    solfeggioLayer: 639,
+    chakraLayer: 639,
+    ambientSoundscape: 'temple',
+    duration: 'Personal',
+    gitaWisdom: 'BG 9.22 - अनन्याश्चिन्तयन्तो मां (Those who worship Me with exclusive devotion)'
+  },
+  relaxation: {
+    name: 'Gentle Unwinding',
+    nameSanskrit: 'विश्रांति - Vishranti',
+    description: 'Low alpha waves for peaceful relaxation',
+    brainwaveTarget: 'Low Alpha (8-10 Hz)',
+    primaryBeat: 8,
+    baseFrequency: 200,
+    solfeggioLayer: 396,
+    chakraLayer: 396,
+    ambientSoundscape: 'rain',
+    duration: '15-45 minutes',
+    gitaWisdom: 'BG 2.66 - नास्ति बुद्धिरयुक्तस्य न चायुक्तस्य भावना (No peace for the unconnected)'
+  }
+}
+
+/**
+ * Isochronic Tone Configurations
+ *
+ * More effective than binaural beats for some purposes
+ * Single tone pulsed at specific rate - works without headphones
+ */
+const ISOCHRONIC_CONFIGS: Record<string, {
+  frequency: number
+  pulseRate: number  // Hz
+  dutyCycle: number  // 0-1
   description: string
 }> = {
-  focus: { beatFrequency: 18, baseFrequency: 200, description: 'Beta waves for concentration' },
-  relaxation: { beatFrequency: 10, baseFrequency: 200, description: 'Alpha waves for calm awareness' },
-  meditation: { beatFrequency: 6, baseFrequency: 200, chakraFrequency: 528, description: 'Theta waves for deep meditation' },
-  deep_sleep: { beatFrequency: 2, baseFrequency: 100, description: 'Delta waves for restorative sleep' },
-  creativity: { beatFrequency: 6, baseFrequency: 150, description: 'Theta waves for inspiration' },
-  healing: { beatFrequency: 8, baseFrequency: 528, chakraFrequency: 528, description: 'Solfeggio 528 Hz for cellular repair' },
-  grounding: { beatFrequency: 10, baseFrequency: 396, chakraFrequency: 396, description: 'Root chakra for stability' },
-  clarity: { beatFrequency: 6, baseFrequency: 852, chakraFrequency: 852, description: 'Third eye for intuition' },
-  transcendence: { beatFrequency: 2, baseFrequency: 963, chakraFrequency: 963, description: 'Crown chakra for divine connection' }
+  delta_deep: { frequency: 100, pulseRate: 2, dutyCycle: 0.5, description: 'Deep delta for sleep' },
+  theta_meditation: { frequency: 200, pulseRate: 6, dutyCycle: 0.6, description: 'Theta for meditation' },
+  alpha_relaxation: { frequency: 200, pulseRate: 10, dutyCycle: 0.5, description: 'Alpha for relaxation' },
+  beta_focus: { frequency: 200, pulseRate: 18, dutyCycle: 0.4, description: 'Beta for focus' },
+  gamma_insight: { frequency: 300, pulseRate: 40, dutyCycle: 0.3, description: 'Gamma for insight' },
+  schumann_earth: { frequency: 136.1, pulseRate: 7.83, dutyCycle: 0.5, description: 'Earth resonance' },
+  om_universal: { frequency: 136.1, pulseRate: 7.5, dutyCycle: 0.6, description: 'OM frequency pulse' }
 }
 
 // Layer to brainwave mapping
@@ -547,10 +1136,33 @@ class AudioManager {
     binauralEnabled: false,
     spatialEnabled: false,
     ambientEnabled: false,
+    activityEnabled: false,
+    isochronicEnabled: false,
     currentBrainwave: null,
     currentAmbient: null,
-    currentSpatialScene: null
+    currentSpatialScene: null,
+    currentActivity: null,
+    currentChakra: null,
+    currentGuna: null
   }
+
+  // Activity soundscape nodes
+  private activityOscillators: OscillatorNode[] = []
+  private activitySources: AudioBufferSourceNode[] = []
+  private activityGain: GainNode | null = null
+  private activityVolume = 0.4
+
+  // Isochronic tone nodes
+  private isochronicOsc: OscillatorNode | null = null
+  private isochronicGain: GainNode | null = null
+  private isochronicLFO: OscillatorNode | null = null
+  private isochronicVolume = 0.25
+
+  // Solfeggio/Chakra nodes
+  private solfeggioOsc: OscillatorNode | null = null
+  private solfeggioGain: GainNode | null = null
+  private chakraOscillators: OscillatorNode[] = []
+  private chakraGains: GainNode[] = []
 
   private config: AudioManagerConfig = {}
   private binauralVolume = 0.3
@@ -1023,6 +1635,565 @@ class AudioManager {
     }
   }
 
+  // ============ GITA-BASED ACTIVITY SOUNDSCAPES ============
+
+  /**
+   * Start activity-optimized soundscape
+   *
+   * Combines brainwave entrainment, solfeggio frequencies,
+   * chakra alignment, and ambient soundscapes for specific activities
+   *
+   * Based on Bhagavad Gita's guidance for different states of being
+   */
+  async startActivitySoundscape(activity: ActivitySoundscape): Promise<void> {
+    if (!this.audioContext) {
+      await this.ensureInitialized()
+      if (!this.audioContext) return
+    }
+
+    await this.resume()
+
+    // Stop existing activity soundscape
+    this.stopActivitySoundscape()
+
+    const config = ACTIVITY_CONFIGS[activity]
+    const now = this.audioContext!.currentTime
+
+    // Setup activity gain
+    if (!this.activityGain) {
+      this.activityGain = this.audioContext!.createGain()
+      this.activityGain.gain.value = 0
+      this.activityGain.connect(this.masterGain!)
+    }
+
+    // 1. Start binaural beats for brainwave entrainment
+    await this.createActivityBinauralLayer(config.primaryBeat, config.baseFrequency, now)
+
+    // 2. Add solfeggio frequency layer
+    if (config.solfeggioLayer) {
+      this.createSolfeggioLayer(config.solfeggioLayer, 0.15, now)
+    }
+
+    // 3. Add chakra alignment layer
+    if (config.chakraLayer) {
+      this.createChakraLayer(config.chakraLayer, 0.1, now)
+    }
+
+    // 4. Start ambient soundscape if specified
+    if (config.ambientSoundscape) {
+      await this.startAmbientSoundscape(config.ambientSoundscape)
+    }
+
+    // Fade in
+    this.activityGain!.gain.setTargetAtTime(this.activityVolume, now, 2)
+
+    this.state.activityEnabled = true
+    this.state.currentActivity = activity
+    this.emitStateChange()
+
+    console.log(`AudioManager: Started activity soundscape - ${activity} (${config.nameSanskrit})`)
+    console.log(`Gita Wisdom: ${config.gitaWisdom}`)
+  }
+
+  /**
+   * Create binaural beat layer for activity
+   */
+  private async createActivityBinauralLayer(
+    beatFreq: number,
+    baseFreq: number,
+    startTime: number
+  ): Promise<void> {
+    if (!this.audioContext || !this.activityGain) return
+
+    // Left ear - base frequency
+    const leftOsc = this.audioContext.createOscillator()
+    leftOsc.type = 'sine'
+    leftOsc.frequency.value = baseFreq
+
+    const leftGain = this.audioContext.createGain()
+    leftGain.gain.setValueAtTime(0, startTime)
+    leftGain.gain.linearRampToValueAtTime(0.15, startTime + 3)
+
+    // Pan left
+    const leftPanner = this.audioContext.createStereoPanner()
+    leftPanner.pan.value = -1
+
+    leftOsc.connect(leftGain)
+    leftGain.connect(leftPanner)
+    leftPanner.connect(this.activityGain)
+
+    // Right ear - base + beat frequency
+    const rightOsc = this.audioContext.createOscillator()
+    rightOsc.type = 'sine'
+    rightOsc.frequency.value = baseFreq + beatFreq
+
+    const rightGain = this.audioContext.createGain()
+    rightGain.gain.setValueAtTime(0, startTime)
+    rightGain.gain.linearRampToValueAtTime(0.15, startTime + 3)
+
+    // Pan right
+    const rightPanner = this.audioContext.createStereoPanner()
+    rightPanner.pan.value = 1
+
+    rightOsc.connect(rightGain)
+    rightGain.connect(rightPanner)
+    rightPanner.connect(this.activityGain)
+
+    // Start
+    leftOsc.start()
+    rightOsc.start()
+
+    this.activityOscillators.push(leftOsc, rightOsc)
+  }
+
+  /**
+   * Create solfeggio frequency layer
+   */
+  private createSolfeggioLayer(frequency: number, volume: number, startTime: number): void {
+    if (!this.audioContext || !this.activityGain) return
+
+    const osc = this.audioContext.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.value = frequency
+
+    const gain = this.audioContext.createGain()
+    gain.gain.setValueAtTime(0, startTime)
+    gain.gain.linearRampToValueAtTime(volume * this.activityVolume, startTime + 4)
+
+    // Add subtle chorus effect with second detuned oscillator
+    const osc2 = this.audioContext.createOscillator()
+    osc2.type = 'sine'
+    osc2.frequency.value = frequency
+    osc2.detune.value = 5
+
+    const gain2 = this.audioContext.createGain()
+    gain2.gain.setValueAtTime(0, startTime)
+    gain2.gain.linearRampToValueAtTime(volume * 0.3 * this.activityVolume, startTime + 4)
+
+    osc.connect(gain)
+    gain.connect(this.activityGain)
+
+    osc2.connect(gain2)
+    gain2.connect(this.activityGain)
+
+    osc.start()
+    osc2.start()
+
+    this.activityOscillators.push(osc, osc2)
+  }
+
+  /**
+   * Create chakra frequency layer
+   */
+  private createChakraLayer(frequency: number, volume: number, startTime: number): void {
+    if (!this.audioContext || !this.activityGain) return
+
+    // Main chakra frequency
+    const osc = this.audioContext.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.value = frequency
+
+    const gain = this.audioContext.createGain()
+    gain.gain.setValueAtTime(0, startTime)
+    gain.gain.linearRampToValueAtTime(volume * this.activityVolume, startTime + 5)
+
+    // Add harmonic for richness
+    const harmonic = this.audioContext.createOscillator()
+    harmonic.type = 'sine'
+    harmonic.frequency.value = frequency * 2
+
+    const harmonicGain = this.audioContext.createGain()
+    harmonicGain.gain.setValueAtTime(0, startTime)
+    harmonicGain.gain.linearRampToValueAtTime(volume * 0.15 * this.activityVolume, startTime + 5)
+
+    osc.connect(gain)
+    gain.connect(this.activityGain)
+
+    harmonic.connect(harmonicGain)
+    harmonicGain.connect(this.activityGain)
+
+    osc.start()
+    harmonic.start()
+
+    this.activityOscillators.push(osc, harmonic)
+  }
+
+  /**
+   * Stop activity soundscape
+   */
+  stopActivitySoundscape(): void {
+    if (this.activityGain && this.audioContext) {
+      this.activityGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 1)
+    }
+
+    setTimeout(() => {
+      this.activityOscillators.forEach(osc => {
+        try { osc.stop() } catch {}
+      })
+      this.activityOscillators = []
+
+      this.activitySources.forEach(source => {
+        try { source.stop() } catch {}
+      })
+      this.activitySources = []
+    }, 1200)
+
+    // Also stop ambient if it was started
+    this.stopAmbientSoundscape()
+
+    this.state.activityEnabled = false
+    this.state.currentActivity = null
+    this.emitStateChange()
+  }
+
+  /**
+   * Set activity soundscape volume
+   */
+  setActivityVolume(volume: number): void {
+    this.activityVolume = Math.max(0, Math.min(1, volume))
+
+    if (this.activityGain && this.audioContext && this.state.activityEnabled) {
+      this.activityGain.gain.setTargetAtTime(this.activityVolume, this.audioContext.currentTime, 0.1)
+    }
+  }
+
+  // ============ SOLFEGGIO FREQUENCIES ============
+
+  /**
+   * Play individual solfeggio frequency
+   *
+   * Ancient sacred healing tones for specific purposes
+   */
+  async playSolfeggioFrequency(solfeggio: SolfeggioFrequency, duration?: number): Promise<void> {
+    if (!this.audioContext) {
+      await this.ensureInitialized()
+      if (!this.audioContext) return
+    }
+
+    await this.resume()
+
+    // Stop existing solfeggio
+    this.stopSolfeggioFrequency()
+
+    const config = SOLFEGGIO_CONFIGS[solfeggio]
+    const now = this.audioContext!.currentTime
+
+    // Create main frequency
+    this.solfeggioOsc = this.audioContext!.createOscillator()
+    this.solfeggioOsc.type = 'sine'
+    this.solfeggioOsc.frequency.value = config.frequency
+
+    // Create gain with fade in
+    this.solfeggioGain = this.audioContext!.createGain()
+    this.solfeggioGain.gain.setValueAtTime(0, now)
+    this.solfeggioGain.gain.linearRampToValueAtTime(0.3, now + 3)
+
+    // Add subtle harmonic
+    const harmonic = this.audioContext!.createOscillator()
+    harmonic.type = 'sine'
+    harmonic.frequency.value = config.frequency * 2
+
+    const harmonicGain = this.audioContext!.createGain()
+    harmonicGain.gain.setValueAtTime(0, now)
+    harmonicGain.gain.linearRampToValueAtTime(0.08, now + 4)
+
+    this.solfeggioOsc.connect(this.solfeggioGain)
+    this.solfeggioGain.connect(this.masterGain!)
+
+    harmonic.connect(harmonicGain)
+    harmonicGain.connect(this.masterGain!)
+
+    this.solfeggioOsc.start()
+    harmonic.start()
+
+    console.log(`AudioManager: Playing Solfeggio ${config.frequency}Hz - ${config.name} (${config.nameSanskrit})`)
+    console.log(`Healing: ${config.healingProperty}`)
+
+    // Auto-stop after duration if specified
+    if (duration) {
+      setTimeout(() => {
+        this.stopSolfeggioFrequency()
+      }, duration * 1000)
+    }
+  }
+
+  /**
+   * Stop solfeggio frequency
+   */
+  stopSolfeggioFrequency(): void {
+    if (this.solfeggioGain && this.audioContext) {
+      this.solfeggioGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.5)
+    }
+
+    setTimeout(() => {
+      this.solfeggioOsc?.stop()
+      this.solfeggioOsc = null
+      this.solfeggioGain = null
+    }, 600)
+  }
+
+  // ============ CHAKRA FREQUENCIES ============
+
+  /**
+   * Play chakra alignment frequency
+   *
+   * Based on Kundalini yoga tradition
+   * "कुण्डलिनी शक्ति जागरण" - Kundalini Shakti awakening
+   */
+  async playChakraFrequency(chakra: ChakraFrequency, withBinaural = true): Promise<void> {
+    if (!this.audioContext) {
+      await this.ensureInitialized()
+      if (!this.audioContext) return
+    }
+
+    await this.resume()
+
+    // Stop existing chakra sounds
+    this.stopChakraFrequency()
+
+    const config = CHAKRA_CONFIGS[chakra]
+    const now = this.audioContext!.currentTime
+
+    // Main chakra frequency
+    const mainOsc = this.audioContext!.createOscillator()
+    mainOsc.type = 'sine'
+    mainOsc.frequency.value = config.frequency
+
+    const mainGain = this.audioContext!.createGain()
+    mainGain.gain.setValueAtTime(0, now)
+    mainGain.gain.linearRampToValueAtTime(0.25, now + 4)
+
+    mainOsc.connect(mainGain)
+    mainGain.connect(this.masterGain!)
+    mainOsc.start()
+
+    this.chakraOscillators.push(mainOsc)
+    this.chakraGains.push(mainGain)
+
+    // Add binaural entrainment if requested
+    if (withBinaural) {
+      // Left oscillator
+      const leftOsc = this.audioContext!.createOscillator()
+      leftOsc.type = 'sine'
+      leftOsc.frequency.value = config.frequency
+
+      const leftGain = this.audioContext!.createGain()
+      leftGain.gain.setValueAtTime(0, now)
+      leftGain.gain.linearRampToValueAtTime(0.12, now + 3)
+
+      const leftPanner = this.audioContext!.createStereoPanner()
+      leftPanner.pan.value = -1
+
+      leftOsc.connect(leftGain)
+      leftGain.connect(leftPanner)
+      leftPanner.connect(this.masterGain!)
+      leftOsc.start()
+
+      // Right oscillator with binaural beat
+      const rightOsc = this.audioContext!.createOscillator()
+      rightOsc.type = 'sine'
+      rightOsc.frequency.value = config.frequency + config.binauralBeat
+
+      const rightGain = this.audioContext!.createGain()
+      rightGain.gain.setValueAtTime(0, now)
+      rightGain.gain.linearRampToValueAtTime(0.12, now + 3)
+
+      const rightPanner = this.audioContext!.createStereoPanner()
+      rightPanner.pan.value = 1
+
+      rightOsc.connect(rightGain)
+      rightGain.connect(rightPanner)
+      rightPanner.connect(this.masterGain!)
+      rightOsc.start()
+
+      this.chakraOscillators.push(leftOsc, rightOsc)
+      this.chakraGains.push(leftGain, rightGain)
+    }
+
+    this.state.currentChakra = chakra
+    this.emitStateChange()
+
+    console.log(`AudioManager: Playing Chakra ${config.name} (${config.nameSanskrit}) - ${config.frequency}Hz`)
+    console.log(`Bija Mantra: ${config.bija}`)
+    console.log(`Element: ${config.element} (${config.elementSanskrit})`)
+    console.log(`Gita: ${config.gitaConnection}`)
+  }
+
+  /**
+   * Stop chakra frequency
+   */
+  stopChakraFrequency(): void {
+    this.chakraGains.forEach(gain => {
+      if (this.audioContext) {
+        gain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.5)
+      }
+    })
+
+    setTimeout(() => {
+      this.chakraOscillators.forEach(osc => {
+        try { osc.stop() } catch {}
+      })
+      this.chakraOscillators = []
+      this.chakraGains = []
+    }, 600)
+
+    this.state.currentChakra = null
+    this.emitStateChange()
+  }
+
+  /**
+   * Play full chakra journey - ascend through all 7 chakras
+   *
+   * Based on Kundalini yoga - energy rises from Muladhara to Sahasrara
+   */
+  async playChakraJourney(durationPerChakra = 60): Promise<void> {
+    const chakras: ChakraFrequency[] = [
+      'muladhara', 'svadhisthana', 'manipura',
+      'anahata', 'vishuddha', 'ajna', 'sahasrara'
+    ]
+
+    console.log('AudioManager: Starting Chakra Journey - कुण्डलिनी जागरण')
+
+    for (const chakra of chakras) {
+      await this.playChakraFrequency(chakra, true)
+      await new Promise(resolve => setTimeout(resolve, durationPerChakra * 1000))
+    }
+
+    console.log('AudioManager: Chakra Journey complete - समाधि प्राप्ति')
+    this.stopChakraFrequency()
+  }
+
+  // ============ ISOCHRONIC TONES ============
+
+  /**
+   * Start isochronic tone for brain entrainment
+   *
+   * More effective than binaural beats for some purposes
+   * Works without headphones
+   */
+  async startIsochronicTone(
+    frequency: number,
+    pulseRate: number,
+    dutyCycle = 0.5
+  ): Promise<void> {
+    if (!this.audioContext) {
+      await this.ensureInitialized()
+      if (!this.audioContext) return
+    }
+
+    await this.resume()
+
+    // Stop existing isochronic
+    this.stopIsochronicTone()
+
+    const now = this.audioContext!.currentTime
+
+    // Main carrier oscillator
+    this.isochronicOsc = this.audioContext!.createOscillator()
+    this.isochronicOsc.type = 'sine'
+    this.isochronicOsc.frequency.value = frequency
+
+    // Gain for the pulse
+    this.isochronicGain = this.audioContext!.createGain()
+    this.isochronicGain.gain.value = 0
+
+    // LFO to create the pulse (square wave)
+    this.isochronicLFO = this.audioContext!.createOscillator()
+    this.isochronicLFO.type = 'square'
+    this.isochronicLFO.frequency.value = pulseRate
+
+    // LFO gain to control pulse depth
+    const lfoGain = this.audioContext!.createGain()
+    lfoGain.gain.value = this.isochronicVolume * dutyCycle
+
+    // Connect
+    this.isochronicOsc.connect(this.isochronicGain)
+    this.isochronicLFO.connect(lfoGain)
+    lfoGain.connect(this.isochronicGain.gain)
+    this.isochronicGain.connect(this.masterGain!)
+
+    // Start
+    this.isochronicOsc.start()
+    this.isochronicLFO.start()
+
+    this.state.isochronicEnabled = true
+    this.emitStateChange()
+
+    console.log(`AudioManager: Started isochronic tone - ${frequency}Hz @ ${pulseRate}Hz pulse`)
+  }
+
+  /**
+   * Start preset isochronic tone
+   */
+  async startIsochronicPreset(preset: keyof typeof ISOCHRONIC_CONFIGS): Promise<void> {
+    const config = ISOCHRONIC_CONFIGS[preset]
+    await this.startIsochronicTone(config.frequency, config.pulseRate, config.dutyCycle)
+  }
+
+  /**
+   * Stop isochronic tone
+   */
+  stopIsochronicTone(): void {
+    if (this.isochronicGain && this.audioContext) {
+      this.isochronicGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.3)
+    }
+
+    setTimeout(() => {
+      this.isochronicOsc?.stop()
+      this.isochronicLFO?.stop()
+      this.isochronicOsc = null
+      this.isochronicGain = null
+      this.isochronicLFO = null
+    }, 400)
+
+    this.state.isochronicEnabled = false
+    this.emitStateChange()
+  }
+
+  /**
+   * Set isochronic tone volume
+   */
+  setIsochronicVolume(volume: number): void {
+    this.isochronicVolume = Math.max(0, Math.min(1, volume))
+  }
+
+  // ============ GUNA-BASED PRESETS ============
+
+  /**
+   * Set audio state based on Gita's three Gunas
+   *
+   * From Bhagavad Gita Chapter 14:
+   * - Sattva: Purity, clarity, wisdom
+   * - Rajas: Activity, passion, energy
+   * - Tamas: Rest, stillness, grounding
+   */
+  async setGunaState(guna: GunaState): Promise<void> {
+    this.state.currentGuna = guna
+
+    switch (guna) {
+      case 'sattva':
+        // Pure consciousness - clarity and wisdom
+        await this.startBinauralBeats('sattva')
+        await this.playSolfeggioFrequency('mi_528')
+        break
+
+      case 'rajas':
+        // Active energy - action and focus
+        await this.startBinauralBeats('rajas')
+        await this.startActivitySoundscape('focus')
+        break
+
+      case 'tamas':
+        // Deep rest - stillness and restoration
+        await this.startBinauralBeats('tamas')
+        await this.startActivitySoundscape('sleep')
+        break
+    }
+
+    this.emitStateChange()
+    console.log(`AudioManager: Set Guna state to ${guna} based on BG Chapter 14`)
+  }
+
   // ============ Master Controls ============
 
   /**
@@ -1052,6 +2223,10 @@ class AudioManager {
   stopAll(): void {
     this.stopBinauralBeats()
     this.stopAmbientSoundscape()
+    this.stopActivitySoundscape()
+    this.stopSolfeggioFrequency()
+    this.stopChakraFrequency()
+    this.stopIsochronicTone()
   }
 
   /**
@@ -1176,6 +2351,92 @@ export function playOm(): void {
 
 export function playSingingBowl(): void {
   audioManager.playUISound('singing_bowl')
+}
+
+// ============ Gita-Based Functions ============
+
+/**
+ * Start activity-optimized soundscape
+ */
+export async function startActivitySoundscape(activity: ActivitySoundscape): Promise<void> {
+  await audioManager.startActivitySoundscape(activity)
+}
+
+/**
+ * Stop activity soundscape
+ */
+export function stopActivitySoundscape(): void {
+  audioManager.stopActivitySoundscape()
+}
+
+/**
+ * Play solfeggio healing frequency
+ */
+export async function playSolfeggioFrequency(solfeggio: SolfeggioFrequency, duration?: number): Promise<void> {
+  await audioManager.playSolfeggioFrequency(solfeggio, duration)
+}
+
+/**
+ * Stop solfeggio frequency
+ */
+export function stopSolfeggioFrequency(): void {
+  audioManager.stopSolfeggioFrequency()
+}
+
+/**
+ * Play chakra alignment frequency
+ */
+export async function playChakraFrequency(chakra: ChakraFrequency, withBinaural = true): Promise<void> {
+  await audioManager.playChakraFrequency(chakra, withBinaural)
+}
+
+/**
+ * Stop chakra frequency
+ */
+export function stopChakraFrequency(): void {
+  audioManager.stopChakraFrequency()
+}
+
+/**
+ * Play full chakra journey
+ */
+export async function playChakraJourney(durationPerChakra = 60): Promise<void> {
+  await audioManager.playChakraJourney(durationPerChakra)
+}
+
+/**
+ * Start isochronic tone
+ */
+export async function startIsochronicTone(
+  frequency: number,
+  pulseRate: number,
+  dutyCycle?: number
+): Promise<void> {
+  await audioManager.startIsochronicTone(frequency, pulseRate, dutyCycle)
+}
+
+/**
+ * Stop isochronic tone
+ */
+export function stopIsochronicTone(): void {
+  audioManager.stopIsochronicTone()
+}
+
+/**
+ * Set Guna state (Sattva, Rajas, Tamas)
+ */
+export async function setGunaState(guna: GunaState): Promise<void> {
+  await audioManager.setGunaState(guna)
+}
+
+// ============ Config Exports ============
+
+export {
+  SOLFEGGIO_CONFIGS,
+  CHAKRA_CONFIGS,
+  ACTIVITY_CONFIGS,
+  BRAINWAVE_CONFIGS,
+  ISOCHRONIC_CONFIGS
 }
 
 export default audioManager

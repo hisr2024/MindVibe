@@ -3,17 +3,28 @@
 /**
  * Global Audio Context Provider
  *
+ * ॐ श्री गणेशाय नमः
+ *
  * Provides audio functionality throughout the entire MindVibe app:
  * - UI sound effects (clicks, toggles, notifications)
  * - Binaural beats and brainwave entrainment
+ * - Solfeggio healing frequencies (174-963 Hz)
+ * - Chakra alignment frequencies
+ * - Gita-based Guna states (Sattva, Rajas, Tamas)
+ * - Activity soundscapes (Sleep, Meditation, Reading, Focus, Listening)
+ * - Isochronic tones for enhanced entrainment
  * - Ambient soundscapes
  * - Meditation sounds (bells, gongs, singing bowls)
  * - Haptic feedback
  *
+ * Based on Bhagavad Gita principles for spiritual well-being
+ *
  * Usage:
  *   import { useAudio } from '@/contexts/AudioContext'
- *   const { playSound, startBinaural } = useAudio()
+ *   const { playSound, startBinaural, startActivity, playChakra } = useAudio()
  *   playSound('click')
+ *   startActivity('meditation')
+ *   playChakra('anahata')
  */
 
 import React, {
@@ -30,11 +41,25 @@ import {
   type BrainwavePreset,
   type AmbientSoundscape,
   type ConsciousnessLayer,
-  type AudioManagerState
+  type AudioManagerState,
+  type ActivitySoundscape,
+  type SolfeggioFrequency,
+  type ChakraFrequency,
+  type GunaState
 } from '@/utils/audio/AudioManager'
 
 // Re-export types for consumers
-export type { UISound, BrainwavePreset, AmbientSoundscape, ConsciousnessLayer, AudioManagerState }
+export type {
+  UISound,
+  BrainwavePreset,
+  AmbientSoundscape,
+  ConsciousnessLayer,
+  AudioManagerState,
+  ActivitySoundscape,
+  SolfeggioFrequency,
+  ChakraFrequency,
+  GunaState
+}
 
 // ============ Types ============
 
@@ -58,6 +83,28 @@ interface AudioContextValue {
   startAmbient: (soundscape: AmbientSoundscape) => Promise<void>
   stopAmbient: () => void
   setAmbientVolume: (volume: number) => void
+
+  // Gita-Based Activity Soundscapes
+  startActivity: (activity: ActivitySoundscape) => Promise<void>
+  stopActivity: () => void
+  setActivityVolume: (volume: number) => void
+
+  // Solfeggio Frequencies
+  playSolfeggio: (frequency: SolfeggioFrequency, duration?: number) => Promise<void>
+  stopSolfeggio: () => void
+
+  // Chakra Frequencies
+  playChakra: (chakra: ChakraFrequency, withBinaural?: boolean) => Promise<void>
+  stopChakra: () => void
+  playChakraJourney: (durationPerChakra?: number) => Promise<void>
+
+  // Isochronic Tones
+  startIsochronic: (frequency: number, pulseRate: number, dutyCycle?: number) => Promise<void>
+  stopIsochronic: () => void
+  setIsochronicVolume: (volume: number) => void
+
+  // Guna States (Gita Chapter 14)
+  setGuna: (guna: GunaState) => Promise<void>
 
   // Master Controls
   setMasterVolume: (volume: number) => void
@@ -119,9 +166,14 @@ export function AudioProvider({
     binauralEnabled: false,
     spatialEnabled: false,
     ambientEnabled: false,
+    activityEnabled: false,
+    isochronicEnabled: false,
     currentBrainwave: null,
     currentAmbient: null,
-    currentSpatialScene: null
+    currentSpatialScene: null,
+    currentActivity: null,
+    currentChakra: null,
+    currentGuna: null
   })
   const [isReady, setIsReady] = useState(false)
 
@@ -200,6 +252,64 @@ export function AudioProvider({
     audioManager.setAmbientVolume(volume)
   }, [])
 
+  // ============ Gita-Based Activity Soundscapes ============
+
+  const startActivity = useCallback(async (activity: ActivitySoundscape) => {
+    await audioManager.startActivitySoundscape(activity)
+  }, [])
+
+  const stopActivity = useCallback(() => {
+    audioManager.stopActivitySoundscape()
+  }, [])
+
+  const setActivityVolume = useCallback((volume: number) => {
+    audioManager.setActivityVolume(volume)
+  }, [])
+
+  // ============ Solfeggio Frequencies ============
+
+  const playSolfeggio = useCallback(async (frequency: SolfeggioFrequency, duration?: number) => {
+    await audioManager.playSolfeggioFrequency(frequency, duration)
+  }, [])
+
+  const stopSolfeggio = useCallback(() => {
+    audioManager.stopSolfeggioFrequency()
+  }, [])
+
+  // ============ Chakra Frequencies ============
+
+  const playChakra = useCallback(async (chakra: ChakraFrequency, withBinaural = true) => {
+    await audioManager.playChakraFrequency(chakra, withBinaural)
+  }, [])
+
+  const stopChakra = useCallback(() => {
+    audioManager.stopChakraFrequency()
+  }, [])
+
+  const playChakraJourney = useCallback(async (durationPerChakra = 60) => {
+    await audioManager.playChakraJourney(durationPerChakra)
+  }, [])
+
+  // ============ Isochronic Tones ============
+
+  const startIsochronic = useCallback(async (frequency: number, pulseRate: number, dutyCycle?: number) => {
+    await audioManager.startIsochronicTone(frequency, pulseRate, dutyCycle)
+  }, [])
+
+  const stopIsochronic = useCallback(() => {
+    audioManager.stopIsochronicTone()
+  }, [])
+
+  const setIsochronicVolume = useCallback((volume: number) => {
+    audioManager.setIsochronicVolume(volume)
+  }, [])
+
+  // ============ Guna States (Gita Chapter 14) ============
+
+  const setGuna = useCallback(async (guna: GunaState) => {
+    await audioManager.setGunaState(guna)
+  }, [])
+
   // ============ Master Controls ============
 
   const setMasterVolume = useCallback((volume: number) => {
@@ -256,6 +366,28 @@ export function AudioProvider({
     stopAmbient,
     setAmbientVolume,
 
+    // Gita-Based Activity Soundscapes
+    startActivity,
+    stopActivity,
+    setActivityVolume,
+
+    // Solfeggio Frequencies
+    playSolfeggio,
+    stopSolfeggio,
+
+    // Chakra Frequencies
+    playChakra,
+    stopChakra,
+    playChakraJourney,
+
+    // Isochronic Tones
+    startIsochronic,
+    stopIsochronic,
+    setIsochronicVolume,
+
+    // Guna States
+    setGuna,
+
     setMasterVolume,
     stopAll,
 
@@ -307,9 +439,14 @@ export function useAudio(): AudioContextValue {
         binauralEnabled: false,
         spatialEnabled: false,
         ambientEnabled: false,
+        activityEnabled: false,
+        isochronicEnabled: false,
         currentBrainwave: null,
         currentAmbient: null,
-        currentSpatialScene: null
+        currentSpatialScene: null,
+        currentActivity: null,
+        currentChakra: null,
+        currentGuna: null
       },
       isInitialized: false,
       isReady: false,
@@ -322,6 +459,23 @@ export function useAudio(): AudioContextValue {
       startAmbient: async () => {},
       stopAmbient: () => {},
       setAmbientVolume: () => {},
+      // Gita-Based Activity Soundscapes
+      startActivity: async () => {},
+      stopActivity: () => {},
+      setActivityVolume: () => {},
+      // Solfeggio Frequencies
+      playSolfeggio: async () => {},
+      stopSolfeggio: () => {},
+      // Chakra Frequencies
+      playChakra: async () => {},
+      stopChakra: () => {},
+      playChakraJourney: async () => {},
+      // Isochronic Tones
+      startIsochronic: async () => {},
+      stopIsochronic: () => {},
+      setIsochronicVolume: () => {},
+      // Guna States
+      setGuna: async () => {},
       setMasterVolume: () => {},
       stopAll: () => {},
       playMeditationStart: () => {},
@@ -521,6 +675,218 @@ export function useAmbientSoundscape(soundscape: AmbientSoundscape | null, autoS
     currentSoundscape: state.currentAmbient,
     start: startAmbient,
     stop: stopAmbient
+  }
+}
+
+// ============ Gita-Based Hooks ============
+
+/**
+ * Hook for activity soundscapes with auto-cleanup
+ *
+ * Usage:
+ *   const { isPlaying } = useActivitySoundscape('meditation', true)
+ */
+export function useActivitySoundscape(activity: ActivitySoundscape | null, autoStart = false) {
+  const { startActivity, stopActivity, state } = useAudio()
+
+  useEffect(() => {
+    if (autoStart && activity) {
+      startActivity(activity)
+    }
+
+    return () => {
+      if (autoStart && state.activityEnabled) {
+        stopActivity()
+      }
+    }
+  }, [autoStart, activity, startActivity, stopActivity, state.activityEnabled])
+
+  return {
+    isPlaying: state.activityEnabled,
+    currentActivity: state.currentActivity,
+    start: startActivity,
+    stop: stopActivity
+  }
+}
+
+/**
+ * Hook for chakra frequencies with auto-cleanup
+ *
+ * Usage:
+ *   const { isPlaying } = useChakraFrequency('anahata', true)
+ */
+export function useChakraFrequency(chakra: ChakraFrequency | null, autoStart = false) {
+  const { playChakra, stopChakra, state } = useAudio()
+
+  useEffect(() => {
+    if (autoStart && chakra) {
+      playChakra(chakra)
+    }
+
+    return () => {
+      if (autoStart && state.currentChakra) {
+        stopChakra()
+      }
+    }
+  }, [autoStart, chakra, playChakra, stopChakra, state.currentChakra])
+
+  return {
+    currentChakra: state.currentChakra,
+    play: playChakra,
+    stop: stopChakra
+  }
+}
+
+/**
+ * Hook for Guna states
+ *
+ * Usage:
+ *   const { setGuna, currentGuna } = useGunaState()
+ *   setGuna('sattva') // Pure consciousness
+ */
+export function useGunaState() {
+  const { setGuna, state } = useAudio()
+
+  return {
+    currentGuna: state.currentGuna,
+    setGuna,
+    setSattva: useCallback(() => setGuna('sattva'), [setGuna]),
+    setRajas: useCallback(() => setGuna('rajas'), [setGuna]),
+    setTamas: useCallback(() => setGuna('tamas'), [setGuna])
+  }
+}
+
+/**
+ * Hook for sleep mode - optimized for deep restorative sleep
+ *
+ * Based on Bhagavad Gita 6.17:
+ * "युक्तस्वप्नावबोधस्य योगो भवति दुःखहा"
+ * "Yoga destroys sorrow for one of regulated sleep"
+ */
+export function useSleepMode(autoStart = false) {
+  const { startActivity, stopActivity, state, setGuna } = useAudio()
+
+  useEffect(() => {
+    if (autoStart) {
+      startActivity('sleep')
+    }
+
+    return () => {
+      if (autoStart && state.activityEnabled) {
+        stopActivity()
+      }
+    }
+  }, [autoStart, startActivity, stopActivity, state.activityEnabled])
+
+  const startSleep = useCallback(async () => {
+    await setGuna('tamas')
+    await startActivity('sleep')
+  }, [setGuna, startActivity])
+
+  return {
+    isPlaying: state.currentActivity === 'sleep',
+    start: startSleep,
+    stop: stopActivity
+  }
+}
+
+/**
+ * Hook for meditation mode - deep dhyana practice
+ *
+ * Based on Bhagavad Gita Chapter 6 - Dhyana Yoga
+ */
+export function useMeditationMode(autoStart = false) {
+  const { startActivity, stopActivity, state, playSolfeggio } = useAudio()
+
+  useEffect(() => {
+    if (autoStart) {
+      startActivity('meditation')
+    }
+
+    return () => {
+      if (autoStart && state.activityEnabled) {
+        stopActivity()
+      }
+    }
+  }, [autoStart, startActivity, stopActivity, state.activityEnabled])
+
+  const startMeditation = useCallback(async () => {
+    await playSolfeggio('mi_528')  // Heart healing frequency
+    await startActivity('meditation')
+  }, [playSolfeggio, startActivity])
+
+  return {
+    isPlaying: state.currentActivity === 'meditation',
+    start: startMeditation,
+    stop: stopActivity
+  }
+}
+
+/**
+ * Hook for focus mode - karma yoga (action with awareness)
+ *
+ * Based on Bhagavad Gita 2.48:
+ * "योगस्थः कुरु कर्माणि"
+ * "Established in yoga, perform action"
+ */
+export function useFocusMode(autoStart = false) {
+  const { startActivity, stopActivity, state, setGuna } = useAudio()
+
+  useEffect(() => {
+    if (autoStart) {
+      startActivity('focus')
+    }
+
+    return () => {
+      if (autoStart && state.activityEnabled) {
+        stopActivity()
+      }
+    }
+  }, [autoStart, startActivity, stopActivity, state.activityEnabled])
+
+  const startFocus = useCallback(async () => {
+    await setGuna('rajas')  // Active energy state
+    await startActivity('focus')
+  }, [setGuna, startActivity])
+
+  return {
+    isPlaying: state.currentActivity === 'focus',
+    start: startFocus,
+    stop: stopActivity
+  }
+}
+
+/**
+ * Hook for reading/study mode - jnana yoga (wisdom)
+ *
+ * Based on Bhagavad Gita 4.38:
+ * "न हि ज्ञानेन सदृशं पवित्रमिह विद्यते"
+ * "Nothing purifies like knowledge"
+ */
+export function useStudyMode(autoStart = false) {
+  const { startActivity, stopActivity, state, playSolfeggio } = useAudio()
+
+  useEffect(() => {
+    if (autoStart) {
+      startActivity('reading')
+    }
+
+    return () => {
+      if (autoStart && state.activityEnabled) {
+        stopActivity()
+      }
+    }
+  }, [autoStart, startActivity, stopActivity, state.activityEnabled])
+
+  const startStudy = useCallback(async () => {
+    await playSolfeggio('la_852')  // Third eye - intuition
+    await startActivity('reading')
+  }, [playSolfeggio, startActivity])
+
+  return {
+    isPlaying: state.currentActivity === 'reading',
+    start: startStudy,
+    stop: stopActivity
   }
 }
 
