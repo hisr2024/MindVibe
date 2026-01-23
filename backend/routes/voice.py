@@ -331,17 +331,39 @@ async def batch_download_verses(
 
 @router.get("/settings", response_model=VoiceSettingsResponse)
 async def get_voice_settings(
-    user_id: str = Depends(get_user_id)
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
 ) -> VoiceSettingsResponse:
     """
     Get user's voice settings
 
     Returns current voice preferences and supported languages.
     """
-    # TODO: Load from database user_preferences table
-    # For now, return defaults
+    from sqlalchemy import select
+    from backend.models import UserVoicePreferences
+
     tts_service = get_tts_service()
 
+    # Load from database
+    result = await db.execute(
+        select(UserVoicePreferences).where(UserVoicePreferences.user_id == user_id)
+    )
+    prefs = result.scalar_one_or_none()
+
+    if prefs:
+        return VoiceSettingsResponse(
+            settings=VoiceSettings(
+                enabled=prefs.voice_enabled,
+                auto_play=prefs.auto_play_enabled,
+                speed=float(prefs.speaking_rate),
+                voice_gender=prefs.preferred_voice_gender,
+                offline_download=prefs.offline_enabled,
+                download_quality=prefs.audio_quality
+            ),
+            supported_languages=tts_service.get_supported_languages()
+        )
+
+    # Return defaults if no preferences exist
     return VoiceSettingsResponse(
         settings=VoiceSettings(
             enabled=True,
@@ -366,10 +388,41 @@ async def update_voice_settings(
 
     Stores preferences for future sessions.
     """
+    from sqlalchemy import select
+    from backend.models import UserVoicePreferences
+    from datetime import datetime
+
     logger.info(f"Updating voice settings for user {user_id}")
 
-    # TODO: Store in database user_preferences table
-    # For now, just acknowledge
+    # Check if preferences exist
+    result = await db.execute(
+        select(UserVoicePreferences).where(UserVoicePreferences.user_id == user_id)
+    )
+    prefs = result.scalar_one_or_none()
+
+    if prefs:
+        # Update existing preferences
+        prefs.voice_enabled = payload.enabled
+        prefs.auto_play_enabled = payload.auto_play
+        prefs.speaking_rate = payload.speed
+        prefs.preferred_voice_gender = payload.voice_gender
+        prefs.offline_enabled = payload.offline_download
+        prefs.audio_quality = payload.download_quality
+        prefs.updated_at = datetime.utcnow()
+    else:
+        # Create new preferences
+        prefs = UserVoicePreferences(
+            user_id=user_id,
+            voice_enabled=payload.enabled,
+            auto_play_enabled=payload.auto_play,
+            speaking_rate=payload.speed,
+            preferred_voice_gender=payload.voice_gender,
+            offline_enabled=payload.offline_download,
+            audio_quality=payload.download_quality,
+        )
+        db.add(prefs)
+
+    await db.commit()
 
     return {
         "status": "success",
@@ -542,3 +595,520 @@ async def process_voice_query(
             concern="general",
             confidence=0.0
         )
+
+
+# ===== Enhanced Voice Settings Endpoints =====
+
+class EnhancedVoiceSettings(BaseModel):
+    """Enhanced voice settings with all options"""
+    # Core settings
+    enabled: bool = True
+    auto_play: bool = False
+    speed: float = Field(0.9, ge=0.5, le=2.0)
+    pitch: float = Field(0.0, ge=-20.0, le=20.0)
+    voice_gender: Literal["male", "female", "neutral"] = "female"
+    voice_type: Literal["calm", "wisdom", "friendly"] = "friendly"
+
+    # Language
+    preferred_language: str = "en"
+    secondary_language: Optional[str] = None
+    auto_detect_language: bool = True
+
+    # Wake word
+    wake_word_enabled: bool = True
+    custom_wake_word: str = "Hey KIAAN"
+
+    # Quality
+    audio_quality: Literal["low", "medium", "high", "ultra"] = "high"
+
+    # Offline
+    offline_enabled: bool = False
+
+    # Enhancements
+    binaural_beats_enabled: bool = False
+    binaural_frequency: str = "alpha"
+    spatial_audio_enabled: bool = False
+    breathing_sync_enabled: bool = False
+    ambient_sounds_enabled: bool = False
+    ambient_sound_type: str = "nature"
+
+    # Accessibility
+    haptic_feedback: bool = True
+
+
+@router.get("/settings/enhanced")
+async def get_enhanced_voice_settings(
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Get complete voice settings with all enhancements."""
+    from sqlalchemy import select
+    from backend.models import UserVoicePreferences
+
+    result = await db.execute(
+        select(UserVoicePreferences).where(UserVoicePreferences.user_id == user_id)
+    )
+    prefs = result.scalar_one_or_none()
+
+    tts_service = get_tts_service()
+
+    if prefs:
+        return {
+            "settings": {
+                "enabled": prefs.voice_enabled,
+                "auto_play": prefs.auto_play_enabled,
+                "speed": float(prefs.speaking_rate),
+                "pitch": float(prefs.voice_pitch),
+                "voice_gender": prefs.preferred_voice_gender,
+                "voice_type": prefs.preferred_voice_type,
+                "preferred_language": prefs.preferred_language,
+                "secondary_language": prefs.secondary_language,
+                "auto_detect_language": prefs.auto_detect_language,
+                "wake_word_enabled": prefs.wake_word_enabled,
+                "custom_wake_word": prefs.custom_wake_word,
+                "audio_quality": prefs.audio_quality,
+                "offline_enabled": prefs.offline_enabled,
+                "offline_verses_downloaded": prefs.offline_verses_downloaded,
+                "binaural_beats_enabled": prefs.binaural_beats_enabled,
+                "binaural_frequency": prefs.binaural_frequency,
+                "spatial_audio_enabled": prefs.spatial_audio_enabled,
+                "breathing_sync_enabled": prefs.breathing_sync_enabled,
+                "ambient_sounds_enabled": prefs.ambient_sounds_enabled,
+                "ambient_sound_type": prefs.ambient_sound_type,
+                "haptic_feedback": prefs.haptic_feedback,
+            },
+            "supported_languages": tts_service.get_supported_languages(),
+            "voice_types": ["calm", "wisdom", "friendly"],
+            "audio_qualities": ["low", "medium", "high", "ultra"],
+            "binaural_frequencies": ["delta", "theta", "alpha", "beta", "gamma"],
+            "ambient_sounds": ["nature", "rain", "ocean", "forest", "fire", "wind"],
+        }
+
+    # Return defaults
+    return {
+        "settings": EnhancedVoiceSettings().dict(),
+        "supported_languages": tts_service.get_supported_languages(),
+        "voice_types": ["calm", "wisdom", "friendly"],
+        "audio_qualities": ["low", "medium", "high", "ultra"],
+        "binaural_frequencies": ["delta", "theta", "alpha", "beta", "gamma"],
+        "ambient_sounds": ["nature", "rain", "ocean", "forest", "fire", "wind"],
+    }
+
+
+@router.put("/settings/enhanced")
+async def update_enhanced_voice_settings(
+    payload: EnhancedVoiceSettings,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Update complete voice settings with all enhancements."""
+    from sqlalchemy import select
+    from backend.models import UserVoicePreferences
+    from datetime import datetime
+
+    logger.info(f"Updating enhanced voice settings for user {user_id}")
+
+    result = await db.execute(
+        select(UserVoicePreferences).where(UserVoicePreferences.user_id == user_id)
+    )
+    prefs = result.scalar_one_or_none()
+
+    if prefs:
+        # Update all fields
+        prefs.voice_enabled = payload.enabled
+        prefs.auto_play_enabled = payload.auto_play
+        prefs.speaking_rate = payload.speed
+        prefs.voice_pitch = payload.pitch
+        prefs.preferred_voice_gender = payload.voice_gender
+        prefs.preferred_voice_type = payload.voice_type
+        prefs.preferred_language = payload.preferred_language
+        prefs.secondary_language = payload.secondary_language
+        prefs.auto_detect_language = payload.auto_detect_language
+        prefs.wake_word_enabled = payload.wake_word_enabled
+        prefs.custom_wake_word = payload.custom_wake_word
+        prefs.audio_quality = payload.audio_quality
+        prefs.offline_enabled = payload.offline_enabled
+        prefs.binaural_beats_enabled = payload.binaural_beats_enabled
+        prefs.binaural_frequency = payload.binaural_frequency
+        prefs.spatial_audio_enabled = payload.spatial_audio_enabled
+        prefs.breathing_sync_enabled = payload.breathing_sync_enabled
+        prefs.ambient_sounds_enabled = payload.ambient_sounds_enabled
+        prefs.ambient_sound_type = payload.ambient_sound_type
+        prefs.haptic_feedback = payload.haptic_feedback
+        prefs.updated_at = datetime.utcnow()
+    else:
+        prefs = UserVoicePreferences(
+            user_id=user_id,
+            voice_enabled=payload.enabled,
+            auto_play_enabled=payload.auto_play,
+            speaking_rate=payload.speed,
+            voice_pitch=payload.pitch,
+            preferred_voice_gender=payload.voice_gender,
+            preferred_voice_type=payload.voice_type,
+            preferred_language=payload.preferred_language,
+            secondary_language=payload.secondary_language,
+            auto_detect_language=payload.auto_detect_language,
+            wake_word_enabled=payload.wake_word_enabled,
+            custom_wake_word=payload.custom_wake_word,
+            audio_quality=payload.audio_quality,
+            offline_enabled=payload.offline_enabled,
+            binaural_beats_enabled=payload.binaural_beats_enabled,
+            binaural_frequency=payload.binaural_frequency,
+            spatial_audio_enabled=payload.spatial_audio_enabled,
+            breathing_sync_enabled=payload.breathing_sync_enabled,
+            ambient_sounds_enabled=payload.ambient_sounds_enabled,
+            ambient_sound_type=payload.ambient_sound_type,
+            haptic_feedback=payload.haptic_feedback,
+        )
+        db.add(prefs)
+
+    await db.commit()
+
+    return {
+        "status": "success",
+        "message": "Enhanced voice settings updated",
+    }
+
+
+# ===== Voice Conversation History =====
+
+@router.get("/history")
+async def get_voice_history(
+    limit: int = 50,
+    offset: int = 0,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Get user's voice conversation history."""
+    from backend.services.voice_analytics_service import get_voice_analytics_service
+
+    analytics_service = get_voice_analytics_service(db)
+    history = await analytics_service.get_conversation_history(
+        user_id=user_id,
+        limit=limit,
+        offset=offset
+    )
+
+    return {
+        "conversations": history,
+        "count": len(history),
+        "limit": limit,
+        "offset": offset
+    }
+
+
+@router.post("/history/{conversation_id}/feedback")
+async def submit_conversation_feedback(
+    conversation_id: str,
+    rating: Optional[int] = None,
+    feedback: Optional[str] = None,
+    was_helpful: Optional[bool] = None,
+    verses_helpful: Optional[bool] = None,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Submit feedback for a voice conversation."""
+    from backend.services.voice_analytics_service import get_voice_analytics_service
+
+    analytics_service = get_voice_analytics_service(db)
+    conversation = await analytics_service.update_conversation_feedback(
+        conversation_id=conversation_id,
+        user_rating=rating,
+        user_feedback=feedback,
+        was_helpful=was_helpful,
+        verses_helpful=verses_helpful
+    )
+
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    return {
+        "status": "success",
+        "message": "Feedback submitted"
+    }
+
+
+# ===== Voice Enhancement Sessions =====
+
+class EnhancementSessionRequest(BaseModel):
+    """Request to start an enhancement session."""
+    session_type: Literal["binaural", "spatial", "breathing", "ambient", "sleep", "meditation"]
+    config: dict = Field(default_factory=dict)
+    binaural_frequency: Optional[str] = None
+    breathing_pattern: Optional[str] = None
+    ambient_type: Optional[str] = None
+    ambient_volume: Optional[float] = None
+
+
+@router.post("/enhancement/start")
+async def start_enhancement_session(
+    payload: EnhancementSessionRequest,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Start a voice enhancement session."""
+    from backend.services.voice_analytics_service import get_voice_analytics_service
+
+    analytics_service = get_voice_analytics_service(db)
+    session = await analytics_service.start_enhancement_session(
+        user_id=user_id,
+        session_type=payload.session_type,
+        enhancement_config=payload.config,
+        binaural_frequency=payload.binaural_frequency,
+        breathing_pattern=payload.breathing_pattern,
+        ambient_type=payload.ambient_type,
+        ambient_volume=payload.ambient_volume,
+    )
+
+    return {
+        "session_id": session.id,
+        "session_type": session.session_type,
+        "started_at": session.started_at.isoformat()
+    }
+
+
+@router.post("/enhancement/{session_id}/end")
+async def end_enhancement_session(
+    session_id: str,
+    duration_seconds: int,
+    completed: bool = True,
+    effectiveness_rating: Optional[int] = None,
+    breath_count: Optional[int] = None,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """End a voice enhancement session."""
+    from backend.services.voice_analytics_service import get_voice_analytics_service
+
+    analytics_service = get_voice_analytics_service(db)
+    session = await analytics_service.end_enhancement_session(
+        session_id=session_id,
+        duration_seconds=duration_seconds,
+        completed=completed,
+        effectiveness_rating=effectiveness_rating,
+        breath_count=breath_count
+    )
+
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    return {
+        "status": "success",
+        "session_id": session.id,
+        "duration_seconds": session.duration_seconds,
+        "completed": session.completed
+    }
+
+
+# ===== Daily Check-in =====
+
+class DailyCheckinRequest(BaseModel):
+    """Daily voice check-in request."""
+    is_morning: bool = True
+    mood: Optional[str] = None
+    energy_level: Optional[int] = Field(None, ge=1, le=10)
+    stress_level: Optional[int] = Field(None, ge=1, le=10)
+    detected_emotions: Optional[dict] = None
+    voice_sentiment_score: Optional[float] = None
+    affirmation_played: Optional[str] = None
+    affirmation_resonated: Optional[bool] = None
+
+
+@router.post("/checkin")
+async def submit_daily_checkin(
+    payload: DailyCheckinRequest,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Submit a daily voice check-in."""
+    from backend.services.voice_analytics_service import get_voice_analytics_service
+
+    analytics_service = get_voice_analytics_service(db)
+    checkin = await analytics_service.log_daily_checkin(
+        user_id=user_id,
+        is_morning=payload.is_morning,
+        mood=payload.mood,
+        energy_level=payload.energy_level,
+        stress_level=payload.stress_level,
+        detected_emotions=payload.detected_emotions,
+        voice_sentiment_score=payload.voice_sentiment_score,
+        affirmation_played=payload.affirmation_played,
+        affirmation_resonated=payload.affirmation_resonated,
+    )
+
+    return {
+        "status": "success",
+        "checkin_date": str(checkin.checkin_date),
+        "type": "morning" if payload.is_morning else "evening"
+    }
+
+
+# ===== Wake Word Events =====
+
+class WakeWordEventRequest(BaseModel):
+    """Wake word detection event."""
+    wake_word_detected: str
+    session_id: Optional[str] = None
+    detection_confidence: Optional[float] = None
+    is_valid_activation: bool = True
+    ambient_noise_level: Optional[float] = None
+    device_type: Optional[str] = None
+    browser_type: Optional[str] = None
+
+
+@router.post("/wake-word/event")
+async def log_wake_word_event(
+    payload: WakeWordEventRequest,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Log a wake word detection event."""
+    from backend.services.voice_analytics_service import get_voice_analytics_service
+
+    analytics_service = get_voice_analytics_service(db)
+    event = await analytics_service.log_wake_word_event(
+        wake_word_detected=payload.wake_word_detected,
+        user_id=user_id,
+        session_id=payload.session_id,
+        detection_confidence=payload.detection_confidence,
+        is_valid_activation=payload.is_valid_activation,
+        ambient_noise_level=payload.ambient_noise_level,
+        device_type=payload.device_type,
+        browser_type=payload.browser_type,
+    )
+
+    return {
+        "status": "success",
+        "event_id": event.id
+    }
+
+
+# ===== Enhanced Voice Query with Logging =====
+
+class EnhancedVoiceQueryRequest(BaseModel):
+    """Enhanced voice query with full metrics."""
+    query: str = Field(..., min_length=1, max_length=2000)
+    language: str = "en"
+    history: List[dict] = Field(default_factory=list)
+    session_id: Optional[str] = None
+    mood_at_time: Optional[str] = None
+    speech_to_text_ms: Optional[int] = None
+    user_audio_duration_ms: Optional[int] = None
+
+
+@router.post("/query/enhanced")
+async def process_enhanced_voice_query(
+    payload: EnhancedVoiceQueryRequest,
+    user_id: str = Depends(get_user_id),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    Process voice query with full analytics logging.
+
+    This enhanced endpoint logs all metrics for analytics.
+    """
+    import time
+    import uuid
+    start_time = time.time()
+
+    session_id = payload.session_id or str(uuid.uuid4())
+
+    logger.info(f"Enhanced voice query from user {user_id}: {payload.query[:50]}...")
+
+    try:
+        from backend.services.kiaan_core import KIAANCore
+        from backend.services.voice_analytics_service import get_voice_analytics_service
+
+        kiaan = KIAANCore()
+        analytics_service = get_voice_analytics_service(db)
+
+        # Build conversation context
+        history_context = ""
+        if payload.history:
+            for msg in payload.history[-4:]:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                history_context += f"{role.capitalize()}: {content}\n"
+
+        full_message = payload.query
+        if history_context:
+            full_message = f"Previous conversation:\n{history_context}\n\nCurrent question: {payload.query}"
+
+        # Get KIAAN response
+        ai_start = time.time()
+        kiaan_result = await kiaan.get_kiaan_response(
+            message=full_message,
+            user_id=user_id,
+            db=db,
+            context="voice_assistant",
+            stream=False,
+            language=payload.language
+        )
+        ai_processing_ms = int((time.time() - ai_start) * 1000)
+
+        response_text = kiaan_result.get("response", "I'm here for you. How can I help?")
+
+        # Calculate TTS time estimate (actual synthesis happens on frontend)
+        tts_estimate_ms = len(response_text) * 2  # ~2ms per character estimate
+
+        total_latency = int((time.time() - start_time) * 1000)
+
+        # Extract verse data
+        verses_used = kiaan_result.get("verses_used", [])
+        verse_ids = [v.get("id") for v in verses_used if v.get("id")]
+
+        # Log conversation
+        conversation = await analytics_service.log_voice_conversation(
+            user_id=user_id,
+            session_id=session_id,
+            user_query=payload.query,
+            kiaan_response=response_text,
+            detected_intent=kiaan_result.get("intent"),
+            detected_emotion=kiaan_result.get("emotion"),
+            confidence_score=0.8 if kiaan_result.get("validation", {}).get("valid") else 0.5,
+            concern_category=kiaan_result.get("context", "general"),
+            mood_at_time=payload.mood_at_time,
+            verse_ids=verse_ids,
+            speech_to_text_ms=payload.speech_to_text_ms,
+            ai_processing_ms=ai_processing_ms,
+            text_to_speech_ms=tts_estimate_ms,
+            user_audio_duration_ms=payload.user_audio_duration_ms,
+            language_used=payload.language,
+            voice_type_used="friendly",
+        )
+
+        logger.info(f"Voice query processed in {total_latency}ms")
+
+        return {
+            "conversation_id": conversation.id,
+            "response": response_text,
+            "verses": [
+                {
+                    "id": v.get("id", ""),
+                    "chapter": v.get("chapter", 0),
+                    "verse": v.get("verse", 0),
+                    "text": v.get("text", "")
+                }
+                for v in verses_used
+            ],
+            "concern": kiaan_result.get("context", "general"),
+            "confidence": 0.8 if kiaan_result.get("validation", {}).get("valid") else 0.5,
+            "metrics": {
+                "ai_processing_ms": ai_processing_ms,
+                "total_latency_ms": total_latency,
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Enhanced voice query error: {e}")
+
+        return {
+            "conversation_id": None,
+            "response": "I'm here with you. Could you try asking that again?",
+            "verses": [],
+            "concern": "general",
+            "confidence": 0.0,
+            "metrics": {
+                "error": str(e)
+            }
+        }
