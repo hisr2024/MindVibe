@@ -371,6 +371,154 @@ const LAYER_BRAINWAVES: Record<ConsciousnessLayer, BrainwavePreset> = {
   anandamaya: 'transcendence'
 }
 
+// Soundscape layer configuration
+interface SoundscapeLayer {
+  useNoise: boolean           // Use noise buffer for natural sounds
+  filterType?: BiquadFilterType
+  filterFreq?: number
+  filterQ?: number
+  frequency?: number          // For oscillator-based sounds
+  type?: OscillatorType
+  volume: number
+  pan?: number                // -1 (left) to 1 (right)
+  modFreq?: number            // LFO modulation frequency
+  fadeIn?: number             // Fade in time in seconds
+}
+
+interface SoundscapeConfig {
+  layers: SoundscapeLayer[]
+  ambientTone?: { frequency: number; volume: number }
+}
+
+// Realistic soundscape configurations with noise-based nature sounds
+const SOUNDSCAPE_CONFIGS: Record<AmbientSoundscape, SoundscapeConfig> = {
+  rain: {
+    layers: [
+      // Gentle rain - highpass filtered noise
+      { useNoise: true, filterType: 'highpass', filterFreq: 1000, filterQ: 0.5, volume: 0.35, fadeIn: 3 },
+      // Rain texture - bandpass filtered
+      { useNoise: true, filterType: 'bandpass', filterFreq: 2500, filterQ: 1, volume: 0.15, fadeIn: 2 },
+      // Low rumble
+      { useNoise: true, filterType: 'lowpass', filterFreq: 200, filterQ: 0.5, volume: 0.1, fadeIn: 4 }
+    ]
+  },
+  ocean: {
+    layers: [
+      // Deep ocean waves - lowpass filtered
+      { useNoise: true, filterType: 'lowpass', filterFreq: 400, filterQ: 1, volume: 0.4, modFreq: 0.08, fadeIn: 4 },
+      // Wave crashes - bandpass
+      { useNoise: true, filterType: 'bandpass', filterFreq: 800, filterQ: 0.5, volume: 0.2, modFreq: 0.12, fadeIn: 3 },
+      // Foam/spray - highpass
+      { useNoise: true, filterType: 'highpass', filterFreq: 3000, filterQ: 0.3, volume: 0.08, modFreq: 0.15, fadeIn: 2 }
+    ]
+  },
+  forest: {
+    layers: [
+      // Wind through leaves
+      { useNoise: true, filterType: 'bandpass', filterFreq: 1500, filterQ: 0.5, volume: 0.2, modFreq: 0.3, fadeIn: 3 },
+      // Ambient forest tone
+      { useNoise: true, filterType: 'lowpass', filterFreq: 300, filterQ: 0.5, volume: 0.1, fadeIn: 4 },
+      // Bird-like chirps (high frequency oscillator)
+      { useNoise: false, frequency: 2000, type: 'sine', volume: 0.03, modFreq: 5, fadeIn: 2 }
+    ],
+    ambientTone: { frequency: 396, volume: 0.05 }
+  },
+  wind: {
+    layers: [
+      // Main wind - lowpass filtered
+      { useNoise: true, filterType: 'lowpass', filterFreq: 400, filterQ: 0.8, volume: 0.3, modFreq: 0.1, fadeIn: 3 },
+      // Wind gusts
+      { useNoise: true, filterType: 'bandpass', filterFreq: 600, filterQ: 0.5, volume: 0.15, modFreq: 0.2, fadeIn: 2 },
+      // High whistle
+      { useNoise: true, filterType: 'highpass', filterFreq: 2000, filterQ: 1, volume: 0.05, modFreq: 0.3, fadeIn: 2 }
+    ]
+  },
+  river: {
+    layers: [
+      // Flowing water - bandpass
+      { useNoise: true, filterType: 'bandpass', filterFreq: 2000, filterQ: 0.5, volume: 0.35, modFreq: 0.2, fadeIn: 3 },
+      // Deep current
+      { useNoise: true, filterType: 'lowpass', filterFreq: 300, filterQ: 0.5, volume: 0.15, modFreq: 0.08, fadeIn: 4 },
+      // Bubbling
+      { useNoise: true, filterType: 'bandpass', filterFreq: 3000, filterQ: 2, volume: 0.08, modFreq: 0.5, fadeIn: 2 }
+    ]
+  },
+  fire: {
+    layers: [
+      // Crackling - bandpass
+      { useNoise: true, filterType: 'bandpass', filterFreq: 1500, filterQ: 2, volume: 0.25, modFreq: 3, fadeIn: 2 },
+      // Low roar
+      { useNoise: true, filterType: 'lowpass', filterFreq: 200, filterQ: 0.5, volume: 0.15, fadeIn: 3 },
+      // Pops and snaps
+      { useNoise: true, filterType: 'highpass', filterFreq: 2500, filterQ: 1, volume: 0.1, modFreq: 5, fadeIn: 1 }
+    ]
+  },
+  birds: {
+    layers: [
+      // Background ambient
+      { useNoise: true, filterType: 'lowpass', filterFreq: 400, filterQ: 0.3, volume: 0.1, fadeIn: 3 },
+      // Bird chirps simulation
+      { useNoise: false, frequency: 2500, type: 'sine', volume: 0.04, modFreq: 8, fadeIn: 2 },
+      { useNoise: false, frequency: 3500, type: 'sine', volume: 0.03, modFreq: 12, fadeIn: 2 },
+      { useNoise: false, frequency: 4500, type: 'sine', volume: 0.02, modFreq: 6, fadeIn: 2 }
+    ]
+  },
+  night: {
+    layers: [
+      // Night ambient - very low
+      { useNoise: true, filterType: 'lowpass', filterFreq: 150, filterQ: 0.5, volume: 0.15, fadeIn: 5 },
+      // Crickets simulation
+      { useNoise: false, frequency: 4000, type: 'sine', volume: 0.02, modFreq: 10, fadeIn: 3 },
+      { useNoise: false, frequency: 4200, type: 'sine', volume: 0.015, modFreq: 12, fadeIn: 3 },
+      // Distant sounds
+      { useNoise: true, filterType: 'bandpass', filterFreq: 800, filterQ: 0.3, volume: 0.05, modFreq: 0.1, fadeIn: 4 }
+    ]
+  },
+  temple: {
+    layers: [
+      // OM frequency drone
+      { useNoise: false, frequency: 136.1, type: 'sine', volume: 0.15, fadeIn: 4 },
+      // Harmonic
+      { useNoise: false, frequency: 272.2, type: 'sine', volume: 0.08, fadeIn: 3 },
+      // Healing frequency
+      { useNoise: false, frequency: 528, type: 'sine', volume: 0.06, fadeIn: 3 }
+    ],
+    ambientTone: { frequency: 396, volume: 0.05 }
+  },
+  tibetan: {
+    layers: [
+      // Singing bowl frequencies
+      { useNoise: false, frequency: 528, type: 'sine', volume: 0.15, fadeIn: 4 },
+      { useNoise: false, frequency: 639, type: 'sine', volume: 0.1, fadeIn: 3 },
+      { useNoise: false, frequency: 741, type: 'sine', volume: 0.08, fadeIn: 3 },
+      // Subtle resonance
+      { useNoise: true, filterType: 'bandpass', filterFreq: 528, filterQ: 10, volume: 0.05, fadeIn: 5 }
+    ]
+  },
+  cosmic: {
+    layers: [
+      // Deep space drone
+      { useNoise: false, frequency: 40, type: 'sine', volume: 0.12, modFreq: 0.02, fadeIn: 5 },
+      { useNoise: false, frequency: 80, type: 'sine', volume: 0.08, modFreq: 0.03, fadeIn: 4 },
+      // Cosmic wind
+      { useNoise: true, filterType: 'lowpass', filterFreq: 100, filterQ: 0.5, volume: 0.1, modFreq: 0.05, fadeIn: 6 },
+      // Ethereal shimmer
+      { useNoise: true, filterType: 'highpass', filterFreq: 4000, filterQ: 0.5, volume: 0.03, modFreq: 0.1, fadeIn: 4 }
+    ]
+  },
+  nature: {
+    layers: [
+      // General nature ambient
+      { useNoise: true, filterType: 'lowpass', filterFreq: 300, filterQ: 0.5, volume: 0.15, fadeIn: 4 },
+      // Leaves rustling
+      { useNoise: true, filterType: 'bandpass', filterFreq: 1200, filterQ: 0.5, volume: 0.1, modFreq: 0.2, fadeIn: 3 },
+      // Distant birds
+      { useNoise: false, frequency: 2000, type: 'sine', volume: 0.02, modFreq: 4, fadeIn: 2 }
+    ],
+    ambientTone: { frequency: 396, volume: 0.03 }
+  }
+}
+
 // ============ Audio Manager Class ============
 
 class AudioManager {
@@ -387,7 +535,9 @@ class AudioManager {
 
   // Ambient soundscape nodes
   private ambientOscillators: OscillatorNode[] = []
+  private ambientSources: AudioBufferSourceNode[] = []
   private ambientGain: GainNode | null = null
+  private noiseBuffer: AudioBuffer | null = null  // For realistic nature sounds
 
   // State
   private state: AudioManagerState = {
@@ -426,6 +576,9 @@ class AudioManager {
       this.masterGain.gain.value = config?.masterVolume ?? 0.7
       this.masterGain.connect(this.audioContext.destination)
 
+      // Create noise buffer for realistic nature sounds
+      this.noiseBuffer = this.createNoiseBuffer()
+
       // Setup binaural beats infrastructure
       this.setupBinauralInfrastructure()
 
@@ -445,6 +598,28 @@ class AudioManager {
       console.error('AudioManager: Initialization failed', error)
       return false
     }
+  }
+
+  /**
+   * Create white noise buffer for nature sounds (rain, ocean, wind, etc.)
+   */
+  private createNoiseBuffer(): AudioBuffer {
+    if (!this.audioContext) throw new Error('AudioContext not initialized')
+
+    // Create 2 seconds of stereo white noise
+    const sampleRate = this.audioContext.sampleRate
+    const bufferSize = sampleRate * 2
+    const buffer = this.audioContext.createBuffer(2, bufferSize, sampleRate)
+
+    for (let channel = 0; channel < 2; channel++) {
+      const data = buffer.getChannelData(channel)
+      for (let i = 0; i < bufferSize; i++) {
+        // White noise with slight stereo variation
+        data[i] = (Math.random() * 2 - 1) * (channel === 0 ? 1 : 0.98)
+      }
+    }
+
+    return buffer
   }
 
   private setupBinauralInfrastructure(): void {
@@ -663,12 +838,12 @@ class AudioManager {
   // ============ Ambient Soundscapes ============
 
   /**
-   * Start ambient soundscape
+   * Start ambient soundscape with realistic noise-based sounds
    */
   async startAmbientSoundscape(soundscape: AmbientSoundscape): Promise<void> {
-    if (!this.audioContext || !this.ambientGain) {
+    if (!this.audioContext || !this.ambientGain || !this.noiseBuffer) {
       await this.ensureInitialized()
-      if (!this.audioContext) return
+      if (!this.audioContext || !this.noiseBuffer) return
     }
 
     await this.resume()
@@ -676,37 +851,41 @@ class AudioManager {
     // Stop existing ambient
     this.stopAmbientSoundscape()
 
-    // Create layered ambient sounds based on type
-    const layers = this.getAmbientLayers(soundscape)
+    // Get soundscape configuration
+    const config = SOUNDSCAPE_CONFIGS[soundscape]
+    const now = this.audioContext!.currentTime
 
-    layers.forEach(({ frequency, type, volume, modFreq }) => {
-      const osc = this.audioContext!.createOscillator()
-      osc.type = type
-      osc.frequency.value = frequency
-
-      const gain = this.audioContext!.createGain()
-      gain.gain.value = volume * this.ambientVolume
-
-      // Add subtle modulation for natural feel
-      if (modFreq) {
-        const lfo = this.audioContext!.createOscillator()
-        const lfoGain = this.audioContext!.createGain()
-        lfo.frequency.value = modFreq
-        lfoGain.gain.value = volume * 0.3
-        lfo.connect(lfoGain)
-        lfoGain.connect(gain.gain)
-        lfo.start()
+    // Create each layer of the soundscape
+    config.layers.forEach(layer => {
+      if (layer.useNoise) {
+        // Noise-based sound (rain, ocean, wind, etc.)
+        this.createNoiseLayer(layer, now)
+      } else {
+        // Oscillator-based sound (sacred tones, drones)
+        this.createOscillatorLayer(layer, now)
       }
-
-      osc.connect(gain)
-      gain.connect(this.ambientGain!)
-      osc.start()
-
-      this.ambientOscillators.push(osc)
     })
 
-    // Fade in
-    this.ambientGain!.gain.setTargetAtTime(this.ambientVolume, this.audioContext!.currentTime, 2)
+    // Fade in master ambient gain
+    this.ambientGain!.gain.setTargetAtTime(this.ambientVolume, now, 2)
+
+    // Add ambient tone if specified
+    const ambientTone = config.ambientTone
+    if (ambientTone) {
+      const toneOsc = this.audioContext!.createOscillator()
+      toneOsc.type = 'sine'
+      toneOsc.frequency.value = ambientTone.frequency
+
+      const toneGain = this.audioContext!.createGain()
+      toneGain.gain.setValueAtTime(0, now)
+      toneGain.gain.linearRampToValueAtTime(ambientTone.volume * this.ambientVolume, now + 4)
+
+      toneOsc.connect(toneGain)
+      toneGain.connect(this.ambientGain!)
+      toneOsc.start()
+
+      this.ambientOscillators.push(toneOsc)
+    }
 
     this.state.ambientEnabled = true
     this.state.currentAmbient = soundscape
@@ -715,76 +894,95 @@ class AudioManager {
     console.log(`AudioManager: Started ambient soundscape - ${soundscape}`)
   }
 
-  private getAmbientLayers(soundscape: AmbientSoundscape): {
-    frequency: number
-    type: OscillatorType
-    volume: number
-    modFreq?: number
-  }[] {
-    const configs: Record<AmbientSoundscape, typeof arguments[0][]> = {
-      nature: [
-        { frequency: 200, type: 'sine' as OscillatorType, volume: 0.1, modFreq: 0.1 },
-        { frequency: 400, type: 'sine' as OscillatorType, volume: 0.05, modFreq: 0.15 },
-        { frequency: 600, type: 'sine' as OscillatorType, volume: 0.03, modFreq: 0.2 }
-      ],
-      rain: [
-        { frequency: 100, type: 'sawtooth' as OscillatorType, volume: 0.02, modFreq: 0.5 },
-        { frequency: 300, type: 'triangle' as OscillatorType, volume: 0.015, modFreq: 0.7 },
-        { frequency: 800, type: 'sawtooth' as OscillatorType, volume: 0.01, modFreq: 1 }
-      ],
-      ocean: [
-        { frequency: 50, type: 'sine' as OscillatorType, volume: 0.15, modFreq: 0.05 },
-        { frequency: 100, type: 'sine' as OscillatorType, volume: 0.1, modFreq: 0.08 },
-        { frequency: 200, type: 'triangle' as OscillatorType, volume: 0.05, modFreq: 0.1 }
-      ],
-      forest: [
-        { frequency: 300, type: 'sine' as OscillatorType, volume: 0.08, modFreq: 0.2 },
-        { frequency: 500, type: 'sine' as OscillatorType, volume: 0.05, modFreq: 0.3 },
-        { frequency: 150, type: 'triangle' as OscillatorType, volume: 0.04, modFreq: 0.1 }
-      ],
-      temple: [
-        { frequency: 136.1, type: 'sine' as OscillatorType, volume: 0.12 },  // OM frequency
-        { frequency: 272.2, type: 'sine' as OscillatorType, volume: 0.08 },
-        { frequency: 528, type: 'sine' as OscillatorType, volume: 0.05 }
-      ],
-      cosmic: [
-        { frequency: 40, type: 'sine' as OscillatorType, volume: 0.1, modFreq: 0.02 },
-        { frequency: 80, type: 'sine' as OscillatorType, volume: 0.08, modFreq: 0.03 },
-        { frequency: 160, type: 'triangle' as OscillatorType, volume: 0.05, modFreq: 0.05 }
-      ],
-      fire: [
-        { frequency: 100, type: 'sawtooth' as OscillatorType, volume: 0.03, modFreq: 2 },
-        { frequency: 200, type: 'triangle' as OscillatorType, volume: 0.02, modFreq: 3 },
-        { frequency: 400, type: 'sawtooth' as OscillatorType, volume: 0.015, modFreq: 5 }
-      ],
-      wind: [
-        { frequency: 80, type: 'sine' as OscillatorType, volume: 0.08, modFreq: 0.1 },
-        { frequency: 200, type: 'triangle' as OscillatorType, volume: 0.04, modFreq: 0.2 },
-        { frequency: 500, type: 'sine' as OscillatorType, volume: 0.02, modFreq: 0.3 }
-      ],
-      river: [
-        { frequency: 150, type: 'sine' as OscillatorType, volume: 0.1, modFreq: 0.15 },
-        { frequency: 300, type: 'triangle' as OscillatorType, volume: 0.06, modFreq: 0.25 },
-        { frequency: 600, type: 'sine' as OscillatorType, volume: 0.03, modFreq: 0.35 }
-      ],
-      birds: [
-        { frequency: 800, type: 'sine' as OscillatorType, volume: 0.04, modFreq: 2 },
-        { frequency: 1200, type: 'sine' as OscillatorType, volume: 0.03, modFreq: 3 },
-        { frequency: 1600, type: 'sine' as OscillatorType, volume: 0.02, modFreq: 4 }
-      ],
-      night: [
-        { frequency: 60, type: 'sine' as OscillatorType, volume: 0.08, modFreq: 0.05 },
-        { frequency: 800, type: 'sine' as OscillatorType, volume: 0.02, modFreq: 0.5 },
-        { frequency: 1500, type: 'sine' as OscillatorType, volume: 0.01, modFreq: 1 }
-      ],
-      tibetan: [
-        { frequency: 528, type: 'sine' as OscillatorType, volume: 0.12 },
-        { frequency: 639, type: 'sine' as OscillatorType, volume: 0.08 },
-        { frequency: 741, type: 'sine' as OscillatorType, volume: 0.05 }
-      ]
+  /**
+   * Create a noise-based ambient layer (rain, ocean, wind, etc.)
+   */
+  private createNoiseLayer(layer: SoundscapeLayer, startTime: number): void {
+    if (!this.audioContext || !this.noiseBuffer || !this.ambientGain) return
+
+    // Create noise source from buffer
+    const noiseSource = this.audioContext.createBufferSource()
+    noiseSource.buffer = this.noiseBuffer
+    noiseSource.loop = true
+
+    // Create filter for shaping the noise
+    const filter = this.audioContext.createBiquadFilter()
+    filter.type = layer.filterType || 'lowpass'
+    filter.frequency.value = layer.filterFreq || 1000
+    filter.Q.value = layer.filterQ || 0.5
+
+    // Create gain node
+    const gainNode = this.audioContext.createGain()
+    const targetVolume = layer.volume * this.ambientVolume
+    const fadeIn = layer.fadeIn || 2
+    gainNode.gain.setValueAtTime(0, startTime)
+    gainNode.gain.linearRampToValueAtTime(targetVolume, startTime + fadeIn)
+
+    // Add modulation (LFO) for natural movement
+    if (layer.modFreq) {
+      const lfo = this.audioContext.createOscillator()
+      const lfoGain = this.audioContext.createGain()
+      lfo.frequency.value = layer.modFreq
+      lfoGain.gain.value = targetVolume * 0.4  // Modulation depth
+      lfo.connect(lfoGain)
+      lfoGain.connect(gainNode.gain)
+      lfo.start()
     }
 
-    return configs[soundscape] || configs.nature
+    // Add stereo panning if specified
+    if (layer.pan !== undefined && 'createStereoPanner' in this.audioContext) {
+      const panner = this.audioContext.createStereoPanner()
+      panner.pan.value = layer.pan
+      noiseSource.connect(filter)
+      filter.connect(gainNode)
+      gainNode.connect(panner)
+      panner.connect(this.ambientGain)
+    } else {
+      noiseSource.connect(filter)
+      filter.connect(gainNode)
+      gainNode.connect(this.ambientGain)
+    }
+
+    noiseSource.start()
+    this.ambientSources.push(noiseSource)
+  }
+
+  /**
+   * Create an oscillator-based ambient layer (drones, sacred tones)
+   */
+  private createOscillatorLayer(layer: SoundscapeLayer, startTime: number): void {
+    if (!this.audioContext || !this.ambientGain) return
+
+    const osc = this.audioContext.createOscillator()
+    osc.type = layer.type || 'sine'
+    osc.frequency.value = layer.frequency || 440
+
+    // Slight detuning for richer sound
+    osc.detune.value = Math.random() * 10 - 5
+
+    // Create gain node with fade in
+    const gainNode = this.audioContext.createGain()
+    const targetVolume = layer.volume * this.ambientVolume
+    const fadeIn = layer.fadeIn || 2
+    gainNode.gain.setValueAtTime(0, startTime)
+    gainNode.gain.linearRampToValueAtTime(targetVolume, startTime + fadeIn)
+
+    // Add modulation for natural movement
+    if (layer.modFreq) {
+      const lfo = this.audioContext.createOscillator()
+      const lfoGain = this.audioContext.createGain()
+      lfo.frequency.value = layer.modFreq
+      lfoGain.gain.value = layer.frequency ? layer.frequency * 0.02 : 10  // Subtle pitch modulation
+      lfo.connect(lfoGain)
+      lfoGain.connect(osc.frequency)
+      lfo.start()
+    }
+
+    osc.connect(gainNode)
+    gainNode.connect(this.ambientGain)
+    osc.start()
+
+    this.ambientOscillators.push(osc)
   }
 
   /**
@@ -796,10 +994,17 @@ class AudioManager {
     }
 
     setTimeout(() => {
+      // Stop oscillators
       this.ambientOscillators.forEach(osc => {
         try { osc.stop() } catch {}
       })
       this.ambientOscillators = []
+
+      // Stop noise sources
+      this.ambientSources.forEach(source => {
+        try { source.stop() } catch {}
+      })
+      this.ambientSources = []
     }, 1200)
 
     this.state.ambientEnabled = false
