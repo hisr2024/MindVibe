@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ToolsSheet } from './ToolsSheet'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { useAudio } from '@/contexts/AudioContext'
 
 export interface NavTab {
   id: string
@@ -168,6 +169,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
   const { t } = useLanguage()
   const { triggerHaptic } = useHapticFeedback()
+  const { playSound } = useAudio()
 
   // Get translated label for tab
   const getTabLabel = useMemo(() => {
@@ -176,18 +178,25 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
     }
   }, [t])
 
-  // Handle tab press with haptic feedback
-  const handleTabPress = useCallback((isActive: boolean) => {
+  // Handle tab press with haptic feedback AND SOUND
+  const handleTabPress = useCallback((isActive: boolean, tabId: string) => {
     if (!isActive) {
       triggerHaptic('light')
+      // Play different sounds based on tab
+      if (tabId === 'kiaan-chat') {
+        playSound('notification')  // Special sound for KIAAN
+      } else {
+        playSound('click')  // Standard navigation click
+      }
     }
-  }, [triggerHaptic])
+  }, [triggerHaptic, playSound])
 
-  // Handle tools button press
+  // Handle tools button press with sound
   const handleToolsPress = useCallback(() => {
     triggerHaptic('medium')
+    playSound('open')  // Play open sound for tools sheet
     setToolsSheetOpen(true)
-  }, [triggerHaptic])
+  }, [triggerHaptic, playSound])
 
   return (
     <>
@@ -268,7 +277,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   <Link
                     key={tab.id}
                     href={tab.href}
-                    onClick={() => handleTabPress(isActive)}
+                    onClick={() => handleTabPress(isActive, tab.id)}
                     className="relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
                     aria-current={isActive ? 'page' : undefined}
                   >
@@ -346,7 +355,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                 <Link
                   key={tab.id}
                   href={tab.href}
-                  onClick={() => handleTabPress(isActive)}
+                  onClick={() => handleTabPress(isActive, tab.id)}
                   className="relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -398,7 +407,10 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
       </motion.nav>
 
       {/* Tools Bottom Sheet */}
-      <ToolsSheet isOpen={toolsSheetOpen} onClose={() => setToolsSheetOpen(false)} />
+      <ToolsSheet isOpen={toolsSheetOpen} onClose={() => {
+        playSound('close')  // Play close sound
+        setToolsSheetOpen(false)
+      }} />
     </>
   )
 }
