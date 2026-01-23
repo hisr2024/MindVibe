@@ -16,6 +16,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
+import { VoiceEnhancementsPanel, VoiceEnhancementsMobile } from '@/components/voice/enhancements'
 
 // Types
 type QuantumDiveStage =
@@ -410,8 +411,11 @@ export default function QuantumDivePage() {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="relative z-10 px-4 py-8 max-w-4xl mx-auto">
+      {/* Main content with sidebar */}
+      <div className="relative z-10 px-4 py-8 max-w-7xl mx-auto">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-6">
+          {/* Main content */}
+          <main className="max-w-4xl mx-auto lg:mx-0">
         {/* Stage indicator */}
         <div className="text-center mb-8">
           <div className="text-sm text-white/50 mb-2">{STAGE_TITLES[stage]}</div>
@@ -708,7 +712,25 @@ export default function QuantumDivePage() {
             </div>
           </div>
         )}
-      </main>
+          </main>
+
+          {/* Desktop Sidebar - Voice Enhancements */}
+          <aside className="hidden lg:block sticky top-4 h-fit">
+            <VoiceEnhancementsPanel
+              currentLayer={selectedLayer || undefined}
+              compact
+              className="w-full"
+            />
+          </aside>
+        </div>
+
+        {/* Mobile Voice Enhancements */}
+        <div className="lg:hidden">
+          <VoiceEnhancementsMobile
+            currentLayer={selectedLayer || undefined}
+          />
+        </div>
+      </div>
 
       {/* Custom animation styles */}
       <style jsx>{`
