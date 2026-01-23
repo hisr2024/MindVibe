@@ -8,6 +8,7 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
+import { OverlayRoot } from '@/components/ui/OverlayRoot'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -48,6 +49,8 @@ export default function RootLayout({
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
         <ClientLayout>
           <Providers>
+            {/* Overlay root for Portal-based modals/sheets - must be early in tree */}
+            <OverlayRoot />
             <ServiceWorkerRegistration />
             <OfflineStatusBanner />
             {/* Fixed header navigation */}

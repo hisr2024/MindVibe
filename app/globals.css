@@ -334,12 +334,21 @@ html.light [class*="bg-slate-950"] {
 }
 
 /* =====================================================
-   Z-INDEX LAYER SYSTEM
-   - z-10: Content overlays (tooltips, popovers)
-   - z-30: Backdrop overlays
-   - z-40: Fixed header navigation (SiteNav)
-   - z-50: Mobile bottom navigation, Language selector
-   - z-60: Floating widgets (ChatFooter, modals)
+   Z-INDEX LAYER SYSTEM (Updated for Overlay Architecture)
+   ─────────────────────────────────────────────────────
+   z-[9999] - Crisis alerts, critical system modals
+   z-[100]  - Toasts, notifications
+   z-[80]   - Tooltips, popovers
+   z-[70]   - Modals, dialogs (via Portal)
+   z-[65]   - Bottom sheets, drawers (via Portal)
+   z-[60]   - Floating action buttons, chat widgets
+   z-[50]   - Mobile bottom navigation
+   z-[40]   - Fixed header navigation (SiteNav)
+   z-[30]   - Backdrop overlays
+   z-[10]   - Content overlays
+   ─────────────────────────────────────────────────────
+   IMPORTANT: All modals/sheets should use Portal component
+   to render into #overlay-root, escaping stacking contexts.
    ===================================================== */
 
 .mobile-safe-area {
@@ -1750,20 +1759,21 @@ html.light .swipe-indicator:active {
     min-height: -webkit-fill-available;
   }
 
-  /* Fix iOS bounce/overscroll for fixed elements */
-  body.mobile-viewport-fix {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
+  /*
+   * NOTE: We no longer use position: fixed on body for iOS.
+   * That approach was trapping overlays and blocking gestures.
+   * Instead, we use overflow: hidden only when scroll-locked class is applied.
+   * The scroll lock is managed by bodyScrollLock.ts utility.
+   */
+}
 
-  /* Allow main content to scroll */
-  body.mobile-viewport-fix > div {
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+/* Body scroll lock styles - applied by bodyScrollLock.ts */
+body.scroll-locked {
+  overflow: hidden !important;
+}
+
+html:has(body.scroll-locked) {
+  overflow: hidden !important;
 }
 
 /* Enhanced mobile viewport stability */
@@ -2159,5 +2169,94 @@ button:not(.no-highlight) {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =====================================================
+   OVERLAY ROOT & PORTAL SYSTEM
+   These styles ensure overlays escape stacking contexts
+   and render properly above all content.
+   ===================================================== */
+
+/* Overlay root container - renders at document.body level */
+#overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  overflow: visible;
+  /* Prevent any clipping of children */
+  contain: none;
+}
+
+/* Overlay children should be interactive */
+#overlay-root > * {
+  pointer-events: auto;
+}
+
+/* Overlay backdrop - blocks interaction with content below */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  touch-action: none;
+}
+
+/* Overlay content container - escapes parent stacking */
+.overlay-content {
+  position: fixed;
+  pointer-events: auto;
+  /* GPU acceleration for smooth animations */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Bottom sheet specific styles */
+.overlay-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 95vh;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  /* Allow sheet content to expand */
+  overflow: visible;
+}
+
+/* Modal specific styles */
+.overlay-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Touch gesture support for overlays */
+.overlay-draggable {
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.overlay-draggable:active {
+  cursor: grabbing;
+}
+
+/* Ensure overlays work in iOS Safari PWA mode */
+@supports (-webkit-touch-callout: none) {
+  #overlay-root {
+    /* Prevent iOS rubber-banding affecting overlays */
+    -webkit-overflow-scrolling: auto;
+  }
+
+  .overlay-bottom-sheet {
+    /* iOS safe area support */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }

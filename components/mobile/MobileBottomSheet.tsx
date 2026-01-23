@@ -11,6 +11,8 @@ import {
 import { motion, AnimatePresence, PanInfo, useAnimation } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { X } from 'lucide-react'
+import { Portal } from '@/components/ui/Portal'
+import { lockBodyScroll, unlockBodyScroll } from '@/lib/mobile/bodyScrollLock'
 
 export interface MobileBottomSheetProps {
   /** Whether the sheet is open */
@@ -39,7 +41,7 @@ export interface MobileBottomSheetProps {
   expandable?: boolean
   /** Additional CSS classes */
   className?: string
-  /** Z-index for the sheet */
+  /** Z-index for the sheet (default: 65 per z-index system) */
   zIndex?: number
   /** Callback when sheet is fully expanded */
   onExpand?: () => void
@@ -95,7 +97,7 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
       height = 'auto',
       expandable = false,
       className = '',
-      zIndex = 60,
+      zIndex = 65,
       onExpand,
       onCollapse,
     },
@@ -171,28 +173,12 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
       triggerHaptic('selection')
     }, [triggerHaptic])
 
-    // Store original scroll position for restoration
-    const scrollYRef = useRef(0)
-
-    // Lock body scroll when open - using position fixed to prevent flicker
+    // Lock body scroll when open using centralized utility
     useEffect(() => {
       if (isOpen) {
-        scrollYRef.current = window.scrollY
-        document.body.style.position = 'fixed'
-        document.body.style.top = `-${scrollYRef.current}px`
-        document.body.style.left = '0'
-        document.body.style.right = '0'
-        document.body.style.overflow = 'hidden'
+        lockBodyScroll()
         return () => {
-          document.body.style.position = ''
-          document.body.style.top = ''
-          document.body.style.left = ''
-          document.body.style.right = ''
-          document.body.style.overflow = ''
-          // Restore scroll position
-          if (scrollYRef.current > 0) {
-            window.scrollTo(0, scrollYRef.current)
-          }
+          unlockBodyScroll()
         }
       }
     }, [isOpen])
@@ -217,132 +203,137 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
     }, [isOpen, dismissible, onClose])
 
     return (
-      <AnimatePresence mode="sync">
-        {isOpen && (
-          <>
-            {/* Backdrop - hardware accelerated */}
-            {showBackdrop && (
+      <Portal>
+        <AnimatePresence mode="sync">
+          {isOpen && (
+            <>
+              {/* Backdrop - hardware accelerated */}
+              {showBackdrop && (
+                <motion.div
+                  variants={backdropVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  onClick={closeOnBackdropClick ? onClose : undefined}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm will-change-[opacity]"
+                  style={{
+                    zIndex: zIndex - 1,
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackdropFilter: 'blur(4px)',
+                    backdropFilter: 'blur(4px)',
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+
+              {/* Sheet - hardware accelerated, rendered via Portal */}
               <motion.div
-                variants={backdropVariants}
+                ref={(node) => {
+                  (sheetRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+                  if (typeof ref === 'function') ref(node)
+                  else if (ref) ref.current = node
+                }}
+                variants={sheetVariants}
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                onClick={closeOnBackdropClick ? onClose : undefined}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm will-change-[opacity]"
+                drag={dismissible || expandable ? 'y' : false}
+                dragConstraints={{ top: expandable ? -100 : 0, bottom: 0 }}
+                dragElastic={{ top: 0.1, bottom: 0.4 }}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
                 style={{
-                  zIndex: zIndex - 1,
+                  zIndex,
+                  height: isExpanded ? '95vh' : getHeightValue(),
+                  maxHeight: '95vh',
                   WebkitBackfaceVisibility: 'hidden',
                   backfaceVisibility: 'hidden',
+                  transform: 'translateZ(0)',
                 }}
-                aria-hidden="true"
-              />
-            )}
-
-            {/* Sheet - hardware accelerated */}
-            <motion.div
-              ref={(node) => {
-                (sheetRef as React.MutableRefObject<HTMLDivElement | null>).current = node
-                if (typeof ref === 'function') ref(node)
-                else if (ref) ref.current = node
-              }}
-              variants={sheetVariants}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              drag={dismissible || expandable ? 'y' : false}
-              dragConstraints={{ top: expandable ? -100 : 0, bottom: 0 }}
-              dragElastic={{ top: 0.1, bottom: 0.4 }}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              style={{
-                zIndex,
-                height: isExpanded ? '95vh' : getHeightValue(),
-                maxHeight: '95vh',
-                WebkitBackfaceVisibility: 'hidden',
-                backfaceVisibility: 'hidden',
-                transform: 'translateZ(0)',
-              }}
-              className={`
-                fixed bottom-0 left-0 right-0
-                rounded-t-[28px] overflow-hidden
-                bg-[#0f1624] border-t border-white/[0.08]
-                shadow-2xl shadow-black/40
-                flex flex-col will-change-transform
-                ${isDragging ? 'cursor-grabbing' : ''}
-                ${className}
-              `.trim()}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={title ? 'bottom-sheet-title' : undefined}
-            >
-              {/* Drag Handle */}
-              {showHandle && (
-                <div
-                  className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
-                  aria-hidden="true"
-                >
+                className={`
+                  overlay-bottom-sheet
+                  fixed bottom-0 left-0 right-0
+                  rounded-t-[28px] overflow-hidden
+                  bg-[#0f1624] border-t border-white/[0.08]
+                  shadow-2xl shadow-black/40
+                  flex flex-col will-change-transform
+                  ${isDragging ? 'cursor-grabbing' : ''}
+                  ${className}
+                `.trim()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={title ? 'bottom-sheet-title' : undefined}
+              >
+                {/* Drag Handle */}
+                {showHandle && (
                   <div
-                    className={`
-                      w-10 h-1.5 rounded-full
-                      transition-colors duration-200
-                      ${isDragging ? 'bg-orange-400/80' : 'bg-white/30'}
-                    `}
-                  />
-                </div>
-              )}
+                    className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing overlay-draggable"
+                    aria-hidden="true"
+                  >
+                    <div
+                      className={`
+                        w-10 h-1.5 rounded-full
+                        transition-colors duration-200
+                        ${isDragging ? 'bg-orange-400/80' : 'bg-white/30'}
+                      `}
+                    />
+                  </div>
+                )}
 
-              {/* Header */}
-              {(title || showCloseButton) && (
-                <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
-                  <div className="flex-1">
-                    {title && (
-                      <h2
-                        id="bottom-sheet-title"
-                        className="text-lg font-semibold text-white"
+                {/* Header */}
+                {(title || showCloseButton) && (
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
+                    <div className="flex-1">
+                      {title && (
+                        <h2
+                          id="bottom-sheet-title"
+                          className="text-lg font-semibold text-white"
+                        >
+                          {title}
+                        </h2>
+                      )}
+                      {subtitle && (
+                        <p className="text-sm text-slate-400 mt-0.5">{subtitle}</p>
+                      )}
+                    </div>
+                    {showCloseButton && (
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => {
+                          triggerHaptic('light')
+                          onClose()
+                        }}
+                        className="
+                          w-9 h-9 rounded-full
+                          flex items-center justify-center
+                          bg-white/[0.06] hover:bg-white/[0.1]
+                          transition-colors
+                        "
+                        aria-label="Close"
                       >
-                        {title}
-                      </h2>
-                    )}
-                    {subtitle && (
-                      <p className="text-sm text-slate-400 mt-0.5">{subtitle}</p>
+                        <X className="w-5 h-5 text-slate-300" />
+                      </motion.button>
                     )}
                   </div>
-                  {showCloseButton && (
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => {
-                        triggerHaptic('light')
-                        onClose()
-                      }}
-                      className="
-                        w-9 h-9 rounded-full
-                        flex items-center justify-center
-                        bg-white/[0.06] hover:bg-white/[0.1]
-                        transition-colors
-                      "
-                      aria-label="Close"
-                    >
-                      <X className="w-5 h-5 text-slate-300" />
-                    </motion.button>
-                  )}
-                </div>
-              )}
+                )}
 
-              {/* Content */}
-              <div
-                ref={contentRef}
-                className="flex-1 overflow-y-auto overscroll-contain px-5 py-4"
-                style={{
-                  WebkitOverflowScrolling: 'touch',
-                  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
-                }}
-              >
-                {children}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                {/* Content */}
+                <div
+                  ref={contentRef}
+                  className="flex-1 overflow-y-auto overscroll-contain px-5 py-4"
+                  style={{
+                    WebkitOverflowScrolling: 'touch',
+                    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+                  }}
+                >
+                  {children}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </Portal>
     )
   }
 )
