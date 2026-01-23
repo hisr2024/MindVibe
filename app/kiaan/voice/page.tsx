@@ -19,6 +19,8 @@ import { useLanguage } from '@/hooks/useLanguage'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useWakeWord } from '@/hooks/useWakeWord'
 import { getBrowserName, isSecureContext, isSpeechRecognitionSupported } from '@/utils/browserSupport'
+import { playSound, playSoundWithHaptic, playOmChime, cleanupAudio } from '@/utils/audio/soundEffects'
+import { detectCommand, isBlockingCommand, getCommandResponse, extractLanguage, getAllCommands, type VoiceCommandType } from '@/utils/speech/voiceCommands'
 
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
@@ -49,6 +51,13 @@ export default function EliteVoicePage() {
   // Microphone permission state
   const [micPermission, setMicPermission] = useState<'prompt' | 'granted' | 'denied' | 'unsupported' | 'checking'>('checking')
   const [isRequestingPermission, setIsRequestingPermission] = useState(false)
+
+  // Voice settings
+  const [voiceVolume, setVoiceVolume] = useState(1.0)
+  const [voiceRate, setVoiceRate] = useState(0.95)
+  const [isMuted, setIsMuted] = useState(false)
+  const [lastResponse, setLastResponse] = useState('')
+  const [showHelpPanel, setShowHelpPanel] = useState(false)
 
   // Browser diagnostics
   const [browserInfo, setBrowserInfo] = useState<{
@@ -159,7 +168,7 @@ export default function EliteVoicePage() {
       setMicPermission('granted')
 
       // Play success sound
-      playActivationSound()
+      playSound('success')
 
       return true
 
@@ -214,6 +223,7 @@ export default function EliteVoicePage() {
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      cleanupAudio()
     }
   }, [])
 
@@ -224,45 +234,103 @@ export default function EliteVoicePage() {
 
   // Handle wake word detection
   function handleWakeWordDetected() {
-    // Play activation sound
-    playActivationSound()
-
-    // Haptic feedback
-    if ('vibrate' in navigator) {
-      navigator.vibrate([50, 100, 50])
-    }
+    // Play activation sound with haptic
+    playSoundWithHaptic('wakeWord', 'medium')
 
     // Start listening
     setState('listening')
     resetTranscript()
     startListening()
+    playSound('listening')
   }
 
-  // Play activation sound
-  function playActivationSound() {
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
-      if (!AudioContextClass) return
+  // Handle voice command
+  function handleVoiceCommand(commandType: VoiceCommandType, param?: string): boolean {
+    switch (commandType) {
+      case 'stop':
+        stopSpeaking()
+        playSound('click')
+        return true
 
-      const ctx = new AudioContextClass()
-      const oscillator = ctx.createOscillator()
-      const gain = ctx.createGain()
+      case 'repeat':
+        if (lastResponse) {
+          playSound('notification')
+          speakResponse(lastResponse)
+        }
+        return true
 
-      oscillator.connect(gain)
-      gain.connect(ctx.destination)
+      case 'help':
+        setShowHelpPanel(true)
+        playSound('notification')
+        const helpText = getCommandResponse('help')
+        speakResponse(helpText)
+        return true
 
-      oscillator.frequency.value = 800
-      oscillator.type = 'sine'
+      case 'louder':
+        setVoiceVolume(Math.min(1.5, voiceVolume + 0.25))
+        playSound('toggle')
+        speakResponse('Speaking louder now.')
+        return true
 
-      gain.gain.setValueAtTime(0.3, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15)
+      case 'quieter':
+        setVoiceVolume(Math.max(0.25, voiceVolume - 0.25))
+        playSound('toggle')
+        speakResponse('Speaking quieter now.')
+        return true
 
-      oscillator.start(ctx.currentTime)
-      oscillator.stop(ctx.currentTime + 0.15)
+      case 'faster':
+        setVoiceRate(Math.min(1.5, voiceRate + 0.15))
+        playSound('toggle')
+        speakResponse('Speaking faster now.')
+        return true
 
-      setTimeout(() => ctx.close(), 200)
-    } catch (e) {
-      // Silent fail
+      case 'slower':
+        setVoiceRate(Math.max(0.5, voiceRate - 0.15))
+        playSound('toggle')
+        speakResponse('Speaking more slowly now.')
+        return true
+
+      case 'clear':
+        clearConversation()
+        playSound('success')
+        speakResponse('Conversation cleared. How can I help you?')
+        return true
+
+      case 'mute':
+        setIsMuted(true)
+        playSound('toggle')
+        return true
+
+      case 'unmute':
+        setIsMuted(false)
+        playSound('toggle')
+        speakResponse('Voice responses enabled.')
+        return true
+
+      case 'goodbye':
+        playOmChime()
+        speakResponse('Goodbye! Take care, and may peace be with you. Namaste.')
+        setTimeout(() => {
+          setWakeWordEnabled(false)
+          stopWakeWord()
+          setState('idle')
+        }, 3000)
+        return true
+
+      case 'thank_you':
+        playSound('success')
+        speakResponse('You\'re welcome! I\'m always here to help. Namaste.')
+        return true
+
+      case 'language':
+        if (param) {
+          playSound('success')
+          speakResponse(`Switching to ${param}.`)
+        }
+        return true
+
+      default:
+        return false
     }
   }
 
@@ -271,6 +339,31 @@ export default function EliteVoicePage() {
     if (!query.trim()) {
       setState(wakeWordEnabled ? 'wakeword' : 'idle')
       return
+    }
+
+    // Check for voice commands first
+    const commandMatch = detectCommand(query)
+    if (commandMatch && commandMatch.confidence > 0.7) {
+      const { command } = commandMatch
+
+      // Add user message for commands too
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: query,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, userMessage])
+
+      // Handle the command
+      const handled = handleVoiceCommand(command.type, command.param)
+      if (handled && isBlockingCommand(command.type)) {
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        return
+      }
+      if (handled) {
+        return
+      }
     }
 
     // Add user message
@@ -286,6 +379,7 @@ export default function EliteVoicePage() {
     setState('thinking')
     setTranscript('')
     setInterimTranscript('')
+    playSound('thinking')
 
     try {
       let responseText: string
@@ -324,11 +418,17 @@ export default function EliteVoicePage() {
       setMessages(prev => [...prev, assistantMessage])
       setResponse(responseText)
 
+      // Play success sound
+      playSound('success')
+
       // Speak response
       await speakResponse(responseText)
 
     } catch (err) {
       console.error('Query error:', err)
+
+      // Play error sound
+      playSound('error')
 
       // Fallback response
       const fallbackResponse = "I'm here with you. Could you try asking that again?"
@@ -380,6 +480,23 @@ export default function EliteVoicePage() {
 
   // Speak response using TTS
   async function speakResponse(text: string): Promise<void> {
+    // Save for repeat command
+    setLastResponse(text)
+
+    // Skip speaking if muted
+    if (isMuted) {
+      // Add as text message only
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: text,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, assistantMessage])
+      setState(wakeWordEnabled ? 'wakeword' : 'idle')
+      return
+    }
+
     setState('speaking')
 
     return new Promise((resolve) => {
@@ -399,9 +516,9 @@ export default function EliteVoicePage() {
 
       const utterance = new SpeechSynthesisUtterance(processedText)
       utterance.lang = language || 'en-US'
-      utterance.rate = 0.95
+      utterance.rate = voiceRate
       utterance.pitch = 1.0
-      utterance.volume = 1.0
+      utterance.volume = voiceVolume
 
       // Select voice
       const voices = synthesisRef.current.getVoices()
@@ -815,14 +932,67 @@ export default function EliteVoicePage() {
             </div>
           )}
 
+          {/* Voice Commands Help Panel */}
+          {showHelpPanel && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-orange-500/30 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-orange-100">Voice Commands</h3>
+                  <button
+                    onClick={() => setShowHelpPanel(false)}
+                    className="text-orange-300/60 hover:text-orange-300 p-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+                  {getAllCommands().map((cmd, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50">
+                      <span className="text-orange-400 font-semibold text-sm whitespace-nowrap">&quot;{cmd.command}&quot;</span>
+                      <span className="text-orange-200/70 text-sm">{cmd.description}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-orange-500/20">
+                  <p className="text-orange-200/50 text-xs text-center">
+                    Say any command naturally, KIAAN will understand
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Voice Settings Indicator */}
+          {(isMuted || voiceVolume !== 1.0 || voiceRate !== 0.95) && (
+            <div className="flex justify-center gap-2 mb-4">
+              {isMuted && (
+                <span className="px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-xs">
+                  Muted
+                </span>
+              )}
+              {voiceVolume !== 1.0 && (
+                <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs">
+                  Volume: {Math.round(voiceVolume * 100)}%
+                </span>
+              )}
+              {voiceRate !== 0.95 && (
+                <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs">
+                  Speed: {voiceRate < 0.95 ? 'Slower' : 'Faster'}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Instructions */}
           <div className="text-center text-orange-100/50 text-xs sm:text-sm px-4">
             {wakeWordEnabled ? (
-              <p>Say &quot;Hey KIAAN&quot; or tap the button to start</p>
+              <p>Say &quot;Hey KIAAN&quot;, &quot;Namaste KIAAN&quot;, or tap the button to start</p>
             ) : (
               <p>Tap the button above to speak to KIAAN</p>
             )}
-            <p className="mt-1">KIAAN uses ancient Gita wisdom to guide you</p>
+            <p className="mt-1">Say &quot;help&quot; for voice commands | KIAAN uses ancient Gita wisdom</p>
           </div>
         </div>
       </div>
