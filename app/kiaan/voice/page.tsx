@@ -125,15 +125,33 @@ export default function EliteVoicePage() {
         return
       }
 
+      // Check if SpeechRecognition is supported
+      if (!isSpeechRecognitionSupported()) {
+        setMicPermission('unsupported')
+        return
+      }
+
       // Check permission status using Permissions API if available
       if (navigator.permissions && navigator.permissions.query) {
         try {
           const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-          setMicPermission(result.state as 'prompt' | 'granted' | 'denied')
+
+          // Don't trust 'granted' - always verify with actual test
+          if (result.state === 'denied') {
+            setMicPermission('denied')
+          } else {
+            // For 'granted' or 'prompt', set to 'prompt' to force fresh permission request
+            // This ensures we don't have stale permission state
+            setMicPermission('prompt')
+          }
 
           // Listen for permission changes
           result.onchange = () => {
-            setMicPermission(result.state as 'prompt' | 'granted' | 'denied')
+            if (result.state === 'denied') {
+              setMicPermission('denied')
+            } else {
+              setMicPermission('prompt')
+            }
           }
         } catch {
           // Permissions API not supported for microphone, default to prompt
@@ -687,17 +705,15 @@ export default function EliteVoicePage() {
       return
     }
 
-    // Check permission
-    if (micPermission !== 'granted') {
-      console.log('[KIAAN Voice] Requesting microphone permission...')
-      const granted = await requestMicrophonePermission()
-      if (!granted) {
-        console.log('[KIAAN Voice] Permission not granted')
-        setState('error')
-        return
-      }
-      console.log('[KIAAN Voice] Permission granted')
+    // Always request permission to ensure it's fresh (don't rely on cached state)
+    console.log('[KIAAN Voice] Requesting microphone permission (fresh)...')
+    const granted = await requestMicrophonePermission()
+    if (!granted) {
+      console.log('[KIAAN Voice] Permission not granted')
+      setState('error')
+      return
     }
+    console.log('[KIAAN Voice] Permission granted, starting voice...')
 
     handleWakeWordDetected()
   }
