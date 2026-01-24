@@ -9,7 +9,7 @@ import logging
 from datetime import date, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -238,7 +238,7 @@ async def get_latest_assessment(
 
 @router.get("/history")
 async def get_assessment_history(
-    limit: int = Field(default=10, ge=1, le=50),
+    limit: int = Query(default=10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
     user_id: str | None = Depends(get_current_user_optional),
 ) -> list[AssessmentResponse]:
