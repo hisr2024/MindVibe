@@ -12,6 +12,9 @@ export { MeditationMusicPlayer } from './MeditationMusicPlayer'
 export { FloatingMusicPlayer } from './FloatingMusicPlayer'
 export { DashboardMusicWidget } from './DashboardMusicWidget'
 
+// Spiritual Music Player - Simple & Clean
+export { SpiritualMusicPlayer } from './SpiritualMusicPlayer'
+
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'
 
