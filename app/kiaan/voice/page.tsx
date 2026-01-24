@@ -24,10 +24,8 @@ import { playSound, playSoundWithHaptic, playOmChime, cleanupAudio } from '@/uti
 import { detectCommand, isBlockingCommand, getCommandResponse, extractLanguage, getAllCommands, type VoiceCommandType } from '@/utils/speech/voiceCommands'
 import {
   checkMicrophonePermission as checkMicPermission,
-  requestMicrophoneAccess,
   runMicrophoneDiagnostics as runDiagnostics,
-  detectPlatform,
-  stopMediaStream
+  detectPlatform
 } from '@/utils/microphone/UniversalMicrophoneAccess'
 
 // Types
