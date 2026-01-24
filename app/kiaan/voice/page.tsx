@@ -78,6 +78,10 @@ export default function EliteVoicePage() {
   const synthesisRef = useRef<SpeechSynthesis | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const micTransitionRef = useRef<boolean>(false) // Prevent race conditions during mic transitions
+  const permissionListenerRef = useRef<{ result: PermissionStatus | null; handler: (() => void) | null }>({
+    result: null,
+    handler: null
+  })
 
   // Hooks
   const { t, language } = useLanguage()
@@ -198,8 +202,14 @@ export default function EliteVoicePage() {
       }
 
       // Listen for permission changes if Permissions API is available
+      // Store refs for cleanup to prevent memory leaks
       if (navigator.permissions && navigator.permissions.query) {
         try {
+          // Clean up any previous listener
+          if (permissionListenerRef.current.result && permissionListenerRef.current.handler) {
+            permissionListenerRef.current.result.removeEventListener('change', permissionListenerRef.current.handler)
+          }
+
           const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
           const handlePermissionChange = () => {
             console.log('[KIAAN Voice] Permission state changed, re-checking...')
@@ -212,6 +222,9 @@ export default function EliteVoicePage() {
               }
             })
           }
+
+          // Store refs for cleanup
+          permissionListenerRef.current = { result, handler: handlePermissionChange }
           result.addEventListener('change', handlePermissionChange)
         } catch {
           // Permissions API not supported for microphone, that's okay
@@ -464,6 +477,12 @@ export default function EliteVoicePage() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
       cleanupAudio()
+
+      // Clean up permission listener to prevent memory leak
+      if (permissionListenerRef.current.result && permissionListenerRef.current.handler) {
+        permissionListenerRef.current.result.removeEventListener('change', permissionListenerRef.current.handler)
+        permissionListenerRef.current = { result: null, handler: null }
+      }
     }
   }, [])
 

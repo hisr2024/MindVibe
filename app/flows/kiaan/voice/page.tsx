@@ -54,6 +54,7 @@ export default function MobileVoicePage() {
 
   const [showSettings, setShowSettings] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const micTransitionRef = useRef<boolean>(false) // Prevent race conditions during mic transitions
 
   const { t, language } = useLanguage()
 
@@ -87,6 +88,24 @@ export default function MobileVoicePage() {
       }
     },
     onError: (err) => {
+      console.error('[Mobile Voice] Voice input error:', err)
+
+      // Don't show error if we're in a transition
+      if (micTransitionRef.current) {
+        console.log('[Mobile Voice] Ignoring error during mic transition')
+        return
+      }
+
+      // Check if this is a recoverable error
+      const lowerErr = err.toLowerCase()
+      if (lowerErr.includes('no-speech') || lowerErr.includes('aborted') || lowerErr.includes('no speech')) {
+        // These are expected - just return to idle
+        console.log('[Mobile Voice] Recoverable error, returning to idle')
+        setState('idle')
+        return
+      }
+
+      // For actual errors, show the error state
       setError(err)
       setState('error')
       playSound('error')  // Sound on error
@@ -118,14 +137,28 @@ export default function MobileVoicePage() {
     [settings.hapticFeedback]
   )
 
-  // Handle voice button press
+  // Handle voice button press with race condition protection
   const handleVoicePress = async () => {
+    // Prevent rapid clicks causing issues
+    if (micTransitionRef.current) {
+      console.log('[Mobile Voice] Already transitioning, ignoring press')
+      return
+    }
+
     triggerHaptic('medium')
 
     if (isListening) {
-      stopListening()
-      setState('idle')
+      micTransitionRef.current = true
+      try {
+        stopListening()
+        setState('idle')
+      } finally {
+        setTimeout(() => {
+          micTransitionRef.current = false
+        }, 300)
+      }
     } else {
+      micTransitionRef.current = true
       setError(null)
       resetTranscript()
       setInterimTranscript('')
@@ -133,10 +166,18 @@ export default function MobileVoicePage() {
       setState('listening')
 
       try {
-        await startListening()
+        // Small delay to ensure any previous recognition is fully stopped
+        await new Promise(resolve => setTimeout(resolve, 100))
+        startListening()
       } catch (err) {
+        console.error('[Mobile Voice] Failed to start listening:', err)
         setError('Could not start listening. Please check microphone permissions.')
         setState('error')
+        playSound('error')
+      } finally {
+        setTimeout(() => {
+          micTransitionRef.current = false
+        }, 500)
       }
     }
   }
