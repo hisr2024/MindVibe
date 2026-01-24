@@ -10,6 +10,8 @@ Implements complete MindVibe AI Mental-Wellness Coach with 4-phase framework:
 """
 
 import datetime
+from collections import OrderedDict
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,13 +23,100 @@ from backend.services.safety_validator import SafetyValidator
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 
+class BoundedConversationStore:
+    """Memory-safe conversation storage with LRU eviction and TTL."""
+
+    # Memory limits
+    MAX_SESSIONS = 10000  # Maximum concurrent sessions
+    MAX_MESSAGES_PER_SESSION = 50  # Maximum messages per session
+    SESSION_TTL_HOURS = 24  # Session expiration time
+
+    def __init__(self) -> None:
+        """Initialize the bounded conversation store."""
+        # OrderedDict for LRU eviction
+        self._sessions: OrderedDict[str, dict[str, Any]] = OrderedDict()
+
+    def _cleanup_expired_sessions(self) -> None:
+        """Remove sessions older than TTL."""
+        now = datetime.datetime.now(datetime.UTC)
+        cutoff = now - datetime.timedelta(hours=self.SESSION_TTL_HOURS)
+
+        # Collect expired session IDs
+        expired = [
+            sid for sid, data in self._sessions.items()
+            if data.get("last_activity", now) < cutoff
+        ]
+
+        # Remove expired sessions
+        for sid in expired:
+            del self._sessions[sid]
+
+    def _evict_if_needed(self) -> None:
+        """Evict oldest sessions if over limit."""
+        while len(self._sessions) > self.MAX_SESSIONS:
+            # Remove oldest (first) entry
+            self._sessions.popitem(last=False)
+
+    def get(self, session_id: str) -> list[dict]:
+        """Get conversation history for a session."""
+        if session_id not in self._sessions:
+            return []
+
+        # Move to end (most recently used)
+        self._sessions.move_to_end(session_id)
+        return self._sessions[session_id].get("messages", [])
+
+    def append(self, session_id: str, message: dict) -> None:
+        """Add a message to a session's history."""
+        now = datetime.datetime.now(datetime.UTC)
+
+        if session_id not in self._sessions:
+            # Periodic cleanup before adding new session
+            if len(self._sessions) % 100 == 0:
+                self._cleanup_expired_sessions()
+
+            self._evict_if_needed()
+            self._sessions[session_id] = {"messages": [], "last_activity": now}
+
+        # Move to end (most recently used)
+        self._sessions.move_to_end(session_id)
+        self._sessions[session_id]["last_activity"] = now
+
+        messages = self._sessions[session_id]["messages"]
+        messages.append(message)
+
+        # Trim to max messages (keep most recent)
+        if len(messages) > self.MAX_MESSAGES_PER_SESSION:
+            self._sessions[session_id]["messages"] = messages[-self.MAX_MESSAGES_PER_SESSION:]
+
+    def clear(self, session_id: str) -> bool:
+        """Clear a session's history."""
+        if session_id in self._sessions:
+            del self._sessions[session_id]
+            return True
+        return False
+
+    def exists(self, session_id: str) -> bool:
+        """Check if a session exists."""
+        return session_id in self._sessions
+
+    def session_count(self) -> int:
+        """Get current number of active sessions."""
+        return len(self._sessions)
+
+    def keys(self) -> list[str]:
+        """Get all session IDs."""
+        return list(self._sessions.keys())
+
+
 class ChatbotService:
     """Enhanced chatbot service with wisdom knowledge base integration."""
 
     def __init__(self) -> None:
         """Initialize the chatbot service."""
         self.kb = WisdomKnowledgeBase()
-        self.conversation_histories: dict[str, list[dict]] = {}
+        # Use bounded conversation store instead of unbounded dict
+        self._conversation_store = BoundedConversationStore()
         # Phase 1: Core Response Engine
         self.response_engine = ResponseEngine()
         self.action_generator = ActionPlanGenerator()
@@ -37,6 +126,15 @@ class ChatbotService:
         self.safety_validator = SafetyValidator()
         # Phase 4: Evidence-Based Psychology
         self.psychology_patterns = PsychologyPatterns()
+
+    @property
+    def conversation_histories(self) -> dict:
+        """Backward compatibility: return dict-like access to conversations.
+
+        Note: This is deprecated. Use get_conversation_history() instead.
+        """
+        # Return a view that mimics dict access for backward compatibility
+        return {sid: self._conversation_store.get(sid) for sid in self._conversation_store.keys()}
 
     def get_conversation_history(self, session_id: str) -> list[dict]:
         """
@@ -48,7 +146,7 @@ class ChatbotService:
         Returns:
             List of conversation messages or empty list if session doesn't exist
         """
-        return self.conversation_histories.get(session_id, [])
+        return self._conversation_store.get(session_id)
 
     def clear_conversation(self, session_id: str) -> bool:
         """
@@ -60,10 +158,7 @@ class ChatbotService:
         Returns:
             True if session existed and was cleared, False otherwise
         """
-        if session_id in self.conversation_histories:
-            del self.conversation_histories[session_id]
-            return True
-        return False
+        return self._conversation_store.clear(session_id)
 
     def get_active_sessions(self) -> list[str]:
         """
@@ -72,7 +167,7 @@ class ChatbotService:
         Returns:
             List of session IDs
         """
-        return list(self.conversation_histories.keys())
+        return self._conversation_store.keys()
 
     def _generate_template_chat_response(
         self,
@@ -224,13 +319,10 @@ class ChatbotService:
         Returns:
             Dictionary with response, verses, and metadata
         """
-        # Initialize session if it doesn't exist
-        if session_id not in self.conversation_histories:
-            self.conversation_histories[session_id] = []
-
-        # Add user message to history
+        # Add user message to history (bounded store handles session creation)
         timestamp = datetime.datetime.now(datetime.UTC).isoformat()
-        self.conversation_histories[session_id].append(
+        self._conversation_store.append(
+            session_id,
             {
                 "role": "user",
                 "content": message,
@@ -246,7 +338,7 @@ class ChatbotService:
         )
 
         # Get conversation history (limit to last 6 messages for context)
-        history = self.conversation_histories[session_id][-6:]
+        history = self._conversation_store.get(session_id)[-6:]
 
         # Generate response
         response_text = self._generate_chat_response(
@@ -257,7 +349,8 @@ class ChatbotService:
         )
 
         # Add assistant response to history
-        self.conversation_histories[session_id].append(
+        self._conversation_store.append(
+            session_id,
             {
                 "role": "assistant",
                 "content": response_text,
@@ -282,7 +375,7 @@ class ChatbotService:
             "response": response_text,
             "verses": formatted_verses,
             "language": language,
-            "conversation_length": len(self.conversation_histories[session_id]),
+            "conversation_length": len(self._conversation_store.get(session_id)),
         }
 
 

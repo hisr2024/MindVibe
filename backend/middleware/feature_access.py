@@ -57,10 +57,12 @@ async def get_current_user_id(request: Request) -> str:
         except Exception:
             pass
     
-    # DEVELOPMENT ONLY: Return a default user ID for testing
-    # In production, this should raise an authentication error
-    # Note: This is a legacy-format ID; real users will have UUID format IDs
-    return "1"
+    # No valid authentication found - raise 401 Unauthorized
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required. Please provide a valid Bearer token.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 class SubscriptionRequired:

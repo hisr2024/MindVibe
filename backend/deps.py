@@ -29,9 +29,20 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 def get_user_id() -> str:
-    """Get user ID - returns test user for now"""
-    # For development/testing, return a test user ID
-    return "dev-anon"
+    """Get user ID - DEPRECATED: Use get_current_user() instead.
+
+    This function is deprecated and should not be used.
+    Use get_current_user() or get_current_user_optional() for proper auth.
+
+    Raises:
+        HTTPException: Always raises 401 Unauthorized.
+    """
+    from fastapi import HTTPException, status
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required. Use proper authentication endpoint.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 async def get_current_user(

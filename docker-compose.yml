@@ -6,15 +6,15 @@ services:
     image: postgres:16-alpine
     container_name: mindvibe-db
     environment:
-      POSTGRES_USER: navi
-      POSTGRES_PASSWORD: navi
-      POSTGRES_DB: navi
+      POSTGRES_USER: ${POSTGRES_USER:-mindvibe}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mindvibe_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-mindvibe}
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U navi"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mindvibe}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
       target: backend-base
     container_name: mindvibe-api
     environment:
-      - DATABASE_URL=postgresql+asyncpg://navi:navi@db:5432/navi
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mindvibe}:${POSTGRES_PASSWORD:-mindvibe_dev_password}@db:5432/${POSTGRES_DB:-mindvibe}
       - PORT=8000
     depends_on:
       db:

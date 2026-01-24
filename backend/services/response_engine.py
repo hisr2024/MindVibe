@@ -251,14 +251,15 @@ class ResponseEngine:
         if word_count < self.MIN_WORDS:
             # Add additional supportive text to reach minimum
             additional_text = " Remember, making changes takes time and patience. Each small step you take builds on the previous one, creating sustainable progress. You're capable of navigating this challenge, and you don't have to do it perfectly. Trust in your ability to learn and adapt as you go."
-            
-            # Keep adding until we reach minimum
-            while len(response.split()) < self.MIN_WORDS:
+
+            # Safety: limit iterations to prevent infinite loops
+            max_iterations = 5
+            iteration = 0
+
+            while len(response.split()) < self.MIN_WORDS and iteration < max_iterations:
                 response += additional_text
-                # Break if we've added text and are close to minimum
-                if len(response.split()) >= self.MIN_WORDS - 10:
-                    break
-            
+                iteration += 1
+
             return response
 
         # If too long, trim intelligently

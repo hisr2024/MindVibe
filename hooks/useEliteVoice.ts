@@ -182,10 +182,14 @@ export function useEliteVoice(
     if (servicesInitializedRef.current) return
     servicesInitializedRef.current = true
 
+    // Named handlers for proper cleanup
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
     // Check online status
     setIsOnline(navigator.onLine)
-    window.addEventListener('online', () => setIsOnline(true))
-    window.addEventListener('offline', () => setIsOnline(false))
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
 
     // Initialize speech synthesis
     if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -200,8 +204,8 @@ export function useEliteVoice(
     }
 
     return () => {
-      window.removeEventListener('online', () => setIsOnline(true))
-      window.removeEventListener('offline', () => setIsOnline(false))
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
     }
   }, [])
 
