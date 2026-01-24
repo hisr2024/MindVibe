@@ -167,7 +167,9 @@ async def ensure_seed_data(db: AsyncSession) -> dict[str, Achievement]:
         HTTPException: If there's an error with enum values or database operations
     """
     try:
-        existing = await db.execute(select(Achievement))
+        existing = await db.execute(
+            select(Achievement).where(Achievement.deleted_at.is_(None))
+        )
         achievement_map = {ach.key: ach for ach in existing.scalars().all()}
 
         for payload in DEFAULT_ACHIEVEMENTS:
@@ -189,12 +191,17 @@ async def ensure_seed_data(db: AsyncSession) -> dict[str, Achievement]:
 
         await db.flush()
         # Refresh with IDs for unlockable wiring
-        refreshed = await db.execute(select(Achievement))
+        refreshed = await db.execute(
+            select(Achievement).where(Achievement.deleted_at.is_(None))
+        )
         achievement_map = {ach.key: ach for ach in refreshed.scalars().all()}
 
         for unlock_payload in DEFAULT_UNLOCKABLES:
             exists = await db.scalar(
-                select(Unlockable).where(Unlockable.key == unlock_payload["key"])
+                select(Unlockable).where(
+                    Unlockable.key == unlock_payload["key"],
+                    Unlockable.deleted_at.is_(None)
+                )
             )
             if exists:
                 continue
@@ -287,7 +294,10 @@ async def update_user_achievements(
 ) -> list[TreeNotification]:
     notifications: list[TreeNotification] = []
     existing = await db.execute(
-        select(UserAchievement).where(UserAchievement.user_id == user_id)
+        select(UserAchievement).where(
+            UserAchievement.user_id == user_id,
+            UserAchievement.deleted_at.is_(None)
+        )
     )
     achievement_map = {ua.achievement_id: ua for ua in existing.scalars().all()}
 
@@ -319,9 +329,14 @@ async def update_user_achievements(
 async def sync_unlockables(
     db: AsyncSession, user_id: str, achievement_map: dict[int, UserAchievement]
 ) -> list[UnlockableOut]:
-    unlockables = (await db.execute(select(Unlockable))).scalars().all()
+    unlockables = (await db.execute(
+        select(Unlockable).where(Unlockable.deleted_at.is_(None))
+    )).scalars().all()
     user_unlocks = await db.execute(
-        select(UserUnlockable).where(UserUnlockable.user_id == user_id)
+        select(UserUnlockable).where(
+            UserUnlockable.user_id == user_id,
+            UserUnlockable.deleted_at.is_(None)
+        )
     )
     user_unlock_map = {u.unlockable_id: u for u in user_unlocks.scalars().all()}
 
@@ -415,7 +430,10 @@ async def get_progress(
         notifications = await update_user_achievements(db, user_id, achievement_rows, counts)
 
         user_progress_rows = await db.execute(
-            select(UserAchievement).where(UserAchievement.user_id == user_id)
+            select(UserAchievement).where(
+                UserAchievement.user_id == user_id,
+                UserAchievement.deleted_at.is_(None)
+            )
         )
         user_progress_map = {ua.achievement_id: ua for ua in user_progress_rows.scalars().all()}
         unlockables = await sync_unlockables(db, user_id, user_progress_map)
@@ -471,7 +489,10 @@ async def list_achievements(
         achievements_map = await ensure_seed_data(db)
         counts = await get_activity_counts(db, user_id)
         user_progress_rows = await db.execute(
-            select(UserAchievement).where(UserAchievement.user_id == user_id)
+            select(UserAchievement).where(
+                UserAchievement.user_id == user_id,
+                UserAchievement.deleted_at.is_(None)
+            )
         )
         user_progress_map = {ua.achievement_id: ua for ua in user_progress_rows.scalars().all()}
         payloads = await _build_achievement_payload(
@@ -504,7 +525,12 @@ async def unlock_reward(
     db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_user_id),
 ) -> UnlockableOut:
-    unlockable = await db.scalar(select(Unlockable).where(Unlockable.key == request.unlockable_key))
+    unlockable = await db.scalar(
+        select(Unlockable).where(
+            Unlockable.key == request.unlockable_key,
+            Unlockable.deleted_at.is_(None)
+        )
+    )
     if not unlockable:
         raise HTTPException(status_code=404, detail="Unlockable not found")
 
@@ -513,6 +539,7 @@ async def unlock_reward(
             select(UserAchievement).where(
                 UserAchievement.user_id == user_id,
                 UserAchievement.achievement_id == unlockable.required_achievement_id,
+                UserAchievement.deleted_at.is_(None),
             )
         )
         if not achievement_progress or not achievement_progress.unlocked:
@@ -524,6 +551,7 @@ async def unlock_reward(
         select(UserUnlockable).where(
             UserUnlockable.user_id == user_id,
             UserUnlockable.unlockable_id == unlockable.id,
+            UserUnlockable.deleted_at.is_(None),
         )
     )
     if not user_unlock:

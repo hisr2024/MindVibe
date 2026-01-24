@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 export interface KeyboardState {
   /** Whether the keyboard is currently visible */
@@ -40,8 +40,8 @@ export function useKeyboardVisibility(options: UseKeyboardVisibilityOptions = {}
   })
 
   // Track the initial viewport height
-  const initialHeightRef = { current: typeof window !== 'undefined' ? window.innerHeight : 0 }
-  const animationTimeoutRef = { current: null as NodeJS.Timeout | null }
+  const initialHeightRef = useRef(typeof window !== 'undefined' ? window.innerHeight : 0)
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleViewportResize = useCallback(() => {
     if (typeof window === 'undefined') return

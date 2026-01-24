@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user
 from backend.models import Mood
 from backend.schemas import MoodIn, MoodOut
 
@@ -43,26 +43,38 @@ def get_micro_response(score: int) -> str:
 async def create_mood(
     payload: MoodIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user),
 ) -> dict:
-    res = await db.execute(
-        insert(Mood)
-        .values(
-            user_id=user_id,
-            score=payload.score,
-            tags={"tags": payload.tags} if payload.tags else None,
-            note=payload.note,
+    """Create a new mood entry for the authenticated user."""
+    try:
+        res = await db.execute(
+            insert(Mood)
+            .values(
+                user_id=user_id,
+                score=payload.score,
+                tags={"tags": payload.tags} if payload.tags else None,
+                note=payload.note,
+            )
+            .returning(Mood.id, Mood.score, Mood.tags, Mood.note, Mood.at)
         )
-        .returning(Mood.id, Mood.score, Mood.tags, Mood.note, Mood.at)
-    )
-    row = res.first()
-    await db.commit()
+        row = res.first()
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create mood entry. Please try again.",
+        )
+
     if not row:
-        raise Exception("Failed to create mood")
-    
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create mood entry. No data returned.",
+        )
+
     # Include KIAAN micro-response in response
     micro_response = get_micro_response(row.score)
-    
+
     return {
         "id": row.id,
         "score": row.score,
@@ -74,12 +86,14 @@ async def create_mood(
 
 
 @router.get("/micro-response")
-async def get_mood_micro_response(score: int) -> dict:
+async def get_mood_micro_response(
+    score: int = Query(..., ge=1, le=10, description="Mood score on a 1-10 scale")
+) -> dict:
     """Get KIAAN's empathetic micro-response for a mood score.
-    
+
     Args:
-        score: Mood score on a 1-10 scale.
-        
+        score: Mood score on a 1-10 scale (validated).
+
     Returns:
         dict: Contains the micro-response message.
     """

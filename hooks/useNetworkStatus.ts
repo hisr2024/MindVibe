@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 export type ConnectionType = 'slow-2g' | '2g' | '3g' | '4g' | 'wifi' | 'unknown'
 export type ConnectionQuality = 'poor' | 'moderate' | 'good' | 'excellent'
@@ -91,7 +91,8 @@ export function useNetworkStatus(): NetworkStatus {
     }
   })
 
-  const offlineStartRef = { current: null as number | null }
+  const offlineStartRef = useRef<number | null>(null)
+  const wasOfflineTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const updateNetworkInfo = useCallback(() => {
     const connection = (navigator as { connection?: NetworkConnection }).connection
@@ -122,9 +123,13 @@ export function useNetworkStatus(): NetworkStatus {
       lastChange: Date.now(),
     }))
 
-    // Clear wasOffline after 5 seconds
-    setTimeout(() => {
+    // Clear wasOffline after 5 seconds (with cleanup)
+    if (wasOfflineTimeoutRef.current) {
+      clearTimeout(wasOfflineTimeoutRef.current)
+    }
+    wasOfflineTimeoutRef.current = setTimeout(() => {
       setStatus(prev => ({ ...prev, wasOffline: false }))
+      wasOfflineTimeoutRef.current = null
     }, 5000)
 
     updateNetworkInfo()
@@ -157,6 +162,11 @@ export function useNetworkStatus(): NetworkStatus {
 
       if (connection?.removeEventListener) {
         connection.removeEventListener('change', updateNetworkInfo)
+      }
+
+      // Cleanup pending timeout
+      if (wasOfflineTimeoutRef.current) {
+        clearTimeout(wasOfflineTimeoutRef.current)
       }
     }
   }, [handleOnline, handleOffline, updateNetworkInfo])

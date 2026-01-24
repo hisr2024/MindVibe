@@ -936,21 +936,7 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Animation for fade in */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
-}
+/* Note: fadeIn animation defined earlier in file - using that definition */
 
 /* Chat wobble animation */
 @keyframes chat-wobble {
