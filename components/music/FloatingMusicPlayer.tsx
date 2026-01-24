@@ -141,14 +141,17 @@ export function FloatingMusicPlayer({
             className="w-72 rounded-2xl bg-[#0d0d12]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="p-3 border-b border-white/5 flex items-center justify-between">
+            <div className="p-3 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-violet-900/20 to-purple-900/20">
               <div className="flex items-center gap-2">
-                <div className={`p-2 rounded-lg ${isPlaying ? 'bg-gradient-to-r from-violet-600 to-purple-600' : 'bg-white/10'}`}>
+                <div className={`p-2 rounded-lg ${isPlaying ? 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-purple-500/20' : 'bg-white/10'}`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">MindVibe Music</p>
-                  <p className="text-xs text-white/50">{isPlaying ? 'Playing' : 'Paused'}</p>
+                  <p className="text-sm font-medium text-white flex items-center gap-1.5">
+                    MindVibe Music
+                    <span className="text-[8px] px-1 py-0.5 rounded bg-violet-500/30 text-violet-200">PRO</span>
+                  </p>
+                  <p className="text-xs text-white/50">{isPlaying ? 'Now Playing' : 'Ready to play'}</p>
                 </div>
               </div>
 
@@ -238,13 +241,19 @@ export function FloatingMusicPlayer({
               )}
             </div>
 
-            {/* Close */}
-            <div className="p-2 border-t border-white/5">
+            {/* Footer with link */}
+            <div className="p-2 border-t border-white/5 flex items-center justify-between gap-2">
+              <a
+                href="/sounds"
+                className="flex-1 p-2 rounded-lg text-xs text-violet-400/70 hover:text-violet-300 hover:bg-violet-500/10 transition-colors text-center"
+              >
+                Full Experience →
+              </a>
               <button
                 onClick={() => setIsVisible(false)}
-                className="w-full p-2 rounded-lg text-xs text-white/40 hover:text-white/60 hover:bg-white/5 transition-colors"
+                className="p-2 rounded-lg text-xs text-white/40 hover:text-white/60 hover:bg-white/5 transition-colors"
               >
-                Hide Player
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </motion.div>

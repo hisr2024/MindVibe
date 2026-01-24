@@ -277,9 +277,12 @@ export function DashboardMusicWidget({
               <Music className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">Sound System</h3>
+              <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                MindVibe Music
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-purple-300 font-medium">PRO</span>
+              </h3>
               <p className="text-xs text-white/50">
-                {isPlaying ? `Playing: ${getCurrentDescription()}` : 'Professional ambient music'}
+                {isPlaying ? `Playing: ${getCurrentDescription()}` : 'Spiritual & therapeutic sounds'}
               </p>
             </div>
           </div>
@@ -427,10 +430,13 @@ export function DashboardMusicWidget({
       {/* Footer Link */}
       <Link
         href="/sounds"
-        className="flex items-center justify-between p-4 border-t border-white/5 hover:bg-white/5 transition-colors"
+        className="flex items-center justify-between p-4 border-t border-white/5 hover:bg-white/5 transition-colors group"
       >
-        <span className="text-sm text-white/60">Full Sound Experience</span>
-        <ChevronRight className="w-4 h-4 text-white/40" />
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Explore MindVibe Music</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/40">20+ sounds</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white/60 transition-colors" />
       </Link>
     </div>
   )

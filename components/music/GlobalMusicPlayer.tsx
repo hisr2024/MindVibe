@@ -195,8 +195,9 @@ export function GlobalMusicPlayer({
 
             {/* Now Playing Info */}
             <div>
-              <h3 className="text-sm font-medium text-white">
-                {isPlaying ? 'Now Playing' : 'Music System'}
+              <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                {isPlaying ? 'Now Playing' : 'MindVibe Music'}
+                {!isPlaying && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300">PRO</span>}
               </h3>
               <p className="text-xs text-white/50">
                 {state.ambientEnabled && state.currentAmbientMode && (

@@ -12,6 +12,12 @@ export { MeditationMusicPlayer } from './MeditationMusicPlayer'
 export { FloatingMusicPlayer } from './FloatingMusicPlayer'
 export { DashboardMusicWidget } from './DashboardMusicWidget'
 
+// Visualizations
+export { AdvancedVisualizer } from './AdvancedVisualizer'
+
+// Therapeutic Programs
+export { ProgramTracker } from './ProgramTracker'
+
 // Re-export context for convenience
 export {
   useMusic,
@@ -36,3 +42,16 @@ export type {
   RagaTime,
   BrainwaveState
 } from '@/contexts/MusicContext'
+
+// Re-export therapeutic programs
+export {
+  therapeuticProgramsEngine,
+  THERAPEUTIC_PROGRAMS
+} from '@/utils/audio/TherapeuticProgramsEngine'
+
+export type {
+  TherapeuticProgram,
+  ProgramSession,
+  ProgramEnrollment,
+  ProgramType
+} from '@/utils/audio/TherapeuticProgramsEngine'
