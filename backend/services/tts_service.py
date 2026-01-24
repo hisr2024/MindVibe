@@ -22,6 +22,7 @@ between text and sound, making teachings accessible to all learning modalities.
 import hashlib
 import logging
 import re
+import threading
 from typing import Optional, Literal, Dict, List, Tuple
 from io import BytesIO
 import os
@@ -821,13 +822,17 @@ class TTSService:
                 logger.warning(f"Failed to clear Redis cache: {e}")
 
 
-# Singleton instance
+# Singleton instance with thread-safe initialization
 _tts_service_instance: Optional[TTSService] = None
+_tts_service_lock = threading.Lock()
 
 
 def get_tts_service(redis_client=None) -> TTSService:
-    """Get singleton TTS service instance"""
+    """Get singleton TTS service instance with thread-safe initialization"""
     global _tts_service_instance
     if _tts_service_instance is None:
-        _tts_service_instance = TTSService(redis_client)
+        with _tts_service_lock:
+            # Double-check after acquiring lock
+            if _tts_service_instance is None:
+                _tts_service_instance = TTSService(redis_client)
     return _tts_service_instance

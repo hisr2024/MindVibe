@@ -14,6 +14,7 @@ Quantum Enhancement #5: Community Wisdom Circles
 import hashlib
 import hmac
 import secrets
+import threading
 from typing import Dict, Optional
 from datetime import datetime
 from pydantic import BaseModel
@@ -301,16 +302,20 @@ class AnonymizationService:
         }
 
 
-# Singleton instance
+# Singleton instance with thread-safe initialization
 _anonymization_service: Optional[AnonymizationService] = None
+_anonymization_service_lock = threading.Lock()
 
 
 def get_anonymization_service() -> AnonymizationService:
-    """Get or create singleton anonymization service instance"""
+    """Get or create singleton anonymization service instance with thread-safe initialization"""
     global _anonymization_service
     if _anonymization_service is None:
-        # In production, load secret from environment variable
-        import os
-        secret_key = os.getenv('ANONYMIZATION_SECRET_KEY')
-        _anonymization_service = AnonymizationService(secret_key=secret_key)
+        with _anonymization_service_lock:
+            # Double-check after acquiring lock
+            if _anonymization_service is None:
+                # In production, load secret from environment variable
+                import os
+                secret_key = os.getenv('ANONYMIZATION_SECRET_KEY')
+                _anonymization_service = AnonymizationService(secret_key=secret_key)
     return _anonymization_service

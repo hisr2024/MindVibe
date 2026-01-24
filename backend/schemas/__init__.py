@@ -61,7 +61,8 @@ class WisdomVerse(BaseModel):
 
 
 class BlobIn(BaseModel):
-    blob_json: str
+    # Limit to 1MB to prevent DoS attacks
+    blob_json: Annotated[str, Field(max_length=1_000_000)]
 
 
 class BlobOut(BaseModel):
