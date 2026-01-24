@@ -2,6 +2,7 @@
 
 import { FadeIn } from '@/components/ui'
 import { ToolsDashboardSection } from '@/components/dashboard'
+import { DashboardMusicWidget } from '@/components/music'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -133,6 +134,11 @@ export default function DashboardClient() {
                 </motion.div>
               </motion.div>
             </Link>
+          </motion.div>
+
+          {/* Professional Sound System */}
+          <motion.div className="mb-6" variants={itemVariants}>
+            <DashboardMusicWidget variant="full" />
           </motion.div>
 
           {/* Quick Actions Grid */}

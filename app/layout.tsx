@@ -10,6 +10,7 @@ import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { GlobalSoundPlayer } from '@/components/sounds'
+import { FloatingMusicPlayer } from '@/components/music'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -70,6 +71,8 @@ export default function RootLayout({
             <KiaanFooter />
             {/* Global floating sound player - shows when ambient audio is playing */}
             <GlobalSoundPlayer />
+            {/* Floating music player - professional music system access */}
+            <FloatingMusicPlayer position="bottom-left" />
           </Providers>
         </ClientLayout>
       </body>

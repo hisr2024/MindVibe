@@ -26,6 +26,7 @@ import {
   Music
 } from 'lucide-react'
 import { AmbientSoundsPlayer, SOUND_SCENES, SoundSceneCard } from '@/components/sounds'
+import { GlobalMusicPlayer, MeditationMusicPlayer } from '@/components/music'
 
 export default function SoundsPage() {
   const [featuredScene, setFeaturedScene] = useState<string | null>(null)
@@ -229,12 +230,52 @@ export default function SoundsPage() {
             </div>
           </motion.section>
 
-          {/* Main Player */}
+          {/* Professional Music System */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="mb-12"
           >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <span className="text-xl">🎵</span>
+                  Professional Music System
+                </h3>
+                <p className="text-sm text-white/50">Time-based ragas, spiritual sounds & ambient music</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <GlobalMusicPlayer
+                showTimeMusic={true}
+                showSpiritualMusic={true}
+                compact={false}
+              />
+
+              <MeditationMusicPlayer
+                showTimer={true}
+              />
+            </div>
+          </motion.section>
+
+          {/* Main Player */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <span className="text-xl">🎧</span>
+                  Ambient Sound Scenes
+                </h3>
+                <p className="text-sm text-white/50">Nature sounds, rain, ocean & more</p>
+              </div>
+            </div>
+
             <AmbientSoundsPlayer
               defaultScene={featuredScene || undefined}
               showMixer={true}
@@ -246,7 +287,7 @@ export default function SoundsPage() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="mt-12 mb-8"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
