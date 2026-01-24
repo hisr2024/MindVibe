@@ -54,6 +54,10 @@ export default function MobileVoicePage() {
 
   const [showSettings, setShowSettings] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const micTransitionRef = useRef<boolean>(false) // Prevent race conditions during mic transitions
+  const warmUpStreamRef = useRef<MediaStream | null>(null) // Keep microphone warm for instant activation
+  const retryCountRef = useRef<number>(0)
+  const maxRetries = 3
 
   const { t, language } = useLanguage()
 
@@ -87,22 +91,76 @@ export default function MobileVoicePage() {
       }
     },
     onError: (err) => {
+      console.error('[Mobile Voice] Voice input error:', err)
+
+      // Don't show error if we're in a transition
+      if (micTransitionRef.current) {
+        console.log('[Mobile Voice] Ignoring error during mic transition')
+        return
+      }
+
+      // Check if this is a recoverable error
+      const lowerErr = err.toLowerCase()
+      if (lowerErr.includes('no-speech') || lowerErr.includes('aborted') || lowerErr.includes('no speech')) {
+        // These are expected - just return to idle
+        console.log('[Mobile Voice] Recoverable error, returning to idle')
+        setState('idle')
+
+        // Elite: Re-warm microphone for next activation
+        setTimeout(() => warmUpMicrophone(), 500)
+        return
+      }
+
+      // For actual errors, show the error state
       setError(err)
       setState('error')
       playSound('error')  // Sound on error
     },
   })
 
-  // Online status
+  // Elite: Warm up microphone for instant activation
+  async function warmUpMicrophone(): Promise<boolean> {
+    if (warmUpStreamRef.current) return true
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true }
+      })
+      warmUpStreamRef.current = stream
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  // Elite: Release warm-up stream
+  function releaseWarmUpStream(): void {
+    if (warmUpStreamRef.current) {
+      warmUpStreamRef.current.getTracks().forEach(track => track.stop())
+      warmUpStreamRef.current = null
+    }
+  }
+
+  // Online status and warm-up
   useEffect(() => {
     setIsOnline(navigator.onLine)
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
+
+    // Elite: Pre-warm microphone if permission already granted
+    if (navigator.permissions?.query) {
+      navigator.permissions.query({ name: 'microphone' as PermissionName })
+        .then(result => {
+          if (result.state === 'granted') warmUpMicrophone()
+        })
+        .catch(() => {})
+    }
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      releaseWarmUpStream()
     }
   }, [])
 
@@ -118,14 +176,28 @@ export default function MobileVoicePage() {
     [settings.hapticFeedback]
   )
 
-  // Handle voice button press
+  // Handle voice button press with race condition protection
   const handleVoicePress = async () => {
+    // Prevent rapid clicks causing issues
+    if (micTransitionRef.current) {
+      console.log('[Mobile Voice] Already transitioning, ignoring press')
+      return
+    }
+
     triggerHaptic('medium')
 
     if (isListening) {
-      stopListening()
-      setState('idle')
+      micTransitionRef.current = true
+      try {
+        stopListening()
+        setState('idle')
+      } finally {
+        setTimeout(() => {
+          micTransitionRef.current = false
+        }, 300)
+      }
     } else {
+      micTransitionRef.current = true
       setError(null)
       resetTranscript()
       setInterimTranscript('')
@@ -133,10 +205,21 @@ export default function MobileVoicePage() {
       setState('listening')
 
       try {
-        await startListening()
+        // Elite: Release warm-up stream - SpeechRecognition manages its own mic
+        releaseWarmUpStream()
+
+        // Small delay to ensure any previous recognition is fully stopped
+        await new Promise(resolve => setTimeout(resolve, 100))
+        startListening()
       } catch (err) {
+        console.error('[Mobile Voice] Failed to start listening:', err)
         setError('Could not start listening. Please check microphone permissions.')
         setState('error')
+        playSound('error')
+      } finally {
+        setTimeout(() => {
+          micTransitionRef.current = false
+        }, 500)
       }
     }
   }
