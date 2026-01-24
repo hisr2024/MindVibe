@@ -159,49 +159,48 @@ export default function IntroductionPage() {
   return (
     <DivineConsciousnessProvider>
       <SakhaModeProvider>
+        {/* ==================== MODALS (Outside main for proper fixed positioning) ==================== */}
+
+        {/* Morning Darshan Modal - Full screen on mobile */}
+        <AnimatePresence mode="wait">
+          {showMorningDarshan && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="max-w-lg w-full max-h-[90vh] overflow-y-auto"
+              >
+                <KrishnaMorningDarshan
+                  onComplete={completeDarshan}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <DivineProtectionShield
+          isOpen={showProtectionShield}
+          onClose={closeProtectionShield}
+        />
+
+        <HeartToHeartJournal
+          isOpen={showHeartJournal}
+          onClose={closeHeartJournal}
+        />
+
         {/* Main Container - Responsive padding with CSS containment to prevent layout thrashing */}
         <main
           className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 md:pb-16"
           style={{ contain: 'layout style', touchAction: 'manipulation' }}
         >
-
-          {/* ==================== MODALS ==================== */}
-
-          {/* Morning Darshan Modal - Full screen on mobile */}
-          <AnimatePresence mode="wait">
-            {showMorningDarshan && (
-              <motion.div
-                className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/90 backdrop-blur-md"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.95, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="max-w-lg w-full max-h-[90vh] overflow-y-auto"
-                >
-                  <KrishnaMorningDarshan
-                    onComplete={completeDarshan}
-                  />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <DivineProtectionShield
-            isOpen={showProtectionShield}
-            onClose={closeProtectionShield}
-          />
-
-          <HeartToHeartJournal
-            isOpen={showHeartJournal}
-            onClose={closeHeartJournal}
-          />
-
           {/* ==================== HERO SECTION ==================== */}
 
           <motion.section
