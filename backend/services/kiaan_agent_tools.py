@@ -1,5 +1,5 @@
 """
-KIAAN Agent Tools - Autonomous Tool Execution Framework
+KIAAN Agent Tools - Autonomous Tool Execution Framework with OFFLINE SUPPORT
 
 This module provides KIAAN with the ability to execute tools autonomously,
 making it an independent software researcher and Python specialist.
@@ -11,6 +11,11 @@ Tools Available:
 4. Repository Analysis - Clone and analyze GitHub repositories
 5. Documentation Fetcher - Fetch and parse technical documentation
 6. Package Manager - Search and analyze Python packages
+
+OFFLINE TOOLS (v3.0):
+7. Local Documentation Search - Search cached documentation offline
+8. Local Repository Analyzer - Analyze local repos without GitHub API
+9. Offline Knowledge Base - Query pre-cached programming knowledge
 """
 
 import asyncio
@@ -22,16 +27,21 @@ import re
 import shutil
 import subprocess
 import tempfile
+import sqlite3
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 import aiohttp
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+# Default cache path for offline documentation
+DEFAULT_DOCS_CACHE_PATH = Path.home() / ".mindvibe" / "docs_cache"
 
 
 class ToolStatus(str, Enum):
@@ -939,13 +949,598 @@ class RepositoryAnalyzerTool(BaseTool):
         return result
 
 
-# Tool Registry - All available tools
+# =============================================================================
+# OFFLINE TOOLS - Work without internet
+# =============================================================================
+
+class OfflineDocumentationCache:
+    """
+    Cache for storing documentation locally for offline access.
+    Stores package docs, tutorials, and code examples.
+    """
+
+    def __init__(self, cache_dir: Optional[str] = None):
+        self.cache_dir = Path(cache_dir or DEFAULT_DOCS_CACHE_PATH)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.db_path = self.cache_dir / "docs.db"
+        self._initialized = False
+
+    def _ensure_initialized(self) -> bool:
+        """Initialize SQLite database for docs cache."""
+        if self._initialized:
+            return True
+
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+
+            # Create documentation table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS documentation (
+                    id TEXT PRIMARY KEY,
+                    package_name TEXT NOT NULL,
+                    version TEXT,
+                    section TEXT,
+                    title TEXT,
+                    content TEXT NOT NULL,
+                    url TEXT,
+                    cached_at TEXT NOT NULL,
+                    language TEXT DEFAULT 'en'
+                )
+            """)
+
+            # Create FTS table for search
+            cursor.execute("""
+                CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(
+                    package_name, title, content,
+                    content='documentation'
+                )
+            """)
+
+            # Create index
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_package ON documentation(package_name)")
+
+            conn.commit()
+            conn.close()
+            self._initialized = True
+            logger.info(f"Documentation cache initialized: {self.db_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to initialize docs cache: {e}")
+            return False
+
+    def cache_documentation(
+        self,
+        package_name: str,
+        content: str,
+        title: str = "",
+        section: str = "overview",
+        version: str = "",
+        url: str = ""
+    ) -> bool:
+        """Cache documentation for a package."""
+        if not self._ensure_initialized():
+            return False
+
+        try:
+            doc_id = hashlib.md5(f"{package_name}:{section}:{version}".encode()).hexdigest()
+
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO documentation
+                (id, package_name, version, section, title, content, url, cached_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                doc_id, package_name, version, section, title, content, url,
+                datetime.now().isoformat()
+            ))
+
+            # Update FTS
+            cursor.execute("""
+                INSERT OR REPLACE INTO docs_fts(package_name, title, content)
+                VALUES (?, ?, ?)
+            """, (package_name, title, content))
+
+            conn.commit()
+            conn.close()
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to cache documentation: {e}")
+            return False
+
+    def search(self, query: str, limit: int = 10) -> list[dict]:
+        """Search cached documentation."""
+        if not self._ensure_initialized():
+            return []
+
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            # Try FTS search first
+            try:
+                cursor.execute("""
+                    SELECT d.* FROM documentation d
+                    JOIN docs_fts fts ON d.package_name = fts.package_name
+                    WHERE docs_fts MATCH ?
+                    LIMIT ?
+                """, (query, limit))
+            except Exception:
+                # Fallback to LIKE search
+                cursor.execute("""
+                    SELECT * FROM documentation
+                    WHERE content LIKE ? OR title LIKE ? OR package_name LIKE ?
+                    LIMIT ?
+                """, (f"%{query}%", f"%{query}%", f"%{query}%", limit))
+
+            results = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            return results
+
+        except Exception as e:
+            logger.error(f"Documentation search failed: {e}")
+            return []
+
+    def get_package_docs(self, package_name: str) -> list[dict]:
+        """Get all cached documentation for a package."""
+        if not self._ensure_initialized():
+            return []
+
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "SELECT * FROM documentation WHERE package_name = ?",
+                (package_name,)
+            )
+
+            results = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to get package docs: {e}")
+            return []
+
+    def get_stats(self) -> dict:
+        """Get cache statistics."""
+        if not self._ensure_initialized():
+            return {}
+
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT COUNT(*) FROM documentation")
+            total = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(DISTINCT package_name) FROM documentation")
+            packages = cursor.fetchone()[0]
+
+            conn.close()
+
+            return {
+                "total_docs": total,
+                "unique_packages": packages,
+                "cache_path": str(self.cache_dir),
+                "db_size_mb": round(self.db_path.stat().st_size / (1024 * 1024), 2) if self.db_path.exists() else 0
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to get stats: {e}")
+            return {}
+
+
+# Global documentation cache
+_docs_cache: Optional[OfflineDocumentationCache] = None
+
+
+def get_docs_cache() -> OfflineDocumentationCache:
+    """Get documentation cache singleton."""
+    global _docs_cache
+    if _docs_cache is None:
+        _docs_cache = OfflineDocumentationCache()
+    return _docs_cache
+
+
+class LocalDocSearchTool(BaseTool):
+    """
+    Local Documentation Search Tool - Search cached documentation offline.
+    Works without internet connection.
+    """
+
+    name = "local_doc_search"
+    description = """Search locally cached documentation for Python packages,
+    frameworks, and programming concepts. Use this when offline or to quickly
+    find previously accessed documentation without network latency."""
+
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Search query for documentation"
+            },
+            "package_name": {
+                "type": "string",
+                "description": "Optional: specific package to search within"
+            },
+            "max_results": {
+                "type": "integer",
+                "description": "Maximum results to return",
+                "default": 5
+            }
+        },
+        "required": ["query"]
+    }
+
+    def __init__(self):
+        self.cache = get_docs_cache()
+
+    async def execute(
+        self,
+        query: str,
+        package_name: Optional[str] = None,
+        max_results: int = 5
+    ) -> ToolResult:
+        """Search local documentation cache."""
+        import time
+        start_time = time.time()
+
+        try:
+            if package_name:
+                # Search within specific package
+                results = self.cache.get_package_docs(package_name)
+                # Filter by query
+                query_lower = query.lower()
+                results = [
+                    r for r in results
+                    if query_lower in r.get("content", "").lower() or
+                       query_lower in r.get("title", "").lower()
+                ][:max_results]
+            else:
+                # General search
+                results = self.cache.search(query, max_results)
+
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.SUCCESS,
+                output={
+                    "results": results,
+                    "count": len(results),
+                    "offline": True
+                },
+                execution_time_ms=(time.time() - start_time) * 1000,
+                metadata={"query": query, "offline": True}
+            )
+
+        except Exception as e:
+            logger.error(f"Local doc search failed: {e}")
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.ERROR,
+                output=None,
+                error=str(e),
+                execution_time_ms=(time.time() - start_time) * 1000
+            )
+
+
+class LocalRepositoryAnalyzerTool(BaseTool):
+    """
+    Local Repository Analyzer - Analyze local repositories without GitHub API.
+    Fully offline capable.
+    """
+
+    name = "analyze_local_repository"
+    description = """Analyze a local Git repository to understand its structure,
+    dependencies, and codebase. Works completely offline without requiring
+    GitHub API access."""
+
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "repo_path": {
+                "type": "string",
+                "description": "Path to local Git repository"
+            },
+            "analysis_type": {
+                "type": "string",
+                "enum": ["structure", "dependencies", "git_history", "all"],
+                "description": "Type of analysis to perform",
+                "default": "structure"
+            }
+        },
+        "required": ["repo_path"]
+    }
+
+    async def execute(self, repo_path: str, analysis_type: str = "structure") -> ToolResult:
+        """Analyze local repository."""
+        import time
+        start_time = time.time()
+
+        path = Path(repo_path).expanduser().resolve()
+
+        if not path.exists():
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.ERROR,
+                output=None,
+                error=f"Repository path not found: {repo_path}",
+                execution_time_ms=(time.time() - start_time) * 1000
+            )
+
+        try:
+            result = {
+                "path": str(path),
+                "is_git_repo": (path / ".git").exists()
+            }
+
+            if analysis_type in ("structure", "all"):
+                result["structure"] = self._analyze_structure(path)
+
+            if analysis_type in ("dependencies", "all"):
+                result["dependencies"] = self._analyze_dependencies(path)
+
+            if analysis_type in ("git_history", "all") and result["is_git_repo"]:
+                result["git_history"] = await self._analyze_git_history(path)
+
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.SUCCESS,
+                output=result,
+                execution_time_ms=(time.time() - start_time) * 1000,
+                metadata={"path": str(path), "offline": True}
+            )
+
+        except Exception as e:
+            logger.error(f"Local repo analysis failed: {e}")
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.ERROR,
+                output=None,
+                error=str(e),
+                execution_time_ms=(time.time() - start_time) * 1000
+            )
+
+    def _analyze_structure(self, path: Path) -> dict:
+        """Analyze repository file structure."""
+        structure = {
+            "total_files": 0,
+            "by_extension": {},
+            "directories": [],
+            "key_files": []
+        }
+
+        key_file_patterns = [
+            "README*", "LICENSE*", "setup.py", "pyproject.toml",
+            "requirements*.txt", "package.json", "Cargo.toml",
+            "Makefile", "Dockerfile", ".env.example"
+        ]
+
+        for item in path.rglob("*"):
+            if item.is_file() and ".git" not in str(item):
+                structure["total_files"] += 1
+
+                ext = item.suffix.lower() or "no_extension"
+                structure["by_extension"][ext] = structure["by_extension"].get(ext, 0) + 1
+
+                # Check if key file
+                for pattern in key_file_patterns:
+                    if item.match(pattern):
+                        structure["key_files"].append(str(item.relative_to(path)))
+
+        # Get top-level directories
+        structure["directories"] = [
+            d.name for d in path.iterdir()
+            if d.is_dir() and not d.name.startswith(".")
+        ][:20]
+
+        return structure
+
+    def _analyze_dependencies(self, path: Path) -> dict:
+        """Analyze project dependencies."""
+        deps = {
+            "python": [],
+            "javascript": [],
+            "other": []
+        }
+
+        # Python: requirements.txt, pyproject.toml
+        req_file = path / "requirements.txt"
+        if req_file.exists():
+            with open(req_file) as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        # Extract package name
+                        pkg = re.split(r"[<>=!~\[]", line)[0].strip()
+                        if pkg:
+                            deps["python"].append(pkg)
+
+        # JavaScript: package.json
+        pkg_json = path / "package.json"
+        if pkg_json.exists():
+            try:
+                with open(pkg_json) as f:
+                    data = json.load(f)
+                deps["javascript"] = list(data.get("dependencies", {}).keys())
+            except Exception:
+                pass
+
+        return deps
+
+    async def _analyze_git_history(self, path: Path) -> dict:
+        """Analyze Git history."""
+        history = {
+            "total_commits": 0,
+            "recent_commits": [],
+            "branches": []
+        }
+
+        try:
+            # Get commit count
+            result = subprocess.run(
+                ["git", "rev-list", "--count", "HEAD"],
+                cwd=path, capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                history["total_commits"] = int(result.stdout.strip())
+
+            # Get recent commits
+            result = subprocess.run(
+                ["git", "log", "-5", "--oneline"],
+                cwd=path, capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                history["recent_commits"] = result.stdout.strip().split("\n")
+
+            # Get branches
+            result = subprocess.run(
+                ["git", "branch", "-a"],
+                cwd=path, capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                history["branches"] = [
+                    b.strip().replace("* ", "")
+                    for b in result.stdout.strip().split("\n")[:10]
+                ]
+
+        except Exception as e:
+            logger.warning(f"Git analysis failed: {e}")
+
+        return history
+
+
+class OfflineKnowledgeBaseTool(BaseTool):
+    """
+    Offline Knowledge Base - Query pre-cached programming knowledge.
+    Contains common programming patterns, best practices, and solutions.
+    """
+
+    name = "offline_knowledge"
+    description = """Query the offline programming knowledge base for common
+    patterns, best practices, error solutions, and coding conventions.
+    Works completely offline."""
+
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "topic": {
+                "type": "string",
+                "description": "Programming topic to query"
+            },
+            "category": {
+                "type": "string",
+                "enum": ["python", "javascript", "general", "patterns", "errors"],
+                "description": "Knowledge category",
+                "default": "general"
+            }
+        },
+        "required": ["topic"]
+    }
+
+    # Built-in offline knowledge base
+    KNOWLEDGE_BASE = {
+        "python": {
+            "list_comprehension": "List comprehensions provide a concise way to create lists: [expr for item in iterable if condition]",
+            "async_await": "Use 'async def' to define coroutines and 'await' to call them. Requires asyncio.run() to execute.",
+            "decorators": "Decorators wrap functions: @decorator_name above function definition. Use functools.wraps for proper metadata.",
+            "context_managers": "Use 'with' statement for resource management. Implement __enter__ and __exit__ methods.",
+            "type_hints": "Add type hints: def func(param: Type) -> ReturnType. Use Optional[T] for nullable types.",
+        },
+        "javascript": {
+            "promises": "Promises handle async operations: new Promise((resolve, reject) => {...}). Use .then() and .catch().",
+            "async_await": "async functions return Promises. Use 'await' inside to wait for Promise resolution.",
+            "destructuring": "Extract values: const {a, b} = obj; or const [x, y] = arr;",
+            "spread_operator": "Spread arrays: [...arr1, ...arr2]. Spread objects: {...obj1, ...obj2}",
+        },
+        "patterns": {
+            "singleton": "Ensure only one instance exists. Use __new__ in Python or module-level instance.",
+            "factory": "Create objects without specifying exact class. Use factory function or class method.",
+            "observer": "Define subscription mechanism to notify observers of state changes.",
+            "decorator_pattern": "Attach additional responsibilities to objects dynamically.",
+        },
+        "errors": {
+            "importerror": "Check: 1) Package installed 2) Virtual env activated 3) PYTHONPATH correct 4) Circular imports",
+            "typeerror": "Check: 1) Argument types 2) Method signature 3) NoneType operations 4) Callable requirements",
+            "keyerror": "Dict key missing. Use .get(key, default), 'in' check, or try/except KeyError.",
+            "attributeerror": "Object lacks attribute. Check: 1) Typos 2) Initialization 3) Class definition 4) Import",
+        }
+    }
+
+    async def execute(self, topic: str, category: str = "general") -> ToolResult:
+        """Query offline knowledge base."""
+        import time
+        start_time = time.time()
+
+        try:
+            topic_lower = topic.lower()
+            results = []
+
+            # Search in specified category or all
+            categories_to_search = [category] if category != "general" else list(self.KNOWLEDGE_BASE.keys())
+
+            for cat in categories_to_search:
+                if cat in self.KNOWLEDGE_BASE:
+                    for key, value in self.KNOWLEDGE_BASE[cat].items():
+                        if topic_lower in key.lower() or topic_lower in value.lower():
+                            results.append({
+                                "category": cat,
+                                "topic": key,
+                                "knowledge": value
+                            })
+
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.SUCCESS,
+                output={
+                    "results": results,
+                    "count": len(results),
+                    "offline": True
+                },
+                execution_time_ms=(time.time() - start_time) * 1000,
+                metadata={"topic": topic, "category": category, "offline": True}
+            )
+
+        except Exception as e:
+            return ToolResult(
+                tool_name=self.name,
+                status=ToolStatus.ERROR,
+                output=None,
+                error=str(e),
+                execution_time_ms=(time.time() - start_time) * 1000
+            )
+
+
+# Tool Registry - All available tools (including offline)
 KIAAN_TOOLS: dict[str, BaseTool] = {
+    # Online tools
     "web_search": WebSearchTool(),
     "python_execute": PythonExecutionTool(),
     "file_analyze": FileAnalysisTool(),
     "fetch_documentation": DocumentationFetcherTool(),
     "analyze_repository": RepositoryAnalyzerTool(),
+
+    # Offline tools (v3.0)
+    "local_doc_search": LocalDocSearchTool(),
+    "analyze_local_repository": LocalRepositoryAnalyzerTool(),
+    "offline_knowledge": OfflineKnowledgeBaseTool(),
+}
+
+# Offline-only tools registry
+OFFLINE_TOOLS: dict[str, BaseTool] = {
+    "local_doc_search": KIAAN_TOOLS["local_doc_search"],
+    "analyze_local_repository": KIAAN_TOOLS["analyze_local_repository"],
+    "offline_knowledge": KIAAN_TOOLS["offline_knowledge"],
+    "python_execute": KIAAN_TOOLS["python_execute"],  # Works offline
+    "file_analyze": KIAAN_TOOLS["file_analyze"],  # Works offline
 }
 
 
@@ -970,15 +1565,30 @@ async def execute_tool(tool_name: str, **kwargs) -> ToolResult:
 
 # Export
 __all__ = [
+    # Base classes
     "BaseTool",
     "ToolResult",
     "ToolStatus",
+
+    # Online tools
     "WebSearchTool",
     "PythonExecutionTool",
     "FileAnalysisTool",
     "DocumentationFetcherTool",
     "RepositoryAnalyzerTool",
+
+    # Offline tools (v3.0)
+    "LocalDocSearchTool",
+    "LocalRepositoryAnalyzerTool",
+    "OfflineKnowledgeBaseTool",
+    "OfflineDocumentationCache",
+
+    # Tool registries
     "KIAAN_TOOLS",
+    "OFFLINE_TOOLS",
+
+    # Functions
     "get_all_tool_schemas",
-    "execute_tool"
+    "execute_tool",
+    "get_docs_cache",
 ]

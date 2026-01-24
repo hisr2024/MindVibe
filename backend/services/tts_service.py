@@ -1,5 +1,5 @@
 """
-MindVibe Text-to-Speech Service - Ultra-Natural Voice Processing
+MindVibe Text-to-Speech Service - Ultra-Natural Voice Processing with OFFLINE SUPPORT
 
 Provides multilingual voice synthesis for Gita verses, KIAAN responses,
 and meditation guidance across 17 languages with advanced prosody,
@@ -15,6 +15,13 @@ Features:
 - Multi-layer caching (Redis + Memory)
 - Real-time quality metrics tracking
 
+OFFLINE INDEPENDENCE (v3.0):
+- pyttsx3 for fully offline TTS (no internet required)
+- edge-tts for high-quality Microsoft voices (works with cached tokens)
+- Automatic fallback chain: Google → edge-tts → pyttsx3
+- Local audio caching for common phrases
+- Pre-generated audio for offline meditation content
+
 Quantum Coherence: Voice brings ancient wisdom to life, creating resonance
 between text and sound, making teachings accessible to all learning modalities.
 """
@@ -23,9 +30,12 @@ import hashlib
 import logging
 import re
 import threading
+import asyncio
 from typing import Optional, Literal, Dict, List, Tuple
 from io import BytesIO
+from pathlib import Path
 import os
+import json
 
 # Google Cloud TTS (primary provider)
 try:
@@ -33,6 +43,20 @@ try:
     GOOGLE_TTS_AVAILABLE = True
 except ImportError:
     GOOGLE_TTS_AVAILABLE = False
+
+# pyttsx3 for offline TTS (no internet required)
+try:
+    import pyttsx3
+    PYTTSX3_AVAILABLE = True
+except ImportError:
+    PYTTSX3_AVAILABLE = False
+
+# edge-tts for Microsoft voices (lightweight, works offline with cached tokens)
+try:
+    import edge_tts
+    EDGE_TTS_AVAILABLE = True
+except ImportError:
+    EDGE_TTS_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -185,12 +209,328 @@ VOICE_TYPE_SETTINGS: Dict[str, Dict[str, float]] = {
 }
 
 
+# =============================================================================
+# OFFLINE TTS - Edge-TTS Voice Mapping
+# =============================================================================
+
+EDGE_TTS_VOICES: Dict[str, Dict[str, str]] = {
+    "en": {
+        "calm": "en-US-AriaNeural",
+        "wisdom": "en-US-GuyNeural",
+        "friendly": "en-US-JennyNeural",
+    },
+    "hi": {
+        "calm": "hi-IN-SwaraNeural",
+        "wisdom": "hi-IN-MadhurNeural",
+        "friendly": "hi-IN-SwaraNeural",
+    },
+    "es": {
+        "calm": "es-ES-ElviraNeural",
+        "wisdom": "es-ES-AlvaroNeural",
+        "friendly": "es-MX-DaliaNeural",
+    },
+    "fr": {
+        "calm": "fr-FR-DeniseNeural",
+        "wisdom": "fr-FR-HenriNeural",
+        "friendly": "fr-FR-DeniseNeural",
+    },
+    "de": {
+        "calm": "de-DE-KatjaNeural",
+        "wisdom": "de-DE-ConradNeural",
+        "friendly": "de-DE-KatjaNeural",
+    },
+    "ja": {
+        "calm": "ja-JP-NanamiNeural",
+        "wisdom": "ja-JP-KeitaNeural",
+        "friendly": "ja-JP-NanamiNeural",
+    },
+    "zh": {
+        "calm": "zh-CN-XiaoxiaoNeural",
+        "wisdom": "zh-CN-YunxiNeural",
+        "friendly": "zh-CN-XiaoxiaoNeural",
+    },
+}
+
+
+# =============================================================================
+# LOCAL TTS PROVIDERS
+# =============================================================================
+
+class LocalTTSProvider:
+    """
+    Local TTS provider using pyttsx3 for fully offline voice synthesis.
+    Works without any internet connection.
+    """
+
+    def __init__(self):
+        self._engine = None
+        self._lock = threading.Lock()
+        self._initialized = False
+
+    def _ensure_initialized(self) -> bool:
+        """Initialize pyttsx3 engine on first use."""
+        if self._initialized:
+            return self._engine is not None
+
+        with self._lock:
+            if self._initialized:
+                return self._engine is not None
+
+            if not PYTTSX3_AVAILABLE:
+                logger.warning("pyttsx3 not available for offline TTS")
+                self._initialized = True
+                return False
+
+            try:
+                self._engine = pyttsx3.init()
+
+                # Configure voice properties
+                self._engine.setProperty('rate', 150)  # Words per minute
+                self._engine.setProperty('volume', 0.9)
+
+                # Try to set a good voice
+                voices = self._engine.getProperty('voices')
+                if voices:
+                    # Prefer female voices for calm
+                    for voice in voices:
+                        if 'female' in voice.name.lower() or 'zira' in voice.name.lower():
+                            self._engine.setProperty('voice', voice.id)
+                            break
+
+                logger.info("pyttsx3 TTS initialized successfully")
+                self._initialized = True
+                return True
+
+            except Exception as e:
+                logger.error(f"Failed to initialize pyttsx3: {e}")
+                self._initialized = True
+                return False
+
+    def synthesize(
+        self,
+        text: str,
+        voice_type: str = "friendly",
+        speed: float = 1.0
+    ) -> Optional[bytes]:
+        """Synthesize text to audio using pyttsx3."""
+        if not self._ensure_initialized():
+            return None
+
+        try:
+            import tempfile
+            import wave
+
+            # Adjust rate based on voice type
+            base_rate = 150
+            rate_multiplier = {
+                "calm": 0.85,
+                "wisdom": 0.90,
+                "friendly": 1.0
+            }.get(voice_type, 1.0)
+
+            self._engine.setProperty('rate', int(base_rate * rate_multiplier * speed))
+
+            # Save to temp file
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
+                temp_path = f.name
+
+            self._engine.save_to_file(text, temp_path)
+            self._engine.runAndWait()
+
+            # Read the file and convert to bytes
+            with open(temp_path, 'rb') as f:
+                audio_bytes = f.read()
+
+            # Clean up
+            os.unlink(temp_path)
+
+            return audio_bytes
+
+        except Exception as e:
+            logger.error(f"pyttsx3 synthesis failed: {e}")
+            return None
+
+    def is_available(self) -> bool:
+        """Check if pyttsx3 is available."""
+        return PYTTSX3_AVAILABLE and self._ensure_initialized()
+
+
+class EdgeTTSProvider:
+    """
+    Edge TTS provider using Microsoft's neural voices.
+    High quality voices that work with minimal bandwidth.
+    """
+
+    def __init__(self):
+        self._available = EDGE_TTS_AVAILABLE
+
+    async def synthesize(
+        self,
+        text: str,
+        language: str = "en",
+        voice_type: str = "friendly",
+        speed: float = 1.0
+    ) -> Optional[bytes]:
+        """Synthesize text using edge-tts."""
+        if not self._available:
+            return None
+
+        try:
+            # Get appropriate voice
+            voice = self._get_voice(language, voice_type)
+
+            # Adjust rate (+/- percentage)
+            rate_adjustment = int((speed - 1.0) * 100)
+            rate_str = f"+{rate_adjustment}%" if rate_adjustment >= 0 else f"{rate_adjustment}%"
+
+            # Create communication object
+            communicate = edge_tts.Communicate(text, voice, rate=rate_str)
+
+            # Collect audio chunks
+            audio_chunks = []
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    audio_chunks.append(chunk["data"])
+
+            if audio_chunks:
+                return b"".join(audio_chunks)
+            return None
+
+        except Exception as e:
+            logger.error(f"edge-tts synthesis failed: {e}")
+            return None
+
+    def _get_voice(self, language: str, voice_type: str) -> str:
+        """Get edge-tts voice for language and type."""
+        lang_voices = EDGE_TTS_VOICES.get(language, EDGE_TTS_VOICES.get("en", {}))
+        return lang_voices.get(voice_type, "en-US-AriaNeural")
+
+    def is_available(self) -> bool:
+        """Check if edge-tts is available."""
+        return self._available
+
+
+class OfflineAudioCache:
+    """
+    Cache for pre-generated offline audio.
+    Stores commonly used phrases and meditations for instant access.
+    """
+
+    def __init__(self, cache_dir: Optional[str] = None):
+        self.cache_dir = Path(cache_dir or Path.home() / ".mindvibe" / "audio_cache")
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self._index: Dict[str, str] = {}
+        self._load_index()
+
+    def _load_index(self) -> None:
+        """Load cache index from disk."""
+        index_file = self.cache_dir / "index.json"
+        if index_file.exists():
+            try:
+                with open(index_file, "r") as f:
+                    self._index = json.load(f)
+            except Exception as e:
+                logger.warning(f"Failed to load audio cache index: {e}")
+
+    def _save_index(self) -> None:
+        """Save cache index to disk."""
+        index_file = self.cache_dir / "index.json"
+        try:
+            with open(index_file, "w") as f:
+                json.dump(self._index, f, indent=2)
+        except Exception as e:
+            logger.warning(f"Failed to save audio cache index: {e}")
+
+    def _generate_key(self, text: str, language: str, voice_type: str) -> str:
+        """Generate cache key."""
+        content = f"{text}:{language}:{voice_type}"
+        return hashlib.md5(content.encode()).hexdigest()
+
+    def get(self, text: str, language: str, voice_type: str) -> Optional[bytes]:
+        """Get cached audio if available."""
+        key = self._generate_key(text, language, voice_type)
+        if key not in self._index:
+            return None
+
+        audio_file = self.cache_dir / self._index[key]
+        if not audio_file.exists():
+            return None
+
+        try:
+            with open(audio_file, "rb") as f:
+                return f.read()
+        except Exception:
+            return None
+
+    def set(self, text: str, language: str, voice_type: str, audio: bytes) -> None:
+        """Cache audio for future offline use."""
+        key = self._generate_key(text, language, voice_type)
+        filename = f"{key}.mp3"
+        audio_file = self.cache_dir / filename
+
+        try:
+            with open(audio_file, "wb") as f:
+                f.write(audio)
+            self._index[key] = filename
+            self._save_index()
+        except Exception as e:
+            logger.warning(f"Failed to cache audio: {e}")
+
+    def clear(self) -> None:
+        """Clear all cached audio."""
+        for filename in self._index.values():
+            try:
+                (self.cache_dir / filename).unlink(missing_ok=True)
+            except Exception:
+                pass
+        self._index = {}
+        self._save_index()
+
+
+# Global offline providers
+_local_tts_provider: Optional[LocalTTSProvider] = None
+_edge_tts_provider: Optional[EdgeTTSProvider] = None
+_offline_audio_cache: Optional[OfflineAudioCache] = None
+
+
+def get_local_tts_provider() -> LocalTTSProvider:
+    """Get or create local TTS provider."""
+    global _local_tts_provider
+    if _local_tts_provider is None:
+        _local_tts_provider = LocalTTSProvider()
+    return _local_tts_provider
+
+
+def get_edge_tts_provider() -> EdgeTTSProvider:
+    """Get or create edge TTS provider."""
+    global _edge_tts_provider
+    if _edge_tts_provider is None:
+        _edge_tts_provider = EdgeTTSProvider()
+    return _edge_tts_provider
+
+
+def get_offline_audio_cache() -> OfflineAudioCache:
+    """Get or create offline audio cache."""
+    global _offline_audio_cache
+    if _offline_audio_cache is None:
+        _offline_audio_cache = OfflineAudioCache()
+    return _offline_audio_cache
+
+
 class TTSService:
-    """Text-to-Speech service with Google Cloud TTS and caching"""
+    """
+    Text-to-Speech service with Google Cloud TTS, edge-tts, and pyttsx3 fallback.
+
+    OFFLINE SUPPORT (v3.0):
+    - Primary: Google Cloud TTS (highest quality, requires internet)
+    - Fallback 1: edge-tts (Microsoft neural voices, lightweight)
+    - Fallback 2: pyttsx3 (fully offline, no internet required)
+    - Automatic fallback chain based on availability
+    """
 
     def __init__(self, redis_client=None):
         """
-        Initialize TTS service
+        Initialize TTS service with offline fallback support.
 
         Args:
             redis_client: Optional Redis client for caching
@@ -199,7 +539,7 @@ class TTSService:
         self.memory_cache: Dict[str, bytes] = {}  # Fallback cache
         self.cache_ttl = 604800  # 1 week in seconds
 
-        # Initialize Google TTS client
+        # Initialize Google TTS client (primary)
         if GOOGLE_TTS_AVAILABLE:
             try:
                 self.tts_client = texttospeech.TextToSpeechClient()
@@ -208,8 +548,21 @@ class TTSService:
                 logger.error(f"Failed to initialize Google TTS: {e}")
                 self.tts_client = None
         else:
-            logger.warning("Google Cloud TTS not available - install google-cloud-texttospeech")
+            logger.warning("Google Cloud TTS not available - will use offline fallback")
             self.tts_client = None
+
+        # Initialize offline providers (v3.0)
+        self.local_tts = get_local_tts_provider()
+        self.edge_tts = get_edge_tts_provider()
+        self.offline_cache = get_offline_audio_cache()
+
+        # Track provider availability
+        self._google_available = self.tts_client is not None
+        self._edge_available = EDGE_TTS_AVAILABLE
+        self._local_available = PYTTSX3_AVAILABLE
+
+        logger.info(f"TTS Providers: Google={self._google_available}, "
+                   f"Edge={self._edge_available}, Local={self._local_available}")
 
     def _generate_cache_key(
         self,
@@ -278,10 +631,11 @@ class TTSService:
         language: str = "en",
         voice_type: VoiceType = "friendly",
         speed: Optional[float] = None,
-        pitch: Optional[float] = None
+        pitch: Optional[float] = None,
+        force_offline: bool = False
     ) -> Optional[bytes]:
         """
-        Synthesize text to speech with natural prosody
+        Synthesize text to speech with natural prosody and offline fallback.
 
         Args:
             text: Text to synthesize
@@ -289,9 +643,10 @@ class TTSService:
             voice_type: Voice persona (calm, wisdom, friendly)
             speed: Speaking rate (0.5 - 2.0), defaults to voice type optimal
             pitch: Voice pitch (-20.0 - 20.0), defaults to voice type optimal
+            force_offline: Force offline synthesis even when Google is available
 
         Returns:
-            MP3 audio bytes or None if synthesis fails
+            MP3/WAV audio bytes or None if synthesis fails
         """
         if not text or not text.strip():
             logger.warning("Empty text provided for TTS")
@@ -302,15 +657,79 @@ class TTSService:
         actual_speed = speed if speed is not None else voice_settings["speed"]
         actual_pitch = pitch if pitch is not None else voice_settings["pitch"]
 
-        # Check cache first
+        # Check cache first (including offline cache)
         cache_key = self._generate_cache_key(text, language, voice_type, actual_speed)
         cached_audio = self._get_cached_audio(cache_key)
         if cached_audio:
             return cached_audio
 
-        # Generate new audio
+        # Check offline cache
+        offline_cached = self.offline_cache.get(text, language, voice_type)
+        if offline_cached:
+            logger.info("Using offline cached audio")
+            return offline_cached
+
+        # If forcing offline or Google not available, use offline providers
+        if force_offline or not self.tts_client:
+            return self._synthesize_offline(text, language, voice_type, actual_speed)
+
+        # Try Google TTS first, then fallback to offline
+        audio = self._synthesize_google(text, language, voice_type, actual_speed, actual_pitch)
+
+        if audio:
+            # Cache for future offline use
+            self.offline_cache.set(text, language, voice_type, audio)
+            return audio
+
+        # Google failed, try offline
+        logger.warning("Google TTS failed, trying offline fallback")
+        return self._synthesize_offline(text, language, voice_type, actual_speed)
+
+    def _synthesize_offline(
+        self,
+        text: str,
+        language: str,
+        voice_type: str,
+        speed: float
+    ) -> Optional[bytes]:
+        """Synthesize using offline providers (edge-tts → pyttsx3)."""
+        # Try edge-tts first (better quality)
+        if self._edge_available:
+            try:
+                # Run async edge-tts in sync context
+                loop = asyncio.new_event_loop()
+                try:
+                    audio = loop.run_until_complete(
+                        self.edge_tts.synthesize(text, language, voice_type, speed)
+                    )
+                    if audio:
+                        logger.info("Successfully synthesized with edge-tts")
+                        return audio
+                finally:
+                    loop.close()
+            except Exception as e:
+                logger.warning(f"edge-tts synthesis failed: {e}")
+
+        # Fallback to pyttsx3 (fully offline)
+        if self._local_available:
+            audio = self.local_tts.synthesize(text, voice_type, speed)
+            if audio:
+                logger.info("Successfully synthesized with pyttsx3 (fully offline)")
+                return audio
+
+        logger.error("All TTS providers failed")
+        return None
+
+    def _synthesize_google(
+        self,
+        text: str,
+        language: str,
+        voice_type: str,
+        speed: float,
+        pitch: float
+    ) -> Optional[bytes]:
+        """Synthesize using Google Cloud TTS."""
         if not self.tts_client:
-            logger.error("TTS client not available")
             return None
 
         try:
@@ -321,7 +740,6 @@ class TTSService:
                 return None
 
             # Configure synthesis input with SSML for more natural pauses
-            # Add subtle pauses after punctuation for natural rhythm
             processed_text = self._add_natural_pauses(text)
             synthesis_input = texttospeech.SynthesisInput(ssml=processed_text)
 
@@ -334,8 +752,8 @@ class TTSService:
             # Configure audio output with enhanced settings
             audio_config = texttospeech.AudioConfig(
                 audio_encoding=texttospeech.AudioEncoding.MP3,
-                speaking_rate=actual_speed,
-                pitch=actual_pitch,
+                speaking_rate=speed,
+                pitch=pitch,
                 # Enable audio effects for more natural sound
                 effects_profile_id=["headphone-class-device"]
             )
@@ -349,17 +767,18 @@ class TTSService:
 
             audio_bytes = response.audio_content
             logger.info(
-                f"Generated TTS audio: {len(audio_bytes)} bytes "
-                f"(lang={language}, voice={voice_type}, speed={actual_speed}, pitch={actual_pitch})"
+                f"Generated Google TTS audio: {len(audio_bytes)} bytes "
+                f"(lang={language}, voice={voice_type}, speed={speed}, pitch={pitch})"
             )
 
-            # Cache the result
+            # Cache in memory/redis
+            cache_key = self._generate_cache_key(text, language, voice_type, speed)
             self._cache_audio(cache_key, audio_bytes)
 
             return audio_bytes
 
         except Exception as e:
-            logger.error(f"TTS synthesis failed: {e}", exc_info=True)
+            logger.error(f"Google TTS synthesis failed: {e}", exc_info=True)
             return None
 
     def _add_natural_pauses(self, text: str) -> str:
@@ -836,3 +1255,18 @@ def get_tts_service(redis_client=None) -> TTSService:
             if _tts_service_instance is None:
                 _tts_service_instance = TTSService(redis_client)
     return _tts_service_instance
+
+
+def is_offline_tts_available() -> bool:
+    """Check if any offline TTS provider is available."""
+    return PYTTSX3_AVAILABLE or EDGE_TTS_AVAILABLE
+
+
+def get_available_tts_providers() -> Dict[str, bool]:
+    """Get status of all TTS providers."""
+    return {
+        "google_cloud": GOOGLE_TTS_AVAILABLE,
+        "edge_tts": EDGE_TTS_AVAILABLE,
+        "pyttsx3": PYTTSX3_AVAILABLE,
+        "offline_capable": is_offline_tts_available()
+    }
