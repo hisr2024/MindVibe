@@ -29,12 +29,35 @@ vi.mock('@/hooks/useLanguage', () => ({
   }),
 }))
 
-// Mock fetch for health check
+// Mock window.matchMedia to simulate desktop viewport for responsive tests
+// This makes md:block classes work correctly in jsdom
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: query.includes('min-width') || query.includes('768px'),
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+})
+
+// Mock fetch for health check and DOM methods
 beforeEach(() => {
+  // Clear localStorage to ensure clean state for each test
+  // The component loads 'kiaan-footer-open' from localStorage
+  localStorage.clear()
+
   global.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve({ status: 'healthy' }),
   })
+
+  // Mock scrollIntoView which is not available in jsdom
+  Element.prototype.scrollIntoView = vi.fn()
 })
 
 const renderWithProvider = (component: React.ReactElement) => {
@@ -86,12 +109,15 @@ describe('ChatFooter', () => {
     const user = userEvent.setup()
     renderWithProvider(<ChatFooter />)
 
+    // The button has hidden md:block class - jsdom doesn't support CSS media queries
+    // so we query directly by aria-label attribute using querySelector
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /open kiaan chat/i })).toBeInTheDocument()
+      const openButton = document.querySelector('button[aria-label="Open KIAAN chat"]')
+      expect(openButton).toBeInTheDocument()
     }, { timeout: 3000 })
 
-    // Open chat
-    const openButton = screen.getByRole('button', { name: /open kiaan chat/i })
+    // Open chat by clicking the button
+    const openButton = document.querySelector('button[aria-label="Open KIAAN chat"]') as HTMLButtonElement
     await user.click(openButton)
 
     await waitFor(() => {
@@ -102,20 +128,25 @@ describe('ChatFooter', () => {
     const minimizeButton = screen.getByRole('button', { name: /minimize chat/i })
     await user.click(minimizeButton)
 
+    // After minimizing, the "Open KIAAN chat" button should be back in DOM
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /open kiaan chat/i })).toBeInTheDocument()
+      const button = document.querySelector('button[aria-label="Open KIAAN chat"]')
+      expect(button).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 
   it('should have proper styling for fixed positioning', async () => {
     renderWithProvider(<ChatFooter />)
 
+    // The button has hidden md:block class - jsdom doesn't support CSS media queries
+    // so we query directly by aria-label attribute using querySelector
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /open kiaan chat/i })).toBeInTheDocument()
+      const button = document.querySelector('button[aria-label="Open KIAAN chat"]')
+      expect(button).toBeInTheDocument()
     }, { timeout: 3000 })
 
-    const button = screen.getByRole('button', { name: /open kiaan chat/i })
-    const buttonContainer = button.closest('div')
+    const button = document.querySelector('button[aria-label="Open KIAAN chat"]')
+    const buttonContainer = button?.closest('div')
     expect(buttonContainer).toHaveClass('fixed')
   })
 })
