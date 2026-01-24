@@ -11,6 +11,7 @@
 // ========================================
 export { SerenityBackground } from './SerenityBackground';
 export { SacredBreathing } from './SacredBreathing';
+export { SacredBreathingModal } from './SacredBreathingModal';
 export { DivineMoment, InstantPeaceButton, DivinePresenceButton, GratitudeButton, AffirmationButton, DivineReminderButton } from './DivineMoment';
 export { DivineMoodCheckIn } from './DivineMoodCheckIn';
 export { SacredMessage } from './SacredMessage';
