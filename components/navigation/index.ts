@@ -13,3 +13,4 @@ export {
   type ToolCategory,
 } from './ToolsDropdown'
 export { ToolsSheet, type ToolsSheetProps } from './ToolsSheet'
+export { GlobalLanguageSelector } from './GlobalLanguageSelector'

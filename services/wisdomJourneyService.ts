@@ -242,6 +242,31 @@ export async function deleteJourney(userId: string, journeyId: string): Promise<
   clearCache()
 }
 
+// Default recommendations for new users or when API fails
+const DEFAULT_RECOMMENDATIONS: JourneyRecommendation[] = [
+  {
+    template: 'inner_peace',
+    title: 'Journey to Inner Peace',
+    description: 'A 7-day exploration of tranquility, acceptance, and letting go of anxiety through timeless wisdom.',
+    score: 0.85,
+    reason: 'Perfect for beginning your wisdom journey with foundational teachings on finding peace within.',
+  },
+  {
+    template: 'self_discovery',
+    title: 'Path of Self-Discovery',
+    description: 'Explore your true nature, purpose, and potential through reflective wisdom.',
+    score: 0.78,
+    reason: 'Discover deeper insights about yourself and your life purpose.',
+  },
+  {
+    template: 'balanced_action',
+    title: 'Wisdom of Balanced Action',
+    description: 'Learn to act without attachment, finding harmony between effort and surrender.',
+    score: 0.72,
+    reason: 'A versatile path for navigating daily life with greater awareness.',
+  },
+]
+
 /**
  * Get personalized journey recommendations
  */
@@ -250,7 +275,7 @@ export async function getJourneyRecommendations(
 ): Promise<JourneyRecommendation[]> {
   const cacheKey = 'recommendations'
   const cached = getCached<JourneyRecommendation[]>(cacheKey)
-  if (cached) return cached
+  if (cached && cached.length > 0) return cached
 
   try {
     const response = await apiFetch(
@@ -260,15 +285,26 @@ export async function getJourneyRecommendations(
     )
 
     if (!response.ok) {
-      throw new Error('Failed to fetch recommendations')
+      // Return default recommendations on API error
+      console.warn('API returned error, using default recommendations')
+      return DEFAULT_RECOMMENDATIONS
     }
 
     const recommendations: JourneyRecommendation[] = await response.json()
+
+    // If empty array returned, use defaults
+    if (!recommendations || recommendations.length === 0) {
+      console.log('No recommendations from API, using defaults')
+      setCached(cacheKey, DEFAULT_RECOMMENDATIONS)
+      return DEFAULT_RECOMMENDATIONS
+    }
+
     setCached(cacheKey, recommendations)
     return recommendations
   } catch (error) {
     console.error('Error fetching recommendations:', error)
-    return []
+    // Return defaults instead of empty array
+    return DEFAULT_RECOMMENDATIONS
   }
 }
 

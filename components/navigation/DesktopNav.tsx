@@ -6,6 +6,7 @@ import { useState, useMemo } from 'react'
 import { MindVibeLockup } from '@/components/branding'
 import { ThemeToggle } from '@/components/ui'
 import { ToolsDropdown } from './ToolsDropdown'
+import { GlobalLanguageSelector } from './GlobalLanguageSelector'
 import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
 import { useLanguage } from '@/hooks/useLanguage'
 
@@ -99,6 +100,9 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3">
+          {/* Language Selector */}
+          <GlobalLanguageSelector className="hidden sm:block" />
+
           <Link
             href="/dashboard/subscription"
             className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
@@ -183,6 +187,10 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
             <div className="flex items-center justify-between rounded-xl px-3 py-2 border-t border-white/5 mt-2 pt-2">
               <span className="text-sm text-white/80">{t('navigation.mainNav.theme', 'Theme')}</span>
               <ThemeToggle />
+            </div>
+            <div className="flex items-center justify-between rounded-xl px-3 py-2">
+              <span className="text-sm text-white/80">{t('navigation.mainNav.language', 'Language')}</span>
+              <GlobalLanguageSelector />
             </div>
             <Link
               href="/profile"
