@@ -9,6 +9,7 @@ import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
+import { GlobalSoundPlayer } from '@/components/sounds'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -67,6 +68,8 @@ export default function RootLayout({
             <MobileNav />
             {/* OM floating chat widget - unified for mobile and desktop */}
             <KiaanFooter />
+            {/* Global floating sound player - shows when ambient audio is playing */}
+            <GlobalSoundPlayer />
           </Providers>
         </ClientLayout>
       </body>
