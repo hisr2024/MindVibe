@@ -11,8 +11,8 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Headphones } from 'lucide-react'
-import { MeditationPlayer } from '@/components/music'
+import { ArrowLeft, Headphones, Music } from 'lucide-react'
+import { SpiritualMusicPlayer, SoulSoothingMusicPlayer } from '@/components/music'
 
 export default function SoundsPage() {
   return (
@@ -62,20 +62,41 @@ export default function SoundsPage() {
             </p>
           </motion.section>
 
-          {/* Meditation Player */}
+          {/* Soul-Soothing Music Player - Real Natural Audio */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            className="mb-8"
           >
-            <MeditationPlayer />
+            <div className="flex items-center gap-2 mb-4">
+              <Music className="w-5 h-5 text-orange-400" />
+              <h3 className="text-lg font-semibold text-white">Natural Music Library</h3>
+              <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 text-xs">Real Audio</span>
+            </div>
+            <SoulSoothingMusicPlayer />
+          </motion.section>
+
+          {/* Spiritual Sound Generator */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Headphones className="w-5 h-5 text-violet-400" />
+              <h3 className="text-lg font-semibold text-white">Sound Generator</h3>
+              <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs">Mix Your Own</span>
+            </div>
+            <SpiritualMusicPlayer />
           </motion.section>
 
           {/* Info Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.3 }}
             className="mt-8"
           >
             <div className="rounded-2xl bg-white/5 border border-white/5 p-5">
@@ -113,7 +134,7 @@ export default function SoundsPage() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.4 }}
             className="mt-6"
           >
             <div className="rounded-2xl bg-violet-500/5 border border-violet-500/10 p-5">

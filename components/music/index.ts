@@ -15,8 +15,9 @@ export { DashboardMusicWidget } from './DashboardMusicWidget'
 // Spiritual Music Player - Simple & Clean
 export { SpiritualMusicPlayer } from './SpiritualMusicPlayer'
 
-// Meditation Player - Natural Ultra HD Music
-export { MeditationPlayer } from './MeditationPlayer'
+// Soul-Soothing Music Player - Real Natural Audio (No Digital Tones)
+export { SoulSoothingMusicPlayer } from './SoulSoothingMusicPlayer'
+export * from '@/lib/music/soulSoothingMusicLibrary'
 
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'

@@ -67,6 +67,9 @@ export function SacredBreathing({
   // Ref to hold the latest transitionPhase callback to avoid effect re-runs
   const transitionPhaseRef = useRef<() => void>(() => {});
 
+  // Track if autoStart has been triggered to prevent re-runs
+  const autoStartTriggeredRef = useRef(false);
+
   // Load exercise on mount or pattern change
   useEffect(() => {
     const ex = actions.getBreathingExercise(pattern);
@@ -74,7 +77,25 @@ export function SacredBreathing({
     setPhase('ready');
     setCurrentCycle(0);
     setCurrentInstruction(0);
+    // Reset autoStart trigger when pattern changes
+    autoStartTriggeredRef.current = false;
   }, [pattern, actions]);
+
+  // Auto-start the breathing exercise when autoStart is true and exercise is loaded
+  useEffect(() => {
+    if (autoStart && exercise && phase === 'ready' && !autoStartTriggeredRef.current) {
+      autoStartTriggeredRef.current = true;
+      // Small delay to allow the UI to render and show the "Prepare to breathe" state
+      const timer = setTimeout(() => {
+        setIsActive(true);
+        setPhase('inhale');
+        setCountdown(exercise.inhale);
+        setCurrentCycle(0);
+        actions.startBreathing(pattern);
+      }, 1500); // 1.5 second delay to let user prepare
+      return () => clearTimeout(timer);
+    }
+  }, [autoStart, exercise, phase, pattern, actions]);
 
   // Handle phase transitions
   const transitionPhase = useCallback(() => {
