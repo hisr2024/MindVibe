@@ -108,14 +108,16 @@ export function lockBodyScroll(): void {
 
   if (isIOS()) {
     // iOS requires position: fixed to prevent Safari's rubber-banding
-    // This is the most reliable approach for iOS
-    body.style.position = 'fixed'
-    body.style.top = `-${state.scrollY}px`
-    body.style.left = '0'
-    body.style.right = '0'
-    body.style.width = '100%'
-    body.style.overflow = 'hidden'
-    html.style.overflow = 'hidden'
+    // Use requestAnimationFrame to batch style changes and reduce flicker
+    requestAnimationFrame(() => {
+      body.style.position = 'fixed'
+      body.style.top = `-${state.scrollY}px`
+      body.style.left = '0'
+      body.style.right = '0'
+      body.style.width = '100%'
+      body.style.overflow = 'hidden'
+      html.style.overflow = 'hidden'
+    })
   } else {
     // Desktop and Android - standard overflow: hidden
     body.style.overflow = 'hidden'
@@ -178,8 +180,11 @@ export function unlockBodyScroll(): void {
   body.classList.remove('scroll-locked')
 
   // Restore scroll position (only needed for iOS position: fixed approach)
+  // Use requestAnimationFrame to ensure styles are applied before scrolling
   if (isIOS() && state.scrollY > 0) {
-    window.scrollTo(0, state.scrollY)
+    requestAnimationFrame(() => {
+      window.scrollTo(0, state.scrollY)
+    })
   }
 }
 

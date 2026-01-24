@@ -40,15 +40,29 @@
    SMOOTH TRANSITIONS
    ============================================================ */
 
-/* Root element transitions */
+/*
+ * IMPORTANT: Do NOT apply transitions to * selector globally.
+ * This causes severe performance issues on mobile, especially:
+ * - Layout thrashing during page load
+ * - Flickering during hydration
+ * - Delayed paint operations
+ *
+ * Instead, apply transitions only to specific emotion-aware components.
+ */
+
+/* Root element transitions - only for theme changes */
 :root {
   transition:
     background-color var(--emotion-transition-slow) ease,
     color var(--emotion-transition-slow) ease;
 }
 
-/* Global transitions for all elements */
-* {
+/* Emotion-aware elements only - not global * selector */
+.emotion-transition,
+.emotion-card,
+.emotion-button,
+.emotion-accent-text,
+.emotion-border {
   transition:
     background-color var(--emotion-transition-medium) ease,
     color var(--emotion-transition-medium) ease,
@@ -56,10 +70,19 @@
     box-shadow var(--emotion-transition-medium) ease;
 }
 
-/* Respect reduced motion */
+/* Respect reduced motion - target specific elements, not global * */
 @media (prefers-reduced-motion: reduce) {
   :root,
-  * {
+  .emotion-transition,
+  .emotion-card,
+  .emotion-button,
+  .emotion-particles,
+  .emotion-particle,
+  .animation-gentle-flow,
+  .animation-dynamic-pulse,
+  .animation-slow-drift,
+  .animation-steady-breathe,
+  .animation-subtle-wave {
     transition: none !important;
     animation: none !important;
   }
@@ -215,29 +238,44 @@
    EMOTION-SPECIFIC OVERRIDES
    ============================================================ */
 
+/*
+ * Apply emotion-specific transitions only to emotion-aware components
+ * NOT to all elements (*) which causes mobile performance issues
+ */
+
 /* Calm theme - Extra smooth */
-[data-emotion="calm"] * {
+[data-emotion="calm"] .emotion-transition,
+[data-emotion="calm"] .emotion-card,
+[data-emotion="calm"] .emotion-button {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Energized theme - Faster transitions */
-[data-emotion="energized"] * {
+[data-emotion="energized"] .emotion-transition,
+[data-emotion="energized"] .emotion-card,
+[data-emotion="energized"] .emotion-button {
   transition-duration: calc(var(--emotion-transition-medium) * 0.7);
 }
 
 /* Melancholic theme - Slower, gentler */
-[data-emotion="melancholic"] * {
+[data-emotion="melancholic"] .emotion-transition,
+[data-emotion="melancholic"] .emotion-card,
+[data-emotion="melancholic"] .emotion-button {
   transition-duration: calc(var(--emotion-transition-medium) * 1.3);
   transition-timing-function: cubic-bezier(0.25, 0, 0.15, 1);
 }
 
 /* Anxious theme - Steady, grounding */
-[data-emotion="anxious"] * {
+[data-emotion="anxious"] .emotion-transition,
+[data-emotion="anxious"] .emotion-card,
+[data-emotion="anxious"] .emotion-button {
   transition-timing-function: linear;
 }
 
 /* Balanced theme - Standard easing */
-[data-emotion="balanced"] * {
+[data-emotion="balanced"] .emotion-transition,
+[data-emotion="balanced"] .emotion-card,
+[data-emotion="balanced"] .emotion-button {
   transition-timing-function: ease;
 }
 

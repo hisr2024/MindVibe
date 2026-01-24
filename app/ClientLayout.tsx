@@ -10,14 +10,16 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   }, [])
 
   // Show a minimal loading state to prevent flicker during hydration
+  // Use opacity: 0 to fully hide content until hydration completes
   if (!mounted) {
     return (
       <div
         className="min-h-screen bg-slate-950"
         style={{
-          opacity: 0.99,
-          visibility: 'visible',
+          opacity: 0,
+          visibility: 'hidden',
         }}
+        aria-hidden="true"
       >
         {/* Invisible placeholder to prevent layout shift */}
         <div className="sr-only">Loading...</div>
