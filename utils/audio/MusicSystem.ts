@@ -382,13 +382,27 @@ class MusicSystem {
     try {
       this.config = config
 
-      // Create audio context
-      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+      // Create Ultra HD audio context with highest sample rate
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      this.audioContext = new AudioContextClass({
+        sampleRate: 48000, // Ultra HD: 48kHz sample rate
+        latencyHint: 'playback' // Optimize for audio quality over latency
+      })
 
-      // Create master gain
+      // Create master gain with smooth transitions
       this.masterGain = this.audioContext.createGain()
       this.masterGain.gain.value = config.masterVolume ?? 0.6
-      this.masterGain.connect(this.audioContext.destination)
+
+      // Add master compressor for polished sound
+      const masterCompressor = this.audioContext.createDynamicsCompressor()
+      masterCompressor.threshold.value = -24
+      masterCompressor.knee.value = 30
+      masterCompressor.ratio.value = 4
+      masterCompressor.attack.value = 0.003
+      masterCompressor.release.value = 0.25
+
+      this.masterGain.connect(masterCompressor)
+      masterCompressor.connect(this.audioContext.destination)
 
       // Create layer gains
       this.ambientGain = this.audioContext.createGain()
@@ -432,27 +446,47 @@ class MusicSystem {
     }
   }
 
-  // ============ Reverb Generation ============
+  // ============ Ultra HD Reverb Generation ============
 
   private async createReverb(): Promise<void> {
     if (!this.audioContext) return
 
-    // Create impulse response for reverb
+    // Create high-quality impulse response for Ultra HD reverb
     const sampleRate = this.audioContext.sampleRate
-    const length = sampleRate * 3 // 3 second reverb
+    const length = sampleRate * 4 // 4 second lush reverb tail
     const impulse = this.audioContext.createBuffer(2, length, sampleRate)
 
+    // Generate studio-quality reverb with multiple decay stages
     for (let channel = 0; channel < 2; channel++) {
       const channelData = impulse.getChannelData(channel)
       for (let i = 0; i < length; i++) {
-        // Exponential decay with random noise
-        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5)
+        const t = i / length
+        // Multi-stage decay for rich, natural reverb
+        const earlyReflections = t < 0.05 ? Math.random() * 0.8 : 0
+        const lateReverb = Math.pow(1 - t, 3) * 0.6
+        const diffusion = Math.sin(t * Math.PI * 50) * Math.pow(1 - t, 4) * 0.2
+        // Stereo width variation
+        const stereoSpread = channel === 0 ? 1 : 0.95 + Math.random() * 0.1
+        channelData[i] = (Math.random() * 2 - 1) * (earlyReflections + lateReverb + diffusion) * stereoSpread
       }
     }
 
     this.convolver = this.audioContext.createConvolver()
     this.convolver.buffer = impulse
-    this.convolver.connect(this.masterGain!)
+
+    // Add reverb pre-filter for warmth
+    const reverbFilter = this.audioContext.createBiquadFilter()
+    reverbFilter.type = 'lowpass'
+    reverbFilter.frequency.value = 6000
+    reverbFilter.Q.value = 0.7
+
+    // Reverb wet/dry mix
+    const reverbGain = this.audioContext.createGain()
+    reverbGain.gain.value = 0.35
+
+    this.convolver.connect(reverbFilter)
+    reverbFilter.connect(reverbGain)
+    reverbGain.connect(this.masterGain!)
   }
 
   // ============ Noise Generation ============
