@@ -15,6 +15,9 @@ export { DashboardMusicWidget } from './DashboardMusicWidget'
 // Spiritual Music Player - Simple & Clean
 export { SpiritualMusicPlayer } from './SpiritualMusicPlayer'
 
+// Meditation Player - Natural Ultra HD Music
+export { MeditationPlayer } from './MeditationPlayer'
+
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'
 
