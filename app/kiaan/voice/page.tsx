@@ -82,6 +82,10 @@ export default function EliteVoicePage() {
     result: null,
     handler: null
   })
+  const selfHealingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const retryCountRef = useRef<number>(0)
+  const maxRetries = 3
+  const warmUpStreamRef = useRef<MediaStream | null>(null) // Keep microphone warm for instant activation
 
   // Hooks
   const { t, language } = useLanguage()
@@ -131,12 +135,18 @@ export default function EliteVoicePage() {
         } else {
           setState('idle')
         }
+
+        // Elite: Re-warm microphone for next activation
+        setTimeout(() => warmUpMicrophone(), 500)
         return
       }
 
       // For actual errors, show the error state
       setError(err)
       setState('error')
+
+      // Elite: Schedule self-healing for recoverable errors
+      scheduleSelfHealing(err)
     }
   })
 
@@ -424,10 +434,14 @@ export default function EliteVoicePage() {
         }
       })
 
-      // Successfully got microphone access - stop the stream as we just needed permission
-      stream.getTracks().forEach(track => track.stop())
+      // Keep the stream warm for instant activation instead of stopping immediately
+      // This reduces latency when user taps to speak
+      if (warmUpStreamRef.current) {
+        warmUpStreamRef.current.getTracks().forEach(track => track.stop())
+      }
+      warmUpStreamRef.current = stream
 
-      console.log('[KIAAN Voice] Direct microphone access granted!')
+      console.log('[KIAAN Voice] Direct microphone access granted! (keeping warm)')
       return { success: true }
 
     } catch (err: any) {
@@ -443,6 +457,87 @@ export default function EliteVoicePage() {
 
       return { success: false, error: `Could not access microphone: ${err.message}` }
     }
+  }
+
+  // Elite: Preemptive microphone warm-up for instant activation
+  async function warmUpMicrophone(): Promise<boolean> {
+    if (warmUpStreamRef.current) {
+      console.log('[KIAAN Voice] Microphone already warm')
+      return true
+    }
+
+    try {
+      console.log('[KIAAN Voice] Warming up microphone for instant activation...')
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true }
+      })
+      warmUpStreamRef.current = stream
+      console.log('[KIAAN Voice] ✓ Microphone warmed up!')
+      return true
+    } catch (err) {
+      console.warn('[KIAAN Voice] Warm-up failed (non-critical):', err)
+      return false
+    }
+  }
+
+  // Elite: Release warm-up stream before starting SpeechRecognition
+  function releaseWarmUpStream(): void {
+    if (warmUpStreamRef.current) {
+      console.log('[KIAAN Voice] Releasing warm-up stream for SpeechRecognition...')
+      warmUpStreamRef.current.getTracks().forEach(track => track.stop())
+      warmUpStreamRef.current = null
+    }
+  }
+
+  // Elite: Self-healing error recovery with exponential backoff
+  function scheduleSelfHealing(errorType: string): void {
+    // Only self-heal for recoverable errors
+    const nonRecoverableErrors = ['denied', 'blocked', 'unsupported', 'not found', 'no microphone']
+    const isRecoverable = !nonRecoverableErrors.some(e => errorType.toLowerCase().includes(e))
+
+    if (!isRecoverable || retryCountRef.current >= maxRetries) {
+      console.log('[KIAAN Voice] Error is not recoverable or max retries reached')
+      retryCountRef.current = 0
+      return
+    }
+
+    // Calculate exponential backoff delay
+    const delay = Math.min(500 * Math.pow(2, retryCountRef.current), 8000)
+    retryCountRef.current++
+
+    console.log(`[KIAAN Voice] Scheduling self-healing in ${delay}ms (attempt ${retryCountRef.current}/${maxRetries})`)
+
+    if (selfHealingTimerRef.current) {
+      clearTimeout(selfHealingTimerRef.current)
+    }
+
+    selfHealingTimerRef.current = setTimeout(async () => {
+      console.log('[KIAAN Voice] Attempting self-healing...')
+
+      // Clear error state
+      setError(null)
+
+      // Re-check permission
+      await checkMicrophonePermission()
+
+      // If permission is now granted, try to return to ready state
+      if (micPermission === 'granted') {
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        console.log('[KIAAN Voice] ✓ Self-healing successful!')
+        retryCountRef.current = 0
+      } else {
+        console.log('[KIAAN Voice] Self-healing: permission still not granted')
+      }
+    }, delay)
+  }
+
+  // Elite: Cancel self-healing
+  function cancelSelfHealing(): void {
+    if (selfHealingTimerRef.current) {
+      clearTimeout(selfHealingTimerRef.current)
+      selfHealingTimerRef.current = null
+    }
+    retryCountRef.current = 0
   }
 
   // Initialize services
@@ -473,6 +568,17 @@ export default function EliteVoicePage() {
     // Mark services as ready
     setServicesReady(true)
 
+    // Elite: Warm up microphone if we already have permission for instant activation
+    if (typeof navigator !== 'undefined' && navigator.permissions?.query) {
+      navigator.permissions.query({ name: 'microphone' as PermissionName })
+        .then(result => {
+          if (result.state === 'granted') {
+            warmUpMicrophone()
+          }
+        })
+        .catch(() => {})
+    }
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
@@ -482,6 +588,18 @@ export default function EliteVoicePage() {
       if (permissionListenerRef.current.result && permissionListenerRef.current.handler) {
         permissionListenerRef.current.result.removeEventListener('change', permissionListenerRef.current.handler)
         permissionListenerRef.current = { result: null, handler: null }
+      }
+
+      // Clean up warm-up stream
+      if (warmUpStreamRef.current) {
+        warmUpStreamRef.current.getTracks().forEach(track => track.stop())
+        warmUpStreamRef.current = null
+      }
+
+      // Cancel any pending self-healing
+      if (selfHealingTimerRef.current) {
+        clearTimeout(selfHealingTimerRef.current)
+        selfHealingTimerRef.current = null
       }
     }
   }, [])
@@ -526,9 +644,16 @@ export default function EliteVoicePage() {
         await new Promise(resolve => setTimeout(resolve, 200))
       }
 
+      // Elite: Release warm-up stream before SpeechRecognition starts
+      // SpeechRecognition manages its own microphone access
+      releaseWarmUpStream()
+
       // Now safe to start listening
       setState('listening')
       resetTranscript()
+
+      // Cancel any pending self-healing since user is actively using
+      cancelSelfHealing()
 
       console.log('[KIAAN Voice] Starting voice input...')
       startListening()
