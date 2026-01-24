@@ -70,6 +70,15 @@ export const CORE_TOOLS: ToolConfig[] = [
     gradient: 'from-teal-400/30 to-cyan-400/30',
     href: '/dashboard/analytics',
   },
+  {
+    id: 'ambient-sounds',
+    icon: '🎧',
+    title: 'Ambient Sounds',
+    description: 'Relaxing soundscapes',
+    gradient: 'from-emerald-400/30 to-teal-400/30',
+    href: '/sounds',
+    badge: 'new',
+  },
 ]
 
 /**
