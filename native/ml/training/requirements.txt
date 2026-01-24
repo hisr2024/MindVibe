@@ -1,0 +1,26 @@
+# KIAAN Wake Word Training Requirements
+
+# TTS Engines (at least one required)
+edge-tts>=6.1.0          # Microsoft Edge TTS - best quality, free
+gtts>=2.3.0              # Google TTS - good coverage
+pyttsx3>=2.90            # Offline TTS
+
+# Audio Processing
+librosa>=0.10.0          # Audio analysis
+soundfile>=0.12.0        # Audio I/O
+scipy>=1.10.0            # Signal processing
+numpy>=1.24.0            # Numerical computing
+
+# Machine Learning
+tensorflow>=2.13.0       # Model training
+# tensorflow-metal>=1.0.0  # macOS GPU acceleration (uncomment on Mac)
+
+# Model Export
+# coremltools>=7.0         # iOS Core ML export (macOS only, optional)
+
+# Optional: High-quality TTS
+# TTS>=0.17.0              # Coqui TTS (large download)
+
+# Development
+tqdm>=4.65.0             # Progress bars
+matplotlib>=3.7.0        # Visualization
