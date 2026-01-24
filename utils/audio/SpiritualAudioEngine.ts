@@ -450,7 +450,8 @@ class SpiritualAudioEngine {
       const currentTime = this.audioContext.currentTime
 
       // Bowl harmonics
-      [1, 2.71, 5.4].forEach((ratio, i) => {
+      const bowlRatios: number[] = [1, 2.71, 5.4]
+      bowlRatios.forEach((ratio: number, i: number) => {
         const osc = this.audioContext!.createOscillator()
         const gain = this.audioContext!.createGain()
 
@@ -485,7 +486,8 @@ class SpiritualAudioEngine {
       const currentTime = this.audioContext.currentTime
 
       // Bell harmonics
-      [1, 2, 2.4, 3, 4.5].forEach((ratio, i) => {
+      const bellRatios: number[] = [1, 2, 2.4, 3, 4.5]
+      bellRatios.forEach((ratio: number, i: number) => {
         const osc = this.audioContext!.createOscillator()
         const gain = this.audioContext!.createGain()
 
@@ -553,7 +555,8 @@ class SpiritualAudioEngine {
       const fundamental = 180
 
       // Rich harmonics of conch
-      [1, 1.5, 2, 3, 4].forEach((ratio, i) => {
+      const conchRatios: number[] = [1, 1.5, 2, 3, 4]
+      conchRatios.forEach((ratio: number, i: number) => {
         const osc = this.audioContext!.createOscillator()
         const gain = this.audioContext!.createGain()
 
