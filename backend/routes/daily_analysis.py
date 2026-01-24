@@ -9,7 +9,7 @@ import logging
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -113,7 +113,7 @@ async def get_todays_analysis(
 
 @router.get("/history")
 async def get_analysis_history(
-    days: int = Field(default=7, ge=1, le=30),
+    days: int = Query(default=7, ge=1, le=30),
     db: AsyncSession = Depends(get_db),
     user_id: str | None = Depends(get_current_user_optional),
 ) -> list[DailyAnalysisResponse]:

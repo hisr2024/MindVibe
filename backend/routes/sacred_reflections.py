@@ -9,7 +9,7 @@ import logging
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -110,7 +110,7 @@ async def get_current_week_reflection(
 
 @router.get("/history")
 async def get_reflection_history(
-    weeks: int = Field(default=4, ge=1, le=12),
+    weeks: int = Query(default=4, ge=1, le=12),
     db: AsyncSession = Depends(get_db),
     user_id: str | None = Depends(get_current_user_optional),
 ) -> list[SacredReflectionResponse]:
