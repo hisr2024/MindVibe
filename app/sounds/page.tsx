@@ -57,12 +57,15 @@ export default function SoundsPage() {
                 </Link>
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/10">
-                      <Headphones className="w-5 h-5 text-orange-400" />
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/10">
+                      <Headphones className="w-5 h-5 text-violet-400" />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold text-white">Ambient Sounds</h1>
-                      <p className="text-xs text-white/50">परिवेश ध्वनियाँ</p>
+                      <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                        MindVibe Music
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-violet-500/30 to-purple-500/30 text-purple-200 font-medium">PRO</span>
+                      </h1>
+                      <p className="text-xs text-white/50">संगीत अनुभव</p>
                     </div>
                   </div>
                 </div>
@@ -88,23 +91,23 @@ export default function SoundsPage() {
           >
             <div className="text-center max-w-2xl mx-auto mb-8">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-orange-200 via-amber-200 to-orange-100 bg-clip-text text-transparent">
-                  Immersive Sound Experiences
+                <span className="bg-gradient-to-r from-violet-200 via-purple-200 to-violet-100 bg-clip-text text-transparent">
+                  Your Sacred Sound Sanctuary
                 </span>
               </h2>
               <p className="text-white/60">
-                Curated ambient soundscapes for relaxation, focus, meditation, and deep sleep.
-                Mix and layer sounds to create your perfect audio environment.
+                Professional therapeutic sounds, time-based ragas, binaural beats, and sacred frequencies.
+                Experience deep relaxation, enhanced focus, and spiritual connection.
               </p>
             </div>
 
             {/* Feature pills */}
             <div className="flex flex-wrap justify-center gap-3 mb-8">
               {[
-                { icon: Music, label: '20+ Sounds', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
-                { icon: Sparkles, label: '12 Presets', color: 'text-violet-400 bg-violet-500/10 border-violet-500/20' },
-                { icon: Volume2, label: 'Mixer', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-                { icon: Clock, label: 'Timer', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+                { icon: Music, label: 'Time-Based Ragas', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                { icon: Brain, label: 'Brainwave Sync', color: 'text-violet-400 bg-violet-500/10 border-violet-500/20' },
+                { icon: Heart, label: 'Healing Frequencies', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+                { icon: Sparkles, label: 'Sacred Sounds', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
               ].map(({ icon: Icon, label, color }) => (
                 <div
                   key={label}
@@ -230,7 +233,7 @@ export default function SoundsPage() {
             </div>
           </motion.section>
 
-          {/* Professional Music System */}
+          {/* MindVibe Music System */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -241,9 +244,10 @@ export default function SoundsPage() {
               <div>
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <span className="text-xl">🎵</span>
-                  Professional Music System
+                  MindVibe Music Player
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-medium">CORE</span>
                 </h3>
-                <p className="text-sm text-white/50">Time-based ragas, spiritual sounds & ambient music</p>
+                <p className="text-sm text-white/50">Indian classical ragas, spiritual sounds & therapeutic frequencies</p>
               </div>
             </div>
 
@@ -260,7 +264,7 @@ export default function SoundsPage() {
             </div>
           </motion.section>
 
-          {/* Main Player */}
+          {/* Ambient Sound Scenes */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -270,9 +274,10 @@ export default function SoundsPage() {
               <div>
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <span className="text-xl">🎧</span>
-                  Ambient Sound Scenes
+                  Ambient Soundscapes
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-medium">MIX</span>
                 </h3>
-                <p className="text-sm text-white/50">Nature sounds, rain, ocean & more</p>
+                <p className="text-sm text-white/50">Layer nature sounds for your perfect environment</p>
               </div>
             </div>
 
@@ -294,9 +299,10 @@ export default function SoundsPage() {
               <div>
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <span className="text-xl">📿</span>
-                  Therapeutic Programs
+                  Therapeutic Journeys
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-medium">NEW</span>
                 </h3>
-                <p className="text-sm text-white/50">Multi-day journeys for transformation</p>
+                <p className="text-sm text-white/50">Multi-day programs for deep transformation</p>
               </div>
             </div>
 
