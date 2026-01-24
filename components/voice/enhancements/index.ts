@@ -11,6 +11,12 @@
  * - AffirmationsWidget: Personalized positive affirmations
  * - VoiceEnhancementsPanel: Main container panel
  * - VoiceEnhancementsMobile: Mobile-optimized bottom sheet
+ *
+ * Gita-Based Audio Controls:
+ * - ActivitySoundscapeControl: Activity-optimized soundscapes
+ * - SolfeggioFrequencyControl: Sacred healing frequencies (174-963 Hz)
+ * - ChakraFrequencyControl: Chakra alignment with Kundalini journey
+ * - GunaStateControl: Three Gunas from Bhagavad Gita Chapter 14
  */
 
 // Individual Controls
@@ -19,6 +25,12 @@ export { SpatialAudioControl, type SpatialAudioControlProps } from './SpatialAud
 export { BreathingSyncControl, type BreathingSyncControlProps } from './BreathingSyncControl'
 export { AmbientSoundscapeControl, type AmbientSoundscapeControlProps } from './AmbientSoundscapeControl'
 export { SleepModeControl, type SleepModeControlProps } from './SleepModeControl'
+
+// Gita-Based Audio Controls
+export { ActivitySoundscapeControl } from './ActivitySoundscapeControl'
+export { SolfeggioFrequencyControl } from './SolfeggioFrequencyControl'
+export { ChakraFrequencyControl } from './ChakraFrequencyControl'
+export { GunaStateControl } from './GunaStateControl'
 
 // Widgets
 export { DailyCheckInWidget, type DailyCheckInWidgetProps, type CheckInData } from './DailyCheckInWidget'

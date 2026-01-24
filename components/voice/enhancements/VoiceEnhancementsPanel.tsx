@@ -26,7 +26,11 @@ import {
   Music,
   Moon,
   Sun,
-  Heart
+  Heart,
+  Target,
+  Waves,
+  Zap,
+  Compass
 } from 'lucide-react'
 import { BinauraBeatsControl } from './BinauraBeatsControl'
 import { SpatialAudioControl } from './SpatialAudioControl'
@@ -35,6 +39,11 @@ import { AmbientSoundscapeControl } from './AmbientSoundscapeControl'
 import { SleepModeControl } from './SleepModeControl'
 import { DailyCheckInWidget } from './DailyCheckInWidget'
 import { AffirmationsWidget } from './AffirmationsWidget'
+// Gita-Based Controls
+import { ActivitySoundscapeControl } from './ActivitySoundscapeControl'
+import { SolfeggioFrequencyControl } from './SolfeggioFrequencyControl'
+import { ChakraFrequencyControl } from './ChakraFrequencyControl'
+import { GunaStateControl } from './GunaStateControl'
 import type { ConsciousnessLayer } from '@/services/voice/elite/QuantumDiveEngine'
 
 // ============ Types ============
@@ -47,6 +56,11 @@ export type EnhancementType =
   | 'sleep_mode'
   | 'check_in'
   | 'affirmations'
+  // Gita-Based
+  | 'activity_soundscape'
+  | 'solfeggio'
+  | 'chakra'
+  | 'guna'
 
 export interface EnhancementState {
   type: EnhancementType
@@ -137,6 +151,43 @@ const ENHANCEMENTS: {
     icon: Heart,
     color: 'text-pink-400',
     gradient: 'from-pink-500/20 to-rose-500/20'
+  },
+  // Gita-Based Enhancements
+  {
+    type: 'activity_soundscape',
+    name: 'Activity Mode',
+    nameHindi: 'गतिविधि मोड',
+    description: 'Sleep, meditation, focus, reading soundscapes',
+    icon: Target,
+    color: 'text-cyan-400',
+    gradient: 'from-cyan-500/20 to-teal-500/20'
+  },
+  {
+    type: 'solfeggio',
+    name: 'Solfeggio Frequencies',
+    nameHindi: 'सॉल्फेजियो',
+    description: 'Sacred healing frequencies 174-963 Hz',
+    icon: Waves,
+    color: 'text-rose-400',
+    gradient: 'from-rose-500/20 to-pink-500/20'
+  },
+  {
+    type: 'chakra',
+    name: 'Chakra Alignment',
+    nameHindi: 'चक्र संतुलन',
+    description: 'Seven chakra frequencies & Kundalini',
+    icon: Zap,
+    color: 'text-violet-400',
+    gradient: 'from-violet-500/20 to-purple-500/20'
+  },
+  {
+    type: 'guna',
+    name: 'Guna States',
+    nameHindi: 'गुण स्थिति',
+    description: 'Sattva, Rajas, Tamas from Gita Ch.14',
+    icon: Compass,
+    color: 'text-yellow-400',
+    gradient: 'from-yellow-500/20 to-amber-500/20'
   }
 ]
 
@@ -260,6 +311,35 @@ function EnhancementSection({
               )}
               {enhancement.type === 'affirmations' && (
                 <AffirmationsWidget compact={compact} />
+              )}
+              {/* Gita-Based Controls */}
+              {enhancement.type === 'activity_soundscape' && (
+                <ActivitySoundscapeControl
+                  isActive={isActive}
+                  onToggle={onToggleActive}
+                  compact={compact}
+                />
+              )}
+              {enhancement.type === 'solfeggio' && (
+                <SolfeggioFrequencyControl
+                  isActive={isActive}
+                  onToggle={onToggleActive}
+                  compact={compact}
+                />
+              )}
+              {enhancement.type === 'chakra' && (
+                <ChakraFrequencyControl
+                  isActive={isActive}
+                  onToggle={onToggleActive}
+                  compact={compact}
+                />
+              )}
+              {enhancement.type === 'guna' && (
+                <GunaStateControl
+                  isActive={isActive}
+                  onToggle={onToggleActive}
+                  compact={compact}
+                />
               )}
             </div>
           </motion.div>
