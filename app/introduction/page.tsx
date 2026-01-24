@@ -106,26 +106,25 @@ export default function IntroductionPage() {
 
   // Check if user has seen today's darshan
   useEffect(() => {
-    // Small delay to ensure smooth page load
-    const readyTimer = setTimeout(() => setIsPageReady(true), 100);
+    // Mark page as ready immediately - the 100ms delay was causing flicker
+    setIsPageReady(true)
 
     const today = new Date().toDateString()
     const lastDarshanDate = localStorage.getItem('lastDarshanDate')
 
     if (lastDarshanDate !== today) {
+      // Use requestAnimationFrame for smoother animation scheduling
+      // This prevents blocking the main thread and reduces flicker
       const timer = setTimeout(() => {
-        setShowMorningDarshan(true)
-        playOm()  // Play OM sound when darshan appears
-      }, 1800) // Slightly longer delay for smoother appearance
-      return () => {
-        clearTimeout(timer)
-        clearTimeout(readyTimer)
-      }
+        requestAnimationFrame(() => {
+          setShowMorningDarshan(true)
+          playOm()  // Play OM sound when darshan appears
+        })
+      }, 1500) // Reduced from 1800ms for better perceived performance
+      return () => clearTimeout(timer)
     } else {
       setHasSeenDarshan(true)
     }
-
-    return () => clearTimeout(readyTimer)
   }, [playOm])
 
   // Memoized handlers to prevent recreation
@@ -160,8 +159,11 @@ export default function IntroductionPage() {
   return (
     <DivineConsciousnessProvider>
       <SakhaModeProvider>
-        {/* Main Container - Responsive padding */}
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 md:pb-16">
+        {/* Main Container - Responsive padding with CSS containment to prevent layout thrashing */}
+        <main
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 md:pb-16"
+          style={{ contain: 'layout style', touchAction: 'manipulation' }}
+        >
 
           {/* ==================== MODALS ==================== */}
 

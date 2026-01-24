@@ -66,6 +66,8 @@
   html {
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
+    /* Prevent iOS text size inflation */
+    text-size-adjust: 100%;
   }
 
   body {
@@ -73,6 +75,23 @@
     font-size: var(--text-body);
     line-height: var(--line-relaxed);
     letter-spacing: -0.01em;
+    /* Prevent accidental zoom from double-tap or pinch gestures */
+    touch-action: pan-x pan-y;
+    /* Prevent pull-to-refresh which can cause visual zoom effect */
+    overscroll-behavior-y: none;
+  }
+
+  /* Comprehensive zoom prevention for mobile */
+  /* This prevents double-tap zoom while still allowing touch interactions */
+  @media (pointer: coarse) {
+    html, body {
+      touch-action: manipulation;
+    }
+
+    /* Prevent pinch zoom on all interactive elements */
+    button, input, textarea, select, a, [role="button"] {
+      touch-action: manipulation;
+    }
   }
 
   h1,
@@ -1847,21 +1866,30 @@ img {
   content-visibility: auto;
 }
 
-/* GPU acceleration for smooth animations */
+/* GPU acceleration for smooth animations - mobile optimized */
 .gpu-accelerated,
 .mobile-card-interactive,
 .mobile-btn-primary,
 .mobile-btn-secondary,
 .mobile-fab {
   transform: translateZ(0);
-  will-change: transform;
   backface-visibility: hidden;
+  /* Note: will-change: transform should NOT be set permanently
+   * as it consumes memory. Only apply during animations. */
 }
 
-/* Remove GPU acceleration after interaction */
-.gpu-accelerated:not(:hover):not(:active),
-.mobile-card-interactive:not(:hover):not(:active) {
-  will-change: auto;
+/* Apply will-change only during active interaction (works on mobile) */
+.gpu-accelerated:active,
+.mobile-card-interactive:active {
+  will-change: transform;
+}
+
+/* For desktop, also apply on hover */
+@media (hover: hover) {
+  .gpu-accelerated:hover,
+  .mobile-card-interactive:hover {
+    will-change: transform;
+  }
 }
 
 /* Safe area padding utilities */

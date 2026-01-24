@@ -129,7 +129,12 @@ export default function WisdomRoomsPage() {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' })
+      // Use instant scroll on mobile to prevent zoom/jank issues
+      const isMobile = window.matchMedia('(max-width: 768px)').matches
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: isMobile ? 'instant' : 'smooth'
+      })
     }
   }, [roomMessages, activeRoomId])
 
@@ -211,7 +216,12 @@ export default function WisdomRoomsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] divide-y md:divide-y-0 md:divide-x divide-orange-500/15">
-            <div className="p-4 md:p-6 space-y-4 h-[420px] overflow-y-auto scroll-smooth" ref={chatContainerRef}>
+            {/* Chat container - disable smooth scroll on mobile to prevent jank and zoom issues */}
+            <div
+              className="p-4 md:p-6 space-y-4 h-[420px] overflow-y-auto md:scroll-smooth overscroll-contain"
+              ref={chatContainerRef}
+              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+            >
               {activeMessages.length === 0 && (
                 <p className="text-orange-100/70 text-sm">No messages yet. Say hello to open the conversation.</p>
               )}
