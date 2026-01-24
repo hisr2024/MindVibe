@@ -26,7 +26,7 @@ import {
   Music
 } from 'lucide-react'
 import { AmbientSoundsPlayer, SOUND_SCENES, SoundSceneCard } from '@/components/sounds'
-import { GlobalMusicPlayer, MeditationMusicPlayer } from '@/components/music'
+import { GlobalMusicPlayer, MeditationMusicPlayer, ProgramTracker, AdvancedVisualizer } from '@/components/music'
 
 export default function SoundsPage() {
   const [featuredScene, setFeaturedScene] = useState<string | null>(null)
@@ -283,11 +283,50 @@ export default function SoundsPage() {
             />
           </motion.section>
 
-          {/* Info Section */}
+          {/* Therapeutic Programs Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+            className="mt-12 mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <span className="text-xl">📿</span>
+                  Therapeutic Programs
+                </h3>
+                <p className="text-sm text-white/50">Multi-day journeys for transformation</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProgramTracker />
+
+              {/* Visualizer Demo */}
+              <div className="rounded-2xl bg-gradient-to-br from-[#0d0d12] to-[#08080b] border border-white/10 overflow-hidden">
+                <div className="p-4 border-b border-white/5">
+                  <h4 className="text-sm font-medium text-white flex items-center gap-2">
+                    <span>✨</span> Audio Visualizer
+                  </h4>
+                  <p className="text-xs text-white/50 mt-1">Interactive sound visualization</p>
+                </div>
+                <AdvancedVisualizer
+                  type="spectrum"
+                  isPlaying={true}
+                  colorScheme="purple"
+                  size="large"
+                  showControls={true}
+                />
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Info Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
             className="mt-12 mb-8"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
