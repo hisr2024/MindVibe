@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pyotp
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -31,6 +31,10 @@ from backend.services.session_service import (
 )
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# Brute force protection constants
+MAX_FAILED_LOGIN_ATTEMPTS = 5
+LOCKOUT_DURATION_MINUTES = 30
 
 
 # ----------------------
@@ -220,8 +224,42 @@ async def login(
     email_norm = payload.email.lower()
     stmt = select(User).where(User.email == email_norm)
     user = (await db.execute(stmt)).scalars().first()
+
+    # Check if account is locked
+    if user and user.locked_until and user.locked_until > datetime.now(UTC):
+        remaining = int((user.locked_until - datetime.now(UTC)).total_seconds() / 60)
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail=f"Account locked. Try again in {remaining} minutes.",
+        )
+
+    # Validate credentials
     if not user or not verify_password(payload.password, user.hashed_password):
+        # Track failed attempts if user exists
+        if user:
+            new_attempts = (user.failed_login_attempts or 0) + 1
+            update_values = {"failed_login_attempts": new_attempts}
+
+            # Lock account after max failed attempts
+            if new_attempts >= MAX_FAILED_LOGIN_ATTEMPTS:
+                update_values["locked_until"] = datetime.now(UTC) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+
+            await db.execute(
+                update(User).where(User.id == user.id).values(**update_values)
+            )
+            await db.commit()
+
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Reset failed attempts on successful login
+    if user.failed_login_attempts and user.failed_login_attempts > 0:
+        await db.execute(
+            update(User).where(User.id == user.id).values(
+                failed_login_attempts=0,
+                locked_until=None,
+            )
+        )
+        await db.commit()
 
     if user.two_factor_enabled:
         if not payload.two_factor_code:
@@ -273,9 +311,10 @@ async def login(
 
 
 # ----------------------
-# Two Factor Authentication
+# Two Factor Authentication (rate limited to prevent brute force)
 # ----------------------
 @router.get("/2fa/status", response_model=TwoFactorStatusOut)
+@limiter.limit(AUTH_RATE_LIMIT)
 async def two_factor_status(request: Request, db: AsyncSession = Depends(get_db)):
     _, user, session_row, _ = await _get_user_and_active_session(request, db)
     await touch_session(db, session_row)
@@ -286,6 +325,7 @@ async def two_factor_status(request: Request, db: AsyncSession = Depends(get_db)
 
 
 @router.post("/2fa/setup", response_model=TwoFactorSetupOut)
+@limiter.limit(AUTH_RATE_LIMIT)
 async def initiate_two_factor(request: Request, db: AsyncSession = Depends(get_db)):
     _, user, session_row, _ = await _get_user_and_active_session(request, db)
 
@@ -307,6 +347,7 @@ async def initiate_two_factor(request: Request, db: AsyncSession = Depends(get_d
 
 
 @router.post("/2fa/verify", response_model=TwoFactorStatusOut)
+@limiter.limit(AUTH_RATE_LIMIT)
 async def verify_two_factor(
     payload: TwoFactorVerifyIn,
     request: Request,

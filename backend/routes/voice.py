@@ -8,18 +8,40 @@ Quantum Coherence: Voice transcends language barriers, making wisdom
 accessible through sound vibrations that resonate with all beings.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
 import logging
+import re
 
 from backend.deps import get_db, get_user_id
+from backend.middleware.rate_limiter import limiter
 from backend.services.tts_service import get_tts_service, VoiceType
+
+# Rate limit for voice synthesis (resource-intensive)
+VOICE_RATE_LIMIT = "10/minute"
 
 router = APIRouter(prefix="/voice", tags=["voice"])
 logger = logging.getLogger(__name__)
+
+
+def _sanitize_filename(value: str) -> str:
+    """Sanitize a string for use in Content-Disposition filename.
+
+    Removes/replaces characters that could cause header injection or path traversal.
+    """
+    # Remove newlines and carriage returns (CRLF injection prevention)
+    value = value.replace("\r", "").replace("\n", "")
+    # Remove path separators
+    value = value.replace("/", "_").replace("\\", "_")
+    # Remove quotes and semicolons that could break headers
+    value = value.replace('"', "").replace("'", "").replace(";", "_")
+    # Only allow alphanumeric, underscore, hyphen, and dot
+    value = re.sub(r"[^a-zA-Z0-9_\-.]", "_", value)
+    # Limit length
+    return value[:100]
 
 
 # ===== Pydantic Models =====
@@ -65,7 +87,9 @@ class VoiceSettingsResponse(BaseModel):
 # ===== API Endpoints =====
 
 @router.post("/synthesize")
+@limiter.limit(VOICE_RATE_LIMIT)
 async def synthesize_speech(
+    request: Request,
     payload: SynthesizeRequest,
     user_id: str = Depends(get_user_id)
 ) -> Response:
@@ -113,7 +137,9 @@ async def synthesize_speech(
 
 
 @router.post("/verse/{verse_id}")
+@limiter.limit(VOICE_RATE_LIMIT)
 async def synthesize_verse(
+    request: Request,
     verse_id: str,
     language: str = "en",
     include_commentary: bool = False,
@@ -165,11 +191,14 @@ async def synthesize_verse(
             detail="Failed to generate verse audio"
         )
 
+    # Sanitize filename to prevent header injection
+    safe_verse_id = _sanitize_filename(verse_id)
+    safe_language = _sanitize_filename(language)
     return Response(
         content=audio_bytes,
         media_type="audio/mpeg",
         headers={
-            "Content-Disposition": f"inline; filename={verse_id}_{language}.mp3",
+            "Content-Disposition": f"inline; filename={safe_verse_id}_{safe_language}.mp3",
             "Cache-Control": "public, max-age=2592000"  # Cache for 30 days (verses don't change)
         }
     )

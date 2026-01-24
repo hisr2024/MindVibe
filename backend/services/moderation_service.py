@@ -15,6 +15,7 @@ Quantum Enhancement #5: Community Wisdom Circles
 """
 
 import re
+import threading
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 from pydantic import BaseModel
@@ -491,16 +492,20 @@ class ModerationService:
         return descriptions.get(badge_type, 'Compassion badge')
 
 
-# Singleton instance
+# Singleton instance with thread-safe initialization
 _moderation_service: Optional[ModerationService] = None
+_moderation_service_lock = threading.Lock()
 
 
 def get_moderation_service() -> ModerationService:
-    """Get or create singleton moderation service instance"""
+    """Get or create singleton moderation service instance with thread-safe initialization"""
     global _moderation_service
     if _moderation_service is None:
-        import os
-        openai_key = os.getenv('OPENAI_API_KEY')
-        use_openai = os.getenv('USE_OPENAI_MODERATION', 'false').lower() == 'true'
-        _moderation_service = ModerationService(openai_api_key=openai_key, use_openai=use_openai)
+        with _moderation_service_lock:
+            # Double-check after acquiring lock
+            if _moderation_service is None:
+                import os
+                openai_key = os.getenv('OPENAI_API_KEY')
+                use_openai = os.getenv('USE_OPENAI_MODERATION', 'false').lower() == 'true'
+                _moderation_service = ModerationService(openai_api_key=openai_key, use_openai=use_openai)
     return _moderation_service

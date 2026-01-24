@@ -164,7 +164,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=ALLOWED_HEADERS,
-    expose_headers=["*"],
+    # Explicitly list headers instead of wildcard (required with credentials)
+    expose_headers=[
+        "content-type",
+        "content-length",
+        "x-csrf-token",
+        "x-request-id",
+        "x-ratelimit-limit",
+        "x-ratelimit-remaining",
+        "x-ratelimit-reset",
+    ],
     max_age=3600,
 )
 
@@ -643,7 +652,7 @@ except Exception as e:
 print("\n[Voice] Attempting to import Voice router...")
 try:
     from backend.routes.voice import router as voice_router
-    app.include_router(voice_router)
+    app.include_router(voice_router, prefix="/api")
     print("✅ [SUCCESS] Voice router loaded (Quantum Enhancement #3 - Multilingual Voice)")
     print("   • POST   /api/voice/synthesize - Synthesize text to speech")
     print("   • POST   /api/voice/verse/{id} - Get verse audio")
@@ -673,6 +682,73 @@ try:
     print("   • GET    /api/divine/check-in - Get divine check-in")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Divine Consciousness router: {e}")
+
+# Load Journal router
+print("\n[Journal] Attempting to import Journal router...")
+try:
+    from backend.routes.journal import router as journal_router
+    app.include_router(journal_router, prefix="/api")
+    print("✅ [SUCCESS] Journal router loaded")
+    print("   • GET    /api/journal/entries - List journal entries")
+    print("   • POST   /api/journal/entries - Create journal entry")
+    print("   • POST   /api/journal/quick-save - Quick save content")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Journal router: {e}")
+
+# Load Community router
+print("\n[Community] Attempting to import Community router...")
+try:
+    from backend.routes.community import router as community_router
+    app.include_router(community_router)
+    print("✅ [SUCCESS] Community router loaded")
+    print("   • GET    /api/community/circles - List wisdom circles")
+    print("   • POST   /api/community/circles/{id}/join - Join circle")
+    print("   • POST   /api/community/posts - Create post")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Community router: {e}")
+
+# Load Analytics router
+print("\n[Analytics] Attempting to import Analytics router...")
+try:
+    from backend.routes.analytics import router as analytics_router
+    app.include_router(analytics_router, prefix="/api")
+    print("✅ [SUCCESS] Analytics router loaded")
+    print("   • GET    /api/analytics/dashboard - Get dashboard data")
+    print("   • GET    /api/analytics/overview - Get overview metrics")
+    print("   • GET    /api/analytics/mood-trends - Get mood trends")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Analytics router: {e}")
+
+# Load Moods router
+print("\n[Moods] Attempting to import Moods router...")
+try:
+    from backend.routes.moods import router as moods_router
+    app.include_router(moods_router, prefix="/api")
+    print("✅ [SUCCESS] Moods router loaded")
+    print("   • POST   /api/moods - Submit mood entry")
+    print("   • GET    /api/moods/micro-response - Get mood analysis")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Moods router: {e}")
+
+# Load Feedback router
+print("\n[Feedback] Attempting to import Feedback router...")
+try:
+    from backend.routes.feedback import router as feedback_router
+    app.include_router(feedback_router, prefix="/api")
+    print("✅ [SUCCESS] Feedback router loaded")
+    print("   • POST   /api/feedback - Submit feedback")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Feedback router: {e}")
+
+# Load Content router
+print("\n[Content] Attempting to import Content router...")
+try:
+    from backend.routes.content import router as content_router
+    app.include_router(content_router, prefix="/api")
+    print("✅ [SUCCESS] Content router loaded")
+    print("   • GET    /api/content/{locale} - Get localized content")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Content router: {e}")
 
 print("="*80)
 print(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
