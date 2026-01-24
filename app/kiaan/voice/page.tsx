@@ -77,6 +77,7 @@ export default function EliteVoicePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthesisRef = useRef<SpeechSynthesis | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const micTransitionRef = useRef<boolean>(false) // Prevent race conditions during mic transitions
 
   // Hooks
   const { t, language } = useLanguage()
@@ -102,6 +103,34 @@ export default function EliteVoicePage() {
       }
     },
     onError: (err) => {
+      console.error('[KIAAN Voice] Voice input error:', err)
+
+      // Don't show error if we're in a transition (e.g., switching to wake word mode)
+      if (micTransitionRef.current) {
+        console.log('[KIAAN Voice] Ignoring error during mic transition')
+        return
+      }
+
+      // Check if this is a recoverable error
+      const lowerErr = err.toLowerCase()
+      if (lowerErr.includes('no-speech') || lowerErr.includes('aborted')) {
+        // These are expected - just return to previous state
+        console.log('[KIAAN Voice] Recoverable error, returning to previous state')
+        if (wakeWordEnabled) {
+          setState('wakeword')
+          // Restart wake word after a brief delay
+          setTimeout(() => {
+            if (wakeWordEnabled && !wakeWordActive) {
+              startWakeWord()
+            }
+          }, 300)
+        } else {
+          setState('idle')
+        }
+        return
+      }
+
+      // For actual errors, show the error state
       setError(err)
       setState('error')
     }
@@ -444,24 +473,54 @@ export default function EliteVoicePage() {
   }, [messages])
 
   // Handle wake word detection
-  function handleWakeWordDetected() {
-    // Clear any previous errors
-    setError(null)
+  // CRITICAL: Must stop wake word detection BEFORE starting voice input
+  // Both use SpeechRecognition API which can't run two instances simultaneously
+  async function handleWakeWordDetected() {
+    // Prevent race conditions - don't start if we're already transitioning
+    if (micTransitionRef.current) {
+      console.log('[KIAAN Voice] Already transitioning, ignoring wake word')
+      return
+    }
 
-    // Play activation sound with haptic
-    playSoundWithHaptic('wakeWord', 'medium')
+    micTransitionRef.current = true
 
-    // Start listening
-    setState('listening')
-    resetTranscript()
+    try {
+      // Clear any previous errors
+      setError(null)
 
-    // Add logging for debugging
-    console.log('[KIAAN Voice] Wake word detected, starting listening...')
-    console.log('[KIAAN Voice] Voice supported:', voiceSupported)
-    console.log('[KIAAN Voice] Mic permission:', micPermission)
+      // Play activation sound with haptic
+      playSoundWithHaptic('wakeWord', 'medium')
 
-    startListening()
-    playSound('listening')
+      // Add logging for debugging
+      console.log('[KIAAN Voice] Wake word detected!')
+      console.log('[KIAAN Voice] Voice supported:', voiceSupported)
+      console.log('[KIAAN Voice] Mic permission:', micPermission)
+      console.log('[KIAAN Voice] Wake word active:', wakeWordActive)
+
+      // CRITICAL FIX: Stop wake word detection before starting voice input
+      // Both WakeWordDetector and useVoiceInput use SpeechRecognition
+      // Having two SpeechRecognition instances causes microphone conflicts
+      if (wakeWordActive) {
+        console.log('[KIAAN Voice] Pausing wake word detection for voice input...')
+        stopWakeWord()
+        // Wait for wake word to fully stop and release microphone
+        await new Promise(resolve => setTimeout(resolve, 200))
+      }
+
+      // Now safe to start listening
+      setState('listening')
+      resetTranscript()
+
+      console.log('[KIAAN Voice] Starting voice input...')
+      startListening()
+      playSound('listening')
+
+    } finally {
+      // Release the transition lock after a brief delay
+      setTimeout(() => {
+        micTransitionRef.current = false
+      }, 500)
+    }
   }
 
   // Handle voice command
@@ -555,9 +614,24 @@ export default function EliteVoicePage() {
   }
 
   // Handle user query
+  // CRITICAL: This is called after voice input ends, need to properly manage mic state
   async function handleUserQuery(query: string) {
+    // Helper to restart wake word if enabled
+    const restartWakeWordIfNeeded = () => {
+      if (wakeWordEnabled && !wakeWordActive) {
+        setTimeout(() => {
+          console.log('[KIAAN Voice] Restarting wake word detection after query handling...')
+          setState('wakeword')
+          startWakeWord()
+        }, 300)
+      } else if (!wakeWordEnabled) {
+        setState('idle')
+      }
+    }
+
     if (!query.trim()) {
-      setState(wakeWordEnabled ? 'wakeword' : 'idle')
+      console.log('[KIAAN Voice] Empty query, returning to previous state')
+      restartWakeWordIfNeeded()
       return
     }
 
@@ -578,7 +652,7 @@ export default function EliteVoicePage() {
       // Handle the command
       const handled = handleVoiceCommand(command.type, command.param)
       if (handled && isBlockingCommand(command.type)) {
-        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        restartWakeWordIfNeeded()
         return
       }
       if (handled) {
@@ -751,14 +825,24 @@ export default function EliteVoicePage() {
 
       utterance.onend = () => {
         setResponse('')
-        setState(wakeWordEnabled ? 'wakeword' : 'idle')
 
-        // Auto-resume listening in hands-free mode
+        // Auto-resume in hands-free mode
         if (wakeWordEnabled) {
+          // After speaking, restart wake word detection (not direct listening)
+          // This gives user time to respond naturally with "Hey KIAAN" again
+          // or they can tap to speak manually
+          console.log('[KIAAN Voice] Speech ended, resuming wake word detection...')
+          setState('wakeword')
+
+          // Give a brief delay then restart wake word detection
           setTimeout(() => {
-            setState('listening')
-            startListening()
-          }, 1000)
+            if (wakeWordEnabled && !wakeWordActive) {
+              console.log('[KIAAN Voice] Restarting wake word detection...')
+              startWakeWord()
+            }
+          }, 500)
+        } else {
+          setState('idle')
         }
 
         resolve()
@@ -829,6 +913,12 @@ export default function EliteVoicePage() {
 
   // Manual activation - robust flow with permission handling
   async function activateManually() {
+    // Prevent double-clicks or rapid activation
+    if (micTransitionRef.current) {
+      console.log('[KIAAN Voice] Already transitioning, ignoring manual activation')
+      return
+    }
+
     // Clear previous errors
     setError(null)
 
@@ -836,6 +926,7 @@ export default function EliteVoicePage() {
     console.log('[KIAAN Voice] Voice supported:', voiceSupported)
     console.log('[KIAAN Voice] Current permission:', micPermission)
     console.log('[KIAAN Voice] Browser:', browserInfo?.name)
+    console.log('[KIAAN Voice] Wake word active:', wakeWordActive)
 
     // Check if voice is supported first
     if (!voiceSupported) {
@@ -877,8 +968,8 @@ export default function EliteVoicePage() {
     // Permission is granted - verify one more time that microphone is accessible
     console.log('[KIAAN Voice] Permission granted, starting voice input...')
 
-    // Start listening - SpeechRecognition will handle microphone access
-    handleWakeWordDetected()
+    // Start listening - this will handle stopping wake word if needed
+    await handleWakeWordDetected()
   }
 
   // Run comprehensive diagnostic check using the enhanced utility
