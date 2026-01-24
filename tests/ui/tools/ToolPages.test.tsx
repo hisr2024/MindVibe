@@ -36,8 +36,8 @@ describe('Karma Footprint Page', () => {
   it('renders the subtitle correctly', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
-    expect(screen.getByText('Daily Action Reflection')).toBeInTheDocument()
+
+    expect(screen.getByText(/Track your daily actions/i)).toBeInTheDocument()
   })
 
   it('renders the action input form', async () => {
@@ -66,8 +66,10 @@ describe('Karma Footprint Page', () => {
   it('renders KarmicTreeClient widget', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
-    expect(screen.getByText('Your Karmic Tree')).toBeInTheDocument()
+
+    // KarmicTreeClient shows loading state or tree content
+    const treeElements = screen.getAllByText(/Karmic Tree/i)
+    expect(treeElements.length).toBeGreaterThan(0)
   })
 
   it('renders related tools links', async () => {
@@ -131,8 +133,8 @@ describe('Existing Tool Pages Headers', () => {
   it('viyog page has correct heading', async () => {
     const { default: ViyogPage } = await import('@/app/viyog/page')
     render(<ViyogPage />)
-    
-    expect(screen.getByText(/Viyog – The Detachment Coach/i)).toBeInTheDocument()
+
+    expect(screen.getByText(/Viyoga – The Detachment Coach/i)).toBeInTheDocument()
   })
 
   it('ardha page has correct heading', async () => {
