@@ -123,31 +123,69 @@ export default function EliteVoicePage() {
   })
 
   // Check microphone permission status using enhanced universal utility
+  // This version actively tests microphone access to get accurate status
   async function checkMicrophonePermission() {
     try {
+      console.log('[KIAAN Voice] Checking microphone permission status...')
+
+      // Get basic permission state from utility
       const permState = await checkMicPermission()
 
-      // Update state based on result
-      setMicPermission(permState.status)
+      // Log platform info for debugging
+      console.log('[KIAAN Voice] Platform:', permState.platform, '| Browser:', permState.browser, '| Initial status:', permState.status)
 
-      // Set error if there is one
-      if (permState.error) {
-        setError(permState.error)
+      // If the permission API says "granted", verify it actually works
+      // (Some browsers report granted but still fail on actual access)
+      if (permState.status === 'granted') {
+        console.log('[KIAAN Voice] Permission API says granted - verifying...')
+        try {
+          // Quick test to verify microphone is actually accessible
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          stream.getTracks().forEach(track => track.stop())
+          console.log('[KIAAN Voice] ✓ Verified microphone access works')
+          setMicPermission('granted')
+        } catch (verifyErr: any) {
+          console.warn('[KIAAN Voice] Permission was "granted" but verification failed:', verifyErr.name)
+          // The permission state was wrong - update to reflect reality
+          if (verifyErr.name === 'NotAllowedError') {
+            setMicPermission('denied')
+            setError('Microphone permission was revoked. Please allow access again.')
+          } else if (verifyErr.name === 'NotFoundError') {
+            setMicPermission('unsupported')
+            setError('No microphone found on this device.')
+          } else {
+            setMicPermission('prompt')
+          }
+          return
+        }
+      } else {
+        // Update state based on result
+        setMicPermission(permState.status)
       }
 
-      // Log platform info for debugging
-      console.log('[KIAAN Voice] Platform:', permState.platform, '| Browser:', permState.browser, '| Status:', permState.status)
+      // Set error if there is one (and we didn't set one above)
+      if (permState.error && permState.status !== 'granted') {
+        setError(permState.error)
+      }
 
       // Listen for permission changes if Permissions API is available
       if (navigator.permissions && navigator.permissions.query) {
         try {
           const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
           const handlePermissionChange = () => {
-            checkMicPermission().then(newState => setMicPermission(newState.status))
+            console.log('[KIAAN Voice] Permission state changed, re-checking...')
+            checkMicPermission().then(newState => {
+              setMicPermission(newState.status)
+              if (newState.status === 'denied') {
+                setError('Microphone permission was revoked. Please allow access in your browser settings.')
+              } else if (newState.status === 'granted') {
+                setError(null)
+              }
+            })
           }
           result.addEventListener('change', handlePermissionChange)
         } catch {
-          // Permissions API not supported, that's okay
+          // Permissions API not supported for microphone, that's okay
         }
       }
     } catch (err: any) {
@@ -156,7 +194,7 @@ export default function EliteVoicePage() {
     }
   }
 
-  // Request microphone permission for SpeechRecognition - simplified flow
+  // Request microphone permission for SpeechRecognition - robust flow with fallback
   async function requestMicrophonePermission(): Promise<boolean> {
     setIsRequestingPermission(true)
     setError(null)
@@ -181,33 +219,55 @@ export default function EliteVoicePage() {
         return false
       }
 
-      // Try to test SpeechRecognition directly (it will request microphone internally)
-      console.log('[KIAAN Voice] Testing SpeechRecognition API...')
+      // First, try to get permission via direct getUserMedia (more reliable for permission prompt)
+      // This is especially important on mobile browsers where SpeechRecognition may not show a permission dialog
+      console.log('[KIAAN Voice] Step 1: Requesting microphone permission directly...')
+      const directResult = await requestMicrophoneDirectly()
+
+      if (!directResult.success) {
+        console.log('[KIAAN Voice] Direct microphone request failed:', directResult.error)
+
+        // Check if it's a hard denial
+        if (directResult.error?.includes('denied') || directResult.error?.includes('not-allowed')) {
+          setMicPermission('denied')
+          setError(directResult.error || 'Microphone permission denied. Please allow access in your browser settings.')
+          return false
+        }
+
+        // For other errors, still try SpeechRecognition as fallback
+        console.log('[KIAAN Voice] Trying SpeechRecognition as fallback...')
+      }
+
+      // If direct request succeeded OR wasn't a hard denial, test SpeechRecognition
+      console.log('[KIAAN Voice] Step 2: Testing SpeechRecognition API...')
       const testResult = await testSpeechRecognition()
 
       if (!testResult.success) {
         console.log('[KIAAN Voice] SpeechRecognition test failed:', testResult.error)
 
         // Parse the error to set appropriate permission state
-        if (testResult.error?.includes('not-allowed') || testResult.error?.includes('denied')) {
+        if (testResult.error?.includes('denied') || testResult.error?.includes('not-allowed') || testResult.error?.includes('not granted')) {
           setMicPermission('denied')
-        } else if (testResult.error?.includes('audio-capture') || testResult.error?.includes('not found')) {
+        } else if (testResult.error?.includes('audio-capture') || testResult.error?.includes('not found') || testResult.error?.includes('No microphone')) {
           setMicPermission('unsupported')
+        } else if (testResult.error?.includes('timed out')) {
+          // Timeout could mean user dismissed dialog without choosing
+          setMicPermission('prompt')
         }
 
-        setError(testResult.error || 'Failed to access microphone for voice recognition')
+        setError(testResult.error || 'Failed to access microphone for voice recognition. Please check your browser settings.')
         return false
       }
 
       // Success!
       setMicPermission('granted')
       playSound('success')
-      console.log('[KIAAN Voice] ✓ Microphone access granted')
+      console.log('[KIAAN Voice] ✓ Microphone access granted for voice recognition!')
       return true
 
     } catch (err: any) {
       console.error('[KIAAN Voice] Permission error:', err)
-      setError(err.message || 'Failed to request microphone access')
+      setError(err.message || 'Failed to request microphone access. Please try again.')
       return false
     } finally {
       setIsRequestingPermission(false)
@@ -215,6 +275,7 @@ export default function EliteVoicePage() {
   }
 
   // Test if SpeechRecognition actually works (some browsers claim support but fail)
+  // This version is more robust and handles slow permission dialogs
   async function testSpeechRecognition(): Promise<{ success: boolean; error?: string }> {
     return new Promise((resolve) => {
       try {
@@ -230,42 +291,116 @@ export default function EliteVoicePage() {
         testRecognition.continuous = false
         testRecognition.interimResults = false
 
-        // Set a timeout in case it hangs
-        const timeout = setTimeout(() => {
+        let resolved = false
+        const safeResolve = (result: { success: boolean; error?: string }) => {
+          if (resolved) return
+          resolved = true
           try { testRecognition.abort() } catch {}
-          resolve({ success: true }) // Assume success if no error after 2s
-        }, 2000)
+          resolve(result)
+        }
+
+        // Extended timeout (10s) - permission dialogs can take time on mobile
+        // DO NOT assume success on timeout - treat as error
+        const timeout = setTimeout(() => {
+          console.log('[KIAAN Voice] testSpeechRecognition timeout - permission dialog may have been dismissed')
+          safeResolve({
+            success: false,
+            error: 'Microphone permission request timed out. Please tap "Allow" when the permission dialog appears, then try again.'
+          })
+        }, 10000)
 
         testRecognition.onstart = () => {
           clearTimeout(timeout)
-          try { testRecognition.abort() } catch {}
-          resolve({ success: true })
+          console.log('[KIAAN Voice] testSpeechRecognition onstart - permission granted!')
+          safeResolve({ success: true })
+        }
+
+        testRecognition.onaudiostart = () => {
+          // Audio started means we have microphone access
+          clearTimeout(timeout)
+          console.log('[KIAAN Voice] testSpeechRecognition onaudiostart - microphone accessible!')
+          safeResolve({ success: true })
         }
 
         testRecognition.onerror = (event: any) => {
           clearTimeout(timeout)
-          try { testRecognition.abort() } catch {}
+          console.log('[KIAAN Voice] testSpeechRecognition error:', event.error)
 
           // 'no-speech' is expected since we're just testing, consider it success
+          // 'aborted' means we aborted it ourselves, which is fine
           if (event.error === 'no-speech' || event.error === 'aborted') {
-            resolve({ success: true })
+            safeResolve({ success: true })
           } else if (event.error === 'not-allowed') {
-            resolve({ success: false, error: 'Microphone permission denied for speech recognition. Please allow access.' })
+            safeResolve({ success: false, error: 'Microphone permission denied. Please allow microphone access in your browser settings and try again.' })
           } else if (event.error === 'network') {
-            resolve({ success: false, error: 'Network error. Speech recognition requires internet connection in most browsers.' })
+            safeResolve({ success: false, error: 'Network error. Speech recognition requires an internet connection in most browsers.' })
           } else if (event.error === 'audio-capture') {
-            resolve({ success: false, error: 'Microphone not accessible. Please check your device settings.' })
+            safeResolve({ success: false, error: 'Microphone not accessible. Please check that your microphone is connected and not being used by another app.' })
+          } else if (event.error === 'service-not-allowed') {
+            safeResolve({ success: false, error: 'Speech recognition service not available. Please ensure you have an internet connection.' })
           } else {
-            resolve({ success: false, error: `Speech recognition error: ${event.error}` })
+            safeResolve({ success: false, error: `Speech recognition error: ${event.error}. Please try again.` })
           }
         }
 
+        testRecognition.onend = () => {
+          // If we haven't resolved yet, the recognition ended without starting audio
+          // This could mean the permission dialog was dismissed
+          clearTimeout(timeout)
+          if (!resolved) {
+            console.log('[KIAAN Voice] testSpeechRecognition ended without audio - possible permission issue')
+            safeResolve({
+              success: false,
+              error: 'Microphone access was not granted. Please allow microphone permissions and try again.'
+            })
+          }
+        }
+
+        console.log('[KIAAN Voice] Starting SpeechRecognition test...')
         testRecognition.start()
 
       } catch (err: any) {
+        console.error('[KIAAN Voice] testSpeechRecognition exception:', err)
         resolve({ success: false, error: `Failed to initialize speech recognition: ${err.message}` })
       }
     })
+  }
+
+  // Fallback: Request microphone directly via getUserMedia if SpeechRecognition fails
+  async function requestMicrophoneDirectly(): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log('[KIAAN Voice] Attempting direct microphone request via getUserMedia...')
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        return { success: false, error: 'Microphone API not available in this browser' }
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      })
+
+      // Successfully got microphone access - stop the stream as we just needed permission
+      stream.getTracks().forEach(track => track.stop())
+
+      console.log('[KIAAN Voice] Direct microphone access granted!')
+      return { success: true }
+
+    } catch (err: any) {
+      console.error('[KIAAN Voice] Direct microphone request failed:', err)
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        return { success: false, error: 'Microphone permission denied. Please allow access in your browser settings.' }
+      } else if (err.name === 'NotFoundError') {
+        return { success: false, error: 'No microphone found. Please connect a microphone and try again.' }
+      } else if (err.name === 'NotReadableError') {
+        return { success: false, error: 'Microphone is being used by another application. Please close other apps using the microphone.' }
+      }
+
+      return { success: false, error: `Could not access microphone: ${err.message}` }
+    }
   }
 
   // Initialize services
@@ -652,7 +787,11 @@ export default function EliteVoicePage() {
       stopWakeWord()
       setWakeWordEnabled(false)
       setState('idle')
+      setError(null)
     } else {
+      // Clear any previous errors
+      setError(null)
+
       // Check if voice is supported
       if (!voiceSupported) {
         const browserName = getBrowserName()
@@ -660,8 +799,20 @@ export default function EliteVoicePage() {
         return
       }
 
+      // Check for unsupported/denied state
+      if (micPermission === 'unsupported') {
+        setError('Microphone is not available on this device.')
+        return
+      }
+
+      if (micPermission === 'denied') {
+        setError('Microphone access is blocked. Please allow microphone access in your browser settings and refresh the page.')
+        return
+      }
+
       // Request permission if needed (will also be requested when wake word is detected)
       if (micPermission !== 'granted') {
+        console.log('[KIAAN Voice] Requesting permission for wake word mode...')
         const granted = await requestMicrophonePermission()
         if (!granted) {
           return
@@ -669,13 +820,14 @@ export default function EliteVoicePage() {
       }
 
       // Start wake word detection
+      console.log('[KIAAN Voice] Starting wake word detection...')
       startWakeWord()
       setWakeWordEnabled(true)
       setState('wakeword')
     }
   }
 
-  // Manual activation - simplified to directly start listening
+  // Manual activation - robust flow with permission handling
   async function activateManually() {
     // Clear previous errors
     setError(null)
@@ -683,6 +835,7 @@ export default function EliteVoicePage() {
     console.log('[KIAAN Voice] ====== MANUAL ACTIVATION ======')
     console.log('[KIAAN Voice] Voice supported:', voiceSupported)
     console.log('[KIAAN Voice] Current permission:', micPermission)
+    console.log('[KIAAN Voice] Browser:', browserInfo?.name)
 
     // Check if voice is supported first
     if (!voiceSupported) {
@@ -693,19 +846,38 @@ export default function EliteVoicePage() {
       return
     }
 
-    // If permission is not granted yet, request it first
+    // Check for unsupported state (no microphone or browser issue)
+    if (micPermission === 'unsupported') {
+      setError('Microphone is not available. Please check that you have a microphone connected and your browser supports voice input.')
+      setState('error')
+      playSound('error')
+      return
+    }
+
+    // If permission is denied, show clear instructions
+    if (micPermission === 'denied') {
+      setError('Microphone access is blocked. Please click the lock/info icon in your browser\'s address bar, allow microphone access, and refresh the page.')
+      setState('error')
+      playSound('error')
+      return
+    }
+
+    // If permission is not granted yet (prompt state), request it first
     if (micPermission !== 'granted') {
       console.log('[KIAAN Voice] Requesting permission first...')
       const granted = await requestMicrophonePermission()
       if (!granted) {
-        console.log('[KIAAN Voice] Permission denied')
+        console.log('[KIAAN Voice] Permission not granted')
+        // Error is already set by requestMicrophonePermission
         setState('error')
         return
       }
     }
 
+    // Permission is granted - verify one more time that microphone is accessible
+    console.log('[KIAAN Voice] Permission granted, starting voice input...')
+
     // Start listening - SpeechRecognition will handle microphone access
-    console.log('[KIAAN Voice] Starting voice input...')
     handleWakeWordDetected()
   }
 
@@ -1015,21 +1187,71 @@ export default function EliteVoicePage() {
               <div className="mt-4 px-4 py-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300 text-sm">
                 <div className="flex items-start gap-2">
                   <span className="text-red-400 text-lg">⚠️</span>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{error}</p>
-                    {error.includes('permission') && (
-                      <p className="mt-1 text-red-300/70 text-xs">
-                        Try: Click the lock/info icon in your browser&apos;s address bar → Site settings → Microphone → Allow
-                      </p>
+
+                    {/* Permission denied instructions */}
+                    {(error.toLowerCase().includes('denied') || error.toLowerCase().includes('blocked') || error.toLowerCase().includes('not-allowed')) && (
+                      <div className="mt-2 text-red-300/70 text-xs space-y-1">
+                        <p className="font-medium text-red-200">How to enable microphone access:</p>
+                        {browserInfo?.name === 'Chrome' && (
+                          <p>Click the lock icon (🔒) in the address bar → Site settings → Microphone → Allow</p>
+                        )}
+                        {browserInfo?.name === 'Safari' && (
+                          <p>Safari menu → Settings for This Website → Microphone → Allow</p>
+                        )}
+                        {browserInfo?.name === 'Edge' && (
+                          <p>Click the lock icon (🔒) in the address bar → Permissions for this site → Microphone → Allow</p>
+                        )}
+                        {browserInfo?.name === 'Firefox' && (
+                          <p>Click the permissions icon next to the address bar → Clear permission → Refresh and try again</p>
+                        )}
+                        {!browserInfo?.name || browserInfo?.name === 'Unknown' && (
+                          <p>Check your browser settings to allow microphone access for this site</p>
+                        )}
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="mt-2 px-3 py-1.5 rounded bg-red-500/30 hover:bg-red-500/40 text-red-200 text-xs font-medium transition-colors"
+                        >
+                          Refresh Page After Allowing
+                        </button>
+                      </div>
                     )}
+
+                    {/* Timeout instructions */}
+                    {error.toLowerCase().includes('timed out') && (
+                      <div className="mt-2 text-red-300/70 text-xs">
+                        <p>The permission dialog may have been dismissed. Please try again and tap &quot;Allow&quot; when prompted.</p>
+                        <button
+                          onClick={() => {
+                            setError(null)
+                            setMicPermission('prompt')
+                          }}
+                          className="mt-2 px-3 py-1.5 rounded bg-orange-500/30 hover:bg-orange-500/40 text-orange-200 text-xs font-medium transition-colors"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Firefox limitation */}
                     {error.includes('Firefox') && (
-                      <p className="mt-1 text-red-300/70 text-xs">
-                        Firefox has limited speech recognition support. Please try Chrome, Edge, or Safari.
+                      <p className="mt-2 text-red-300/70 text-xs">
+                        Firefox has limited speech recognition support. For the best experience, please use Chrome, Edge, or Safari.
                       </p>
                     )}
-                    {error.includes('network') && (
-                      <p className="mt-1 text-red-300/70 text-xs">
-                        Speech recognition requires an internet connection in most browsers.
+
+                    {/* Network error */}
+                    {error.toLowerCase().includes('network') && (
+                      <p className="mt-2 text-red-300/70 text-xs">
+                        Speech recognition requires an internet connection. Please check your connection and try again.
+                      </p>
+                    )}
+
+                    {/* Audio capture / microphone not found */}
+                    {(error.toLowerCase().includes('audio-capture') || error.toLowerCase().includes('not found') || error.toLowerCase().includes('no microphone')) && (
+                      <p className="mt-2 text-red-300/70 text-xs">
+                        Please ensure your microphone is properly connected and not being used by another application.
                       </p>
                     )}
                   </div>
@@ -1046,7 +1268,13 @@ export default function EliteVoicePage() {
                 disabled={!voiceSupported || micPermission === 'unsupported'}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
               >
-                {micPermission === 'granted' ? 'Tap to Speak' : micPermission === 'checking' ? 'Loading...' : 'Enable Microphone & Speak'}
+                {micPermission === 'granted'
+                  ? 'Tap to Speak'
+                  : micPermission === 'checking'
+                  ? 'Checking microphone...'
+                  : micPermission === 'denied'
+                  ? 'Microphone Blocked - Tap for Help'
+                  : 'Enable Microphone & Speak'}
               </button>
             )}
 
@@ -1074,6 +1302,20 @@ export default function EliteVoicePage() {
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
                 Stop
+              </button>
+            )}
+
+            {state === 'error' && (
+              <button
+                onClick={() => {
+                  setError(null)
+                  setState('idle')
+                  // Re-check permission status
+                  checkMicrophonePermission()
+                }}
+                className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105"
+              >
+                Try Again
               </button>
             )}
           </div>
