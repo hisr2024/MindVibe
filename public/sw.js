@@ -184,18 +184,40 @@ self.addEventListener('fetch', (event) => {
 
 /**
  * Handle API requests with cache-first, then network strategy
+ * Note: Only GET requests can be cached
  */
 async function handleAPIRequest(request) {
+  // POST, PUT, DELETE requests cannot be cached - skip caching logic
+  if (request.method !== 'GET') {
+    try {
+      console.log('[Service Worker] Non-cacheable request (method: ' + request.method + '):', request.url)
+      const networkResponse = await fetch(request)
+      return networkResponse
+    } catch (error) {
+      console.error('[Service Worker] Network fetch failed for non-GET request:', error)
+      return new Response(
+        JSON.stringify({
+          error: 'network_error',
+          message: 'Network request failed. Please try again.',
+        }),
+        {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    }
+  }
+
   try {
-    // Try cache first
+    // Try cache first (only for GET requests)
     const cachedResponse = await caches.match(request)
-    
+
     if (cachedResponse) {
       // Check if cache is still fresh
       const cachedDate = new Date(cachedResponse.headers.get('date'))
       const now = new Date()
       const age = now - cachedDate
-      
+
       // Determine cache duration based on endpoint
       let maxAge = CACHE_DURATION.api
       if (request.url.includes('/gita/verses')) {
@@ -203,7 +225,7 @@ async function handleAPIRequest(request) {
       } else if (request.url.includes('/chat')) {
         maxAge = CACHE_DURATION.api
       }
-      
+
       if (age < maxAge) {
         console.log('[Service Worker] Serving from cache:', request.url)
         return cachedResponse
@@ -214,7 +236,7 @@ async function handleAPIRequest(request) {
     console.log('[Service Worker] Fetching from network:', request.url)
     const networkResponse = await fetch(request)
 
-    // Only cache successful, non-redirected responses
+    // Only cache successful, non-redirected GET responses
     if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
       const cache = await caches.open(CACHE_API)
       cache.put(request, networkResponse.clone())
