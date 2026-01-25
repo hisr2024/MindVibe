@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { apiFetch } from '@/lib/api'
 
-type Account = {
+type LegacyAccount = {
   name: string
   email: string
   passwordHash: string
@@ -12,27 +14,20 @@ type Account = {
 
 type Status = { type: 'success' | 'error' | 'info'; message: string }
 
-const ACCOUNT_STORAGE_KEY = 'mindvibe_accounts_v2'
-
-async function hashPassword(password: string) {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password)
-  const hash = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(hash))
-    .map(byte => byte.toString(16).padStart(2, '0'))
-    .join('')
-}
+const LEGACY_ACCOUNT_STORAGE_KEY = 'mindvibe_accounts_v2'
 
 function formatDate(dateString: string) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(dateString))
 }
 
 export default function AccountPageClient() {
+  const { user, isAuthenticated, login, signup, logout, loading: authLoading, error: authError } = useAuth()
+
   const [mode, setMode] = useState<'create' | 'login'>('create')
-  const [accounts, setAccounts] = useState<Account[]>([])
-  const [sessionUser, setSessionUser] = useState<Account | null>(null)
+  const [legacyAccounts, setLegacyAccounts] = useState<LegacyAccount[]>([])
   const [status, setStatus] = useState<Status | null>(null)
   const [hydrated, setHydrated] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [createForm, setCreateForm] = useState({
     name: '',
@@ -43,30 +38,25 @@ export default function AccountPageClient() {
   const [loginForm, setLoginForm] = useState({
     email: '',
     password: '',
+    twoFactorCode: '',
   })
 
+  const [needsTwoFactor, setNeedsTwoFactor] = useState(false)
+
+  // Load legacy accounts for display purposes only
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const stored = window.localStorage.getItem(ACCOUNT_STORAGE_KEY)
-    const storedSession = window.sessionStorage.getItem('mindvibe_session_user')
-    if (stored) setAccounts(JSON.parse(stored))
-    if (storedSession) setSessionUser(JSON.parse(storedSession))
+    const stored = window.localStorage.getItem(LEGACY_ACCOUNT_STORAGE_KEY)
+    if (stored) setLegacyAccounts(JSON.parse(stored))
     setHydrated(true)
   }, [])
 
+  // Show auth errors
   useEffect(() => {
-    if (!hydrated || typeof window === 'undefined') return
-    window.localStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(accounts))
-  }, [accounts, hydrated])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (sessionUser) {
-      window.sessionStorage.setItem('mindvibe_session_user', JSON.stringify(sessionUser))
-    } else {
-      window.sessionStorage.removeItem('mindvibe_session_user')
+    if (authError) {
+      setStatus({ type: 'error', message: authError })
     }
-  }, [sessionUser])
+  }, [authError])
 
   const passwordStrength = useMemo(() => {
     const requirements = [
@@ -108,26 +98,42 @@ export default function AccountPageClient() {
       return
     }
 
-    const exists = accounts.some(account => account.email.toLowerCase() === createForm.email.trim().toLowerCase())
-    if (exists) {
-      setStatus({ type: 'error', message: 'You already have an account. Switch to Login to continue.' })
-      setMode('login')
-      return
-    }
+    setIsSubmitting(true)
 
-    const passwordHash = await hashPassword(createForm.password)
-    const newAccount: Account = {
-      name: createForm.name.trim(),
-      email: createForm.email.trim().toLowerCase(),
-      passwordHash,
-      createdAt: new Date().toISOString(),
-    }
+    try {
+      // Call backend signup API via useAuth hook
+      const authUser = await signup(createForm.email.trim(), createForm.password, createForm.name.trim())
 
-    setAccounts(current => [...current, newAccount])
-    setSessionUser(newAccount)
-    setStatus({ type: 'success', message: 'Account created. You are signed in and ready to continue.' })
-    setCreateForm({ name: '', email: '', password: '' })
-    setLoginForm({ email: newAccount.email, password: '' })
+      // Create profile with name after signup
+      try {
+        await apiFetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: createForm.name.trim(),
+            base_experience: 'new_user', // Required field
+          }),
+        })
+      } catch (profileError) {
+        // Profile creation is optional, don't fail the signup
+        console.warn('Profile creation failed:', profileError)
+      }
+
+      setStatus({ type: 'success', message: 'Account created successfully! You are now signed in.' })
+      setCreateForm({ name: '', email: '', password: '' })
+      setLoginForm({ email: authUser.email, password: '', twoFactorCode: '' })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.'
+      setStatus({ type: 'error', message })
+
+      // If email already exists, suggest login
+      if (message.toLowerCase().includes('already registered') || message.toLowerCase().includes('already exists')) {
+        setMode('login')
+        setLoginForm(prev => ({ ...prev, email: createForm.email.trim().toLowerCase() }))
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleLogin = async (event: FormEvent) => {
@@ -139,28 +145,44 @@ export default function AccountPageClient() {
       return
     }
 
-    const account = accounts.find(acc => acc.email === loginForm.email.trim().toLowerCase())
-    if (!account) {
-      setStatus({ type: 'error', message: 'No account found for that email. Try Create Account instead.' })
-      setMode('create')
-      return
-    }
+    setIsSubmitting(true)
 
-    const passwordHash = await hashPassword(loginForm.password)
-    if (passwordHash !== account.passwordHash) {
-      setStatus({ type: 'error', message: 'Password does not match. Try again with the correct password.' })
-      return
-    }
+    try {
+      await login(loginForm.email.trim(), loginForm.password, loginForm.twoFactorCode || undefined)
 
-    setSessionUser(account)
-    setStatus({ type: 'success', message: 'Signed in. Your journey is synced and ready.' })
-    setLoginForm({ email: account.email, password: '' })
+      setStatus({ type: 'success', message: 'Signed in successfully! Your journey awaits.' })
+      setLoginForm({ email: '', password: '', twoFactorCode: '' })
+      setNeedsTwoFactor(false)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
+
+      // Check if 2FA is required
+      if (message.toLowerCase().includes('two-factor') || message.toLowerCase().includes('2fa')) {
+        setNeedsTwoFactor(true)
+        setStatus({ type: 'info', message: 'Enter your two-factor authentication code.' })
+      } else if (message.toLowerCase().includes('locked')) {
+        setStatus({ type: 'error', message })
+      } else {
+        setStatus({ type: 'error', message })
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const signOut = () => {
-    setSessionUser(null)
-    setStatus({ type: 'info', message: 'Signed out. You can log back in anytime.' })
+  const signOut = async () => {
+    setIsSubmitting(true)
+    try {
+      await logout()
+      setStatus({ type: 'info', message: 'Signed out. You can log back in anytime.' })
+    } catch (err) {
+      setStatus({ type: 'info', message: 'Signed out successfully.' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
+
+  const accountCreatedAt = user ? new Date().toISOString() : null
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16">
@@ -173,23 +195,24 @@ export default function AccountPageClient() {
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
         <div className="space-y-4">
-          {sessionUser ? (
+          {isAuthenticated && user ? (
             <div className="flex flex-col gap-3 rounded-3xl border border-emerald-400/30 bg-emerald-400/10 p-5 text-sm text-emerald-50 shadow-lg shadow-emerald-500/20">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-emerald-50/80">Signed in</p>
-                  <p className="text-lg font-semibold text-emerald-50">{sessionUser.name}</p>
-                  <p className="text-emerald-50/80">{sessionUser.email}</p>
+                  <p className="text-lg font-semibold text-emerald-50">{user.name || user.email.split('@')[0]}</p>
+                  <p className="text-emerald-50/80">{user.email}</p>
                 </div>
                 <button
                   onClick={signOut}
-                  className="rounded-xl border border-emerald-200/40 px-3 py-2 text-xs font-semibold text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-100/10"
+                  disabled={isSubmitting}
+                  className="rounded-xl border border-emerald-200/40 px-3 py-2 text-xs font-semibold text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-100/10 disabled:opacity-50"
                 >
-                  Sign out
+                  {isSubmitting ? 'Signing out...' : 'Sign out'}
                 </button>
               </div>
               <div className="flex items-center justify-between text-emerald-50/80">
-                <p>Since {formatDate(sessionUser.createdAt)}</p>
+                <p>Session active</p>
                 <Link
                   href="/dashboard"
                   className="rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300 px-3 py-2 text-xs font-semibold text-slate-900 shadow-md shadow-emerald-400/20 transition hover:scale-[1.01]"
@@ -215,19 +238,19 @@ export default function AccountPageClient() {
               </div>
               <div className="flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-50">
                 <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
-                Secure hashing
+                Secure authentication
               </div>
             </div>
 
             <div className="mt-6 flex items-center gap-2 rounded-2xl border border-orange-500/15 bg-orange-500/10 p-1 text-sm font-semibold text-orange-50">
               <button
-                onClick={() => setMode('create')}
+                onClick={() => { setMode('create'); setNeedsTwoFactor(false); resetStatus(); }}
                 className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'create' ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/30' : 'hover:bg-orange-500/20'}`}
               >
                 Create Account
               </button>
               <button
-                onClick={() => setMode('login')}
+                onClick={() => { setMode('login'); resetStatus(); }}
                 className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'login' ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/30' : 'hover:bg-orange-500/20'}`}
               >
                 Login with Password
@@ -259,7 +282,8 @@ export default function AccountPageClient() {
                     type="text"
                     value={createForm.name}
                     onChange={event => setCreateForm({ ...createForm, name: event.target.value })}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
                     placeholder="Alex Parker"
                   />
                 </div>
@@ -272,7 +296,8 @@ export default function AccountPageClient() {
                     type="email"
                     value={createForm.email}
                     onChange={event => setCreateForm({ ...createForm, email: event.target.value })}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
                     placeholder="you@mindvibe.app"
                   />
                 </div>
@@ -285,7 +310,8 @@ export default function AccountPageClient() {
                     type="password"
                     value={createForm.password}
                     onChange={event => setCreateForm({ ...createForm, password: event.target.value })}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
                     placeholder="At least 8 characters"
                   />
                   <div className="flex items-center gap-3 text-xs text-orange-100/80">
@@ -297,11 +323,12 @@ export default function AccountPageClient() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-orange-500/25 transition hover:scale-[1.01]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-orange-500/25 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  Create account
+                  {isSubmitting ? 'Creating account...' : 'Create account'}
                 </button>
-                <p className="text-center text-xs text-orange-100/70">All credentials stay on your device.</p>
+                <p className="text-center text-xs text-orange-100/70">Your account is secured with bcrypt encryption.</p>
               </form>
             ) : (
               <form className="mt-6 space-y-4" onSubmit={handleLogin}>
@@ -314,7 +341,8 @@ export default function AccountPageClient() {
                     type="email"
                     value={loginForm.email}
                     onChange={event => setLoginForm({ ...loginForm, email: event.target.value.toLowerCase() })}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
                     placeholder="you@mindvibe.app"
                   />
                 </div>
@@ -327,10 +355,30 @@ export default function AccountPageClient() {
                     type="password"
                     value={loginForm.password}
                     onChange={event => setLoginForm({ ...loginForm, password: event.target.value })}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
                     placeholder="Enter your password"
                   />
                 </div>
+                {needsTwoFactor && (
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-orange-50" htmlFor="two-factor">
+                      Two-Factor Code
+                    </label>
+                    <input
+                      id="two-factor"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      value={loginForm.twoFactorCode}
+                      onChange={event => setLoginForm({ ...loginForm, twoFactorCode: event.target.value.replace(/\D/g, '').slice(0, 6) })}
+                      disabled={isSubmitting}
+                      className="w-full rounded-xl border border-cyan-500/30 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40 disabled:opacity-50"
+                      placeholder="6-digit code"
+                      maxLength={6}
+                    />
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-orange-100/75">
                   <button
                     type="button"
@@ -342,21 +390,23 @@ export default function AccountPageClient() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-emerald-400/20 transition hover:scale-[1.01]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-emerald-400/20 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  Sign in securely
+                  {isSubmitting ? 'Signing in...' : 'Sign in securely'}
                 </button>
-                <p className="text-center text-xs text-orange-100/70">Passwords are verified locally with SHA-256 hashing.</p>
+                <p className="text-center text-xs text-orange-100/70">Secure authentication with session management.</p>
               </form>
             )}
           </div>
-          <div className="rounded-3xl border border-orange-500/15 bg-black/50 p-5 text-sm text-orange-100/80">
-            <p className="text-xs uppercase tracking-[0.18em] text-orange-100/60">Recent accounts</p>
-            {accounts.length === 0 ? (
-              <p className="mt-3 text-orange-100/70">Your first account will appear here once created.</p>
-            ) : (
+
+          {/* Show legacy accounts if any exist */}
+          {legacyAccounts.length > 0 && (
+            <div className="rounded-3xl border border-orange-500/15 bg-black/50 p-5 text-sm text-orange-100/80">
+              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/60">Previous local accounts</p>
+              <p className="mt-2 text-xs text-orange-100/50">These accounts were stored locally. Create a new account to sync your data securely.</p>
               <ul className="mt-3 space-y-3">
-                {accounts
+                {legacyAccounts
                   .slice()
                   .reverse()
                   .slice(0, 3)
@@ -370,8 +420,8 @@ export default function AccountPageClient() {
                     </li>
                   ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </section>
     </main>
