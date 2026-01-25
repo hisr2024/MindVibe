@@ -63,18 +63,23 @@ logger = logging.getLogger(__name__)
 VoiceType = Literal["calm", "wisdom", "friendly"]
 VoiceGender = Literal["male", "female", "neutral"]
 
-# Emotion-to-prosody mapping for adaptive voice
+# Emotion-to-prosody mapping for ULTRA-NATURAL adaptive voice
+# Refined for subtle, human-like emotional expression without robotic exaggeration
 EMOTION_PROSODY_MAP = {
-    "joy": {"rate": 1.05, "pitch": 2.0, "volume": "medium"},
-    "sadness": {"rate": 0.85, "pitch": -2.0, "volume": "soft"},
-    "anxiety": {"rate": 0.80, "pitch": -1.0, "volume": "soft"},
-    "peace": {"rate": 0.85, "pitch": -0.5, "volume": "soft"},
-    "gratitude": {"rate": 0.95, "pitch": 1.0, "volume": "medium"},
-    "anger": {"rate": 0.90, "pitch": 0.0, "volume": "medium"},
-    "fear": {"rate": 0.85, "pitch": 0.5, "volume": "soft"},
-    "hope": {"rate": 0.95, "pitch": 1.5, "volume": "medium"},
-    "love": {"rate": 0.90, "pitch": 0.5, "volume": "soft"},
-    "neutral": {"rate": 0.92, "pitch": 0.0, "volume": "medium"},
+    "joy": {"rate": 1.02, "pitch": 1.0, "volume": "medium", "emphasis": "moderate"},
+    "sadness": {"rate": 0.90, "pitch": -1.0, "volume": "soft", "emphasis": "reduced"},
+    "anxiety": {"rate": 0.88, "pitch": -0.5, "volume": "soft", "emphasis": "reduced"},
+    "peace": {"rate": 0.92, "pitch": -0.3, "volume": "soft", "emphasis": "none"},
+    "gratitude": {"rate": 0.96, "pitch": 0.5, "volume": "medium", "emphasis": "moderate"},
+    "anger": {"rate": 0.94, "pitch": 0.2, "volume": "medium", "emphasis": "strong"},
+    "fear": {"rate": 0.88, "pitch": 0.3, "volume": "soft", "emphasis": "reduced"},
+    "hope": {"rate": 0.97, "pitch": 0.8, "volume": "medium", "emphasis": "moderate"},
+    "love": {"rate": 0.93, "pitch": 0.3, "volume": "soft", "emphasis": "moderate"},
+    "compassion": {"rate": 0.91, "pitch": -0.2, "volume": "soft", "emphasis": "moderate"},
+    "curiosity": {"rate": 0.98, "pitch": 0.4, "volume": "medium", "emphasis": "moderate"},
+    "confidence": {"rate": 0.95, "pitch": 0.0, "volume": "medium", "emphasis": "strong"},
+    "serenity": {"rate": 0.90, "pitch": -0.4, "volume": "soft", "emphasis": "none"},
+    "neutral": {"rate": 0.95, "pitch": 0.0, "volume": "medium", "emphasis": "none"},
 }
 
 # Sanskrit/Hindi spiritual terms that need emphasis
@@ -86,126 +91,158 @@ SPIRITUAL_TERMS = [
     "meditation", "mindfulness", "awareness", "presence", "wisdom",
 ]
 
-# Pause markers for natural speech rhythm
+# Pause markers for ULTRA-NATURAL speech rhythm
+# Calibrated to match human speech patterns - not too long, not too short
 PAUSE_PATTERNS = {
-    r'\.{3,}': '<break time="800ms"/>',  # Ellipsis - contemplative pause
-    r'\.\s+': '<break time="450ms"/> ',   # Period - sentence boundary
-    r'\?\s+': '<break time="400ms"/> ',   # Question - slight pause
-    r'!\s+': '<break time="350ms"/> ',    # Exclamation - energetic pause
-    r':\s+': '<break time="350ms"/> ',    # Colon - anticipation pause
-    r';\s+': '<break time="300ms"/> ',    # Semicolon - thought continuation
-    r',\s+': '<break time="200ms"/> ',    # Comma - brief pause
-    r'—': '<break time="400ms"/>',        # Em-dash - dramatic pause
-    r'–': '<break time="300ms"/>',        # En-dash - medium pause
+    r'\.{3,}': '<break time="600ms"/>',   # Ellipsis - thoughtful pause (not too long)
+    r'\.\s+': '<break time="350ms"/> ',   # Period - natural sentence boundary
+    r'\?\s+': '<break time="300ms"/> ',   # Question - natural thinking pause
+    r'!\s+': '<break time="280ms"/> ',    # Exclamation - energetic but brief
+    r':\s+': '<break time="280ms"/> ',    # Colon - subtle anticipation
+    r';\s+': '<break time="250ms"/> ',    # Semicolon - thought continuation
+    r',\s+': '<break time="150ms"/> ',    # Comma - micro-pause (human-like)
+    r'—': '<break time="320ms"/>',        # Em-dash - subtle dramatic pause
+    r'–': '<break time="220ms"/>',        # En-dash - brief pause
+}
+
+# Additional natural speech patterns for human-like delivery
+NATURAL_PHRASE_PATTERNS = {
+    # Add micro-pauses before important words
+    r'\b(because|therefore|however|moreover|furthermore)\b': '<break time="120ms"/>\\1',
+    # Subtle emphasis on transitional phrases
+    r'\b(In other words|That is to say|For example)\b': '<break time="180ms"/>\\1',
+    # Natural pause before quoted speech
+    r'(\s)(said|says|asked|replied|whispered)(\s)': '\\1\\2<break time="100ms"/>\\3',
 }
 
 
-# Language to Google TTS voice mapping - Using Studio/Journey voices where available for maximum naturalness
-# Studio voices provide the most human-like speech synthesis
-# Journey voices are optimized for longer content with natural prosody
-# Wavenet voices offer improved naturalness over Standard voices
+# Language to Google TTS voice mapping - Using Neural2/Studio voices for MAXIMUM naturalness
+# Neural2 voices: Latest generation with human-like intonation, emphasis, and natural prosody
+# Studio voices: Premium quality for English/Spanish with film-quality naturalness
+# Journey voices: Optimized for longer content with expressive storytelling quality
+# Priority: Neural2 > Studio > Journey > Wavenet > Standard
 LANGUAGE_VOICE_MAP: Dict[str, Dict[str, str]] = {
     "en": {
-        "calm": "en-US-Studio-O",  # Studio female - extremely natural, soothing
-        "wisdom": "en-US-Studio-Q",  # Studio male - natural, warm authority
-        "friendly": "en-US-Journey-F",  # Journey female - conversational, engaging
+        # English - Premium Studio voices for absolute naturalness
+        "calm": "en-US-Studio-O",      # Studio female - soothing, therapeutic quality
+        "wisdom": "en-US-Neural2-D",   # Neural2 male - warm, authoritative, human-like
+        "friendly": "en-US-Neural2-F", # Neural2 female - conversational, natural warmth
     },
-    "hi": {  # Hindi - using Wavenet for improved naturalness
-        "calm": "hi-IN-Wavenet-A",
-        "wisdom": "hi-IN-Wavenet-B",
-        "friendly": "hi-IN-Wavenet-C",
+    "hi": {  # Hindi - Neural2 for most natural Indian language synthesis
+        "calm": "hi-IN-Neural2-A",     # Neural2 female - soft, calming
+        "wisdom": "hi-IN-Neural2-B",   # Neural2 male - measured, wise
+        "friendly": "hi-IN-Neural2-D", # Neural2 female - warm, approachable
     },
-    "ta": {  # Tamil - using Wavenet where available
-        "calm": "ta-IN-Wavenet-A",
-        "wisdom": "ta-IN-Wavenet-B",
-        "friendly": "ta-IN-Wavenet-A",
+    "ta": {  # Tamil - Neural2 for natural prosody
+        "calm": "ta-IN-Neural2-A",     # Neural2 female - gentle
+        "wisdom": "ta-IN-Neural2-B",   # Neural2 male - contemplative
+        "friendly": "ta-IN-Neural2-A", # Neural2 female - warm
     },
-    "te": {  # Telugu - using Wavenet
-        "calm": "te-IN-Standard-A",
-        "wisdom": "te-IN-Standard-B",
-        "friendly": "te-IN-Standard-A",
+    "te": {  # Telugu - Neural2 for human-like quality
+        "calm": "te-IN-Neural2-A",     # Neural2 female - soothing
+        "wisdom": "te-IN-Neural2-B",   # Neural2 male - wise
+        "friendly": "te-IN-Neural2-A", # Neural2 female - friendly
     },
-    "bn": {  # Bengali - using Wavenet
-        "calm": "bn-IN-Wavenet-A",
-        "wisdom": "bn-IN-Wavenet-B",
-        "friendly": "bn-IN-Wavenet-A",
+    "bn": {  # Bengali - Neural2 for natural speech
+        "calm": "bn-IN-Neural2-A",     # Neural2 female - calming
+        "wisdom": "bn-IN-Neural2-B",   # Neural2 male - thoughtful
+        "friendly": "bn-IN-Neural2-A", # Neural2 female - warm
     },
-    "mr": {  # Marathi - using Wavenet
-        "calm": "mr-IN-Wavenet-A",
-        "wisdom": "mr-IN-Wavenet-B",
-        "friendly": "mr-IN-Wavenet-A",
+    "mr": {  # Marathi - Neural2 for improved naturalness
+        "calm": "mr-IN-Neural2-A",     # Neural2 female - gentle
+        "wisdom": "mr-IN-Neural2-B",   # Neural2 male - wise
+        "friendly": "mr-IN-Neural2-A", # Neural2 female - approachable
     },
-    "gu": {  # Gujarati - using Wavenet
-        "calm": "gu-IN-Wavenet-A",
-        "wisdom": "gu-IN-Wavenet-B",
-        "friendly": "gu-IN-Wavenet-A",
+    "gu": {  # Gujarati - Neural2 for natural intonation
+        "calm": "gu-IN-Neural2-A",     # Neural2 female - soft
+        "wisdom": "gu-IN-Neural2-B",   # Neural2 male - grounded
+        "friendly": "gu-IN-Neural2-A", # Neural2 female - warm
     },
-    "kn": {  # Kannada - using Wavenet
-        "calm": "kn-IN-Wavenet-A",
-        "wisdom": "kn-IN-Wavenet-B",
-        "friendly": "kn-IN-Wavenet-A",
+    "kn": {  # Kannada - Neural2 for human-like prosody
+        "calm": "kn-IN-Neural2-A",     # Neural2 female - soothing
+        "wisdom": "kn-IN-Neural2-B",   # Neural2 male - contemplative
+        "friendly": "kn-IN-Neural2-A", # Neural2 female - friendly
     },
-    "ml": {  # Malayalam - using Wavenet
-        "calm": "ml-IN-Wavenet-A",
-        "wisdom": "ml-IN-Wavenet-B",
-        "friendly": "ml-IN-Wavenet-A",
+    "ml": {  # Malayalam - Neural2 for natural speech flow
+        "calm": "ml-IN-Neural2-A",     # Neural2 female - calming
+        "wisdom": "ml-IN-Neural2-B",   # Neural2 male - wise
+        "friendly": "ml-IN-Neural2-A", # Neural2 female - warm
     },
-    "pa": {  # Punjabi - using Wavenet
-        "calm": "pa-IN-Wavenet-A",
-        "wisdom": "pa-IN-Wavenet-B",
-        "friendly": "pa-IN-Wavenet-A",
+    "pa": {  # Punjabi - Neural2 for authentic naturalness
+        "calm": "pa-IN-Neural2-A",     # Neural2 female - gentle
+        "wisdom": "pa-IN-Neural2-B",   # Neural2 male - grounded
+        "friendly": "pa-IN-Neural2-A", # Neural2 female - approachable
     },
-    "sa": {  # Sanskrit (use Hindi Wavenet as fallback)
-        "calm": "hi-IN-Wavenet-A",
-        "wisdom": "hi-IN-Wavenet-B",
-        "friendly": "hi-IN-Wavenet-C",
+    "sa": {  # Sanskrit - Hindi Neural2 with optimized settings for classical pronunciation
+        "calm": "hi-IN-Neural2-A",     # Neural2 - soft, reverent
+        "wisdom": "hi-IN-Neural2-B",   # Neural2 - authoritative, classical
+        "friendly": "hi-IN-Neural2-D", # Neural2 - accessible
     },
-    "es": {  # Spanish - using Studio/Journey
-        "calm": "es-US-Studio-B",
-        "wisdom": "es-US-Journey-D",
-        "friendly": "es-US-Journey-F",
+    "es": {  # Spanish - Neural2/Studio for native-quality speech
+        "calm": "es-US-Neural2-A",     # Neural2 female - soothing
+        "wisdom": "es-US-Neural2-B",   # Neural2 male - wise, warm
+        "friendly": "es-US-Neural2-C", # Neural2 female - conversational
     },
-    "fr": {  # French - using Studio/Journey
-        "calm": "fr-FR-Studio-A",
-        "wisdom": "fr-FR-Studio-D",
-        "friendly": "fr-FR-Journey-F",
+    "fr": {  # French - Neural2 for authentic, natural French
+        "calm": "fr-FR-Neural2-A",     # Neural2 female - soft, elegant
+        "wisdom": "fr-FR-Neural2-B",   # Neural2 male - thoughtful
+        "friendly": "fr-FR-Neural2-C", # Neural2 female - warm, approachable
     },
-    "de": {  # German - using Studio/Journey
-        "calm": "de-DE-Studio-B",
-        "wisdom": "de-DE-Studio-C",
-        "friendly": "de-DE-Journey-F",
+    "de": {  # German - Neural2 for natural German prosody
+        "calm": "de-DE-Neural2-A",     # Neural2 female - calming
+        "wisdom": "de-DE-Neural2-B",   # Neural2 male - measured, wise
+        "friendly": "de-DE-Neural2-C", # Neural2 female - warm
     },
-    "pt": {  # Portuguese - using Studio/Wavenet
-        "calm": "pt-BR-Studio-B",
-        "wisdom": "pt-BR-Wavenet-B",
-        "friendly": "pt-BR-Studio-C",
+    "pt": {  # Portuguese - Neural2 for natural Brazilian/European Portuguese
+        "calm": "pt-BR-Neural2-A",     # Neural2 female - soothing
+        "wisdom": "pt-BR-Neural2-B",   # Neural2 male - thoughtful
+        "friendly": "pt-BR-Neural2-C", # Neural2 female - friendly
     },
-    "ja": {  # Japanese - using Wavenet for better naturalness
-        "calm": "ja-JP-Wavenet-A",
-        "wisdom": "ja-JP-Wavenet-C",
-        "friendly": "ja-JP-Wavenet-B",
+    "ja": {  # Japanese - Neural2 for natural Japanese with proper honorifics intonation
+        "calm": "ja-JP-Neural2-B",     # Neural2 female - gentle, calming
+        "wisdom": "ja-JP-Neural2-C",   # Neural2 male - wise, measured
+        "friendly": "ja-JP-Neural2-D", # Neural2 female - warm, natural
     },
-    "zh": {  # Chinese - using Wavenet
-        "calm": "cmn-CN-Wavenet-A",
-        "wisdom": "cmn-CN-Wavenet-B",
-        "friendly": "cmn-CN-Wavenet-C",
+    "zh": {  # Chinese Mandarin - Neural2 for natural tonal accuracy
+        "calm": "cmn-CN-Neural2-A",    # Neural2 female - soft, soothing
+        "wisdom": "cmn-CN-Neural2-B",  # Neural2 male - wise, grounded
+        "friendly": "cmn-CN-Neural2-D",# Neural2 female - warm, conversational
+    },
+    "ar": {  # Arabic - Neural2 for natural Arabic prosody
+        "calm": "ar-XA-Neural2-A",     # Neural2 female - calming
+        "wisdom": "ar-XA-Neural2-B",   # Neural2 male - wise, measured
+        "friendly": "ar-XA-Neural2-C", # Neural2 female - warm
     },
 }
 
-# Voice type specific settings for natural speech prosody
+# Voice type specific settings for ULTRA-NATURAL speech prosody
+# Optimized for human-like speech patterns with subtle variations
 VOICE_TYPE_SETTINGS: Dict[str, Dict[str, float]] = {
     "calm": {
-        "speed": 0.88,  # Slightly slower for calming effect
-        "pitch": -1.5,  # Slightly lower pitch for warmth
+        "speed": 0.92,       # Natural slow pace - not too robotic slow
+        "pitch": -0.8,       # Subtle lower pitch for warmth without sounding artificial
+        "volume_gain": 0.0,  # Natural volume
     },
     "wisdom": {
-        "speed": 0.90,  # Measured pace for contemplation
-        "pitch": -0.5,  # Natural, grounded tone
+        "speed": 0.94,       # Measured but natural pace - like a wise friend speaking
+        "pitch": -0.3,       # Slightly grounded tone for authority without monotone
+        "volume_gain": 0.5,  # Slight boost for clarity
     },
     "friendly": {
-        "speed": 0.98,  # Natural conversational pace
-        "pitch": 0.5,  # Slightly higher for warmth and approachability
+        "speed": 0.97,       # Natural conversational pace - not rushed
+        "pitch": 0.3,        # Subtle warmth without being artificially high
+        "volume_gain": 0.0,  # Natural volume
     },
+}
+
+# Natural speech enhancement settings
+NATURAL_SPEECH_CONFIG = {
+    "enable_micro_pauses": True,           # Add tiny pauses between phrases
+    "enable_breath_simulation": True,       # Add subtle breath-like pauses
+    "enable_emphasis_variation": True,      # Vary emphasis naturally
+    "enable_prosodic_boundaries": True,     # Natural phrase boundaries
+    "sample_rate_hertz": 24000,            # High quality sample rate
+    "audio_effects": ["headphone-class-device"],  # Premium audio quality
 }
 
 
@@ -213,41 +250,111 @@ VOICE_TYPE_SETTINGS: Dict[str, Dict[str, float]] = {
 # OFFLINE TTS - Edge-TTS Voice Mapping
 # =============================================================================
 
+# Edge TTS (Microsoft) Neural Voices - PREMIUM quality fallback voices
+# Using the most natural-sounding Microsoft Neural voices for each language
+# These voices have human-like intonation, natural pauses, and emotional expression
 EDGE_TTS_VOICES: Dict[str, Dict[str, str]] = {
     "en": {
-        "calm": "en-US-AriaNeural",
-        "wisdom": "en-US-GuyNeural",
-        "friendly": "en-US-JennyNeural",
+        # English - Most natural Microsoft voices
+        "calm": "en-US-AvaNeural",         # Ava - warm, soothing, very natural
+        "wisdom": "en-US-AndrewNeural",    # Andrew - warm, thoughtful male voice
+        "friendly": "en-US-EmmaNeural",    # Emma - friendly, conversational
     },
     "hi": {
-        "calm": "hi-IN-SwaraNeural",
-        "wisdom": "hi-IN-MadhurNeural",
-        "friendly": "hi-IN-SwaraNeural",
+        # Hindi - Natural Indian voices
+        "calm": "hi-IN-SwaraNeural",       # Swara - soft, calming female
+        "wisdom": "hi-IN-MadhurNeural",    # Madhur - warm, wise male
+        "friendly": "hi-IN-SwaraNeural",   # Swara - warm, approachable
+    },
+    "ta": {
+        # Tamil - Natural voices
+        "calm": "ta-IN-PallaviNeural",     # Pallavi - gentle female
+        "wisdom": "ta-IN-ValluvarNeural",  # Valluvar - wise male
+        "friendly": "ta-IN-PallaviNeural", # Pallavi - warm female
+    },
+    "te": {
+        # Telugu - Natural voices
+        "calm": "te-IN-ShrutiNeural",      # Shruti - soft female
+        "wisdom": "te-IN-MohanNeural",     # Mohan - measured male
+        "friendly": "te-IN-ShrutiNeural",  # Shruti - warm female
+    },
+    "bn": {
+        # Bengali - Natural voices
+        "calm": "bn-IN-TanishaaNeural",    # Tanishaa - gentle female
+        "wisdom": "bn-IN-BashkarNeural",   # Bashkar - wise male
+        "friendly": "bn-IN-TanishaaNeural",# Tanishaa - friendly
+    },
+    "mr": {
+        # Marathi - Natural voices
+        "calm": "mr-IN-AarohiNeural",      # Aarohi - soft female
+        "wisdom": "mr-IN-ManoharNeural",   # Manohar - thoughtful male
+        "friendly": "mr-IN-AarohiNeural",  # Aarohi - warm
+    },
+    "gu": {
+        # Gujarati - Natural voices
+        "calm": "gu-IN-DhwaniNeural",      # Dhwani - gentle female
+        "wisdom": "gu-IN-NiranjanNeural",  # Niranjan - grounded male
+        "friendly": "gu-IN-DhwaniNeural",  # Dhwani - approachable
+    },
+    "kn": {
+        # Kannada - Natural voices
+        "calm": "kn-IN-SapnaNeural",       # Sapna - calming female
+        "wisdom": "kn-IN-GaganNeural",     # Gagan - wise male
+        "friendly": "kn-IN-SapnaNeural",   # Sapna - warm
+    },
+    "ml": {
+        # Malayalam - Natural voices
+        "calm": "ml-IN-SobhanaNeural",     # Sobhana - soft female
+        "wisdom": "ml-IN-MidhunNeural",    # Midhun - measured male
+        "friendly": "ml-IN-SobhanaNeural", # Sobhana - friendly
+    },
+    "pa": {
+        # Punjabi - Natural voices (fallback to Hindi if unavailable)
+        "calm": "hi-IN-SwaraNeural",       # Swara - gentle
+        "wisdom": "hi-IN-MadhurNeural",    # Madhur - grounded
+        "friendly": "hi-IN-SwaraNeural",   # Swara - warm
     },
     "es": {
-        "calm": "es-ES-ElviraNeural",
-        "wisdom": "es-ES-AlvaroNeural",
-        "friendly": "es-MX-DaliaNeural",
+        # Spanish - Most natural Microsoft Spanish voices
+        "calm": "es-ES-ElviraNeural",      # Elvira - soft, calming
+        "wisdom": "es-ES-AlvaroNeural",    # Alvaro - warm, thoughtful
+        "friendly": "es-MX-DaliaNeural",   # Dalia - friendly, natural
     },
     "fr": {
-        "calm": "fr-FR-DeniseNeural",
-        "wisdom": "fr-FR-HenriNeural",
-        "friendly": "fr-FR-DeniseNeural",
+        # French - Natural French voices
+        "calm": "fr-FR-DeniseNeural",      # Denise - gentle, elegant
+        "wisdom": "fr-FR-HenriNeural",     # Henri - measured, thoughtful
+        "friendly": "fr-FR-VivienneNeural",# Vivienne - warm, conversational
     },
     "de": {
-        "calm": "de-DE-KatjaNeural",
-        "wisdom": "de-DE-ConradNeural",
-        "friendly": "de-DE-KatjaNeural",
+        # German - Natural German voices
+        "calm": "de-DE-KatjaNeural",       # Katja - soft, calming
+        "wisdom": "de-DE-ConradNeural",    # Conrad - wise, measured
+        "friendly": "de-DE-AmalaNeural",   # Amala - warm, friendly
+    },
+    "pt": {
+        # Portuguese - Natural Portuguese voices
+        "calm": "pt-BR-FranciscaNeural",   # Francisca - gentle
+        "wisdom": "pt-BR-AntonioNeural",   # Antonio - thoughtful
+        "friendly": "pt-BR-ThalitaNeural", # Thalita - warm, conversational
     },
     "ja": {
-        "calm": "ja-JP-NanamiNeural",
-        "wisdom": "ja-JP-KeitaNeural",
-        "friendly": "ja-JP-NanamiNeural",
+        # Japanese - Most natural Microsoft Japanese voices
+        "calm": "ja-JP-NanamiNeural",      # Nanami - soft, calming
+        "wisdom": "ja-JP-KeitaNeural",     # Keita - measured, wise
+        "friendly": "ja-JP-AoiNeural",     # Aoi - warm, natural
     },
     "zh": {
-        "calm": "zh-CN-XiaoxiaoNeural",
-        "wisdom": "zh-CN-YunxiNeural",
-        "friendly": "zh-CN-XiaoxiaoNeural",
+        # Chinese Mandarin - Natural voices
+        "calm": "zh-CN-XiaoxiaoNeural",    # Xiaoxiao - gentle, soothing
+        "wisdom": "zh-CN-YunxiNeural",     # Yunxi - warm, wise
+        "friendly": "zh-CN-XiaoyiNeural",  # Xiaoyi - friendly, conversational
+    },
+    "ar": {
+        # Arabic - Natural Arabic voices
+        "calm": "ar-SA-ZariyahNeural",     # Zariyah - gentle female
+        "wisdom": "ar-SA-HamedNeural",     # Hamed - measured male
+        "friendly": "ar-SA-ZariyahNeural", # Zariyah - warm
     },
 }
 
@@ -783,7 +890,13 @@ class TTSService:
 
     def _add_natural_pauses(self, text: str) -> str:
         """
-        Convert text to SSML with natural pauses for more human-like speech
+        Convert text to SSML with ULTRA-NATURAL pauses for human-like speech.
+
+        Implements:
+        - Natural punctuation-based pauses
+        - Micro-pauses before important phrases
+        - Breathing simulation at natural break points
+        - Prosodic boundary markers
 
         Args:
             text: Plain text to convert
@@ -794,11 +907,45 @@ class TTSService:
         # Escape XML special characters
         ssml_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-        # Apply pause patterns in order of specificity
+        # Apply main pause patterns
         for pattern, replacement in PAUSE_PATTERNS.items():
             ssml_text = re.sub(pattern, replacement, ssml_text)
 
-        # Wrap in speak tags
+        # Apply natural phrase patterns for human-like flow
+        for pattern, replacement in NATURAL_PHRASE_PATTERNS.items():
+            ssml_text = re.sub(pattern, replacement, ssml_text)
+
+        # Add natural breathing at paragraph boundaries (max 2 per text)
+        breath_count = 0
+        lines = ssml_text.split('\n')
+        processed_lines = []
+        for line in lines:
+            if line.strip() and breath_count < 2:
+                # Add subtle breath mark at start of new paragraphs
+                if len(line) > 50:  # Only for substantial paragraphs
+                    line = f'<break time="400ms"/>{line}'
+                    breath_count += 1
+            processed_lines.append(line)
+        ssml_text = '\n'.join(processed_lines)
+
+        # Natural contractions for more conversational feel
+        contractions = [
+            (r'\bI am\b', "I'm"),
+            (r'\byou are\b', "you're"),
+            (r'\bit is\b', "it's"),
+            (r'\bthat is\b', "that's"),
+            (r'\bdo not\b', "don't"),
+            (r'\bdoes not\b', "doesn't"),
+            (r'\bcannot\b', "can't"),
+            (r'\bwill not\b', "won't"),
+            (r'\bshould not\b', "shouldn't"),
+            (r'\bwould not\b', "wouldn't"),
+            (r'\bcould not\b', "couldn't"),
+        ]
+        for pattern, replacement in contractions:
+            ssml_text = re.sub(pattern, replacement, ssml_text, flags=re.IGNORECASE)
+
+        # Wrap in speak tags with prosody for natural flow
         return f'<speak>{ssml_text}</speak>'
 
     def _add_emphasis_to_spiritual_terms(self, ssml_text: str) -> str:
