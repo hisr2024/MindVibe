@@ -18,6 +18,9 @@ export { SpiritualMusicPlayer } from './SpiritualMusicPlayer'
 // Meditation Player - Natural Ultra HD Music
 export { MeditationPlayer } from './MeditationPlayer'
 
+// Simple Music Player - Clean & Minimal with User Uploads
+export { SimpleMusicPlayer } from './SimpleMusicPlayer'
+
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'
 

@@ -12,7 +12,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Headphones } from 'lucide-react'
-import { MeditationPlayer } from '@/components/music'
+import { SimpleMusicPlayer } from '@/components/music'
 
 export default function SoundsPage() {
   return (
@@ -68,7 +68,7 @@ export default function SoundsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <MeditationPlayer />
+            <SimpleMusicPlayer />
           </motion.section>
 
           {/* Info Section */}
