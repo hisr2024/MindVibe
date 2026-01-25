@@ -138,6 +138,10 @@ class JourneyAccessResponse(BaseModel):
     remaining: int
     is_unlimited: bool
     can_start_more: bool
+    # Trial access info for free users
+    is_trial: bool = False
+    trial_days_limit: int = 0  # 0 = no limit, 3 = trial limited to 3 days
+    # Upgrade prompts
     upgrade_url: str | None = None
     upgrade_cta: str | None = None
 
@@ -180,42 +184,47 @@ async def get_journey_access(
 
         stats = await get_wisdom_journeys_stats(db, user_id)
 
-        # Add upgrade info for users without access or at limit
+        # Add upgrade info based on access status
         upgrade_url = None
         upgrade_cta = None
 
-        if not stats["has_access"]:
+        if stats["is_trial"]:
+            # Trial users - encourage upgrade
             upgrade_url = "/pricing"
-            upgrade_cta = "Unlock Wisdom Journeys"
+            upgrade_cta = "Upgrade for Full Access"
         elif not stats["can_start_more"] and not stats["is_unlimited"]:
             upgrade_url = "/pricing"
             upgrade_cta = "Upgrade for More Journeys"
 
         return JourneyAccessResponse(
             has_access=stats["has_access"],
-            tier=stats["tier"],
+            tier="trial" if stats["is_trial"] else stats["tier"],
             active_journeys=stats["active_journeys"],
             journey_limit=stats["journey_limit"],
             remaining=stats["remaining"],
             is_unlimited=stats["is_unlimited"],
             can_start_more=stats["can_start_more"],
+            is_trial=stats["is_trial"],
+            trial_days_limit=stats["trial_days_limit"],
             upgrade_url=upgrade_url,
             upgrade_cta=upgrade_cta,
         )
 
     except HTTPException as e:
-        # For 401 errors (not authenticated), return free tier response
+        # For 401 errors (not authenticated), show trial access available
         if e.status_code == 401:
             return JourneyAccessResponse(
-                has_access=False,
-                tier="free",
+                has_access=True,  # Trial available after sign in
+                tier="trial",
                 active_journeys=0,
-                journey_limit=0,
-                remaining=0,
+                journey_limit=1,
+                remaining=1,
                 is_unlimited=False,
-                can_start_more=False,
+                can_start_more=True,
+                is_trial=True,
+                trial_days_limit=3,
                 upgrade_url="/account",
-                upgrade_cta="Sign in to Start",
+                upgrade_cta="Sign in for Free Trial",
             )
         raise
     except Exception as e:

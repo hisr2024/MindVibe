@@ -23,9 +23,11 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "sso": False,
         "dedicated_support": False,
         "data_retention_days": 30,
-        # Wisdom Journeys - Premium feature
-        "wisdom_journeys": False,
-        "wisdom_journeys_limit": 0,  # Max active journeys (0 = no access)
+        # Wisdom Journeys - Trial access for free users
+        "wisdom_journeys": True,  # Allow trial access
+        "wisdom_journeys_limit": 1,  # 1 trial journey
+        "wisdom_journeys_trial": True,  # This is a trial (limited to 3 days)
+        "wisdom_journeys_trial_days": 3,  # Trial limited to first 3 days
     },
     SubscriptionTier.BASIC: {
         "kiaan_questions_monthly": 50,
@@ -139,3 +141,27 @@ def get_wisdom_journeys_limit(tier: SubscriptionTier) -> int:
         int: Maximum active journeys allowed (-1 = unlimited, 0 = no access).
     """
     return get_tier_features(tier).get("wisdom_journeys_limit", 0)
+
+
+def is_wisdom_journeys_trial(tier: SubscriptionTier) -> bool:
+    """Check if the tier has trial access to Wisdom Journeys.
+
+    Args:
+        tier: The subscription tier.
+
+    Returns:
+        bool: True if this is trial access (limited days).
+    """
+    return get_tier_features(tier).get("wisdom_journeys_trial", False)
+
+
+def get_wisdom_journeys_trial_days(tier: SubscriptionTier) -> int:
+    """Get the trial days limit for Wisdom Journeys.
+
+    Args:
+        tier: The subscription tier.
+
+    Returns:
+        int: Maximum days allowed in trial (0 = no limit).
+    """
+    return get_tier_features(tier).get("wisdom_journeys_trial_days", 0)

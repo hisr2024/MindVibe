@@ -328,10 +328,12 @@ function PersonalizationModal({ isOpen, onClose, onSave }: PersonalizationModalP
 function PremiumBadge({ tier }: { tier: string }) {
   if (tier === 'free') return null
 
-  const badgeConfig: Record<string, { bg: string; text: string; label: string }> = {
+  const badgeConfig: Record<string, { bg: string; text: string; label: string; icon?: string }> = {
+    trial: { bg: 'from-emerald-500 to-teal-500', text: 'text-emerald-100', label: 'Free Trial', icon: '🎁' },
     basic: { bg: 'from-blue-500 to-cyan-500', text: 'text-blue-100', label: 'Basic' },
     premium: { bg: 'from-orange-500 to-amber-500', text: 'text-orange-100', label: 'Premium' },
     enterprise: { bg: 'from-purple-500 to-pink-500', text: 'text-purple-100', label: 'Enterprise' },
+    developer: { bg: 'from-rose-500 to-red-500', text: 'text-rose-100', label: 'Developer', icon: '⚡' },
   }
 
   const config = badgeConfig[tier] || badgeConfig.basic
@@ -340,7 +342,7 @@ function PremiumBadge({ tier }: { tier: string }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${config.bg} px-3 py-1 text-xs font-semibold ${config.text}`}
     >
-      <Crown className="h-3 w-3" />
+      {config.icon ? <span>{config.icon}</span> : <Crown className="h-3 w-3" />}
       {config.label}
     </span>
   )
@@ -509,32 +511,34 @@ export default function JourneysCatalogClient() {
             more journeys to begin your path to inner peace.
           </p>
 
-          {/* Premium Feature Badge for Free Users */}
-          {access && !access.has_access && (
+          {/* Trial Info Banner for Free Users */}
+          {access && access.is_trial && (
             <div className="mx-auto mt-6 max-w-md">
-              <button
-                onClick={() => {
-                  setPaywallVariant('no_access')
-                  setShowPaywall(true)
-                }}
-                className="group flex w-full items-center justify-between rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-purple-500/10 p-4 text-left transition-all hover:border-orange-500/50"
-              >
+              <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-purple-600">
-                    <Star className="h-5 w-5 text-white" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500">
+                    <span className="text-xl">🎁</span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-orange-100">Premium Feature</p>
-                    <p className="text-sm text-orange-100/60">Upgrade to unlock Wisdom Journeys</p>
+                  <div className="flex-1">
+                    <p className="font-semibold text-emerald-100">Free Trial Access</p>
+                    <p className="text-sm text-emerald-100/70">
+                      Try 1 journey for {access.trial_days_limit} days free! Experience the transformation.
+                    </p>
                   </div>
                 </div>
-                <ArrowRight className="h-5 w-5 text-orange-400 transition-transform group-hover:translate-x-1" />
-              </button>
+                <button
+                  onClick={() => router.push(access.upgrade_url || '/pricing')}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/20 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/30"
+                >
+                  <Star className="h-4 w-4" />
+                  {access.upgrade_cta || 'Upgrade for Full Access'}
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Journey Limit Info for Subscribed Users */}
-          {access && access.has_access && !access.is_unlimited && (
+          {/* Journey Limit Info for Subscribed Users (not trial) */}
+          {access && access.has_access && !access.is_unlimited && !access.is_trial && (
             <div className="mx-auto mt-6 max-w-md rounded-xl border border-white/10 bg-white/5 p-4">
               <div className="flex items-center justify-between">
                 <div className="text-left">

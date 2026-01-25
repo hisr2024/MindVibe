@@ -22,7 +22,13 @@ from backend.models import (
     SubscriptionTier,
     SubscriptionStatus,
 )
-from backend.config.feature_config import get_tier_features, get_kiaan_quota, get_wisdom_journeys_limit
+from backend.config.feature_config import (
+    get_tier_features,
+    get_kiaan_quota,
+    get_wisdom_journeys_limit,
+    is_wisdom_journeys_trial,
+    get_wisdom_journeys_trial_days,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -226,12 +232,16 @@ async def get_wisdom_journeys_stats(db: AsyncSession, user_id: str) -> dict:
         user_id: The user's ID.
 
     Returns:
-        dict: Journey statistics including access, limits, and usage.
+        dict: Journey statistics including access, limits, usage, and trial info.
     """
     has_access, active_count, journey_limit = await check_wisdom_journeys_access(
         db, user_id
     )
     tier = await get_user_tier(db, user_id)
+
+    # Check trial status
+    is_trial = is_wisdom_journeys_trial(tier)
+    trial_days = get_wisdom_journeys_trial_days(tier)
 
     return {
         "feature": "wisdom_journeys",
@@ -242,6 +252,9 @@ async def get_wisdom_journeys_stats(db: AsyncSession, user_id: str) -> dict:
         "remaining": -1 if journey_limit == -1 else max(0, journey_limit - active_count),
         "is_unlimited": journey_limit == -1,
         "can_start_more": has_access and (journey_limit == -1 or active_count < journey_limit),
+        # Trial info
+        "is_trial": is_trial,
+        "trial_days_limit": trial_days,
     }
 
 
