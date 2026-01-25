@@ -36,7 +36,8 @@ import {
 } from 'lucide-react'
 import musicEngine, {
   type MusicTrack,
-  type PlayerState
+  type PlayerState,
+  type SoundType
 } from '@/utils/audio/SimpleMusicEngine'
 
 // Track categories for filtering
@@ -51,27 +52,39 @@ const TRACK_CATEGORIES = {
 
 type Category = keyof typeof TRACK_CATEGORIES
 
+// Map sound types to categories
+const SOUND_TYPE_CATEGORIES: Record<SoundType, Category> = {
+  rain: 'nature',
+  ocean: 'nature',
+  forest: 'nature',
+  river: 'nature',
+  crickets: 'nature',
+  thunder: 'nature',
+  meditation: 'meditation',
+  relaxation: 'meditation',
+  healing_528: 'healing',
+  spiritual: 'meditation',
+  singing_bowls: 'healing',
+  chakra: 'healing',
+  zen: 'meditation',
+  sleep: 'sleep',
+  night_rain: 'sleep',
+  ocean_night: 'sleep',
+  flute: 'meditation',
+  piano: 'meditation',
+  sitar: 'meditation',
+  om: 'sacred',
+  temple_bells: 'sacred',
+  gayatri: 'sacred',
+  vedic: 'sacred',
+  alpha: 'healing',
+  theta: 'healing'
+}
+
 // Categorize preset tracks
 function getCategoryForTrack(track: MusicTrack): Category {
-  const title = track.title.toLowerCase()
-  const artist = (track.artist || '').toLowerCase()
-
-  if (artist.includes('nature') || title.includes('rain') || title.includes('ocean') ||
-      title.includes('forest') || title.includes('river') || title.includes('cricket') ||
-      title.includes('bird') || title.includes('thunder')) {
-    return 'nature'
-  }
-  if (artist.includes('sacred') || title.includes('om') || title.includes('temple') ||
-      title.includes('gayatri') || title.includes('vedic') || title.includes('mantra')) {
-    return 'sacred'
-  }
-  if (artist.includes('sleep') || title.includes('sleep') || title.includes('night') ||
-      title.includes('lullaby')) {
-    return 'sleep'
-  }
-  if (artist.includes('healing') || title.includes('healing') || title.includes('chakra') ||
-      title.includes('frequency') || title.includes('singing bowl') || title.includes('hz')) {
-    return 'healing'
+  if (track.soundType && SOUND_TYPE_CATEGORIES[track.soundType]) {
+    return SOUND_TYPE_CATEGORIES[track.soundType]
   }
   return 'meditation'
 }
