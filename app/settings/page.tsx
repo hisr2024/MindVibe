@@ -100,6 +100,27 @@ export default function SettingsPage() {
         </SettingsItem>
       </SettingsSection>
 
+      {/* Security */}
+      <SettingsSection title="Security" description="Protect your account with additional security measures" className="mb-6">
+        <SettingsItem label="Two-Factor Authentication" description="Add an extra layer of security to your account">
+          <Link href="/settings/security">
+            <Button variant="outline" size="sm">Configure</Button>
+          </Link>
+        </SettingsItem>
+        <SettingsDivider />
+        <SettingsItem label="Active Sessions" description="Manage devices logged into your account">
+          <Link href="/settings/security/sessions">
+            <Button variant="outline" size="sm">View Sessions</Button>
+          </Link>
+        </SettingsItem>
+        <SettingsDivider />
+        <SettingsItem label="Password" description="Change your account password">
+          <Link href="/settings/security">
+            <Button variant="outline" size="sm">Update</Button>
+          </Link>
+        </SettingsItem>
+      </SettingsSection>
+
       {/* Appearance */}
       <SettingsSection title="Appearance" description="Customize how MindVibe looks" className="mb-6">
         <SettingsItem label="Theme" description="Switch between light and dark mode">
