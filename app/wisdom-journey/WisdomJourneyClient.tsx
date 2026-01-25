@@ -172,7 +172,7 @@ export default function WisdomJourneyClient() {
   }
 
   const handleStepClick = (stepNumber: number) => {
-    if (!activeJourney) return
+    if (!activeJourney || !activeJourney.steps || !Array.isArray(activeJourney.steps)) return
 
     const step = activeJourney.steps.find((s) => s.step_number === stepNumber)
     if (step) {
