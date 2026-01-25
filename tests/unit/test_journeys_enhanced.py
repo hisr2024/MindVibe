@@ -13,7 +13,7 @@ Tests cover:
 import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Note: These imports will work once the modules are properly set up
@@ -28,7 +28,7 @@ class TestJourneyScheduler:
         from backend.services.journey_engine_enhanced import JourneyScheduler
 
         scheduler = JourneyScheduler()
-        started_at = datetime.now() - timedelta(days=5)
+        started_at = datetime.now(timezone.utc) - timedelta(days=5)
 
         day_index = scheduler.calculate_day_index(started_at, "daily", 3)
 
@@ -41,7 +41,7 @@ class TestJourneyScheduler:
         from backend.services.journey_engine_enhanced import JourneyScheduler
 
         scheduler = JourneyScheduler()
-        started_at = datetime.now() - timedelta(days=10)
+        started_at = datetime.now(timezone.utc) - timedelta(days=10)
 
         day_index = scheduler.calculate_day_index(started_at, "every_other_day", 3)
 
@@ -54,7 +54,7 @@ class TestJourneyScheduler:
         from backend.services.journey_engine_enhanced import JourneyScheduler
 
         scheduler = JourneyScheduler()
-        started_at = datetime.now() - timedelta(days=21)
+        started_at = datetime.now(timezone.utc) - timedelta(days=21)
 
         day_index = scheduler.calculate_day_index(started_at, "weekly", 2)
 
