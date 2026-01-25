@@ -25,22 +25,18 @@ import {
   VolumeX,
   Music,
   Upload,
-  X,
   ChevronUp,
   ChevronDown,
   Leaf,
   Moon,
   Heart,
   Sparkles,
-  Waves,
-  Bird,
   Wind,
   Headphones
 } from 'lucide-react'
 import musicEngine, {
   type MusicTrack,
-  type PlayerState,
-  PRESET_TRACKS
+  type PlayerState
 } from '@/utils/audio/SimpleMusicEngine'
 
 // Track categories for filtering
