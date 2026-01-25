@@ -14,9 +14,17 @@ import {
   Check,
   ArrowRight,
   Settings,
+  Lock,
+  Star,
+  Zap,
+  X,
 } from 'lucide-react'
 import * as journeysService from '@/services/journeysEnhancedService'
-import type { JourneyTemplate, Personalization } from '@/services/journeysEnhancedService'
+import type {
+  JourneyTemplate,
+  Personalization,
+  JourneyAccess,
+} from '@/services/journeysEnhancedService'
 
 // Enemy icons mapping
 const ENEMY_ICONS: Record<string, typeof Flame> = {
@@ -41,6 +49,153 @@ const ENEMY_GRADIENTS: Record<string, string> = {
   mixed: 'from-indigo-500 to-purple-600',
   general: 'from-blue-500 to-cyan-600',
 }
+
+// =============================================================================
+// Premium Paywall Modal
+// =============================================================================
+
+interface PaywallModalProps {
+  isOpen: boolean
+  onClose: () => void
+  access: JourneyAccess | null
+  variant: 'no_access' | 'limit_reached'
+}
+
+function PaywallModal({ isOpen, onClose, access, variant }: PaywallModalProps) {
+  const router = useRouter()
+
+  if (!isOpen) return null
+
+  const isLimitReached = variant === 'limit_reached'
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg rounded-3xl border border-orange-500/30 bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/50 p-8">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-orange-100/40 hover:text-orange-100"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        {/* Premium badge */}
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-purple-600 shadow-lg shadow-orange-500/25">
+          {isLimitReached ? (
+            <Zap className="h-10 w-10 text-white" />
+          ) : (
+            <Lock className="h-10 w-10 text-white" />
+          )}
+        </div>
+
+        {/* Title */}
+        <h2 className="mt-6 text-center text-2xl font-bold text-orange-50">
+          {isLimitReached ? 'Journey Limit Reached' : 'Unlock Wisdom Journeys'}
+        </h2>
+
+        {/* Description */}
+        <p className="mt-3 text-center text-orange-100/70">
+          {isLimitReached ? (
+            <>
+              You&apos;ve reached your limit of{' '}
+              <span className="font-semibold text-orange-300">
+                {access?.journey_limit} active journey
+                {(access?.journey_limit ?? 0) > 1 ? 's' : ''}
+              </span>{' '}
+              on your {access?.tier} plan. Upgrade to start more journeys simultaneously.
+            </>
+          ) : (
+            <>
+              Wisdom Journeys is a{' '}
+              <span className="font-semibold text-orange-300">premium feature</span> that provides
+              AI-powered spiritual transformation paths. Upgrade to Basic or higher to begin your
+              journey.
+            </>
+          )}
+        </p>
+
+        {/* Features list */}
+        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+          <h4 className="text-sm font-semibold text-orange-100">What you&apos;ll unlock:</h4>
+          <ul className="mt-3 space-y-2">
+            {[
+              'Personalized multi-day spiritual journeys',
+              'KIAAN AI-generated daily guidance',
+              'Transform the 6 inner enemies (Sad-Ripu)',
+              'Bhagavad Gita verse-based teachings',
+              'Progress tracking & reflections',
+            ].map((feature, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-orange-100/70">
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Tier comparison */}
+        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+          <div
+            className={`rounded-xl border p-3 ${
+              access?.tier === 'basic'
+                ? 'border-blue-500/50 bg-blue-500/10'
+                : 'border-white/10 bg-white/5'
+            }`}
+          >
+            <p className="text-xs font-medium text-orange-100/60">Basic</p>
+            <p className="mt-1 text-lg font-bold text-orange-50">1</p>
+            <p className="text-xs text-orange-100/50">journey</p>
+          </div>
+          <div
+            className={`rounded-xl border p-3 ${
+              access?.tier === 'premium'
+                ? 'border-orange-500/50 bg-orange-500/10'
+                : 'border-white/10 bg-white/5'
+            }`}
+          >
+            <p className="text-xs font-medium text-orange-100/60">Premium</p>
+            <p className="mt-1 text-lg font-bold text-orange-300">5</p>
+            <p className="text-xs text-orange-100/50">journeys</p>
+          </div>
+          <div
+            className={`rounded-xl border p-3 ${
+              access?.tier === 'enterprise'
+                ? 'border-purple-500/50 bg-purple-500/10'
+                : 'border-white/10 bg-white/5'
+            }`}
+          >
+            <p className="text-xs font-medium text-orange-100/60">Enterprise</p>
+            <p className="mt-1 text-lg font-bold text-purple-300">∞</p>
+            <p className="text-xs text-orange-100/50">unlimited</p>
+          </div>
+        </div>
+
+        {/* CTA buttons */}
+        <div className="mt-8 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-xl border border-white/10 px-4 py-3 text-sm font-medium text-orange-100 hover:bg-white/5"
+          >
+            Maybe Later
+          </button>
+          <button
+            onClick={() => router.push(access?.upgrade_url || '/pricing')}
+            className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30"
+          >
+            <span className="flex items-center justify-center gap-2">
+              <Star className="h-4 w-4" />
+              {access?.upgrade_cta || 'View Plans'}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// =============================================================================
+// Personalization Modal
+// =============================================================================
 
 interface PersonalizationModalProps {
   isOpen: boolean
@@ -166,27 +321,64 @@ function PersonalizationModal({ isOpen, onClose, onSave }: PersonalizationModalP
   )
 }
 
+// =============================================================================
+// Premium Badge Component
+// =============================================================================
+
+function PremiumBadge({ tier }: { tier: string }) {
+  if (tier === 'free') return null
+
+  const badgeConfig: Record<string, { bg: string; text: string; label: string }> = {
+    basic: { bg: 'from-blue-500 to-cyan-500', text: 'text-blue-100', label: 'Basic' },
+    premium: { bg: 'from-orange-500 to-amber-500', text: 'text-orange-100', label: 'Premium' },
+    enterprise: { bg: 'from-purple-500 to-pink-500', text: 'text-purple-100', label: 'Enterprise' },
+  }
+
+  const config = badgeConfig[tier] || badgeConfig.basic
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${config.bg} px-3 py-1 text-xs font-semibold ${config.text}`}
+    >
+      <Crown className="h-3 w-3" />
+      {config.label}
+    </span>
+  )
+}
+
+// =============================================================================
+// Main Catalog Component
+// =============================================================================
+
 export default function JourneysCatalogClient() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
   const [templates, setTemplates] = useState<JourneyTemplate[]>([])
+  const [access, setAccess] = useState<JourneyAccess | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [showPersonalization, setShowPersonalization] = useState(false)
+  const [showPaywall, setShowPaywall] = useState(false)
+  const [paywallVariant, setPaywallVariant] = useState<'no_access' | 'limit_reached'>('no_access')
   const [personalization, setPersonalization] = useState<Personalization | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    loadCatalog()
+    loadData()
   }, [])
 
-  async function loadCatalog() {
+  async function loadData() {
     try {
       setLoading(true)
-      const data = await journeysService.getCatalog()
-      setTemplates(data)
+      // Load catalog and access info in parallel
+      const [catalogData, accessData] = await Promise.all([
+        journeysService.getCatalog(),
+        journeysService.getJourneyAccess().catch(() => null),
+      ])
+      setTemplates(catalogData)
+      setAccess(accessData)
     } catch (err) {
-      console.error('Failed to load catalog:', err)
+      console.error('Failed to load data:', err)
       setError('Failed to load journey catalog. Please try again.')
     } finally {
       setLoading(false)
@@ -194,13 +386,30 @@ export default function JourneysCatalogClient() {
   }
 
   function toggleSelection(id: string) {
+    // Check if user has access first
+    if (!access?.has_access) {
+      setPaywallVariant('no_access')
+      setShowPaywall(true)
+      return
+    }
+
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) {
         next.delete(id)
       } else {
+        // Check journey limit
+        const maxAllowed = access?.is_unlimited
+          ? Infinity
+          : Math.max(0, (access?.journey_limit ?? 0) - (access?.active_journeys ?? 0))
+
+        if (next.size >= maxAllowed) {
+          setPaywallVariant('limit_reached')
+          setShowPaywall(true)
+          return prev
+        }
         if (next.size >= 5) {
-          // Max 5 journeys
+          // Hard limit even for unlimited
           return prev
         }
         next.add(id)
@@ -212,6 +421,13 @@ export default function JourneysCatalogClient() {
   async function handleStartJourneys() {
     if (selectedIds.size === 0) return
 
+    // Check access before starting
+    if (!access?.has_access) {
+      setPaywallVariant('no_access')
+      setShowPaywall(true)
+      return
+    }
+
     try {
       setStarting(true)
       setError(null)
@@ -222,6 +438,18 @@ export default function JourneysCatalogClient() {
       router.push('/journeys/today')
     } catch (err) {
       console.error('Failed to start journeys:', err)
+
+      // Handle premium errors
+      if (journeysService.isPremiumError(err)) {
+        if (err.errorCode === 'journey_limit_reached') {
+          setPaywallVariant('limit_reached')
+        } else {
+          setPaywallVariant('no_access')
+        }
+        setShowPaywall(true)
+        return
+      }
+
       setError(err instanceof Error ? err.message : 'Failed to start journeys')
     } finally {
       setStarting(false)
@@ -241,17 +469,80 @@ export default function JourneysCatalogClient() {
 
   const featuredTemplates = templates.filter((t) => t.is_featured)
   const regularTemplates = templates.filter((t) => !t.is_featured)
+  const maxSelectable = access?.is_unlimited
+    ? 5
+    : Math.min(5, Math.max(0, (access?.journey_limit ?? 0) - (access?.active_journeys ?? 0)))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/30 to-orange-900/20 py-12">
       <div className="container mx-auto max-w-6xl px-4">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-orange-50">Wisdom Journeys</h1>
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <h1 className="text-4xl font-bold text-orange-50">Wisdom Journeys</h1>
+            {access && <PremiumBadge tier={access.tier} />}
+          </div>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-orange-100/70">
-            Transform your inner world by overcoming the six inner enemies (Ṣaḍ-Ripu). Select one
-            or more journeys to begin your path to inner peace.
+            Transform your inner world by overcoming the six inner enemies (Sad-Ripu). Select one or
+            more journeys to begin your path to inner peace.
           </p>
+
+          {/* Premium Feature Badge for Free Users */}
+          {access && !access.has_access && (
+            <div className="mx-auto mt-6 max-w-md">
+              <button
+                onClick={() => {
+                  setPaywallVariant('no_access')
+                  setShowPaywall(true)
+                }}
+                className="group flex w-full items-center justify-between rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-purple-500/10 p-4 text-left transition-all hover:border-orange-500/50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-purple-600">
+                    <Star className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-orange-100">Premium Feature</p>
+                    <p className="text-sm text-orange-100/60">Upgrade to unlock Wisdom Journeys</p>
+                  </div>
+                </div>
+                <ArrowRight className="h-5 w-5 text-orange-400 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          )}
+
+          {/* Journey Limit Info for Subscribed Users */}
+          {access && access.has_access && !access.is_unlimited && (
+            <div className="mx-auto mt-6 max-w-md rounded-xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <p className="text-sm font-medium text-orange-100">Active Journeys</p>
+                  <p className="text-xs text-orange-100/60">
+                    {access.active_journeys} of {access.journey_limit} used
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: access.journey_limit }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-2 w-6 rounded-full ${
+                        i < access.active_journeys ? 'bg-orange-500' : 'bg-white/20'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              {access.remaining === 0 && (
+                <button
+                  onClick={() => router.push(access.upgrade_url || '/pricing')}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-orange-500/20 py-2 text-sm font-medium text-orange-300 hover:bg-orange-500/30"
+                >
+                  <Zap className="h-4 w-4" />
+                  Upgrade for More Journeys
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Error Alert */}
@@ -268,6 +559,11 @@ export default function JourneysCatalogClient() {
               <div>
                 <p className="font-medium text-orange-100">
                   {selectedIds.size} journey{selectedIds.size > 1 ? 's' : ''} selected
+                  {maxSelectable < 5 && (
+                    <span className="ml-2 text-sm text-orange-100/60">
+                      (max {maxSelectable} available)
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-orange-100/60">
                   You can start multiple journeys and work on them simultaneously
@@ -305,8 +601,10 @@ export default function JourneysCatalogClient() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {featuredTemplates.map((template) => {
                 const Icon = ENEMY_ICONS[template.primary_enemy_tags[0]] || Sparkles
-                const gradient = ENEMY_GRADIENTS[template.primary_enemy_tags[0]] || 'from-gray-500 to-gray-600'
+                const gradient =
+                  ENEMY_GRADIENTS[template.primary_enemy_tags[0]] || 'from-gray-500 to-gray-600'
                 const isSelected = selectedIds.has(template.id)
+                const isLocked = !access?.has_access
 
                 return (
                   <button
@@ -315,13 +613,22 @@ export default function JourneysCatalogClient() {
                     className={`group relative overflow-hidden rounded-2xl border p-6 text-left transition-all ${
                       isSelected
                         ? 'border-orange-500 bg-orange-500/10'
-                        : 'border-white/10 bg-gradient-to-br from-gray-800/50 to-gray-900/50 hover:border-white/20'
+                        : isLocked
+                          ? 'border-white/5 bg-gradient-to-br from-gray-800/30 to-gray-900/30 opacity-75'
+                          : 'border-white/10 bg-gradient-to-br from-gray-800/50 to-gray-900/50 hover:border-white/20'
                     }`}
                   >
                     {/* Selected indicator */}
                     {isSelected && (
                       <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500">
                         <Check className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+
+                    {/* Lock indicator for free users */}
+                    {isLocked && !isSelected && (
+                      <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
+                        <Lock className="h-3.5 w-3.5 text-orange-100/50" />
                       </div>
                     )}
 
@@ -349,9 +656,7 @@ export default function JourneysCatalogClient() {
                     {/* Meta */}
                     <div className="mt-4 flex items-center gap-4 text-xs text-orange-100/50">
                       <span>{journeysService.formatDuration(template.duration_days)}</span>
-                      <span>
-                        {journeysService.getDifficultyLabel(template.difficulty)}
-                      </span>
+                      <span>{journeysService.getDifficultyLabel(template.difficulty)}</span>
                     </div>
 
                     {/* Tags */}
@@ -382,6 +687,7 @@ export default function JourneysCatalogClient() {
                 const gradient =
                   ENEMY_GRADIENTS[template.primary_enemy_tags[0]] || 'from-gray-500 to-gray-600'
                 const isSelected = selectedIds.has(template.id)
+                const isLocked = !access?.has_access
 
                 return (
                   <button
@@ -390,13 +696,22 @@ export default function JourneysCatalogClient() {
                     className={`group relative overflow-hidden rounded-2xl border p-6 text-left transition-all ${
                       isSelected
                         ? 'border-orange-500 bg-orange-500/10'
-                        : 'border-white/10 bg-gradient-to-br from-gray-800/50 to-gray-900/50 hover:border-white/20'
+                        : isLocked
+                          ? 'border-white/5 bg-gradient-to-br from-gray-800/30 to-gray-900/30 opacity-75'
+                          : 'border-white/10 bg-gradient-to-br from-gray-800/50 to-gray-900/50 hover:border-white/20'
                     }`}
                   >
                     {/* Selected indicator */}
                     {isSelected && (
                       <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500">
                         <Check className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+
+                    {/* Lock indicator */}
+                    {isLocked && !isSelected && (
+                      <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
+                        <Lock className="h-3.5 w-3.5 text-orange-100/50" />
                       </div>
                     )}
 
@@ -416,9 +731,7 @@ export default function JourneysCatalogClient() {
                     {/* Meta */}
                     <div className="mt-4 flex items-center gap-4 text-xs text-orange-100/50">
                       <span>{journeysService.formatDuration(template.duration_days)}</span>
-                      <span>
-                        {journeysService.getDifficultyLabel(template.difficulty)}
-                      </span>
+                      <span>{journeysService.getDifficultyLabel(template.difficulty)}</span>
                     </div>
                   </button>
                 )
@@ -432,17 +745,21 @@ export default function JourneysCatalogClient() {
           <div className="py-16 text-center">
             <Sparkles className="mx-auto h-16 w-16 text-orange-500/50" />
             <h3 className="mt-4 text-xl font-semibold text-orange-100">No journeys available</h3>
-            <p className="mt-2 text-orange-100/60">
-              Check back soon for new wisdom journeys.
-            </p>
+            <p className="mt-2 text-orange-100/60">Check back soon for new wisdom journeys.</p>
           </div>
         )}
 
-        {/* Personalization Modal */}
+        {/* Modals */}
         <PersonalizationModal
           isOpen={showPersonalization}
           onClose={() => setShowPersonalization(false)}
           onSave={(p) => setPersonalization(p)}
+        />
+        <PaywallModal
+          isOpen={showPaywall}
+          onClose={() => setShowPaywall(false)}
+          access={access}
+          variant={paywallVariant}
         />
       </div>
     </div>

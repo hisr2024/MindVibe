@@ -22,7 +22,7 @@ from backend.models import (
     SubscriptionTier,
     SubscriptionStatus,
 )
-from backend.config.feature_config import get_tier_features, get_kiaan_quota
+from backend.config.feature_config import get_tier_features, get_kiaan_quota, get_wisdom_journeys_limit
 
 logger = logging.getLogger(__name__)
 
@@ -165,15 +165,84 @@ async def check_feature_access(
 
 async def check_journal_access(db: AsyncSession, user_id: str) -> bool:
     """Check if a user has access to the encrypted journal.
-    
+
     Args:
         db: Database session.
         user_id: The user's ID.
-        
+
     Returns:
         bool: True if the user has journal access (subscribers only).
     """
     return await check_feature_access(db, user_id, "encrypted_journal")
+
+
+async def check_wisdom_journeys_access(
+    db: AsyncSession, user_id: str
+) -> tuple[bool, int, int]:
+    """Check if a user has access to Wisdom Journeys and their current usage.
+
+    Args:
+        db: Database session.
+        user_id: The user's ID.
+
+    Returns:
+        tuple: (has_access, active_journey_count, journey_limit)
+            - has_access: True if the user can access Wisdom Journeys
+            - active_journey_count: Number of currently active journeys
+            - journey_limit: Maximum allowed (-1 = unlimited, 0 = no access)
+    """
+    tier = await get_user_tier(db, user_id)
+    journey_limit = get_wisdom_journeys_limit(tier)
+
+    # No access for free tier (limit = 0)
+    if journey_limit == 0:
+        return False, 0, 0
+
+    # Count active journeys for this user
+    try:
+        from backend.models import UserJourney, UserJourneyStatus
+
+        stmt = select(UserJourney).where(
+            and_(
+                UserJourney.user_id == user_id,
+                UserJourney.status == UserJourneyStatus.ACTIVE,
+            )
+        )
+        result = await db.execute(stmt)
+        active_journeys = list(result.scalars().all())
+        active_count = len(active_journeys)
+    except Exception as e:
+        logger.warning(f"Failed to count active journeys: {e}")
+        active_count = 0
+
+    return True, active_count, journey_limit
+
+
+async def get_wisdom_journeys_stats(db: AsyncSession, user_id: str) -> dict:
+    """Get Wisdom Journeys statistics for a user.
+
+    Args:
+        db: Database session.
+        user_id: The user's ID.
+
+    Returns:
+        dict: Journey statistics including access, limits, and usage.
+    """
+    has_access, active_count, journey_limit = await check_wisdom_journeys_access(
+        db, user_id
+    )
+    tier = await get_user_tier(db, user_id)
+
+    return {
+        "feature": "wisdom_journeys",
+        "has_access": has_access,
+        "tier": tier.value,
+        "active_journeys": active_count,
+        "journey_limit": journey_limit,
+        "remaining": -1 if journey_limit == -1 else max(0, journey_limit - active_count),
+        "is_unlimited": journey_limit == -1,
+        "can_start_more": has_access and (journey_limit == -1 or active_count < journey_limit),
+    }
 
 
 # =============================================================================
