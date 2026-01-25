@@ -134,6 +134,35 @@ export interface ProviderStatus {
   }
 }
 
+/**
+ * Journey access information for premium gating
+ */
+export interface JourneyAccess {
+  has_access: boolean
+  tier: 'free' | 'basic' | 'premium' | 'enterprise'
+  active_journeys: number
+  journey_limit: number
+  remaining: number
+  is_unlimited: boolean
+  can_start_more: boolean
+  upgrade_url: string | null
+  upgrade_cta: string | null
+}
+
+/**
+ * Premium feature error response
+ */
+export interface PremiumError {
+  error: 'feature_not_available' | 'journey_limit_reached' | 'quota_exceeded'
+  feature: string
+  message: string
+  tier: string
+  upgrade_url: string
+  upgrade_cta: string
+  active_count?: number
+  journey_limit?: number
+}
+
 // =============================================================================
 // Helper Functions
 // =============================================================================
@@ -163,10 +192,52 @@ function getHeaders(): HeadersInit {
   return headers
 }
 
+/**
+ * Custom error class for premium feature errors
+ */
+export class PremiumFeatureError extends Error {
+  public readonly isPremiumError = true
+  public readonly errorCode: string
+  public readonly feature: string
+  public readonly tier: string
+  public readonly upgradeUrl: string
+  public readonly upgradeCta: string
+  public readonly activeCount?: number
+  public readonly journeyLimit?: number
+
+  constructor(data: PremiumError) {
+    super(data.message)
+    this.name = 'PremiumFeatureError'
+    this.errorCode = data.error
+    this.feature = data.feature
+    this.tier = data.tier
+    this.upgradeUrl = data.upgrade_url
+    this.upgradeCta = data.upgrade_cta
+    this.activeCount = data.active_count
+    this.journeyLimit = data.journey_limit
+  }
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
-    throw new Error(error.detail || `HTTP error ${response.status}`)
+
+    // Check for premium feature errors (403 Forbidden)
+    if (response.status === 403 && error.detail?.error) {
+      const detail = error.detail as PremiumError
+      if (
+        detail.error === 'feature_not_available' ||
+        detail.error === 'journey_limit_reached'
+      ) {
+        throw new PremiumFeatureError(detail)
+      }
+    }
+
+    throw new Error(
+      typeof error.detail === 'string'
+        ? error.detail
+        : error.detail?.message || `HTTP error ${response.status}`
+    )
   }
   return response.json()
 }
@@ -174,6 +245,17 @@ async function handleResponse<T>(response: Response): Promise<T> {
 // =============================================================================
 // API Functions
 // =============================================================================
+
+/**
+ * Check the current user's access to Wisdom Journeys (premium feature)
+ */
+export async function getJourneyAccess(): Promise<JourneyAccess> {
+  const response = await fetch(`${API_BASE_URL}/api/journeys/access`, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+  return handleResponse<JourneyAccess>(response)
+}
 
 /**
  * Get all available journey templates (catalog)
@@ -395,4 +477,27 @@ export function formatDuration(days: number): string {
     return weeks === 1 ? '1 week' : `${weeks} weeks`
   }
   return `${weeks}w ${remainingDays}d`
+}
+
+/**
+ * Check if an error is a premium feature error
+ */
+export function isPremiumError(error: unknown): error is PremiumFeatureError {
+  return error instanceof PremiumFeatureError
+}
+
+/**
+ * Get tier badge display info
+ */
+export function getTierBadge(tier: string): { label: string; color: string; icon: string } {
+  switch (tier.toLowerCase()) {
+    case 'basic':
+      return { label: 'Basic', color: 'blue', icon: 'star' }
+    case 'premium':
+      return { label: 'Premium', color: 'orange', icon: 'crown' }
+    case 'enterprise':
+      return { label: 'Enterprise', color: 'purple', icon: 'building' }
+    default:
+      return { label: 'Free', color: 'gray', icon: 'user' }
+  }
 }

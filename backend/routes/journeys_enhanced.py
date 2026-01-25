@@ -24,11 +24,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_current_user_flexible, get_db
 from backend.middleware.rate_limiter import limiter
+from backend.middleware.feature_access import (
+    require_wisdom_journeys,
+    WisdomJourneysAccessRequired,
+    get_current_user_id,
+)
 from backend.services.journey_engine_enhanced import (
     EnhancedJourneyEngine,
     get_journey_engine,
 )
 from backend.services.ai.providers import get_provider_manager
+from backend.services.subscription_service import (
+    get_wisdom_journeys_stats,
+    get_user_tier,
+    get_or_create_free_subscription,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +128,72 @@ class ProviderStatusResponse(BaseModel):
     providers: dict[str, dict[str, Any]]
 
 
+class JourneyAccessResponse(BaseModel):
+    """Wisdom Journeys access information for the current user."""
+    has_access: bool
+    tier: str
+    active_journeys: int
+    journey_limit: int
+    remaining: int
+    is_unlimited: bool
+    can_start_more: bool
+    upgrade_url: str | None = None
+    upgrade_cta: str | None = None
+
+
+# =============================================================================
+# ACCESS & SUBSCRIPTION ENDPOINTS
+# =============================================================================
+
+
+@router.get("/access", response_model=JourneyAccessResponse)
+async def get_journey_access(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> JourneyAccessResponse:
+    """
+    Check the current user's access to Wisdom Journeys.
+
+    Returns subscription tier, active journey count, and limits.
+    This endpoint is available to all users (including free tier)
+    to show appropriate upgrade prompts.
+    """
+    try:
+        user_id = await get_current_user_id(request)
+        await get_or_create_free_subscription(db, user_id)
+
+        stats = await get_wisdom_journeys_stats(db, user_id)
+
+        # Add upgrade info for users without access or at limit
+        upgrade_url = None
+        upgrade_cta = None
+
+        if not stats["has_access"]:
+            upgrade_url = "/pricing"
+            upgrade_cta = "Unlock Wisdom Journeys"
+        elif not stats["can_start_more"] and not stats["is_unlimited"]:
+            upgrade_url = "/pricing"
+            upgrade_cta = "Upgrade for More Journeys"
+
+        return JourneyAccessResponse(
+            has_access=stats["has_access"],
+            tier=stats["tier"],
+            active_journeys=stats["active_journeys"],
+            journey_limit=stats["journey_limit"],
+            remaining=stats["remaining"],
+            is_unlimited=stats["is_unlimited"],
+            can_start_more=stats["can_start_more"],
+            upgrade_url=upgrade_url,
+            upgrade_cta=upgrade_cta,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking journey access: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to check journey access")
+
+
 # =============================================================================
 # CATALOG ENDPOINTS
 # =============================================================================
@@ -125,13 +201,14 @@ class ProviderStatusResponse(BaseModel):
 
 @router.get("/catalog", response_model=list[JourneyTemplateResponse])
 async def get_catalog(
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
 ) -> list[JourneyTemplateResponse]:
     """
     Get all available journey templates.
 
     Returns journey templates sorted by featured status and title.
+    Available to all users to show the catalog (with premium badges).
     """
     engine = get_journey_engine()
 
@@ -155,14 +232,25 @@ async def start_journeys(
     request: Request,
     body: StartJourneysRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
 ) -> list[UserJourneyResponse]:
     """
     Start one or more journeys.
 
+    **Premium Feature**: Requires Basic tier or higher.
+    - FREE: No access
+    - BASIC: 1 active journey
+    - PREMIUM: Up to 5 active journeys
+    - ENTERPRISE: Unlimited journeys
+
     Supports starting multiple journeys in a single request.
     Rate limited to 10 journey starts per hour.
     """
+    # Check premium access with limit validation
+    access_check = WisdomJourneysAccessRequired(
+        check_limit=True, requested_count=len(body.journey_ids)
+    )
+    user_id, active_count, journey_limit = await access_check(request, db)
+
     engine = get_journey_engine()
 
     try:
@@ -189,6 +277,8 @@ async def start_journeys(
             for j in journeys
         ]
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error starting journeys: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to start journeys")
@@ -196,10 +286,16 @@ async def start_journeys(
 
 @router.get("/active", response_model=list[UserJourneyResponse])
 async def get_active_journeys(
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> list[UserJourneyResponse]:
-    """Get all active journeys for the current user."""
+    """
+    Get all active journeys for the current user.
+
+    **Premium Feature**: Requires Basic tier or higher.
+    """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:
@@ -218,19 +314,25 @@ async def get_active_journeys(
 
 @router.get("/today", response_model=TodayAgendaResponse)
 async def get_today_agenda(
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> TodayAgendaResponse:
     """
     Get today's agenda across all active journeys.
 
+    **Premium Feature**: Requires Basic tier or higher.
+
     Returns steps for all active journeys and optionally recommends
     a priority step based on check-in intensity.
     """
+    user_id, active_count, journey_limit = access
     engine = get_journey_engine()
 
     try:
         agenda = await engine.get_today_steps(db, user_id)
+        # Add journey count info to response
+        agenda["active_journey_count"] = active_count
         return TodayAgendaResponse(**agenda)
 
     except Exception as e:
@@ -244,16 +346,19 @@ async def get_or_generate_today_step(
     request: Request,
     user_journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> StepResponse:
     """
     Get or generate today's step for a specific journey.
+
+    **Premium Feature**: Requires Basic tier or higher.
 
     This endpoint is idempotent - calling it multiple times returns
     the same cached step if already generated.
 
     Rate limited to 30 step generations per hour.
     """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:
@@ -295,13 +400,16 @@ async def complete_step(
     day_index: int,
     body: CompleteStepRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, Any]:
     """
     Mark a journey step as complete with check-in and reflection.
 
+    **Premium Feature**: Requires Basic tier or higher.
+
     The reflection is stored using the existing journaling/encryption system.
     """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:
@@ -341,11 +449,17 @@ async def complete_step(
 
 @router.post("/{user_journey_id}/pause")
 async def pause_journey(
+    request: Request,
     user_journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, str]:
-    """Pause an active journey."""
+    """
+    Pause an active journey.
+
+    **Premium Feature**: Requires Basic tier or higher.
+    """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:
@@ -370,11 +484,17 @@ async def pause_journey(
 
 @router.post("/{user_journey_id}/resume")
 async def resume_journey(
+    request: Request,
     user_journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, str]:
-    """Resume a paused journey."""
+    """
+    Resume a paused journey.
+
+    **Premium Feature**: Requires Basic tier or higher.
+    """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:
@@ -401,11 +521,17 @@ async def resume_journey(
 
 @router.post("/{user_journey_id}/abandon")
 async def abandon_journey(
+    request: Request,
     user_journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, str]:
-    """Abandon a journey."""
+    """
+    Abandon a journey.
+
+    **Premium Feature**: Requires Basic tier or higher.
+    """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:
@@ -435,11 +561,17 @@ async def abandon_journey(
 
 @router.get("/{user_journey_id}/history")
 async def get_journey_history(
+    request: Request,
     user_journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> list[dict[str, Any]]:
-    """Get complete history of a journey's steps."""
+    """
+    Get complete history of a journey's steps.
+
+    **Premium Feature**: Requires Basic tier or higher.
+    """
+    user_id, _, _ = access
     engine = get_journey_engine()
 
     try:

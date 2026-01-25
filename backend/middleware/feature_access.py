@@ -22,6 +22,7 @@ from backend.services.subscription_service import (
     check_kiaan_quota,
     check_journal_access,
     check_feature_access,
+    check_wisdom_journeys_access,
     get_user_tier,
 )
 
@@ -200,12 +201,97 @@ class JournalAccessRequired:
         return user_id
 
 
+class WisdomJourneysAccessRequired:
+    """Dependency that ensures user has Wisdom Journeys access.
+
+    Checks both feature access and journey limits based on subscription tier:
+    - FREE: No access
+    - BASIC: 1 active journey
+    - PREMIUM: Up to 5 active journeys
+    - ENTERPRISE: Unlimited journeys
+    """
+
+    def __init__(self, check_limit: bool = False, requested_count: int = 1):
+        """Initialize with optional limit checking.
+
+        Args:
+            check_limit: Whether to check against the journey limit.
+            requested_count: Number of journeys being requested (for start endpoint).
+        """
+        self.check_limit = check_limit
+        self.requested_count = requested_count
+
+    async def __call__(
+        self,
+        request: Request,
+        db: AsyncSession = Depends(get_db),
+    ) -> tuple[str, int, int]:
+        """Check that user has Wisdom Journeys access.
+
+        Args:
+            request: The FastAPI request.
+            db: Database session.
+
+        Returns:
+            tuple: (user_id, active_count, journey_limit)
+
+        Raises:
+            HTTPException: If user doesn't have access or exceeds limit.
+        """
+        user_id = await get_current_user_id(request)
+
+        # Ensure user has a subscription
+        await get_or_create_free_subscription(db, user_id)
+
+        # Check wisdom journeys access
+        has_access, active_count, journey_limit = await check_wisdom_journeys_access(
+            db, user_id
+        )
+
+        tier = await get_user_tier(db, user_id)
+
+        if not has_access:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "feature_not_available",
+                    "feature": "wisdom_journeys",
+                    "message": "Wisdom Journeys is a premium feature. "
+                               "Upgrade to Basic or higher to embark on your spiritual transformation journey.",
+                    "tier": tier.value,
+                    "upgrade_url": "/pricing",
+                    "upgrade_cta": "Unlock Wisdom Journeys",
+                },
+            )
+
+        # Check limit if enabled
+        if self.check_limit and journey_limit != -1:
+            if active_count + self.requested_count > journey_limit:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "error": "journey_limit_reached",
+                        "feature": "wisdom_journeys",
+                        "message": f"You can have up to {journey_limit} active journey(s) on your {tier.value} plan. "
+                                   f"You currently have {active_count}. Complete or abandon a journey to start a new one, "
+                                   "or upgrade for more journeys.",
+                        "tier": tier.value,
+                        "active_count": active_count,
+                        "journey_limit": journey_limit,
+                        "upgrade_url": "/pricing",
+                        "upgrade_cta": "Upgrade for More Journeys",
+                    },
+                )
+
+        return user_id, active_count, journey_limit
+
+
 class FeatureRequired:
     """Generic dependency for checking feature access."""
-    
+
     def __init__(self, feature_name: str):
         """Initialize with the feature name to check.
-        
+
         Args:
             feature_name: The name of the feature to check access for.
         """
@@ -257,6 +343,28 @@ class FeatureRequired:
 require_subscription = SubscriptionRequired()
 require_kiaan_quota = KiaanQuotaRequired()
 require_journal_access = JournalAccessRequired()
+require_wisdom_journeys = WisdomJourneysAccessRequired()
+
+
+def require_wisdom_journeys_with_limit(requested_count: int = 1) -> WisdomJourneysAccessRequired:
+    """Factory function to create a wisdom journeys dependency with limit checking.
+
+    Usage:
+        @router.post("/start")
+        async def start_journeys(
+            payload: StartJourneysRequest,
+            access: tuple = Depends(require_wisdom_journeys_with_limit(len(payload.journey_ids))),
+        ):
+            user_id, active_count, limit = access
+            ...
+
+    Args:
+        requested_count: Number of journeys being requested.
+
+    Returns:
+        WisdomJourneysAccessRequired: A dependency that checks access and limits.
+    """
+    return WisdomJourneysAccessRequired(check_limit=True, requested_count=requested_count)
 
 
 def require_feature(feature_name: str) -> FeatureRequired:
