@@ -268,7 +268,23 @@ export default function WisdomJourneyClient() {
             {/* Sidebar - Journey Timeline */}
             <div className="lg:col-span-1">
               <div className="sticky top-4 rounded-xl border border-white/10 bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-6 backdrop-blur-sm">
-                <JourneyTimeline journey={activeJourney} onStepClick={handleStepClick} />
+                {/* Show message if journey has no valid steps */}
+                {(!activeJourney.steps || !Array.isArray(activeJourney.steps) || activeJourney.steps.length === 0) ? (
+                  <div className="text-center py-8">
+                    <p className="text-orange-100/70 mb-4">Journey data is incomplete.</p>
+                    <button
+                      onClick={() => {
+                        setActiveJourney(null)
+                        setView('recommendations')
+                      }}
+                      className="rounded-lg bg-gradient-to-r from-orange-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-orange-600 hover:to-purple-700"
+                    >
+                      Start a New Journey
+                    </button>
+                  </div>
+                ) : (
+                  <JourneyTimeline journey={activeJourney} onStepClick={handleStepClick} />
+                )}
 
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-3">

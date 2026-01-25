@@ -51,6 +51,14 @@ export async function GET(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json()
+
+        // Ensure the journey has valid steps array
+        // If not, return null to allow frontend to show recommendations
+        if (data && (!data.steps || !Array.isArray(data.steps) || data.steps.length === 0)) {
+          console.warn('Active journey returned without valid steps, returning null')
+          return safeJsonResponse(null)
+        }
+
         return safeJsonResponse(data)
       }
 
