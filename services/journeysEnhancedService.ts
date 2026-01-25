@@ -261,11 +261,21 @@ export async function getJourneyAccess(): Promise<JourneyAccess> {
  * Get all available journey templates (catalog)
  */
 export async function getCatalog(): Promise<JourneyTemplate[]> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/catalog`, {
-    method: 'GET',
-    headers: getHeaders(),
-  })
-  return handleResponse<JourneyTemplate[]>(response)
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/journeys/catalog`, {
+      method: 'GET',
+      headers: getHeaders(),
+    })
+    // If the response is a server error, return empty array (migrations may not be run yet)
+    if (!response.ok && response.status >= 500) {
+      console.warn('Catalog endpoint returned error, returning empty catalog')
+      return []
+    }
+    return handleResponse<JourneyTemplate[]>(response)
+  } catch (error) {
+    console.warn('Failed to fetch catalog:', error)
+    return [] // Return empty array on network errors
+  }
 }
 
 /**
