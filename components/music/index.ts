@@ -19,6 +19,9 @@ export { SpiritualMusicPlayer } from './SpiritualMusicPlayer'
 export { SoulSoothingMusicPlayer } from './SoulSoothingMusicPlayer'
 export * from '@/lib/music/soulSoothingMusicLibrary'
 
+// Simple Music Player - Clean & Minimal with User Uploads
+export { SimpleMusicPlayer } from './SimpleMusicPlayer'
+
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'
 
