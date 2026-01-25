@@ -36,24 +36,26 @@ const TAB_TRANSLATION_KEYS: Record<string, string> = {
   'profile': 'navigation.mainNav.profile',
 }
 
-// Default navigation tabs
+// Default navigation tabs - Optimized for mobile (5 tabs max for usability)
 const defaultTabs: NavTab[] = [
-  {
-    id: 'introduction',
-    label: 'Introduction',
-    href: '/introduction',
-    icon: (
-      <span className="text-lg">🙏</span>
-    ),
-  },
   {
     id: 'home',
     label: 'Home',
     href: '/dashboard',
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
+  },
+  {
+    id: 'journal',
+    label: 'Journal',
+    href: '/sacred-reflections',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
       </svg>
     ),
   },
@@ -63,29 +65,7 @@ const defaultTabs: NavTab[] = [
     href: '/kiaan/chat',
     isHighlighted: true,
     icon: (
-      <span className="text-lg font-bold">K</span>
-    ),
-  },
-  {
-    id: 'journal',
-    label: 'Sacred Reflections',
-    href: '/sacred-reflections',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-      </svg>
-    ),
-  },
-  {
-    id: 'wisdom',
-    label: 'Wisdom',
-    href: '/wisdom-rooms',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
+      <span className="text-xl font-black">K</span>
     ),
   },
   {
@@ -94,17 +74,20 @@ const defaultTabs: NavTab[] = [
     href: '#',
     isToolsButton: true,
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
       </svg>
     ),
   },
   {
     id: 'profile',
-    label: 'You',
+    label: 'Profile',
     href: '/profile',
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
@@ -220,15 +203,15 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
         {/* Gradient fade overlay for content behind nav */}
         <div className="absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-[#0b0b0f] to-transparent pointer-events-none" />
 
-        {/* Main nav container with glass effect */}
+        {/* Main nav container with glass effect - Enhanced mobile UX */}
         <div
-          className="relative border-t border-orange-500/20 bg-[#0b0b0f]/95 backdrop-blur-xl shadow-mobile-nav"
+          className="relative border-t border-white/10 bg-[#0a0a0e]/98 backdrop-blur-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.5)]"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           {/* Subtle top glow line */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
 
-          <div className="flex items-stretch justify-around px-1">
+          <div className="flex items-stretch justify-evenly px-2">
             {tabs.map((tab) => {
               const isActive = tab.href !== '#' && (pathname === tab.href || pathname.startsWith(`${tab.href}/`))
 
@@ -243,17 +226,17 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     initial="rest"
                     whileTap="pressed"
                     whileHover="hover"
-                    className={`relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 ${
+                    className={`relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 ${
                       toolsSheetOpen
                         ? 'text-orange-400'
-                        : 'text-white/60'
+                        : 'text-white/50'
                     }`}
                     aria-expanded={toolsSheetOpen}
                     aria-haspopup="dialog"
                   >
                     <motion.span
-                      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-200 ${
-                        toolsSheetOpen ? 'bg-orange-500/20' : ''
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-200 ${
+                        toolsSheetOpen ? 'bg-orange-500/25 text-orange-400' : 'bg-white/5'
                       }`}
                       variants={iconGlowVariants}
                       animate={toolsSheetOpen ? 'active' : 'inactive'}
@@ -261,8 +244,8 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                       {tab.icon}
                     </motion.span>
                     <span
-                      className={`text-[10px] leading-tight tracking-wide ${
-                        toolsSheetOpen ? 'font-semibold text-orange-400' : 'font-medium'
+                      className={`text-[11px] leading-tight ${
+                        toolsSheetOpen ? 'font-bold text-orange-400' : 'font-medium text-white/50'
                       }`}
                     >
                       {getTabLabel(tab.id, tab.label)}
@@ -271,14 +254,14 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                 )
               }
 
-              // Special styling for KIAAN (highlighted tab)
+              // Special styling for KIAAN (highlighted central tab)
               if (tab.isHighlighted) {
                 return (
                   <Link
                     key={tab.id}
                     href={tab.href}
                     onClick={() => handleTabPress(isActive, tab.id)}
-                    className="relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
+                    className="relative flex min-h-[68px] min-w-[70px] flex-col items-center justify-center gap-1 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 -mt-4"
                     aria-current={isActive ? 'page' : undefined}
                   >
                     <motion.div
@@ -288,18 +271,18 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                       whileHover="hover"
                       className="flex flex-col items-center gap-1"
                     >
-                      {/* Highlighted KIAAN button with pulsing glow */}
+                      {/* Highlighted KIAAN button - Prominent floating design */}
                       <motion.span
-                        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 text-white shadow-lg"
+                        className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 text-white shadow-xl border-4 border-[#0a0a0e]"
                         animate={{
                           boxShadow: isActive
                             ? [
-                                '0 4px 20px rgba(255, 145, 89, 0.5)',
-                                '0 4px 30px rgba(255, 145, 89, 0.7)',
-                                '0 4px 20px rgba(255, 145, 89, 0.5)',
+                                '0 6px 24px rgba(255, 145, 89, 0.5)',
+                                '0 6px 32px rgba(255, 145, 89, 0.7)',
+                                '0 6px 24px rgba(255, 145, 89, 0.5)',
                               ]
-                            : '0 4px 16px rgba(255, 145, 89, 0.4)',
-                          scale: isActive ? 1.05 : 1,
+                            : '0 6px 20px rgba(255, 145, 89, 0.4)',
+                          scale: isActive ? 1.08 : 1,
                         }}
                         transition={{
                           boxShadow: {
@@ -319,44 +302,31 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                           className="absolute inset-0 rounded-full"
                           animate={{
                             boxShadow: isActive
-                              ? 'inset 0 0 12px rgba(255, 255, 255, 0.3)'
-                              : 'inset 0 0 8px rgba(255, 255, 255, 0.2)',
+                              ? 'inset 0 0 14px rgba(255, 255, 255, 0.35)'
+                              : 'inset 0 0 10px rgba(255, 255, 255, 0.25)',
                           }}
                         />
                         {tab.icon}
                       </motion.span>
                       <span
-                        className={`text-[10px] leading-tight tracking-wide font-semibold ${
-                          isActive ? 'text-orange-400' : 'text-orange-300/80'
+                        className={`text-[11px] leading-tight font-bold ${
+                          isActive ? 'text-orange-400' : 'text-orange-300/90'
                         }`}
                       >
                         {getTabLabel(tab.id, tab.label)}
                       </span>
                     </motion.div>
-
-                    {/* Active indicator dot */}
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.span
-                          className="absolute bottom-1 left-1/2 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 shadow-[0_0_8px_rgba(255,145,89,0.6)]"
-                          initial={{ scale: 0, x: '-50%' }}
-                          animate={{ scale: 1, x: '-50%' }}
-                          exit={{ scale: 0, x: '-50%' }}
-                          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                        />
-                      )}
-                    </AnimatePresence>
                   </Link>
                 )
               }
 
-              // Regular tab item
+              // Regular tab item - Enhanced mobile UX
               return (
                 <Link
                   key={tab.id}
                   href={tab.href}
                   onClick={() => handleTabPress(isActive, tab.id)}
-                  className="relative flex min-h-[64px] min-w-[48px] flex-1 flex-col items-center justify-center gap-1 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
+                  className="relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <motion.div
@@ -364,23 +334,20 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     initial="rest"
                     whileTap="pressed"
                     whileHover="hover"
-                    className="flex flex-col items-center gap-1"
+                    className="flex flex-col items-center gap-1.5"
                   >
                     <motion.span
-                      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-200 ${
-                        isActive ? 'text-orange-400' : 'text-white/60'
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-200 ${
+                        isActive ? 'text-orange-400 bg-orange-500/20' : 'text-white/50 bg-white/5'
                       }`}
                       variants={iconGlowVariants}
                       animate={isActive ? 'active' : 'inactive'}
-                      style={{
-                        backgroundColor: isActive ? 'rgba(255, 145, 89, 0.15)' : 'transparent',
-                      }}
                     >
                       {tab.icon}
                     </motion.span>
                     <span
-                      className={`text-[10px] leading-tight tracking-wide ${
-                        isActive ? 'font-semibold text-orange-400' : 'font-medium text-white/60'
+                      className={`text-[11px] leading-tight ${
+                        isActive ? 'font-bold text-orange-400' : 'font-medium text-white/50'
                       }`}
                     >
                       {getTabLabel(tab.id, tab.label)}
@@ -391,7 +358,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   <AnimatePresence>
                     {isActive && (
                       <motion.span
-                        className="absolute bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 shadow-[0_0_10px_rgba(255,145,89,0.5)]"
+                        className="absolute bottom-1 left-1/2 h-1 w-8 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 shadow-[0_0_12px_rgba(255,145,89,0.6)]"
                         variants={activeIndicatorVariants}
                         initial="initial"
                         animate="animate"

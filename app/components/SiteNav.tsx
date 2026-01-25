@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/ui'
 import { MindVibeLockup } from '@/components/branding'
 import { springConfigs, animationVariants } from '@/lib/animations/spring-configs'
 import { useLanguage } from '@/hooks/useLanguage'
+import { GlobalLanguageSelector } from '@/components/navigation/GlobalLanguageSelector'
 
 export default function SiteNav() {
   const pathname = usePathname()
@@ -106,7 +107,10 @@ export default function SiteNav() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Language Selector - Always visible */}
+          <GlobalLanguageSelector />
+
           <Link
             href="/dashboard/subscription"
             className="hidden rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex"
@@ -119,8 +123,8 @@ export default function SiteNav() {
             href="/account"
             className="hidden rounded-full bg-mvGradientSunrise px-4 py-2 text-sm font-semibold text-slate-950 shadow-glowSunrise md:inline-flex"
           >
-            <motion.span 
-              whileHover={{ scale: 1.05 }} 
+            <motion.span
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={springConfigs.snappy}
             >

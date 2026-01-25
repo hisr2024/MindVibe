@@ -7,7 +7,7 @@ import { InnerPeaceLogo } from '@/components/branding';
 import { MinimalFeatures } from '@/components/home/MinimalFeatures';
 import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
 import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
-import { MinimalLanguageSelector } from '@/components/MinimalLanguageSelector';
+// Language selector is now in the global header (SiteNav)
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs, animationVariants } from '@/lib/animations/spring-configs';
 
@@ -46,10 +46,7 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      {/* Language Selector - Fixed Top Right, positioned to avoid nav overlap */}
-      <div className="fixed top-3 right-3 z-50 md:top-4 md:right-4">
-        <MinimalLanguageSelector />
-      </div>
+      {/* Language Selector is now in the global header (SiteNav) */}
 
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0">
