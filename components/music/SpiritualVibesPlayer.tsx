@@ -149,12 +149,19 @@ export function SpiritualVibesPlayer({
     })
   }, [activeCategory])
 
-  // Play track
+  // Play track - immediately switches to selected track
   const handlePlay = useCallback((track: MusicTrack) => {
+    // If clicking on the currently playing track, toggle play/pause
+    if (state.currentTrack?.id === track.id) {
+      musicEngine.toggle()
+      return
+    }
+
+    // Otherwise, play the new track
     const tracks = getFilteredTracks()
     const index = tracks.findIndex(t => t.id === track.id)
     musicEngine.setQueue(tracks, index >= 0 ? index : 0)
-  }, [getFilteredTracks])
+  }, [getFilteredTracks, state.currentTrack])
 
   // Toggle play/pause
   const handleToggle = useCallback(() => {
