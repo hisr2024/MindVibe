@@ -55,22 +55,23 @@ describe('i18n Integration Tests', () => {
     });
     
     // Mock fetch for translation files
-    global.fetch = vi.fn((url: string) => {
-      const mockTranslations: Record<string, any> = {
+    global.fetch = vi.fn((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const mockTranslations: Record<string, Record<string, string>> = {
         '/locales/en/common.json': { greeting: 'Hello', farewell: 'Goodbye' },
         '/locales/hi/common.json': { greeting: 'नमस्ते', farewell: 'अलविदा' },
         '/locales/es/common.json': { greeting: 'Hola', farewell: 'Adiós' },
         '/locales/ja/common.json': { greeting: 'こんにちは', farewell: 'さようなら' },
         '/locales/zh-CN/common.json': { greeting: '你好', farewell: '再见' },
       };
-      
-      const translation = mockTranslations[url as string] || {};
-      
+
+      const translation = mockTranslations[url] || {};
+
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(translation),
       } as Response);
-    });
+    }) as typeof fetch;
   });
 
   afterEach(() => {
