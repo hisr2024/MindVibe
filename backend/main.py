@@ -670,6 +670,28 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Wisdom Journey router: {e}")
 
+# Load Enhanced Journeys router (Ṣaḍ-Ripu / Six Inner Enemies)
+print("\n[Enhanced Journeys] Attempting to import Enhanced Journeys router...")
+try:
+    from backend.routes.journeys_enhanced import router as journeys_enhanced_router
+    from backend.routes.journeys_enhanced import admin_router as journeys_admin_router
+    app.include_router(journeys_enhanced_router)
+    app.include_router(journeys_admin_router)
+    print("✅ [SUCCESS] Enhanced Journeys router loaded (Ṣaḍ-Ripu)")
+    print("   • GET    /api/journeys/catalog - Journey templates catalog")
+    print("   • POST   /api/journeys/start - Start multiple journeys")
+    print("   • GET    /api/journeys/active - Get active journeys")
+    print("   • GET    /api/journeys/today - Today's agenda (all journeys)")
+    print("   • POST   /api/journeys/{id}/today - Get/generate today's step")
+    print("   • POST   /api/journeys/{id}/steps/{day}/complete - Complete step")
+    print("   • POST   /api/journeys/{id}/pause - Pause journey")
+    print("   • POST   /api/journeys/{id}/resume - Resume journey")
+    print("   • POST   /api/journeys/{id}/abandon - Abandon journey")
+    print("   • GET    /api/journeys/{id}/history - Journey history")
+    print("   • GET    /api/admin/ai/providers/status - Provider health (admin)")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Enhanced Journeys router: {e}")
+
 # Load Sync router (Quantum Enhancement #2)
 print("\n[Sync] Attempting to import Sync router...")
 try:

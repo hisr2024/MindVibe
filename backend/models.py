@@ -2643,3 +2643,331 @@ class IndianSourceFetchLog(Base):
     fetched_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), index=True
     )
+
+
+# =============================================================================
+# Enhanced Wisdom Journeys System - Ṣaḍ-Ripu (Six Inner Enemies)
+# =============================================================================
+
+
+class EnemyTag(str, enum.Enum):
+    """The six inner enemies (Ṣaḍ-Ripu) from Bhagavad Gita philosophy."""
+
+    KAMA = "kama"  # Desire/Lust
+    KRODHA = "krodha"  # Anger
+    LOBHA = "lobha"  # Greed
+    MOHA = "moha"  # Delusion/Attachment
+    MADA = "mada"  # Ego/Pride
+    MATSARYA = "matsarya"  # Envy/Jealousy
+    MIXED = "mixed"  # Combined journey
+    GENERAL = "general"  # General wisdom
+
+
+class UserJourneyStatus(str, enum.Enum):
+    """Status of a user's journey instance."""
+
+    ACTIVE = "active"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
+
+
+class JourneyPace(str, enum.Enum):
+    """Pace preference for journey steps."""
+
+    DAILY = "daily"
+    EVERY_OTHER_DAY = "every_other_day"
+    WEEKLY = "weekly"
+
+
+class JourneyTone(str, enum.Enum):
+    """Tone preference for KIAAN responses."""
+
+    GENTLE = "gentle"
+    DIRECT = "direct"
+    INSPIRING = "inspiring"
+
+
+class JourneyTemplate(SoftDeleteMixin, Base):
+    """
+    Admin-defined journey blueprints for the six inner enemies (Ṣaḍ-Ripu).
+
+    Each template defines a multi-day journey focused on overcoming
+    specific inner enemies through Gita wisdom.
+    """
+
+    __tablename__ = "journey_templates"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    slug: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Primary focus area (which inner enemy this journey addresses)
+    primary_enemy_tags: Mapped[list] = mapped_column(
+        JSON, default=list
+    )  # ["krodha", "moha"]
+
+    # Journey configuration
+    duration_days: Mapped[int] = mapped_column(Integer, default=14)
+    difficulty: Mapped[int] = mapped_column(Integer, default=3)  # 1-5 scale
+
+    # Status flags
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # UI metadata
+    icon_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    color_theme: Mapped[str | None] = mapped_column(String(32), nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+    # Relationships
+    steps: Mapped[list["JourneyTemplateStep"]] = relationship(
+        "JourneyTemplateStep", back_populates="template", cascade="all, delete-orphan"
+    )
+
+
+class JourneyTemplateStep(SoftDeleteMixin, Base):
+    """
+    Day-by-day skeleton for journey templates.
+
+    Contains hints for AI generation and verse selection configuration.
+    """
+
+    __tablename__ = "journey_template_steps"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    journey_template_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("journey_templates.id", ondelete="CASCADE"), index=True
+    )
+    day_index: Mapped[int] = mapped_column(Integer)  # 1-indexed
+
+    # Step content hints (for AI generation)
+    step_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    teaching_hint: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reflection_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    practice_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Verse selection configuration
+    verse_selector: Mapped[dict | None] = mapped_column(
+        JSON, default=lambda: {"tags": [], "max_verses": 3, "avoid_recent": 20}
+    )
+    # Optional: fixed verses like [{"chapter": 2, "verse": 63}]
+    static_verse_refs: Mapped[list | None] = mapped_column(JSON, nullable=True)
+
+    # Safety notes for sensitive content
+    safety_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+    # Relationships
+    template: Mapped["JourneyTemplate"] = relationship(
+        "JourneyTemplate", back_populates="steps"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("journey_template_id", "day_index", name="uq_template_step"),
+    )
+
+
+class UserJourney(SoftDeleteMixin, Base):
+    """
+    User instances of journey templates with personalization settings.
+
+    Supports multiple active journeys per user.
+    """
+
+    __tablename__ = "user_journeys"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    journey_template_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("journey_templates.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Legacy reference for backward compatibility
+    legacy_journey_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("wisdom_journeys.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Status
+    status: Mapped[UserJourneyStatus] = mapped_column(
+        Enum(UserJourneyStatus, native_enum=False, length=32),
+        default=UserJourneyStatus.ACTIVE,
+        index=True,
+    )
+
+    # Progress tracking
+    current_day_index: Mapped[int] = mapped_column(Integer, default=1)
+    started_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    paused_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+
+    # Personalization settings
+    personalization: Mapped[dict | None] = mapped_column(
+        JSON, default=lambda: {}
+    )
+    # Schema: {
+    #   "pace": "daily" | "every_other_day" | "weekly",
+    #   "time_budget_minutes": 10,
+    #   "focus_tags": ["krodha", "moha"],
+    #   "preferred_tone": "gentle" | "direct" | "inspiring",
+    #   "provider_preference": "auto" | "openai" | "sarvam" | "oai_compat"
+    # }
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+    # Relationships
+    template: Mapped["JourneyTemplate | None"] = relationship("JourneyTemplate")
+    step_states: Mapped[list["UserJourneyStepState"]] = relationship(
+        "UserJourneyStepState", back_populates="user_journey", cascade="all, delete-orphan"
+    )
+
+
+class UserJourneyStepState(Base):
+    """
+    AI-generated step content and user progress for each day.
+
+    Stores KIAAN-generated content, verse refs, and user check-ins.
+    """
+
+    __tablename__ = "user_journey_step_state"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    user_journey_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("user_journeys.id", ondelete="CASCADE"), index=True
+    )
+    day_index: Mapped[int] = mapped_column(Integer)
+
+    # Delivery tracking
+    delivered_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+
+    # Verse references (from corpus, not full text)
+    verse_refs: Mapped[list] = mapped_column(JSON, default=list)
+    # Schema: [{"chapter": 2, "verse": 47}, {"chapter": 2, "verse": 48}]
+
+    # AI-generated step content (strict JSON from KIAAN)
+    kiaan_step_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Schema: {
+    #   "step_title": "...",
+    #   "today_focus": "kama|krodha|...",
+    #   "verse_refs": [...],
+    #   "teaching": "...",
+    #   "guided_reflection": ["...", "...", "..."],
+    #   "practice": {"name": "...", "instructions": [...], "duration_minutes": 5},
+    #   "micro_commitment": "...",
+    #   "check_in_prompt": {"scale": "0-10", "label": "..."},
+    #   "safety_note": "..." (optional)
+    # }
+
+    # User reflection (encrypted reference or FK to journal)
+    reflection_reference: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reflection_encrypted: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    # Check-in data
+    check_in: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Schema: {"intensity": 7, "label": "...", "timestamp": "..."}
+
+    # Provider tracking
+    provider_used: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    model_used: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+    # Additional metadata
+    metadata: Mapped[dict | None] = mapped_column(JSON, default=lambda: {})
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+    # Relationships
+    user_journey: Mapped["UserJourney"] = relationship(
+        "UserJourney", back_populates="step_states"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("user_journey_id", "day_index", name="uq_journey_step_state"),
+    )
+
+
+class AIProviderConfig(Base):
+    """
+    Configuration for multi-provider LLM support.
+
+    Tracks health status, rate limits, and priority for fallback.
+    """
+
+    __tablename__ = "ai_provider_configs"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    provider_name: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    display_name: Mapped[str] = mapped_column(String(128))
+
+    # Configuration
+    is_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+    priority: Mapped[int] = mapped_column(Integer, default=100)
+
+    # Health status
+    last_health_check: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    health_status: Mapped[str | None] = mapped_column(String(32), default="unknown")
+    avg_latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Rate limiting
+    rate_limit_per_minute: Mapped[int] = mapped_column(Integer, default=60)
+    rate_limit_per_hour: Mapped[int] = mapped_column(Integer, default=1000)
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
