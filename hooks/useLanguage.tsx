@@ -96,18 +96,40 @@ function getNestedValue(obj: TranslationObject, key: string): string | undefined
   return typeof current === 'string' ? current : undefined
 }
 
+// Get initial language synchronously - runs during component initialization
+function getInitialLanguage(): Language {
+  if (typeof window === 'undefined') return 'en'
+
+  try {
+    // First check localStorage for persisted preference
+    const stored = localStorage.getItem(STORAGE_KEY) as Language | null
+    if (stored && LANGUAGES[stored]) {
+      return stored
+    }
+
+    // Then check if the inline script already set a language on the document
+    const docLang = document.documentElement.lang as Language
+    if (docLang && LANGUAGES[docLang]) {
+      return docLang
+    }
+
+    // Fall back to browser detection
+    return detectLanguageFromLocale()
+  } catch {
+    return 'en'
+  }
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en')
+  // Initialize with the correct language synchronously to avoid flash
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage)
   const [translations, setTranslations] = useState<TranslationObject>({})
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Load translations for a language
   const loadTranslations = useCallback(async (lang: Language) => {
-    console.log(`[useLanguage] Loading translations for: ${lang}`)
-
     // Check cache first
     if (translationCache.has(lang)) {
-      console.log(`[useLanguage] Using cached translations for: ${lang}`)
       setTranslations(translationCache.get(lang)!)
       return
     }
@@ -118,7 +140,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const results = await Promise.allSettled(
         files.map(file => fetch(`/locales/${lang}/${file}.json`).then(r => {
           if (!r.ok) {
-            console.warn(`[useLanguage] Failed to fetch /locales/${lang}/${file}.json - Status: ${r.status}`)
             return {}
           }
           return r.json()
@@ -131,13 +152,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         if (result.status === 'fulfilled') {
           const fileName = files[index]
           merged[fileName] = result.value
-          console.log(`[useLanguage] Loaded ${fileName} for ${lang}:`, Object.keys(result.value).length > 0 ? 'OK' : 'EMPTY')
-        } else {
-          console.warn(`[useLanguage] Failed to load ${files[index]} for ${lang}:`, result.reason)
         }
       })
 
-      console.log(`[useLanguage] Translation keys loaded for ${lang}:`, Object.keys(merged))
       translationCache.set(lang, merged)
       setTranslations(merged)
     } catch (error) {
@@ -149,23 +166,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Initialize language from localStorage or auto-detect
+  // Initialize on mount - sync document attributes and load translations
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Language | null
-    const initialLang = stored && LANGUAGES[stored] ? stored : detectLanguageFromLocale()
-    
-    setLanguageState(initialLang)
-    localStorage.setItem(STORAGE_KEY, initialLang)
-    
+    // Ensure localStorage is synced with the initial language
+    localStorage.setItem(STORAGE_KEY, language)
+
     // Apply RTL direction if needed
-    const dir = LANGUAGES[initialLang].dir
+    const dir = LANGUAGES[language].dir
     document.documentElement.dir = dir
-    document.documentElement.lang = initialLang
-    
-    loadTranslations(initialLang).then(() => {
+    document.documentElement.lang = language
+
+    loadTranslations(language).then(() => {
       setIsInitialized(true)
     })
-  }, [loadTranslations])
+  }, []) // Only run once on mount - language is already set correctly
 
   const setLanguage = useCallback(async (newLang: Language) => {
     setLanguageState(newLang)
