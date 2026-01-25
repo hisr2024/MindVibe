@@ -10,7 +10,7 @@ import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { GlobalSoundPlayer } from '@/components/sounds'
-import { SpiritualVibesPlayer } from '@/components/music'
+import { MeditationMusicPlayerWidget } from '@/components/music'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -71,8 +71,8 @@ export default function RootLayout({
             <KiaanFooter />
             {/* Global floating sound player - shows when ambient audio is playing */}
             <GlobalSoundPlayer />
-            {/* Spiritual Vibes - Global floating music player (Ctrl+M shortcut) */}
-            <SpiritualVibesPlayer position="bottom-left" />
+            {/* Meditation Music Player - Robust floating player (Ctrl+M shortcut) */}
+            <MeditationMusicPlayerWidget position="bottom-left" />
           </Providers>
         </ClientLayout>
       </body>
