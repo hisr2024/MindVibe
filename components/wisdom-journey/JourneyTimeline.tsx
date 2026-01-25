@@ -19,6 +19,17 @@ interface JourneyTimelineProps {
  * - Responsive layout
  */
 export function JourneyTimeline({ journey, onStepClick }: JourneyTimelineProps) {
+  // Early return if journey or steps are undefined
+  if (!journey || !journey.steps || !Array.isArray(journey.steps)) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center text-orange-100/70 py-8">
+          <p>Loading journey data...</p>
+        </div>
+      </div>
+    )
+  }
+
   const getStepStatus = (step: typeof journey.steps[0], index: number) => {
     if (step.completed) return 'completed'
     if (index === journey.current_step) return 'current'

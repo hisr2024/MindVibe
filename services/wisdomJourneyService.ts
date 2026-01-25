@@ -416,22 +416,34 @@ export async function getJourneyRecommendations(
 
 /**
  * Get current step for a journey
+ * Returns null if journey or steps are undefined
  */
-export function getCurrentStep(journey: WisdomJourney) {
+export function getCurrentStep(journey: WisdomJourney | null | undefined) {
+  if (!journey || !journey.steps || !Array.isArray(journey.steps)) {
+    return null
+  }
   return journey.steps.find((step) => step.step_number === journey.current_step + 1) || null
 }
 
 /**
  * Get next uncompleted step
+ * Returns null if journey or steps are undefined
  */
-export function getNextStep(journey: WisdomJourney) {
+export function getNextStep(journey: WisdomJourney | null | undefined) {
+  if (!journey || !journey.steps || !Array.isArray(journey.steps)) {
+    return null
+  }
   return journey.steps.find((step) => !step.completed) || null
 }
 
 /**
  * Calculate completion percentage
+ * Returns 0 if journey or steps are undefined
  */
-export function calculateProgress(journey: WisdomJourney): number {
+export function calculateProgress(journey: WisdomJourney | null | undefined): number {
+  if (!journey || !journey.steps || !Array.isArray(journey.steps) || journey.total_steps === 0) {
+    return 0
+  }
   const completedSteps = journey.steps.filter((step) => step.completed).length
   return Math.round((completedSteps / journey.total_steps) * 100)
 }

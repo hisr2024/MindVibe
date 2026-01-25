@@ -58,7 +58,7 @@ export function JourneyRecommendations({
     )
   }
 
-  if (recommendations.length === 0) {
+  if (!recommendations || !Array.isArray(recommendations) || recommendations.length === 0) {
     return (
       <div className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-8 text-center">
         <p className="text-orange-100/70">No recommendations available at this time.</p>
