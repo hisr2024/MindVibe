@@ -243,13 +243,19 @@ async def enable_2fa(
             detail="Invalid code. Please try again.",
         )
     
-    # Enable 2FA
+    # Enable 2FA and generate backup codes if not already present
     user.two_factor_enabled = True
+
+    # Generate and store backup codes if not already stored
+    if not user.mfa_backup_codes:
+        backup_codes = generate_backup_codes()
+        user.mfa_backup_codes = backup_codes
+
     await db.commit()
-    
+
     ip_address = get_client_ip(request)
     user_agent = request.headers.get("User-Agent", "")[:512]
-    
+
     await log_2fa_action(
         db=db,
         user_id=user_id,
@@ -258,7 +264,7 @@ async def enable_2fa(
         ip_address=ip_address,
         user_agent=user_agent,
     )
-    
+
     return {"message": "2FA has been enabled successfully", "enabled": True}
 
 

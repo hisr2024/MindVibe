@@ -38,6 +38,8 @@ from backend.middleware.security import SecurityHeadersMiddleware
 from backend.middleware.rate_limiter import limiter
 from backend.middleware.logging_middleware import RequestLoggingMiddleware
 from backend.middleware.ddos_protection import DDoSProtectionMiddleware
+from backend.middleware.threat_detection import ThreatDetectionMiddleware
+from backend.middleware.input_sanitizer import InputSanitizerMiddleware
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
@@ -146,6 +148,21 @@ app.add_middleware(
     time_window=60,
     max_connections=10,  # 10 concurrent connections per IP
     max_request_size=10 * 1024 * 1024,  # 10MB
+)
+
+# Add threat detection middleware (malware, ransomware, trojans, injections)
+app.add_middleware(
+    ThreatDetectionMiddleware,
+    enabled=True,
+    log_threats=True,
+    block_threats=True,
+)
+
+# Add input sanitization middleware (XSS, SQL injection, path traversal)
+app.add_middleware(
+    InputSanitizerMiddleware,
+    sanitize_input=False,  # Don't alter input, just detect
+    log_suspicious=True,
 )
 
 # Add security headers middleware
