@@ -68,3 +68,13 @@ mobile/ios/**/*.xcworkspace
 *.aar
 *.ipa
 *.dSYM.zip
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# SQLite development databases
+*.db
+*.sqlite
+*.sqlite3
