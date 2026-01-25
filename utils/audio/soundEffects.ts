@@ -93,11 +93,38 @@ const SOUND_CONFIGS: Record<SoundType, SoundConfig | SoundConfig[]> = {
 // Singleton audio context
 let audioContext: AudioContext | null = null
 
+// Track if user has interacted with the page (required for AudioContext autoplay policy)
+let userHasInteracted = false
+
+// Setup user interaction tracking
+if (typeof window !== 'undefined') {
+  const markUserInteraction = () => {
+    userHasInteracted = true
+    // Clean up listeners after first interaction
+    document.removeEventListener('click', markUserInteraction)
+    document.removeEventListener('touchstart', markUserInteraction)
+    document.removeEventListener('keydown', markUserInteraction)
+    document.removeEventListener('pointerdown', markUserInteraction)
+  }
+
+  // Listen for first user interaction
+  document.addEventListener('click', markUserInteraction)
+  document.addEventListener('touchstart', markUserInteraction)
+  document.addEventListener('keydown', markUserInteraction)
+  document.addEventListener('pointerdown', markUserInteraction)
+}
+
 /**
  * Get or create the audio context
+ * Returns null if user hasn't interacted yet (browser autoplay policy)
  */
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null
+
+  // Don't create AudioContext before user interaction to avoid browser warnings
+  if (!userHasInteracted) {
+    return null
+  }
 
   if (!audioContext) {
     try {
