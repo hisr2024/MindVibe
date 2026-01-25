@@ -163,64 +163,74 @@ async def get_active_journey(
 ) -> JourneyResponse | None:
     """Get the user's currently active wisdom journey, if any."""
 
-    service = WisdomJourneyService()
-    journey = await service.get_active_journey(db, user_id)
+    try:
+        service = WisdomJourneyService()
+        journey = await service.get_active_journey(db, user_id)
 
-    if not journey:
-        return None
+        if not journey:
+            return None
 
-    # Get steps
-    steps = await service.get_journey_steps(db, journey.id)
+        # Get steps
+        steps = await service.get_journey_steps(db, journey.id)
 
-    # Fetch verse details for steps
-    from backend.models import GitaVerse
+        # Fetch verse details for steps
+        from backend.models import GitaVerse
 
-    steps_with_verses = []
-    for step in steps:
-        verse_data = {}
-        if step.verse_id:
-            verse = await db.get(GitaVerse, step.verse_id)
-            if verse:
-                verse_data = {
-                    "verse_text": verse.text,
-                    "verse_translation": verse.transliteration,
-                    "verse_chapter": verse.chapter,
-                    "verse_number": verse.verse,
-                }
+        steps_with_verses = []
+        for step in steps:
+            verse_data = {}
+            if step.verse_id:
+                try:
+                    verse = await db.get(GitaVerse, step.verse_id)
+                    if verse:
+                        verse_data = {
+                            "verse_text": verse.text,
+                            "verse_translation": verse.transliteration,
+                            "verse_chapter": verse.chapter,
+                            "verse_number": verse.verse,
+                        }
+                except Exception:
+                    # Continue without verse data if lookup fails
+                    pass
 
-        steps_with_verses.append(
-            JourneyStepResponse(
-                id=step.id,
-                step_number=step.step_number,
-                verse_id=step.verse_id,
-                **verse_data,
-                reflection_prompt=step.reflection_prompt,
-                ai_insight=step.ai_insight,
-                completed=step.completed,
-                completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                time_spent_seconds=step.time_spent_seconds,
-                user_notes=step.user_notes,
-                user_rating=step.user_rating,
+            steps_with_verses.append(
+                JourneyStepResponse(
+                    id=step.id,
+                    step_number=step.step_number,
+                    verse_id=step.verse_id,
+                    **verse_data,
+                    reflection_prompt=step.reflection_prompt,
+                    ai_insight=step.ai_insight,
+                    completed=step.completed,
+                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
+                    time_spent_seconds=step.time_spent_seconds,
+                    user_notes=step.user_notes,
+                    user_rating=step.user_rating,
+                )
             )
+
+        return JourneyResponse(
+            id=journey.id,
+            user_id=journey.user_id,
+            title=journey.title,
+            description=journey.description,
+            total_steps=journey.total_steps,
+            current_step=journey.current_step,
+            status=journey.status.value,
+            progress_percentage=journey.progress_percentage,
+            recommended_by=journey.recommended_by,
+            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
+            recommendation_reason=journey.recommendation_reason,
+            created_at=journey.created_at.isoformat(),
+            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
+            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
+            steps=steps_with_verses,
         )
 
-    return JourneyResponse(
-        id=journey.id,
-        user_id=journey.user_id,
-        title=journey.title,
-        description=journey.description,
-        total_steps=journey.total_steps,
-        current_step=journey.current_step,
-        status=journey.status.value,
-        progress_percentage=journey.progress_percentage,
-        recommended_by=journey.recommended_by,
-        recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-        recommendation_reason=journey.recommendation_reason,
-        created_at=journey.created_at.isoformat(),
-        updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-        completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-        steps=steps_with_verses,
-    )
+    except Exception as e:
+        logger.error(f"Error fetching active journey for user {user_id}: {e}", exc_info=True)
+        # Return None instead of 500 for active journey endpoint (allows graceful fallback)
+        return None
 
 
 # IMPORTANT: This route MUST be defined BEFORE /{journey_id} routes to avoid
@@ -232,19 +242,47 @@ async def get_journey_recommendations(
 ) -> list[RecommendationResponse]:
     """Get personalized journey recommendations based on user mood and activity."""
 
-    service = WisdomJourneyService()
-    recommendations = await service.get_journey_recommendations(db, user_id, limit=3)
+    try:
+        service = WisdomJourneyService()
+        recommendations = await service.get_journey_recommendations(db, user_id, limit=3)
 
-    return [
-        RecommendationResponse(
-            template=rec["template"],
-            title=rec["title"],
-            description=rec["description"],
-            score=rec["score"],
-            reason=rec["reason"],
-        )
-        for rec in recommendations
-    ]
+        return [
+            RecommendationResponse(
+                template=rec["template"],
+                title=rec["title"],
+                description=rec["description"],
+                score=rec["score"],
+                reason=rec["reason"],
+            )
+            for rec in recommendations
+        ]
+
+    except Exception as e:
+        logger.error(f"Error fetching recommendations for user {user_id}: {e}", exc_info=True)
+        # Return default recommendations on error
+        return [
+            RecommendationResponse(
+                template="inner_peace",
+                title="Journey to Inner Peace",
+                description="A 7-day exploration of tranquility through timeless Bhagavad Gita wisdom.",
+                score=0.85,
+                reason="Perfect for beginning your wisdom journey.",
+            ),
+            RecommendationResponse(
+                template="self_discovery",
+                title="Path of Self-Discovery",
+                description="Explore your true nature and purpose through reflective wisdom.",
+                score=0.78,
+                reason="Discover deeper insights about yourself.",
+            ),
+            RecommendationResponse(
+                template="balanced_action",
+                title="Wisdom of Balanced Action",
+                description="Learn to act without attachment, finding harmony between effort and surrender.",
+                score=0.72,
+                reason="A versatile path for navigating daily life.",
+            ),
+        ]
 
 
 @router.get("/{journey_id}", response_model=JourneyResponse)
@@ -255,67 +293,78 @@ async def get_journey(
 ) -> JourneyResponse:
     """Get a specific wisdom journey by ID."""
 
-    service = WisdomJourneyService()
-    journey = await service.get_journey(db, journey_id)
+    try:
+        service = WisdomJourneyService()
+        journey = await service.get_journey(db, journey_id)
 
-    if not journey:
-        raise HTTPException(status_code=404, detail="Journey not found")
+        if not journey:
+            raise HTTPException(status_code=404, detail="Journey not found")
 
-    # Verify ownership
-    if journey.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this journey")
+        # Verify ownership
+        if journey.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to access this journey")
 
-    # Get steps with verse details
-    steps = await service.get_journey_steps(db, journey.id)
+        # Get steps with verse details
+        steps = await service.get_journey_steps(db, journey.id)
 
-    from backend.models import GitaVerse
+        from backend.models import GitaVerse
 
-    steps_with_verses = []
-    for step in steps:
-        verse_data = {}
-        if step.verse_id:
-            verse = await db.get(GitaVerse, step.verse_id)
-            if verse:
-                verse_data = {
-                    "verse_text": verse.text,
-                    "verse_translation": verse.transliteration,
-                    "verse_chapter": verse.chapter,
-                    "verse_number": verse.verse,
-                }
+        steps_with_verses = []
+        for step in steps:
+            verse_data = {}
+            if step.verse_id:
+                try:
+                    verse = await db.get(GitaVerse, step.verse_id)
+                    if verse:
+                        verse_data = {
+                            "verse_text": verse.text,
+                            "verse_translation": verse.transliteration,
+                            "verse_chapter": verse.chapter,
+                            "verse_number": verse.verse,
+                        }
+                except Exception:
+                    # Continue without verse data if lookup fails
+                    pass
 
-        steps_with_verses.append(
-            JourneyStepResponse(
-                id=step.id,
-                step_number=step.step_number,
-                verse_id=step.verse_id,
-                **verse_data,
-                reflection_prompt=step.reflection_prompt,
-                ai_insight=step.ai_insight,
-                completed=step.completed,
-                completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                time_spent_seconds=step.time_spent_seconds,
-                user_notes=step.user_notes,
-                user_rating=step.user_rating,
+            steps_with_verses.append(
+                JourneyStepResponse(
+                    id=step.id,
+                    step_number=step.step_number,
+                    verse_id=step.verse_id,
+                    **verse_data,
+                    reflection_prompt=step.reflection_prompt,
+                    ai_insight=step.ai_insight,
+                    completed=step.completed,
+                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
+                    time_spent_seconds=step.time_spent_seconds,
+                    user_notes=step.user_notes,
+                    user_rating=step.user_rating,
+                )
             )
+
+        return JourneyResponse(
+            id=journey.id,
+            user_id=journey.user_id,
+            title=journey.title,
+            description=journey.description,
+            total_steps=journey.total_steps,
+            current_step=journey.current_step,
+            status=journey.status.value,
+            progress_percentage=journey.progress_percentage,
+            recommended_by=journey.recommended_by,
+            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
+            recommendation_reason=journey.recommendation_reason,
+            created_at=journey.created_at.isoformat(),
+            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
+            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
+            steps=steps_with_verses,
         )
 
-    return JourneyResponse(
-        id=journey.id,
-        user_id=journey.user_id,
-        title=journey.title,
-        description=journey.description,
-        total_steps=journey.total_steps,
-        current_step=journey.current_step,
-        status=journey.status.value,
-        progress_percentage=journey.progress_percentage,
-        recommended_by=journey.recommended_by,
-        recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-        recommendation_reason=journey.recommendation_reason,
-        created_at=journey.created_at.isoformat(),
-        updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-        completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-        steps=steps_with_verses,
-    )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching journey {journey_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to fetch journey") from e
 
 
 @router.post("/{journey_id}/progress", response_model=JourneyStepResponse)
@@ -329,41 +378,48 @@ async def mark_step_complete(
 ) -> JourneyStepResponse:
     """Mark a journey step as complete and update progress."""
 
-    service = WisdomJourneyService()
+    try:
+        service = WisdomJourneyService()
 
-    # Verify journey ownership
-    journey = await service.get_journey(db, journey_id)
-    if not journey:
-        raise HTTPException(status_code=404, detail="Journey not found")
+        # Verify journey ownership
+        journey = await service.get_journey(db, journey_id)
+        if not journey:
+            raise HTTPException(status_code=404, detail="Journey not found")
 
-    if journey.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this journey")
+        if journey.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to update this journey")
 
-    # Mark step complete
-    step = await service.mark_step_complete(
-        db=db,
-        journey_id=journey_id,
-        step_number=body.step_number,
-        time_spent_seconds=body.time_spent_seconds,
-        user_notes=body.user_notes,
-        user_rating=body.user_rating,
-    )
+        # Mark step complete
+        step = await service.mark_step_complete(
+            db=db,
+            journey_id=journey_id,
+            step_number=body.step_number,
+            time_spent_seconds=body.time_spent_seconds,
+            user_notes=body.user_notes,
+            user_rating=body.user_rating,
+        )
 
-    if not step:
-        raise HTTPException(status_code=404, detail="Journey step not found")
+        if not step:
+            raise HTTPException(status_code=404, detail="Journey step not found")
 
-    return JourneyStepResponse(
-        id=step.id,
-        step_number=step.step_number,
-        verse_id=step.verse_id,
-        reflection_prompt=step.reflection_prompt,
-        ai_insight=step.ai_insight,
-        completed=step.completed,
-        completed_at=step.completed_at.isoformat() if step.completed_at else None,
-        time_spent_seconds=step.time_spent_seconds,
-        user_notes=step.user_notes,
-        user_rating=step.user_rating,
-    )
+        return JourneyStepResponse(
+            id=step.id,
+            step_number=step.step_number,
+            verse_id=step.verse_id,
+            reflection_prompt=step.reflection_prompt,
+            ai_insight=step.ai_insight,
+            completed=step.completed,
+            completed_at=step.completed_at.isoformat() if step.completed_at else None,
+            time_spent_seconds=step.time_spent_seconds,
+            user_notes=step.user_notes,
+            user_rating=step.user_rating,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error marking step complete for journey {journey_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to update progress") from e
 
 
 @router.put("/{journey_id}/pause", response_model=JourneyResponse)
@@ -374,54 +430,61 @@ async def pause_journey(
 ) -> JourneyResponse:
     """Pause an active wisdom journey."""
 
-    service = WisdomJourneyService()
+    try:
+        service = WisdomJourneyService()
 
-    # Verify ownership
-    journey = await service.get_journey(db, journey_id)
-    if not journey:
-        raise HTTPException(status_code=404, detail="Journey not found")
+        # Verify ownership
+        journey = await service.get_journey(db, journey_id)
+        if not journey:
+            raise HTTPException(status_code=404, detail="Journey not found")
 
-    if journey.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to pause this journey")
+        if journey.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to pause this journey")
 
-    # Pause journey
-    journey = await service.pause_journey(db, journey_id)
-    if not journey:
-        raise HTTPException(status_code=500, detail="Failed to pause journey")
+        # Pause journey
+        journey = await service.pause_journey(db, journey_id)
+        if not journey:
+            raise HTTPException(status_code=500, detail="Failed to pause journey")
 
-    steps = await service.get_journey_steps(db, journey.id)
+        steps = await service.get_journey_steps(db, journey.id)
 
-    return JourneyResponse(
-        id=journey.id,
-        user_id=journey.user_id,
-        title=journey.title,
-        description=journey.description,
-        total_steps=journey.total_steps,
-        current_step=journey.current_step,
-        status=journey.status.value,
-        progress_percentage=journey.progress_percentage,
-        recommended_by=journey.recommended_by,
-        recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-        recommendation_reason=journey.recommendation_reason,
-        created_at=journey.created_at.isoformat(),
-        updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-        completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-        steps=[
-            JourneyStepResponse(
-                id=step.id,
-                step_number=step.step_number,
-                verse_id=step.verse_id,
-                reflection_prompt=step.reflection_prompt,
-                ai_insight=step.ai_insight,
-                completed=step.completed,
-                completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                time_spent_seconds=step.time_spent_seconds,
-                user_notes=step.user_notes,
-                user_rating=step.user_rating,
-            )
-            for step in steps
-        ],
-    )
+        return JourneyResponse(
+            id=journey.id,
+            user_id=journey.user_id,
+            title=journey.title,
+            description=journey.description,
+            total_steps=journey.total_steps,
+            current_step=journey.current_step,
+            status=journey.status.value,
+            progress_percentage=journey.progress_percentage,
+            recommended_by=journey.recommended_by,
+            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
+            recommendation_reason=journey.recommendation_reason,
+            created_at=journey.created_at.isoformat(),
+            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
+            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
+            steps=[
+                JourneyStepResponse(
+                    id=step.id,
+                    step_number=step.step_number,
+                    verse_id=step.verse_id,
+                    reflection_prompt=step.reflection_prompt,
+                    ai_insight=step.ai_insight,
+                    completed=step.completed,
+                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
+                    time_spent_seconds=step.time_spent_seconds,
+                    user_notes=step.user_notes,
+                    user_rating=step.user_rating,
+                )
+                for step in steps
+            ],
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error pausing journey {journey_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to pause journey") from e
 
 
 @router.put("/{journey_id}/resume", response_model=JourneyResponse)
@@ -432,54 +495,61 @@ async def resume_journey(
 ) -> JourneyResponse:
     """Resume a paused wisdom journey."""
 
-    service = WisdomJourneyService()
+    try:
+        service = WisdomJourneyService()
 
-    # Verify ownership
-    journey = await service.get_journey(db, journey_id)
-    if not journey:
-        raise HTTPException(status_code=404, detail="Journey not found")
+        # Verify ownership
+        journey = await service.get_journey(db, journey_id)
+        if not journey:
+            raise HTTPException(status_code=404, detail="Journey not found")
 
-    if journey.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to resume this journey")
+        if journey.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to resume this journey")
 
-    # Resume journey
-    journey = await service.resume_journey(db, journey_id)
-    if not journey:
-        raise HTTPException(status_code=400, detail="Journey cannot be resumed (not paused)")
+        # Resume journey
+        journey = await service.resume_journey(db, journey_id)
+        if not journey:
+            raise HTTPException(status_code=400, detail="Journey cannot be resumed (not paused)")
 
-    steps = await service.get_journey_steps(db, journey.id)
+        steps = await service.get_journey_steps(db, journey.id)
 
-    return JourneyResponse(
-        id=journey.id,
-        user_id=journey.user_id,
-        title=journey.title,
-        description=journey.description,
-        total_steps=journey.total_steps,
-        current_step=journey.current_step,
-        status=journey.status.value,
-        progress_percentage=journey.progress_percentage,
-        recommended_by=journey.recommended_by,
-        recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-        recommendation_reason=journey.recommendation_reason,
-        created_at=journey.created_at.isoformat(),
-        updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-        completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-        steps=[
-            JourneyStepResponse(
-                id=step.id,
-                step_number=step.step_number,
-                verse_id=step.verse_id,
-                reflection_prompt=step.reflection_prompt,
-                ai_insight=step.ai_insight,
-                completed=step.completed,
-                completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                time_spent_seconds=step.time_spent_seconds,
-                user_notes=step.user_notes,
-                user_rating=step.user_rating,
-            )
-            for step in steps
-        ],
-    )
+        return JourneyResponse(
+            id=journey.id,
+            user_id=journey.user_id,
+            title=journey.title,
+            description=journey.description,
+            total_steps=journey.total_steps,
+            current_step=journey.current_step,
+            status=journey.status.value,
+            progress_percentage=journey.progress_percentage,
+            recommended_by=journey.recommended_by,
+            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
+            recommendation_reason=journey.recommendation_reason,
+            created_at=journey.created_at.isoformat(),
+            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
+            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
+            steps=[
+                JourneyStepResponse(
+                    id=step.id,
+                    step_number=step.step_number,
+                    verse_id=step.verse_id,
+                    reflection_prompt=step.reflection_prompt,
+                    ai_insight=step.ai_insight,
+                    completed=step.completed,
+                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
+                    time_spent_seconds=step.time_spent_seconds,
+                    user_notes=step.user_notes,
+                    user_rating=step.user_rating,
+                )
+                for step in steps
+            ],
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error resuming journey {journey_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to resume journey") from e
 
 
 @router.delete("/{journey_id}")
@@ -490,19 +560,26 @@ async def delete_journey(
 ) -> dict[str, str]:
     """Soft delete a wisdom journey."""
 
-    service = WisdomJourneyService()
+    try:
+        service = WisdomJourneyService()
 
-    # Verify ownership
-    journey = await service.get_journey(db, journey_id)
-    if not journey:
-        raise HTTPException(status_code=404, detail="Journey not found")
+        # Verify ownership
+        journey = await service.get_journey(db, journey_id)
+        if not journey:
+            raise HTTPException(status_code=404, detail="Journey not found")
 
-    if journey.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this journey")
+        if journey.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to delete this journey")
 
-    # Delete journey
-    success = await service.delete_journey(db, journey_id)
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to delete journey")
+        # Delete journey
+        success = await service.delete_journey(db, journey_id)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to delete journey")
 
-    return {"message": "Journey deleted successfully", "journey_id": journey_id}
+        return {"message": "Journey deleted successfully", "journey_id": journey_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting journey {journey_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to delete journey") from e
