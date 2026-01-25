@@ -50,13 +50,12 @@ export function LanguageSettings({ onClose, className = '' }: LanguageSettingsPr
     setSaveStatus('idle');
 
     try {
-      // Save to localStorage
+      // Save autoTranslate to localStorage (language is saved by setLanguage)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('preferredLanguage', selectedLanguage);
         localStorage.setItem('autoTranslate', autoTranslate.toString());
       }
 
-      // Update language context
+      // Update language context - this handles localStorage persistence for language
       setLanguage(selectedLanguage as Language);
 
       // Optionally save to backend API

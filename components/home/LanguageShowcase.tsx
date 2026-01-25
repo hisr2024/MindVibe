@@ -1,43 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { LANGUAGES, type Language } from '@/lib/i18n/languages'
+import { LANGUAGES } from '@/lib/i18n/languages'
+import { useLanguage, type Language as ContextLanguage } from '@/hooks/useLanguage'
 
 export function LanguageShowcase() {
-  const [selectedLang, setSelectedLang] = useState<string>('en')
-  const [currentLocale, setCurrentLocale] = useState<string>('en')
+  // Use the global language context - single source of truth
+  const { language, setLanguage } = useLanguage()
 
-  useEffect(() => {
-    // Get current locale from localStorage
-    if (typeof window !== 'undefined') {
-      const savedLocale = localStorage.getItem('preferredLocale') || 'en'
-      setCurrentLocale(savedLocale)
-      setSelectedLang(savedLocale)
-    }
-  }, [])
+  // The current locale comes from the context
+  const currentLocale = language
+  const selectedLang = language
 
   const handleLanguageSelect = (langCode: string) => {
-    setSelectedLang(langCode)
-    
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('preferredLocale', langCode)
-      
-      // Update HTML lang attribute
-      document.documentElement.lang = langCode
-      const lang = LANGUAGES.find(l => l.code === langCode)
-      if (lang) {
-        document.documentElement.dir = lang.direction
-      }
-      
-      // Dispatch event for other components
-      window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale: langCode } }))
-      
-      // Reload page to apply translations (required for next-intl to update server-side rendered content)
-      setTimeout(() => {
-        window.location.reload()
-      }, 300)
-    }
+    // Use the context's setLanguage which handles:
+    // - State update
+    // - localStorage persistence
+    // - Document lang/dir update
+    // - Translation loading
+    // No page reload needed - React handles re-render
+    setLanguage(langCode as ContextLanguage)
   }
 
   // Translations object - temporary inline translations for showcase section

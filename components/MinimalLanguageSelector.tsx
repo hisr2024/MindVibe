@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { locales, localeNames, type Locale, defaultLocale } from '@/i18n';
+import { locales, localeNames, type Locale } from '@/i18n';
 import { springConfigs } from '@/lib/animations/spring-configs';
+import { useLanguage, LANGUAGES, type Language } from '@/hooks/useLanguage';
 
 const flagEmojis: Record<Locale, string> = {
   en: '🇬🇧',
@@ -26,20 +27,13 @@ const flagEmojis: Record<Locale, string> = {
 };
 
 export function MinimalLanguageSelector() {
+  // Use the global LanguageProvider context - single source of truth
+  const { language, setLanguage, config } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState<Locale>(defaultLocale);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Load saved locale preference
-    if (typeof window !== 'undefined') {
-      const savedLocale = localStorage.getItem('preferredLocale') as Locale;
-      if (savedLocale && locales.includes(savedLocale)) {
-        setCurrentLocale(savedLocale);
-        updateHtmlLang(savedLocale);
-      }
-    }
-  }, []);
+  // Map Language type to Locale for display
+  const currentLocale = language as Locale;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -65,28 +59,14 @@ export function MinimalLanguageSelector() {
     };
   }, [isOpen]);
 
-  function updateHtmlLang(locale: Locale) {
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = locale;
-      // No RTL support needed as Arabic is removed
-      document.documentElement.dir = 'ltr';
-    }
-  }
-
   function switchLocale(newLocale: Locale) {
-    // Save preference
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('preferredLocale', newLocale);
-    }
-
-    setCurrentLocale(newLocale);
-    updateHtmlLang(newLocale);
+    // Use the context's setLanguage which handles:
+    // - Updating state
+    // - Persisting to localStorage
+    // - Updating document.lang/dir
+    // - Loading translations
+    setLanguage(newLocale as Language);
     setIsOpen(false);
-
-    // Trigger a custom event that LanguageProvider listens to
-    window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale: newLocale } }));
-    
-    // No need to reload - React will handle the re-render
   }
 
   function handleKeyDown(event: React.KeyboardEvent, locale: Locale) {
