@@ -316,7 +316,7 @@ class AudioSynthesizer {
 
     // Bird chirps (high frequency oscillators)
     const birdFreqs: number[] = [2000, 2400, 2800, 3200]
-    birdFreqs.forEach((freq, i) => {
+    birdFreqs.forEach((freq) => {
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = freq
       osc.type = 'sine'
@@ -787,7 +787,7 @@ class AudioSynthesizer {
       const freq: number = notes[Math.floor(Math.random() * notes.length)]
 
       // Main tone with harmonics
-      [1, 2, 3, 4].forEach((harmonic, i) => {
+      ;[1, 2, 3, 4].forEach((harmonic) => {
         const osc = this.ctx!.createOscillator()
         osc.frequency.value = freq * harmonic
         osc.type = 'sawtooth'
