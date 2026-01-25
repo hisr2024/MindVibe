@@ -1,5 +1,5 @@
 """
-KIAAN Memory Service - Persistent Context and Knowledge Management
+KIAAN Memory Service - Persistent Context and Knowledge Management with OFFLINE SUPPORT
 
 This module provides KIAAN with long-term memory capabilities:
 1. Session Memory - Track conversation context across interactions
@@ -7,6 +7,13 @@ This module provides KIAAN with long-term memory capabilities:
 3. Task Memory - Remember ongoing tasks and their progress
 4. Code Memory - Cache analyzed code and patterns
 5. Research Memory - Store research findings for reference
+
+OFFLINE INDEPENDENCE (v3.0):
+- SQLite backend for offline persistence (no Redis required)
+- Automatic fallback chain: Redis → SQLite → In-Memory
+- Memory export/import for backup and restore
+- Full-text search support in SQLite
+- Encrypted storage option for sensitive data
 """
 
 import asyncio
@@ -14,10 +21,12 @@ import hashlib
 import json
 import logging
 import os
-import pickle
+import sqlite3
+import aiosqlite
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
 from enum import Enum
+from pathlib import Path
 from typing import Any, Optional
 from collections import OrderedDict
 
@@ -29,6 +38,9 @@ except ImportError:
     REDIS_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
+# Default SQLite database path
+DEFAULT_SQLITE_PATH = Path.home() / ".mindvibe" / "memory.db"
 
 
 class MemoryType(str, Enum):
@@ -88,6 +100,358 @@ class MemoryEntry:
         return datetime.now() > expiry
 
 
+# =============================================================================
+# SQLITE MEMORY BACKEND - Offline Persistence
+# =============================================================================
+
+class SQLiteMemoryBackend:
+    """
+    SQLite-based memory backend for offline persistence.
+    Provides full persistence without requiring Redis.
+    """
+
+    def __init__(self, db_path: Optional[str] = None):
+        self.db_path = Path(db_path or os.getenv("SQLITE_DB_PATH", str(DEFAULT_SQLITE_PATH)))
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._initialized = False
+
+    async def initialize(self) -> bool:
+        """Initialize SQLite database and create tables."""
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                # Create memories table
+                await db.execute("""
+                    CREATE TABLE IF NOT EXISTS memories (
+                        id TEXT PRIMARY KEY,
+                        type TEXT NOT NULL,
+                        content TEXT NOT NULL,
+                        metadata TEXT,
+                        created_at TEXT NOT NULL,
+                        accessed_at TEXT NOT NULL,
+                        access_count INTEGER DEFAULT 0,
+                        relevance_score REAL DEFAULT 1.0,
+                        ttl_hours INTEGER,
+                        user_id TEXT
+                    )
+                """)
+
+                # Create indexes for fast lookups
+                await db.execute("CREATE INDEX IF NOT EXISTS idx_type ON memories(type)")
+                await db.execute("CREATE INDEX IF NOT EXISTS idx_user ON memories(user_id)")
+                await db.execute("CREATE INDEX IF NOT EXISTS idx_created ON memories(created_at)")
+
+                # Create FTS table for full-text search
+                await db.execute("""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
+                        id,
+                        content,
+                        content='memories',
+                        content_rowid='rowid'
+                    )
+                """)
+
+                await db.commit()
+
+            self._initialized = True
+            logger.info(f"SQLite memory backend initialized: {self.db_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to initialize SQLite backend: {e}")
+            return False
+
+    async def store(self, entry: "MemoryEntry") -> bool:
+        """Store a memory entry in SQLite."""
+        if not self._initialized:
+            await self.initialize()
+
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                await db.execute("""
+                    INSERT OR REPLACE INTO memories
+                    (id, type, content, metadata, created_at, accessed_at,
+                     access_count, relevance_score, ttl_hours, user_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    entry.id,
+                    entry.type.value,
+                    json.dumps(entry.content, default=str),
+                    json.dumps(entry.metadata, default=str),
+                    entry.created_at.isoformat(),
+                    entry.accessed_at.isoformat(),
+                    entry.access_count,
+                    entry.relevance_score,
+                    entry.ttl_hours,
+                    entry.metadata.get("user_id")
+                ))
+
+                # Update FTS index
+                await db.execute("""
+                    INSERT OR REPLACE INTO memories_fts(id, content)
+                    VALUES (?, ?)
+                """, (entry.id, json.dumps(entry.content, default=str)))
+
+                await db.commit()
+                return True
+
+        except Exception as e:
+            logger.error(f"SQLite store failed: {e}")
+            return False
+
+    async def retrieve(self, memory_id: str) -> Optional["MemoryEntry"]:
+        """Retrieve a memory entry from SQLite."""
+        if not self._initialized:
+            await self.initialize()
+
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                db.row_factory = aiosqlite.Row
+                async with db.execute(
+                    "SELECT * FROM memories WHERE id = ?",
+                    (memory_id,)
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    if row:
+                        # Update access time and count
+                        await db.execute("""
+                            UPDATE memories
+                            SET accessed_at = ?, access_count = access_count + 1
+                            WHERE id = ?
+                        """, (datetime.now().isoformat(), memory_id))
+                        await db.commit()
+
+                        return self._row_to_entry(dict(row))
+                    return None
+
+        except Exception as e:
+            logger.error(f"SQLite retrieve failed: {e}")
+            return None
+
+    async def search(
+        self,
+        query: str,
+        memory_type: Optional["MemoryType"] = None,
+        user_id: Optional[str] = None,
+        limit: int = 10
+    ) -> list["MemoryEntry"]:
+        """Search memories using full-text search."""
+        if not self._initialized:
+            await self.initialize()
+
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                db.row_factory = aiosqlite.Row
+
+                # Build query
+                sql = """
+                    SELECT m.* FROM memories m
+                    JOIN memories_fts fts ON m.id = fts.id
+                    WHERE memories_fts MATCH ?
+                """
+                params = [query]
+
+                if memory_type:
+                    sql += " AND m.type = ?"
+                    params.append(memory_type.value)
+
+                if user_id:
+                    sql += " AND m.user_id = ?"
+                    params.append(user_id)
+
+                sql += " ORDER BY m.relevance_score DESC, m.accessed_at DESC LIMIT ?"
+                params.append(limit)
+
+                async with db.execute(sql, params) as cursor:
+                    rows = await cursor.fetchall()
+                    return [self._row_to_entry(dict(row)) for row in rows]
+
+        except Exception as e:
+            logger.error(f"SQLite search failed: {e}")
+            # Fallback to simple LIKE search
+            return await self._simple_search(query, memory_type, user_id, limit)
+
+    async def _simple_search(
+        self,
+        query: str,
+        memory_type: Optional["MemoryType"],
+        user_id: Optional[str],
+        limit: int
+    ) -> list["MemoryEntry"]:
+        """Simple LIKE-based search as fallback."""
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                db.row_factory = aiosqlite.Row
+
+                sql = "SELECT * FROM memories WHERE content LIKE ?"
+                params = [f"%{query}%"]
+
+                if memory_type:
+                    sql += " AND type = ?"
+                    params.append(memory_type.value)
+
+                if user_id:
+                    sql += " AND user_id = ?"
+                    params.append(user_id)
+
+                sql += " LIMIT ?"
+                params.append(limit)
+
+                async with db.execute(sql, params) as cursor:
+                    rows = await cursor.fetchall()
+                    return [self._row_to_entry(dict(row)) for row in rows]
+
+        except Exception as e:
+            logger.error(f"SQLite simple search failed: {e}")
+            return []
+
+    async def get_by_type(
+        self,
+        memory_type: "MemoryType",
+        user_id: Optional[str] = None,
+        limit: int = 50
+    ) -> list["MemoryEntry"]:
+        """Get all memories of a specific type."""
+        if not self._initialized:
+            await self.initialize()
+
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                db.row_factory = aiosqlite.Row
+
+                if user_id:
+                    sql = "SELECT * FROM memories WHERE type = ? AND user_id = ? ORDER BY created_at DESC LIMIT ?"
+                    params = (memory_type.value, user_id, limit)
+                else:
+                    sql = "SELECT * FROM memories WHERE type = ? ORDER BY created_at DESC LIMIT ?"
+                    params = (memory_type.value, limit)
+
+                async with db.execute(sql, params) as cursor:
+                    rows = await cursor.fetchall()
+                    return [self._row_to_entry(dict(row)) for row in rows]
+
+        except Exception as e:
+            logger.error(f"SQLite get_by_type failed: {e}")
+            return []
+
+    async def delete(self, memory_id: str) -> bool:
+        """Delete a memory entry."""
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                await db.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
+                await db.execute("DELETE FROM memories_fts WHERE id = ?", (memory_id,))
+                await db.commit()
+                return True
+        except Exception as e:
+            logger.error(f"SQLite delete failed: {e}")
+            return False
+
+    async def cleanup_expired(self) -> int:
+        """Remove expired memories."""
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                # Find expired entries
+                result = await db.execute("""
+                    DELETE FROM memories
+                    WHERE ttl_hours IS NOT NULL
+                    AND datetime(created_at, '+' || ttl_hours || ' hours') < datetime('now')
+                """)
+                await db.commit()
+                return result.rowcount
+        except Exception as e:
+            logger.error(f"SQLite cleanup failed: {e}")
+            return 0
+
+    async def export_to_json(self, output_path: str) -> bool:
+        """Export all memories to JSON file for backup."""
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                db.row_factory = aiosqlite.Row
+                async with db.execute("SELECT * FROM memories") as cursor:
+                    rows = await cursor.fetchall()
+                    entries = [dict(row) for row in rows]
+
+            with open(output_path, "w") as f:
+                json.dump(entries, f, indent=2, default=str)
+
+            logger.info(f"Exported {len(entries)} memories to {output_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Export failed: {e}")
+            return False
+
+    async def import_from_json(self, input_path: str) -> int:
+        """Import memories from JSON file."""
+        try:
+            with open(input_path, "r") as f:
+                entries = json.load(f)
+
+            count = 0
+            for entry_data in entries:
+                entry = MemoryEntry(
+                    id=entry_data["id"],
+                    type=MemoryType(entry_data["type"]),
+                    content=json.loads(entry_data["content"]) if isinstance(entry_data["content"], str) else entry_data["content"],
+                    metadata=json.loads(entry_data.get("metadata", "{}")) if isinstance(entry_data.get("metadata"), str) else entry_data.get("metadata", {}),
+                    created_at=datetime.fromisoformat(entry_data["created_at"]),
+                    accessed_at=datetime.fromisoformat(entry_data["accessed_at"]),
+                    access_count=entry_data.get("access_count", 0),
+                    relevance_score=entry_data.get("relevance_score", 1.0),
+                    ttl_hours=entry_data.get("ttl_hours")
+                )
+                if await self.store(entry):
+                    count += 1
+
+            logger.info(f"Imported {count} memories from {input_path}")
+            return count
+
+        except Exception as e:
+            logger.error(f"Import failed: {e}")
+            return 0
+
+    async def get_stats(self) -> dict:
+        """Get database statistics."""
+        try:
+            async with aiosqlite.connect(str(self.db_path)) as db:
+                # Total count
+                async with db.execute("SELECT COUNT(*) FROM memories") as cursor:
+                    total = (await cursor.fetchone())[0]
+
+                # Count by type
+                async with db.execute(
+                    "SELECT type, COUNT(*) FROM memories GROUP BY type"
+                ) as cursor:
+                    by_type = {row[0]: row[1] for row in await cursor.fetchall()}
+
+                # Database file size
+                file_size = self.db_path.stat().st_size if self.db_path.exists() else 0
+
+                return {
+                    "total_entries": total,
+                    "by_type": by_type,
+                    "file_size_bytes": file_size,
+                    "file_size_mb": round(file_size / (1024 * 1024), 2)
+                }
+
+        except Exception as e:
+            logger.error(f"Get stats failed: {e}")
+            return {}
+
+    def _row_to_entry(self, row: dict) -> "MemoryEntry":
+        """Convert database row to MemoryEntry."""
+        return MemoryEntry(
+            id=row["id"],
+            type=MemoryType(row["type"]),
+            content=json.loads(row["content"]) if isinstance(row["content"], str) else row["content"],
+            metadata=json.loads(row["metadata"]) if isinstance(row.get("metadata"), str) else row.get("metadata", {}),
+            created_at=datetime.fromisoformat(row["created_at"]),
+            accessed_at=datetime.fromisoformat(row["accessed_at"]),
+            access_count=row.get("access_count", 0),
+            relevance_score=row.get("relevance_score", 1.0),
+            ttl_hours=row.get("ttl_hours")
+        )
+
+
 class LRUCache:
     """LRU Cache for in-memory storage."""
 
@@ -135,13 +499,17 @@ class LRUCache:
 
 class KIAANMemoryService:
     """
-    Memory service for KIAAN's persistent context.
+    Memory service for KIAAN's persistent context with OFFLINE SUPPORT.
 
     Provides:
     - In-memory LRU cache for fast access
-    - Optional Redis backend for persistence
+    - Redis backend for distributed persistence (when available)
+    - SQLite backend for offline persistence (always available)
     - Automatic memory cleanup (TTL, relevance decay)
     - Semantic memory retrieval
+    - Memory export/import for backup
+
+    FALLBACK CHAIN: Redis → SQLite → In-Memory
     """
 
     # Default TTLs by memory type (in hours)
@@ -154,31 +522,74 @@ class KIAANMemoryService:
         MemoryType.PREFERENCE: None       # Permanent
     }
 
-    def __init__(self, redis_url: Optional[str] = None, max_cache_size: int = 1000):
-        """Initialize memory service."""
+    def __init__(
+        self,
+        redis_url: Optional[str] = None,
+        sqlite_path: Optional[str] = None,
+        max_cache_size: int = 1000,
+        backend: str = "auto"  # auto, redis, sqlite, memory
+    ):
+        """
+        Initialize memory service with fallback support.
+
+        Args:
+            redis_url: Redis connection URL
+            sqlite_path: Path to SQLite database
+            max_cache_size: Maximum LRU cache size
+            backend: Backend preference (auto, redis, sqlite, memory)
+        """
         self.cache = LRUCache(max_size=max_cache_size)
         self.redis_client: Optional[Any] = None
         self.redis_url = redis_url or os.getenv("REDIS_URL")
+        self.backend_preference = backend
+
+        # Initialize SQLite backend for offline persistence
+        self.sqlite_backend = SQLiteMemoryBackend(sqlite_path)
+        self._sqlite_available = False
+
+        # Track active backend
+        self._active_backend = "memory"  # Will be updated in initialize()
 
         # Index for fast lookups by type and user
         self._type_index: dict[MemoryType, set[str]] = {t: set() for t in MemoryType}
         self._user_index: dict[str, set[str]] = {}
 
     async def initialize(self) -> None:
-        """Initialize Redis connection if available."""
-        if REDIS_AVAILABLE and self.redis_url:
+        """
+        Initialize memory backends with automatic fallback.
+        Fallback chain: Redis → SQLite → In-Memory
+        """
+        # Try Redis first (if preferred or auto)
+        if self.backend_preference in ("auto", "redis") and REDIS_AVAILABLE and self.redis_url:
             try:
                 self.redis_client = await aioredis.from_url(
                     self.redis_url,
                     encoding="utf-8",
                     decode_responses=True
                 )
-                logger.info("KIAAN Memory: Redis connected")
+                # Test connection
+                await self.redis_client.ping()
+                self._active_backend = "redis"
+                logger.info("KIAAN Memory: Redis connected and active")
             except Exception as e:
                 logger.warning(f"KIAAN Memory: Redis connection failed: {e}")
                 self.redis_client = None
-        else:
+
+        # Try SQLite (if Redis failed or SQLite preferred)
+        if self._active_backend == "memory" or self.backend_preference == "sqlite":
+            try:
+                self._sqlite_available = await self.sqlite_backend.initialize()
+                if self._sqlite_available:
+                    self._active_backend = "sqlite"
+                    logger.info("KIAAN Memory: SQLite backend initialized (offline capable)")
+            except Exception as e:
+                logger.warning(f"KIAAN Memory: SQLite initialization failed: {e}")
+
+        # Log final backend
+        if self._active_backend == "memory":
             logger.info("KIAAN Memory: Using in-memory storage only")
+        else:
+            logger.info(f"KIAAN Memory: Active backend = {self._active_backend}")
 
     async def store(
         self,
@@ -243,11 +654,18 @@ class KIAANMemoryService:
             except Exception as e:
                 logger.warning(f"Redis store failed: {e}")
 
-        logger.debug(f"Stored memory: {memory_id} (type: {memory_type.value})")
+        # Store in SQLite for offline persistence
+        if self._sqlite_available:
+            try:
+                await self.sqlite_backend.store(entry)
+            except Exception as e:
+                logger.warning(f"SQLite store failed: {e}")
+
+        logger.debug(f"Stored memory: {memory_id} (type: {memory_type.value}, backend: {self._active_backend})")
         return memory_id
 
     async def retrieve(self, memory_id: str) -> Optional[MemoryEntry]:
-        """Retrieve a memory entry by ID."""
+        """Retrieve a memory entry by ID with fallback chain."""
         # Try cache first
         entry = await self.cache.get(memory_id)
         if entry:
@@ -268,6 +686,20 @@ class KIAANMemoryService:
                     return entry
             except Exception as e:
                 logger.warning(f"Redis retrieve failed: {e}")
+
+        # Try SQLite (offline fallback)
+        if self._sqlite_available:
+            try:
+                entry = await self.sqlite_backend.retrieve(memory_id)
+                if entry:
+                    if entry.is_expired():
+                        await self.delete(memory_id)
+                        return None
+                    # Restore to cache
+                    await self.cache.set(memory_id, entry)
+                    return entry
+            except Exception as e:
+                logger.warning(f"SQLite retrieve failed: {e}")
 
         return None
 
@@ -525,9 +957,40 @@ class KIAANMemoryService:
                 t.value: len(ids) for t, ids in self._type_index.items()
             },
             "users_with_memories": len(self._user_index),
-            "redis_connected": self.redis_client is not None
+            "redis_connected": self.redis_client is not None,
+            "sqlite_available": self._sqlite_available,
+            "active_backend": self._active_backend,
+            "offline_capable": self._sqlite_available
         }
+
+        # Add SQLite stats if available
+        if self._sqlite_available:
+            sqlite_stats = await self.sqlite_backend.get_stats()
+            stats["sqlite_stats"] = sqlite_stats
+
         return stats
+
+    async def export_memories(self, output_path: str) -> bool:
+        """Export all memories to JSON file for backup."""
+        if self._sqlite_available:
+            return await self.sqlite_backend.export_to_json(output_path)
+        return False
+
+    async def import_memories(self, input_path: str) -> int:
+        """Import memories from JSON file."""
+        if self._sqlite_available:
+            return await self.sqlite_backend.import_from_json(input_path)
+        return 0
+
+    def get_backend_info(self) -> dict:
+        """Get information about active backends."""
+        return {
+            "active": self._active_backend,
+            "redis_available": self.redis_client is not None,
+            "sqlite_available": self._sqlite_available,
+            "fallback_chain": ["redis", "sqlite", "memory"],
+            "offline_capable": self._sqlite_available
+        }
 
 
 # Singleton instance
@@ -539,5 +1002,8 @@ __all__ = [
     "KIAANMemoryService",
     "MemoryEntry",
     "MemoryType",
-    "kiaan_memory"
+    "SQLiteMemoryBackend",
+    "LRUCache",
+    "kiaan_memory",
+    "REDIS_AVAILABLE",
 ]

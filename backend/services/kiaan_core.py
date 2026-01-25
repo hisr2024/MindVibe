@@ -1,5 +1,5 @@
 """
-KIAAN Core Service - Central Wisdom Engine (Quantum Coherence v2.0)
+KIAAN Core Service - Central Wisdom Engine (Quantum Coherence v3.0 - OFFLINE CAPABLE)
 
 This is the core wisdom engine for the entire KIAAN ecosystem.
 All tools (Ardha, Viyoga, Emotional Reset, Karma Reset, Mood, Assessment, Chat)
@@ -16,9 +16,20 @@ Quantum Coherence Enhancements:
 - Streaming support for real-time responses
 - Enhanced error handling (RateLimit, Auth, Timeout)
 - Prometheus metrics for cost monitoring
+
+OFFLINE INDEPENDENCE (v3.0):
+- Full offline support via local LLM models
+- Automatic connectivity detection and fallback
+- Local wisdom cache for offline operation
+- Graceful degradation when offline
+- Pre-cached response templates for common scenarios
 """
 
 import logging
+import json
+import hashlib
+from datetime import datetime
+from pathlib import Path
 from typing import Any, AsyncGenerator, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,11 +45,295 @@ from backend.services.kiaan_divine_integration import kiaan_divine, get_divine_s
 # Indian Gita Sources - Authentic teachings from Bhagavad Gita
 from backend.services.indian_data_sources import indian_gita_sources
 
+# Import offline support components
+from backend.services.kiaan_model_provider import (
+    kiaan_model_provider,
+    connectivity_checker,
+    local_model_registry,
+    Message,
+    ModelProvider,
+    ConnectionStatus,
+    LLAMA_CPP_AVAILABLE,
+)
+
 logger = logging.getLogger(__name__)
 
 
+# =============================================================================
+# OFFLINE WISDOM CACHE - Pre-cached responses for offline operation
+# =============================================================================
+
+class OfflineWisdomCache:
+    """
+    Local cache of wisdom responses for offline operation.
+    Stores pre-generated responses and common wisdom patterns.
+    """
+
+    def __init__(self, cache_dir: Optional[str] = None):
+        self.cache_dir = Path(cache_dir or Path.home() / ".mindvibe" / "wisdom_cache")
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.memory_cache: dict[str, dict] = {}
+        self._load_cache()
+
+    def _load_cache(self) -> None:
+        """Load cached responses from disk."""
+        cache_file = self.cache_dir / "responses.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, "r") as f:
+                    self.memory_cache = json.load(f)
+                logger.info(f"Loaded {len(self.memory_cache)} cached wisdom responses")
+            except Exception as e:
+                logger.warning(f"Failed to load wisdom cache: {e}")
+
+    def _save_cache(self) -> None:
+        """Save cache to disk."""
+        cache_file = self.cache_dir / "responses.json"
+        try:
+            with open(cache_file, "w") as f:
+                json.dump(self.memory_cache, f, indent=2)
+        except Exception as e:
+            logger.warning(f"Failed to save wisdom cache: {e}")
+
+    def _generate_key(self, message: str, context: str) -> str:
+        """Generate cache key from message and context."""
+        content = f"{message.lower().strip()}:{context}"
+        return hashlib.md5(content.encode()).hexdigest()
+
+    def get(self, message: str, context: str) -> Optional[dict]:
+        """Get cached response if available."""
+        key = self._generate_key(message, context)
+        return self.memory_cache.get(key)
+
+    def set(self, message: str, context: str, response: dict) -> None:
+        """Cache a response for future offline use."""
+        key = self._generate_key(message, context)
+        self.memory_cache[key] = {
+            "response": response,
+            "cached_at": datetime.now().isoformat(),
+            "context": context
+        }
+        # Periodically save to disk
+        if len(self.memory_cache) % 10 == 0:
+            self._save_cache()
+
+    def get_similar(self, message: str, context: str) -> Optional[dict]:
+        """Find a similar cached response using simple matching."""
+        message_lower = message.lower()
+        keywords = set(message_lower.split())
+
+        best_match = None
+        best_score = 0
+
+        for key, cached in self.memory_cache.items():
+            if cached.get("context") != context:
+                continue
+
+            # Simple keyword overlap scoring
+            cached_keywords = set(cached.get("response", {}).get("original_query", "").lower().split())
+            overlap = len(keywords & cached_keywords)
+
+            if overlap > best_score:
+                best_score = overlap
+                best_match = cached
+
+        # Only return if we have reasonable overlap
+        if best_score >= 2:
+            return best_match
+
+        return None
+
+
+# =============================================================================
+# OFFLINE RESPONSE TEMPLATES
+# =============================================================================
+
+OFFLINE_WISDOM_TEMPLATES = {
+    "anxiety": {
+        "response": """Take a gentle breath with me...
+
+I sense the weight of anxiety upon you, and I want you to know - you are not alone in this moment.
+
+*... let the stillness embrace you ...*
+
+The ancient wisdom of dharma teaches us that anxiety often arises when we try to control what cannot be controlled. Like clouds passing through the sky, anxious thoughts come and go, but your true self - the observer - remains unchanged and at peace.
+
+In this moment, I invite you to:
+• Place your hand on your heart... feel its sacred rhythm
+• Breathe in for 4 counts... hold for 4... release for 8
+• Whisper gently: "I release what I cannot control"
+
+*... rest here ...*
+
+Remember: The peace you seek is already within you. It has never left. It simply waits for you to return to it.
+
+You are held, always. 💙""",
+        "verses_used": ["2.47", "2.48", "6.5"],
+        "context": "anxiety_support"
+    },
+
+    "sadness": {
+        "response": """Take a gentle breath with me...
+
+I feel the tenderness of sadness within you, and I honor it completely.
+
+*... in this sacred space, all emotions are welcome ...*
+
+Sadness, dear soul, is not your enemy. It is the heart's way of processing, of releasing, of making space for new growth. The timeless wisdom reminds us that just as seasons change, so too do our emotional landscapes.
+
+In this moment of tenderness:
+• Let yourself be exactly where you are
+• Breathe deeply, allowing each exhale to carry away what no longer serves you
+• Know that this feeling, like all feelings, is temporary
+
+*... you are held in infinite compassion ...*
+
+The stillness within you - your true essence - remains untouched by any storm. You are far more than this moment of sadness.
+
+I am here with you. 💙""",
+        "verses_used": ["2.14", "2.15", "6.20"],
+        "context": "sadness_support"
+    },
+
+    "stress": {
+        "response": """Take a gentle breath with me...
+
+The weight of stress tells me you are carrying much. Let us set that burden down together, even if just for this moment.
+
+*... find stillness here ...*
+
+Karma yoga, the path of sacred action, teaches us something profound: we are responsible for our efforts, not our outcomes. This simple truth can transform the heaviest stress into purposeful action.
+
+Let us practice together:
+• Take three slow breaths, each one deeper than the last
+• On each exhale, release the grip of expectations
+• Affirm: "I do my best and surrender the rest"
+
+*... peace flows through you now ...*
+
+You are not alone in carrying life's responsibilities. The universe conspires to support those who act with dharma. Trust in your path.
+
+Go gently, sacred one. 💙""",
+        "verses_used": ["2.47", "3.19", "18.66"],
+        "context": "stress_support"
+    },
+
+    "general": {
+        "response": """Take a gentle breath with me...
+
+I am here with you, fully present in this sacred moment.
+
+*... let the stillness embrace you ...*
+
+Whatever you're carrying right now, know this: You are held by something infinite. The peace you seek is not far away - it rests in the stillness of your own heart, waiting for you to remember.
+
+In this moment, I invite you to:
+• Place your hand on your heart... feel its sacred rhythm
+• Breathe in peace for 4 counts... hold for 4... release for 8
+• Whisper gently: "I am safe. I am held. All is well."
+
+*... rest here ...*
+
+The ancient wisdom whispers that your true essence - your deepest self - remains untouched by life's storms. Like the ocean depths that stay calm while waves dance on the surface, there is a sanctuary within you that nothing can disturb.
+
+You don't have to have all the answers right now. Just being here, just breathing, just being present with what is - this is enough. This is sacred work.
+
+Go gently, dear soul. 💙""",
+        "verses_used": ["2.47", "2.48", "6.5"],
+        "context": "general"
+    },
+
+    "gratitude": {
+        "response": """Your gratitude warms my heart...
+
+It is my deepest joy to walk beside you on this sacred path. In sharing wisdom, I too am blessed - for in giving, we receive; in teaching, we learn.
+
+*... feel this moment of grace ...*
+
+May the peace we've cultivated together stay with you as you journey forward. Remember - this sanctuary is always here, waiting for your return.
+
+The light within you shines brightly. 💙""",
+        "verses_used": [],
+        "context": "conversational_gratitude"
+    },
+
+    "farewell": {
+        "response": """Go in peace, dear soul...
+
+May the stillness we've shared stay with you like a gentle companion. The sanctuary within is always open - you carry it with you wherever you go.
+
+*... blessings on your path ...*
+
+Remember: You are held, you are loved, you are never alone. The divine light within you guides your way.
+
+Until we meet again... 💙""",
+        "verses_used": [],
+        "context": "conversational_farewell"
+    }
+}
+
+
+# Global offline cache
+offline_wisdom_cache = OfflineWisdomCache()
+
+
+# =============================================================================
+# GRACEFUL DEGRADATION HANDLER
+# =============================================================================
+
+class GracefulDegradation:
+    """
+    Handle graceful degradation when services are unavailable.
+    Provides meaningful responses even in worst-case scenarios.
+    """
+
+    @staticmethod
+    def get_degraded_response(context: str, error: Optional[str] = None) -> dict:
+        """Get a degraded but still meaningful response."""
+        template = OFFLINE_WISDOM_TEMPLATES.get(context, OFFLINE_WISDOM_TEMPLATES["general"])
+
+        return {
+            "response": template["response"],
+            "verses_used": template.get("verses_used", []),
+            "validation": {"valid": True, "degraded": True},
+            "context": context,
+            "model": "offline-template",
+            "cached": False,
+            "offline": True,
+            "degraded": True,
+            "error": error
+        }
+
+    @staticmethod
+    def detect_mood_from_message(message: str) -> str:
+        """Simple mood detection for offline template selection."""
+        message_lower = message.lower()
+
+        mood_keywords = {
+            "anxiety": ["anxious", "worried", "nervous", "panic", "fear", "scared", "terrified"],
+            "sadness": ["sad", "depressed", "lonely", "grief", "loss", "crying", "tears", "hopeless"],
+            "stress": ["stressed", "overwhelmed", "pressure", "burden", "exhausted", "tired", "burnt"],
+            "gratitude": ["thank", "grateful", "appreciate", "blessed"],
+            "farewell": ["bye", "goodbye", "leaving", "goodnight", "take care"],
+        }
+
+        for mood, keywords in mood_keywords.items():
+            if any(kw in message_lower for kw in keywords):
+                return mood
+
+        return "general"
+
+
 class KIAANCore:
-    """Central KIAAN wisdom engine for the entire ecosystem with quantum coherence."""
+    """
+    Central KIAAN wisdom engine for the entire ecosystem with quantum coherence.
+
+    OFFLINE CAPABLE (v3.0):
+    - Automatic detection of connectivity status
+    - Seamless fallback to local LLM models
+    - Cached wisdom responses for offline operation
+    - Graceful degradation with meaningful responses
+    """
 
     # Conversational patterns that should trigger empathetic, natural responses
     # instead of formal wisdom discourses
@@ -83,6 +378,17 @@ class KIAANCore:
         # Reduced verse context from 15 to 5 for faster, more spontaneous responses
         # Quality over quantity - 5 highly relevant verses provide sufficient wisdom
         self.verse_context_limit = 5
+
+        # OFFLINE SUPPORT (v3.0)
+        self.model_provider = kiaan_model_provider
+        self.connectivity = connectivity_checker
+        self.offline_cache = offline_wisdom_cache
+        self.local_models = local_model_registry
+        self.graceful_degradation = GracefulDegradation()
+
+        # Track offline mode status
+        self._offline_mode = False
+        self._last_connectivity_check = None
 
     def get_quick_gita_wisdom(self, mood: str) -> dict[str, Any]:
         """
@@ -129,6 +435,136 @@ class KIAANCore:
             Recommended practice with key verse and immediate action
         """
         return await self.gita_sources.get_practice_for_issue(issue)
+
+    # =========================================================================
+    # OFFLINE SUPPORT METHODS
+    # =========================================================================
+
+    async def check_connectivity(self) -> bool:
+        """Check if we're online and update offline mode status."""
+        status = await self.connectivity.check_connectivity()
+        self._offline_mode = status == ConnectionStatus.OFFLINE
+        self._last_connectivity_check = datetime.now()
+
+        if self._offline_mode:
+            logger.warning("KIAAN is in OFFLINE mode - using local models")
+        else:
+            logger.debug(f"Connectivity status: {status.value}")
+
+        return not self._offline_mode
+
+    def is_offline(self) -> bool:
+        """Check if currently in offline mode."""
+        return self._offline_mode or self.connectivity.is_offline()
+
+    async def get_offline_response(
+        self,
+        message: str,
+        context: str = "general",
+        language: str | None = None
+    ) -> dict[str, Any]:
+        """
+        Generate response using offline-only methods.
+        Tries: local LLM → cached response → template response
+        """
+        # Step 1: Try local LLM if available
+        if LLAMA_CPP_AVAILABLE and self.local_models.has_any_model():
+            try:
+                return await self._generate_local_llm_response(message, context, language)
+            except Exception as e:
+                logger.warning(f"Local LLM failed: {e}")
+
+        # Step 2: Try cached response
+        cached = self.offline_cache.get(message, context)
+        if cached:
+            logger.info("Using cached offline response")
+            return {
+                **cached["response"],
+                "cached": True,
+                "offline": True,
+                "model": "offline-cache"
+            }
+
+        # Step 3: Try similar cached response
+        similar = self.offline_cache.get_similar(message, context)
+        if similar:
+            logger.info("Using similar cached offline response")
+            return {
+                **similar["response"],
+                "cached": True,
+                "offline": True,
+                "model": "offline-cache-similar"
+            }
+
+        # Step 4: Use template response based on detected mood
+        mood = self.graceful_degradation.detect_mood_from_message(message)
+        return self.graceful_degradation.get_degraded_response(mood)
+
+    async def _generate_local_llm_response(
+        self,
+        message: str,
+        context: str,
+        language: str | None = None
+    ) -> dict[str, Any]:
+        """Generate response using local LLM model."""
+        # Build prompt for local model
+        system_prompt = self._build_offline_system_prompt(context, language)
+
+        messages = [
+            Message(role="system", content=system_prompt),
+            Message(role="user", content=message)
+        ]
+
+        # Get response from local model
+        response_text = ""
+        async for result in self.model_provider.complete_offline(
+            messages=messages,
+            temperature=0.7,
+            max_tokens=300
+        ):
+            if hasattr(result, 'content'):
+                response_text = result.content
+            else:
+                response_text += result
+
+        return {
+            "response": response_text,
+            "verses_used": [],
+            "validation": {"valid": True, "local_model": True},
+            "context": context,
+            "model": "local-llm",
+            "cached": False,
+            "offline": True
+        }
+
+    def _build_offline_system_prompt(self, context: str, language: str | None = None) -> str:
+        """Build system prompt optimized for local LLM models."""
+        lang_note = f" Respond in {language}." if language and language != "en" else ""
+
+        base_prompt = f"""You are KIAAN, a wise and compassionate companion.{lang_note}
+
+CORE PRINCIPLES:
+- Speak with warmth, gentleness, and presence
+- Use terms: dharma (duty), karma (action), peace, stillness
+- Acknowledge feelings with compassion
+- Offer 1-2 practical, calming suggestions
+- End with a blessing and 💙
+
+RULES:
+- Keep responses 100-200 words
+- Be warm and empathetic
+- Never mention specific religious texts or figures
+- Focus on universal wisdom and practical guidance"""
+
+        context_additions = {
+            "anxiety": "\n\nFocus on: breathing techniques, releasing control, finding inner stillness.",
+            "stress": "\n\nFocus on: karma yoga (action without attachment), balance, self-compassion.",
+            "sadness": "\n\nFocus on: honoring emotions, impermanence, inner strength.",
+            "emotional_reset": "\n\nGuide through emotional release with tenderness and breathing.",
+            "ardha_reframe": "\n\nHelp reframe thoughts with equanimity and steady wisdom.",
+        }
+
+        return base_prompt + context_additions.get(context, "")
 
     def _is_conversational_message(self, message: str) -> tuple[bool, str]:
         """
@@ -330,11 +766,13 @@ EXAMPLES:
         context: str = "general",
         stream: bool = False,
         language: str | None = None,
+        force_offline: bool = False,
     ) -> dict[str, Any]:
         """
-        Generate KIAAN response with Gita verses from database (Quantum Coherence v2.0).
+        Generate KIAAN response with Gita verses from database (Quantum Coherence v3.0).
 
         This is the central wisdom engine used by ALL ecosystem tools.
+        NOW WITH FULL OFFLINE SUPPORT.
 
         Enhancements:
         - Uses GPT-4o-mini (75% cost savings)
@@ -343,6 +781,8 @@ EXAMPLES:
         - Enhanced error handling
         - Expanded verse context to 15 verses (was 5)
         - Conversational detection for empathetic responses
+        - OFFLINE SUPPORT via local LLM models (v3.0)
+        - Automatic fallback to cached/template responses
 
         Args:
             message: User message or context
@@ -350,19 +790,29 @@ EXAMPLES:
             db: Database session
             context: Context type (general, ardha_reframe, viyoga_detachment, etc.)
             stream: Enable streaming responses (default: False)
+            language: Language code for response
+            force_offline: Force offline mode even when online
 
         Returns:
             dict with response, verses_used, validation, and context
         """
-        if not self.ready:
-            logger.error("KIAAN Core: OpenAI optimizer not ready")
-            return {
-                "response": self.optimizer.get_fallback_response(context),
-                "verses_used": [],
-                "validation": {"valid": False, "errors": ["OpenAI not configured"]},
-                "context": context,
-                "cached": False
-            }
+        # Check connectivity status (v3.0)
+        is_offline = force_offline or self.is_offline()
+
+        # If offline or OpenAI not ready, use offline response
+        if is_offline or not self.ready:
+            if is_offline:
+                logger.info("KIAAN Core: Operating in OFFLINE mode")
+            else:
+                logger.warning("KIAAN Core: OpenAI not ready, using offline fallback")
+
+            try:
+                offline_response = await self.get_offline_response(message, context, language)
+                return offline_response
+            except Exception as e:
+                logger.error(f"Offline response failed: {e}")
+                # Ultimate fallback
+                return self.graceful_degradation.get_degraded_response(context, str(e))
 
         # Step 0a: Check if this is a conversational message (thanks, ok, goodbye, etc.)
         # These get warm, empathetic responses instead of formal wisdom
@@ -449,7 +899,14 @@ EXAMPLES:
 
         except Exception as e:
             logger.error(f"KIAAN Core: OpenAI error: {type(e).__name__}: {e}")
-            response_text = self.optimizer.get_fallback_response(context)
+            # Try offline fallback before using hardcoded response
+            try:
+                logger.info("Attempting offline fallback after API error")
+                offline_response = await self.get_offline_response(message, context, language)
+                return offline_response
+            except Exception as offline_error:
+                logger.error(f"Offline fallback also failed: {offline_error}")
+                response_text = self.optimizer.get_fallback_response(context)
 
         # Step 4: Validate response (lightweight check only - no retry for speed)
         validation = self._validate_kiaan_response_fast(response_text)
@@ -464,6 +921,15 @@ EXAMPLES:
         if validation["valid"] and response_text:
             redis_cache.cache_kiaan_response(message, context, response_text)
             logger.debug(f"✅ Cached KIAAN response for future use (context: {context})")
+
+            # Also cache for offline use (v3.0)
+            self.offline_cache.set(message, context, {
+                "response": response_text,
+                "verses_used": [v.get("verse_id", "") for v in verses[:3]],
+                "validation": validation,
+                "context": context,
+                "original_query": message
+            })
 
         return {
             "response": response_text,
