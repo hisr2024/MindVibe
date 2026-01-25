@@ -1,11 +1,26 @@
 /**
  * Wisdom Journey by ID - Get, Delete journey
  * This route proxies to the backend with fallback support
+ *
+ * IMPORTANT: This route is designed to NEVER return a 500 error.
+ * All errors are caught and converted to 200 responses with offline data.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+
+// Safe response helper that never throws
+function safeJsonResponse(data: unknown, status = 200): NextResponse {
+  try {
+    return NextResponse.json(data, { status })
+  } catch {
+    return new NextResponse(JSON.stringify({ _offline: true, error: 'Response serialization failed' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
 
 // Embedded fallback journey data for offline support
 const FALLBACK_VERSES = [
@@ -170,10 +185,10 @@ export async function GET(
   } catch (outerError) {
     console.error('Critical error in journey GET handler:', outerError)
     // Even if params parsing fails, return a generic fallback
-    return NextResponse.json({
+    return safeJsonResponse({
       detail: 'Unable to process request',
       _offline: true,
-    }, { status: 200 })
+    })
   }
 }
 
@@ -231,9 +246,9 @@ export async function DELETE(
     }
   } catch (outerError) {
     console.error('Critical error in journey DELETE handler:', outerError)
-    return NextResponse.json({
+    return safeJsonResponse({
       message: 'Journey deletion queued',
       _offline: true,
-    }, { status: 200 })
+    })
   }
 }
