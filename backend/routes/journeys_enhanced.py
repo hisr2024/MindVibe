@@ -395,6 +395,22 @@ async def start_journeys(
 
     engine = get_journey_engine()
 
+    # Check if trying to start demo journeys (database not yet set up)
+    demo_ids = [jid for jid in body.journey_ids if jid.startswith("demo-")]
+    if demo_ids:
+        # Demo templates are preview-only until database is set up
+        logger.info(f"User {user_id} attempted to start demo journeys: {demo_ids}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "demo_preview_only",
+                "message": "Wisdom Journeys is currently in preview mode. "
+                           "The full feature with personalized AI content is coming soon! "
+                           "Please check back later or contact support for early access.",
+                "journey_ids": demo_ids,
+            }
+        )
+
     try:
         journeys = await engine.start_journeys(
             db=db,
