@@ -849,7 +849,7 @@ class AudioSynthesizer {
     gain.gain.value = 0.2
 
     // Harmonics
-    [2, 3, 4].forEach(harmonic => {
+    ;[2, 3, 4].forEach(harmonic => {
       const h = this.ctx!.createOscillator()
       h.frequency.value = 136.1 * harmonic
       h.type = 'sine'
@@ -953,7 +953,7 @@ class AudioSynthesizer {
     base.start()
 
     // Harmonic overtones
-    [2, 3, 4, 5].forEach(h => {
+    ;[2, 3, 4, 5].forEach(h => {
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = 130.81 * h
       osc.type = 'sine'
