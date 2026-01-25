@@ -153,8 +153,8 @@ CREATE TABLE IF NOT EXISTS user_journey_step_state (
     provider_used VARCHAR(64),
     model_used VARCHAR(128),
 
-    -- Additional metadata
-    metadata JSONB DEFAULT '{}',
+    -- Additional step metadata (named step_metadata to avoid ORM conflicts)
+    step_metadata JSONB DEFAULT '{}',
 
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

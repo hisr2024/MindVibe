@@ -409,5 +409,61 @@ async def seed_journey_templates():
     print("\nSeeding complete!")
 
 
+def validate_data():
+    """Validate seed data structure (dry-run mode)."""
+    print("=" * 60)
+    print("Validating Journey Templates Data (Dry Run)")
+    print("=" * 60)
+
+    print(f"\n[Templates] Found {len(JOURNEY_TEMPLATES)} journey templates:")
+    for t in JOURNEY_TEMPLATES:
+        enemies = ", ".join(t["primary_enemy_tags"])
+        print(f"  - {t['title']} ({t['duration_days']} days, focus: {enemies})")
+
+    print(f"\n[Steps] Found {len(TEMPLATE_STEPS)} enemy step sets:")
+    for enemy, steps in TEMPLATE_STEPS.items():
+        print(f"  - {enemy}: {len(steps)} days defined")
+
+    # Validate structure
+    errors = []
+    for t in JOURNEY_TEMPLATES:
+        required = ["slug", "title", "description", "primary_enemy_tags", "duration_days", "difficulty"]
+        for field in required:
+            if field not in t:
+                errors.append(f"Template '{t.get('slug', 'unknown')}' missing field: {field}")
+
+    for enemy, steps in TEMPLATE_STEPS.items():
+        for step in steps:
+            required = ["day_index", "step_title"]
+            for field in required:
+                if field not in step:
+                    errors.append(f"Step in '{enemy}' day {step.get('day_index', '?')} missing field: {field}")
+
+    if errors:
+        print(f"\n[ERRORS] Found {len(errors)} validation errors:")
+        for e in errors:
+            print(f"  - {e}")
+        return False
+    else:
+        print("\n[SUCCESS] All data structures are valid!")
+        print("\nTo seed the database, run with a PostgreSQL DATABASE_URL:")
+        print("  DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/db python scripts/seed_journey_templates.py --seed")
+        return True
+
+
 if __name__ == "__main__":
-    asyncio.run(seed_journey_templates())
+    import sys
+
+    if "--dry-run" in sys.argv or len(sys.argv) == 1:
+        # Default to dry-run mode (validation only)
+        success = validate_data()
+        sys.exit(0 if success else 1)
+    elif "--seed" in sys.argv:
+        # Actual seeding requires database
+        asyncio.run(seed_journey_templates())
+    else:
+        print("Usage:")
+        print("  python scripts/seed_journey_templates.py           # Validate data (dry-run)")
+        print("  python scripts/seed_journey_templates.py --dry-run # Validate data (dry-run)")
+        print("  python scripts/seed_journey_templates.py --seed    # Seed database")
+        sys.exit(1)

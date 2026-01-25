@@ -2912,8 +2912,8 @@ class UserJourneyStepState(Base):
     provider_used: Mapped[str | None] = mapped_column(String(64), nullable=True)
     model_used: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
-    # Additional metadata
-    metadata: Mapped[dict | None] = mapped_column(JSON, default=lambda: {})
+    # Additional step metadata (named step_metadata to avoid SQLAlchemy conflict)
+    step_metadata: Mapped[dict | None] = mapped_column(JSON, default=lambda: {})
 
     # Timestamps
     created_at: Mapped[datetime.datetime] = mapped_column(
