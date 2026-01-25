@@ -28,6 +28,7 @@ from backend.middleware.feature_access import (
     require_wisdom_journeys,
     WisdomJourneysAccessRequired,
     get_current_user_id,
+    is_developer,
 )
 from backend.services.journey_engine_enhanced import (
     EnhancedJourneyEngine,
@@ -162,6 +163,21 @@ async def get_journey_access(
         user_id = await get_current_user_id(request)
         await get_or_create_free_subscription(db, user_id)
 
+        # Check for developer bypass - gives full unlimited access
+        if await is_developer(db, user_id):
+            logger.info(f"Developer access: unlimited journeys for {user_id}")
+            return JourneyAccessResponse(
+                has_access=True,
+                tier="developer",
+                active_journeys=0,
+                journey_limit=-1,
+                remaining=999,
+                is_unlimited=True,
+                can_start_more=True,
+                upgrade_url=None,
+                upgrade_cta=None,
+            )
+
         stats = await get_wisdom_journeys_stats(db, user_id)
 
         # Add upgrade info for users without access or at limit
@@ -208,6 +224,98 @@ async def get_journey_access(
 
 
 # =============================================================================
+# DEMO JOURNEY TEMPLATES (shown when database not seeded)
+# =============================================================================
+
+DEMO_JOURNEY_TEMPLATES = [
+    {
+        "id": "demo-krodha-001",
+        "slug": "transform-anger-demo",
+        "title": "Transform Anger (Krodha)",
+        "description": "A 14-day journey to transform destructive anger into constructive energy through Gita wisdom. Learn to recognize triggers, practice patience, and cultivate inner peace.",
+        "primary_enemy_tags": ["krodha"],
+        "duration_days": 14,
+        "difficulty": 2,
+        "is_featured": True,
+        "icon_name": "flame",
+        "color_theme": "red",
+    },
+    {
+        "id": "demo-kama-001",
+        "slug": "master-desire-demo",
+        "title": "Mastering Desire (Kama)",
+        "description": "A 21-day journey to understand and master desires. Transform cravings into purposeful aspirations aligned with your dharma.",
+        "primary_enemy_tags": ["kama"],
+        "duration_days": 21,
+        "difficulty": 3,
+        "is_featured": True,
+        "icon_name": "heart",
+        "color_theme": "pink",
+    },
+    {
+        "id": "demo-lobha-001",
+        "slug": "overcome-greed-demo",
+        "title": "Contentment Over Greed (Lobha)",
+        "description": "A 14-day journey to cultivate santosha (contentment) and release the grip of greed. Find abundance in simplicity.",
+        "primary_enemy_tags": ["lobha"],
+        "duration_days": 14,
+        "difficulty": 2,
+        "is_featured": False,
+        "icon_name": "coins",
+        "color_theme": "amber",
+    },
+    {
+        "id": "demo-moha-001",
+        "slug": "clarity-attachment-demo",
+        "title": "Clarity Over Attachment (Moha)",
+        "description": "A 21-day journey to see through delusion and attachment. Develop viveka (discrimination) and find clarity.",
+        "primary_enemy_tags": ["moha"],
+        "duration_days": 21,
+        "difficulty": 3,
+        "is_featured": False,
+        "icon_name": "cloud",
+        "color_theme": "purple",
+    },
+    {
+        "id": "demo-mada-001",
+        "slug": "humility-pride-demo",
+        "title": "Humility Over Ego (Mada)",
+        "description": "A 14-day journey to dissolve ego and cultivate true humility. Recognize the Self beyond the small self.",
+        "primary_enemy_tags": ["mada"],
+        "duration_days": 14,
+        "difficulty": 2,
+        "is_featured": False,
+        "icon_name": "crown",
+        "color_theme": "orange",
+    },
+    {
+        "id": "demo-matsarya-001",
+        "slug": "joy-envy-demo",
+        "title": "Joy Over Envy (Matsarya)",
+        "description": "A 14-day journey to transform envy into mudita (sympathetic joy). Celebrate others' success as your own.",
+        "primary_enemy_tags": ["matsarya"],
+        "duration_days": 14,
+        "difficulty": 2,
+        "is_featured": False,
+        "icon_name": "eye",
+        "color_theme": "emerald",
+    },
+    {
+        "id": "demo-complete-001",
+        "slug": "complete-transformation-demo",
+        "title": "Complete Inner Transformation",
+        "description": "A comprehensive 30-day journey addressing all six inner enemies. The ultimate path to self-mastery and liberation.",
+        "primary_enemy_tags": ["kama", "krodha", "lobha", "moha", "mada", "matsarya"],
+        "duration_days": 30,
+        "difficulty": 4,
+        "is_featured": True,
+        "icon_name": "sparkles",
+        "color_theme": "indigo",
+    },
+]
+
+
+# =============================================================================
 # CATALOG ENDPOINTS
 # =============================================================================
 
@@ -222,19 +330,26 @@ async def get_catalog(
 
     Returns journey templates sorted by featured status and title.
     Available to all users to show the catalog (with premium badges).
+    Falls back to demo templates if database is not seeded.
     """
     engine = get_journey_engine()
 
     try:
         templates = await engine.get_catalog(db)
+
+        # If database returned empty, use demo templates
+        if not templates:
+            logger.info("No templates in database, returning demo templates")
+            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
+
         return [JourneyTemplateResponse(**t) for t in templates]
 
     except Exception as e:
         error_msg = str(e).lower()
         # Handle case where table doesn't exist yet (not migrated)
         if "journey_templates" in error_msg or "relation" in error_msg or "does not exist" in error_msg:
-            logger.warning("Journey templates table not found - migrations may need to be run")
-            return []  # Return empty catalog instead of 500
+            logger.warning("Journey templates table not found - returning demo templates")
+            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
         logger.error(f"Error getting catalog: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to get journey catalog")
 
