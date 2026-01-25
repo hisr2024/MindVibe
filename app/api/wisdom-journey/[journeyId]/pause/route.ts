@@ -1,11 +1,25 @@
 /**
  * Wisdom Journey Pause - Pause an active journey
  * This route proxies to the backend with robust fallback support
+ *
+ * IMPORTANT: This route is designed to NEVER return a 500 error.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+
+// Safe response helper that never throws
+function safeJsonResponse(data: unknown, status = 200): NextResponse {
+  try {
+    return NextResponse.json(data, { status })
+  } catch {
+    return new NextResponse(JSON.stringify({ _offline: true, status: 'paused' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
 
 function createPausedResponse(journeyId: string, isOffline = false) {
   const now = new Date().toISOString()
@@ -55,19 +69,19 @@ export async function PUT(
 
       if (response.ok) {
         const data = await response.json()
-        return NextResponse.json(data, { status: 200 })
+        return safeJsonResponse(data)
       }
 
       // Backend failed - return simulated paused state
       console.warn(`Backend returned ${response.status} for pause, returning simulated response`)
-      return NextResponse.json(createPausedResponse(journeyId, true), { status: 200 })
+      return safeJsonResponse(createPausedResponse(journeyId, true))
 
     } catch (error) {
       console.error('Error pausing journey:', error)
-      return NextResponse.json(createPausedResponse(journeyId, true), { status: 200 })
+      return safeJsonResponse(createPausedResponse(journeyId, true))
     }
   } catch (outerError) {
     console.error('Critical error in pause PUT handler:', outerError)
-    return NextResponse.json(createPausedResponse(journeyId, true), { status: 200 })
+    return safeJsonResponse(createPausedResponse(journeyId, true))
   }
 }

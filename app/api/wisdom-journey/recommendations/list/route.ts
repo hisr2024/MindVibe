@@ -1,11 +1,25 @@
 /**
  * Wisdom Journey Recommendations - Get personalized journey recommendations
  * This route proxies to the backend with fallback support
+ *
+ * IMPORTANT: This route is designed to NEVER return a 500 error.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+
+// Safe response helper that never throws
+function safeJsonResponse(data: unknown, status = 200): NextResponse {
+  try {
+    return NextResponse.json(data, { status })
+  } catch {
+    return new NextResponse(JSON.stringify([]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
 
 // Default recommendations for fallback
 const DEFAULT_RECOMMENDATIONS = [
@@ -33,44 +47,55 @@ const DEFAULT_RECOMMENDATIONS = [
 ]
 
 export async function GET(request: NextRequest) {
-  const headers = new Headers()
-
-  // Forward auth headers
-  const authHeader = request.headers.get('Authorization')
-  if (authHeader) {
-    headers.set('Authorization', authHeader)
-  }
-
-  const uidHeader = request.headers.get('X-Auth-UID')
-  if (uidHeader) {
-    headers.set('X-Auth-UID', uidHeader)
-  }
-
   try {
-    const response = await fetch(`${BACKEND_URL}/api/wisdom-journey/recommendations/list`, {
-      method: 'GET',
-      headers,
-      cache: 'no-store',
-    })
+    const headers = new Headers()
 
-    if (!response.ok) {
-      // Return default recommendations on backend error
-      console.warn(`Backend returned ${response.status}, using default recommendations`)
-      return NextResponse.json(DEFAULT_RECOMMENDATIONS, { status: 200 })
+    // Forward auth headers
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader) {
+      headers.set('Authorization', authHeader)
     }
 
-    const data = await response.json()
-
-    // If backend returns empty array, use defaults
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      return NextResponse.json(DEFAULT_RECOMMENDATIONS, { status: 200 })
+    const uidHeader = request.headers.get('X-Auth-UID')
+    if (uidHeader) {
+      headers.set('X-Auth-UID', uidHeader)
     }
 
-    return NextResponse.json(data, { status: 200 })
-  } catch (error) {
-    console.error('Error fetching recommendations:', error)
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
 
-    // Return default recommendations on error
-    return NextResponse.json(DEFAULT_RECOMMENDATIONS, { status: 200 })
+      const response = await fetch(`${BACKEND_URL}/api/wisdom-journey/recommendations/list`, {
+        method: 'GET',
+        headers,
+        cache: 'no-store',
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        // Return default recommendations on backend error
+        console.warn(`Backend returned ${response.status}, using default recommendations`)
+        return safeJsonResponse(DEFAULT_RECOMMENDATIONS)
+      }
+
+      const data = await response.json()
+
+      // If backend returns empty array, use defaults
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        return safeJsonResponse(DEFAULT_RECOMMENDATIONS)
+      }
+
+      return safeJsonResponse(data)
+    } catch (error) {
+      console.error('Error fetching recommendations:', error)
+
+      // Return default recommendations on error
+      return safeJsonResponse(DEFAULT_RECOMMENDATIONS)
+    }
+  } catch (outerError) {
+    console.error('Critical error in recommendations GET handler:', outerError)
+    return safeJsonResponse(DEFAULT_RECOMMENDATIONS)
   }
 }

@@ -1,11 +1,25 @@
 /**
  * Wisdom Journey Generate - Create a new personalized journey
  * This route proxies to the backend with fallback support
+ *
+ * IMPORTANT: This route is designed to NEVER return a 500 error.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+
+// Safe response helper that never throws
+function safeJsonResponse(data: unknown, status = 200): NextResponse {
+  try {
+    return NextResponse.json(data, { status })
+  } catch {
+    return new NextResponse(JSON.stringify({ _offline: true, id: crypto.randomUUID(), status: 'active' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
 
 // Embedded wisdom verses for fallback
 const EMBEDDED_VERSES = [
@@ -118,37 +132,62 @@ function generateFallbackJourney(userId: string, durationDays: number, customTit
 }
 
 export async function POST(request: NextRequest) {
-  const headers = new Headers()
-  headers.set('Content-Type', 'application/json')
-
-  // Forward auth headers
-  const authHeader = request.headers.get('Authorization')
-  if (authHeader) {
-    headers.set('Authorization', authHeader)
-  }
-
-  const uidHeader = request.headers.get('X-Auth-UID')
-  if (uidHeader) {
-    headers.set('X-Auth-UID', uidHeader)
-  }
-
-  let body: { duration_days?: number; custom_title?: string } = {}
-  try {
-    body = await request.json()
-  } catch {
-    body = { duration_days: 7 }
-  }
+  let body: { duration_days?: number; custom_title?: string } = { duration_days: 7 }
+  let uidHeader: string | null = null
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/wisdom-journey/generate`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    })
+    const headers = new Headers()
+    headers.set('Content-Type', 'application/json')
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.warn(`Backend returned ${response.status}: ${errorText}, using fallback`)
+    // Forward auth headers
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader) {
+      headers.set('Authorization', authHeader)
+    }
+
+    uidHeader = request.headers.get('X-Auth-UID')
+    if (uidHeader) {
+      headers.set('X-Auth-UID', uidHeader)
+    }
+
+    try {
+      body = await request.json()
+    } catch {
+      body = { duration_days: 7 }
+    }
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+      const response = await fetch(`${BACKEND_URL}/api/wisdom-journey/generate`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error')
+        console.warn(`Backend returned ${response.status}: ${errorText}, using fallback`)
+
+        // Generate fallback journey
+        const userId = uidHeader || 'demo-user'
+        const fallbackJourney = generateFallbackJourney(
+          userId,
+          body.duration_days || 7,
+          body.custom_title
+        )
+
+        return safeJsonResponse(fallbackJourney)
+      }
+
+      const data = await response.json()
+      return safeJsonResponse(data)
+    } catch (error) {
+      console.error('Error generating journey:', error)
 
       // Generate fallback journey
       const userId = uidHeader || 'demo-user'
@@ -158,22 +197,16 @@ export async function POST(request: NextRequest) {
         body.custom_title
       )
 
-      return NextResponse.json(fallbackJourney, { status: 200 })
+      return safeJsonResponse(fallbackJourney)
     }
-
-    const data = await response.json()
-    return NextResponse.json(data, { status: 200 })
-  } catch (error) {
-    console.error('Error generating journey:', error)
-
-    // Generate fallback journey
-    const userId = uidHeader || 'demo-user'
+  } catch (outerError) {
+    console.error('Critical error in generate POST handler:', outerError)
+    // Generate a minimal fallback journey
     const fallbackJourney = generateFallbackJourney(
-      userId,
+      uidHeader || 'demo-user',
       body.duration_days || 7,
       body.custom_title
     )
-
-    return NextResponse.json(fallbackJourney, { status: 200 })
+    return safeJsonResponse({ ...fallbackJourney, _offline: true })
   }
 }

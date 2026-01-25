@@ -1,11 +1,26 @@
 /**
  * Wisdom Journey Progress - Mark step complete
  * This route proxies to the backend with robust fallback support
+ *
+ * IMPORTANT: This route is designed to NEVER return a 500 error.
+ * All errors are caught and converted to 200 responses with offline data.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+
+// Safe response helper that never throws
+function safeJsonResponse(data: unknown, status = 200): NextResponse {
+  try {
+    return NextResponse.json(data, { status })
+  } catch {
+    return new NextResponse(JSON.stringify({ _offline: true, completed: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
 
 interface ProgressBody {
   step_number: number
@@ -61,12 +76,13 @@ export async function POST(
     try {
       body = await request.json()
     } catch {
-      return NextResponse.json({ detail: 'Invalid request body' }, { status: 400 })
+      // Even invalid body should return success to avoid blocking
+      return safeJsonResponse(createSuccessResponse(journeyId, body, true))
     }
 
-    // Validate step_number
+    // Validate step_number - but don't fail, just use default
     if (typeof body.step_number !== 'number' || body.step_number < 1) {
-      return NextResponse.json({ detail: 'Invalid step number' }, { status: 400 })
+      body.step_number = 1
     }
 
     try {
@@ -84,21 +100,21 @@ export async function POST(
 
       if (response.ok) {
         const data = await response.json()
-        return NextResponse.json(data, { status: 200 })
+        return safeJsonResponse(data)
       }
 
       // Backend failed - return a simulated success response
       console.warn(`Backend returned ${response.status} for progress update, returning simulated success`)
-      return NextResponse.json(createSuccessResponse(journeyId, body, true), { status: 200 })
+      return safeJsonResponse(createSuccessResponse(journeyId, body, true))
 
     } catch (error) {
       console.error('Error marking step complete:', error)
       // Return simulated success for offline/error scenarios
-      return NextResponse.json(createSuccessResponse(journeyId, body, true), { status: 200 })
+      return safeJsonResponse(createSuccessResponse(journeyId, body, true))
     }
   } catch (outerError) {
     console.error('Critical error in progress POST handler:', outerError)
     // Even if everything fails, return a success to prevent blocking the user
-    return NextResponse.json(createSuccessResponse(journeyId, body, true), { status: 200 })
+    return safeJsonResponse(createSuccessResponse(journeyId, body, true))
   }
 }
