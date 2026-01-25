@@ -5,14 +5,17 @@ Provides decorators and dependencies for enforcing subscription-based access con
 - require_kiaan_quota() - Enforces 10 question limit for free tier
 - require_journal_access() - Blocks free tier from journal
 - require_feature(feature_name) - Generic feature guard
+- Developer bypass for app owners
 """
 
 import logging
+import os
 from functools import wraps
 from typing import Callable, Optional
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from backend.deps import get_db
 from backend.models import User, SubscriptionStatus
@@ -27,6 +30,50 @@ from backend.services.subscription_service import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Developer emails with full access (set via environment variable)
+# Format: comma-separated list of emails
+DEVELOPER_EMAILS = set(
+    email.strip().lower()
+    for email in os.getenv("DEVELOPER_EMAILS", "").split(",")
+    if email.strip()
+)
+
+
+async def is_developer(db: AsyncSession, user_id: str) -> bool:
+    """Check if user is a developer with full access.
+
+    Developers are identified by:
+    1. Email in DEVELOPER_EMAILS environment variable
+    2. is_admin flag in user record
+
+    Returns:
+        bool: True if user has developer access.
+    """
+    try:
+        result = await db.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = result.scalar_one_or_none()
+
+        if not user:
+            return False
+
+        # Check if email is in developer list
+        if user.email and user.email.lower() in DEVELOPER_EMAILS:
+            logger.info(f"Developer access granted for {user.email}")
+            return True
+
+        # Check if user is admin
+        if hasattr(user, "is_admin") and user.is_admin:
+            logger.info(f"Admin access granted for user {user_id}")
+            return True
+
+        return False
+
+    except Exception as e:
+        logger.warning(f"Error checking developer status: {e}")
+        return False
 
 
 async def get_current_user_id(request: Request) -> str:
@@ -205,6 +252,7 @@ class WisdomJourneysAccessRequired:
     """Dependency that ensures user has Wisdom Journeys access.
 
     Checks both feature access and journey limits based on subscription tier:
+    - DEVELOPER: Full unlimited access (bypasses all restrictions)
     - FREE: No access
     - BASIC: 1 active journey
     - PREMIUM: Up to 5 active journeys
@@ -242,6 +290,11 @@ class WisdomJourneysAccessRequired:
 
         # Ensure user has a subscription
         await get_or_create_free_subscription(db, user_id)
+
+        # Check for developer bypass - gives full unlimited access
+        if await is_developer(db, user_id):
+            logger.info(f"Developer bypass: granting unlimited Wisdom Journeys access to {user_id}")
+            return user_id, 0, -1  # -1 means unlimited
 
         # Check wisdom journeys access
         has_access, active_count, journey_limit = await check_wisdom_journeys_access(
