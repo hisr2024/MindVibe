@@ -154,12 +154,16 @@ export interface ProviderStatus {
  */
 export interface JourneyAccess {
   has_access: boolean
-  tier: 'free' | 'basic' | 'premium' | 'enterprise'
+  tier: 'free' | 'trial' | 'basic' | 'premium' | 'enterprise' | 'developer'
   active_journeys: number
   journey_limit: number
   remaining: number
   is_unlimited: boolean
   can_start_more: boolean
+  // Trial info
+  is_trial: boolean
+  trial_days_limit: number  // 0 = no limit, 3 = trial limited to 3 days
+  // Upgrade prompts
   upgrade_url: string | null
   upgrade_cta: string | null
 }
