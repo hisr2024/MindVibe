@@ -315,7 +315,7 @@ class AudioSynthesizer {
     windNoise.start()
 
     // Bird chirps (high frequency oscillators)
-    const birdFreqs = [2000, 2400, 2800, 3200]
+    const birdFreqs: number[] = [2000, 2400, 2800, 3200]
     birdFreqs.forEach((freq, i) => {
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = freq
@@ -374,7 +374,7 @@ class AudioSynthesizer {
 
   private playCrickets(): void {
     // Create multiple cricket sounds at different frequencies
-    const cricketFreqs = [4000, 4200, 4400, 4600, 4800]
+    const cricketFreqs: number[] = [4000, 4200, 4400, 4600, 4800]
 
     cricketFreqs.forEach((freq, i) => {
       const osc = this.ctx!.createOscillator()
@@ -461,7 +461,7 @@ class AudioSynthesizer {
 
   private playMeditation(): void {
     // Soft pad with multiple harmonics
-    const fundamentals = [220, 277.18, 329.63] // A3, C#4, E4 (A major chord)
+    const fundamentals: number[] = [220, 277.18, 329.63] // A3, C#4, E4 (A major chord)
 
     fundamentals.forEach(freq => {
       const osc = this.ctx!.createOscillator()
@@ -536,7 +536,7 @@ class AudioSynthesizer {
 
   private playSingingBowls(): void {
     // Multiple singing bowl frequencies with rich harmonics
-    const bowlFreqs = [256, 384, 512, 640] // C4 and harmonics
+    const bowlFreqs: number[] = [256, 384, 512, 640] // C4 and harmonics
 
     bowlFreqs.forEach((freq, i) => {
       const osc = this.ctx!.createOscillator()
@@ -565,7 +565,7 @@ class AudioSynthesizer {
 
   private playChakra(): void {
     // Seven chakra frequencies
-    const chakraFreqs = [
+    const chakraFreqs: number[] = [
       256,    // Root - C
       288,    // Sacral - D
       320,    // Solar Plexus - E
@@ -695,11 +695,11 @@ class AudioSynthesizer {
 
   private playFlute(): void {
     // Pentatonic scale flute-like tones
-    const notes = [392, 440, 494, 587, 659] // G4, A4, B4, D5, E5
+    const notes: number[] = [392, 440, 494, 587, 659] // G4, A4, B4, D5, E5
     let currentNote = 0
 
-    const playNote = () => {
-      const freq = notes[currentNote]
+    const playNote = (): void => {
+      const freq: number = notes[currentNote]
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = freq
       osc.type = 'sine'
@@ -747,7 +747,7 @@ class AudioSynthesizer {
 
   private playPiano(): void {
     // Soft piano-like tones with harmonics
-    const chords = [
+    const chords: number[][] = [
       [261.63, 329.63, 392], // C major
       [293.66, 369.99, 440], // D minor
       [349.23, 440, 523.25], // F major
@@ -756,8 +756,8 @@ class AudioSynthesizer {
 
     let chordIndex = 0
 
-    const playChord = () => {
-      chords[chordIndex].forEach((freq, i) => {
+    const playChord = (): void => {
+      chords[chordIndex].forEach((freq: number) => {
         const osc = this.ctx!.createOscillator()
         osc.frequency.value = freq
         osc.type = 'triangle'
@@ -781,10 +781,10 @@ class AudioSynthesizer {
 
   private playSitar(): void {
     // Indian classical raga-like tones
-    const notes = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88] // C major scale
+    const notes: number[] = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88] // C major scale
 
-    const playNote = () => {
-      const freq = notes[Math.floor(Math.random() * notes.length)]
+    const playNote = (): void => {
+      const freq: number = notes[Math.floor(Math.random() * notes.length)]
 
       // Main tone with harmonics
       [1, 2, 3, 4].forEach((harmonic, i) => {
@@ -811,7 +811,7 @@ class AudioSynthesizer {
     }
 
     // Tanpura drone
-    const droneFreqs = [130.81, 196, 261.63] // C3, G3, C4
+    const droneFreqs: number[] = [130.81, 196, 261.63] // C3, G3, C4
     droneFreqs.forEach(freq => {
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = freq
@@ -882,7 +882,7 @@ class AudioSynthesizer {
   }
 
   private playTempleBells(): void {
-    const bellFreqs = [523.25, 659.25, 783.99, 1046.5] // C5, E5, G5, C6
+    const bellFreqs: number[] = [523.25, 659.25, 783.99, 1046.5] // C5, E5, G5, C6
 
     const ringBell = () => {
       const freq = bellFreqs[Math.floor(Math.random() * bellFreqs.length)]
