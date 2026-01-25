@@ -20,7 +20,19 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
   }
 
   const headers = new Headers(options.headers || {})
-  if (uid) headers.set('X-Auth-UID', uid)
+
+  // Try to get JWT token from localStorage first (if available)
+  if (typeof window !== 'undefined') {
+    const accessToken = localStorage.getItem('access_token') || localStorage.getItem('mindvibe_access_token')
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    }
+  }
+
+  // Also set X-Auth-UID for flexible authentication fallback
+  if (uid) {
+    headers.set('X-Auth-UID', uid)
+  }
 
   return fetch(url, { ...options, headers })
 }
