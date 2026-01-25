@@ -77,12 +77,20 @@ export class EliteNeuralTTS {
     'consciousness', 'liberation', 'devotion', 'surrender', 'truth'
   ]
 
+  // Natural speech enhancement settings for human-like delivery
+  private readonly naturalSpeechConfig = {
+    enableMicroPauses: true,        // Add tiny natural pauses
+    enableBreathSimulation: true,   // Subtle breath-like gaps
+    enableEmphasisVariation: true,  // Natural word emphasis
+    enableProsodySmoothing: true,   // Smooth transitions between phrases
+  }
+
   constructor(config: Partial<TTSConfig> = {}) {
     this.config = {
       mode: 'auto',
       voicePersona: 'friendly',
       language: 'en-US',
-      speechRate: 0.95,
+      speechRate: 0.96,  // Natural conversational pace (not too slow)
       pitch: 1.0,
       emotionalTone: 'compassionate',
       volume: 1.0,
@@ -129,7 +137,7 @@ export class EliteNeuralTTS {
   }
 
   /**
-   * Select best voice based on config
+   * Select best voice based on config - prioritizing most natural-sounding voices
    */
   private selectBestVoice(): void {
     if (this.availableVoices.length === 0) return
@@ -139,53 +147,83 @@ export class EliteNeuralTTS {
       v.lang.startsWith(lang.split('-')[0])
     )
 
-    // Prefer neural/enhanced voices
-    const enhancedVoices = langVoices.filter(v =>
-      v.name.toLowerCase().includes('neural') ||
-      v.name.toLowerCase().includes('enhanced') ||
-      v.name.toLowerCase().includes('natural') ||
-      v.name.toLowerCase().includes('premium')
-    )
+    // Priority order for natural-sounding voices (highest to lowest quality)
+    const naturalVoicePriority = [
+      'neural2',     // Google Neural2 - most natural
+      'studio',      // Google Studio - premium quality
+      'journey',     // Google Journey - expressive storytelling
+      'wavenet',     // Google Wavenet - high quality
+      'neural',      // Microsoft Neural - natural
+      'natural',     // Generic natural voices
+      'enhanced',    // Enhanced quality
+      'premium',     // Premium voices
+      'hd',          // High definition
+    ]
 
-    // Voice selection based on persona
+    // Score voices by naturalness priority
+    const scoreVoice = (voice: SpeechSynthesisVoice): number => {
+      const name = voice.name.toLowerCase()
+      let score = 0
+
+      // Priority-based scoring (higher = more natural)
+      naturalVoicePriority.forEach((term, index) => {
+        if (name.includes(term)) {
+          score += (naturalVoicePriority.length - index) * 10
+        }
+      })
+
+      // Bonus for local voices (usually higher quality)
+      if (voice.localService) score += 5
+
+      return score
+    }
+
+    // Sort by naturalness score (highest first)
+    const sortedVoices = [...langVoices].sort((a, b) => scoreVoice(b) - scoreVoice(a))
+
+    // Voice selection based on persona with natural voice preference
     let preferredVoices: SpeechSynthesisVoice[] = []
+
+    // Calm voice keywords - soothing, soft female voices
+    const calmKeywords = ['female', 'samantha', 'karen', 'ava', 'emma', 'aria', 'siri', 'alexa', 'cortana', 'zira']
+    // Wisdom voice keywords - warm, grounded male voices
+    const wisdomKeywords = ['male', 'daniel', 'james', 'david', 'guy', 'andrew', 'tom', 'alex']
+    // Friendly voice keywords - warm, conversational
+    const friendlyKeywords = ['jenny', 'emma', 'aria', 'samantha', 'natural', 'conversational']
 
     switch (this.config.voicePersona) {
       case 'calm':
-        // Prefer female voices for calm persona
-        preferredVoices = (enhancedVoices.length > 0 ? enhancedVoices : langVoices)
-          .filter(v => v.name.toLowerCase().includes('female') ||
-                       v.name.toLowerCase().includes('samantha') ||
-                       v.name.toLowerCase().includes('karen'))
+        preferredVoices = sortedVoices.filter(v =>
+          calmKeywords.some(kw => v.name.toLowerCase().includes(kw))
+        )
         break
       case 'wisdom':
-        // Prefer deeper/male voices for wisdom persona
-        preferredVoices = (enhancedVoices.length > 0 ? enhancedVoices : langVoices)
-          .filter(v => v.name.toLowerCase().includes('male') ||
-                       v.name.toLowerCase().includes('daniel') ||
-                       v.name.toLowerCase().includes('james'))
+        preferredVoices = sortedVoices.filter(v =>
+          wisdomKeywords.some(kw => v.name.toLowerCase().includes(kw))
+        )
         break
       case 'friendly':
       default:
-        // Prefer local/high-quality voices for friendly persona
-        preferredVoices = (enhancedVoices.length > 0 ? enhancedVoices : langVoices)
-          .filter(v => v.localService)
+        preferredVoices = sortedVoices.filter(v =>
+          friendlyKeywords.some(kw => v.name.toLowerCase().includes(kw)) || v.localService
+        )
         break
     }
 
-    // Select voice
+    // Select best available voice
     if (preferredVoices.length > 0) {
       this.selectedVoice = preferredVoices[0]
-    } else if (langVoices.length > 0) {
-      // Prefer local voices
-      const localVoice = langVoices.find(v => v.localService)
-      this.selectedVoice = localVoice || langVoices[0]
+    } else if (sortedVoices.length > 0) {
+      // Use highest scored voice for the language
+      this.selectedVoice = sortedVoices[0]
     } else if (this.availableVoices.length > 0) {
-      this.selectedVoice = this.availableVoices[0]
+      // Ultimate fallback - any voice, prefer local
+      const localVoice = this.availableVoices.find(v => v.localService)
+      this.selectedVoice = localVoice || this.availableVoices[0]
     }
 
     if (this.selectedVoice) {
-      console.log(`🎯 Selected voice: ${this.selectedVoice.name} (${this.selectedVoice.lang})`)
+      console.log(`🎯 Selected natural voice: ${this.selectedVoice.name} (${this.selectedVoice.lang})`)
     }
   }
 
@@ -283,78 +321,116 @@ export class EliteNeuralTTS {
   }
 
   /**
-   * Process text for natural speech (enhanced SSML-like processing)
+   * Process text for ULTRA-NATURAL speech (human-like delivery)
+   * Adds subtle pauses, micro-breaks, and natural rhythm patterns
    */
   private processForNaturalSpeech(text: string): string {
     let processed = text
 
-    // Add natural pauses at punctuation
+    // Natural punctuation-based pauses (calibrated for human-like rhythm)
     processed = processed
-      // Sentence endings - longer pause
-      .replace(/\.\s+/g, '. ... ')
-      // Questions - slightly longer pause
-      .replace(/\?\s+/g, '? ... ')
-      // Exclamations - moderate pause
-      .replace(/!\s+/g, '! .. ')
-      // Colons - short pause
-      .replace(/:\s+/g, ': .. ')
-      // Semicolons - short pause
-      .replace(/;\s+/g, '; .. ')
-      // "Here's what you can do" - add emphasis pause
-      .replace(/Here's what you can do/gi, "... Here's what you can do ...")
-      // "First, Second, Third" - add list pauses
-      .replace(/First,/g, '... First, ...')
-      .replace(/Then,/g, '... Then, ...')
-      .replace(/Finally,/g, '... Finally, ...')
-      .replace(/Second,/g, '... Second, ...')
-      .replace(/Third,/g, '... Third, ...')
+      // Sentence endings - natural pause (not too long)
+      .replace(/\.\s+/g, '. .. ')
+      // Questions - thinking pause
+      .replace(/\?\s+/g, '? .. ')
+      // Exclamations - brief energetic pause
+      .replace(/!\s+/g, '! . ')
+      // Colons - anticipation micro-pause
+      .replace(/:\s+/g, ': . ')
+      // Semicolons - thought continuation
+      .replace(/;\s+/g, '; . ')
+      // Commas - subtle micro-pause (most natural)
+      .replace(/,\s+/g, ', ')
 
-    // Add emphasis to wisdom terms (by adding brief pause before)
+    // Natural phrase starters with subtle pauses
+    const phraseStarters = [
+      { pattern: /\b(However|Moreover|Furthermore|Nevertheless|Therefore)\b/gi, pause: ' .. ' },
+      { pattern: /\b(In fact|For example|In other words|That is|On the other hand)\b/gi, pause: ' .. ' },
+      { pattern: /\b(First|Second|Third|Finally|Next|Then|Also)\b,/gi, pause: ' . $1, . ' },
+    ]
+
+    phraseStarters.forEach(({ pattern, pause }) => {
+      processed = processed.replace(pattern, (match) => pause.replace('$1', match))
+    })
+
+    // Natural breath points before longer phrases
+    processed = processed
+      .replace(/\bHere's what you can do\b/gi, '.. Here\'s what you can do ..')
+      .replace(/\bLet me explain\b/gi, '.. Let me explain')
+      .replace(/\bI understand\b/gi, '.. I understand')
+      .replace(/\bTake a moment\b/gi, '.. Take a moment ..')
+
+    // Subtle emphasis for wisdom/spiritual terms (not over-pronounced)
     for (const term of this.wisdomTerms) {
       const regex = new RegExp(`\\b(${term})\\b`, 'gi')
-      processed = processed.replace(regex, ' $1')
+      // Add tiny pause before important terms (more natural than heavy emphasis)
+      processed = processed.replace(regex, '. $1')
     }
 
-    // Clean up multiple spaces and ellipses
+    // Natural contraction handling (flows better)
     processed = processed
-      .replace(/\s+/g, ' ')
-      .replace(/\.{4,}/g, '...')
+      .replace(/\bI am\b/g, "I'm")
+      .replace(/\byou are\b/g, "you're")
+      .replace(/\bthey are\b/g, "they're")
+      .replace(/\bwe are\b/g, "we're")
+      .replace(/\bit is\b/g, "it's")
+      .replace(/\bthat is\b/g, "that's")
+      .replace(/\bwhat is\b/g, "what's")
+      .replace(/\bdoes not\b/g, "doesn't")
+      .replace(/\bdo not\b/g, "don't")
+      .replace(/\bcannot\b/g, "can't")
+      .replace(/\bwill not\b/g, "won't")
+
+    // Clean up - maintain natural rhythm
+    processed = processed
+      .replace(/\s+/g, ' ')           // Normalize spaces
+      .replace(/\.\s*\.\s*\./g, '..') // Normalize ellipses (max 2 dots for micro-pause)
+      .replace(/\.{3,}/g, '..')       // Cap ellipses
+      .replace(/\.\s*,/g, ',')        // Clean up dot-comma
       .trim()
 
     return processed
   }
 
   /**
-   * Get emotional speech rate
+   * Get emotional speech rate - calibrated for natural human-like delivery
+   * Subtle variations that sound natural, not robotic
    */
   private getEmotionalRate(): number {
     const baseRate = this.config.speechRate
 
     switch (this.config.emotionalTone) {
       case 'compassionate':
-        return baseRate * 0.95 // Slightly slower for warmth
+        // Gentle, warm pace - like a caring friend
+        return baseRate * 0.97
       case 'encouraging':
-        return baseRate * 1.0  // Normal pace for energy
+        // Natural energy without rushing
+        return baseRate * 1.0
       case 'meditative':
-        return baseRate * 0.85 // Slower for calm
+        // Calm but not unnaturally slow
+        return baseRate * 0.92
       default:
         return baseRate
     }
   }
 
   /**
-   * Get emotional pitch adjustment
+   * Get emotional pitch adjustment - subtle variations for natural expression
+   * Avoids exaggerated pitch changes that sound artificial
    */
   private getEmotionalPitch(): number {
     const basePitch = this.config.pitch
 
     switch (this.config.emotionalTone) {
       case 'compassionate':
-        return basePitch * 1.02 // Slightly higher for warmth
+        // Subtle warmth in tone
+        return basePitch * 1.01
       case 'encouraging':
-        return basePitch * 1.05 // Brighter, more energetic
+        // Slight brightness without being artificial
+        return basePitch * 1.02
       case 'meditative':
-        return basePitch * 0.98 // Lower, more grounding
+        // Grounded, calming tone
+        return basePitch * 0.99
       default:
         return basePitch
     }
@@ -523,13 +599,14 @@ export class EliteNeuralTTS {
   }
 }
 
-// Export singleton instance with default config
+// Export singleton instance with ULTRA-NATURAL settings
+// Optimized for human-like speech delivery across all languages
 export const eliteNeuralTTS = new EliteNeuralTTS({
   mode: 'auto',
   voicePersona: 'friendly',
   language: 'en-US',
-  speechRate: 0.95,
-  pitch: 1.0,
+  speechRate: 0.96,    // Natural conversational pace
+  pitch: 1.0,          // Natural pitch baseline
   emotionalTone: 'compassionate',
   volume: 1.0
 })

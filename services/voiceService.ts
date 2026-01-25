@@ -58,7 +58,7 @@ class VoiceService {
    * Generate cache key for audio
    */
   private getCacheKey(options: SynthesizeOptions): string {
-    const { text, language = 'en', voiceType = 'friendly', speed = 0.9 } = options
+    const { text, language = 'en', voiceType = 'friendly', speed = 0.96 } = options
     return `${text.substring(0, 50)}:${language}:${voiceType}:${speed}`
   }
 
@@ -100,7 +100,7 @@ class VoiceService {
       return cached
     }
 
-    // Call API
+    // Call API with ULTRA-NATURAL voice settings
     const response = await apiFetch(
       '/api/voice/synthesize',
       {
@@ -110,7 +110,7 @@ class VoiceService {
           text: options.text,
           language: options.language || 'en',
           voice_type: options.voiceType || 'friendly',
-          speed: options.speed !== undefined ? options.speed : 0.9,
+          speed: options.speed !== undefined ? options.speed : 0.96,  // Natural pace
           pitch: options.pitch !== undefined ? options.pitch : 0.0
         })
       },
@@ -166,7 +166,8 @@ class VoiceService {
   }
 
   /**
-   * Synthesize KIAAN message
+   * Synthesize KIAAN message with ULTRA-NATURAL voice
+   * Uses optimal speech parameters for human-like conversational delivery
    */
   async synthesizeKiaanMessage(
     message: string,
@@ -178,14 +179,16 @@ class VoiceService {
         text: message,
         language,
         voiceType: 'friendly',
-        speed: 0.95
+        speed: 0.97,  // Natural conversational pace
+        pitch: 0.3    // Subtle warmth
       },
       userId
     )
   }
 
   /**
-   * Synthesize meditation guidance
+   * Synthesize meditation guidance with ULTRA-NATURAL calming voice
+   * Optimized for soothing delivery without robotic slowness
    */
   async synthesizeMeditation(
     script: string,
@@ -197,7 +200,8 @@ class VoiceService {
         text: script,
         language,
         voiceType: 'calm',
-        speed: 0.8
+        speed: 0.92,  // Calm but natural pace
+        pitch: -0.5   // Subtle grounding warmth
       },
       userId
     )

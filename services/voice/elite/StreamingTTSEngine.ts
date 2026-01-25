@@ -96,6 +96,7 @@ export class StreamingTTSEngine {
   private readonly clauseEnders = /[,;:–—]/
 
   constructor(config: StreamingTTSConfig = {}) {
+    // ULTRA-NATURAL streaming voice settings
     this.config = {
       maxChunkLength: config.maxChunkLength ?? 200,
       minChunkLength: config.minChunkLength ?? 50,
@@ -107,7 +108,7 @@ export class StreamingTTSEngine {
       adaptiveQuality: config.adaptiveQuality ?? true,
       language: config.language ?? 'en',
       voiceType: config.voiceType ?? 'friendly',
-      speechRate: config.speechRate ?? 0.95,
+      speechRate: config.speechRate ?? 0.96,  // Natural conversational pace
       pitch: config.pitch ?? 1.0,
       onStart: config.onStart ?? (() => {}),
       onProgress: config.onProgress ?? (() => {}),
