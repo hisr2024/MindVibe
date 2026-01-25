@@ -21,9 +21,11 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
 
   const headers = new Headers(options.headers || {})
 
-  // Try to get JWT token from localStorage first (if available)
+  // Try to get JWT token from localStorage (check multiple possible keys)
   if (typeof window !== 'undefined') {
-    const accessToken = localStorage.getItem('access_token') || localStorage.getItem('mindvibe_access_token')
+    // Check the primary key first (used by useAuth hook)
+    const accessToken = localStorage.getItem('mindvibe_access_token')
+      || localStorage.getItem('access_token')
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`)
     }
@@ -35,4 +37,19 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
   }
 
   return fetch(url, { ...options, headers })
+}
+
+/**
+ * Get the current access token if available
+ */
+export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token')
+}
+
+/**
+ * Check if the user is authenticated (has a valid access token)
+ */
+export function isAuthenticated(): boolean {
+  return !!getAccessToken()
 }

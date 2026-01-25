@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
 import { Card, CardContent, Badge, Button } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useAuth } from '@/hooks/useAuth'
+import { apiFetch } from '@/lib/api'
 import Link from 'next/link'
 
 interface ProfileData {
@@ -14,48 +16,204 @@ interface ProfileData {
   bio?: string
   avatarUrl?: string
   createdAt: string
+  baseExperience?: string
+}
+
+interface BackendProfile {
+  profile_id: number
+  user_id: string
+  full_name: string | null
+  base_experience: string
+  created_at: string
+  updated_at: string | null
 }
 
 const PROFILE_STORAGE_KEY = 'mindvibe_profile'
 
 export default function ProfilePage() {
   const { subscription } = useSubscription()
+  const { user, isAuthenticated, loading: authLoading } = useAuth()
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
-    if (stored) {
-      setProfile(JSON.parse(stored))
-    } else {
-      // Default profile
-      const defaultProfile: ProfileData = {
-        name: 'MindVibe User',
-        email: 'user@mindvibe.app',
+  // Fetch profile from backend or localStorage
+  const fetchProfile = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      // If authenticated, try to fetch from backend
+      if (isAuthenticated && user) {
+        try {
+          const response = await apiFetch('/api/profile', {
+            method: 'GET',
+          })
+
+          if (response.ok) {
+            const backendProfile: BackendProfile = await response.json()
+            const profileData: ProfileData = {
+              name: backendProfile.full_name || user.name || user.email.split('@')[0],
+              email: user.email,
+              bio: '', // Backend doesn't store bio yet
+              baseExperience: backendProfile.base_experience,
+              createdAt: backendProfile.created_at,
+            }
+
+            // Try to get avatar and bio from localStorage cache
+            const cached = localStorage.getItem(PROFILE_STORAGE_KEY)
+            if (cached) {
+              try {
+                const cachedData = JSON.parse(cached)
+                profileData.avatarUrl = cachedData.avatarUrl
+                profileData.bio = cachedData.bio || ''
+              } catch {
+                // Ignore parse errors
+              }
+            }
+
+            setProfile(profileData)
+            // Cache profile locally
+            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData))
+            return
+          } else if (response.status === 404) {
+            // Profile doesn't exist in backend, create it
+            const createResponse = await apiFetch('/api/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                full_name: user.name || user.email.split('@')[0],
+                base_experience: 'new_user',
+              }),
+            })
+
+            if (createResponse.ok) {
+              const newProfile: BackendProfile = await createResponse.json()
+              const profileData: ProfileData = {
+                name: newProfile.full_name || user.email.split('@')[0],
+                email: user.email,
+                bio: '',
+                createdAt: newProfile.created_at,
+                baseExperience: newProfile.base_experience,
+              }
+              setProfile(profileData)
+              localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData))
+              return
+            }
+          }
+
+          // Backend fetch failed, fall back to localStorage
+          throw new Error('Backend profile fetch failed')
+        } catch (backendError) {
+          console.warn('Backend profile fetch failed, using localStorage:', backendError)
+          // Fall through to localStorage fallback
+        }
+      }
+
+      // Fall back to localStorage (for unauthenticated users or backend failures)
+      const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        // If we have a user, update the profile with user info
+        if (user) {
+          parsed.email = user.email
+          parsed.name = parsed.name || user.name || user.email.split('@')[0]
+        }
+        setProfile(parsed)
+      } else {
+        // Default profile
+        const defaultProfile: ProfileData = {
+          name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
+          email: user?.email || 'user@mindvibe.app',
+          bio: '',
+          createdAt: new Date().toISOString(),
+        }
+        setProfile(defaultProfile)
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(defaultProfile))
+      }
+    } catch (err) {
+      console.error('Error loading profile:', err)
+      setError('Failed to load profile')
+
+      // Set a minimal profile
+      const fallbackProfile: ProfileData = {
+        name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
+        email: user?.email || 'user@mindvibe.app',
         bio: '',
         createdAt: new Date().toISOString(),
       }
-      setProfile(defaultProfile)
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(defaultProfile))
+      setProfile(fallbackProfile)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
-  }, [])
+  }, [isAuthenticated, user])
+
+  // Initial load
+  useEffect(() => {
+    if (!authLoading) {
+      fetchProfile()
+    }
+  }, [authLoading, fetchProfile])
+
+  // Sync with auth changes
+  useEffect(() => {
+    const handleAuthChange = () => {
+      fetchProfile()
+    }
+
+    window.addEventListener('auth-changed', handleAuthChange)
+    return () => window.removeEventListener('auth-changed', handleAuthChange)
+  }, [fetchProfile])
 
   const handleSaveProfile = async (data: { name: string; email: string; bio?: string }) => {
     if (!profile) return
 
-    const updated = {
-      ...profile,
-      ...data,
+    setSaving(true)
+    setError(null)
+
+    try {
+      // If authenticated, sync to backend
+      if (isAuthenticated) {
+        try {
+          const response = await apiFetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              full_name: data.name,
+              base_experience: profile.baseExperience || 'returning_user',
+            }),
+          })
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            throw new Error(errorData.detail || 'Failed to save profile')
+          }
+        } catch (backendError) {
+          console.warn('Backend profile save failed:', backendError)
+          // Continue to save locally
+        }
+      }
+
+      // Update local state and localStorage
+      const updated: ProfileData = {
+        ...profile,
+        ...data,
+      }
+      setProfile(updated)
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated))
+      setIsEditing(false)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save profile'
+      setError(message)
+    } finally {
+      setSaving(false)
     }
-    setProfile(updated)
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated))
-    setIsEditing(false)
   }
 
   const handleAvatarUpload = async (file: File): Promise<string> => {
-    // Convert to base64 for local storage (in production, this would upload to a server)
+    // Convert to base64 for local storage (avatar storage would need backend support)
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => {
@@ -79,7 +237,7 @@ export default function ProfilePage() {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated))
   }
 
-  if (loading || !profile) {
+  if (authLoading || loading || !profile) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-12">
         <div className="animate-pulse space-y-6">
@@ -90,8 +248,35 @@ export default function ProfilePage() {
     )
   }
 
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-12">
+        <Card variant="elevated" className="mb-8">
+          <CardContent>
+            <div className="text-center py-8">
+              <h2 className="text-xl font-semibold text-orange-50 mb-2">Sign in to access your profile</h2>
+              <p className="text-sm text-orange-100/70 mb-6">
+                Create an account or sign in to save your profile and access all features.
+              </p>
+              <Link href="/account">
+                <Button variant="primary">Go to Account</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-12">
+      {error && (
+        <div className="mb-6 rounded-2xl border border-orange-400/40 bg-orange-500/10 p-4 text-sm text-orange-50">
+          {error}
+        </div>
+      )}
+
       {/* Profile Header */}
       <Card variant="elevated" className="mb-8">
         <CardContent>
