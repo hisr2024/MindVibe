@@ -11,11 +11,32 @@ import * as wisdomJourneyService from '@/services/wisdomJourneyService'
 
 type View = 'overview' | 'recommendations' | 'journey' | 'step'
 
-export default function WisdomJourneyClient() {
-  // TODO: Replace with actual auth when available
-  // For now, using a demo user ID - in production, get from Firebase auth or auth context
-  const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') || 'demo-user' : 'demo-user'
+/**
+ * Generate or retrieve a persistent user ID for the Wisdom Journey feature.
+ * In production, this should come from Firebase auth or an auth context.
+ */
+function getOrCreateUserId(): string {
+  if (typeof window === 'undefined') return 'demo-user'
 
+  // Try multiple localStorage keys for compatibility
+  const storedId = localStorage.getItem('user_id') ||
+                   localStorage.getItem('mindvibe_user_id') ||
+                   localStorage.getItem('mindvibe_uid')
+
+  if (storedId && storedId !== 'undefined' && storedId !== 'null') {
+    return storedId
+  }
+
+  // Generate a new user ID if none exists
+  const newUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+  localStorage.setItem('user_id', newUserId)
+  localStorage.setItem('mindvibe_user_id', newUserId)
+
+  return newUserId
+}
+
+export default function WisdomJourneyClient() {
+  const [userId, setUserId] = useState<string>('demo-user')
   const [view, setView] = useState<View>('overview')
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -25,9 +46,15 @@ export default function WisdomJourneyClient() {
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Initialize user ID on mount
+  useEffect(() => {
+    const id = getOrCreateUserId()
+    setUserId(id)
+  }, [])
+
   // Load active journey and recommendations
   useEffect(() => {
-    if (!userId) return
+    if (!userId || userId === 'demo-user') return
 
     const loadData = async () => {
       try {

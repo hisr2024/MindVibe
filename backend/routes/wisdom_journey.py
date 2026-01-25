@@ -6,13 +6,12 @@ personalized wisdom journeys based on Bhagavad Gita verses.
 """
 
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_current_user, get_db
+from backend.deps import get_current_user_flexible, get_db
 from backend.middleware.rate_limiter import limiter
 from backend.models import JourneyStatus
 from backend.services.wisdom_journey_service import WisdomJourneyService
@@ -97,14 +96,13 @@ async def generate_journey(
     request: Request,
     body: GenerateJourneyRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JourneyResponse:
     """
     Generate a personalized wisdom journey based on user mood and journal patterns.
 
     Rate limited to 5 journeys per hour per user.
     """
-    user_id = current_user["id"]
 
     logger.info(f"Generating journey for user {user_id}, duration: {body.duration_days} days")
 
@@ -161,10 +159,9 @@ async def generate_journey(
 @router.get("/active", response_model=JourneyResponse | None)
 async def get_active_journey(
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JourneyResponse | None:
     """Get the user's currently active wisdom journey, if any."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
     journey = await service.get_active_journey(db, user_id)
@@ -230,10 +227,9 @@ async def get_active_journey(
 async def get_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JourneyResponse:
     """Get a specific wisdom journey by ID."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
     journey = await service.get_journey(db, journey_id)
@@ -305,10 +301,9 @@ async def mark_step_complete(
     journey_id: str,
     body: MarkStepCompleteRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JourneyStepResponse:
     """Mark a journey step as complete and update progress."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
 
@@ -351,10 +346,9 @@ async def mark_step_complete(
 async def pause_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JourneyResponse:
     """Pause an active wisdom journey."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
 
@@ -410,10 +404,9 @@ async def pause_journey(
 async def resume_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JourneyResponse:
     """Resume a paused wisdom journey."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
 
@@ -469,10 +462,9 @@ async def resume_journey(
 async def delete_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> dict[str, str]:
     """Soft delete a wisdom journey."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
 
@@ -495,10 +487,9 @@ async def delete_journey(
 @router.get("/recommendations/list", response_model=list[RecommendationResponse])
 async def get_journey_recommendations(
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> list[RecommendationResponse]:
     """Get personalized journey recommendations based on user mood and activity."""
-    user_id = current_user["id"]
 
     service = WisdomJourneyService()
     recommendations = await service.get_journey_recommendations(db, user_id, limit=3)
