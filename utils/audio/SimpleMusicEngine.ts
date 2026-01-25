@@ -30,72 +30,175 @@ export interface PlayerState {
 }
 
 // ============ Preset Tracks ============
-// Add your meditation music files to /public/audio/music/
+// Soul-soothing meditation tracks from open-source royalty-free libraries
+// All tracks are from Pixabay's free audio collection (CC0/Pixabay License)
 
 export const PRESET_TRACKS: MusicTrack[] = [
+  // === NATURE SOUNDS ===
   {
-    id: 'preset-1',
-    title: 'Morning Raga - Bhairav',
-    artist: 'Traditional',
-    duration: 1800,
+    id: 'preset-rain-gentle',
+    title: 'Gentle Rain',
+    artist: 'Nature Ambience',
+    duration: 600,
     source: 'preset',
-    url: '/audio/music/morning-raga-bhairav.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/05/16/audio_58fcd61a7b.mp3'
   },
   {
-    id: 'preset-2',
-    title: 'Evening Raga - Yaman',
-    artist: 'Traditional',
-    duration: 2100,
+    id: 'preset-ocean-waves',
+    title: 'Ocean Waves',
+    artist: 'Nature Ambience',
+    duration: 180,
     source: 'preset',
-    url: '/audio/music/evening-raga-yaman.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/03/10/audio_f4c739491a.mp3'
   },
   {
-    id: 'preset-3',
-    title: 'Deep Meditation',
-    artist: 'Ambient',
-    duration: 3600,
+    id: 'preset-forest-birds',
+    title: 'Forest Birds Morning',
+    artist: 'Nature Ambience',
+    duration: 120,
     source: 'preset',
-    url: '/audio/music/deep-meditation.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/02/07/audio_6c5a1c43fa.mp3'
   },
   {
-    id: 'preset-4',
-    title: 'Peaceful Sleep',
-    artist: 'Ambient',
-    duration: 5400,
+    id: 'preset-river-stream',
+    title: 'Flowing River Stream',
+    artist: 'Nature Ambience',
+    duration: 180,
     source: 'preset',
-    url: '/audio/music/peaceful-sleep.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/07/26/audio_e205dc4c25.mp3'
   },
   {
-    id: 'preset-5',
-    title: 'Nature - Forest Morning',
-    artist: 'Nature Sounds',
-    duration: 2700,
+    id: 'preset-night-crickets',
+    title: 'Night Forest Crickets',
+    artist: 'Nature Ambience',
+    duration: 300,
     source: 'preset',
-    url: '/audio/music/forest-morning.mp3'
+    url: 'https://cdn.pixabay.com/audio/2021/08/08/audio_ebee6e1a2c.mp3'
+  },
+  // === MEDITATION MUSIC ===
+  {
+    id: 'preset-meditation-calm',
+    title: 'Calm Meditation',
+    artist: 'Meditation Music',
+    duration: 180,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/02/22/audio_7c6d0d9fdd.mp3'
   },
   {
-    id: 'preset-6',
-    title: 'Nature - Flowing River',
-    artist: 'Nature Sounds',
-    duration: 3000,
+    id: 'preset-deep-relaxation',
+    title: 'Deep Relaxation',
+    artist: 'Ambient Meditation',
+    duration: 240,
     source: 'preset',
-    url: '/audio/music/flowing-river.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/08/03/audio_54fb8e8c0d.mp3'
   },
   {
-    id: 'preset-7',
-    title: 'Om Meditation',
-    artist: 'Sacred Chants',
-    duration: 1800,
+    id: 'preset-peaceful-ambient',
+    title: 'Peaceful Ambient',
+    artist: 'Meditation Music',
+    duration: 195,
     source: 'preset',
-    url: '/audio/music/om-meditation.mp3'
+    url: 'https://cdn.pixabay.com/audio/2023/04/13/audio_ce71fd9bfe.mp3'
   },
   {
-    id: 'preset-8',
-    title: 'Flute Serenity',
+    id: 'preset-spiritual-awakening',
+    title: 'Spiritual Awakening',
+    artist: 'Healing Sounds',
+    duration: 217,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/10/25/audio_d1c7f0b0a2.mp3'
+  },
+  // === HEALING & WELLNESS ===
+  {
+    id: 'preset-singing-bowls',
+    title: 'Tibetan Singing Bowls',
+    artist: 'Healing Sounds',
+    duration: 180,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/03/09/audio_5a9be2a9ca.mp3'
+  },
+  {
+    id: 'preset-healing-tones',
+    title: 'Healing Frequency Tones',
+    artist: 'Sound Therapy',
+    duration: 240,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2023/03/27/audio_0a15b62c7a.mp3'
+  },
+  {
+    id: 'preset-zen-garden',
+    title: 'Zen Garden Ambience',
+    artist: 'Meditation Music',
+    duration: 180,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/05/17/audio_c8e3f16c7d.mp3'
+  },
+  // === SLEEP & REST ===
+  {
+    id: 'preset-sleep-ambient',
+    title: 'Sleep Ambient Music',
+    artist: 'Sleep Sounds',
+    duration: 300,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/06/02/audio_03ee1f4c2a.mp3'
+  },
+  {
+    id: 'preset-night-rain',
+    title: 'Rainy Night Relaxation',
+    artist: 'Sleep Sounds',
+    duration: 240,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2023/03/06/audio_2b25dc7c6b.mp3'
+  },
+  {
+    id: 'preset-ocean-night',
+    title: 'Ocean at Night',
+    artist: 'Sleep Sounds',
+    duration: 180,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/10/30/audio_0e9a1961ba.mp3'
+  },
+  // === INSTRUMENTAL ===
+  {
+    id: 'preset-flute-meditation',
+    title: 'Flute Meditation',
     artist: 'Instrumental',
-    duration: 2400,
+    duration: 210,
     source: 'preset',
-    url: '/audio/music/flute-serenity.mp3'
+    url: 'https://cdn.pixabay.com/audio/2024/02/14/audio_ab5726c84e.mp3'
+  },
+  {
+    id: 'preset-piano-serenity',
+    title: 'Piano Serenity',
+    artist: 'Instrumental',
+    duration: 180,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2023/10/31/audio_fc9e554c2a.mp3'
+  },
+  {
+    id: 'preset-harp-dreams',
+    title: 'Harp Dreams',
+    artist: 'Instrumental',
+    duration: 195,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2024/01/08/audio_dc39bea5c0.mp3'
+  },
+  // === SACRED SOUNDS ===
+  {
+    id: 'preset-om-chanting',
+    title: 'Om Meditation Chant',
+    artist: 'Sacred Sounds',
+    duration: 300,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/08/23/audio_9d8a1c99f1.mp3'
+  },
+  {
+    id: 'preset-temple-bells',
+    title: 'Temple Bells',
+    artist: 'Sacred Sounds',
+    duration: 180,
+    source: 'preset',
+    url: 'https://cdn.pixabay.com/audio/2022/11/17/audio_c3e1c67be9.mp3'
   }
 ]
 
