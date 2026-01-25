@@ -22,8 +22,11 @@ export * from '@/lib/music/soulSoothingMusicLibrary'
 // Simple Music Player - Clean & Minimal with User Uploads
 export { SimpleMusicPlayer } from './SimpleMusicPlayer'
 
-// Spiritual Vibes - Global Floating Music Player with Keyboard Shortcuts
-export { SpiritualVibesPlayer } from './SpiritualVibesPlayer'
+// Meditation Music Player Widget - Robust, No-Overlap Player with Upload Support
+export { MeditationMusicPlayerWidget } from './MeditationMusicPlayerWidget'
+
+// Legacy: Spiritual Vibes Player (replaced by MeditationMusicPlayerWidget)
+// export { SpiritualVibesPlayer } from './SpiritualVibesPlayer'
 
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'
