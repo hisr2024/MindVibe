@@ -144,7 +144,7 @@ export const CHAPTERS: ChapterInfo[] = [
     number: 13,
     name: 'Ksetra Ksetrajna Vibhaga Yoga',
     sanskritName: 'क्षेत्रक्षेत्रज्ञविभागयोग',
-    totalVerses: 35,
+    totalVerses: 34,
     summary: 'The yoga distinguishing the field (body) from the knower of the field (soul).',
     themes: ['body', 'soul', 'knowledge', 'nature', 'consciousness'],
   },

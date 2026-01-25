@@ -61,7 +61,7 @@ export const CHAPTER_VERSE_COUNTS: Record<number, { name: string; sanskritName: 
   10: { name: 'Vibhuti Yoga', sanskritName: 'विभूतियोग', verses: 42 },
   11: { name: 'Visvarupa Darsana Yoga', sanskritName: 'विश्वरूपदर्शनयोग', verses: 55 },
   12: { name: 'Bhakti Yoga', sanskritName: 'भक्तियोग', verses: 20 },
-  13: { name: 'Ksetra Ksetrajna Vibhaga Yoga', sanskritName: 'क्षेत्रक्षेत्रज्ञविभागयोग', verses: 35 },
+  13: { name: 'Ksetra Ksetrajna Vibhaga Yoga', sanskritName: 'क्षेत्रक्षेत्रज्ञविभागयोग', verses: 34 },
   14: { name: 'Gunatraya Vibhaga Yoga', sanskritName: 'गुणत्रयविभागयोग', verses: 27 },
   15: { name: 'Purusottama Yoga', sanskritName: 'पुरुषोत्तमयोग', verses: 20 },
   16: { name: 'Daivasura Sampad Vibhaga Yoga', sanskritName: 'दैवासुरसम्पद्विभागयोग', verses: 24 },
