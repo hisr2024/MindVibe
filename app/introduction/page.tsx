@@ -435,11 +435,11 @@ export default function IntroductionPage() {
                   <h3 className="text-white/90 font-medium text-sm sm:text-base mb-3 sm:mb-4">Quick Divine Access</h3>
                   <div className="grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-3">
                     <Link
-                      href="/wisdom-journey"
+                      href="/journeys"
                       className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
                     >
-                      <span className="text-xl sm:text-2xl mb-1">📖</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">Gita</span>
+                      <span className="text-xl sm:text-2xl mb-1">🕉️</span>
+                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">Journeys</span>
                     </Link>
                     <Link
                       href="/flows/journal"
