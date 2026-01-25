@@ -8,7 +8,22 @@
  * - Provider tracking
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+// Use relative path for Vercel proxy (avoids CORS), direct URL only for local dev
+function getApiBaseUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || ''
+  }
+
+  const isLocalDev = window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1'
+
+  if (isLocalDev && process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+
+  // Production - use relative path for Vercel proxy
+  return ''
+}
 
 // =============================================================================
 // Types
@@ -170,9 +185,10 @@ export interface PremiumError {
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null
 
-  // Try multiple token storage locations
+  // Try multiple token storage locations (matching lib/api.ts pattern)
   return (
     localStorage.getItem('access_token') ||
+    localStorage.getItem('mindvibe_access_token') ||
     localStorage.getItem('auth_token') ||
     localStorage.getItem('mindvibe_token') ||
     sessionStorage.getItem('access_token')
@@ -250,7 +266,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * Check the current user's access to Wisdom Journeys (premium feature)
  */
 export async function getJourneyAccess(): Promise<JourneyAccess> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/access`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/access`, {
     method: 'GET',
     headers: getHeaders(),
   })
@@ -262,7 +278,7 @@ export async function getJourneyAccess(): Promise<JourneyAccess> {
  */
 export async function getCatalog(): Promise<JourneyTemplate[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/journeys/catalog`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/journeys/catalog`, {
       method: 'GET',
       headers: getHeaders(),
     })
@@ -285,7 +301,7 @@ export async function startJourneys(
   journeyIds: string[],
   personalization?: Personalization
 ): Promise<UserJourney[]> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/start`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/start`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({
@@ -300,7 +316,7 @@ export async function startJourneys(
  * Get all active journeys for the current user
  */
 export async function getActiveJourneys(): Promise<UserJourney[]> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/active`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/active`, {
     method: 'GET',
     headers: getHeaders(),
   })
@@ -311,7 +327,7 @@ export async function getActiveJourneys(): Promise<UserJourney[]> {
  * Get today's agenda across all active journeys
  */
 export async function getTodayAgenda(): Promise<TodayAgenda> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/today`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/today`, {
     method: 'GET',
     headers: getHeaders(),
   })
@@ -322,7 +338,7 @@ export async function getTodayAgenda(): Promise<TodayAgenda> {
  * Get or generate today's step for a specific journey
  */
 export async function getTodayStep(userJourneyId: string): Promise<StepState> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/${userJourneyId}/today`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/today`, {
     method: 'POST',
     headers: getHeaders(),
   })
@@ -347,7 +363,7 @@ export async function completeStep(
   journey_completed: boolean
 }> {
   const response = await fetch(
-    `${API_BASE_URL}/api/journeys/${userJourneyId}/steps/${dayIndex}/complete`,
+    `${getApiBaseUrl()}/api/journeys/${userJourneyId}/steps/${dayIndex}/complete`,
     {
       method: 'POST',
       headers: getHeaders(),
@@ -363,7 +379,7 @@ export async function completeStep(
 export async function pauseJourney(
   userJourneyId: string
 ): Promise<{ status: string; journey_id: string }> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/${userJourneyId}/pause`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/pause`, {
     method: 'POST',
     headers: getHeaders(),
   })
@@ -376,7 +392,7 @@ export async function pauseJourney(
 export async function resumeJourney(
   userJourneyId: string
 ): Promise<{ status: string; journey_id: string }> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/${userJourneyId}/resume`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/resume`, {
     method: 'POST',
     headers: getHeaders(),
   })
@@ -389,7 +405,7 @@ export async function resumeJourney(
 export async function abandonJourney(
   userJourneyId: string
 ): Promise<{ status: string; journey_id: string }> {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/${userJourneyId}/abandon`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/abandon`, {
     method: 'POST',
     headers: getHeaders(),
   })
@@ -411,7 +427,7 @@ export async function getJourneyHistory(
     provider_used: string | null
   }[]
 > {
-  const response = await fetch(`${API_BASE_URL}/api/journeys/${userJourneyId}/history`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/history`, {
     method: 'GET',
     headers: getHeaders(),
   })
@@ -422,7 +438,7 @@ export async function getJourneyHistory(
  * Get AI provider health status (admin)
  */
 export async function getProviderStatus(): Promise<ProviderStatus> {
-  const response = await fetch(`${API_BASE_URL}/api/admin/ai/providers/status`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/admin/ai/providers/status`, {
     method: 'GET',
     headers: getHeaders(),
   })
