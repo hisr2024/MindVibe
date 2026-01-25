@@ -158,6 +158,40 @@ app.add_middleware(RequestLoggingMiddleware)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
+# Global exception handler to prevent unhandled 500 errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Catch all unhandled exceptions and return a proper JSON response.
+    This ensures no raw 500 errors leak to clients.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # Log the full exception for debugging
+    logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
+
+    # For wisdom-journey endpoints, return a more graceful response
+    if "/wisdom-journey/" in request.url.path:
+        return JSONResponse(
+            status_code=200,  # Return 200 to allow frontend fallback
+            content={
+                "error": "server_error",
+                "message": "Service temporarily unavailable. Please try again.",
+                "_offline": True,
+            },
+        )
+
+    # For other endpoints, return standard 500 with details
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error",
+            "message": str(exc) if os.getenv("DEBUG", "false").lower() == "true" else "An unexpected error occurred",
+        },
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
