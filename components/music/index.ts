@@ -22,6 +22,9 @@ export * from '@/lib/music/soulSoothingMusicLibrary'
 // Simple Music Player - Clean & Minimal with User Uploads
 export { SimpleMusicPlayer } from './SimpleMusicPlayer'
 
+// Spiritual Vibes - Global Floating Music Player with Keyboard Shortcuts
+export { SpiritualVibesPlayer } from './SpiritualVibesPlayer'
+
 // Visualizations
 export { AdvancedVisualizer } from './AdvancedVisualizer'
 

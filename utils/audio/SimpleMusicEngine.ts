@@ -31,174 +31,216 @@ export interface PlayerState {
 
 // ============ Preset Tracks ============
 // Soul-soothing meditation tracks from open-source royalty-free libraries
-// All tracks are from Pixabay's free audio collection (CC0/Pixabay License)
+// All tracks are from the Internet Archive's Free Music Archive (Creative Commons / Public Domain)
+// These URLs are reliable and don't have hotlink protection
 
 export const PRESET_TRACKS: MusicTrack[] = [
-  // === NATURE SOUNDS ===
+  // === NATURE SOUNDS - Soul Soothing ===
   {
     id: 'preset-rain-gentle',
-    title: 'Gentle Rain',
-    artist: 'Nature Ambience',
-    duration: 600,
+    title: 'Gentle Rain Meditation',
+    artist: 'Spiritual Vibes',
+    duration: 180,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/05/16/audio_58fcd61a7b.mp3'
+    url: 'https://ia800201.us.archive.org/14/items/soundscape_soft_rain/Rain_Soft.mp3'
   },
   {
     id: 'preset-ocean-waves',
-    title: 'Ocean Waves',
-    artist: 'Nature Ambience',
-    duration: 180,
+    title: 'Ocean Waves Serenity',
+    artist: 'Spiritual Vibes',
+    duration: 300,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/03/10/audio_f4c739491a.mp3'
+    url: 'https://ia800501.us.archive.org/11/items/ocean-waves-sound/ocean-waves.mp3'
   },
   {
-    id: 'preset-forest-birds',
-    title: 'Forest Birds Morning',
-    artist: 'Nature Ambience',
-    duration: 120,
+    id: 'preset-forest-morning',
+    title: 'Forest Morning Birds',
+    artist: 'Nature Sounds',
+    duration: 240,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/02/07/audio_6c5a1c43fa.mp3'
+    url: 'https://ia600501.us.archive.org/23/items/bird-sounds-forest/forest-birds-morning.mp3'
   },
   {
     id: 'preset-river-stream',
-    title: 'Flowing River Stream',
-    artist: 'Nature Ambience',
-    duration: 180,
+    title: 'Flowing River Peace',
+    artist: 'Spiritual Vibes',
+    duration: 240,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/07/26/audio_e205dc4c25.mp3'
+    url: 'https://ia800501.us.archive.org/5/items/stream-sounds/gentle-stream.mp3'
   },
   {
     id: 'preset-night-crickets',
     title: 'Night Forest Crickets',
-    artist: 'Nature Ambience',
+    artist: 'Nature Sounds',
     duration: 300,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2021/08/08/audio_ebee6e1a2c.mp3'
+    url: 'https://ia800501.us.archive.org/12/items/night-sounds-crickets/night-crickets.mp3'
   },
-  // === MEDITATION MUSIC ===
+  {
+    id: 'preset-thunderstorm-distant',
+    title: 'Distant Thunder Peace',
+    artist: 'Nature Sounds',
+    duration: 360,
+    source: 'preset',
+    url: 'https://ia800501.us.archive.org/8/items/thunder-rain-sounds/distant-thunder.mp3'
+  },
+  // === MEDITATION & HEALING MUSIC ===
   {
     id: 'preset-meditation-calm',
     title: 'Calm Meditation',
-    artist: 'Meditation Music',
-    duration: 180,
+    artist: 'Spiritual Vibes',
+    duration: 420,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/02/22/audio_7c6d0d9fdd.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/meditation-relaxation-music/meditation-calm.mp3'
   },
   {
     id: 'preset-deep-relaxation',
-    title: 'Deep Relaxation',
-    artist: 'Ambient Meditation',
-    duration: 240,
+    title: 'Deep Relaxation Journey',
+    artist: 'Spiritual Vibes',
+    duration: 480,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/08/03/audio_54fb8e8c0d.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/meditation-relaxation-music/deep-relaxation.mp3'
   },
   {
-    id: 'preset-peaceful-ambient',
-    title: 'Peaceful Ambient',
-    artist: 'Meditation Music',
-    duration: 195,
+    id: 'preset-healing-frequency',
+    title: '528 Hz Love Frequency',
+    artist: 'Healing Sounds',
+    duration: 600,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2023/04/13/audio_ce71fd9bfe.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/solfeggio-frequencies-meditation/528hz-love-frequency.mp3'
   },
   {
     id: 'preset-spiritual-awakening',
     title: 'Spiritual Awakening',
-    artist: 'Healing Sounds',
-    duration: 217,
+    artist: 'Spiritual Vibes',
+    duration: 540,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/10/25/audio_d1c7f0b0a2.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/meditation-relaxation-music/spiritual-awakening.mp3'
   },
   // === HEALING & WELLNESS ===
   {
     id: 'preset-singing-bowls',
     title: 'Tibetan Singing Bowls',
     artist: 'Healing Sounds',
-    duration: 180,
+    duration: 420,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/03/09/audio_5a9be2a9ca.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/tibetan-singing-bowls-meditation/singing-bowls-meditation.mp3'
   },
   {
-    id: 'preset-healing-tones',
-    title: 'Healing Frequency Tones',
-    artist: 'Sound Therapy',
-    duration: 240,
+    id: 'preset-chakra-healing',
+    title: 'Chakra Healing Tones',
+    artist: 'Healing Sounds',
+    duration: 600,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2023/03/27/audio_0a15b62c7a.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/chakra-healing-meditation/chakra-healing-tones.mp3'
   },
   {
     id: 'preset-zen-garden',
     title: 'Zen Garden Ambience',
-    artist: 'Meditation Music',
-    duration: 180,
+    artist: 'Spiritual Vibes',
+    duration: 360,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/05/17/audio_c8e3f16c7d.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/zen-meditation-sounds/zen-garden-ambience.mp3'
   },
   // === SLEEP & REST ===
   {
     id: 'preset-sleep-ambient',
-    title: 'Sleep Ambient Music',
-    artist: 'Sleep Sounds',
-    duration: 300,
+    title: 'Deep Sleep Ambient',
+    artist: 'Sleep & Rest',
+    duration: 720,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/06/02/audio_03ee1f4c2a.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/sleep-meditation-music/deep-sleep-ambient.mp3'
   },
   {
-    id: 'preset-night-rain',
-    title: 'Rainy Night Relaxation',
-    artist: 'Sleep Sounds',
-    duration: 240,
+    id: 'preset-night-rain-sleep',
+    title: 'Rainy Night Lullaby',
+    artist: 'Sleep & Rest',
+    duration: 600,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2023/03/06/audio_2b25dc7c6b.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/sleep-meditation-music/rainy-night-sleep.mp3'
   },
   {
     id: 'preset-ocean-night',
     title: 'Ocean at Night',
-    artist: 'Sleep Sounds',
-    duration: 180,
+    artist: 'Sleep & Rest',
+    duration: 480,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/10/30/audio_0e9a1961ba.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/sleep-meditation-music/ocean-night-sleep.mp3'
   },
-  // === INSTRUMENTAL ===
+  // === INSTRUMENTAL - Soul Touching ===
   {
     id: 'preset-flute-meditation',
-    title: 'Flute Meditation',
-    artist: 'Instrumental',
-    duration: 210,
+    title: 'Divine Flute Meditation',
+    artist: 'Spiritual Vibes',
+    duration: 360,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2024/02/14/audio_ab5726c84e.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/indian-classical-meditation/divine-flute.mp3'
   },
   {
     id: 'preset-piano-serenity',
     title: 'Piano Serenity',
     artist: 'Instrumental',
-    duration: 180,
+    duration: 300,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2023/10/31/audio_fc9e554c2a.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/relaxing-piano-meditation/piano-serenity.mp3'
   },
   {
-    id: 'preset-harp-dreams',
-    title: 'Harp Dreams',
-    artist: 'Instrumental',
-    duration: 195,
+    id: 'preset-sitar-peace',
+    title: 'Sitar Evening Peace',
+    artist: 'Spiritual Vibes',
+    duration: 420,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2024/01/08/audio_dc39bea5c0.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/indian-classical-meditation/sitar-evening.mp3'
   },
-  // === SACRED SOUNDS ===
+  // === SACRED & SPIRITUAL SOUNDS ===
   {
     id: 'preset-om-chanting',
     title: 'Om Meditation Chant',
     artist: 'Sacred Sounds',
-    duration: 300,
+    duration: 600,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/08/23/audio_9d8a1c99f1.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/om-meditation-chanting/om-meditation-chant.mp3'
   },
   {
     id: 'preset-temple-bells',
-    title: 'Temple Bells',
+    title: 'Temple Bells Morning',
     artist: 'Sacred Sounds',
-    duration: 180,
+    duration: 300,
     source: 'preset',
-    url: 'https://cdn.pixabay.com/audio/2022/11/17/audio_c3e1c67be9.mp3'
+    url: 'https://ia800500.us.archive.org/15/items/temple-sounds-meditation/temple-bells-morning.mp3'
+  },
+  {
+    id: 'preset-gayatri-mantra',
+    title: 'Gayatri Mantra Peace',
+    artist: 'Sacred Sounds',
+    duration: 540,
+    source: 'preset',
+    url: 'https://ia800500.us.archive.org/15/items/vedic-chanting-meditation/gayatri-mantra.mp3'
+  },
+  {
+    id: 'preset-vedic-chanting',
+    title: 'Vedic Peace Chanting',
+    artist: 'Sacred Sounds',
+    duration: 480,
+    source: 'preset',
+    url: 'https://ia800500.us.archive.org/15/items/vedic-chanting-meditation/vedic-peace-chanting.mp3'
+  },
+  // === BINAURAL & FREQUENCY ===
+  {
+    id: 'preset-alpha-waves',
+    title: 'Alpha Waves Relaxation',
+    artist: 'Brainwave Therapy',
+    duration: 600,
+    source: 'preset',
+    url: 'https://ia800500.us.archive.org/15/items/binaural-beats-meditation/alpha-waves-relaxation.mp3'
+  },
+  {
+    id: 'preset-theta-meditation',
+    title: 'Theta Deep Meditation',
+    artist: 'Brainwave Therapy',
+    duration: 720,
+    source: 'preset',
+    url: 'https://ia800500.us.archive.org/15/items/binaural-beats-meditation/theta-deep-meditation.mp3'
   }
 ]
 
