@@ -186,10 +186,10 @@ export async function getActiveJourney(userId: string): Promise<WisdomJourney | 
         return null
       }
 
-      const journey = await response.json() as WisdomJourney & { _offline?: boolean }
+      const journey = await response.json() as WisdomJourney & { _offline?: boolean } | null
 
-      // Only cache if not an offline fallback response
-      if (!journey._offline) {
+      // Only cache if not an offline fallback response and journey is not null
+      if (journey && !journey._offline) {
         setCached(cacheKey, journey)
       }
 
@@ -223,11 +223,15 @@ export async function getJourney(userId: string, journeyId: string): Promise<Wis
       return res
     })
 
-    const journey = await response.json() as WisdomJourney & { _offline?: boolean }
+    const journey = await response.json() as WisdomJourney & { _offline?: boolean } | null
 
-    // Only cache if not an offline fallback response
-    if (!journey._offline) {
+    // Only cache if not an offline fallback response and journey exists
+    if (journey && !journey._offline) {
       setCached(cacheKey, journey)
+    }
+
+    if (!journey) {
+      throw new Error('Journey not found')
     }
 
     return journey
