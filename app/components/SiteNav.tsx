@@ -35,9 +35,9 @@ export default function SiteNav() {
   const links = useMemo(() => [
     { href: '/introduction', label: t('navigation.mainNav.introduction', 'Introduction'), divine: true },
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
-    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN Chat'), highlight: true },
+    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), highlight: true },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
-    { href: '/wisdom-rooms', label: t('navigation.features.wisdomRooms', 'Wisdom Rooms') },
+    { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true },
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },

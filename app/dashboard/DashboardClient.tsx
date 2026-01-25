@@ -180,18 +180,18 @@ export default function DashboardClient() {
               </Link>
             </motion.div>
 
-            {/* Gita Wisdom */}
+            {/* Wisdom Journeys */}
             <motion.div variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
               <Link
-                href="/wisdom-journey"
+                href="/journeys"
                 onClick={handleCardTap}
                 className="flex flex-col items-center justify-center rounded-[18px] border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 transition-all duration-200 active:opacity-90 md:p-5"
               >
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] shadow-inner md:h-14 md:w-14">
-                  <span className="text-2xl md:text-3xl">📖</span>
+                  <span className="text-2xl md:text-3xl">🕉️</span>
                 </div>
-                <span className="text-sm font-medium text-white/80">Gita Wisdom</span>
-                <span className="mt-0.5 text-[10px] text-white/40">Sacred Verses</span>
+                <span className="text-sm font-medium text-white/80">Wisdom Journeys</span>
+                <span className="mt-0.5 text-[10px] text-white/40">Transform Within</span>
               </Link>
             </motion.div>
 
