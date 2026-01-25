@@ -187,7 +187,20 @@ async def get_journey_access(
             upgrade_cta=upgrade_cta,
         )
 
-    except HTTPException:
+    except HTTPException as e:
+        # For 401 errors (not authenticated), return free tier response
+        if e.status_code == 401:
+            return JourneyAccessResponse(
+                has_access=False,
+                tier="free",
+                active_journeys=0,
+                journey_limit=0,
+                remaining=0,
+                is_unlimited=False,
+                can_start_more=False,
+                upgrade_url="/account",
+                upgrade_cta="Sign in to Start",
+            )
         raise
     except Exception as e:
         logger.error(f"Error checking journey access: {e}", exc_info=True)
@@ -217,6 +230,11 @@ async def get_catalog(
         return [JourneyTemplateResponse(**t) for t in templates]
 
     except Exception as e:
+        error_msg = str(e).lower()
+        # Handle case where table doesn't exist yet (not migrated)
+        if "journey_templates" in error_msg or "relation" in error_msg or "does not exist" in error_msg:
+            logger.warning("Journey templates table not found - migrations may need to be run")
+            return []  # Return empty catalog instead of 500
         logger.error(f"Error getting catalog: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to get journey catalog")
 

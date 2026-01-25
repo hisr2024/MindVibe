@@ -467,6 +467,28 @@ export default function JourneysCatalogClient() {
     )
   }
 
+  // Show coming soon state if no templates are available (migrations not run yet)
+  if (templates.length === 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900/30 to-orange-900/20">
+        <div className="text-center max-w-md px-4">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500/20 to-purple-600/20 mb-6">
+            <Sparkles className="h-10 w-10 text-orange-400" />
+          </div>
+          <h1 className="text-3xl font-bold text-orange-50 mb-4">Wisdom Journeys</h1>
+          <p className="text-lg text-orange-100/70 mb-6">
+            AI-powered spiritual transformation journeys are coming soon. Transform your inner world by overcoming the six inner enemies.
+          </p>
+          <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+            <p className="text-sm text-orange-200">
+              🕉️ Based on Ṣaḍ-Ripu from Bhagavad Gita wisdom
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const featuredTemplates = templates.filter((t) => t.is_featured)
   const regularTemplates = templates.filter((t) => !t.is_featured)
   const maxSelectable = access?.is_unlimited
