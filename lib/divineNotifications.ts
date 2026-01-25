@@ -132,7 +132,7 @@ export function sendDivineReminder(): void {
   const reminder = getRandomItem(DIVINE_REMINDERS);
   new Notification(reminder.title, {
     body: reminder.body,
-    icon: '/icons/kiaan-icon-192.png',
+    icon: '/icons/icon.svg',
     tag: 'divine-reminder',
     silent: false,
     requireInteraction: false,
@@ -148,7 +148,7 @@ export function sendBreathingInvitation(): void {
   const invitation = getRandomItem(BREATHING_INVITATIONS);
   new Notification(invitation.title, {
     body: invitation.body,
-    icon: '/icons/kiaan-icon-192.png',
+    icon: '/icons/icon.svg',
     tag: 'breathing-invitation',
     requireInteraction: true,
     data: {
@@ -167,7 +167,7 @@ export function sendCheckInInvitation(): void {
   const invitation = getRandomItem(CHECKIN_INVITATIONS);
   new Notification(invitation.title, {
     body: invitation.body,
-    icon: '/icons/kiaan-icon-192.png',
+    icon: '/icons/icon.svg',
     tag: 'checkin-invitation',
     requireInteraction: true,
     data: {
@@ -186,7 +186,7 @@ export function sendAffirmation(): void {
   const affirmation = getRandomItem(AFFIRMATIONS);
   new Notification(affirmation.title, {
     body: affirmation.body,
-    icon: '/icons/kiaan-icon-192.png',
+    icon: '/icons/icon.svg',
     tag: 'affirmation',
     silent: true,
   });
