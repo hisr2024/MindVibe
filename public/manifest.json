@@ -17,36 +17,7 @@
       "src": "/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon.svg",
-      "sizes": "48x48 72x72 96x96 128x128 144x144 152x152 192x192 256x256 384x384 512x512",
-      "type": "image/svg+xml",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/mobile-home.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "MindVibe Home Screen"
-    },
-    {
-      "src": "/screenshots/mobile-chat.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "KIAAN AI Chat"
-    },
-    {
-      "src": "/screenshots/desktop-home.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "MindVibe Dashboard"
     }
   ],
   "shortcuts": [
@@ -58,7 +29,7 @@
       "icons": [
         {
           "src": "/icons/icon.svg",
-          "sizes": "96x96",
+          "sizes": "any",
           "type": "image/svg+xml"
         }
       ]
@@ -71,7 +42,7 @@
       "icons": [
         {
           "src": "/icons/icon.svg",
-          "sizes": "96x96",
+          "sizes": "any",
           "type": "image/svg+xml"
         }
       ]
@@ -84,20 +55,7 @@
       "icons": [
         {
           "src": "/icons/icon.svg",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Spiritual Vibes",
-      "short_name": "Music",
-      "description": "Soul-soothing spiritual music player",
-      "url": "/spiritual-vibes",
-      "icons": [
-        {
-          "src": "/icons/icon.svg",
-          "sizes": "96x96",
+          "sizes": "any",
           "type": "image/svg+xml"
         }
       ]
