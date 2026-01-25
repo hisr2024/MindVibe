@@ -223,6 +223,30 @@ async def get_active_journey(
     )
 
 
+# IMPORTANT: This route MUST be defined BEFORE /{journey_id} routes to avoid
+# FastAPI matching "recommendations" as a journey_id
+@router.get("/recommendations/list", response_model=list[RecommendationResponse])
+async def get_journey_recommendations(
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible),
+) -> list[RecommendationResponse]:
+    """Get personalized journey recommendations based on user mood and activity."""
+
+    service = WisdomJourneyService()
+    recommendations = await service.get_journey_recommendations(db, user_id, limit=3)
+
+    return [
+        RecommendationResponse(
+            template=rec["template"],
+            title=rec["title"],
+            description=rec["description"],
+            score=rec["score"],
+            reason=rec["reason"],
+        )
+        for rec in recommendations
+    ]
+
+
 @router.get("/{journey_id}", response_model=JourneyResponse)
 async def get_journey(
     journey_id: str,
@@ -482,25 +506,3 @@ async def delete_journey(
         raise HTTPException(status_code=500, detail="Failed to delete journey")
 
     return {"message": "Journey deleted successfully", "journey_id": journey_id}
-
-
-@router.get("/recommendations/list", response_model=list[RecommendationResponse])
-async def get_journey_recommendations(
-    db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
-) -> list[RecommendationResponse]:
-    """Get personalized journey recommendations based on user mood and activity."""
-
-    service = WisdomJourneyService()
-    recommendations = await service.get_journey_recommendations(db, user_id, limit=3)
-
-    return [
-        RecommendationResponse(
-            template=rec["template"],
-            title=rec["title"],
-            description=rec["description"],
-            score=rec["score"],
-            reason=rec["reason"],
-        )
-        for rec in recommendations
-    ]

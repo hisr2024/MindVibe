@@ -59,7 +59,13 @@ const nextConfig = {
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com';
     return {
-      beforeFiles: [
+      // No beforeFiles - let Next.js API routes handle requests first
+      beforeFiles: [],
+      // afterFiles runs after checking filesystem (including API routes)
+      afterFiles: [],
+      // Fallback rewrites to backend for routes not handled by local API routes
+      // This ensures local /app/api/* routes take precedence
+      fallback: [
         {
           source: '/api/:path*',
           destination: `${apiUrl}/api/:path*`,
