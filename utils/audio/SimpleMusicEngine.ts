@@ -90,6 +90,9 @@ class AudioSynthesizer {
   private activeNodes: AudioNode[] = []
   private oscillators: OscillatorNode[] = []
   private noiseSource: AudioBufferSourceNode | null = null
+  private noiseSources: AudioBufferSourceNode[] = []
+  private intervals: ReturnType<typeof setInterval>[] = []
+  private timeouts: ReturnType<typeof setTimeout>[] = []
 
   async initialize(): Promise<void> {
     if (this.ctx) return
@@ -111,20 +114,44 @@ class AudioSynthesizer {
   }
 
   stop(): void {
+    // Clear all intervals and timeouts first
+    this.intervals.forEach(interval => clearInterval(interval))
+    this.intervals = []
+
+    this.timeouts.forEach(timeout => clearTimeout(timeout))
+    this.timeouts = []
+
+    // Stop all oscillators
     this.oscillators.forEach(osc => {
       try { osc.stop() } catch {}
     })
     this.oscillators = []
 
+    // Stop primary noise source
     if (this.noiseSource) {
       try { this.noiseSource.stop() } catch {}
       this.noiseSource = null
     }
 
+    // Stop all noise sources
+    this.noiseSources.forEach(source => {
+      try { source.stop() } catch {}
+    })
+    this.noiseSources = []
+
+    // Disconnect all nodes
     this.activeNodes.forEach(node => {
       try { node.disconnect() } catch {}
     })
     this.activeNodes = []
+  }
+
+  private addInterval(interval: ReturnType<typeof setInterval>): void {
+    this.intervals.push(interval)
+  }
+
+  private addTimeout(timeout: ReturnType<typeof setTimeout>): void {
+    this.timeouts.push(timeout)
   }
 
   private createNoise(type: 'white' | 'pink' | 'brown' = 'white'): AudioBufferSourceNode {
@@ -326,12 +353,12 @@ class AudioSynthesizer {
 
       // Random chirp pattern
       const interval = 2000 + Math.random() * 3000
-      setInterval(() => {
+      this.addInterval(setInterval(() => {
         if (Math.random() > 0.5) {
           gain.gain.setTargetAtTime(0.03, this.ctx!.currentTime, 0.01)
           gain.gain.setTargetAtTime(0, this.ctx!.currentTime + 0.1, 0.05)
         }
-      }, interval)
+      }, interval))
 
       osc.connect(gain)
       gain.connect(this.masterGain!)
@@ -388,19 +415,19 @@ class AudioSynthesizer {
       const baseInterval = 800 + i * 200
       let isChirping = false
 
-      setInterval(() => {
+      this.addInterval(setInterval(() => {
         if (!isChirping && Math.random() > 0.3) {
           isChirping = true
           // Rapid on-off for chirping
           for (let j = 0; j < 5; j++) {
-            setTimeout(() => {
+            this.addTimeout(setTimeout(() => {
               gain.gain.setTargetAtTime(0.01, this.ctx!.currentTime, 0.001)
               gain.gain.setTargetAtTime(0, this.ctx!.currentTime + 0.03, 0.001)
-            }, j * 60)
+            }, j * 60))
           }
-          setTimeout(() => { isChirping = false }, 400)
+          this.addTimeout(setTimeout(() => { isChirping = false }, 400))
         }
-      }, baseInterval)
+      }, baseInterval))
 
       osc.connect(gain)
       gain.connect(this.masterGain!)
@@ -432,7 +459,7 @@ class AudioSynthesizer {
     this.playRain()
 
     // Thunder rumbles
-    setInterval(() => {
+    this.addInterval(setInterval(() => {
       if (Math.random() > 0.7) {
         const thunderOsc = this.ctx!.createOscillator()
         thunderOsc.frequency.value = 50 + Math.random() * 30
@@ -454,55 +481,144 @@ class AudioSynthesizer {
         thunderOsc.start()
         thunderOsc.stop(this.ctx!.currentTime + 3)
       }
-    }, 5000)
+    }, 5000))
   }
 
   // === Meditation ===
 
   private playMeditation(): void {
-    // Soft pad with multiple harmonics
-    const fundamentals: number[] = [220, 277.18, 329.63] // A3, C#4, E4 (A major chord)
+    // Full meditation composition with evolving chord progressions and arpeggios
+    // Chord progression: Am - F - C - G (peaceful, reflective)
+    const chordProgressions: number[][] = [
+      [220, 261.63, 329.63],      // Am (A3, C4, E4)
+      [174.61, 220, 261.63],      // F (F3, A3, C4)
+      [196, 261.63, 329.63],      // C (G3, C4, E4)
+      [196, 246.94, 293.66]       // G (G3, B3, D4)
+    ]
 
-    fundamentals.forEach(freq => {
+    let currentChord = 0
+    const padGains: GainNode[] = []
+
+    // Create reverb-like effect with multiple delays
+    const reverbGain = this.ctx!.createGain()
+    reverbGain.gain.value = 0.3
+    reverbGain.connect(this.masterGain!)
+    this.activeNodes.push(reverbGain)
+
+    // Create pad oscillators for current chord
+    const createPad = (frequencies: number[]): void => {
+      frequencies.forEach((freq, i) => {
+        const osc = this.ctx!.createOscillator()
+        osc.frequency.value = freq
+        osc.type = 'sine'
+
+        const gain = this.ctx!.createGain()
+        gain.gain.value = 0
+        // Smooth fade in
+        gain.gain.setTargetAtTime(0.06, this.ctx!.currentTime, 0.5)
+
+        // Add subtle vibrato
+        const vibrato = this.createLFO(0.2 + i * 0.05)
+        const vibratoGain = this.ctx!.createGain()
+        vibratoGain.gain.value = 1
+        vibrato.connect(vibratoGain)
+        vibratoGain.connect(osc.frequency)
+        vibrato.start()
+
+        osc.connect(gain)
+        gain.connect(this.masterGain!)
+        gain.connect(reverbGain)
+        osc.start()
+
+        padGains.push(gain)
+        this.oscillators.push(osc, vibrato)
+        this.activeNodes.push(gain, vibratoGain)
+      })
+    }
+
+    // Start with first chord
+    createPad(chordProgressions[0])
+
+    // Chord progression every 12 seconds
+    this.addInterval(setInterval(() => {
+      // Fade out current pads
+      padGains.forEach(g => {
+        g.gain.setTargetAtTime(0, this.ctx!.currentTime, 0.5)
+      })
+
+      // Move to next chord
+      currentChord = (currentChord + 1) % chordProgressions.length
+
+      // Create new pads after fade
+      this.addTimeout(setTimeout(() => {
+        createPad(chordProgressions[currentChord])
+      }, 1000))
+    }, 12000))
+
+    // Arpeggiated melody line
+    const melodyNotes: number[] = [329.63, 392, 440, 523.25, 587.33, 659.25, 523.25, 440] // E4 to E5
+    let melodyIndex = 0
+
+    const playMelodyNote = (): void => {
+      const freq = melodyNotes[melodyIndex]
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = freq
-      osc.type = 'sine'
+      osc.type = 'triangle'
+
+      const filter = this.ctx!.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = 2000
 
       const gain = this.ctx!.createGain()
-      gain.gain.value = 0.08
+      gain.gain.setValueAtTime(0, this.ctx!.currentTime)
+      gain.gain.linearRampToValueAtTime(0.05, this.ctx!.currentTime + 0.1)
+      gain.gain.setValueAtTime(0.05, this.ctx!.currentTime + 1.5)
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 3)
 
-      // Slow tremolo
-      const lfo = this.createLFO(0.1)
-      const lfoGain = this.ctx!.createGain()
-      lfoGain.gain.value = 0.02
-      lfo.connect(lfoGain)
-      lfoGain.connect(gain.gain)
-      lfo.start()
-
-      osc.connect(gain)
+      osc.connect(filter)
+      filter.connect(gain)
       gain.connect(this.masterGain!)
       osc.start()
+      osc.stop(this.ctx!.currentTime + 3)
 
-      this.oscillators.push(osc, lfo)
-      this.activeNodes.push(gain, lfoGain)
-    })
+      melodyIndex = (melodyIndex + 1) % melodyNotes.length
+    }
 
-    // Add soft noise layer
+    // Play melody notes every 3 seconds
+    playMelodyNote()
+    this.addInterval(setInterval(playMelodyNote, 3000))
+
+    // Soft noise layer for atmosphere
     const noise = this.createNoise('pink')
-    const filter = this.ctx!.createBiquadFilter()
-    filter.type = 'lowpass'
-    filter.frequency.value = 500
+    const noiseFilter = this.ctx!.createBiquadFilter()
+    noiseFilter.type = 'lowpass'
+    noiseFilter.frequency.value = 400
 
     const noiseGain = this.ctx!.createGain()
-    noiseGain.gain.value = 0.03
+    noiseGain.gain.value = 0.02
 
-    noise.connect(filter)
-    filter.connect(noiseGain)
+    noise.connect(noiseFilter)
+    noiseFilter.connect(noiseGain)
     noiseGain.connect(this.masterGain!)
     noise.start()
 
     this.noiseSource = noise
-    this.activeNodes.push(filter, noiseGain)
+    this.activeNodes.push(noiseFilter, noiseGain)
+
+    // Deep bass drone
+    const bassOsc = this.ctx!.createOscillator()
+    bassOsc.frequency.value = 55 // A1
+    bassOsc.type = 'sine'
+
+    const bassGain = this.ctx!.createGain()
+    bassGain.gain.value = 0.08
+
+    bassOsc.connect(bassGain)
+    bassGain.connect(this.masterGain!)
+    bassOsc.start()
+
+    this.oscillators.push(bassOsc)
+    this.activeNodes.push(bassGain)
   }
 
   private play528Hz(): void {
@@ -535,21 +651,31 @@ class AudioSynthesizer {
   }
 
   private playSingingBowls(): void {
-    // Multiple singing bowl frequencies with rich harmonics
-    const bowlFreqs: number[] = [256, 384, 512, 640] // C4 and harmonics
+    // Complete Tibetan Singing Bowl meditation session
+    // Multiple bowls with authentic harmonic series and periodic strikes
 
-    bowlFreqs.forEach((freq, i) => {
+    // Bowl frequencies based on actual Tibetan bowls (approximate)
+    const bowls: { fundamental: number; harmonics: number[] }[] = [
+      { fundamental: 174.61, harmonics: [2.1, 3.2, 4.1, 5.3] },  // F3 bowl
+      { fundamental: 261.63, harmonics: [2.0, 3.1, 4.2, 5.1] },  // C4 bowl
+      { fundamental: 329.63, harmonics: [2.2, 3.0, 4.3, 5.2] },  // E4 bowl
+      { fundamental: 392, harmonics: [2.1, 3.3, 4.0, 5.4] },     // G4 bowl
+    ]
+
+    // Create sustained bowl tones
+    bowls.forEach((bowl, bowlIndex) => {
+      // Fundamental
       const osc = this.ctx!.createOscillator()
-      osc.frequency.value = freq
+      osc.frequency.value = bowl.fundamental
       osc.type = 'sine'
 
       const gain = this.ctx!.createGain()
-      gain.gain.value = 0.1 / (i + 1)
+      gain.gain.value = 0.06
 
-      // Slow amplitude modulation for shimmering
-      const lfo = this.createLFO(0.5 + i * 0.2)
+      // Slow beating/shimmering
+      const lfo = this.createLFO(0.3 + bowlIndex * 0.15)
       const lfoGain = this.ctx!.createGain()
-      lfoGain.gain.value = 0.03 / (i + 1)
+      lfoGain.gain.value = 0.015
       lfo.connect(lfoGain)
       lfoGain.connect(gain.gain)
       lfo.start()
@@ -560,7 +686,113 @@ class AudioSynthesizer {
 
       this.oscillators.push(osc, lfo)
       this.activeNodes.push(gain, lfoGain)
+
+      // Add harmonics for richness
+      bowl.harmonics.forEach((harmRatio, i) => {
+        const harmOsc = this.ctx!.createOscillator()
+        harmOsc.frequency.value = bowl.fundamental * harmRatio
+        harmOsc.type = 'sine'
+
+        const harmGain = this.ctx!.createGain()
+        harmGain.gain.value = 0.02 / (i + 1)
+
+        harmOsc.connect(harmGain)
+        harmGain.connect(this.masterGain!)
+        harmOsc.start()
+
+        this.oscillators.push(harmOsc)
+        this.activeNodes.push(harmGain)
+      })
     })
+
+    // Periodic bowl strikes (like being played with mallet)
+    let currentBowl = 0
+
+    const strikeBowl = (): void => {
+      const bowl = bowls[currentBowl]
+
+      // Strike sound - quick attack, long decay
+      const strikeOsc = this.ctx!.createOscillator()
+      strikeOsc.frequency.value = bowl.fundamental
+      strikeOsc.type = 'sine'
+
+      // Strike harmonics
+      const strikeOsc2 = this.ctx!.createOscillator()
+      strikeOsc2.frequency.value = bowl.fundamental * 2.1
+      strikeOsc2.type = 'sine'
+
+      const strikeOsc3 = this.ctx!.createOscillator()
+      strikeOsc3.frequency.value = bowl.fundamental * 3.2
+      strikeOsc3.type = 'sine'
+
+      // Attack transient (mallet hit)
+      const transient = this.ctx!.createOscillator()
+      transient.frequency.value = bowl.fundamental * 8
+      transient.type = 'triangle'
+
+      const strikeGain = this.ctx!.createGain()
+      strikeGain.gain.setValueAtTime(0, this.ctx!.currentTime)
+      strikeGain.gain.linearRampToValueAtTime(0.15, this.ctx!.currentTime + 0.01)
+      strikeGain.gain.exponentialRampToValueAtTime(0.05, this.ctx!.currentTime + 0.5)
+      strikeGain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 8)
+
+      const strikeGain2 = this.ctx!.createGain()
+      strikeGain2.gain.setValueAtTime(0, this.ctx!.currentTime)
+      strikeGain2.gain.linearRampToValueAtTime(0.08, this.ctx!.currentTime + 0.01)
+      strikeGain2.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 6)
+
+      const strikeGain3 = this.ctx!.createGain()
+      strikeGain3.gain.setValueAtTime(0, this.ctx!.currentTime)
+      strikeGain3.gain.linearRampToValueAtTime(0.04, this.ctx!.currentTime + 0.01)
+      strikeGain3.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 4)
+
+      const transientGain = this.ctx!.createGain()
+      transientGain.gain.setValueAtTime(0.1, this.ctx!.currentTime)
+      transientGain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.05)
+
+      strikeOsc.connect(strikeGain)
+      strikeOsc2.connect(strikeGain2)
+      strikeOsc3.connect(strikeGain3)
+      transient.connect(transientGain)
+
+      strikeGain.connect(this.masterGain!)
+      strikeGain2.connect(this.masterGain!)
+      strikeGain3.connect(this.masterGain!)
+      transientGain.connect(this.masterGain!)
+
+      strikeOsc.start()
+      strikeOsc2.start()
+      strikeOsc3.start()
+      transient.start()
+
+      strikeOsc.stop(this.ctx!.currentTime + 8)
+      strikeOsc2.stop(this.ctx!.currentTime + 6)
+      strikeOsc3.stop(this.ctx!.currentTime + 4)
+      transient.stop(this.ctx!.currentTime + 0.05)
+
+      currentBowl = (currentBowl + 1) % bowls.length
+    }
+
+    // Strike a bowl every 6 seconds
+    strikeBowl()
+    this.addInterval(setInterval(strikeBowl, 6000))
+
+    // Soft ambient pad for depth
+    const noise = this.createNoise('pink')
+    const noiseFilter = this.ctx!.createBiquadFilter()
+    noiseFilter.type = 'lowpass'
+    noiseFilter.frequency.value = 300
+
+    const noiseGain = this.ctx!.createGain()
+    noiseGain.gain.value = 0.015
+
+    noise.connect(noiseFilter)
+    noiseFilter.connect(noiseGain)
+    noiseGain.connect(this.masterGain!)
+    noise.start()
+
+    this.noiseSource = noise
+    this.activeNodes.push(noiseFilter, noiseGain)
   }
 
   private playChakra(): void {
@@ -604,7 +836,7 @@ class AudioSynthesizer {
     }
 
     playNextChakra()
-    setInterval(playNextChakra, 30000) // Change chakra every 30 seconds
+    this.addInterval(setInterval(playNextChakra, 30000)) // Change chakra every 30 seconds
   }
 
   private playZen(): void {
@@ -612,7 +844,7 @@ class AudioSynthesizer {
     this.playForest()
 
     // Occasional bell tones
-    setInterval(() => {
+    this.addInterval(setInterval(() => {
       if (Math.random() > 0.5) {
         const bell = this.ctx!.createOscillator()
         bell.frequency.value = 800 + Math.random() * 400
@@ -627,49 +859,161 @@ class AudioSynthesizer {
         bell.start()
         bell.stop(this.ctx!.currentTime + 4)
       }
-    }, 8000)
+    }, 8000))
   }
 
   // === Sleep ===
 
   private playSleep(): void {
-    // Deep delta wave base
-    const osc = this.ctx!.createOscillator()
-    osc.frequency.value = 100
-    osc.type = 'sine'
+    // Complete Sleep Lullaby - gentle, soothing composition
+    // Combines delta waves, soft pads, and gentle melodic elements
 
-    const gain = this.ctx!.createGain()
-    gain.gain.value = 0.1
+    // Delta wave base for deep relaxation (1-4 Hz binaural)
+    const deltaBase = 100
+    const deltaOscL = this.ctx!.createOscillator()
+    deltaOscL.frequency.value = deltaBase
+    deltaOscL.type = 'sine'
 
-    // Very slow modulation
-    const lfo = this.createLFO(0.05)
-    const lfoGain = this.ctx!.createGain()
-    lfoGain.gain.value = 0.03
-    lfo.connect(lfoGain)
-    lfoGain.connect(gain.gain)
-    lfo.start()
+    const deltaOscR = this.ctx!.createOscillator()
+    deltaOscR.frequency.value = deltaBase + 2 // 2 Hz delta beat
+    deltaOscR.type = 'sine'
 
-    osc.connect(gain)
-    gain.connect(this.masterGain!)
-    osc.start()
+    const panL = this.ctx!.createStereoPanner()
+    panL.pan.value = -0.8
+    const panR = this.ctx!.createStereoPanner()
+    panR.pan.value = 0.8
 
-    // Soft brown noise
+    const deltaGainL = this.ctx!.createGain()
+    deltaGainL.gain.value = 0.06
+    const deltaGainR = this.ctx!.createGain()
+    deltaGainR.gain.value = 0.06
+
+    deltaOscL.connect(deltaGainL)
+    deltaGainL.connect(panL)
+    panL.connect(this.masterGain!)
+
+    deltaOscR.connect(deltaGainR)
+    deltaGainR.connect(panR)
+    panR.connect(this.masterGain!)
+
+    deltaOscL.start()
+    deltaOscR.start()
+
+    this.oscillators.push(deltaOscL, deltaOscR)
+    this.activeNodes.push(deltaGainL, deltaGainR, panL, panR)
+
+    // Soft pad chord progression (very slow, dreamy)
+    const sleepChords: number[][] = [
+      [130.81, 164.81, 196],      // C3, E3, G3 (C major)
+      [116.54, 146.83, 174.61],   // Bb2, D3, F3 (Bb major)
+      [110, 138.59, 164.81],      // A2, C#3, E3 (A major)
+      [123.47, 155.56, 185]       // B2, Eb3, F#3 (B major)
+    ]
+
+    let chordIndex = 0
+    const padGains: GainNode[] = []
+
+    const playPadChord = (): void => {
+      // Fade out old pads
+      padGains.forEach(g => {
+        g.gain.setTargetAtTime(0, this.ctx!.currentTime, 2)
+      })
+
+      const chord = sleepChords[chordIndex]
+
+      chord.forEach((freq, i) => {
+        const osc = this.ctx!.createOscillator()
+        osc.frequency.value = freq
+        osc.type = 'sine'
+
+        const gain = this.ctx!.createGain()
+        gain.gain.value = 0
+        gain.gain.setTargetAtTime(0.04, this.ctx!.currentTime, 1)
+
+        // Very slow tremolo
+        const lfo = this.createLFO(0.08 + i * 0.02)
+        const lfoGain = this.ctx!.createGain()
+        lfoGain.gain.value = 0.01
+        lfo.connect(lfoGain)
+        lfoGain.connect(gain.gain)
+        lfo.start()
+
+        osc.connect(gain)
+        gain.connect(this.masterGain!)
+        osc.start()
+
+        padGains.push(gain)
+        this.oscillators.push(osc, lfo)
+        this.activeNodes.push(gain, lfoGain)
+      })
+
+      chordIndex = (chordIndex + 1) % sleepChords.length
+    }
+
+    playPadChord()
+    this.addInterval(setInterval(playPadChord, 20000))
+
+    // Gentle lullaby melody (very sparse, quiet)
+    const lullabyNotes: number[] = [392, 329.63, 293.66, 261.63, 246.94, 261.63, 293.66, 261.63]
+    let noteIndex = 0
+
+    const playLullabyNote = (): void => {
+      const freq = lullabyNotes[noteIndex]
+
+      const osc = this.ctx!.createOscillator()
+      osc.frequency.value = freq
+      osc.type = 'sine'
+
+      const filter = this.ctx!.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = 800
+
+      const gain = this.ctx!.createGain()
+      gain.gain.setValueAtTime(0, this.ctx!.currentTime)
+      gain.gain.linearRampToValueAtTime(0.03, this.ctx!.currentTime + 0.5)
+      gain.gain.setValueAtTime(0.03, this.ctx!.currentTime + 2)
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 4)
+
+      osc.connect(filter)
+      filter.connect(gain)
+      gain.connect(this.masterGain!)
+      osc.start()
+      osc.stop(this.ctx!.currentTime + 4)
+
+      noteIndex = (noteIndex + 1) % lullabyNotes.length
+    }
+
+    // Play lullaby notes very slowly
+    this.addTimeout(setTimeout(() => {
+      playLullabyNote()
+      this.addInterval(setInterval(playLullabyNote, 5000))
+    }, 3000))
+
+    // Soft brown noise (like distant wind or breathing)
     const noise = this.createNoise('brown')
-    const filter = this.ctx!.createBiquadFilter()
-    filter.type = 'lowpass'
-    filter.frequency.value = 300
+    const noiseFilter = this.ctx!.createBiquadFilter()
+    noiseFilter.type = 'lowpass'
+    noiseFilter.frequency.value = 200
 
     const noiseGain = this.ctx!.createGain()
-    noiseGain.gain.value = 0.15
+    noiseGain.gain.value = 0.08
 
-    noise.connect(filter)
-    filter.connect(noiseGain)
+    // Breathing modulation on noise
+    const breathLfo = this.createLFO(0.15) // ~9 breaths per minute
+    const breathGain = this.ctx!.createGain()
+    breathGain.gain.value = 0.03
+    breathLfo.connect(breathGain)
+    breathGain.connect(noiseGain.gain)
+    breathLfo.start()
+
+    noise.connect(noiseFilter)
+    noiseFilter.connect(noiseGain)
     noiseGain.connect(this.masterGain!)
     noise.start()
 
     this.noiseSource = noise
-    this.oscillators.push(osc, lfo)
-    this.activeNodes.push(gain, lfoGain, filter, noiseGain)
+    this.oscillators.push(breathLfo)
+    this.activeNodes.push(noiseFilter, noiseGain, breathGain)
   }
 
   private playOceanNight(): void {
@@ -694,89 +1038,298 @@ class AudioSynthesizer {
   // === Instrumental ===
 
   private playFlute(): void {
-    // Pentatonic scale flute-like tones
-    const notes: number[] = [392, 440, 494, 587, 659] // G4, A4, B4, D5, E5
-    let currentNote = 0
+    // Complete Divine Flute composition - Raga Yaman style
+    // This creates a beautiful, soul-soothing flute meditation piece
 
-    const playNote = (): void => {
-      const freq: number = notes[currentNote]
+    // Raga Yaman scale (Sa Re Ga Ma# Pa Dha Ni Sa)
+    const ragaNotes: number[] = [
+      261.63,   // Sa (C4)
+      293.66,   // Re (D4)
+      329.63,   // Ga (E4)
+      369.99,   // Ma# (F#4)
+      392,      // Pa (G4)
+      440,      // Dha (A4)
+      493.88,   // Ni (B4)
+      523.25,   // Sa' (C5)
+      587.33,   // Re' (D5)
+      659.25    // Ga' (E5)
+    ]
+
+    // Melodic phrases typical of Raga Yaman
+    const phrases: number[][] = [
+      [4, 5, 6, 7, 6, 5, 4],           // Pa Dha Ni Sa' Ni Dha Pa
+      [7, 6, 5, 4, 3, 4, 5],           // Sa' Ni Dha Pa Ma# Pa Dha
+      [2, 3, 4, 5, 4, 3, 2, 0],        // Ga Ma# Pa Dha Pa Ma# Ga Sa
+      [5, 6, 7, 8, 7, 6, 5],           // Dha Ni Sa' Re' Sa' Ni Dha
+      [0, 2, 3, 4, 3, 2, 0],           // Sa Ga Ma# Pa Ma# Ga Sa
+      [4, 5, 7, 8, 9, 8, 7, 5, 4],     // Pa Dha Sa' Re' Ga' Re' Sa' Dha Pa
+    ]
+
+    let currentPhrase = 0
+    let noteInPhrase = 0
+
+    // Play a flute note with breath-like quality
+    const playFluteNote = (freq: number, duration: number): void => {
+      // Main flute tone
       const osc = this.ctx!.createOscillator()
       osc.frequency.value = freq
       osc.type = 'sine'
 
-      // Add slight vibrato
-      const vibrato = this.createLFO(5)
+      // Add breathy overtones
+      const osc2 = this.ctx!.createOscillator()
+      osc2.frequency.value = freq * 2
+      osc2.type = 'sine'
+
+      // Vibrato for expression
+      const vibrato = this.createLFO(5.5)
       const vibratoGain = this.ctx!.createGain()
-      vibratoGain.gain.value = 3
+      vibratoGain.gain.value = 4
       vibrato.connect(vibratoGain)
       vibratoGain.connect(osc.frequency)
       vibrato.start()
 
+      // Breath noise
+      const noise = this.createNoise('white')
+      const noiseFilter = this.ctx!.createBiquadFilter()
+      noiseFilter.type = 'bandpass'
+      noiseFilter.frequency.value = freq * 2
+      noiseFilter.Q.value = 5
+
+      const noiseGain = this.ctx!.createGain()
+      noiseGain.gain.value = 0.01
+
+      // Envelopes
       const gain = this.ctx!.createGain()
       gain.gain.setValueAtTime(0, this.ctx!.currentTime)
-      gain.gain.linearRampToValueAtTime(0.1, this.ctx!.currentTime + 0.3)
-      gain.gain.setValueAtTime(0.1, this.ctx!.currentTime + 2)
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 3)
+      gain.gain.linearRampToValueAtTime(0.1, this.ctx!.currentTime + 0.15)
+      gain.gain.setValueAtTime(0.1, this.ctx!.currentTime + duration - 0.5)
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + duration)
 
+      const gain2 = this.ctx!.createGain()
+      gain2.gain.setValueAtTime(0, this.ctx!.currentTime)
+      gain2.gain.linearRampToValueAtTime(0.03, this.ctx!.currentTime + 0.15)
+      gain2.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + duration * 0.8)
+
+      // Connect everything
       osc.connect(gain)
-      gain.connect(this.masterGain!)
-      osc.start()
-      osc.stop(this.ctx!.currentTime + 3)
+      osc2.connect(gain2)
+      noise.connect(noiseFilter)
+      noiseFilter.connect(noiseGain)
 
-      currentNote = Math.floor(Math.random() * notes.length)
+      gain.connect(this.masterGain!)
+      gain2.connect(this.masterGain!)
+      noiseGain.connect(this.masterGain!)
+
+      osc.start()
+      osc2.start()
+      noise.start()
+      vibrato.start()
+
+      osc.stop(this.ctx!.currentTime + duration)
+      osc2.stop(this.ctx!.currentTime + duration * 0.8)
+      noise.stop(this.ctx!.currentTime + duration)
+
+      this.noiseSources.push(noise)
     }
 
-    playNote()
-    setInterval(playNote, 4000)
+    // Play melodic phrase
+    const playPhrase = (): void => {
+      const phrase = phrases[currentPhrase]
 
-    // Background drone
-    const drone = this.ctx!.createOscillator()
-    drone.frequency.value = 196 // G3
-    drone.type = 'sine'
+      phrase.forEach((noteIdx, i) => {
+        this.addTimeout(setTimeout(() => {
+          const freq = ragaNotes[noteIdx]
+          const isLongNote = i === phrase.length - 1 || Math.random() > 0.7
+          playFluteNote(freq, isLongNote ? 2.5 : 1.2)
+        }, i * 800))
+      })
 
-    const droneGain = this.ctx!.createGain()
-    droneGain.gain.value = 0.05
+      currentPhrase = (currentPhrase + 1) % phrases.length
+    }
 
-    drone.connect(droneGain)
-    droneGain.connect(this.masterGain!)
-    drone.start()
+    // Tanpura drone (Sa and Pa)
+    const droneNotes: number[] = [130.81, 196, 261.63] // C3, G3, C4
+    droneNotes.forEach((freq, i) => {
+      const drone = this.ctx!.createOscillator()
+      drone.frequency.value = freq
+      drone.type = 'sawtooth'
 
-    this.oscillators.push(drone)
-    this.activeNodes.push(droneGain)
+      const filter = this.ctx!.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = 600
+
+      const droneGain = this.ctx!.createGain()
+      droneGain.gain.value = 0.025
+
+      // Slow swelling for tanpura effect
+      const lfo = this.createLFO(0.3 + i * 0.1)
+      const lfoGain = this.ctx!.createGain()
+      lfoGain.gain.value = 0.008
+      lfo.connect(lfoGain)
+      lfoGain.connect(droneGain.gain)
+      lfo.start()
+
+      drone.connect(filter)
+      filter.connect(droneGain)
+      droneGain.connect(this.masterGain!)
+      drone.start()
+
+      this.oscillators.push(drone, lfo)
+      this.activeNodes.push(filter, droneGain, lfoGain)
+    })
+
+    // Start melody
+    playPhrase()
+    this.addInterval(setInterval(playPhrase, 8000))
+
+    // Occasional ornamental notes (gamak)
+    this.addInterval(setInterval(() => {
+      if (Math.random() > 0.6) {
+        const idx = Math.floor(Math.random() * ragaNotes.length)
+        playFluteNote(ragaNotes[idx], 0.8)
+      }
+    }, 2500))
   }
 
   private playPiano(): void {
-    // Soft piano-like tones with harmonics
-    const chords: number[][] = [
-      [261.63, 329.63, 392], // C major
-      [293.66, 369.99, 440], // D minor
-      [349.23, 440, 523.25], // F major
-      [392, 493.88, 587.33]  // G major
+    // Complete piano composition - "Peaceful Journey"
+    // Beautiful chord progression with arpeggios and melody
+    const chordProgressions: number[][] = [
+      [261.63, 329.63, 392],        // C major
+      [220, 261.63, 329.63],        // Am
+      [349.23, 440, 523.25],        // F major
+      [392, 493.88, 587.33],        // G major
+      [261.63, 329.63, 392],        // C major
+      [329.63, 392, 493.88],        // Em
+      [349.23, 440, 523.25],        // F major
+      [261.63, 329.63, 392]         // C major
+    ]
+
+    // Melody notes that complement the chords
+    const melodySequences: number[][] = [
+      [523.25, 587.33, 659.25, 587.33],  // Over C
+      [523.25, 493.88, 440, 392],         // Over Am
+      [523.25, 587.33, 698.46, 659.25],  // Over F
+      [587.33, 659.25, 783.99, 659.25],  // Over G
+      [659.25, 587.33, 523.25, 493.88],  // Over C
+      [493.88, 523.25, 587.33, 523.25],  // Over Em
+      [523.25, 493.88, 440, 523.25],     // Over F
+      [523.25, 392, 329.63, 261.63]      // Over C (ending)
     ]
 
     let chordIndex = 0
+    let melodyNoteIndex = 0
 
-    const playChord = (): void => {
-      chords[chordIndex].forEach((freq: number) => {
-        const osc = this.ctx!.createOscillator()
-        osc.frequency.value = freq
-        osc.type = 'triangle'
+    // Play a single piano note with harmonics (piano-like timbre)
+    const playPianoNote = (freq: number, volume: number, duration: number): void => {
+      // Fundamental
+      const osc = this.ctx!.createOscillator()
+      osc.frequency.value = freq
+      osc.type = 'triangle'
 
-        const gain = this.ctx!.createGain()
-        gain.gain.setValueAtTime(0.08, this.ctx!.currentTime)
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 6)
+      // Add harmonics for richness
+      const osc2 = this.ctx!.createOscillator()
+      osc2.frequency.value = freq * 2
+      osc2.type = 'sine'
 
-        osc.connect(gain)
-        gain.connect(this.masterGain!)
-        osc.start()
-        osc.stop(this.ctx!.currentTime + 6)
-      })
+      const osc3 = this.ctx!.createOscillator()
+      osc3.frequency.value = freq * 3
+      osc3.type = 'sine'
 
-      chordIndex = (chordIndex + 1) % chords.length
+      const gain = this.ctx!.createGain()
+      const gain2 = this.ctx!.createGain()
+      const gain3 = this.ctx!.createGain()
+
+      // Piano-like envelope - quick attack, gradual decay
+      gain.gain.setValueAtTime(0, this.ctx!.currentTime)
+      gain.gain.linearRampToValueAtTime(volume, this.ctx!.currentTime + 0.02)
+      gain.gain.setValueAtTime(volume * 0.7, this.ctx!.currentTime + 0.1)
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + duration)
+
+      gain2.gain.setValueAtTime(0, this.ctx!.currentTime)
+      gain2.gain.linearRampToValueAtTime(volume * 0.3, this.ctx!.currentTime + 0.02)
+      gain2.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + duration * 0.7)
+
+      gain3.gain.setValueAtTime(0, this.ctx!.currentTime)
+      gain3.gain.linearRampToValueAtTime(volume * 0.1, this.ctx!.currentTime + 0.02)
+      gain3.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + duration * 0.5)
+
+      osc.connect(gain)
+      osc2.connect(gain2)
+      osc3.connect(gain3)
+      gain.connect(this.masterGain!)
+      gain2.connect(this.masterGain!)
+      gain3.connect(this.masterGain!)
+
+      osc.start()
+      osc2.start()
+      osc3.start()
+      osc.stop(this.ctx!.currentTime + duration)
+      osc2.stop(this.ctx!.currentTime + duration * 0.7)
+      osc3.stop(this.ctx!.currentTime + duration * 0.5)
     }
 
-    playChord()
-    setInterval(playChord, 8000)
+    // Play arpeggiated chord
+    const playArpeggio = (): void => {
+      const chord = chordProgressions[chordIndex]
+
+      // Play chord notes as arpeggio (broken chord)
+      chord.forEach((freq, i) => {
+        this.addTimeout(setTimeout(() => {
+          playPianoNote(freq, 0.06, 4)
+        }, i * 300))
+      })
+
+      // Play bass note
+      playPianoNote(chord[0] / 2, 0.08, 6)
+
+      chordIndex = (chordIndex + 1) % chordProgressions.length
+    }
+
+    // Play melody notes
+    const playMelody = (): void => {
+      const melodyChordIndex = chordIndex % melodySequences.length
+      const currentMelody = melodySequences[melodyChordIndex]
+      const note = currentMelody[melodyNoteIndex % currentMelody.length]
+
+      playPianoNote(note, 0.07, 2)
+      melodyNoteIndex++
+    }
+
+    // Start playing
+    playArpeggio()
+
+    // Play arpeggios every 4 seconds
+    this.addInterval(setInterval(playArpeggio, 4000))
+
+    // Play melody notes every 1 second
+    this.addInterval(setInterval(playMelody, 1000))
+
+    // Soft sustain pedal effect - ambient pad
+    const padFreqs: number[] = [130.81, 196, 261.63] // C2, G2, C3
+    padFreqs.forEach(freq => {
+      const pad = this.ctx!.createOscillator()
+      pad.frequency.value = freq
+      pad.type = 'sine'
+
+      const padGain = this.ctx!.createGain()
+      padGain.gain.value = 0.02
+
+      // Slow tremolo for warmth
+      const lfo = this.createLFO(0.15)
+      const lfoGain = this.ctx!.createGain()
+      lfoGain.gain.value = 0.005
+      lfo.connect(lfoGain)
+      lfoGain.connect(padGain.gain)
+      lfo.start()
+
+      pad.connect(padGain)
+      padGain.connect(this.masterGain!)
+      pad.start()
+
+      this.oscillators.push(pad, lfo)
+      this.activeNodes.push(padGain, lfoGain)
+    })
   }
 
   private playSitar(): void {
@@ -834,7 +1387,7 @@ class AudioSynthesizer {
     })
 
     playNote()
-    setInterval(playNote, 3000)
+    this.addInterval(setInterval(playNote, 3000))
   }
 
   // === Sacred ===
@@ -916,7 +1469,7 @@ class AudioSynthesizer {
     }
 
     ringBell()
-    setInterval(ringBell, 5000)
+    this.addInterval(setInterval(ringBell, 5000))
 
     // Soft background
     const drone = this.ctx!.createOscillator()
@@ -1221,7 +1774,7 @@ class SimpleMusicEngine {
 
   async play(track?: MusicTrack): Promise<void> {
     if (track) {
-      // Stop current playback
+      // Stop current playback immediately
       this.synth.stop()
       if (this.userAudio) {
         this.userAudio.pause()
@@ -1229,9 +1782,14 @@ class SimpleMusicEngine {
       }
       if (this.timeInterval) {
         clearInterval(this.timeInterval)
+        this.timeInterval = null
       }
 
+      // Update track and state immediately for responsive UI
       this.currentTrack = track
+      this.isPlaying = true
+      this.startTime = Date.now()
+      this.notify() // Immediate notification for UI update
 
       if (track.source === 'user' && this.userAudio) {
         // Play user uploaded file
@@ -1239,25 +1797,30 @@ class SimpleMusicEngine {
         this.userAudio.volume = this.volume
         try {
           await this.userAudio.play()
-          this.isPlaying = true
         } catch (e) {
           console.error('Playback error:', e)
+          this.isPlaying = false
+          this.notify()
         }
       } else if (track.soundType) {
         // Play synthesized preset
-        await this.synth.playSoundType(track.soundType)
-        this.synth.setVolume(this.volume)
-        this.isPlaying = true
-        this.startTime = Date.now()
+        try {
+          await this.synth.playSoundType(track.soundType)
+          this.synth.setVolume(this.volume)
 
-        // Update time periodically
-        this.timeInterval = setInterval(() => {
+          // Update time periodically
+          this.timeInterval = setInterval(() => {
+            this.notify()
+            // Loop after duration
+            if (this.getCurrentTime() >= (track.duration || 300)) {
+              this.playNext()
+            }
+          }, 1000)
+        } catch (e) {
+          console.error('Synthesis error:', e)
+          this.isPlaying = false
           this.notify()
-          // Loop after duration
-          if (this.getCurrentTime() >= (track.duration || 300)) {
-            this.playNext()
-          }
-        }, 1000)
+        }
       }
     } else if (this.currentTrack) {
       // Resume
@@ -1271,9 +1834,8 @@ class SimpleMusicEngine {
       } else {
         await this.play(this.currentTrack)
       }
+      this.notify()
     }
-
-    this.notify()
   }
 
   pause(): void {
