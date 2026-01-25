@@ -12,15 +12,20 @@ import type {
 } from '@/types/wisdomJourney.types'
 
 const JOURNEY_CACHE_KEY = 'mindvibe_wisdom_journey_cache'
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+const CACHE_DURATION = 2 * 60 * 1000 // 2 minutes (reduced from 5 to prevent stale data)
+
+// Request deduplication to prevent concurrent identical requests
+const pendingRequests = new Map<string, Promise<unknown>>()
 
 interface CacheEntry<T> {
   data: T
   timestamp: number
+  isOffline?: boolean // Track if this was an offline fallback response
 }
 
 /**
  * Get cached data if still valid
+ * Does NOT return offline fallback data from cache (prevents cache poisoning)
  */
 function getCached<T>(key: string): T | null {
   try {
@@ -28,6 +33,13 @@ function getCached<T>(key: string): T | null {
     if (!stored) return null
 
     const entry: CacheEntry<T> = JSON.parse(stored)
+
+    // Don't return offline fallback data from cache
+    if (entry.isOffline) {
+      localStorage.removeItem(`${JOURNEY_CACHE_KEY}_${key}`)
+      return null
+    }
+
     if (Date.now() - entry.timestamp > CACHE_DURATION) {
       localStorage.removeItem(`${JOURNEY_CACHE_KEY}_${key}`)
       return null
@@ -41,14 +53,68 @@ function getCached<T>(key: string): T | null {
 
 /**
  * Set cached data
+ * Does NOT cache offline fallback responses (prevents cache poisoning)
  */
 function setCached<T>(key: string, data: T): void {
   try {
+    // Don't cache offline fallback responses - they should be refetched
+    if (data && typeof data === 'object' && '_offline' in (data as Record<string, unknown>) && (data as Record<string, unknown>)._offline === true) {
+      return
+    }
+
     const entry: CacheEntry<T> = { data, timestamp: Date.now() }
     localStorage.setItem(`${JOURNEY_CACHE_KEY}_${key}`, JSON.stringify(entry))
   } catch {
     // Ignore cache errors
   }
+}
+
+/**
+ * Retry a function with exponential backoff
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+
+      // Don't retry on 4xx errors (client errors)
+      if (lastError.message.includes('401') || lastError.message.includes('403') || lastError.message.includes('404')) {
+        throw lastError
+      }
+
+      if (attempt < maxRetries - 1) {
+        const delay = baseDelay * Math.pow(2, attempt)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+      }
+    }
+  }
+
+  throw lastError || new Error('Max retries exceeded')
+}
+
+/**
+ * Deduplicate concurrent requests to the same endpoint
+ */
+async function deduplicatedRequest<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const existing = pendingRequests.get(key)
+  if (existing) {
+    return existing as Promise<T>
+  }
+
+  const promise = fn().finally(() => {
+    pendingRequests.delete(key)
+  })
+
+  pendingRequests.set(key, promise)
+  return promise
 }
 
 /**
@@ -99,55 +165,73 @@ export async function generateJourney(
 
 /**
  * Get user's active wisdom journey
+ * Uses request deduplication and retry logic
  */
 export async function getActiveJourney(userId: string): Promise<WisdomJourney | null> {
   const cacheKey = 'active_journey'
-  const cached = getCached<WisdomJourney | null>(cacheKey)
+  const cached = getCached<WisdomJourney>(cacheKey)
   if (cached !== null) return cached
 
-  try {
-    const response = await apiFetch('/api/wisdom-journey/active', { method: 'GET' }, userId)
+  return deduplicatedRequest(`active_${userId}`, async () => {
+    try {
+      const response = await withRetry(async () => {
+        const res = await apiFetch('/api/wisdom-journey/active', { method: 'GET' }, userId)
+        if (!res.ok && res.status !== 404 && res.status !== 204) {
+          throw new Error(`Failed with status ${res.status}`)
+        }
+        return res
+      })
 
-    if (response.status === 404 || response.status === 204) {
-      setCached(cacheKey, null)
+      if (response.status === 404 || response.status === 204) {
+        return null
+      }
+
+      const journey = await response.json() as WisdomJourney & { _offline?: boolean }
+
+      // Only cache if not an offline fallback response
+      if (!journey._offline) {
+        setCached(cacheKey, journey)
+      }
+
+      return journey
+    } catch (error) {
+      console.error('Error fetching active journey:', error)
       return null
     }
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch active journey')
-    }
-
-    const journey: WisdomJourney = await response.json()
-    setCached(cacheKey, journey)
-    return journey
-  } catch (error) {
-    console.error('Error fetching active journey:', error)
-    return null
-  }
+  })
 }
 
 /**
  * Get a specific wisdom journey by ID
+ * Uses request deduplication and retry logic
  */
 export async function getJourney(userId: string, journeyId: string): Promise<WisdomJourney> {
   const cacheKey = `journey_${journeyId}`
   const cached = getCached<WisdomJourney>(cacheKey)
   if (cached) return cached
 
-  const response = await apiFetch(
-    `/api/wisdom-journey/${journeyId}`,
-    { method: 'GET' },
-    userId
-  )
+  return deduplicatedRequest(`journey_${journeyId}_${userId}`, async () => {
+    const response = await withRetry(async () => {
+      const res = await apiFetch(
+        `/api/wisdom-journey/${journeyId}`,
+        { method: 'GET' },
+        userId
+      )
+      if (!res.ok) {
+        throw new Error(`Failed with status ${res.status}`)
+      }
+      return res
+    })
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Failed to fetch journey' }))
-    throw new Error(error.detail || 'Failed to fetch journey')
-  }
+    const journey = await response.json() as WisdomJourney & { _offline?: boolean }
 
-  const journey: WisdomJourney = await response.json()
-  setCached(cacheKey, journey)
-  return journey
+    // Only cache if not an offline fallback response
+    if (!journey._offline) {
+      setCached(cacheKey, journey)
+    }
+
+    return journey
+  })
 }
 
 /**
@@ -289,6 +373,7 @@ const DEFAULT_RECOMMENDATIONS: JourneyRecommendation[] = [
 
 /**
  * Get personalized journey recommendations
+ * Uses request deduplication and retry logic
  */
 export async function getJourneyRecommendations(
   userId: string
@@ -297,35 +382,36 @@ export async function getJourneyRecommendations(
   const cached = getCached<JourneyRecommendation[]>(cacheKey)
   if (cached && cached.length > 0) return cached
 
-  try {
-    const response = await apiFetch(
-      '/api/wisdom-journey/recommendations/list',
-      { method: 'GET' },
-      userId
-    )
+  return deduplicatedRequest(`recommendations_${userId}`, async () => {
+    try {
+      const response = await withRetry(async () => {
+        const res = await apiFetch(
+          '/api/wisdom-journey/recommendations/list',
+          { method: 'GET' },
+          userId
+        )
+        if (!res.ok) {
+          throw new Error(`Failed with status ${res.status}`)
+        }
+        return res
+      }, 2) // Only 2 retries for recommendations since we have fallback
 
-    if (!response.ok) {
-      // Return default recommendations on API error
-      console.warn('API returned error, using default recommendations')
+      const recommendations = await response.json() as JourneyRecommendation[]
+
+      // If empty array returned, use defaults (don't cache defaults)
+      if (!recommendations || recommendations.length === 0) {
+        console.log('No recommendations from API, using defaults')
+        return DEFAULT_RECOMMENDATIONS
+      }
+
+      setCached(cacheKey, recommendations)
+      return recommendations
+    } catch (error) {
+      console.error('Error fetching recommendations:', error)
+      // Return defaults instead of throwing
       return DEFAULT_RECOMMENDATIONS
     }
-
-    const recommendations: JourneyRecommendation[] = await response.json()
-
-    // If empty array returned, use defaults
-    if (!recommendations || recommendations.length === 0) {
-      console.log('No recommendations from API, using defaults')
-      setCached(cacheKey, DEFAULT_RECOMMENDATIONS)
-      return DEFAULT_RECOMMENDATIONS
-    }
-
-    setCached(cacheKey, recommendations)
-    return recommendations
-  } catch (error) {
-    console.error('Error fetching recommendations:', error)
-    // Return defaults instead of empty array
-    return DEFAULT_RECOMMENDATIONS
-  }
+  })
 }
 
 /**
