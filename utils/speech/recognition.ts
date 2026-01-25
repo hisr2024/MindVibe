@@ -22,12 +22,15 @@ export interface RecognitionCallbacks {
 export class SpeechRecognitionService {
   private recognition: SpeechRecognition | null = null
   private isListening = false
+  private isStopping = false // Track if we're in the process of stopping
   private silenceTimer: ReturnType<typeof setTimeout> | null = null
   private callbacks: RecognitionCallbacks = {}
+  private startAttempts = 0
+  private readonly maxStartAttempts = 3
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionConstructor = getSpeechRecognition()
-    
+
     if (!SpeechRecognitionConstructor) {
       console.warn('SpeechRecognition not supported in this browser')
       return
@@ -68,30 +71,40 @@ export class SpeechRecognitionService {
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       let errorMessage = 'Speech recognition error'
-      
+
       switch (event.error) {
         case 'no-speech':
-          errorMessage = 'No speech detected. Please try again.'
+          errorMessage = 'no-speech: No speech detected. Please try again.'
           break
         case 'audio-capture':
-          errorMessage = 'Microphone not found or accessible.'
+          errorMessage = 'audio-capture: Microphone not found or accessible.'
           break
         case 'not-allowed':
-          errorMessage = 'Microphone permission denied.'
+          errorMessage = 'not-allowed: Microphone permission denied.'
           break
         case 'network':
-          errorMessage = 'Network error occurred.'
+          errorMessage = 'network: Network error occurred.'
+          break
+        case 'aborted':
+          errorMessage = 'aborted: Recognition was aborted.'
+          break
+        case 'service-not-allowed':
+          errorMessage = 'service-not-allowed: Speech recognition service not available.'
           break
         default:
           errorMessage = `Error: ${event.error}`
       }
 
+      console.log('[SpeechRecognition] Error:', event.error, errorMessage)
       this.callbacks.onError?.(errorMessage)
       this.isListening = false
+      this.isStopping = false
     }
 
     this.recognition.onend = () => {
+      console.log('[SpeechRecognition] Recognition ended')
       this.isListening = false
+      this.isStopping = false
       this.resetSilenceTimer()
       this.callbacks.onEnd?.()
     }
@@ -106,6 +119,7 @@ export class SpeechRecognitionService {
 
   /**
    * Start listening for voice input
+   * Handles edge cases like starting while stopping, or rapid start/stop
    */
   start(callbacks: RecognitionCallbacks = {}): void {
     if (!this.recognition) {
@@ -113,49 +127,95 @@ export class SpeechRecognitionService {
       return
     }
 
+    // If currently stopping, wait and retry
+    if (this.isStopping) {
+      console.log('[SpeechRecognition] Currently stopping, will retry in 200ms')
+      setTimeout(() => {
+        if (this.startAttempts < this.maxStartAttempts) {
+          this.startAttempts++
+          this.start(callbacks)
+        } else {
+          this.startAttempts = 0
+          callbacks.onError?.('Failed to start recognition - microphone may be in use')
+        }
+      }, 200)
+      return
+    }
+
     if (this.isListening) {
-      console.warn('Already listening')
+      console.warn('[SpeechRecognition] Already listening, ignoring start request')
+      // Still set callbacks so the existing session uses new callbacks
+      this.callbacks = callbacks
       return
     }
 
     this.callbacks = callbacks
+    this.startAttempts = 0
 
     try {
       this.recognition.start()
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
+
+      // Handle "already started" error by stopping and retrying
+      if (errorMsg.includes('already started') && this.startAttempts < this.maxStartAttempts) {
+        console.log('[SpeechRecognition] Recognition already started, stopping and retrying...')
+        this.startAttempts++
+        this.abort()
+        setTimeout(() => this.start(callbacks), 200)
+        return
+      }
+
       this.callbacks.onError?.(errorMsg)
     }
   }
 
   /**
-   * Stop listening
+   * Stop listening gracefully (waits for final result)
    */
   stop(): void {
-    if (!this.recognition || !this.isListening) return
+    if (!this.recognition) return
 
+    // Don't stop if already stopping or not listening
+    if (this.isStopping || !this.isListening) {
+      console.log('[SpeechRecognition] Stop called but not listening or already stopping')
+      return
+    }
+
+    this.isStopping = true
     this.resetSilenceTimer()
-    
+
     try {
       this.recognition.stop()
     } catch (error) {
-      console.error('Error stopping recognition:', error)
+      console.error('[SpeechRecognition] Error stopping recognition:', error)
+      // Reset state if stop fails
+      this.isListening = false
+      this.isStopping = false
     }
   }
 
   /**
-   * Abort listening immediately
+   * Abort listening immediately (no final result)
    */
   abort(): void {
     if (!this.recognition) return
 
+    this.isStopping = true
     this.resetSilenceTimer()
-    
+
     try {
       this.recognition.abort()
     } catch (error) {
-      console.error('Error aborting recognition:', error)
+      console.error('[SpeechRecognition] Error aborting recognition:', error)
     }
+
+    // Force reset state after abort
+    this.isListening = false
+    // isStopping will be reset by onend handler, but set a timeout as fallback
+    setTimeout(() => {
+      this.isStopping = false
+    }, 500)
   }
 
   /**

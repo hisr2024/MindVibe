@@ -13,6 +13,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, BreathingPattern } from '@/contexts/DivineConsciousnessContext';
+import { SacredBreathingModal } from './SacredBreathingModal';
+import { DivineMoment } from './DivineMoment';
 
 interface SacredDashboardWidgetProps {
   showBreathing?: boolean;
@@ -27,7 +29,7 @@ const QUICK_BREATHING_OPTIONS: { pattern: BreathingPattern; name: string; durati
   { pattern: 'grounding_breath', name: 'Grounding', duration: '40s', icon: '🌿' },
 ];
 
-const DIVINE_MOMENTS = [
+const DIVINE_MOMENTS: { type: 'instant_peace' | 'divine_presence' | 'gratitude'; name: string; icon: string }[] = [
   { type: 'instant_peace', name: 'Instant Peace', icon: '✨' },
   { type: 'divine_presence', name: 'Divine Presence', icon: '🙏' },
   { type: 'gratitude', name: 'Gratitude', icon: '💫' },
@@ -42,6 +44,34 @@ export function SacredDashboardWidget({
   const { actions, state } = useDivineConsciousness();
   const [reminder, setReminder] = useState(() => actions.getDivineReminder());
   const [activeSection, setActiveSection] = useState<'breathing' | 'moments' | null>(null);
+
+  // Modal states
+  const [breathingModalOpen, setBreathingModalOpen] = useState(false);
+  const [selectedBreathingPattern, setSelectedBreathingPattern] = useState<BreathingPattern>('peace_breath');
+  const [divineMomentOpen, setDivineMomentOpen] = useState(false);
+  const [selectedMomentType, setSelectedMomentType] = useState<'instant_peace' | 'divine_presence' | 'gratitude'>('instant_peace');
+
+  const handleStartBreathing = (pattern: BreathingPattern) => {
+    setSelectedBreathingPattern(pattern);
+    setBreathingModalOpen(true);
+    actions.startBreathing(pattern);
+  };
+
+  const handleStartDivineMoment = (type: 'instant_peace' | 'divine_presence' | 'gratitude') => {
+    setSelectedMomentType(type);
+    setDivineMomentOpen(true);
+    actions.startMicroMeditation(type);
+  };
+
+  const handleCloseBreathingModal = () => {
+    setBreathingModalOpen(false);
+    actions.stopBreathing();
+  };
+
+  const handleCloseDivineMoment = () => {
+    setDivineMomentOpen(false);
+    actions.stopMicroMeditation();
+  };
 
   const refreshReminder = () => {
     setReminder(actions.getDivineReminder());
@@ -137,7 +167,7 @@ export function SacredDashboardWidget({
                     {QUICK_BREATHING_OPTIONS.map(({ pattern, name, duration, icon }) => (
                       <motion.button
                         key={pattern}
-                        onClick={() => actions.startBreathing(pattern)}
+                        onClick={() => handleStartBreathing(pattern)}
                         className="flex flex-col items-center p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -185,7 +215,7 @@ export function SacredDashboardWidget({
                     {DIVINE_MOMENTS.map(({ type, name, icon }) => (
                       <motion.button
                         key={type}
-                        onClick={() => actions.startMicroMeditation(type)}
+                        onClick={() => handleStartDivineMoment(type)}
                         className="flex flex-col items-center p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -211,6 +241,24 @@ export function SacredDashboardWidget({
         <span>Talk to KIAAN</span>
         <span className="text-lg">💙</span>
       </motion.button>
+
+      {/* Sacred Breathing Modal */}
+      <SacredBreathingModal
+        pattern={selectedBreathingPattern}
+        isOpen={breathingModalOpen}
+        onClose={handleCloseBreathingModal}
+        cycles={3}
+      />
+
+      {/* Divine Moment Modal - rendered conditionally to trigger autoShow */}
+      {divineMomentOpen && (
+        <DivineMoment
+          type={selectedMomentType}
+          autoShow={true}
+          duration={30}
+          onComplete={handleCloseDivineMoment}
+        />
+      )}
     </motion.div>
   );
 }

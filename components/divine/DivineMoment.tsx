@@ -19,6 +19,7 @@ interface DivineMomentProps {
   duration?: number; // seconds
   autoShow?: boolean;
   onComplete?: () => void;
+  onClose?: () => void; // Called when modal is closed (by user or completion)
   className?: string;
 }
 
@@ -89,9 +90,10 @@ export function DivineMoment({
   duration = 30,
   autoShow = false,
   onComplete,
+  onClose,
   className = '',
 }: DivineMomentProps) {
-  const { actions, state } = useDivineConsciousness();
+  const { actions } = useDivineConsciousness();
 
   const [isVisible, setIsVisible] = useState(autoShow);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -146,7 +148,10 @@ export function DivineMoment({
           clearInterval(progressInterval);
           setTimeout(() => {
             onComplete?.();
-            if (autoShow) setIsVisible(false);
+            if (autoShow) {
+              setIsVisible(false);
+              onClose?.();
+            }
           }, 3000);
           return prev;
         }
@@ -170,6 +175,7 @@ export function DivineMoment({
   const handleClose = () => {
     setIsVisible(false);
     actions.stopMicroMeditation();
+    onClose?.();
   };
 
   return (
