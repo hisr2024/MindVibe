@@ -2274,3 +2274,162 @@ button:not(.no-highlight) {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+
+/* =====================================================
+   ENHANCED MOBILE NAVIGATION - Premium UX
+   ===================================================== */
+
+/* Mobile bottom nav shadow enhancement */
+.shadow-mobile-nav {
+  box-shadow:
+    0 -8px 32px rgba(0, 0, 0, 0.5),
+    0 -2px 8px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 145, 89, 0.1) inset;
+}
+
+/* Mobile nav active glow */
+.mobile-nav-glow {
+  position: relative;
+}
+
+.mobile-nav-glow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 80px;
+  height: 100%;
+  background: radial-gradient(
+    ellipse 50% 80% at 50% 0%,
+    rgba(255, 145, 89, 0.2) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-nav-glow.active::after {
+  opacity: 1;
+}
+
+/* Central KIAAN button lift effect */
+.kiaan-nav-button {
+  position: relative;
+  z-index: 10;
+}
+
+.kiaan-nav-button::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 145, 89, 0.15) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Tools sheet grid enhancements */
+.tools-grid-card {
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tools-grid-card:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Mobile-optimized horizontal scroll indicator */
+.scroll-indicator {
+  position: relative;
+}
+
+.scroll-indicator::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(11, 11, 15, 0.9));
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator.scrolled-end::after {
+  opacity: 0;
+}
+
+/* Language selector mobile enhancement */
+.language-selector-mobile {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Full-screen mobile overlay background */
+.mobile-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 60;
+}
+
+/* Mobile sheet handle for drag gestures */
+.mobile-sheet-handle {
+  width: 48px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  margin: 0 auto;
+  transition: all 0.2s ease;
+}
+
+.mobile-sheet-handle:active,
+.mobile-sheet-handle.dragging {
+  width: 60px;
+  background: rgba(255, 145, 89, 0.6);
+}
+
+/* Mobile tab indicator pulse */
+@keyframes tab-indicator-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 145, 89, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 145, 89, 0.6);
+  }
+}
+
+.tab-indicator-active {
+  animation: tab-indicator-pulse 2s ease-in-out infinite;
+}
+
+/* Ensure proper z-index stacking for mobile */
+@media (max-width: 768px) {
+  /* Mobile nav should be below overlays but above content */
+  nav[aria-label="Mobile navigation"] {
+    z-index: 50;
+  }
+
+  /* Overlay backdrops above mobile nav */
+  .overlay-backdrop {
+    z-index: 64;
+  }
+
+  /* Bottom sheets above backdrop */
+  .overlay-bottom-sheet {
+    z-index: 65;
+  }
+}

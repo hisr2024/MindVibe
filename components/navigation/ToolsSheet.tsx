@@ -157,15 +157,17 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
               aria-hidden="true"
             />
 
-            {/* Sheet - z-[65] to be above backdrop */}
+            {/* Sheet - z-[65] to be above backdrop - Full height mobile optimized */}
             <motion.div
               ref={sheetRef}
-              className={`overlay-bottom-sheet fixed inset-x-0 bottom-0 max-h-[85vh] overflow-hidden rounded-t-[28px] border-t border-orange-500/25 bg-gradient-to-b from-[#111118] to-[#0b0b0f] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
+              className={`overlay-bottom-sheet fixed inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[28px] border-t border-orange-500/25 bg-gradient-to-b from-[#111118] to-[#0b0b0f] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
               style={{
                 zIndex: 65,
                 WebkitBackfaceVisibility: 'hidden',
                 backfaceVisibility: 'hidden',
                 transform: 'translateZ(0)',
+                maxHeight: 'calc(100vh - 60px)', // Leave space for status bar
+                height: 'calc(100dvh - 60px)', // Use dynamic viewport height for mobile
               }}
               variants={sheetVariants}
               initial="hidden"
@@ -198,28 +200,27 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                 />
               </div>
 
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-white/5 px-5 pb-4">
+              {/* Header - Sticky */}
+              <div className="flex items-center justify-between border-b border-white/10 px-4 pb-3 bg-gradient-to-b from-[#111118] to-transparent sticky top-0">
                 <div>
-                  <h2 className="text-lg font-semibold text-orange-50">All Tools</h2>
-                  <p className="text-xs text-white/40 mt-0.5">Explore your wellness toolkit</p>
+                  <h2 className="text-xl font-bold text-orange-50">All Tools</h2>
+                  <p className="text-xs text-white/50 mt-0.5">Tap to explore your wellness toolkit</p>
                 </div>
                 <motion.button
                   type="button"
                   onClick={onClose}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/15 hover:text-white active:scale-95"
                   aria-label="Close tools menu"
                   whileTap={{ scale: 0.92 }}
-                  whileHover={{ scale: 1.05 }}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
+                    width="22"
+                    height="22"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
@@ -229,27 +230,30 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                 </motion.button>
               </div>
 
-              {/* Scrollable content - hardware accelerated */}
+              {/* Scrollable content - hardware accelerated, fills available space */}
               <motion.div
-                className="overflow-y-auto overscroll-contain px-5 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-5 smooth-touch-scroll"
+                className="flex-1 overflow-y-auto overscroll-contain px-4 pt-4 smooth-touch-scroll"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
                 style={{
                   WebkitOverflowScrolling: 'touch',
                   touchAction: 'pan-y',
+                  paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 24px)',
                 }}
               >
                 {TOOLS_BY_CATEGORY.map((category, categoryIndex) => (
                   <motion.div
                     key={category.id}
-                    className={categoryIndex > 0 ? 'mt-7' : ''}
+                    className={categoryIndex > 0 ? 'mt-6' : ''}
                     variants={itemVariants}
                   >
-                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-orange-200/50">
+                    <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-300/70">
+                      <span className="h-px flex-1 bg-gradient-to-r from-orange-500/30 to-transparent" />
                       {category.name}
+                      <span className="h-px flex-1 bg-gradient-to-l from-orange-500/30 to-transparent" />
                     </h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                       {category.tools.map((tool: ToolConfig, toolIndex: number) => (
                         <motion.div
                           key={tool.id}
@@ -259,34 +263,28 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                           <Link
                             href={tool.href}
                             onClick={handleToolClick}
-                            className="group flex items-center gap-3 rounded-2xl border border-orange-500/15 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-3.5 transition-all duration-200 hover:border-orange-400/30 hover:from-white/[0.08] hover:to-white/[0.02] active:scale-[0.97]"
+                            className="group relative flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 transition-all duration-200 hover:border-orange-400/40 hover:from-white/[0.1] hover:to-white/[0.04] active:scale-[0.96] min-h-[100px]"
                           >
+                            {/* Badge - positioned absolute */}
+                            {tool.badge && (
+                              <span className="absolute -top-1 -right-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-lg">
+                                {tool.badge}
+                              </span>
+                            )}
                             <motion.span
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/15 text-lg shadow-inner"
-                              whileHover={{ scale: 1.08 }}
-                              whileTap={{ scale: 0.95 }}
+                              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500/25 to-amber-500/20 text-2xl shadow-lg"
+                              whileTap={{ scale: 0.9 }}
                             >
                               {tool.icon}
                             </motion.span>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-orange-50 group-hover:text-white">
+                            <div className="text-center min-w-0 w-full">
+                              <p className="text-sm font-semibold text-orange-50 group-hover:text-white truncate">
                                 {tool.title}
                               </p>
-                              {tool.badge && (
-                                <span className="mt-1 inline-block rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
-                                  {tool.badge}
-                                </span>
-                              )}
+                              <p className="text-[10px] text-white/40 mt-0.5 truncate">
+                                {tool.description}
+                              </p>
                             </div>
-                            {/* Arrow indicator */}
-                            <svg
-                              className="h-4 w-4 text-white/20 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-orange-400/60"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
                           </Link>
                         </motion.div>
                       ))}
