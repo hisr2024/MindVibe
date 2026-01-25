@@ -134,7 +134,8 @@ export function SpiritualVibesPlayer({
     const allTracks = musicEngine.getAllTracks()
     if (activeCategory === 'all') return allTracks
     return allTracks.filter(track => {
-      if (track.source === 'user') return activeCategory === 'all'
+      // Note: User tracks only show in 'all' category (handled above)
+      if (track.source === 'user') return false
       return getCategoryForTrack(track) === activeCategory
     })
   }, [activeCategory])
