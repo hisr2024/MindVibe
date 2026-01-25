@@ -26,7 +26,6 @@ import {
   Upload,
   ChevronUp,
   ChevronDown,
-  X,
   Heart,
   Leaf,
   Sparkles,
@@ -36,8 +35,7 @@ import {
 import meditationAudioManager, {
   type MeditationTrack,
   type MeditationCategory,
-  type PlayerState,
-  MEDITATION_TRACKS
+  type PlayerState
 } from '@/utils/audio/MeditationAudioManager'
 
 // Category definitions with icons and colors
