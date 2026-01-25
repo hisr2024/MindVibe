@@ -177,33 +177,42 @@ export default function EliteVoicePage() {
       // Log platform info for debugging
       console.log('[KIAAN Voice] Platform:', permState.platform, '| Browser:', permState.browser, '| Initial status:', permState.status)
 
-      // If the permission API says "granted", verify it actually works
-      // (Some browsers report granted but still fail on actual access)
-      if (permState.status === 'granted') {
-        console.log('[KIAAN Voice] Permission API says granted - verifying...')
-        try {
-          // Quick test to verify microphone is actually accessible
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          stream.getTracks().forEach(track => track.stop())
-          console.log('[KIAAN Voice] ✓ Verified microphone access works')
-          setMicPermission('granted')
-        } catch (verifyErr: any) {
-          console.warn('[KIAAN Voice] Permission was "granted" but verification failed:', verifyErr.name)
-          // The permission state was wrong - update to reflect reality
-          if (verifyErr.name === 'NotAllowedError') {
-            setMicPermission('denied')
-            setError('Microphone permission was revoked. Please allow access again.')
-          } else if (verifyErr.name === 'NotFoundError') {
-            setMicPermission('unsupported')
-            setError('No microphone found on this device.')
-          } else {
+      // ALWAYS verify by actually trying to access the microphone
+      // The Permissions API is unreliable and often reports wrong state
+      console.log('[KIAAN Voice] Verifying microphone access by actually trying...')
+      try {
+        // Quick test to verify microphone is actually accessible
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach(track => track.stop())
+        console.log('[KIAAN Voice] ✓ Microphone access works!')
+        setMicPermission('granted')
+        setError(null) // Clear any previous error
+        return // Success - no need to continue
+      } catch (verifyErr: any) {
+        console.warn('[KIAAN Voice] Microphone access test result:', verifyErr.name, verifyErr.message)
+
+        // Only set denied if we get a definitive denial
+        if (verifyErr.name === 'NotAllowedError' || verifyErr.name === 'PermissionDeniedError') {
+          // Check if this might be a dismissal vs actual block
+          // Some browsers throw NotAllowedError even when user just hasn't responded yet
+          if (permState.status === 'prompt') {
+            console.log('[KIAAN Voice] User may not have responded to prompt yet')
             setMicPermission('prompt')
+          } else {
+            setMicPermission('denied')
+            setError('Microphone access is blocked. Please click the lock icon in your address bar, allow microphone, and refresh.')
           }
-          return
+        } else if (verifyErr.name === 'NotFoundError') {
+          setMicPermission('unsupported')
+          setError('No microphone found on this device.')
+        } else if (verifyErr.name === 'NotReadableError') {
+          // Microphone in use by another app - this is temporary
+          setMicPermission('prompt')
+          setError('Microphone is in use by another app. Please close other apps and try again.')
+        } else {
+          // Unknown error - don't block, let user try
+          setMicPermission('prompt')
         }
-      } else {
-        // Update state based on result
-        setMicPermission(permState.status)
       }
 
       // Set error if there is one (and we didn't set one above)
@@ -1027,20 +1036,15 @@ export default function EliteVoicePage() {
         return
       }
 
-      // Check for unsupported/denied state
+      // Check for unsupported state
       if (micPermission === 'unsupported') {
         setError('Microphone is not available on this device.')
         return
       }
 
-      if (micPermission === 'denied') {
-        setError('Microphone access is blocked. Please allow microphone access in your browser settings and refresh the page.')
-        return
-      }
-
-      // Request permission if needed (will also be requested when wake word is detected)
+      // Always try to get permission - don't trust the cached state
       if (micPermission !== 'granted') {
-        console.log('[KIAAN Voice] Requesting permission for wake word mode...')
+        console.log('[KIAAN Voice] Requesting permission for wake word mode (current state:', micPermission, ')...')
         const granted = await requestMicrophonePermission()
         if (!granted) {
           return
@@ -1089,20 +1093,13 @@ export default function EliteVoicePage() {
       return
     }
 
-    // If permission is denied, show clear instructions
-    if (micPermission === 'denied') {
-      setError('Microphone access is blocked. Please click the lock/info icon in your browser\'s address bar, allow microphone access, and refresh the page.')
-      setState('error')
-      playSound('error')
-      return
-    }
-
-    // If permission is not granted yet (prompt state), request it first
+    // Always try to get permission - don't trust the cached state
+    // The Permissions API can be wrong, so we try regardless of what it says
     if (micPermission !== 'granted') {
-      console.log('[KIAAN Voice] Requesting permission first...')
+      console.log('[KIAAN Voice] Requesting permission (current state:', micPermission, ')...')
       const granted = await requestMicrophonePermission()
       if (!granted) {
-        console.log('[KIAAN Voice] Permission not granted')
+        console.log('[KIAAN Voice] Permission not granted after request')
         // Error is already set by requestMicrophonePermission
         setState('error')
         return
