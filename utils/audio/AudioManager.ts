@@ -1108,6 +1108,29 @@ const SOUNDSCAPE_CONFIGS: Record<AmbientSoundscape, SoundscapeConfig> = {
   }
 }
 
+// ============ User Interaction Tracking ============
+
+// Track if user has interacted with the page (required for AudioContext autoplay policy)
+let userHasInteracted = false
+
+// Setup user interaction tracking
+if (typeof window !== 'undefined') {
+  const markUserInteraction = () => {
+    userHasInteracted = true
+    // Clean up listeners after first interaction
+    document.removeEventListener('click', markUserInteraction)
+    document.removeEventListener('touchstart', markUserInteraction)
+    document.removeEventListener('keydown', markUserInteraction)
+    document.removeEventListener('pointerdown', markUserInteraction)
+  }
+
+  // Listen for first user interaction
+  document.addEventListener('click', markUserInteraction)
+  document.addEventListener('touchstart', markUserInteraction)
+  document.addEventListener('keydown', markUserInteraction)
+  document.addEventListener('pointerdown', markUserInteraction)
+}
+
 // ============ Audio Manager Class ============
 
 class AudioManager {
@@ -1262,8 +1285,13 @@ class AudioManager {
 
   /**
    * Resume audio context (required after user interaction)
+   * Only resumes if user has interacted with the page to avoid browser warnings
    */
   async resume(): Promise<void> {
+    // Only resume if user has interacted to avoid browser autoplay policy warnings
+    if (!userHasInteracted) {
+      return
+    }
     if (this.audioContext?.state === 'suspended') {
       await this.audioContext.resume()
     }
@@ -1273,8 +1301,14 @@ class AudioManager {
 
   /**
    * Play a UI sound effect
+   * Skips if user hasn't interacted yet (browser autoplay policy)
    */
   playUISound(sound: UISound): void {
+    // Skip if user hasn't interacted to avoid browser autoplay policy warnings
+    if (!userHasInteracted) {
+      return
+    }
+
     if (!this.state.uiSoundsEnabled || !this.audioContext || !this.masterGain) {
       this.ensureInitialized()
       return
@@ -2264,6 +2298,10 @@ class AudioManager {
   // ============ Private Helpers ============
 
   private async ensureInitialized(): Promise<void> {
+    // Don't initialize before user interaction to avoid browser autoplay policy warnings
+    if (!userHasInteracted) {
+      return
+    }
     if (!this.state.initialized) {
       await this.initialize(this.config)
     }
