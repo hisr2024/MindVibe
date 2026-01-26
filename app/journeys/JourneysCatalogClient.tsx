@@ -364,6 +364,7 @@ export default function JourneysCatalogClient() {
   const [paywallVariant, setPaywallVariant] = useState<'no_access' | 'limit_reached'>('no_access')
   const [personalization, setPersonalization] = useState<Personalization | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [infoMessage, setInfoMessage] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -433,6 +434,7 @@ export default function JourneysCatalogClient() {
     try {
       setStarting(true)
       setError(null)
+      setInfoMessage(null)
 
       await journeysService.startJourneys(Array.from(selectedIds), personalization || undefined)
 
@@ -452,17 +454,20 @@ export default function JourneysCatalogClient() {
         return
       }
 
-      // Handle demo preview and service unavailable errors
+      // Handle demo preview and service unavailable - show as info, not error
       const errorMessage = err instanceof Error ? err.message : String(err)
       if (errorMessage.includes('demo_preview_only') || errorMessage.includes('preview mode')) {
-        setError('🚀 Wisdom Journeys is in preview mode! The full feature with personalized AI content is launching soon. Stay tuned!')
+        setError(null)
+        setInfoMessage('🚀 Wisdom Journeys is in preview mode! The full feature with personalized AI content is launching soon. Stay tuned!')
         return
       }
       if (errorMessage.includes('service_unavailable') || errorMessage.includes('being set up')) {
-        setError('🔧 Wisdom Journeys is being set up. Please check back in a few minutes!')
+        setError(null)
+        setInfoMessage('🔧 Wisdom Journeys is being set up. Please check back in a few minutes!')
         return
       }
 
+      setInfoMessage(null)
       setError(err instanceof Error ? err.message : 'Failed to start journeys')
     } finally {
       setStarting(false)
@@ -581,6 +586,13 @@ export default function JourneysCatalogClient() {
             </div>
           )}
         </div>
+
+        {/* Info Message (preview mode, setup, etc.) */}
+        {infoMessage && (
+          <div className="mb-6 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10 p-4 text-center">
+            <p className="text-base font-medium text-amber-200">{infoMessage}</p>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
