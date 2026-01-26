@@ -352,20 +352,35 @@ async def get_catalog(
     try:
         templates = await engine.get_catalog(db)
 
-        # If database returned empty, use demo templates
+        # If database returned empty, return clear error instead of demo templates
         if not templates:
-            logger.info("No templates in database, returning demo templates")
-            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
+            logger.warning("No templates in database - seeding required")
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_seeded",
+                    "message": "Journey templates have not been seeded. "
+                               "Run: python scripts/seed_journey_templates.py --seed",
+                }
+            )
 
         logger.info(f"Returning {len(templates)} templates from database")
         return [JourneyTemplateResponse(**t) for t in templates]
 
+    except HTTPException:
+        raise
     except Exception as e:
         error_msg = str(e).lower()
         # Handle case where table doesn't exist yet (not migrated)
         if "journey_templates" in error_msg or "relation" in error_msg or "does not exist" in error_msg:
-            logger.warning("Journey templates table not found - returning demo templates")
-            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
+            logger.warning("Journey templates table not found - migration required")
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_ready",
+                    "message": "Journey templates table not found. Database migration may be required.",
+                }
+            )
         logger.error(f"Error getting catalog: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to get journey catalog")
 
@@ -394,24 +409,7 @@ async def start_journeys(
     Supports starting multiple journeys in a single request.
     Rate limited to 10 journey starts per hour.
     """
-    # Check if trying to start demo journeys FIRST (before access check)
-    # This allows showing preview message even when database is not set up
-    demo_ids = [jid for jid in body.journey_ids if jid.startswith("demo-")]
-    if demo_ids:
-        # Demo templates are preview-only until database is set up
-        logger.info(f"User attempted to start demo journeys: {demo_ids}")
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "error": "demo_preview_only",
-                "message": "Wisdom Journeys is currently in preview mode. "
-                           "The full feature with personalized AI content is coming soon! "
-                           "Please check back later or contact support for early access.",
-                "journey_ids": demo_ids,
-            }
-        )
-
-    # Now check premium access with limit validation
+    # Check premium access with limit validation
     try:
         access_check = WisdomJourneysAccessRequired(
             check_limit=True, requested_count=len(body.journey_ids)
@@ -438,6 +436,19 @@ async def start_journeys(
             journey_template_ids=body.journey_ids,
             personalization=body.personalization,
         )
+
+        # Check if any journeys were created
+        if not journeys:
+            logger.warning(f"No journeys created for IDs: {body.journey_ids}")
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "error": "templates_not_found",
+                    "message": "The selected journey templates were not found. "
+                               "Please ensure the database has been seeded with journey templates.",
+                    "requested_ids": body.journey_ids,
+                }
+            )
 
         return [
             UserJourneyResponse(
