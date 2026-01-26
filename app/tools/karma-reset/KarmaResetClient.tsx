@@ -16,6 +16,8 @@ import { ConfettiEffect } from '@/components/animations/ConfettiEffect'
 import { getBriefErrorMessage } from '@/lib/api-client'
 import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
 import { springConfigs } from '@/lib/animations/spring-configs'
+import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
 
@@ -42,6 +44,9 @@ export default function KarmaResetClient() {
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const MAX_RETRIES = 2
+
+  // Voice integration
+  const { language } = useLanguage()
 
   // Health check on mount
   useEffect(() => {
@@ -260,16 +265,23 @@ export default function KarmaResetClient() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Situation */}
                   <div>
-                    <label htmlFor="situation" className="block text-sm font-medium text-orange-50 mb-2">
-                      What happened?
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label htmlFor="situation" className="text-sm font-medium text-orange-50">
+                        What happened?
+                      </label>
+                      <VoiceInputButton
+                        language={language}
+                        onTranscript={(text) => setSituation(prev => prev ? `${prev} ${text}` : text)}
+                        disabled={loading}
+                      />
+                    </div>
                     <textarea
                       id="situation"
                       value={situation}
                       onChange={(e) => setSituation(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg border border-orange-500/30 bg-white/5 text-orange-50 placeholder:text-orange-100/40 focus:ring-2 focus:ring-orange-400/50 focus:border-transparent resize-none"
                       rows={4}
-                      placeholder="Describe what happened briefly..."
+                      placeholder="Speak or type to describe what happened..."
                       required
                     />
                   </div>
@@ -279,15 +291,22 @@ export default function KarmaResetClient() {
                     <label htmlFor="whoFelt" className="block text-sm font-medium text-orange-50 mb-2">
                       Who felt the ripple?
                     </label>
-                    <input
-                      id="whoFelt"
-                      type="text"
-                      value={whoFelt}
-                      onChange={(e) => setWhoFelt(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-orange-500/30 bg-white/5 text-orange-50 placeholder:text-orange-100/40 focus:ring-2 focus:ring-orange-400/50 focus:border-transparent"
-                      placeholder="e.g., My friend, My partner, A colleague"
-                      required
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        id="whoFelt"
+                        type="text"
+                        value={whoFelt}
+                        onChange={(e) => setWhoFelt(e.target.value)}
+                        className="flex-1 px-4 py-3 rounded-lg border border-orange-500/30 bg-white/5 text-orange-50 placeholder:text-orange-100/40 focus:ring-2 focus:ring-orange-400/50 focus:border-transparent"
+                        placeholder="e.g., My friend, My partner, A colleague"
+                        required
+                      />
+                      <VoiceInputButton
+                        language={language}
+                        onTranscript={(text) => setWhoFelt(text)}
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
 
                   {/* Repair type */}
@@ -375,7 +394,7 @@ export default function KarmaResetClient() {
 
             {/* Breathing Step */}
             {currentStep === 'breathing' && resetGuidance && (
-              <motion.div 
+              <motion.div
                 className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -384,17 +403,25 @@ export default function KarmaResetClient() {
                 <h2 className="text-2xl font-bold text-orange-50 mb-6 text-center">
                   Pause & Breathe
                 </h2>
-                <p className="text-lg text-orange-100/80 text-center mb-8">
-                  {resetGuidance.breathingLine}
-                </p>
-                
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <p className="text-lg text-orange-100/80 text-center">
+                    {resetGuidance.breathingLine}
+                  </p>
+                  <VoiceResponseButton
+                    text={resetGuidance.breathingLine}
+                    language={language}
+                    size="md"
+                    variant="accent"
+                  />
+                </div>
+
                 <BreathingOrb
                   size={250}
                   color="#ff9933"
                   pattern="4-7-8"
                   className="my-8"
                 />
-                
+
                 <div className="text-center mt-8">
                   <button
                     onClick={() => setCurrentStep('plan')}

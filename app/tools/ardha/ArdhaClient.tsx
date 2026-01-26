@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -52,6 +54,9 @@ export default function ArdhaClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ArdhaResult | null>('ardha_reframe', null)
+
+  // Voice integration
+  const { language } = useLanguage()
 
   useEffect(() => {
     if (error) setError(null)
@@ -152,14 +157,21 @@ ${guidance.small_action_step}`
           {/* Left: Input and Response */}
           <section className="space-y-4">
             <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <label htmlFor="thought-input" className="text-sm font-semibold text-orange-100 block mb-3">
-                Share the thought to reframe
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label htmlFor="thought-input" className="text-sm font-semibold text-orange-100">
+                  Share the thought to reframe
+                </label>
+                <VoiceInputButton
+                  language={language}
+                  onTranscript={(text) => setThought(prev => prev ? `${prev} ${text}` : text)}
+                  disabled={loading}
+                />
+              </div>
               <textarea
                 id="thought-input"
                 value={thought}
                 onChange={e => setThought(e.target.value)}
-                placeholder="Example: I keep messing up at work, maybe I'm just not cut out for this."
+                placeholder="Speak or type your thought. Example: I keep messing up at work, maybe I'm just not cut out for this."
                 className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="thought-hint"
               />
@@ -196,7 +208,15 @@ ${guidance.small_action_step}`
                       </span>
                     )}
                   </div>
-                  <span>{new Date(result.requestedAt).toLocaleString()}</span>
+                  <div className="flex items-center gap-2">
+                    <VoiceResponseButton
+                      text={result.response.replace(/\*\*/g, '')}
+                      language={language}
+                      size="sm"
+                      variant="accent"
+                    />
+                    <span>{new Date(result.requestedAt).toLocaleString()}</span>
+                  </div>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
                   {result.response}
