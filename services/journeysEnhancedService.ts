@@ -284,6 +284,58 @@ export async function getJourneyAccess(): Promise<JourneyAccess> {
   return handleResponse<JourneyAccess>(response)
 }
 
+// Default journey templates for when backend is unavailable
+const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
+  {
+    id: 'tpl_inner_peace',
+    slug: 'inner-peace',
+    title: 'Journey to Inner Peace',
+    description: 'A transformative 7-day exploration of tranquility and letting go of anxiety.',
+    primary_enemy_tags: ['krodha', 'moha'],
+    duration_days: 7,
+    difficulty: 1,
+    is_featured: true,
+    icon_name: 'peace',
+    color_theme: 'emerald',
+  },
+  {
+    id: 'tpl_conquering_desire',
+    slug: 'conquering-desire',
+    title: 'Conquering Desire (Kama)',
+    description: 'Learn to master desires and attachments through ancient wisdom.',
+    primary_enemy_tags: ['kama'],
+    duration_days: 14,
+    difficulty: 2,
+    is_featured: true,
+    icon_name: 'heart',
+    color_theme: 'rose',
+  },
+  {
+    id: 'tpl_anger_mastery',
+    slug: 'anger-mastery',
+    title: 'Mastering Anger (Krodha)',
+    description: 'Transform reactive anger into mindful responses.',
+    primary_enemy_tags: ['krodha'],
+    duration_days: 14,
+    difficulty: 2,
+    is_featured: true,
+    icon_name: 'flame',
+    color_theme: 'red',
+  },
+  {
+    id: 'tpl_balanced_action',
+    slug: 'balanced-action',
+    title: 'Wisdom of Balanced Action',
+    description: 'Learn Karma Yoga - the art of action without attachment to results.',
+    primary_enemy_tags: ['mixed'],
+    duration_days: 7,
+    difficulty: 1,
+    is_featured: true,
+    icon_name: 'sparkles',
+    color_theme: 'blue',
+  },
+]
+
 /**
  * Get all available journey templates (catalog)
  */
@@ -293,15 +345,20 @@ export async function getCatalog(): Promise<JourneyTemplate[]> {
       method: 'GET',
       headers: getHeaders(),
     })
-    // If the response is a server error, return empty array (migrations may not be run yet)
+    // If the response is a server error, return default templates
     if (!response.ok && response.status >= 500) {
-      console.warn('Catalog endpoint returned error, returning empty catalog')
-      return []
+      console.warn('Catalog endpoint returned error, using default templates')
+      return DEFAULT_CATALOG_TEMPLATES
     }
-    return handleResponse<JourneyTemplate[]>(response)
+    const data = await handleResponse<JourneyTemplate[]>(response)
+    // If empty array, return defaults
+    if (!data || data.length === 0) {
+      return DEFAULT_CATALOG_TEMPLATES
+    }
+    return data
   } catch (error) {
     console.warn('Failed to fetch catalog:', error)
-    return [] // Return empty array on network errors
+    return DEFAULT_CATALOG_TEMPLATES // Return default templates on errors
   }
 }
 
