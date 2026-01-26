@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { BreathingAnimation } from './BreathingAnimation'
+import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 interface StepData {
   current_step: number
@@ -58,6 +60,9 @@ export function EmotionalResetWizard({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [crisisDetected, setCrisisDetected] = useState(false)
+
+  // Voice integration
+  const { language } = useLanguage()
   const [crisisResponse, setCrisisResponse] = useState<string | null>(null)
   const [breathingComplete, setBreathingComplete] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
@@ -224,10 +229,32 @@ export function EmotionalResetWizard({
 
   const renderStep1 = () => (
     <div className="space-y-4">
-      <p className="text-orange-100/90 leading-relaxed">
-        {stepData?.guidance}
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-orange-100/90 leading-relaxed flex-1">
+          {stepData?.guidance}
+        </p>
+        {stepData?.guidance && (
+          <VoiceResponseButton
+            text={stepData.guidance}
+            language={language}
+            size="sm"
+            variant="minimal"
+          />
+        )}
+      </div>
       <div className="relative">
+        <div className="flex items-center justify-end mb-2">
+          <VoiceInputButton
+            language={language}
+            onTranscript={(text) => {
+              const newValue = userInput ? `${userInput} ${text}` : text
+              if (newValue.length <= 200) {
+                setUserInput(newValue)
+              }
+            }}
+            disabled={isLoading}
+          />
+        </div>
         <textarea
           value={userInput}
           onChange={(e) => {
@@ -235,7 +262,7 @@ export function EmotionalResetWizard({
               setUserInput(e.target.value)
             }
           }}
-          placeholder="Share what's weighing on your heart..."
+          placeholder="Speak or type what's weighing on your heart..."
           className="w-full h-32 px-4 py-3 bg-white/5 border border-orange-500/30 rounded-2xl text-orange-50 placeholder:text-orange-100/40 focus:outline-none focus:ring-2 focus:ring-orange-400/50 resize-none"
           aria-label="Share your feelings"
           maxLength={200}
@@ -254,9 +281,17 @@ export function EmotionalResetWizard({
       </p>
       {stepData?.assessment && (
         <div className="bg-gradient-to-br from-orange-500/10 to-amber-300/10 border border-orange-400/30 rounded-2xl p-4">
-          <p className="text-orange-50 leading-relaxed whitespace-pre-wrap">
-            {stepData.assessment.assessment}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-orange-50 leading-relaxed whitespace-pre-wrap flex-1">
+              {stepData.assessment.assessment}
+            </p>
+            <VoiceResponseButton
+              text={stepData.assessment.assessment}
+              language={language}
+              size="sm"
+              variant="accent"
+            />
+          </div>
         </div>
       )}
     </div>
@@ -290,9 +325,17 @@ export function EmotionalResetWizard({
       </p>
       {stepData?.visualization && (
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-2xl p-6">
-          <p className="text-orange-50 leading-relaxed italic whitespace-pre-wrap">
-            {stepData.visualization}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-orange-50 leading-relaxed italic whitespace-pre-wrap flex-1">
+              {stepData.visualization}
+            </p>
+            <VoiceResponseButton
+              text={stepData.visualization}
+              language={language}
+              size="sm"
+              variant="accent"
+            />
+          </div>
         </div>
       )}
     </div>
@@ -305,11 +348,19 @@ export function EmotionalResetWizard({
       </p>
       {stepData?.wisdom?.map((item, index) => (
         <div key={index} className="bg-gradient-to-br from-orange-500/10 to-amber-300/10 border border-orange-400/30 rounded-2xl p-4 space-y-3">
-          <p className="text-orange-50 leading-relaxed">
-            &ldquo;{item.wisdom}&rdquo;
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-orange-50 leading-relaxed flex-1">
+              &ldquo;{item.wisdom}&rdquo;
+            </p>
+            <VoiceResponseButton
+              text={`${item.wisdom}. ${item.application}`}
+              language={language}
+              size="sm"
+              variant="accent"
+            />
+          </div>
           <p className="text-sm text-orange-100/70 border-t border-orange-500/20 pt-3">
-            💡 {item.application}
+            {item.application}
           </p>
         </div>
       ))}
@@ -331,6 +382,12 @@ export function EmotionalResetWizard({
             <p className="text-orange-50 leading-relaxed flex-1">
               {affirmation}
             </p>
+            <VoiceResponseButton
+              text={affirmation}
+              language={language}
+              size="sm"
+              variant="minimal"
+            />
           </div>
         ))}
       </div>

@@ -15,6 +15,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
+import { VoiceInputButton, VoiceResponseButton } from '@/components/voice';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface JournalEntry {
   id: string;
@@ -102,6 +104,9 @@ export function HeartToHeartJournal({
   const [currentPrompt, setCurrentPrompt] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const entriesEndRef = useRef<HTMLDivElement>(null);
+
+  // Voice integration
+  const { language } = useLanguage();
 
   // Sync with isOpen prop
   useEffect(() => {
@@ -268,9 +273,19 @@ export function HeartToHeartJournal({
                     : 'bg-pink-500/10 border border-pink-500/20 rounded-tr-sm'
                 }`}
               >
-                <p className={`text-xs mb-1 ${entry.type === 'krishna' ? 'text-amber-400/60' : 'text-pink-400/60'}`}>
-                  {entry.type === 'krishna' ? 'Krishna' : 'You'}
-                </p>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <p className={`text-xs ${entry.type === 'krishna' ? 'text-amber-400/60' : 'text-pink-400/60'}`}>
+                    {entry.type === 'krishna' ? 'Krishna' : 'You'}
+                  </p>
+                  {entry.type === 'krishna' && (
+                    <VoiceResponseButton
+                      text={entry.content}
+                      language={language}
+                      size="sm"
+                      variant="minimal"
+                    />
+                  )}
+                </div>
                 <p className={`${entry.type === 'krishna' ? 'text-amber-100/90 italic' : 'text-pink-100/90'} whitespace-pre-wrap`}>
                   {entry.content}
                 </p>
@@ -320,16 +335,25 @@ export function HeartToHeartJournal({
         {/* Input Area */}
         <div className="border-t border-pink-500/20 p-4 bg-slate-900/50 flex-shrink-0">
           <div className="flex gap-3">
-            <textarea
-              ref={textareaRef}
-              value={currentEntry}
-              onChange={(e) => setCurrentEntry(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Dear Krishna..."
-              className="flex-1 bg-pink-500/5 border border-pink-500/20 rounded-xl px-4 py-3 text-pink-100 placeholder:text-pink-200/40 focus:outline-none focus:border-pink-500/40 resize-none"
-              rows={3}
-              disabled={isKrishnaTyping}
-            />
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                value={currentEntry}
+                onChange={(e) => setCurrentEntry(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Speak or type your heart to Krishna..."
+                className="w-full bg-pink-500/5 border border-pink-500/20 rounded-xl px-4 py-3 text-pink-100 placeholder:text-pink-200/40 focus:outline-none focus:border-pink-500/40 resize-none"
+                rows={3}
+                disabled={isKrishnaTyping}
+              />
+              <div className="absolute bottom-2 right-2">
+                <VoiceInputButton
+                  language={language}
+                  onTranscript={(text) => setCurrentEntry(prev => prev ? `${prev} ${text}` : text)}
+                  disabled={isKrishnaTyping}
+                />
+              </div>
+            </div>
             <motion.button
               onClick={handleSubmit}
               disabled={!currentEntry.trim() || isKrishnaTyping}
@@ -341,7 +365,7 @@ export function HeartToHeartJournal({
             </motion.button>
           </div>
           <p className="text-pink-200/40 text-xs mt-2 text-center">
-            Press Enter to send, Shift+Enter for new line
+            Press Enter to send, Shift+Enter for new line, or tap the mic to speak
           </p>
         </div>
       </motion.div>

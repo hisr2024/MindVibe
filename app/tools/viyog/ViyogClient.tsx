@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -51,6 +53,9 @@ export default function ViyogClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ViyogResult | null>('viyog_detachment', null)
+
+  // Voice integration
+  const { language } = useLanguage()
 
   useEffect(() => {
     if (error) setError(null)
@@ -151,14 +156,21 @@ ${guidance.one_action}`
           {/* Left: Input and Response */}
           <section className="space-y-4">
             <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <label htmlFor="concern-input" className="text-sm font-semibold text-orange-100 block mb-3">
-                Share the outcome worry
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label htmlFor="concern-input" className="text-sm font-semibold text-orange-100">
+                  Share the outcome worry
+                </label>
+                <VoiceInputButton
+                  language={language}
+                  onTranscript={(text) => setConcern(prev => prev ? `${prev} ${text}` : text)}
+                  disabled={loading}
+                />
+              </div>
               <textarea
                 id="concern-input"
                 value={concern}
                 onChange={e => setConcern(e.target.value)}
-                placeholder="Example: I'm afraid the presentation will flop and everyone will think I'm incompetent."
+                placeholder="Speak or type your concern. Example: I'm afraid the presentation will flop."
                 className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="concern-hint"
               />
@@ -195,7 +207,15 @@ ${guidance.one_action}`
                       </span>
                     )}
                   </div>
-                  <span>{new Date(result.requestedAt).toLocaleString()}</span>
+                  <div className="flex items-center gap-2">
+                    <VoiceResponseButton
+                      text={result.response.replace(/\*\*/g, '')}
+                      language={language}
+                      size="sm"
+                      variant="accent"
+                    />
+                    <span>{new Date(result.requestedAt).toLocaleString()}</span>
+                  </div>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
                   {result.response}

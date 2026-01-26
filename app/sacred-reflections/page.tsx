@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { useLanguage } from '@/hooks/useLanguage'
 
 type EncryptedPayload = {
   ciphertext: string
@@ -101,6 +103,9 @@ export default function SacredReflectionsPage() {
   const [isOnline, setIsOnline] = useState(true)
   const [guidance, setGuidance] = useState<Record<string, string>>({})
   const [guidanceLoading, setGuidanceLoading] = useState<Record<string, boolean>>({})
+
+  // Voice integration
+  const { language } = useLanguage()
 
   // Track passphrase only in-memory; do not persist sensitive material to disk
   useEffect(() => {
@@ -421,22 +426,34 @@ export default function SacredReflectionsPage() {
             {/* Title */}
             <div>
               <label className="text-sm font-semibold text-orange-100">Title (optional)</label>
-              <input
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="A word or phrase for this moment..."
-                className="mt-2 w-full bg-black/50 border border-orange-800/60 rounded-2xl px-4 py-3 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
-              />
+              <div className="mt-2 flex gap-2 items-center">
+                <input
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="A word or phrase for this moment..."
+                  className="flex-1 bg-black/50 border border-orange-800/60 rounded-2xl px-4 py-3 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                />
+                <VoiceInputButton
+                  language={language}
+                  onTranscript={(text) => setTitle(prev => prev ? `${prev} ${text}` : text)}
+                />
+              </div>
             </div>
 
             {/* Body */}
             <div>
-              <label className="text-sm font-semibold text-orange-100">Write freely</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-semibold text-orange-100">Write freely</label>
+                <VoiceInputButton
+                  language={language}
+                  onTranscript={(text) => setBody(prev => prev ? `${prev} ${text}` : text)}
+                />
+              </div>
               <textarea
                 value={body}
                 onChange={e => setBody(e.target.value)}
-                placeholder="Let your thoughts flow. Only you can see this."
-                className="mt-2 w-full h-40 bg-black/50 border border-orange-800/60 rounded-2xl p-4 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                placeholder="Let your thoughts flow. Tap the microphone to speak your reflection."
+                className="w-full h-40 bg-black/50 border border-orange-800/60 rounded-2xl p-4 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
               />
             </div>
 
@@ -528,7 +545,15 @@ export default function SacredReflectionsPage() {
                     </button>
                     {guidance[entry.id] && (
                       <div className="text-sm text-orange-100/90 bg-black/40 border border-orange-700/50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
-                        {guidance[entry.id]}
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="flex-1">{guidance[entry.id]}</span>
+                          <VoiceResponseButton
+                            text={guidance[entry.id]}
+                            language={language}
+                            size="sm"
+                            variant="minimal"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
