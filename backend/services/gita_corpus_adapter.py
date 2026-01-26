@@ -15,7 +15,7 @@ import logging
 import random
 from typing import Any, TypedDict
 
-from sqlalchemy import and_, or_, select, func
+from sqlalchemy import and_, or_, select, func, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import GitaVerse, WisdomVerse
