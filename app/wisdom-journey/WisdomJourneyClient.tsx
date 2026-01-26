@@ -54,11 +54,14 @@ export default function WisdomJourneyClient() {
 
   // Load active journey and recommendations
   useEffect(() => {
-    if (!userId || userId === 'demo-user') return
+    // Allow loading even for demo users
+    if (!userId) return
 
     const loadData = async () => {
       try {
         setLoading(true)
+        setError(null)
+
         const [journey, recs] = await Promise.all([
           wisdomJourneyService.getActiveJourney(userId),
           wisdomJourneyService.getJourneyRecommendations(userId),
@@ -79,7 +82,9 @@ export default function WisdomJourneyClient() {
         }
       } catch (err) {
         console.error('Error loading wisdom journey data:', err)
-        setError('Failed to load journey data')
+        setError('Failed to load journey data. Please try again.')
+        // Still show recommendations view on error
+        setView('recommendations')
       } finally {
         setLoading(false)
       }
@@ -255,7 +260,7 @@ export default function WisdomJourneyClient() {
         )}
 
         {/* Content */}
-        {view === 'recommendations' && (
+        {(view === 'recommendations' || view === 'overview') && (
           <JourneyRecommendations
             recommendations={recommendations}
             onSelect={handleStartJourney}
