@@ -21,6 +21,7 @@ export { useLanguage, LanguageProvider, LANGUAGES, type Language, type LanguageC
 export { useSmartScroll } from './useSmartScroll'
 export { useVoiceInput, type UseVoiceInputOptions, type UseVoiceInputReturn } from './useVoiceInput'
 export { useVoiceOutput, type UseVoiceOutputOptions, type UseVoiceOutputReturn } from './useVoiceOutput'
+export { useEnhancedVoiceOutput, type UseEnhancedVoiceOutputOptions, type UseEnhancedVoiceOutputReturn } from './useEnhancedVoiceOutput'
 export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './useWakeWord'
 export { useKiaanVoice, type UseKiaanVoiceOptions, type UseKiaanVoiceReturn, type KiaanVoiceState, type KiaanVoiceMessage } from './useKiaanVoice'
 export { useHapticFeedback } from './useHapticFeedback'
