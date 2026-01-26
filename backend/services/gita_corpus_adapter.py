@@ -185,11 +185,11 @@ class GitaCorpusAdapter:
                 verse_text: VerseText = {
                     "sanskrit": getattr(verse_row, "sanskrit", None),
                     "transliteration": getattr(verse_row, "transliteration", None),
-                    "translation": getattr(verse_row, "text", "") or getattr(verse_row, "english", ""),
+                    "translation": verse_row.english or "",
                     "hindi": getattr(verse_row, "hindi", None),
-                    "reflection": getattr(verse_row, "reflection", None),
-                    "themes": getattr(verse_row, "themes", []) or [],
-                    "keywords": getattr(verse_row, "keywords", []) or [],
+                    "reflection": getattr(verse_row, "principle", None),
+                    "themes": [verse_row.theme] if verse_row.theme else [],
+                    "keywords": getattr(verse_row, "mental_health_applications", []) or [],
                 }
                 self._cache[cache_key] = verse_text
                 return verse_text
@@ -295,11 +295,17 @@ class GitaCorpusAdapter:
             conditions = []
 
             for theme in list(expanded_themes)[:10]:  # Limit to avoid query explosion
+                # Match against 'theme' field (singular string column)
                 conditions.append(
-                    func.lower(func.cast(GitaVerse.themes, String)).contains(theme.lower())
+                    func.lower(GitaVerse.theme).contains(theme.lower())
                 )
+                # Match against 'principle' field
                 conditions.append(
-                    func.lower(func.cast(GitaVerse.keywords, String)).contains(theme.lower())
+                    func.lower(GitaVerse.principle).contains(theme.lower())
+                )
+                # Match against mental_health_applications JSON array if not null
+                conditions.append(
+                    func.lower(func.cast(GitaVerse.mental_health_applications, String)).contains(theme.lower())
                 )
 
             if not conditions:
@@ -331,7 +337,7 @@ class GitaCorpusAdapter:
                     "chapter": v.chapter,
                     "verse": v.verse,
                     "score": score,
-                    "themes": getattr(v, "themes", []) or [],
+                    "themes": [v.theme] if v.theme else [],
                 })
 
             # Sort by score and limit
@@ -350,16 +356,28 @@ class GitaCorpusAdapter:
         """Calculate relevance score for a verse based on theme overlap."""
         score = 0.0
 
-        verse_themes = set(t.lower() for t in (getattr(verse, "themes", []) or []))
-        verse_keywords = set(k.lower() for k in (getattr(verse, "keywords", []) or []))
+        # Get theme as set (single value to set)
+        verse_theme = verse.theme.lower() if verse.theme else ""
+        verse_principle = verse.principle.lower() if verse.principle else ""
+        verse_apps = set(
+            a.lower() for a in (getattr(verse, "mental_health_applications", []) or [])
+        )
 
         # Theme matches
-        theme_overlap = len(themes & verse_themes)
-        score += theme_overlap * 0.3
+        for t in themes:
+            if t.lower() in verse_theme:
+                score += 0.3
+                break
 
-        # Keyword matches
-        keyword_overlap = len(themes & verse_keywords)
-        score += keyword_overlap * 0.2
+        # Principle matches
+        for t in themes:
+            if t.lower() in verse_principle:
+                score += 0.2
+                break
+
+        # Application keyword matches
+        app_overlap = len(themes & verse_apps)
+        score += min(app_overlap * 0.15, 0.3)
 
         # Journey relevance boost
         if hasattr(verse, "journey_relevance_score") and verse.journey_relevance_score:
@@ -418,7 +436,7 @@ class GitaCorpusAdapter:
                     "chapter": v.chapter,
                     "verse": v.verse,
                     "score": 0.5,  # Neutral score for random
-                    "themes": getattr(v, "themes", []) or [],
+                    "themes": [v.theme] if v.theme else [],
                 })
 
                 if len(filtered) >= limit:
@@ -569,7 +587,7 @@ class GitaCorpusAdapter:
                     "chapter": v.chapter,
                     "verse": v.verse,
                     "score": 0.7,  # Chapter-based selection score
-                    "themes": getattr(v, "themes", []) or [],
+                    "themes": [v.theme] if v.theme else [],
                 })
 
                 if len(filtered) >= limit:

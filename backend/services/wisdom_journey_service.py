@@ -434,11 +434,11 @@ class WisdomJourneyService:
             .where(
                 and_(
                     Mood.user_id == user_id,
-                    Mood.created_at >= seven_days_ago,
+                    Mood.at >= seven_days_ago,
                     Mood.deleted_at.is_(None),
                 )
             )
-            .order_by(Mood.created_at.desc())
+            .order_by(Mood.at.desc())
         )
         moods = list(mood_result.scalars().all())
 
@@ -447,10 +447,13 @@ class WisdomJourneyService:
             context["mood_average"] = sum(context["mood_scores"]) / len(context["mood_scores"])
             context["mood_trend"] = self._calculate_mood_trend(context["mood_scores"])
 
-            # Collect emotion tags
+            # Collect emotion tags from mood tags JSON
             for mood in moods:
-                if mood.emotion_tags:
-                    context["emotion_tags"].extend(mood.emotion_tags)
+                if mood.tags and isinstance(mood.tags, dict):
+                    # Extract emotions from tags JSON structure
+                    emotions = mood.tags.get("emotions", [])
+                    if emotions:
+                        context["emotion_tags"].extend(emotions)
 
             context["emotion_tags"] = list(set(context["emotion_tags"]))  # Dedupe
         else:
@@ -476,8 +479,8 @@ class WisdomJourneyService:
         if journals:
             # Extract tags as themes (privacy-preserving)
             for journal in journals:
-                if journal.tags:
-                    context["themes"].extend(journal.tags)
+                if journal.tag_labels:
+                    context["themes"].extend(journal.tag_labels)
 
             context["themes"] = list(set(context["themes"]))  # Dedupe
 
