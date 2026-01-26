@@ -64,7 +64,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         
         # Permissions-Policy: Restricts browser features
-        # Note: microphone=(self) allows microphone access for KIAAN Voice feature
+        # Note: microphone=(self) allows KIAAN Voice to access the microphone
         response.headers["Permissions-Policy"] = (
             "accelerometer=(), "
             "camera=(), "

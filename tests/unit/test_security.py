@@ -69,12 +69,13 @@ class TestSecurityHeaders:
     async def test_permissions_policy_restricts_features(self, test_client: AsyncClient):
         """Test that Permissions-Policy restricts browser features."""
         response = await test_client.get("/")
-        
+
         policy = response.headers.get("Permissions-Policy", "")
-        
+
         # Check that dangerous features are restricted
         assert "camera=()" in policy
-        assert "microphone=()" in policy
+        # microphone=(self) is allowed for KIAAN Voice functionality
+        assert "microphone=(self)" in policy
         assert "geolocation=()" in policy
 
 

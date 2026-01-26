@@ -184,7 +184,7 @@ async def get_active_journey(
                     verse = await db.get(GitaVerse, step.verse_id)
                     if verse:
                         verse_data = {
-                            "verse_text": verse.text,
+                            "verse_text": verse.english,
                             "verse_translation": verse.transliteration,
                             "verse_chapter": verse.chapter,
                             "verse_number": verse.verse,
@@ -317,7 +317,7 @@ async def get_journey(
                     verse = await db.get(GitaVerse, step.verse_id)
                     if verse:
                         verse_data = {
-                            "verse_text": verse.text,
+                            "verse_text": verse.english,
                             "verse_translation": verse.transliteration,
                             "verse_chapter": verse.chapter,
                             "verse_number": verse.verse,

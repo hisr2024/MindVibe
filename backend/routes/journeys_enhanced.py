@@ -18,7 +18,7 @@ Provides endpoints for the multi-journey Wisdom Journey system:
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -332,6 +332,7 @@ DEMO_JOURNEY_TEMPLATES = [
 @router.get("/catalog", response_model=list[JourneyTemplateResponse])
 async def get_catalog(
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> list[JourneyTemplateResponse]:
     """
@@ -341,24 +342,45 @@ async def get_catalog(
     Available to all users to show the catalog (with premium badges).
     Falls back to demo templates if database is not seeded.
     """
+    # Prevent browser caching to ensure fresh data
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     engine = get_journey_engine()
 
     try:
         templates = await engine.get_catalog(db)
 
-        # If database returned empty, use demo templates
+        # If database returned empty, return clear error instead of demo templates
         if not templates:
-            logger.info("No templates in database, returning demo templates")
-            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
+            logger.warning("No templates in database - seeding required")
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_seeded",
+                    "message": "Journey templates have not been seeded. "
+                               "Run: python scripts/seed_journey_templates.py --seed",
+                }
+            )
 
+        logger.info(f"Returning {len(templates)} templates from database")
         return [JourneyTemplateResponse(**t) for t in templates]
 
+    except HTTPException:
+        raise
     except Exception as e:
         error_msg = str(e).lower()
         # Handle case where table doesn't exist yet (not migrated)
         if "journey_templates" in error_msg or "relation" in error_msg or "does not exist" in error_msg:
-            logger.warning("Journey templates table not found - returning demo templates")
-            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
+            logger.warning("Journey templates table not found - migration required")
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_ready",
+                    "message": "Journey templates table not found. Database migration may be required.",
+                }
+            )
         logger.error(f"Error getting catalog: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to get journey catalog")
 
@@ -388,10 +410,22 @@ async def start_journeys(
     Rate limited to 10 journey starts per hour.
     """
     # Check premium access with limit validation
-    access_check = WisdomJourneysAccessRequired(
-        check_limit=True, requested_count=len(body.journey_ids)
-    )
-    user_id, active_count, journey_limit = await access_check(request, db)
+    try:
+        access_check = WisdomJourneysAccessRequired(
+            check_limit=True, requested_count=len(body.journey_ids)
+        )
+        user_id, active_count, journey_limit = await access_check(request, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking access (database may not be ready): {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "service_unavailable",
+                "message": "Wisdom Journeys is being set up. Please check back in a few minutes!",
+            }
+        )
 
     engine = get_journey_engine()
 
@@ -402,6 +436,19 @@ async def start_journeys(
             journey_template_ids=body.journey_ids,
             personalization=body.personalization,
         )
+
+        # Check if any journeys were created
+        if not journeys:
+            logger.warning(f"No journeys created for IDs: {body.journey_ids}")
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "error": "templates_not_found",
+                    "message": "The selected journey templates were not found. "
+                               "Please ensure the database has been seeded with journey templates.",
+                    "requested_ids": body.journey_ids,
+                }
+            )
 
         return [
             UserJourneyResponse(

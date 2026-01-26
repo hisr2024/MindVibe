@@ -12,7 +12,7 @@
  * the network connection is lost (decoherence), ensuring uninterrupted user experience.
  */
 
-const CACHE_VERSION = 'mindvibe-v14.2-bulletproof';
+const CACHE_VERSION = 'mindvibe-v14.3-journeys';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
@@ -338,6 +338,11 @@ async function handleNavigationRequest(request) {
  * Handle static resource requests
  */
 async function handleStaticRequest(request) {
+  // POST requests cannot be cached - pass through to network
+  if (request.method !== 'GET') {
+    return fetch(request)
+  }
+
   try {
     // Try cache first
     const cachedResponse = await caches.match(request)

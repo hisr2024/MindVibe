@@ -253,6 +253,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
       }
     }
 
+    // Check for service unavailable / preview mode (503)
+    if (response.status === 503 && error.detail?.error) {
+      const detail = error.detail
+      // Throw with the error code so frontend can detect it
+      throw new Error(`[${detail.error}] ${detail.message}`)
+    }
+
     throw new Error(
       typeof error.detail === 'string'
         ? error.detail

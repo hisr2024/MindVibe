@@ -15,7 +15,7 @@ import logging
 import random
 from typing import Any, TypedDict
 
-from sqlalchemy import and_, or_, select, func
+from sqlalchemy import and_, or_, select, func, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import GitaVerse, WisdomVerse
@@ -49,31 +49,71 @@ class VerseSearchResult(TypedDict):
 
 
 # Enemy tag to related theme mappings for verse selection
+# These themes map to the full 700+ verse corpus across all 18 chapters
 ENEMY_TAG_THEMES: dict[str, list[str]] = {
     "kama": [
         "desire", "lust", "attachment", "senses", "restraint", "control",
-        "brahmacharya", "self-control", "moderation", "detachment"
+        "brahmacharya", "self-control", "moderation", "detachment",
+        "renunciation", "tyaga", "vairagya", "indriya", "manas"
     ],
     "krodha": [
         "anger", "wrath", "patience", "peace", "calm", "equanimity",
-        "tolerance", "forgiveness", "serenity", "composure"
+        "tolerance", "forgiveness", "serenity", "composure",
+        "kshama", "shanti", "prasada", "forbearance", "tranquility"
     ],
     "lobha": [
         "greed", "avarice", "contentment", "generosity", "charity",
-        "satisfaction", "non-attachment", "selflessness", "giving"
+        "satisfaction", "non-attachment", "selflessness", "giving",
+        "dana", "santosha", "aparigraha", "tyaga", "abundance"
     ],
     "moha": [
         "delusion", "attachment", "clarity", "discrimination", "wisdom",
-        "viveka", "knowledge", "understanding", "truth", "reality"
+        "viveka", "knowledge", "understanding", "truth", "reality",
+        "jnana", "buddhi", "maya", "avidya", "vidya", "prajna"
     ],
     "mada": [
         "pride", "ego", "arrogance", "humility", "modesty", "surrender",
-        "service", "humbleness", "gratitude", "devotion"
+        "service", "humbleness", "gratitude", "devotion",
+        "ahamkara", "seva", "bhakti", "namrata", "vinaya"
     ],
     "matsarya": [
         "envy", "jealousy", "contentment", "appreciation", "joy",
-        "mudita", "compassion", "empathy", "celebration", "harmony"
+        "mudita", "compassion", "empathy", "celebration", "harmony",
+        "karuna", "maitri", "sukha", "ananda", "prem"
     ],
+}
+
+# Additional theme categories for comprehensive verse selection from all 18 chapters
+CHAPTER_THEMES: dict[int, list[str]] = {
+    1: ["grief", "confusion", "dharma", "duty", "family", "compassion", "despair"],
+    2: ["soul", "immortality", "equanimity", "karma-yoga", "wisdom", "duty", "action", "detachment"],
+    3: ["karma", "action", "duty", "sacrifice", "selflessness", "desire", "anger"],
+    4: ["knowledge", "wisdom", "sacrifice", "renunciation", "divine", "incarnation"],
+    5: ["renunciation", "action", "sannyasa", "karma-yoga", "peace", "brahman"],
+    6: ["meditation", "yoga", "mind-control", "discipline", "self-realization", "equanimity"],
+    7: ["knowledge", "divine", "maya", "devotion", "nature", "prakrti"],
+    8: ["brahman", "death", "liberation", "om", "remembrance", "devotion"],
+    9: ["devotion", "bhakti", "divine-secret", "worship", "grace", "surrender"],
+    10: ["divine-glories", "vibhuti", "manifestation", "supreme", "infinite"],
+    11: ["cosmic-form", "vishvarupa", "divine-vision", "time", "destruction", "devotion"],
+    12: ["devotion", "bhakti", "qualities", "dear-to-divine", "equanimity", "love"],
+    13: ["field", "knower", "prakrti", "purusha", "knowledge", "body", "soul"],
+    14: ["gunas", "sattva", "rajas", "tamas", "liberation", "transcendence"],
+    15: ["supreme-person", "tree-of-life", "eternal", "purushottama", "detachment"],
+    16: ["divine-qualities", "demonic-qualities", "virtue", "vice", "liberation"],
+    17: ["faith", "shraddha", "food", "sacrifice", "austerity", "charity", "gunas"],
+    18: ["renunciation", "liberation", "duty", "surrender", "moksha", "grace", "devotion"],
+}
+
+# Modern life application themes for KIAAN AI
+MODERN_THEMES: dict[str, list[str]] = {
+    "workplace": ["duty", "action", "karma", "detachment", "leadership", "service", "dharma"],
+    "relationships": ["love", "attachment", "compassion", "forgiveness", "harmony", "devotion"],
+    "mental_health": ["peace", "equanimity", "mind-control", "anxiety", "stress", "clarity"],
+    "technology": ["senses", "restraint", "detachment", "awareness", "moderation"],
+    "financial": ["contentment", "greed", "charity", "renunciation", "abundance", "detachment"],
+    "wellness": ["discipline", "body", "senses", "yoga", "meditation", "balance"],
+    "purpose": ["dharma", "duty", "calling", "action", "service", "self-realization"],
 }
 
 # Virtue tags (opposite of enemies)
@@ -145,11 +185,11 @@ class GitaCorpusAdapter:
                 verse_text: VerseText = {
                     "sanskrit": getattr(verse_row, "sanskrit", None),
                     "transliteration": getattr(verse_row, "transliteration", None),
-                    "translation": getattr(verse_row, "text", "") or getattr(verse_row, "english", ""),
+                    "translation": verse_row.english or "",
                     "hindi": getattr(verse_row, "hindi", None),
-                    "reflection": getattr(verse_row, "reflection", None),
-                    "themes": getattr(verse_row, "themes", []) or [],
-                    "keywords": getattr(verse_row, "keywords", []) or [],
+                    "reflection": getattr(verse_row, "principle", None),
+                    "themes": [verse_row.theme] if verse_row.theme else [],
+                    "keywords": getattr(verse_row, "mental_health_applications", []) or [],
                 }
                 self._cache[cache_key] = verse_text
                 return verse_text
@@ -214,15 +254,17 @@ class GitaCorpusAdapter:
         tags: list[str],
         limit: int = 10,
         exclude_refs: list[VerseReference] | None = None,
+        chapters: list[int] | None = None,
     ) -> list[VerseSearchResult]:
         """
-        Search verses by tags (enemy tags, themes, keywords).
+        Search verses by tags (enemy tags, themes, keywords) across all 700+ verses.
 
         Args:
             db: Database session
             tags: Tags to search for (enemy tags like "krodha" are expanded)
             limit: Maximum results to return
             exclude_refs: Verse references to exclude
+            chapters: Optional list of chapters to search within
 
         Returns:
             List of VerseSearchResult sorted by relevance score
@@ -235,8 +277,17 @@ class GitaCorpusAdapter:
             tag_lower = tag.lower()
             if tag_lower in ENEMY_TAG_THEMES:
                 expanded_themes.update(ENEMY_TAG_THEMES[tag_lower])
+            # Also check modern themes
+            elif tag_lower in MODERN_THEMES:
+                expanded_themes.update(MODERN_THEMES[tag_lower])
             else:
                 expanded_themes.add(tag_lower)
+
+        # Add chapter-specific themes if chapters provided
+        if chapters:
+            for ch in chapters:
+                if ch in CHAPTER_THEMES:
+                    expanded_themes.update(CHAPTER_THEMES[ch])
 
         try:
             # Query GitaVerse with theme/keyword matching
@@ -244,11 +295,17 @@ class GitaCorpusAdapter:
             conditions = []
 
             for theme in list(expanded_themes)[:10]:  # Limit to avoid query explosion
+                # Match against 'theme' field (singular string column)
                 conditions.append(
-                    func.lower(func.cast(GitaVerse.themes, String)).contains(theme.lower())
+                    func.lower(GitaVerse.theme).contains(theme.lower())
                 )
+                # Match against 'principle' field
                 conditions.append(
-                    func.lower(func.cast(GitaVerse.keywords, String)).contains(theme.lower())
+                    func.lower(GitaVerse.principle).contains(theme.lower())
+                )
+                # Match against mental_health_applications JSON array if not null
+                conditions.append(
+                    func.lower(func.cast(GitaVerse.mental_health_applications, String)).contains(theme.lower())
                 )
 
             if not conditions:
@@ -280,7 +337,7 @@ class GitaCorpusAdapter:
                     "chapter": v.chapter,
                     "verse": v.verse,
                     "score": score,
-                    "themes": getattr(v, "themes", []) or [],
+                    "themes": [v.theme] if v.theme else [],
                 })
 
             # Sort by score and limit
@@ -299,16 +356,28 @@ class GitaCorpusAdapter:
         """Calculate relevance score for a verse based on theme overlap."""
         score = 0.0
 
-        verse_themes = set(t.lower() for t in (getattr(verse, "themes", []) or []))
-        verse_keywords = set(k.lower() for k in (getattr(verse, "keywords", []) or []))
+        # Get theme as set (single value to set)
+        verse_theme = verse.theme.lower() if verse.theme else ""
+        verse_principle = verse.principle.lower() if verse.principle else ""
+        verse_apps = set(
+            a.lower() for a in (getattr(verse, "mental_health_applications", []) or [])
+        )
 
         # Theme matches
-        theme_overlap = len(themes & verse_themes)
-        score += theme_overlap * 0.3
+        for t in themes:
+            if t.lower() in verse_theme:
+                score += 0.3
+                break
 
-        # Keyword matches
-        keyword_overlap = len(themes & verse_keywords)
-        score += keyword_overlap * 0.2
+        # Principle matches
+        for t in themes:
+            if t.lower() in verse_principle:
+                score += 0.2
+                break
+
+        # Application keyword matches
+        app_overlap = len(themes & verse_apps)
+        score += min(app_overlap * 0.15, 0.3)
 
         # Journey relevance boost
         if hasattr(verse, "journey_relevance_score") and verse.journey_relevance_score:
@@ -367,7 +436,7 @@ class GitaCorpusAdapter:
                     "chapter": v.chapter,
                     "verse": v.verse,
                     "score": 0.5,  # Neutral score for random
-                    "themes": getattr(v, "themes", []) or [],
+                    "themes": [v.theme] if v.theme else [],
                 })
 
                 if len(filtered) >= limit:
@@ -448,6 +517,87 @@ class GitaCorpusAdapter:
     def get_virtue_for_enemy(self, enemy: str) -> str:
         """Get the virtue that counters a specific enemy."""
         return VIRTUE_TAGS.get(enemy.lower(), "peace")
+
+    def get_recommended_chapters(self, enemy: str) -> list[int]:
+        """
+        Get recommended Gita chapters for addressing a specific enemy.
+
+        Returns chapters from the 18-chapter corpus most relevant to each enemy.
+        """
+        # Map enemies to most relevant chapters from the 700+ verse corpus
+        chapter_recommendations = {
+            "kama": [2, 3, 5, 6, 13, 14, 15],  # Desire, senses, detachment
+            "krodha": [2, 3, 6, 12, 16],        # Anger, equanimity, divine qualities
+            "lobha": [2, 3, 5, 12, 16, 17],     # Greed, charity, selflessness
+            "moha": [2, 4, 7, 13, 14, 15, 18],  # Delusion, knowledge, wisdom
+            "mada": [2, 9, 11, 12, 16, 18],     # Pride, devotion, surrender
+            "matsarya": [2, 6, 12, 14, 16],     # Envy, equanimity, divine qualities
+            "mixed": list(range(1, 19)),        # All 18 chapters for comprehensive journey
+        }
+        return chapter_recommendations.get(enemy.lower(), list(range(1, 19)))
+
+    def get_chapter_themes(self, chapter: int) -> list[str]:
+        """Get themes for a specific chapter."""
+        return CHAPTER_THEMES.get(chapter, [])
+
+    def get_modern_themes(self, context: str) -> list[str]:
+        """Get verse search themes for modern life contexts."""
+        return MODERN_THEMES.get(context.lower(), [])
+
+    async def get_verses_from_chapters(
+        self,
+        db: AsyncSession,
+        chapters: list[int],
+        limit: int = 10,
+        exclude_refs: list[VerseReference] | None = None,
+    ) -> list[VerseSearchResult]:
+        """
+        Get random verses from specific chapters.
+
+        Args:
+            db: Database session
+            chapters: List of chapter numbers to search
+            limit: Maximum verses to return
+            exclude_refs: Verses to exclude
+
+        Returns:
+            List of VerseSearchResult from the specified chapters
+        """
+        exclude_refs = exclude_refs or []
+
+        try:
+            result = await db.execute(
+                select(GitaVerse)
+                .where(GitaVerse.chapter.in_(chapters))
+                .order_by(func.random())
+                .limit(limit * 3)
+            )
+            verses = list(result.scalars().all())
+
+            # Filter excluded
+            filtered: list[VerseSearchResult] = []
+            for v in verses:
+                if any(
+                    r["chapter"] == v.chapter and r["verse"] == v.verse
+                    for r in exclude_refs
+                ):
+                    continue
+
+                filtered.append({
+                    "chapter": v.chapter,
+                    "verse": v.verse,
+                    "score": 0.7,  # Chapter-based selection score
+                    "themes": [v.theme] if v.theme else [],
+                })
+
+                if len(filtered) >= limit:
+                    break
+
+            return filtered
+
+        except Exception as e:
+            logger.error(f"Error getting verses from chapters: {e}")
+            return self._get_fallback_verses(limit, exclude_refs)
 
     def clear_cache(self) -> None:
         """Clear the verse text cache."""

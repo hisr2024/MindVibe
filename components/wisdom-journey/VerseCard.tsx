@@ -43,9 +43,15 @@ export function VerseCard({ step, onComplete, isCurrentStep = false }: VerseCard
               <BookOpen className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-orange-50">
-                Bhagavad Gita {step.verse_chapter}:{step.verse_number}
-              </h3>
+              {step.verse_chapter && step.verse_number ? (
+                <h3 className="text-sm font-semibold text-orange-50">
+                  Bhagavad Gita {step.verse_chapter}:{step.verse_number}
+                </h3>
+              ) : (
+                <h3 className="text-sm font-semibold text-orange-50">
+                  Wisdom Verse
+                </h3>
+              )}
               <p className="text-xs text-orange-100/60">Step {step.step_number}</p>
             </div>
           </div>

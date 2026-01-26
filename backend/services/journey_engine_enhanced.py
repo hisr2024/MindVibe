@@ -116,11 +116,12 @@ class JourneyScheduler:
 
 class VersePicker:
     """
-    Selects verses for journey steps.
+    Selects verses for journey steps from the full 700+ verse corpus.
 
     Features:
     - Prefers static_verse_refs if defined in template
-    - Falls back to tag-based search from corpus
+    - Uses chapter recommendations based on enemy focus
+    - Falls back to tag-based search from full corpus
     - Excludes recently used verses (configurable window)
     """
 
@@ -137,7 +138,7 @@ class VersePicker:
         max_verses: int = 3,
     ) -> list[VerseReference]:
         """
-        Pick verses for a journey step.
+        Pick verses for a journey step from the 700+ verse Gita corpus.
 
         Args:
             db: Database session
@@ -148,7 +149,7 @@ class VersePicker:
             max_verses: Maximum verses to return
 
         Returns:
-            List of verse references
+            List of verse references from across all 18 chapters
         """
         # 1. Check for static verse refs in template
         if template_step and template_step.static_verse_refs:
@@ -167,13 +168,35 @@ class VersePicker:
         tags = selector.get("tags", []) or enemy_tags
         limit = min(selector.get("max_verses", max_verses), max_verses)
 
-        # 4. Search for verses by tags
+        # 4. Get chapters - prefer template-specified, fallback to enemy-recommended
+        primary_enemy = enemy_tags[0] if enemy_tags else "mixed"
+        selector_chapters = selector.get("chapters", [])
+        if selector_chapters:
+            # Use template-specified chapters (from 700+ verse corpus)
+            recommended_chapters = selector_chapters
+        else:
+            # Use enemy-based recommendations across all 18 chapters
+            recommended_chapters = self._adapter.get_recommended_chapters(primary_enemy)
+
+        # 5. Search for verses by tags across recommended chapters (full 700+ corpus)
         results = await self._adapter.search_by_tags(
             db=db,
             tags=tags,
             limit=limit,
             exclude_refs=exclude_refs,
+            chapters=recommended_chapters,
         )
+
+        # 6. If not enough results, broaden search to all chapters
+        if len(results) < limit:
+            additional = await self._adapter.search_by_tags(
+                db=db,
+                tags=tags,
+                limit=limit - len(results),
+                exclude_refs=exclude_refs + [{"chapter": r["chapter"], "verse": r["verse"]} for r in results],
+                chapters=None,  # Search all chapters
+            )
+            results.extend(additional)
 
         return [{"chapter": r["chapter"], "verse": r["verse"]} for r in results]
 
@@ -537,13 +560,14 @@ class EnhancedJourneyEngine:
         self,
         db: AsyncSession,
     ) -> list[dict[str, Any]]:
-        """Get all active journey templates."""
+        """Get all active journey templates from 700+ verse corpus."""
         result = await db.execute(
             select(JourneyTemplate)
             .where(JourneyTemplate.is_active == True)
             .order_by(JourneyTemplate.is_featured.desc(), JourneyTemplate.title)
         )
         templates = list(result.scalars().all())
+        logger.info(f"Found {len(templates)} active journey templates in database")
 
         return [
             {
@@ -583,7 +607,7 @@ class EnhancedJourneyEngine:
         journeys: list[UserJourney] = []
 
         for template_id in journey_template_ids:
-            # Verify template exists
+            # Verify template exists and is active
             template = await db.get(JourneyTemplate, template_id)
             if not template or not template.is_active:
                 logger.warning(f"Template {template_id} not found or inactive")

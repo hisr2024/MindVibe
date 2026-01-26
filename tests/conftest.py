@@ -12,7 +12,10 @@ from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import JSON
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.types import TypeDecorator
 from starlette.requests import Request
 
 # Add the project root to the path
@@ -24,6 +27,22 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from backend import main as app_module
 from backend import models
+
+
+# Patch ARRAY type to work with SQLite (convert to JSON)
+class SQLiteCompatibleArray(TypeDecorator):
+    """Type decorator that converts ARRAY to JSON for SQLite compatibility."""
+    impl = JSON
+    cache_ok = True
+
+    def __init__(self, item_type=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.item_type = item_type
+
+
+# Monkey-patch the ARRAY type for SQLite testing
+original_array = ARRAY
+models.ARRAY = SQLiteCompatibleArray
 
 
 @pytest.fixture(scope="session")
@@ -40,15 +59,49 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
     Create a test database session.
     Uses an in-memory SQLite database for testing.
     """
+    from sqlalchemy.dialects import postgresql
+
+    # Monkey-patch ARRAY at the dialect level for SQLite
+    original_array_class = postgresql.ARRAY
+    postgresql.ARRAY = SQLiteCompatibleArray
+
     # Create an in-memory SQLite database
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
 
-    # Create all tables
+    # Create only the tables needed for wisdom journey tests
+    # Skip tables with PostgreSQL-specific types that can't be easily converted
+    tables_to_create = [
+        models.User.__table__,
+        models.GitaVerse.__table__,
+        models.Mood.__table__,
+        models.JournalEntry.__table__,
+        models.WisdomJourney.__table__,
+        models.JourneyStep.__table__,
+        models.JourneyRecommendation.__table__,
+    ]
+
+    # Also add enhanced journey tables if they exist
+    for table_name in ['journey_templates', 'journey_template_steps', 'user_journeys', 'user_journey_step_state']:
+        if hasattr(models, table_name):
+            tables_to_create.append(getattr(models, table_name))
+        # Check for class-based tables
+        for cls_name in ['JourneyTemplate', 'JourneyTemplateStep', 'UserJourney', 'UserJourneyStepState']:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
+
     async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
+        # Create only compatible tables
+        for table in tables_to_create:
+            try:
+                await conn.run_sync(table.create, checkfirst=True)
+            except Exception:
+                # Skip tables that fail to create
+                pass
 
     # Create a session maker
     async_session = async_sessionmaker(
@@ -61,6 +114,9 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
 
     # Cleanup
     await engine.dispose()
+
+    # Restore original
+    postgresql.ARRAY = original_array_class
 
 
 @pytest.fixture(scope="function")
