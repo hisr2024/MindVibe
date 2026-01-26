@@ -307,6 +307,12 @@ async def seed_journey_templates():
     """Seed journey templates and their steps."""
     engine = create_async_engine(DATABASE_URL, echo=True)
 
+    # First, ensure all tables exist (including user_journeys, user_journey_step_state)
+    from backend.models import Base
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        print("Ensured all tables exist")
+
     async with engine.begin() as conn:
         # Create templates
         for template in JOURNEY_TEMPLATES:
