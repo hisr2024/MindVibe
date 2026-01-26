@@ -387,19 +387,12 @@ async def start_journeys(
     Supports starting multiple journeys in a single request.
     Rate limited to 10 journey starts per hour.
     """
-    # Check premium access with limit validation
-    access_check = WisdomJourneysAccessRequired(
-        check_limit=True, requested_count=len(body.journey_ids)
-    )
-    user_id, active_count, journey_limit = await access_check(request, db)
-
-    engine = get_journey_engine()
-
-    # Check if trying to start demo journeys (database not yet set up)
+    # Check if trying to start demo journeys FIRST (before access check)
+    # This allows showing preview message even when database is not set up
     demo_ids = [jid for jid in body.journey_ids if jid.startswith("demo-")]
     if demo_ids:
         # Demo templates are preview-only until database is set up
-        logger.info(f"User {user_id} attempted to start demo journeys: {demo_ids}")
+        logger.info(f"User attempted to start demo journeys: {demo_ids}")
         raise HTTPException(
             status_code=503,
             detail={
@@ -410,6 +403,26 @@ async def start_journeys(
                 "journey_ids": demo_ids,
             }
         )
+
+    # Now check premium access with limit validation
+    try:
+        access_check = WisdomJourneysAccessRequired(
+            check_limit=True, requested_count=len(body.journey_ids)
+        )
+        user_id, active_count, journey_limit = await access_check(request, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking access (database may not be ready): {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "service_unavailable",
+                "message": "Wisdom Journeys is being set up. Please check back in a few minutes!",
+            }
+        )
+
+    engine = get_journey_engine()
 
     try:
         journeys = await engine.start_journeys(

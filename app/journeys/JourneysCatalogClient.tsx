@@ -452,10 +452,14 @@ export default function JourneysCatalogClient() {
         return
       }
 
-      // Handle demo preview error
+      // Handle demo preview and service unavailable errors
       const errorMessage = err instanceof Error ? err.message : String(err)
-      if (errorMessage.includes('preview') || errorMessage.includes('demo') || errorMessage.includes('503')) {
+      if (errorMessage.includes('demo_preview_only') || errorMessage.includes('preview mode')) {
         setError('🚀 Wisdom Journeys is in preview mode! The full feature with personalized AI content is launching soon. Stay tuned!')
+        return
+      }
+      if (errorMessage.includes('service_unavailable') || errorMessage.includes('being set up')) {
+        setError('🔧 Wisdom Journeys is being set up. Please check back in a few minutes!')
         return
       }
 
