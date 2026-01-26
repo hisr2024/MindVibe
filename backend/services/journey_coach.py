@@ -141,29 +141,49 @@ TONE INSTRUCTION:
 {tone_instruction}
 
 YOUR TASK:
-Generate a daily step for the user's Wisdom Journey. You will be given verse references from the Bhagavad Gita to incorporate.
+Generate a daily step for the user's Wisdom Journey. You will be given verse references from the Bhagavad Gita corpus (700+ verses across 18 chapters) to incorporate.
+
+MODERN-DAY IMPLEMENTATION GUIDELINES:
+You must translate the ancient Gita wisdom from the verses into PRACTICAL, MODERN-DAY applications:
+
+1. WORKPLACE APPLICATIONS - Apply wisdom to office stress, career decisions, workplace conflicts, professional growth, team dynamics, leadership challenges, work-life balance
+2. RELATIONSHIPS - Modern dating, marriage, family dynamics, friendships, social media interactions, setting healthy boundaries, communication
+3. MENTAL HEALTH - Anxiety management, depression, stress, burnout, overthinking, emotional regulation, building resilience
+4. TECHNOLOGY BALANCE - Screen time, social media comparison, digital detox, mindful tech use, online presence
+5. FINANCIAL WISDOM - Money mindset, career vs calling, material attachment, conscious consumption, financial anxiety
+6. DAILY PRACTICES - Morning routines, commute meditation, lunch break practices, evening wind-down, micro-moments of awareness
+7. PHYSICAL WELLNESS - Exercise as spiritual practice, mindful eating, sleep hygiene, body awareness, stress in the body
+
+EXAMPLE MODERN IMPLEMENTATIONS:
+- "When you feel road rage arising, practice the 3-breath pause before reacting"
+- "Before checking social media, ask: 'What am I seeking that I can give myself?'"
+- "In your next work meeting, practice listening without planning your response"
+- "Tonight, put your phone away 30 minutes before bed and reflect on your day"
+- "When you feel comparison scrolling through LinkedIn, remember your unique dharma"
+- "During your commute, practice witnessing thoughts without engaging them"
 
 CRITICAL RULES:
 1. OUTPUT STRICT JSON - Your response must be valid JSON matching the schema exactly
 2. VERSE REFS ONLY - Include only verse references (chapter/verse numbers), NEVER include verse text
 3. NO RELIGIOUS NAMES - Never mention "Krishna", "Arjuna", "Bhagavad Gita", or specific religious figures
-4. UNIVERSAL WISDOM - Frame teachings as universal wisdom, not religious doctrine
-5. PRACTICAL FOCUS - Every step must have an actionable practice the user can do today
-6. SAFETY AWARE - If any user reflection indicates self-harm, return a safety response instead
+4. UNIVERSAL WISDOM - Frame teachings as universal wisdom applicable to modern life
+5. PRACTICAL FOCUS - Every step must have an actionable practice the user can do TODAY in their MODERN LIFE
+6. RELATABLE EXAMPLES - Use examples from modern life: work emails, social media, commute, gym, family dinners
+7. SAFETY AWARE - If any user reflection indicates self-harm, return a safety response instead
 
 OUTPUT SCHEMA:
 {{
   "step_title": "Brief, inspiring title for today's step",
   "today_focus": "kama|krodha|lobha|moha|mada|matsarya|mixed",
   "verse_refs": [{{"chapter": 2, "verse": 47}}],
-  "teaching": "200-400 word teaching weaving together the wisdom from the verses...",
-  "guided_reflection": ["Reflection question 1", "Reflection question 2", "Reflection question 3"],
+  "teaching": "200-400 word teaching weaving together the wisdom from the verses with MODERN-DAY applications and relatable examples from contemporary life...",
+  "guided_reflection": ["Reflection question 1 (modern context)", "Reflection question 2 (modern context)", "Reflection question 3 (modern context)"],
   "practice": {{
     "name": "Practice name",
-    "instructions": ["Step 1...", "Step 2...", "Step 3..."],
+    "instructions": ["Step 1 (specific, modern action)...", "Step 2...", "Step 3..."],
     "duration_minutes": 5
   }},
-  "micro_commitment": "One small, specific action the user commits to today",
+  "micro_commitment": "One small, specific action the user commits to today IN THEIR MODERN LIFE",
   "check_in_prompt": {{
     "scale": "0-10",
     "label": "How intense is your [enemy] feeling today?"
@@ -171,7 +191,7 @@ OUTPUT SCHEMA:
   "safety_note": "Optional note if content touches on sensitive topics"
 }}
 
-Remember: verse_refs must ONLY contain the references you were given. The user interface will fetch the actual verse text from our corpus."""
+Remember: verse_refs must ONLY contain the references you were given. The user interface will fetch the actual verse text from our corpus of 700+ Gita verses across all 18 chapters."""
 
 
 SAFETY_DETECTION_PROMPT = """Analyze the following user reflection for signs of crisis or self-harm intent.
