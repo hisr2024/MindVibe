@@ -9,6 +9,7 @@ Usage:
 """
 
 import asyncio
+import json
 import os
 import sys
 import uuid
@@ -320,14 +321,14 @@ async def seed_journey_templates():
                         icon_name, color_theme, created_at, updated_at
                     )
                     VALUES (
-                        :id, :slug, :title, :description, :primary_enemy_tags::jsonb,
+                        :id, :slug, :title, :description, CAST(:primary_enemy_tags AS jsonb),
                         :duration_days, :difficulty, true, :is_featured,
                         :icon_name, :color_theme, NOW(), NOW()
                     )
                     ON CONFLICT (slug) DO UPDATE SET
                         title = EXCLUDED.title,
                         description = EXCLUDED.description,
-                        primary_enemy_tags = EXCLUDED.primary_enemy_tags,
+                        primary_enemy_tags = CAST(EXCLUDED.primary_enemy_tags AS jsonb),
                         duration_days = EXCLUDED.duration_days,
                         difficulty = EXCLUDED.difficulty,
                         is_featured = EXCLUDED.is_featured,
@@ -341,7 +342,7 @@ async def seed_journey_templates():
                     "slug": template["slug"],
                     "title": template["title"],
                     "description": template["description"],
-                    "primary_enemy_tags": str(template["primary_enemy_tags"]).replace("'", '"'),
+                    "primary_enemy_tags": json.dumps(template["primary_enemy_tags"]),
                     "duration_days": template["duration_days"],
                     "difficulty": template["difficulty"],
                     "is_featured": template["is_featured"],
@@ -377,7 +378,7 @@ async def seed_journey_templates():
                         VALUES (
                             :id, :journey_template_id, :day_index,
                             :step_title, :teaching_hint, :reflection_prompt, :practice_prompt,
-                            :verse_selector::jsonb, :static_verse_refs::jsonb, :safety_notes,
+                            CAST(:verse_selector AS jsonb), CAST(:static_verse_refs AS jsonb), :safety_notes,
                             NOW(), NOW()
                         )
                         ON CONFLICT (journey_template_id, day_index) DO UPDATE SET
@@ -397,8 +398,8 @@ async def seed_journey_templates():
                         "teaching_hint": step.get("teaching_hint"),
                         "reflection_prompt": step.get("reflection_prompt"),
                         "practice_prompt": step.get("practice_prompt"),
-                        "verse_selector": str(step.get("verse_selector", {})).replace("'", '"'),
-                        "static_verse_refs": str(step.get("static_verse_refs")).replace("'", '"') if step.get("static_verse_refs") else None,
+                        "verse_selector": json.dumps(step.get("verse_selector", {})),
+                        "static_verse_refs": json.dumps(step.get("static_verse_refs")) if step.get("static_verse_refs") else None,
                         "safety_notes": step.get("safety_notes"),
                     },
                 )
