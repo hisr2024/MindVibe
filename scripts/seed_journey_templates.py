@@ -860,12 +860,12 @@ async def seed_journey_templates():
                     INSERT INTO journey_templates (
                         id, slug, title, description, primary_enemy_tags,
                         duration_days, difficulty, is_active, is_featured,
-                        icon_name, color_theme, created_at, updated_at
+                        icon_name, color_theme, deleted_at, created_at, updated_at
                     )
                     VALUES (
                         :id, :slug, :title, :description, CAST(:primary_enemy_tags AS jsonb),
                         :duration_days, :difficulty, true, :is_featured,
-                        :icon_name, :color_theme, NOW(), NOW()
+                        :icon_name, :color_theme, NULL, NOW(), NOW()
                     )
                     ON CONFLICT (slug) DO UPDATE SET
                         title = EXCLUDED.title,
@@ -876,6 +876,7 @@ async def seed_journey_templates():
                         is_featured = EXCLUDED.is_featured,
                         icon_name = EXCLUDED.icon_name,
                         color_theme = EXCLUDED.color_theme,
+                        deleted_at = NULL,
                         updated_at = NOW()
                     RETURNING id
                 """),
