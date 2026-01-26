@@ -191,12 +191,28 @@ function getAuthToken(): string | null {
 
   // Try multiple token storage locations (matching lib/api.ts pattern)
   return (
+    localStorage.getItem('mindvibe_access_token') ||  // Primary - set by useAuth hook
     localStorage.getItem('access_token') ||
-    localStorage.getItem('mindvibe_access_token') ||
     localStorage.getItem('auth_token') ||
     localStorage.getItem('mindvibe_token') ||
     sessionStorage.getItem('access_token')
   )
+}
+
+function getUserId(): string | null {
+  if (typeof window === 'undefined') return null
+
+  // Try to get user ID from stored auth data
+  const userJson = localStorage.getItem('mindvibe_auth_user')
+  if (userJson) {
+    try {
+      const user = JSON.parse(userJson)
+      return user.id || null
+    } catch {
+      return null
+    }
+  }
+  return null
 }
 
 function getHeaders(): HeadersInit {
@@ -207,6 +223,12 @@ function getHeaders(): HeadersInit {
   const token = getAuthToken()
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
+  }
+
+  // Also add X-Auth-UID as fallback (backend supports both methods)
+  const userId = getUserId()
+  if (userId) {
+    headers['X-Auth-UID'] = userId
   }
 
   return headers
@@ -238,9 +260,55 @@ export class PremiumFeatureError extends Error {
   }
 }
 
+/**
+ * Custom error class for authentication errors
+ */
+export class AuthenticationError extends Error {
+  public readonly isAuthError = true
+  public readonly statusCode: number
+
+  constructor(message: string, statusCode: number = 401) {
+    super(message)
+    this.name = 'AuthenticationError'
+    this.statusCode = statusCode
+  }
+}
+
+/**
+ * Custom error class for service unavailable errors
+ */
+export class ServiceUnavailableError extends Error {
+  public readonly isServiceError = true
+  public readonly errorCode: string
+
+  constructor(errorCode: string, message: string) {
+    super(message)
+    this.name = 'ServiceUnavailableError'
+    this.errorCode = errorCode
+  }
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
+
+    // Check for authentication errors (401 Unauthorized)
+    if (response.status === 401) {
+      const message = typeof error.detail === 'string'
+        ? error.detail
+        : error.detail?.message || 'Authentication required. Please log in.'
+
+      console.warn('[JourneysService] Authentication error:', message)
+
+      // Dispatch event so other components can react (e.g., show login modal)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth-required', {
+          detail: { message, redirectTo: window.location.pathname }
+        }))
+      }
+
+      throw new AuthenticationError(message)
+    }
 
     // Check for premium feature errors (403 Forbidden)
     if (response.status === 403 && error.detail?.error) {
@@ -254,10 +322,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
     }
 
     // Check for service unavailable / preview mode (503)
-    if (response.status === 503 && error.detail?.error) {
-      const detail = error.detail
-      // Throw with the error code so frontend can detect it
-      throw new Error(`[${detail.error}] ${detail.message}`)
+    if (response.status === 503) {
+      const detail = error.detail || {}
+      const errorCode = detail.error || 'service_unavailable'
+      const message = detail.message || 'Service temporarily unavailable. Please try again.'
+
+      console.warn('[JourneysService] Service unavailable:', errorCode, message)
+
+      throw new ServiceUnavailableError(errorCode, message)
     }
 
     throw new Error(
@@ -364,20 +436,56 @@ export async function getCatalog(): Promise<JourneyTemplate[]> {
 
 /**
  * Start one or more journeys
+ *
+ * Handles various error cases:
+ * - 401: Not authenticated - dispatches auth-required event
+ * - 403: Premium feature not available or journey limit reached
+ * - 503: Service unavailable (database not ready/seeded)
  */
 export async function startJourneys(
   journeyIds: string[],
   personalization?: Personalization
 ): Promise<UserJourney[]> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/start`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({
-      journey_ids: journeyIds,
-      personalization,
-    }),
-  })
-  return handleResponse<UserJourney[]>(response)
+  // Verify auth token exists before making request
+  const token = getAuthToken()
+  const userId = getUserId()
+
+  if (!token && !userId) {
+    console.warn('[JourneysService] No auth credentials found for startJourneys')
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth-required', {
+        detail: { message: 'Please log in to start a journey', redirectTo: window.location.pathname }
+      }))
+    }
+    throw new AuthenticationError('Authentication required. Please log in to start a journey.')
+  }
+
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/api/journeys/start`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        journey_ids: journeyIds,
+        personalization,
+      }),
+    })
+    return handleResponse<UserJourney[]>(response)
+  } catch (error) {
+    // Re-throw known error types with additional context
+    if (error instanceof AuthenticationError) {
+      throw error
+    }
+    if (error instanceof ServiceUnavailableError) {
+      console.error('[JourneysService] Service unavailable when starting journeys:', error.errorCode)
+      throw error
+    }
+    if (error instanceof PremiumFeatureError) {
+      throw error
+    }
+    // Wrap unknown errors
+    console.error('[JourneysService] Failed to start journeys:', error)
+    throw error
+  }
 }
 
 /**
@@ -578,6 +686,33 @@ export function formatDuration(days: number): string {
  */
 export function isPremiumError(error: unknown): error is PremiumFeatureError {
   return error instanceof PremiumFeatureError
+}
+
+/**
+ * Check if an error is an authentication error
+ */
+export function isAuthError(error: unknown): error is AuthenticationError {
+  return error instanceof AuthenticationError
+}
+
+/**
+ * Check if an error is a service unavailable error
+ */
+export function isServiceError(error: unknown): error is ServiceUnavailableError {
+  return error instanceof ServiceUnavailableError
+}
+
+/**
+ * Check if the error indicates database is not seeded
+ */
+export function isDatabaseNotSeeded(error: unknown): boolean {
+  if (error instanceof ServiceUnavailableError) {
+    return error.errorCode === 'database_not_seeded' || error.errorCode === 'database_not_ready'
+  }
+  if (error instanceof Error) {
+    return error.message.includes('database_not_seeded') || error.message.includes('database_not_ready')
+  }
+  return false
 }
 
 /**

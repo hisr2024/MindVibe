@@ -352,19 +352,13 @@ async def get_catalog(
     try:
         templates = await engine.get_catalog(db)
 
-        # If database returned empty, return clear error instead of demo templates
+        # If database returned empty, return demo templates with a warning header
         if not templates:
-            logger.warning("No templates in database - seeding required")
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_not_seeded",
-                    "message": "Journey templates have not been seeded. "
-                               "Run: python scripts/seed_journey_templates.py --seed",
-                }
-            )
+            logger.warning("[catalog] No templates in database - returning demo templates. Run seeding script to populate.")
+            response.headers["X-MindVibe-Fallback"] = "demo-templates"
+            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
 
-        logger.info(f"Returning {len(templates)} templates from database")
+        logger.info(f"[catalog] Returning {len(templates)} templates from database")
         return [JourneyTemplateResponse(**t) for t in templates]
 
     except HTTPException:
@@ -373,16 +367,14 @@ async def get_catalog(
         error_msg = str(e).lower()
         # Handle case where table doesn't exist yet (not migrated)
         if "journey_templates" in error_msg or "relation" in error_msg or "does not exist" in error_msg:
-            logger.warning("Journey templates table not found - migration required")
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_not_ready",
-                    "message": "Journey templates table not found. Database migration may be required.",
-                }
-            )
-        logger.error(f"Error getting catalog: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get journey catalog")
+            logger.warning("[catalog] Journey templates table not found - returning demo templates")
+            response.headers["X-MindVibe-Fallback"] = "demo-templates"
+            return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
+
+        logger.error(f"[catalog] Error getting catalog: {e}", exc_info=True)
+        # Return demo templates as fallback instead of 500 error
+        response.headers["X-MindVibe-Fallback"] = "demo-templates-error"
+        return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
 
 
 # =============================================================================
@@ -409,23 +401,55 @@ async def start_journeys(
     Supports starting multiple journeys in a single request.
     Rate limited to 10 journey starts per hour.
     """
+    # Debug: Log auth headers for troubleshooting
+    auth_header = request.headers.get("Authorization", "")
+    x_auth_uid = request.headers.get("X-Auth-UID", "")
+    logger.info(
+        f"[start_journeys] Auth check - "
+        f"Authorization: {'present' if auth_header else 'missing'}, "
+        f"X-Auth-UID: {'present' if x_auth_uid else 'missing'}, "
+        f"journey_ids: {body.journey_ids}"
+    )
+
     # Check premium access with limit validation
     try:
         access_check = WisdomJourneysAccessRequired(
             check_limit=True, requested_count=len(body.journey_ids)
         )
         user_id, active_count, journey_limit = await access_check(request, db)
-    except HTTPException:
+        logger.info(f"[start_journeys] Access granted for user {user_id}, active: {active_count}, limit: {journey_limit}")
+    except HTTPException as e:
+        logger.warning(f"[start_journeys] Access denied: {e.status_code} - {e.detail}")
         raise
     except Exception as e:
-        logger.error(f"Error checking access (database may not be ready): {e}")
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "error": "service_unavailable",
-                "message": "Wisdom Journeys is being set up. Please check back in a few minutes!",
-            }
-        )
+        error_msg = str(e).lower()
+        logger.error(f"[start_journeys] Error checking access: {e}", exc_info=True)
+
+        # Provide more specific error messages based on the error type
+        if "relation" in error_msg or "does not exist" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_ready",
+                    "message": "Database tables are being set up. Please try again in a moment.",
+                }
+            )
+        elif "connection" in error_msg or "connect" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_connection_error",
+                    "message": "Unable to connect to the database. Please try again in a moment.",
+                }
+            )
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "service_unavailable",
+                    "message": "Wisdom Journeys is being set up. Please check back in a few minutes!",
+                }
+            )
 
     engine = get_journey_engine()
 
