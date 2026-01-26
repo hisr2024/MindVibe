@@ -36,81 +36,87 @@ async def sample_user_id():
 
 
 @pytest.fixture
-async def sample_gita_verses(db_session: AsyncSession):
+async def sample_gita_verses(test_db: AsyncSession):
     """Fixture for sample Gita verses."""
     verses = [
         GitaVerse(
             id=1,
             chapter=2,
             verse=47,
-            text="You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions.",
+            sanskrit="कर्मण्येवाधिकारस्ते मा फलेषु कदाचन",
             transliteration="karmaṇy-evādhikāras te mā phaleṣhu kadāchana",
-            translation="You have the right to work only, but never to its fruits.",
+            hindi="तेरा कर्म करने में ही अधिकार है, फलों में कभी नहीं",
+            english="You have the right to work only, but never to its fruits.",
+            principle="Detachment from results",
+            theme="karma_yoga",
         ),
         GitaVerse(
             id=2,
             chapter=6,
             verse=35,
-            text="The mind is restless and difficult to control, but it can be conquered through practice and detachment.",
+            sanskrit="असंशयं महाबाहो मनो दुर्निग्रहं चलम्",
             transliteration="asanśhayaṁ mahā-bāho mano durnigrahaṁ chalam",
-            translation="The mind is restless, turbulent, strong and unyielding.",
+            hindi="मन चंचल और कठिन है, लेकिन अभ्यास और वैराग्य से इसे वश में किया जा सकता है",
+            english="The mind is restless, turbulent, strong and unyielding.",
+            principle="Mind control through practice",
+            theme="dhyana_yoga",
         ),
         GitaVerse(
             id=3,
             chapter=12,
             verse=13,
-            text="One who is not envious but is a kind friend to all living entities is dear to Me.",
+            sanskrit="अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च",
             transliteration="adveṣhṭā sarva-bhūtānāṁ maitraḥ karuṇa eva cha",
-            translation="One who is free from envy and is a well-wisher to all.",
+            hindi="जो सभी प्राणियों से द्वेष नहीं करता और सबका मित्र है",
+            english="One who is free from envy and is a well-wisher to all.",
+            principle="Universal compassion",
+            theme="bhakti_yoga",
         ),
     ]
 
     for verse in verses:
-        db_session.add(verse)
+        test_db.add(verse)
 
-    await db_session.commit()
+    await test_db.commit()
 
     return verses
 
 
 @pytest.fixture
-async def sample_user_moods(db_session: AsyncSession, sample_user_id):
+async def sample_user_moods(test_db: AsyncSession, sample_user_id):
     """Fixture for sample user moods."""
     moods = [
         Mood(
             user_id=sample_user_id,
-            score=3.5,
-            tags=["Reflective"],
-            emotion_tags=["anxious", "thoughtful"],
-            created_at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=1),
+            score=4,
+            tags={"primary": "Reflective", "emotions": ["anxious", "thoughtful"]},
+            at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=1),
         ),
         Mood(
             user_id=sample_user_id,
-            score=4.0,
-            tags=["Calm"],
-            emotion_tags=["calm", "peaceful"],
-            created_at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=2),
+            score=5,
+            tags={"primary": "Calm", "emotions": ["calm", "peaceful"]},
+            at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=2),
         ),
         Mood(
             user_id=sample_user_id,
-            score=5.5,
-            tags=["Hopeful"],
-            emotion_tags=["hopeful", "optimistic"],
-            created_at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=3),
+            score=6,
+            tags={"primary": "Hopeful", "emotions": ["hopeful", "optimistic"]},
+            at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=3),
         ),
     ]
 
     for mood in moods:
-        db_session.add(mood)
+        test_db.add(mood)
 
-    await db_session.commit()
+    await test_db.commit()
 
     return moods
 
 
 @pytest.mark.asyncio
 async def test_generate_personalized_journey_creates_journey(
-    wisdom_journey_service, db_session, sample_user_id, sample_gita_verses
+    wisdom_journey_service, test_db, sample_user_id, sample_gita_verses
 ):
     """Test that generate_personalized_journey creates a journey."""
     # Mock the recommender to return predictable verses
@@ -121,7 +127,7 @@ async def test_generate_personalized_journey_creates_journey(
 
         # Generate journey
         journey = await wisdom_journey_service.generate_personalized_journey(
-            db=db_session, user_id=sample_user_id, duration_days=3
+            db=test_db, user_id=sample_user_id, duration_days=3
         )
 
         # Assertions
@@ -134,7 +140,7 @@ async def test_generate_personalized_journey_creates_journey(
         assert journey.recommended_by == "ai"
 
         # Verify steps were created
-        steps = await wisdom_journey_service.get_journey_steps(db_session, journey.id)
+        steps = await wisdom_journey_service.get_journey_steps(test_db, journey.id)
         assert len(steps) == 3
         assert steps[0].step_number == 1
         assert steps[1].step_number == 2
@@ -143,7 +149,7 @@ async def test_generate_personalized_journey_creates_journey(
 
 @pytest.mark.asyncio
 async def test_get_active_journey_returns_active_journey(
-    wisdom_journey_service, db_session, sample_user_id
+    wisdom_journey_service, test_db, sample_user_id
 ):
     """Test that get_active_journey returns the active journey."""
     # Create an active journey
@@ -157,12 +163,12 @@ async def test_get_active_journey_returns_active_journey(
         status=JourneyStatus.ACTIVE,
         progress_percentage=28,
     )
-    db_session.add(journey)
-    await db_session.commit()
+    test_db.add(journey)
+    await test_db.commit()
 
     # Get active journey
     active_journey = await wisdom_journey_service.get_active_journey(
-        db_session, sample_user_id
+        test_db, sample_user_id
     )
 
     # Assertions
@@ -173,11 +179,11 @@ async def test_get_active_journey_returns_active_journey(
 
 @pytest.mark.asyncio
 async def test_get_active_journey_returns_none_when_no_active(
-    wisdom_journey_service, db_session, sample_user_id
+    wisdom_journey_service, test_db, sample_user_id
 ):
     """Test that get_active_journey returns None when no active journey."""
     active_journey = await wisdom_journey_service.get_active_journey(
-        db_session, sample_user_id
+        test_db, sample_user_id
     )
 
     assert active_journey is None
@@ -185,7 +191,7 @@ async def test_get_active_journey_returns_none_when_no_active(
 
 @pytest.mark.asyncio
 async def test_mark_step_complete_updates_progress(
-    wisdom_journey_service, db_session, sample_user_id, sample_gita_verses
+    wisdom_journey_service, test_db, sample_user_id, sample_gita_verses
 ):
     """Test that mark_step_complete updates journey progress."""
     # Create journey with steps
@@ -199,7 +205,7 @@ async def test_mark_step_complete_updates_progress(
         status=JourneyStatus.ACTIVE,
         progress_percentage=0,
     )
-    db_session.add(journey)
+    test_db.add(journey)
 
     step1 = JourneyStep(
         id=str(uuid.uuid4()),
@@ -209,12 +215,12 @@ async def test_mark_step_complete_updates_progress(
         reflection_prompt="Test prompt",
         completed=False,
     )
-    db_session.add(step1)
-    await db_session.commit()
+    test_db.add(step1)
+    await test_db.commit()
 
     # Mark step 1 complete
     updated_step = await wisdom_journey_service.mark_step_complete(
-        db=db_session,
+        db=test_db,
         journey_id=journey.id,
         step_number=1,
         time_spent_seconds=120,
@@ -229,14 +235,14 @@ async def test_mark_step_complete_updates_progress(
     assert updated_step.completed_at is not None
 
     # Verify journey progress updated
-    await db_session.refresh(journey)
+    await test_db.refresh(journey)
     assert journey.current_step == 1
     assert journey.progress_percentage == 33  # 1/3 = 33%
 
 
 @pytest.mark.asyncio
 async def test_mark_step_complete_completes_journey_on_last_step(
-    wisdom_journey_service, db_session, sample_user_id, sample_gita_verses
+    wisdom_journey_service, test_db, sample_user_id, sample_gita_verses
 ):
     """Test that marking last step complete sets journey status to completed."""
     # Create journey with 3 steps
@@ -250,7 +256,7 @@ async def test_mark_step_complete_completes_journey_on_last_step(
         status=JourneyStatus.ACTIVE,
         progress_percentage=66,
     )
-    db_session.add(journey)
+    test_db.add(journey)
 
     step3 = JourneyStep(
         id=str(uuid.uuid4()),
@@ -260,16 +266,16 @@ async def test_mark_step_complete_completes_journey_on_last_step(
         reflection_prompt="Final step",
         completed=False,
     )
-    db_session.add(step3)
-    await db_session.commit()
+    test_db.add(step3)
+    await test_db.commit()
 
     # Mark final step complete
     await wisdom_journey_service.mark_step_complete(
-        db=db_session, journey_id=journey.id, step_number=3
+        db=test_db, journey_id=journey.id, step_number=3
     )
 
     # Verify journey completed
-    await db_session.refresh(journey)
+    await test_db.refresh(journey)
     assert journey.status == JourneyStatus.COMPLETED
     assert journey.completed_at is not None
     assert journey.progress_percentage == 100
@@ -277,7 +283,7 @@ async def test_mark_step_complete_completes_journey_on_last_step(
 
 @pytest.mark.asyncio
 async def test_pause_journey_sets_status_to_paused(
-    wisdom_journey_service, db_session, sample_user_id
+    wisdom_journey_service, test_db, sample_user_id
 ):
     """Test that pause_journey sets journey status to paused."""
     # Create active journey
@@ -291,11 +297,11 @@ async def test_pause_journey_sets_status_to_paused(
         status=JourneyStatus.ACTIVE,
         progress_percentage=28,
     )
-    db_session.add(journey)
-    await db_session.commit()
+    test_db.add(journey)
+    await test_db.commit()
 
     # Pause journey
-    paused_journey = await wisdom_journey_service.pause_journey(db_session, journey.id)
+    paused_journey = await wisdom_journey_service.pause_journey(test_db, journey.id)
 
     # Assertions
     assert paused_journey is not None
@@ -305,7 +311,7 @@ async def test_pause_journey_sets_status_to_paused(
 
 @pytest.mark.asyncio
 async def test_resume_journey_sets_status_to_active(
-    wisdom_journey_service, db_session, sample_user_id
+    wisdom_journey_service, test_db, sample_user_id
 ):
     """Test that resume_journey sets journey status back to active."""
     # Create paused journey
@@ -320,12 +326,12 @@ async def test_resume_journey_sets_status_to_active(
         progress_percentage=28,
         paused_at=datetime.datetime.now(datetime.UTC),
     )
-    db_session.add(journey)
-    await db_session.commit()
+    test_db.add(journey)
+    await test_db.commit()
 
     # Resume journey
     resumed_journey = await wisdom_journey_service.resume_journey(
-        db_session, journey.id
+        test_db, journey.id
     )
 
     # Assertions
@@ -336,7 +342,7 @@ async def test_resume_journey_sets_status_to_active(
 
 @pytest.mark.asyncio
 async def test_delete_journey_soft_deletes_journey_and_steps(
-    wisdom_journey_service, db_session, sample_user_id, sample_gita_verses
+    wisdom_journey_service, test_db, sample_user_id, sample_gita_verses
 ):
     """Test that delete_journey soft deletes journey and its steps."""
     # Create journey with steps
@@ -350,7 +356,7 @@ async def test_delete_journey_soft_deletes_journey_and_steps(
         status=JourneyStatus.ACTIVE,
         progress_percentage=0,
     )
-    db_session.add(journey)
+    test_db.add(journey)
 
     step1 = JourneyStep(
         id=str(uuid.uuid4()),
@@ -368,53 +374,56 @@ async def test_delete_journey_soft_deletes_journey_and_steps(
         reflection_prompt="Test prompt 2",
         completed=False,
     )
-    db_session.add(step1)
-    db_session.add(step2)
-    await db_session.commit()
+    test_db.add(step1)
+    test_db.add(step2)
+    await test_db.commit()
 
     # Delete journey
-    success = await wisdom_journey_service.delete_journey(db_session, journey.id)
+    success = await wisdom_journey_service.delete_journey(test_db, journey.id)
 
     # Assertions
     assert success is True
 
     # Verify journey is soft deleted
-    await db_session.refresh(journey)
+    await test_db.refresh(journey)
     assert journey.deleted_at is not None
 
     # Verify steps are soft deleted
-    await db_session.refresh(step1)
-    await db_session.refresh(step2)
+    await test_db.refresh(step1)
+    await test_db.refresh(step2)
     assert step1.deleted_at is not None
     assert step2.deleted_at is not None
 
 
 @pytest.mark.asyncio
 async def test_analyze_user_context_with_moods_and_journals(
-    wisdom_journey_service, db_session, sample_user_id, sample_user_moods
+    wisdom_journey_service, test_db, sample_user_id, sample_user_moods
 ):
     """Test that _analyze_user_context extracts mood and journal data."""
+    now = datetime.datetime.now(datetime.UTC)
     # Create sample journal entries
     journal1 = JournalEntry(
         id=str(uuid.uuid4()),
         user_id=sample_user_id,
-        encrypted_data="encrypted",
-        tags=["gratitude", "reflection"],
-        created_at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5),
+        encrypted_content={"encrypted": True, "data": "sample"},
+        tag_labels=["gratitude", "reflection"],
+        client_updated_at=now - datetime.timedelta(days=5),
+        created_at=now - datetime.timedelta(days=5),
     )
     journal2 = JournalEntry(
         id=str(uuid.uuid4()),
         user_id=sample_user_id,
-        encrypted_data="encrypted",
-        tags=["anxiety", "work"],
-        created_at=datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10),
+        encrypted_content={"encrypted": True, "data": "sample2"},
+        tag_labels=["anxiety", "work"],
+        client_updated_at=now - datetime.timedelta(days=10),
+        created_at=now - datetime.timedelta(days=10),
     )
-    db_session.add(journal1)
-    db_session.add(journal2)
-    await db_session.commit()
+    test_db.add(journal1)
+    test_db.add(journal2)
+    await test_db.commit()
 
     # Analyze user context
-    context = await wisdom_journey_service._analyze_user_context(db_session, sample_user_id)
+    context = await wisdom_journey_service._analyze_user_context(test_db, sample_user_id)
 
     # Assertions
     assert context["user_id"] == sample_user_id
