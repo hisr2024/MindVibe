@@ -563,12 +563,7 @@ class EnhancedJourneyEngine:
         """Get all active journey templates from 700+ verse corpus."""
         result = await db.execute(
             select(JourneyTemplate)
-            .where(
-                and_(
-                    JourneyTemplate.is_active == True,
-                    JourneyTemplate.deleted_at.is_(None),  # Filter out soft-deleted
-                )
-            )
+            .where(JourneyTemplate.is_active == True)
             .order_by(JourneyTemplate.is_featured.desc(), JourneyTemplate.title)
         )
         templates = list(result.scalars().all())
@@ -612,10 +607,10 @@ class EnhancedJourneyEngine:
         journeys: list[UserJourney] = []
 
         for template_id in journey_template_ids:
-            # Verify template exists and is active (not soft-deleted)
+            # Verify template exists and is active
             template = await db.get(JourneyTemplate, template_id)
-            if not template or not template.is_active or template.deleted_at is not None:
-                logger.warning(f"Template {template_id} not found, inactive, or deleted")
+            if not template or not template.is_active:
+                logger.warning(f"Template {template_id} not found or inactive")
                 continue
 
             # Create user journey
