@@ -18,7 +18,7 @@ Provides endpoints for the multi-journey Wisdom Journey system:
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -332,6 +332,7 @@ DEMO_JOURNEY_TEMPLATES = [
 @router.get("/catalog", response_model=list[JourneyTemplateResponse])
 async def get_catalog(
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> list[JourneyTemplateResponse]:
     """
@@ -341,6 +342,11 @@ async def get_catalog(
     Available to all users to show the catalog (with premium badges).
     Falls back to demo templates if database is not seeded.
     """
+    # Prevent browser caching to ensure fresh data
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     engine = get_journey_engine()
 
     try:
@@ -351,6 +357,7 @@ async def get_catalog(
             logger.info("No templates in database, returning demo templates")
             return [JourneyTemplateResponse(**t) for t in DEMO_JOURNEY_TEMPLATES]
 
+        logger.info(f"Returning {len(templates)} templates from database")
         return [JourneyTemplateResponse(**t) for t in templates]
 
     except Exception as e:
