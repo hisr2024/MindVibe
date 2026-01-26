@@ -438,7 +438,7 @@ export default function JourneysCatalogClient() {
 
       // Navigate to today's agenda
       router.push('/journeys/today')
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to start journeys:', err)
 
       // Handle premium errors
@@ -449,6 +449,13 @@ export default function JourneysCatalogClient() {
           setPaywallVariant('no_access')
         }
         setShowPaywall(true)
+        return
+      }
+
+      // Handle demo preview error
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      if (errorMessage.includes('preview') || errorMessage.includes('demo') || errorMessage.includes('503')) {
+        setError('🚀 Wisdom Journeys is in preview mode! The full feature with personalized AI content is launching soon. Stay tuned!')
         return
       }
 
