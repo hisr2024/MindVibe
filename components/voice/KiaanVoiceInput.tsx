@@ -94,12 +94,11 @@ export function KiaanVoiceInput({
 
   // Voice learning integration for personalized responses
   const voiceLearning = useVoiceLearningWithKiaan({
-    enabled: enableVoiceLearning,
     language,
-    autoStartSession: true,
+    autoStartSession: enableVoiceLearning,
     onEnhancedResponse: (enhanced) => {
       // Track enhanced response for feedback
-      if (enhanced.response) {
+      if (enableVoiceLearning && enhanced.response) {
         setLastResponse(enhanced.response)
         setShowFeedback(showFeedbackButtons)
         setFeedbackGiven(false)
