@@ -235,18 +235,24 @@ export function detectCrisis(message: string): CrisisAssessment {
   const detectedKeywords: string[] = []
   let highestLevel: CrisisLevel = 'none'
 
-  // Check each level from most severe to least
+  // Priority order for crisis levels (higher index = more severe)
+  const levelPriority: Record<CrisisLevel, number> = {
+    'none': 0,
+    'low': 1,
+    'moderate': 2,
+    'high': 3,
+    'critical': 4
+  }
+
+  // Check each level for keywords
   for (const [level, keywords] of Object.entries(CRISIS_KEYWORDS)) {
     for (const keyword of keywords) {
       if (lowerMessage.includes(keyword)) {
         detectedKeywords.push(keyword)
-        // Set level to highest found
-        if (highestLevel === 'none' ||
-            (level === 'critical') ||
-            (level === 'high' && highestLevel !== 'critical') ||
-            (level === 'moderate' && !['critical', 'high'].includes(highestLevel)) ||
-            (level === 'low' && highestLevel === 'none')) {
-          highestLevel = level as CrisisLevel
+        // Set level to highest found based on priority
+        const currentLevel = level as CrisisLevel
+        if (levelPriority[currentLevel] > levelPriority[highestLevel]) {
+          highestLevel = currentLevel
         }
       }
     }
