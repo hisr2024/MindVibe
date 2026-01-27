@@ -18,13 +18,19 @@ from starlette.requests import Request
 from starlette.responses import Response, JSONResponse
 
 
-# Paths that are exempt from CSRF protection (webhooks, etc.)
+# Paths that are exempt from CSRF protection (webhooks, server-to-server APIs, etc.)
+# Note: Chat endpoints are called server-to-server from Next.js API routes,
+# which are trusted internal calls. CSRF protection is for browser-based attacks.
 CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/webhooks/stripe",
     "/api/webhooks/payment",
     "/health",
     "/",
     "/api/health",
+    # KIAAN Chat endpoints - called from Next.js server-side API routes
+    "/api/chat/message",
+    "/api/chat/message/stream",
+    "/api/chat/start",
 }
 
 # Methods that require CSRF protection
