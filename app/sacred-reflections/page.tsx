@@ -267,8 +267,8 @@ export default function SacredReflectionsPage() {
     setGuidanceLoading(prev => ({ ...prev, [entry.id]: true }))
     try {
       const sanitizedBody = sanitizeForApi(entry.body)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      // Use local Next.js API route which handles backend proxying
+      const response = await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: `Please offer a supportive Ancient Wisdom-inspired reflection on this private journal entry: ${sanitizedBody}` })
