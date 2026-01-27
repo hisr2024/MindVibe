@@ -203,11 +203,11 @@ async def get_user(
     
     Permissions required: users:view
     """
-    # Get user
-    stmt = select(User).where(User.id == user_id)
+    # Get user (excluding soft-deleted users)
+    stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
     result = await db.execute(stmt)
     user = result.scalars().first()
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -276,113 +276,115 @@ async def sync_batch(
     logger.info(f"Processing batch sync for user {user_id} with {len(payload.items)} items")
 
     for item in payload.items:
+        # Use savepoint for each item to allow partial success without corrupting state
         try:
-            if item.operation == "create":
-                # Handle create operations
-                if item.entity_type == "mood":
-                    entity_id, timestamp = await sync_mood_create(
-                        db, user_id, item.data, item.local_timestamp
-                    )
-                    results.append(SyncItemResult(
-                        client_request_id=item.client_request_id,
-                        status="success",
-                        entity_id=entity_id,
-                        server_timestamp=timestamp
-                    ))
-                    success_count += 1
-
-                elif item.entity_type == "journal":
-                    entity_id, timestamp = await sync_journal_create(
-                        db, user_id, item.data, item.local_timestamp
-                    )
-                    results.append(SyncItemResult(
-                        client_request_id=item.client_request_id,
-                        status="success",
-                        entity_id=entity_id,
-                        server_timestamp=timestamp
-                    ))
-                    success_count += 1
-
-                else:
-                    results.append(SyncItemResult(
-                        client_request_id=item.client_request_id,
-                        status="error",
-                        error_message=f"Unsupported entity type for create: {item.entity_type}"
-                    ))
-                    error_count += 1
-
-            elif item.operation == "update":
-                # Handle update operations with conflict detection
-                if not item.entity_id:
-                    results.append(SyncItemResult(
-                        client_request_id=item.client_request_id,
-                        status="error",
-                        error_message="entity_id required for update operations"
-                    ))
-                    error_count += 1
-                    continue
-
-                if item.entity_type == "mood":
-                    conflict, timestamp = await sync_mood_update(
-                        db, user_id, item.entity_id, item.data, item.local_timestamp
-                    )
-
-                    if conflict:
-                        results.append(SyncItemResult(
-                            client_request_id=item.client_request_id,
-                            status="conflict",
-                            entity_id=item.entity_id,
-                            conflict=conflict
-                        ))
-                        conflicts_count += 1
-                    else:
+            async with db.begin_nested():
+                if item.operation == "create":
+                    # Handle create operations
+                    if item.entity_type == "mood":
+                        entity_id, timestamp = await sync_mood_create(
+                            db, user_id, item.data, item.local_timestamp
+                        )
                         results.append(SyncItemResult(
                             client_request_id=item.client_request_id,
                             status="success",
-                            entity_id=item.entity_id,
+                            entity_id=entity_id,
                             server_timestamp=timestamp
                         ))
                         success_count += 1
 
-                elif item.entity_type == "journey_progress":
-                    conflict, timestamp = await sync_journey_progress_update(
-                        db, user_id, item.entity_id, item.data, item.local_timestamp
-                    )
-
-                    if conflict:
-                        results.append(SyncItemResult(
-                            client_request_id=item.client_request_id,
-                            status="conflict",
-                            entity_id=item.entity_id,
-                            conflict=conflict
-                        ))
-                        conflicts_count += 1
-                    else:
+                    elif item.entity_type == "journal":
+                        entity_id, timestamp = await sync_journal_create(
+                            db, user_id, item.data, item.local_timestamp
+                        )
                         results.append(SyncItemResult(
                             client_request_id=item.client_request_id,
                             status="success",
-                            entity_id=item.entity_id,
+                            entity_id=entity_id,
                             server_timestamp=timestamp
                         ))
                         success_count += 1
 
-                else:
+                    else:
+                        results.append(SyncItemResult(
+                            client_request_id=item.client_request_id,
+                            status="error",
+                            error_message=f"Unsupported entity type for create: {item.entity_type}"
+                        ))
+                        error_count += 1
+
+                elif item.operation == "update":
+                    # Handle update operations with conflict detection
+                    if not item.entity_id:
+                        results.append(SyncItemResult(
+                            client_request_id=item.client_request_id,
+                            status="error",
+                            error_message="entity_id required for update operations"
+                        ))
+                        error_count += 1
+                        continue
+
+                    if item.entity_type == "mood":
+                        conflict, timestamp = await sync_mood_update(
+                            db, user_id, item.entity_id, item.data, item.local_timestamp
+                        )
+
+                        if conflict:
+                            results.append(SyncItemResult(
+                                client_request_id=item.client_request_id,
+                                status="conflict",
+                                entity_id=item.entity_id,
+                                conflict=conflict
+                            ))
+                            conflicts_count += 1
+                        else:
+                            results.append(SyncItemResult(
+                                client_request_id=item.client_request_id,
+                                status="success",
+                                entity_id=item.entity_id,
+                                server_timestamp=timestamp
+                            ))
+                            success_count += 1
+
+                    elif item.entity_type == "journey_progress":
+                        conflict, timestamp = await sync_journey_progress_update(
+                            db, user_id, item.entity_id, item.data, item.local_timestamp
+                        )
+
+                        if conflict:
+                            results.append(SyncItemResult(
+                                client_request_id=item.client_request_id,
+                                status="conflict",
+                                entity_id=item.entity_id,
+                                conflict=conflict
+                            ))
+                            conflicts_count += 1
+                        else:
+                            results.append(SyncItemResult(
+                                client_request_id=item.client_request_id,
+                                status="success",
+                                entity_id=item.entity_id,
+                                server_timestamp=timestamp
+                            ))
+                            success_count += 1
+
+                    else:
+                        results.append(SyncItemResult(
+                            client_request_id=item.client_request_id,
+                            status="error",
+                            error_message=f"Unsupported entity type for update: {item.entity_type}"
+                        ))
+                        error_count += 1
+
+                elif item.operation == "delete":
+                    # Handle soft deletes
+                    # Implementation depends on specific entity type
                     results.append(SyncItemResult(
                         client_request_id=item.client_request_id,
                         status="error",
-                        error_message=f"Unsupported entity type for update: {item.entity_type}"
+                        error_message="Delete operations not yet implemented"
                     ))
                     error_count += 1
-
-            elif item.operation == "delete":
-                # Handle soft deletes
-                # Implementation depends on specific entity type
-                results.append(SyncItemResult(
-                    client_request_id=item.client_request_id,
-                    status="error",
-                    error_message="Delete operations not yet implemented"
-                ))
-                error_count += 1
 
         except HTTPException as e:
             results.append(SyncItemResult(
