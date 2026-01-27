@@ -98,8 +98,8 @@ export function KiaanVoiceInput({
     autoStartSession: enableVoiceLearning,
     onEnhancedResponse: (enhanced) => {
       // Track enhanced response for feedback
-      if (enableVoiceLearning && enhanced.response) {
-        setLastResponse(enhanced.response)
+      if (enableVoiceLearning && enhanced.text) {
+        setLastResponse(enhanced.text)
         setShowFeedback(showFeedbackButtons)
         setFeedbackGiven(false)
         responseStartTimeRef.current = Date.now()
