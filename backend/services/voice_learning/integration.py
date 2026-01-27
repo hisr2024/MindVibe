@@ -66,7 +66,7 @@ from backend.services.voice_learning.cross_session_context import (
     MemoryPriority,
 )
 from backend.services.voice_learning.feedback_loop import (
-    get_learning_feedback_service,
+    get_feedback_service as get_learning_feedback_service,
     FeedbackSignal,
     FeedbackType,
 )

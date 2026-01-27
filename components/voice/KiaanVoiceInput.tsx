@@ -7,13 +7,15 @@
  * - Auto-save to Sacred Reflections
  * - Real-time transcription display
  * - TTS response playback
+ * - Voice learning integration for personalized responses
  */
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKiaanVoice, KiaanVoiceState } from '@/hooks/useKiaanVoice'
+import { useVoiceLearningWithKiaan } from '@/hooks/useVoiceLearning'
 import { useLanguage } from '@/hooks/useLanguage'
 
 export type VoiceInputMode = 'simple' | 'conversation' | 'dictation'
@@ -45,6 +47,10 @@ export interface KiaanVoiceInputProps {
   submitLabel?: string
   /** Called when user wants to submit the transcription */
   onSubmit?: (text: string) => void
+  /** Enable voice learning for personalized responses */
+  enableVoiceLearning?: boolean
+  /** Show feedback buttons after KIAAN response */
+  showFeedbackButtons?: boolean
 }
 
 const sizeClasses = {
@@ -73,12 +79,34 @@ export function KiaanVoiceInput({
   className = '',
   submitLabel = 'Send to KIAAN',
   onSubmit,
+  enableVoiceLearning = true,
+  showFeedbackButtons = true,
 }: KiaanVoiceInputProps) {
   const { language: appLanguage } = useLanguage()
   const language = languageOverride || appLanguage || 'en'
 
   const [localTranscript, setLocalTranscript] = useState('')
   const [showControls, setShowControls] = useState(false)
+  const [lastResponse, setLastResponse] = useState<string | null>(null)
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackGiven, setFeedbackGiven] = useState(false)
+  const responseStartTimeRef = useRef<number>(0)
+
+  // Voice learning integration for personalized responses
+  const voiceLearning = useVoiceLearningWithKiaan({
+    enabled: enableVoiceLearning,
+    language,
+    autoStartSession: true,
+    onEnhancedResponse: (enhanced) => {
+      // Track enhanced response for feedback
+      if (enhanced.response) {
+        setLastResponse(enhanced.response)
+        setShowFeedback(showFeedbackButtons)
+        setFeedbackGiven(false)
+        responseStartTimeRef.current = Date.now()
+      }
+    },
+  })
 
   const {
     state,
@@ -104,8 +132,17 @@ export function KiaanVoiceInput({
         if (mode === 'simple' || mode === 'dictation') {
           setLocalTranscript(msg.content)
         }
+        // Track user input in voice learning
+        if (enableVoiceLearning && voiceLearning.isReady) {
+          voiceLearning.processUserInput(msg.content)
+        }
       } else if (msg.role === 'kiaan') {
         onKiaanResponse?.(msg.content)
+        // Track KIAAN response and show feedback buttons
+        setLastResponse(msg.content)
+        setShowFeedback(showFeedbackButtons && mode === 'conversation')
+        setFeedbackGiven(false)
+        responseStartTimeRef.current = Date.now()
       }
     },
   })
@@ -165,6 +202,49 @@ export function KiaanVoiceInput({
       setShowControls(false)
     }
   }, [localTranscript, saveToReflections])
+
+  // Handle positive feedback (thumbs up)
+  const handlePositiveFeedback = useCallback(async () => {
+    if (!lastResponse || feedbackGiven || !enableVoiceLearning) return
+
+    const listenDuration = Date.now() - responseStartTimeRef.current
+
+    // Record positive feedback via voice learning
+    if (voiceLearning.isReady) {
+      await voiceLearning.submitFeedback({
+        type: 'rating',
+        rating: 5,
+        completed: true,
+        listenDuration,
+        responseText: lastResponse,
+      })
+    }
+
+    setFeedbackGiven(true)
+    // Hide feedback after a short delay
+    setTimeout(() => setShowFeedback(false), 1500)
+  }, [lastResponse, feedbackGiven, enableVoiceLearning, voiceLearning])
+
+  // Handle negative feedback (thumbs down)
+  const handleNegativeFeedback = useCallback(async () => {
+    if (!lastResponse || feedbackGiven || !enableVoiceLearning) return
+
+    const listenDuration = Date.now() - responseStartTimeRef.current
+
+    // Record negative feedback via voice learning
+    if (voiceLearning.isReady) {
+      await voiceLearning.submitFeedback({
+        type: 'rating',
+        rating: 1,
+        completed: false,
+        listenDuration,
+        responseText: lastResponse,
+      })
+    }
+
+    setFeedbackGiven(true)
+    setTimeout(() => setShowFeedback(false), 1500)
+  }, [lastResponse, feedbackGiven, enableVoiceLearning, voiceLearning])
 
   // Don't render if not supported
   if (!isVoiceSupported) {
@@ -323,6 +403,72 @@ export function KiaanVoiceInput({
               <div className="px-4 py-2 text-xs text-orange-100/50 text-center">
                 Tap again to stop
               </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Feedback Buttons - Show after KIAAN responds */}
+      <AnimatePresence>
+        {showFeedback && !isSpeaking && !isListening && !isProcessing && lastResponse && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-30 flex items-center gap-2"
+          >
+            {feedbackGiven ? (
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                className="px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
+              >
+                Thanks for the feedback!
+              </motion.div>
+            ) : (
+              <>
+                <span className="text-xs text-orange-100/60 mr-1">Was this helpful?</span>
+                <button
+                  onClick={handlePositiveFeedback}
+                  className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition"
+                  aria-label="Helpful"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M7 10v12" />
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleNegativeFeedback}
+                  className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:scale-105 transition"
+                  aria-label="Not helpful"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 14V2" />
+                    <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
+                  </svg>
+                </button>
+              </>
             )}
           </motion.div>
         )}
