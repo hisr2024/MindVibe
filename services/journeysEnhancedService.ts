@@ -63,10 +63,17 @@ export interface Personalization {
   provider_preference?: 'auto' | 'openai' | 'sarvam' | 'oai_compat'
 }
 
-export interface VerseRef {
+/**
+ * A reference to a Gita verse (chapter and verse number only).
+ * Matches Python: backend/services/gita_corpus_adapter.py::VerseReference
+ */
+export interface VerseReference {
   chapter: number
   verse: number
 }
+
+// Alias for backward compatibility
+export type VerseRef = VerseReference
 
 export interface VerseText {
   chapter: number
@@ -220,6 +227,8 @@ function getHeaders(): HeadersInit {
     'Content-Type': 'application/json',
   }
 
+  // Backward compatibility: Also check localStorage for tokens during migration
+  // Note: httpOnly cookies are sent automatically with credentials: 'include'
   const token = getAuthToken()
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -232,6 +241,38 @@ function getHeaders(): HeadersInit {
   }
 
   return headers
+}
+
+/**
+ * Get CSRF token from cookie for state-changing requests.
+ */
+function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/**
+ * Standard fetch options with credentials for httpOnly cookie authentication
+ * and CSRF protection for state-changing requests.
+ */
+function getFetchOptions(options: RequestInit = {}): RequestInit {
+  const method = (options.method || 'GET').toUpperCase()
+  const headers = new Headers(options.headers as HeadersInit || {})
+
+  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+      headers.set('X-CSRF-Token', csrfToken)
+    }
+  }
+
+  return {
+    ...options,
+    headers,
+    credentials: 'include', // Required for httpOnly cookie authentication
+  }
 }
 
 /**
@@ -349,10 +390,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * Check the current user's access to Wisdom Journeys (premium feature)
  */
 export async function getJourneyAccess(): Promise<JourneyAccess> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/access`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/access`, getFetchOptions({
     method: 'GET',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse<JourneyAccess>(response)
 }
 
@@ -453,10 +494,10 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
  */
 export async function getCatalog(): Promise<JourneyTemplate[]> {
   try {
-    const response = await fetch(`${getApiBaseUrl()}/api/journeys/catalog`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/journeys/catalog`, getFetchOptions({
       method: 'GET',
       headers: getHeaders(),
-    })
+    }))
 
     // If the response is a server error, return default templates
     if (!response.ok && response.status >= 500) {
@@ -512,14 +553,14 @@ export async function startJourneys(
   }
 
   try {
-    const response = await fetch(`${getApiBaseUrl()}/api/journeys/start`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/journeys/start`, getFetchOptions({
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({
         journey_ids: journeyIds,
         personalization,
       }),
-    })
+    }))
     return handleResponse<UserJourney[]>(response)
   } catch (error) {
     // Re-throw known error types with additional context
@@ -543,10 +584,10 @@ export async function startJourneys(
  * Get all active journeys for the current user
  */
 export async function getActiveJourneys(): Promise<UserJourney[]> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/active`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/active`, getFetchOptions({
     method: 'GET',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse<UserJourney[]>(response)
 }
 
@@ -554,10 +595,10 @@ export async function getActiveJourneys(): Promise<UserJourney[]> {
  * Get today's agenda across all active journeys
  */
 export async function getTodayAgenda(): Promise<TodayAgenda> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/today`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/today`, getFetchOptions({
     method: 'GET',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse<TodayAgenda>(response)
 }
 
@@ -565,10 +606,10 @@ export async function getTodayAgenda(): Promise<TodayAgenda> {
  * Get or generate today's step for a specific journey
  */
 export async function getTodayStep(userJourneyId: string): Promise<StepState> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/today`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/today`, getFetchOptions({
     method: 'POST',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse<StepState>(response)
 }
 
@@ -591,11 +632,11 @@ export async function completeStep(
 }> {
   const response = await fetch(
     `${getApiBaseUrl()}/api/journeys/${userJourneyId}/steps/${dayIndex}/complete`,
-    {
+    getFetchOptions({
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data),
-    }
+    })
   )
   return handleResponse(response)
 }
@@ -606,10 +647,10 @@ export async function completeStep(
 export async function pauseJourney(
   userJourneyId: string
 ): Promise<{ status: string; journey_id: string }> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/pause`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/pause`, getFetchOptions({
     method: 'POST',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse(response)
 }
 
@@ -619,10 +660,10 @@ export async function pauseJourney(
 export async function resumeJourney(
   userJourneyId: string
 ): Promise<{ status: string; journey_id: string }> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/resume`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/resume`, getFetchOptions({
     method: 'POST',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse(response)
 }
 
@@ -632,10 +673,10 @@ export async function resumeJourney(
 export async function abandonJourney(
   userJourneyId: string
 ): Promise<{ status: string; journey_id: string }> {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/abandon`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/abandon`, getFetchOptions({
     method: 'POST',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse(response)
 }
 
@@ -654,10 +695,10 @@ export async function getJourneyHistory(
     provider_used: string | null
   }[]
 > {
-  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/history`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/journeys/${userJourneyId}/history`, getFetchOptions({
     method: 'GET',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse(response)
 }
 
@@ -665,10 +706,10 @@ export async function getJourneyHistory(
  * Get AI provider health status (admin)
  */
 export async function getProviderStatus(): Promise<ProviderStatus> {
-  const response = await fetch(`${getApiBaseUrl()}/api/admin/ai/providers/status`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/admin/ai/providers/status`, getFetchOptions({
     method: 'GET',
     headers: getHeaders(),
-  })
+  }))
   return handleResponse<ProviderStatus>(response)
 }
 

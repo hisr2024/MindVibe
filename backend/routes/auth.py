@@ -135,12 +135,20 @@ class RefreshOut(BaseModel):
 # Internal helpers
 # ----------------------
 async def _extract_auth_context(request: Request):
+    # Check Authorization header first (for API clients/backward compatibility)
     auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.lower().startswith("bearer "):
+    token = None
+
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+    else:
+        # Fall back to httpOnly cookie (more secure, XSS protected)
+        token = request.cookies.get("access_token")
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
-    token = auth_header.split(" ", 1)[1].strip()
     try:
         payload = decode_access_token(token)
     except Exception as err:
@@ -300,6 +308,18 @@ async def login(
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
     )
 
+    # Also set access token in httpOnly cookie for XSS protection
+    # This is the primary auth mechanism - more secure than localStorage
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax",  # lax allows top-level navigations, strict would break links
+        path="/",  # Available for all paths
+        max_age=expires_in_seconds,
+    )
+
     return LoginOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
@@ -415,36 +435,48 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
 async def logout(
     request: Request, response: Response, db: AsyncSession = Depends(get_db)
 ):
+    # Check Authorization header first, then cookie
     auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.lower().startswith("bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
-        )
+    token = None
 
-    token = auth_header.split(" ", 1)[1].strip()
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+    else:
+        token = request.cookies.get("access_token")
+
+    if not token:
+        # Still clear cookies even if no token
+        response.delete_cookie("refresh_token", path="/api/auth")
+        response.delete_cookie("access_token", path="/")
+        return LogoutOut(revoked=False, session_id=None)
     try:
         payload = decode_access_token(token)
     except Exception:
         response.delete_cookie("refresh_token", path="/api/auth")
+        response.delete_cookie("access_token", path="/")
         return LogoutOut(revoked=False, session_id=None)
 
     session_id = payload.get("sid")
     if not session_id:
         response.delete_cookie("refresh_token", path="/api/auth")
+        response.delete_cookie("access_token", path="/")
         return LogoutOut(revoked=False, session_id=None)
 
     session_row = await get_session(db, session_id)
     if not session_row:
         response.delete_cookie("refresh_token", path="/api/auth")
+        response.delete_cookie("access_token", path="/")
         return LogoutOut(revoked=False, session_id=session_id)
 
     if session_row.revoked_at is None:
         await revoke_session(db, session_row)
         await revoke_all_for_session(db, session_id)
         response.delete_cookie("refresh_token", path="/api/auth")
+        response.delete_cookie("access_token", path="/")
         return LogoutOut(revoked=True, session_id=session_id)
 
     response.delete_cookie("refresh_token", path="/api/auth")
+    response.delete_cookie("access_token", path="/")
     return LogoutOut(revoked=False, session_id=session_id)
 
 

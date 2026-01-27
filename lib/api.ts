@@ -1,7 +1,23 @@
 /**
+ * Get CSRF token from cookie.
+ * The CSRF token is set by the backend on GET requests and must be included
+ * in the X-CSRF-Token header for state-changing requests (POST, PUT, PATCH, DELETE).
+ */
+function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/**
  * API Fetch utility
  * Uses relative paths to leverage Vercel proxy rewrites for CORS handling
  * The proxy rewrite in vercel.json routes /api/* to the backend
+ *
+ * Security features:
+ * - Authentication: Uses httpOnly cookies (XSS-protected) as primary auth method
+ * - CSRF Protection: Automatically includes X-CSRF-Token header for state-changing requests
+ * - Falls back to localStorage tokens for backward compatibility during migration
  */
 export async function apiFetch(path: string, options: RequestInit = {}, uid?: string) {
   // Use relative path to go through Vercel proxy (avoids CORS issues)
@@ -21,9 +37,9 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
 
   const headers = new Headers(options.headers || {})
 
-  // Try to get JWT token from localStorage (check multiple possible keys)
+  // Backward compatibility: Also check localStorage for tokens during migration
+  // httpOnly cookies are sent automatically with credentials: 'include'
   if (typeof window !== 'undefined') {
-    // Check the primary key first (used by useAuth hook)
     const accessToken = localStorage.getItem('mindvibe_access_token')
       || localStorage.getItem('access_token')
     if (accessToken) {
@@ -36,7 +52,22 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
     headers.set('X-Auth-UID', uid)
   }
 
-  return fetch(url, { ...options, headers })
+  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
+  const method = (options.method || 'GET').toUpperCase()
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+      headers.set('X-CSRF-Token', csrfToken)
+    }
+  }
+
+  // Use credentials: 'include' to send httpOnly cookies automatically
+  // This is the primary (XSS-protected) auth mechanism
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include',
+  })
 }
 
 /**

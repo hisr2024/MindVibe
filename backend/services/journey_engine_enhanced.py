@@ -516,33 +516,197 @@ class StepGenerator:
         day_index: int,
         verse_refs: list[VerseReference],
     ) -> dict[str, Any]:
-        """Generate a fallback step when AI generation fails."""
-        enemy_labels = {
-            "kama": "desire",
-            "krodha": "anger",
-            "lobha": "greed",
-            "moha": "attachment",
-            "mada": "ego",
-            "matsarya": "envy",
-            "mixed": "inner challenges",
+        """
+        Generate a high-quality fallback step when AI generation fails.
+
+        Each enemy type has carefully crafted content based on Gita teachings.
+        """
+        # Rich fallback content per enemy type
+        enemy_content = {
+            "kama": {
+                "label": "desire",
+                "title": f"Day {day_index}: Understanding Desire",
+                "teaching": (
+                    "The Gita teaches that desire (kama) is neither good nor bad in itself - "
+                    "it is the attachment to outcomes that creates suffering. Like fire that provides "
+                    "warmth but can also burn, desire requires awareness and direction. Today, we "
+                    "practice discerning between desires that align with our dharma and those that "
+                    "lead us astray. The goal is not to eliminate desire but to channel it wisely."
+                ),
+                "reflections": [
+                    "What desires have been occupying your mind lately?",
+                    "Which of these desires align with your deeper values and purpose?",
+                    "Can you find the stillness behind the wanting?",
+                ],
+                "practice": {
+                    "name": "Desire Observation",
+                    "instructions": [
+                        "Sit quietly and bring to mind a current desire",
+                        "Notice where you feel it in your body",
+                        "Observe without judgment - just witness the sensation",
+                        "Ask: 'What is the deeper need behind this want?'",
+                        "Rest in the awareness that observes the desire",
+                    ],
+                    "duration_minutes": 10,
+                },
+                "commitment": "Today I will pause when a strong desire arises and ask what deeper need it represents.",
+            },
+            "krodha": {
+                "label": "anger",
+                "title": f"Day {day_index}: Transforming Anger",
+                "teaching": (
+                    "Krishna warns that anger clouds judgment and leads to delusion. Yet anger "
+                    "itself carries important information - it often signals a boundary being crossed "
+                    "or a value being violated. The practice is not to suppress anger but to understand "
+                    "its message without being controlled by it. Today we work on creating space between "
+                    "the trigger and our response, allowing wisdom to guide our actions."
+                ),
+                "reflections": [
+                    "What situations have triggered anger in you recently?",
+                    "What boundary or value was being challenged in those moments?",
+                    "How might you honor that value without being consumed by anger?",
+                ],
+                "practice": {
+                    "name": "STOP Practice for Anger",
+                    "instructions": [
+                        "S - Stop: When anger arises, pause physically",
+                        "T - Take a breath: Three deep breaths, exhaling slowly",
+                        "O - Observe: Notice the anger without judgment",
+                        "P - Proceed: Choose your response consciously",
+                        "Practice this mentally with a recent trigger",
+                    ],
+                    "duration_minutes": 10,
+                },
+                "commitment": "Today I will take three breaths before responding when I feel anger rising.",
+            },
+            "lobha": {
+                "label": "greed",
+                "title": f"Day {day_index}: Cultivating Contentment",
+                "teaching": (
+                    "The Gita speaks of santosha - contentment that comes from within rather than "
+                    "from accumulation. Greed (lobha) arises from a sense of lack, a belief that we "
+                    "are not enough as we are. Today we practice recognizing the abundance already "
+                    "present in our lives. True wealth is measured not by what we possess but by "
+                    "how little we need to feel complete."
+                ),
+                "reflections": [
+                    "In what areas of life do you feel a sense of 'not enough'?",
+                    "What blessings in your life often go unacknowledged?",
+                    "How might contentment change your relationship with wanting more?",
+                ],
+                "practice": {
+                    "name": "Gratitude Inventory",
+                    "instructions": [
+                        "Close your eyes and take a few centering breaths",
+                        "Mentally scan through your day so far",
+                        "Notice five things you can be grateful for",
+                        "For each one, feel the gratitude in your heart",
+                        "Rest in the feeling of abundance",
+                    ],
+                    "duration_minutes": 8,
+                },
+                "commitment": "Today I will notice one moment of 'wanting more' and pause to appreciate what I have.",
+            },
+            "moha": {
+                "label": "attachment",
+                "title": f"Day {day_index}: Seeing Through Illusion",
+                "teaching": (
+                    "Moha - delusion or attachment - is described in the Gita as the veil that "
+                    "obscures our true nature. We become attached to roles, possessions, and outcomes, "
+                    "forgetting the unchanging Self beneath all changes. Today we practice viveka - "
+                    "discrimination between the eternal and the temporary. This is not about "
+                    "abandoning life but about holding it more lightly."
+                ),
+                "reflections": [
+                    "What attachments feel most difficult to release?",
+                    "What would remain if these attachments were gone?",
+                    "Can you find the part of you that exists beyond all attachments?",
+                ],
+                "practice": {
+                    "name": "Witness Meditation",
+                    "instructions": [
+                        "Sit comfortably and close your eyes",
+                        "Notice thoughts as they arise and pass",
+                        "Ask: 'Who is aware of these thoughts?'",
+                        "Rest in the awareness itself",
+                        "Recognize: 'I am the witness, not the witnessed'",
+                    ],
+                    "duration_minutes": 12,
+                },
+                "commitment": "Today I will observe one attachment without identifying with it completely.",
+            },
+            "mada": {
+                "label": "ego",
+                "title": f"Day {day_index}: Dissolving the Small Self",
+                "teaching": (
+                    "Pride (mada) inflates the ego and separates us from others and from the Divine. "
+                    "The Gita teaches that true humility is not self-deprecation but recognition of "
+                    "our place in the larger whole. The ego is not an enemy to be destroyed but a "
+                    "servant that has tried to become master. Today we practice returning the ego "
+                    "to its proper place through service and surrender."
+                ),
+                "reflections": [
+                    "Where does pride show up most strongly in your life?",
+                    "What fear might be hiding beneath this pride?",
+                    "How might genuine humility feel different from insecurity?",
+                ],
+                "practice": {
+                    "name": "Seva Contemplation",
+                    "instructions": [
+                        "Reflect on someone you could help today",
+                        "Plan one small act of service with no expectation of return",
+                        "Notice any resistance or pride that arises",
+                        "Offer the act mentally to something greater than yourself",
+                        "Feel the lightness of ego-free giving",
+                    ],
+                    "duration_minutes": 10,
+                },
+                "commitment": "Today I will perform one act of kindness without seeking recognition.",
+            },
+            "matsarya": {
+                "label": "envy",
+                "title": f"Day {day_index}: Transforming Envy into Joy",
+                "teaching": (
+                    "Envy (matsarya) arises from comparison and the belief that another's gain is "
+                    "our loss. The Gita teaches that each soul has its own dharma, its own path. "
+                    "Mudita - sympathetic joy - is the antidote to envy. When we celebrate others' "
+                    "success, we expand our capacity for happiness. Their joy becomes our joy. "
+                    "Today we practice replacing comparison with celebration."
+                ),
+                "reflections": [
+                    "Who do you find yourself comparing yourself to most often?",
+                    "What do their achievements trigger in you?",
+                    "How might celebrating their success feel in your body?",
+                ],
+                "practice": {
+                    "name": "Mudita Practice",
+                    "instructions": [
+                        "Bring to mind someone whose success triggers envy",
+                        "Mentally offer them sincere congratulations",
+                        "Say: 'May your happiness increase'",
+                        "Notice any resistance and breathe through it",
+                        "Feel your heart expanding to include their joy",
+                    ],
+                    "duration_minutes": 10,
+                },
+                "commitment": "Today I will genuinely celebrate someone else's success as if it were my own.",
+            },
         }
 
-        label = enemy_labels.get(enemy_focus, "inner challenges")
-
-        return {
-            "step_title": f"Day {day_index}: Finding Balance",
-            "today_focus": enemy_focus,
-            "verse_refs": verse_refs,
+        # Get content for this enemy or use general fallback
+        content = enemy_content.get(enemy_focus, {
+            "label": "inner challenges",
+            "title": f"Day {day_index}: Walking the Path",
             "teaching": (
-                f"Today we focus on working with {label} through ancient wisdom. "
-                "Take time to read the verses provided and reflect on how they apply to your life. "
-                "Remember that change comes gradually through consistent practice. "
-                "Be patient and compassionate with yourself as you walk this path."
+                "The Gita reminds us that transformation is a gradual process requiring patience, "
+                "practice, and self-compassion. Each step on this path, no matter how small, moves "
+                "us closer to our true nature. Today we honor wherever we are in the journey, "
+                "trusting that awareness itself is the beginning of change."
             ),
-            "guided_reflection": [
-                f"How has {label} shown up in your life recently?",
-                "What would life look like if you found more balance in this area?",
-                "What one small step could you take today?",
+            "reflections": [
+                "What inner challenge has been most present for you lately?",
+                "What would freedom from this challenge feel like?",
+                "What support do you need on this journey?",
             ],
             "practice": {
                 "name": "Mindful Breathing",
@@ -554,10 +718,20 @@ class StepGenerator:
                 ],
                 "duration_minutes": 5,
             },
-            "micro_commitment": f"Today I will notice when {label} arises and pause before reacting.",
+            "commitment": "Today I will bring gentle awareness to my inner state.",
+        })
+
+        return {
+            "step_title": content["title"],
+            "today_focus": enemy_focus,
+            "verse_refs": verse_refs,
+            "teaching": content["teaching"],
+            "guided_reflection": content["reflections"],
+            "practice": content["practice"],
+            "micro_commitment": content["commitment"],
             "check_in_prompt": {
                 "scale": "0-10",
-                "label": f"How intense is your {label} feeling today?",
+                "label": f"How present is {content['label']} in your experience today?",
             },
         }
 

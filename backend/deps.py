@@ -51,21 +51,28 @@ async def get_current_user(
 ) -> str:
     """
     Get the current authenticated user from JWT token.
-    
-    Extracts the user ID from the Authorization header (Bearer token).
+
+    Extracts the user ID from the Authorization header (Bearer token)
+    or from httpOnly access_token cookie (XSS-protected).
     Returns the user ID if valid, raises 401 if not authenticated.
     """
+    # Check Authorization header first (for API clients/backward compatibility)
     auth_header = request.headers.get("Authorization")
-    
-    if not auth_header or not auth_header.startswith("Bearer "):
+    token = None
+
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+    else:
+        # Fall back to httpOnly cookie (more secure, XSS protected)
+        token = request.cookies.get("access_token")
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    token = auth_header.split(" ", 1)[1].strip()
-    
+
     try:
         payload = decode_access_token(token)
     except Exception:
@@ -74,26 +81,26 @@ async def get_current_user(
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     user_id = payload.get("sub")
-    
+
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token: missing user ID",
         )
-    
+
     # Verify user exists and is not deleted
     stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or deleted",
         )
-    
+
     return user_id
 
 
@@ -121,7 +128,8 @@ async def get_current_user_flexible(
 
     Supports multiple authentication methods in order of preference:
     1. Authorization: Bearer <JWT token> - Standard JWT authentication
-    2. X-Auth-UID header - User ID header (for frontend compatibility)
+    2. access_token httpOnly cookie - XSS-protected JWT authentication
+    3. X-Auth-UID header - User ID header (for frontend compatibility)
 
     This is designed for endpoints that need to work with both JWT tokens
     and direct user ID headers from the frontend.
@@ -130,10 +138,15 @@ async def get_current_user_flexible(
     """
     # First, try JWT Bearer token authentication
     auth_header = request.headers.get("Authorization")
+    token = None
 
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ", 1)[1].strip()
+    else:
+        # Second, try httpOnly cookie (XSS-protected)
+        token = request.cookies.get("access_token")
 
+    if token:
         try:
             payload = decode_access_token(token)
             user_id = payload.get("sub")
@@ -149,7 +162,7 @@ async def get_current_user_flexible(
         except Exception:
             pass  # Fall through to try other auth methods
 
-    # Second, try X-Auth-UID header (frontend compatibility)
+    # Third, try X-Auth-UID header (frontend compatibility)
     x_auth_uid = request.headers.get("X-Auth-UID")
 
     if x_auth_uid:
@@ -175,6 +188,6 @@ async def get_current_user_flexible(
     # No valid authentication found
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated. Please provide a valid Bearer token or X-Auth-UID header.",
+        detail="Not authenticated. Please provide a valid Bearer token, access_token cookie, or X-Auth-UID header.",
         headers={"WWW-Authenticate": "Bearer"},
     )
