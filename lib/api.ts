@@ -37,13 +37,23 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
 
   const headers = new Headers(options.headers || {})
 
-  // Backward compatibility: Also check localStorage for tokens during migration
+  // DEPRECATED: localStorage token storage - migrate to httpOnly cookies
+  // Security Risk: Tokens in localStorage are vulnerable to XSS attacks.
   // httpOnly cookies are sent automatically with credentials: 'include'
+  // This fallback will be removed in a future version.
   if (typeof window !== 'undefined') {
     const accessToken = localStorage.getItem('mindvibe_access_token')
       || localStorage.getItem('access_token')
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`)
+      // Log deprecation warning in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(
+          '[SECURITY] Using localStorage token (DEPRECATED). ' +
+          'Migrate to httpOnly cookies for XSS protection. ' +
+          'See: https://owasp.org/www-community/HttpOnly'
+        )
+      }
     }
   }
 
@@ -72,6 +82,10 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
 
 /**
  * Get the current access token if available
+ *
+ * @deprecated This function uses localStorage which is vulnerable to XSS.
+ * Prefer using httpOnly cookies for authentication.
+ * The primary auth mechanism is httpOnly cookies sent with credentials: 'include'.
  */
 export function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -79,7 +93,11 @@ export function getAccessToken(): string | null {
 }
 
 /**
- * Check if the user is authenticated (has a valid access token)
+ * Check if the user is authenticated
+ *
+ * Note: This only checks localStorage token presence. The primary auth mechanism
+ * uses httpOnly cookies which cannot be checked from JavaScript (by design).
+ * For accurate auth status, make an API call to verify session.
  */
 export function isAuthenticated(): boolean {
   return !!getAccessToken()
