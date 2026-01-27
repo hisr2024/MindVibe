@@ -40,6 +40,7 @@ from backend.middleware.logging_middleware import RequestLoggingMiddleware
 from backend.middleware.ddos_protection import DDoSProtectionMiddleware
 from backend.middleware.threat_detection import ThreatDetectionMiddleware
 from backend.middleware.input_sanitizer import InputSanitizerMiddleware
+from backend.middleware.csrf import CSRFMiddleware
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
@@ -171,6 +172,13 @@ app.add_middleware(SecurityHeadersMiddleware)
 # Add request logging middleware
 app.add_middleware(RequestLoggingMiddleware)
 
+# Add CSRF protection middleware
+app.add_middleware(
+    CSRFMiddleware,
+    cookie_secure=os.getenv("ENVIRONMENT", "development") == "production",
+    cookie_samesite="strict",
+)
+
 # Configure rate limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -237,7 +245,11 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
         allowed_origin = origin
     else:
         # Fallback to first allowed origin (for non-browser clients)
-        allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "*"
+        # SECURITY: Never use wildcard - reject if no valid origin
+        if not ALLOWED_ORIGINS:
+            allowed_origin = "https://mind-vibe-universal.vercel.app"  # Default production origin
+        else:
+            allowed_origin = ALLOWED_ORIGINS[0]
 
     if request.method == "OPTIONS":
         return JSONResponse(
@@ -263,7 +275,7 @@ async def startup():
         # Step 1: Run SQL migrations
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
-            if migration_result. applied:
+            if migration_result.applied:
                 print(f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}")
             else:
                 print("ℹ️ No new SQL migrations to apply")
@@ -295,14 +307,40 @@ async def startup():
         print("✅ Database schema ready")
         
     except Exception as exc:
-        failed_meta = migrations_module. LATEST_MIGRATION_RESULT
+        failed_meta = migrations_module.LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
             print("❌ [MIGRATIONS] Context for the failure:")
             print(f"   File: {failed_meta.failed_file}")
-            if failed_meta. failed_statement:
+            if failed_meta.failed_statement:
                 print(f"   Statement: {failed_meta.failed_statement}")
         print(f"❌ [MIGRATIONS] Failed to apply migrations: {exc}")
         raise
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    """Cleanup resources on application shutdown."""
+    print("\n🛑 MINDVIBE - SHUTDOWN SEQUENCE")
+
+    # Dispose database engine
+    try:
+        await engine.dispose()
+        print("✅ Database engine disposed")
+    except Exception as e:
+        print(f"⚠️ Error disposing database engine: {e}")
+
+    # Close Redis connections if available
+    try:
+        from backend.cache.redis_cache import get_redis_cache
+        redis_cache = await get_redis_cache()
+        if redis_cache and hasattr(redis_cache, '_client') and redis_cache._client:
+            await redis_cache._client.close()
+            print("✅ Redis connection closed")
+    except Exception as e:
+        print(f"⚠️ Error closing Redis connection: {e}")
+
+    print("✅ Shutdown complete")
+
 
 print("\n[1/3] Attempting to import KIAAN chat router...")
 kiaan_router_loaded = False
@@ -454,8 +492,8 @@ except Exception as e:
 # Load Karmic Tree Analytics router
 print("\n[Karmic Tree] Attempting to import Karmic Tree Analytics router...")
 try:
-    from backend.routes.analytics.karmic_tree import router as karmic_tree_router
-    app.include_router(karmic_tree_router, prefix="/api/analytics")
+    from backend.routes.analytics.karmic_tree import router as analytics_karmic_tree_router
+    app.include_router(analytics_karmic_tree_router, prefix="/api/analytics")
     print("✅ [SUCCESS] Karmic Tree Analytics router loaded")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Karmic Tree Analytics router: {e}")

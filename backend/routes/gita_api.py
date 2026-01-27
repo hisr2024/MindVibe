@@ -350,7 +350,10 @@ async def semantic_search(
     if page_size > 50:
         raise HTTPException(status_code=422, detail="Page size cannot exceed 50")
     
-    # Build search query
+    # Build search query - whitelist valid language fields to prevent attribute access attacks
+    valid_languages = {"en", "hi", "sa", "te", "ta", "bn", "mr", "gu", "kn", "ml", "pa", "translation_en", "translation_hi"}
+    if language not in valid_languages:
+        raise HTTPException(status_code=422, detail=f"Invalid language. Must be one of: {', '.join(sorted(valid_languages))}")
     lang_field = getattr(GitaVerse, language)
     search_conditions = [lang_field.ilike(f"%{keyword}%")]
 
@@ -633,7 +636,14 @@ Response (following the structure above):"""
                 temperature=0.7,
                 max_tokens=400,
             )
-            guidance = response.choices[0].message.content.strip()
+            # Safe null check for OpenAI response
+            guidance = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content:
+                    guidance = message.content.strip()
+            if not guidance:
+                guidance = generate_template_gita_response(request.query, verses, request.language)
         except Exception as e:
             print(f"OpenAI API error: {str(e)}")
             guidance = generate_template_gita_response(request.query, verses, request.language)

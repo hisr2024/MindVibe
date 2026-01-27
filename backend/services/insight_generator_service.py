@@ -242,7 +242,19 @@ Keep it warm, personal, and encouraging. Use "you" and "your"."""
                 temperature=0.7
             )
 
-            return response.choices[0].message.content.strip()
+            # Safe null check for OpenAI response
+            content = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content:
+                    content = message.content.strip()
+
+            if not content:
+                return self._generate_template_insight(
+                    mood_data, journal_data, verse_interactions,
+                    wellness_score, trend_analysis
+                )
+            return content
 
         except Exception as e:
             print(f"GPT insight generation failed: {e}")

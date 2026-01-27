@@ -332,7 +332,12 @@ Response (following the structure above):"""
             temperature=0.7,
             max_tokens=500,
         )
-        content = response.choices[0].message.content
+        # Safe null check for OpenAI response
+        content = None
+        if response and response.choices and len(response.choices) > 0:
+            message = response.choices[0].message
+            if message:
+                content = message.content
         return content.strip() if content else ""
     except Exception as e:
         print(f"OpenAI API error: {str(e)}")

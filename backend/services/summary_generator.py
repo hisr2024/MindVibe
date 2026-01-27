@@ -96,7 +96,12 @@ class SummaryGenerator:
                 max_tokens=self.max_tokens
             )
 
-            summary_text = response.choices[0].message.content
+            # Safe null check for OpenAI response
+            summary_text = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message:
+                    summary_text = message.content
             if not summary_text:
                 return self._create_fallback_summary(full_response)
 

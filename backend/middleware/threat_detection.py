@@ -182,10 +182,12 @@ def calculate_entropy(data: bytes) -> float:
     length = len(data)
     entropy = 0.0
 
+    import math
     for count in byte_counts.values():
         probability = count / length
         if probability > 0:
-            entropy -= probability * (probability.bit_length() - 1)
+            # Use log2 for entropy calculation (Shannon entropy)
+            entropy -= probability * math.log2(probability)
 
     return entropy
 

@@ -30,6 +30,7 @@ from backend.middleware.feature_access import (
     get_current_user_id,
     is_developer,
 )
+from backend.middleware.rbac import get_current_admin, AdminContext
 from backend.services.journey_engine_enhanced import (
     EnhancedJourneyEngine,
     get_journey_engine,
@@ -813,13 +814,13 @@ async def get_journey_history(
 
 @admin_router.get("/providers/status", response_model=ProviderStatusResponse)
 async def get_provider_status(
-    # Note: In production, add admin auth check here
-    # admin: AdminUser = Depends(require_admin_role)
+    admin: AdminContext = Depends(get_current_admin),
 ) -> ProviderStatusResponse:
     """
     Get health status of all AI providers.
 
     Admin-only endpoint for monitoring provider health.
+    Requires admin authentication.
     """
     manager = get_provider_manager()
 

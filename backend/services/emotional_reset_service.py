@@ -305,7 +305,12 @@ End with 💙"""
                 max_tokens=150,  # Optimized from 200
             )
 
-            content = response.choices[0].message.content or ""
+            # Safe null check for OpenAI response
+            content = ""
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content:
+                    content = message.content
 
             # Extract emotions using simple keyword matching
             emotions = self._extract_emotions(user_input)
@@ -435,7 +440,13 @@ Keep it under 80 words. End with 💙"""
                 max_tokens=120,  # Optimized from 150
             )
 
-            return response.choices[0].message.content or self._get_fallback_visualization(emotions)
+            # Safe null check for OpenAI response
+            content = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message:
+                    content = message.content
+            return content or self._get_fallback_visualization(emotions)
 
         except Exception as e:
             logger.error(f"OpenAI visualization error: {type(e).__name__}: {e}")
@@ -579,7 +590,12 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
                 max_tokens=180,  # Optimized from 200
             )
 
-            content = response.choices[0].message.content or ""
+            # Safe null check for OpenAI response
+            content = ""
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content:
+                    content = message.content
             affirmations = [
                 line.strip().lstrip("•-1234567890. ")
                 for line in content.strip().split("\n")

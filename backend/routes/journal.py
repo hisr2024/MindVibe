@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 from backend.models import (
     EncryptedBlob,
     JournalEntry,
@@ -91,7 +91,7 @@ async def quick_save_to_journal(
     request: Request,
     payload: QuickSaveIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> QuickSaveOut:
     """Quick-save a KIAAN insight directly to journal.
     
@@ -146,7 +146,7 @@ async def upload_blob(
     request: Request,
     payload: BlobIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> dict:
     # Check subscription access for journal
     await _check_journal_permission(request, db)
@@ -211,7 +211,7 @@ async def create_entry(
     request: Request,
     payload: JournalEntryCreate,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JournalEntryOut:
     await _check_journal_permission(request, db, premium=False)
 
@@ -252,7 +252,7 @@ async def create_entry(
 async def list_entries(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     limit: int = 50,
     cursor: datetime | None = None,
 ) -> Sequence[JournalEntryOut]:
@@ -277,7 +277,7 @@ async def get_entry(
     request: Request,
     entry_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JournalEntryOut:
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
@@ -292,7 +292,7 @@ async def update_entry(
     entry_id: str,
     payload: JournalEntryUpdate,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JournalEntryOut:
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
@@ -342,7 +342,7 @@ async def delete_entry(
     request: Request,
     entry_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> dict:
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
@@ -360,7 +360,7 @@ async def sync_entries(
     request: Request,
     payload: SyncRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> SyncResponse:
     await _check_journal_permission(request, db, premium=False)
 
@@ -397,7 +397,7 @@ async def search_entries(
     request: Request,
     payload: JournalSearchRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> Sequence[JournalEntryOut]:
     await _check_journal_permission(request, db, premium=True)
 
@@ -427,7 +427,7 @@ async def search_entries(
 async def journal_analytics(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> JournalAnalytics:
     await _check_journal_permission(request, db, premium=True)
 
@@ -485,7 +485,7 @@ async def journal_analytics(
 async def latest_blob(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> dict:
     # Check subscription access for journal
     await _check_journal_permission(request, db)

@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 
 logger = logging.getLogger(__name__)
 from backend.models import (
@@ -413,7 +413,7 @@ async def _build_achievement_payload(
 
 @router.get("/progress", response_model=ProgressResponse)
 async def get_progress(
-    db: AsyncSession = Depends(get_db), user_id: str = Depends(get_user_id)
+    db: AsyncSession = Depends(get_db), user_id: str = Depends(get_current_user_flexible)
 ) -> ProgressResponse:
     """
     Get user's karmic tree progress, achievements, and unlockables.
@@ -478,7 +478,7 @@ async def get_progress(
 
 @router.get("/achievements", response_model=list[AchievementProgress])
 async def list_achievements(
-    db: AsyncSession = Depends(get_db), user_id: str = Depends(get_user_id)
+    db: AsyncSession = Depends(get_db), user_id: str = Depends(get_current_user_flexible)
 ) -> list[AchievementProgress]:
     """
     List all achievements and user progress.
@@ -523,7 +523,7 @@ async def list_achievements(
 async def unlock_reward(
     request: UnlockRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> UnlockableOut:
     unlockable = await db.scalar(
         select(Unlockable).where(

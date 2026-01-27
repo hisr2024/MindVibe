@@ -17,7 +17,7 @@ from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 from backend.models import (
     UserAchievement,
     UserProgress,
@@ -52,7 +52,7 @@ class ProgressResetError(Exception):
 async def reset_user_progress(
     request: ResetProgressRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> ResetProgressResponse:
     """
     Reset user's Karmic Tree progress while preserving KIAAN ecosystem data.
@@ -260,7 +260,7 @@ async def reset_user_progress(
 @router.get("/reset/preview", response_model=dict)
 async def preview_reset(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> dict[str, Any]:
     """
     Preview what data will be reset without actually resetting it.

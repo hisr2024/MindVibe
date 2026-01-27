@@ -803,17 +803,25 @@ class TTSService:
         # Try edge-tts first (better quality)
         if self._edge_available:
             try:
-                # Run async edge-tts in sync context
-                loop = asyncio.new_event_loop()
+                # Use asyncio.to_thread for sync context or get running loop for async context
                 try:
-                    audio = loop.run_until_complete(
-                        self.edge_tts.synthesize(text, language, voice_type, speed)
-                    )
-                    if audio:
-                        logger.info("Successfully synthesized with edge-tts")
-                        return audio
-                finally:
-                    loop.close()
+                    # Check if we're already in an async context
+                    loop = asyncio.get_running_loop()
+                    # We're in async context - use create_task
+                    audio = await self.edge_tts.synthesize(text, language, voice_type, speed)
+                except RuntimeError:
+                    # No running loop - use run_until_complete
+                    loop = asyncio.new_event_loop()
+                    try:
+                        audio = loop.run_until_complete(
+                            self.edge_tts.synthesize(text, language, voice_type, speed)
+                        )
+                    finally:
+                        loop.close()
+
+                if audio:
+                    logger.info("Successfully synthesized with edge-tts")
+                    return audio
             except Exception as e:
                 logger.warning(f"edge-tts synthesis failed: {e}")
 
