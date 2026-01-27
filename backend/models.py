@@ -2857,11 +2857,12 @@ class UserJourney(SoftDeleteMixin, Base):
     )
 
 
-class UserJourneyStepState(Base):
+class UserJourneyStepState(SoftDeleteMixin, Base):
     """
     AI-generated step content and user progress for each day.
 
     Stores KIAAN-generated content, verse refs, and user check-ins.
+    Includes soft delete support for data recovery.
     """
 
     __tablename__ = "user_journey_step_state"
@@ -2900,8 +2901,11 @@ class UserJourneyStepState(Base):
     #   "safety_note": "..." (optional)
     # }
 
-    # User reflection (encrypted reference or FK to journal)
+    # User reflection storage
+    # DEPRECATED: reflection_reference is no longer used - use reflection_encrypted instead
+    # Kept for backward compatibility; will be removed in future migration
     reflection_reference: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Encrypted reflection content (primary storage for user reflections)
     reflection_encrypted: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Check-in data
