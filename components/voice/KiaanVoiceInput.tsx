@@ -15,7 +15,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKiaanVoice, KiaanVoiceState } from '@/hooks/useKiaanVoice'
-import { useVoiceLearningWithKiaan } from '@/hooks/useVoiceLearning'
+import { useVoiceLearning } from '@/hooks/useVoiceLearning'
 import { useLanguage } from '@/hooks/useLanguage'
 
 export type VoiceInputMode = 'simple' | 'conversation' | 'dictation'
@@ -93,7 +93,7 @@ export function KiaanVoiceInput({
   const responseStartTimeRef = useRef<number>(0)
 
   // Voice learning integration for personalized responses
-  const voiceLearning = useVoiceLearningWithKiaan({
+  const voiceLearning = useVoiceLearning({
     language,
     autoStartSession: enableVoiceLearning,
     onEnhancedResponse: (enhanced) => {
@@ -132,8 +132,8 @@ export function KiaanVoiceInput({
           setLocalTranscript(msg.content)
         }
         // Track user input in voice learning
-        if (enableVoiceLearning && voiceLearning.isReady) {
-          voiceLearning.processUserInput(msg.content)
+        if (enableVoiceLearning && voiceLearning.isSessionActive) {
+          voiceLearning.processInput(msg.content)
         }
       } else if (msg.role === 'kiaan') {
         onKiaanResponse?.(msg.content)
@@ -209,13 +209,10 @@ export function KiaanVoiceInput({
     const listenDuration = Date.now() - responseStartTimeRef.current
 
     // Record positive feedback via voice learning
-    if (voiceLearning.isReady) {
-      await voiceLearning.submitFeedback({
-        type: 'rating',
-        rating: 5,
+    if (voiceLearning.isSessionActive) {
+      await voiceLearning.recordFeedback(5, lastResponse, {
         completed: true,
         listenDuration,
-        responseText: lastResponse,
       })
     }
 
@@ -231,13 +228,10 @@ export function KiaanVoiceInput({
     const listenDuration = Date.now() - responseStartTimeRef.current
 
     // Record negative feedback via voice learning
-    if (voiceLearning.isReady) {
-      await voiceLearning.submitFeedback({
-        type: 'rating',
-        rating: 1,
+    if (voiceLearning.isSessionActive) {
+      await voiceLearning.recordFeedback(1, lastResponse, {
         completed: false,
         listenDuration,
-        responseText: lastResponse,
       })
     }
 
