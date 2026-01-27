@@ -305,10 +305,12 @@ async def update_user_achievements(
         progress_value = _progress_value_for_category(achievement.category, counts)
         user_progress = achievement_map.get(achievement.id)
         if not user_progress:
+            # Use merge to handle race conditions - if another request created
+            # the same record, this will update it instead of failing
             user_progress = UserAchievement(
                 user_id=user_id, achievement_id=achievement.id, progress=progress_value
             )
-            db.add(user_progress)
+            user_progress = await db.merge(user_progress)
             achievement_map[achievement.id] = user_progress
         else:
             user_progress.progress = progress_value

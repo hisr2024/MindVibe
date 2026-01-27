@@ -62,8 +62,8 @@ class Settings(BaseSettings):
     SESSION_TOUCH_INTERVAL_MINUTES: int = 5
     
     # Redis Configuration
-    REDIS_ENABLED: bool = False
-    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_ENABLED: bool = os.getenv("REDIS_ENABLED", "false").lower() == "true"
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     CACHE_KIAAN_RESPONSES: bool = False
     
     # Rate Limiting

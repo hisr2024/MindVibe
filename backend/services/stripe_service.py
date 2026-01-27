@@ -188,8 +188,14 @@ async def create_checkout_session(
         # Get or create customer
         customer_id = await get_or_create_stripe_customer(db, user)
         
-        # Default URLs
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        # Default URLs - require FRONTEND_URL in production
+        frontend_url = os.getenv("FRONTEND_URL")
+        if not frontend_url:
+            environment = os.getenv("ENVIRONMENT", "development")
+            if environment == "production":
+                raise ValueError("FRONTEND_URL environment variable is required in production")
+            frontend_url = "http://localhost:3000"
+            logger.warning("FRONTEND_URL not set, using localhost (development only)")
         if not success_url:
             success_url = f"{frontend_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
         if not cancel_url:
