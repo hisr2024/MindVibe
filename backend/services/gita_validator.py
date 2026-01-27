@@ -224,7 +224,8 @@ Remember: you are not your thoughts, not your circumstances, but the aware prese
         # Simple hash to pick a consistent response based on message
         import hashlib
         if user_message:
-            hash_val = int(hashlib.md5(user_message.encode()).hexdigest(), 16)
+            # SECURITY: Use sha256 instead of md5 for consistency
+            hash_val = int(hashlib.sha256(user_message.encode()).hexdigest(), 16)
             index = hash_val % len(fallback_responses)
         else:
             index = 0

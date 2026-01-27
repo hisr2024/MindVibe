@@ -39,7 +39,7 @@ class PsychologyPatterns:
         # Simple selection based on context length
         import hashlib
 
-        hash_val = int(hashlib.md5(context.encode()).hexdigest(), 16)
+        hash_val = int(hashlib.sha256(context.encode()).hexdigest(), 16)
         return patterns[hash_val % len(patterns)]
 
     def get_thought_labeling_technique(self, context: str) -> str:
@@ -103,7 +103,7 @@ class PsychologyPatterns:
 
         import hashlib
 
-        hash_val = int(hashlib.md5(context.encode()).hexdigest(), 16)
+        hash_val = int(hashlib.sha256(context.encode()).hexdigest(), 16)
         return strategies[hash_val % len(strategies)]
 
     def get_committed_action_step(self, values_area: str | None = None) -> str:

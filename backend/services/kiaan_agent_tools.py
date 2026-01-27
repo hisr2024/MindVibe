@@ -30,7 +30,7 @@ import tempfile
 import sqlite3
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -1024,7 +1024,8 @@ class OfflineDocumentationCache:
             return False
 
         try:
-            doc_id = hashlib.md5(f"{package_name}:{section}:{version}".encode()).hexdigest()
+            # SECURITY: Use sha256 instead of md5 to avoid collision risk
+            doc_id = hashlib.sha256(f"{package_name}:{section}:{version}".encode()).hexdigest()
 
             conn = sqlite3.connect(str(self.db_path))
             cursor = conn.cursor()
@@ -1035,7 +1036,7 @@ class OfflineDocumentationCache:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 doc_id, package_name, version, section, title, content, url,
-                datetime.now().isoformat()
+                datetime.now(timezone.utc).isoformat()
             ))
 
             # Update FTS

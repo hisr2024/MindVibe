@@ -551,7 +551,8 @@ class OfflineAudioCache:
     def _generate_key(self, text: str, language: str, voice_type: str) -> str:
         """Generate cache key."""
         content = f"{text}:{language}:{voice_type}"
-        return hashlib.md5(content.encode()).hexdigest()
+        # SECURITY: Use sha256 instead of md5 to avoid collision risk
+        return hashlib.sha256(content.encode()).hexdigest()
 
     def get(self, text: str, language: str, voice_type: str) -> Optional[bytes]:
         """Get cached audio if available."""
@@ -680,7 +681,8 @@ class TTSService:
     ) -> str:
         """Generate unique cache key for audio"""
         content = f"{text}:{language}:{voice_type}:{speed}"
-        return f"tts:{hashlib.md5(content.encode()).hexdigest()}"
+        # SECURITY: Use sha256 instead of md5 to avoid collision risk
+        return f"tts:{hashlib.sha256(content.encode()).hexdigest()}"
 
     def _get_voice_config(
         self,

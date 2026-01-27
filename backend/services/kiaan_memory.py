@@ -24,7 +24,7 @@ import os
 import sqlite3
 import aiosqlite
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
@@ -60,8 +60,8 @@ class MemoryEntry:
     type: MemoryType
     content: Any
     metadata: dict = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.now)
-    accessed_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    accessed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     access_count: int = 0
     relevance_score: float = 1.0
     ttl_hours: Optional[int] = None  # None = no expiration
@@ -97,7 +97,7 @@ class MemoryEntry:
         if self.ttl_hours is None:
             return False
         expiry = self.created_at + timedelta(hours=self.ttl_hours)
-        return datetime.now() > expiry
+        return datetime.now(timezone.utc) > expiry
 
 
 # =============================================================================
@@ -217,7 +217,7 @@ class SQLiteMemoryBackend:
                             UPDATE memories
                             SET accessed_at = ?, access_count = access_count + 1
                             WHERE id = ?
-                        """, (datetime.now().isoformat(), memory_id))
+                        """, (datetime.now(timezone.utc).isoformat(), memory_id))
                         await db.commit()
 
                         return self._row_to_entry(dict(row))
@@ -467,7 +467,7 @@ class LRUCache:
             # Move to end (most recently used)
             self.cache.move_to_end(key)
             entry = self.cache[key]
-            entry.accessed_at = datetime.now()
+            entry.accessed_at = datetime.now(timezone.utc)
             entry.access_count += 1
             return entry
 
@@ -617,7 +617,7 @@ class KIAANMemoryService:
         content_hash = hashlib.sha256(
             json.dumps(content, sort_keys=True, default=str).encode()
         ).hexdigest()[:12]  # Use 12 chars of sha256 for better uniqueness
-        memory_id = f"{memory_type.value}_{content_hash}_{int(datetime.now().timestamp())}"
+        memory_id = f"{memory_type.value}_{content_hash}_{int(datetime.now(timezone.utc).timestamp())}"
 
         # Create entry
         entry = MemoryEntry(
@@ -810,7 +810,7 @@ class KIAANMemoryService:
                 "session_id": session_id,
                 "role": role,
                 "content": content,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             memory_type=MemoryType.CONVERSATION,
             user_id=user_id,

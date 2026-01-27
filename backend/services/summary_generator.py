@@ -246,7 +246,8 @@ Now summarize the given KIAAN response:"""
     def _get_cache_key(self, response: str) -> str:
         """Generate a cache key from response content."""
         import hashlib
-        return hashlib.md5(response.encode()).hexdigest()[:16]
+        # SECURITY: Use sha256 instead of md5 for consistency
+        return hashlib.sha256(response.encode()).hexdigest()[:16]
 
     async def generate_summary_streaming(
         self,

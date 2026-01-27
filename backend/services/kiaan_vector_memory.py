@@ -14,7 +14,7 @@ import json
 import logging
 import os
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Optional
 import numpy as np
@@ -68,8 +68,8 @@ class VectorMemoryEntry:
     content: Any
     embedding: Optional[list[float]] = None
     metadata: dict = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.now)
-    accessed_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    accessed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     access_count: int = 0
     relevance_score: float = 1.0
     ttl_hours: Optional[int] = None
@@ -110,7 +110,7 @@ class VectorMemoryEntry:
         if self.ttl_hours is None:
             return False
         expiry = self.created_at + timedelta(hours=self.ttl_hours)
-        return datetime.now() > expiry
+        return datetime.now(timezone.utc) > expiry
 
 
 @dataclass
@@ -301,7 +301,7 @@ class KIAANVectorMemory:
             # SECURITY: Use sha256 instead of md5 to reduce collision risk
             content_str = json.dumps(content, sort_keys=True, default=str)
             content_hash = hashlib.sha256(content_str.encode()).hexdigest()[:12]
-            memory_id = f"{memory_type.value}_{content_hash}_{int(datetime.now().timestamp())}"
+            memory_id = f"{memory_type.value}_{content_hash}_{int(datetime.now(timezone.utc).timestamp())}"
 
             # Generate embedding
             text_for_embedding = self._extract_text(content)
@@ -401,7 +401,7 @@ class KIAANVectorMemory:
 
         # Update access counts
         for memory, _ in results[:limit]:
-            memory.accessed_at = datetime.now()
+            memory.accessed_at = datetime.now(timezone.utc)
             memory.access_count += 1
 
         return results[:limit]
@@ -440,7 +440,8 @@ class KIAANVectorMemory:
         connections: Optional[list[tuple[str, str]]] = None
     ) -> str:
         """Add a node to the knowledge graph."""
-        node_id = f"node_{hashlib.md5(name.encode()).hexdigest()[:8]}"
+        # SECURITY: Use sha256 instead of md5 to avoid collision risk
+        node_id = f"node_{hashlib.sha256(name.encode()).hexdigest()[:8]}"
 
         node = KnowledgeNode(
             id=node_id,
@@ -532,7 +533,7 @@ class KIAANVectorMemory:
                 "query": query,
                 "response": response,
                 "feedback": feedback,
-                "learned_at": datetime.now().isoformat()
+                "learned_at": datetime.now(timezone.utc).isoformat()
             },
             memory_type=MemoryType.KNOWLEDGE,
             user_id=user_id,

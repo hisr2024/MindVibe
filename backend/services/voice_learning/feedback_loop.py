@@ -202,7 +202,8 @@ class LearningFeedbackService:
 
     def _hash_content(self, content: str) -> str:
         """Generate hash for content."""
-        return hashlib.md5(content.encode()).hexdigest()[:12]
+        # SECURITY: Use sha256 instead of md5 for consistency
+        return hashlib.sha256(content.encode()).hexdigest()[:12]
 
     async def record_feedback(
         self,

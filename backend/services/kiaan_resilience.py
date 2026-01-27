@@ -18,7 +18,7 @@ import os
 import random
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Callable, Optional, TypeVar, Generic
 from collections import OrderedDict
@@ -263,7 +263,7 @@ class CircuitBreaker:
         if self.state == CircuitState.OPEN:
             # Check if timeout has passed
             if self.last_failure_time:
-                elapsed = (datetime.now() - self.last_failure_time).total_seconds()
+                elapsed = (datetime.now(timezone.utc) - self.last_failure_time).total_seconds()
                 if elapsed >= self.config.timeout_seconds:
                     logger.info(f"Circuit breaker '{self.name}' transitioning to half-open")
                     self.state = CircuitState.HALF_OPEN
@@ -287,7 +287,7 @@ class CircuitBreaker:
         """Handle failed call."""
         async with self._lock:
             self.failure_count += 1
-            self.last_failure_time = datetime.now()
+            self.last_failure_time = datetime.now(timezone.utc)
 
             if self.state == CircuitState.HALF_OPEN:
                 logger.warning(f"Circuit breaker '{self.name}' reopening")
@@ -424,7 +424,8 @@ class ResponseCache:
             "kwargs": {k: str(v)[:500] for k, v in sorted(kwargs.items())}
         }, sort_keys=True)
 
-        key_hash = hashlib.md5(key_data.encode()).hexdigest()
+        # SECURITY: Use sha256 instead of md5 to avoid collision risk
+        key_hash = hashlib.sha256(key_data.encode()).hexdigest()
         return f"{self.config.namespace}:{key_hash}"
 
     async def get(self, key: str) -> Optional[Any]:
