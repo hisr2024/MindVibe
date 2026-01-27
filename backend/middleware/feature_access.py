@@ -31,13 +31,25 @@ from backend.services.subscription_service import (
 
 logger = logging.getLogger(__name__)
 
-# Developer emails with full access (set via environment variable)
-# Format: comma-separated list of emails
-DEVELOPER_EMAILS = set(
+# Default developer emails with full access (hardcoded for app owners)
+# These emails always get free unlimited access regardless of subscription
+DEFAULT_DEVELOPER_EMAILS = {
+    "developer@mindvibe.app",
+    "admin@mindvibe.app",
+    # Add your developer email below:
+    "hisr2024@gmail.com",
+}
+
+# Additional developer emails from environment variable
+# Format: comma-separated list of emails (e.g., DEVELOPER_EMAILS=dev1@example.com,dev2@example.com)
+_env_developer_emails = set(
     email.strip().lower()
     for email in os.getenv("DEVELOPER_EMAILS", "").split(",")
     if email.strip()
 )
+
+# Combined developer emails (hardcoded + environment variable)
+DEVELOPER_EMAILS = DEFAULT_DEVELOPER_EMAILS | _env_developer_emails
 
 
 async def is_developer(db: AsyncSession, user_id: str) -> bool:
