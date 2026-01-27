@@ -127,7 +127,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     },
   })
 
-  // Send message to KIAAN API
+  // Send message to KIAAN Voice API
   const sendToKiaan = useCallback(async (text: string): Promise<string | null> => {
     if (processingRef.current) return null
     processingRef.current = true
@@ -135,14 +135,15 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     setError(null)
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
-      const response = await fetch(`${apiUrl}/api/chat/message`, {
+      // Use voice query API for better voice-specific responses
+      const response = await fetch('/api/voice/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
+          query: text,
           language,
-          context: 'voice'  // Indicate this is a voice interaction
+          context: 'voice',
+          include_audio: false,  // We'll use browser TTS
         }),
       })
 
@@ -155,6 +156,26 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
       return kiaanResponse
     } catch (err) {
+      // Fallback to chat API if voice API fails
+      try {
+        const fallbackResponse = await fetch('/api/chat/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            language,
+            context: 'voice',
+          }),
+        })
+
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json()
+          return fallbackData.response || fallbackData.message || 'I am here with you.'
+        }
+      } catch {
+        // Ignore fallback error
+      }
+
       const errorMsg = err instanceof Error ? err.message : 'Failed to connect to KIAAN'
       setError(errorMsg)
       updateState('error')

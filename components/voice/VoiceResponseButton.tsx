@@ -4,6 +4,7 @@
  * Plays KIAAN responses with natural voice synthesis.
  * Features:
  * - Play/Pause/Stop controls
+ * - Backend TTS with neural voices (with browser fallback)
  * - Natural voice with adjustable rate
  * - Visual feedback during playback
  * - Multi-language support
@@ -11,9 +12,9 @@
 
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { useVoiceOutput } from '@/hooks/useVoiceOutput'
+import { useEnhancedVoiceOutput } from '@/hooks/useEnhancedVoiceOutput'
 import { useLanguage } from '@/hooks/useLanguage'
 
 export interface VoiceResponseButtonProps {
@@ -63,19 +64,24 @@ export function VoiceResponseButton({
   const {
     isSpeaking,
     isPaused,
+    isLoading,
     isSupported,
     speak,
     pause,
     resume,
     cancel,
-  } = useVoiceOutput({
+  } = useEnhancedVoiceOutput({
     language,
     rate,
+    voiceType: 'friendly',
+    useBackendTts: true,
     onStart,
     onEnd,
   })
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback(async () => {
+    if (isLoading) return
+
     if (isSpeaking) {
       if (isPaused) {
         resume()
@@ -83,9 +89,9 @@ export function VoiceResponseButton({
         pause()
       }
     } else {
-      speak(text)
+      await speak(text)
     }
-  }, [isSpeaking, isPaused, speak, pause, resume, text])
+  }, [isSpeaking, isPaused, isLoading, speak, pause, resume, text])
 
   const handleStop = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -121,10 +127,29 @@ export function VoiceResponseButton({
         onClick={handleClick}
         className={`relative flex items-center justify-center rounded-xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${sizeClasses[size]} ${getVariantStyles()}`}
         whileTap={{ scale: 0.95 }}
-        aria-label={isSpeaking ? (isPaused ? 'Resume' : 'Pause') : 'Listen'}
-        title={isSpeaking ? (isPaused ? 'Resume speaking' : 'Pause speaking') : 'Listen to response'}
+        aria-label={isLoading ? 'Loading' : isSpeaking ? (isPaused ? 'Resume' : 'Pause') : 'Listen'}
+        title={isLoading ? 'Loading voice...' : isSpeaking ? (isPaused ? 'Resume speaking' : 'Pause speaking') : 'Listen to response'}
       >
-        {!isSpeaking && (
+        {isLoading && (
+          // Loading spinner
+          <motion.svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={iconSize}
+            height={iconSize}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          >
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </motion.svg>
+        )}
+
+        {!isSpeaking && !isLoading && (
           // Play/Speaker icon
           <svg
             xmlns="http://www.w3.org/2000/svg"
