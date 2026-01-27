@@ -617,12 +617,22 @@ export function useAdvancedVoiceLearning(options: AdvancedVoiceLearningOptions =
     enablePatterns = true,
   } = options
 
-  const analytics = enableAnalytics ? useAnalyticsDashboard() : null
-  const proactive = enableProactive ? useProactiveEngagement() : null
-  const offlineSync = enableOfflineSync ? useOfflineSync() : null
-  const personalization = enablePersonalization ? useVoicePersonalization() : null
-  const spiritualMemory = enableSpiritualMemory ? useSpiritualMemory() : null
-  const patterns = enablePatterns ? useInteractionPatterns() : null
+  // Always call all hooks unconditionally to follow React hooks rules
+  // Then conditionally expose their results based on options
+  const analyticsHook = useAnalyticsDashboard()
+  const proactiveHook = useProactiveEngagement()
+  const offlineSyncHook = useOfflineSync()
+  const personalizationHook = useVoicePersonalization()
+  const spiritualMemoryHook = useSpiritualMemory()
+  const patternsHook = useInteractionPatterns()
+
+  // Return null for disabled features to maintain API compatibility
+  const analytics = enableAnalytics ? analyticsHook : null
+  const proactive = enableProactive ? proactiveHook : null
+  const offlineSync = enableOfflineSync ? offlineSyncHook : null
+  const personalization = enablePersonalization ? personalizationHook : null
+  const spiritualMemory = enableSpiritualMemory ? spiritualMemoryHook : null
+  const patterns = enablePatterns ? patternsHook : null
 
   return {
     analytics,
@@ -632,9 +642,9 @@ export function useAdvancedVoiceLearning(options: AdvancedVoiceLearningOptions =
     spiritualMemory,
     patterns,
     isReady: Boolean(
-      (!enableAnalytics || analytics?.snapshot) &&
-      (!enablePersonalization || personalization?.profile) &&
-      (!enableSpiritualMemory || spiritualMemory?.summary)
+      (!enableAnalytics || analyticsHook.snapshot) &&
+      (!enablePersonalization || personalizationHook.profile) &&
+      (!enableSpiritualMemory || spiritualMemoryHook.summary)
     ),
   }
 }
