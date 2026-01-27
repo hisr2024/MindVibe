@@ -48,6 +48,45 @@ import {
   type MeditationStep
 } from '@/utils/voice/meditationGuide'
 
+// Daily Rituals imports
+import {
+  generateMorningRitual,
+  generateEveningRitual,
+  getTimeAppropriateRitual,
+  recordRitualCompletion,
+  getRitualStreak,
+  type DailyRitual,
+  type RitualDuration
+} from '@/utils/voice/dailyRituals'
+
+// Crisis Detection imports
+import {
+  detectCrisis,
+  formatHelplinesForSpeech,
+  getCrisisWisdomResponse,
+  getGroundingTechnique,
+  needsCrisisPriority,
+  type CrisisAssessment
+} from '@/utils/voice/crisisDetection'
+
+// Advanced Features imports
+import {
+  getProactiveCheckIn,
+  getEmotionAdaptiveVoice,
+  getEmotionalIntro,
+  getMantras,
+  getMantraByPurpose,
+  generateSleepStory,
+  generateAffirmations,
+  getAffirmationWithWisdom,
+  playBellSound,
+  playOmSound,
+  getAmbienceOptions,
+  type Mantra,
+  type SleepStory,
+  type AmbienceType
+} from '@/utils/voice/kiaanAdvancedFeatures'
+
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
 
@@ -100,6 +139,30 @@ export default function EliteVoicePage() {
   // Context memory state
   const [memoryInitialized, setMemoryInitialized] = useState(false)
   const [showMemoryPanel, setShowMemoryPanel] = useState(false)
+
+  // Daily Rituals state
+  const [showRitualPicker, setShowRitualPicker] = useState(false)
+  const [currentRitual, setCurrentRitual] = useState<DailyRitual | null>(null)
+  const [ritualStep, setRitualStep] = useState(0)
+  const ritualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Crisis detection state
+  const [showCrisisSupport, setShowCrisisSupport] = useState(false)
+  const [currentCrisis, setCurrentCrisis] = useState<CrisisAssessment | null>(null)
+
+  // Advanced features state
+  const [showMantraPicker, setShowMantraPicker] = useState(false)
+  const [currentMantra, setCurrentMantra] = useState<Mantra | null>(null)
+  const [mantraCount, setMantraCount] = useState(0)
+  const [sleepStoryMode, setSleepStoryMode] = useState(false)
+  const [currentSleepStory, setCurrentSleepStory] = useState<SleepStory | null>(null)
+  const [sleepStorySegment, setSleepStorySegment] = useState(0)
+  const [showAffirmation, setShowAffirmation] = useState(false)
+  const [currentAffirmations, setCurrentAffirmations] = useState<string[]>([])
+  const [detectedEmotion, setDetectedEmotion] = useState<string>('neutral')
+
+  // Audio context for ambience
+  const audioContextRef = useRef<AudioContext | null>(null)
 
   // Browser diagnostics
   const [browserInfo, setBrowserInfo] = useState<{
@@ -905,6 +968,48 @@ export default function EliteVoicePage() {
     }
     setMessages(prev => [...prev, userMessage])
 
+    // CRISIS DETECTION - Priority check for user safety
+    const crisisAssessment = detectCrisis(query)
+    if (crisisAssessment.detected) {
+      console.log('[KIAAN Voice] Crisis detected:', crisisAssessment.level)
+      setCurrentCrisis(crisisAssessment)
+
+      // For critical/high severity, show helplines immediately
+      if (['critical', 'high'].includes(crisisAssessment.level)) {
+        setShowCrisisSupport(true)
+      }
+
+      // Get crisis response with Gita wisdom
+      const crisisResponse = crisisAssessment.response + ' ' + getCrisisWisdomResponse(crisisAssessment.level)
+
+      // Add assistant message
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: crisisResponse,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, assistantMessage])
+
+      // Speak with extra gentle voice
+      const gentleVoice = getEmotionAdaptiveVoice('sadness')
+      await speakResponseWithEmotion(crisisResponse, gentleVoice.settings)
+
+      // Add helpline info for high severity
+      if (crisisAssessment.shouldShowHelpline) {
+        const helplineText = formatHelplinesForSpeech(crisisAssessment.helplines)
+        await speakResponseWithEmotion(helplineText, gentleVoice.settings)
+      }
+
+      // Record in memory
+      if (memoryInitialized) {
+        await recordKiaanConversation(query, crisisResponse)
+      }
+
+      restartWakeWordIfNeeded()
+      return
+    }
+
     // Start thinking
     setState('thinking')
     setTranscript('')
@@ -1147,6 +1252,82 @@ export default function EliteVoicePage() {
       synthesisRef.current.cancel()
     }
     setState(wakeWordEnabled ? 'wakeword' : 'idle')
+  }
+
+  // Speak response with emotion-adaptive voice settings
+  async function speakResponseWithEmotion(
+    text: string,
+    voiceSettings: { rate: number; pitch: number; volume: number }
+  ): Promise<void> {
+    // Save for repeat command
+    setLastResponse(text)
+
+    // Add as text message
+    const assistantMessage: Message = {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content: text,
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, assistantMessage])
+
+    if (isMuted) {
+      setState('idle')
+      return
+    }
+
+    setState('speaking')
+
+    return new Promise((resolve) => {
+      if (!synthesisRef.current) {
+        setState('idle')
+        resolve()
+        return
+      }
+
+      // Process text for natural speech
+      const processedText = text
+        .replace(/\.\s+/g, '... ')
+        .replace(/,/g, '.. ')
+
+      const utterance = new SpeechSynthesisUtterance(processedText)
+      utterance.lang = language || 'en-US'
+      utterance.rate = voiceSettings.rate
+      utterance.pitch = voiceSettings.pitch
+      utterance.volume = voiceSettings.volume
+
+      // Select voice
+      const voices = synthesisRef.current.getVoices()
+      const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
+      if (langVoices.length > 0) {
+        const localVoice = langVoices.find(v => v.localService)
+        utterance.voice = localVoice || langVoices[0]
+      }
+
+      utterance.onend = () => {
+        setState('idle')
+        resolve()
+      }
+
+      utterance.onerror = () => {
+        setState('idle')
+        resolve()
+      }
+
+      synthesisRef.current.speak(utterance)
+    })
+  }
+
+  // Interrupt current speech (for natural conversation)
+  function interruptSpeech() {
+    if (synthesisRef.current && state === 'speaking') {
+      synthesisRef.current.cancel()
+      console.log('[KIAAN Voice] Speech interrupted by user')
+      setState('listening')
+      startListening()
+      return true
+    }
+    return false
   }
 
   // Toggle conversation mode - true divine dialogue
@@ -1469,6 +1650,210 @@ export default function EliteVoicePage() {
     } catch {
       return getConversationGreeting()
     }
+  }
+
+  // ============================================
+  // DAILY RITUALS FUNCTIONS
+  // ============================================
+
+  async function startDailyRitual(type: 'morning' | 'evening', duration: RitualDuration = 'standard') {
+    console.log('[KIAAN Voice] Starting daily ritual:', type)
+
+    // Disable other modes
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+    if (wakeWordEnabled) {
+      stopWakeWord()
+      setWakeWordEnabled(false)
+    }
+
+    const ritual = type === 'morning'
+      ? generateMorningRitual(duration)
+      : generateEveningRitual(duration)
+
+    setCurrentRitual(ritual)
+    setRitualStep(0)
+    setShowRitualPicker(false)
+
+    playOmChime()
+
+    // Run the ritual
+    await runRitualStep(ritual, 0)
+  }
+
+  async function runRitualStep(ritual: DailyRitual, stepIndex: number) {
+    if (stepIndex >= ritual.steps.length) {
+      await completeRitual(ritual)
+      return
+    }
+
+    const step = ritual.steps[stepIndex]
+    setRitualStep(stepIndex)
+
+    if (step.bellSound) {
+      playOmChime()
+      await new Promise(resolve => setTimeout(resolve, 800))
+    }
+
+    if (step.text) {
+      const voiceSettings = step.type === 'breathing'
+        ? { rate: 0.8, pitch: 0.95, volume: voiceVolume }
+        : { rate: 0.85, pitch: 1.0, volume: voiceVolume }
+      await speakResponseWithEmotion(step.text, voiceSettings)
+    }
+
+    ritualTimerRef.current = setTimeout(() => {
+      runRitualStep(ritual, stepIndex + 1)
+    }, step.duration * 1000)
+  }
+
+  async function completeRitual(ritual: DailyRitual) {
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    await speakResponseWithEmotion(ritual.closingBlessing, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    playOmChime()
+    recordRitualCompletion(ritual.type)
+
+    setCurrentRitual(null)
+    setRitualStep(0)
+    setState('idle')
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(
+        `Completed ${ritual.title}`,
+        ritual.closingBlessing,
+        true
+      )
+    }
+  }
+
+  function stopRitual() {
+    if (ritualTimerRef.current) {
+      clearTimeout(ritualTimerRef.current)
+      ritualTimerRef.current = null
+    }
+    if (synthesisRef.current) synthesisRef.current.cancel()
+    setCurrentRitual(null)
+    setRitualStep(0)
+    setState('idle')
+  }
+
+  // ============================================
+  // MANTRA CHANTING FUNCTIONS
+  // ============================================
+
+  async function startMantraChanting(mantra: Mantra) {
+    console.log('[KIAAN Voice] Starting mantra:', mantra.transliteration)
+
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+
+    setCurrentMantra(mantra)
+    setMantraCount(0)
+    setShowMantraPicker(false)
+
+    playOmChime()
+
+    // Introduce the mantra
+    const intro = `We will chant ${mantra.transliteration} together. ${mantra.meaning}. This mantra is for ${mantra.purpose}. We will repeat it ${mantra.repetitions} times. After I chant, you may repeat silently or aloud.`
+    await speakResponseWithEmotion(intro, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Chant the mantra
+    for (let i = 0; i < mantra.repetitions; i++) {
+      setMantraCount(i + 1)
+      await speakResponseWithEmotion(mantra.transliteration, { rate: 0.7, pitch: 0.9, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, mantra.pauseBetween * 1000))
+    }
+
+    // Closing
+    playOmChime()
+    await speakResponseWithEmotion('Om Shanti. The vibration of the mantra continues within you.', { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    setCurrentMantra(null)
+    setMantraCount(0)
+    setState('idle')
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(`Chanted ${mantra.transliteration} ${mantra.repetitions} times`, 'Mantra practice completed', true)
+    }
+  }
+
+  // ============================================
+  // SLEEP STORY FUNCTIONS
+  // ============================================
+
+  async function startSleepStory() {
+    console.log('[KIAAN Voice] Starting sleep story')
+
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+
+    const story = generateSleepStory()
+    setCurrentSleepStory(story)
+    setSleepStorySegment(0)
+    setSleepStoryMode(true)
+
+    playOmChime()
+
+    // Run through segments with fading volume
+    for (let i = 0; i < story.segments.length; i++) {
+      if (!sleepStoryMode) break
+
+      const segment = story.segments[i]
+      setSleepStorySegment(i)
+
+      if (segment.text) {
+        const fadeVolume = voiceVolume * segment.fadeLevel
+        await speakResponseWithEmotion(segment.text, { rate: 0.75, pitch: 0.95, volume: fadeVolume })
+      }
+
+      await new Promise(resolve => setTimeout(resolve, segment.duration * 1000))
+    }
+
+    setSleepStoryMode(false)
+    setCurrentSleepStory(null)
+    setState('idle')
+  }
+
+  function stopSleepStory() {
+    setSleepStoryMode(false)
+    if (synthesisRef.current) synthesisRef.current.cancel()
+    setCurrentSleepStory(null)
+    setSleepStorySegment(0)
+    setState('idle')
+  }
+
+  // ============================================
+  // AFFIRMATION FUNCTIONS
+  // ============================================
+
+  async function speakAffirmations() {
+    const hour = new Date().getHours()
+    const timeOfDay = hour < 12 ? 'morning' : 'evening'
+    const emotionState = detectedEmotion || 'neutral'
+
+    const affirmations = generateAffirmations(emotionState, [], timeOfDay as 'morning' | 'evening')
+    const texts = affirmations.map(a => a.text)
+    setCurrentAffirmations(texts)
+    setShowAffirmation(true)
+
+    playOmChime()
+
+    await speakResponseWithEmotion('Receive these affirmations for your journey today.', { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+
+    for (const text of texts) {
+      await speakResponseWithEmotion(text, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 3000))
+    }
+
+    playOmChime()
+    await speakResponseWithEmotion('Carry these truths with you. You are worthy. You are enough.', { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    setTimeout(() => setShowAffirmation(false), 5000)
   }
 
   // Manual activation - robust flow with permission handling
