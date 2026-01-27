@@ -274,7 +274,7 @@ export function useEnhancedVoiceOutput(
       audioRef.current.playbackRate = newRate
     }
     if (synthesisRef.current) {
-      synthesisRef.current.updateOptions({ rate: newRate })
+      synthesisRef.current.updateConfig({ rate: newRate })
     }
   }, [])
 
