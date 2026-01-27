@@ -24,6 +24,16 @@ export { useVoiceOutput, type UseVoiceOutputOptions, type UseVoiceOutputReturn }
 export { useEnhancedVoiceOutput, type UseEnhancedVoiceOutputOptions, type UseEnhancedVoiceOutputReturn } from './useEnhancedVoiceOutput'
 export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './useWakeWord'
 export { useKiaanVoice, type UseKiaanVoiceOptions, type UseKiaanVoiceReturn, type KiaanVoiceState, type KiaanVoiceMessage } from './useKiaanVoice'
+export {
+  useVoiceLearning,
+  useVoiceLearningWithKiaan,
+  type UseVoiceLearningOptions,
+  type UseVoiceLearningReturn,
+  type VoiceLearningSession,
+  type EnhancedResponse,
+  type SentimentAnalysis,
+  type UserPreference,
+} from './useVoiceLearning'
 export { useHapticFeedback } from './useHapticFeedback'
 export { useStreamingText, streamText } from './useStreamingText'
 export { usePrefersReducedMotion, getSafeAnimation } from './usePrefersReducedMotion'

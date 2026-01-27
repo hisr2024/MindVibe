@@ -776,6 +776,23 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Voice router: {e}")
 
+# Load Voice Learning router (KIAAN Self-Improvement System)
+print("\n[Voice Learning] Attempting to import Voice Learning router...")
+try:
+    from backend.routes.voice_learning import router as voice_learning_router
+    app.include_router(voice_learning_router, prefix="/api")
+    print("✅ [SUCCESS] Voice Learning router loaded (KIAAN Self-Improvement)")
+    print("   • POST   /api/voice-learning/session/start - Start learning session")
+    print("   • POST   /api/voice-learning/enhance - Enhance response with learning")
+    print("   • POST   /api/voice-learning/feedback - Record user feedback")
+    print("   • POST   /api/voice-learning/playback-event - Record playback events")
+    print("   • GET    /api/voice-learning/memories - Get user memories")
+    print("   • GET    /api/voice-learning/preferences - Get learned preferences")
+    print("   • GET    /api/voice-learning/insights - Get user insights")
+    print("   • GET    /api/voice-learning/experiments - List A/B experiments")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Voice Learning router: {e}")
+
 # Load Divine Consciousness router (Sacred Atmosphere Enhancement)
 print("\n[Divine Consciousness] Attempting to import Divine Consciousness router...")
 try:
