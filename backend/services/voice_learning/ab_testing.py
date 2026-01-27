@@ -275,7 +275,7 @@ class ABTestingService:
         Same user+experiment always gets same bucket for consistency.
         """
         content = f"{user_id}:{experiment_id}"
-        hash_value = int(hashlib.md5(content.encode()).hexdigest(), 16)
+        hash_value = int(hashlib.sha256(content.encode()).hexdigest(), 16)
         return hash_value % num_buckets
 
     def _is_user_in_experiment(self, user_id: str, experiment: Experiment) -> bool:
