@@ -14,7 +14,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useKiaanVoice, KiaanVoiceState } from '@/hooks/useKiaanVoice'
+import { useKiaanVoice } from '@/hooks/useKiaanVoice'
 import { useVoiceLearning } from '@/hooks/useVoiceLearning'
 import { useLanguage } from '@/hooks/useLanguage'
 
@@ -98,8 +98,8 @@ export function KiaanVoiceInput({
     autoStartSession: enableVoiceLearning,
     onEnhancedResponse: (enhanced) => {
       // Track enhanced response for feedback
-      if (enableVoiceLearning && enhanced.response) {
-        setLastResponse(enhanced.response)
+      if (enableVoiceLearning && enhanced.text) {
+        setLastResponse(enhanced.text)
         setShowFeedback(showFeedbackButtons)
         setFeedbackGiven(false)
         responseStartTimeRef.current = Date.now()
@@ -108,7 +108,7 @@ export function KiaanVoiceInput({
   })
 
   const {
-    state,
+    state: _state,
     isListening,
     isProcessing,
     isSpeaking,
@@ -120,7 +120,7 @@ export function KiaanVoiceInput({
     sendToKiaan,
     saveToReflections,
     isVoiceSupported,
-    isTtsSupported,
+    isTtsSupported: _isTtsSupported,
   } = useKiaanVoice({
     language,
     autoSpeak: mode === 'conversation' && autoSpeak,
@@ -147,8 +147,10 @@ export function KiaanVoiceInput({
   })
 
   // Update local transcript from interim results
+  // This syncs external hook state to local component state for UI display
   useEffect(() => {
     if (currentTranscript) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTranscript(currentTranscript)
     }
   }, [currentTranscript])
