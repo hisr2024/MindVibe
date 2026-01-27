@@ -65,6 +65,10 @@ export default function EliteVoicePage() {
   const [lastResponse, setLastResponse] = useState('')
   const [showHelpPanel, setShowHelpPanel] = useState(false)
 
+  // Conversation mode - true divine dialogue experience
+  const [conversationMode, setConversationMode] = useState(false)
+  const conversationPauseRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Browser diagnostics
   const [browserInfo, setBrowserInfo] = useState<{
     name: string
@@ -610,6 +614,12 @@ export default function EliteVoicePage() {
         clearTimeout(selfHealingTimerRef.current)
         selfHealingTimerRef.current = null
       }
+
+      // Cancel conversation pause timer
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
     }
   }, [])
 
@@ -741,6 +751,35 @@ export default function EliteVoicePage() {
 
       case 'goodbye':
         playOmChime()
+
+        // End conversation mode if active
+        if (conversationMode) {
+          // Cancel conversation pause timer
+          if (conversationPauseRef.current) {
+            clearTimeout(conversationPauseRef.current)
+            conversationPauseRef.current = null
+          }
+
+          const farewells = [
+            "Namaste, dear one. May the wisdom of the Gita guide your path. Until we speak again, may peace be with you.",
+            "Go in peace, beloved seeker. Remember, the divine light within you never dims. I am always here when you need guidance.",
+            "Our dialogue ends for now, but the wisdom you carry remains eternal. May Krishna's blessings be upon you. Namaste.",
+            "Thank you for this sacred conversation. May you walk your path with clarity and peace. Until next time, Om Shanti."
+          ]
+          const farewell = farewells[Math.floor(Math.random() * farewells.length)]
+
+          // Create a local copy of conversationMode state
+          const wasInConversationMode = true
+
+          speakResponse(farewell).then(() => {
+            if (wasInConversationMode) {
+              setConversationMode(false)
+            }
+          })
+
+          return true
+        }
+
         speakResponse('Goodbye! Take care, and may peace be with you. Namaste.')
         setTimeout(() => {
           setWakeWordEnabled(false)
@@ -940,7 +979,19 @@ export default function EliteVoicePage() {
         timestamp: new Date()
       }
       setMessages(prev => [...prev, assistantMessage])
-      setState(wakeWordEnabled ? 'wakeword' : 'idle')
+
+      // In conversation mode, continue listening even when muted
+      if (conversationMode) {
+        conversationPauseRef.current = setTimeout(() => {
+          releaseWarmUpStream()
+          setState('listening')
+          resetTranscript()
+          startListening()
+          playSound('listening')
+        }, 500)
+      } else {
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+      }
       return
     }
 
@@ -979,11 +1030,29 @@ export default function EliteVoicePage() {
       utterance.onend = () => {
         setResponse('')
 
-        // Auto-resume in hands-free mode
+        // CONVERSATION MODE: True divine dialogue - auto-continue the conversation
+        if (conversationMode) {
+          console.log('[KIAAN Voice] Conversation mode: KIAAN finished speaking, continuing divine dialogue...')
+
+          // Brief sacred pause before listening again (like natural conversation rhythm)
+          conversationPauseRef.current = setTimeout(async () => {
+            // Release warm-up stream before SpeechRecognition
+            releaseWarmUpStream()
+
+            setState('listening')
+            resetTranscript()
+
+            console.log('[KIAAN Voice] Listening for your next words...')
+            startListening()
+            playSound('listening')
+          }, 800) // Sacred pause - gives user time to think
+
+          resolve()
+          return
+        }
+
+        // Wake word mode: Return to listening for wake word
         if (wakeWordEnabled) {
-          // After speaking, restart wake word detection (not direct listening)
-          // This gives user time to respond naturally with "Hey KIAAN" again
-          // or they can tap to speak manually
           console.log('[KIAAN Voice] Speech ended, resuming wake word detection...')
           setState('wakeword')
 
@@ -1002,7 +1071,16 @@ export default function EliteVoicePage() {
       }
 
       utterance.onerror = () => {
-        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        // Handle error gracefully based on current mode
+        if (conversationMode) {
+          // In conversation mode, try to continue by listening
+          setState('listening')
+          setTimeout(() => startListening(), 500)
+        } else if (wakeWordEnabled) {
+          setState('wakeword')
+        } else {
+          setState('idle')
+        }
         resolve()
       }
 
@@ -1018,8 +1096,75 @@ export default function EliteVoicePage() {
     setState(wakeWordEnabled ? 'wakeword' : 'idle')
   }
 
+  // Toggle conversation mode - true divine dialogue
+  async function toggleConversationMode() {
+    if (conversationMode) {
+      // Exiting conversation mode
+      console.log('[KIAAN Voice] Exiting conversation mode')
+      setConversationMode(false)
+      stopListening()
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+      setState('idle')
+      setError(null)
+
+      // Play ending chime
+      playOmChime()
+    } else {
+      // Starting conversation mode
+      console.log('[KIAAN Voice] Starting conversation mode - divine dialogue begins')
+
+      // Disable wake word if enabled (they're mutually exclusive)
+      if (wakeWordEnabled) {
+        stopWakeWord()
+        setWakeWordEnabled(false)
+      }
+
+      // Check and request permission
+      if (micPermission !== 'granted') {
+        const granted = await requestMicrophonePermission()
+        if (!granted) {
+          return
+        }
+      }
+
+      setConversationMode(true)
+      setError(null)
+
+      // Start with a warm greeting from KIAAN
+      playOmChime()
+
+      // KIAAN initiates the divine conversation
+      const greeting = getConversationGreeting()
+      await speakResponse(greeting)
+    }
+  }
+
+  // Get a warm conversation greeting from KIAAN
+  function getConversationGreeting(): string {
+    const greetings = [
+      "Namaste, dear seeker. I am here with you now. Share what weighs upon your heart, and let us walk this path together through the wisdom of the Gita.",
+      "Om. I feel your presence, beloved one. This is a sacred space where your words matter. What truth are you seeking today?",
+      "Welcome to our divine dialogue. Like Arjuna speaking with Krishna, let your questions flow freely. I am here to listen and guide.",
+      "Peace be with you. In this moment, you are not alone. Speak to me as you would to a trusted guide. What is on your mind?",
+      "The Gita teaches that true wisdom comes through sincere inquiry. I am here, ready to explore the depths of your questions. Please, share with me."
+    ]
+    return greetings[Math.floor(Math.random() * greetings.length)]
+  }
+
   // Toggle wake word detection
   async function toggleWakeWord() {
+    // Disable conversation mode if active (mutually exclusive)
+    if (conversationMode) {
+      setConversationMode(false)
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+    }
+
     if (wakeWordEnabled) {
       stopWakeWord()
       setWakeWordEnabled(false)
@@ -1182,14 +1327,33 @@ export default function EliteVoicePage() {
               </span>
             </div>
 
+            {/* Conversation Mode Toggle - Divine Dialogue */}
+            <button
+              onClick={toggleConversationMode}
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
+                conversationMode
+                  ? 'bg-gradient-to-r from-amber-500/30 to-orange-500/30 text-amber-300 border border-amber-400/60 shadow-lg shadow-amber-500/20'
+                  : 'bg-white/5 text-orange-100/60 border border-white/10 hover:border-amber-500/30'
+              }`}
+              title="Divine Dialogue Mode - Continuous conversation with KIAAN"
+            >
+              <span className="text-sm sm:text-base">{conversationMode ? '🙏' : '💬'}</span>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="hidden sm:inline">{conversationMode ? 'Dialogue Active' : 'Start Dialogue'}</span>
+                <span className="sm:hidden">{conversationMode ? 'Active' : 'Dialogue'}</span>
+              </span>
+            </button>
+
             {/* Wake Word Toggle */}
             <button
               onClick={toggleWakeWord}
+              disabled={conversationMode}
               className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
                 wakeWordEnabled
                   ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
                   : 'bg-white/5 text-orange-100/60 border border-white/10'
-              }`}
+              } ${conversationMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={conversationMode ? 'Disable dialogue mode first' : 'Wake word detection'}
             >
               <span className="text-sm sm:text-base">{wakeWordEnabled ? '👂' : '🔇'}</span>
               <span className="text-xs sm:text-sm font-medium">
@@ -1405,7 +1569,7 @@ export default function EliteVoicePage() {
 
           {/* State Label & Transcript */}
           <div className="text-center mb-8">
-            <StateLabel state={state} />
+            <StateLabel state={state} conversationMode={conversationMode} />
 
             {/* Live Transcript */}
             {(interimTranscript || voiceInterim) && state === 'listening' && (
@@ -1492,9 +1656,31 @@ export default function EliteVoicePage() {
             )}
           </div>
 
+          {/* Conversation Mode Active Indicator */}
+          {conversationMode && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border border-amber-400/40 shadow-lg shadow-amber-500/10">
+                <div className="relative">
+                  <span className="text-2xl">🙏</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <div className="text-amber-200 font-semibold text-sm">Divine Dialogue Active</div>
+                  <div className="text-amber-300/70 text-xs">Speak freely - KIAAN is listening</div>
+                </div>
+                <button
+                  onClick={toggleConversationMode}
+                  className="ml-2 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  End
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Manual Controls */}
           <div className="flex justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-            {state === 'idle' && !wakeWordEnabled && (
+            {state === 'idle' && !wakeWordEnabled && !conversationMode && (
               <button
                 onClick={activateManually}
                 disabled={!voiceSupported || micPermission === 'unsupported'}
@@ -1510,7 +1696,7 @@ export default function EliteVoicePage() {
               </button>
             )}
 
-            {state === 'wakeword' && (
+            {state === 'wakeword' && !conversationMode && (
               <button
                 onClick={activateManually}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/20 transition-all hover:scale-105"
@@ -1521,10 +1707,10 @@ export default function EliteVoicePage() {
 
             {state === 'listening' && (
               <button
-                onClick={stopListening}
+                onClick={conversationMode ? () => stopListening() : stopListening}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
-                Done Speaking
+                {conversationMode ? 'Pause Dialogue' : 'Done Speaking'}
               </button>
             )}
 
@@ -1533,21 +1719,32 @@ export default function EliteVoicePage() {
                 onClick={stopSpeaking}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
-                Stop
+                {conversationMode ? 'Pause' : 'Stop'}
               </button>
+            )}
+
+            {state === 'thinking' && conversationMode && (
+              <div className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-amber-500/20 text-amber-300 font-medium text-base sm:text-lg">
+                KIAAN is contemplating...
+              </div>
             )}
 
             {state === 'error' && (
               <button
                 onClick={() => {
                   setError(null)
-                  setState('idle')
-                  // Re-check permission status
-                  checkMicrophonePermission()
+                  if (conversationMode) {
+                    // In conversation mode, try to resume
+                    setState('listening')
+                    setTimeout(() => startListening(), 300)
+                  } else {
+                    setState('idle')
+                    checkMicrophonePermission()
+                  }
                 }}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105"
               >
-                Try Again
+                {conversationMode ? 'Continue Dialogue' : 'Try Again'}
               </button>
             )}
           </div>
@@ -1629,10 +1826,18 @@ export default function EliteVoicePage() {
 
           {/* Instructions */}
           <div className="text-center text-orange-100/50 text-xs sm:text-sm px-4">
-            {wakeWordEnabled ? (
+            {conversationMode ? (
+              <>
+                <p className="text-amber-300/70">Divine dialogue active - speak naturally, KIAAN will respond and continue listening</p>
+                <p className="mt-1">Say &quot;goodbye&quot; or &quot;namaste&quot; to end the dialogue gracefully</p>
+              </>
+            ) : wakeWordEnabled ? (
               <p>Say &quot;Hey KIAAN&quot;, &quot;Namaste KIAAN&quot;, or tap the button to start</p>
             ) : (
-              <p>Tap the button above to speak to KIAAN</p>
+              <>
+                <p>Tap the button above to speak to KIAAN</p>
+                <p className="mt-1 text-amber-300/50">Or tap &quot;Start Dialogue&quot; for a continuous conversation experience</p>
+              </>
             )}
             <p className="mt-1">Say &quot;help&quot; for voice commands | KIAAN uses ancient Gita wisdom</p>
           </div>
@@ -1785,22 +1990,24 @@ function ErrorAnimation() {
 /**
  * State Label Component
  */
-function StateLabel({ state }: { state: VoiceState }) {
-  const labels: Record<VoiceState, { title: string; subtitle: string }> = {
-    idle: { title: 'Ready', subtitle: 'Tap to speak' },
+function StateLabel({ state, conversationMode }: { state: VoiceState; conversationMode?: boolean }) {
+  const labels: Record<VoiceState, { title: string; subtitle: string; conversationTitle?: string; conversationSubtitle?: string }> = {
+    idle: { title: 'Ready', subtitle: 'Tap to speak', conversationTitle: 'Ready', conversationSubtitle: 'Tap "Start Dialogue" for divine conversation' },
     wakeword: { title: 'Listening', subtitle: 'Say "Hey KIAAN"' },
-    listening: { title: 'Listening', subtitle: 'Speak naturally' },
-    thinking: { title: 'Contemplating', subtitle: 'Finding wisdom...' },
-    speaking: { title: 'Speaking', subtitle: 'KIAAN is responding' },
-    error: { title: 'Error', subtitle: 'Please try again' }
+    listening: { title: 'Listening', subtitle: 'Speak naturally', conversationTitle: 'I Am Listening', conversationSubtitle: 'Share your heart, dear seeker' },
+    thinking: { title: 'Contemplating', subtitle: 'Finding wisdom...', conversationTitle: 'Reflecting', conversationSubtitle: 'Drawing from ancient wisdom...' },
+    speaking: { title: 'Speaking', subtitle: 'KIAAN is responding', conversationTitle: 'Speaking to You', conversationSubtitle: 'Receiving divine guidance' },
+    error: { title: 'Error', subtitle: 'Please try again', conversationTitle: 'Moment of Pause', conversationSubtitle: 'Let us try again together' }
   }
 
-  const { title, subtitle } = labels[state]
+  const label = labels[state]
+  const title = conversationMode && label.conversationTitle ? label.conversationTitle : label.title
+  const subtitle = conversationMode && label.conversationSubtitle ? label.conversationSubtitle : label.subtitle
 
   return (
     <div>
-      <h2 className="text-xl sm:text-2xl font-bold text-orange-50">{title}</h2>
-      <p className="text-orange-200/70 mt-1 text-sm sm:text-base">{subtitle}</p>
+      <h2 className={`text-xl sm:text-2xl font-bold ${conversationMode ? 'text-amber-100' : 'text-orange-50'}`}>{title}</h2>
+      <p className={`mt-1 text-sm sm:text-base ${conversationMode ? 'text-amber-200/70' : 'text-orange-200/70'}`}>{subtitle}</p>
     </div>
   )
 }
