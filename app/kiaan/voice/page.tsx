@@ -9,6 +9,8 @@
  * - Offline-capable AI responses
  * - Neural text-to-speech
  * - Beautiful animated visualizations
+ * - Context memory across sessions
+ * - Guided meditation mode
  *
  * Best-in-class voice experience for Gita wisdom.
  */
@@ -27,6 +29,24 @@ import {
   runMicrophoneDiagnostics as runDiagnostics,
   detectPlatform
 } from '@/utils/microphone/UniversalMicrophoneAccess'
+
+// Context Memory & Meditation imports
+import {
+  contextMemory,
+  recordKiaanConversation,
+  getPersonalizedKiaanGreeting,
+  getKiaanContextForResponse,
+  getEmotionalSummary
+} from '@/utils/voice/contextMemory'
+import {
+  generateMeditationSession,
+  getMeditationTypes,
+  getMeditationDurations,
+  type MeditationType,
+  type MeditationDuration,
+  type MeditationSession,
+  type MeditationStep
+} from '@/utils/voice/meditationGuide'
 
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
@@ -68,6 +88,18 @@ export default function EliteVoicePage() {
   // Conversation mode - true divine dialogue experience
   const [conversationMode, setConversationMode] = useState(false)
   const conversationPauseRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Meditation mode - guided meditation with KIAAN
+  const [meditationMode, setMeditationMode] = useState(false)
+  const [showMeditationPicker, setShowMeditationPicker] = useState(false)
+  const [currentMeditation, setCurrentMeditation] = useState<MeditationSession | null>(null)
+  const [meditationStep, setMeditationStep] = useState(0)
+  const [meditationPaused, setMeditationPaused] = useState(false)
+  const meditationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Context memory state
+  const [memoryInitialized, setMemoryInitialized] = useState(false)
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false)
 
   // Browser diagnostics
   const [browserInfo, setBrowserInfo] = useState<{
@@ -567,6 +599,12 @@ export default function EliteVoicePage() {
       synthesisRef.current = window.speechSynthesis
     }
 
+    // Initialize context memory
+    contextMemory.initialize().then(() => {
+      setMemoryInitialized(true)
+      console.log('[KIAAN Voice] Context memory initialized')
+    })
+
     // Gather browser diagnostics
     setBrowserInfo({
       name: getBrowserName(),
@@ -619,6 +657,12 @@ export default function EliteVoicePage() {
       if (conversationPauseRef.current) {
         clearTimeout(conversationPauseRef.current)
         conversationPauseRef.current = null
+      }
+
+      // Cancel meditation timer
+      if (meditationTimerRef.current) {
+        clearTimeout(meditationTimerRef.current)
+        meditationTimerRef.current = null
       }
     }
   }, [])
@@ -910,6 +954,15 @@ export default function EliteVoicePage() {
       // Speak response
       await speakResponse(responseText)
 
+      // Record conversation in context memory
+      if (memoryInitialized) {
+        try {
+          await recordKiaanConversation(query, responseText)
+        } catch (memErr) {
+          console.warn('[KIAAN Voice] Failed to record conversation:', memErr)
+        }
+      }
+
     } catch (err) {
       console.error('Query error:', err)
 
@@ -1136,8 +1189,8 @@ export default function EliteVoicePage() {
       // Start with a warm greeting from KIAAN
       playOmChime()
 
-      // KIAAN initiates the divine conversation
-      const greeting = getConversationGreeting()
+      // KIAAN initiates the divine conversation with memory-aware greeting
+      const greeting = await getMemoryAwareGreeting()
       await speakResponse(greeting)
     }
   }
@@ -1201,6 +1254,220 @@ export default function EliteVoicePage() {
       startWakeWord()
       setWakeWordEnabled(true)
       setState('wakeword')
+    }
+  }
+
+  // ============================================
+  // MEDITATION MODE FUNCTIONS
+  // ============================================
+
+  // Start a meditation session
+  async function startMeditation(type: MeditationType, duration: MeditationDuration) {
+    console.log('[KIAAN Voice] Starting meditation:', type, duration, 'minutes')
+
+    // Disable other modes
+    if (conversationMode) {
+      setConversationMode(false)
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+    }
+    if (wakeWordEnabled) {
+      stopWakeWord()
+      setWakeWordEnabled(false)
+    }
+
+    // Generate the meditation session
+    const session = generateMeditationSession(type, duration)
+    setCurrentMeditation(session)
+    setMeditationStep(0)
+    setMeditationMode(true)
+    setMeditationPaused(false)
+    setShowMeditationPicker(false)
+
+    // Play opening chime
+    playOmChime()
+
+    // Start the meditation
+    await runMeditationStep(session, 0)
+  }
+
+  // Run a single meditation step
+  async function runMeditationStep(session: MeditationSession, stepIndex: number) {
+    if (stepIndex >= session.steps.length) {
+      // Meditation complete
+      await completeMeditation(session)
+      return
+    }
+
+    const step = session.steps[stepIndex]
+    setMeditationStep(stepIndex)
+
+    // Play bell if required
+    if (step.bellSound) {
+      playOmChime()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    // Speak the step text if there is any
+    if (step.text) {
+      setState('speaking')
+      await speakMeditationText(step.text)
+    }
+
+    // Wait for the duration then move to next step
+    if (!meditationPaused && meditationMode) {
+      meditationTimerRef.current = setTimeout(() => {
+        if (meditationMode && !meditationPaused) {
+          runMeditationStep(session, stepIndex + 1)
+        }
+      }, step.duration * 1000)
+    }
+  }
+
+  // Speak meditation text (slower, more peaceful)
+  async function speakMeditationText(text: string): Promise<void> {
+    return new Promise((resolve) => {
+      if (!synthesisRef.current || !text) {
+        resolve()
+        return
+      }
+
+      // Process text for meditation (add pauses)
+      const processedText = text
+        .replace(/\.\.\./g, '... ... ...') // Extra long pauses
+        .replace(/\.\s+/g, '.... ')
+        .replace(/,/g, '... ')
+
+      const utterance = new SpeechSynthesisUtterance(processedText)
+      utterance.lang = language || 'en-US'
+      utterance.rate = 0.85 // Slower for meditation
+      utterance.pitch = 0.95 // Slightly lower pitch for calm
+      utterance.volume = voiceVolume
+
+      // Select voice
+      const voices = synthesisRef.current.getVoices()
+      const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
+      if (langVoices.length > 0) {
+        const localVoice = langVoices.find(v => v.localService)
+        utterance.voice = localVoice || langVoices[0]
+      }
+
+      utterance.onend = () => {
+        setState('idle')
+        resolve()
+      }
+
+      utterance.onerror = () => {
+        setState('idle')
+        resolve()
+      }
+
+      synthesisRef.current.speak(utterance)
+    })
+  }
+
+  // Complete meditation and give closing blessing
+  async function completeMeditation(session: MeditationSession) {
+    console.log('[KIAAN Voice] Meditation complete!')
+
+    // Play completion chime
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    // Speak closing blessing
+    setState('speaking')
+    await speakMeditationText(session.closingBlessing)
+
+    // Final chime
+    playOmChime()
+
+    // Reset state
+    setMeditationMode(false)
+    setCurrentMeditation(null)
+    setMeditationStep(0)
+    setState('idle')
+
+    // Record in memory
+    if (memoryInitialized) {
+      await recordKiaanConversation(
+        `Completed ${session.title} meditation (${session.duration} minutes)`,
+        session.closingBlessing,
+        true
+      )
+    }
+  }
+
+  // Pause meditation
+  function pauseMeditation() {
+    setMeditationPaused(true)
+    if (meditationTimerRef.current) {
+      clearTimeout(meditationTimerRef.current)
+      meditationTimerRef.current = null
+    }
+    if (synthesisRef.current) {
+      synthesisRef.current.pause()
+    }
+    playSound('click')
+  }
+
+  // Resume meditation
+  function resumeMeditation() {
+    if (!currentMeditation) return
+
+    setMeditationPaused(false)
+    if (synthesisRef.current) {
+      synthesisRef.current.resume()
+    }
+    playSound('click')
+
+    // Resume from current step
+    const currentStep = currentMeditation.steps[meditationStep]
+    if (currentStep) {
+      meditationTimerRef.current = setTimeout(() => {
+        if (meditationMode && !meditationPaused) {
+          runMeditationStep(currentMeditation, meditationStep + 1)
+        }
+      }, currentStep.duration * 1000)
+    }
+  }
+
+  // Stop meditation early
+  function stopMeditation() {
+    if (meditationTimerRef.current) {
+      clearTimeout(meditationTimerRef.current)
+      meditationTimerRef.current = null
+    }
+    if (synthesisRef.current) {
+      synthesisRef.current.cancel()
+    }
+
+    setMeditationMode(false)
+    setCurrentMeditation(null)
+    setMeditationStep(0)
+    setMeditationPaused(false)
+    setState('idle')
+
+    playSound('click')
+    console.log('[KIAAN Voice] Meditation stopped early')
+  }
+
+  // ============================================
+  // CONTEXT MEMORY ENHANCED GREETING
+  // ============================================
+
+  // Get greeting that uses context memory
+  async function getMemoryAwareGreeting(): Promise<string> {
+    if (!memoryInitialized) {
+      return getConversationGreeting()
+    }
+
+    try {
+      const personalizedGreeting = await getPersonalizedKiaanGreeting()
+      return personalizedGreeting
+    } catch {
+      return getConversationGreeting()
     }
   }
 
@@ -1347,18 +1614,36 @@ export default function EliteVoicePage() {
             {/* Wake Word Toggle */}
             <button
               onClick={toggleWakeWord}
-              disabled={conversationMode}
+              disabled={conversationMode || meditationMode}
               className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
                 wakeWordEnabled
                   ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
                   : 'bg-white/5 text-orange-100/60 border border-white/10'
-              } ${conversationMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-              title={conversationMode ? 'Disable dialogue mode first' : 'Wake word detection'}
+              } ${conversationMode || meditationMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={conversationMode || meditationMode ? 'Disable other modes first' : 'Wake word detection'}
             >
               <span className="text-sm sm:text-base">{wakeWordEnabled ? '👂' : '🔇'}</span>
               <span className="text-xs sm:text-sm font-medium">
                 <span className="hidden sm:inline">{wakeWordEnabled ? 'Wake Word On' : 'Wake Word Off'}</span>
                 <span className="sm:hidden">{wakeWordEnabled ? 'On' : 'Off'}</span>
+              </span>
+            </button>
+
+            {/* Meditation Mode Toggle */}
+            <button
+              onClick={() => setShowMeditationPicker(true)}
+              disabled={meditationMode}
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
+                meditationMode
+                  ? 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-purple-300 border border-purple-400/60 shadow-lg shadow-purple-500/20'
+                  : 'bg-white/5 text-orange-100/60 border border-white/10 hover:border-purple-500/30'
+              }`}
+              title="Guided Meditation with KIAAN"
+            >
+              <span className="text-sm sm:text-base">{meditationMode ? '🧘' : '🪷'}</span>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="hidden sm:inline">{meditationMode ? 'Meditating' : 'Meditate'}</span>
+                <span className="sm:hidden">{meditationMode ? '...' : 'Med'}</span>
               </span>
             </button>
 
@@ -1803,6 +2088,118 @@ export default function EliteVoicePage() {
             </div>
           )}
 
+          {/* Meditation Picker Modal */}
+          {showMeditationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-purple-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-purple-100">Guided Meditation</h3>
+                    <p className="text-purple-200/60 text-sm mt-1">Choose your practice with KIAAN</p>
+                  </div>
+                  <button
+                    onClick={() => setShowMeditationPicker(false)}
+                    className="text-purple-300/60 hover:text-purple-300 p-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Meditation Types */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  {getMeditationTypes().map((med) => (
+                    <button
+                      key={med.type}
+                      onClick={() => {
+                        const defaultDuration: MeditationDuration = 5
+                        startMeditation(med.type, defaultDuration)
+                      }}
+                      className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-400/50 transition-all text-left group"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">{med.icon}</span>
+                        <span className="font-semibold text-purple-100 group-hover:text-purple-50">{med.title}</span>
+                      </div>
+                      <p className="text-xs text-purple-200/60">{med.description}</p>
+                      <p className="text-xs text-purple-300/40 mt-1">{med.recommended}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick Duration Selector */}
+                <div className="border-t border-purple-500/20 pt-4">
+                  <p className="text-purple-200/70 text-sm mb-3">Or select duration for breathing meditation:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {getMeditationDurations().map((dur) => (
+                      <button
+                        key={dur.minutes}
+                        onClick={() => startMeditation('breathing', dur.minutes)}
+                        className="px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-200 text-sm hover:bg-purple-500/20 hover:border-purple-400/50 transition-all"
+                      >
+                        {dur.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Meditation Active Indicator */}
+          {meditationMode && currentMeditation && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex flex-col items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 border border-purple-400/40 shadow-lg shadow-purple-500/10 max-w-md w-full">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="relative">
+                    <span className="text-3xl">🧘</span>
+                    {!meditationPaused && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse" />
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="text-purple-200 font-semibold text-sm">{currentMeditation.title}</div>
+                    <div className="text-purple-300/70 text-xs">
+                      Step {meditationStep + 1} of {currentMeditation.steps.length}
+                      {meditationPaused && ' • Paused'}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {meditationPaused ? (
+                      <button
+                        onClick={resumeMeditation}
+                        className="px-3 py-1.5 rounded-lg bg-purple-500/30 border border-purple-400/40 text-purple-200 text-xs font-medium hover:bg-purple-500/40 transition-colors"
+                      >
+                        Resume
+                      </button>
+                    ) : (
+                      <button
+                        onClick={pauseMeditation}
+                        className="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs font-medium hover:bg-purple-500/30 transition-colors"
+                      >
+                        Pause
+                      </button>
+                    )}
+                    <button
+                      onClick={stopMeditation}
+                      className="px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                    >
+                      End
+                    </button>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-purple-900/50 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-purple-400 to-indigo-400 h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${((meditationStep + 1) / currentMeditation.steps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Voice Settings Indicator */}
           {(isMuted || voiceVolume !== 1.0 || voiceRate !== 0.95) && (
             <div className="flex justify-center gap-2 mb-4">
@@ -1826,7 +2223,12 @@ export default function EliteVoicePage() {
 
           {/* Instructions */}
           <div className="text-center text-orange-100/50 text-xs sm:text-sm px-4">
-            {conversationMode ? (
+            {meditationMode ? (
+              <>
+                <p className="text-purple-300/70">Guided meditation in progress - follow KIAAN&apos;s voice</p>
+                <p className="mt-1">Breathe deeply and let go of all tension</p>
+              </>
+            ) : conversationMode ? (
               <>
                 <p className="text-amber-300/70">Divine dialogue active - speak naturally, KIAAN will respond and continue listening</p>
                 <p className="mt-1">Say &quot;goodbye&quot; or &quot;namaste&quot; to end the dialogue gracefully</p>
@@ -1836,10 +2238,12 @@ export default function EliteVoicePage() {
             ) : (
               <>
                 <p>Tap the button above to speak to KIAAN</p>
-                <p className="mt-1 text-amber-300/50">Or tap &quot;Start Dialogue&quot; for a continuous conversation experience</p>
+                <p className="mt-1 text-amber-300/50">Dialogue for conversation | Meditate for guided practice</p>
               </>
             )}
-            <p className="mt-1">Say &quot;help&quot; for voice commands | KIAAN uses ancient Gita wisdom</p>
+            {!meditationMode && (
+              <p className="mt-1">Say &quot;help&quot; for voice commands | KIAAN remembers your journey</p>
+            )}
           </div>
         </div>
       </div>
