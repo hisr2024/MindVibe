@@ -613,9 +613,10 @@ class KIAANMemoryService:
             Memory ID
         """
         # Generate unique ID
-        content_hash = hashlib.md5(
+        # SECURITY: Use sha256 instead of md5 to reduce collision risk
+        content_hash = hashlib.sha256(
             json.dumps(content, sort_keys=True, default=str).encode()
-        ).hexdigest()[:8]
+        ).hexdigest()[:12]  # Use 12 chars of sha256 for better uniqueness
         memory_id = f"{memory_type.value}_{content_hash}_{int(datetime.now().timestamp())}"
 
         # Create entry

@@ -27,6 +27,13 @@ try:
 except ImportError:
     REDIS_AVAILABLE = False
 
+# Optional aiofiles for async file I/O
+try:
+    import aiofiles
+    AIOFILES_AVAILABLE = True
+except ImportError:
+    AIOFILES_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -162,6 +169,7 @@ class AuditLogHandler:
         )
         self.redis_client: Optional[Any] = None
         self._file_handle = None
+        self._file_lock = asyncio.Lock()  # Shared lock for file writes
 
     async def initialize(self) -> None:
         """Initialize log handlers."""
@@ -198,13 +206,28 @@ class AuditLogHandler:
             print(f"[AUDIT] {event_json}")
 
     async def _write_to_file(self, event_json: str) -> None:
-        """Write event to log file."""
+        """Write event to log file using async I/O."""
         try:
-            async with asyncio.Lock():
-                with open(self.log_file_path, "a") as f:
-                    f.write(event_json + "\n")
+            async with self._file_lock:
+                if AIOFILES_AVAILABLE:
+                    # Use async file I/O for better performance
+                    async with aiofiles.open(self.log_file_path, "a") as f:
+                        await f.write(event_json + "\n")
+                else:
+                    # Fallback to sync I/O in thread pool to avoid blocking
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(
+                        None,
+                        self._sync_write_to_file,
+                        event_json
+                    )
         except Exception as e:
             logger.error(f"Failed to write audit log to file: {e}")
+
+    def _sync_write_to_file(self, event_json: str) -> None:
+        """Sync file write helper for fallback."""
+        with open(self.log_file_path, "a") as f:
+            f.write(event_json + "\n")
 
     async def _write_to_redis(self, event: AuditEvent) -> None:
         """Write event to Redis."""

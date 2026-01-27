@@ -298,8 +298,9 @@ class KIAANVectorMemory:
         """
         async with self._lock:
             # Generate ID
+            # SECURITY: Use sha256 instead of md5 to reduce collision risk
             content_str = json.dumps(content, sort_keys=True, default=str)
-            content_hash = hashlib.md5(content_str.encode()).hexdigest()[:8]
+            content_hash = hashlib.sha256(content_str.encode()).hexdigest()[:12]
             memory_id = f"{memory_type.value}_{content_hash}_{int(datetime.now().timestamp())}"
 
             # Generate embedding

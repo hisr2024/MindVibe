@@ -7,6 +7,11 @@ This module exposes KIAAN's autonomous capabilities through REST API endpoints:
 3. /agent/code - Developer mode for code tasks
 4. /agent/analyze - Analysis mode for understanding systems
 5. /agent/tools - Direct tool execution
+
+SECURITY:
+- All endpoints require authentication (get_current_user_flexible)
+- Rate limiting applied per-user (60 req/min for queries, 10 req/min for tools)
+- Audit logging for all operations
 """
 
 import asyncio
@@ -15,12 +20,13 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import get_db
+from backend.deps import get_current_user_flexible
 from backend.services.kiaan_agent_orchestrator import (
     KIAANAgentOrchestrator,
     AgentContext,
@@ -36,10 +42,42 @@ from backend.services.kiaan_memory import (
     kiaan_memory,
     MemoryType
 )
+from backend.services.kiaan_resilience import RateLimiter, RateLimitConfig
+from backend.services.kiaan_audit import kiaan_audit, AuditEventType
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/kiaan/agent", tags=["KIAAN Agent"])
+
+# Rate limiters for different operation types
+_query_rate_limiter = RateLimiter(RateLimitConfig(
+    requests_per_minute=60,  # 60 queries/min
+    requests_per_hour=500,
+    burst_size=10
+))
+
+_tool_rate_limiter = RateLimiter(RateLimitConfig(
+    requests_per_minute=10,  # 10 tool executions/min (more restrictive)
+    requests_per_hour=100,
+    burst_size=3
+))
+
+
+async def _check_rate_limit(limiter: RateLimiter, user_id: str) -> None:
+    """Check rate limit and raise exception if exceeded."""
+    if not await limiter.is_allowed(user_id):
+        limits = limiter.get_limits(user_id)
+        await kiaan_audit.log_security_event(
+            event_type=AuditEventType.RATE_LIMIT_EXCEEDED,
+            message=f"Rate limit exceeded for user {user_id}",
+            user_id=user_id,
+            details={"limits": limits}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded. Please wait before making more requests. "
+                   f"Remaining: minute={limits['minute_remaining']}, hour={limits['hour_remaining']}"
+        )
 
 
 # Request/Response Models
@@ -89,7 +127,8 @@ class AnalyzeRequest(BaseModel):
 async def process_agent_query(
     request: AgentQueryRequest,
     http_request: Request,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible)
 ):
     """
     Process a query using KIAAN's autonomous agent capabilities.
@@ -101,7 +140,20 @@ async def process_agent_query(
     - Synthesize comprehensive responses
 
     Returns a streaming response with real-time updates.
+
+    Requires authentication. Rate limited to 60 requests/minute.
     """
+    # Rate limit check
+    await _check_rate_limit(_query_rate_limiter, user_id)
+
+    # Audit log the request
+    await kiaan_audit.log_request(
+        user_id=user_id,
+        session_id=request.session_id or "unknown",
+        query=request.query,
+        intent="agent_query"
+    )
+
     # Get or create session
     session_id = request.session_id or f"session_{int(datetime.now().timestamp())}"
 
@@ -191,7 +243,8 @@ async def process_agent_query(
 @router.post("/research")
 async def research_topic(
     request: ResearchRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible)
 ):
     """
     Research a software topic using KIAAN's research capabilities.
@@ -201,7 +254,12 @@ async def research_topic(
     - Searching code repositories
     - Analyzing libraries and frameworks
     - Synthesizing research findings
+
+    Requires authentication. Rate limited to 60 requests/minute.
     """
+    # Rate limit check
+    await _check_rate_limit(_query_rate_limiter, user_id)
+
     # Build research query
     research_query = f"""Research the following topic thoroughly:
 
@@ -250,7 +308,8 @@ Please:
 @router.post("/code")
 async def process_code_task(
     request: CodeRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible)
 ):
     """
     Process a code-related task using KIAAN's developer capabilities.
@@ -260,7 +319,12 @@ async def process_code_task(
     - Analyzing and explaining code
     - Debugging and fixing issues
     - Code review and suggestions
+
+    Requires authentication. Rate limited to 60 requests/minute.
     """
+    # Rate limit check
+    await _check_rate_limit(_query_rate_limiter, user_id)
+
     # Build code task query
     code_context = ""
     if request.code:
@@ -302,7 +366,8 @@ Please:
 @router.post("/analyze")
 async def analyze_target(
     request: AnalyzeRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible)
 ):
     """
     Analyze code, repositories, or concepts using KIAAN's analysis capabilities.
@@ -312,7 +377,12 @@ async def analyze_target(
     - Repository structure analysis
     - Dependency analysis
     - Security analysis
+
+    Requires authentication. Rate limited to 60 requests/minute.
     """
+    # Rate limit check
+    await _check_rate_limit(_query_rate_limiter, user_id)
+
     # Build analysis query
     analysis_query = f"""Perform a {request.analysis_type} analysis of:
 
@@ -350,7 +420,8 @@ Please provide:
 @router.post("/tools/execute")
 async def execute_tool_directly(
     request: ToolExecuteRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible)
 ):
     """
     Execute a specific tool directly.
@@ -360,7 +431,20 @@ async def execute_tool_directly(
     - Code execution
     - File analysis
     - Documentation lookups
+
+    Requires authentication. Rate limited to 10 requests/minute (stricter).
     """
+    # Stricter rate limit for direct tool execution
+    await _check_rate_limit(_tool_rate_limiter, user_id)
+
+    # Audit log tool execution
+    await kiaan_audit.log_tool_execution(
+        tool_name=request.tool_name,
+        status="started",
+        user_id=user_id,
+        params=request.parameters
+    )
+
     if request.tool_name not in KIAAN_TOOLS:
         raise HTTPException(
             status_code=400,
@@ -380,12 +464,17 @@ async def execute_tool_directly(
 
 
 @router.get("/tools")
-async def list_available_tools():
+async def list_available_tools(
+    user_id: str = Depends(get_current_user_flexible)
+):
     """
     List all available KIAAN agent tools.
 
     Returns tool names, descriptions, and parameter schemas.
+
+    Requires authentication.
     """
+    # No rate limit for this read-only endpoint, but auth required
     tools = []
     for name, tool in KIAAN_TOOLS.items():
         tools.append({
@@ -402,8 +491,10 @@ async def list_available_tools():
 
 
 @router.get("/memory/stats")
-async def get_memory_stats():
-    """Get KIAAN memory statistics."""
+async def get_memory_stats(
+    user_id: str = Depends(get_current_user_flexible)
+):
+    """Get KIAAN memory statistics. Requires authentication."""
     stats = await kiaan_memory.get_stats()
     return {
         "status": "success",
@@ -415,9 +506,10 @@ async def get_memory_stats():
 async def search_memories(
     query: str = Query(..., min_length=1),
     memory_type: Optional[str] = Query(None),
-    limit: int = Query(10, ge=1, le=50)
+    limit: int = Query(10, ge=1, le=50),
+    user_id: str = Depends(get_current_user_flexible)
 ):
-    """Search KIAAN's memory."""
+    """Search KIAAN's memory. Requires authentication."""
     m_type = None
     if memory_type:
         try:
@@ -457,11 +549,15 @@ async def agent_health_check():
 
 
 @router.get("/capabilities")
-async def get_agent_capabilities():
+async def get_agent_capabilities(
+    user_id: str = Depends(get_current_user_flexible)
+):
     """
     Get detailed information about KIAAN Agent's capabilities.
 
     Returns comprehensive documentation of what KIAAN can do.
+
+    Requires authentication.
     """
     return {
         "status": "success",

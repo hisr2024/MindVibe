@@ -239,10 +239,21 @@ class PluginValidator:
         if total_size > self.MAX_PLUGIN_SIZE_MB * 1024 * 1024:
             self.errors.append(f"Plugin exceeds size limit of {self.MAX_PLUGIN_SIZE_MB}MB")
 
-        # Check for dangerous patterns
+        # Check for dangerous patterns - comprehensive security scan
         dangerous_patterns = [
-            "os.system", "subprocess.run", "subprocess.Popen",
-            "eval(", "exec(", "__import__", "shutil.rmtree"
+            # Command execution
+            "os.system", "subprocess.run", "subprocess.Popen", "subprocess.call",
+            "subprocess.check_output", "subprocess.check_call",
+            # Code execution
+            "eval(", "exec(", "compile(", "__import__",
+            # File system danger
+            "shutil.rmtree", "os.remove", "os.rmdir", "os.unlink",
+            # Network danger
+            "socket.socket", "urllib.request.urlopen",
+            # Reflection/introspection abuse
+            "getattr(", "setattr(", "__getattribute__",
+            # Pickle deserialization (security risk)
+            "pickle.load", "pickle.loads",
         ]
 
         for py_file in plugin_path.rglob("*.py"):
@@ -253,8 +264,10 @@ class PluginValidator:
                         self.errors.append(
                             f"Potentially dangerous pattern '{pattern}' in {py_file.name}"
                         )
-            except Exception:
-                pass
+            except Exception as e:
+                # SECURITY: Don't silently swallow errors during security scanning
+                logger.warning(f"Security scan failed for {py_file}: {e}")
+                self.errors.append(f"Could not scan {py_file.name}: {e}")
 
         return len(self.errors) == 0, self.errors
 
