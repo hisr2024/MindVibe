@@ -11,6 +11,8 @@ type Message = {
   text: string
   timestamp: string
   status?: 'error'
+  summary?: string
+  gitaPowered?: boolean
 }
 
 const starterPrompts = [
@@ -47,7 +49,9 @@ export default function Chat() {
       const assistant: Message = {
         sender: 'assistant',
         text: data.response || 'I am here for you with a calm response.',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        summary: data.summary || undefined,
+        gitaPowered: data.gita_powered || data.gita_wisdom || true
       }
       setMessages(prev => [...prev, assistant])
     } catch (error) {
@@ -134,6 +138,8 @@ export default function Chat() {
                   text={message.text}
                   timestamp={message.timestamp}
                   status={message.status}
+                  summary={message.summary}
+                  gitaPowered={message.gitaPowered}
                   onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
                 />
               ))}
