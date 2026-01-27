@@ -374,7 +374,7 @@ const MEMORIZATION_VERSES: MemorizationCard[] = [
 // SM-2 Algorithm constants
 const MIN_EASE_FACTOR = 1.3
 const DEFAULT_EASE_FACTOR = 2.5
-const INITIAL_INTERVAL = 1 // 1 day
+const _INITIAL_INTERVAL = 1 // 1 day - kept for SM-2 reference
 
 /**
  * Calculate next review using SM-2 algorithm
@@ -592,7 +592,6 @@ export function recordReview(
   quality: RecallQuality,
   chunkId?: string
 ): MemorizationProgress {
-  const key = chunkId || verseId
   const currentProgress = getProgress(verseId, chunkId)
 
   const newProgress = calculateNextReview(currentProgress, quality)

@@ -404,6 +404,9 @@ class ContextMemoryManager {
         contextParts.push(`[User returning after ${Math.floor(hoursSinceLast / 24)} days]`)
       }
       contextParts.push(`[Total conversations: ${this.profile.totalConversations}]`)
+      if (daysSinceFirst > 30) {
+        contextParts.push(`[Long-term user: ${daysSinceFirst} days since first conversation]`)
+      }
     }
 
     // Add emotional patterns

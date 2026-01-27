@@ -13,7 +13,7 @@
  * - Insights and patterns
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 
 // Emotion to numeric value mapping (for y-axis positioning)
 const EMOTION_VALUES: Record<string, number> = {
@@ -202,9 +202,8 @@ export default function EmotionalVisualization({
     return showInsights ? generateInsights(sortedData) : []
   }, [sortedData, showInsights])
 
-  // Calculate SVG dimensions
-  const width = 100 // percentage
-  const padding = { top: 20, right: 20, bottom: 40, left: 60 }
+  // Calculate SVG dimensions - padding is constant to avoid dependency issues
+  const padding = useMemo(() => ({ top: 20, right: 20, bottom: 40, left: 60 }), [])
   const chartHeight = height - padding.top - padding.bottom
   const chartWidth = 100 - ((padding.left + padding.right) / 10)
 

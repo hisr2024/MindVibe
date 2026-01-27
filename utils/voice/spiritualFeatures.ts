@@ -152,7 +152,6 @@ export function getAccountabilityStats(): AccountabilityStats {
   const weekLogs = getPracticeLogs(undefined, 7)
 
   // Calculate streaks
-  const today = new Date().toISOString().split('T')[0]
   const practicesByDate: Record<string, boolean> = {}
 
   for (const log of logs) {
