@@ -793,6 +793,20 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Voice Learning router: {e}")
 
+# Load Advanced Voice Learning router (Analytics, Proactive, Offline, Personalization)
+print("\n[Voice Learning Advanced] Attempting to import Advanced Voice Learning router...")
+try:
+    from backend.routes.voice_learning_advanced import router as voice_learning_advanced_router
+    app.include_router(voice_learning_advanced_router, prefix="/api")
+    print("✅ [SUCCESS] Advanced Voice Learning router loaded")
+    print("   • GET    /api/voice-learning/advanced/analytics/snapshot - Dashboard snapshot")
+    print("   • GET    /api/voice-learning/advanced/engagement/pending - Proactive messages")
+    print("   • GET    /api/voice-learning/advanced/personalization/profile - Voice profile")
+    print("   • GET    /api/voice-learning/advanced/spiritual/summary - Spiritual journey")
+    print("   • GET    /api/voice-learning/advanced/patterns/analytics - Interaction patterns")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Advanced Voice Learning router: {e}")
+
 # Load Divine Consciousness router (Sacred Atmosphere Enhancement)
 print("\n[Divine Consciousness] Attempting to import Divine Consciousness router...")
 try:

@@ -39,3 +39,21 @@ export { useStreamingText, streamText } from './useStreamingText'
 export { usePrefersReducedMotion, getSafeAnimation } from './usePrefersReducedMotion'
 export { useDivineContent } from './useDivineContent'
 export { usePullToRefresh, type UsePullToRefreshOptions, type UsePullToRefreshReturn } from './usePullToRefresh'
+export {
+  useAdvancedVoiceLearning,
+  useAnalyticsDashboard,
+  useProactiveEngagement,
+  useOfflineSync,
+  useVoicePersonalization,
+  useSpiritualMemory,
+  useInteractionPatterns,
+  type DashboardSnapshot,
+  type ProactiveMessage,
+  type VoiceProfile,
+  type SpiritualSummary,
+  type QualityTrend,
+  type InteractionAnalytics,
+  type SyncStatus,
+  type OfflineFeedback,
+  type AdvancedVoiceLearningOptions,
+} from './useAdvancedVoiceLearning'
