@@ -35,7 +35,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     title: 'KIAAN Chat',
     description: 'AI mental health companion',
     gradient: 'from-blue-400/30 to-purple-400/30',
-    href: '/#kiaan-chat',
+    href: '/kiaan/chat',
   },
   {
     id: 'kiaan-voice',

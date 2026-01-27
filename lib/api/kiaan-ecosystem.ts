@@ -17,7 +17,7 @@ export const KIAAN_TOOLS: KiaanTool[] = [
     description: 'AI companion powered by Ancient Wisdom',
     category: 'wisdom',
     endpoint: '/api/chat/message',
-    route: '/chat',
+    route: '/kiaan/chat',
     icon: '🕉️',
     usesGitaVerses: true,
     usesValidation: true,
