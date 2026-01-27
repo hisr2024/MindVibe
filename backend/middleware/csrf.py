@@ -49,18 +49,33 @@ def validate_csrf_token(token: str, expected: str) -> bool:
 
 class CSRFMiddleware(BaseHTTPMiddleware):
     """Middleware to protect against CSRF attacks.
-    
+
     How it works:
     1. On GET requests, sets a CSRF token cookie if not present
     2. On state-changing requests (POST, PUT, PATCH, DELETE):
        - Validates the X-CSRF-Token header matches the cookie
        - Returns 403 if validation fails
     3. Exempt paths skip CSRF validation (webhooks, health checks)
-    
+
     Frontend integration:
     - Read the csrf_token cookie
     - Include it in the X-CSRF-Token header for all state-changing requests
+
+    Args:
+        app: The ASGI application to wrap
+        cookie_secure: Whether to set the Secure flag on the cookie (HTTPS only)
+        cookie_samesite: The SameSite policy for the cookie ("strict", "lax", or "none")
     """
+
+    def __init__(
+        self,
+        app,
+        cookie_secure: bool = True,
+        cookie_samesite: str = "strict",
+    ):
+        super().__init__(app)
+        self.cookie_secure = cookie_secure
+        self.cookie_samesite = cookie_samesite
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -94,12 +109,12 @@ class CSRFMiddleware(BaseHTTPMiddleware):
                     value=new_token,
                     # httponly=False is required for CSRF tokens so JavaScript can read them
                     # and include them in request headers. This is safe because:
-                    # 1. SameSite=strict prevents cross-site cookie sending
+                    # 1. SameSite policy prevents cross-site cookie sending
                     # 2. The token must match what's in the cookie for validation
                     # 3. XSS attacks are mitigated by CSP headers
                     httponly=False,
-                    samesite="strict",
-                    secure=True,  # Only send over HTTPS
+                    samesite=self.cookie_samesite,
+                    secure=self.cookie_secure,
                     max_age=86400,  # 24 hours
                 )
             
