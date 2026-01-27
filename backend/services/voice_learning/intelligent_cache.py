@@ -231,7 +231,8 @@ class IntelligentCacheService:
     ) -> str:
         """Generate cache key."""
         content = f"{text}:{language}:{voice_type}:{context}"
-        return hashlib.md5(content.encode()).hexdigest()
+        # SECURITY: Use sha256 instead of md5 for consistency
+        return hashlib.sha256(content.encode()).hexdigest()
 
     @property
     def prediction_hit_rate(self) -> float:
@@ -320,7 +321,7 @@ class IntelligentCacheService:
         # Create entry
         entry = CacheEntry(
             key=key,
-            content_hash=hashlib.md5(data).hexdigest(),
+            content_hash=hashlib.sha256(data).hexdigest(),
             data=data,
             content_type=content_type,
             language=language,

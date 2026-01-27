@@ -276,7 +276,8 @@ class VoiceLearningIntegration:
         enhancements_applied = []
 
         # Step 1: Check intelligent cache
-        text_hash = hashlib.md5(text.encode()).hexdigest()[:16]
+        # SECURITY: Use sha256 instead of md5 for consistency
+        text_hash = hashlib.sha256(text.encode()).hexdigest()[:16]
         cached = await self.cache.get(text_hash)
         if cached:
             logger.debug(f"Cache hit for response: {text_hash}")

@@ -335,12 +335,12 @@ Response (following the structure above):"""
         # Safe null check for OpenAI response
         content = None
         if response and response.choices and len(response.choices) > 0:
-            message = response.choices[0].message
-            if message:
-                content = message.content
+            response_msg = response.choices[0].message
+            if response_msg:
+                content = response_msg.content
         return content.strip() if content else ""
     except Exception as e:
-        print(f"OpenAI API error: {str(e)}")
+        logger.error(f"OpenAI API error: {str(e)}")
         return generate_template_response(query, verses, language)
 
 

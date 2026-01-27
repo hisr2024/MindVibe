@@ -76,7 +76,8 @@ class SyncItem:
     def _calculate_checksum(self) -> str:
         """Calculate checksum for data integrity."""
         data_str = json.dumps(self.data, sort_keys=True, default=str)
-        return hashlib.md5(data_str.encode()).hexdigest()
+        # SECURITY: Use sha256 instead of md5 for data integrity
+        return hashlib.sha256(data_str.encode()).hexdigest()
 
 
 @dataclass

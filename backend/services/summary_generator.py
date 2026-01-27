@@ -99,9 +99,9 @@ class SummaryGenerator:
             # Safe null check for OpenAI response
             summary_text = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    summary_text = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    summary_text = response_msg.content
             if not summary_text:
                 return self._create_fallback_summary(full_response)
 
@@ -246,7 +246,8 @@ Now summarize the given KIAAN response:"""
     def _get_cache_key(self, response: str) -> str:
         """Generate a cache key from response content."""
         import hashlib
-        return hashlib.md5(response.encode()).hexdigest()[:16]
+        # SECURITY: Use sha256 instead of md5 for consistency
+        return hashlib.sha256(response.encode()).hexdigest()[:16]
 
     async def generate_summary_streaming(
         self,

@@ -364,9 +364,9 @@ Return ONLY the JSON plan, no other text."""
             # Safe null check for OpenAI response
             plan_text = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    plan_text = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    plan_text = response_msg.content
             if not plan_text:
                 raise ValueError("Empty response from OpenAI")
             plan_data = json.loads(plan_text)

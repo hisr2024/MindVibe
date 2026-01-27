@@ -161,7 +161,8 @@ class IndianGitaSourcesService:
 
     def _generate_id(self, prefix: str, title: str) -> str:
         """Generate a unique content ID."""
-        content_hash = hashlib.md5(f"{prefix}:{title}".encode()).hexdigest()[:12]
+        # SECURITY: Use sha256 instead of md5 for consistency
+        content_hash = hashlib.sha256(f"{prefix}:{title}".encode()).hexdigest()[:12]
         return f"{prefix}_{content_hash}"
 
     # ==================== GITA TEACHINGS ====================

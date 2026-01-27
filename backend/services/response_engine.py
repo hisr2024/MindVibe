@@ -227,7 +227,8 @@ class ResponseEngine:
         # Simple selection based on message length (varying responses)
         import hashlib
 
-        hash_val = int(hashlib.md5(message.encode()).hexdigest(), 16)
+        # SECURITY: Use sha256 instead of md5 for consistency
+        hash_val = int(hashlib.sha256(message.encode()).hexdigest(), 16)
         return encouragements[hash_val % len(encouragements)]
 
     def _enforce_word_count(self, response: str) -> str:

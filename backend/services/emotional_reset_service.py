@@ -308,9 +308,9 @@ End with 💙"""
             # Safe null check for OpenAI response
             content = ""
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message and message.content:
-                    content = message.content
+                response_msg = response.choices[0].message
+                if response_msg and response_msg.content:
+                    content = response_msg.content
 
             # Extract emotions using simple keyword matching
             emotions = self._extract_emotions(user_input)
@@ -593,9 +593,9 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
             # Safe null check for OpenAI response
             content = ""
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message and message.content:
-                    content = message.content
+                response_msg = response.choices[0].message
+                if response_msg and response_msg.content:
+                    content = response_msg.content
             affirmations = [
                 line.strip().lstrip("•-1234567890. ")
                 for line in content.strip().split("\n")

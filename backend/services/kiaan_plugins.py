@@ -20,7 +20,7 @@ import shutil
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Optional, Type
@@ -367,7 +367,7 @@ class PluginLoader:
                 status=PluginStatus.VALIDATED,
                 module=plugin_instance,
                 tools=tools,
-                loaded_at=datetime.now(),
+                loaded_at=datetime.now(timezone.utc),
                 checksum=checksum
             )
 

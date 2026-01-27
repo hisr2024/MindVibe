@@ -164,9 +164,9 @@ Example format:
         # Safe null check for OpenAI response
         guidance_text = "{}"
         if response and response.choices and len(response.choices) > 0:
-            message = response.choices[0].message
-            if message and message.content:
-                guidance_text = message.content
+            response_msg = response.choices[0].message
+            if response_msg and response_msg.content:
+                guidance_text = response_msg.content
 
         # Parse JSON response
         try:
