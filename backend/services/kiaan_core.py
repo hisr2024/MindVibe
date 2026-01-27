@@ -715,7 +715,12 @@ EXAMPLES:
                 max_tokens=100  # Very short responses for conversational messages
             )
 
-            response_text = response.choices[0].message.content
+            # Safe access to response with null checks
+            response_text = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message:
+                    response_text = message.content
             if not response_text:
                 # Fallback conversational responses
                 fallbacks = {
@@ -871,7 +876,12 @@ EXAMPLES:
                     "context": context
                 }
 
-            response_text = response.choices[0].message.content
+            # Safe access to response with null checks
+            response_text = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message:
+                    response_text = message.content
             if not response_text:
                 response_text = self.optimizer.get_fallback_response(context)
 
@@ -892,7 +902,14 @@ EXAMPLES:
                     temperature=0.7,
                     max_tokens=400
                 )
-                response_text = response.choices[0].message.content or self.optimizer.get_fallback_response(context)
+                # Safe access to response with null checks
+                response_text = None
+                if response and response.choices and len(response.choices) > 0:
+                    message = response.choices[0].message
+                    if message:
+                        response_text = message.content
+                if not response_text:
+                    response_text = self.optimizer.get_fallback_response(context)
             except Exception as retry_error:
                 logger.error(f"KIAAN Core: Retry failed: {retry_error}")
                 response_text = self.optimizer.get_fallback_response(context)
@@ -1395,7 +1412,12 @@ Provide a complete, validated response that meets ALL requirements above."""
                 max_tokens=400,  # Optimized from 600
             )
 
-            response_text = response.choices[0].message.content
+            # Safe access to response with null checks
+            response_text = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message:
+                    response_text = message.content
             if not response_text:
                 response_text = self._get_emergency_fallback(context)
 

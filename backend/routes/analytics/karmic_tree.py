@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 
 router = APIRouter(prefix="/karmic-tree", tags=["karmic-tree"])
 
@@ -70,7 +70,7 @@ def get_season_description(season: str) -> str:
 @router.get("", response_model=KarmicTreeResponse)
 async def get_karmic_tree_data(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> KarmicTreeResponse:
     """
     Get all data needed for the Karmic Tree visualization.
@@ -150,7 +150,7 @@ async def get_karmic_tree_data(
 @router.get("/stats", response_model=TreeStats)
 async def get_tree_stats(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> TreeStats:
     """
     Get just the stats for the Karmic Tree.
@@ -177,7 +177,7 @@ async def get_tree_stats(
 @router.get("/milestones", response_model=list[Milestone])
 async def get_milestones(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> list[Milestone]:
     """
     Get all earned milestones for the Karmic Tree.

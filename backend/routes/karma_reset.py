@@ -161,8 +161,13 @@ Example format:
             response_format={"type": "json_object"}
         )
         
-        guidance_text = response.choices[0].message.content or "{}"
-        
+        # Safe null check for OpenAI response
+        guidance_text = "{}"
+        if response and response.choices and len(response.choices) > 0:
+            message = response.choices[0].message
+            if message and message.content:
+                guidance_text = message.content
+
         # Parse JSON response
         try:
             guidance_data = json.loads(guidance_text)

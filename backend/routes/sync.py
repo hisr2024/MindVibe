@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime
 import logging
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 from backend.models import Mood, Journal, WisdomJourney
 
 router = APIRouter(prefix="/sync", tags=["sync"])
@@ -257,7 +257,7 @@ async def sync_journey_progress_update(
 async def sync_batch(
     payload: SyncBatchRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> SyncBatchResponse:
     """
     Batch sync endpoint - handles multiple offline operations in a single request.
@@ -419,7 +419,7 @@ async def sync_batch(
 async def pull_server_changes(
     payload: ServerChangesRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> ServerChangesResponse:
     """
     Pull server-side changes since last sync.
@@ -490,7 +490,7 @@ async def pull_server_changes(
 
 @router.get("/status")
 async def sync_status(
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
 ) -> dict:
     """
     Get sync status and server health.

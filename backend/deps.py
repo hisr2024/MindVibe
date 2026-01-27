@@ -164,10 +164,13 @@ async def get_current_user_flexible(
             if user:
                 return str(user_id)
 
-            # If user doesn't exist, check if it's a demo/test scenario
-            # In production, you might want to create a user here or return error
-            # For now, we allow the user ID to pass through for new users
-            return str(user_id)
+            # User doesn't exist - reject the request
+            # This prevents authentication bypass with arbitrary user IDs
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found. Please sign up or use a valid account.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
     # No valid authentication found
     raise HTTPException(

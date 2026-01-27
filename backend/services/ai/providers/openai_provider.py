@@ -120,11 +120,17 @@ class OpenAIProvider(AIProvider):
 
             latency_ms = int((time.time() - start_time) * 1000)
 
-            # Extract content
-            content = response.choices[0].message.content or ""
+            # Safe null check for OpenAI response
+            content = ""
+            finish_reason = None
+            if response and response.choices and len(response.choices) > 0:
+                choice = response.choices[0]
+                if choice.message and choice.message.content:
+                    content = choice.message.content
+                finish_reason = choice.finish_reason
 
             # Get token usage
-            usage = response.usage
+            usage = response.usage if response else None
             prompt_tokens = usage.prompt_tokens if usage else 0
             completion_tokens = usage.completion_tokens if usage else 0
 
@@ -137,8 +143,8 @@ class OpenAIProvider(AIProvider):
                 total_tokens=prompt_tokens + completion_tokens,
                 latency_ms=latency_ms,
                 metadata={
-                    "finish_reason": response.choices[0].finish_reason,
-                    "response_id": response.id,
+                    "finish_reason": finish_reason,
+                    "response_id": response.id if response else None,
                 },
             )
 

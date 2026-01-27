@@ -16,7 +16,7 @@ from typing import Optional, List, Literal
 import logging
 import re
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 from backend.middleware.rate_limiter import limiter
 from backend.services.tts_service import get_tts_service, VoiceType
 
@@ -91,7 +91,7 @@ class VoiceSettingsResponse(BaseModel):
 async def synthesize_speech(
     request: Request,
     payload: SynthesizeRequest,
-    user_id: str = Depends(get_user_id)
+    user_id: str = Depends(get_current_user_flexible)
 ) -> Response:
     """
     Synthesize text to speech
@@ -143,7 +143,7 @@ async def synthesize_verse(
     verse_id: str,
     language: str = "en",
     include_commentary: bool = False,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> Response:
     """
@@ -207,7 +207,7 @@ async def synthesize_verse(
 @router.post("/message")
 async def synthesize_message(
     payload: SynthesizeRequest,
-    user_id: str = Depends(get_user_id)
+    user_id: str = Depends(get_current_user_flexible)
 ) -> Response:
     """
     Synthesize a KIAAN message
@@ -242,7 +242,7 @@ async def synthesize_message(
 @router.post("/meditation")
 async def synthesize_meditation(
     payload: SynthesizeRequest,
-    user_id: str = Depends(get_user_id)
+    user_id: str = Depends(get_current_user_flexible)
 ) -> Response:
     """
     Synthesize meditation guidance
@@ -277,7 +277,7 @@ async def synthesize_meditation(
 @router.post("/batch-download")
 async def batch_download_verses(
     payload: BatchDownloadRequest,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """
@@ -360,7 +360,7 @@ async def batch_download_verses(
 
 @router.get("/settings", response_model=VoiceSettingsResponse)
 async def get_voice_settings(
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> VoiceSettingsResponse:
     """
@@ -409,7 +409,7 @@ async def get_voice_settings(
 @router.put("/settings")
 async def update_voice_settings(
     payload: VoiceSettings,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """
@@ -505,7 +505,7 @@ async def get_supported_languages() -> dict:
 
 @router.delete("/cache")
 async def clear_voice_cache(
-    user_id: str = Depends(get_user_id)
+    user_id: str = Depends(get_current_user_flexible)
 ) -> dict:
     """
     Clear TTS cache
@@ -543,7 +543,7 @@ class VoiceQueryResponse(BaseModel):
 @router.post("/query", response_model=VoiceQueryResponse)
 async def process_voice_query(
     payload: VoiceQueryRequest,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> VoiceQueryResponse:
     """
@@ -667,7 +667,7 @@ class EnhancedVoiceSettings(BaseModel):
 
 @router.get("/settings/enhanced")
 async def get_enhanced_voice_settings(
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Get complete voice settings with all enhancements."""
@@ -727,7 +727,7 @@ async def get_enhanced_voice_settings(
 @router.put("/settings/enhanced")
 async def update_enhanced_voice_settings(
     payload: EnhancedVoiceSettings,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Update complete voice settings with all enhancements."""
@@ -805,7 +805,7 @@ async def update_enhanced_voice_settings(
 async def get_voice_history(
     limit: int = 50,
     offset: int = 0,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Get user's voice conversation history."""
@@ -833,7 +833,7 @@ async def submit_conversation_feedback(
     feedback: Optional[str] = None,
     was_helpful: Optional[bool] = None,
     verses_helpful: Optional[bool] = None,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Submit feedback for a voice conversation."""
@@ -872,7 +872,7 @@ class EnhancementSessionRequest(BaseModel):
 @router.post("/enhancement/start")
 async def start_enhancement_session(
     payload: EnhancementSessionRequest,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Start a voice enhancement session."""
@@ -903,7 +903,7 @@ async def end_enhancement_session(
     completed: bool = True,
     effectiveness_rating: Optional[int] = None,
     breath_count: Optional[int] = None,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """End a voice enhancement session."""
@@ -946,7 +946,7 @@ class DailyCheckinRequest(BaseModel):
 @router.post("/checkin")
 async def submit_daily_checkin(
     payload: DailyCheckinRequest,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Submit a daily voice check-in."""
@@ -988,7 +988,7 @@ class WakeWordEventRequest(BaseModel):
 @router.post("/wake-word/event")
 async def log_wake_word_event(
     payload: WakeWordEventRequest,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Log a wake word detection event."""
@@ -1028,7 +1028,7 @@ class EnhancedVoiceQueryRequest(BaseModel):
 @router.post("/query/enhanced")
 async def process_enhanced_voice_query(
     payload: EnhancedVoiceQueryRequest,
-    user_id: str = Depends(get_user_id),
+    user_id: str = Depends(get_current_user_flexible),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """

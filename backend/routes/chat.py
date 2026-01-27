@@ -119,12 +119,14 @@ class KIAAN:
         self.gita_analytics = gita_analytics
         self.crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
 
-        # Import optimizer for status check
+        # Import optimizer for status check and client
         try:
             from backend.services.openai_optimizer import openai_optimizer
             self.ready = openai_optimizer.ready
+            self.client = openai_optimizer.client
         except ImportError:
             self.ready = False
+            self.client = None
 
     def is_crisis(self, message: str) -> bool:
         return any(word in message.lower() for word in self.crisis_keywords)
@@ -250,7 +252,12 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
                 timeout=30.0,  # Add 30 second timeout
             )
 
-            content = response.choices[0].message.content
+            # Safe null check for OpenAI response
+            content = None
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message:
+                    content = message.content
             if not content:
                 content = "I'm here for you. Let's try again. 💙"
 

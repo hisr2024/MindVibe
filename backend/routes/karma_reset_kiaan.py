@@ -21,7 +21,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_user_id
+from backend.deps import get_db, get_current_user_flexible
 from backend.services.karma_reset_service import KarmaResetService
 
 # Configure logging
@@ -252,8 +252,13 @@ Example format:
                 response_format={"type": "json_object"}
             )
             
-            guidance_text = response.choices[0].message.content or "{}"
-            
+            # Safe null check for OpenAI response
+            guidance_text = "{}"
+            if response and response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content:
+                    guidance_text = message.content
+
             # Parse JSON response with specific error handling
             try:
                 guidance_data = json.loads(guidance_text)
@@ -372,7 +377,7 @@ class JourneyResetResponse(BaseModel):
 async def reset_user_journey(
     request: JourneyResetRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id)
+    user_id: str = Depends(get_current_user_flexible)
 ) -> JourneyResetResponse:
     """
     Reset user's KIAAN journey data with wisdom-based fresh start guidance.
@@ -526,9 +531,14 @@ Tone: warm, encouraging, wisdom-based, non-judgmental.
                     response_format={"type": "json_object"}
                 )
                 
-                wisdom_text = response.choices[0].message.content or "{}"
+                # Safe null check for OpenAI response
+                wisdom_text = "{}"
+                if response and response.choices and len(response.choices) > 0:
+                    message = response.choices[0].message
+                    if message and message.content:
+                        wisdom_text = message.content
                 kiaan_wisdom = json.loads(wisdom_text)
-                
+
             except Exception as e:
                 logger.error(f"[{request_id}] Error generating KIAAN wisdom: {str(e)}")
                 # Fallback wisdom
