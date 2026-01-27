@@ -345,7 +345,8 @@ Return ONLY the JSON plan, no other text."""
         prompt = self.PLANNING_PROMPT.format(query=query, tools=tools_desc)
 
         try:
-            response = self.client.chat.completions.create(
+            # FIXED: Use async client instead of sync client to avoid blocking
+            response = await self.async_client.chat.completions.create(
                 model=self.planning_model,
                 messages=[
                     {"role": "system", "content": "You are a planning assistant. Output only valid JSON."},
@@ -426,7 +427,8 @@ Use markdown formatting for readability. Be thorough but concise."""
 
         # Stream the synthesis
         try:
-            stream = self.client.chat.completions.create(
+            # FIXED: Use async client instead of sync client to avoid blocking
+            stream = await self.async_client.chat.completions.create(
                 model=self.synthesis_model,
                 messages=[
                     {"role": "system", "content": self.SYSTEM_PROMPTS[context.mode]},
@@ -437,7 +439,7 @@ Use markdown formatting for readability. Be thorough but concise."""
                 stream=True
             )
 
-            for chunk in stream:
+            async for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
                     yield chunk.choices[0].delta.content
 
@@ -464,7 +466,8 @@ Use markdown formatting for readability. Be thorough but concise."""
                     "content": msg["content"]
                 })
 
-            stream = self.client.chat.completions.create(
+            # FIXED: Use async client instead of sync client to avoid blocking
+            stream = await self.async_client.chat.completions.create(
                 model=self.execution_model,
                 messages=messages,
                 temperature=0.7,
@@ -472,7 +475,7 @@ Use markdown formatting for readability. Be thorough but concise."""
                 stream=True
             )
 
-            for chunk in stream:
+            async for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
                     yield chunk.choices[0].delta.content
 

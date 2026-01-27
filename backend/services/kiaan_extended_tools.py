@@ -838,22 +838,33 @@ class TerminalTool(BaseTool):
         "required": ["command"]
     }
 
-    # Whitelist of allowed command prefixes
+    # Whitelist of allowed command prefixes (security-hardened)
+    # SECURITY NOTE: Removed dangerous commands:
+    # - curl, wget: SSRF vulnerability
+    # - docker, docker-compose: Container escape risk
+    # - top: Interactive command
+    # - awk: Code execution capability
     ALLOWED_COMMANDS = [
         "ls", "cat", "head", "tail", "grep", "find", "wc",
-        "df", "du", "ps", "top", "free", "uname", "whoami",
+        "df", "du", "ps", "free", "uname", "whoami",
         "pwd", "echo", "date", "which", "file", "stat",
         "npm", "yarn", "pnpm", "pip", "python", "node",
-        "make", "cargo", "go", "docker", "docker-compose",
-        "curl", "wget", "jq", "sort", "uniq", "cut", "awk"
+        "make", "cargo", "go", "jq", "sort", "uniq", "cut"
     ]
 
-    # Blocked patterns
+    # Blocked patterns - expanded for better security
     BLOCKED_PATTERNS = [
         r"\bsudo\b", r"\brm\s+-rf", r"\bchmod\b", r"\bchown\b",
         r">\s*/", r"&>", r"\|.*sh\b", r"\beval\b",
         r"\bexec\b", r"\bkill\b", r"\bkillall\b", r"\bshutdown\b",
-        r"\breboot\b", r"\bmkfs\b", r"\bdd\b", r"\bformat\b"
+        r"\breboot\b", r"\bmkfs\b", r"\bdd\b", r"\bformat\b",
+        r"\$\(", r"`",  # Command substitution
+        r";\s*\w+",  # Command chaining
+        r"&&\s*\w+",  # AND command chaining
+        r"\|\|\s*\w+",  # OR command chaining
+        r">\s*&",  # Redirect stderr
+        r"2>&1",  # Redirect stderr to stdout
+        r"<\(",  # Process substitution
     ]
 
     async def execute(
@@ -895,8 +906,22 @@ class TerminalTool(BaseTool):
             if env:
                 run_env.update(env)
 
-            process = await asyncio.create_subprocess_shell(
-                command,
+            # SECURITY: Use create_subprocess_exec instead of shell to prevent injection
+            # Split command into arguments safely using shlex
+            import shlex
+            try:
+                cmd_args = shlex.split(command)
+            except ValueError as e:
+                return ToolResult(
+                    tool_name=self.name,
+                    status=ToolStatus.ERROR,
+                    output=None,
+                    error=f"Invalid command syntax: {e}",
+                    execution_time_ms=(time.time() - start_time) * 1000
+                )
+
+            process = await asyncio.create_subprocess_exec(
+                *cmd_args,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=working_dir,
