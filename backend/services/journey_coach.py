@@ -10,6 +10,12 @@ Features:
 - Verse reference validation (only refs, no text)
 - Provider tracking for each generated step
 - Retry with fallback on invalid JSON
+- Prompt injection protection via input sanitization
+
+Security:
+- User reflections are sanitized before passing to LLM
+- AI output is validated against strict schema
+- Crisis detection with safe fallback responses
 """
 
 import json
@@ -17,7 +23,7 @@ import logging
 import re
 from typing import Any, TypedDict
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from backend.services.ai.providers import (
     ProviderManager,
@@ -78,8 +84,9 @@ class JourneyStepSchema(BaseModel):
     check_in_prompt: CheckInPromptSchema
     safety_note: str | None = Field(default=None, max_length=500)
 
-    @validator("verse_refs")
-    def validate_verse_refs(cls, v):
+    @field_validator("verse_refs")
+    @classmethod
+    def validate_verse_refs(cls, v: list[VerseRefSchema]) -> list[VerseRefSchema]:
         """Ensure verse_refs only contain valid references."""
         if not v:
             raise ValueError("At least one verse reference required")
@@ -207,6 +214,69 @@ Only flag if there are clear indicators of self-harm ideation, suicide mentions,
 
 
 # =============================================================================
+# SECURITY: PROMPT INJECTION PROTECTION
+# =============================================================================
+
+
+def sanitize_user_input(text: str, max_length: int = 2000) -> str:
+    """
+    Sanitize user input to prevent prompt injection attacks.
+
+    This function:
+    1. Truncates to max length
+    2. Removes potential injection patterns
+    3. Escapes special markers
+    4. Removes control characters
+
+    Args:
+        text: Raw user input
+        max_length: Maximum allowed length
+
+    Returns:
+        Sanitized text safe for LLM prompts
+    """
+    if not text:
+        return ""
+
+    # Truncate to prevent context overflow
+    sanitized = text[:max_length]
+
+    # Remove common prompt injection patterns
+    injection_patterns = [
+        r"ignore\s+(previous|above|all)\s+instructions?",
+        r"disregard\s+(previous|above|all)\s+instructions?",
+        r"forget\s+(previous|above|all)\s+instructions?",
+        r"new\s+instructions?:",
+        r"system\s*prompt:",
+        r"<\s*system\s*>",
+        r"<\s*/?\s*instruction\s*>",
+        r"\[INST\]",
+        r"\[/INST\]",
+        r"<<SYS>>",
+        r"<</SYS>>",
+        r"###\s*Human:",
+        r"###\s*Assistant:",
+        r"Human:",
+        r"Assistant:",
+        r"```\s*(system|instruction)",
+    ]
+
+    for pattern in injection_patterns:
+        sanitized = re.sub(pattern, "[filtered]", sanitized, flags=re.IGNORECASE)
+
+    # Remove control characters (except newlines and tabs)
+    sanitized = "".join(
+        char for char in sanitized
+        if char == "\n" or char == "\t" or (ord(char) >= 32 and ord(char) < 127) or ord(char) > 127
+    )
+
+    # Escape any remaining special markers
+    sanitized = sanitized.replace("{{", "{ {").replace("}}", "} }")
+
+    return sanitized.strip()
+
+
+# =============================================================================
 # JOURNEY COACH
 # =============================================================================
 
@@ -240,6 +310,9 @@ class JourneyCoach:
         """
         Generate a journey step using KIAAN AI.
 
+        SECURITY: User reflection is sanitized to prevent prompt injection.
+        PERFORMANCE: Retry messages are capped to prevent context overflow.
+
         Args:
             verse_refs: List of verse references to incorporate
             enemy_focus: Primary enemy being addressed
@@ -257,10 +330,14 @@ class JourneyCoach:
             AIProviderError: If generation fails after retries
             ValueError: If safety concerns detected in user reflection
         """
-        # Check for safety concerns in user reflection
+        # SECURITY FIX: Sanitize user reflection to prevent prompt injection
+        sanitized_reflection: str | None = None
         if user_reflection:
+            sanitized_reflection = sanitize_user_input(user_reflection)
+
+            # Check for safety concerns with sanitized input
             safety_result = await self._check_safety(
-                user_reflection, provider_preference
+                sanitized_reflection, provider_preference
             )
             if safety_result:
                 return safety_result, "safety_check", "none"
@@ -285,16 +362,30 @@ VERSE REFERENCES TO USE (incorporate the wisdom from these verses):
 Remember: Only include the verse references in your response, not the verse text.
 Output valid JSON matching the schema exactly."""
 
-        messages = [
+        # Initial messages (will be rebuilt on retry to prevent unbounded growth)
+        base_messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
 
         # Try to generate with retries
         last_error: Exception | None = None
+        last_response_content: str = ""
 
         for attempt in range(max_retries + 1):
             try:
+                # PERFORMANCE FIX: Rebuild messages each retry to cap growth
+                # Only include the last error context, not accumulated history
+                if attempt == 0:
+                    messages = base_messages.copy()
+                else:
+                    # Include only one retry context message to limit token usage
+                    messages = base_messages.copy()
+                    messages.append({
+                        "role": "user",
+                        "content": f"Previous attempt failed with error: {last_error}. Please output valid JSON matching the schema exactly.",
+                    })
+
                 response, tracking = await self._provider_manager.chat_with_tracking(
                     messages=messages,
                     temperature=0.7,
@@ -302,6 +393,8 @@ Output valid JSON matching the schema exactly."""
                     response_format={"type": "json_object"},
                     preference=provider_preference,
                 )
+
+                last_response_content = response.content
 
                 # Parse and validate JSON
                 step_data = self._parse_and_validate_response(
@@ -315,19 +408,8 @@ Output valid JSON matching the schema exactly."""
             except (json.JSONDecodeError, ValueError) as e:
                 last_error = e
                 logger.warning(
-                    f"JSON validation failed (attempt {attempt + 1}): {e}"
+                    f"JSON validation failed (attempt {attempt + 1}/{max_retries + 1}): {e}"
                 )
-
-                if attempt < max_retries:
-                    # Add correction message and retry
-                    messages.append({
-                        "role": "assistant",
-                        "content": response.content if 'response' in dir() else "",
-                    })
-                    messages.append({
-                        "role": "user",
-                        "content": f"Your response was not valid JSON or didn't match the schema. Error: {e}. Please try again with valid JSON.",
-                    })
 
             except AIProviderError as e:
                 logger.error(f"Provider error during step generation: {e}")
