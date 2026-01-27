@@ -639,13 +639,13 @@ Response (following the structure above):"""
             # Safe null check for OpenAI response
             guidance = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message and message.content:
-                    guidance = message.content.strip()
+                response_msg = response.choices[0].message
+                if response_msg and response_msg.content:
+                    guidance = response_msg.content.strip()
             if not guidance:
                 guidance = generate_template_gita_response(request.query, verses, request.language)
         except Exception as e:
-            print(f"OpenAI API error: {str(e)}")
+            logger.error(f"OpenAI API error: {str(e)}")
             guidance = generate_template_gita_response(request.query, verses, request.language)
     
     # Format verse references

@@ -11,12 +11,15 @@ legitimate KIAAN interactions.
 """
 
 import html
+import logging
 import re
 from typing import Awaitable, Callable, Any
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+logger = logging.getLogger(__name__)
 
 
 # Patterns that indicate potential attacks
@@ -152,14 +155,19 @@ class InputSanitizerMiddleware(BaseHTTPMiddleware):
             if detect_xss(value) or detect_sql_injection(value) or detect_path_traversal(value):
                 if self.log_suspicious:
                     client_ip = self._get_client_ip(request)
-                    # In production, this would log to a proper logging system
-                    print(f"[SECURITY] Suspicious query param detected: key={key}, ip={client_ip}")
-        
+                    logger.warning(
+                        f"Suspicious query param detected: key={key}, ip={client_ip}",
+                        extra={"security_event": "suspicious_input", "key": key, "ip": client_ip}
+                    )
+
         # Check path for traversal
         if detect_path_traversal(request.url.path):
             if self.log_suspicious:
                 client_ip = self._get_client_ip(request)
-                print(f"[SECURITY] Path traversal attempt detected: path={request.url.path}, ip={client_ip}")
+                logger.warning(
+                    f"Path traversal attempt detected: path={request.url.path}, ip={client_ip}",
+                    extra={"security_event": "path_traversal", "path": request.url.path, "ip": client_ip}
+                )
         
         return await call_next(request)
     

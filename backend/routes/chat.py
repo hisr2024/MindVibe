@@ -310,9 +310,9 @@ Remember: You are KIAAN - every response must be 100% Gita-rooted wisdom present
             # Safe null check for OpenAI response
             content = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    content = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    content = response_msg.content
             if not content:
                 content = "I'm here for you. Let's try again. 💙"
 

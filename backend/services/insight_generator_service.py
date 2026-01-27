@@ -245,9 +245,9 @@ Keep it warm, personal, and encouraging. Use "you" and "your"."""
             # Safe null check for OpenAI response
             content = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message and message.content:
-                    content = message.content.strip()
+                response_msg = response.choices[0].message
+                if response_msg and response_msg.content:
+                    content = response_msg.content.strip()
 
             if not content:
                 return self._generate_template_insight(
@@ -257,7 +257,7 @@ Keep it warm, personal, and encouraging. Use "you" and "your"."""
             return content
 
         except Exception as e:
-            print(f"GPT insight generation failed: {e}")
+            logger.error(f"GPT insight generation failed: {e}")
             # Fallback to template
             return self._generate_template_insight(
                 mood_data, journal_data, verse_interactions,

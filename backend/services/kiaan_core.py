@@ -96,9 +96,13 @@ class OfflineWisdomCache:
             logger.warning(f"Failed to save wisdom cache: {e}")
 
     def _generate_key(self, message: str, context: str) -> str:
-        """Generate cache key from message and context."""
+        """Generate cache key from message and context.
+
+        Uses SHA256 instead of MD5 for security best practices,
+        truncated to 32 chars for reasonable key length.
+        """
         content = f"{message.lower().strip()}:{context}"
-        return hashlib.md5(content.encode()).hexdigest()
+        return hashlib.sha256(content.encode()).hexdigest()[:32]
 
     def get(self, message: str, context: str) -> Optional[dict]:
         """Get cached response if available."""
@@ -716,11 +720,12 @@ EXAMPLES:
             )
 
             # Safe access to response with null checks
+            # Note: Using response_msg to avoid shadowing the 'message' parameter
             response_text = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    response_text = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    response_text = response_msg.content
             if not response_text:
                 # Fallback conversational responses
                 fallbacks = {
@@ -877,11 +882,12 @@ EXAMPLES:
                 }
 
             # Safe access to response with null checks
+            # Note: Using response_msg to avoid shadowing the 'message' parameter
             response_text = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    response_text = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    response_text = response_msg.content
             if not response_text:
                 response_text = self.optimizer.get_fallback_response(context)
 
@@ -1413,11 +1419,12 @@ Provide a complete, validated response that meets ALL requirements above."""
             )
 
             # Safe access to response with null checks
+            # Note: Using response_msg to avoid shadowing the 'message' parameter
             response_text = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    response_text = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    response_text = response_msg.content
             if not response_text:
                 response_text = self._get_emergency_fallback(context)
 

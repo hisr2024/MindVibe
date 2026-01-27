@@ -11,7 +11,7 @@ Manages multiple AI providers and provides:
 import asyncio
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .base import (
@@ -102,7 +102,8 @@ class ProviderManager:
         # Check cache
         if name in self._health_cache:
             cached = self._health_cache[name]
-            age = datetime.utcnow() - cached.timestamp
+            # Use timezone-aware datetime (utcnow() is deprecated in Python 3.12+)
+            age = datetime.now(timezone.utc) - cached.timestamp
             if age < self._health_cache_ttl:
                 return cached
 

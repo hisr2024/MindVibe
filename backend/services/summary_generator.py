@@ -99,9 +99,9 @@ class SummaryGenerator:
             # Safe null check for OpenAI response
             summary_text = None
             if response and response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message:
-                    summary_text = message.content
+                response_msg = response.choices[0].message
+                if response_msg:
+                    summary_text = response_msg.content
             if not summary_text:
                 return self._create_fallback_summary(full_response)
 
