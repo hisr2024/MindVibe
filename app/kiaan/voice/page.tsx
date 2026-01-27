@@ -87,6 +87,75 @@ import {
   type AmbienceType
 } from '@/utils/voice/kiaanAdvancedFeatures'
 
+// Sanskrit Pronunciation imports
+import {
+  getVersePronunciation,
+  getAvailableVerses,
+  generatePronunciationLesson,
+  savePronunciationProgress,
+  type VersePronunciation
+} from '@/utils/voice/sanskritPronunciation'
+
+// Verse Memorization imports
+import {
+  getMemorizationSession,
+  getAllMemorizationVerses,
+  getMemorizationVerse,
+  startLearningVerse,
+  recordReview,
+  generateMemorizationPractice,
+  getMemorizationStats,
+  type MemorizationCard,
+  type RecallQuality
+} from '@/utils/voice/verseMemorization'
+
+// Binaural Beats imports
+import {
+  startBinauralSession,
+  stopBinauralBeat,
+  getBinauralPresets,
+  getBinauralPreset,
+  getRecommendedPreset,
+  getCurrentSession,
+  isBinauralPlaying,
+  getBinauralIntroSpeech,
+  getHeadphoneReminder,
+  cleanupAudio as cleanupBinauralAudio,
+  type BinauralPreset
+} from '@/utils/voice/binauralBeats'
+
+// Spiritual Features imports
+import {
+  getAvailablePractices,
+  logPractice,
+  getAccountabilityStats,
+  getAccountabilityReminder,
+  getPersona,
+  getAllPersonas,
+  getPersonaResponse,
+  getPersonaGreeting,
+  getPersonaClosing,
+  checkMilestones,
+  getAchievedMilestones,
+  getCelebrationSpeech,
+  getDharmaQuestions,
+  analyzeDharmaPath,
+  getDharmaGuidance,
+  analyzeKarma,
+  getGunaQuestions,
+  calculateGunaProfile,
+  getGunaAdvice,
+  saveGunaAssessment,
+  type VoicePersona,
+  type Milestone,
+  type GunaProfile,
+  type KarmaAnalysis,
+  type DharmaProfile
+} from '@/utils/voice/spiritualFeatures'
+
+// Emotional Visualization Component
+import EmotionalVisualization from '@/components/voice/EmotionalVisualization'
+
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
 
@@ -163,6 +232,51 @@ export default function EliteVoicePage() {
 
   // Audio context for ambience
   const audioContextRef = useRef<AudioContext | null>(null)
+
+  // Sanskrit Pronunciation state
+  const [showPronunciationPicker, setShowPronunciationPicker] = useState(false)
+  const [currentPronunciation, setCurrentPronunciation] = useState<VersePronunciation | null>(null)
+  const [pronunciationStep, setPronunciationStep] = useState(0)
+
+  // Verse Memorization state
+  const [showMemorizationPicker, setShowMemorizationPicker] = useState(false)
+  const [currentMemorizationVerse, setCurrentMemorizationVerse] = useState<MemorizationCard | null>(null)
+  const [memorizationReviewMode, setMemorizationReviewMode] = useState(false)
+
+  // Binaural Beats state
+  const [showBinauralPicker, setShowBinauralPicker] = useState(false)
+  const [activeBinauralPreset, setActiveBinauralPreset] = useState<BinauralPreset | null>(null)
+  const [binauralPlaying, setBinauralPlaying] = useState(false)
+
+  // Voice Persona state
+  const [showPersonaPicker, setShowPersonaPicker] = useState(false)
+  const [currentPersona, setCurrentPersona] = useState<VoicePersona>('krishna')
+
+  // Celebration state
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [currentMilestone, setCurrentMilestone] = useState<Milestone | null>(null)
+
+  // Dharma Discovery state
+  const [showDharmaDiscovery, setShowDharmaDiscovery] = useState(false)
+  const [dharmaQuestionIndex, setDharmaQuestionIndex] = useState(0)
+  const [dharmaAnswers, setDharmaAnswers] = useState<Record<string, string>>({})
+  const [dharmaProfile, setDharmaProfile] = useState<DharmaProfile | null>(null)
+
+  // Karma Analysis state
+  const [showKarmaAnalysis, setShowKarmaAnalysis] = useState(false)
+  const [karmaResult, setKarmaResult] = useState<KarmaAnalysis | null>(null)
+
+  // Guna Assessment state
+  const [showGunaAssessment, setShowGunaAssessment] = useState(false)
+  const [gunaQuestionIndex, setGunaQuestionIndex] = useState(0)
+  const [gunaAnswers, setGunaAnswers] = useState<Record<string, 'sattva' | 'rajas' | 'tamas'>>({})
+  const [gunaProfile, setGunaProfile] = useState<GunaProfile | null>(null)
+
+  // Emotional Visualization state
+  const [showEmotionalJourney, setShowEmotionalJourney] = useState(false)
+
+  // Accountability state
+  const [showAccountability, setShowAccountability] = useState(false)
 
   // Browser diagnostics
   const [browserInfo, setBrowserInfo] = useState<{
@@ -1856,6 +1970,280 @@ export default function EliteVoicePage() {
     setTimeout(() => setShowAffirmation(false), 5000)
   }
 
+  // ============================================
+  // SANSKRIT PRONUNCIATION FUNCTIONS
+  // ============================================
+
+  async function startPronunciationLesson(verseId: string) {
+    console.log('[KIAAN Voice] Starting pronunciation lesson:', verseId)
+
+    const verse = getVersePronunciation(verseId)
+    if (!verse) {
+      await speakResponse('I could not find that verse for pronunciation practice.')
+      return
+    }
+
+    setCurrentPronunciation(verse)
+    setPronunciationStep(0)
+    setShowPronunciationPicker(false)
+
+    playOmChime()
+
+    const lesson = generatePronunciationLesson(verseId)
+    for (const line of lesson) {
+      await speakResponseWithEmotion(line, { rate: 0.8, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 1500))
+    }
+
+    savePronunciationProgress({
+      verseId,
+      attempts: 1,
+      lastPracticed: new Date(),
+      confidence: 50,
+      masteredSyllables: [],
+      difficultSyllables: []
+    })
+
+    setCurrentPronunciation(null)
+    setState('idle')
+  }
+
+  // ============================================
+  // VERSE MEMORIZATION FUNCTIONS
+  // ============================================
+
+  async function startMemorizationSession(verseId: string) {
+    console.log('[KIAAN Voice] Starting memorization:', verseId)
+
+    const verse = getMemorizationVerse(verseId)
+    if (!verse) {
+      await speakResponse('I could not find that verse for memorization.')
+      return
+    }
+
+    startLearningVerse(verseId)
+    setCurrentMemorizationVerse(verse)
+    setMemorizationReviewMode(true)
+    setShowMemorizationPicker(false)
+
+    playOmChime()
+
+    const practice = generateMemorizationPractice(verseId)
+    for (const line of practice) {
+      await speakResponseWithEmotion(line, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    setCurrentMemorizationVerse(null)
+    setMemorizationReviewMode(false)
+    setState('idle')
+  }
+
+  async function recordMemorizationReview(quality: RecallQuality) {
+    if (!currentMemorizationVerse) return
+
+    const result = recordReview(currentMemorizationVerse.verseId, quality)
+    const qualityText = quality >= 4 ? 'Excellent recall!' : quality >= 3 ? 'Good effort!' : 'Keep practicing, you will master this.'
+    await speakResponse(`${qualityText} Next review in ${result.interval} days.`)
+
+    setCurrentMemorizationVerse(null)
+    setMemorizationReviewMode(false)
+  }
+
+  // ============================================
+  // BINAURAL BEATS FUNCTIONS
+  // ============================================
+
+  async function startBinauralBeats(presetName: string) {
+    console.log('[KIAAN Voice] Starting binaural beats:', presetName)
+
+    const preset = getBinauralPreset(presetName)
+    if (!preset) {
+      await speakResponse('I could not find that binaural preset.')
+      return
+    }
+
+    setShowBinauralPicker(false)
+
+    // Headphone reminder
+    await speakResponse(getHeadphoneReminder())
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Introduction
+    const intro = getBinauralIntroSpeech(presetName)
+    for (const line of intro) {
+      await speakResponseWithEmotion(line, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    // Start the binaural beat
+    const started = await startBinauralSession(presetName)
+    if (started) {
+      setActiveBinauralPreset(preset)
+      setBinauralPlaying(true)
+    } else {
+      await speakResponse('I could not start the binaural session. Please try again.')
+    }
+  }
+
+  function stopBinauralBeats() {
+    stopBinauralBeat()
+    setBinauralPlaying(false)
+    setActiveBinauralPreset(null)
+    playSound('click')
+  }
+
+  // ============================================
+  // VOICE PERSONA FUNCTIONS
+  // ============================================
+
+  async function switchPersona(persona: VoicePersona) {
+    setCurrentPersona(persona)
+    setShowPersonaPicker(false)
+
+    const config = getPersona(persona)
+    playOmChime()
+
+    await speakResponseWithEmotion(getPersonaGreeting(persona), config.voiceSettings)
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(`Switched to ${config.name} persona`, getPersonaGreeting(persona))
+    }
+  }
+
+  function getPersonaVoiceSettings() {
+    return getPersona(currentPersona).voiceSettings
+  }
+
+  // ============================================
+  // MILESTONE CELEBRATION FUNCTIONS
+  // ============================================
+
+  async function celebrateMilestone(milestone: Milestone) {
+    setCurrentMilestone(milestone)
+    setShowCelebration(true)
+
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 500))
+    playSound('success')
+
+    const celebration = getCelebrationSpeech(milestone)
+    for (const line of celebration) {
+      await speakResponseWithEmotion(line, { rate: 0.9, pitch: 1.05, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    playOmChime()
+
+    setTimeout(() => {
+      setShowCelebration(false)
+      setCurrentMilestone(null)
+    }, 5000)
+  }
+
+  // ============================================
+  // DHARMA DISCOVERY FUNCTIONS
+  // ============================================
+
+  async function startDharmaDiscovery() {
+    setShowDharmaDiscovery(true)
+    setDharmaQuestionIndex(0)
+    setDharmaAnswers({})
+    setDharmaProfile(null)
+
+    playOmChime()
+    await speakResponse('Let us explore your dharma together. I will ask you questions to help discover your life purpose. Reflect deeply before answering.')
+  }
+
+  async function answerDharmaQuestion(answer: string) {
+    const questions = getDharmaQuestions()
+    const currentQuestion = questions[dharmaQuestionIndex]
+
+    setDharmaAnswers(prev => ({
+      ...prev,
+      [currentQuestion.id]: answer
+    }))
+
+    if (currentQuestion.followUp) {
+      await speakResponseWithEmotion(currentQuestion.followUp, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+    }
+
+    if (dharmaQuestionIndex < questions.length - 1) {
+      setDharmaQuestionIndex(prev => prev + 1)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      await speakResponse(questions[dharmaQuestionIndex + 1].question)
+    } else {
+      // Complete - analyze
+      const profile = analyzeDharmaPath({ ...dharmaAnswers, [currentQuestion.id]: answer })
+      setDharmaProfile(profile)
+
+      playOmChime()
+      await speakResponseWithEmotion(getDharmaGuidance(profile), { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+    }
+  }
+
+  // ============================================
+  // KARMA ANALYSIS FUNCTIONS
+  // ============================================
+
+  async function analyzeKarmaSituation(situation: string) {
+    const analysis = analyzeKarma(situation)
+    setKarmaResult(analysis)
+    setShowKarmaAnalysis(true)
+
+    playOmChime()
+    await speakResponseWithEmotion(analysis.recommendation, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    await speakResponseWithEmotion(analysis.gitaWisdom, { rate: 0.8, pitch: 0.95, volume: voiceVolume })
+
+    for (const question of analysis.questions) {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      await speakResponseWithEmotion(question, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+    }
+  }
+
+  // ============================================
+  // GUNA ASSESSMENT FUNCTIONS
+  // ============================================
+
+  async function startGunaAssessment() {
+    setShowGunaAssessment(true)
+    setGunaQuestionIndex(0)
+    setGunaAnswers({})
+    setGunaProfile(null)
+
+    playOmChime()
+    await speakResponse('The Gita teaches about three gunas - sattva, rajas, and tamas - that influence our nature. Let me help you understand your dominant guna through this assessment.')
+
+    const questions = getGunaQuestions()
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    await speakResponse(questions[0].question)
+  }
+
+  function answerGunaQuestion(guna: 'sattva' | 'rajas' | 'tamas') {
+    const questions = getGunaQuestions()
+    const currentQuestion = questions[gunaQuestionIndex]
+
+    const newAnswers = { ...gunaAnswers, [currentQuestion.id]: guna }
+    setGunaAnswers(newAnswers)
+
+    if (gunaQuestionIndex < questions.length - 1) {
+      setGunaQuestionIndex(prev => prev + 1)
+    } else {
+      // Complete - calculate
+      const profile = calculateGunaProfile(newAnswers)
+      setGunaProfile(profile)
+      saveGunaAssessment(profile)
+    }
+  }
+
+  async function speakGunaResults() {
+    if (!gunaProfile) return
+
+    playOmChime()
+    await speakResponseWithEmotion(getGunaAdvice(gunaProfile), { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+  }
+
   // Manual activation - robust flow with permission handling
   async function activateManually() {
     // Prevent double-clicks or rapid activation
@@ -2037,6 +2425,82 @@ export default function EliteVoicePage() {
               <LanguageSelector compact />
             </div>
           </div>
+        </div>
+
+        {/* Advanced Features Quick Access Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-slate-900/50 border-y border-orange-500/10">
+          <button
+            onClick={() => setShowPronunciationPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs hover:bg-teal-500/20 transition-all"
+            title="Sanskrit Pronunciation"
+          >
+            <span>🕉️</span>
+            <span className="hidden sm:inline">Pronunciation</span>
+          </button>
+          <button
+            onClick={() => setShowMemorizationPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs hover:bg-emerald-500/20 transition-all"
+            title="Verse Memorization"
+          >
+            <span>📜</span>
+            <span className="hidden sm:inline">Memorize</span>
+          </button>
+          <button
+            onClick={() => setShowBinauralPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs hover:bg-cyan-500/20 transition-all"
+            title="Binaural Beats"
+          >
+            <span>🎧</span>
+            <span className="hidden sm:inline">Binaural</span>
+          </button>
+          <button
+            onClick={() => setShowPersonaPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs hover:bg-amber-500/20 transition-all"
+            title="Choose Voice Persona"
+          >
+            <span>🎭</span>
+            <span className="hidden sm:inline">Persona</span>
+          </button>
+          <button
+            onClick={() => startGunaAssessment()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs hover:bg-violet-500/20 transition-all"
+            title="Guna Assessment"
+          >
+            <span>⚖️</span>
+            <span className="hidden sm:inline">Gunas</span>
+          </button>
+          <button
+            onClick={() => setShowEmotionalJourney(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-300 text-xs hover:bg-pink-500/20 transition-all"
+            title="Emotional Journey"
+          >
+            <span>📊</span>
+            <span className="hidden sm:inline">Journey</span>
+          </button>
+          <button
+            onClick={() => setShowRitualPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs hover:bg-orange-500/20 transition-all"
+            title="Daily Rituals"
+          >
+            <span>🌅</span>
+            <span className="hidden sm:inline">Rituals</span>
+          </button>
+          <button
+            onClick={() => setShowMantraPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs hover:bg-yellow-500/20 transition-all"
+            title="Mantra Chanting"
+          >
+            <span>🔔</span>
+            <span className="hidden sm:inline">Mantras</span>
+          </button>
+          <button
+            onClick={() => speakAffirmations()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs hover:bg-rose-500/20 transition-all"
+            title="Daily Affirmations"
+          >
+            <span>💫</span>
+            <span className="hidden sm:inline">Affirm</span>
+          </button>
         </div>
       </div>
 
@@ -2581,6 +3045,279 @@ export default function EliteVoicePage() {
                     style={{ width: `${((meditationStep + 1) / currentMeditation.steps.length) * 100}%` }}
                   />
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Binaural Beats Active Indicator */}
+          {binauralPlaying && activeBinauralPreset && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 border border-cyan-400/40 shadow-lg shadow-cyan-500/10">
+                <div className="relative">
+                  <span className="text-2xl">🎧</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <div className="text-cyan-200 font-semibold text-sm">{activeBinauralPreset.name}</div>
+                  <div className="text-cyan-300/70 text-xs">{activeBinauralPreset.type} waves • {activeBinauralPreset.beatFrequency}Hz</div>
+                </div>
+                <button
+                  onClick={stopBinauralBeats}
+                  className="ml-2 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Sanskrit Pronunciation Picker Modal */}
+          {showPronunciationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-teal-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-teal-100">Sanskrit Pronunciation</h3>
+                    <p className="text-teal-200/60 text-sm mt-1">Learn correct shloka pronunciation</p>
+                  </div>
+                  <button onClick={() => setShowPronunciationPicker(false)} className="text-teal-300/60 hover:text-teal-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {getAvailableVerses().map((verse) => (
+                    <button
+                      key={verse.verseId}
+                      onClick={() => startPronunciationLesson(verse.verseId)}
+                      className="w-full p-4 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-teal-100">{verse.reference}</div>
+                      <div className="text-xs text-teal-300/60 mt-1">Difficulty: {verse.difficulty}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verse Memorization Picker Modal */}
+          {showMemorizationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-emerald-100">Verse Memorization</h3>
+                    <p className="text-emerald-200/60 text-sm mt-1">Spaced repetition for deep learning</p>
+                  </div>
+                  <button onClick={() => setShowMemorizationPicker(false)} className="text-emerald-300/60 hover:text-emerald-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                {(() => {
+                  const stats = getMemorizationStats()
+                  return (
+                    <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <div className="text-emerald-200 text-sm">Progress: {stats.totalVersesMastered} mastered • {stats.reviewsDueToday} due today • {stats.currentStreak} day streak</div>
+                    </div>
+                  )
+                })()}
+                <div className="space-y-3">
+                  {getAllMemorizationVerses().map((verse) => (
+                    <button
+                      key={verse.verseId}
+                      onClick={() => startMemorizationSession(verse.verseId)}
+                      className="w-full p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-emerald-100">{verse.reference}</div>
+                      <div className="text-xs text-emerald-300/70 mt-1 line-clamp-2">{verse.translation}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Binaural Beats Picker Modal */}
+          {showBinauralPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-cyan-100">Binaural Beats</h3>
+                    <p className="text-cyan-200/60 text-sm mt-1">Alpha/theta waves for meditation</p>
+                  </div>
+                  <button onClick={() => setShowBinauralPicker(false)} className="text-cyan-300/60 hover:text-cyan-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="mb-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 text-sm">
+                  Use headphones for best effect. Each ear receives a different frequency.
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {getBinauralPresets().map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => startBinauralBeats(preset.name)}
+                      className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-cyan-100">{preset.name}</div>
+                      <div className="text-xs text-cyan-300/60 mt-1">{preset.type} • {preset.beatFrequency}Hz</div>
+                      <div className="text-xs text-cyan-300/40 mt-1">{preset.recommendedDuration}min</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Voice Persona Picker Modal */}
+          {showPersonaPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-amber-100">Choose Your Guide</h3>
+                    <p className="text-amber-200/60 text-sm mt-1">Each persona speaks with unique wisdom</p>
+                  </div>
+                  <button onClick={() => setShowPersonaPicker(false)} className="text-amber-300/60 hover:text-amber-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {getAllPersonas().map((persona) => (
+                    <button
+                      key={persona.id}
+                      onClick={() => switchPersona(persona.id)}
+                      className={`w-full p-4 rounded-xl border transition-all text-left ${
+                        currentPersona === persona.id
+                          ? 'bg-amber-500/20 border-amber-400/60'
+                          : 'bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/15'
+                      }`}
+                    >
+                      <div className="font-semibold text-amber-100">{persona.name}</div>
+                      <div className="text-xs text-amber-300/70 mt-1">{persona.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Guna Assessment Modal */}
+          {showGunaAssessment && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-violet-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-violet-100">Guna Assessment</h3>
+                    <p className="text-violet-200/60 text-sm mt-1">Discover your dominant nature</p>
+                  </div>
+                  <button onClick={() => setShowGunaAssessment(false)} className="text-violet-300/60 hover:text-violet-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                {!gunaProfile ? (
+                  <>
+                    <div className="mb-4 text-violet-200/80 text-sm">
+                      Question {gunaQuestionIndex + 1} of {getGunaQuestions().length}
+                    </div>
+                    <div className="mb-6 text-violet-100 font-medium">
+                      {getGunaQuestions()[gunaQuestionIndex]?.question}
+                    </div>
+                    <div className="space-y-2">
+                      {getGunaQuestions()[gunaQuestionIndex]?.options.map((option, i) => (
+                        <button
+                          key={i}
+                          onClick={() => answerGunaQuestion(option.guna)}
+                          className="w-full p-3 rounded-lg bg-violet-500/10 border border-violet-500/30 hover:bg-violet-500/20 transition-all text-left text-violet-200 text-sm"
+                        >
+                          {option.text}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className="text-3xl mb-2">{gunaProfile.dominantGuna === 'sattva' ? '✨' : gunaProfile.dominantGuna === 'rajas' ? '🔥' : '🌙'}</div>
+                      <div className="text-2xl font-bold text-violet-100 capitalize">{gunaProfile.dominantGuna}</div>
+                      <div className="text-violet-300/70 text-sm mt-1">Dominant Guna</div>
+                    </div>
+                    <p className="text-violet-200/80 text-sm">{gunaProfile.description}</p>
+                    <div className="flex justify-between text-xs text-violet-300/60">
+                      <span>Sattva: {gunaProfile.scores.sattva}</span>
+                      <span>Rajas: {gunaProfile.scores.rajas}</span>
+                      <span>Tamas: {gunaProfile.scores.tamas}</span>
+                    </div>
+                    <button
+                      onClick={speakGunaResults}
+                      className="w-full py-2 rounded-lg bg-violet-500/20 text-violet-200 text-sm font-medium hover:bg-violet-500/30 transition-colors"
+                    >
+                      Hear Full Guidance
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Emotional Journey Modal */}
+          {showEmotionalJourney && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-orange-500/30 rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-orange-100">Your Emotional Journey</h3>
+                  <button onClick={() => setShowEmotionalJourney(false)} className="text-orange-300/60 hover:text-orange-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <EmotionalVisualization height={350} showInsights={true} />
+              </div>
+            </div>
+          )}
+
+          {/* Celebration Modal */}
+          {showCelebration && currentMilestone && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-gradient-to-br from-amber-900/90 to-orange-900/90 border border-amber-400/50 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center">
+                <div className="text-6xl mb-4 animate-bounce">🏆</div>
+                <h3 className="text-2xl font-bold text-amber-100 mb-2">{currentMilestone.name}</h3>
+                <p className="text-amber-200/80 mb-4">{currentMilestone.description}</p>
+                <p className="text-amber-300/70 text-sm italic">{currentMilestone.celebration}</p>
+                <button
+                  onClick={() => { setShowCelebration(false); setCurrentMilestone(null); }}
+                  className="mt-6 px-6 py-2 rounded-full bg-amber-500 text-slate-900 font-bold hover:bg-amber-400 transition-colors"
+                >
+                  Continue Journey
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Crisis Support Panel */}
+          {showCrisisSupport && currentCrisis && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-red-500/30 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-2">💜</div>
+                  <h3 className="text-xl font-bold text-red-100">You Are Not Alone</h3>
+                </div>
+                <p className="text-red-200/80 mb-4">{currentCrisis.response}</p>
+                <div className="space-y-2 mb-4">
+                  {currentCrisis.helplines.slice(0, 3).map((helpline, i) => (
+                    <div key={i} className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <div className="font-semibold text-red-100">{helpline.name}</div>
+                      <div className="text-red-300 text-lg font-mono">{helpline.number}</div>
+                      <div className="text-red-300/60 text-xs">{helpline.available}</div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowCrisisSupport(false)}
+                  className="w-full py-2 rounded-lg bg-red-500/20 text-red-200 text-sm font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  I understand, close this
+                </button>
               </div>
             </div>
           )}
