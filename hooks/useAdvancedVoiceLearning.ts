@@ -255,27 +255,6 @@ export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const queueRef = useRef<OfflineFeedback[]>([])
 
-  // Monitor online status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
-
-  // Auto-sync when coming back online
-  useEffect(() => {
-    if (isOnline && queueRef.current.length > 0) {
-      syncQueue()
-    }
-  }, [isOnline])
-
   const fetchSyncStatus = useCallback(async () => {
     const data = await fetchApi<SyncStatus>('/sync/status')
     setSyncStatus(data)
@@ -322,6 +301,28 @@ export function useOfflineSync() {
     } catch {
       return { synced: 0, failed: queueRef.current.length }
     }
+  }, [isOnline])
+
+  // Monitor online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
+  // Auto-sync when coming back online
+  useEffect(() => {
+    if (isOnline && queueRef.current.length > 0) {
+      syncQueue()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnline])
 
   const analyzeOffline = useCallback((text: string) => {

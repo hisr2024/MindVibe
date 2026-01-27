@@ -356,6 +356,21 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     }
   }, [])
 
+  // Refresh memories
+  const refreshMemories = useCallback(async () => {
+    try {
+      const response = await fetch('/api/voice-learning/memories')
+
+      if (response.ok) {
+        const data = await response.json()
+        const memoryKeys = (data.memories || []).map((m: { key: string }) => m.key)
+        setMemories(memoryKeys)
+      }
+    } catch {
+      // Silent fail
+    }
+  }, [])
+
   // Add memory
   const addMemory = useCallback(async (
     type: string,
@@ -384,22 +399,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       setError(errorMsg)
       onError?.(errorMsg)
     }
-  }, [onError])
-
-  // Refresh memories
-  const refreshMemories = useCallback(async () => {
-    try {
-      const response = await fetch('/api/voice-learning/memories')
-
-      if (response.ok) {
-        const data = await response.json()
-        const memoryKeys = (data.memories || []).map((m: { key: string }) => m.key)
-        setMemories(memoryKeys)
-      }
-    } catch {
-      // Silent fail
-    }
-  }, [])
+  }, [onError, refreshMemories])
 
   // Refresh preferences
   const refreshPreferences = useCallback(async () => {
