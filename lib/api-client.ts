@@ -38,7 +38,10 @@ export async function apiCall(
   endpoint: string,
   options: APICallOptions = {}
 ): Promise<Response> {
-  const url = `${API_BASE_URL}${endpoint}`
+  // Use relative URL for local Next.js API routes, backend URL for others
+  // This ensures /api/* paths are handled by local Next.js routes
+  const isLocalApiRoute = endpoint.startsWith('/api/')
+  const url = isLocalApiRoute ? endpoint : `${API_BASE_URL}${endpoint}`
   const { timeout = 30000, ...fetchOptions } = options
 
   // Get current language preference
