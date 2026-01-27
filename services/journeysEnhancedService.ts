@@ -356,37 +356,14 @@ export async function getJourneyAccess(): Promise<JourneyAccess> {
   return handleResponse<JourneyAccess>(response)
 }
 
-// Default journey templates for when backend is unavailable
+// Default journey templates - MUST MATCH backend/routes/journeys_enhanced.py DEMO_JOURNEY_TEMPLATES
+// This ensures frontend/backend consistency when database is not seeded
 const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
   {
-    id: 'tpl_inner_peace',
-    slug: 'inner-peace',
-    title: 'Journey to Inner Peace',
-    description: 'A transformative 7-day exploration of tranquility and letting go of anxiety.',
-    primary_enemy_tags: ['krodha', 'moha'],
-    duration_days: 7,
-    difficulty: 1,
-    is_featured: true,
-    icon_name: 'peace',
-    color_theme: 'emerald',
-  },
-  {
-    id: 'tpl_conquering_desire',
-    slug: 'conquering-desire',
-    title: 'Conquering Desire (Kama)',
-    description: 'Learn to master desires and attachments through ancient wisdom.',
-    primary_enemy_tags: ['kama'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: true,
-    icon_name: 'heart',
-    color_theme: 'rose',
-  },
-  {
-    id: 'tpl_anger_mastery',
-    slug: 'anger-mastery',
-    title: 'Mastering Anger (Krodha)',
-    description: 'Transform reactive anger into mindful responses.',
+    id: 'demo-krodha-001',
+    slug: 'transform-anger-demo',
+    title: 'Transform Anger (Krodha)',
+    description: 'A 14-day journey to transform destructive anger into constructive energy through Gita wisdom. Learn to recognize triggers, practice patience, and cultivate inner peace.',
     primary_enemy_tags: ['krodha'],
     duration_days: 14,
     difficulty: 2,
@@ -395,21 +372,84 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     color_theme: 'red',
   },
   {
-    id: 'tpl_balanced_action',
-    slug: 'balanced-action',
-    title: 'Wisdom of Balanced Action',
-    description: 'Learn Karma Yoga - the art of action without attachment to results.',
-    primary_enemy_tags: ['mixed'],
-    duration_days: 7,
-    difficulty: 1,
+    id: 'demo-kama-001',
+    slug: 'master-desire-demo',
+    title: 'Mastering Desire (Kama)',
+    description: 'A 21-day journey to understand and master desires. Transform cravings into purposeful aspirations aligned with your dharma.',
+    primary_enemy_tags: ['kama'],
+    duration_days: 21,
+    difficulty: 3,
+    is_featured: true,
+    icon_name: 'heart',
+    color_theme: 'pink',
+  },
+  {
+    id: 'demo-lobha-001',
+    slug: 'overcome-greed-demo',
+    title: 'Contentment Over Greed (Lobha)',
+    description: 'A 14-day journey to cultivate santosha (contentment) and release the grip of greed. Find abundance in simplicity.',
+    primary_enemy_tags: ['lobha'],
+    duration_days: 14,
+    difficulty: 2,
+    is_featured: false,
+    icon_name: 'coins',
+    color_theme: 'amber',
+  },
+  {
+    id: 'demo-moha-001',
+    slug: 'clarity-attachment-demo',
+    title: 'Clarity Over Attachment (Moha)',
+    description: 'A 21-day journey to see through delusion and attachment. Develop viveka (discrimination) and find clarity.',
+    primary_enemy_tags: ['moha'],
+    duration_days: 21,
+    difficulty: 3,
+    is_featured: false,
+    icon_name: 'cloud',
+    color_theme: 'purple',
+  },
+  {
+    id: 'demo-mada-001',
+    slug: 'humility-pride-demo',
+    title: 'Humility Over Ego (Mada)',
+    description: 'A 14-day journey to dissolve ego and cultivate true humility. Recognize the Self beyond the small self.',
+    primary_enemy_tags: ['mada'],
+    duration_days: 14,
+    difficulty: 2,
+    is_featured: false,
+    icon_name: 'crown',
+    color_theme: 'orange',
+  },
+  {
+    id: 'demo-matsarya-001',
+    slug: 'joy-envy-demo',
+    title: 'Joy Over Envy (Matsarya)',
+    description: 'A 14-day journey to transform envy into mudita (sympathetic joy). Celebrate others\' success as your own.',
+    primary_enemy_tags: ['matsarya'],
+    duration_days: 14,
+    difficulty: 2,
+    is_featured: false,
+    icon_name: 'eye',
+    color_theme: 'emerald',
+  },
+  {
+    id: 'demo-complete-001',
+    slug: 'complete-transformation-demo',
+    title: 'Complete Inner Transformation',
+    description: 'A comprehensive 30-day journey addressing all six inner enemies. The ultimate path to self-mastery and liberation.',
+    primary_enemy_tags: ['kama', 'krodha', 'lobha', 'moha', 'mada', 'matsarya'],
+    duration_days: 30,
+    difficulty: 4,
     is_featured: true,
     icon_name: 'sparkles',
-    color_theme: 'blue',
+    color_theme: 'indigo',
   },
 ]
 
 /**
  * Get all available journey templates (catalog)
+ *
+ * CACHING NOTE: If backend returns X-MindVibe-Fallback header (demo templates),
+ * we mark the data as fallback to prevent caching stale demo data.
  */
 export async function getCatalog(): Promise<JourneyTemplate[]> {
   try {
@@ -417,19 +457,30 @@ export async function getCatalog(): Promise<JourneyTemplate[]> {
       method: 'GET',
       headers: getHeaders(),
     })
+
     // If the response is a server error, return default templates
     if (!response.ok && response.status >= 500) {
-      console.warn('Catalog endpoint returned error, using default templates')
+      console.warn('[getCatalog] Server error, using default templates')
       return DEFAULT_CATALOG_TEMPLATES
     }
+
+    // Check if this is fallback/demo data from backend
+    const isFallback = response.headers.get('X-MindVibe-Fallback') === 'demo-templates'
+    if (isFallback) {
+      console.warn('[getCatalog] Backend returned demo templates - database may not be seeded')
+    }
+
     const data = await handleResponse<JourneyTemplate[]>(response)
+
     // If empty array, return defaults
     if (!data || data.length === 0) {
+      console.warn('[getCatalog] Empty catalog, using default templates')
       return DEFAULT_CATALOG_TEMPLATES
     }
+
     return data
   } catch (error) {
-    console.warn('Failed to fetch catalog:', error)
+    console.warn('[getCatalog] Failed to fetch catalog:', error)
     return DEFAULT_CATALOG_TEMPLATES // Return default templates on errors
   }
 }

@@ -7,20 +7,49 @@ This engine provides:
 - Verse picker with exclusion of recent verses
 - Step generation with caching (idempotent)
 - Journey scheduling based on pace preferences
+- Encrypted reflection storage for mental health data
 
 Integrates with:
 - GitaCorpusAdapter for verse access
 - JourneyCoach for KIAAN AI step generation
 - Multi-provider LLM layer
+
+Security:
+- Reflections encrypted at rest using Fernet (AES-256)
+- Race condition protection with SELECT FOR UPDATE
+- Idempotent operations
 """
 
 import datetime
 import logging
+import os
 import uuid
 from typing import Any
 
+# Optional encryption support - graceful fallback if cryptography not available
+# Note: Import is deferred to avoid import-time crashes with broken cryptography library
+Fernet = None
+ENCRYPTION_AVAILABLE = False
+
+
+def _try_import_fernet():
+    """Try to import Fernet, returning None if unavailable."""
+    global Fernet, ENCRYPTION_AVAILABLE
+    try:
+        from cryptography.fernet import Fernet as _Fernet
+        Fernet = _Fernet
+        ENCRYPTION_AVAILABLE = True
+        return _Fernet
+    except Exception:
+        return None
+
+
+# Attempt import (will silently fail if cryptography is unavailable)
+_try_import_fernet()
+
 from sqlalchemy import and_, or_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import with_for_update
 
 from backend.models import (
     JourneyTemplate,
@@ -42,6 +71,108 @@ from backend.services.journey_coach import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# ENCRYPTION HELPER
+# =============================================================================
+
+
+class ReflectionEncryption:
+    """
+    Handles encryption/decryption of user reflections.
+
+    Uses Fernet symmetric encryption (AES-256-CBC with HMAC).
+    Key is stored in environment variable for security.
+    """
+
+    _instance: "ReflectionEncryption | None" = None
+    _fernet: Fernet | None = None
+
+    def __new__(cls) -> "ReflectionEncryption":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialize()
+        return cls._instance
+
+    def _initialize(self) -> None:
+        """Initialize Fernet cipher with key from environment."""
+        if not ENCRYPTION_AVAILABLE:
+            logger.warning(
+                "cryptography library not available - reflections will be stored unencrypted. "
+                "Install cryptography package for production use."
+            )
+            self._fernet = None
+            return
+
+        key = os.environ.get("MINDVIBE_REFLECTION_KEY")
+        if key:
+            try:
+                self._fernet = Fernet(key.encode() if isinstance(key, str) else key)
+                logger.info("ReflectionEncryption initialized with provided key")
+            except Exception as e:
+                logger.error(f"Failed to initialize encryption with provided key: {e}")
+                self._fernet = None
+        else:
+            logger.warning(
+                "MINDVIBE_REFLECTION_KEY not set - reflections will be stored unencrypted. "
+                "Set this environment variable in production!"
+            )
+            self._fernet = None
+
+    def encrypt(self, plaintext: str) -> str:
+        """
+        Encrypt reflection text.
+
+        Returns encrypted string (base64 encoded) or plaintext if encryption unavailable.
+        """
+        if not plaintext:
+            return ""
+        if self._fernet is None:
+            # Return with marker so we know it's not encrypted
+            return f"UNENCRYPTED:{plaintext}"
+        try:
+            encrypted = self._fernet.encrypt(plaintext.encode())
+            return encrypted.decode()
+        except Exception as e:
+            logger.error(f"Encryption failed: {e}")
+            return f"UNENCRYPTED:{plaintext}"
+
+    def decrypt(self, ciphertext: str) -> str:
+        """
+        Decrypt reflection text.
+
+        Returns decrypted string or original if decryption fails.
+        """
+        if not ciphertext:
+            return ""
+        # Handle unencrypted data
+        if ciphertext.startswith("UNENCRYPTED:"):
+            return ciphertext[12:]
+        if self._fernet is None:
+            logger.warning("Attempting to decrypt without encryption key")
+            return ciphertext
+        try:
+            decrypted = self._fernet.decrypt(ciphertext.encode())
+            return decrypted.decode()
+        except Exception as e:
+            logger.error(f"Decryption failed: {e}")
+            return ciphertext
+
+    @property
+    def is_available(self) -> bool:
+        """Check if encryption is available."""
+        return self._fernet is not None
+
+
+def get_reflection_encryption() -> ReflectionEncryption:
+    """Get singleton encryption instance."""
+    return ReflectionEncryption()
+
+
+# =============================================================================
+# JOURNEY SCHEDULER
+# =============================================================================
 
 
 class JourneyScheduler:
@@ -72,6 +203,12 @@ class JourneyScheduler:
             Current day index (1-based)
         """
         now = datetime.datetime.now(datetime.UTC)
+
+        # Ensure started_at has timezone info for correct comparison
+        if started_at.tzinfo is None:
+            # Assume UTC for timezone-naive timestamps from DB
+            started_at = started_at.replace(tzinfo=datetime.UTC)
+
         elapsed = now - started_at
 
         if pace == "daily":
@@ -482,6 +619,10 @@ class TodayAgenda:
         highest_intensity = -1
         priority_step: dict[str, Any] | None = None
 
+        # Collect all verse refs first for bulk fetch (FIX N+1 query)
+        all_verse_refs: list[VerseReference] = []
+        step_states_map: dict[str, tuple[UserJourney, UserJourneyStepState, int]] = {}
+
         for journey in active_journeys:
             pace = journey.personalization.get("pace", "daily") if journey.personalization else "daily"
             current_day = self._scheduler.calculate_day_index(
@@ -495,7 +636,19 @@ class TodayAgenda:
                 day_index=current_day,
             )
 
-            # Build step response
+            step_states_map[journey.id] = (journey, step_state, current_day)
+
+            # Collect verse refs for bulk fetch
+            if include_verse_text and step_state.verse_refs:
+                all_verse_refs.extend(step_state.verse_refs)
+
+        # PERFORMANCE FIX: Single bulk query for all verses across all journeys
+        verse_texts_map: dict[str, dict[str, Any]] = {}
+        if include_verse_text and all_verse_refs:
+            verse_texts_map = await self._adapter.get_verses_bulk(db, all_verse_refs)
+
+        # Build responses using cached verse data
+        for journey_id, (journey, step_state, current_day) in step_states_map.items():
             step_data = {
                 "user_journey_id": journey.id,
                 "journey_title": journey.template.title if journey.template else "Wisdom Journey",
@@ -507,11 +660,12 @@ class TodayAgenda:
                 "verse_refs": step_state.verse_refs,
             }
 
-            # Resolve verse text if requested
+            # Resolve verse texts from bulk-fetched data
             if include_verse_text and step_state.verse_refs:
                 verse_texts: list[dict[str, Any]] = []
                 for ref in step_state.verse_refs:
-                    text = await self._adapter.get_verse_text(db, ref["chapter"], ref["verse"])
+                    cache_key = f"{ref['chapter']}:{ref['verse']}"
+                    text = verse_texts_map.get(cache_key)
                     if text:
                         verse_texts.append({
                             "chapter": ref["chapter"],
@@ -595,6 +749,9 @@ class EnhancedJourneyEngine:
         """
         Start one or more journeys for a user.
 
+        IDEMPOTENCY: If user already has an active journey from the same template,
+        returns the existing journey instead of creating a duplicate.
+
         Args:
             db: Database session
             user_id: User ID
@@ -602,11 +759,33 @@ class EnhancedJourneyEngine:
             personalization: Optional personalization settings
 
         Returns:
-            List of created UserJourney instances
+            List of created/existing UserJourney instances
         """
         journeys: list[UserJourney] = []
 
+        # IDEMPOTENCY FIX: Check for existing active journeys for these templates
+        existing_result = await db.execute(
+            select(UserJourney).where(
+                and_(
+                    UserJourney.user_id == user_id,
+                    UserJourney.journey_template_id.in_(journey_template_ids),
+                    UserJourney.status == UserJourneyStatus.ACTIVE,
+                )
+            )
+        )
+        existing_journeys = {j.journey_template_id: j for j in existing_result.scalars().all()}
+
         for template_id in journey_template_ids:
+            # Check for existing active journey (idempotency)
+            if template_id in existing_journeys:
+                existing = existing_journeys[template_id]
+                logger.info(
+                    f"User {user_id} already has active journey {existing.id} "
+                    f"for template {template_id} - returning existing"
+                )
+                journeys.append(existing)
+                continue
+
             # Verify template exists and is active
             template = await db.get(JourneyTemplate, template_id)
             if not template or not template.is_active:
@@ -652,21 +831,40 @@ class EnhancedJourneyEngine:
         )
         journeys = list(result.scalars().all())
 
-        return [
-            {
+        # Build response with correct progress calculation
+        journey_data = []
+        for j in journeys:
+            total_days = j.template.duration_days if j.template else 14
+
+            # FIX: Calculate progress based on COMPLETED steps, not current day index
+            # This gives accurate progress even if user skips days
+            completed_steps_result = await db.execute(
+                select(func.count(UserJourneyStepState.id))
+                .where(
+                    and_(
+                        UserJourneyStepState.user_journey_id == j.id,
+                        UserJourneyStepState.completed_at.isnot(None),
+                    )
+                )
+            )
+            completed_steps = completed_steps_result.scalar() or 0
+            progress_percentage = int((completed_steps / total_days) * 100) if total_days > 0 else 0
+
+            journey_data.append({
                 "id": j.id,
                 "template_id": j.journey_template_id,
                 "template_title": j.template.title if j.template else "Journey",
                 "template_slug": j.template.slug if j.template else None,
                 "status": j.status.value,
                 "current_day_index": j.current_day_index,
-                "total_days": j.template.duration_days if j.template else 14,
-                "progress_percentage": int((j.current_day_index / (j.template.duration_days if j.template else 14)) * 100),
+                "total_days": total_days,
+                "progress_percentage": min(progress_percentage, 100),  # Cap at 100%
+                "completed_steps": completed_steps,
                 "started_at": j.started_at.isoformat(),
                 "personalization": j.personalization,
-            }
-            for j in journeys
-        ]
+            })
+
+        return journey_data
 
     async def get_today_steps(
         self,
@@ -734,6 +932,9 @@ class EnhancedJourneyEngine:
         """
         Mark a step as complete with check-in and reflection.
 
+        Uses SELECT FOR UPDATE to prevent race conditions when two
+        requests try to complete the same step simultaneously.
+
         Args:
             db: Database session
             user_journey_id: Journey ID
@@ -743,25 +944,47 @@ class EnhancedJourneyEngine:
 
         Returns:
             Updated step state
+
+        Raises:
+            ValueError: If journey or step not found, or step already completed
         """
-        # Get journey
-        journey = await db.get(UserJourney, user_journey_id)
+        # Get journey with FOR UPDATE lock to prevent race conditions
+        result = await db.execute(
+            select(UserJourney)
+            .where(UserJourney.id == user_journey_id)
+            .with_for_update()
+        )
+        journey = result.scalar_one_or_none()
         if not journey:
             raise ValueError(f"Journey {user_journey_id} not found")
 
-        # Get or create step state
+        # Get step state with FOR UPDATE lock
         result = await db.execute(
-            select(UserJourneyStepState).where(
+            select(UserJourneyStepState)
+            .where(
                 and_(
                     UserJourneyStepState.user_journey_id == user_journey_id,
                     UserJourneyStepState.day_index == day_index,
                 )
             )
+            .with_for_update()
         )
         step_state = result.scalar_one_or_none()
 
         if not step_state:
             raise ValueError(f"Step {day_index} not found for journey {user_journey_id}")
+
+        # Check if already completed (idempotency check)
+        if step_state.completed_at is not None:
+            logger.info(f"Step {day_index} already completed for journey {user_journey_id}")
+            return {
+                "step_state_id": step_state.id,
+                "day_index": day_index,
+                "completed": True,
+                "check_in": step_state.check_in,
+                "journey_completed": journey.status == UserJourneyStatus.COMPLETED,
+                "already_completed": True,
+            }
 
         # Update step state
         step_state.completed_at = datetime.datetime.now(datetime.UTC)
@@ -773,10 +996,13 @@ class EnhancedJourneyEngine:
             }
 
         if reflection_response:
-            # Store encrypted reflection reference
-            # In production, this would link to the journal encryption system
+            # SECURITY FIX: Encrypt reflection before storing
+            encryption = get_reflection_encryption()
+            encrypted_content = encryption.encrypt(reflection_response)
+
             step_state.reflection_encrypted = {
-                "content": reflection_response,  # Should be encrypted
+                "content": encrypted_content,
+                "encrypted": encryption.is_available,
                 "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             }
 

@@ -229,24 +229,114 @@ class GitaCorpusAdapter:
         self,
         db: AsyncSession,
         refs: list[VerseReference],
-    ) -> list[tuple[VerseReference, VerseText | None]]:
+    ) -> dict[str, VerseText]:
         """
-        Get multiple verses in bulk.
+        Get multiple verses in a single bulk query.
+
+        PERFORMANCE FIX: Uses a single SQL query with OR conditions
+        instead of N individual queries (N+1 problem).
 
         Args:
             db: Database session
             refs: List of verse references
 
         Returns:
-            List of (reference, verse_text) tuples
+            Dict mapping "chapter:verse" keys to VerseText values
         """
-        results: list[tuple[VerseReference, VerseText | None]] = []
+        if not refs:
+            return {}
 
+        results: dict[str, VerseText] = {}
+
+        # First check cache for all refs
+        uncached_refs: list[VerseReference] = []
         for ref in refs:
-            verse_text = await self.get_verse_text(db, ref["chapter"], ref["verse"])
-            results.append((ref, verse_text))
+            cache_key = self._make_cache_key(ref["chapter"], ref["verse"])
+            if cache_key in self._cache:
+                results[cache_key] = self._cache[cache_key]
+            else:
+                uncached_refs.append(ref)
 
-        return results
+        if not uncached_refs:
+            return results
+
+        try:
+            # Build OR conditions for bulk query
+            conditions = [
+                and_(
+                    GitaVerse.chapter == ref["chapter"],
+                    GitaVerse.verse == ref["verse"],
+                )
+                for ref in uncached_refs
+            ]
+
+            # Single bulk query for all uncached verses
+            result = await db.execute(
+                select(GitaVerse).where(or_(*conditions))
+            )
+            verse_rows = list(result.scalars().all())
+
+            # Process fetched verses
+            found_keys: set[str] = set()
+            for verse_row in verse_rows:
+                cache_key = self._make_cache_key(verse_row.chapter, verse_row.verse)
+                verse_text: VerseText = {
+                    "sanskrit": getattr(verse_row, "sanskrit", None),
+                    "transliteration": getattr(verse_row, "transliteration", None),
+                    "translation": verse_row.english or "",
+                    "hindi": getattr(verse_row, "hindi", None),
+                    "reflection": getattr(verse_row, "principle", None),
+                    "themes": [verse_row.theme] if verse_row.theme else [],
+                    "keywords": getattr(verse_row, "mental_health_applications", []) or [],
+                }
+                self._cache[cache_key] = verse_text
+                results[cache_key] = verse_text
+                found_keys.add(cache_key)
+
+            # For any still not found, try WisdomVerse as fallback
+            still_missing = [
+                ref for ref in uncached_refs
+                if self._make_cache_key(ref["chapter"], ref["verse"]) not in found_keys
+            ]
+
+            if still_missing:
+                wisdom_conditions = [
+                    and_(
+                        WisdomVerse.chapter == ref["chapter"],
+                        WisdomVerse.verse_number == ref["verse"],
+                    )
+                    for ref in still_missing
+                ]
+
+                wisdom_result = await db.execute(
+                    select(WisdomVerse).where(or_(*wisdom_conditions))
+                )
+
+                for wisdom_row in wisdom_result.scalars().all():
+                    cache_key = self._make_cache_key(wisdom_row.chapter, wisdom_row.verse_number)
+                    verse_text = {
+                        "sanskrit": getattr(wisdom_row, "sanskrit", None),
+                        "transliteration": None,
+                        "translation": wisdom_row.english or "",
+                        "hindi": wisdom_row.hindi,
+                        "reflection": None,
+                        "themes": [],
+                        "keywords": [],
+                    }
+                    self._cache[cache_key] = verse_text
+                    results[cache_key] = verse_text
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Error in bulk verse fetch: {e}")
+            # Fall back to individual fetches on error
+            for ref in uncached_refs:
+                verse_text = await self.get_verse_text(db, ref["chapter"], ref["verse"])
+                if verse_text:
+                    cache_key = self._make_cache_key(ref["chapter"], ref["verse"])
+                    results[cache_key] = verse_text
+            return results
 
     async def search_by_tags(
         self,
