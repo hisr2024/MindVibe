@@ -71,9 +71,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           response: data.response || data.message,
+          summary: data.summary || null,  // AI-generated summary for Quick View
           verse: data.verse,
+          verses_used: data.verses_used,
           emotion: data.detected_emotion || data.emotion,
           gita_wisdom: true,
+          gita_powered: data.gita_powered || true,
         })
       }
 
