@@ -198,7 +198,7 @@ export default function OnboardingStepPage() {
 
   const handleStartChat = () => {
     handleComplete()
-    router.push('/#kiaan-chat')
+    router.push('/kiaan/chat')
   }
 
   const handleGoToDashboard = () => {

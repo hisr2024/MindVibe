@@ -159,7 +159,7 @@ Tone: short, clear sentences; calm; secular; never shaming.`
                   {loading ? <span>Balancing guidance...</span> : <span>Guide me with Relationship Compass</span>}
                 </button>
                 <Link
-                  href="/#kiaan-chat"
+                  href="/kiaan/chat"
                   className="px-5 py-3 rounded-2xl bg-white/5 border border-orange-500/30 text-orange-50 text-sm font-semibold hover:border-orange-300/50 transition"
                 >
                   Send context to KIAAN
