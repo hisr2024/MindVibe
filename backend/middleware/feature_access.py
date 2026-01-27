@@ -145,30 +145,38 @@ async def get_current_user_id(request: Request) -> str:
 
 
 class SubscriptionRequired:
-    """Dependency that ensures user has an active subscription."""
-    
+    """Dependency that ensures user has an active subscription.
+
+    Developers bypass subscription requirements.
+    """
+
     async def __call__(
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
     ) -> str:
         """Check that user has an active subscription.
-        
+
         Args:
             request: The FastAPI request.
             db: Database session.
-            
+
         Returns:
             str: The user ID.
-            
+
         Raises:
             HTTPException: If user doesn't have an active subscription.
         """
         user_id = await get_current_user_id(request)
-        
+
+        # Check for developer bypass - no subscription required
+        if await is_developer(db, user_id):
+            logger.info(f"Developer bypass: skipping subscription check for {user_id}")
+            return user_id
+
         # Get or create subscription (auto-assign free tier)
         subscription = await get_or_create_free_subscription(db, user_id)
-        
+
         if subscription.status not in (SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING):
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
@@ -206,13 +214,18 @@ class KiaanQuotaRequired:
             HTTPException: If user has exceeded their quota.
         """
         user_id = await get_current_user_id(request)
-        
+
         # Ensure user has a subscription
         await get_or_create_free_subscription(db, user_id)
-        
+
+        # Check for developer bypass - gives unlimited KIAAN questions
+        if await is_developer(db, user_id):
+            logger.info(f"Developer bypass: granting unlimited KIAAN quota to {user_id}")
+            return user_id, 0, -1  # -1 means unlimited
+
         # Check quota
         has_quota, usage_count, usage_limit = await check_kiaan_quota(db, user_id)
-        
+
         if not has_quota:
             tier = await get_user_tier(db, user_id)
             raise HTTPException(
@@ -233,35 +246,41 @@ class KiaanQuotaRequired:
 
 class JournalAccessRequired:
     """Dependency that ensures user has journal access.
-    
+
     Encrypted journal is only available to paid subscribers.
+    Developers get free access.
     """
-    
+
     async def __call__(
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
     ) -> str:
         """Check that user has journal access.
-        
+
         Args:
             request: The FastAPI request.
             db: Database session.
-            
+
         Returns:
             str: The user ID.
-            
+
         Raises:
             HTTPException: If user doesn't have journal access.
         """
         user_id = await get_current_user_id(request)
-        
+
         # Ensure user has a subscription
         await get_or_create_free_subscription(db, user_id)
-        
+
+        # Check for developer bypass - gives full journal access
+        if await is_developer(db, user_id):
+            logger.info(f"Developer bypass: granting journal access to {user_id}")
+            return user_id
+
         # Check journal access
         has_access = await check_journal_access(db, user_id)
-        
+
         if not has_access:
             tier = await get_user_tier(db, user_id)
             raise HTTPException(
@@ -371,7 +390,10 @@ class WisdomJourneysAccessRequired:
 
 
 class FeatureRequired:
-    """Generic dependency for checking feature access."""
+    """Generic dependency for checking feature access.
+
+    Developers get access to all features.
+    """
 
     def __init__(self, feature_name: str):
         """Initialize with the feature name to check.
@@ -380,32 +402,37 @@ class FeatureRequired:
             feature_name: The name of the feature to check access for.
         """
         self.feature_name = feature_name
-    
+
     async def __call__(
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
     ) -> str:
         """Check that user has access to the specified feature.
-        
+
         Args:
             request: The FastAPI request.
             db: Database session.
-            
+
         Returns:
             str: The user ID.
-            
+
         Raises:
             HTTPException: If user doesn't have access to the feature.
         """
         user_id = await get_current_user_id(request)
-        
+
         # Ensure user has a subscription
         await get_or_create_free_subscription(db, user_id)
-        
+
+        # Check for developer bypass - gives access to all features
+        if await is_developer(db, user_id):
+            logger.info(f"Developer bypass: granting access to {self.feature_name} for {user_id}")
+            return user_id
+
         # Check feature access
         has_access = await check_feature_access(db, user_id, self.feature_name)
-        
+
         if not has_access:
             tier = await get_user_tier(db, user_id)
             raise HTTPException(
