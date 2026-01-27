@@ -24,7 +24,36 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 
 class BoundedConversationStore:
-    """Memory-safe conversation storage with LRU eviction and TTL."""
+    """Memory-safe conversation storage with LRU eviction and TTL.
+
+    Architecture Decision: In-Memory Session Storage
+    ------------------------------------------------
+    This store is intentionally in-memory (not persisted to database/Redis) because:
+
+    1. Stateless Scaling: Allows horizontal scaling without session affinity
+    2. Privacy: Conversation history is ephemeral, not stored permanently
+    3. Performance: No database round-trips for conversation context
+    4. Simplicity: No external dependencies for basic chat functionality
+
+    Trade-offs:
+    - Session data is lost on server restart
+    - Users lose context if routed to different server instances
+    - Not suitable for conversation analytics (use audit logs instead)
+
+    Future Enhancement:
+    For production environments needing persistence, implement a Redis-backed
+    store by subclassing this and overriding get/append methods:
+
+        class RedisConversationStore(BoundedConversationStore):
+            def __init__(self, redis_url: str):
+                self.redis = Redis.from_url(redis_url)
+            def get(self, session_id: str) -> list[dict]:
+                return json.loads(self.redis.get(f"chat:{session_id}") or "[]")
+            # etc.
+
+    The current in-memory implementation is appropriate for MindVibe's mental
+    health context where users typically have short, self-contained sessions.
+    """
 
     # Memory limits
     MAX_SESSIONS = 10000  # Maximum concurrent sessions

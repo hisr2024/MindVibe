@@ -70,6 +70,10 @@ class AuditEventType(str, Enum):
     MODEL_SWITCH = "model_switch"
     MEMORY_CLEANUP = "memory_cleanup"
 
+    # Crisis Events (Mental Health Compliance)
+    CRISIS_DETECTED = "crisis_detected"
+    CRISIS_RESPONSE_SENT = "crisis_response_sent"
+
 
 class AuditSeverity(str, Enum):
     """Severity levels for audit events."""
@@ -482,6 +486,57 @@ class KIAANAuditLogger:
                 "context": context
             }
         )
+
+    async def log_crisis_event(
+        self,
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        triggered_keywords: Optional[list[str]] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None
+    ) -> str:
+        """
+        Log a crisis detection event for compliance and safety monitoring.
+
+        This is a critical compliance requirement for mental health applications.
+        All crisis events must be logged for:
+        - Regulatory compliance (HIPAA, SOC2)
+        - Safety monitoring and follow-up
+        - Service quality assurance
+        - Legal documentation
+
+        Note: User message content is NOT logged to protect privacy.
+        Only the fact that crisis keywords were detected is recorded.
+        """
+        event_id = await self.log(
+            event_type=AuditEventType.CRISIS_DETECTED,
+            message="Crisis keywords detected - escalation response provided",
+            severity=AuditSeverity.CRITICAL,
+            user_id=user_id,
+            session_id=session_id,
+            details={
+                "triggered_keywords_count": len(triggered_keywords) if triggered_keywords else 0,
+                "response_type": "immediate_escalation",
+                "resources_provided": ["988_suicide_lifeline", "crisis_text_line", "findahelpline"]
+            },
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+
+        # Also log the response was sent
+        await self.log(
+            event_type=AuditEventType.CRISIS_RESPONSE_SENT,
+            message="Crisis escalation resources sent to user",
+            severity=AuditSeverity.INFO,
+            user_id=user_id,
+            session_id=session_id,
+            details={
+                "parent_event_id": event_id,
+                "resources_included": True
+            }
+        )
+
+        return event_id
 
     # Query methods
 

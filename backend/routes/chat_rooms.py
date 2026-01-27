@@ -243,7 +243,41 @@ async def recent_messages(
 
 @router.websocket("/{room_id}/ws")
 async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
-    token = websocket.query_params.get("token")
+    """WebSocket endpoint for real-time chat.
+
+    Security Note: Token authentication supports two methods:
+    1. Sec-WebSocket-Protocol header (PREFERRED) - Token not logged
+    2. Query parameter (DEPRECATED) - Token may appear in server logs
+
+    Clients should migrate to header-based auth by sending token via
+    Sec-WebSocket-Protocol: "access_token, <token_value>"
+    """
+    import logging
+    ws_logger = logging.getLogger(__name__)
+
+    token: str | None = None
+    auth_method = "unknown"
+
+    # PREFERRED: Try to get token from Sec-WebSocket-Protocol header first
+    # Format: "access_token, <actual_token>"
+    protocols = websocket.headers.get("sec-websocket-protocol", "")
+    if protocols and "access_token" in protocols:
+        # Parse protocol header: "access_token, eyJhbG..."
+        parts = [p.strip() for p in protocols.split(",")]
+        if len(parts) >= 2 and parts[0] == "access_token":
+            token = parts[1]
+            auth_method = "header"
+
+    # DEPRECATED FALLBACK: Query parameter (logs security warning)
+    if not token:
+        token = websocket.query_params.get("token")
+        if token:
+            auth_method = "query_param"
+            ws_logger.warning(
+                "WebSocket auth via query param (DEPRECATED) - token may be logged. "
+                "Migrate to Sec-WebSocket-Protocol header for security."
+            )
+
     if not token:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
@@ -251,6 +285,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
     try:
         payload = decode_access_token(token)
         user_id = payload.get("sub")
+        ws_logger.debug(f"WebSocket auth success via {auth_method}")
     except Exception:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return

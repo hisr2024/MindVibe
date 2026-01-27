@@ -128,15 +128,70 @@ class KIAAN:
             self.ready = False
             self.client = None
 
+        # Import audit logger for crisis event tracking
+        try:
+            from backend.services.kiaan_audit import kiaan_audit
+            self.audit_logger = kiaan_audit
+        except ImportError:
+            self.audit_logger = None
+            logger.warning("Audit logger not available for crisis event tracking")
+
     def is_crisis(self, message: str) -> bool:
+        """Check if message contains crisis keywords."""
         return any(word in message.lower() for word in self.crisis_keywords)
+
+    def get_triggered_crisis_keywords(self, message: str) -> list[str]:
+        """Return list of crisis keywords found in message (for audit logging)."""
+        message_lower = message.lower()
+        return [kw for kw in self.crisis_keywords if kw in message_lower]
 
     def get_crisis_response(self) -> str:
         return "🆘 Please reach out for help RIGHT NOW\n\n📞 988 - Suicide & Crisis Lifeline (24/7)\n💬 Crisis Text: Text HOME to 741741\n🌍 findahelpline.com\n\nYou matter. Help is real. 💙"
 
-    async def generate_response_with_gita(self, user_message: str, db: AsyncSession, language: str | None = None) -> str:
+    async def log_crisis_detection(
+        self,
+        message: str,
+        user_id: str | None = None,
+        session_id: str | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None
+    ) -> None:
+        """Log crisis detection event for compliance and safety monitoring."""
+        if self.audit_logger:
+            try:
+                triggered = self.get_triggered_crisis_keywords(message)
+                await self.audit_logger.log_crisis_event(
+                    user_id=user_id,
+                    session_id=session_id,
+                    triggered_keywords=triggered,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
+                logger.info("Crisis event logged for compliance tracking")
+            except Exception as e:
+                # Never fail the response due to audit logging issues
+                logger.error(f"Failed to log crisis event: {e}")
+
+    async def generate_response_with_gita(
+        self,
+        user_message: str,
+        db: AsyncSession,
+        language: str | None = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None
+    ) -> str:
         try:
             if self.is_crisis(user_message):
+                # Log crisis event for compliance (async, non-blocking)
+                await self.log_crisis_detection(
+                    message=user_message,
+                    user_id=user_id,
+                    session_id=session_id,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
                 return self.get_crisis_response()
 
             if not self.ready or not self.client:
@@ -426,6 +481,19 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
             # Check for crisis keywords
             crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
             if any(word in message.lower() for word in crisis_keywords):
+                # Log crisis event for compliance (non-blocking)
+                try:
+                    from backend.services.kiaan_audit import kiaan_audit
+                    triggered = [kw for kw in crisis_keywords if kw in message.lower()]
+                    await kiaan_audit.log_crisis_event(
+                        user_id=None,  # Streaming endpoint doesn't track user
+                        session_id=request.headers.get('X-Session-ID'),
+                        triggered_keywords=triggered,
+                        ip_address=request.client.host if request.client else None,
+                        user_agent=request.headers.get('User-Agent')
+                    )
+                except Exception as audit_error:
+                    logger.warning(f"Failed to log crisis event in stream: {audit_error}")
                 yield f"data: 🆘 Please reach out for help RIGHT NOW\\n\\n📞 988 - Suicide & Crisis Lifeline (24/7)\\n💬 Crisis Text: Text HOME to 741741\\n🌍 findahelpline.com\\n\\nYou matter. Help is real. 💙\n\n"
                 yield "data: [DONE]\n\n"
                 return
