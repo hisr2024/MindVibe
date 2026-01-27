@@ -221,15 +221,19 @@ Return ONLY the JSON plan, no other text."""
     def __init__(self):
         """Initialize the orchestrator."""
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        self.client = OpenAI(api_key=api_key, timeout=30.0) if api_key else None
-        self.async_client = AsyncOpenAI(api_key=api_key, timeout=30.0) if api_key else None
+
+        # Configurable timeout (default 30 seconds)
+        timeout = float(os.getenv("KIAAN_OPENAI_TIMEOUT", "30.0"))
+
+        self.client = OpenAI(api_key=api_key, timeout=timeout) if api_key else None
+        self.async_client = AsyncOpenAI(api_key=api_key, timeout=timeout) if api_key else None
         self.ready = bool(api_key)
         self.tool_schemas = get_all_tool_schemas()
 
-        # Model configuration
-        self.planning_model = "gpt-4o"  # Use GPT-4o for planning
-        self.execution_model = "gpt-4o-mini"  # Use mini for execution
-        self.synthesis_model = "gpt-4o"  # Use GPT-4o for final synthesis
+        # Model configuration - configurable via environment variables
+        self.planning_model = os.getenv("KIAAN_PLANNING_MODEL", "gpt-4o")
+        self.execution_model = os.getenv("KIAAN_EXECUTION_MODEL", "gpt-4o-mini")
+        self.synthesis_model = os.getenv("KIAAN_SYNTHESIS_MODEL", "gpt-4o")
 
     async def process_query(
         self,
