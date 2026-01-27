@@ -9,6 +9,8 @@
  * - Offline-capable AI responses
  * - Neural text-to-speech
  * - Beautiful animated visualizations
+ * - Context memory across sessions
+ * - Guided meditation mode
  *
  * Best-in-class voice experience for Gita wisdom.
  */
@@ -27,6 +29,132 @@ import {
   runMicrophoneDiagnostics as runDiagnostics,
   detectPlatform
 } from '@/utils/microphone/UniversalMicrophoneAccess'
+
+// Context Memory & Meditation imports
+import {
+  contextMemory,
+  recordKiaanConversation,
+  getPersonalizedKiaanGreeting,
+  getKiaanContextForResponse,
+  getEmotionalSummary
+} from '@/utils/voice/contextMemory'
+import {
+  generateMeditationSession,
+  getMeditationTypes,
+  getMeditationDurations,
+  type MeditationType,
+  type MeditationDuration,
+  type MeditationSession,
+  type MeditationStep
+} from '@/utils/voice/meditationGuide'
+
+// Daily Rituals imports
+import {
+  generateMorningRitual,
+  generateEveningRitual,
+  getTimeAppropriateRitual,
+  recordRitualCompletion,
+  getRitualStreak,
+  type DailyRitual,
+  type RitualDuration
+} from '@/utils/voice/dailyRituals'
+
+// Crisis Detection imports
+import {
+  detectCrisis,
+  formatHelplinesForSpeech,
+  getCrisisWisdomResponse,
+  getGroundingTechnique,
+  needsCrisisPriority,
+  type CrisisAssessment
+} from '@/utils/voice/crisisDetection'
+
+// Advanced Features imports
+import {
+  getProactiveCheckIn,
+  getEmotionAdaptiveVoice,
+  getEmotionalIntro,
+  getMantras,
+  getMantraByPurpose,
+  generateSleepStory,
+  generateAffirmations,
+  getAffirmationWithWisdom,
+  playBellSound,
+  playOmSound,
+  getAmbienceOptions,
+  type Mantra,
+  type SleepStory,
+  type AmbienceType
+} from '@/utils/voice/kiaanAdvancedFeatures'
+
+// Sanskrit Pronunciation imports
+import {
+  getVersePronunciation,
+  getAvailableVerses,
+  generatePronunciationLesson,
+  savePronunciationProgress,
+  type VersePronunciation
+} from '@/utils/voice/sanskritPronunciation'
+
+// Verse Memorization imports
+import {
+  getMemorizationSession,
+  getAllMemorizationVerses,
+  getMemorizationVerse,
+  startLearningVerse,
+  recordReview,
+  generateMemorizationPractice,
+  getMemorizationStats,
+  type MemorizationCard,
+  type RecallQuality
+} from '@/utils/voice/verseMemorization'
+
+// Binaural Beats imports
+import {
+  startBinauralSession,
+  stopBinauralBeat,
+  getBinauralPresets,
+  getBinauralPreset,
+  getRecommendedPreset,
+  getCurrentSession,
+  isBinauralPlaying,
+  getBinauralIntroSpeech,
+  getHeadphoneReminder,
+  cleanupAudio as cleanupBinauralAudio,
+  type BinauralPreset
+} from '@/utils/voice/binauralBeats'
+
+// Spiritual Features imports
+import {
+  getAvailablePractices,
+  logPractice,
+  getAccountabilityStats,
+  getAccountabilityReminder,
+  getPersona,
+  getAllPersonas,
+  getPersonaResponse,
+  getPersonaGreeting,
+  getPersonaClosing,
+  checkMilestones,
+  getAchievedMilestones,
+  getCelebrationSpeech,
+  getDharmaQuestions,
+  analyzeDharmaPath,
+  getDharmaGuidance,
+  analyzeKarma,
+  getGunaQuestions,
+  calculateGunaProfile,
+  getGunaAdvice,
+  saveGunaAssessment,
+  type VoicePersona,
+  type Milestone,
+  type GunaProfile,
+  type KarmaAnalysis,
+  type DharmaProfile
+} from '@/utils/voice/spiritualFeatures'
+
+// Emotional Visualization Component
+import EmotionalVisualization from '@/components/voice/EmotionalVisualization'
 
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
@@ -64,6 +192,91 @@ export default function EliteVoicePage() {
   const [isMuted, setIsMuted] = useState(false)
   const [lastResponse, setLastResponse] = useState('')
   const [showHelpPanel, setShowHelpPanel] = useState(false)
+
+  // Conversation mode - true divine dialogue experience
+  const [conversationMode, setConversationMode] = useState(false)
+  const conversationPauseRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Meditation mode - guided meditation with KIAAN
+  const [meditationMode, setMeditationMode] = useState(false)
+  const [showMeditationPicker, setShowMeditationPicker] = useState(false)
+  const [currentMeditation, setCurrentMeditation] = useState<MeditationSession | null>(null)
+  const [meditationStep, setMeditationStep] = useState(0)
+  const [meditationPaused, setMeditationPaused] = useState(false)
+  const meditationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Context memory state
+  const [memoryInitialized, setMemoryInitialized] = useState(false)
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false)
+
+  // Daily Rituals state
+  const [showRitualPicker, setShowRitualPicker] = useState(false)
+  const [currentRitual, setCurrentRitual] = useState<DailyRitual | null>(null)
+  const [ritualStep, setRitualStep] = useState(0)
+  const ritualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Crisis detection state
+  const [showCrisisSupport, setShowCrisisSupport] = useState(false)
+  const [currentCrisis, setCurrentCrisis] = useState<CrisisAssessment | null>(null)
+
+  // Advanced features state
+  const [showMantraPicker, setShowMantraPicker] = useState(false)
+  const [currentMantra, setCurrentMantra] = useState<Mantra | null>(null)
+  const [mantraCount, setMantraCount] = useState(0)
+  const [sleepStoryMode, setSleepStoryMode] = useState(false)
+  const [currentSleepStory, setCurrentSleepStory] = useState<SleepStory | null>(null)
+  const [sleepStorySegment, setSleepStorySegment] = useState(0)
+  const [showAffirmation, setShowAffirmation] = useState(false)
+  const [currentAffirmations, setCurrentAffirmations] = useState<string[]>([])
+  const [detectedEmotion, setDetectedEmotion] = useState<string>('neutral')
+
+  // Audio context for ambience
+  const audioContextRef = useRef<AudioContext | null>(null)
+
+  // Sanskrit Pronunciation state
+  const [showPronunciationPicker, setShowPronunciationPicker] = useState(false)
+  const [currentPronunciation, setCurrentPronunciation] = useState<VersePronunciation | null>(null)
+  const [pronunciationStep, setPronunciationStep] = useState(0)
+
+  // Verse Memorization state
+  const [showMemorizationPicker, setShowMemorizationPicker] = useState(false)
+  const [currentMemorizationVerse, setCurrentMemorizationVerse] = useState<MemorizationCard | null>(null)
+  const [memorizationReviewMode, setMemorizationReviewMode] = useState(false)
+
+  // Binaural Beats state
+  const [showBinauralPicker, setShowBinauralPicker] = useState(false)
+  const [activeBinauralPreset, setActiveBinauralPreset] = useState<BinauralPreset | null>(null)
+  const [binauralPlaying, setBinauralPlaying] = useState(false)
+
+  // Voice Persona state
+  const [showPersonaPicker, setShowPersonaPicker] = useState(false)
+  const [currentPersona, setCurrentPersona] = useState<VoicePersona>('krishna')
+
+  // Celebration state
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [currentMilestone, setCurrentMilestone] = useState<Milestone | null>(null)
+
+  // Dharma Discovery state
+  const [showDharmaDiscovery, setShowDharmaDiscovery] = useState(false)
+  const [dharmaQuestionIndex, setDharmaQuestionIndex] = useState(0)
+  const [dharmaAnswers, setDharmaAnswers] = useState<Record<string, string>>({})
+  const [dharmaProfile, setDharmaProfile] = useState<DharmaProfile | null>(null)
+
+  // Karma Analysis state
+  const [showKarmaAnalysis, setShowKarmaAnalysis] = useState(false)
+  const [karmaResult, setKarmaResult] = useState<KarmaAnalysis | null>(null)
+
+  // Guna Assessment state
+  const [showGunaAssessment, setShowGunaAssessment] = useState(false)
+  const [gunaQuestionIndex, setGunaQuestionIndex] = useState(0)
+  const [gunaAnswers, setGunaAnswers] = useState<Record<string, 'sattva' | 'rajas' | 'tamas'>>({})
+  const [gunaProfile, setGunaProfile] = useState<GunaProfile | null>(null)
+
+  // Emotional Visualization state
+  const [showEmotionalJourney, setShowEmotionalJourney] = useState(false)
+
+  // Accountability state
+  const [showAccountability, setShowAccountability] = useState(false)
 
   // Browser diagnostics
   const [browserInfo, setBrowserInfo] = useState<{
@@ -563,6 +776,12 @@ export default function EliteVoicePage() {
       synthesisRef.current = window.speechSynthesis
     }
 
+    // Initialize context memory
+    contextMemory.initialize().then(() => {
+      setMemoryInitialized(true)
+      console.log('[KIAAN Voice] Context memory initialized')
+    })
+
     // Gather browser diagnostics
     setBrowserInfo({
       name: getBrowserName(),
@@ -609,6 +828,18 @@ export default function EliteVoicePage() {
       if (selfHealingTimerRef.current) {
         clearTimeout(selfHealingTimerRef.current)
         selfHealingTimerRef.current = null
+      }
+
+      // Cancel conversation pause timer
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+
+      // Cancel meditation timer
+      if (meditationTimerRef.current) {
+        clearTimeout(meditationTimerRef.current)
+        meditationTimerRef.current = null
       }
     }
   }, [])
@@ -741,6 +972,35 @@ export default function EliteVoicePage() {
 
       case 'goodbye':
         playOmChime()
+
+        // End conversation mode if active
+        if (conversationMode) {
+          // Cancel conversation pause timer
+          if (conversationPauseRef.current) {
+            clearTimeout(conversationPauseRef.current)
+            conversationPauseRef.current = null
+          }
+
+          const farewells = [
+            "Namaste, dear one. May the wisdom of the Gita guide your path. Until we speak again, may peace be with you.",
+            "Go in peace, beloved seeker. Remember, the divine light within you never dims. I am always here when you need guidance.",
+            "Our dialogue ends for now, but the wisdom you carry remains eternal. May Krishna's blessings be upon you. Namaste.",
+            "Thank you for this sacred conversation. May you walk your path with clarity and peace. Until next time, Om Shanti."
+          ]
+          const farewell = farewells[Math.floor(Math.random() * farewells.length)]
+
+          // Create a local copy of conversationMode state
+          const wasInConversationMode = true
+
+          speakResponse(farewell).then(() => {
+            if (wasInConversationMode) {
+              setConversationMode(false)
+            }
+          })
+
+          return true
+        }
+
         speakResponse('Goodbye! Take care, and may peace be with you. Namaste.')
         setTimeout(() => {
           setWakeWordEnabled(false)
@@ -822,6 +1082,48 @@ export default function EliteVoicePage() {
     }
     setMessages(prev => [...prev, userMessage])
 
+    // CRISIS DETECTION - Priority check for user safety
+    const crisisAssessment = detectCrisis(query)
+    if (crisisAssessment.detected) {
+      console.log('[KIAAN Voice] Crisis detected:', crisisAssessment.level)
+      setCurrentCrisis(crisisAssessment)
+
+      // For critical/high severity, show helplines immediately
+      if (['critical', 'high'].includes(crisisAssessment.level)) {
+        setShowCrisisSupport(true)
+      }
+
+      // Get crisis response with Gita wisdom
+      const crisisResponse = crisisAssessment.response + ' ' + getCrisisWisdomResponse(crisisAssessment.level)
+
+      // Add assistant message
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: crisisResponse,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, assistantMessage])
+
+      // Speak with extra gentle voice
+      const gentleVoice = getEmotionAdaptiveVoice('sadness')
+      await speakResponseWithEmotion(crisisResponse, gentleVoice.settings)
+
+      // Add helpline info for high severity
+      if (crisisAssessment.shouldShowHelpline) {
+        const helplineText = formatHelplinesForSpeech(crisisAssessment.helplines)
+        await speakResponseWithEmotion(helplineText, gentleVoice.settings)
+      }
+
+      // Record in memory
+      if (memoryInitialized) {
+        await recordKiaanConversation(query, crisisResponse)
+      }
+
+      restartWakeWordIfNeeded()
+      return
+    }
+
     // Start thinking
     setState('thinking')
     setTranscript('')
@@ -870,6 +1172,15 @@ export default function EliteVoicePage() {
 
       // Speak response
       await speakResponse(responseText)
+
+      // Record conversation in context memory
+      if (memoryInitialized) {
+        try {
+          await recordKiaanConversation(query, responseText)
+        } catch (memErr) {
+          console.warn('[KIAAN Voice] Failed to record conversation:', memErr)
+        }
+      }
 
     } catch (err) {
       console.error('Query error:', err)
@@ -940,7 +1251,19 @@ export default function EliteVoicePage() {
         timestamp: new Date()
       }
       setMessages(prev => [...prev, assistantMessage])
-      setState(wakeWordEnabled ? 'wakeword' : 'idle')
+
+      // In conversation mode, continue listening even when muted
+      if (conversationMode) {
+        conversationPauseRef.current = setTimeout(() => {
+          releaseWarmUpStream()
+          setState('listening')
+          resetTranscript()
+          startListening()
+          playSound('listening')
+        }, 500)
+      } else {
+        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+      }
       return
     }
 
@@ -979,11 +1302,29 @@ export default function EliteVoicePage() {
       utterance.onend = () => {
         setResponse('')
 
-        // Auto-resume in hands-free mode
+        // CONVERSATION MODE: True divine dialogue - auto-continue the conversation
+        if (conversationMode) {
+          console.log('[KIAAN Voice] Conversation mode: KIAAN finished speaking, continuing divine dialogue...')
+
+          // Brief sacred pause before listening again (like natural conversation rhythm)
+          conversationPauseRef.current = setTimeout(async () => {
+            // Release warm-up stream before SpeechRecognition
+            releaseWarmUpStream()
+
+            setState('listening')
+            resetTranscript()
+
+            console.log('[KIAAN Voice] Listening for your next words...')
+            startListening()
+            playSound('listening')
+          }, 800) // Sacred pause - gives user time to think
+
+          resolve()
+          return
+        }
+
+        // Wake word mode: Return to listening for wake word
         if (wakeWordEnabled) {
-          // After speaking, restart wake word detection (not direct listening)
-          // This gives user time to respond naturally with "Hey KIAAN" again
-          // or they can tap to speak manually
           console.log('[KIAAN Voice] Speech ended, resuming wake word detection...')
           setState('wakeword')
 
@@ -1002,7 +1343,16 @@ export default function EliteVoicePage() {
       }
 
       utterance.onerror = () => {
-        setState(wakeWordEnabled ? 'wakeword' : 'idle')
+        // Handle error gracefully based on current mode
+        if (conversationMode) {
+          // In conversation mode, try to continue by listening
+          setState('listening')
+          setTimeout(() => startListening(), 500)
+        } else if (wakeWordEnabled) {
+          setState('wakeword')
+        } else {
+          setState('idle')
+        }
         resolve()
       }
 
@@ -1018,8 +1368,151 @@ export default function EliteVoicePage() {
     setState(wakeWordEnabled ? 'wakeword' : 'idle')
   }
 
+  // Speak response with emotion-adaptive voice settings
+  async function speakResponseWithEmotion(
+    text: string,
+    voiceSettings: { rate: number; pitch: number; volume: number }
+  ): Promise<void> {
+    // Save for repeat command
+    setLastResponse(text)
+
+    // Add as text message
+    const assistantMessage: Message = {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content: text,
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, assistantMessage])
+
+    if (isMuted) {
+      setState('idle')
+      return
+    }
+
+    setState('speaking')
+
+    return new Promise((resolve) => {
+      if (!synthesisRef.current) {
+        setState('idle')
+        resolve()
+        return
+      }
+
+      // Process text for natural speech
+      const processedText = text
+        .replace(/\.\s+/g, '... ')
+        .replace(/,/g, '.. ')
+
+      const utterance = new SpeechSynthesisUtterance(processedText)
+      utterance.lang = language || 'en-US'
+      utterance.rate = voiceSettings.rate
+      utterance.pitch = voiceSettings.pitch
+      utterance.volume = voiceSettings.volume
+
+      // Select voice
+      const voices = synthesisRef.current.getVoices()
+      const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
+      if (langVoices.length > 0) {
+        const localVoice = langVoices.find(v => v.localService)
+        utterance.voice = localVoice || langVoices[0]
+      }
+
+      utterance.onend = () => {
+        setState('idle')
+        resolve()
+      }
+
+      utterance.onerror = () => {
+        setState('idle')
+        resolve()
+      }
+
+      synthesisRef.current.speak(utterance)
+    })
+  }
+
+  // Interrupt current speech (for natural conversation)
+  function interruptSpeech() {
+    if (synthesisRef.current && state === 'speaking') {
+      synthesisRef.current.cancel()
+      console.log('[KIAAN Voice] Speech interrupted by user')
+      setState('listening')
+      startListening()
+      return true
+    }
+    return false
+  }
+
+  // Toggle conversation mode - true divine dialogue
+  async function toggleConversationMode() {
+    if (conversationMode) {
+      // Exiting conversation mode
+      console.log('[KIAAN Voice] Exiting conversation mode')
+      setConversationMode(false)
+      stopListening()
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+      setState('idle')
+      setError(null)
+
+      // Play ending chime
+      playOmChime()
+    } else {
+      // Starting conversation mode
+      console.log('[KIAAN Voice] Starting conversation mode - divine dialogue begins')
+
+      // Disable wake word if enabled (they're mutually exclusive)
+      if (wakeWordEnabled) {
+        stopWakeWord()
+        setWakeWordEnabled(false)
+      }
+
+      // Check and request permission
+      if (micPermission !== 'granted') {
+        const granted = await requestMicrophonePermission()
+        if (!granted) {
+          return
+        }
+      }
+
+      setConversationMode(true)
+      setError(null)
+
+      // Start with a warm greeting from KIAAN
+      playOmChime()
+
+      // KIAAN initiates the divine conversation with memory-aware greeting
+      const greeting = await getMemoryAwareGreeting()
+      await speakResponse(greeting)
+    }
+  }
+
+  // Get a warm conversation greeting from KIAAN
+  function getConversationGreeting(): string {
+    const greetings = [
+      "Namaste, dear seeker. I am here with you now. Share what weighs upon your heart, and let us walk this path together through the wisdom of the Gita.",
+      "Om. I feel your presence, beloved one. This is a sacred space where your words matter. What truth are you seeking today?",
+      "Welcome to our divine dialogue. Like Arjuna speaking with Krishna, let your questions flow freely. I am here to listen and guide.",
+      "Peace be with you. In this moment, you are not alone. Speak to me as you would to a trusted guide. What is on your mind?",
+      "The Gita teaches that true wisdom comes through sincere inquiry. I am here, ready to explore the depths of your questions. Please, share with me."
+    ]
+    return greetings[Math.floor(Math.random() * greetings.length)]
+  }
+
   // Toggle wake word detection
   async function toggleWakeWord() {
+    // Disable conversation mode if active (mutually exclusive)
+    if (conversationMode) {
+      setConversationMode(false)
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+    }
+
     if (wakeWordEnabled) {
       stopWakeWord()
       setWakeWordEnabled(false)
@@ -1057,6 +1550,698 @@ export default function EliteVoicePage() {
       setWakeWordEnabled(true)
       setState('wakeword')
     }
+  }
+
+  // ============================================
+  // MEDITATION MODE FUNCTIONS
+  // ============================================
+
+  // Start a meditation session
+  async function startMeditation(type: MeditationType, duration: MeditationDuration) {
+    console.log('[KIAAN Voice] Starting meditation:', type, duration, 'minutes')
+
+    // Disable other modes
+    if (conversationMode) {
+      setConversationMode(false)
+      if (conversationPauseRef.current) {
+        clearTimeout(conversationPauseRef.current)
+        conversationPauseRef.current = null
+      }
+    }
+    if (wakeWordEnabled) {
+      stopWakeWord()
+      setWakeWordEnabled(false)
+    }
+
+    // Generate the meditation session
+    const session = generateMeditationSession(type, duration)
+    setCurrentMeditation(session)
+    setMeditationStep(0)
+    setMeditationMode(true)
+    setMeditationPaused(false)
+    setShowMeditationPicker(false)
+
+    // Play opening chime
+    playOmChime()
+
+    // Start the meditation
+    await runMeditationStep(session, 0)
+  }
+
+  // Run a single meditation step
+  async function runMeditationStep(session: MeditationSession, stepIndex: number) {
+    if (stepIndex >= session.steps.length) {
+      // Meditation complete
+      await completeMeditation(session)
+      return
+    }
+
+    const step = session.steps[stepIndex]
+    setMeditationStep(stepIndex)
+
+    // Play bell if required
+    if (step.bellSound) {
+      playOmChime()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    // Speak the step text if there is any
+    if (step.text) {
+      setState('speaking')
+      await speakMeditationText(step.text)
+    }
+
+    // Wait for the duration then move to next step
+    if (!meditationPaused && meditationMode) {
+      meditationTimerRef.current = setTimeout(() => {
+        if (meditationMode && !meditationPaused) {
+          runMeditationStep(session, stepIndex + 1)
+        }
+      }, step.duration * 1000)
+    }
+  }
+
+  // Speak meditation text (slower, more peaceful)
+  async function speakMeditationText(text: string): Promise<void> {
+    return new Promise((resolve) => {
+      if (!synthesisRef.current || !text) {
+        resolve()
+        return
+      }
+
+      // Process text for meditation (add pauses)
+      const processedText = text
+        .replace(/\.\.\./g, '... ... ...') // Extra long pauses
+        .replace(/\.\s+/g, '.... ')
+        .replace(/,/g, '... ')
+
+      const utterance = new SpeechSynthesisUtterance(processedText)
+      utterance.lang = language || 'en-US'
+      utterance.rate = 0.85 // Slower for meditation
+      utterance.pitch = 0.95 // Slightly lower pitch for calm
+      utterance.volume = voiceVolume
+
+      // Select voice
+      const voices = synthesisRef.current.getVoices()
+      const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
+      if (langVoices.length > 0) {
+        const localVoice = langVoices.find(v => v.localService)
+        utterance.voice = localVoice || langVoices[0]
+      }
+
+      utterance.onend = () => {
+        setState('idle')
+        resolve()
+      }
+
+      utterance.onerror = () => {
+        setState('idle')
+        resolve()
+      }
+
+      synthesisRef.current.speak(utterance)
+    })
+  }
+
+  // Complete meditation and give closing blessing
+  async function completeMeditation(session: MeditationSession) {
+    console.log('[KIAAN Voice] Meditation complete!')
+
+    // Play completion chime
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    // Speak closing blessing
+    setState('speaking')
+    await speakMeditationText(session.closingBlessing)
+
+    // Final chime
+    playOmChime()
+
+    // Reset state
+    setMeditationMode(false)
+    setCurrentMeditation(null)
+    setMeditationStep(0)
+    setState('idle')
+
+    // Record in memory
+    if (memoryInitialized) {
+      await recordKiaanConversation(
+        `Completed ${session.title} meditation (${session.duration} minutes)`,
+        session.closingBlessing,
+        true
+      )
+    }
+  }
+
+  // Pause meditation
+  function pauseMeditation() {
+    setMeditationPaused(true)
+    if (meditationTimerRef.current) {
+      clearTimeout(meditationTimerRef.current)
+      meditationTimerRef.current = null
+    }
+    if (synthesisRef.current) {
+      synthesisRef.current.pause()
+    }
+    playSound('click')
+  }
+
+  // Resume meditation
+  function resumeMeditation() {
+    if (!currentMeditation) return
+
+    setMeditationPaused(false)
+    if (synthesisRef.current) {
+      synthesisRef.current.resume()
+    }
+    playSound('click')
+
+    // Resume from current step
+    const currentStep = currentMeditation.steps[meditationStep]
+    if (currentStep) {
+      meditationTimerRef.current = setTimeout(() => {
+        if (meditationMode && !meditationPaused) {
+          runMeditationStep(currentMeditation, meditationStep + 1)
+        }
+      }, currentStep.duration * 1000)
+    }
+  }
+
+  // Stop meditation early
+  function stopMeditation() {
+    if (meditationTimerRef.current) {
+      clearTimeout(meditationTimerRef.current)
+      meditationTimerRef.current = null
+    }
+    if (synthesisRef.current) {
+      synthesisRef.current.cancel()
+    }
+
+    setMeditationMode(false)
+    setCurrentMeditation(null)
+    setMeditationStep(0)
+    setMeditationPaused(false)
+    setState('idle')
+
+    playSound('click')
+    console.log('[KIAAN Voice] Meditation stopped early')
+  }
+
+  // ============================================
+  // CONTEXT MEMORY ENHANCED GREETING
+  // ============================================
+
+  // Get greeting that uses context memory
+  async function getMemoryAwareGreeting(): Promise<string> {
+    if (!memoryInitialized) {
+      return getConversationGreeting()
+    }
+
+    try {
+      const personalizedGreeting = await getPersonalizedKiaanGreeting()
+      return personalizedGreeting
+    } catch {
+      return getConversationGreeting()
+    }
+  }
+
+  // ============================================
+  // DAILY RITUALS FUNCTIONS
+  // ============================================
+
+  async function startDailyRitual(type: 'morning' | 'evening', duration: RitualDuration = 'standard') {
+    console.log('[KIAAN Voice] Starting daily ritual:', type)
+
+    // Disable other modes
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+    if (wakeWordEnabled) {
+      stopWakeWord()
+      setWakeWordEnabled(false)
+    }
+
+    const ritual = type === 'morning'
+      ? generateMorningRitual(duration)
+      : generateEveningRitual(duration)
+
+    setCurrentRitual(ritual)
+    setRitualStep(0)
+    setShowRitualPicker(false)
+
+    playOmChime()
+
+    // Run the ritual
+    await runRitualStep(ritual, 0)
+  }
+
+  async function runRitualStep(ritual: DailyRitual, stepIndex: number) {
+    if (stepIndex >= ritual.steps.length) {
+      await completeRitual(ritual)
+      return
+    }
+
+    const step = ritual.steps[stepIndex]
+    setRitualStep(stepIndex)
+
+    if (step.bellSound) {
+      playOmChime()
+      await new Promise(resolve => setTimeout(resolve, 800))
+    }
+
+    if (step.text) {
+      const voiceSettings = step.type === 'breathing'
+        ? { rate: 0.8, pitch: 0.95, volume: voiceVolume }
+        : { rate: 0.85, pitch: 1.0, volume: voiceVolume }
+      await speakResponseWithEmotion(step.text, voiceSettings)
+    }
+
+    ritualTimerRef.current = setTimeout(() => {
+      runRitualStep(ritual, stepIndex + 1)
+    }, step.duration * 1000)
+  }
+
+  async function completeRitual(ritual: DailyRitual) {
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    await speakResponseWithEmotion(ritual.closingBlessing, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    playOmChime()
+    recordRitualCompletion(ritual.type)
+
+    setCurrentRitual(null)
+    setRitualStep(0)
+    setState('idle')
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(
+        `Completed ${ritual.title}`,
+        ritual.closingBlessing,
+        true
+      )
+    }
+  }
+
+  function stopRitual() {
+    if (ritualTimerRef.current) {
+      clearTimeout(ritualTimerRef.current)
+      ritualTimerRef.current = null
+    }
+    if (synthesisRef.current) synthesisRef.current.cancel()
+    setCurrentRitual(null)
+    setRitualStep(0)
+    setState('idle')
+  }
+
+  // ============================================
+  // MANTRA CHANTING FUNCTIONS
+  // ============================================
+
+  async function startMantraChanting(mantra: Mantra) {
+    console.log('[KIAAN Voice] Starting mantra:', mantra.transliteration)
+
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+
+    setCurrentMantra(mantra)
+    setMantraCount(0)
+    setShowMantraPicker(false)
+
+    playOmChime()
+
+    // Introduce the mantra
+    const intro = `We will chant ${mantra.transliteration} together. ${mantra.meaning}. This mantra is for ${mantra.purpose}. We will repeat it ${mantra.repetitions} times. After I chant, you may repeat silently or aloud.`
+    await speakResponseWithEmotion(intro, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Chant the mantra
+    for (let i = 0; i < mantra.repetitions; i++) {
+      setMantraCount(i + 1)
+      await speakResponseWithEmotion(mantra.transliteration, { rate: 0.7, pitch: 0.9, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, mantra.pauseBetween * 1000))
+    }
+
+    // Closing
+    playOmChime()
+    await speakResponseWithEmotion('Om Shanti. The vibration of the mantra continues within you.', { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    setCurrentMantra(null)
+    setMantraCount(0)
+    setState('idle')
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(`Chanted ${mantra.transliteration} ${mantra.repetitions} times`, 'Mantra practice completed', true)
+    }
+  }
+
+  // ============================================
+  // SLEEP STORY FUNCTIONS
+  // ============================================
+
+  async function startSleepStory() {
+    console.log('[KIAAN Voice] Starting sleep story')
+
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+
+    const story = generateSleepStory()
+    setCurrentSleepStory(story)
+    setSleepStorySegment(0)
+    setSleepStoryMode(true)
+
+    playOmChime()
+
+    // Run through segments with fading volume
+    for (let i = 0; i < story.segments.length; i++) {
+      if (!sleepStoryMode) break
+
+      const segment = story.segments[i]
+      setSleepStorySegment(i)
+
+      if (segment.text) {
+        const fadeVolume = voiceVolume * segment.fadeLevel
+        await speakResponseWithEmotion(segment.text, { rate: 0.75, pitch: 0.95, volume: fadeVolume })
+      }
+
+      await new Promise(resolve => setTimeout(resolve, segment.duration * 1000))
+    }
+
+    setSleepStoryMode(false)
+    setCurrentSleepStory(null)
+    setState('idle')
+  }
+
+  function stopSleepStory() {
+    setSleepStoryMode(false)
+    if (synthesisRef.current) synthesisRef.current.cancel()
+    setCurrentSleepStory(null)
+    setSleepStorySegment(0)
+    setState('idle')
+  }
+
+  // ============================================
+  // AFFIRMATION FUNCTIONS
+  // ============================================
+
+  async function speakAffirmations() {
+    const hour = new Date().getHours()
+    const timeOfDay = hour < 12 ? 'morning' : 'evening'
+    const emotionState = detectedEmotion || 'neutral'
+
+    const affirmations = generateAffirmations(emotionState, [], timeOfDay as 'morning' | 'evening')
+    const texts = affirmations.map(a => a.text)
+    setCurrentAffirmations(texts)
+    setShowAffirmation(true)
+
+    playOmChime()
+
+    await speakResponseWithEmotion('Receive these affirmations for your journey today.', { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+
+    for (const text of texts) {
+      await speakResponseWithEmotion(text, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 3000))
+    }
+
+    playOmChime()
+    await speakResponseWithEmotion('Carry these truths with you. You are worthy. You are enough.', { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    setTimeout(() => setShowAffirmation(false), 5000)
+  }
+
+  // ============================================
+  // SANSKRIT PRONUNCIATION FUNCTIONS
+  // ============================================
+
+  async function startPronunciationLesson(verseId: string) {
+    console.log('[KIAAN Voice] Starting pronunciation lesson:', verseId)
+
+    const verse = getVersePronunciation(verseId)
+    if (!verse) {
+      await speakResponse('I could not find that verse for pronunciation practice.')
+      return
+    }
+
+    setCurrentPronunciation(verse)
+    setPronunciationStep(0)
+    setShowPronunciationPicker(false)
+
+    playOmChime()
+
+    const lesson = generatePronunciationLesson(verseId)
+    for (const line of lesson) {
+      await speakResponseWithEmotion(line, { rate: 0.8, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 1500))
+    }
+
+    savePronunciationProgress({
+      verseId,
+      attempts: 1,
+      lastPracticed: new Date(),
+      confidence: 50,
+      masteredSyllables: [],
+      difficultSyllables: []
+    })
+
+    setCurrentPronunciation(null)
+    setState('idle')
+  }
+
+  // ============================================
+  // VERSE MEMORIZATION FUNCTIONS
+  // ============================================
+
+  async function startMemorizationSession(verseId: string) {
+    console.log('[KIAAN Voice] Starting memorization:', verseId)
+
+    const verse = getMemorizationVerse(verseId)
+    if (!verse) {
+      await speakResponse('I could not find that verse for memorization.')
+      return
+    }
+
+    startLearningVerse(verseId)
+    setCurrentMemorizationVerse(verse)
+    setMemorizationReviewMode(true)
+    setShowMemorizationPicker(false)
+
+    playOmChime()
+
+    const practice = generateMemorizationPractice(verseId)
+    for (const line of practice) {
+      await speakResponseWithEmotion(line, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    setCurrentMemorizationVerse(null)
+    setMemorizationReviewMode(false)
+    setState('idle')
+  }
+
+  async function recordMemorizationReview(quality: RecallQuality) {
+    if (!currentMemorizationVerse) return
+
+    const result = recordReview(currentMemorizationVerse.verseId, quality)
+    const qualityText = quality >= 4 ? 'Excellent recall!' : quality >= 3 ? 'Good effort!' : 'Keep practicing, you will master this.'
+    await speakResponse(`${qualityText} Next review in ${result.interval} days.`)
+
+    setCurrentMemorizationVerse(null)
+    setMemorizationReviewMode(false)
+  }
+
+  // ============================================
+  // BINAURAL BEATS FUNCTIONS
+  // ============================================
+
+  async function startBinauralBeats(presetName: string) {
+    console.log('[KIAAN Voice] Starting binaural beats:', presetName)
+
+    const preset = getBinauralPreset(presetName)
+    if (!preset) {
+      await speakResponse('I could not find that binaural preset.')
+      return
+    }
+
+    setShowBinauralPicker(false)
+
+    // Headphone reminder
+    await speakResponse(getHeadphoneReminder())
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Introduction
+    const intro = getBinauralIntroSpeech(presetName)
+    for (const line of intro) {
+      await speakResponseWithEmotion(line, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    // Start the binaural beat
+    const started = await startBinauralSession(presetName)
+    if (started) {
+      setActiveBinauralPreset(preset)
+      setBinauralPlaying(true)
+    } else {
+      await speakResponse('I could not start the binaural session. Please try again.')
+    }
+  }
+
+  function stopBinauralBeats() {
+    stopBinauralBeat()
+    setBinauralPlaying(false)
+    setActiveBinauralPreset(null)
+    playSound('click')
+  }
+
+  // ============================================
+  // VOICE PERSONA FUNCTIONS
+  // ============================================
+
+  async function switchPersona(persona: VoicePersona) {
+    setCurrentPersona(persona)
+    setShowPersonaPicker(false)
+
+    const config = getPersona(persona)
+    playOmChime()
+
+    await speakResponseWithEmotion(getPersonaGreeting(persona), config.voiceSettings)
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(`Switched to ${config.name} persona`, getPersonaGreeting(persona))
+    }
+  }
+
+  function getPersonaVoiceSettings() {
+    return getPersona(currentPersona).voiceSettings
+  }
+
+  // ============================================
+  // MILESTONE CELEBRATION FUNCTIONS
+  // ============================================
+
+  async function celebrateMilestone(milestone: Milestone) {
+    setCurrentMilestone(milestone)
+    setShowCelebration(true)
+
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 500))
+    playSound('success')
+
+    const celebration = getCelebrationSpeech(milestone)
+    for (const line of celebration) {
+      await speakResponseWithEmotion(line, { rate: 0.9, pitch: 1.05, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    playOmChime()
+
+    setTimeout(() => {
+      setShowCelebration(false)
+      setCurrentMilestone(null)
+    }, 5000)
+  }
+
+  // ============================================
+  // DHARMA DISCOVERY FUNCTIONS
+  // ============================================
+
+  async function startDharmaDiscovery() {
+    setShowDharmaDiscovery(true)
+    setDharmaQuestionIndex(0)
+    setDharmaAnswers({})
+    setDharmaProfile(null)
+
+    playOmChime()
+    await speakResponse('Let us explore your dharma together. I will ask you questions to help discover your life purpose. Reflect deeply before answering.')
+  }
+
+  async function answerDharmaQuestion(answer: string) {
+    const questions = getDharmaQuestions()
+    const currentQuestion = questions[dharmaQuestionIndex]
+
+    setDharmaAnswers(prev => ({
+      ...prev,
+      [currentQuestion.id]: answer
+    }))
+
+    if (currentQuestion.followUp) {
+      await speakResponseWithEmotion(currentQuestion.followUp, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+    }
+
+    if (dharmaQuestionIndex < questions.length - 1) {
+      setDharmaQuestionIndex(prev => prev + 1)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      await speakResponse(questions[dharmaQuestionIndex + 1].question)
+    } else {
+      // Complete - analyze
+      const profile = analyzeDharmaPath({ ...dharmaAnswers, [currentQuestion.id]: answer })
+      setDharmaProfile(profile)
+
+      playOmChime()
+      await speakResponseWithEmotion(getDharmaGuidance(profile), { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+    }
+  }
+
+  // ============================================
+  // KARMA ANALYSIS FUNCTIONS
+  // ============================================
+
+  async function analyzeKarmaSituation(situation: string) {
+    const analysis = analyzeKarma(situation)
+    setKarmaResult(analysis)
+    setShowKarmaAnalysis(true)
+
+    playOmChime()
+    await speakResponseWithEmotion(analysis.recommendation, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    await speakResponseWithEmotion(analysis.gitaWisdom, { rate: 0.8, pitch: 0.95, volume: voiceVolume })
+
+    for (const question of analysis.questions) {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      await speakResponseWithEmotion(question, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+    }
+  }
+
+  // ============================================
+  // GUNA ASSESSMENT FUNCTIONS
+  // ============================================
+
+  async function startGunaAssessment() {
+    setShowGunaAssessment(true)
+    setGunaQuestionIndex(0)
+    setGunaAnswers({})
+    setGunaProfile(null)
+
+    playOmChime()
+    await speakResponse('The Gita teaches about three gunas - sattva, rajas, and tamas - that influence our nature. Let me help you understand your dominant guna through this assessment.')
+
+    const questions = getGunaQuestions()
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    await speakResponse(questions[0].question)
+  }
+
+  function answerGunaQuestion(guna: 'sattva' | 'rajas' | 'tamas') {
+    const questions = getGunaQuestions()
+    const currentQuestion = questions[gunaQuestionIndex]
+
+    const newAnswers = { ...gunaAnswers, [currentQuestion.id]: guna }
+    setGunaAnswers(newAnswers)
+
+    if (gunaQuestionIndex < questions.length - 1) {
+      setGunaQuestionIndex(prev => prev + 1)
+    } else {
+      // Complete - calculate
+      const profile = calculateGunaProfile(newAnswers)
+      setGunaProfile(profile)
+      saveGunaAssessment(profile)
+    }
+  }
+
+  async function speakGunaResults() {
+    if (!gunaProfile) return
+
+    playOmChime()
+    await speakResponseWithEmotion(getGunaAdvice(gunaProfile), { rate: 0.85, pitch: 1.0, volume: voiceVolume })
   }
 
   // Manual activation - robust flow with permission handling
@@ -1182,14 +2367,33 @@ export default function EliteVoicePage() {
               </span>
             </div>
 
+            {/* Conversation Mode Toggle - Divine Dialogue */}
+            <button
+              onClick={toggleConversationMode}
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
+                conversationMode
+                  ? 'bg-gradient-to-r from-amber-500/30 to-orange-500/30 text-amber-300 border border-amber-400/60 shadow-lg shadow-amber-500/20'
+                  : 'bg-white/5 text-orange-100/60 border border-white/10 hover:border-amber-500/30'
+              }`}
+              title="Divine Dialogue Mode - Continuous conversation with KIAAN"
+            >
+              <span className="text-sm sm:text-base">{conversationMode ? '🙏' : '💬'}</span>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="hidden sm:inline">{conversationMode ? 'Dialogue Active' : 'Start Dialogue'}</span>
+                <span className="sm:hidden">{conversationMode ? 'Active' : 'Dialogue'}</span>
+              </span>
+            </button>
+
             {/* Wake Word Toggle */}
             <button
               onClick={toggleWakeWord}
+              disabled={conversationMode || meditationMode}
               className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
                 wakeWordEnabled
                   ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
                   : 'bg-white/5 text-orange-100/60 border border-white/10'
-              }`}
+              } ${conversationMode || meditationMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={conversationMode || meditationMode ? 'Disable other modes first' : 'Wake word detection'}
             >
               <span className="text-sm sm:text-base">{wakeWordEnabled ? '👂' : '🔇'}</span>
               <span className="text-xs sm:text-sm font-medium">
@@ -1198,11 +2402,105 @@ export default function EliteVoicePage() {
               </span>
             </button>
 
+            {/* Meditation Mode Toggle */}
+            <button
+              onClick={() => setShowMeditationPicker(true)}
+              disabled={meditationMode}
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${
+                meditationMode
+                  ? 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-purple-300 border border-purple-400/60 shadow-lg shadow-purple-500/20'
+                  : 'bg-white/5 text-orange-100/60 border border-white/10 hover:border-purple-500/30'
+              }`}
+              title="Guided Meditation with KIAAN"
+            >
+              <span className="text-sm sm:text-base">{meditationMode ? '🧘' : '🪷'}</span>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="hidden sm:inline">{meditationMode ? 'Meditating' : 'Meditate'}</span>
+                <span className="sm:hidden">{meditationMode ? '...' : 'Med'}</span>
+              </span>
+            </button>
+
             {/* Language Selector */}
             <div className="hidden sm:block">
               <LanguageSelector compact />
             </div>
           </div>
+        </div>
+
+        {/* Advanced Features Quick Access Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-slate-900/50 border-y border-orange-500/10">
+          <button
+            onClick={() => setShowPronunciationPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs hover:bg-teal-500/20 transition-all"
+            title="Sanskrit Pronunciation"
+          >
+            <span>🕉️</span>
+            <span className="hidden sm:inline">Pronunciation</span>
+          </button>
+          <button
+            onClick={() => setShowMemorizationPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs hover:bg-emerald-500/20 transition-all"
+            title="Verse Memorization"
+          >
+            <span>📜</span>
+            <span className="hidden sm:inline">Memorize</span>
+          </button>
+          <button
+            onClick={() => setShowBinauralPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs hover:bg-cyan-500/20 transition-all"
+            title="Binaural Beats"
+          >
+            <span>🎧</span>
+            <span className="hidden sm:inline">Binaural</span>
+          </button>
+          <button
+            onClick={() => setShowPersonaPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs hover:bg-amber-500/20 transition-all"
+            title="Choose Voice Persona"
+          >
+            <span>🎭</span>
+            <span className="hidden sm:inline">Persona</span>
+          </button>
+          <button
+            onClick={() => startGunaAssessment()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs hover:bg-violet-500/20 transition-all"
+            title="Guna Assessment"
+          >
+            <span>⚖️</span>
+            <span className="hidden sm:inline">Gunas</span>
+          </button>
+          <button
+            onClick={() => setShowEmotionalJourney(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-300 text-xs hover:bg-pink-500/20 transition-all"
+            title="Emotional Journey"
+          >
+            <span>📊</span>
+            <span className="hidden sm:inline">Journey</span>
+          </button>
+          <button
+            onClick={() => setShowRitualPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs hover:bg-orange-500/20 transition-all"
+            title="Daily Rituals"
+          >
+            <span>🌅</span>
+            <span className="hidden sm:inline">Rituals</span>
+          </button>
+          <button
+            onClick={() => setShowMantraPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs hover:bg-yellow-500/20 transition-all"
+            title="Mantra Chanting"
+          >
+            <span>🔔</span>
+            <span className="hidden sm:inline">Mantras</span>
+          </button>
+          <button
+            onClick={() => speakAffirmations()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs hover:bg-rose-500/20 transition-all"
+            title="Daily Affirmations"
+          >
+            <span>💫</span>
+            <span className="hidden sm:inline">Affirm</span>
+          </button>
         </div>
       </div>
 
@@ -1405,7 +2703,7 @@ export default function EliteVoicePage() {
 
           {/* State Label & Transcript */}
           <div className="text-center mb-8">
-            <StateLabel state={state} />
+            <StateLabel state={state} conversationMode={conversationMode} />
 
             {/* Live Transcript */}
             {(interimTranscript || voiceInterim) && state === 'listening' && (
@@ -1492,9 +2790,31 @@ export default function EliteVoicePage() {
             )}
           </div>
 
+          {/* Conversation Mode Active Indicator */}
+          {conversationMode && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border border-amber-400/40 shadow-lg shadow-amber-500/10">
+                <div className="relative">
+                  <span className="text-2xl">🙏</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <div className="text-amber-200 font-semibold text-sm">Divine Dialogue Active</div>
+                  <div className="text-amber-300/70 text-xs">Speak freely - KIAAN is listening</div>
+                </div>
+                <button
+                  onClick={toggleConversationMode}
+                  className="ml-2 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  End
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Manual Controls */}
           <div className="flex justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-            {state === 'idle' && !wakeWordEnabled && (
+            {state === 'idle' && !wakeWordEnabled && !conversationMode && (
               <button
                 onClick={activateManually}
                 disabled={!voiceSupported || micPermission === 'unsupported'}
@@ -1510,7 +2830,7 @@ export default function EliteVoicePage() {
               </button>
             )}
 
-            {state === 'wakeword' && (
+            {state === 'wakeword' && !conversationMode && (
               <button
                 onClick={activateManually}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/20 transition-all hover:scale-105"
@@ -1521,10 +2841,10 @@ export default function EliteVoicePage() {
 
             {state === 'listening' && (
               <button
-                onClick={stopListening}
+                onClick={conversationMode ? () => stopListening() : stopListening}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
-                Done Speaking
+                {conversationMode ? 'Pause Dialogue' : 'Done Speaking'}
               </button>
             )}
 
@@ -1533,21 +2853,32 @@ export default function EliteVoicePage() {
                 onClick={stopSpeaking}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-red-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-red-500/30 transition-all hover:scale-105"
               >
-                Stop
+                {conversationMode ? 'Pause' : 'Stop'}
               </button>
+            )}
+
+            {state === 'thinking' && conversationMode && (
+              <div className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-amber-500/20 text-amber-300 font-medium text-base sm:text-lg">
+                KIAAN is contemplating...
+              </div>
             )}
 
             {state === 'error' && (
               <button
                 onClick={() => {
                   setError(null)
-                  setState('idle')
-                  // Re-check permission status
-                  checkMicrophonePermission()
+                  if (conversationMode) {
+                    // In conversation mode, try to resume
+                    setState('listening')
+                    setTimeout(() => startListening(), 300)
+                  } else {
+                    setState('idle')
+                    checkMicrophonePermission()
+                  }
                 }}
                 className="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-900 font-bold text-base sm:text-lg shadow-lg shadow-orange-500/30 transition-all hover:scale-105"
               >
-                Try Again
+                {conversationMode ? 'Continue Dialogue' : 'Try Again'}
               </button>
             )}
           </div>
@@ -1606,6 +2937,391 @@ export default function EliteVoicePage() {
             </div>
           )}
 
+          {/* Meditation Picker Modal */}
+          {showMeditationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-purple-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-purple-100">Guided Meditation</h3>
+                    <p className="text-purple-200/60 text-sm mt-1">Choose your practice with KIAAN</p>
+                  </div>
+                  <button
+                    onClick={() => setShowMeditationPicker(false)}
+                    className="text-purple-300/60 hover:text-purple-300 p-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Meditation Types */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  {getMeditationTypes().map((med) => (
+                    <button
+                      key={med.type}
+                      onClick={() => {
+                        const defaultDuration: MeditationDuration = 5
+                        startMeditation(med.type, defaultDuration)
+                      }}
+                      className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-400/50 transition-all text-left group"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">{med.icon}</span>
+                        <span className="font-semibold text-purple-100 group-hover:text-purple-50">{med.title}</span>
+                      </div>
+                      <p className="text-xs text-purple-200/60">{med.description}</p>
+                      <p className="text-xs text-purple-300/40 mt-1">{med.recommended}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick Duration Selector */}
+                <div className="border-t border-purple-500/20 pt-4">
+                  <p className="text-purple-200/70 text-sm mb-3">Or select duration for breathing meditation:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {getMeditationDurations().map((dur) => (
+                      <button
+                        key={dur.minutes}
+                        onClick={() => startMeditation('breathing', dur.minutes)}
+                        className="px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-200 text-sm hover:bg-purple-500/20 hover:border-purple-400/50 transition-all"
+                      >
+                        {dur.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Meditation Active Indicator */}
+          {meditationMode && currentMeditation && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex flex-col items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 border border-purple-400/40 shadow-lg shadow-purple-500/10 max-w-md w-full">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="relative">
+                    <span className="text-3xl">🧘</span>
+                    {!meditationPaused && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse" />
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="text-purple-200 font-semibold text-sm">{currentMeditation.title}</div>
+                    <div className="text-purple-300/70 text-xs">
+                      Step {meditationStep + 1} of {currentMeditation.steps.length}
+                      {meditationPaused && ' • Paused'}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {meditationPaused ? (
+                      <button
+                        onClick={resumeMeditation}
+                        className="px-3 py-1.5 rounded-lg bg-purple-500/30 border border-purple-400/40 text-purple-200 text-xs font-medium hover:bg-purple-500/40 transition-colors"
+                      >
+                        Resume
+                      </button>
+                    ) : (
+                      <button
+                        onClick={pauseMeditation}
+                        className="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs font-medium hover:bg-purple-500/30 transition-colors"
+                      >
+                        Pause
+                      </button>
+                    )}
+                    <button
+                      onClick={stopMeditation}
+                      className="px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                    >
+                      End
+                    </button>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-purple-900/50 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-purple-400 to-indigo-400 h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${((meditationStep + 1) / currentMeditation.steps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Binaural Beats Active Indicator */}
+          {binauralPlaying && activeBinauralPreset && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 border border-cyan-400/40 shadow-lg shadow-cyan-500/10">
+                <div className="relative">
+                  <span className="text-2xl">🎧</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <div className="text-cyan-200 font-semibold text-sm">{activeBinauralPreset.name}</div>
+                  <div className="text-cyan-300/70 text-xs">{activeBinauralPreset.type} waves • {activeBinauralPreset.beatFrequency}Hz</div>
+                </div>
+                <button
+                  onClick={stopBinauralBeats}
+                  className="ml-2 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Sanskrit Pronunciation Picker Modal */}
+          {showPronunciationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-teal-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-teal-100">Sanskrit Pronunciation</h3>
+                    <p className="text-teal-200/60 text-sm mt-1">Learn correct shloka pronunciation</p>
+                  </div>
+                  <button onClick={() => setShowPronunciationPicker(false)} className="text-teal-300/60 hover:text-teal-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {getAvailableVerses().map((verse) => (
+                    <button
+                      key={verse.verseId}
+                      onClick={() => startPronunciationLesson(verse.verseId)}
+                      className="w-full p-4 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-teal-100">{verse.reference}</div>
+                      <div className="text-xs text-teal-300/60 mt-1">Difficulty: {verse.difficulty}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verse Memorization Picker Modal */}
+          {showMemorizationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-emerald-100">Verse Memorization</h3>
+                    <p className="text-emerald-200/60 text-sm mt-1">Spaced repetition for deep learning</p>
+                  </div>
+                  <button onClick={() => setShowMemorizationPicker(false)} className="text-emerald-300/60 hover:text-emerald-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                {(() => {
+                  const stats = getMemorizationStats()
+                  return (
+                    <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <div className="text-emerald-200 text-sm">Progress: {stats.totalVersesMastered} mastered • {stats.reviewsDueToday} due today • {stats.currentStreak} day streak</div>
+                    </div>
+                  )
+                })()}
+                <div className="space-y-3">
+                  {getAllMemorizationVerses().map((verse) => (
+                    <button
+                      key={verse.verseId}
+                      onClick={() => startMemorizationSession(verse.verseId)}
+                      className="w-full p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-emerald-100">{verse.reference}</div>
+                      <div className="text-xs text-emerald-300/70 mt-1 line-clamp-2">{verse.translation}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Binaural Beats Picker Modal */}
+          {showBinauralPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-cyan-100">Binaural Beats</h3>
+                    <p className="text-cyan-200/60 text-sm mt-1">Alpha/theta waves for meditation</p>
+                  </div>
+                  <button onClick={() => setShowBinauralPicker(false)} className="text-cyan-300/60 hover:text-cyan-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="mb-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 text-sm">
+                  Use headphones for best effect. Each ear receives a different frequency.
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {getBinauralPresets().map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => startBinauralBeats(preset.name)}
+                      className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-cyan-100">{preset.name}</div>
+                      <div className="text-xs text-cyan-300/60 mt-1">{preset.type} • {preset.beatFrequency}Hz</div>
+                      <div className="text-xs text-cyan-300/40 mt-1">{preset.recommendedDuration}min</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Voice Persona Picker Modal */}
+          {showPersonaPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-amber-100">Choose Your Guide</h3>
+                    <p className="text-amber-200/60 text-sm mt-1">Each persona speaks with unique wisdom</p>
+                  </div>
+                  <button onClick={() => setShowPersonaPicker(false)} className="text-amber-300/60 hover:text-amber-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {getAllPersonas().map((persona) => (
+                    <button
+                      key={persona.id}
+                      onClick={() => switchPersona(persona.id)}
+                      className={`w-full p-4 rounded-xl border transition-all text-left ${
+                        currentPersona === persona.id
+                          ? 'bg-amber-500/20 border-amber-400/60'
+                          : 'bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/15'
+                      }`}
+                    >
+                      <div className="font-semibold text-amber-100">{persona.name}</div>
+                      <div className="text-xs text-amber-300/70 mt-1">{persona.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Guna Assessment Modal */}
+          {showGunaAssessment && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-violet-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-violet-100">Guna Assessment</h3>
+                    <p className="text-violet-200/60 text-sm mt-1">Discover your dominant nature</p>
+                  </div>
+                  <button onClick={() => setShowGunaAssessment(false)} className="text-violet-300/60 hover:text-violet-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                {!gunaProfile ? (
+                  <>
+                    <div className="mb-4 text-violet-200/80 text-sm">
+                      Question {gunaQuestionIndex + 1} of {getGunaQuestions().length}
+                    </div>
+                    <div className="mb-6 text-violet-100 font-medium">
+                      {getGunaQuestions()[gunaQuestionIndex]?.question}
+                    </div>
+                    <div className="space-y-2">
+                      {getGunaQuestions()[gunaQuestionIndex]?.options.map((option, i) => (
+                        <button
+                          key={i}
+                          onClick={() => answerGunaQuestion(option.guna)}
+                          className="w-full p-3 rounded-lg bg-violet-500/10 border border-violet-500/30 hover:bg-violet-500/20 transition-all text-left text-violet-200 text-sm"
+                        >
+                          {option.text}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className="text-3xl mb-2">{gunaProfile.dominantGuna === 'sattva' ? '✨' : gunaProfile.dominantGuna === 'rajas' ? '🔥' : '🌙'}</div>
+                      <div className="text-2xl font-bold text-violet-100 capitalize">{gunaProfile.dominantGuna}</div>
+                      <div className="text-violet-300/70 text-sm mt-1">Dominant Guna</div>
+                    </div>
+                    <p className="text-violet-200/80 text-sm">{gunaProfile.description}</p>
+                    <div className="flex justify-between text-xs text-violet-300/60">
+                      <span>Sattva: {gunaProfile.scores.sattva}</span>
+                      <span>Rajas: {gunaProfile.scores.rajas}</span>
+                      <span>Tamas: {gunaProfile.scores.tamas}</span>
+                    </div>
+                    <button
+                      onClick={speakGunaResults}
+                      className="w-full py-2 rounded-lg bg-violet-500/20 text-violet-200 text-sm font-medium hover:bg-violet-500/30 transition-colors"
+                    >
+                      Hear Full Guidance
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Emotional Journey Modal */}
+          {showEmotionalJourney && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-orange-500/30 rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-orange-100">Your Emotional Journey</h3>
+                  <button onClick={() => setShowEmotionalJourney(false)} className="text-orange-300/60 hover:text-orange-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <EmotionalVisualization height={350} showInsights={true} />
+              </div>
+            </div>
+          )}
+
+          {/* Celebration Modal */}
+          {showCelebration && currentMilestone && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-gradient-to-br from-amber-900/90 to-orange-900/90 border border-amber-400/50 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center">
+                <div className="text-6xl mb-4 animate-bounce">🏆</div>
+                <h3 className="text-2xl font-bold text-amber-100 mb-2">{currentMilestone.name}</h3>
+                <p className="text-amber-200/80 mb-4">{currentMilestone.description}</p>
+                <p className="text-amber-300/70 text-sm italic">{currentMilestone.celebration}</p>
+                <button
+                  onClick={() => { setShowCelebration(false); setCurrentMilestone(null); }}
+                  className="mt-6 px-6 py-2 rounded-full bg-amber-500 text-slate-900 font-bold hover:bg-amber-400 transition-colors"
+                >
+                  Continue Journey
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Crisis Support Panel */}
+          {showCrisisSupport && currentCrisis && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-red-500/30 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-2">💜</div>
+                  <h3 className="text-xl font-bold text-red-100">You Are Not Alone</h3>
+                </div>
+                <p className="text-red-200/80 mb-4">{currentCrisis.response}</p>
+                <div className="space-y-2 mb-4">
+                  {currentCrisis.helplines.slice(0, 3).map((helpline, i) => (
+                    <div key={i} className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <div className="font-semibold text-red-100">{helpline.name}</div>
+                      <div className="text-red-300 text-lg font-mono">{helpline.number}</div>
+                      <div className="text-red-300/60 text-xs">{helpline.available}</div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowCrisisSupport(false)}
+                  className="w-full py-2 rounded-lg bg-red-500/20 text-red-200 text-sm font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  I understand, close this
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Voice Settings Indicator */}
           {(isMuted || voiceVolume !== 1.0 || voiceRate !== 0.95) && (
             <div className="flex justify-center gap-2 mb-4">
@@ -1629,12 +3345,27 @@ export default function EliteVoicePage() {
 
           {/* Instructions */}
           <div className="text-center text-orange-100/50 text-xs sm:text-sm px-4">
-            {wakeWordEnabled ? (
+            {meditationMode ? (
+              <>
+                <p className="text-purple-300/70">Guided meditation in progress - follow KIAAN&apos;s voice</p>
+                <p className="mt-1">Breathe deeply and let go of all tension</p>
+              </>
+            ) : conversationMode ? (
+              <>
+                <p className="text-amber-300/70">Divine dialogue active - speak naturally, KIAAN will respond and continue listening</p>
+                <p className="mt-1">Say &quot;goodbye&quot; or &quot;namaste&quot; to end the dialogue gracefully</p>
+              </>
+            ) : wakeWordEnabled ? (
               <p>Say &quot;Hey KIAAN&quot;, &quot;Namaste KIAAN&quot;, or tap the button to start</p>
             ) : (
-              <p>Tap the button above to speak to KIAAN</p>
+              <>
+                <p>Tap the button above to speak to KIAAN</p>
+                <p className="mt-1 text-amber-300/50">Dialogue for conversation | Meditate for guided practice</p>
+              </>
             )}
-            <p className="mt-1">Say &quot;help&quot; for voice commands | KIAAN uses ancient Gita wisdom</p>
+            {!meditationMode && (
+              <p className="mt-1">Say &quot;help&quot; for voice commands | KIAAN remembers your journey</p>
+            )}
           </div>
         </div>
       </div>
@@ -1785,22 +3516,24 @@ function ErrorAnimation() {
 /**
  * State Label Component
  */
-function StateLabel({ state }: { state: VoiceState }) {
-  const labels: Record<VoiceState, { title: string; subtitle: string }> = {
-    idle: { title: 'Ready', subtitle: 'Tap to speak' },
+function StateLabel({ state, conversationMode }: { state: VoiceState; conversationMode?: boolean }) {
+  const labels: Record<VoiceState, { title: string; subtitle: string; conversationTitle?: string; conversationSubtitle?: string }> = {
+    idle: { title: 'Ready', subtitle: 'Tap to speak', conversationTitle: 'Ready', conversationSubtitle: 'Tap "Start Dialogue" for divine conversation' },
     wakeword: { title: 'Listening', subtitle: 'Say "Hey KIAAN"' },
-    listening: { title: 'Listening', subtitle: 'Speak naturally' },
-    thinking: { title: 'Contemplating', subtitle: 'Finding wisdom...' },
-    speaking: { title: 'Speaking', subtitle: 'KIAAN is responding' },
-    error: { title: 'Error', subtitle: 'Please try again' }
+    listening: { title: 'Listening', subtitle: 'Speak naturally', conversationTitle: 'I Am Listening', conversationSubtitle: 'Share your heart, dear seeker' },
+    thinking: { title: 'Contemplating', subtitle: 'Finding wisdom...', conversationTitle: 'Reflecting', conversationSubtitle: 'Drawing from ancient wisdom...' },
+    speaking: { title: 'Speaking', subtitle: 'KIAAN is responding', conversationTitle: 'Speaking to You', conversationSubtitle: 'Receiving divine guidance' },
+    error: { title: 'Error', subtitle: 'Please try again', conversationTitle: 'Moment of Pause', conversationSubtitle: 'Let us try again together' }
   }
 
-  const { title, subtitle } = labels[state]
+  const label = labels[state]
+  const title = conversationMode && label.conversationTitle ? label.conversationTitle : label.title
+  const subtitle = conversationMode && label.conversationSubtitle ? label.conversationSubtitle : label.subtitle
 
   return (
     <div>
-      <h2 className="text-xl sm:text-2xl font-bold text-orange-50">{title}</h2>
-      <p className="text-orange-200/70 mt-1 text-sm sm:text-base">{subtitle}</p>
+      <h2 className={`text-xl sm:text-2xl font-bold ${conversationMode ? 'text-amber-100' : 'text-orange-50'}`}>{title}</h2>
+      <p className={`mt-1 text-sm sm:text-base ${conversationMode ? 'text-amber-200/70' : 'text-orange-200/70'}`}>{subtitle}</p>
     </div>
   )
 }
