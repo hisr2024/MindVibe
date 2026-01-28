@@ -31,6 +31,14 @@ export interface SynthesizeOptions {
   pitch?: number
 }
 
+// Voice type settings aligned with backend for consistent natural speech
+// These values are optimized for human-like delivery without robotic slowness
+const VOICE_TYPE_DEFAULTS: Record<VoiceType, { speed: number; pitch: number }> = {
+  calm: { speed: 0.92, pitch: -0.8 },      // Slower, soothing for meditation
+  wisdom: { speed: 0.94, pitch: -0.3 },    // Measured, thoughtful for verses
+  friendly: { speed: 0.97, pitch: 0.3 },   // Conversational, natural for KIAAN
+}
+
 export interface BatchDownloadResult {
   total: number
   success: number
@@ -55,11 +63,36 @@ class VoiceService {
   private maxCacheSize = 50 // Maximum number of cached audio files
 
   /**
-   * Generate cache key for audio
+   * Generate a simple hash for cache key to prevent collisions.
+   * Uses a fast non-cryptographic hash for performance.
+   */
+  private hashText(text: string): string {
+    let hash = 0
+    for (let i = 0; i < text.length; i++) {
+      const char = text.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(36)
+  }
+
+  /**
+   * Generate cache key for audio using hash to prevent collisions.
+   * Fixed: Previously used substring which could cause cache collisions
+   * for similar texts. Now uses proper hashing.
    */
   private getCacheKey(options: SynthesizeOptions): string {
-    const { text, language = 'en', voiceType = 'friendly', speed = 0.96 } = options
-    return `${text.substring(0, 50)}:${language}:${voiceType}:${speed}`
+    const voiceType = options.voiceType || 'friendly'
+    const defaults = VOICE_TYPE_DEFAULTS[voiceType]
+    const {
+      text,
+      language = 'en',
+      speed = defaults.speed,
+      pitch = defaults.pitch
+    } = options
+    // Use hash of full text + parameters to prevent collisions
+    const textHash = this.hashText(text)
+    return `voice:${textHash}:${language}:${voiceType}:${speed}:${pitch}`
   }
 
   /**
@@ -85,7 +118,10 @@ class VoiceService {
   }
 
   /**
-   * Synthesize text to speech
+   * Synthesize text to speech with ULTRA-NATURAL voice settings.
+   *
+   * Uses voice type-specific defaults for speed and pitch that are
+   * aligned with the backend TTS service for consistent natural delivery.
    */
   async synthesize(
     options: SynthesizeOptions,
@@ -100,7 +136,11 @@ class VoiceService {
       return cached
     }
 
-    // Call API with ULTRA-NATURAL voice settings
+    // Get voice type-specific defaults for natural speech
+    const voiceType = options.voiceType || 'friendly'
+    const defaults = VOICE_TYPE_DEFAULTS[voiceType]
+
+    // Call API with ULTRA-NATURAL voice settings aligned with backend
     const response = await apiFetch(
       '/api/voice/synthesize',
       {
@@ -109,19 +149,25 @@ class VoiceService {
         body: JSON.stringify({
           text: options.text,
           language: options.language || 'en',
-          voice_type: options.voiceType || 'friendly',
-          speed: options.speed !== undefined ? options.speed : 0.96,  // Natural pace
-          pitch: options.pitch !== undefined ? options.pitch : 0.0
+          voice_type: voiceType,
+          speed: options.speed !== undefined ? options.speed : defaults.speed,
+          pitch: options.pitch !== undefined ? options.pitch : defaults.pitch
         })
       },
       userId
     )
 
     if (!response.ok) {
-      throw new Error(`Voice synthesis failed: ${response.statusText}`)
+      const errorText = await response.text().catch(() => response.statusText)
+      throw new Error(`Voice synthesis failed: ${errorText}`)
     }
 
     const blob = await response.blob()
+
+    // Verify we got actual audio data
+    if (blob.size === 0) {
+      throw new Error('Voice synthesis returned empty audio')
+    }
 
     // Cache the audio
     this.cacheAudio(cacheKey, blob)
@@ -166,42 +212,54 @@ class VoiceService {
   }
 
   /**
-   * Synthesize KIAAN message with ULTRA-NATURAL voice
-   * Uses optimal speech parameters for human-like conversational delivery
+   * Synthesize KIAAN message with ULTRA-NATURAL voice.
+   *
+   * Uses 'friendly' voice type with optimal settings for:
+   * - Human-like conversational delivery
+   * - Natural pacing that feels like talking to a wise friend
+   * - Subtle warmth without being artificially upbeat
    */
   async synthesizeKiaanMessage(
     message: string,
     language: string = 'en',
     userId: string
   ): Promise<Blob> {
+    // Use voice type defaults for consistent natural speech
+    const defaults = VOICE_TYPE_DEFAULTS.friendly
     return this.synthesize(
       {
         text: message,
         language,
         voiceType: 'friendly',
-        speed: 0.97,  // Natural conversational pace
-        pitch: 0.3    // Subtle warmth
+        speed: defaults.speed,  // 0.97 - Natural conversational pace
+        pitch: defaults.pitch   // 0.3 - Subtle warmth
       },
       userId
     )
   }
 
   /**
-   * Synthesize meditation guidance with ULTRA-NATURAL calming voice
-   * Optimized for soothing delivery without robotic slowness
+   * Synthesize meditation guidance with ULTRA-NATURAL calming voice.
+   *
+   * Uses 'calm' voice type with optimal settings for:
+   * - Soothing delivery without robotic slowness
+   * - Grounded, peaceful tone that promotes relaxation
+   * - Natural breathing rhythm pauses
    */
   async synthesizeMeditation(
     script: string,
     language: string = 'en',
     userId: string
   ): Promise<Blob> {
+    // Use voice type defaults for consistent natural speech
+    const defaults = VOICE_TYPE_DEFAULTS.calm
     return this.synthesize(
       {
         text: script,
         language,
         voiceType: 'calm',
-        speed: 0.92,  // Calm but natural pace
-        pitch: -0.5   // Subtle grounding warmth
+        speed: defaults.speed,  // 0.92 - Calm but natural pace
+        pitch: defaults.pitch   // -0.8 - Grounding warmth
       },
       userId
     )

@@ -18,7 +18,12 @@ import re
 
 from backend.deps import get_db, get_current_user_flexible
 from backend.middleware.rate_limiter import limiter
-from backend.services.tts_service import get_tts_service, VoiceType
+from backend.services.tts_service import (
+    get_tts_service,
+    get_tts_health_status,
+    get_tts_provider_quality_info,
+    VoiceType
+)
 
 # Rate limit for voice synthesis (resource-intensive)
 VOICE_RATE_LIMIT = "10/minute"
@@ -47,12 +52,15 @@ def _sanitize_filename(value: str) -> str:
 # ===== Pydantic Models =====
 
 class SynthesizeRequest(BaseModel):
-    """Request to synthesize text to speech"""
+    """Request to synthesize text to speech with ULTRA-NATURAL voice settings"""
     text: str = Field(..., min_length=1, max_length=5000, description="Text to synthesize")
     language: str = Field("en", description="Language code (en, hi, ta, etc.)")
-    voice_type: VoiceType = Field("friendly", description="Voice persona")
-    speed: float = Field(0.9, ge=0.5, le=2.0, description="Speaking rate")
-    pitch: float = Field(0.0, ge=-20.0, le=20.0, description="Voice pitch")
+    voice_type: VoiceType = Field("friendly", description="Voice persona (calm, wisdom, friendly)")
+    # Speed defaults match VOICE_TYPE_SETTINGS in tts_service.py:
+    # calm=0.92, wisdom=0.94, friendly=0.97
+    # Using None as default so backend applies voice type-specific defaults
+    speed: Optional[float] = Field(None, ge=0.5, le=2.0, description="Speaking rate (defaults to voice type optimal)")
+    pitch: Optional[float] = Field(None, ge=-20.0, le=20.0, description="Voice pitch (defaults to voice type optimal)")
 
 
 class VerseSynthesizeRequest(BaseModel):
@@ -521,6 +529,35 @@ async def clear_voice_cache(
         "status": "success",
         "message": "Voice cache cleared"
     }
+
+
+@router.get("/health")
+async def get_voice_health() -> dict:
+    """
+    Get voice system health status.
+
+    Returns:
+        - Overall health status (healthy/degraded/limited/unavailable)
+        - Active TTS provider and quality tier
+        - Available features (emotion detection, SSML, offline support)
+
+    This endpoint helps the frontend:
+    1. Display voice quality indicators to users
+    2. Show appropriate messages during fallback scenarios
+    3. Decide whether to enable/disable voice features
+    """
+    return get_tts_health_status()
+
+
+@router.get("/quality")
+async def get_voice_quality_info() -> dict:
+    """
+    Get detailed voice quality information.
+
+    Returns quality scores and feature availability for each TTS provider.
+    Useful for debugging and displaying quality indicators.
+    """
+    return get_tts_provider_quality_info()
 
 
 # ===== Elite Voice Query Endpoint =====

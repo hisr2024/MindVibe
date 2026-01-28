@@ -107,12 +107,38 @@ PAUSE_PATTERNS = {
 
 # Additional natural speech patterns for human-like delivery
 NATURAL_PHRASE_PATTERNS = {
-    # Add micro-pauses before important words
+    # Add micro-pauses before important transition words
     r'\b(because|therefore|however|moreover|furthermore)\b': '<break time="120ms"/>\\1',
     # Subtle emphasis on transitional phrases
     r'\b(In other words|That is to say|For example)\b': '<break time="180ms"/>\\1',
     # Natural pause before quoted speech
     r'(\s)(said|says|asked|replied|whispered)(\s)': '\\1\\2<break time="100ms"/>\\3',
+    # Pause before conjunctions that connect ideas
+    r'\b(and|but|so|yet|or)\s+': '<break time="80ms"/>\\1 ',
+}
+
+# Natural speech rhythm modifiers for different content types
+CONTENT_PROSODY_MODIFIERS = {
+    "affirmation": {
+        "rate_modifier": 0.95,    # Slightly slower for emphasis
+        "pitch_modifier": 0.0,    # Neutral
+        "pause_multiplier": 1.2,  # Longer pauses
+    },
+    "meditation": {
+        "rate_modifier": 0.90,    # Much slower
+        "pitch_modifier": -1.0,   # Lower, calmer
+        "pause_multiplier": 1.5,  # Significantly longer pauses
+    },
+    "verse": {
+        "rate_modifier": 0.92,    # Measured pace
+        "pitch_modifier": -0.5,   # Slight depth
+        "pause_multiplier": 1.3,  # Extended pauses for reflection
+    },
+    "conversation": {
+        "rate_modifier": 1.0,     # Natural pace
+        "pitch_modifier": 0.0,    # Neutral
+        "pause_multiplier": 1.0,  # Normal pauses
+    }
 }
 
 
@@ -801,28 +827,34 @@ class TTSService:
         voice_type: str,
         speed: float
     ) -> Optional[bytes]:
-        """Synthesize using offline providers (edge-tts → pyttsx3)."""
-        # Try edge-tts first (better quality)
+        """
+        Synthesize using offline providers (edge-tts → pyttsx3).
+
+        This is a SYNCHRONOUS method that handles async edge-tts properly
+        by running it in its own event loop when needed.
+        """
+        # Try edge-tts first (better quality - uses Microsoft Neural voices)
         if self._edge_available:
             try:
-                # Use asyncio.to_thread for sync context or get running loop for async context
+                # We need to run the async edge-tts in a sync context
+                # Check if there's already a running event loop
                 try:
-                    # Check if we're already in an async context
                     loop = asyncio.get_running_loop()
-                    # We're in async context - use create_task
-                    audio = await self.edge_tts.synthesize(text, language, voice_type, speed)
-                except RuntimeError:
-                    # No running loop - use run_until_complete
-                    loop = asyncio.new_event_loop()
-                    try:
-                        audio = loop.run_until_complete(
-                            self.edge_tts.synthesize(text, language, voice_type, speed)
+                    # We're being called from an async context - this shouldn't happen
+                    # but if it does, we need to use a thread to avoid blocking
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        future = executor.submit(
+                            self._run_edge_tts_sync,
+                            text, language, voice_type, speed
                         )
-                    finally:
-                        loop.close()
+                        audio = future.result(timeout=30)
+                except RuntimeError:
+                    # No running loop - safe to create our own
+                    audio = self._run_edge_tts_sync(text, language, voice_type, speed)
 
                 if audio:
-                    logger.info("Successfully synthesized with edge-tts")
+                    logger.info("Successfully synthesized with edge-tts (Microsoft Neural voices)")
                     return audio
             except Exception as e:
                 logger.warning(f"edge-tts synthesis failed: {e}")
@@ -836,6 +868,29 @@ class TTSService:
 
         logger.error("All TTS providers failed")
         return None
+
+    def _run_edge_tts_sync(
+        self,
+        text: str,
+        language: str,
+        voice_type: str,
+        speed: float
+    ) -> Optional[bytes]:
+        """
+        Helper method to run edge-tts synthesis in a new event loop.
+
+        This allows the async edge-tts to be called from synchronous code
+        without blocking an existing event loop.
+        """
+        loop = asyncio.new_event_loop()
+        try:
+            asyncio.set_event_loop(loop)
+            return loop.run_until_complete(
+                self.edge_tts.synthesize(text, language, voice_type, speed)
+            )
+        finally:
+            loop.close()
+            asyncio.set_event_loop(None)
 
     def _synthesize_google(
         self,
@@ -979,32 +1034,186 @@ class TTSService:
 
     def _detect_emotion_from_text(self, text: str) -> str:
         """
-        Simple emotion detection from text content.
+        Advanced emotion detection from text content for natural voice prosody.
+
+        Uses multi-layer detection:
+        1. Strong emotional indicators (phrases and patterns)
+        2. Keyword-based detection with intensity weighting
+        3. Context-aware fallback
 
         Args:
             text: Input text
 
         Returns:
-            Detected emotion string
+            Detected emotion string (one of the EMOTION_PROSODY_MAP keys)
         """
         text_lower = text.lower()
 
-        # Emotion keyword mapping
-        emotion_keywords = {
-            "anxiety": ["anxious", "worried", "nervous", "stress", "panic", "fear", "scared"],
-            "sadness": ["sad", "depressed", "lonely", "grief", "loss", "pain", "hurt", "crying"],
-            "joy": ["happy", "joy", "grateful", "blessed", "wonderful", "amazing", "excited"],
-            "peace": ["calm", "peaceful", "serene", "tranquil", "relaxed", "content"],
-            "anger": ["angry", "frustrated", "annoyed", "irritated", "furious"],
-            "hope": ["hope", "optimistic", "better", "forward", "future", "believe"],
-            "love": ["love", "care", "compassion", "kindness", "heart", "soul"],
-            "gratitude": ["thank", "grateful", "appreciate", "blessed", "fortunate"],
+        # Layer 1: Strong emotional phrases (high confidence)
+        strong_indicators = {
+            "anxiety": [
+                "i'm so worried", "can't stop thinking", "feel anxious",
+                "panic attack", "overwhelming", "can't breathe", "racing thoughts",
+                "what if", "constantly worried", "on edge", "restless"
+            ],
+            "sadness": [
+                "i feel sad", "i'm depressed", "feel empty", "feel alone",
+                "nobody cares", "heartbroken", "lost someone", "miss them",
+                "feel hopeless", "can't go on", "deep pain", "unbearable"
+            ],
+            "joy": [
+                "so happy", "feeling great", "wonderful day", "amazing news",
+                "can't believe it", "thrilled", "best day", "overjoyed",
+                "finally happened", "dreams come true"
+            ],
+            "peace": [
+                "at peace", "feel calm", "inner peace", "found serenity",
+                "letting go", "acceptance", "at ease", "tranquil state",
+                "mindful", "present moment", "centered", "grounded"
+            ],
+            "anger": [
+                "so angry", "makes me furious", "can't stand", "hate this",
+                "infuriating", "drives me crazy", "fed up", "had enough",
+                "why do they", "unfair", "injustice"
+            ],
+            "hope": [
+                "there's hope", "looking forward", "better tomorrow",
+                "light at the end", "things will improve", "optimistic",
+                "new beginning", "fresh start", "believe in"
+            ],
+            "love": [
+                "love you", "deeply care", "my heart", "soul connection",
+                "unconditional", "cherish", "adore", "devoted to",
+                "grateful for you", "you mean everything"
+            ],
+            "gratitude": [
+                "thank you so much", "deeply grateful", "appreciate everything",
+                "blessed to have", "fortunate", "thankful for", "means a lot",
+                "touched by", "kindness means"
+            ],
+            "compassion": [
+                "feel for you", "understand your pain", "here for you",
+                "want to help", "empathy", "support you", "by your side"
+            ],
+            "curiosity": [
+                "wonder about", "curious to know", "interested in",
+                "tell me more", "want to understand", "how does", "why is"
+            ],
+            "confidence": [
+                "i can do this", "believe in myself", "strong enough",
+                "capable", "i've got this", "ready for", "determined"
+            ],
+            "serenity": [
+                "completely at peace", "deep calm", "inner stillness",
+                "meditation", "enlightened", "one with", "spiritual peace"
+            ],
+            "fear": [
+                "i'm scared", "terrified", "frightened", "fear of",
+                "afraid of", "nightmare", "haunted by", "dread"
+            ]
         }
 
-        for emotion, keywords in emotion_keywords.items():
-            if any(kw in text_lower for kw in keywords):
-                return emotion
+        # Check strong indicators first
+        for emotion, phrases in strong_indicators.items():
+            for phrase in phrases:
+                if phrase in text_lower:
+                    logger.debug(f"Detected emotion '{emotion}' via strong indicator: '{phrase}'")
+                    return emotion
 
+        # Layer 2: Weighted keyword detection
+        # Keywords with weights - higher weight = stronger indicator
+        emotion_keywords = {
+            "anxiety": {
+                "anxious": 3, "worried": 2, "nervous": 2, "stress": 2, "stressed": 3,
+                "panic": 3, "fear": 2, "scared": 2, "uneasy": 2, "tense": 2,
+                "apprehensive": 2, "dread": 3, "concern": 1, "uncertain": 1
+            },
+            "sadness": {
+                "sad": 3, "depressed": 3, "lonely": 2, "grief": 3, "loss": 2,
+                "pain": 2, "hurt": 2, "crying": 3, "tears": 2, "sorrow": 3,
+                "melancholy": 2, "despair": 3, "miserable": 3, "down": 1
+            },
+            "joy": {
+                "happy": 3, "joy": 3, "grateful": 2, "blessed": 2, "wonderful": 2,
+                "amazing": 2, "excited": 3, "delighted": 3, "ecstatic": 3,
+                "thrilled": 3, "elated": 3, "cheerful": 2, "good": 1
+            },
+            "peace": {
+                "calm": 3, "peaceful": 3, "serene": 3, "tranquil": 3, "relaxed": 2,
+                "content": 2, "still": 1, "quiet": 1, "centered": 2, "balanced": 2
+            },
+            "anger": {
+                "angry": 3, "frustrated": 2, "annoyed": 2, "irritated": 2,
+                "furious": 3, "rage": 3, "mad": 2, "outraged": 3, "resentful": 2
+            },
+            "hope": {
+                "hope": 3, "hopeful": 3, "optimistic": 3, "better": 1, "forward": 1,
+                "future": 1, "believe": 2, "faith": 2, "positive": 2, "trust": 2
+            },
+            "love": {
+                "love": 3, "loving": 3, "care": 2, "caring": 2, "compassion": 2,
+                "kindness": 2, "heart": 2, "soul": 2, "affection": 3, "tenderness": 2
+            },
+            "gratitude": {
+                "thank": 2, "thanks": 2, "grateful": 3, "appreciate": 3,
+                "blessed": 2, "fortunate": 2, "thankful": 3, "appreciation": 3
+            },
+            "compassion": {
+                "empathy": 3, "understand": 1, "support": 2, "help": 1,
+                "sympathy": 2, "kind": 2, "gentle": 2
+            },
+            "curiosity": {
+                "curious": 3, "wonder": 2, "interested": 2, "question": 1,
+                "explore": 2, "discover": 2, "learn": 1
+            },
+            "confidence": {
+                "confident": 3, "strong": 2, "capable": 3, "determined": 3,
+                "certain": 2, "assured": 2, "brave": 2, "courage": 3
+            },
+            "serenity": {
+                "serene": 3, "bliss": 3, "enlightened": 3, "transcendent": 3,
+                "divine": 2, "spiritual": 2, "eternal": 2, "infinite": 2
+            },
+            "fear": {
+                "afraid": 3, "fearful": 3, "terrified": 3, "frightened": 3,
+                "horror": 3, "terror": 3, "phobia": 3, "anxious": 2
+            }
+        }
+
+        # Calculate weighted scores for each emotion
+        emotion_scores = {}
+        words = re.findall(r'\b\w+\b', text_lower)
+
+        for emotion, keywords in emotion_keywords.items():
+            score = 0
+            for word in words:
+                if word in keywords:
+                    score += keywords[word]
+            if score > 0:
+                emotion_scores[emotion] = score
+
+        # Return highest scoring emotion if above threshold
+        if emotion_scores:
+            best_emotion = max(emotion_scores, key=emotion_scores.get)
+            best_score = emotion_scores[best_emotion]
+
+            # Only return if score is significant (at least 2 points)
+            if best_score >= 2:
+                logger.debug(f"Detected emotion '{best_emotion}' with score {best_score}")
+                return best_emotion
+
+        # Layer 3: Context-aware fallback based on message type
+        # Questions often indicate curiosity or anxiety
+        if text.strip().endswith('?'):
+            if any(word in text_lower for word in ['why', 'how', 'what if']):
+                return "curiosity"
+
+        # Spiritual/meditation content defaults to peace
+        spiritual_words = ['meditation', 'mindfulness', 'breath', 'dharma', 'karma', 'yoga']
+        if any(word in text_lower for word in spiritual_words):
+            return "peace"
+
+        # Default to neutral for natural speech
         return "neutral"
 
     def _apply_emotion_prosody(
@@ -1426,4 +1635,131 @@ def get_available_tts_providers() -> Dict[str, bool]:
         "edge_tts": EDGE_TTS_AVAILABLE,
         "pyttsx3": PYTTSX3_AVAILABLE,
         "offline_capable": is_offline_tts_available()
+    }
+
+
+# Voice quality tiers for provider comparison
+PROVIDER_QUALITY_TIERS = {
+    "google_cloud": {
+        "tier": "premium",
+        "quality_score": 95,
+        "naturalness": "ultra-natural",
+        "features": ["Neural2 voices", "Studio voices", "SSML prosody", "emotion detection"],
+        "latency_ms": 200,
+    },
+    "edge_tts": {
+        "tier": "high",
+        "quality_score": 85,
+        "naturalness": "natural",
+        "features": ["Microsoft Neural voices", "basic prosody"],
+        "latency_ms": 300,
+    },
+    "pyttsx3": {
+        "tier": "basic",
+        "quality_score": 50,
+        "naturalness": "synthetic",
+        "features": ["offline only", "system voices"],
+        "latency_ms": 100,
+    }
+}
+
+
+def get_tts_provider_quality_info() -> Dict[str, any]:
+    """
+    Get detailed quality information about available TTS providers.
+
+    Returns information about voice quality tiers, which helps the frontend
+    inform users about any quality degradation during fallback scenarios.
+    """
+    active_provider = "unavailable"
+    quality_info = {}
+
+    if GOOGLE_TTS_AVAILABLE:
+        active_provider = "google_cloud"
+    elif EDGE_TTS_AVAILABLE:
+        active_provider = "edge_tts"
+    elif PYTTSX3_AVAILABLE:
+        active_provider = "pyttsx3"
+
+    return {
+        "active_provider": active_provider,
+        "providers": {
+            name: {
+                **info,
+                "available": (
+                    GOOGLE_TTS_AVAILABLE if name == "google_cloud"
+                    else EDGE_TTS_AVAILABLE if name == "edge_tts"
+                    else PYTTSX3_AVAILABLE
+                )
+            }
+            for name, info in PROVIDER_QUALITY_TIERS.items()
+        },
+        "quality_tier": PROVIDER_QUALITY_TIERS.get(active_provider, {}).get("tier", "unavailable"),
+        "quality_score": PROVIDER_QUALITY_TIERS.get(active_provider, {}).get("quality_score", 0),
+    }
+
+
+class TTSSynthesisError(Exception):
+    """Custom exception for TTS synthesis failures with detailed context."""
+
+    def __init__(
+        self,
+        message: str,
+        provider: str = "unknown",
+        error_code: str = "TTS_FAILED",
+        recoverable: bool = True,
+        user_message: str = None
+    ):
+        self.message = message
+        self.provider = provider
+        self.error_code = error_code
+        self.recoverable = recoverable
+        self.user_message = user_message or "Voice synthesis is temporarily unavailable. Please try again."
+        super().__init__(self.message)
+
+    def to_dict(self) -> Dict[str, any]:
+        """Convert to dictionary for API response."""
+        return {
+            "error": self.error_code,
+            "message": self.user_message,
+            "provider": self.provider,
+            "recoverable": self.recoverable,
+            "technical_message": self.message,
+        }
+
+
+def get_tts_health_status() -> Dict[str, any]:
+    """
+    Get comprehensive health status of the TTS system.
+
+    Used for monitoring and displaying status to users.
+    """
+    providers = get_available_tts_providers()
+    quality = get_tts_provider_quality_info()
+
+    # Determine overall health
+    if providers["google_cloud"]:
+        health = "healthy"
+        status_message = "Premium voice quality available"
+    elif providers["edge_tts"]:
+        health = "degraded"
+        status_message = "Using high-quality fallback voices"
+    elif providers["pyttsx3"]:
+        health = "limited"
+        status_message = "Using basic offline voices"
+    else:
+        health = "unavailable"
+        status_message = "Voice synthesis is unavailable"
+
+    return {
+        "health": health,
+        "status_message": status_message,
+        "providers": providers,
+        "quality": quality,
+        "features": {
+            "emotion_detection": providers["google_cloud"],
+            "ssml_prosody": providers["google_cloud"] or providers["edge_tts"],
+            "offline_support": providers["pyttsx3"] or providers["edge_tts"],
+            "multi_language": True,
+        }
     }
