@@ -73,30 +73,30 @@ class TestQuotaEnforcement:
     """Test quota enforcement logic."""
 
     def test_free_tier_limit(self):
-        """Test that free tier has 10 questions limit."""
+        """Test that free tier has 20 questions limit."""
         from backend.config.feature_config import get_kiaan_quota
-        
+
         quota = get_kiaan_quota(SubscriptionTier.FREE)
-        assert quota == 10
+        assert quota == 20
 
     def test_basic_tier_limit(self):
-        """Test that basic tier has 100 questions limit."""
+        """Test that basic tier has 50 questions limit."""
         from backend.config.feature_config import get_kiaan_quota
-        
-        quota = get_kiaan_quota(SubscriptionTier.BASIC)
-        assert quota == 100
 
-    def test_premium_tier_unlimited(self):
-        """Test that premium tier has unlimited questions."""
+        quota = get_kiaan_quota(SubscriptionTier.BASIC)
+        assert quota == 50
+
+    def test_premium_tier_limit(self):
+        """Test that premium tier has 300 questions limit."""
         from backend.config.feature_config import get_kiaan_quota
-        
+
         quota = get_kiaan_quota(SubscriptionTier.PREMIUM)
-        assert quota == -1  # -1 means unlimited
+        assert quota == 300
 
     def test_enterprise_tier_unlimited(self):
         """Test that enterprise tier has unlimited questions."""
         from backend.config.feature_config import get_kiaan_quota
-        
+
         quota = get_kiaan_quota(SubscriptionTier.ENTERPRISE)
         assert quota == -1  # -1 means unlimited
 
@@ -155,14 +155,14 @@ class TestFeatureAccessMatrix:
     def test_basic_tier_features(self):
         """Test all features for basic tier."""
         from backend.config.feature_config import has_feature_access
-        
+
         # Should have
         assert has_feature_access(SubscriptionTier.BASIC, "mood_tracking") is True
         assert has_feature_access(SubscriptionTier.BASIC, "wisdom_access") is True
         assert has_feature_access(SubscriptionTier.BASIC, "encrypted_journal") is True
-        assert has_feature_access(SubscriptionTier.BASIC, "advanced_analytics") is True
-        
+
         # Should NOT have
+        assert has_feature_access(SubscriptionTier.BASIC, "advanced_analytics") is False
         assert has_feature_access(SubscriptionTier.BASIC, "priority_support") is False
         assert has_feature_access(SubscriptionTier.BASIC, "offline_access") is False
         assert has_feature_access(SubscriptionTier.BASIC, "white_label") is False
