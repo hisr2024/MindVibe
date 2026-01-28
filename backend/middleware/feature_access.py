@@ -303,8 +303,8 @@ class WisdomJourneysAccessRequired:
 
     Checks both feature access and journey limits based on subscription tier:
     - DEVELOPER: Full unlimited access (bypasses all restrictions)
-    - FREE: No access
-    - BASIC: 1 active journey
+    - FREE: Trial access - 1 journey, limited to 3 days
+    - BASIC: 1 active journey (full duration)
     - PREMIUM: Up to 5 active journeys
     - ENTERPRISE: Unlimited journeys
     """
@@ -354,13 +354,23 @@ class WisdomJourneysAccessRequired:
         tier = await get_user_tier(db, user_id)
 
         if not has_access:
+            # Provide tier-appropriate message
+            if tier.value == "free":
+                message = (
+                    "Your free trial for Wisdom Journeys has ended or you've reached your trial limit. "
+                    "Upgrade to continue your spiritual transformation journey."
+                )
+            else:
+                message = (
+                    "Wisdom Journeys is not available on your current plan. "
+                    "Please upgrade to access this feature."
+                )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={
                     "error": "feature_not_available",
                     "feature": "wisdom_journeys",
-                    "message": "Wisdom Journeys is a premium feature. "
-                               "Upgrade to Basic or higher to embark on your spiritual transformation journey.",
+                    "message": message,
                     "tier": tier.value,
                     "upgrade_url": "/pricing",
                     "upgrade_cta": "Unlock Wisdom Journeys",

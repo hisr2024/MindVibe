@@ -218,3 +218,57 @@ class TestKiaanResponseQuality:
         for tier, features in TIER_FEATURES.items():
             for key in quality_related_keys:
                 assert key not in features, f"Tier {tier} should not have quality-related feature: {key}"
+
+
+class TestWisdomJourneysAccess:
+    """Test Wisdom Journeys access across tiers.
+
+    Critical: FREE tier should have trial access (1 journey, 3 days).
+    """
+
+    def test_free_tier_has_trial_access(self):
+        """Test that FREE tier has trial access to Wisdom Journeys."""
+        from backend.config.feature_config import (
+            get_wisdom_journeys_limit,
+            is_wisdom_journeys_trial,
+            get_wisdom_journeys_trial_days,
+            has_feature_access,
+        )
+
+        # FREE tier should have trial access
+        assert has_feature_access(SubscriptionTier.FREE, "wisdom_journeys") is True
+        assert get_wisdom_journeys_limit(SubscriptionTier.FREE) == 1
+        assert is_wisdom_journeys_trial(SubscriptionTier.FREE) is True
+        assert get_wisdom_journeys_trial_days(SubscriptionTier.FREE) == 3
+
+    def test_basic_tier_wisdom_journeys(self):
+        """Test that BASIC tier has full Wisdom Journeys access."""
+        from backend.config.feature_config import (
+            get_wisdom_journeys_limit,
+            is_wisdom_journeys_trial,
+            has_feature_access,
+        )
+
+        assert has_feature_access(SubscriptionTier.BASIC, "wisdom_journeys") is True
+        assert get_wisdom_journeys_limit(SubscriptionTier.BASIC) == 1
+        assert is_wisdom_journeys_trial(SubscriptionTier.BASIC) is False
+
+    def test_premium_tier_wisdom_journeys(self):
+        """Test that PREMIUM tier has 5 active journeys."""
+        from backend.config.feature_config import (
+            get_wisdom_journeys_limit,
+            has_feature_access,
+        )
+
+        assert has_feature_access(SubscriptionTier.PREMIUM, "wisdom_journeys") is True
+        assert get_wisdom_journeys_limit(SubscriptionTier.PREMIUM) == 5
+
+    def test_enterprise_tier_unlimited_journeys(self):
+        """Test that ENTERPRISE tier has unlimited journeys."""
+        from backend.config.feature_config import (
+            get_wisdom_journeys_limit,
+            has_feature_access,
+        )
+
+        assert has_feature_access(SubscriptionTier.ENTERPRISE, "wisdom_journeys") is True
+        assert get_wisdom_journeys_limit(SubscriptionTier.ENTERPRISE) == -1  # Unlimited
