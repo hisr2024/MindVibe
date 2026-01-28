@@ -2570,12 +2570,13 @@ Speak soul to soul. Let the divine flow through your words."""
             logger.warning(f"Shloka '{shloka_key}' not found in database")
             return f"<speak>{shloka_key}</speak>"
 
-        return generate_shloka_ssml(
+        ssml_content = generate_shloka_ssml(
             shloka=shloka,
             include_meaning=include_meaning,
             voice_gender=voice_gender,
             chanting_style=chanting_style
         )
+        return f"<speak>{ssml_content}</speak>"
 
     def format_with_perfect_pronunciation(
         self,
