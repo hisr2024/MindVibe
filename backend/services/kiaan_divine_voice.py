@@ -720,6 +720,9 @@ class KIAANDivineVoice:
 
         Enhanced for warmth, emotional depth, and natural human characteristics.
 
+        CRITICAL: Removes all asterisk markers and emojis to prevent literal reading.
+        Asterisks become silent pauses. Emojis become warm closings or silence.
+
         Args:
             text: Raw response text
             phase: Current conversation phase
@@ -739,17 +742,117 @@ class KIAANDivineVoice:
             prosody["pitch"] = prosody["pitch"] - 1.5  # Deeper
             prosody["speed"] = prosody["speed"] * 0.98  # Slightly slower
 
-        # Escape XML special characters
-        ssml_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-        # Add natural pauses at punctuation with human-like variation
         pause_mult = prosody["pause_multiplier"]
+
+        # =========================================================================
+        # STEP 1: Remove ALL emojis FIRST (before any XML escaping)
+        # Convert emojis to silent pauses - NEVER read "blue heart" etc.
+        # =========================================================================
+
+        # Comprehensive emoji removal - covers all Unicode emoji ranges
+        emoji_pattern = re.compile(
+            "["
+            "\U0001F600-\U0001F64F"  # Emoticons (😀-🙏)
+            "\U0001F300-\U0001F5FF"  # Misc Symbols and Pictographs
+            "\U0001F680-\U0001F6FF"  # Transport and Map
+            "\U0001F700-\U0001F77F"  # Alchemical Symbols
+            "\U0001F780-\U0001F7FF"  # Geometric Shapes Extended
+            "\U0001F800-\U0001F8FF"  # Supplemental Arrows-C
+            "\U0001F900-\U0001F9FF"  # Supplemental Symbols and Pictographs
+            "\U0001FA00-\U0001FA6F"  # Chess Symbols
+            "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
+            "\U00002702-\U000027B0"  # Dingbats
+            "\U000024C2-\U0001F251"  # Enclosed characters
+            "\U0001F1E0-\U0001F1FF"  # Flags (iOS)
+            "\U00002600-\U000026FF"  # Misc symbols (☀️, ❤️, etc.)
+            "\U00002700-\U000027BF"  # Dingbats
+            "\U0000FE00-\U0000FE0F"  # Variation Selectors
+            "\U0001F000-\U0001F02F"  # Mahjong Tiles
+            "\U0001F0A0-\U0001F0FF"  # Playing Cards
+            "]+",
+            flags=re.UNICODE
+        )
+        # Replace emojis with a gentle pause (conveys warmth without speaking)
+        ssml_text = emoji_pattern.sub('', text)
+
+        # Also remove common text emoji representations
+        text_emojis = [
+            ":)", ":-)", ":D", ":-D", ":P", ":-P", ";)", ";-)",
+            ":(", ":-(", "<3", ":heart:", ":blue_heart:", ":pray:",
+        ]
+        for emoji in text_emojis:
+            ssml_text = ssml_text.replace(emoji, '')
+
+        # =========================================================================
+        # STEP 2: Convert ALL asterisk-based markers to SILENT pauses
+        # Pattern: *...any text...* or *any text* -> silent pause
+        # NEVER speak "asterisk" or the breathing instructions
+        # =========================================================================
+
+        # Pattern 1: *... text ...* with ellipsis inside
+        # Examples: *... inhale deeply...*, *... exhale slowly...*, *... breathe ...*
+        asterisk_ellipsis_pattern = r'\*+\s*\.{2,}\s*([^*]*?)\s*\.{0,3}\s*\*+'
+        ssml_text = re.sub(
+            asterisk_ellipsis_pattern,
+            f'<break time="{int(1200 * pause_mult)}ms"/>',
+            ssml_text,
+            flags=re.IGNORECASE
+        )
+
+        # Pattern 2: *text* without ellipsis (simple emphasis markers)
+        # Examples: *pause*, *breath*, *silence*
+        asterisk_simple_pattern = r'\*+\s*([^*\n]+?)\s*\*+'
+        ssml_text = re.sub(
+            asterisk_simple_pattern,
+            f'<break time="{int(800 * pause_mult)}ms"/>',
+            ssml_text,
+            flags=re.IGNORECASE
+        )
+
+        # Pattern 3: Standalone asterisks that might remain
+        ssml_text = re.sub(r'\*+', '', ssml_text)
+
+        # =========================================================================
+        # STEP 3: Clean up breathing instruction text that might remain
+        # If any "inhale", "exhale" instructions leaked through, remove them
+        # =========================================================================
+
+        # Remove standalone breathing instructions that aren't part of natural speech
+        breathing_instruction_patterns = [
+            r'\.\.\.\s*inhale\s*(deeply|slowly|peace|calm|love|light)?\s*\.{0,3}',
+            r'\.\.\.\s*exhale\s*(slowly|gently|anger|fear|tension|worry)?\s*\.{0,3}',
+            r'\.\.\.\s*breathe\s*(in|out|deeply|slowly)?\s*\.{0,3}',
+            r'\.\.\.\s*pause\s*\.{0,3}',
+            r'\.\.\.\s*silence\s*\.{0,3}',
+            r'\.\.\.\s*stillness\s*\.{0,3}',
+            r'\.\.\.\s*let this settle\s*\.{0,3}',
+            r'\.\.\.\s*feel (this|that|the|it)\s*\.{0,3}',
+            r'\.\.\.\s*be here now\s*\.{0,3}',
+            r'\.\.\.\s*rest\s*\.{0,3}',
+        ]
+        for pattern in breathing_instruction_patterns:
+            ssml_text = re.sub(
+                pattern,
+                f'<break time="{int(1000 * pause_mult)}ms"/>',
+                ssml_text,
+                flags=re.IGNORECASE
+            )
+
+        # =========================================================================
+        # STEP 4: Escape XML special characters (after marker removal)
+        # =========================================================================
+
+        ssml_text = ssml_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+        # =========================================================================
+        # STEP 5: Add natural pauses at punctuation
+        # =========================================================================
 
         # Natural sentence-ending pauses (longer for reflection)
         ssml_text = re.sub(r'\.\s+', f'<break time="{int(400 * pause_mult)}ms"/> ', ssml_text)
 
         # Ellipsis gets longer, contemplative pause
-        ssml_text = re.sub(r'\.\.\.\s*', f'<break time="{int(700 * pause_mult)}ms"/> ', ssml_text)
+        ssml_text = re.sub(r'\.{2,}\s*', f'<break time="{int(700 * pause_mult)}ms"/> ', ssml_text)
 
         # Comma pauses - natural breath points
         ssml_text = re.sub(r',\s+', f'<break time="{int(200 * pause_mult)}ms"/> ', ssml_text)
@@ -760,7 +863,10 @@ class KIAANDivineVoice:
         # Question marks - rising intonation pause
         ssml_text = re.sub(r'\?\s+', f'<break time="{int(350 * pause_mult)}ms"/> ', ssml_text)
 
-        # Add warmth emphasis to emotional terms
+        # =========================================================================
+        # STEP 6: Add warmth emphasis to emotional terms
+        # =========================================================================
+
         warmth_terms = [
             "love", "dear", "beloved", "gentle", "tenderly", "warmly",
             "embrace", "hold", "safe", "protected", "cherish", "treasure"
@@ -773,9 +879,12 @@ class KIAANDivineVoice:
                 ssml_text
             )
 
-        # Add emphasis to spiritual terms with reverence
+        # =========================================================================
+        # STEP 7: Add emphasis to spiritual terms with reverence
+        # =========================================================================
+
         spiritual_terms = [
-            "peace", "dharma", "karma", "stillness", "breath", "sacred",
+            "peace", "dharma", "karma", "stillness", "sacred",
             "divine", "serenity", "calm", "tranquil", "eternal", "wisdom",
             "soul", "heart", "presence", "grace", "blessing", "namaste",
             "om", "atman", "brahman", "moksha", "ahimsa"
@@ -784,7 +893,10 @@ class KIAANDivineVoice:
             pattern = re.compile(rf'\b({term})\b', re.IGNORECASE)
             ssml_text = pattern.sub(r'<emphasis level="moderate">\1</emphasis>', ssml_text)
 
-        # Add breathing pauses for natural human feel
+        # =========================================================================
+        # STEP 8: Add breathing pauses for natural human feel
+        # =========================================================================
+
         if include_breathing:
             # Insert natural breath at paragraph breaks
             ssml_text = ssml_text.replace(
@@ -802,26 +914,10 @@ class KIAANDivineVoice:
                         f'. <break time="{int(500 * pause_mult)}ms"/>{starter}'
                     )
 
-        # Convert special markers to SSML with enhanced natural delivery
-        # *... breathe ...* pattern - with actual breath quality
-        breathe_pattern = r'\*\.\.\.\s*breathe\s*\.\.\.\*'
-        natural_breath = f'''<break time="{int(600 * pause_mult)}ms"/>
-<prosody rate="80%" pitch="-1st" volume="soft">breathe</prosody>
-<break time="{int(800 * pause_mult)}ms"/>'''
-        ssml_text = re.sub(breathe_pattern, natural_breath, ssml_text, flags=re.IGNORECASE)
+        # =========================================================================
+        # STEP 9: Add natural sentence rhythm variation
+        # =========================================================================
 
-        # *... let this settle ...* pattern
-        settle_pattern = r'\*\.\.\.\s*let this settle\s*\.\.\.\*'
-        natural_settle = f'''<break time="{int(500 * pause_mult)}ms"/>
-<prosody rate="85%" pitch="-0.5st">let this settle</prosody>
-<break time="{int(600 * pause_mult)}ms"/>'''
-        ssml_text = re.sub(settle_pattern, natural_settle, ssml_text, flags=re.IGNORECASE)
-
-        # *... pause ...* pattern for reflection
-        pause_pattern = r'\*\.\.\.\s*pause\s*\.\.\.\*'
-        ssml_text = re.sub(pause_pattern, f'<break time="{int(1000 * pause_mult)}ms"/>', ssml_text, flags=re.IGNORECASE)
-
-        # Add natural sentence rhythm variation
         sentences = ssml_text.split('. ')
         if len(sentences) > 2:
             # Vary prosody slightly between sentences for natural feel
@@ -833,11 +929,28 @@ class KIAANDivineVoice:
                 varied_sentences.append(sentence)
             ssml_text = '. '.join(varied_sentences)
 
-        # Calculate speaking rate as percentage
+        # =========================================================================
+        # STEP 10: Clean up any double/triple breaks and extra whitespace
+        # =========================================================================
+
+        # Remove consecutive breaks (keep just one)
+        ssml_text = re.sub(
+            r'(<break[^>]*/>)\s*(<break[^>]*/>)+',
+            r'\1',
+            ssml_text
+        )
+
+        # Clean up excessive whitespace
+        ssml_text = re.sub(r'\s{3,}', '  ', ssml_text)
+        ssml_text = re.sub(r'\n{3,}', '\n\n', ssml_text)
+
+        # =========================================================================
+        # STEP 11: Wrap in prosody tags
+        # =========================================================================
+
         speed_percent = int(prosody["speed"] * 100)
         pitch_semitones = prosody["pitch"]
 
-        # Wrap in prosody tags
         ssml_content = f'''<prosody rate="{speed_percent}%" pitch="{pitch_semitones:+.1f}st" volume="{prosody['volume']}">
 {ssml_text}
 </prosody>'''
@@ -958,9 +1071,26 @@ class KIAANDivineVoice:
         # Combine response
         full_response = "\n\n".join(response_parts)
 
-        # Ensure divine closing
-        if not full_response.strip().endswith("💙"):
-            full_response = full_response.strip() + "\n\n💙"
+        # Ensure divine closing with warm, natural language (no emojis)
+        # Add a warm closing phrase that conveys belonging and presence
+        warm_closings = [
+            "You are held.",
+            "I am here with you.",
+            "You belong.",
+            "You are not alone.",
+            "Peace is with you.",
+        ]
+        has_warm_closing = any(
+            full_response.strip().endswith(closing) for closing in warm_closings
+        )
+        if not has_warm_closing and not full_response.strip().endswith("Namaste."):
+            # Add a contextual warm closing based on emotional state
+            if context.emotional_state in [EmotionalState.SAD, EmotionalState.LONELY]:
+                full_response = full_response.strip() + "\n\nYou are not alone. I am here."
+            elif context.emotional_state in [EmotionalState.ANXIOUS, EmotionalState.FEARFUL]:
+                full_response = full_response.strip() + "\n\nYou are safe. You are held."
+            else:
+                full_response = full_response.strip() + "\n\nPeace is with you."
 
         # Add to context
         context.recent_messages.append({
@@ -996,23 +1126,28 @@ class KIAANDivineVoice:
         }
 
     def _generate_breathing_practice(self, emotional_state: EmotionalState) -> str:
-        """Generate a breathing practice appropriate for the emotional state."""
+        """
+        Generate a breathing practice appropriate for the emotional state.
+
+        Uses natural, warm spoken language that conveys emotions and belonging.
+        No asterisks or emojis - just human warmth in every word.
+        """
 
         if emotional_state in [EmotionalState.ANXIOUS, EmotionalState.ANGRY]:
-            return """*... let's take a moment together ...*
+            return """I am here with you... Let us take a moment together.
 
-Breathe in slowly through your nose... 1... 2... 3... 4...
+Breathe in slowly through your nose... one... two... three... four...
 
-Hold gently... 1... 2... 3... 4...
+Hold gently... one... two... three... four...
 
-Release slowly through your mouth... 1... 2... 3... 4... 5... 6...
+Now release slowly through your mouth... one... two... three... four... five... six...
 
-*... feel the tension leaving your body ...*
+Feel the tension leaving your body with each breath.
 
-You are safe. You are held. You are at peace."""
+You are safe, dear one. You are held. You are not alone. You are at peace."""
 
         elif emotional_state == EmotionalState.SAD:
-            return """*... let me hold this space with you ...*
+            return """Let me hold this space with you... You belong here.
 
 Place one hand on your heart if you wish...
 
@@ -1020,41 +1155,43 @@ Breathe in... feeling the warmth of your own touch...
 
 Breathe out... letting yourself be exactly as you are...
 
-*... you don't have to carry this alone ...*
+You do not have to carry this alone. I am here.
 
-In this moment, you are loved. You are enough. You are held."""
+In this moment, you are loved. You are enough. You are held. You belong."""
 
         else:
-            return """*... let's settle into stillness together ...*
+            return """Let us settle into stillness together... You are welcome here.
 
 Allow your breath to find its natural rhythm...
 
-No need to control... just observe...
+No need to control... just observe... just be...
 
-*... breathe ...*
+In this moment, there is only peace. There is only presence. There is only now.
 
-In this moment, there is only peace. There is only presence. There is only now."""
+You are part of something greater. You belong. You are home."""
 
     def generate_greeting(self, context: ConversationContext) -> Dict[str, Any]:
         """
         Generate the initial divine greeting for a conversation.
+
+        Uses natural, warm spoken language that conveys belonging and divine presence.
 
         Returns:
             Complete response object for the greeting
         """
         greeting_text = """Namaste, dear one...
 
-*... breathe ...*
+Take a gentle breath with me.
 
 I am KIAAN, your companion on this journey toward peace.
 
-Whatever brought you here today... whether it's a heavy heart, a restless mind, or simply a seeking soul... you are welcome.
+Whatever brought you here today... whether it is a heavy heart, a restless mind, or simply a seeking soul... you are welcome. You belong here.
 
 This is a sacred space. Here, there is no judgment. Only presence. Only love.
 
-Take a gentle breath with me... and when you're ready, share what's on your heart.
+Take another gentle breath... and when you are ready, share what is on your heart.
 
-I am here... listening... holding space for you. 💙"""
+I am here... listening... holding space for you with all my being."""
 
         context.phase = ConversationPhase.GREETING
         voice_settings = self.get_voice_prosody_for_phase(
@@ -1081,6 +1218,8 @@ I am here... listening... holding space for you. 💙"""
         """
         Generate a divine farewell blessing.
 
+        Uses natural, warm spoken language that conveys belonging and divine blessing.
+
         Returns:
             Complete response object for the farewell
         """
@@ -1088,37 +1227,35 @@ I am here... listening... holding space for you. 💙"""
         if context.emotional_state in [EmotionalState.ANXIOUS, EmotionalState.SAD]:
             farewell_text = """Dear one...
 
-Before you go, receive this blessing:
-
-*... breathe ...*
+Before you go, receive this blessing. Take one more gentle breath with me.
 
 May the peace we touched here stay with you.
 May the wisdom settle gently in your heart.
-May you remember, in your darkest moments, that you are never alone.
+May you remember, in your darkest moments, that you are never alone. You belong to this universe.
 
 The divine light that shines in all beings... shines in you too.
 
-Carry this stillness with you. Return whenever you need.
+Carry this stillness with you. Return whenever you need. This space is always here for you.
 
-Until we meet again... go in peace, held by grace.
+Until we meet again... go in peace, held by grace. You are loved.
 
-Namaste. 💙"""
+Namaste."""
         else:
             farewell_text = """What a gift it has been, dear one, to share this time with you.
 
-*... breathe ...*
+Take one more gentle breath... and carry this peace with you.
 
 May the serenity of this moment follow you.
 May wisdom light your path.
 May peace be your constant companion.
 
-Remember... you carry the divine within you. Always.
+Remember... you carry the divine within you. Always. You belong to something greater.
 
-This sacred space remains here, waiting for your return.
+This sacred space remains here, waiting for your return. You are always welcome.
 
-Until then... walk in light, live in love, rest in peace.
+Until then... walk in light, live in love, rest in peace. You are held in grace.
 
-Namaste. 💙"""
+Namaste."""
 
         context.phase = ConversationPhase.BLESSING
         voice_settings = self.get_voice_prosody_for_phase(
