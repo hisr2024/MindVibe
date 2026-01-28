@@ -84,10 +84,14 @@ class ReflectionEncryption:
 
     Uses Fernet symmetric encryption (AES-256-CBC with HMAC).
     Key is stored in environment variable for security.
+
+    SECURITY: Mental health data MUST be encrypted in production.
+    Set MINDVIBE_REFLECTION_KEY and MINDVIBE_REQUIRE_ENCRYPTION=true in production.
     """
 
     _instance: "ReflectionEncryption | None" = None
     _fernet: Fernet | None = None
+    _require_encryption: bool = False
 
     def __new__(cls) -> "ReflectionEncryption":
         if cls._instance is None:
@@ -97,11 +101,24 @@ class ReflectionEncryption:
 
     def _initialize(self) -> None:
         """Initialize Fernet cipher with key from environment."""
+        # Check if encryption is required (MUST be true in production)
+        self._require_encryption = os.environ.get(
+            "MINDVIBE_REQUIRE_ENCRYPTION", ""
+        ).lower() in ("true", "1", "yes")
+
+        environment = os.environ.get("ENVIRONMENT", "development")
+        is_production = environment.lower() in ("production", "prod")
+
         if not ENCRYPTION_AVAILABLE:
-            logger.warning(
-                "cryptography library not available - reflections will be stored unencrypted. "
-                "Install cryptography package for production use."
+            error_msg = (
+                "CRITICAL SECURITY ERROR: cryptography library not available. "
+                "Mental health data CANNOT be stored without encryption. "
+                "Install cryptography package: pip install cryptography"
             )
+            if self._require_encryption or is_production:
+                logger.critical(error_msg)
+                raise RuntimeError(error_msg)
+            logger.warning(error_msg)
             self._fernet = None
             return
 
@@ -109,33 +126,57 @@ class ReflectionEncryption:
         if key:
             try:
                 self._fernet = Fernet(key.encode() if isinstance(key, str) else key)
-                logger.info("ReflectionEncryption initialized with provided key")
+                logger.info("✓ ReflectionEncryption initialized - mental health data will be encrypted")
             except Exception as e:
-                logger.error(f"Failed to initialize encryption with provided key: {e}")
+                error_msg = f"Failed to initialize encryption with provided key: {e}"
+                if self._require_encryption or is_production:
+                    logger.critical(error_msg)
+                    raise RuntimeError(error_msg)
+                logger.error(error_msg)
                 self._fernet = None
         else:
-            logger.warning(
-                "MINDVIBE_REFLECTION_KEY not set - reflections will be stored unencrypted. "
-                "Set this environment variable in production!"
+            error_msg = (
+                "SECURITY WARNING: MINDVIBE_REFLECTION_KEY not set. "
+                "Mental health reflections will be stored UNENCRYPTED. "
+                "This is a serious privacy risk. Set this environment variable!"
             )
+            if self._require_encryption or is_production:
+                logger.critical(f"CRITICAL: {error_msg}")
+                raise RuntimeError(
+                    f"Cannot start in production without encryption. {error_msg}"
+                )
+            logger.warning(f"⚠️  {error_msg}")
             self._fernet = None
 
     def encrypt(self, plaintext: str) -> str:
         """
         Encrypt reflection text.
 
-        Returns encrypted string (base64 encoded) or plaintext if encryption unavailable.
+        Returns encrypted string (base64 encoded).
+
+        Raises:
+            RuntimeError: If encryption is required but unavailable.
         """
         if not plaintext:
             return ""
         if self._fernet is None:
-            # Return with marker so we know it's not encrypted
+            if self._require_encryption:
+                raise RuntimeError(
+                    "Cannot store mental health data: encryption is required but unavailable. "
+                    "Set MINDVIBE_REFLECTION_KEY environment variable."
+                )
+            # In development, allow unencrypted storage with warning
+            logger.warning(
+                "⚠️  Storing reflection WITHOUT encryption - development mode only"
+            )
             return f"UNENCRYPTED:{plaintext}"
         try:
             encrypted = self._fernet.encrypt(plaintext.encode())
             return encrypted.decode()
         except Exception as e:
             logger.error(f"Encryption failed: {e}")
+            if self._require_encryption:
+                raise RuntimeError(f"Encryption failed and is required: {e}")
             return f"UNENCRYPTED:{plaintext}"
 
     def decrypt(self, ciphertext: str) -> str:

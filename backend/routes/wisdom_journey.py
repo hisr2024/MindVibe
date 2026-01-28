@@ -11,12 +11,49 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy import select
+
 from backend.deps import get_current_user_flexible, get_db
 from backend.middleware.rate_limiter import limiter
-from backend.models import JourneyStatus
+from backend.middleware.feature_access import (
+    require_wisdom_journeys,
+    require_wisdom_journeys_with_limit,
+)
+from backend.models import JourneyStatus, GitaVerse
 from backend.services.wisdom_journey_service import WisdomJourneyService
 
 logger = logging.getLogger(__name__)
+
+
+async def batch_fetch_verses(db: AsyncSession, verse_ids: list[int]) -> dict[int, GitaVerse]:
+    """
+    Batch fetch multiple verses in a single query.
+
+    This prevents the N+1 query problem when loading steps with verses.
+
+    Args:
+        db: Database session
+        verse_ids: List of verse IDs to fetch
+
+    Returns:
+        Dictionary mapping verse_id to GitaVerse object
+    """
+    if not verse_ids:
+        return {}
+
+    # Remove None values and duplicates
+    valid_ids = list(set(v for v in verse_ids if v is not None))
+    if not valid_ids:
+        return {}
+
+    try:
+        stmt = select(GitaVerse).where(GitaVerse.id.in_(valid_ids))
+        result = await db.execute(stmt)
+        verses = result.scalars().all()
+        return {v.id: v for v in verses}
+    except Exception as e:
+        logger.warning(f"Failed to batch fetch verses: {e}")
+        return {}
 
 router = APIRouter(prefix="/api/wisdom-journey", tags=["wisdom-journey"])
 
@@ -96,14 +133,15 @@ async def generate_journey(
     request: Request,
     body: GenerateJourneyRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys_with_limit(1)),
 ) -> JourneyResponse:
     """
     Generate a personalized wisdom journey based on user mood and journal patterns.
 
     Rate limited to 5 journeys per hour per user.
+    Requires Wisdom Journeys subscription access.
     """
-
+    user_id, active_count, journey_limit = access
     logger.info(f"Generating journey for user {user_id}, duration: {body.duration_days} days")
 
     try:
@@ -159,9 +197,13 @@ async def generate_journey(
 @router.get("/active", response_model=JourneyResponse | None)
 async def get_active_journey(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> JourneyResponse | None:
-    """Get the user's currently active wisdom journey, if any."""
+    """Get the user's currently active wisdom journey, if any.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()
@@ -173,25 +215,21 @@ async def get_active_journey(
         # Get steps
         steps = await service.get_journey_steps(db, journey.id)
 
-        # Fetch verse details for steps
-        from backend.models import GitaVerse
+        # Batch fetch all verses in one query (N+1 prevention)
+        verse_ids = [step.verse_id for step in steps if step.verse_id]
+        verses_map = await batch_fetch_verses(db, verse_ids)
 
         steps_with_verses = []
         for step in steps:
             verse_data = {}
-            if step.verse_id:
-                try:
-                    verse = await db.get(GitaVerse, step.verse_id)
-                    if verse:
-                        verse_data = {
-                            "verse_text": verse.english,
-                            "verse_translation": verse.transliteration,
-                            "verse_chapter": verse.chapter,
-                            "verse_number": verse.verse,
-                        }
-                except Exception:
-                    # Continue without verse data if lookup fails
-                    pass
+            if step.verse_id and step.verse_id in verses_map:
+                verse = verses_map[step.verse_id]
+                verse_data = {
+                    "verse_text": verse.english,
+                    "verse_translation": verse.transliteration,
+                    "verse_chapter": verse.chapter,
+                    "verse_number": verse.verse,
+                }
 
             steps_with_verses.append(
                 JourneyStepResponse(
@@ -238,9 +276,13 @@ async def get_active_journey(
 @router.get("/recommendations/list", response_model=list[RecommendationResponse])
 async def get_journey_recommendations(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> list[RecommendationResponse]:
-    """Get personalized journey recommendations based on user mood and activity."""
+    """Get personalized journey recommendations based on user mood and activity.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()
@@ -289,9 +331,13 @@ async def get_journey_recommendations(
 async def get_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> JourneyResponse:
-    """Get a specific wisdom journey by ID."""
+    """Get a specific wisdom journey by ID.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()
@@ -307,24 +353,21 @@ async def get_journey(
         # Get steps with verse details
         steps = await service.get_journey_steps(db, journey.id)
 
-        from backend.models import GitaVerse
+        # Batch fetch all verses in one query (N+1 prevention)
+        verse_ids = [step.verse_id for step in steps if step.verse_id]
+        verses_map = await batch_fetch_verses(db, verse_ids)
 
         steps_with_verses = []
         for step in steps:
             verse_data = {}
-            if step.verse_id:
-                try:
-                    verse = await db.get(GitaVerse, step.verse_id)
-                    if verse:
-                        verse_data = {
-                            "verse_text": verse.english,
-                            "verse_translation": verse.transliteration,
-                            "verse_chapter": verse.chapter,
-                            "verse_number": verse.verse,
-                        }
-                except Exception:
-                    # Continue without verse data if lookup fails
-                    pass
+            if step.verse_id and step.verse_id in verses_map:
+                verse = verses_map[step.verse_id]
+                verse_data = {
+                    "verse_text": verse.english,
+                    "verse_translation": verse.transliteration,
+                    "verse_chapter": verse.chapter,
+                    "verse_number": verse.verse,
+                }
 
             steps_with_verses.append(
                 JourneyStepResponse(
@@ -374,9 +417,13 @@ async def mark_step_complete(
     journey_id: str,
     body: MarkStepCompleteRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> JourneyStepResponse:
-    """Mark a journey step as complete and update progress."""
+    """Mark a journey step as complete and update progress.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()
@@ -426,9 +473,13 @@ async def mark_step_complete(
 async def pause_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> JourneyResponse:
-    """Pause an active wisdom journey."""
+    """Pause an active wisdom journey.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()
@@ -491,9 +542,13 @@ async def pause_journey(
 async def resume_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> JourneyResponse:
-    """Resume a paused wisdom journey."""
+    """Resume a paused wisdom journey.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()
@@ -556,9 +611,13 @@ async def resume_journey(
 async def delete_journey(
     journey_id: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible),
+    access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, str]:
-    """Soft delete a wisdom journey."""
+    """Soft delete a wisdom journey.
+
+    Requires Wisdom Journeys subscription access.
+    """
+    user_id, _, _ = access
 
     try:
         service = WisdomJourneyService()

@@ -1,42 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, Play, Pause, Trash2, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Loader2, Play, Pause, Trash2, ArrowLeft, LogIn } from 'lucide-react'
 import { JourneyRecommendations } from '@/components/wisdom-journey/JourneyRecommendations'
 import { JourneyTimeline } from '@/components/wisdom-journey/JourneyTimeline'
 import { VerseCard } from '@/components/wisdom-journey/VerseCard'
 import { ProgressModal } from '@/components/wisdom-journey/ProgressModal'
 import type { WisdomJourney, JourneyRecommendation, JourneyStep } from '@/types/wisdomJourney.types'
 import * as wisdomJourneyService from '@/services/wisdomJourneyService'
+import { useAuth } from '@/hooks/useAuth'
 
 type View = 'overview' | 'recommendations' | 'journey' | 'step'
 
-/**
- * Generate or retrieve a persistent user ID for the Wisdom Journey feature.
- * In production, this should come from Firebase auth or an auth context.
- */
-function getOrCreateUserId(): string {
-  if (typeof window === 'undefined') return 'demo-user'
-
-  // Try multiple localStorage keys for compatibility
-  const storedId = localStorage.getItem('user_id') ||
-                   localStorage.getItem('mindvibe_user_id') ||
-                   localStorage.getItem('mindvibe_uid')
-
-  if (storedId && storedId !== 'undefined' && storedId !== 'null') {
-    return storedId
-  }
-
-  // Generate a new user ID if none exists
-  const newUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-  localStorage.setItem('user_id', newUserId)
-  localStorage.setItem('mindvibe_user_id', newUserId)
-
-  return newUserId
-}
-
 export default function WisdomJourneyClient() {
-  const [userId, setUserId] = useState<string>('demo-user')
+  const router = useRouter()
+  const { user, isAuthenticated, loading: authLoading } = useAuth()
+
   const [view, setView] = useState<View>('overview')
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -46,16 +26,19 @@ export default function WisdomJourneyClient() {
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Initialize user ID on mount
-  useEffect(() => {
-    const id = getOrCreateUserId()
-    setUserId(id)
-  }, [])
+  // Get authenticated user ID - no fake IDs allowed
+  const userId = user?.id || null
 
-  // Load active journey and recommendations
+  // Load active journey and recommendations when authenticated
   useEffect(() => {
-    // Allow loading even for demo users
-    if (!userId) return
+    // Wait for auth to finish loading
+    if (authLoading) return
+
+    // If not authenticated, stop loading but don't fetch data
+    if (!userId) {
+      setLoading(false)
+      return
+    }
 
     const loadData = async () => {
       try {
@@ -91,7 +74,7 @@ export default function WisdomJourneyClient() {
     }
 
     loadData()
-  }, [userId])
+  }, [userId, authLoading])
 
   const handleStartJourney = async (template: string, title: string) => {
     if (!userId) return
@@ -215,13 +198,40 @@ export default function WisdomJourneyClient() {
     }
   }
 
-  // Loading State
-  if (loading) {
+  // Loading State (auth loading or data loading)
+  if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900/30 to-orange-900/20">
         <div className="text-center">
           <Loader2 className="mx-auto h-12 w-12 animate-spin text-orange-500" />
           <p className="mt-4 text-lg text-orange-100/70">Loading your wisdom journey...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Authentication Required State
+  if (!isAuthenticated || !userId) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900/30 to-orange-900/20">
+        <div className="max-w-md rounded-2xl border border-white/10 bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-8 text-center backdrop-blur-sm">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-orange-500/20 to-purple-600/20">
+            <LogIn className="h-8 w-8 text-orange-400" />
+          </div>
+          <h2 className="mb-3 text-2xl font-bold text-orange-50">Sign In Required</h2>
+          <p className="mb-6 text-orange-100/70">
+            Wisdom Journeys is a personalized feature that tracks your spiritual growth.
+            Please sign in to begin or continue your journey through Bhagavad Gita wisdom.
+          </p>
+          <button
+            onClick={() => router.push('/account')}
+            className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-purple-600 px-6 py-3 font-semibold text-white transition-all duration-200 hover:from-orange-600 hover:to-purple-700"
+          >
+            Sign In to Continue
+          </button>
+          <p className="mt-4 text-sm text-orange-100/50">
+            Your journey progress is securely stored and encrypted.
+          </p>
         </div>
       </div>
     )

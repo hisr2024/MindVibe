@@ -187,6 +187,10 @@ async def check_wisdom_journeys_access(
 ) -> tuple[bool, int, int]:
     """Check if a user has access to Wisdom Journeys and their current usage.
 
+    Enforces:
+    - Journey limit per tier (FREE=1, BASIC=1, PREMIUM=5, ENTERPRISE=unlimited)
+    - Trial day limit for FREE tier (3 days max per journey)
+
     Args:
         db: Database session.
         user_id: The user's ID.
@@ -200,11 +204,12 @@ async def check_wisdom_journeys_access(
     tier = await get_user_tier(db, user_id)
     journey_limit = get_wisdom_journeys_limit(tier)
 
-    # No access for free tier (limit = 0)
+    # No access if limit is 0
     if journey_limit == 0:
         return False, 0, 0
 
     # Count active journeys for this user
+    active_count = 0
     try:
         from backend.models import UserJourney, UserJourneyStatus
 
@@ -217,6 +222,28 @@ async def check_wisdom_journeys_access(
         result = await db.execute(stmt)
         active_journeys = list(result.scalars().all())
         active_count = len(active_journeys)
+
+        # Check trial day enforcement for free tier
+        is_trial = is_wisdom_journeys_trial(tier)
+        if is_trial and active_journeys:
+            trial_days = get_wisdom_journeys_trial_days(tier)
+            if trial_days > 0:
+                now = datetime.now(UTC)
+                for journey in active_journeys:
+                    # Check if journey has exceeded trial days
+                    if journey.started_at:
+                        days_active = (now - journey.started_at).days
+                        if days_active > trial_days:
+                            # Auto-pause journeys that exceed trial limit
+                            journey.status = UserJourneyStatus.PAUSED
+                            logger.info(
+                                f"Trial journey {journey.id} paused after {days_active} days "
+                                f"(limit: {trial_days} days)"
+                            )
+                            active_count -= 1
+
+                await db.commit()
+
     except Exception as e:
         logger.warning(f"Failed to count active journeys: {e}")
         active_count = 0

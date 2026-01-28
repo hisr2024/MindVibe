@@ -12,6 +12,7 @@ from typing import Any
 
 from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import with_for_update
 
 from backend.models import (
     WisdomJourney,
@@ -236,6 +237,9 @@ class WisdomJourneyService:
         """
         Mark a journey step as complete and update progress.
 
+        Uses SELECT FOR UPDATE to prevent race conditions when two
+        requests try to complete the same step simultaneously.
+
         Args:
             db: Database session
             journey_id: Journey ID
@@ -247,20 +251,27 @@ class WisdomJourneyService:
         Returns:
             Updated JourneyStep or None if not found
         """
-        # Get step
+        # Get step with FOR UPDATE lock to prevent race conditions
         result = await db.execute(
-            select(JourneyStep).where(
+            select(JourneyStep)
+            .where(
                 and_(
                     JourneyStep.journey_id == journey_id,
                     JourneyStep.step_number == step_number,
                     JourneyStep.deleted_at.is_(None),
                 )
             )
+            .with_for_update()
         )
         step = result.scalar_one_or_none()
         if not step:
             logger.warning(f"Step {step_number} not found for journey {journey_id}")
             return None
+
+        # Idempotency check: if already completed, return current state
+        if step.completed:
+            logger.info(f"Step {step_number} already completed for journey {journey_id}")
+            return step
 
         # Update step
         step.completed = True
@@ -272,8 +283,13 @@ class WisdomJourneyService:
         if user_rating is not None:
             step.user_rating = max(1, min(5, user_rating))  # Clamp to 1-5
 
-        # Update journey progress
-        journey = await self.get_journey(db, journey_id)
+        # Get journey with FOR UPDATE lock for progress update
+        journey_result = await db.execute(
+            select(WisdomJourney)
+            .where(WisdomJourney.id == journey_id)
+            .with_for_update()
+        )
+        journey = journey_result.scalar_one_or_none()
         if journey:
             journey.current_step = step_number
             journey.progress_percentage = int((step_number / journey.total_steps) * 100)

@@ -31,30 +31,59 @@ class Settings(BaseSettings):
     @field_validator("SECRET_KEY")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
-        """Ensure SECRET_KEY is not using default value in production."""
+        """Ensure SECRET_KEY is secure, especially in production.
+
+        Requirements:
+        - Production: Must be set via environment variable, minimum 32 characters
+        - Production: MUST NOT use default development key (hard failure)
+        - Development: Warning only, allows default key for convenience
+
+        Generate secure key with: python -c 'import secrets; print(secrets.token_urlsafe(64))'
+        """
         import warnings
         import logging
 
-        if os.getenv("ENVIRONMENT") == "production":
-            if v == "dev-secret-key-change-in-production" or len(v) < 32:
-                # Log critical warning but allow startup to proceed
-                # This prevents deployment failures when environment variables haven't been synced yet
-                critical_msg = (
-                    "CRITICAL SECURITY WARNING: SECRET_KEY is not set to a secure value! "
-                    "The application is running with an insecure SECRET_KEY. "
-                    "Please set SECRET_KEY environment variable immediately. "
-                    "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(64))'"
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_production = environment in ("production", "prod")
+
+        if is_production:
+            # SECURITY: Hard failure in production with insecure key
+            if v == "dev-secret-key-change-in-production":
+                error_msg = (
+                    "SECURITY ERROR: SECRET_KEY must be set in production! "
+                    "Cannot start application with default development key. "
+                    "Set SECRET_KEY environment variable with: "
+                    "python -c 'import secrets; print(secrets.token_urlsafe(64))'"
                 )
-                logging.critical(critical_msg)
-                warnings.warn(critical_msg, UserWarning)
-                # Return the value to allow startup, but this should be fixed ASAP
-                return v
+                logging.critical(error_msg)
+                raise ValueError(error_msg)
+
+            if len(v) < 32:
+                error_msg = (
+                    f"SECURITY ERROR: SECRET_KEY too short ({len(v)} chars). "
+                    "Minimum 32 characters required for production. "
+                    "Generate with: python -c 'import secrets; print(secrets.token_urlsafe(64))'"
+                )
+                logging.critical(error_msg)
+                raise ValueError(error_msg)
+
+            # Warn if key looks weak (no special characters, all same case, etc.)
+            has_mixed_case = any(c.isupper() for c in v) and any(c.islower() for c in v)
+            has_special = any(not c.isalnum() for c in v)
+            if not (has_mixed_case or has_special):
+                warnings.warn(
+                    "SECRET_KEY appears weak (no mixed case or special characters). "
+                    "Consider using a stronger key generated with secrets.token_urlsafe(64).",
+                    UserWarning
+                )
+
         elif v == "dev-secret-key-change-in-production":
             warnings.warn(
                 "Using default SECRET_KEY. This is only safe for development. "
                 "Set a secure SECRET_KEY for production.",
                 UserWarning
             )
+
         return v
     
     # Session settings

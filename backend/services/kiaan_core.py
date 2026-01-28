@@ -38,6 +38,7 @@ from backend.services.gita_service import GitaService
 from backend.services.openai_optimizer import openai_optimizer, TokenLimitExceededError
 from backend.services.redis_cache_enhanced import redis_cache
 from backend.services.wisdom_kb import WisdomKnowledgeBase
+from backend.services.ai.providers.provider_manager import get_provider_manager, AIProviderError
 
 # Divine Consciousness Integration for sacred atmosphere
 from backend.services.kiaan_divine_integration import kiaan_divine, get_divine_system_prompt
@@ -376,6 +377,10 @@ class KIAANCore:
         self.gita_service = GitaService()
         self.wisdom_kb = WisdomKnowledgeBase()
 
+        # Multi-provider support with automatic fallback (v3.1)
+        # Uses ProviderManager for OpenAI, Sarvam, and OpenAI-compatible providers
+        self._provider_manager = None  # Lazy init to avoid import issues
+
         # Indian Gita Sources - Authentic teachings and practices from Bhagavad Gita
         self.gita_sources = indian_gita_sources
 
@@ -393,6 +398,17 @@ class KIAANCore:
         # Track offline mode status
         self._offline_mode = False
         self._last_connectivity_check = None
+
+    @property
+    def provider_manager(self):
+        """Lazy initialization of provider manager for multi-provider fallback."""
+        if self._provider_manager is None:
+            try:
+                self._provider_manager = get_provider_manager()
+            except Exception as e:
+                logger.warning(f"Failed to initialize ProviderManager: {e}")
+                self._provider_manager = None
+        return self._provider_manager
 
     def get_quick_gita_wisdom(self, mood: str) -> dict[str, Any]:
         """
@@ -856,80 +872,114 @@ EXAMPLES:
         # Step 2: Build wisdom context from verses
         wisdom_context = self._build_verse_context(verses)
 
-        # Step 3: Generate response with GPT-4o-mini, incorporating verses
+        # Step 3: Generate response with multi-provider fallback (v3.1)
+        # Priority: ProviderManager (OpenAI/Sarvam/Compatible) -> Legacy OpenAI -> Offline
         system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": message}
+        ]
 
-        try:
-            # Use optimizer for automatic retries and enhanced error handling
-            # Reduced max_tokens from 400 to 250 for faster spontaneous responses
-            response = await self.optimizer.create_completion_with_retry(
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message}
-                ],
-                model="gpt-4o-mini",  # Upgraded from gpt-4
-                temperature=0.7,
-                max_tokens=250,  # Reduced from 400 for faster responses
-                stream=stream
-            )
+        response_text = None
+        provider_used = None
+        model_used = None
 
-            if stream:
-                # Return streaming response
+        # For streaming, use legacy optimizer (ProviderManager doesn't support streaming yet)
+        if stream:
+            try:
+                response = await self.optimizer.create_completion_with_retry(
+                    messages=messages,
+                    model="gpt-4o-mini",
+                    temperature=0.7,
+                    max_tokens=250,
+                    stream=True
+                )
                 return {
                     "stream": response,
                     "verses_used": [v.get("verse_id", "") for v in verses[:3]],
                     "context": context
                 }
+            except Exception as e:
+                logger.error(f"KIAAN Core: Streaming failed: {e}")
+                # Fall through to non-streaming fallback
 
-            # Safe access to response with null checks
-            # Note: Using response_msg to avoid shadowing the 'message' parameter
-            response_text = None
-            if response and response.choices and len(response.choices) > 0:
-                response_msg = response.choices[0].message
-                if response_msg:
-                    response_text = response_msg.content
-            if not response_text:
-                response_text = self.optimizer.get_fallback_response(context)
+        # Try ProviderManager first (multi-provider with automatic fallback)
+        try:
+            if self.provider_manager:
+                logger.info("KIAAN Core: Using ProviderManager for multi-provider fallback")
+                provider_response = await self.provider_manager.chat(
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=250,
+                )
+                response_text = provider_response.content
+                provider_used = provider_response.provider
+                model_used = provider_response.model
+                logger.info(f"KIAAN Core: Response from {provider_used}/{model_used}")
+            else:
+                raise AIProviderError("ProviderManager not available", provider="none", retryable=True)
 
-        except TokenLimitExceededError as e:
-            logger.error(f"KIAAN Core: Token limit exceeded: {e}")
-            # Try with smaller context
-            verses = verses[:5]  # Reduce to 5 verses
-            wisdom_context = self._build_verse_context(verses)
-            system_prompt = self._build_system_prompt(wisdom_context, message, context)
+        except (AIProviderError, Exception) as provider_error:
+            logger.warning(f"KIAAN Core: ProviderManager failed: {provider_error}, trying legacy optimizer")
 
+            # Fallback to legacy OpenAI optimizer
             try:
                 response = await self.optimizer.create_completion_with_retry(
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": message}
-                    ],
+                    messages=messages,
                     model="gpt-4o-mini",
                     temperature=0.7,
-                    max_tokens=400
+                    max_tokens=250,
+                    stream=False
                 )
-                # Safe access to response with null checks
-                response_text = None
-                if response and response.choices and len(response.choices) > 0:
-                    message = response.choices[0].message
-                    if message:
-                        response_text = message.content
-                if not response_text:
-                    response_text = self.optimizer.get_fallback_response(context)
-            except Exception as retry_error:
-                logger.error(f"KIAAN Core: Retry failed: {retry_error}")
-                response_text = self.optimizer.get_fallback_response(context)
 
-        except Exception as e:
-            logger.error(f"KIAAN Core: OpenAI error: {type(e).__name__}: {e}")
-            # Try offline fallback before using hardcoded response
+                # Safe access to response with null checks
+                if response and response.choices and len(response.choices) > 0:
+                    response_msg = response.choices[0].message
+                    if response_msg:
+                        response_text = response_msg.content
+                        provider_used = "openai"
+                        model_used = "gpt-4o-mini"
+
+            except TokenLimitExceededError as e:
+                logger.error(f"KIAAN Core: Token limit exceeded: {e}")
+                # Try with smaller context
+                verses = verses[:5]
+                wisdom_context = self._build_verse_context(verses)
+                system_prompt = self._build_system_prompt(wisdom_context, message, context)
+
+                try:
+                    response = await self.optimizer.create_completion_with_retry(
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": message}
+                        ],
+                        model="gpt-4o-mini",
+                        temperature=0.7,
+                        max_tokens=400
+                    )
+                    if response and response.choices and len(response.choices) > 0:
+                        response_msg = response.choices[0].message
+                        if response_msg:
+                            response_text = response_msg.content
+                            provider_used = "openai"
+                            model_used = "gpt-4o-mini"
+                except Exception as retry_error:
+                    logger.error(f"KIAAN Core: Retry failed: {retry_error}")
+
+            except Exception as e:
+                logger.error(f"KIAAN Core: OpenAI error: {type(e).__name__}: {e}")
+
+        # If still no response, try offline fallback
+        if not response_text:
             try:
-                logger.info("Attempting offline fallback after API error")
+                logger.info("KIAAN Core: All providers failed, attempting offline fallback")
                 offline_response = await self.get_offline_response(message, context, language)
                 return offline_response
             except Exception as offline_error:
                 logger.error(f"Offline fallback also failed: {offline_error}")
                 response_text = self.optimizer.get_fallback_response(context)
+                provider_used = "fallback"
+                model_used = "hardcoded"
 
         # Step 4: Validate response (lightweight check only - no retry for speed)
         validation = self._validate_kiaan_response_fast(response_text)
@@ -959,7 +1009,8 @@ EXAMPLES:
             "verses_used": [v.get("verse_id", "") for v in verses[:3]],
             "validation": validation,
             "context": context,
-            "model": "gpt-4o-mini",
+            "model": model_used or "gpt-4o-mini",
+            "provider": provider_used or "openai",
             "token_optimized": True,
             "cached": False  # This is a fresh response, not from cache
         }
