@@ -84,6 +84,56 @@ except ImportError as e:
     WORLD_CLASS_SPEECH_AVAILABLE = False
     logging.getLogger(__name__).warning(f"World-class speech modules not available: {e}")
 
+# Perfect Pronunciation & Multi-Language Support
+try:
+    from backend.services.kiaan_pronunciation_languages import (
+        # Sanskrit Pronunciation
+        SanskritPhoneme,
+        VedicAccent,
+        Chandas,
+        SanskritShloka,
+        SACRED_SHLOKAS,
+        CHANDAS_PATTERNS,
+        convert_to_ipa,
+        generate_shloka_ssml,
+        add_sanskrit_phonemes,
+        # Multi-language
+        IndianLanguage,
+        LANGUAGE_CONFIGS,
+        get_language_greeting,
+        generate_multilingual_ssml,
+        # Regional Accents
+        RegionalAccent,
+        ACCENT_PROFILES,
+        apply_regional_accent,
+        # Natural Voice
+        VocalQuality,
+        PitchContour,
+        VOCAL_QUALITY_PRESETS,
+        PITCH_CONTOURS,
+        apply_pitch_contour,
+        add_natural_disfluencies,
+        # Vedic Chanting
+        ChantingMode,
+        VedicChant,
+        VEDIC_PEACE_CHANTS,
+        generate_vedic_chant_ssml,
+        # Human Qualities
+        EmotionalContagion,
+        PersonalityTrait,
+        KIAAN_PERSONALITIES,
+        GENTLE_HUMOR_PATTERNS,
+        WARMTH_EXPRESSIONS,
+        apply_emotional_contagion,
+        add_personality_voice,
+        # Integration
+        create_perfect_pronunciation_ssml,
+    )
+    PRONUNCIATION_LANGUAGES_AVAILABLE = True
+except ImportError as e:
+    PRONUNCIATION_LANGUAGES_AVAILABLE = False
+    logging.getLogger(__name__).warning(f"Pronunciation & languages module not available: {e}")
+
 logger = logging.getLogger(__name__)
 
 
@@ -2476,6 +2526,308 @@ Speak soul to soul. Let the divine flow through your words."""
             status["supported_languages"] = self._divine_speech.get_supported_languages()
 
         return status
+
+    # =========================================================================
+    # PERFECT PRONUNCIATION & MULTI-LANGUAGE METHODS
+    # =========================================================================
+
+    def format_sanskrit_shloka(
+        self,
+        shloka_key: str,
+        include_meaning: bool = True,
+        voice_gender: str = "male",
+        chanting_style: str = "traditional"
+    ) -> str:
+        """
+        Format a Sanskrit shloka with perfect pronunciation for TTS.
+
+        Uses IPA phoneme mapping and Vedic accent markers for authentic
+        recitation that honors the sacred texts.
+
+        Args:
+            shloka_key: Key for pre-defined shlokas (e.g., "karmanye_vadhikaraste")
+            include_meaning: Whether to include English meaning after shloka
+            voice_gender: "male" or "female" voice
+            chanting_style: "traditional", "meditative", or "devotional"
+
+        Returns:
+            SSML-formatted text with perfect Sanskrit pronunciation
+
+        Example:
+            >>> ssml = divine_voice.format_sanskrit_shloka(
+            ...     "karmanye_vadhikaraste",
+            ...     include_meaning=True,
+            ...     voice_gender="male",
+            ...     chanting_style="meditative"
+            ... )
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            logger.warning("Pronunciation module not available, returning basic format")
+            return f"<speak>{shloka_key}</speak>"
+
+        shloka = SACRED_SHLOKAS.get(shloka_key)
+        if not shloka:
+            logger.warning(f"Shloka '{shloka_key}' not found in database")
+            return f"<speak>{shloka_key}</speak>"
+
+        return generate_shloka_ssml(
+            shloka=shloka,
+            include_meaning=include_meaning,
+            voice_gender=voice_gender,
+            chanting_style=chanting_style
+        )
+
+    def format_with_perfect_pronunciation(
+        self,
+        text: str,
+        phase: ConversationPhase,
+        emotional_state: EmotionalState,
+        language: Optional[str] = None,
+        accent: Optional[str] = None,
+        is_shloka: bool = False,
+        voice_gender: str = "female",
+        personality: str = "wise_sage"
+    ) -> str:
+        """
+        Format text with perfect pronunciation, language, and accent support.
+
+        This enhanced method combines:
+        - Sanskrit pronunciation with IPA phonemes
+        - Multi-language support (Hindi, Tamil, Telugu, etc.)
+        - Regional Indian accent variations
+        - Emotional contagion and personality expression
+        - Natural voice features
+
+        Args:
+            text: Text to format
+            phase: Current conversation phase
+            emotional_state: User's emotional state
+            language: Optional language code (e.g., "hi" for Hindi)
+            accent: Optional regional accent (e.g., "tamil_english")
+            is_shloka: Whether text contains Sanskrit shlokas
+            voice_gender: "male" or "female"
+            personality: Personality profile ("wise_sage", "nurturing_mother", etc.)
+
+        Returns:
+            SSML-formatted text with all pronunciation enhancements
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            # Fall back to standard format
+            return self.format_for_divine_voice(
+                text, phase, emotional_state,
+                include_breathing=True, gender=voice_gender
+            )
+
+        # Map string to enum if needed
+        lang_enum = None
+        accent_enum = None
+
+        if language:
+            try:
+                lang_enum = IndianLanguage(language)
+            except ValueError:
+                logger.warning(f"Unknown language code: {language}")
+
+        if accent:
+            try:
+                accent_enum = RegionalAccent(accent)
+            except ValueError:
+                logger.warning(f"Unknown accent: {accent}")
+
+        # Determine chandas if it's a shloka
+        chandas = None
+        if is_shloka:
+            # Default to Anushtup (most common meter)
+            chandas = Chandas.ANUSHTUP
+
+        # Get emotion as string
+        emotion_str = emotional_state.value
+
+        # Use the integrated pronunciation function
+        enhanced_ssml = create_perfect_pronunciation_ssml(
+            text=text,
+            language=lang_enum,
+            accent=accent_enum,
+            is_shloka=is_shloka,
+            chandas=chandas,
+            voice_gender=voice_gender,
+            personality=personality,
+            emotion=emotion_str,
+            emotion_intensity=0.5
+        )
+
+        # Wrap in speak tags
+        return f"<speak>{enhanced_ssml}</speak>"
+
+    def generate_vedic_chant(
+        self,
+        chant_key: str,
+        repetitions: int = 1,
+        include_meaning: bool = True,
+        voice_gender: str = "male"
+    ) -> str:
+        """
+        Generate SSML for a Vedic peace chant (shanti mantra).
+
+        Perfect for opening/closing meditation sessions or providing
+        sacred comfort during difficult moments.
+
+        Args:
+            chant_key: Key for pre-defined chants
+                       ("shanti_mantra_1", "shanti_mantra_2", "gayatri", "mahamrityunjaya")
+            repetitions: Number of times to repeat the chant
+            include_meaning: Include English meaning
+            voice_gender: "male" or "female"
+
+        Returns:
+            SSML-formatted text for sacred chanting
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            return "<speak>Om Shanti Shanti Shanti</speak>"
+
+        chant = VEDIC_PEACE_CHANTS.get(chant_key)
+        if not chant:
+            logger.warning(f"Vedic chant '{chant_key}' not found")
+            return "<speak>Om Shanti Shanti Shanti</speak>"
+
+        ssml = generate_vedic_chant_ssml(
+            chant=chant,
+            repetitions=repetitions,
+            include_meaning=include_meaning,
+            voice_gender=voice_gender
+        )
+
+        return f"<speak>{ssml}</speak>"
+
+    def get_language_greeting(self, language: str) -> str:
+        """
+        Get a native language greeting for KIAAN.
+
+        Args:
+            language: Language code (e.g., "hi", "ta", "te", "bn")
+
+        Returns:
+            Native greeting in the specified language
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            return "Namaste, I am KIAAN"
+
+        try:
+            lang_enum = IndianLanguage(language)
+            return get_language_greeting(lang_enum)
+        except ValueError:
+            return "Namaste, I am KIAAN"
+
+    def get_supported_languages(self) -> List[Dict[str, str]]:
+        """
+        Get list of supported languages for multi-language voice.
+
+        Returns:
+            List of dictionaries with language code, name, and native name
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            return [{"code": "en", "name": "English", "native_name": "English"}]
+
+        languages = []
+        for lang in IndianLanguage:
+            config = LANGUAGE_CONFIGS.get(lang)
+            if config:
+                languages.append({
+                    "code": config.code,
+                    "name": config.name,
+                    "native_name": config.native_name,
+                    "script": config.script,
+                })
+
+        return languages
+
+    def get_supported_accents(self) -> List[Dict[str, str]]:
+        """
+        Get list of supported regional Indian accents.
+
+        Returns:
+            List of dictionaries with accent code, name, and region
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            return []
+
+        accents = []
+        for accent in RegionalAccent:
+            profile = ACCENT_PROFILES.get(accent)
+            if profile:
+                accents.append({
+                    "code": accent.value,
+                    "name": profile.name,
+                    "region": profile.region,
+                })
+
+        return accents
+
+    def get_available_shlokas(self) -> List[Dict[str, str]]:
+        """
+        Get list of available pre-defined Sanskrit shlokas.
+
+        Returns:
+            List with shloka key, source, and meaning preview
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            return []
+
+        shlokas = []
+        for key, shloka in SACRED_SHLOKAS.items():
+            shlokas.append({
+                "key": key,
+                "source": shloka.source,
+                "reference": shloka.chapter_verse,
+                "meaning_preview": shloka.meaning[:100] + "..." if len(shloka.meaning) > 100 else shloka.meaning,
+            })
+
+        return shlokas
+
+    def get_available_vedic_chants(self) -> List[Dict[str, str]]:
+        """
+        Get list of available Vedic peace chants.
+
+        Returns:
+            List with chant key, name, source, and purpose
+        """
+        if not PRONUNCIATION_LANGUAGES_AVAILABLE:
+            return []
+
+        chants = []
+        for key, chant in VEDIC_PEACE_CHANTS.items():
+            chants.append({
+                "key": key,
+                "name": chant.name,
+                "source": chant.source,
+                "recitation_notes": chant.recitation_notes or "Sacred peace chant",
+            })
+
+        return chants
+
+    def get_pronunciation_status(self) -> Dict[str, Any]:
+        """
+        Get status of pronunciation and language features.
+
+        Returns comprehensive information about available capabilities.
+        """
+        return {
+            "pronunciation_available": PRONUNCIATION_LANGUAGES_AVAILABLE,
+            "features": {
+                "sanskrit_ipa": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "vedic_accents": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "multi_language": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "regional_accents": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "vedic_chanting": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "natural_voice": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "emotional_contagion": PRONUNCIATION_LANGUAGES_AVAILABLE,
+                "personality_expression": PRONUNCIATION_LANGUAGES_AVAILABLE,
+            },
+            "supported_languages": self.get_supported_languages(),
+            "supported_accents": self.get_supported_accents(),
+            "available_shlokas": len(SACRED_SHLOKAS) if PRONUNCIATION_LANGUAGES_AVAILABLE else 0,
+            "available_chants": len(VEDIC_PEACE_CHANTS) if PRONUNCIATION_LANGUAGES_AVAILABLE else 0,
+        }
 
 
 # Singleton instance
