@@ -162,7 +162,7 @@ class TestKiaanProtection:
         
         # KIAAN contract preserved
         assert data["bot"] == "KIAAN"
-        assert data["version"] == "13.0"
+        assert data["version"] == "15.0"
         
         # Security headers present
         assert response.headers.get("X-Content-Type-Options") == "nosniff"

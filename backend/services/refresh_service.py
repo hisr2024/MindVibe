@@ -53,6 +53,7 @@ async def create_refresh_token(
         session_id=session_id,
         token_hash=hashed,
         expires_at=expires_at,
+        parent_id=parent.id if parent else None,
     )
     db.add(row)
     await db.commit()
@@ -71,7 +72,14 @@ async def get_refresh_token_by_raw(db: AsyncSession, raw: str) -> RefreshToken |
 
 
 def is_expired(token: RefreshToken) -> bool:
-    return bool(token.expires_at < datetime.now(UTC))
+    """Check if a token is expired. Handles both timezone-aware and naive datetimes."""
+    now = datetime.now(UTC)
+    expires_at = token.expires_at
+    # Handle SQLite test environment which may return naive datetimes
+    if expires_at.tzinfo is None:
+        # Treat naive datetime as UTC
+        expires_at = expires_at.replace(tzinfo=UTC)
+    return bool(expires_at < now)
 
 
 async def mark_rotated(db: AsyncSession, token: RefreshToken) -> None:
