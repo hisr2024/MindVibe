@@ -18,7 +18,12 @@ import re
 
 from backend.deps import get_db, get_current_user_flexible
 from backend.middleware.rate_limiter import limiter
-from backend.services.tts_service import get_tts_service, VoiceType
+from backend.services.tts_service import (
+    get_tts_service,
+    get_tts_health_status,
+    get_tts_provider_quality_info,
+    VoiceType
+)
 
 # Rate limit for voice synthesis (resource-intensive)
 VOICE_RATE_LIMIT = "10/minute"
@@ -47,12 +52,15 @@ def _sanitize_filename(value: str) -> str:
 # ===== Pydantic Models =====
 
 class SynthesizeRequest(BaseModel):
-    """Request to synthesize text to speech"""
+    """Request to synthesize text to speech with ULTRA-NATURAL voice settings"""
     text: str = Field(..., min_length=1, max_length=5000, description="Text to synthesize")
     language: str = Field("en", description="Language code (en, hi, ta, etc.)")
-    voice_type: VoiceType = Field("friendly", description="Voice persona")
-    speed: float = Field(0.9, ge=0.5, le=2.0, description="Speaking rate")
-    pitch: float = Field(0.0, ge=-20.0, le=20.0, description="Voice pitch")
+    voice_type: VoiceType = Field("friendly", description="Voice persona (calm, wisdom, friendly)")
+    # Speed defaults match VOICE_TYPE_SETTINGS in tts_service.py:
+    # calm=0.92, wisdom=0.94, friendly=0.97
+    # Using None as default so backend applies voice type-specific defaults
+    speed: Optional[float] = Field(None, ge=0.5, le=2.0, description="Speaking rate (defaults to voice type optimal)")
+    pitch: Optional[float] = Field(None, ge=-20.0, le=20.0, description="Voice pitch (defaults to voice type optimal)")
 
 
 class VerseSynthesizeRequest(BaseModel):
@@ -521,6 +529,35 @@ async def clear_voice_cache(
         "status": "success",
         "message": "Voice cache cleared"
     }
+
+
+@router.get("/health")
+async def get_voice_health() -> dict:
+    """
+    Get voice system health status.
+
+    Returns:
+        - Overall health status (healthy/degraded/limited/unavailable)
+        - Active TTS provider and quality tier
+        - Available features (emotion detection, SSML, offline support)
+
+    This endpoint helps the frontend:
+    1. Display voice quality indicators to users
+    2. Show appropriate messages during fallback scenarios
+    3. Decide whether to enable/disable voice features
+    """
+    return get_tts_health_status()
+
+
+@router.get("/quality")
+async def get_voice_quality_info() -> dict:
+    """
+    Get detailed voice quality information.
+
+    Returns quality scores and feature availability for each TTS provider.
+    Useful for debugging and displaying quality indicators.
+    """
+    return get_tts_provider_quality_info()
 
 
 # ===== Elite Voice Query Endpoint =====
@@ -1141,3 +1178,386 @@ async def process_enhanced_voice_query(
                 "error": str(e)
             }
         }
+
+
+# =============================================================================
+# KIAAN DIVINE VOICE CONVERSATION - Alexa/Siri-like Sacred Experience
+# =============================================================================
+
+from backend.services.kiaan_divine_voice import (
+    get_divine_voice_service,
+    ConversationPhase,
+    EmotionalState
+)
+
+
+class DivineConversationStartRequest(BaseModel):
+    """Request to start a divine voice conversation."""
+    language: str = Field("en", description="Language code")
+    voice_preference: str = Field("calm", description="Voice preference: calm, wisdom, friendly")
+
+
+class DivineConversationMessageRequest(BaseModel):
+    """Request for a message in divine voice conversation."""
+    session_id: str = Field(..., description="Conversation session ID")
+    message: str = Field(..., min_length=1, max_length=2000, description="User's voice message")
+    language: str = Field("en", description="Language code")
+    include_breathing: bool = Field(True, description="Include breathing pauses in response")
+    include_practice: bool = Field(False, description="Include guided practice")
+    voice_features: Optional[dict] = Field(None, description="Voice analysis features (pitch, speed)")
+
+
+@router.post("/conversation/start")
+async def start_divine_conversation(
+    payload: DivineConversationStartRequest,
+    user_id: str = Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    Start a new divine voice conversation session.
+
+    This creates an immersive, Alexa/Siri-like conversation experience
+    with KIAAN, infused with the calming wisdom of Bhagavad Gita.
+
+    Returns:
+        - session_id: Unique conversation session identifier
+        - greeting: Divine welcome message
+        - ssml: SSML-formatted greeting for TTS
+        - voice_settings: Optimal voice prosody for the greeting
+    """
+    logger.info(f"Starting divine voice conversation for user {user_id}")
+
+    divine_voice = get_divine_voice_service()
+
+    # Create conversation context
+    context = divine_voice.create_conversation(user_id)
+
+    # Generate divine greeting
+    greeting_response = divine_voice.generate_greeting(context)
+
+    # Get TTS audio for the greeting
+    tts_service = get_tts_service()
+    voice_settings = greeting_response["voice_settings"]
+
+    audio_bytes = tts_service.synthesize_with_emotion(
+        text=greeting_response["response_text"],
+        language=payload.language,
+        voice_type="calm",
+        emotion="peace",
+        speed=voice_settings["speed"],
+        add_emphasis=True,
+        breathing_simulation=True
+    )
+
+    # Encode audio as base64 for response (optional)
+    import base64
+    audio_base64 = base64.b64encode(audio_bytes).decode() if audio_bytes else None
+
+    return {
+        "session_id": context.session_id,
+        "greeting": greeting_response["response_text"],
+        "ssml": greeting_response["ssml_text"],
+        "voice_settings": {
+            "speed": voice_settings["speed"],
+            "pitch": voice_settings["pitch"],
+            "volume": voice_settings["volume"],
+            "voice_type": "calm",
+        },
+        "audio_base64": audio_base64,
+        "phase": "greeting",
+        "message": "Divine conversation started. KIAAN is ready to listen."
+    }
+
+
+@router.post("/conversation/message")
+@limiter.limit(VOICE_RATE_LIMIT)
+async def send_divine_conversation_message(
+    request: Request,
+    payload: DivineConversationMessageRequest,
+    user_id: str = Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    Send a message in the divine voice conversation.
+
+    This endpoint:
+    1. Analyzes the user's emotional state from their message
+    2. Gets KIAAN wisdom response rooted in Bhagavad Gita
+    3. Formats the response for divine, calming voice delivery
+    4. Returns both text and SSML for TTS synthesis
+
+    The response is optimized for VOICE delivery - concise, flowing,
+    with natural pauses and a serene, divine tone.
+    """
+    import time
+    start_time = time.time()
+
+    logger.info(f"Divine voice message from user {user_id}: {payload.message[:50]}...")
+
+    divine_voice = get_divine_voice_service()
+
+    # Get or create conversation context
+    context = divine_voice.get_conversation(payload.session_id)
+    if not context:
+        # Create new context if session expired
+        context = divine_voice.create_conversation(user_id, payload.session_id)
+
+    try:
+        # Import KIAAN Core for wisdom generation
+        from backend.services.kiaan_core import kiaan_core
+
+        # Get divine system prompt for voice-optimized response
+        divine_prompt = divine_voice.get_divine_system_prompt(context)
+
+        # Get KIAAN wisdom response
+        kiaan_result = await kiaan_core.get_kiaan_response(
+            message=payload.message,
+            user_id=user_id,
+            db=db,
+            context="voice_divine",
+            stream=False,
+            language=payload.language,
+            custom_system_prompt=divine_prompt
+        )
+
+        wisdom_response = kiaan_result.get("response", "I am here with you. Share what's on your heart. 💙")
+
+        # Generate divine voice response
+        divine_response = await divine_voice.generate_divine_response(
+            user_message=payload.message,
+            context=context,
+            kiaan_wisdom=wisdom_response,
+            include_breathing=payload.include_breathing,
+            include_practice=payload.include_practice
+        )
+
+        # Get TTS audio
+        tts_service = get_tts_service()
+        voice_settings = divine_response["voice_settings"]
+
+        audio_bytes = tts_service.synthesize_with_emotion(
+            text=divine_response["response_text"],
+            language=payload.language,
+            voice_type="calm",
+            emotion=divine_response["emotional_state"],
+            speed=voice_settings["speed"],
+            pitch=voice_settings["pitch"],
+            add_emphasis=True,
+            breathing_simulation=payload.include_breathing
+        )
+
+        # Encode audio
+        import base64
+        audio_base64 = base64.b64encode(audio_bytes).decode() if audio_bytes else None
+
+        processing_time = int((time.time() - start_time) * 1000)
+
+        return {
+            "session_id": payload.session_id,
+            "response": divine_response["response_text"],
+            "ssml": divine_response["ssml_text"],
+            "voice_settings": {
+                "speed": voice_settings["speed"],
+                "pitch": voice_settings["pitch"],
+                "volume": voice_settings["volume"],
+                "voice_type": "calm",
+            },
+            "audio_base64": audio_base64,
+            "emotional_analysis": {
+                "state": divine_response["emotional_state"],
+                "intensity": divine_response["emotional_intensity"],
+            },
+            "phase": divine_response["phase"],
+            "message_count": divine_response["message_count"],
+            "verses_used": kiaan_result.get("verses_used", []),
+            "metrics": {
+                "processing_ms": processing_time,
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Divine conversation error: {e}", exc_info=True)
+
+        # Return a compassionate fallback response
+        fallback_text = """I sense a moment of disconnection...
+
+*... breathe ...*
+
+Let's pause here together. Sometimes the divine speaks through silence.
+
+Take a gentle breath... and when you're ready, share again.
+
+I am here, listening with an open heart. 💙"""
+
+        return {
+            "session_id": payload.session_id,
+            "response": fallback_text,
+            "ssml": divine_voice.format_for_divine_voice(
+                fallback_text,
+                ConversationPhase.ACKNOWLEDGING,
+                EmotionalState.NEUTRAL,
+                True
+            ),
+            "voice_settings": {
+                "speed": 0.88,
+                "pitch": -1.0,
+                "volume": "soft",
+                "voice_type": "calm",
+            },
+            "audio_base64": None,
+            "emotional_analysis": {
+                "state": "neutral",
+                "intensity": 0.5,
+            },
+            "phase": "acknowledging",
+            "error": str(e)
+        }
+
+
+@router.post("/conversation/end")
+async def end_divine_conversation(
+    session_id: str,
+    user_id: str = Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    End a divine voice conversation with a blessing.
+
+    Returns a sacred farewell message to close the conversation
+    with grace and love.
+    """
+    logger.info(f"Ending divine conversation {session_id} for user {user_id}")
+
+    divine_voice = get_divine_voice_service()
+
+    context = divine_voice.get_conversation(session_id)
+    if not context:
+        return {
+            "session_id": session_id,
+            "farewell": "Go in peace, dear one. May serenity be your companion. 💙",
+            "error": "Session not found"
+        }
+
+    # Generate divine farewell
+    farewell_response = divine_voice.generate_farewell(context)
+
+    # Get TTS audio
+    tts_service = get_tts_service()
+    voice_settings = farewell_response["voice_settings"]
+
+    audio_bytes = tts_service.synthesize_with_emotion(
+        text=farewell_response["response_text"],
+        language="en",
+        voice_type="calm",
+        emotion="peace",
+        speed=voice_settings["speed"],
+        add_emphasis=True,
+        breathing_simulation=True
+    )
+
+    import base64
+    audio_base64 = base64.b64encode(audio_bytes).decode() if audio_bytes else None
+
+    return {
+        "session_id": session_id,
+        "farewell": farewell_response["response_text"],
+        "ssml": farewell_response["ssml_text"],
+        "voice_settings": {
+            "speed": voice_settings["speed"],
+            "pitch": voice_settings["pitch"],
+            "volume": voice_settings["volume"],
+            "voice_type": "calm",
+        },
+        "audio_base64": audio_base64,
+        "conversation_summary": {
+            "messages": context.message_count,
+            "duration_seconds": (context.last_interaction - context.started_at).seconds,
+            "topics": context.topics_discussed,
+            "emotional_journey": context.emotional_state.value,
+        }
+    }
+
+
+@router.post("/conversation/breathe")
+async def divine_breathing_moment(
+    session_id: Optional[str] = None,
+    emotional_state: str = "neutral",
+    user_id: str = Depends(get_current_user_flexible)
+) -> dict:
+    """
+    Generate a divine breathing moment.
+
+    A standalone guided breathing exercise that can be used
+    independently or within a conversation.
+    """
+    divine_voice = get_divine_voice_service()
+
+    # Convert emotional state string to enum
+    try:
+        emotion = EmotionalState(emotional_state)
+    except ValueError:
+        emotion = EmotionalState.NEUTRAL
+
+    breathing_text = divine_voice._generate_breathing_practice(emotion)
+
+    # Format for voice
+    ssml_text = divine_voice.format_for_divine_voice(
+        breathing_text,
+        ConversationPhase.PRACTICING,
+        emotion,
+        include_breathing=True
+    )
+
+    # Get TTS audio
+    tts_service = get_tts_service()
+    audio_bytes = tts_service.synthesize_guided_meditation(
+        script=breathing_text,
+        language="en",
+        include_long_pauses=True
+    )
+
+    import base64
+    audio_base64 = base64.b64encode(audio_bytes).decode() if audio_bytes else None
+
+    return {
+        "breathing_guide": breathing_text,
+        "ssml": ssml_text,
+        "voice_settings": {
+            "speed": 0.80,
+            "pitch": -2.0,
+            "volume": "soft",
+            "voice_type": "calm",
+        },
+        "audio_base64": audio_base64,
+        "duration_estimate_seconds": 45,
+    }
+
+
+@router.get("/conversation/{session_id}/status")
+async def get_conversation_status(
+    session_id: str,
+    user_id: str = Depends(get_current_user_flexible)
+) -> dict:
+    """
+    Get the current status of a divine conversation.
+    """
+    divine_voice = get_divine_voice_service()
+    context = divine_voice.get_conversation(session_id)
+
+    if not context:
+        return {
+            "session_id": session_id,
+            "active": False,
+            "error": "Session not found"
+        }
+
+    return {
+        "session_id": session_id,
+        "active": True,
+        "phase": context.phase.value,
+        "emotional_state": context.emotional_state.value,
+        "emotional_intensity": context.emotional_intensity,
+        "message_count": context.message_count,
+        "started_at": context.started_at.isoformat(),
+        "last_interaction": context.last_interaction.isoformat(),
+    }
