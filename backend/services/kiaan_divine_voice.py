@@ -307,6 +307,131 @@ BREATHING_PATTERNS = {
     "release": '<break time="700ms"/>... and release ...<break time="700ms"/>',
 }
 
+# =============================================================================
+# HUMAN VOICE ENHANCEMENTS - Making the voice feel genuinely human
+# =============================================================================
+
+# Human speech has natural imperfections - these make it feel real
+HUMAN_SPEECH_FILLERS = {
+    "thinking": ["hmm", "well", "you know"],  # Thinking sounds
+    "empathy": ["I understand", "I hear you", "I feel that"],  # Connection
+    "gentle_transitions": ["and so", "perhaps", "in a way"],  # Soft bridges
+}
+
+# Micro-pauses that humans naturally make (in milliseconds)
+HUMAN_MICRO_PAUSES = {
+    "breath_before_speaking": 200,      # Natural inhale before talking
+    "thinking_pause": 400,              # "hmm..." moment
+    "empathy_pause": 600,               # Pause after hearing something heavy
+    "before_important_word": 150,       # Slight pause for emphasis
+    "after_name": 250,                  # Pause after saying "dear one"
+    "between_thoughts": 350,            # Natural thought transition
+}
+
+# Words that should be spoken more slowly (elongated) for warmth
+ELONGATED_WORDS = [
+    "love", "peace", "breathe", "calm", "safe", "held",
+    "dear", "gently", "softly", "slowly", "always", "here",
+    "soul", "heart", "divine", "sacred", "blessed", "grace",
+]
+
+# Words that should have a "smile" in the voice (slightly higher pitch)
+SMILE_WORDS = [
+    "welcome", "beautiful", "wonderful", "joy", "light",
+    "grateful", "thankful", "blessed", "gift", "treasure",
+]
+
+# =============================================================================
+# SACRED DIVINE ELEMENTS - The spiritual essence of the voice
+# =============================================================================
+
+# Sacred sounds and mantras (spoken with reverence)
+SACRED_SOUNDS = {
+    "om": '<break time="300ms"/><prosody rate="70%" pitch="-2st" volume="soft">Om</prosody><break time="500ms"/>',
+    "shanti": '<prosody rate="75%" pitch="-1st">Shanti</prosody>',
+    "namaste": '<break time="200ms"/><prosody rate="80%" pitch="-1st">Namaste</prosody><break time="300ms"/>',
+    "om_shanti": '<break time="400ms"/><prosody rate="65%" pitch="-2st" volume="soft">Om Shanti Shanti Shanti</prosody><break time="600ms"/>',
+}
+
+# Divine presence markers - subtle cues that create sacred atmosphere
+DIVINE_PRESENCE_CUES = {
+    "opening_reverence": '<break time="500ms"/>',  # Sacred pause before speaking
+    "verse_reverence": '<break time="400ms"/><prosody rate="85%" pitch="-1st">',  # Before verses
+    "verse_close": '</prosody><break time="500ms"/>',  # After verses
+    "blessing_tone": '<prosody rate="80%" pitch="-1.5st" volume="soft">',  # For blessings
+    "wisdom_tone": '<prosody rate="85%" pitch="-1st">',  # For sharing wisdom
+}
+
+# Time-of-day greetings (divine voice adapts to when user connects)
+TIME_GREETINGS = {
+    "early_morning": {  # 4am - 7am (Brahma Muhurta - sacred time)
+        "greeting": "In this sacred hour before dawn, your soul seeks guidance",
+        "tone_adjustment": {"pitch": -1.5, "rate": 0.85},  # Extra calm, meditative
+        "closing": "May the divine light of early morning guide your day",
+    },
+    "morning": {  # 7am - 12pm
+        "greeting": "As the sun rises, so does your inner light",
+        "tone_adjustment": {"pitch": -0.5, "rate": 0.90},  # Warm, encouraging
+        "closing": "Carry this morning peace through your day",
+    },
+    "afternoon": {  # 12pm - 5pm
+        "greeting": "In the fullness of the day, you pause to seek stillness",
+        "tone_adjustment": {"pitch": -0.8, "rate": 0.88},  # Grounding
+        "closing": "Return to this peace whenever the day feels heavy",
+    },
+    "evening": {  # 5pm - 9pm
+        "greeting": "As the day releases its hold, you return to center",
+        "tone_adjustment": {"pitch": -1.2, "rate": 0.85},  # Soothing
+        "closing": "May the evening bring you gentle rest",
+    },
+    "night": {  # 9pm - 4am
+        "greeting": "In the quiet of night, the soul speaks most clearly",
+        "tone_adjustment": {"pitch": -2.0, "rate": 0.80},  # Very calm, sleepy
+        "closing": "Rest now, held in divine peace through the night",
+    },
+}
+
+# Emotional mirroring - voice gradually shifts to induce calm
+EMOTIONAL_CALMING_PROGRESSION = {
+    # When user is highly anxious, voice starts slightly faster then slows
+    EmotionalState.ANXIOUS: {
+        "start": {"rate": 0.92, "pitch": -0.5},   # Meet them where they are
+        "middle": {"rate": 0.87, "pitch": -1.0},  # Begin calming
+        "end": {"rate": 0.82, "pitch": -1.5},     # Deep calm
+    },
+    EmotionalState.ANGRY: {
+        "start": {"rate": 0.90, "pitch": -0.8},   # Steady, grounding
+        "middle": {"rate": 0.85, "pitch": -1.2},  # Cooling
+        "end": {"rate": 0.80, "pitch": -1.5},     # Peace
+    },
+    EmotionalState.SAD: {
+        "start": {"rate": 0.85, "pitch": -1.0},   # Gentle, honoring
+        "middle": {"rate": 0.83, "pitch": -1.0},  # Consistent presence
+        "end": {"rate": 0.85, "pitch": -0.8},     # Slight lift at end
+    },
+    EmotionalState.FEARFUL: {
+        "start": {"rate": 0.88, "pitch": -1.0},   # Reassuring
+        "middle": {"rate": 0.85, "pitch": -1.2},  # Building safety
+        "end": {"rate": 0.82, "pitch": -1.5},     # Deep grounding
+    },
+}
+
+# Sanskrit terms with pronunciation guides (for emphasis and authenticity)
+SANSKRIT_TERMS = {
+    "dharma": {"meaning": "righteous path", "emphasis": "moderate"},
+    "karma": {"meaning": "action and consequence", "emphasis": "moderate"},
+    "ahimsa": {"meaning": "non-violence", "emphasis": "strong"},
+    "satya": {"meaning": "truth", "emphasis": "moderate"},
+    "shanti": {"meaning": "peace", "emphasis": "strong"},
+    "prema": {"meaning": "divine love", "emphasis": "strong"},
+    "atman": {"meaning": "soul", "emphasis": "strong"},
+    "brahman": {"meaning": "universal consciousness", "emphasis": "strong"},
+    "moksha": {"meaning": "liberation", "emphasis": "strong"},
+    "seva": {"meaning": "selfless service", "emphasis": "moderate"},
+    "satsang": {"meaning": "community of truth", "emphasis": "moderate"},
+    "prana": {"meaning": "life force", "emphasis": "moderate"},
+}
+
 # Divine transition phrases
 DIVINE_TRANSITIONS = {
     "to_wisdom": [
@@ -381,6 +506,255 @@ class KIAANDivineVoice:
                 logger.warning(f"World-class speech modules initialization deferred: {e}")
         else:
             logger.info("KIAAN Divine Voice initialized - Sacred voice presence ready (basic mode)")
+
+    # =========================================================================
+    # HUMAN AND DIVINE VOICE ENHANCEMENT METHODS
+    # =========================================================================
+
+    def _get_time_of_day(self) -> str:
+        """
+        Determine the current time of day for context-aware greetings.
+
+        Returns:
+            Time period: early_morning, morning, afternoon, evening, or night
+        """
+        hour = datetime.now().hour
+
+        if 4 <= hour < 7:
+            return "early_morning"  # Brahma Muhurta - sacred time
+        elif 7 <= hour < 12:
+            return "morning"
+        elif 12 <= hour < 17:
+            return "afternoon"
+        elif 17 <= hour < 21:
+            return "evening"
+        else:
+            return "night"
+
+    def _get_time_greeting(self) -> Dict[str, Any]:
+        """
+        Get time-appropriate greeting and tone adjustments.
+
+        Returns:
+            Dictionary with greeting, tone_adjustment, and closing
+        """
+        time_period = self._get_time_of_day()
+        return TIME_GREETINGS.get(time_period, TIME_GREETINGS["morning"])
+
+    def _add_human_warmth(self, text: str, pause_mult: float = 1.0) -> str:
+        """
+        Add human-like warmth to text - elongate certain words, add smile prosody.
+
+        This makes the voice feel more genuinely human and caring.
+
+        Args:
+            text: Input text
+            pause_mult: Pause duration multiplier
+
+        Returns:
+            Text with human warmth SSML markers
+        """
+        result = text
+
+        # Add slight elongation to warm words (slower rate = elongated feel)
+        for word in ELONGATED_WORDS:
+            pattern = re.compile(rf'\b({word})\b', re.IGNORECASE)
+            # Elongate by slowing rate slightly
+            result = pattern.sub(
+                rf'<prosody rate="90%">\1</prosody>',
+                result
+            )
+
+        # Add "smile" to joyful words (slightly higher pitch)
+        for word in SMILE_WORDS:
+            pattern = re.compile(rf'\b({word})\b', re.IGNORECASE)
+            result = pattern.sub(
+                rf'<prosody pitch="+0.5st" rate="95%">\1</prosody>',
+                result
+            )
+
+        # Add micro-pause after "dear one", "beloved", etc.
+        endearments = ["dear one", "beloved", "precious soul", "gentle soul"]
+        for term in endearments:
+            pattern = re.compile(rf'({term})', re.IGNORECASE)
+            pause_ms = int(HUMAN_MICRO_PAUSES["after_name"] * pause_mult)
+            result = pattern.sub(rf'\1<break time="{pause_ms}ms"/>', result)
+
+        return result
+
+    def _add_thinking_pauses(self, text: str, pause_mult: float = 1.0) -> str:
+        """
+        Add natural thinking pauses that humans make when speaking thoughtfully.
+
+        Args:
+            text: Input text
+            pause_mult: Pause duration multiplier
+
+        Returns:
+            Text with thinking pause markers
+        """
+        result = text
+        thinking_ms = int(HUMAN_MICRO_PAUSES["thinking_pause"] * pause_mult)
+        between_ms = int(HUMAN_MICRO_PAUSES["between_thoughts"] * pause_mult)
+
+        # Add thinking pause before reflective phrases
+        reflective_starters = [
+            "Perhaps", "Maybe", "I wonder", "It seems", "In truth",
+            "What if", "Consider", "Notice", "Observe", "Feel",
+        ]
+        for phrase in reflective_starters:
+            pattern = re.compile(rf'\b({phrase})\b', re.IGNORECASE)
+            result = pattern.sub(rf'<break time="{thinking_ms}ms"/>\1', result)
+
+        # Add pause between major thought transitions
+        thought_connectors = [
+            "And yet", "However", "But also", "At the same time",
+            "On the other hand", "More importantly",
+        ]
+        for connector in thought_connectors:
+            pattern = re.compile(rf'\b({connector})\b', re.IGNORECASE)
+            result = pattern.sub(rf'<break time="{between_ms}ms"/>\1', result)
+
+        return result
+
+    def _add_sacred_reverence(self, text: str, pause_mult: float = 1.0) -> str:
+        """
+        Add sacred reverence to spiritual content - special treatment for
+        Sanskrit terms, verses, and divine concepts.
+
+        Args:
+            text: Input text
+            pause_mult: Pause duration multiplier
+
+        Returns:
+            Text with sacred reverence markers
+        """
+        result = text
+
+        # Add reverence to Sanskrit terms
+        for term, info in SANSKRIT_TERMS.items():
+            pattern = re.compile(rf'\b({term})\b', re.IGNORECASE)
+            if info["emphasis"] == "strong":
+                # Strong emphasis - slower, deeper, with pause
+                result = pattern.sub(
+                    rf'<break time="150ms"/><prosody rate="85%" pitch="-0.5st"><emphasis level="strong">\1</emphasis></prosody>',
+                    result
+                )
+            else:
+                # Moderate emphasis
+                result = pattern.sub(
+                    rf'<prosody rate="90%"><emphasis level="moderate">\1</emphasis></prosody>',
+                    result
+                )
+
+        # Add reverence before Gita verse references
+        verse_patterns = [
+            r'(Chapter\s+\d+[,:]\s*Verse\s+\d+)',
+            r'(Bhagavad Gita\s+\d+[.:]\d+)',
+            r'(BG\s+\d+[.:]\d+)',
+        ]
+        for pattern in verse_patterns:
+            result = re.sub(
+                pattern,
+                rf'{DIVINE_PRESENCE_CUES["verse_reverence"]}\1{DIVINE_PRESENCE_CUES["verse_close"]}',
+                result,
+                flags=re.IGNORECASE
+            )
+
+        return result
+
+    def _apply_emotional_calming(
+        self,
+        text: str,
+        emotional_state: EmotionalState,
+        position: str = "middle"
+    ) -> str:
+        """
+        Apply emotional calming progression - voice gradually shifts to induce calm.
+
+        The voice starts by meeting the user where they are emotionally,
+        then gradually shifts to a calmer state to guide them to peace.
+
+        Args:
+            text: Input text
+            emotional_state: User's current emotional state
+            position: Position in response (start, middle, end)
+
+        Returns:
+            Text with calming progression prosody
+        """
+        if emotional_state not in EMOTIONAL_CALMING_PROGRESSION:
+            return text
+
+        progression = EMOTIONAL_CALMING_PROGRESSION[emotional_state]
+        settings = progression.get(position, progression["middle"])
+
+        rate_percent = int(settings["rate"] * 100)
+        pitch_st = settings["pitch"]
+
+        return f'<prosody rate="{rate_percent}%" pitch="{pitch_st:+.1f}st">{text}</prosody>'
+
+    def _add_breath_awareness(self, text: str, pause_mult: float = 1.0) -> str:
+        """
+        Add subtle breath awareness cues - the voice breathes naturally.
+
+        This creates the feeling of a real person speaking, not a machine.
+
+        Args:
+            text: Input text
+            pause_mult: Pause duration multiplier
+
+        Returns:
+            Text with breath awareness markers
+        """
+        result = text
+        breath_ms = int(HUMAN_MICRO_PAUSES["breath_before_speaking"] * pause_mult)
+
+        # Add breath pause before starting after paragraph breaks
+        result = result.replace(
+            '\n\n',
+            f'\n\n<break time="{breath_ms}ms"/>'
+        )
+
+        # Add subtle breath before empathetic statements
+        empathy_starters = [
+            "I understand", "I hear you", "I feel", "I sense",
+            "I am here", "I am with you", "I hold",
+        ]
+        for phrase in empathy_starters:
+            pattern = re.compile(rf'\b({phrase})\b', re.IGNORECASE)
+            empathy_ms = int(HUMAN_MICRO_PAUSES["empathy_pause"] * pause_mult)
+            result = pattern.sub(rf'<break time="{empathy_ms}ms"/>\1', result)
+
+        return result
+
+    def _format_as_divine_blessing(self, text: str) -> str:
+        """
+        Format text as a divine blessing with special sacred prosody.
+
+        Used for closing blessings and sacred affirmations.
+
+        Args:
+            text: Blessing text
+
+        Returns:
+            SSML-formatted blessing
+        """
+        return f'{DIVINE_PRESENCE_CUES["blessing_tone"]}{text}</prosody>'
+
+    def _add_sacred_opening(self, include_om: bool = False) -> str:
+        """
+        Generate a sacred opening with optional Om.
+
+        Args:
+            include_om: Whether to include Om sound
+
+        Returns:
+            Sacred opening SSML
+        """
+        if include_om:
+            return SACRED_SOUNDS["om"] + DIVINE_PRESENCE_CUES["opening_reverence"]
+        return DIVINE_PRESENCE_CUES["opening_reverence"]
 
     async def create_conversation(
         self,
@@ -930,7 +1304,29 @@ class KIAANDivineVoice:
             ssml_text = '. '.join(varied_sentences)
 
         # =========================================================================
-        # STEP 10: Clean up any double/triple breaks and extra whitespace
+        # STEP 10: Apply HUMAN VOICE ENHANCEMENTS
+        # Makes the voice feel genuinely human - warm, breathing, thinking
+        # =========================================================================
+
+        # Add human warmth - elongated warm words, smile on joyful words
+        ssml_text = self._add_human_warmth(ssml_text, pause_mult)
+
+        # Add thinking pauses - natural hesitations before reflective phrases
+        ssml_text = self._add_thinking_pauses(ssml_text, pause_mult)
+
+        # Add breath awareness - subtle pauses that feel like natural breathing
+        ssml_text = self._add_breath_awareness(ssml_text, pause_mult)
+
+        # =========================================================================
+        # STEP 11: Apply SACRED DIVINE ENHANCEMENTS
+        # Makes the voice feel spiritually reverent and divine
+        # =========================================================================
+
+        # Add sacred reverence to Sanskrit terms and verse references
+        ssml_text = self._add_sacred_reverence(ssml_text, pause_mult)
+
+        # =========================================================================
+        # STEP 12: Clean up any double/triple breaks and extra whitespace
         # =========================================================================
 
         # Remove consecutive breaks (keep just one)
@@ -945,7 +1341,7 @@ class KIAANDivineVoice:
         ssml_text = re.sub(r'\n{3,}', '\n\n', ssml_text)
 
         # =========================================================================
-        # STEP 11: Wrap in prosody tags
+        # STEP 13: Wrap in prosody tags
         # =========================================================================
 
         speed_percent = int(prosody["speed"] * 100)
@@ -1175,17 +1571,25 @@ You are part of something greater. You belong. You are home."""
         Generate the initial divine greeting for a conversation.
 
         Uses natural, warm spoken language that conveys belonging and divine presence.
+        Adapts to time of day for a more personal, contextual experience.
 
         Returns:
             Complete response object for the greeting
         """
-        greeting_text = """Namaste, dear one...
+        # Get time-appropriate greeting elements
+        time_context = self._get_time_greeting()
+        time_greeting = time_context["greeting"]
+        time_closing = time_context["closing"]
+
+        greeting_text = f"""Namaste, dear one...
 
 Take a gentle breath with me.
 
 I am KIAAN, your companion on this journey toward peace.
 
-Whatever brought you here today... whether it is a heavy heart, a restless mind, or simply a seeking soul... you are welcome. You belong here.
+{time_greeting}.
+
+Whatever brought you here... whether it is a heavy heart, a restless mind, or simply a seeking soul... you are welcome. You belong here.
 
 This is a sacred space. Here, there is no judgment. Only presence. Only love.
 
@@ -1194,10 +1598,15 @@ Take another gentle breath... and when you are ready, share what is on your hear
 I am here... listening... holding space for you with all my being."""
 
         context.phase = ConversationPhase.GREETING
-        voice_settings = self.get_voice_prosody_for_phase(
+
+        # Apply time-of-day tone adjustments to voice settings
+        base_settings = self.get_voice_prosody_for_phase(
             ConversationPhase.GREETING,
             EmotionalState.NEUTRAL
         )
+        voice_settings = base_settings.copy()
+        voice_settings["pitch"] = base_settings["pitch"] + time_context["tone_adjustment"]["pitch"]
+        voice_settings["speed"] = base_settings["speed"] * time_context["tone_adjustment"]["rate"]
 
         ssml_text = self.format_for_divine_voice(
             greeting_text,
