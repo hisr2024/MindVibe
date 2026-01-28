@@ -148,9 +148,10 @@ class TestChatbotService:
     def test_get_conversation_history_exists(self, chatbot_service):
         """Test retrieving existing conversation history."""
         session_id = "test-session-3"
-        chatbot_service.conversation_histories[session_id] = [
-            {"role": "user", "content": "Hello", "timestamp": "2024-01-01T00:00:00"}
-        ]
+        # Use the internal store's append method as conversation_histories is a read-only view
+        chatbot_service._conversation_store.append(
+            session_id, {"role": "user", "content": "Hello", "timestamp": "2024-01-01T00:00:00"}
+        )
 
         history = chatbot_service.get_conversation_history(session_id)
         assert len(history) == 1
@@ -164,9 +165,10 @@ class TestChatbotService:
     def test_clear_conversation_exists(self, chatbot_service):
         """Test clearing existing conversation."""
         session_id = "test-session-4"
-        chatbot_service.conversation_histories[session_id] = [
-            {"role": "user", "content": "Test"}
-        ]
+        # Use the internal store's append method as conversation_histories is a read-only view
+        chatbot_service._conversation_store.append(
+            session_id, {"role": "user", "content": "Test"}
+        )
 
         result = chatbot_service.clear_conversation(session_id)
         assert result is True
@@ -179,8 +181,13 @@ class TestChatbotService:
 
     def test_get_active_sessions(self, chatbot_service):
         """Test getting list of active sessions."""
-        chatbot_service.conversation_histories["session-1"] = []
-        chatbot_service.conversation_histories["session-2"] = []
+        # Use the internal store's append method as conversation_histories is a read-only view
+        chatbot_service._conversation_store.append(
+            "session-1", {"role": "user", "content": "Test 1"}
+        )
+        chatbot_service._conversation_store.append(
+            "session-2", {"role": "user", "content": "Test 2"}
+        )
 
         sessions = chatbot_service.get_active_sessions()
         assert len(sessions) == 2

@@ -21,10 +21,12 @@ class TestRateLimiter:
     def rate_limiter(self):
         """Create rate limiter instance for testing."""
         from backend.services.kiaan_resilience import RateLimiter, RateLimitConfig
+        # burst_size must be >= requests_per_minute for immediate burst testing
+        # Otherwise token bucket limits immediate requests to burst_size
         config = RateLimitConfig(
             requests_per_minute=5,
             requests_per_hour=20,
-            burst_size=2
+            burst_size=5  # Allow 5 immediate requests in test
         )
         return RateLimiter(config)
 
@@ -242,9 +244,13 @@ class TestAuditLogging:
     @pytest.mark.asyncio
     async def test_audit_concurrent_writes_safe(self):
         """Test that concurrent audit writes don't corrupt data."""
-        from backend.services.kiaan_audit import AuditLogHandler, AuditEvent, AuditEventType
+        from backend.services.kiaan_audit import (
+            AuditLogHandler, AuditEvent, AuditEventType, AuditSeverity
+        )
+        from datetime import datetime, timezone
         import tempfile
         import os
+        import uuid
 
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.log') as f:
             log_path = f.name
@@ -260,10 +266,14 @@ class TestAuditLogging:
             # Simulate concurrent writes
             async def write_event(i):
                 event = AuditEvent(
+                    id=str(uuid.uuid4()),
+                    timestamp=datetime.now(timezone.utc),
                     event_type=AuditEventType.USER_REQUEST,
+                    severity=AuditSeverity.INFO,
                     user_id=f"user_{i}",
                     session_id=f"session_{i}",
-                    data={"message": f"test_{i}"}
+                    message=f"Test message {i}",
+                    details={"test_data": f"test_{i}"}
                 )
                 await handler.write(event)
 
