@@ -65,6 +65,25 @@ except ImportError as e:
     VOICE_LEARNING_AVAILABLE = False
     logging.getLogger(__name__).warning(f"Voice learning modules not available: {e}")
 
+# World-Class Speech Modules Integration
+try:
+    from backend.services.speech_modules.divine_speech_integration import (
+        DivineSpeechIntegration,
+        DivineSynthesisConfig,
+        DivineVoiceMode,
+        get_divine_speech_integration,
+        synthesize_divine_voice,
+    )
+    from backend.services.speech_modules.models import (
+        SpeechSynthesisResult,
+        SpeechRecognitionResult,
+        VoiceQuality,
+    )
+    WORLD_CLASS_SPEECH_AVAILABLE = True
+except ImportError as e:
+    WORLD_CLASS_SPEECH_AVAILABLE = False
+    logging.getLogger(__name__).warning(f"World-class speech modules not available: {e}")
+
 logger = logging.getLogger(__name__)
 
 
@@ -325,7 +344,7 @@ class KIAANDivineVoice:
     """
 
     def __init__(self):
-        """Initialize the Divine Voice service with Voice Learning integration."""
+        """Initialize the Divine Voice service with Voice Learning and World-Class Speech integration."""
         self._conversations: Dict[str, ConversationContext] = {}
         self._response_cache: Dict[str, Dict] = {}
 
@@ -336,6 +355,10 @@ class KIAANDivineVoice:
         self._spiritual_memory: Optional[SpiritualMemoryService] = None
         self._quality_scoring: Optional[ConversationQualityService] = None
         self._multimodal_emotion: Optional[MultiModalEmotionService] = None
+
+        # World-Class Speech Modules Integration
+        self._divine_speech: Optional[DivineSpeechIntegration] = None
+        self._speech_initialized = False
 
         if VOICE_LEARNING_AVAILABLE:
             try:
@@ -348,6 +371,14 @@ class KIAANDivineVoice:
                 logger.info("KIAAN Divine Voice initialized with full Voice Learning integration")
             except Exception as e:
                 logger.warning(f"Voice Learning services partially available: {e}")
+
+        # Initialize World-Class Speech Modules
+        if WORLD_CLASS_SPEECH_AVAILABLE:
+            try:
+                self._divine_speech = get_divine_speech_integration()
+                logger.info("World-class speech modules integrated with KIAAN Divine Voice")
+            except Exception as e:
+                logger.warning(f"World-class speech modules initialization deferred: {e}")
         else:
             logger.info("KIAAN Divine Voice initialized - Sacred voice presence ready (basic mode)")
 
@@ -1563,6 +1594,274 @@ Speak soul to soul. Let the divine flow through your words."""
                 logger.warning(f"Failed to add spiritual context: {e}")
 
         return base_prompt + spiritual_context
+
+
+    # =========================================================================
+    # WORLD-CLASS SPEECH SYNTHESIS METHODS
+    # =========================================================================
+
+    async def _ensure_speech_initialized(self) -> bool:
+        """Ensure world-class speech modules are initialized."""
+        if self._speech_initialized:
+            return self._divine_speech is not None
+
+        if self._divine_speech and WORLD_CLASS_SPEECH_AVAILABLE:
+            try:
+                await self._divine_speech.initialize()
+                self._speech_initialized = True
+                logger.info("World-class speech modules fully initialized")
+                return True
+            except Exception as e:
+                logger.warning(f"Failed to initialize world-class speech: {e}")
+                return False
+
+        return False
+
+    async def synthesize_divine_audio(
+        self,
+        text: str,
+        context: ConversationContext,
+        include_breathing: bool = True
+    ) -> Optional[bytes]:
+        """
+        Synthesize speech using world-class open source providers.
+
+        Uses intelligent provider selection from:
+        - Coqui XTTS (Germany) - Neural TTS with voice cloning
+        - Silero (Russia) - Fast, efficient synthesis
+        - StyleTTS2 (Korea) - Expressive emotional synthesis
+        - Piper (France) - Low-latency local TTS
+        - Bark (USA) - Generative audio
+        - Plus fallbacks to edge-tts and pyttsx3
+
+        Args:
+            text: Text to synthesize
+            context: Conversation context for emotion and phase
+            include_breathing: Include breathing pauses
+
+        Returns:
+            Audio bytes (MP3/WAV) or None if synthesis fails
+        """
+        if not await self._ensure_speech_initialized():
+            logger.warning("World-class speech not available, falling back to basic TTS")
+            return None
+
+        try:
+            # Map conversation phase to divine voice mode
+            phase_to_mode = {
+                ConversationPhase.GREETING: DivineVoiceMode.CONVERSATION,
+                ConversationPhase.LISTENING: DivineVoiceMode.COMPASSIONATE,
+                ConversationPhase.ACKNOWLEDGING: DivineVoiceMode.COMPASSIONATE,
+                ConversationPhase.OFFERING_WISDOM: DivineVoiceMode.WISE,
+                ConversationPhase.PRACTICING: DivineVoiceMode.MEDITATION,
+                ConversationPhase.BLESSING: DivineVoiceMode.SERENE,
+            }
+            mode = phase_to_mode.get(context.phase, DivineVoiceMode.CONVERSATION)
+
+            # Map emotional state to synthesis emotion
+            emotion_map = {
+                EmotionalState.ANXIOUS: "compassion",
+                EmotionalState.SAD: "compassion",
+                EmotionalState.ANGRY: "peace",
+                EmotionalState.CONFUSED: "wisdom",
+                EmotionalState.HOPEFUL: "encouragement",
+                EmotionalState.PEACEFUL: "peace",
+                EmotionalState.SEEKING: "wisdom",
+                EmotionalState.GRATEFUL: "joy",
+                EmotionalState.NEUTRAL: "peace",
+                EmotionalState.FEARFUL: "compassion",
+                EmotionalState.LONELY: "compassion",
+            }
+            emotion = emotion_map.get(context.emotional_state, "peace")
+
+            # Create synthesis config
+            config = DivineSynthesisConfig(
+                mode=mode,
+                emotion=emotion,
+                intensity=context.emotional_intensity,
+                language=context.learned_preferences.get("language", "en"),
+                quality_tier=VoiceQuality.DIVINE,
+                use_neural_voices=True,
+                include_breathing=include_breathing,
+                include_pauses=True,
+                spiritual_emphasis=True,
+                user_id=context.user_id,
+                session_id=context.session_id,
+            )
+
+            # Synthesize with world-class providers
+            result = await self._divine_speech.synthesize_divine(text, config)
+
+            if result.success and result.audio_data:
+                logger.info(
+                    f"Divine audio synthesized: {len(result.audio_data)} bytes, "
+                    f"provider={result.provider_used}, quality={result.quality_score:.2f}"
+                )
+                return result.audio_data
+            else:
+                logger.warning(f"Divine synthesis failed: {result.error_message}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Divine audio synthesis error: {e}")
+            return None
+
+    async def synthesize_with_response(
+        self,
+        response_data: Dict[str, Any],
+        context: ConversationContext
+    ) -> Dict[str, Any]:
+        """
+        Synthesize audio for a complete divine response.
+
+        Takes the output from generate_divine_response and adds audio.
+
+        Args:
+            response_data: Response dict from generate_divine_response
+            context: Conversation context
+
+        Returns:
+            Response data with audio_data and audio_metadata added
+        """
+        result = response_data.copy()
+
+        # Synthesize audio
+        audio_data = await self.synthesize_divine_audio(
+            response_data["response_text"],
+            context,
+            include_breathing=response_data.get("phase") in ["practicing", "acknowledging"]
+        )
+
+        if audio_data:
+            result["audio_data"] = audio_data
+            result["audio_available"] = True
+            result["audio_metadata"] = {
+                "provider": "world_class_divine",
+                "format": "mp3",
+                "quality": "divine",
+            }
+        else:
+            result["audio_available"] = False
+            result["audio_metadata"] = {"error": "Synthesis unavailable"}
+
+        return result
+
+    async def recognize_user_speech(
+        self,
+        audio_data: bytes,
+        context: ConversationContext,
+        language: str = "en"
+    ) -> Optional[str]:
+        """
+        Recognize user speech using world-class STT providers.
+
+        Uses Whisper, Vosk, and other state-of-the-art recognizers.
+
+        Args:
+            audio_data: Raw audio bytes from user
+            context: Conversation context
+            language: Expected language code
+
+        Returns:
+            Transcribed text or None if recognition fails
+        """
+        if not await self._ensure_speech_initialized():
+            return None
+
+        try:
+            result = await self._divine_speech.recognize_speech(
+                audio_data=audio_data,
+                language=language,
+                user_id=context.user_id
+            )
+
+            if result.success:
+                logger.info(f"Speech recognized: {result.transcript[:50]}... (confidence: {result.confidence:.2f})")
+                return result.transcript
+            else:
+                logger.warning(f"Speech recognition failed: {result.error_message}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Speech recognition error: {e}")
+            return None
+
+    async def get_voice_conversation_response(
+        self,
+        user_audio: Optional[bytes],
+        user_text: Optional[str],
+        context: ConversationContext,
+        kiaan_wisdom: str,
+        language: str = "en"
+    ) -> Dict[str, Any]:
+        """
+        Complete voice conversation turn with STT and TTS.
+
+        Handles:
+        1. Speech recognition (if audio provided)
+        2. Emotional analysis
+        3. Response generation
+        4. Speech synthesis
+
+        Args:
+            user_audio: Optional user audio input
+            user_text: Optional user text input (fallback)
+            context: Conversation context
+            kiaan_wisdom: KIAAN's wisdom response
+            language: Language code
+
+        Returns:
+            Complete response with transcription, text response, and audio
+        """
+        # Step 1: Transcribe user audio if provided
+        transcribed_text = user_text
+        if user_audio:
+            transcribed = await self.recognize_user_speech(user_audio, context, language)
+            if transcribed:
+                transcribed_text = transcribed
+
+        if not transcribed_text:
+            return {
+                "success": False,
+                "error": "No user input received",
+            }
+
+        # Step 2: Generate divine response
+        response = await self.generate_divine_response(
+            user_message=transcribed_text,
+            context=context,
+            kiaan_wisdom=kiaan_wisdom,
+            include_breathing=True,
+            include_practice=context.emotional_intensity > 0.7
+        )
+
+        # Step 3: Synthesize audio for response
+        response_with_audio = await self.synthesize_with_response(response, context)
+
+        # Add transcription info
+        if user_audio:
+            response_with_audio["user_transcription"] = transcribed_text
+            response_with_audio["transcription_used"] = True
+
+        return response_with_audio
+
+    def get_world_class_speech_status(self) -> Dict[str, Any]:
+        """
+        Get status of world-class speech modules.
+
+        Returns information about available providers and capabilities.
+        """
+        status = {
+            "world_class_available": WORLD_CLASS_SPEECH_AVAILABLE,
+            "initialized": self._speech_initialized,
+        }
+
+        if self._divine_speech:
+            status["quality_metrics"] = self._divine_speech.get_quality_metrics()
+            status["available_modes"] = self._divine_speech.get_available_modes()
+            status["supported_languages"] = self._divine_speech.get_supported_languages()
+
+        return status
 
 
 # Singleton instance
