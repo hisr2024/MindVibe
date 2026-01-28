@@ -37,7 +37,12 @@ from .models import (
     SpeechProvider,
     SpeechRecognizer,
     DIVINE_VOICE_PROFILES,
+    DIVINE_FEMALE_VOICES,
+    DIVINE_MALE_VOICES,
     DIVINE_EMOTION_PROSODY,
+    NaturalSpeechEnhancement,
+    NATURAL_SPEECH_PRESETS,
+    DivineVoiceGender,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,6 +66,9 @@ class DivineSynthesisConfig:
     intensity: float = 0.7
     language: str = "en"
 
+    # Voice Gender Selection - NEW
+    gender: str = "female"      # "female", "male", or "neutral"
+
     # Quality preferences
     quality_tier: VoiceQuality = VoiceQuality.DIVINE
     use_neural_voices: bool = True
@@ -73,9 +81,14 @@ class DivineSynthesisConfig:
     warmth: Optional[float] = None
     breathiness: Optional[float] = None
 
+    # Natural Speech Enhancement - NEW
+    natural_speech: bool = True         # Enable natural speech enhancements
+    add_breath_sounds: bool = True      # Add natural breaths
+    human_like_variation: bool = True   # Add micro-variations for human feel
+
     # Content markers
     content_type: str = "conversation"
-    include_breathing: bool = False
+    include_breathing: bool = True      # Changed default to True
     include_pauses: bool = True
     spiritual_emphasis: bool = True
 
@@ -105,59 +118,140 @@ class DivineSpeechIntegration:
         self._total_quality_score = 0.0
         self._provider_usage: Dict[str, int] = {}
 
-        # Mode-specific configurations
-        self._mode_configs: Dict[DivineVoiceMode, Dict[str, Any]] = {
+        # Mode-specific configurations with gender support
+        # Female voice profiles (default - nurturing divine mother)
+        self._female_mode_configs: Dict[DivineVoiceMode, Dict[str, Any]] = {
             DivineVoiceMode.SERENE: {
-                "voice_profile": "kiaan_serene",
-                "speaking_rate": 0.88,
-                "pitch": -1.0,
-                "warmth": 0.8,
-                "breathiness": 0.2,
-                "pause_multiplier": 1.3,
+                "voice_profile": "shakti_serene",
+                "speaking_rate": 0.85,
+                "pitch": -0.8,
+                "warmth": 0.92,
+                "breathiness": 0.25,
+                "pause_multiplier": 1.4,
+                "natural_preset": "divine_natural",
             },
             DivineVoiceMode.WISE: {
-                "voice_profile": "kiaan_wise",
-                "speaking_rate": 0.92,
-                "pitch": -0.5,
-                "warmth": 0.6,
-                "breathiness": 0.1,
-                "pause_multiplier": 1.2,
-            },
-            DivineVoiceMode.COMPASSIONATE: {
-                "voice_profile": "kiaan_compassionate",
+                "voice_profile": "saraswati_wise",
                 "speaking_rate": 0.90,
                 "pitch": -0.3,
-                "warmth": 0.9,
-                "breathiness": 0.15,
+                "warmth": 0.7,
+                "breathiness": 0.12,
+                "pause_multiplier": 1.25,
+                "natural_preset": "divine_natural",
+            },
+            DivineVoiceMode.COMPASSIONATE: {
+                "voice_profile": "lakshmi_compassionate",
+                "speaking_rate": 0.87,
+                "pitch": -0.2,
+                "warmth": 0.95,
+                "breathiness": 0.2,
                 "pause_multiplier": 1.1,
+                "natural_preset": "divine_natural",
             },
             DivineVoiceMode.MEDITATION: {
-                "voice_profile": "kiaan_meditation",
-                "speaking_rate": 0.80,
-                "pitch": -2.0,
-                "warmth": 0.7,
-                "breathiness": 0.4,
-                "pause_multiplier": 1.8,
+                "voice_profile": "parvati_meditation",
+                "speaking_rate": 0.78,
+                "pitch": -1.5,
+                "warmth": 0.8,
+                "breathiness": 0.45,
+                "pause_multiplier": 2.0,
+                "natural_preset": "meditation_natural",
             },
             DivineVoiceMode.CONVERSATION: {
-                "voice_profile": "kiaan_serene",
-                "speaking_rate": 0.95,
-                "pitch": -0.3,
-                "warmth": 0.7,
-                "breathiness": 0.1,
+                "voice_profile": "shakti_serene",
+                "speaking_rate": 0.90,
+                "pitch": -0.5,
+                "warmth": 0.85,
+                "breathiness": 0.15,
                 "pause_multiplier": 1.0,
+                "natural_preset": "conversation_natural",
             },
             DivineVoiceMode.VERSE_RECITATION: {
-                "voice_profile": "kiaan_wise",
-                "speaking_rate": 0.85,
+                "voice_profile": "saraswati_wise",
+                "speaking_rate": 0.83,
                 "pitch": -1.0,
-                "warmth": 0.6,
+                "warmth": 0.75,
                 "breathiness": 0.2,
-                "pause_multiplier": 1.5,
+                "pause_multiplier": 1.6,
+                "natural_preset": "divine_natural",
             },
         }
 
-        logger.info("Divine Speech Integration initialized")
+        # Male voice profiles (wise sage divine father)
+        self._male_mode_configs: Dict[DivineVoiceMode, Dict[str, Any]] = {
+            DivineVoiceMode.SERENE: {
+                "voice_profile": "krishna_serene",
+                "speaking_rate": 0.87,
+                "pitch": -2.5,
+                "warmth": 0.88,
+                "breathiness": 0.15,
+                "pause_multiplier": 1.35,
+                "natural_preset": "divine_natural",
+            },
+            DivineVoiceMode.WISE: {
+                "voice_profile": "vishnu_wise",
+                "speaking_rate": 0.88,
+                "pitch": -3.0,
+                "warmth": 0.65,
+                "breathiness": 0.1,
+                "pause_multiplier": 1.4,
+                "natural_preset": "divine_natural",
+            },
+            DivineVoiceMode.COMPASSIONATE: {
+                "voice_profile": "shiva_compassionate",
+                "speaking_rate": 0.85,
+                "pitch": -2.8,
+                "warmth": 0.9,
+                "breathiness": 0.12,
+                "pause_multiplier": 1.3,
+                "natural_preset": "divine_natural",
+            },
+            DivineVoiceMode.MEDITATION: {
+                "voice_profile": "brahma_meditation",
+                "speaking_rate": 0.75,
+                "pitch": -4.0,
+                "warmth": 0.75,
+                "breathiness": 0.3,
+                "pause_multiplier": 2.2,
+                "natural_preset": "meditation_natural",
+            },
+            DivineVoiceMode.CONVERSATION: {
+                "voice_profile": "krishna_serene",
+                "speaking_rate": 0.88,
+                "pitch": -2.3,
+                "warmth": 0.85,
+                "breathiness": 0.12,
+                "pause_multiplier": 1.0,
+                "natural_preset": "conversation_natural",
+            },
+            DivineVoiceMode.VERSE_RECITATION: {
+                "voice_profile": "vishnu_wise",
+                "speaking_rate": 0.82,
+                "pitch": -3.5,
+                "warmth": 0.7,
+                "breathiness": 0.18,
+                "pause_multiplier": 1.7,
+                "natural_preset": "divine_natural",
+            },
+        }
+
+        # Default mode configs (backwards compatible, uses female)
+        self._mode_configs = self._female_mode_configs
+
+        logger.info("Divine Speech Integration initialized with natural voice enhancement")
+
+    def _get_mode_config_for_gender(
+        self,
+        mode: DivineVoiceMode,
+        gender: str = "female"
+    ) -> Dict[str, Any]:
+        """Get configuration for a voice mode with gender selection."""
+        if gender.lower() == "male":
+            configs = self._male_mode_configs
+        else:
+            configs = self._female_mode_configs
+
+        return configs.get(mode, configs[DivineVoiceMode.CONVERSATION])
 
     async def initialize(self) -> bool:
         """
@@ -200,9 +294,9 @@ class DivineSpeechIntegration:
             await self._orchestrator.shutdown()
         self._initialized = False
 
-    def _get_mode_config(self, mode: DivineVoiceMode) -> Dict[str, Any]:
-        """Get configuration for a voice mode."""
-        return self._mode_configs.get(mode, self._mode_configs[DivineVoiceMode.CONVERSATION])
+    def _get_mode_config(self, mode: DivineVoiceMode, gender: str = "female") -> Dict[str, Any]:
+        """Get configuration for a voice mode with optional gender selection."""
+        return self._get_mode_config_for_gender(mode, gender)
 
     def _build_prosody(
         self,
@@ -243,13 +337,24 @@ class DivineSpeechIntegration:
         text: str,
         config: DivineSynthesisConfig,
     ) -> SpeechSynthesisRequest:
-        """Build synthesis request from config."""
-        mode_settings = self._get_mode_config(config.mode)
+        """Build synthesis request from config with gender and natural speech support."""
+        # Get mode config with gender selection
+        mode_settings = self._get_mode_config(config.mode, config.gender)
         prosody = self._build_prosody(config, mode_settings)
 
-        # Get voice profile
+        # Get voice profile based on gender
         profile_id = mode_settings["voice_profile"]
         voice_profile = self._voice_profiles.get(profile_id)
+
+        # Apply natural speech enhancement if enabled
+        if config.natural_speech:
+            natural_preset = mode_settings.get("natural_preset", "divine_natural")
+            enhancement = NATURAL_SPEECH_PRESETS.get(natural_preset)
+            if enhancement:
+                # Apply natural variations to prosody
+                prosody.rhythm_regularity = max(0.4, prosody.rhythm_regularity - enhancement.timing_variation)
+                if enhancement.add_breath_sounds:
+                    prosody.breathiness = min(0.5, prosody.breathiness + enhancement.breath_intensity * 0.3)
 
         return SpeechSynthesisRequest(
             text=text,

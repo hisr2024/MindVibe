@@ -712,58 +712,126 @@ class KIAANDivineVoice:
         text: str,
         phase: ConversationPhase,
         emotional_state: EmotionalState,
-        include_breathing: bool = True
+        include_breathing: bool = True,
+        gender: str = "female"
     ) -> str:
         """
-        Format text with SSML for divine, calming voice delivery.
+        Format text with SSML for divine, natural, human-like voice delivery.
+
+        Enhanced for warmth, emotional depth, and natural human characteristics.
 
         Args:
             text: Raw response text
             phase: Current conversation phase
             emotional_state: User's emotional state
             include_breathing: Whether to include breathing pauses
+            gender: Voice gender ("female" or "male")
 
         Returns:
-            SSML-formatted text optimized for serene voice delivery
+            SSML-formatted text optimized for natural, divine voice delivery
         """
         prosody = self.get_voice_prosody_for_phase(phase, emotional_state)
+
+        # Adjust base prosody for gender
+        if gender.lower() == "male":
+            # Male voices are deeper and slightly slower
+            prosody = prosody.copy()
+            prosody["pitch"] = prosody["pitch"] - 1.5  # Deeper
+            prosody["speed"] = prosody["speed"] * 0.98  # Slightly slower
 
         # Escape XML special characters
         ssml_text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-        # Add natural pauses at punctuation
+        # Add natural pauses at punctuation with human-like variation
         pause_mult = prosody["pause_multiplier"]
-        ssml_text = re.sub(r'\.\s+', f'<break time="{int(350 * pause_mult)}ms"/> ', ssml_text)
-        ssml_text = re.sub(r'\.\.\.\s*', f'<break time="{int(600 * pause_mult)}ms"/> ', ssml_text)
-        ssml_text = re.sub(r',\s+', f'<break time="{int(180 * pause_mult)}ms"/> ', ssml_text)
-        ssml_text = re.sub(r':\s+', f'<break time="{int(250 * pause_mult)}ms"/> ', ssml_text)
 
-        # Add emphasis to spiritual terms
+        # Natural sentence-ending pauses (longer for reflection)
+        ssml_text = re.sub(r'\.\s+', f'<break time="{int(400 * pause_mult)}ms"/> ', ssml_text)
+
+        # Ellipsis gets longer, contemplative pause
+        ssml_text = re.sub(r'\.\.\.\s*', f'<break time="{int(700 * pause_mult)}ms"/> ', ssml_text)
+
+        # Comma pauses - natural breath points
+        ssml_text = re.sub(r',\s+', f'<break time="{int(200 * pause_mult)}ms"/> ', ssml_text)
+
+        # Colon introduces something - slight anticipation pause
+        ssml_text = re.sub(r':\s+', f'<break time="{int(280 * pause_mult)}ms"/> ', ssml_text)
+
+        # Question marks - rising intonation pause
+        ssml_text = re.sub(r'\?\s+', f'<break time="{int(350 * pause_mult)}ms"/> ', ssml_text)
+
+        # Add warmth emphasis to emotional terms
+        warmth_terms = [
+            "love", "dear", "beloved", "gentle", "tenderly", "warmly",
+            "embrace", "hold", "safe", "protected", "cherish", "treasure"
+        ]
+        for term in warmth_terms:
+            pattern = re.compile(rf'\b({term})\b', re.IGNORECASE)
+            # Use soft prosody shift for warmth
+            ssml_text = pattern.sub(
+                rf'<prosody pitch="-0.3st" rate="95%">\1</prosody>',
+                ssml_text
+            )
+
+        # Add emphasis to spiritual terms with reverence
         spiritual_terms = [
             "peace", "dharma", "karma", "stillness", "breath", "sacred",
             "divine", "serenity", "calm", "tranquil", "eternal", "wisdom",
-            "soul", "heart", "presence", "grace", "blessing"
+            "soul", "heart", "presence", "grace", "blessing", "namaste",
+            "om", "atman", "brahman", "moksha", "ahimsa"
         ]
         for term in spiritual_terms:
             pattern = re.compile(rf'\b({term})\b', re.IGNORECASE)
             ssml_text = pattern.sub(r'<emphasis level="moderate">\1</emphasis>', ssml_text)
 
-        # Add breathing pauses if requested
-        if include_breathing and prosody["extra_pauses"]:
-            # Insert gentle breath markers at paragraph breaks
+        # Add breathing pauses for natural human feel
+        if include_breathing:
+            # Insert natural breath at paragraph breaks
             ssml_text = ssml_text.replace(
                 '\n\n',
-                f'\n<break time="{int(800 * pause_mult)}ms"/>\n'
+                f'\n<break time="{int(900 * pause_mult)}ms"/>\n'
             )
 
-        # Convert special markers to SSML
-        # *... breathe ...* pattern
+            # Add subtle breath sounds before long sentences (if prosody allows)
+            if prosody.get("extra_pauses", False):
+                # Insert breath marker before sentences starting with emotional words
+                emotional_starters = ["I ", "You ", "We ", "Let ", "May ", "Remember "]
+                for starter in emotional_starters:
+                    ssml_text = ssml_text.replace(
+                        f". {starter}",
+                        f'. <break time="{int(500 * pause_mult)}ms"/>{starter}'
+                    )
+
+        # Convert special markers to SSML with enhanced natural delivery
+        # *... breathe ...* pattern - with actual breath quality
         breathe_pattern = r'\*\.\.\.\s*breathe\s*\.\.\.\*'
-        ssml_text = re.sub(breathe_pattern, BREATHING_PATTERNS["gentle"], ssml_text, flags=re.IGNORECASE)
+        natural_breath = f'''<break time="{int(600 * pause_mult)}ms"/>
+<prosody rate="80%" pitch="-1st" volume="soft">breathe</prosody>
+<break time="{int(800 * pause_mult)}ms"/>'''
+        ssml_text = re.sub(breathe_pattern, natural_breath, ssml_text, flags=re.IGNORECASE)
 
         # *... let this settle ...* pattern
         settle_pattern = r'\*\.\.\.\s*let this settle\s*\.\.\.\*'
-        ssml_text = re.sub(settle_pattern, BREATHING_PATTERNS["settling"], ssml_text, flags=re.IGNORECASE)
+        natural_settle = f'''<break time="{int(500 * pause_mult)}ms"/>
+<prosody rate="85%" pitch="-0.5st">let this settle</prosody>
+<break time="{int(600 * pause_mult)}ms"/>'''
+        ssml_text = re.sub(settle_pattern, natural_settle, ssml_text, flags=re.IGNORECASE)
+
+        # *... pause ...* pattern for reflection
+        pause_pattern = r'\*\.\.\.\s*pause\s*\.\.\.\*'
+        ssml_text = re.sub(pause_pattern, f'<break time="{int(1000 * pause_mult)}ms"/>', ssml_text, flags=re.IGNORECASE)
+
+        # Add natural sentence rhythm variation
+        sentences = ssml_text.split('. ')
+        if len(sentences) > 2:
+            # Vary prosody slightly between sentences for natural feel
+            varied_sentences = []
+            for i, sentence in enumerate(sentences):
+                if i > 0 and i % 3 == 0:
+                    # Every third sentence, slightly slower for emphasis
+                    sentence = f'<prosody rate="97%">{sentence}</prosody>'
+                varied_sentences.append(sentence)
+            ssml_text = '. '.join(varied_sentences)
 
         # Calculate speaking rate as percentage
         speed_percent = int(prosody["speed"] * 100)
