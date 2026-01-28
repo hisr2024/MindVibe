@@ -9,9 +9,16 @@ enabling seamless integration of diverse speech technologies.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Literal
+from typing import Dict, List, Optional, Any, Literal, TYPE_CHECKING
 from enum import Enum
-import numpy as np
+
+# Optional numpy import for voice embeddings
+try:
+    import numpy as np
+    NumpyArray = np.ndarray
+except ImportError:
+    # Fallback when numpy is not installed
+    NumpyArray = Any  # type: ignore
 
 
 class SpeechProvider(Enum):
@@ -126,7 +133,7 @@ class VoiceProfile:
 
     # Voice cloning data
     reference_audio_path: Optional[str] = None
-    voice_embedding: Optional[np.ndarray] = None
+    voice_embedding: Optional[NumpyArray] = None
     cloning_quality: float = 0.0
 
     # Prosody defaults

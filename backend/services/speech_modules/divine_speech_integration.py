@@ -24,7 +24,6 @@ from enum import Enum
 from .orchestrator import (
     SpeechModuleOrchestrator,
     get_speech_orchestrator,
-    OrchestratorConfig,
 )
 from .models import (
     SpeechSynthesisRequest,
