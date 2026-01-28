@@ -1229,8 +1229,12 @@ async def start_divine_conversation(
 
     divine_voice = get_divine_voice_service()
 
-    # Create conversation context
-    context = divine_voice.create_conversation(user_id)
+    # Create conversation context (async for voice learning integration)
+    context = await divine_voice.create_conversation(
+        user_id,
+        enable_voice_learning=True,
+        voice_persona="MEDITATION_GUIDE" if payload.voice_preference == "calm" else "CALM_GUIDE"
+    )
 
     # Generate divine greeting
     greeting_response = divine_voice.generate_greeting(context)
@@ -1299,8 +1303,12 @@ async def send_divine_conversation_message(
     # Get or create conversation context
     context = divine_voice.get_conversation(payload.session_id)
     if not context:
-        # Create new context if session expired
-        context = divine_voice.create_conversation(user_id, payload.session_id)
+        # Create new context if session expired (async for voice learning)
+        context = await divine_voice.create_conversation(
+            user_id,
+            session_id=payload.session_id,
+            enable_voice_learning=True
+        )
 
     try:
         # Import KIAAN Core for wisdom generation
@@ -1352,6 +1360,13 @@ async def send_divine_conversation_message(
 
         processing_time = int((time.time() - start_time) * 1000)
 
+        # Score response quality for continuous improvement
+        quality_result = await divine_voice.score_response_quality(
+            context=context,
+            user_input=payload.message,
+            kiaan_response=divine_response["response_text"]
+        )
+
         return {
             "session_id": payload.session_id,
             "response": divine_response["response_text"],
@@ -1366,10 +1381,14 @@ async def send_divine_conversation_message(
             "emotional_analysis": {
                 "state": divine_response["emotional_state"],
                 "intensity": divine_response["emotional_intensity"],
+                "stress_level": context.stress_level,
+                "energy_level": context.energy_level,
+                "trajectory": context.emotional_trajectory,
             },
             "phase": divine_response["phase"],
             "message_count": divine_response["message_count"],
             "verses_used": kiaan_result.get("verses_used", []),
+            "quality": quality_result,
             "metrics": {
                 "processing_ms": processing_time,
             }
@@ -1424,7 +1443,8 @@ async def end_divine_conversation(
     End a divine voice conversation with a blessing.
 
     Returns a sacred farewell message to close the conversation
-    with grace and love.
+    with grace and love. Also cleans up voice learning session
+    and records conversation quality metrics.
     """
     logger.info(f"Ending divine conversation {session_id} for user {user_id}")
 
@@ -1458,6 +1478,9 @@ async def end_divine_conversation(
     import base64
     audio_base64 = base64.b64encode(audio_bytes).decode() if audio_bytes else None
 
+    # End conversation and get session summary (includes voice learning cleanup)
+    session_summary = await divine_voice.end_conversation(context)
+
     return {
         "session_id": session_id,
         "farewell": farewell_response["response_text"],
@@ -1470,11 +1493,13 @@ async def end_divine_conversation(
         },
         "audio_base64": audio_base64,
         "conversation_summary": {
-            "messages": context.message_count,
-            "duration_seconds": (context.last_interaction - context.started_at).seconds,
+            "messages": session_summary.get("message_count", context.message_count),
+            "duration_seconds": session_summary.get("duration_seconds", 0),
             "topics": context.topics_discussed,
-            "emotional_journey": context.emotional_state.value,
-        }
+            "emotional_journey": session_summary.get("final_emotional_state", context.emotional_state.value),
+            "average_quality_score": session_summary.get("average_quality_score", 0),
+        },
+        "voice_learning_summary": session_summary.get("voice_learning_summary"),
     }
 
 
