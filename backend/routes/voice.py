@@ -72,7 +72,7 @@ class VerseSynthesizeRequest(BaseModel):
 
 class BatchDownloadRequest(BaseModel):
     """Request to batch download multiple audios"""
-    verse_ids: List[str] = Field(..., max_items=20, description="List of verse IDs")
+    verse_ids: List[str] = Field(..., max_length=20, description="List of verse IDs")
     language: str = Field("en", description="Language code")
 
 

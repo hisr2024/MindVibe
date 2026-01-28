@@ -158,10 +158,11 @@ class TestRateLimiting:
                 "password": "TestPass123!"
             }
         )
-        
-        # The request should succeed (or fail for other reasons like duplicate)
+
+        # The request should succeed (or fail for other reasons like duplicate, validation, or auth)
         # Rate limiting is configured but won't trigger on single request
-        assert response.status_code in [201, 409, 422]  # Created, Conflict, or Validation Error
+        # 403 can occur due to CSRF protection on state-changing endpoints
+        assert response.status_code in [201, 403, 409, 422]  # Created, Forbidden, Conflict, or Validation Error
 
 
 @pytest.mark.asyncio
@@ -171,13 +172,13 @@ class TestKiaanWithSecurity:
     async def test_kiaan_response_unchanged_with_security_headers(self, test_client: AsyncClient):
         """Test that KIAAN responses are unchanged when security headers are added."""
         response = await test_client.get("/api/chat/health")
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # KIAAN contract should be preserved
         assert data["bot"] == "KIAAN"
-        assert data["version"] == "13.0"
+        assert data["version"] == "15.0"  # Updated KIAAN version
         
         # Security headers should be present
         assert response.headers.get("X-Content-Type-Options") == "nosniff"

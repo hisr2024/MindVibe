@@ -37,7 +37,8 @@ router = APIRouter(
 
 class KarmaResetKiaanRequest(BaseModel):
     """Request model for KIAAN-enhanced karma reset."""
-    
+    model_config = {"populate_by_name": True}
+
     situation: str = Field(
         default="",
         max_length=2000,
@@ -53,9 +54,6 @@ class KarmaResetKiaanRequest(BaseModel):
         max_length=100,
         description="Type of repair action to take"
     )
-    
-    class Config:
-        populate_by_name = True
 
 
 class KiaanMetadata(BaseModel):

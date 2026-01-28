@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 class PracticeSchema(BaseModel):
     """Micro-practice definition."""
     name: str = Field(..., min_length=1, max_length=100)
-    instructions: list[str] = Field(..., min_items=1, max_items=10)
+    instructions: list[str] = Field(..., min_length=1, max_length=10)
     duration_minutes: int = Field(default=5, ge=1, le=30)
 
 
@@ -76,9 +76,9 @@ class JourneyStepSchema(BaseModel):
         ...,
         pattern=r"^(kama|krodha|lobha|moha|mada|matsarya|mixed)$"
     )
-    verse_refs: list[VerseRefSchema] = Field(..., min_items=1, max_items=3)
+    verse_refs: list[VerseRefSchema] = Field(..., min_length=1, max_length=3)
     teaching: str = Field(..., min_length=50, max_length=1000)
-    guided_reflection: list[str] = Field(..., min_items=1, max_items=5)
+    guided_reflection: list[str] = Field(..., min_length=1, max_length=5)
     practice: PracticeSchema
     micro_commitment: str = Field(..., min_length=10, max_length=300)
     check_in_prompt: CheckInPromptSchema
