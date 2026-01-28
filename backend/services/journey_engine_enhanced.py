@@ -49,7 +49,6 @@ _try_import_fernet()
 
 from sqlalchemy import and_, or_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import with_for_update
 
 from backend.models import (
     JourneyTemplate,

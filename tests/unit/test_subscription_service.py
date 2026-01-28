@@ -31,9 +31,9 @@ class TestFeatureConfig:
     def test_tier_features_free(self):
         """Test FREE tier features."""
         from backend.config.feature_config import get_tier_features, TIER_FEATURES
-        
+
         features = get_tier_features(SubscriptionTier.FREE)
-        assert features["kiaan_questions_monthly"] == 10
+        assert features["kiaan_questions_monthly"] == 20
         assert features["encrypted_journal"] is False
         assert features["mood_tracking"] is True
         assert features["wisdom_access"] is True
@@ -42,19 +42,19 @@ class TestFeatureConfig:
     def test_tier_features_basic(self):
         """Test BASIC tier features."""
         from backend.config.feature_config import get_tier_features
-        
+
         features = get_tier_features(SubscriptionTier.BASIC)
-        assert features["kiaan_questions_monthly"] == 100
+        assert features["kiaan_questions_monthly"] == 50
         assert features["encrypted_journal"] is True
-        assert features["advanced_analytics"] is True
+        assert features["advanced_analytics"] is False
         assert features["data_retention_days"] == 365
 
     def test_tier_features_premium(self):
         """Test PREMIUM tier features."""
         from backend.config.feature_config import get_tier_features
-        
+
         features = get_tier_features(SubscriptionTier.PREMIUM)
-        assert features["kiaan_questions_monthly"] == -1  # Unlimited
+        assert features["kiaan_questions_monthly"] == 300
         assert features["encrypted_journal"] is True
         assert features["priority_support"] is True
         assert features["offline_access"] is True
@@ -85,10 +85,10 @@ class TestFeatureConfig:
     def test_get_kiaan_quota(self):
         """Test get_kiaan_quota function."""
         from backend.config.feature_config import get_kiaan_quota
-        
-        assert get_kiaan_quota(SubscriptionTier.FREE) == 10
-        assert get_kiaan_quota(SubscriptionTier.BASIC) == 100
-        assert get_kiaan_quota(SubscriptionTier.PREMIUM) == -1
+
+        assert get_kiaan_quota(SubscriptionTier.FREE) == 20
+        assert get_kiaan_quota(SubscriptionTier.BASIC) == 50
+        assert get_kiaan_quota(SubscriptionTier.PREMIUM) == 300
         assert get_kiaan_quota(SubscriptionTier.ENTERPRISE) == -1
 
 

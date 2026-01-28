@@ -12,7 +12,6 @@ from typing import Any
 
 from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import with_for_update
 
 from backend.models import (
     WisdomJourney,
