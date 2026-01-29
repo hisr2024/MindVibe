@@ -68,63 +68,76 @@ class WisdomJourneyService:
             db, user_context, num_verses=duration_days
         )
 
-        # 4. Create journey
+        # 4. Create journey and steps in a transaction with proper error handling
+        # This ensures atomicity - either all data is created or none (no orphaned journeys)
         journey_id = str(uuid.uuid4())
 
-        title = custom_title or journey_template["title"]
-        description = journey_template["description"]
+        try:
+            title = custom_title or journey_template["title"]
+            description = journey_template["description"]
 
-        journey = WisdomJourney(
-            id=journey_id,
-            user_id=user_id,
-            title=title,
-            description=description,
-            total_steps=duration_days,
-            current_step=0,
-            status=JourneyStatus.ACTIVE,
-            progress_percentage=0,
-            recommended_by="ai",
-            recommendation_score=journey_template.get("score", 0.8),
-            recommendation_reason=journey_template.get("reason"),
-            source_mood_scores=user_context.get("mood_scores"),
-            source_themes=user_context.get("themes"),
-        )
-
-        db.add(journey)
-
-        # 5. Create journey steps
-        steps = []
-        for i, verse_id in enumerate(verse_ids, start=1):
-            # Get verse details
-            verse = await db.get(GitaVerse, verse_id)
-            if not verse:
-                logger.warning(f"Verse {verse_id} not found, skipping step {i}")
-                continue
-
-            # Generate reflection prompt
-            reflection_prompt = await self._generate_reflection_prompt(verse, user_context)
-
-            # Generate AI insight
-            ai_insight = await self._generate_ai_insight(verse, user_context)
-
-            step = JourneyStep(
-                id=str(uuid.uuid4()),
-                journey_id=journey_id,
-                step_number=i,
-                verse_id=verse_id,
-                reflection_prompt=reflection_prompt,
-                ai_insight=ai_insight,
-                completed=False,
+            journey = WisdomJourney(
+                id=journey_id,
+                user_id=user_id,
+                title=title,
+                description=description,
+                total_steps=duration_days,
+                current_step=0,
+                status=JourneyStatus.ACTIVE,
+                progress_percentage=0,
+                recommended_by="ai",
+                recommendation_score=journey_template.get("score", 0.8),
+                recommendation_reason=journey_template.get("reason"),
+                source_mood_scores=user_context.get("mood_scores"),
+                source_themes=user_context.get("themes"),
             )
-            steps.append(step)
-            db.add(step)
 
-        await db.commit()
-        await db.refresh(journey)
+            db.add(journey)
 
-        logger.info(f"Created journey {journey_id} with {len(steps)} steps for user {user_id}")
+            # 5. Create journey steps
+            steps = []
+            for i, verse_id in enumerate(verse_ids, start=1):
+                # Get verse details
+                verse = await db.get(GitaVerse, verse_id)
+                if not verse:
+                    logger.warning(f"Verse {verse_id} not found, skipping step {i}")
+                    continue
 
-        return journey
+                # Generate reflection prompt
+                reflection_prompt = await self._generate_reflection_prompt(verse, user_context)
+
+                # Generate AI insight
+                ai_insight = await self._generate_ai_insight(verse, user_context)
+
+                step = JourneyStep(
+                    id=str(uuid.uuid4()),
+                    journey_id=journey_id,
+                    step_number=i,
+                    verse_id=verse_id,
+                    reflection_prompt=reflection_prompt,
+                    ai_insight=ai_insight,
+                    completed=False,
+                )
+                steps.append(step)
+                db.add(step)
+
+            # Validate we created at least one step before committing
+            if not steps:
+                await db.rollback()
+                raise ValueError("Failed to create any journey steps - no valid verses found")
+
+            await db.commit()
+            await db.refresh(journey)
+
+            logger.info(f"Created journey {journey_id} with {len(steps)} steps for user {user_id}")
+
+            return journey
+
+        except Exception as e:
+            # Rollback on any error to prevent orphaned data
+            await db.rollback()
+            logger.error(f"Failed to create journey for user {user_id}: {e}", exc_info=True)
+            raise
 
     async def get_journey(self, db: AsyncSession, journey_id: str) -> WisdomJourney | None:
         """

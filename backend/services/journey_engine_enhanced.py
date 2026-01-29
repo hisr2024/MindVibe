@@ -1032,37 +1032,59 @@ class EnhancedJourneyEngine:
         db: AsyncSession,
         user_id: str,
     ) -> list[dict[str, Any]]:
-        """Get all active journeys for a user."""
+        """Get all active journeys for a user.
+
+        Performance: Uses a single query with subquery to count completed steps,
+        avoiding N+1 query problem (was: 1 + N queries, now: 1 query).
+        """
+        from sqlalchemy.orm import selectinload
+
+        # Subquery to count completed steps per journey (avoids N+1 queries)
+        completed_steps_subquery = (
+            select(
+                UserJourneyStepState.user_journey_id,
+                func.count(UserJourneyStepState.id).label("completed_count"),
+            )
+            .where(UserJourneyStepState.completed_at.isnot(None))
+            .group_by(UserJourneyStepState.user_journey_id)
+            .subquery()
+        )
+
+        # Main query with eager loading of template and left join for step counts
         result = await db.execute(
-            select(UserJourney)
+            select(
+                UserJourney,
+                func.coalesce(completed_steps_subquery.c.completed_count, 0).label(
+                    "completed_steps"
+                ),
+            )
+            .outerjoin(
+                completed_steps_subquery,
+                UserJourney.id == completed_steps_subquery.c.user_journey_id,
+            )
+            .options(selectinload(UserJourney.template))
             .where(
                 and_(
                     UserJourney.user_id == user_id,
                     UserJourney.status == UserJourneyStatus.ACTIVE,
+                    UserJourney.deleted_at.is_(None),
                 )
             )
             .order_by(UserJourney.started_at.desc())
         )
-        journeys = list(result.scalars().all())
+        rows = result.all()
 
         # Build response with correct progress calculation
         journey_data = []
-        for j in journeys:
+        for row in rows:
+            j = row[0]  # UserJourney object
+            completed_steps = row[1]  # completed_count from subquery
             total_days = j.template.duration_days if j.template else 14
 
-            # FIX: Calculate progress based on COMPLETED steps, not current day index
-            # This gives accurate progress even if user skips days
-            completed_steps_result = await db.execute(
-                select(func.count(UserJourneyStepState.id))
-                .where(
-                    and_(
-                        UserJourneyStepState.user_journey_id == j.id,
-                        UserJourneyStepState.completed_at.isnot(None),
-                    )
-                )
+            # Calculate progress based on COMPLETED steps, not current day index
+            progress_percentage = (
+                int((completed_steps / total_days) * 100) if total_days > 0 else 0
             )
-            completed_steps = completed_steps_result.scalar() or 0
-            progress_percentage = int((completed_steps / total_days) * 100) if total_days > 0 else 0
 
             journey_data.append({
                 "id": j.id,
