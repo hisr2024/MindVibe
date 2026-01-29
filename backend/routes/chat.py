@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
+from backend.models import KiaanChatMessage, KiaanChatSession
 
 # Subscription system enabled - plans are seeded via migration
 # See: migrations/20251202_add_subscription_system.sql
@@ -99,6 +100,9 @@ class ChatMessage(BaseModel):
     """Chat message model with validation."""
     message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
     language: str | None = Field(None, description="User's preferred language (e.g., 'en', 'es', 'pt')")
+    session_id: str | None = Field(None, description="Session ID for conversation continuity")
+    context: str | None = Field(None, description="Conversation context (e.g., 'general', 'anxiety', 'grief')")
+    mood: str | None = Field(None, description="User's current mood")
 
     @field_validator('message')
     @classmethod
@@ -683,6 +687,42 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         if quota_info:
             result["quota"] = quota_info
 
+        # Persist message to database for chat history (v16.0 Chat Persistence)
+        try:
+            # Generate session_id if not provided
+            session_id = chat.session_id or str(uuid.uuid4())
+            result["session_id"] = session_id
+
+            # Create chat message record
+            chat_message = KiaanChatMessage(
+                user_id=user_id,
+                session_id=session_id,
+                user_message=message,
+                kiaan_response=response,
+                summary=summary_result.get("summary") if summary_result and summary_result.get("success") else None,
+                context=chat.context or "general",
+                mood_at_time=chat.mood,
+                verses_used=kiaan_result.get("verses_used", []),
+                validation_score=kiaan_result.get("validation", {}).get("score"),
+                gita_terms_found=kiaan_result.get("validation", {}).get("gita_terms_found"),
+                language=language or "en",
+                translation=translation_result.get("translated_text") if translation_result and translation_result.get("success") else None,
+                model_used=kiaan_result.get("model", "gpt-4o-mini"),
+                provider_used=kiaan_result.get("provider", "openai"),
+                was_cached=kiaan_result.get("cached", False),
+                was_streaming=False,
+            )
+            db.add(chat_message)
+            await db.commit()
+
+            result["message_id"] = chat_message.id
+            logger.debug(f"Chat message persisted: {chat_message.id}")
+        except Exception as persist_error:
+            # Log but don't fail the request - persistence is non-critical
+            logger.warning(f"Failed to persist chat message: {persist_error}")
+            # Rollback to prevent transaction issues
+            await db.rollback()
+
         return result
     except Exception as e:
         logger.error(f"Error in send_message: {e}")
@@ -706,10 +746,10 @@ async def about() -> dict[str, Any]:
     from backend.services.openai_optimizer import openai_optimizer
     return {
         "name": "KIAAN",
-        "version": "15.0",
+        "version": "16.0",
         "model": "gpt-4o-mini",
         "status": "Operational" if openai_optimizer.ready else "Error",
-        "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness (Quantum Coherence v14.0)",
+        "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness (Chat Persistence v16.0)",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations",
         "enhancements": [
@@ -719,6 +759,265 @@ async def about() -> dict[str, Any]:
             "Streaming support",
             "Enhanced error handling",
             "Prometheus metrics",
-            "15 verse context (expanded from 5)"
+            "15 verse context (expanded from 5)",
+            "Server-side chat history persistence",
+            "Cross-device conversation sync"
         ]
     }
+
+
+# =============================================================================
+# CHAT HISTORY ENDPOINTS (v16.0 Chat Persistence)
+# =============================================================================
+
+@router.get("/history")
+@limiter.limit("30/minute")
+async def get_chat_history(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    limit: int = 50,
+    offset: int = 0,
+    session_id: str | None = None
+) -> dict[str, Any]:
+    """
+    Retrieve chat history for the authenticated user.
+
+    Args:
+        limit: Maximum messages to return (default 50, max 100)
+        offset: Pagination offset
+        session_id: Optional filter by session ID
+
+    Returns:
+        List of chat messages with metadata
+    """
+    from sqlalchemy import select, desc
+
+    try:
+        # Get current user
+        user_id: str | None = None
+        if SUBSCRIPTION_ENABLED:
+            try:
+                user_id = await get_current_user_id(request)
+            except Exception:
+                return {"status": "error", "message": "Authentication required", "messages": []}
+
+        if not user_id:
+            return {"status": "error", "message": "Authentication required", "messages": []}
+
+        # Limit max results
+        limit = min(limit, 100)
+
+        # Build query
+        query = (
+            select(KiaanChatMessage)
+            .where(KiaanChatMessage.user_id == user_id)
+            .where(KiaanChatMessage.deleted_at.is_(None))
+            .order_by(desc(KiaanChatMessage.created_at))
+            .offset(offset)
+            .limit(limit)
+        )
+
+        # Filter by session if provided
+        if session_id:
+            query = query.where(KiaanChatMessage.session_id == session_id)
+
+        result = await db.execute(query)
+        messages = result.scalars().all()
+
+        return {
+            "status": "success",
+            "messages": [
+                {
+                    "id": msg.id,
+                    "session_id": msg.session_id,
+                    "user_message": msg.user_message,
+                    "kiaan_response": msg.kiaan_response,
+                    "summary": msg.summary,
+                    "context": msg.context,
+                    "mood": msg.mood_at_time,
+                    "verses_used": msg.verses_used,
+                    "language": msg.language,
+                    "translation": msg.translation,
+                    "model_used": msg.model_used,
+                    "was_cached": msg.was_cached,
+                    "user_rating": msg.user_rating,
+                    "was_helpful": msg.was_helpful,
+                    "created_at": msg.created_at.isoformat() if msg.created_at else None,
+                }
+                for msg in messages
+            ],
+            "count": len(messages),
+            "limit": limit,
+            "offset": offset,
+        }
+    except Exception as e:
+        logger.error(f"Error fetching chat history: {e}")
+        return {"status": "error", "message": "Failed to fetch chat history", "messages": []}
+
+
+@router.get("/sessions")
+@limiter.limit("20/minute")
+async def get_chat_sessions(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    limit: int = 20
+) -> dict[str, Any]:
+    """
+    Get list of chat sessions for the authenticated user.
+
+    Returns distinct session IDs with message counts and latest activity.
+    """
+    from sqlalchemy import select, func, desc
+
+    try:
+        user_id: str | None = None
+        if SUBSCRIPTION_ENABLED:
+            try:
+                user_id = await get_current_user_id(request)
+            except Exception:
+                return {"status": "error", "message": "Authentication required", "sessions": []}
+
+        if not user_id:
+            return {"status": "error", "message": "Authentication required", "sessions": []}
+
+        # Get sessions with message counts
+        query = (
+            select(
+                KiaanChatMessage.session_id,
+                func.count(KiaanChatMessage.id).label("message_count"),
+                func.max(KiaanChatMessage.created_at).label("last_activity"),
+                func.min(KiaanChatMessage.created_at).label("started_at"),
+            )
+            .where(KiaanChatMessage.user_id == user_id)
+            .where(KiaanChatMessage.deleted_at.is_(None))
+            .group_by(KiaanChatMessage.session_id)
+            .order_by(desc(func.max(KiaanChatMessage.created_at)))
+            .limit(min(limit, 50))
+        )
+
+        result = await db.execute(query)
+        sessions = result.all()
+
+        return {
+            "status": "success",
+            "sessions": [
+                {
+                    "session_id": row.session_id,
+                    "message_count": row.message_count,
+                    "last_activity": row.last_activity.isoformat() if row.last_activity else None,
+                    "started_at": row.started_at.isoformat() if row.started_at else None,
+                }
+                for row in sessions
+            ],
+            "count": len(sessions),
+        }
+    except Exception as e:
+        logger.error(f"Error fetching chat sessions: {e}")
+        return {"status": "error", "message": "Failed to fetch sessions", "sessions": []}
+
+
+@router.post("/history/{message_id}/feedback")
+@limiter.limit("30/minute")
+async def submit_message_feedback(
+    request: Request,
+    message_id: str,
+    db: AsyncSession = Depends(get_db),
+    rating: int | None = None,
+    was_helpful: bool | None = None
+) -> dict[str, Any]:
+    """
+    Submit feedback for a specific chat message.
+
+    Args:
+        message_id: ID of the message to rate
+        rating: Optional rating 1-5
+        was_helpful: Optional helpful flag
+    """
+    from sqlalchemy import select, update
+
+    try:
+        user_id: str | None = None
+        if SUBSCRIPTION_ENABLED:
+            try:
+                user_id = await get_current_user_id(request)
+            except Exception:
+                return {"status": "error", "message": "Authentication required"}
+
+        if not user_id:
+            return {"status": "error", "message": "Authentication required"}
+
+        # Validate rating
+        if rating is not None and (rating < 1 or rating > 5):
+            return {"status": "error", "message": "Rating must be between 1 and 5"}
+
+        # Update the message
+        stmt = (
+            update(KiaanChatMessage)
+            .where(KiaanChatMessage.id == message_id)
+            .where(KiaanChatMessage.user_id == user_id)
+            .values(
+                user_rating=rating if rating is not None else KiaanChatMessage.user_rating,
+                was_helpful=was_helpful if was_helpful is not None else KiaanChatMessage.was_helpful,
+            )
+        )
+
+        result = await db.execute(stmt)
+        await db.commit()
+
+        if result.rowcount == 0:
+            return {"status": "error", "message": "Message not found or not authorized"}
+
+        return {"status": "success", "message": "Feedback submitted"}
+    except Exception as e:
+        logger.error(f"Error submitting feedback: {e}")
+        await db.rollback()
+        return {"status": "error", "message": "Failed to submit feedback"}
+
+
+@router.delete("/history/{message_id}")
+@limiter.limit("20/minute")
+async def delete_chat_message(
+    request: Request,
+    message_id: str,
+    db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
+    """
+    Soft-delete a specific chat message.
+
+    Args:
+        message_id: ID of the message to delete
+    """
+    from sqlalchemy import select, update
+    import datetime
+
+    try:
+        user_id: str | None = None
+        if SUBSCRIPTION_ENABLED:
+            try:
+                user_id = await get_current_user_id(request)
+            except Exception:
+                return {"status": "error", "message": "Authentication required"}
+
+        if not user_id:
+            return {"status": "error", "message": "Authentication required"}
+
+        # Soft delete the message
+        stmt = (
+            update(KiaanChatMessage)
+            .where(KiaanChatMessage.id == message_id)
+            .where(KiaanChatMessage.user_id == user_id)
+            .where(KiaanChatMessage.deleted_at.is_(None))
+            .values(deleted_at=datetime.datetime.now(datetime.UTC))
+        )
+
+        result = await db.execute(stmt)
+        await db.commit()
+
+        if result.rowcount == 0:
+            return {"status": "error", "message": "Message not found or already deleted"}
+
+        return {"status": "success", "message": "Message deleted"}
+    except Exception as e:
+        logger.error(f"Error deleting message: {e}")
+        await db.rollback()
+        return {"status": "error", "message": "Failed to delete message"}

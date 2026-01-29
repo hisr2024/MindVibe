@@ -2975,3 +2975,102 @@ class AIProviderConfig(Base):
     updated_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
     )
+
+
+class KiaanChatMessage(SoftDeleteMixin, Base):
+    """
+    Persistent storage for KIAAN chat conversations.
+
+    Stores both user messages and KIAAN responses with metadata
+    for conversation history, analytics, and learning.
+    """
+
+    __tablename__ = "kiaan_chat_messages"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str | None] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=True
+    )
+    session_id: Mapped[str] = mapped_column(String(64), index=True)
+
+    # Message content
+    user_message: Mapped[str] = mapped_column(Text)
+    kiaan_response: Mapped[str] = mapped_column(Text)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Context and metadata
+    context: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    detected_emotion: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    mood_at_time: Mapped[str | None] = mapped_column(String(32), nullable=True)
+
+    # Gita wisdom integration
+    verses_used: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    validation_score: Mapped[float | None] = mapped_column(Numeric(4, 3), nullable=True)
+    gita_terms_found: Mapped[list | None] = mapped_column(JSON, nullable=True)
+
+    # Language and translation
+    language: Mapped[str] = mapped_column(String(8), default="en")
+    translation: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Model information
+    model_used: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    provider_used: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    was_cached: Mapped[bool] = mapped_column(Boolean, default=False)
+    was_streaming: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Performance metrics
+    response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    token_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # User feedback
+    user_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    was_helpful: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    saved_to_journal: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+
+
+class KiaanChatSession(Base):
+    """
+    Tracks KIAAN chat sessions for conversation continuity.
+
+    Groups messages into sessions for context and analytics.
+    """
+
+    __tablename__ = "kiaan_chat_sessions"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str | None] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=True
+    )
+
+    # Session metadata
+    started_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    ended_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    message_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Context
+    initial_mood: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    initial_context: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    language: Mapped[str] = mapped_column(String(8), default="en")
+
+    # Session summary (generated on close)
+    session_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    dominant_emotion: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    verses_explored: Mapped[list | None] = mapped_column(JSON, nullable=True)
+
+    # Analytics
+    avg_response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    total_tokens_used: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    was_helpful: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
