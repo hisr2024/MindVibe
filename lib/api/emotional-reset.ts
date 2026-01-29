@@ -14,16 +14,29 @@ import type {
 const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || ''
 
 /**
+ * Get CSRF token from cookie.
+ * The CSRF token is set by the backend on GET requests and must be included
+ * in the X-CSRF-Token header for state-changing requests (POST, PUT, PATCH, DELETE).
+ */
+function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/**
  * Start a new emotional reset session
  * @param token - Optional authentication token
  * @returns Promise with session data
  */
 export async function startEmotionalReset(token?: string): Promise<SessionResponse> {
+  const csrfToken = getCsrfToken()
   const response = await fetch(`${getApiUrl()}/api/emotional-reset/start`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
+      ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
     },
     credentials: 'include',
   })
@@ -50,11 +63,13 @@ export async function processStep(
   input?: string,
   token?: string
 ): Promise<StepResponse> {
+  const csrfToken = getCsrfToken()
   const response = await fetch(`${getApiUrl()}/api/emotional-reset/step`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
+      ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
     },
     credentials: 'include',
     body: JSON.stringify({
@@ -122,11 +137,13 @@ export async function completeSession(
   sessionId: string,
   token?: string
 ): Promise<CompleteResponse> {
+  const csrfToken = getCsrfToken()
   const response = await fetch(`${getApiUrl()}/api/emotional-reset/complete`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
+      ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
     },
     credentials: 'include',
     body: JSON.stringify({
