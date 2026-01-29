@@ -83,6 +83,48 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
         models.JourneyRecommendation.__table__,
     ]
 
+    # Add subscription-related tables
+    for cls_name in ['SubscriptionPlan', 'UserSubscription', 'UsageTracking']:
+        if hasattr(models, cls_name):
+            cls = getattr(models, cls_name)
+            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                tables_to_create.append(cls.__table__)
+
+    # Add auth-related tables
+    for cls_name in ['Session', 'AdminUser', 'RefreshToken']:
+        if hasattr(models, cls_name):
+            cls = getattr(models, cls_name)
+            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                tables_to_create.append(cls.__table__)
+
+    # Add Gita-related tables
+    for cls_name in ['GitaChapter', 'GitaVerseTranslation', 'GitaKeyword', 'GitaModernContext', 'GitaSource', 'GitaVerseKeyword']:
+        if hasattr(models, cls_name):
+            cls = getattr(models, cls_name)
+            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                tables_to_create.append(cls.__table__)
+
+    # Add content and blob tables
+    for cls_name in ['EncryptedBlob', 'ContentPack', 'WisdomVerse']:
+        if hasattr(models, cls_name):
+            cls = getattr(models, cls_name)
+            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                tables_to_create.append(cls.__table__)
+
+    # Add payment tables
+    for cls_name in ['Payment']:
+        if hasattr(models, cls_name):
+            cls = getattr(models, cls_name)
+            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                tables_to_create.append(cls.__table__)
+
+    # Add voice-related tables
+    for cls_name in ['UserVoicePreferences', 'VoiceAnalytics']:
+        if hasattr(models, cls_name):
+            cls = getattr(models, cls_name)
+            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                tables_to_create.append(cls.__table__)
+
     # Also add enhanced journey tables if they exist
     for table_name in ['journey_templates', 'journey_template_steps', 'user_journeys', 'user_journey_step_state']:
         if hasattr(models, table_name):

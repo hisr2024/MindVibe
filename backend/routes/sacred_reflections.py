@@ -50,7 +50,7 @@ class ReflectionRequest(BaseModel):
         default=None, description="Start of week (defaults to current week)"
     )
     gratitude_items: list[str] = Field(
-        default_factory=list, max_items=5, description="Items of gratitude"
+        default_factory=list, max_length=5, description="Items of gratitude"
     )
 
 

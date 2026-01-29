@@ -41,11 +41,16 @@ async def get_session(db: AsyncSession, session_id: str) -> Session | None:
 
 
 def session_is_active(session: Session) -> bool:
-    """Check if a session is active."""
+    """Check if a session is active. Handles both timezone-aware and naive datetimes."""
     if session.revoked_at is not None:
         return False
-    if session.expires_at and session.expires_at < datetime.now(UTC):
-        return False
+    if session.expires_at:
+        expires_at = session.expires_at
+        # Handle SQLite test environment which may return naive datetimes
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+        if expires_at < datetime.now(UTC):
+            return False
     return True
 
 
@@ -53,8 +58,13 @@ async def touch_session(db: AsyncSession, session: Session) -> None:
     """Update the last_used_at timestamp."""
     # Only update if enough time has passed to avoid too many DB writes
     min_interval = timedelta(minutes=settings.SESSION_TOUCH_INTERVAL_MINUTES)
-    if session.last_used_at and (datetime.now(UTC) - session.last_used_at) < min_interval:
-        return
+    if session.last_used_at:
+        last_used = session.last_used_at
+        # Handle SQLite test environment which may return naive datetimes
+        if last_used.tzinfo is None:
+            last_used = last_used.replace(tzinfo=UTC)
+        if (datetime.now(UTC) - last_used) < min_interval:
+            return
 
     await db.execute(
         update(Session)

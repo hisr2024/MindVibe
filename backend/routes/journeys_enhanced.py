@@ -55,7 +55,7 @@ admin_router = APIRouter(prefix="/api/admin/ai", tags=["admin-ai"])
 
 class StartJourneysRequest(BaseModel):
     """Request to start one or more journeys."""
-    journey_ids: list[str] = Field(..., min_items=1, max_items=5)
+    journey_ids: list[str] = Field(..., min_length=1, max_length=5)
     personalization: dict[str, Any] | None = Field(
         default=None,
         description="Personalization settings: pace, time_budget_minutes, focus_tags, preferred_tone, provider_preference"

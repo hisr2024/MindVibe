@@ -23,18 +23,18 @@ router = APIRouter(prefix="/api/karma-reset", tags=["karma-reset"])
 # ==================== REQUEST/RESPONSE MODELS ====================
 
 class KarmaResetRequest(BaseModel):
+    """Request model for Karma Reset guidance."""
+    model_config = {"populate_by_name": True}
+
     # Support both naming conventions from frontend
     situation: str = Field(default="", max_length=2000, description="What happened")
     feeling: str = Field(default="", max_length=500, description="Who felt the ripple")
     repair: str = Field(default="", max_length=100, description="Repair choice")
-    
+
     # Alternative field names (frontend sends both)
     whatHappened: str = Field(default="", max_length=2000, alias="what_happened")
     whoFeltRipple: str = Field(default="", max_length=500, alias="who_felt_it")
     repairType: str = Field(default="", max_length=100, alias="repair_type")
-    
-    class Config:
-        populate_by_name = True
 
 class KarmaResetResponse(BaseModel):
     reset_guidance: dict

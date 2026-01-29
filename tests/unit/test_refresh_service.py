@@ -9,6 +9,13 @@ from backend.services import refresh_service
 from backend.core.settings import settings
 
 
+def ensure_utc(dt: datetime) -> datetime:
+    """Ensure a datetime is timezone-aware UTC for SQLite test compatibility."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt
+
+
 @pytest.fixture
 async def test_user(test_db: AsyncSession):
     """Create a test user."""
@@ -60,7 +67,7 @@ class TestTokenGeneration:
         assert token_row.user_id == test_user.id
         assert token_row.session_id == str(test_session.id)
         assert token_row.token_hash is not None
-        assert token_row.expires_at > datetime.now(UTC)
+        assert ensure_utc(token_row.expires_at) > datetime.now(UTC)
         assert raw_token is not None
         assert isinstance(raw_token, str)
 

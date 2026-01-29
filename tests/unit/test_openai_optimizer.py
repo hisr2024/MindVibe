@@ -84,8 +84,10 @@ class TestOpenAIOptimizer:
 
     def test_token_limit_validation_fail(self):
         """Test that excessive tokens raise exception."""
-        # Create a very long message (estimate: 4 chars ≈ 1 token)
-        long_text = "word " * 30000  # ~30k tokens
+        # Create a very long message that exceeds the SAFE_MAX_TOKENS limit (120k)
+        # Estimate: ~4 chars per token, so need 120k * 4 / 5 = ~96k "word " repetitions
+        # Use 130k repetitions to ensure we exceed the limit
+        long_text = "word " * 130000  # ~130k tokens, well above 120k limit
         messages = [
             {"role": "user", "content": long_text}
         ]
@@ -328,7 +330,8 @@ class TestOpenAIOptimizer:
         """Test that constants are set correctly."""
         assert MAX_CONTEXT_TOKENS == 128000
         assert SAFE_MAX_TOKENS == 120000
-        assert OPTIMIZED_MAX_COMPLETION_TOKENS == 400
+        # Reduced from 400 to 250 for faster spontaneous responses
+        assert OPTIMIZED_MAX_COMPLETION_TOKENS == 250
         assert SAFE_MAX_TOKENS < MAX_CONTEXT_TOKENS
 
 

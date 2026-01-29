@@ -33,6 +33,9 @@ class JournalEntryUpdate(BaseModel):
 
 
 class JournalEntryOut(BaseModel):
+    """Journal entry output model with encrypted content."""
+    model_config = {"ser_json_timedelta": "iso8601"}
+
     id: str
     encrypted_title: Optional[EncryptedPayload | dict]
     encrypted_content: EncryptedPayload | dict
@@ -41,9 +44,6 @@ class JournalEntryOut(BaseModel):
     client_updated_at: datetime
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        json_encoders = {datetime: lambda v: v.isoformat()}
 
 
 class JournalSearchRequest(BaseModel):
