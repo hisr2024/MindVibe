@@ -158,6 +158,8 @@ import EmotionalVisualization from '@/components/voice/EmotionalVisualization'
 
 // Voice Service for High-Quality TTS
 import voiceService from '@/services/voiceService'
+import divineVoiceService, { stopDivineVoice } from '@/services/divineVoiceService'
+import { stopAllAudio, initUniversalAudioStop } from '@/utils/audio/universalAudioStop'
 import { useAuth } from '@/hooks/useAuth'
 
 // Types
@@ -781,6 +783,9 @@ export default function EliteVoicePage() {
       synthesisRef.current = window.speechSynthesis
     }
 
+    // Initialize universal audio stop system
+    initUniversalAudioStop()
+
     // Initialize context memory
     contextMemory.initialize().then(() => {
       setMemoryInitialized(true)
@@ -1315,56 +1320,45 @@ export default function EliteVoicePage() {
       }
     }
 
-    // Try HIGH-QUALITY BACKEND TTS first (Google Cloud Neural voices)
-    if (isOnline && user?.id) {
+    // Try DIVINE VOICE SERVICE first (Sarvam AI for Sanskrit, Google Neural for English)
+    if (isOnline) {
       try {
-        console.log('[KIAAN Voice] Using high-quality backend TTS...')
+        console.log('[KIAAN Voice] Using Divine Voice Service (world-class quality)...')
 
-        // Get audio blob from backend TTS service
-        const audioBlob = await voiceService.synthesizeKiaanMessage(
+        // Use divine voice service for synthesis
+        const result = await divineVoiceService.speakKiaanResponse(
           text,
           language || 'en',
-          user.id
+          {
+            volume: voiceVolume,
+            onStart: () => {
+              console.log('[KIAAN Voice] Divine voice started')
+            },
+            onEnd: () => {
+              console.log('[KIAAN Voice] Divine voice complete')
+              handleSpeechEnd()
+            },
+            onError: (error) => {
+              console.warn('[KIAAN Voice] Divine voice error, falling back to browser:', error)
+              speakWithBrowserFallback(text, handleSpeechEnd)
+            }
+          }
         )
 
-        // Create audio element and play
-        const audioUrl = voiceService.createAudioUrl(audioBlob)
-
-        // Use audioRef for centralized control
-        if (!audioRef.current) {
-          audioRef.current = new Audio()
+        if (result.success) {
+          console.log(`[KIAAN Voice] Playing divine voice (provider: ${result.provider}, quality: ${result.qualityScore})`)
+          // Store audio reference for stop functionality
+          if (result.audio) {
+            audioRef.current = result.audio
+          }
+          return
+        } else {
+          console.warn('[KIAAN Voice] Divine voice synthesis failed:', result.error)
+          // Fall through to browser fallback
         }
-
-        // Revoke old URL if exists
-        if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
-          voiceService.revokeAudioUrl(audioRef.current.src)
-        }
-
-        audioRef.current.src = audioUrl
-        audioRef.current.volume = voiceVolume
-        audioRef.current.playbackRate = voiceRate
-
-        // Set up event handlers
-        audioRef.current.onended = () => {
-          console.log('[KIAAN Voice] Backend TTS playback complete')
-          voiceService.revokeAudioUrl(audioUrl)
-          handleSpeechEnd()
-        }
-
-        audioRef.current.onerror = () => {
-          console.warn('[KIAAN Voice] Backend TTS playback error, falling back to browser...')
-          voiceService.revokeAudioUrl(audioUrl)
-          // Fall back to browser TTS
-          speakWithBrowserFallback(text, handleSpeechEnd)
-        }
-
-        // Start playback
-        await audioRef.current.play()
-        console.log('[KIAAN Voice] Playing high-quality divine voice')
-        return
 
       } catch (err) {
-        console.warn('[KIAAN Voice] Backend TTS failed, using browser fallback:', err)
+        console.warn('[KIAAN Voice] Divine voice error, using browser fallback:', err)
         // Fall through to browser fallback
       }
     }
@@ -1423,61 +1417,68 @@ export default function EliteVoicePage() {
     synthesisRef.current.speak(utterance)
   }
 
-  // Stop speaking - comprehensive cleanup to prevent voice from continuing
+  // Stop speaking - UNIVERSAL STOP to prevent voice from continuing
   function stopSpeaking() {
-    console.log('[KIAAN Voice] Stopping all voice activity...')
+    console.log('[KIAAN Voice] UNIVERSAL STOP - Stopping ALL voice activity...')
 
-    // 1. Cancel browser speech synthesis
+    // 1. UNIVERSAL AUDIO STOP - stops all audio sources globally
+    stopAllAudio()
+
+    // 2. Stop divine voice service
+    stopDivineVoice()
+
+    // 3. Cancel browser speech synthesis (redundant but explicit)
     if (synthesisRef.current) {
       synthesisRef.current.cancel()
     }
 
-    // 2. Clear conversation continuation timer (CRITICAL - prevents auto-restart)
+    // 4. Clear conversation continuation timer (CRITICAL - prevents auto-restart)
     if (conversationPauseRef.current) {
       clearTimeout(conversationPauseRef.current)
       conversationPauseRef.current = null
     }
 
-    // 3. Clear any meditation timers
+    // 5. Clear any meditation timers
     if (meditationTimerRef.current) {
       clearTimeout(meditationTimerRef.current)
       meditationTimerRef.current = null
     }
 
-    // 4. Clear ritual timers
+    // 6. Clear ritual timers
     if (ritualTimerRef.current) {
       clearTimeout(ritualTimerRef.current)
       ritualTimerRef.current = null
     }
 
-    // 5. Clear self-healing timer
+    // 7. Clear self-healing timer
     if (selfHealingTimerRef.current) {
       clearTimeout(selfHealingTimerRef.current)
       selfHealingTimerRef.current = null
     }
 
-    // 6. Stop listening if active
+    // 8. Stop listening if active
     if (isListening) {
       stopListening()
     }
 
-    // 7. Stop any HTML5 Audio elements that might be playing
+    // 9. Stop any HTML5 Audio elements that might be playing
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
+      audioRef.current.src = '' // Clear source to ensure full stop
     }
 
-    // 8. Stop binaural beats if playing
+    // 10. Stop binaural beats if playing
     if (binauralPlaying) {
       stopBinauralBeat()
       setBinauralPlaying(false)
       setActiveBinauralPreset(null)
     }
 
-    // 9. Clear response state
+    // 11. Clear response state
     setResponse('')
 
-    // 10. Set state to idle/wakeword
+    // 12. Set state to idle/wakeword
     setState(wakeWordEnabled ? 'wakeword' : 'idle')
 
     console.log('[KIAAN Voice] All voice activity stopped')
