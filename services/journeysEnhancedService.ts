@@ -41,6 +41,7 @@ export interface JourneyTemplate {
   duration_days: number
   difficulty: number
   is_featured: boolean
+  is_free: boolean  // Free access for all users (one journey should be free for testing)
   icon_name: string | null
   color_theme: string | null
 }

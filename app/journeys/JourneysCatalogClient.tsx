@@ -389,8 +389,13 @@ export default function JourneysCatalogClient() {
   }
 
   function toggleSelection(id: string) {
-    // Check if user has access first
-    if (!access?.has_access) {
+    // Find the template to check if it's free
+    const template = templates.find(t => t.id === id)
+    const isFreeJourney = template?.is_free ?? false
+    const isDeveloper = access?.tier === 'developer'
+
+    // Check if user has access - developers and free journeys bypass paywall
+    if (!access?.has_access && !isFreeJourney && !isDeveloper) {
       setPaywallVariant('no_access')
       setShowPaywall(true)
       return
@@ -401,7 +406,34 @@ export default function JourneysCatalogClient() {
       if (next.has(id)) {
         next.delete(id)
       } else {
-        // Check journey limit
+        // Developers have unlimited access
+        if (isDeveloper) {
+          if (next.size >= 5) {
+            // Hard limit even for developers (5 at once)
+            return prev
+          }
+          next.add(id)
+          return next
+        }
+
+        // Free journeys - allow one free journey at a time
+        if (isFreeJourney) {
+          // Check if they already have a free journey selected
+          const selectedFreeCount = Array.from(prev).filter(
+            selectedId => templates.find(t => t.id === selectedId)?.is_free
+          ).length
+
+          if (selectedFreeCount >= 1) {
+            // Already have a free journey, show limit
+            setPaywallVariant('limit_reached')
+            setShowPaywall(true)
+            return prev
+          }
+          next.add(id)
+          return next
+        }
+
+        // Check journey limit for premium journeys
         const maxAllowed = access?.is_unlimited
           ? Infinity
           : Math.max(0, (access?.journey_limit ?? 0) - (access?.active_journeys ?? 0))
@@ -653,7 +685,9 @@ export default function JourneysCatalogClient() {
                 const gradient =
                   ENEMY_GRADIENTS[template.primary_enemy_tags[0]] || 'from-gray-500 to-gray-600'
                 const isSelected = selectedIds.has(template.id)
-                const isLocked = !access?.has_access
+                const isDeveloper = access?.tier === 'developer'
+                // Free journeys and developer access bypass lock
+                const isLocked = !access?.has_access && !template.is_free && !isDeveloper
 
                 return (
                   <button
@@ -674,8 +708,15 @@ export default function JourneysCatalogClient() {
                       </div>
                     )}
 
-                    {/* Lock indicator for free users */}
-                    {isLocked && !isSelected && (
+                    {/* Free badge for free journeys */}
+                    {template.is_free && !isSelected && (
+                      <div className="absolute right-4 top-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-xs font-semibold text-white shadow-lg">
+                        Free
+                      </div>
+                    )}
+
+                    {/* Lock indicator for premium users */}
+                    {isLocked && !isSelected && !template.is_free && (
                       <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
                         <Lock className="h-3.5 w-3.5 text-orange-100/50" />
                       </div>
@@ -736,7 +777,9 @@ export default function JourneysCatalogClient() {
                 const gradient =
                   ENEMY_GRADIENTS[template.primary_enemy_tags[0]] || 'from-gray-500 to-gray-600'
                 const isSelected = selectedIds.has(template.id)
-                const isLocked = !access?.has_access
+                const isDeveloper = access?.tier === 'developer'
+                // Free journeys and developer access bypass lock
+                const isLocked = !access?.has_access && !template.is_free && !isDeveloper
 
                 return (
                   <button
@@ -757,8 +800,15 @@ export default function JourneysCatalogClient() {
                       </div>
                     )}
 
+                    {/* Free badge for free journeys */}
+                    {template.is_free && !isSelected && (
+                      <div className="absolute right-4 top-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-xs font-semibold text-white shadow-lg">
+                        Free
+                      </div>
+                    )}
+
                     {/* Lock indicator */}
-                    {isLocked && !isSelected && (
+                    {isLocked && !isSelected && !template.is_free && (
                       <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
                         <Lock className="h-3.5 w-3.5 text-orange-100/50" />
                       </div>
