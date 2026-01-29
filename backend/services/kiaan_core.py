@@ -61,6 +61,21 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
+# CONFIGURATION CONSTANTS
+# =============================================================================
+
+# Default model for KIAAN AI operations
+# Using GPT-4o-mini for cost optimization (75% cheaper than GPT-4)
+DEFAULT_KIAAN_MODEL = "gpt-4o-mini"
+
+# Maximum cache entries to prevent memory leaks
+DEFAULT_MAX_CACHE_ENTRIES = 1000
+
+# Mood trend threshold for significant changes
+MOOD_TREND_THRESHOLD = 1.0
+
+
+# =============================================================================
 # OFFLINE WISDOM CACHE - Pre-cached responses for offline operation
 # =============================================================================
 
@@ -74,9 +89,9 @@ class OfflineWisdomCache:
     """
 
     # Maximum number of entries to keep in memory cache (prevents memory leak)
-    MAX_CACHE_ENTRIES = 1000
+    MAX_CACHE_ENTRIES = DEFAULT_MAX_CACHE_ENTRIES
 
-    def __init__(self, cache_dir: Optional[str] = None, max_entries: int = MAX_CACHE_ENTRIES):
+    def __init__(self, cache_dir: Optional[str] = None, max_entries: int = DEFAULT_MAX_CACHE_ENTRIES):
         self.cache_dir = Path(cache_dir or Path.home() / ".mindvibe" / "wisdom_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.memory_cache: dict[str, dict] = {}
