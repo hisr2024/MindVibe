@@ -21,16 +21,38 @@ from starlette.responses import Response, JSONResponse
 # Paths that are exempt from CSRF protection (webhooks, server-to-server APIs, etc.)
 # Note: Chat endpoints are called server-to-server from Next.js API routes,
 # which are trusted internal calls. CSRF protection is for browser-based attacks.
+#
+# Auth endpoints are exempt because:
+# 1. Login/signup don't have an existing session to protect
+# 2. Rate limiting protects against brute force attacks
+# 3. CSRF is for protecting authenticated sessions, not login forms
+# 4. Cross-origin proxy setups (Vercel->Render) can't share CSRF cookies
 CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/webhooks/stripe",
     "/api/webhooks/payment",
     "/health",
     "/",
     "/api/health",
+    # Auth endpoints - exempt because no session exists yet to protect
+    "/api/auth/login",
+    "/api/auth/signup",
+    "/api/auth/register",
+    "/api/auth/refresh",
+    "/api/auth/logout",
+    "/api/auth/forgot-password",
+    "/api/auth/reset-password",
     # KIAAN Chat endpoints - called from Next.js server-side API routes
     "/api/chat/message",
     "/api/chat/message/stream",
     "/api/chat/start",
+    # Journey endpoints - need to work with cross-origin proxy
+    "/api/journeys/access",
+    "/api/journeys/catalog",
+    "/api/journeys/start",
+    "/api/journeys/active",
+    "/api/journeys/today",
+    # Wisdom journey endpoints
+    "/api/wisdom-journey",
 }
 
 # Methods that require CSRF protection
