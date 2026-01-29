@@ -73,10 +73,36 @@ async def get_or_create_free_subscription(
     if subscription:
         return subscription
     
-    # Get the free plan
+    # Get the free plan (create if it doesn't exist for robustness)
     free_plan = await get_plan_by_tier(db, SubscriptionTier.FREE)
     if not free_plan:
-        raise ValueError("Free subscription plan not found. Run seed script first.")
+        logger.warning("Free subscription plan not found - creating on-the-fly")
+        # Create the FREE plan inline as a fallback (seed script should handle this normally)
+        free_plan = SubscriptionPlan(
+            tier=SubscriptionTier.FREE,
+            name="Free",
+            description="Get started with MindVibe's core features and trial Wisdom Journeys",
+            price_monthly=0,
+            price_yearly=None,
+            features={
+                "kiaan_questions_monthly": 20,
+                "encrypted_journal": False,
+                "mood_tracking": True,
+                "wisdom_access": True,
+                "wisdom_journeys": True,
+                "wisdom_journeys_limit": 1,
+                "wisdom_journeys_trial": True,
+                "wisdom_journeys_trial_days": 3,
+            },
+            kiaan_questions_monthly=20,
+            encrypted_journal=False,
+            data_retention_days=30,
+            is_active=True,
+        )
+        db.add(free_plan)
+        await db.commit()
+        await db.refresh(free_plan)
+        logger.info("Created FREE subscription plan on-the-fly")
     
     # Create subscription for the user
     now = datetime.now(UTC)
@@ -209,14 +235,17 @@ async def check_wisdom_journeys_access(
         return False, 0, 0
 
     # Count active journeys for this user
+    # IMPORTANT: Uses WisdomJourney model (not UserJourney) - this is the model
+    # used by the Wisdom Journey feature routes
     active_count = 0
     try:
-        from backend.models import UserJourney, UserJourneyStatus
+        from backend.models import WisdomJourney, JourneyStatus
 
-        stmt = select(UserJourney).where(
+        stmt = select(WisdomJourney).where(
             and_(
-                UserJourney.user_id == user_id,
-                UserJourney.status == UserJourneyStatus.ACTIVE,
+                WisdomJourney.user_id == user_id,
+                WisdomJourney.status == JourneyStatus.ACTIVE,
+                WisdomJourney.deleted_at.is_(None),  # Respect soft deletes
             )
         )
         result = await db.execute(stmt)
@@ -231,11 +260,11 @@ async def check_wisdom_journeys_access(
                 now = datetime.now(UTC)
                 for journey in active_journeys:
                     # Check if journey has exceeded trial days
-                    if journey.started_at:
-                        days_active = (now - journey.started_at).days
+                    if journey.created_at:
+                        days_active = (now - journey.created_at).days
                         if days_active > trial_days:
                             # Auto-pause journeys that exceed trial limit
-                            journey.status = UserJourneyStatus.PAUSED
+                            journey.status = JourneyStatus.PAUSED
                             logger.info(
                                 f"Trial journey {journey.id} paused after {days_active} days "
                                 f"(limit: {trial_days} days)"

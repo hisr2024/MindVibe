@@ -59,19 +59,28 @@ async def is_developer(db: AsyncSession, user_id: str) -> bool:
     1. Email in DEVELOPER_EMAILS environment variable
     2. is_admin flag in user record
 
+    This function checks both User.id and User.auth_uid to handle
+    different authentication sources (JWT uses id, X-Auth-UID might use auth_uid).
+
     Returns:
         bool: True if user has developer access.
     """
+    from sqlalchemy import or_
+
     try:
+        # Query by both id and auth_uid to handle different auth sources
         result = await db.execute(
-            select(User).where(User.id == user_id)
+            select(User).where(
+                or_(User.id == user_id, User.auth_uid == user_id)
+            )
         )
         user = result.scalar_one_or_none()
 
         if not user:
+            logger.debug(f"User not found for id/auth_uid: {user_id}")
             return False
 
-        # Check if email is in developer list
+        # Check if email is in developer list (case-insensitive)
         if user.email and user.email.lower() in DEVELOPER_EMAILS:
             logger.info(f"Developer access granted for {user.email}")
             return True
