@@ -166,10 +166,16 @@ async def get_journey_access(
     """
     try:
         user_id = await get_current_user_id(request)
+        logger.info(f"[access] User ID from request: {user_id}")
+
         await get_or_create_free_subscription(db, user_id)
+        logger.info(f"[access] Subscription ensured for user: {user_id}")
 
         # Check for developer bypass - gives full unlimited access
-        if await is_developer(db, user_id):
+        is_dev = await is_developer(db, user_id)
+        logger.info(f"[access] is_developer check for {user_id}: {is_dev}")
+
+        if is_dev:
             logger.info(f"Developer access: unlimited journeys for {user_id}")
             return JourneyAccessResponse(
                 has_access=True,
@@ -184,6 +190,7 @@ async def get_journey_access(
             )
 
         stats = await get_wisdom_journeys_stats(db, user_id)
+        logger.info(f"[access] Stats for {user_id}: {stats}")
 
         # Add upgrade info based on access status
         upgrade_url = None

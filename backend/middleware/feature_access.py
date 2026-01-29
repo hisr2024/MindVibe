@@ -68,6 +68,9 @@ async def is_developer(db: AsyncSession, user_id: str) -> bool:
     from sqlalchemy import or_
 
     try:
+        logger.info(f"[is_developer] Checking developer status for user_id: {user_id}")
+        logger.info(f"[is_developer] Developer emails configured: {DEVELOPER_EMAILS}")
+
         # Query by both id and auth_uid to handle different auth sources
         result = await db.execute(
             select(User).where(
@@ -77,23 +80,30 @@ async def is_developer(db: AsyncSession, user_id: str) -> bool:
         user = result.scalar_one_or_none()
 
         if not user:
-            logger.debug(f"User not found for id/auth_uid: {user_id}")
+            logger.warning(f"[is_developer] User NOT FOUND for id/auth_uid: {user_id}")
             return False
 
+        logger.info(f"[is_developer] Found user: id={user.id}, email={user.email}, auth_uid={user.auth_uid}")
+
         # Check if email is in developer list (case-insensitive)
-        if user.email and user.email.lower() in DEVELOPER_EMAILS:
-            logger.info(f"Developer access granted for {user.email}")
-            return True
+        if user.email:
+            email_lower = user.email.lower()
+            is_dev_email = email_lower in DEVELOPER_EMAILS
+            logger.info(f"[is_developer] Email check: '{email_lower}' in {DEVELOPER_EMAILS} = {is_dev_email}")
+            if is_dev_email:
+                logger.info(f"Developer access granted for {user.email}")
+                return True
 
         # Check if user is admin
         if hasattr(user, "is_admin") and user.is_admin:
             logger.info(f"Admin access granted for user {user_id}")
             return True
 
+        logger.info(f"[is_developer] No developer/admin access for user {user_id}")
         return False
 
     except Exception as e:
-        logger.warning(f"Error checking developer status: {e}")
+        logger.warning(f"Error checking developer status: {e}", exc_info=True)
         return False
 
 
