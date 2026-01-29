@@ -1385,6 +1385,138 @@ class KIAANLearningEngine:
         else:
             return False, "Wisdom already exists"
 
+    # -------------------------------------------------------------------------
+    # Automatic Scheduled Learning (v4.1)
+    # -------------------------------------------------------------------------
+
+    _scheduler_task: Optional[asyncio.Task] = None
+    _scheduler_running: bool = False
+
+    async def _scheduler_loop(self):
+        """
+        Background scheduler loop for automatic content acquisition.
+
+        Runs every acquisition_interval (default: 6 hours) to fetch
+        new Gita wisdom from external sources.
+        """
+        logger.info("🕉️ KIAAN Learning Scheduler started - automatic Gita wisdom acquisition enabled")
+
+        while self._scheduler_running:
+            try:
+                # Wait for the interval
+                await asyncio.sleep(self._acquisition_interval.total_seconds())
+
+                if not self._scheduler_running:
+                    break
+
+                # Acquire new content
+                logger.info("🕉️ Scheduled acquisition starting...")
+                stats = await self.acquire_new_content(force=True)
+
+                logger.info(
+                    f"🕉️ Scheduled acquisition complete: "
+                    f"{stats.get('stored', 0)} new wisdom items, "
+                    f"{stats.get('rejected', 0)} rejected"
+                )
+
+            except asyncio.CancelledError:
+                logger.info("🕉️ KIAAN Learning Scheduler stopped")
+                break
+            except Exception as e:
+                logger.error(f"🕉️ Scheduler error (will retry): {e}")
+                # Wait a bit before retrying on error
+                await asyncio.sleep(300)  # 5 minutes
+
+    def start_scheduler(self):
+        """
+        Start the automatic learning scheduler.
+
+        The scheduler runs in the background and periodically fetches
+        new Gita wisdom from YouTube, audio platforms, and web sources.
+        """
+        if self._scheduler_running:
+            logger.warning("Scheduler already running")
+            return
+
+        self._scheduler_running = True
+
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If called from async context, create task directly
+                self._scheduler_task = asyncio.create_task(self._scheduler_loop())
+            else:
+                # If called from sync context, run in new thread
+                import threading
+                def run_scheduler():
+                    asyncio.run(self._scheduler_loop())
+                thread = threading.Thread(target=run_scheduler, daemon=True)
+                thread.start()
+
+            logger.info("🕉️ KIAAN Learning Scheduler started successfully")
+        except Exception as e:
+            logger.error(f"Failed to start scheduler: {e}")
+            self._scheduler_running = False
+
+    def stop_scheduler(self):
+        """Stop the automatic learning scheduler."""
+        self._scheduler_running = False
+
+        if self._scheduler_task and not self._scheduler_task.done():
+            self._scheduler_task.cancel()
+            logger.info("🕉️ KIAAN Learning Scheduler stopped")
+
+    async def run_initial_acquisition(self):
+        """
+        Run initial content acquisition on startup.
+
+        This populates the knowledge base with Gita wisdom if empty.
+        """
+        stats = self.store.get_statistics()
+
+        if stats["validated_items"] < 10:
+            logger.info("🕉️ Knowledge base nearly empty - running initial acquisition...")
+
+            # Extended search queries for comprehensive initial population
+            initial_queries = [
+                "bhagavad gita discourse",
+                "bhagavad gita chapter 2 karma yoga",
+                "bhagavad gita chapter 3 action",
+                "krishna arjuna dialogue wisdom",
+                "gita anger management krodha",
+                "gita anxiety peace",
+                "gita detachment vairagya",
+                "bhagavad gita meditation dhyana",
+                "gita self realization atman",
+                "bhagavad gita devotion bhakti",
+            ]
+
+            result = await self.acquire_new_content(
+                force=True,
+                search_queries=initial_queries
+            )
+
+            logger.info(
+                f"🕉️ Initial acquisition complete: {result.get('stored', 0)} wisdom items"
+            )
+            return result
+
+        logger.info(f"🕉️ Knowledge base has {stats['validated_items']} items - skipping initial acquisition")
+        return {"status": "skipped", "reason": "knowledge_base_populated"}
+
+    def get_scheduler_status(self) -> dict:
+        """Get current scheduler status."""
+        return {
+            "running": self._scheduler_running,
+            "interval_hours": self._acquisition_interval.total_seconds() / 3600,
+            "last_acquisition": self._last_acquisition.isoformat() if self._last_acquisition else None,
+            "next_acquisition_in_hours": (
+                (self._acquisition_interval.total_seconds() -
+                 (datetime.now() - self._last_acquisition).total_seconds()) / 3600
+                if self._last_acquisition else 0
+            ),
+        }
+
 
 # =============================================================================
 # SINGLETON ACCESSOR
@@ -1393,6 +1525,36 @@ class KIAANLearningEngine:
 def get_kiaan_learning_engine() -> KIAANLearningEngine:
     """Get the singleton KIAAN Learning Engine instance."""
     return KIAANLearningEngine()
+
+
+# =============================================================================
+# AUTO-START SCHEDULER ON IMPORT (for production)
+# =============================================================================
+
+def initialize_learning_system():
+    """
+    Initialize the KIAAN learning system with automatic scheduling.
+
+    Call this on application startup to enable automatic Gita wisdom acquisition.
+    """
+    engine = get_kiaan_learning_engine()
+
+    # Start the background scheduler
+    engine.start_scheduler()
+
+    # Schedule initial acquisition (non-blocking)
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.create_task(engine.run_initial_acquisition())
+        else:
+            # Will be run when event loop starts
+            pass
+    except RuntimeError:
+        # No event loop - will be initialized later
+        pass
+
+    return engine
 
 
 # Initialize on module load
