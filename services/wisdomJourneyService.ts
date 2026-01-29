@@ -1,6 +1,24 @@
 /**
  * Wisdom Journey Service
  * API integration for personalized wisdom journeys
+ *
+ * @deprecated This service is DEPRECATED. Use journeysEnhancedService.ts instead.
+ *
+ * MIGRATION GUIDE:
+ * ----------------
+ * Old function                -> New function (journeysEnhancedService.ts)
+ * getActiveJourney()          -> getActiveJourneys()
+ * generateJourney()           -> startJourneys()
+ * markStepComplete()          -> completeStep()
+ * getJourneyRecommendations() -> getCatalog()
+ *
+ * The Enhanced service provides:
+ * - Multi-journey support
+ * - Encrypted reflections (mental health data protection)
+ * - Better error handling
+ * - Premium feature detection
+ *
+ * This service will be removed in a future release.
  */
 
 import { apiFetch } from '@/lib/api'

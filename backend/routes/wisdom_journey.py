@@ -3,6 +3,19 @@ Wisdom Journey API Routes.
 
 Provides endpoints for creating, managing, and progressing through AI-powered
 personalized wisdom journeys based on Bhagavad Gita verses.
+
+.. deprecated::
+    These routes are DEPRECATED. Use /api/journeys/* endpoints instead.
+
+    MIGRATION:
+    ----------
+    Old endpoint               -> New endpoint
+    /api/wisdom-journey/       -> /api/journeys/
+    /api/wisdom-journey/generate -> /api/journeys/start
+    /api/wisdom-journey/{id}/progress -> /api/journeys/{id}/steps/{day}/complete
+
+    See backend/routes/journeys_enhanced.py for the new API.
+    Frontend should use services/journeysEnhancedService.ts
 """
 
 import logging

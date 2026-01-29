@@ -3,6 +3,26 @@ Wisdom Journey Service - Core orchestration for AI-powered personalized wisdom j
 
 Provides functionality for creating, managing, and personalizing multi-day wisdom sequences
 based on user mood patterns, journal themes, and Gita verse relevance.
+
+.. deprecated::
+    This module is DEPRECATED in favor of the Enhanced Journey System.
+
+    MIGRATION NOTICE:
+    -----------------
+    Please use the following instead:
+    - Service: backend/services/journey_engine_enhanced.py
+    - Routes: backend/routes/journeys_enhanced.py
+    - Frontend: services/journeysEnhancedService.ts
+
+    The Enhanced system provides:
+    - Multi-journey support (users can have multiple active journeys)
+    - AES-256 encrypted reflection storage (mental health data protection)
+    - Intelligent verse selection with deduplication
+    - Multi-provider AI integration (OpenAI, Anthropic, Google)
+    - Flexible scheduling (daily, bi-daily, weekly)
+
+    This legacy service will be removed in a future release.
+    All new development should use the Enhanced Journey System.
 """
 
 import datetime
