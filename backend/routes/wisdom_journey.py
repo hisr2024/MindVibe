@@ -3,6 +3,19 @@ Wisdom Journey API Routes.
 
 Provides endpoints for creating, managing, and progressing through AI-powered
 personalized wisdom journeys based on Bhagavad Gita verses.
+
+.. deprecated::
+    These routes are DEPRECATED. Use /api/journeys/* endpoints instead.
+
+    MIGRATION:
+    ----------
+    Old endpoint               -> New endpoint
+    /api/wisdom-journey/       -> /api/journeys/
+    /api/wisdom-journey/generate -> /api/journeys/start
+    /api/wisdom-journey/{id}/progress -> /api/journeys/{id}/steps/{day}/complete
+
+    See backend/routes/journeys_enhanced.py for the new API.
+    Frontend should use services/journeysEnhancedService.ts
 """
 
 import logging
@@ -23,6 +36,105 @@ from backend.models import JourneyStatus, GitaVerse
 from backend.services.wisdom_journey_service import WisdomJourneyService
 
 logger = logging.getLogger(__name__)
+
+# =============================================================================
+# CONFIGURATION CONSTANTS
+# =============================================================================
+
+# Number of recommendations to return by default
+DEFAULT_RECOMMENDATIONS_LIMIT = 3
+
+# Default fallback recommendations when API fails
+DEFAULT_JOURNEY_RECOMMENDATIONS = [
+    {
+        "template": "inner_peace",
+        "title": "Journey to Inner Peace",
+        "description": "A 7-day exploration of tranquility through timeless Bhagavad Gita wisdom.",
+        "score": 0.85,
+        "reason": "Perfect for beginning your wisdom journey.",
+    },
+    {
+        "template": "self_discovery",
+        "title": "Path of Self-Discovery",
+        "description": "Explore your true nature and purpose through reflective wisdom.",
+        "score": 0.78,
+        "reason": "Discover deeper insights about yourself.",
+    },
+    {
+        "template": "balanced_action",
+        "title": "Wisdom of Balanced Action",
+        "description": "Learn to act without attachment, finding harmony between effort and surrender.",
+        "score": 0.72,
+        "reason": "A versatile path for navigating daily life.",
+    },
+]
+
+
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+
+def build_step_response(
+    step,
+    verse_data: dict | None = None,
+) -> "JourneyStepResponse":
+    """
+    Build a JourneyStepResponse from a step object.
+
+    Args:
+        step: JourneyStep model instance
+        verse_data: Optional dict with verse_text, verse_translation, verse_chapter, verse_number
+
+    Returns:
+        JourneyStepResponse instance
+    """
+    return JourneyStepResponse(
+        id=step.id,
+        step_number=step.step_number,
+        verse_id=step.verse_id,
+        **(verse_data or {}),
+        reflection_prompt=step.reflection_prompt,
+        ai_insight=step.ai_insight,
+        completed=step.completed,
+        completed_at=step.completed_at.isoformat() if step.completed_at else None,
+        time_spent_seconds=step.time_spent_seconds,
+        user_notes=step.user_notes,
+        user_rating=step.user_rating,
+    )
+
+
+def build_journey_response(
+    journey,
+    steps_responses: list["JourneyStepResponse"],
+) -> "JourneyResponse":
+    """
+    Build a JourneyResponse from a journey object and step responses.
+
+    Args:
+        journey: WisdomJourney model instance
+        steps_responses: List of JourneyStepResponse instances
+
+    Returns:
+        JourneyResponse instance
+    """
+    return JourneyResponse(
+        id=journey.id,
+        user_id=journey.user_id,
+        title=journey.title,
+        description=journey.description,
+        total_steps=journey.total_steps,
+        current_step=journey.current_step,
+        status=journey.status.value,
+        progress_percentage=journey.progress_percentage,
+        recommended_by=journey.recommended_by,
+        recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
+        recommendation_reason=journey.recommendation_reason,
+        created_at=journey.created_at.isoformat(),
+        updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
+        completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
+        steps=steps_responses,
+    )
 
 
 async def batch_fetch_verses(db: AsyncSession, verse_ids: list[int]) -> dict[int, GitaVerse]:
@@ -156,38 +268,9 @@ async def generate_journey(
         # Get steps
         steps = await service.get_journey_steps(db, journey.id)
 
-        # Format response
-        return JourneyResponse(
-            id=journey.id,
-            user_id=journey.user_id,
-            title=journey.title,
-            description=journey.description,
-            total_steps=journey.total_steps,
-            current_step=journey.current_step,
-            status=journey.status.value,
-            progress_percentage=journey.progress_percentage,
-            recommended_by=journey.recommended_by,
-            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-            recommendation_reason=journey.recommendation_reason,
-            created_at=journey.created_at.isoformat(),
-            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-            steps=[
-                JourneyStepResponse(
-                    id=step.id,
-                    step_number=step.step_number,
-                    verse_id=step.verse_id,
-                    reflection_prompt=step.reflection_prompt,
-                    ai_insight=step.ai_insight,
-                    completed=step.completed,
-                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                    time_spent_seconds=step.time_spent_seconds,
-                    user_notes=step.user_notes,
-                    user_rating=step.user_rating,
-                )
-                for step in steps
-            ],
-        )
+        # Format response using helper functions
+        step_responses = [build_step_response(step) for step in steps]
+        return build_journey_response(journey, step_responses)
 
     except Exception as e:
         logger.error(f"Error generating journey for user {user_id}: {e}", exc_info=True)
@@ -219,9 +302,10 @@ async def get_active_journey(
         verse_ids = [step.verse_id for step in steps if step.verse_id]
         verses_map = await batch_fetch_verses(db, verse_ids)
 
+        # Build step responses with verse data
         steps_with_verses = []
         for step in steps:
-            verse_data = {}
+            verse_data = None
             if step.verse_id and step.verse_id in verses_map:
                 verse = verses_map[step.verse_id]
                 verse_data = {
@@ -230,40 +314,9 @@ async def get_active_journey(
                     "verse_chapter": verse.chapter,
                     "verse_number": verse.verse,
                 }
+            steps_with_verses.append(build_step_response(step, verse_data))
 
-            steps_with_verses.append(
-                JourneyStepResponse(
-                    id=step.id,
-                    step_number=step.step_number,
-                    verse_id=step.verse_id,
-                    **verse_data,
-                    reflection_prompt=step.reflection_prompt,
-                    ai_insight=step.ai_insight,
-                    completed=step.completed,
-                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                    time_spent_seconds=step.time_spent_seconds,
-                    user_notes=step.user_notes,
-                    user_rating=step.user_rating,
-                )
-            )
-
-        return JourneyResponse(
-            id=journey.id,
-            user_id=journey.user_id,
-            title=journey.title,
-            description=journey.description,
-            total_steps=journey.total_steps,
-            current_step=journey.current_step,
-            status=journey.status.value,
-            progress_percentage=journey.progress_percentage,
-            recommended_by=journey.recommended_by,
-            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-            recommendation_reason=journey.recommendation_reason,
-            created_at=journey.created_at.isoformat(),
-            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-            steps=steps_with_verses,
-        )
+        return build_journey_response(journey, steps_with_verses)
 
     except Exception as e:
         logger.error(f"Error fetching active journey for user {user_id}: {e}", exc_info=True)
@@ -286,7 +339,9 @@ async def get_journey_recommendations(
 
     try:
         service = WisdomJourneyService()
-        recommendations = await service.get_journey_recommendations(db, user_id, limit=3)
+        recommendations = await service.get_journey_recommendations(
+            db, user_id, limit=DEFAULT_RECOMMENDATIONS_LIMIT
+        )
 
         return [
             RecommendationResponse(
@@ -302,29 +357,7 @@ async def get_journey_recommendations(
     except Exception as e:
         logger.error(f"Error fetching recommendations for user {user_id}: {e}", exc_info=True)
         # Return default recommendations on error
-        return [
-            RecommendationResponse(
-                template="inner_peace",
-                title="Journey to Inner Peace",
-                description="A 7-day exploration of tranquility through timeless Bhagavad Gita wisdom.",
-                score=0.85,
-                reason="Perfect for beginning your wisdom journey.",
-            ),
-            RecommendationResponse(
-                template="self_discovery",
-                title="Path of Self-Discovery",
-                description="Explore your true nature and purpose through reflective wisdom.",
-                score=0.78,
-                reason="Discover deeper insights about yourself.",
-            ),
-            RecommendationResponse(
-                template="balanced_action",
-                title="Wisdom of Balanced Action",
-                description="Learn to act without attachment, finding harmony between effort and surrender.",
-                score=0.72,
-                reason="A versatile path for navigating daily life.",
-            ),
-        ]
+        return [RecommendationResponse(**rec) for rec in DEFAULT_JOURNEY_RECOMMENDATIONS]
 
 
 @router.get("/{journey_id}", response_model=JourneyResponse)
@@ -357,9 +390,10 @@ async def get_journey(
         verse_ids = [step.verse_id for step in steps if step.verse_id]
         verses_map = await batch_fetch_verses(db, verse_ids)
 
+        # Build step responses with verse data
         steps_with_verses = []
         for step in steps:
-            verse_data = {}
+            verse_data = None
             if step.verse_id and step.verse_id in verses_map:
                 verse = verses_map[step.verse_id]
                 verse_data = {
@@ -368,40 +402,9 @@ async def get_journey(
                     "verse_chapter": verse.chapter,
                     "verse_number": verse.verse,
                 }
+            steps_with_verses.append(build_step_response(step, verse_data))
 
-            steps_with_verses.append(
-                JourneyStepResponse(
-                    id=step.id,
-                    step_number=step.step_number,
-                    verse_id=step.verse_id,
-                    **verse_data,
-                    reflection_prompt=step.reflection_prompt,
-                    ai_insight=step.ai_insight,
-                    completed=step.completed,
-                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                    time_spent_seconds=step.time_spent_seconds,
-                    user_notes=step.user_notes,
-                    user_rating=step.user_rating,
-                )
-            )
-
-        return JourneyResponse(
-            id=journey.id,
-            user_id=journey.user_id,
-            title=journey.title,
-            description=journey.description,
-            total_steps=journey.total_steps,
-            current_step=journey.current_step,
-            status=journey.status.value,
-            progress_percentage=journey.progress_percentage,
-            recommended_by=journey.recommended_by,
-            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-            recommendation_reason=journey.recommendation_reason,
-            created_at=journey.created_at.isoformat(),
-            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-            steps=steps_with_verses,
-        )
+        return build_journey_response(journey, steps_with_verses)
 
     except HTTPException:
         raise
@@ -449,18 +452,7 @@ async def mark_step_complete(
         if not step:
             raise HTTPException(status_code=404, detail="Journey step not found")
 
-        return JourneyStepResponse(
-            id=step.id,
-            step_number=step.step_number,
-            verse_id=step.verse_id,
-            reflection_prompt=step.reflection_prompt,
-            ai_insight=step.ai_insight,
-            completed=step.completed,
-            completed_at=step.completed_at.isoformat() if step.completed_at else None,
-            time_spent_seconds=step.time_spent_seconds,
-            user_notes=step.user_notes,
-            user_rating=step.user_rating,
-        )
+        return build_step_response(step)
 
     except HTTPException:
         raise
@@ -498,38 +490,8 @@ async def pause_journey(
             raise HTTPException(status_code=500, detail="Failed to pause journey")
 
         steps = await service.get_journey_steps(db, journey.id)
-
-        return JourneyResponse(
-            id=journey.id,
-            user_id=journey.user_id,
-            title=journey.title,
-            description=journey.description,
-            total_steps=journey.total_steps,
-            current_step=journey.current_step,
-            status=journey.status.value,
-            progress_percentage=journey.progress_percentage,
-            recommended_by=journey.recommended_by,
-            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-            recommendation_reason=journey.recommendation_reason,
-            created_at=journey.created_at.isoformat(),
-            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-            steps=[
-                JourneyStepResponse(
-                    id=step.id,
-                    step_number=step.step_number,
-                    verse_id=step.verse_id,
-                    reflection_prompt=step.reflection_prompt,
-                    ai_insight=step.ai_insight,
-                    completed=step.completed,
-                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                    time_spent_seconds=step.time_spent_seconds,
-                    user_notes=step.user_notes,
-                    user_rating=step.user_rating,
-                )
-                for step in steps
-            ],
-        )
+        step_responses = [build_step_response(step) for step in steps]
+        return build_journey_response(journey, step_responses)
 
     except HTTPException:
         raise
@@ -567,38 +529,8 @@ async def resume_journey(
             raise HTTPException(status_code=400, detail="Journey cannot be resumed (not paused)")
 
         steps = await service.get_journey_steps(db, journey.id)
-
-        return JourneyResponse(
-            id=journey.id,
-            user_id=journey.user_id,
-            title=journey.title,
-            description=journey.description,
-            total_steps=journey.total_steps,
-            current_step=journey.current_step,
-            status=journey.status.value,
-            progress_percentage=journey.progress_percentage,
-            recommended_by=journey.recommended_by,
-            recommendation_score=float(journey.recommendation_score) if journey.recommendation_score else None,
-            recommendation_reason=journey.recommendation_reason,
-            created_at=journey.created_at.isoformat(),
-            updated_at=journey.updated_at.isoformat() if journey.updated_at else None,
-            completed_at=journey.completed_at.isoformat() if journey.completed_at else None,
-            steps=[
-                JourneyStepResponse(
-                    id=step.id,
-                    step_number=step.step_number,
-                    verse_id=step.verse_id,
-                    reflection_prompt=step.reflection_prompt,
-                    ai_insight=step.ai_insight,
-                    completed=step.completed,
-                    completed_at=step.completed_at.isoformat() if step.completed_at else None,
-                    time_spent_seconds=step.time_spent_seconds,
-                    user_notes=step.user_notes,
-                    user_rating=step.user_rating,
-                )
-                for step in steps
-            ],
-        )
+        step_responses = [build_step_response(step) for step in steps]
+        return build_journey_response(journey, step_responses)
 
     except HTTPException:
         raise

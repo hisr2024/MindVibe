@@ -51,8 +51,12 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/journeys/start",
     "/api/journeys/active",
     "/api/journeys/today",
-    # Wisdom journey endpoints
-    "/api/wisdom-journey",
+    # Wisdom journey endpoints - only exempt safe read operations
+    # State-changing operations (POST/PUT/DELETE) on specific paths still need CSRF
+    # but the base path is exempt for GET catalog/recommendations
+    "/api/wisdom-journey/catalog",
+    "/api/wisdom-journey/recommendations",
+    "/api/wisdom-journey/active",
 }
 
 # Methods that require CSRF protection

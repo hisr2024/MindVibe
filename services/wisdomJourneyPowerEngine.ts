@@ -17,7 +17,7 @@
  * - Chapter 10: Vibhuti Yoga (42 verses) - The Yoga of Divine Glories
  * - Chapter 11: Visvarupa Darsana Yoga (55 verses) - The Yoga of the Cosmic Form
  * - Chapter 12: Bhakti Yoga (20 verses) - The Yoga of Devotion
- * - Chapter 13: Ksetra Ksetrajna Vibhaga Yoga (35 verses) - The Yoga of the Field
+ * - Chapter 13: Ksetra Ksetrajna Vibhaga Yoga (34 verses) - The Yoga of the Field
  * - Chapter 14: Gunatraya Vibhaga Yoga (27 verses) - The Yoga of the Three Gunas
  * - Chapter 15: Purusottama Yoga (20 verses) - The Yoga of the Supreme Person
  * - Chapter 16: Daivasura Sampad Vibhaga Yoga (24 verses) - The Yoga of Divine and Demonic

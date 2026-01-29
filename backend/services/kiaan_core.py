@@ -61,6 +61,21 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
+# CONFIGURATION CONSTANTS
+# =============================================================================
+
+# Default model for KIAAN AI operations
+# Using GPT-4o-mini for cost optimization (75% cheaper than GPT-4)
+DEFAULT_KIAAN_MODEL = "gpt-4o-mini"
+
+# Maximum cache entries to prevent memory leaks
+DEFAULT_MAX_CACHE_ENTRIES = 1000
+
+# Mood trend threshold for significant changes
+MOOD_TREND_THRESHOLD = 1.0
+
+
+# =============================================================================
 # OFFLINE WISDOM CACHE - Pre-cached responses for offline operation
 # =============================================================================
 
@@ -68,12 +83,20 @@ class OfflineWisdomCache:
     """
     Local cache of wisdom responses for offline operation.
     Stores pre-generated responses and common wisdom patterns.
+
+    Memory Safety: Uses LRU eviction to prevent unbounded memory growth.
+    Default max size is 1000 entries (~10MB assuming ~10KB per response).
     """
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    # Maximum number of entries to keep in memory cache (prevents memory leak)
+    MAX_CACHE_ENTRIES = DEFAULT_MAX_CACHE_ENTRIES
+
+    def __init__(self, cache_dir: Optional[str] = None, max_entries: int = DEFAULT_MAX_CACHE_ENTRIES):
         self.cache_dir = Path(cache_dir or Path.home() / ".mindvibe" / "wisdom_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.memory_cache: dict[str, dict] = {}
+        self._max_entries = max_entries
+        self._access_order: list[str] = []  # Track access order for LRU eviction
         self._load_cache()
 
     def _load_cache(self) -> None:
@@ -106,18 +129,43 @@ class OfflineWisdomCache:
         return hashlib.sha256(content.encode()).hexdigest()[:32]
 
     def get(self, message: str, context: str) -> Optional[dict]:
-        """Get cached response if available."""
+        """Get cached response if available. Updates LRU access order."""
         key = self._generate_key(message, context)
-        return self.memory_cache.get(key)
+        result = self.memory_cache.get(key)
+        if result is not None:
+            # Update LRU access order (move to end = most recently used)
+            if key in self._access_order:
+                self._access_order.remove(key)
+            self._access_order.append(key)
+        return result
+
+    def _evict_lru(self) -> None:
+        """Evict least recently used entries when cache exceeds max size."""
+        while len(self.memory_cache) >= self._max_entries and self._access_order:
+            oldest_key = self._access_order.pop(0)
+            if oldest_key in self.memory_cache:
+                del self.memory_cache[oldest_key]
+                logger.debug(f"Evicted LRU cache entry: {oldest_key[:8]}...")
 
     def set(self, message: str, context: str, response: dict) -> None:
-        """Cache a response for future offline use."""
+        """Cache a response for future offline use. Implements LRU eviction."""
         key = self._generate_key(message, context)
+
+        # Evict old entries if cache is full (prevents memory leak)
+        if key not in self.memory_cache:
+            self._evict_lru()
+
         self.memory_cache[key] = {
             "response": response,
             "cached_at": datetime.now().isoformat(),
             "context": context
         }
+
+        # Update LRU access order
+        if key in self._access_order:
+            self._access_order.remove(key)
+        self._access_order.append(key)
+
         # Periodically save to disk
         if len(self.memory_cache) % 10 == 0:
             self._save_cache()

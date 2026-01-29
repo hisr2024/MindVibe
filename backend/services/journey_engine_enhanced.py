@@ -33,7 +33,21 @@ ENCRYPTION_AVAILABLE = False
 
 
 def _try_import_fernet():
-    """Try to import Fernet, returning None if unavailable."""
+    """
+    Try to import Fernet encryption, returning None if unavailable.
+
+    This deferred import pattern is used because:
+    1. The cryptography library may not be installed in all environments
+    2. Import-time errors in cryptography can crash the entire application
+    3. Encryption is optional for development but required in production
+
+    The function sets global variables:
+    - Fernet: The Fernet class if available, None otherwise
+    - ENCRYPTION_AVAILABLE: Boolean flag for encryption availability
+
+    Returns:
+        Fernet class if import succeeds, None otherwise
+    """
     global Fernet, ENCRYPTION_AVAILABLE
     try:
         from cryptography.fernet import Fernet as _Fernet
@@ -211,6 +225,21 @@ def get_reflection_encryption() -> ReflectionEncryption:
 
 
 # =============================================================================
+# CONFIGURATION CONSTANTS
+# =============================================================================
+
+# Valid journey pace values
+VALID_PACE_VALUES = frozenset(["daily", "every_other_day", "weekly"])
+DEFAULT_PACE = "daily"
+
+# Maximum number of verses per step
+MAX_VERSES_PER_STEP = 3
+
+# Default journey duration in days
+DEFAULT_JOURNEY_DURATION_DAYS = 14
+
+
+# =============================================================================
 # JOURNEY SCHEDULER
 # =============================================================================
 
@@ -223,12 +252,32 @@ class JourneyScheduler:
     - daily: one step per calendar day
     - every_other_day: one step every 2 days
     - weekly: one step per week
+
+    Unknown pace values default to 'daily' behavior with a warning logged.
     """
+
+    @staticmethod
+    def validate_pace(pace: str | None) -> str:
+        """
+        Validate and normalize pace value.
+
+        Args:
+            pace: Pace value to validate (may be None)
+
+        Returns:
+            Valid pace string (defaults to 'daily' if invalid)
+        """
+        if pace is None:
+            return DEFAULT_PACE
+        if pace not in VALID_PACE_VALUES:
+            logger.warning(f"Invalid pace value '{pace}', defaulting to '{DEFAULT_PACE}'")
+            return DEFAULT_PACE
+        return pace
 
     @staticmethod
     def calculate_day_index(
         started_at: datetime.datetime,
-        pace: str = "daily",
+        pace: str = DEFAULT_PACE,
         completed_days: int = 0,
     ) -> int:
         """
@@ -242,6 +291,9 @@ class JourneyScheduler:
         Returns:
             Current day index (1-based)
         """
+        # Validate pace
+        pace = JourneyScheduler.validate_pace(pace)
+
         now = datetime.datetime.now(datetime.UTC)
 
         # Ensure started_at has timezone info for correct comparison
@@ -258,6 +310,7 @@ class JourneyScheduler:
         elif pace == "weekly":
             elapsed_days = elapsed.days // 7
         else:
+            # Should not reach here due to validation, but fallback to daily
             elapsed_days = elapsed.days
 
         # Day index is at least 1, and at most elapsed_days + 1
@@ -281,7 +334,8 @@ class JourneyScheduler:
         if user_journey.status != UserJourneyStatus.ACTIVE:
             return False
 
-        pace = user_journey.personalization.get("pace", "daily") if user_journey.personalization else "daily"
+        raw_pace = user_journey.personalization.get("pace") if user_journey.personalization else None
+        pace = JourneyScheduler.validate_pace(raw_pace)
         started_at = user_journey.started_at
 
         current_day = JourneyScheduler.calculate_day_index(
@@ -479,7 +533,7 @@ class StepGenerator:
             enemy_tags=enemy_tags,
             user_journey_id=user_journey.id,
             avoid_recent=20,
-            max_verses=3,
+            max_verses=MAX_VERSES_PER_STEP,
         )
 
         # 4. Get personalization preferences
@@ -1033,37 +1087,59 @@ class EnhancedJourneyEngine:
         db: AsyncSession,
         user_id: str,
     ) -> list[dict[str, Any]]:
-        """Get all active journeys for a user."""
+        """Get all active journeys for a user.
+
+        Performance: Uses a single query with subquery to count completed steps,
+        avoiding N+1 query problem (was: 1 + N queries, now: 1 query).
+        """
+        from sqlalchemy.orm import selectinload
+
+        # Subquery to count completed steps per journey (avoids N+1 queries)
+        completed_steps_subquery = (
+            select(
+                UserJourneyStepState.user_journey_id,
+                func.count(UserJourneyStepState.id).label("completed_count"),
+            )
+            .where(UserJourneyStepState.completed_at.isnot(None))
+            .group_by(UserJourneyStepState.user_journey_id)
+            .subquery()
+        )
+
+        # Main query with eager loading of template and left join for step counts
         result = await db.execute(
-            select(UserJourney)
+            select(
+                UserJourney,
+                func.coalesce(completed_steps_subquery.c.completed_count, 0).label(
+                    "completed_steps"
+                ),
+            )
+            .outerjoin(
+                completed_steps_subquery,
+                UserJourney.id == completed_steps_subquery.c.user_journey_id,
+            )
+            .options(selectinload(UserJourney.template))
             .where(
                 and_(
                     UserJourney.user_id == user_id,
                     UserJourney.status == UserJourneyStatus.ACTIVE,
+                    UserJourney.deleted_at.is_(None),
                 )
             )
             .order_by(UserJourney.started_at.desc())
         )
-        journeys = list(result.scalars().all())
+        rows = result.all()
 
         # Build response with correct progress calculation
         journey_data = []
-        for j in journeys:
+        for row in rows:
+            j = row[0]  # UserJourney object
+            completed_steps = row[1]  # completed_count from subquery
             total_days = j.template.duration_days if j.template else 14
 
-            # FIX: Calculate progress based on COMPLETED steps, not current day index
-            # This gives accurate progress even if user skips days
-            completed_steps_result = await db.execute(
-                select(func.count(UserJourneyStepState.id))
-                .where(
-                    and_(
-                        UserJourneyStepState.user_journey_id == j.id,
-                        UserJourneyStepState.completed_at.isnot(None),
-                    )
-                )
+            # Calculate progress based on COMPLETED steps, not current day index
+            progress_percentage = (
+                int((completed_steps / total_days) * 100) if total_days > 0 else 0
             )
-            completed_steps = completed_steps_result.scalar() or 0
-            progress_percentage = int((completed_steps / total_days) * 100) if total_days > 0 else 0
 
             journey_data.append({
                 "id": j.id,

@@ -18,7 +18,7 @@ Provides endpoints for the multi-journey Wisdom Journey system:
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -43,6 +43,7 @@ from backend.services.subscription_service import (
     get_user_tier,
     get_or_create_free_subscription,
 )
+from backend.models import UserJourney
 
 logger = logging.getLogger(__name__)
 
@@ -641,7 +642,6 @@ async def get_or_generate_today_step(
 
     try:
         # Verify ownership
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -675,8 +675,8 @@ async def get_or_generate_today_step(
 async def complete_step(
     request: Request,
     user_journey_id: str,
-    day_index: int,
-    body: CompleteStepRequest,
+    day_index: int = Path(..., ge=1, description="Day index (1-indexed, must be positive)"),
+    body: CompleteStepRequest = None,
     db: AsyncSession = Depends(get_db),
     access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, Any]:
@@ -692,7 +692,6 @@ async def complete_step(
 
     try:
         # Verify ownership
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -741,7 +740,6 @@ async def pause_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -776,7 +774,6 @@ async def resume_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -813,7 +810,6 @@ async def abandon_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -853,7 +849,6 @@ async def get_journey_history(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:

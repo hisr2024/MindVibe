@@ -513,13 +513,16 @@ class GitaCorpusAdapter:
             )
             verses = list(result.scalars().all())
 
-            # Filter excluded
+            # PERFORMANCE FIX: Convert exclude_refs to set for O(1) lookup
+            # Previously O(n*m) where n=verses, m=exclude_refs; now O(n)
+            exclude_set: set[tuple[int, int]] = {
+                (r["chapter"], r["verse"]) for r in exclude_refs
+            }
+
+            # Filter excluded with O(1) lookup per verse
             filtered: list[VerseSearchResult] = []
             for v in verses:
-                if any(
-                    r["chapter"] == v.chapter and r["verse"] == v.verse
-                    for r in exclude_refs
-                ):
+                if (v.chapter, v.verse) in exclude_set:
                     continue
 
                 filtered.append({
@@ -558,12 +561,14 @@ class GitaCorpusAdapter:
             {"chapter": 5, "verse": 10, "score": 0.55, "themes": ["surrender", "detachment"]},
         ]
 
+        # PERFORMANCE FIX: Use set for O(1) lookup instead of O(n) nested loop
+        exclude_set: set[tuple[int, int]] = {
+            (e["chapter"], e["verse"]) for e in exclude_refs
+        }
+
         filtered = [
             r for r in fallback_refs
-            if not any(
-                e["chapter"] == r["chapter"] and e["verse"] == r["verse"]
-                for e in exclude_refs
-            )
+            if (r["chapter"], r["verse"]) not in exclude_set
         ]
 
         return filtered[:limit]

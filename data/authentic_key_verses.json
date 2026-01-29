@@ -1,0 +1,182 @@
+[
+  {
+    "chapter": 1,
+    "verse": 1,
+    "sanskrit": "धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः। मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय॥",
+    "transliteration": "dharmakṣetre kurukṣetre samavetā yuyutsavaḥ māmakāḥ pāṇḍavāś caiva kim akurvata sañjaya",
+    "english": "O Sanjaya, after my sons and the sons of Pandu assembled in the holy land of Kurukshetra, eager for battle, what did they do?",
+    "hindi": "हे संजय! धर्मभूमि कुरुक्षेत्र में युद्ध की इच्छा से एकत्र हुए मेरे और पाण्डु के पुत्रों ने क्या किया?",
+    "themes": ["beginning", "battlefield", "duty"]
+  },
+  {
+    "chapter": 1,
+    "verse": 47,
+    "sanskrit": "एवमुक्त्वार्जुनः सङ्ख्ये रथोपस्थ उपाविशत्। विसृज्य सशरं चापं शोकसंविग्नमानसः॥",
+    "transliteration": "evam uktvārjunaḥ saṅkhye rathopastha upāviśat visṛjya sa-śaraṃ cāpaṃ śoka-saṃvigna-mānasaḥ",
+    "english": "Having spoken thus, Arjuna sat down on the seat of the chariot, casting aside his bow and arrows, his mind overwhelmed with grief.",
+    "hindi": "यह कहकर अर्जुन रणभूमि में बाण सहित धनुष को त्यागकर, शोक से व्याकुल मन वाला होकर रथ के पिछले भाग में बैठ गया।",
+    "themes": ["despair", "grief", "surrender"]
+  },
+  {
+    "chapter": 2,
+    "verse": 11,
+    "sanskrit": "अशोच्यानन्वशोचस्त्वं प्रज्ञावादांश्च भाषसे। गतासूनगतासूंश्च नानुशोचन्ति पण्डिताः॥",
+    "transliteration": "aśocyān anvaśocas tvaṃ prajñā-vādāṃś ca bhāṣase gatāsūn agatāsūṃś ca nānuśocanti paṇḍitāḥ",
+    "english": "You grieve for those who should not be grieved for, yet you speak words of wisdom. The wise grieve neither for the living nor for the dead.",
+    "hindi": "तू न शोक करने योग्यों के लिए शोक करता है और पण्डितों के समान वचन बोलता है। परन्तु पण्डित जन मृत और जीवित किसी के लिए भी शोक नहीं करते।",
+    "themes": ["wisdom", "death", "grief"]
+  },
+  {
+    "chapter": 2,
+    "verse": 13,
+    "sanskrit": "देहिनोऽस्मिन्यथा देहे कौमारं यौवनं जरा। तथा देहान्तरप्राप्तिर्धीरस्तत्र न मुह्यति॥",
+    "transliteration": "dehino 'smin yathā dehe kaumāraṃ yauvanaṃ jarā tathā dehāntara-prāptir dhīras tatra na muhyati",
+    "english": "Just as the soul passes through childhood, youth, and old age in this body, so too does it pass into another body. The wise are not deluded by this.",
+    "hindi": "जैसे इस देह में देही जीवात्मा की बाल्यावस्था, युवावस्था और वृद्धावस्था होती है, वैसे ही अन्य शरीर की प्राप्ति होती है। धीर पुरुष इससे मोहित नहीं होता।",
+    "themes": ["soul", "immortality", "change"]
+  },
+  {
+    "chapter": 2,
+    "verse": 14,
+    "sanskrit": "मात्रास्पर्शास्तु कौन्तेय शीतोष्णसुखदुःखदाः। आगमापायिनोऽनित्यास्तांस्तितिक्षस्व भारत॥",
+    "transliteration": "mātrā-sparśās tu kaunteya śītoṣṇa-sukha-duḥkha-dāḥ āgamāpāyino 'nityās tāṃs titikṣasva bhārata",
+    "english": "The contacts of the senses with objects give rise to cold, heat, pleasure, and pain. They come and go; they are impermanent. Endure them bravely, O Bharata.",
+    "hindi": "हे कुन्तीपुत्र! इन्द्रियों के विषयों से होने वाले सुख-दुःख, शीत-उष्ण आदि का अनुभव अनित्य और आने-जाने वाला है। हे भारत! उन्हें सहन करो।",
+    "themes": ["impermanence", "endurance", "senses"]
+  },
+  {
+    "chapter": 2,
+    "verse": 17,
+    "sanskrit": "अविनाशि तु तद्विद्धि येन सर्वमिदं ततम्। विनाशमव्ययस्यास्य न कश्चित्कर्तुमर्हति॥",
+    "transliteration": "avināśi tu tad viddhi yena sarvam idaṃ tatam vināśam avyayasyāsya na kaścit kartum arhati",
+    "english": "Know that to be indestructible by which all this is pervaded. No one can bring about the destruction of the imperishable.",
+    "hindi": "जिससे यह समस्त जगत व्याप्त है, उसे तू अविनाशी समझ। इस अव्यय का विनाश करने में कोई भी समर्थ नहीं है।",
+    "themes": ["eternal", "soul", "indestructible"]
+  },
+  {
+    "chapter": 2,
+    "verse": 20,
+    "sanskrit": "न जायते म्रियते वा कदाचिन्नायं भूत्वा भविता वा न भूयः। अजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे॥",
+    "transliteration": "na jāyate mriyate vā kadācin nāyaṃ bhūtvā bhavitā vā na bhūyaḥ ajo nityaḥ śāśvato 'yaṃ purāṇo na hanyate hanyamāne śarīre",
+    "english": "The soul is never born, nor does it ever die; nor having once existed, does it ever cease to be. The soul is unborn, eternal, ever-existing, and primeval. It is not slain when the body is slain.",
+    "hindi": "यह आत्मा किसी काल में न तो जन्मता है और न मरता है तथा न यह उत्पन्न होकर फिर होने वाला है। यह अजन्मा, नित्य, शाश्वत और पुरातन है। शरीर के मारे जाने पर भी यह नहीं मारा जाता।",
+    "themes": ["soul", "immortality", "eternal"]
+  },
+  {
+    "chapter": 2,
+    "verse": 47,
+    "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥",
+    "transliteration": "karmaṇy evādhikāras te mā phaleṣu kadācana mā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
+    "english": "You have the right to work, but never to the fruit of work. You should never engage in action for the sake of reward, nor should you long for inaction.",
+    "hindi": "कर्म करने में ही तेरा अधिकार है, फल में कभी नहीं। इसलिए तू कर्मफल का हेतु भी मत बन और अकर्म में भी तेरी आसक्ति न हो।",
+    "themes": ["detachment", "action", "duty", "karma"]
+  },
+  {
+    "chapter": 2,
+    "verse": 48,
+    "sanskrit": "योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय। सिद्ध्यसिद्ध्योः समो भूत्वा समत्वं योग उच्यते॥",
+    "transliteration": "yoga-sthaḥ kuru karmāṇi saṅgaṃ tyaktvā dhanañjaya siddhy-asiddhyoḥ samo bhūtvā samatvaṃ yoga ucyate",
+    "english": "Perform your duty equipoised, O Arjuna, abandoning all attachment to success or failure. Such equanimity is called yoga.",
+    "hindi": "हे धनञ्जय! तू आसक्ति को त्यागकर तथा सिद्धि और असिद्धि में समान बुद्धि वाला होकर योग में स्थित हुआ कर्तव्य कर्मों को कर। समत्व ही योग कहलाता है।",
+    "themes": ["equanimity", "yoga", "action", "balance"]
+  },
+  {
+    "chapter": 2,
+    "verse": 62,
+    "sanskrit": "ध्यायतो विषयान्पुंसः सङ्गस्तेषूपजायते। सङ्गात्सञ्जायते कामः कामात्क्रोधोऽभिजायते॥",
+    "transliteration": "dhyāyato viṣayān puṃsaḥ saṅgas teṣūpajāyate saṅgāt sañjāyate kāmaḥ kāmāt krodho 'bhijāyate",
+    "english": "While contemplating the objects of the senses, one develops attachment; from attachment arises desire; and from desire, anger is born.",
+    "hindi": "विषयों का चिन्तन करने वाले पुरुष की उनमें आसक्ति हो जाती है, आसक्ति से काम उत्पन्न होता है और काम से क्रोध उत्पन्न होता है।",
+    "themes": ["attachment", "desire", "anger", "mind"]
+  },
+  {
+    "chapter": 3,
+    "verse": 19,
+    "sanskrit": "तस्मादसक्तः सततं कार्यं कर्म समाचर। असक्तो ह्याचरन्कर्म परमाप्नोति पूरुषः॥",
+    "transliteration": "tasmād asaktaḥ satataṃ kāryaṃ karma samācara asakto hy ācaran karma param āpnoti pūruṣaḥ",
+    "english": "Therefore, always perform your duty without attachment. By performing action without attachment, one attains the Supreme.",
+    "hindi": "इसलिए तू निरन्तर आसक्ति रहित होकर कर्तव्य कर्म का आचरण कर। क्योंकि आसक्ति रहित होकर कर्म करता हुआ मनुष्य परमात्मा को प्राप्त होता है।",
+    "themes": ["duty", "detachment", "action", "supreme"]
+  },
+  {
+    "chapter": 4,
+    "verse": 7,
+    "sanskrit": "यदा यदा हि धर्मस्य ग्लानिर्भवति भारत। अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्॥",
+    "transliteration": "yadā yadā hi dharmasya glānir bhavati bhārata abhyutthānam adharmasya tadātmānaṃ sṛjāmy aham",
+    "english": "Whenever there is a decline in righteousness and an increase in unrighteousness, O Arjuna, at that time I manifest Myself.",
+    "hindi": "हे भारत! जब-जब धर्म की हानि और अधर्म की वृद्धि होती है, तब-तब मैं अपने आपको प्रकट करता हूँ।",
+    "themes": ["dharma", "divine", "incarnation", "protection"]
+  },
+  {
+    "chapter": 4,
+    "verse": 8,
+    "sanskrit": "परित्राणाय साधूनां विनाशाय च दुष्कृताम्। धर्मसंस्थापनार्थाय सम्भवामि युगे युगे॥",
+    "transliteration": "paritrāṇāya sādhūnāṃ vināśāya ca duṣkṛtām dharma-saṃsthāpanārthāya sambhavāmi yuge yuge",
+    "english": "To protect the righteous, to destroy the wicked, and to establish dharma, I appear in every age.",
+    "hindi": "साधुओं की रक्षा के लिए, दुष्टों के विनाश के लिए और धर्म की स्थापना के लिए मैं युग-युग में प्रकट होता हूँ।",
+    "themes": ["protection", "dharma", "divine", "righteousness"]
+  },
+  {
+    "chapter": 5,
+    "verse": 10,
+    "sanskrit": "ब्रह्मण्याधाय कर्माणि सङ्गं त्यक्त्वा करोति यः। लिप्यते न स पापेन पद्मपत्रमिवाम्भसा॥",
+    "transliteration": "brahmaṇy ādhāya karmāṇi saṅgaṃ tyaktvā karoti yaḥ lipyate na sa pāpena padma-patram ivāmbhasā",
+    "english": "One who acts offering all actions to Brahman and abandoning attachment is not touched by sin, as a lotus leaf is not wetted by water.",
+    "hindi": "जो पुरुष सब कर्मों को ब्रह्म में अर्पण करके और आसक्ति को त्यागकर कर्म करता है, वह पाप से लिप्त नहीं होता, जैसे कमल का पत्ता पानी से।",
+    "themes": ["surrender", "detachment", "purity", "brahman"]
+  },
+  {
+    "chapter": 6,
+    "verse": 5,
+    "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
+    "transliteration": "uddhared ātmanātmānaṃ nātmānam avasādayet ātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ",
+    "english": "One should elevate oneself by one's own mind, not degrade oneself. The mind is the friend of the conditioned soul, and his enemy as well.",
+    "hindi": "अपने द्वारा अपना उद्धार करे और अपने को गिरने न दे। क्योंकि आत्मा ही आत्मा का मित्र है और आत्मा ही आत्मा का शत्रु है।",
+    "themes": ["self-improvement", "mind", "discipline", "friend"]
+  },
+  {
+    "chapter": 6,
+    "verse": 6,
+    "sanskrit": "बन्धुरात्मात्मनस्तस्य येनात्मैवात्मना जितः। अनात्मनस्तु शत्रुत्वे वर्तेतात्मैव शत्रुवत्॥",
+    "transliteration": "bandhur ātmātmanas tasya yenātmaivātmanā jitaḥ anātmanas tu śatrutve vartetātmaiva śatru-vat",
+    "english": "For one who has conquered the mind, the mind is the best of friends; but for one who has failed to do so, the mind remains the greatest enemy.",
+    "hindi": "जिसने अपने आप से अपने आप को जीत लिया है, उसके लिए आत्मा मित्र है। परन्तु जिसने अपने आप को नहीं जीता, उसके लिए आत्मा शत्रु की भाँति व्यवहार करती है।",
+    "themes": ["mind-control", "self-mastery", "friend", "enemy"]
+  },
+  {
+    "chapter": 9,
+    "verse": 22,
+    "sanskrit": "अनन्याश्चिन्तयन्तो मां ये जनाः पर्युपासते। तेषां नित्याभियुक्तानां योगक्षेमं वहाम्यहम्॥",
+    "transliteration": "ananyāś cintayanto māṃ ye janāḥ paryupāsate teṣāṃ nityābhiyuktānāṃ yoga-kṣemaṃ vahāmy aham",
+    "english": "To those who worship Me with single-minded devotion, thinking of no other, I provide what they lack and preserve what they have.",
+    "hindi": "जो लोग अनन्य भाव से मुझ परमेश्वर का चिन्तन करते हुए उपासना करते हैं, उन नित्य युक्त भक्तों का योगक्षेम मैं स्वयं वहन करता हूँ।",
+    "themes": ["devotion", "protection", "providence", "surrender"]
+  },
+  {
+    "chapter": 12,
+    "verse": 13,
+    "sanskrit": "अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च। निर्ममो निरहङ्कारः समदुःखसुखः क्षमी॥",
+    "transliteration": "adveṣṭā sarva-bhūtānāṃ maitraḥ karuṇa eva ca nirmamo nirahaṅkāraḥ sama-duḥkha-sukhaḥ kṣamī",
+    "english": "One who is not envious but is a kind friend to all living entities, who does not think himself a proprietor and is free from false ego, who is equal in both happiness and distress, who is tolerant...",
+    "hindi": "जो सभी प्राणियों से द्वेष नहीं करता, मित्रवत और करुणामय है, ममता और अहंकार से रहित है, सुख-दुःख में समान रहता है और क्षमाशील है...",
+    "themes": ["compassion", "kindness", "equanimity", "devotee"]
+  },
+  {
+    "chapter": 18,
+    "verse": 66,
+    "sanskrit": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज। अहं त्वा सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः॥",
+    "transliteration": "sarva-dharmān parityajya mām ekaṃ śaraṇaṃ vraja ahaṃ tvā sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ",
+    "english": "Abandon all varieties of dharma and simply surrender unto Me. I shall deliver you from all sinful reactions. Do not fear.",
+    "hindi": "सभी धर्मों को त्यागकर केवल मेरी शरण में आ जा। मैं तुझे सभी पापों से मुक्त कर दूँगा, शोक मत कर।",
+    "themes": ["surrender", "liberation", "faith", "grace"]
+  },
+  {
+    "chapter": 18,
+    "verse": 78,
+    "sanskrit": "यत्र योगेश्वरः कृष्णो यत्र पार्थो धनुर्धरः। तत्र श्रीर्विजयो भूतिर्ध्रुवा नीतिर्मतिर्मम॥",
+    "transliteration": "yatra yogeśvaraḥ kṛṣṇo yatra pārtho dhanur-dharaḥ tatra śrīr vijayo bhūtir dhruvā nītir matir mama",
+    "english": "Wherever there is Krishna, the master of all yogis, and wherever there is Arjuna, the supreme archer, there will certainly be opulence, victory, extraordinary power, and morality.",
+    "hindi": "जहाँ योगेश्वर श्रीकृष्ण हैं और जहाँ धनुर्धर अर्जुन है, वहाँ श्री, विजय, विभूति और अचल नीति है - यह मेरा मत है।",
+    "themes": ["victory", "dharma", "conclusion", "divine"]
+  }
+]
