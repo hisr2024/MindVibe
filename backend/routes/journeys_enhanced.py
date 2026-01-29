@@ -18,7 +18,7 @@ Provides endpoints for the multi-journey Wisdom Journey system:
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -618,8 +618,8 @@ async def get_or_generate_today_step(
 async def complete_step(
     request: Request,
     user_journey_id: str,
-    day_index: int,
-    body: CompleteStepRequest,
+    day_index: int = Path(..., ge=1, description="Day index (1-indexed, must be positive)"),
+    body: CompleteStepRequest = None,
     db: AsyncSession = Depends(get_db),
     access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, Any]:

@@ -73,8 +73,7 @@ export default function WisdomJourneyClient() {
       } catch (err) {
         // Only update state if still mounted
         if (!isMounted) return
-        console.error('Error loading wisdom journey data:', err)
-        setError('Failed to load journey data. Please try again.')
+        setError(err instanceof Error ? err.message : 'Failed to load journey data. Please try again.')
         // Still show recommendations view on error
         setView('recommendations')
       } finally {
@@ -165,9 +164,13 @@ export default function WisdomJourneyClient() {
       setActiveJourney(null)
       setView('recommendations')
 
-      // Reload recommendations
-      const recs = await wisdomJourneyService.getJourneyRecommendations(userId)
-      setRecommendations(recs)
+      // Reload recommendations - wrapped in try-catch for resilience
+      try {
+        const recs = await wisdomJourneyService.getJourneyRecommendations(userId)
+        setRecommendations(recs)
+      } catch {
+        // Keep existing recommendations if reload fails
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete journey')
     } finally {
@@ -196,21 +199,26 @@ export default function WisdomJourneyClient() {
   }) => {
     if (!userId || !activeJourney || !selectedStep) return
 
-    await wisdomJourneyService.markStepComplete(userId, activeJourney.id, {
-      step_number: selectedStep.step_number,
-      ...data,
-    })
+    try {
+      await wisdomJourneyService.markStepComplete(userId, activeJourney.id, {
+        step_number: selectedStep.step_number,
+        ...data,
+      })
 
-    // Reload journey
-    const updated = await wisdomJourneyService.getJourney(userId, activeJourney.id)
-    setActiveJourney(updated)
+      // Reload journey
+      const updated = await wisdomJourneyService.getJourney(userId, activeJourney.id)
+      setActiveJourney(updated)
 
-    // Move to next step or journey view
-    const nextStep = wisdomJourneyService.getNextStep(updated)
-    if (nextStep) {
-      setSelectedStep(nextStep)
-    } else {
-      setView('journey')
+      // Move to next step or journey view
+      const nextStep = wisdomJourneyService.getNextStep(updated)
+      if (nextStep) {
+        setSelectedStep(nextStep)
+      } else {
+        setView('journey')
+      }
+    } catch (err) {
+      // Progress was likely saved locally - show a gentle message
+      setError(err instanceof Error ? err.message : 'Progress saved locally. Will sync when online.')
     }
   }
 

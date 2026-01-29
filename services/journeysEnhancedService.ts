@@ -354,8 +354,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
         ? error.detail
         : error.detail?.message || 'Authentication required. Please log in.'
 
-      console.warn('[JourneysService] Authentication error:', message)
-
       // Dispatch event so other components can react (e.g., show login modal)
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('auth-required', {
@@ -382,8 +380,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
       const detail = error.detail || {}
       const errorCode = detail.error || 'service_unavailable'
       const message = detail.message || 'Service temporarily unavailable. Please try again.'
-
-      console.warn('[JourneysService] Service unavailable:', errorCode, message)
 
       throw new ServiceUnavailableError(errorCode, message)
     }
@@ -516,28 +512,20 @@ export async function getCatalog(): Promise<JourneyTemplate[]> {
 
     // If the response is a server error, return default templates
     if (!response.ok && response.status >= 500) {
-      console.warn('[getCatalog] Server error, using default templates')
       return DEFAULT_CATALOG_TEMPLATES
-    }
-
-    // Check if this is fallback/demo data from backend
-    const isFallback = response.headers.get('X-MindVibe-Fallback') === 'demo-templates'
-    if (isFallback) {
-      console.warn('[getCatalog] Backend returned demo templates - database may not be seeded')
     }
 
     const data = await handleResponse<JourneyTemplate[]>(response)
 
     // If empty array, return defaults
     if (!data || data.length === 0) {
-      console.warn('[getCatalog] Empty catalog, using default templates')
       return DEFAULT_CATALOG_TEMPLATES
     }
 
     return data
-  } catch (error) {
-    console.warn('[getCatalog] Failed to fetch catalog:', error)
-    return DEFAULT_CATALOG_TEMPLATES // Return default templates on errors
+  } catch {
+    // Return default templates on errors - graceful degradation
+    return DEFAULT_CATALOG_TEMPLATES
   }
 }
 
@@ -558,7 +546,6 @@ export async function startJourneys(
   const userId = getUserId()
 
   if (!token && !userId) {
-    console.warn('[JourneysService] No auth credentials found for startJourneys')
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('auth-required', {
         detail: { message: 'Please log in to start a journey', redirectTo: window.location.pathname }
@@ -578,19 +565,15 @@ export async function startJourneys(
     }))
     return handleResponse<UserJourney[]>(response)
   } catch (error) {
-    // Re-throw known error types with additional context
-    if (error instanceof AuthenticationError) {
+    // Re-throw all known error types - let callers handle appropriately
+    if (
+      error instanceof AuthenticationError ||
+      error instanceof ServiceUnavailableError ||
+      error instanceof PremiumFeatureError
+    ) {
       throw error
     }
-    if (error instanceof ServiceUnavailableError) {
-      console.error('[JourneysService] Service unavailable when starting journeys:', error.errorCode)
-      throw error
-    }
-    if (error instanceof PremiumFeatureError) {
-      throw error
-    }
-    // Wrap unknown errors
-    console.error('[JourneysService] Failed to start journeys:', error)
+    // Re-throw unknown errors for caller to handle
     throw error
   }
 }
