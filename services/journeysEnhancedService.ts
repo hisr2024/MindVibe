@@ -8,6 +8,9 @@
  * - Provider tracking
  */
 
+// Import shared journey templates - single source of truth for frontend/backend consistency
+import journeyTemplatesData from '../data/journey_templates.json'
+
 // Use relative path for Vercel proxy (avoids CORS), direct URL only for local dev
 function getApiBaseUrl(): string {
   if (typeof window === 'undefined') {
@@ -430,94 +433,17 @@ export async function getJourneyAccess(): Promise<JourneyAccess> {
   return handleResponse<JourneyAccess>(response)
 }
 
-// Default journey templates - MUST MATCH backend/routes/journeys_enhanced.py DEMO_JOURNEY_TEMPLATES
-// This ensures frontend/backend consistency when database is not seeded
-const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
-  {
-    id: 'demo-krodha-001',
-    slug: 'transform-anger-demo',
-    title: 'Transform Anger (Krodha)',
-    description: 'A 14-day journey to transform destructive anger into constructive energy through Gita wisdom. Learn to recognize triggers, practice patience, and cultivate inner peace.',
-    primary_enemy_tags: ['krodha'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: true,
-    icon_name: 'flame',
-    color_theme: 'red',
-  },
-  {
-    id: 'demo-kama-001',
-    slug: 'master-desire-demo',
-    title: 'Mastering Desire (Kama)',
-    description: 'A 21-day journey to understand and master desires. Transform cravings into purposeful aspirations aligned with your dharma.',
-    primary_enemy_tags: ['kama'],
-    duration_days: 21,
-    difficulty: 3,
-    is_featured: true,
-    icon_name: 'heart',
-    color_theme: 'pink',
-  },
-  {
-    id: 'demo-lobha-001',
-    slug: 'overcome-greed-demo',
-    title: 'Contentment Over Greed (Lobha)',
-    description: 'A 14-day journey to cultivate santosha (contentment) and release the grip of greed. Find abundance in simplicity.',
-    primary_enemy_tags: ['lobha'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: false,
-    icon_name: 'coins',
-    color_theme: 'amber',
-  },
-  {
-    id: 'demo-moha-001',
-    slug: 'clarity-attachment-demo',
-    title: 'Clarity Over Attachment (Moha)',
-    description: 'A 21-day journey to see through delusion and attachment. Develop viveka (discrimination) and find clarity.',
-    primary_enemy_tags: ['moha'],
-    duration_days: 21,
-    difficulty: 3,
-    is_featured: false,
-    icon_name: 'cloud',
-    color_theme: 'purple',
-  },
-  {
-    id: 'demo-mada-001',
-    slug: 'humility-pride-demo',
-    title: 'Humility Over Ego (Mada)',
-    description: 'A 14-day journey to dissolve ego and cultivate true humility. Recognize the Self beyond the small self.',
-    primary_enemy_tags: ['mada'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: false,
-    icon_name: 'crown',
-    color_theme: 'orange',
-  },
-  {
-    id: 'demo-matsarya-001',
-    slug: 'joy-envy-demo',
-    title: 'Joy Over Envy (Matsarya)',
-    description: 'A 14-day journey to transform envy into mudita (sympathetic joy). Celebrate others\' success as your own.',
-    primary_enemy_tags: ['matsarya'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: false,
-    icon_name: 'eye',
-    color_theme: 'emerald',
-  },
-  {
-    id: 'demo-complete-001',
-    slug: 'complete-transformation-demo',
-    title: 'Complete Inner Transformation',
-    description: 'A comprehensive 30-day journey addressing all six inner enemies. The ultimate path to self-mastery and liberation.',
-    primary_enemy_tags: ['kama', 'krodha', 'lobha', 'moha', 'mada', 'matsarya'],
-    duration_days: 30,
-    difficulty: 4,
-    is_featured: true,
-    icon_name: 'sparkles',
-    color_theme: 'indigo',
-  },
-]
+// =============================================================================
+// DEFAULT JOURNEY TEMPLATES - Single source of truth: data/journey_templates.json
+// =============================================================================
+
+/**
+ * Default journey templates loaded from shared JSON file.
+ * Used as fallback when backend is unavailable or database not seeded.
+ *
+ * Single source of truth: data/journey_templates.json
+ */
+const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = journeyTemplatesData.templates as JourneyTemplate[]
 
 /**
  * Get all available journey templates (catalog)
