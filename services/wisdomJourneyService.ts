@@ -87,6 +87,23 @@ function setCached<T>(key: string, data: T): void {
   }
 }
 
+// HTTP status codes that should not be retried (client errors)
+const NON_RETRYABLE_STATUS_CODES = [400, 401, 403, 404, 422]
+
+/**
+ * Check if an error is a non-retryable HTTP error
+ */
+function isNonRetryableError(error: Error): boolean {
+  // Check if error has a status property (custom error with HTTP status)
+  const errorWithStatus = error as Error & { status?: number }
+  if (errorWithStatus.status && NON_RETRYABLE_STATUS_CODES.includes(errorWithStatus.status)) {
+    return true
+  }
+
+  // Fallback: check message for status codes (for backwards compatibility)
+  return NON_RETRYABLE_STATUS_CODES.some((code) => error.message.includes(String(code)))
+}
+
 /**
  * Retry a function with exponential backoff
  */
@@ -103,8 +120,8 @@ async function withRetry<T>(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error))
 
-      // Don't retry on 4xx errors (client errors)
-      if (lastError.message.includes('401') || lastError.message.includes('403') || lastError.message.includes('404')) {
+      // Don't retry on client errors (4xx)
+      if (isNonRetryableError(lastError)) {
         throw lastError
       }
 

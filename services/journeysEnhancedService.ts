@@ -259,13 +259,35 @@ function getHeaders(): HeadersInit {
 }
 
 /**
+ * Parse a cookie value by name from the document.cookie string.
+ * More robust than regex-only approach.
+ *
+ * @param name - Cookie name to find
+ * @returns Cookie value or null if not found
+ */
+function getCookieValue(name: string): string | null {
+  if (typeof document === 'undefined') return null
+
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [cookieName, ...valueParts] = cookie.trim().split('=')
+    if (cookieName === name) {
+      const value = valueParts.join('=') // Handle values containing '='
+      return value ? decodeURIComponent(value) : null
+    }
+  }
+  return null
+}
+
+/**
  * Get CSRF token from cookie for state-changing requests.
  */
 function getCsrfToken(): string | null {
-  if (typeof document === 'undefined') return null
-  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) : null
+  return getCookieValue('csrf_token')
 }
+
+// HTTP methods that require CSRF protection (state-changing operations)
+const CSRF_PROTECTED_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'] as const
 
 /**
  * Standard fetch options with credentials for httpOnly cookie authentication
@@ -275,8 +297,8 @@ function getFetchOptions(options: RequestInit = {}): RequestInit {
   const method = (options.method || 'GET').toUpperCase()
   const headers = new Headers(options.headers as HeadersInit || {})
 
-  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+  // Add CSRF token for state-changing requests
+  if (CSRF_PROTECTED_METHODS.includes(method as typeof CSRF_PROTECTED_METHODS[number])) {
     const csrfToken = getCsrfToken()
     if (csrfToken) {
       headers.set('X-CSRF-Token', csrfToken)

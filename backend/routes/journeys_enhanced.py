@@ -41,6 +41,7 @@ from backend.services.subscription_service import (
     get_user_tier,
     get_or_create_free_subscription,
 )
+from backend.models import UserJourney
 
 logger = logging.getLogger(__name__)
 
@@ -584,7 +585,6 @@ async def get_or_generate_today_step(
 
     try:
         # Verify ownership
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -635,7 +635,6 @@ async def complete_step(
 
     try:
         # Verify ownership
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -684,7 +683,6 @@ async def pause_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -719,7 +717,6 @@ async def resume_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -756,7 +753,6 @@ async def abandon_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -796,7 +792,6 @@ async def get_journey_history(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
