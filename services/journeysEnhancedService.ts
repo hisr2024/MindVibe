@@ -193,9 +193,24 @@ export interface PremiumError {
 // Helper Functions
 // =============================================================================
 
+/**
+ * Get authentication token from storage.
+ *
+ * SECURITY NOTE: localStorage is vulnerable to XSS attacks.
+ * This function exists for backward compatibility but should be migrated
+ * to use httpOnly cookies for better security. See backend/routes/auth.py
+ * which sets httpOnly cookies - the fetch() calls should use credentials: 'include'
+ * to send these cookies automatically instead of Authorization headers.
+ *
+ * TODO: Migrate to httpOnly cookies for token storage (priority: HIGH)
+ * - Update fetch calls to use credentials: 'include'
+ * - Remove localStorage token storage in useAuth hook
+ * - Keep this function as fallback during migration period
+ */
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null
 
+  // SECURITY: localStorage tokens are XSS vulnerable - prefer httpOnly cookies
   // Try multiple token storage locations (matching lib/api.ts pattern)
   return (
     localStorage.getItem('mindvibe_access_token') ||  // Primary - set by useAuth hook

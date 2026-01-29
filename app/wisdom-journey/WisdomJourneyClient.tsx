@@ -40,6 +40,10 @@ export default function WisdomJourneyClient() {
       return
     }
 
+    // MEMORY LEAK FIX: Track if component is still mounted
+    // This prevents setState calls on unmounted components
+    let isMounted = true
+
     const loadData = async () => {
       try {
         setLoading(true)
@@ -49,6 +53,9 @@ export default function WisdomJourneyClient() {
           wisdomJourneyService.getActiveJourney(userId),
           wisdomJourneyService.getJourneyRecommendations(userId),
         ])
+
+        // Only update state if still mounted
+        if (!isMounted) return
 
         setActiveJourney(journey)
         setRecommendations(recs)
@@ -64,16 +71,25 @@ export default function WisdomJourneyClient() {
           setView('recommendations')
         }
       } catch (err) {
+        // Only update state if still mounted
+        if (!isMounted) return
         console.error('Error loading wisdom journey data:', err)
         setError('Failed to load journey data. Please try again.')
         // Still show recommendations view on error
         setView('recommendations')
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     loadData()
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      isMounted = false
+    }
   }, [userId, authLoading])
 
   const handleStartJourney = async (template: string, title: string) => {
