@@ -35,16 +35,19 @@ logger = logging.getLogger(__name__)
 
 async def get_user_subscription(db: AsyncSession, user_id: str) -> Optional[UserSubscription]:
     """Get a user's current subscription.
-    
+
     Args:
         db: Database session.
         user_id: The user's ID.
-        
+
     Returns:
         UserSubscription or None if not found.
     """
+    from sqlalchemy.orm import selectinload
+
     stmt = (
         select(UserSubscription)
+        .options(selectinload(UserSubscription.plan))  # Eagerly load the plan relationship
         .where(
             and_(
                 UserSubscription.user_id == user_id,
