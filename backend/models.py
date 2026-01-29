@@ -2717,6 +2717,7 @@ class JourneyTemplate(SoftDeleteMixin, Base):
     # Status flags
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_free: Mapped[bool] = mapped_column(Boolean, default=False, index=True)  # Free access for all users
 
     # UI metadata
     icon_name: Mapped[str | None] = mapped_column(String(64), nullable=True)

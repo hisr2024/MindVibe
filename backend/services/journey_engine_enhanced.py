@@ -947,6 +947,7 @@ class EnhancedJourneyEngine:
                 "duration_days": t.duration_days,
                 "difficulty": t.difficulty,
                 "is_featured": t.is_featured,
+                "is_free": getattr(t, "is_free", False),  # Free access for all users
                 "icon_name": t.icon_name,
                 "color_theme": t.color_theme,
             }
