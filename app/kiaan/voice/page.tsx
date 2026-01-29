@@ -156,6 +156,10 @@ import {
 // Emotional Visualization Component
 import EmotionalVisualization from '@/components/voice/EmotionalVisualization'
 
+// Voice Service for High-Quality TTS
+import voiceService from '@/services/voiceService'
+import { useAuth } from '@/hooks/useAuth'
+
 // Types
 type VoiceState = 'idle' | 'wakeword' | 'listening' | 'thinking' | 'speaking' | 'error'
 
@@ -302,6 +306,7 @@ export default function EliteVoicePage() {
 
   // Hooks
   const { t, language } = useLanguage()
+  const { user } = useAuth()
 
   // Voice input hook
   const {
@@ -1236,7 +1241,7 @@ export default function EliteVoicePage() {
     return "Thank you for sharing what's on your mind. Ancient wisdom teaches that all challenges contain the seeds of growth. First, take a few moments to breathe and center yourself. Then, focus on what's in your control and release what isn't. Finally, take one small action toward what matters to you. What would be most helpful for you right now?"
   }
 
-  // Speak response using TTS
+  // Speak response using HIGH-QUALITY BACKEND TTS with browser fallback
   async function speakResponse(text: string): Promise<void> {
     // Save for repeat command
     setLastResponse(text)
@@ -1269,103 +1274,213 @@ export default function EliteVoicePage() {
 
     setState('speaking')
 
-    return new Promise((resolve) => {
-      if (!synthesisRef.current) {
-        setState(wakeWordEnabled ? 'wakeword' : 'idle')
-        resolve()
+    // Handler for when speech ends (used by both backend TTS and browser fallback)
+    const handleSpeechEnd = () => {
+      setResponse('')
+
+      // CONVERSATION MODE: True divine dialogue - auto-continue the conversation
+      if (conversationMode) {
+        console.log('[KIAAN Voice] Conversation mode: KIAAN finished speaking, continuing divine dialogue...')
+
+        // Brief sacred pause before listening again (like natural conversation rhythm)
+        conversationPauseRef.current = setTimeout(async () => {
+          // Release warm-up stream before SpeechRecognition
+          releaseWarmUpStream()
+
+          setState('listening')
+          resetTranscript()
+
+          console.log('[KIAAN Voice] Listening for your next words...')
+          startListening()
+          playSound('listening')
+        }, 800) // Sacred pause - gives user time to think
+
         return
       }
 
-      // Process text for natural speech
-      const processedText = text
-        .replace(/\.\s+/g, '. ... ')
-        .replace(/\?\s+/g, '? ... ')
-        .replace(/First,/g, '... First, ...')
-        .replace(/Then,/g, '... Then, ...')
-        .replace(/Finally,/g, '... Finally, ...')
+      // Wake word mode: Return to listening for wake word
+      if (wakeWordEnabled) {
+        console.log('[KIAAN Voice] Speech ended, resuming wake word detection...')
+        setState('wakeword')
 
-      const utterance = new SpeechSynthesisUtterance(processedText)
-      utterance.lang = language || 'en-US'
-      utterance.rate = voiceRate
-      utterance.pitch = 1.0
-      utterance.volume = voiceVolume
-
-      // Select voice
-      const voices = synthesisRef.current.getVoices()
-      const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
-      if (langVoices.length > 0) {
-        // Prefer local/enhanced voices
-        const localVoice = langVoices.find(v => v.localService)
-        utterance.voice = localVoice || langVoices[0]
+        // Give a brief delay then restart wake word detection
+        setTimeout(() => {
+          if (wakeWordEnabled && !wakeWordActive) {
+            console.log('[KIAAN Voice] Restarting wake word detection...')
+            startWakeWord()
+          }
+        }, 500)
+      } else {
+        setState('idle')
       }
+    }
 
-      utterance.onend = () => {
-        setResponse('')
+    // Try HIGH-QUALITY BACKEND TTS first (Google Cloud Neural voices)
+    if (isOnline && user?.id) {
+      try {
+        console.log('[KIAAN Voice] Using high-quality backend TTS...')
 
-        // CONVERSATION MODE: True divine dialogue - auto-continue the conversation
-        if (conversationMode) {
-          console.log('[KIAAN Voice] Conversation mode: KIAAN finished speaking, continuing divine dialogue...')
+        // Get audio blob from backend TTS service
+        const audioBlob = await voiceService.synthesizeKiaanMessage(
+          text,
+          language || 'en',
+          user.id
+        )
 
-          // Brief sacred pause before listening again (like natural conversation rhythm)
-          conversationPauseRef.current = setTimeout(async () => {
-            // Release warm-up stream before SpeechRecognition
-            releaseWarmUpStream()
+        // Create audio element and play
+        const audioUrl = voiceService.createAudioUrl(audioBlob)
 
-            setState('listening')
-            resetTranscript()
-
-            console.log('[KIAAN Voice] Listening for your next words...')
-            startListening()
-            playSound('listening')
-          }, 800) // Sacred pause - gives user time to think
-
-          resolve()
-          return
+        // Use audioRef for centralized control
+        if (!audioRef.current) {
+          audioRef.current = new Audio()
         }
 
-        // Wake word mode: Return to listening for wake word
-        if (wakeWordEnabled) {
-          console.log('[KIAAN Voice] Speech ended, resuming wake word detection...')
-          setState('wakeword')
-
-          // Give a brief delay then restart wake word detection
-          setTimeout(() => {
-            if (wakeWordEnabled && !wakeWordActive) {
-              console.log('[KIAAN Voice] Restarting wake word detection...')
-              startWakeWord()
-            }
-          }, 500)
-        } else {
-          setState('idle')
+        // Revoke old URL if exists
+        if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
+          voiceService.revokeAudioUrl(audioRef.current.src)
         }
 
-        resolve()
-      }
+        audioRef.current.src = audioUrl
+        audioRef.current.volume = voiceVolume
+        audioRef.current.playbackRate = voiceRate
 
-      utterance.onerror = () => {
-        // Handle error gracefully based on current mode
-        if (conversationMode) {
-          // In conversation mode, try to continue by listening
-          setState('listening')
-          setTimeout(() => startListening(), 500)
-        } else if (wakeWordEnabled) {
-          setState('wakeword')
-        } else {
-          setState('idle')
+        // Set up event handlers
+        audioRef.current.onended = () => {
+          console.log('[KIAAN Voice] Backend TTS playback complete')
+          voiceService.revokeAudioUrl(audioUrl)
+          handleSpeechEnd()
         }
-        resolve()
-      }
 
-      synthesisRef.current.speak(utterance)
-    })
+        audioRef.current.onerror = () => {
+          console.warn('[KIAAN Voice] Backend TTS playback error, falling back to browser...')
+          voiceService.revokeAudioUrl(audioUrl)
+          // Fall back to browser TTS
+          speakWithBrowserFallback(text, handleSpeechEnd)
+        }
+
+        // Start playback
+        await audioRef.current.play()
+        console.log('[KIAAN Voice] Playing high-quality divine voice')
+        return
+
+      } catch (err) {
+        console.warn('[KIAAN Voice] Backend TTS failed, using browser fallback:', err)
+        // Fall through to browser fallback
+      }
+    }
+
+    // Browser Speech Synthesis fallback
+    speakWithBrowserFallback(text, handleSpeechEnd)
   }
 
-  // Stop speaking
+  // Browser Speech Synthesis fallback function
+  function speakWithBrowserFallback(text: string, onEnd: () => void): void {
+    console.log('[KIAAN Voice] Using browser speech synthesis fallback...')
+
+    if (!synthesisRef.current) {
+      setState(wakeWordEnabled ? 'wakeword' : 'idle')
+      return
+    }
+
+    // Process text for natural speech
+    const processedText = text
+      .replace(/\.\s+/g, '. ... ')
+      .replace(/\?\s+/g, '? ... ')
+      .replace(/First,/g, '... First, ...')
+      .replace(/Then,/g, '... Then, ...')
+      .replace(/Finally,/g, '... Finally, ...')
+
+    const utterance = new SpeechSynthesisUtterance(processedText)
+    utterance.lang = language || 'en-US'
+    utterance.rate = voiceRate
+    utterance.pitch = 1.0
+    utterance.volume = voiceVolume
+
+    // Select voice
+    const voices = synthesisRef.current.getVoices()
+    const langVoices = voices.filter(v => v.lang.startsWith((language || 'en').split('-')[0]))
+    if (langVoices.length > 0) {
+      // Prefer local/enhanced voices
+      const localVoice = langVoices.find(v => v.localService)
+      utterance.voice = localVoice || langVoices[0]
+    }
+
+    utterance.onend = onEnd
+
+    utterance.onerror = () => {
+      // Handle error gracefully based on current mode
+      if (conversationMode) {
+        // In conversation mode, try to continue by listening
+        setState('listening')
+        setTimeout(() => startListening(), 500)
+      } else if (wakeWordEnabled) {
+        setState('wakeword')
+      } else {
+        setState('idle')
+      }
+    }
+
+    synthesisRef.current.speak(utterance)
+  }
+
+  // Stop speaking - comprehensive cleanup to prevent voice from continuing
   function stopSpeaking() {
+    console.log('[KIAAN Voice] Stopping all voice activity...')
+
+    // 1. Cancel browser speech synthesis
     if (synthesisRef.current) {
       synthesisRef.current.cancel()
     }
+
+    // 2. Clear conversation continuation timer (CRITICAL - prevents auto-restart)
+    if (conversationPauseRef.current) {
+      clearTimeout(conversationPauseRef.current)
+      conversationPauseRef.current = null
+    }
+
+    // 3. Clear any meditation timers
+    if (meditationTimerRef.current) {
+      clearTimeout(meditationTimerRef.current)
+      meditationTimerRef.current = null
+    }
+
+    // 4. Clear ritual timers
+    if (ritualTimerRef.current) {
+      clearTimeout(ritualTimerRef.current)
+      ritualTimerRef.current = null
+    }
+
+    // 5. Clear self-healing timer
+    if (selfHealingTimerRef.current) {
+      clearTimeout(selfHealingTimerRef.current)
+      selfHealingTimerRef.current = null
+    }
+
+    // 6. Stop listening if active
+    if (isListening) {
+      stopListening()
+    }
+
+    // 7. Stop any HTML5 Audio elements that might be playing
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+
+    // 8. Stop binaural beats if playing
+    if (binauralPlaying) {
+      stopBinauralBeat()
+      setBinauralPlaying(false)
+      setActiveBinauralPreset(null)
+    }
+
+    // 9. Clear response state
+    setResponse('')
+
+    // 10. Set state to idle/wakeword
     setState(wakeWordEnabled ? 'wakeword' : 'idle')
+
+    console.log('[KIAAN Voice] All voice activity stopped')
   }
 
   // Speak response with emotion-adaptive voice settings

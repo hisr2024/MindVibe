@@ -1587,6 +1587,228 @@ class TTSService:
             voice_type="calm"
         )
 
+    def synthesize_divine_ssml(
+        self,
+        ssml_text: str,
+        language: str = "en",
+        voice_type: VoiceType = "calm",
+        speed: Optional[float] = None,
+        pitch: Optional[float] = None
+    ) -> Optional[bytes]:
+        """
+        Synthesize pre-formatted SSML for divine voice with proper pronunciation.
+
+        CRITICAL: This method accepts ALREADY-FORMATTED SSML and does NOT escape it.
+        Use this for Sanskrit shlokas, mantras, and divine voice responses that have
+        been processed with IPA phoneme tags and Vedic accent markers.
+
+        Args:
+            ssml_text: Pre-formatted SSML text (with <speak> tags, phonemes, prosody)
+            language: Language code (en, hi, sa for Sanskrit, etc.)
+            voice_type: Voice persona (calm, wisdom, friendly)
+            speed: Speaking rate (0.5 - 2.0), defaults to voice type optimal
+            pitch: Voice pitch (-20.0 - 20.0), defaults to voice type optimal
+
+        Returns:
+            MP3 audio bytes or None if synthesis fails
+
+        Example:
+            ssml = '''<speak>
+                <prosody rate="90%" pitch="-2st">
+                    <phoneme alphabet="ipa" ph="kəɾməɳjeː">karmanye</phoneme>
+                </prosody>
+            </speak>'''
+            audio = tts_service.synthesize_divine_ssml(ssml, language="sa")
+        """
+        if not ssml_text or not ssml_text.strip():
+            logger.warning("Empty SSML provided for divine TTS")
+            return None
+
+        # Ensure SSML has speak tags
+        if not ssml_text.strip().startswith('<speak>'):
+            ssml_text = f'<speak>{ssml_text}</speak>'
+
+        # Get voice type specific settings
+        voice_settings = VOICE_TYPE_SETTINGS.get(voice_type, VOICE_TYPE_SETTINGS["calm"])
+        actual_speed = speed if speed is not None else voice_settings["speed"]
+        actual_pitch = pitch if pitch is not None else voice_settings["pitch"]
+
+        # For divine voice, use slightly slower and deeper settings
+        # to maintain reverence and clarity
+        if language == "sa" or "phoneme" in ssml_text:
+            actual_speed = min(actual_speed, 0.90)  # Cap at 90% for clarity
+            actual_pitch = min(actual_pitch, -1.0)  # Deeper for reverence
+
+        # Check cache first
+        cache_key = self._generate_cache_key(ssml_text, language, voice_type, actual_speed)
+        cached_audio = self._get_cached_audio(cache_key)
+        if cached_audio:
+            return cached_audio
+
+        # Use Google TTS with pre-formatted SSML (no processing)
+        if self.tts_client:
+            audio = self._synthesize_google_raw_ssml(
+                ssml_text, language, voice_type, actual_speed, actual_pitch
+            )
+            if audio:
+                self._cache_audio(cache_key, audio)
+                return audio
+
+        # Fallback: Strip SSML and use regular synthesis
+        logger.warning("Google TTS not available for divine SSML, using fallback")
+        plain_text = self._strip_ssml_tags(ssml_text)
+        return self._synthesize_offline(plain_text, language, voice_type, actual_speed)
+
+    def _synthesize_google_raw_ssml(
+        self,
+        ssml_text: str,
+        language: str,
+        voice_type: str,
+        speed: float,
+        pitch: float
+    ) -> Optional[bytes]:
+        """
+        Synthesize using Google Cloud TTS with raw SSML (no processing).
+
+        This preserves phoneme tags, prosody markers, and other SSML elements
+        that are critical for proper Sanskrit pronunciation and divine voice quality.
+        """
+        if not self.tts_client:
+            return None
+
+        try:
+            # Get voice configuration
+            voice_name = self._get_voice_config(language, voice_type)
+            if not voice_name:
+                logger.error(f"No voice configured for language: {language}")
+                return None
+
+            # Use SSML directly WITHOUT processing
+            synthesis_input = texttospeech.SynthesisInput(ssml=ssml_text)
+
+            # Configure voice parameters
+            # Sanskrit uses Hindi voice but the SSML phonemes guide pronunciation
+            lang_code = "hi-IN" if language == "sa" else language
+            if "-" not in lang_code:
+                lang_code = f"{lang_code}-IN" if lang_code in ["hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa"] else f"{lang_code}-US"
+
+            voice = texttospeech.VoiceSelectionParams(
+                language_code=lang_code,
+                name=voice_name
+            )
+
+            # Configure audio output with enhanced settings for divine quality
+            audio_config = texttospeech.AudioConfig(
+                audio_encoding=texttospeech.AudioEncoding.MP3,
+                speaking_rate=speed,
+                pitch=pitch,
+                # Use headphone profile for best quality
+                effects_profile_id=["headphone-class-device"]
+            )
+
+            # Perform synthesis
+            response = self.tts_client.synthesize_speech(
+                input=synthesis_input,
+                voice=voice,
+                audio_config=audio_config
+            )
+
+            audio_bytes = response.audio_content
+            logger.info(
+                f"Generated divine SSML audio: {len(audio_bytes)} bytes "
+                f"(lang={language}, voice={voice_type}, speed={speed}, pitch={pitch})"
+            )
+
+            return audio_bytes
+
+        except Exception as e:
+            logger.error(f"Google TTS divine SSML synthesis failed: {e}", exc_info=True)
+            return None
+
+    def _strip_ssml_tags(self, ssml_text: str) -> str:
+        """
+        Strip SSML tags from text for fallback processing.
+
+        Used when the TTS provider doesn't support SSML but we need
+        to extract the readable text.
+        """
+        import re
+
+        # Remove all XML/SSML tags
+        text = re.sub(r'<[^>]+>', '', ssml_text)
+
+        # Clean up extra whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        return text
+
+    def synthesize_sanskrit_shloka(
+        self,
+        shloka_ssml: str,
+        voice_type: VoiceType = "wisdom",
+        speed: float = 0.88,
+        pitch: float = -2.0
+    ) -> Optional[bytes]:
+        """
+        Synthesize a Sanskrit shloka with perfect pronunciation.
+
+        Optimized settings for sacred verse recitation:
+        - Slower speed for clarity and reverence
+        - Lower pitch for gravitas
+        - Uses Hindi Neural2 voice with SSML phoneme guidance
+
+        Args:
+            shloka_ssml: Pre-formatted SSML with phoneme tags
+            voice_type: Voice persona (wisdom recommended)
+            speed: Speaking rate (default 0.88 for shlokas)
+            pitch: Voice pitch (default -2.0 for depth)
+
+        Returns:
+            MP3 audio bytes
+        """
+        return self.synthesize_divine_ssml(
+            ssml_text=shloka_ssml,
+            language="sa",
+            voice_type=voice_type,
+            speed=speed,
+            pitch=pitch
+        )
+
+    def synthesize_vedic_chant(
+        self,
+        chant_ssml: str,
+        repetitions: int = 1,
+        voice_type: VoiceType = "calm",
+        speed: float = 0.82,
+        pitch: float = -3.0
+    ) -> Optional[bytes]:
+        """
+        Synthesize a Vedic chant/mantra with sacred recitation quality.
+
+        Optimized settings for meditative chanting:
+        - Very slow speed for proper meter
+        - Deep pitch for sacred gravitas
+        - Uses calm voice type for serenity
+
+        Args:
+            chant_ssml: Pre-formatted SSML with chant markers
+            repetitions: Number of times to repeat (built into SSML)
+            voice_type: Voice persona (calm recommended for chants)
+            speed: Speaking rate (default 0.82 for chants)
+            pitch: Voice pitch (default -3.0 for depth)
+
+        Returns:
+            MP3 audio bytes
+        """
+        return self.synthesize_divine_ssml(
+            ssml_text=chant_ssml,
+            language="sa",
+            voice_type=voice_type,
+            speed=speed,
+            pitch=pitch
+        )
+
+
     def get_supported_languages(self) -> list[str]:
         """Get list of supported language codes"""
         return list(LANGUAGE_VOICE_MAP.keys())
