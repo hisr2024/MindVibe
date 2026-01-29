@@ -38,6 +38,7 @@ export interface JourneyTemplate {
   duration_days: number
   difficulty: number
   is_featured: boolean
+  is_free: boolean  // Free access for all users (one journey should be free for testing)
   icon_name: string | null
   color_theme: string | null
 }
@@ -409,6 +410,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 14,
     difficulty: 2,
     is_featured: true,
+    is_free: true,  // FREE for all users to test the journey feature
     icon_name: 'flame',
     color_theme: 'red',
   },
@@ -421,6 +423,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 21,
     difficulty: 3,
     is_featured: true,
+    is_free: false,
     icon_name: 'heart',
     color_theme: 'pink',
   },
@@ -433,6 +436,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 14,
     difficulty: 2,
     is_featured: false,
+    is_free: false,
     icon_name: 'coins',
     color_theme: 'amber',
   },
@@ -445,6 +449,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 21,
     difficulty: 3,
     is_featured: false,
+    is_free: false,
     icon_name: 'cloud',
     color_theme: 'purple',
   },
@@ -457,6 +462,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 14,
     difficulty: 2,
     is_featured: false,
+    is_free: false,
     icon_name: 'crown',
     color_theme: 'orange',
   },
@@ -469,6 +475,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 14,
     difficulty: 2,
     is_featured: false,
+    is_free: false,
     icon_name: 'eye',
     color_theme: 'emerald',
   },
@@ -481,6 +488,7 @@ const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
     duration_days: 30,
     difficulty: 4,
     is_featured: true,
+    is_free: false,
     icon_name: 'sparkles',
     color_theme: 'indigo',
   },

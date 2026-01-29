@@ -21,8 +21,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from backend.deps import get_current_user_flexible, get_db
+from backend.models import JourneyTemplate
 from backend.middleware.rate_limiter import limiter
 from backend.middleware.feature_access import (
     require_wisdom_journeys,
@@ -85,6 +87,7 @@ class JourneyTemplateResponse(BaseModel):
     duration_days: int
     difficulty: int
     is_featured: bool
+    is_free: bool = False  # Free access for all users (one journey should be free for testing)
     icon_name: str | None
     color_theme: str | None
 
@@ -254,6 +257,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 2,
         "is_featured": True,
+        "is_free": True,  # FREE for all users to test the journey feature
         "icon_name": "flame",
         "color_theme": "red",
     },
@@ -266,6 +270,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 21,
         "difficulty": 3,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "heart",
         "color_theme": "pink",
     },
@@ -278,6 +283,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 2,
         "is_featured": False,
+        "is_free": False,
         "icon_name": "coins",
         "color_theme": "amber",
     },
@@ -290,6 +296,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 21,
         "difficulty": 3,
         "is_featured": False,
+        "is_free": False,
         "icon_name": "cloud",
         "color_theme": "purple",
     },
@@ -302,6 +309,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 2,
         "is_featured": False,
+        "is_free": False,
         "icon_name": "crown",
         "color_theme": "orange",
     },
@@ -314,6 +322,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 2,
         "is_featured": False,
+        "is_free": False,
         "icon_name": "eye",
         "color_theme": "emerald",
     },
@@ -326,6 +335,7 @@ DEMO_JOURNEY_TEMPLATES = [
         "duration_days": 30,
         "difficulty": 4,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "sparkles",
         "color_theme": "indigo",
     },
@@ -400,11 +410,13 @@ async def start_journeys(
     """
     Start one or more journeys.
 
-    **Premium Feature**: Requires Basic tier or higher.
-    - FREE: No access
+    **Premium Feature**: Requires Basic tier or higher (except for free journeys).
+    - FREE journeys: Available to all users (one journey marked as free for testing)
+    - FREE tier: Trial access
     - BASIC: 1 active journey
     - PREMIUM: Up to 5 active journeys
     - ENTERPRISE: Unlimited journeys
+    - DEVELOPER: Full access to all journeys
 
     Supports starting multiple journeys in a single request.
     Rate limited to 10 journey starts per hour.
@@ -419,45 +431,90 @@ async def start_journeys(
         f"journey_ids: {body.journey_ids}"
     )
 
-    # Check premium access with limit validation
+    # Get user ID first (authentication still required)
     try:
-        access_check = WisdomJourneysAccessRequired(
-            check_limit=True, requested_count=len(body.journey_ids)
-        )
-        user_id, active_count, journey_limit = await access_check(request, db)
-        logger.info(f"[start_journeys] Access granted for user {user_id}, active: {active_count}, limit: {journey_limit}")
-    except HTTPException as e:
-        logger.warning(f"[start_journeys] Access denied: {e.status_code} - {e.detail}")
+        user_id = await get_current_user_id(request)
+    except HTTPException:
         raise
-    except Exception as e:
-        error_msg = str(e).lower()
-        logger.error(f"[start_journeys] Error checking access: {e}", exc_info=True)
 
-        # Provide more specific error messages based on the error type
-        if "relation" in error_msg or "does not exist" in error_msg:
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_not_ready",
-                    "message": "Database tables are being set up. Please try again in a moment.",
-                }
+    # Check if user is a developer (full access to all journeys)
+    is_dev = await is_developer(db, user_id)
+    if is_dev:
+        logger.info(f"[start_journeys] Developer access granted for {user_id} - full access to all journeys")
+        active_count = 0
+        journey_limit = -1  # Unlimited
+    else:
+        # Check if ALL requested journeys are free (is_free=True in database)
+        # If so, allow access without subscription check
+        all_free = False
+        try:
+            result = await db.execute(
+                select(JourneyTemplate)
+                .where(JourneyTemplate.id.in_(body.journey_ids))
             )
-        elif "connection" in error_msg or "connect" in error_msg:
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_connection_error",
-                    "message": "Unable to connect to the database. Please try again in a moment.",
-                }
-            )
+            templates = list(result.scalars().all())
+
+            # Also check demo templates if no DB results
+            if not templates:
+                # Check demo templates
+                demo_ids = {t["id"] for t in DEMO_JOURNEY_TEMPLATES}
+                requested_demo = [jid for jid in body.journey_ids if jid in demo_ids]
+                if requested_demo:
+                    templates = [t for t in DEMO_JOURNEY_TEMPLATES if t["id"] in body.journey_ids]
+                    all_free = all(t.get("is_free", False) for t in templates) if templates else False
+            else:
+                all_free = all(getattr(t, "is_free", False) for t in templates) if templates else False
+
+            logger.info(f"[start_journeys] Free journey check: all_free={all_free}, templates_count={len(templates)}")
+        except Exception as e:
+            logger.warning(f"[start_journeys] Error checking free journeys: {e}")
+            all_free = False
+
+        if all_free and templates:
+            # All requested journeys are free - allow access
+            logger.info(f"[start_journeys] Free journey access granted for user {user_id}")
+            active_count = 0
+            journey_limit = 1  # Limited to free journeys
         else:
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "service_unavailable",
-                    "message": "Wisdom Journeys is being set up. Please check back in a few minutes!",
-                }
-            )
+            # Check premium access with limit validation
+            try:
+                access_check = WisdomJourneysAccessRequired(
+                    check_limit=True, requested_count=len(body.journey_ids)
+                )
+                user_id, active_count, journey_limit = await access_check(request, db)
+                logger.info(f"[start_journeys] Access granted for user {user_id}, active: {active_count}, limit: {journey_limit}")
+            except HTTPException as e:
+                logger.warning(f"[start_journeys] Access denied: {e.status_code} - {e.detail}")
+                raise
+            except Exception as e:
+                error_msg = str(e).lower()
+                logger.error(f"[start_journeys] Error checking access: {e}", exc_info=True)
+
+                # Provide more specific error messages based on the error type
+                if "relation" in error_msg or "does not exist" in error_msg:
+                    raise HTTPException(
+                        status_code=503,
+                        detail={
+                            "error": "database_not_ready",
+                            "message": "Database tables are being set up. Please try again in a moment.",
+                        }
+                    )
+                elif "connection" in error_msg or "connect" in error_msg:
+                    raise HTTPException(
+                        status_code=503,
+                        detail={
+                            "error": "database_connection_error",
+                            "message": "Unable to connect to the database. Please try again in a moment.",
+                        }
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=503,
+                        detail={
+                            "error": "service_unavailable",
+                            "message": "Wisdom Journeys is being set up. Please check back in a few minutes!",
+                        }
+                    )
 
     engine = get_journey_engine()
 
