@@ -57,6 +57,12 @@ from backend.services.kiaan_model_provider import (
     LLAMA_CPP_AVAILABLE,
 )
 
+# Import learning engine for autonomous knowledge acquisition
+from backend.services.kiaan_learning_engine import (
+    get_kiaan_learning_engine,
+    KIAANLearningEngine,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -447,6 +453,21 @@ class KIAANCore:
         self._offline_mode = False
         self._last_connectivity_check = None
 
+        # Learning Engine for autonomous knowledge acquisition (v4.0)
+        # Enables KIAAN to learn from user queries and external sources
+        self._learning_engine: KIAANLearningEngine | None = None
+
+    @property
+    def learning_engine(self) -> KIAANLearningEngine:
+        """Lazy initialization of learning engine."""
+        if self._learning_engine is None:
+            try:
+                self._learning_engine = get_kiaan_learning_engine()
+                logger.info("KIAAN Learning Engine initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize learning engine: {e}")
+        return self._learning_engine
+
     @property
     def provider_manager(self):
         """Lazy initialization of provider manager for multi-provider fallback."""
@@ -457,6 +478,46 @@ class KIAANCore:
                 logger.warning(f"Failed to initialize ProviderManager: {e}")
                 self._provider_manager = None
         return self._provider_manager
+
+    async def acquire_gita_content(self, force: bool = False) -> dict:
+        """
+        Trigger background acquisition of Gita content from external sources.
+
+        This fetches authentic Gita teachings from:
+        - YouTube (ISKCON, Swami Mukundananda, Gaur Gopal Das, etc.)
+        - Audio platforms (Spotify, Apple Music, Gaana, JioSaavn podcasts)
+        - Web sources (IIT Kanpur Gita Supersite, holy-bhagavad-gita.org, etc.)
+
+        All content is validated for strict Bhagavad Gita compliance.
+
+        Args:
+            force: Force acquisition even if interval hasn't elapsed
+
+        Returns:
+            Acquisition statistics
+        """
+        try:
+            if self.learning_engine:
+                return await self.learning_engine.acquire_new_content(force=force)
+            return {"status": "skipped", "reason": "learning_engine_not_initialized"}
+        except Exception as e:
+            logger.error(f"Content acquisition failed: {e}")
+            return {"status": "error", "error": str(e)}
+
+    def get_learning_statistics(self) -> dict:
+        """
+        Get statistics about the KIAAN learning system.
+
+        Returns:
+            Dictionary with learning stats (wisdom items, patterns, etc.)
+        """
+        try:
+            if self.learning_engine:
+                return self.learning_engine.get_statistics()
+            return {"status": "not_initialized"}
+        except Exception as e:
+            logger.error(f"Failed to get learning statistics: {e}")
+            return {"status": "error", "error": str(e)}
 
     def get_quick_gita_wisdom(self, mood: str) -> dict[str, Any]:
         """
@@ -920,6 +981,23 @@ EXAMPLES:
         # Step 2: Build wisdom context from verses
         wisdom_context = self._build_verse_context(verses)
 
+        # Step 2b: Enhance with learned wisdom from knowledge base (v4.0 Learning Engine)
+        # This adds supplementary teachings from external sources (videos, audio, texts)
+        try:
+            if self.learning_engine:
+                learned_wisdom = self.learning_engine.get_relevant_wisdom(
+                    message, limit=3, language=language
+                )
+                if learned_wisdom:
+                    learned_context = "\n\n--- Supplementary Gita Wisdom ---\n"
+                    for lw in learned_wisdom:
+                        source_info = f" (Source: {lw.source_name})" if lw.source_name else ""
+                        learned_context += f"• {lw.content[:300]}...{source_info}\n"
+                    wisdom_context += learned_context
+                    logger.debug(f"Enhanced with {len(learned_wisdom)} learned wisdom items")
+        except Exception as le_error:
+            logger.warning(f"Learning engine enhancement failed (non-critical): {le_error}")
+
         # Step 3: Generate response with multi-provider fallback (v3.1)
         # Priority: ProviderManager (OpenAI/Sarvam/Compatible) -> Legacy OpenAI -> Offline
         system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
@@ -1051,6 +1129,19 @@ EXAMPLES:
                 "context": context,
                 "original_query": message
             })
+
+        # Step 7: Learn from this query (v4.0 Learning Engine)
+        # This improves KIAAN's understanding of user patterns and preferences
+        try:
+            if self.learning_engine and response_text:
+                self.learning_engine.learn_from_query(
+                    query=message,
+                    successful=validation.get("valid", False),
+                    rating=None  # User rating can be added later via feedback endpoint
+                )
+                logger.debug(f"Learned from query: '{message[:50]}...'")
+        except Exception as learn_error:
+            logger.warning(f"Learning from query failed (non-critical): {learn_error}")
 
         return {
             "response": response_text,
