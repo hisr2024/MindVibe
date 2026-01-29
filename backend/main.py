@@ -303,8 +303,18 @@ async def startup():
         print("\n🔧 Ensuring ORM tables exist...")
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-            
+
         print("✅ Database schema ready")
+
+        # Step 4: Seed subscription plans if they don't exist
+        print("\n🔧 Ensuring subscription plans exist...")
+        try:
+            from backend.scripts.seed_subscription_plans import seed_subscription_plans
+            await seed_subscription_plans(str(engine.url))
+            print("✅ Subscription plans ready")
+        except Exception as seed_error:
+            print(f"⚠️ Subscription plan seeding had issues: {seed_error}")
+            # Don't fail startup - but log the warning
         
     except Exception as exc:
         failed_meta = migrations_module.LATEST_MIGRATION_RESULT
