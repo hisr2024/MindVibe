@@ -104,7 +104,7 @@ async def divine_chat(request: ChatRequest):
     4. Provides healing practices
     """
     try:
-        from services.divine_conversation_engine import conversation_engine
+        from backend.services.divine_conversation_engine import conversation_engine
 
         # Process the message
         response = await conversation_engine.process_message(
@@ -154,7 +154,7 @@ async def synthesize_voice(request: SynthesizeRequest):
     try:
         # Try advanced voice engine first
         try:
-            from services.advanced_voice_synthesis import voice_engine, VoiceCharacter, VoiceEmotion
+            from backend.services.advanced_voice_synthesis import voice_engine, VoiceCharacter, VoiceEmotion
 
             # Map string to enum
             character_map = {
@@ -203,7 +203,7 @@ async def synthesize_voice(request: SynthesizeRequest):
 
         # Fall back to divine voice orchestrator
         try:
-            from services.divine_voice_orchestrator import divine_voice, VoiceStyle
+            from backend.services.divine_voice_orchestrator import divine_voice, VoiceStyle
 
             style_map = {
                 "warm": VoiceStyle.FRIENDLY,
@@ -261,7 +261,7 @@ async def transcribe_voice(request: TranscribeRequest):
     Supports multiple audio formats and languages.
     """
     try:
-        from services.whisper_transcription import transcribe_audio
+        from backend.services.whisper_transcription import transcribe_audio
 
         # Decode base64 audio
         try:
@@ -306,7 +306,7 @@ async def get_soul_reading(request: SoulReadingRequest):
     Get a complete soul reading - deep emotional and spiritual analysis.
     """
     try:
-        from services.kiaan_divine_intelligence import kiaan_intelligence
+        from backend.services.kiaan_divine_intelligence import kiaan_intelligence
 
         reading = kiaan_intelligence.get_complete_soul_reading(
             text=request.text,
@@ -361,14 +361,14 @@ async def stop_all_voice():
     try:
         # Stop advanced voice engine
         try:
-            from services.advanced_voice_synthesis import voice_engine
+            from backend.services.advanced_voice_synthesis import voice_engine
             voice_engine.stop_all()
         except ImportError:
             pass
 
         # Stop divine voice orchestrator
         try:
-            from services.divine_voice_orchestrator import divine_voice
+            from backend.services.divine_voice_orchestrator import divine_voice
             divine_voice.stop_all()
         except ImportError:
             pass
@@ -388,7 +388,7 @@ async def stop_all_voice():
 async def get_session_summary(session_id: str, user_id: str = "anonymous"):
     """Get summary of a conversation session."""
     try:
-        from services.divine_conversation_engine import conversation_engine
+        from backend.services.divine_conversation_engine import conversation_engine
 
         summary = conversation_engine.get_conversation_summary(user_id, session_id)
         return summary
@@ -405,7 +405,7 @@ async def get_session_summary(session_id: str, user_id: str = "anonymous"):
 async def end_session(session_id: str, user_id: str = "anonymous"):
     """End a conversation session."""
     try:
-        from services.divine_conversation_engine import conversation_engine
+        from backend.services.divine_conversation_engine import conversation_engine
 
         result = conversation_engine.end_session(user_id, session_id)
         return result
@@ -432,32 +432,32 @@ async def health_check():
 
     # Check divine intelligence
     try:
-        from services.kiaan_divine_intelligence import kiaan_intelligence
+        from backend.services.kiaan_divine_intelligence import kiaan_intelligence
         status["services"]["divine_intelligence"] = "available"
     except ImportError:
         status["services"]["divine_intelligence"] = "unavailable"
 
     # Check conversation engine
     try:
-        from services.divine_conversation_engine import conversation_engine
+        from backend.services.divine_conversation_engine import conversation_engine
         status["services"]["conversation_engine"] = "available"
     except ImportError:
         status["services"]["conversation_engine"] = "unavailable"
 
     # Check voice synthesis
     try:
-        from services.advanced_voice_synthesis import voice_engine
+        from backend.services.advanced_voice_synthesis import voice_engine
         status["services"]["advanced_voice"] = "available"
     except ImportError:
         try:
-            from services.divine_voice_orchestrator import divine_voice
+            from backend.services.divine_voice_orchestrator import divine_voice
             status["services"]["divine_voice"] = "available"
         except ImportError:
             status["services"]["voice_synthesis"] = "unavailable"
 
     # Check whisper
     try:
-        from services.whisper_transcription import whisper_service
+        from backend.services.whisper_transcription import whisper_service
         status["services"]["speech_recognition"] = "available"
     except ImportError:
         status["services"]["speech_recognition"] = "unavailable"

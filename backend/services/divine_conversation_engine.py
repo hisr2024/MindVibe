@@ -572,7 +572,10 @@ class DivineConversationEngine:
     """
 
     def __init__(self):
-        from services.kiaan_divine_intelligence import kiaan_intelligence
+        try:
+            from backend.services.kiaan_divine_intelligence import kiaan_intelligence
+        except ImportError:
+            from .kiaan_divine_intelligence import kiaan_intelligence
 
         self.intelligence = kiaan_intelligence
         self.response_generator = DivineResponseGenerator()
@@ -675,7 +678,7 @@ class DivineConversationEngine:
         """
         # Import Whisper service (will be created)
         try:
-            from services.whisper_transcription import transcribe_audio
+            from backend.services.whisper_transcription import transcribe_audio
 
             # Transcribe audio
             transcription = await transcribe_audio(audio_data)
