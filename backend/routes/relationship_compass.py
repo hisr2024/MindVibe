@@ -36,26 +36,97 @@ try:
 except Exception as e:
     logger.warning(f"⚠️ Relationship Compass: Gita KB unavailable: {e}")
 
+# Import the comprehensive context builder from KIAAN Chat
+try:
+    from backend.routes.chat import build_gita_context_comprehensive
+    logger.info("✅ Relationship Compass: Using KIAAN Chat's comprehensive context builder")
+except ImportError:
+    build_gita_context_comprehensive = None
+    logger.warning("⚠️ Relationship Compass: Could not import comprehensive context builder")
+
 
 def _build_gita_context(verse_results: list[dict], limit: int = 5) -> str:
-    """Build Gita context from verse results (same pattern as KIAAN Chat)."""
+    """Build Gita context from verse results using KIAAN Chat's comprehensive method."""
+    # Use the comprehensive builder from KIAAN Chat if available
+    if build_gita_context_comprehensive:
+        return build_gita_context_comprehensive(verse_results, limit=limit)
+
+    # Fallback to manual implementation matching KIAAN Chat pattern
+    MAX_TEACHING_LENGTH = 300
+
     if not verse_results:
-        return "Apply dharma principles: right action rooted in truth, compassion, and non-harm."
+        return """FALLBACK WISDOM (no specific verses found):
+Apply universal dharma principles for relationships:
+- Dharma (righteous duty) - Act from your highest self, not ego
+- Daya (compassion) - See the other's pain beneath their behavior
+- Ahimsa (non-harm) - Speak truth without causing unnecessary hurt
+- Kshama (forgiveness) - Release resentment to free yourself
+- Satya (truthfulness) - Honest communication without manipulation
 
-    context_parts = []
-    for result in verse_results[:limit]:
+RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any scripture. Present wisdom as universal life principles."""
+
+    context_parts = [
+        "RELEVANT GITA WISDOM FOR RELATIONSHIPS (use internally, NEVER cite in response):",
+        ""
+    ]
+
+    top_verses = verse_results[:limit]
+
+    for i, result in enumerate(top_verses, 1):
         verse = result.get("verse")
-        if verse:
-            english = getattr(verse, 'english', '') or getattr(verse, 'translation', '')
-            principle = getattr(verse, 'principle', '') or getattr(verse, 'context', '')
-            if english:
-                # Sanitize religious terms (same as KIAAN Chat)
-                english = english.replace("Krishna", "the teacher").replace("Arjuna", "the seeker")
-                context_parts.append(f"• {english}")
-                if principle:
-                    context_parts.append(f"  (Principle: {principle})")
+        score = result.get("score", 0.0)
 
-    return "\n".join(context_parts) if context_parts else "Apply dharma: act with truth and compassion, free from ego."
+        if verse:
+            # Extract verse data - handle both object and dict access
+            english = getattr(verse, 'english', '') if hasattr(verse, 'english') else verse.get('english', '')
+            context = getattr(verse, 'context', '') if hasattr(verse, 'context') else verse.get('context', '')
+            theme = getattr(verse, 'theme', '') if hasattr(verse, 'theme') else verse.get('theme', '')
+
+            # Extract mental health applications
+            mh_apps = None
+            if hasattr(verse, 'mental_health_applications'):
+                mh_apps = verse.mental_health_applications
+            elif isinstance(verse, dict):
+                mh_apps = verse.get('mental_health_applications')
+
+            context_parts.append(f"WISDOM #{i} (relevance: {score:.2f}):")
+
+            if english:
+                # Sanitize religious terms
+                english = english.replace("Krishna", "the teacher").replace("Arjuna", "the seeker")
+                context_parts.append(f"Teaching: {english[:MAX_TEACHING_LENGTH]}")
+
+            if context:
+                context_parts.append(f"Principle: {context}")
+
+            if theme:
+                formatted_theme = theme.replace('_', ' ').title()
+                context_parts.append(f"Theme: {formatted_theme}")
+
+            if mh_apps and isinstance(mh_apps, list):
+                apps_str = ", ".join(mh_apps[:3])
+                context_parts.append(f"Applications: {apps_str}")
+
+            context_parts.append("")
+
+    # Add synthesis guidelines
+    context_parts.extend([
+        "---",
+        "SYNTHESIS GUIDELINES:",
+        "1. Focus on dharma: right action in relationships, not winning",
+        "2. Help them see beyond ego to what truly matters",
+        "3. Present wisdom naturally without citing sources",
+        "4. Use Sanskrit terms (dharma, daya, ahimsa, kshama, satya)",
+        "5. Balance compassion with honest clarity",
+        "",
+        "FORBIDDEN IN RESPONSE:",
+        "❌ Never say 'Bhagavad Gita', 'Gita', 'verse', 'chapter', or cite numbers",
+        "❌ Never say 'Krishna', 'Arjuna', or reference the dialogue",
+        "❌ Never say 'therapists recommend', 'communication experts'",
+        "✅ Instead, say 'ancient wisdom teaches', 'timeless principle', 'eternal truth'",
+    ])
+
+    return "\n".join(context_parts)
 
 
 @router.post("/guide")
