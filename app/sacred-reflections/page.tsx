@@ -395,6 +395,7 @@ export default function SacredReflectionsPage() {
               <label className="text-sm font-semibold text-orange-100">Encryption passphrase</label>
               <input
                 type="password"
+                autoComplete="off"
                 value={passphrase}
                 onChange={e => setPassphrase(e.target.value)}
                 placeholder="Required for decryption and sync"
