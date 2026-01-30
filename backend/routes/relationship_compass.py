@@ -1,73 +1,61 @@
-"""Relationship Compass - KIAAN AI Ecosystem Integration.
+"""Relationship Compass - KIAAN AI Integration (KIAAN Chat Pattern).
 
-This router provides relationship conflict navigation powered by KIAAN Core
-and the complete 700-verse Bhagavad Gita wisdom database.
+This router provides relationship conflict navigation using the same deep KIAAN integration
+as KIAAN Chat - directly fetching Gita verses, building wisdom context, and generating
+responses that truly comprehend and interpret through the Gita.
 
-Relationship Compass acts as a wise friend who truly understands your specific
-situation, helping navigate conflicts with clarity, fairness, and compassion.
+Relationship Compass focuses on dharma (right action) and daya (compassion) principles.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from openai import OpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.services.kiaan_core import kiaan_core
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/relationship-compass", tags=["relationship-compass"])
 
+# Initialize OpenAI client (same pattern as KIAAN Chat)
+api_key = os.getenv("OPENAI_API_KEY", "").strip()
+client = OpenAI(api_key=api_key) if api_key else None
 
-def _build_compass_prompt(conflict: str, gita_wisdom: str) -> str:
-    """Build a detailed, personalized Relationship Compass prompt.
+# Initialize Gita knowledge base
+gita_kb = None
+try:
+    from backend.services.wisdom_kb import WisdomKnowledgeBase
+    gita_kb = WisdomKnowledgeBase()
+    logger.info("✅ Relationship Compass: Gita knowledge base loaded")
+except Exception as e:
+    logger.warning(f"⚠️ Relationship Compass: Gita KB unavailable: {e}")
 
-    This prompt ensures KIAAN responds with deep understanding of the specific
-    conflict, not generic relationship advice.
-    """
-    return f"""You are Relationship Compass, a wise and neutral friend who helps people navigate relationship conflicts.
 
-IMPORTANT: You are NOT giving generic advice. You are speaking DIRECTLY to THIS person about THEIR specific situation:
-"{conflict}"
+def _build_gita_context(verse_results: list[dict], limit: int = 5) -> str:
+    """Build Gita context from verse results (same pattern as KIAAN Chat)."""
+    if not verse_results:
+        return "Apply dharma principles: right action rooted in truth, compassion, and non-harm."
 
-YOUR APPROACH:
-1. First, truly SEE their specific conflict - what's really happening here?
-2. Acknowledge the emotional weight without taking sides
-3. Help them separate their feelings from ego-driven reactions
-4. Identify what they actually want (respect? understanding? peace? to be heard?)
-5. Offer guidance rooted in fairness and clarity, not "winning"
-6. Give ONE specific thing they can do or say differently
+    context_parts = []
+    for result in verse_results[:limit]:
+        verse = result.get("verse")
+        if verse:
+            english = getattr(verse, 'english', '') or getattr(verse, 'translation', '')
+            principle = getattr(verse, 'principle', '') or getattr(verse, 'context', '')
+            if english:
+                # Sanitize religious terms (same as KIAAN Chat)
+                english = english.replace("Krishna", "the teacher").replace("Arjuna", "the seeker")
+                context_parts.append(f"• {english}")
+                if principle:
+                    context_parts.append(f"  (Principle: {principle})")
 
-GITA WISDOM TO WEAVE IN NATURALLY (never cite verses, just embody the wisdom):
-{gita_wisdom}
-
-YOUR VOICE:
-- Calm, balanced, like a wise friend who sees both sides
-- Direct and specific to their conflict
-- Use "you" frequently - this is personal
-- Never take sides or tell them to leave/stay
-- Help them see beyond the conflict to what matters
-- Balance compassion with honest clarity
-
-RESPONSE STRUCTURE (flowing, not numbered):
-1. "I see what you're facing..." - acknowledge THIS specific conflict
-2. The underneath - What emotions and needs are really at play here
-3. The clarity - Help them see what they actually want from this situation
-4. The path forward - One specific action or communication approach
-5. The reminder - Something to hold onto when emotions run high
-
-BOUNDARIES:
-- No therapy, medical, legal, or financial advice
-- Never take sides in the conflict
-- Don't tell them to leave or stay in any relationship
-- If safety is a concern, suggest professional support
-- Keep response 180-220 words, warm and conversational
-
-Remember: This person is in pain about a relationship that matters to them. Help them find clarity, not victory."""
+    return "\n".join(context_parts) if context_parts else "Apply dharma: act with truth and compassion, free from ego."
 
 
 @router.post("/guide")
@@ -75,10 +63,13 @@ async def get_relationship_guidance(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Generate personalized relationship guidance through KIAAN AI.
+    """Generate relationship guidance using KIAAN Chat integration pattern.
 
-    Uses KIAAN Core for Gita wisdom while maintaining the warm, friend-like
-    approach that addresses the user's SPECIFIC conflict.
+    This follows the same deep integration as KIAAN Chat:
+    1. Fetch relevant Gita verses (dharma/compassion focus)
+    2. Build wisdom context from verses
+    3. Use detailed Gita-rooted system prompt
+    4. Generate personalized response for THIS user's conflict
     """
     conflict = payload.get("conflict", "")
 
@@ -88,89 +79,111 @@ async def get_relationship_guidance(
     if len(conflict) > 2000:
         raise HTTPException(status_code=400, detail="Input too long (max 2000 characters)")
 
+    if not client:
+        logger.error("Relationship Compass: OpenAI client not configured")
+        return _get_fallback_response(conflict)
+
     try:
-        # Get relevant Gita wisdom from KIAAN's knowledge base
-        gita_wisdom = await _get_gita_wisdom_for_relationships(db, conflict)
+        # Step 1: Fetch relevant Gita verses (dharma/compassion focus)
+        gita_context = ""
+        verse_results = []
 
-        # Build the personalized prompt
-        full_prompt = _build_compass_prompt(conflict, gita_wisdom)
+        if gita_kb and db:
+            try:
+                # Search for relationship and conflict-related verses
+                search_query = f"{conflict} dharma compassion forgiveness relationships conflict ego peace"
+                verse_results = await gita_kb.search_relevant_verses(db=db, query=search_query, limit=7)
 
-        # Use KIAAN Core with our detailed prompt
-        kiaan_response = await kiaan_core.get_kiaan_response(
-            message=full_prompt,
-            user_id=None,
-            db=db,
-            context="relationship_compass",
-            stream=False,
-            language=None,
+                # Fallback if insufficient results
+                if len(verse_results) < 3:
+                    verse_results = await gita_kb.search_with_fallback(db=db, query=search_query, limit=7)
+
+                gita_context = _build_gita_context(verse_results)
+                logger.info(f"✅ Relationship Compass: Found {len(verse_results)} dharma verses")
+
+            except Exception as e:
+                logger.error(f"Error fetching Gita verses: {e}")
+                gita_context = "Apply dharma: act with truth and compassion, free from ego and the need to win."
+
+        if not gita_context:
+            gita_context = "Apply dharma: act with truth and compassion, free from ego and the need to win."
+
+        # Step 2: Build Gita-rooted system prompt (KIAAN Chat pattern)
+        system_prompt = f"""You are Relationship Compass, an AI guide EXCLUSIVELY rooted in the dharma (right action) and daya (compassion) teachings of the Bhagavad Gita.
+
+GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
+{gita_context}
+
+YOUR SPECIFIC FOCUS: RELATIONSHIP CONFLICT NAVIGATION
+This person is dealing with: "{conflict}"
+
+MANDATORY STRUCTURE - Every response MUST follow this 5-part flow:
+1. ACKNOWLEDGMENT: Show you truly see THEIR specific conflict and its emotional weight
+2. THE UNDERNEATH: Help them see what's really happening - what needs are unmet, what ego is at play
+3. DHARMA CLARITY: What does right action look like in THEIR specific situation - honest, kind, boundaried
+4. THE PATH: Give ONE specific thing they can do or say differently
+5. THE ANCHOR: Something to remember when emotions run high
+
+ABSOLUTE REQUIREMENTS (non-negotiable):
+✅ Root EVERY word in dharma and compassion wisdom - no generic relationship advice
+✅ Use Sanskrit terms naturally (dharma, daya, ahimsa, satya, shanti, equanimity)
+✅ FORBIDDEN: Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", "verse", "chapter"
+✅ FORBIDDEN: Never say "studies show", "communication experts", "therapists recommend"
+✅ Present wisdom as universal life principles, not therapy or religious teaching
+✅ Speak DIRECTLY to THIS person about THEIR specific conflict
+✅ Never take sides or tell them to leave/stay
+✅ Be warm, conversational, like a wise friend who sees both perspectives
+✅ 180-220 words, end with 💙
+
+TONE & STYLE:
+- Direct and specific to their conflict - use "you" frequently
+- Acknowledge the difficulty without taking sides
+- Help them see beyond "winning" to what actually matters
+- Balance compassion with honest clarity
+- If safety is a concern, suggest professional support
+
+Remember: This person is in pain about a relationship that matters. Help them find clarity through dharma - not victory, but understanding and right action."""
+
+        # Step 3: Generate response (KIAAN Chat pattern)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"I'm struggling with this relationship situation: {conflict}"}
+            ],
+            temperature=0.7,
+            max_tokens=400,
+            timeout=30.0,
         )
 
-        response_text = kiaan_response.get("response", "")
-        verses_used = kiaan_response.get("verses_used", [])
-        model = kiaan_response.get("model", "gpt-4o-mini")
+        content = None
+        if response and response.choices and len(response.choices) > 0:
+            response_msg = response.choices[0].message
+            if response_msg:
+                content = response_msg.content
 
-        # Parse into structured format while keeping the full response
-        compass_guidance = _parse_response_to_structure(response_text)
+        if not content:
+            return _get_fallback_response(conflict)
 
-        logger.info(f"Relationship Compass - personalized response generated, {len(verses_used)} verses")
+        # Parse into structured format
+        compass_guidance = _parse_response_to_structure(content)
 
         return {
             "status": "success",
             "compass_guidance": compass_guidance,
-            "response": response_text,  # Full conversational response
-            "gita_verses_used": len(verses_used),
-            "model": model,
+            "response": content,
+            "gita_verses_used": len(verse_results),
+            "model": "gpt-4o-mini",
             "provider": "kiaan",
         }
 
-    except HTTPException:
-        raise
     except Exception as e:
         logger.exception(f"Relationship Compass error: {e}")
         return _get_fallback_response(conflict)
 
 
-async def _get_gita_wisdom_for_relationships(db: AsyncSession, conflict: str) -> str:
-    """Get relevant Gita wisdom for the user's specific conflict."""
-    try:
-        from backend.services.wisdom_kb import WisdomKnowledgeBase
-        from backend.services.gita_service import GitaService
-
-        kb = WisdomKnowledgeBase()
-
-        # Key verses for relationships - dharma, compassion, equanimity
-        key_verses = [
-            (12, 13),  # One who is not envious, friendly to all
-            (16, 2),   # Compassion, absence of pride
-            (2, 56),   # Undisturbed by adversity
-            (6, 9),    # Equal-minded toward friend and foe
-        ]
-
-        wisdom_parts = []
-        for chapter, verse_num in key_verses[:3]:
-            try:
-                verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
-                if verse and verse.english:
-                    wisdom_parts.append(f"- {kb.sanitize_text(verse.english)}")
-            except Exception:
-                pass
-
-        if wisdom_parts:
-            return "\n".join(wisdom_parts)
-
-        return """- One who is friendly and compassionate to all, free from attachment and ego
-- Non-violence, truthfulness, absence of anger, compassion toward all beings
-- Treat friend and foe with equal mind, remaining undisturbed"""
-
-    except Exception as e:
-        logger.warning(f"Could not fetch Gita wisdom: {e}")
-        return """- One who is friendly and compassionate to all, free from attachment and ego
-- Non-violence, truthfulness, absence of anger, compassion toward all beings
-- Treat friend and foe with equal mind, remaining undisturbed"""
-
-
 def _parse_response_to_structure(response_text: str) -> dict[str, str]:
-    """Parse KIAAN's conversational response into structured format."""
+    """Parse response into structured format."""
     lines = response_text.strip().split('\n')
     sections = []
     current = []
@@ -184,7 +197,6 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
     if current:
         sections.append(' '.join(current))
 
-    # Clean emoji
     if sections:
         sections[-1] = sections[-1].replace('💙', '').strip()
 
@@ -215,18 +227,18 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
 
 
 def _get_fallback_response(conflict: str) -> dict[str, Any]:
-    """Return a warm fallback response when KIAAN is unavailable."""
+    """Fallback when KIAAN is unavailable."""
     conflict_snippet = conflict[:50] + "..." if len(conflict) > 50 else conflict
     return {
         "status": "success",
         "compass_guidance": {
-            "acknowledgment": f"I see you're navigating something difficult with '{conflict_snippet}'. Relationship conflicts carry real weight.",
-            "underneath": "Beneath most conflicts are unmet needs - to be heard, respected, or understood. What do you most need here?",
-            "clarity": "Before responding, ask yourself: What do I actually want from this? Not to win, but what outcome would bring peace?",
-            "path_forward": "Try this: 'I feel [emotion] when [specific situation] because [need]. What I'm hoping for is [concrete request].'",
-            "reminder": "The goal isn't to be right. It's to be understood - and to understand. That's where healing lives.",
+            "acknowledgment": f"I see you're navigating something difficult - '{conflict_snippet}'. That weight is real.",
+            "underneath": "Beneath most conflicts are unmet needs - to be heard, respected, understood. What do YOU most need here?",
+            "clarity": "Dharma in relationships means being honest while remaining kind. Not winning, but understanding.",
+            "path_forward": "Try: 'I feel [emotion] when [situation] because [need]. What I'm hoping for is [request].'",
+            "reminder": "The goal isn't to be right. It's to be understood - and to understand. That's where peace lives.",
         },
-        "response": f"I see you're navigating something difficult here. Relationship conflicts carry real weight, and it makes sense this is on your mind.\n\nBeneath most conflicts are unmet needs - to be heard, to be respected, to be understood. Take a moment: what do YOU most need here? Not what you want the other person to do, but what you need.\n\nBefore you respond to them, ask yourself: What do I actually want from this? Not to win - what outcome would actually bring me peace?\n\nHere's something to try: 'I feel [your emotion] when [specific situation] because [your need]. What I'm hoping for is [concrete request].' This invites dialogue rather than defense.\n\nRemember: the goal isn't to be right. It's to be understood - and to understand. That's where healing lives.",
+        "response": f"I see you're navigating something difficult here, and that weight is real.\n\nBeneath most conflicts are unmet needs - to be heard, to be respected, to be understood. Take a moment: what do YOU most need here? Not what you want them to do, but what you truly need.\n\nDharma in relationships means being honest while remaining kind. It's not about winning - it's about acting from your highest self, even when it's hard.\n\nHere's something to try: 'I feel [your emotion] when [the situation] because [your need]. What I'm hoping for is [your request].' This invites dialogue rather than defense.\n\nRemember: the goal isn't to be right. It's to be understood - and to understand. That's where peace lives. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",
@@ -235,10 +247,5 @@ def _get_fallback_response(conflict: str) -> dict[str, Any]:
 
 @router.get("/health")
 async def relationship_compass_health():
-    """Health check for Relationship Compass service."""
-    return {
-        "status": "ok",
-        "service": "relationship-compass",
-        "provider": "kiaan",
-        "ecosystem": "KIAAN AI",
-    }
+    """Health check."""
+    return {"status": "ok", "service": "relationship-compass", "provider": "kiaan"}

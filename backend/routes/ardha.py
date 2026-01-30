@@ -1,70 +1,61 @@
-"""Ardha Reframing Engine - KIAAN AI Ecosystem Integration.
+"""Ardha Reframing Engine - KIAAN AI Integration (KIAAN Chat Pattern).
 
-This router provides cognitive reframing assistance powered by KIAAN Core
-and the complete 700-verse Bhagavad Gita wisdom database.
+This router provides cognitive reframing using the same deep KIAAN integration
+as KIAAN Chat - directly fetching Gita verses, building wisdom context, and generating
+responses that truly comprehend and interpret through the Gita.
 
-Ardha acts as a wise friend who truly understands your specific thought,
-helping transform negative thinking into balanced, empowering perspectives.
+Ardha focuses on sthitaprajna (steady wisdom) principles for thought transformation.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from openai import OpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.services.kiaan_core import kiaan_core
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/ardha", tags=["ardha"])
 
+# Initialize OpenAI client (same pattern as KIAAN Chat)
+api_key = os.getenv("OPENAI_API_KEY", "").strip()
+client = OpenAI(api_key=api_key) if api_key else None
 
-def _build_ardha_prompt(negative_thought: str, gita_wisdom: str) -> str:
-    """Build a detailed, personalized Ardha prompt that feels like a wise friend.
+# Initialize Gita knowledge base
+gita_kb = None
+try:
+    from backend.services.wisdom_kb import WisdomKnowledgeBase
+    gita_kb = WisdomKnowledgeBase()
+    logger.info("✅ Ardha: Gita knowledge base loaded")
+except Exception as e:
+    logger.warning(f"⚠️ Ardha: Gita KB unavailable: {e}")
 
-    This prompt ensures KIAAN responds with deep understanding of the specific
-    thought pattern, not generic reframing advice.
-    """
-    return f"""You are Ardha, a wise and compassionate friend who helps people transform negative thoughts.
 
-IMPORTANT: You are NOT giving generic advice. You are speaking DIRECTLY to THIS person about THEIR specific thought:
-"{negative_thought}"
+def _build_gita_context(verse_results: list[dict], limit: int = 5) -> str:
+    """Build Gita context from verse results (same pattern as KIAAN Chat)."""
+    if not verse_results:
+        return "Apply sthitaprajna principles: steady wisdom that remains undisturbed by life's dualities."
 
-YOUR APPROACH:
-1. First, truly SEE their specific thought - what distortion or pain is underneath?
-2. Validate the feeling without dismissing it - this thought exists for a reason
-3. Gently illuminate what cognitive pattern might be at play
-4. Offer a reframe that speaks to THEIR exact situation (not a platitude)
-5. Give ONE specific thing they can do or remember right now
+    context_parts = []
+    for result in verse_results[:limit]:
+        verse = result.get("verse")
+        if verse:
+            english = getattr(verse, 'english', '') or getattr(verse, 'translation', '')
+            principle = getattr(verse, 'principle', '') or getattr(verse, 'context', '')
+            if english:
+                # Sanitize religious terms (same as KIAAN Chat)
+                english = english.replace("Krishna", "the teacher").replace("Arjuna", "the seeker")
+                context_parts.append(f"• {english}")
+                if principle:
+                    context_parts.append(f"  (Principle: {principle})")
 
-GITA WISDOM TO WEAVE IN NATURALLY (never cite verses, just embody the wisdom):
-{gita_wisdom}
-
-YOUR VOICE:
-- Warm, calm, like a wise friend sitting beside them
-- Direct and specific to their thought
-- Use "you" frequently - this is personal
-- Spot the distortion but don't lecture about it
-- Validate first, then shift perspective
-- Balance compassion with gentle clarity
-
-RESPONSE STRUCTURE (flowing, not numbered):
-1. Recognition - "I hear what you're carrying..." - validate THIS specific feeling
-2. The insight - What's really happening in this thought pattern
-3. The reframe - A balanced perspective for THEIR specific situation
-4. The anchor - ONE thing they can hold onto or do right now
-
-BOUNDARIES:
-- No therapy, medical, legal, or financial advice
-- No toxic positivity or dismissing their pain
-- No "just think positive" - offer genuine perspective shifts
-- Keep response 150-200 words, warm and conversational
-
-Remember: This person shared a vulnerable thought. Honor that. Speak to THEM, not to a textbook case."""
+    return "\n".join(context_parts) if context_parts else "Apply sthitaprajna: the mind undisturbed by adversity, free from attachment and fear."
 
 
 @router.post("/reframe")
@@ -72,10 +63,13 @@ async def reframe_thought(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Generate personalized cognitive reframing through KIAAN AI.
+    """Generate cognitive reframing using KIAAN Chat integration pattern.
 
-    Uses KIAAN Core for Gita wisdom while maintaining the warm, friend-like
-    approach that addresses the user's SPECIFIC negative thought.
+    This follows the same deep integration as KIAAN Chat:
+    1. Fetch relevant Gita verses (sthitaprajna focus)
+    2. Build wisdom context from verses
+    3. Use detailed Gita-rooted system prompt
+    4. Generate personalized response for THIS user's thought
     """
     negative_thought = payload.get("negative_thought", "")
 
@@ -85,89 +79,109 @@ async def reframe_thought(
     if len(negative_thought) > 2000:
         raise HTTPException(status_code=400, detail="Input too long (max 2000 characters)")
 
+    if not client:
+        logger.error("Ardha: OpenAI client not configured")
+        return _get_fallback_response(negative_thought)
+
     try:
-        # Get relevant Gita wisdom from KIAAN's knowledge base
-        gita_wisdom = await _get_gita_wisdom_for_reframing(db, negative_thought)
+        # Step 1: Fetch relevant Gita verses (sthitaprajna/equanimity focus)
+        gita_context = ""
+        verse_results = []
 
-        # Build the personalized prompt
-        full_prompt = _build_ardha_prompt(negative_thought, gita_wisdom)
+        if gita_kb and db:
+            try:
+                # Search for equanimity and mind-stability related verses
+                search_query = f"{negative_thought} equanimity mind stability wisdom balance thoughts peace"
+                verse_results = await gita_kb.search_relevant_verses(db=db, query=search_query, limit=7)
 
-        # Use KIAAN Core with our detailed prompt
-        kiaan_response = await kiaan_core.get_kiaan_response(
-            message=full_prompt,
-            user_id=None,
-            db=db,
-            context="ardha_reframe",
-            stream=False,
-            language=None,
+                # Fallback if insufficient results
+                if len(verse_results) < 3:
+                    verse_results = await gita_kb.search_with_fallback(db=db, query=search_query, limit=7)
+
+                gita_context = _build_gita_context(verse_results)
+                logger.info(f"✅ Ardha: Found {len(verse_results)} sthitaprajna verses")
+
+            except Exception as e:
+                logger.error(f"Error fetching Gita verses: {e}")
+                gita_context = "Apply sthitaprajna: the mind undisturbed by adversity, free from attachment and fear."
+
+        if not gita_context:
+            gita_context = "Apply sthitaprajna: the mind undisturbed by adversity, free from attachment and fear."
+
+        # Step 2: Build Gita-rooted system prompt (KIAAN Chat pattern)
+        system_prompt = f"""You are Ardha, an AI guide EXCLUSIVELY rooted in the sthitaprajna (steady wisdom) teachings of the Bhagavad Gita.
+
+GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
+{gita_context}
+
+YOUR SPECIFIC FOCUS: COGNITIVE REFRAMING & THOUGHT TRANSFORMATION
+This person shared this thought: "{negative_thought}"
+
+MANDATORY STRUCTURE - Every response MUST follow this 4-part flow:
+1. RECOGNITION: Acknowledge THEIR specific thought with genuine empathy - validate the feeling behind it
+2. THE PATTERN: Gently help them see what cognitive pattern is at play (catastrophizing, all-or-nothing, etc.)
+3. STHITAPRAJNA WISDOM: Offer a reframe rooted in steady wisdom - thoughts are not facts, you are the observer
+4. ONE ANCHOR: Give ONE specific thing they can hold onto or do right now about THIS thought
+
+ABSOLUTE REQUIREMENTS (non-negotiable):
+✅ Root EVERY word in sthitaprajna wisdom - no generic CBT or psychology terminology
+✅ Use Sanskrit terms naturally (sthitaprajna, buddhi, atman, viveka, samatva, equanimity)
+✅ FORBIDDEN: Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", "verse", "chapter"
+✅ FORBIDDEN: Never say "studies show", "cognitive distortion", "CBT", "reframing technique"
+✅ Present wisdom as universal life principles, not therapy or religious teaching
+✅ Speak DIRECTLY to THIS person about THEIR specific thought
+✅ Be warm, conversational, like a wise friend who truly sees them
+✅ 150-200 words, end with 💙
+
+TONE & STYLE:
+- Direct and specific to their thought - use "you" frequently
+- Validate first, then gently shift perspective
+- No toxic positivity or dismissing their pain
+- Make ancient wisdom feel immediately practical
+- Balance compassion with gentle clarity
+
+Remember: This person shared a vulnerable thought. Honor that. Help them see that they are the vast sky, not the passing clouds of thought."""
+
+        # Step 3: Generate response (KIAAN Chat pattern)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"I keep thinking: {negative_thought}"}
+            ],
+            temperature=0.7,
+            max_tokens=350,
+            timeout=30.0,
         )
 
-        response_text = kiaan_response.get("response", "")
-        verses_used = kiaan_response.get("verses_used", [])
-        model = kiaan_response.get("model", "gpt-4o-mini")
+        content = None
+        if response and response.choices and len(response.choices) > 0:
+            response_msg = response.choices[0].message
+            if response_msg:
+                content = response_msg.content
 
-        # Parse into structured format while keeping the full response
-        reframe_guidance = _parse_response_to_structure(response_text)
+        if not content:
+            return _get_fallback_response(negative_thought)
 
-        logger.info(f"Ardha - personalized response generated, {len(verses_used)} verses")
+        # Parse into structured format
+        reframe_guidance = _parse_response_to_structure(content)
 
         return {
             "status": "success",
             "reframe_guidance": reframe_guidance,
-            "raw_text": response_text,  # Full conversational response
-            "gita_verses_used": len(verses_used),
-            "model": model,
+            "raw_text": content,
+            "gita_verses_used": len(verse_results),
+            "model": "gpt-4o-mini",
             "provider": "kiaan",
         }
 
-    except HTTPException:
-        raise
     except Exception as e:
         logger.exception(f"Ardha error: {e}")
         return _get_fallback_response(negative_thought)
 
 
-async def _get_gita_wisdom_for_reframing(db: AsyncSession, thought: str) -> str:
-    """Get relevant Gita wisdom for the user's specific thought."""
-    try:
-        from backend.services.wisdom_kb import WisdomKnowledgeBase
-        from backend.services.gita_service import GitaService
-
-        kb = WisdomKnowledgeBase()
-
-        # Key sthitaprajna (steady wisdom) verses
-        key_verses = [
-            (2, 56),   # Unaffected by adversity
-            (2, 57),   # Without attachment, balanced
-            (6, 5),    # Elevate yourself by your own mind
-            (2, 14),   # Endure the dualities
-        ]
-
-        wisdom_parts = []
-        for chapter, verse_num in key_verses[:3]:
-            try:
-                verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
-                if verse and verse.english:
-                    wisdom_parts.append(f"- {kb.sanitize_text(verse.english)}")
-            except Exception:
-                pass
-
-        if wisdom_parts:
-            return "\n".join(wisdom_parts)
-
-        return """- One whose mind remains undisturbed by adversity, who does not crave pleasure, free from attachment and fear
-- The mind can be the soul's friend or its enemy; elevate yourself through your own effort
-- Sensations of heat and cold, pleasure and pain, come and go; learn to endure them"""
-
-    except Exception as e:
-        logger.warning(f"Could not fetch Gita wisdom: {e}")
-        return """- One whose mind remains undisturbed by adversity, who does not crave pleasure, free from attachment and fear
-- The mind can be the soul's friend or its enemy; elevate yourself through your own effort
-- Sensations of heat and cold, pleasure and pain, come and go; learn to endure them"""
-
-
 def _parse_response_to_structure(response_text: str) -> dict[str, str]:
-    """Parse KIAAN's conversational response into structured format."""
+    """Parse response into structured format."""
     lines = response_text.strip().split('\n')
     sections = []
     current = []
@@ -181,7 +195,6 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
     if current:
         sections.append(' '.join(current))
 
-    # Clean emoji
     if sections:
         sections[-1] = sections[-1].replace('💙', '').strip()
 
@@ -209,17 +222,17 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
 
 
 def _get_fallback_response(negative_thought: str) -> dict[str, Any]:
-    """Return a warm fallback response when KIAAN is unavailable."""
+    """Fallback when KIAAN is unavailable."""
     thought_snippet = negative_thought[:50] + "..." if len(negative_thought) > 50 else negative_thought
     return {
         "status": "success",
         "reframe_guidance": {
-            "recognition": f"I hear you - this thought '{thought_snippet}' is weighing on you. That's real, and it makes sense you'd feel this way.",
-            "deep_insight": "Notice that your mind is treating a thought as absolute truth. But thoughts, even painful ones, are not facts - they're interpretations shaped by how you feel right now.",
-            "reframe": "What if this situation, as difficult as it is, contains something you haven't seen yet? Not toxic positivity - just the recognition that your current lens isn't the only one.",
-            "small_action_step": "Right now, take one breath. Then ask yourself: 'What would I tell a friend who shared this same thought with me?'",
+            "recognition": f"I hear you - this thought '{thought_snippet}' is weighing on you. That's real.",
+            "deep_insight": "Notice that your mind is treating this thought as absolute truth. But thoughts, even painful ones, are not facts - they're interpretations.",
+            "reframe": "You are the observer of your thoughts, not the thoughts themselves. Like clouds passing through the sky, this thought will pass. The sky remains.",
+            "small_action_step": "Right now, take one breath. Then ask yourself: 'What would I tell a friend who shared this same thought?'",
         },
-        "raw_text": f"I hear you - this thought is weighing on you, and that makes complete sense. When we're struggling, our minds can be relentless.\n\nHere's what I notice: your mind is treating this thought as absolute truth. But thoughts, even the painful ones, aren't facts - they're interpretations shaped by how you're feeling right now.\n\nWhat if this situation, difficult as it is, contains something you haven't seen yet? I'm not asking you to 'think positive' - just to notice that your current lens isn't the only one available.\n\nHere's something to try: take one breath. Then ask yourself, 'What would I tell a friend who shared this same thought with me?' Often, we have wisdom for others that we forget to offer ourselves.",
+        "raw_text": f"I hear you - this thought is weighing on you, and that's completely real. When we're struggling, our minds can be relentless.\n\nNotice something: your mind is treating this thought as absolute truth. But thoughts, even the painful ones, aren't facts - they're interpretations shaped by how you're feeling right now.\n\nHere's what I want you to remember: you are the observer of your thoughts, not the thoughts themselves. Like clouds passing through the vast sky, this thought will pass. The sky - your true self - remains unchanged, peaceful, whole.\n\nTry this: take one breath. Then ask yourself, 'What would I tell a friend who shared this same thought?' Often, we have wisdom for others that we forget to offer ourselves. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",
@@ -228,10 +241,5 @@ def _get_fallback_response(negative_thought: str) -> dict[str, Any]:
 
 @router.get("/health")
 async def ardha_health():
-    """Health check for Ardha service."""
-    return {
-        "status": "ok",
-        "service": "ardha-reframe",
-        "provider": "kiaan",
-        "ecosystem": "KIAAN AI",
-    }
+    """Health check."""
+    return {"status": "ok", "service": "ardha", "provider": "kiaan"}
