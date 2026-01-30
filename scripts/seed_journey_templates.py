@@ -41,6 +41,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 3,
         "is_featured": True,
+        "is_free": True,  # FREE for all users to test the journey feature
         "icon_name": "flame",
         "color_theme": "red",
     },
@@ -859,12 +860,12 @@ async def seed_journey_templates():
                 text("""
                     INSERT INTO journey_templates (
                         id, slug, title, description, primary_enemy_tags,
-                        duration_days, difficulty, is_active, is_featured,
+                        duration_days, difficulty, is_active, is_featured, is_free,
                         icon_name, color_theme, created_at, updated_at
                     )
                     VALUES (
                         :id, :slug, :title, :description, CAST(:primary_enemy_tags AS jsonb),
-                        :duration_days, :difficulty, true, :is_featured,
+                        :duration_days, :difficulty, true, :is_featured, :is_free,
                         :icon_name, :color_theme, NOW(), NOW()
                     )
                     ON CONFLICT (slug) DO UPDATE SET
@@ -874,6 +875,7 @@ async def seed_journey_templates():
                         duration_days = EXCLUDED.duration_days,
                         difficulty = EXCLUDED.difficulty,
                         is_featured = EXCLUDED.is_featured,
+                        is_free = EXCLUDED.is_free,
                         icon_name = EXCLUDED.icon_name,
                         color_theme = EXCLUDED.color_theme,
                         is_active = true,
@@ -888,6 +890,7 @@ async def seed_journey_templates():
                     "primary_enemy_tags": json.dumps(template["primary_enemy_tags"]),
                     "duration_days": template["duration_days"],
                     "difficulty": template["difficulty"],
+                    "is_free": template.get("is_free", False),
                     "is_featured": template["is_featured"],
                     "icon_name": template.get("icon_name"),
                     "color_theme": template.get("color_theme"),
