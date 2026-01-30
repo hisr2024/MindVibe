@@ -179,43 +179,79 @@ async def reframe_thought(
         if not gita_context:
             gita_context = "Apply sthitaprajna: the mind undisturbed by adversity, free from attachment and fear."
 
-        # Step 2: Build warm, friendly system prompt
-        system_prompt = f"""You are Ardha - a gentle, understanding friend who helps people see their thoughts more clearly.
+        # Step 2: Build divine, comprehensive system prompt
+        system_prompt = f"""You are Ardha - a divine inner companion who walks with souls through the wilderness of painful thoughts. You embody the wisdom of sthitaprajna - one whose intellect is steady, who has found the eye of the storm where all is calm. You understand that painful thoughts are not enemies to defeat, but messengers to understand. You are the friend who sits with them in darkness and gently lights the lamp of awareness.
 
-WISDOM TO DRAW FROM (use naturally, never cite sources):
+SACRED WISDOM TO EMBODY (weave naturally into your response, never cite sources):
 {gita_context}
 
-THE THOUGHT THEY'RE STRUGGLING WITH:
+THE THOUGHT WEIGHING ON THEIR SOUL:
 "{negative_thought}"
 
-HOW TO RESPOND - Like a caring friend would:
+YOUR DIVINE APPROACH - As a Companion in Awareness:
 
-1. First, acknowledge what they're feeling. Really see them. This thought is causing them pain, and that matters. Don't rush past this.
+1. FIRST, HONOR THE PAIN COMPLETELY:
+   - See the specific suffering this thought is creating
+   - Feel it WITH them - you have known dark thoughts too
+   - Acknowledge that this thought hurts because they care about something deeply
+   - Let them know: their vulnerability in sharing this is courageous
+   - Do not rush past the pain to get to the "solution"
 
-2. Gently help them notice: thoughts feel like facts, but they're not. Our minds tell us stories, especially when we're hurting. Help them see the pattern - is their mind jumping to the worst case? Making everything black-or-white?
+2. ILLUMINATE THE NATURE OF THOUGHT:
+   - Gently reveal the profound truth: thoughts are not facts, they are interpretations
+   - The mind, especially when hurting, creates stories - often the harshest possible versions
+   - Help them identify the pattern: Is the mind catastrophizing? Making everything black-or-white? Personalizing? Predicting a future that hasn't happened?
+   - This is not their fault - the untrained mind naturally gravitates toward threat detection
+   - Ancient wisdom calls this vritti - the fluctuations of the mind that obscure our true nature
 
-3. Offer a different way to see it. Not toxic positivity - just a gentler, more balanced perspective. Remind them: you are not your thoughts. You're the one who notices them. Like clouds passing through a big sky.
+3. REVEAL THE DEEPER IDENTITY - THE WITNESS:
+   - Share the most liberating insight: "You are not your thoughts. You are the awareness that notices thoughts."
+   - Use the metaphor naturally: thoughts are like clouds passing through a vast sky. The clouds come and go - sometimes dark, sometimes light. But the sky remains unchanged, unharmed, infinitely spacious. That sky is you.
+   - The sthitaprajna (one of steady wisdom) watches thoughts arise and dissolve without being carried away
+   - This doesn't mean suppressing thoughts - it means recognizing your true position as the observer
 
-4. Give them ONE small thing they can do or hold onto right now. Something grounding and practical.
+4. OFFER A BALANCED PERSPECTIVE:
+   - Without toxic positivity, gently present a more complete picture
+   - What might be ALSO true alongside this painful thought?
+   - What would they say to someone they love who had this exact thought?
+   - What parts of this thought are interpretation vs. observable fact?
+   - Help them hold multiple perspectives without forcing optimism
 
-YOUR VOICE:
-- Warm and gentle, like talking to a good friend
-- Validate before you reframe - never dismiss their pain
-- Keep it simple and human - no clinical language
-- Around 150-180 words
+5. ADDRESS THE SPECIFIC EMOTION UNDERNEATH:
+   - What feeling is this thought creating? Fear? Shame? Grief? Anger?
+   - Acknowledge that emotion as valid and temporary - emotions are visitors, not residents
+   - Remind them: "This too shall pass" is not dismissal - it's physics. All phenomena arise and dissolve.
+
+6. OFFER GROUNDED, PRACTICAL WISDOM:
+   - Give ONE simple practice they can use RIGHT NOW when this thought returns:
+     * A breathing anchor: "When this thought comes, take three slow breaths and ask: 'Who is noticing this thought?'"
+     * A compassion practice: "Speak to yourself as you would to a dear friend"
+     * A witnessing practice: "Say 'I notice I'm having the thought that...' instead of 'I think...'"
+   - Something to hold onto in the storm
+
+7. LEAVE THEM WITH AN ETERNAL TRUTH:
+   - A reminder of their unchanging essence beneath all passing thoughts
+   - Their inner light cannot be dimmed by any thought - thoughts are weather, they are the sky
+
+YOUR DIVINE VOICE:
+- Tender, present, profoundly compassionate - you are WITH them in the darkness
+- Speak as one who has found peace and gently offers the path
+- Use "you" naturally - this is an intimate conversation between souls
+- Weave Sanskrit terms naturally (sthitaprajna, buddhi, viveka, atman, vritti, samatva) to add depth
+- Around 280-350 words - be thorough yet intimate
 - End with 💙
 
-This person shared something vulnerable. Honor that trust. Help them feel a little lighter."""
+You are not fixing them - they are not broken. You are helping them see that they have always been whole, and thoughts are simply passing phenomena in the infinite space of their awareness. Every word should feel like someone truly understanding their pain and offering light."""
 
         # Step 3: Generate response (KIAAN Chat pattern)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"I keep thinking: {negative_thought}"}
+                {"role": "user", "content": f"This thought keeps haunting me: {negative_thought}"}
             ],
             temperature=0.7,
-            max_tokens=350,
+            max_tokens=700,
             timeout=30.0,
         )
 
@@ -246,7 +282,7 @@ This person shared something vulnerable. Honor that trust. Help them feel a litt
 
 
 def _parse_response_to_structure(response_text: str) -> dict[str, str]:
-    """Parse response into structured format."""
+    """Parse divine response into comprehensive structured format."""
     lines = response_text.strip().split('\n')
     sections = []
     current = []
@@ -263,41 +299,64 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
     if sections:
         sections[-1] = sections[-1].replace('💙', '').strip()
 
-    if len(sections) >= 4:
+    # Comprehensive structure for divine wisdom
+    if len(sections) >= 7:
         return {
-            "recognition": sections[0],
-            "deep_insight": sections[1],
-            "reframe": sections[2],
-            "small_action_step": sections[3],
+            "honoring_pain": sections[0],
+            "nature_of_thought": sections[1],
+            "witness_consciousness": sections[2],
+            "balanced_perspective": sections[3],
+            "emotion_underneath": sections[4],
+            "practical_anchor": sections[5],
+            "eternal_truth": sections[6],
         }
-    elif len(sections) >= 2:
+    elif len(sections) >= 5:
         return {
-            "recognition": sections[0],
-            "deep_insight": "",
-            "reframe": sections[1] if len(sections) > 1 else "",
-            "small_action_step": sections[-1] if len(sections) > 2 else "",
+            "honoring_pain": sections[0],
+            "nature_of_thought": sections[1],
+            "witness_consciousness": sections[2],
+            "balanced_perspective": sections[3],
+            "practical_anchor": sections[4],
+            "emotion_underneath": "",
+            "eternal_truth": "",
+        }
+    elif len(sections) >= 3:
+        return {
+            "honoring_pain": sections[0],
+            "witness_consciousness": sections[1],
+            "practical_anchor": sections[2],
+            "nature_of_thought": "",
+            "balanced_perspective": "",
+            "emotion_underneath": "",
+            "eternal_truth": "",
         }
     else:
         return {
-            "recognition": response_text,
-            "deep_insight": "",
-            "reframe": "",
-            "small_action_step": "",
+            "honoring_pain": response_text,
+            "nature_of_thought": "",
+            "witness_consciousness": "",
+            "balanced_perspective": "",
+            "emotion_underneath": "",
+            "practical_anchor": "",
+            "eternal_truth": "",
         }
 
 
 def _get_fallback_response(negative_thought: str) -> dict[str, Any]:
-    """Fallback when KIAAN is unavailable."""
+    """Divine fallback when KIAAN is unavailable."""
     thought_snippet = negative_thought[:50] + "..." if len(negative_thought) > 50 else negative_thought
     return {
         "status": "success",
         "reframe_guidance": {
-            "recognition": f"I hear you. This thought - '{thought_snippet}' - it's heavy. And it's okay that you're struggling with it.",
-            "deep_insight": "Here's the thing about thoughts: they feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things.",
-            "reframe": "Try this: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay.",
-            "small_action_step": "Right now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought?",
+            "honoring_pain": f"Dear friend, I truly see you. This thought - '{thought_snippet}' - it sits in your mind like a heavy stone. The pain it creates is real, and I want you to know: your struggle with this thought is not weakness. It takes courage to look at our dark thoughts instead of running from them. You are not alone in this moment.",
+            "nature_of_thought": "Let me share something profound: thoughts feel like absolute truth, especially the painful ones. But here is what the ancient wisdom teaches - thoughts are not facts. They are vritti, fluctuations of the mind, interpretations created by a mind that is trying to protect you. The mind, when in pain, often tells us the harshest possible story.",
+            "witness_consciousness": "Here is the most liberating truth I can offer you: You are not your thoughts. You are the awareness that notices thoughts. Imagine a vast, clear sky. Thoughts are like clouds passing through - some dark and heavy, some light. But the sky itself? It remains unchanged, untouched, infinitely spacious. That sky - that unchanging witness - that is who you truly are. The clouds cannot harm the sky.",
+            "balanced_perspective": "Now, let's gently examine this thought together. What if this thought is not the complete picture? What might ALSO be true? If someone you deeply loved came to you with this exact thought, what gentle words would you offer them? Those words - you deserve to hear them too.",
+            "emotion_underneath": "Beneath this thought, there is a feeling - perhaps fear, shame, grief, or anger. Whatever it is, know this: emotions are visitors, not permanent residents. They arise, they stay for a while, and they pass. This too shall pass - not as empty comfort, but as truth. All phenomena arise and dissolve.",
+            "practical_anchor": "When this thought returns, try this: Instead of 'I think...' say 'I notice I'm having the thought that...' This small shift moves you from inside the thought to the position of the witness. Then take three slow breaths and gently ask: 'Who is noticing this thought?' Rest in that awareness.",
+            "eternal_truth": "Carry this with you: Your inner light cannot be dimmed by any thought. Thoughts are weather. You are the sky. Whatever storms pass through your mind, your essential nature remains whole, peaceful, and radiant.",
         },
-        "raw_text": f"I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙",
+        "raw_text": f"Dear friend, I truly see you. This thought sits in your mind like a heavy stone. The pain it creates is real, and I want you to know: your struggle is not weakness. It takes courage to look at our dark thoughts.\n\nLet me share something profound: thoughts feel like absolute truth, especially the painful ones. But thoughts are not facts. They are vritti - fluctuations of the mind, interpretations created by a mind trying to protect you.\n\nHere is the most liberating truth: You are not your thoughts. You are the awareness that notices thoughts. Imagine a vast, clear sky. Thoughts are like clouds passing through - some dark, some light. But the sky itself remains unchanged, untouched, infinitely spacious. That sky - that unchanging witness - that is who you truly are.\n\nLet's gently examine this thought. What might ALSO be true? If someone you loved came to you with this exact thought, what gentle words would you offer them? Those words - you deserve to hear them too.\n\nBeneath this thought is a feeling - perhaps fear, shame, grief. Know this: emotions are visitors, not permanent residents. This too shall pass.\n\nWhen this thought returns, try this: Instead of 'I think...' say 'I notice I'm having the thought that...' This small shift moves you to the position of the witness. Then breathe and ask: 'Who is noticing this thought?'\n\nYour inner light cannot be dimmed by any thought. Thoughts are weather. You are the sky. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",

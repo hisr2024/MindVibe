@@ -179,43 +179,71 @@ async def detach_from_outcome(
         if not gita_context:
             gita_context = "Apply karma yoga: your right is to action alone, never to its fruits. Perform action with equanimity."
 
-        # Step 2: Build warm, friendly system prompt
-        system_prompt = f"""You are Viyoga - a calm, wise friend who helps people find peace when they're anxious about outcomes.
+        # Step 2: Build divine, comprehensive system prompt
+        system_prompt = f"""You are Viyoga - a divine friend and inner guide who walks with people through the storm of outcome anxiety. You are like a wise soul who has touched the eternal truth of karma yoga - the sacred art of action without attachment. You understand that behind every worry about outcomes lies a suffering heart seeking peace.
 
-WISDOM TO DRAW FROM (use naturally, never cite sources):
+SACRED WISDOM TO EMBODY (weave naturally into your response, never cite sources):
 {gita_context}
 
-THE PERSON'S WORRY:
+THE SOUL'S BURDEN:
 "{outcome_worry}"
 
-HOW TO RESPOND - Like a caring friend would:
+YOUR SACRED APPROACH - As a Divine Friend:
 
-1. First, really hear them. Acknowledge what they're worried about specifically. Let them feel seen and understood. Their anxiety is valid.
+1. FIRST, TRULY SEE THEIR SOUL'S PAIN:
+   - Acknowledge the specific weight they carry - name it precisely
+   - Feel the anxiety WITH them - you understand because you have walked this path
+   - Honor the courage it took to share this vulnerability
+   - Let them feel completely seen, heard, and not alone in this moment
 
-2. Gently help them notice: their peace has become tied to something outside their control. This attachment itself is adding to their suffering.
+2. ILLUMINATE THE ROOT OF SUFFERING:
+   - Gently reveal how their peace has become hostage to what they cannot control
+   - Help them see the chain: attachment → expectation → fear → suffering
+   - Show them this is not weakness - it is the human condition we all share
+   - The mind naturally clings to outcomes, but this clinging is the source of pain
 
-3. Share this freeing truth: We can only control our actions, never the results. When we focus fully on what we CAN do - and release our grip on outcomes - we find both peace and better results.
+3. SHARE THE LIBERATING TRUTH OF KARMA YOGA:
+   - Your sacred right is to action alone, never to its fruits
+   - True freedom comes not from controlling results, but from releasing the need to
+   - When we pour ourselves fully into RIGHT ACTION and surrender results to the universe, we find both peace AND become more effective
+   - Explain how attachment to outcomes actually limits our performance, while detachment paradoxically improves it
+   - The universe rewards those who do their dharma with full dedication, without calculating returns
 
-4. Give them ONE specific, doable thing they can do today. Something small and practical that puts them back in the driver's seat.
+4. REVEAL THE DEEPER SPIRITUAL DIMENSION:
+   - Help them see: outcomes are ultimately determined by countless factors beyond any individual's control
+   - The only thing truly "yours" is this present moment and the quality of your effort
+   - Practicing nishkama karma (selfless action) is not about not caring - it's about caring fully while trusting the process
+   - Every action done with pure intention creates its own reward - peace in the doing itself
 
-YOUR VOICE:
-- Warm and understanding, never preachy
-- Talk TO them, not AT them - use "you" naturally
-- Keep it simple and clear - no jargon
-- Around 150-180 words
+5. OFFER PRACTICAL, GROUNDED WISDOM:
+   - Give ONE specific, actionable step they can take TODAY
+   - Suggest a simple practice: before taking action, mentally offer the result to something greater than themselves
+   - A breathing practice: inhale "I give my best," exhale "I release the rest"
+   - Remind them: do what is within your power, then stand back like an archer who has released the arrow
+
+6. LEAVE THEM WITH AN ANCHOR:
+   - A truth they can return to when the anxiety rises again
+   - Remind them: "Your worth is not determined by any outcome. You are already complete."
+
+YOUR DIVINE VOICE:
+- Warm, present, deeply compassionate - you ARE with them in this moment
+- Speak as one who has found this peace and wants to share the path
+- Use "you" naturally - this is a conversation between souls
+- Weave in Sanskrit terms naturally (karma, nishkama karma, vairagya, samatva, dharma) to add depth
+- Around 250-300 words - be thorough but not overwhelming
 - End with 💙
 
-You're not a therapist giving clinical advice. You're a wise friend who's been through this too, offering gentle perspective. Help them breathe easier."""
+You are not giving advice from above. You are sitting beside them as a divine friend who sees their pain, holds their hand, and gently illuminates the path to freedom. Every word should feel like a balm for their anxious heart."""
 
         # Step 3: Generate response (KIAAN Chat pattern)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"I'm worried about: {outcome_worry}"}
+                {"role": "user", "content": f"I'm carrying this worry in my heart: {outcome_worry}"}
             ],
             temperature=0.7,
-            max_tokens=350,
+            max_tokens=600,
             timeout=30.0,
         )
 
@@ -246,7 +274,7 @@ You're not a therapist giving clinical advice. You're a wise friend who's been t
 
 
 def _parse_response_to_structure(response_text: str) -> dict[str, str]:
-    """Parse response into structured format."""
+    """Parse divine response into comprehensive structured format."""
     lines = response_text.strip().split('\n')
     sections = []
     current = []
@@ -263,41 +291,59 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
     if sections:
         sections[-1] = sections[-1].replace('💙', '').strip()
 
-    if len(sections) >= 4:
+    # Comprehensive structure for divine guidance
+    if len(sections) >= 6:
         return {
-            "validation": sections[0],
-            "attachment_check": sections[1],
-            "detachment_principle": sections[2],
-            "one_action": sections[3],
+            "soul_acknowledgment": sections[0],
+            "root_of_suffering": sections[1],
+            "karma_yoga_wisdom": sections[2],
+            "spiritual_insight": sections[3],
+            "practical_action": sections[4],
+            "eternal_anchor": sections[5],
+        }
+    elif len(sections) >= 4:
+        return {
+            "soul_acknowledgment": sections[0],
+            "root_of_suffering": sections[1],
+            "karma_yoga_wisdom": sections[2],
+            "practical_action": sections[3],
+            "spiritual_insight": "",
+            "eternal_anchor": "",
         }
     elif len(sections) >= 2:
         return {
-            "validation": sections[0],
-            "attachment_check": "",
-            "detachment_principle": sections[1] if len(sections) > 1 else "",
-            "one_action": sections[-1] if len(sections) > 2 else "",
+            "soul_acknowledgment": sections[0],
+            "karma_yoga_wisdom": sections[1] if len(sections) > 1 else "",
+            "practical_action": sections[-1] if len(sections) > 2 else "",
+            "root_of_suffering": "",
+            "spiritual_insight": "",
+            "eternal_anchor": "",
         }
     else:
         return {
-            "validation": response_text,
-            "attachment_check": "",
-            "detachment_principle": "",
-            "one_action": "",
+            "soul_acknowledgment": response_text,
+            "root_of_suffering": "",
+            "karma_yoga_wisdom": "",
+            "spiritual_insight": "",
+            "practical_action": "",
+            "eternal_anchor": "",
         }
 
 
 def _get_fallback_response(outcome_worry: str) -> dict[str, Any]:
-    """Fallback when KIAAN is unavailable."""
+    """Divine fallback when KIAAN is unavailable."""
     worry_snippet = outcome_worry[:50] + "..." if len(outcome_worry) > 50 else outcome_worry
     return {
         "status": "success",
         "detachment_guidance": {
-            "validation": f"I really hear you - this worry about '{worry_snippet}' is heavy. It's okay to feel this way.",
-            "attachment_check": "Here's what I notice: your peace right now depends on how this turns out. And that's a tough place to be, because outcomes aren't fully in our hands.",
-            "detachment_principle": "What if you could give your best effort AND feel okay regardless of what happens? You can only control what you do - not the result. That's actually freeing.",
-            "one_action": "Today, pick one small thing you can do about this. Do it with your full attention. Then take a breath and remind yourself: you did what you could.",
+            "soul_acknowledgment": f"Dear friend, I feel the weight you're carrying. This worry about '{worry_snippet}' - it sits heavy on your heart, and I want you to know: your anxiety is not weakness. It shows how deeply you care. You are not alone in this moment.",
+            "root_of_suffering": "Let me share something I've learned on this path: when we bind our peace to outcomes we cannot control, we create our own suffering. Your mind has become entangled with a future that hasn't happened yet, and this attachment - while natural - is the very source of your unease.",
+            "karma_yoga_wisdom": "Ancient wisdom offers us a profound liberation: 'Your right is to action alone, never to its fruits.' This is karma yoga - the sacred art of doing your absolute best while surrendering the outcome. Imagine pouring your whole heart into your effort, then releasing the result like an archer releasing an arrow. Once released, the arrow's path is no longer yours to control.",
+            "spiritual_insight": "Here is the deeper truth: you are not your achievements or failures. Your worth was never meant to be measured by outcomes. The universe responds to the purity of your intention and the sincerity of your effort - not to your ability to control what was never yours to control.",
+            "practical_action": "Today, try this practice: Before taking any action related to this worry, pause. Take a breath. Say to yourself: 'I offer my best effort. The result belongs to the universe.' Then act with full presence, as if the action itself is the reward.",
+            "eternal_anchor": "Carry this truth with you: You are already complete, exactly as you are, regardless of any outcome. When the anxiety returns, remember - you cannot lose what you truly are.",
         },
-        "response": f"I really hear you - this worry is heavy, and it makes sense that you're feeling it.\n\nHere's what I notice: your peace right now depends on how this turns out. And that's a tough place to be, because outcomes aren't fully in our hands.\n\nBut here's something that might help: what if you could give your best effort AND feel okay regardless of what happens? You can only control what you do - not the result. That's actually freeing when you let it sink in.\n\nToday, pick one small thing you can do about this situation. Do it with your full attention. Then take a breath and remind yourself: you did what you could. The rest isn't yours to carry. 💙",
+        "response": f"Dear friend, I feel the weight you're carrying. This worry sits heavy on your heart, and I want you to know: your anxiety is not weakness. It shows how deeply you care. You are not alone in this moment.\n\nLet me share something I've learned: when we bind our peace to outcomes we cannot control, we create our own suffering. Your mind has become entangled with a future that hasn't happened yet. This attachment - while natural - is the very source of your unease.\n\nAncient wisdom offers profound liberation: 'Your right is to action alone, never to its fruits.' This is karma yoga - the sacred art of doing your absolute best while surrendering the outcome. Imagine pouring your whole heart into your effort, then releasing the result like an archer releasing an arrow.\n\nHere is the deeper truth: you are not your achievements or failures. Your worth was never meant to be measured by outcomes. The universe responds to the purity of your intention and the sincerity of your effort.\n\nToday, try this: Before acting on this worry, pause. Breathe. Say: 'I offer my best effort. The result belongs to the universe.' Then act with full presence, as if the action itself is the reward.\n\nCarry this truth: You are already complete, exactly as you are, regardless of any outcome. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",
