@@ -395,41 +395,64 @@ async def start_journeys(
         user_id = await get_current_user_id(request)
     except HTTPException:
         raise
+    except Exception as e:
+        logger.error(f"[start_journeys] Error getting user_id: {e}")
+        raise HTTPException(status_code=401, detail="Authentication required")
 
     # Check if user is a developer (full access to all journeys)
-    is_dev = await is_developer(db, user_id)
+    try:
+        is_dev = await is_developer(db, user_id)
+    except Exception as e:
+        logger.warning(f"[start_journeys] Error checking developer status: {e}")
+        is_dev = False
+
     if is_dev:
         logger.info(f"[start_journeys] Developer access granted for {user_id} - full access to all journeys")
         active_count = 0
         journey_limit = -1  # Unlimited
     else:
-        # Check if ALL requested journeys are free (is_free=True in database)
-        # If so, allow access without subscription check
+        # Check if ALL requested journeys are free (is_free=True)
+        # First check demo templates (always available), then database
         all_free = False
+        templates_found = []
+
         try:
-            result = await db.execute(
-                select(JourneyTemplate)
-                .where(JourneyTemplate.id.in_(body.journey_ids))
-            )
-            templates = list(result.scalars().all())
+            # Check demo templates first
+            demo_ids = {t["id"] for t in DEMO_JOURNEY_TEMPLATES}
+            requested_demo_ids = [jid for jid in body.journey_ids if jid in demo_ids]
 
-            # Also check demo templates if no DB results
-            if not templates:
-                # Check demo templates
-                demo_ids = {t["id"] for t in DEMO_JOURNEY_TEMPLATES}
-                requested_demo = [jid for jid in body.journey_ids if jid in demo_ids]
-                if requested_demo:
-                    templates = [t for t in DEMO_JOURNEY_TEMPLATES if t["id"] in body.journey_ids]
-                    all_free = all(t.get("is_free", False) for t in templates) if templates else False
+            if requested_demo_ids and len(requested_demo_ids) == len(body.journey_ids):
+                # All requested journeys are demo templates
+                templates_found = [t for t in DEMO_JOURNEY_TEMPLATES if t["id"] in body.journey_ids]
+                all_free = all(t.get("is_free", False) for t in templates_found) if templates_found else False
+                logger.info(f"[start_journeys] Using demo templates: {[t['title'] for t in templates_found]}")
             else:
-                all_free = all(getattr(t, "is_free", False) for t in templates) if templates else False
+                # Try database query (may fail if is_free column doesn't exist)
+                try:
+                    result = await db.execute(
+                        select(JourneyTemplate)
+                        .where(JourneyTemplate.id.in_(body.journey_ids))
+                    )
+                    db_templates = list(result.scalars().all())
 
-            logger.info(f"[start_journeys] Free journey check: all_free={all_free}, templates_count={len(templates)}")
+                    if db_templates:
+                        templates_found = db_templates
+                        # Safely check is_free with fallback
+                        all_free = all(getattr(t, "is_free", False) for t in db_templates)
+                        logger.info(f"[start_journeys] Found {len(db_templates)} templates in database")
+                except Exception as db_err:
+                    logger.warning(f"[start_journeys] DB query for is_free failed (column may not exist): {db_err}")
+                    # Fall back to demo templates if DB query fails
+                    if requested_demo_ids:
+                        templates_found = [t for t in DEMO_JOURNEY_TEMPLATES if t["id"] in body.journey_ids]
+                        all_free = all(t.get("is_free", False) for t in templates_found) if templates_found else False
+
+            logger.info(f"[start_journeys] Free journey check: all_free={all_free}, templates_count={len(templates_found)}")
         except Exception as e:
             logger.warning(f"[start_journeys] Error checking free journeys: {e}")
             all_free = False
 
-        if all_free and templates:
+        if all_free and templates_found:
             # All requested journeys are free - allow access
             logger.info(f"[start_journeys] Free journey access granted for user {user_id}")
             active_count = 0

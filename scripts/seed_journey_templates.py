@@ -41,7 +41,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 3,
         "is_featured": True,
-        "is_free": True,  # FREE for all users - allows everyone to try the feature
+        "is_free": True,  # FREE for all users to test the journey feature
         "icon_name": "flame",
         "color_theme": "red",
     },
@@ -896,6 +896,7 @@ async def seed_journey_templates():
                     "primary_enemy_tags": json.dumps(template["primary_enemy_tags"]),
                     "duration_days": template["duration_days"],
                     "difficulty": template["difficulty"],
+                    "is_free": template.get("is_free", False),
                     "is_featured": template["is_featured"],
                     "is_free": template.get("is_free", False),
                     "icon_name": template.get("icon_name"),
