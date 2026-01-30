@@ -376,7 +376,24 @@ export default function JourneysCatalogClient() {
       // Load catalog and access info in parallel
       const [catalogData, accessData] = await Promise.all([
         journeysService.getCatalog(),
-        journeysService.getJourneyAccess().catch(() => null),
+        journeysService.getJourneyAccess().catch((err) => {
+          console.warn('Failed to load access info:', err)
+          // Return a fallback that allows free journeys and shows proper upgrade prompts
+          // This ensures users can always access free content even if the access API fails
+          return {
+            has_access: true,  // Allow free journeys
+            tier: 'free' as const,
+            active_journeys: 0,
+            journey_limit: 1,
+            remaining: 1,
+            is_unlimited: false,
+            can_start_more: true,
+            is_trial: true,
+            trial_days_limit: 3,
+            upgrade_url: '/pricing',
+            upgrade_cta: 'Upgrade for Full Access',
+          }
+        }),
       ])
       setTemplates(catalogData)
       setAccess(accessData)
