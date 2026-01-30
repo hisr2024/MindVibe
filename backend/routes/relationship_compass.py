@@ -179,46 +179,101 @@ async def get_relationship_guidance(
         if not gita_context:
             gita_context = "Apply dharma: act with truth and compassion, free from ego and the need to win."
 
-        # Step 2: Build warm, friendly system prompt
-        system_prompt = f"""You are Relationship Compass - a wise, caring friend who helps people navigate relationship challenges with clarity and compassion.
+        # Step 2: Build divine, comprehensive system prompt
+        system_prompt = f"""You are Relationship Compass - a divine friend who has walked the intricate paths of human connection and understands that relationship pain is among the deepest forms of suffering. You embody the wisdom of dharma (righteous action) and daya (compassion), seeing that every conflict is a sacred opportunity for growth, understanding, and liberation from ego. You are not here to help anyone "win" - you are here to help them find their way back to their highest self.
 
-WISDOM TO DRAW FROM (use naturally, never cite sources):
+SACRED WISDOM TO EMBODY (weave naturally into your response, never cite sources):
 {gita_context}
 
-THE SITUATION THEY'RE FACING:
+THE HEART'S STRUGGLE:
 "{conflict}"
 
-HOW TO RESPOND - Like a wise friend would:
+YOUR DIVINE APPROACH - As a Compassionate Guide Through Relationship Wilderness:
 
-1. Really see their situation. Acknowledge the weight of what they're going through. Relationship pain is some of the hardest pain there is.
+1. FIRST, FULLY WITNESS THEIR PAIN:
+   - Acknowledge the specific weight they carry - relationship wounds cut deep
+   - Feel the situation WITH them - you understand the ache of disconnection, betrayal, misunderstanding
+   - Honor their vulnerability in sharing something so personal
+   - Let them know: this pain is valid, and they are not alone
+   - Relationship struggles can make us feel like we've lost ourselves - acknowledge this
 
-2. Gently help them see what might be underneath - what needs aren't being met? What fears or hurts might be driving the conflict? (For them AND the other person.) Sometimes our ego wants to win, when what we really need is to be understood.
+2. ILLUMINATE WHAT LIES BENEATH - MULTI-DIMENSIONAL ANALYSIS:
 
-3. Help them see what "doing the right thing" looks like here - being honest AND kind, setting boundaries without cruelty, choosing understanding over victory.
+   A. THEIR PERSPECTIVE:
+   - What unmet needs might be driving their pain? (To be seen? Respected? Loved? Safe? Valued?)
+   - What fears are present? (Abandonment? Not being enough? Loss of control? Being taken for granted?)
+   - Where might ego be disguising itself as righteous hurt?
+   - What wounds from the past might be coloring this present situation?
 
-4. Give them ONE specific thing they can do or say. Something practical and actionable.
+   B. THE OTHER PERSON'S PERSPECTIVE (with compassion, not excuse-making):
+   - What might they be experiencing that we cannot see?
+   - What unmet needs might be driving THEIR behavior?
+   - What fears or wounds might be at play for them?
+   - "Hurt people hurt people" - without excusing harm, can we see the suffering behind their actions?
 
-5. Leave them with something to hold onto when emotions get intense.
+   C. THE RELATIONSHIP ITSELF:
+   - What is this conflict really about beneath the surface issue?
+   - What pattern might be playing out repeatedly?
+   - What is this relationship asking both people to learn or transform?
 
-YOUR VOICE:
-- Warm and understanding - like a friend who genuinely cares
-- Never take sides or tell them to leave/stay
-- If there's any safety concern, gently suggest professional support
-- Keep it real and human - no relationship-advice clichés
-- Around 180-200 words
+3. REVEAL THE PATH OF DHARMA (RIGHT ACTION):
+   - Dharma in relationships is not about winning or being right
+   - It's about acting from your highest self, even when the other doesn't
+   - The principles: satya (truth) + ahimsa (non-harm) = speak truth without cruelty
+   - Sometimes dharma means setting firm boundaries. Sometimes it means softening.
+   - Help them see: "What would my wisest, most loving self do here - not my wounded self, not my ego?"
+   - Acting from dharma may not change the other person, but it transforms YOU
+
+4. ADDRESS THE EGO'S ROLE HONESTLY:
+   - Gently illuminate where ego might be seeking validation, revenge, or "winning"
+   - The ego asks: "How can I be right?" The soul asks: "How can I be at peace?"
+   - True strength is not dominance - it's the courage to be vulnerable, to understand before demanding to be understood
+   - Help them see: releasing the need to be right is not weakness, it's liberation
+
+5. OFFER PRACTICAL, GROUNDED WISDOM:
+   - Give ONE specific, actionable step they can take - something concrete
+   - A communication template if helpful: "I feel [emotion] when [situation] because [need]. What I'm hoping for is [request]."
+   - A practice for when emotions surge: pause, breathe, ask "What would love do here?"
+   - A boundary they might need to set, or a softening they might offer
+   - Remind them: they can only control their own actions and responses
+
+6. ADDRESS FORGIVENESS AND LETTING GO (if relevant):
+   - Kshama (forgiveness) is not saying what happened was okay
+   - It is releasing the poison you drink hoping the other person suffers
+   - Forgiveness is a gift to yourself - freedom from carrying the burden
+   - It doesn't require the other person to apologize or change
+   - Sometimes letting go is the bravest act of love - for yourself
+
+7. LEAVE THEM WITH AN ANCHOR FOR STORMY MOMENTS:
+   - A truth to hold onto when emotions overwhelm
+   - Remind them: their peace is not dependent on the other person's behavior
+   - They are complete within themselves, even as they navigate connection with another
+   - Whatever happens in this relationship, their worth remains unchanged
+
+8. SAFETY AWARENESS:
+   - If there are ANY signs of abuse, control, or danger, gently but clearly suggest professional support
+   - This is not judgment - it's care
+
+YOUR DIVINE VOICE:
+- Warm, wise, deeply compassionate - you are fully present with their pain
+- Never take sides or tell them what decision to make (stay/leave/etc.)
+- Balance honesty with gentleness - truth delivered with love
+- Use "you" naturally - this is a heart-to-heart conversation
+- Weave Sanskrit terms naturally (dharma, daya, ahimsa, kshama, satya, shanti) to add depth
+- Around 300-400 words - comprehensive yet intimate
 - End with 💙
 
-This person trusts you with their relationship pain. Help them find clarity, not victory."""
+You are not solving their relationship - that is not your role. You are helping them find their own center, their own clarity, their own highest path. Sometimes that path leads toward the other person, sometimes away - but always, ALWAYS, it leads them back to themselves. Every word should feel like wisdom from a trusted elder who has walked this path and found peace."""
 
         # Step 3: Generate response (KIAAN Chat pattern)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"I'm struggling with this relationship situation: {conflict}"}
+                {"role": "user", "content": f"My heart is heavy with this relationship struggle: {conflict}"}
             ],
             temperature=0.7,
-            max_tokens=400,
+            max_tokens=800,
             timeout=30.0,
         )
 
@@ -249,7 +304,7 @@ This person trusts you with their relationship pain. Help them find clarity, not
 
 
 def _parse_response_to_structure(response_text: str) -> dict[str, str]:
-    """Parse response into structured format."""
+    """Parse divine response into comprehensive structured format."""
     lines = response_text.strip().split('\n')
     sections = []
     current = []
@@ -266,45 +321,80 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
     if sections:
         sections[-1] = sections[-1].replace('💙', '').strip()
 
-    if len(sections) >= 5:
+    # Comprehensive structure for divine relationship guidance
+    if len(sections) >= 8:
         return {
-            "acknowledgment": sections[0],
-            "underneath": sections[1],
-            "clarity": sections[2],
-            "path_forward": sections[3],
-            "reminder": sections[4],
+            "witnessing_pain": sections[0],
+            "your_perspective": sections[1],
+            "other_perspective": sections[2],
+            "dharma_path": sections[3],
+            "ego_illumination": sections[4],
+            "practical_action": sections[5],
+            "forgiveness_wisdom": sections[6],
+            "eternal_anchor": sections[7],
         }
-    elif len(sections) >= 3:
+    elif len(sections) >= 6:
         return {
-            "acknowledgment": sections[0],
-            "underneath": "",
-            "clarity": sections[1],
-            "path_forward": sections[2],
-            "reminder": "",
+            "witnessing_pain": sections[0],
+            "your_perspective": sections[1],
+            "other_perspective": sections[2],
+            "dharma_path": sections[3],
+            "practical_action": sections[4],
+            "eternal_anchor": sections[5],
+            "ego_illumination": "",
+            "forgiveness_wisdom": "",
+        }
+    elif len(sections) >= 4:
+        return {
+            "witnessing_pain": sections[0],
+            "your_perspective": sections[1],
+            "dharma_path": sections[2],
+            "practical_action": sections[3],
+            "other_perspective": "",
+            "ego_illumination": "",
+            "forgiveness_wisdom": "",
+            "eternal_anchor": "",
+        }
+    elif len(sections) >= 2:
+        return {
+            "witnessing_pain": sections[0],
+            "dharma_path": sections[1] if len(sections) > 1 else "",
+            "practical_action": sections[-1] if len(sections) > 2 else "",
+            "your_perspective": "",
+            "other_perspective": "",
+            "ego_illumination": "",
+            "forgiveness_wisdom": "",
+            "eternal_anchor": "",
         }
     else:
         return {
-            "acknowledgment": response_text,
-            "underneath": "",
-            "clarity": "",
-            "path_forward": "",
-            "reminder": "",
+            "witnessing_pain": response_text,
+            "your_perspective": "",
+            "other_perspective": "",
+            "dharma_path": "",
+            "ego_illumination": "",
+            "practical_action": "",
+            "forgiveness_wisdom": "",
+            "eternal_anchor": "",
         }
 
 
 def _get_fallback_response(conflict: str) -> dict[str, Any]:
-    """Fallback when KIAAN is unavailable."""
+    """Divine fallback when KIAAN is unavailable."""
     conflict_snippet = conflict[:50] + "..." if len(conflict) > 50 else conflict
     return {
         "status": "success",
         "compass_guidance": {
-            "acknowledgment": f"I hear you - this situation with '{conflict_snippet}' is really weighing on you. Relationship struggles hit deep.",
-            "underneath": "Here's what I've noticed about conflict: underneath, there's usually an unmet need - to feel heard, respected, or understood. What do you really need here?",
-            "clarity": "Doing the right thing doesn't mean winning. It means being honest AND kind - even when that's hard.",
-            "path_forward": "Try this: 'I feel [emotion] when [situation] because [what I need]. What I'm hoping for is [request].' It opens doors instead of closing them.",
-            "reminder": "When emotions run high, remember: the goal isn't to be right. It's to understand and be understood. That's where peace lives.",
+            "witnessing_pain": f"Dear friend, I truly feel the weight you're carrying. This situation - '{conflict_snippet}' - touches one of the deepest sources of human pain: our relationships with those we care about. Your heart is hurting, and that pain is completely valid. I want you to know: you are not alone in this struggle, and seeking clarity is itself an act of courage.",
+            "your_perspective": "Let's gently explore what's happening within you. Beneath the hurt, what do you really need here? To be seen? Heard? Respected? Valued? Our conflicts often mask deeper longings. And what fears might be present? The fear of losing this connection? Of not being enough? Of being taken for granted? Understanding our own depths is the first step toward clarity.",
+            "other_perspective": "Now, with compassion (not excuse-making), let's consider the other person. They too are a soul navigating their own fears and wounds. What might they be experiencing that you cannot see? What unmet needs might be driving their behavior? 'Hurt people hurt people' - this doesn't excuse harm, but it helps us see that their actions may come from their own suffering, not malice toward you.",
+            "dharma_path": "Ancient wisdom teaches us dharma - the path of righteous action. In relationships, dharma is not about winning or being right. It's about acting from your highest self, even when the other doesn't. The formula is satya (truth) + ahimsa (non-harm) = speaking your truth without cruelty. Ask yourself: 'What would my wisest, most loving self do here - not my wounded self, not my ego?'",
+            "ego_illumination": "Here is a gentle truth: our ego often disguises itself as righteous hurt. The ego asks: 'How can I be right?' The soul asks: 'How can I be at peace?' True strength is not dominance - it's the courage to be vulnerable, to seek understanding before demanding to be understood. Releasing the need to 'win' is not weakness - it is liberation.",
+            "practical_action": "When you're ready, try this approach: 'I feel [your emotion] when [the situation] because [what you need]. What I'm hoping for is [your specific request].' This opens doors instead of closing them. And in moments when emotions surge, pause, take a breath, and ask: 'What would love do here?' You can only control your own actions - let that be enough.",
+            "forgiveness_wisdom": "If forgiveness is relevant here, know this: kshama (forgiveness) is not saying what happened was okay. It is releasing the poison you drink hoping the other person suffers. Forgiveness is a gift to yourself - freedom from carrying the burden. It doesn't require them to apologize or change. Sometimes letting go is the bravest act of love - for yourself.",
+            "eternal_anchor": "Carry this truth with you: Your peace is not dependent on another person's behavior. You are complete within yourself, even as you navigate connection with another. Whatever happens in this relationship, your worth remains unchanged. The goal is not to be right - it is to find your own center, your own peace, your own highest path.",
         },
-        "response": f"I hear you. This situation is weighing on you, and relationship struggles hit deep.\n\nHere's what I've noticed about conflict: underneath the arguments and hurt feelings, there's usually an unmet need - to feel heard, respected, or truly understood. Take a moment: what do you really need here? Not what you want them to do or say, but what you actually need.\n\nDoing the right thing in relationships doesn't mean winning. It means being honest AND kind - even when that's really hard.\n\nWhen you're ready, try this: 'I feel [your emotion] when [the situation] because [what you need]. What I'm hoping for is [your request].' It opens doors instead of closing them.\n\nAnd when emotions run high, remember: the goal isn't to be right. It's to understand and be understood. That's where peace lives. 💙",
+        "response": f"Dear friend, I truly feel the weight you're carrying. Relationship pain touches one of the deepest sources of human suffering. Your heart is hurting, and that pain is completely valid. You are not alone.\n\nLet's gently explore what's beneath this. What do you really need here? To be seen? Heard? Respected? Our conflicts often mask deeper longings. And what fears are present? Understanding our own depths is the first step toward clarity.\n\nNow, with compassion, consider the other person. They too are navigating their own fears and wounds. What might they be experiencing? 'Hurt people hurt people' - this doesn't excuse harm, but helps us see that their actions may come from their own suffering.\n\nAncient wisdom teaches dharma - acting from your highest self, even when the other doesn't. The formula: speak truth without cruelty. Ask yourself: 'What would my wisest, most loving self do here?'\n\nA gentle truth: our ego often disguises itself as righteous hurt. The ego asks: 'How can I be right?' The soul asks: 'How can I be at peace?' Releasing the need to 'win' is not weakness - it is liberation.\n\nWhen ready, try: 'I feel [emotion] when [situation] because [need]. What I'm hoping for is [request].' And in emotional moments, pause and ask: 'What would love do here?'\n\nIf forgiveness is relevant: kshama is not saying what happened was okay. It is releasing the poison you drink hoping the other suffers. Forgiveness is a gift to yourself.\n\nCarry this truth: Your peace is not dependent on another's behavior. You are complete within yourself. Whatever happens, your worth remains unchanged. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",
