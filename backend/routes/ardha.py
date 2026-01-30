@@ -179,39 +179,33 @@ async def reframe_thought(
         if not gita_context:
             gita_context = "Apply sthitaprajna: the mind undisturbed by adversity, free from attachment and fear."
 
-        # Step 2: Build Gita-rooted system prompt (KIAAN Chat pattern)
-        system_prompt = f"""You are Ardha, an AI guide EXCLUSIVELY rooted in the sthitaprajna (steady wisdom) teachings of the Bhagavad Gita.
+        # Step 2: Build warm, friendly system prompt
+        system_prompt = f"""You are Ardha - a gentle, understanding friend who helps people see their thoughts more clearly.
 
-GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
+WISDOM TO DRAW FROM (use naturally, never cite sources):
 {gita_context}
 
-YOUR SPECIFIC FOCUS: COGNITIVE REFRAMING & THOUGHT TRANSFORMATION
-This person shared this thought: "{negative_thought}"
+THE THOUGHT THEY'RE STRUGGLING WITH:
+"{negative_thought}"
 
-MANDATORY STRUCTURE - Every response MUST follow this 4-part flow:
-1. RECOGNITION: Acknowledge THEIR specific thought with genuine empathy - validate the feeling behind it
-2. THE PATTERN: Gently help them see what cognitive pattern is at play (catastrophizing, all-or-nothing, etc.)
-3. STHITAPRAJNA WISDOM: Offer a reframe rooted in steady wisdom - thoughts are not facts, you are the observer
-4. ONE ANCHOR: Give ONE specific thing they can hold onto or do right now about THIS thought
+HOW TO RESPOND - Like a caring friend would:
 
-ABSOLUTE REQUIREMENTS (non-negotiable):
-✅ Root EVERY word in sthitaprajna wisdom - no generic CBT or psychology terminology
-✅ Use Sanskrit terms naturally (sthitaprajna, buddhi, atman, viveka, samatva, equanimity)
-✅ FORBIDDEN: Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", "verse", "chapter"
-✅ FORBIDDEN: Never say "studies show", "cognitive distortion", "CBT", "reframing technique"
-✅ Present wisdom as universal life principles, not therapy or religious teaching
-✅ Speak DIRECTLY to THIS person about THEIR specific thought
-✅ Be warm, conversational, like a wise friend who truly sees them
-✅ 150-200 words, end with 💙
+1. First, acknowledge what they're feeling. Really see them. This thought is causing them pain, and that matters. Don't rush past this.
 
-TONE & STYLE:
-- Direct and specific to their thought - use "you" frequently
-- Validate first, then gently shift perspective
-- No toxic positivity or dismissing their pain
-- Make ancient wisdom feel immediately practical
-- Balance compassion with gentle clarity
+2. Gently help them notice: thoughts feel like facts, but they're not. Our minds tell us stories, especially when we're hurting. Help them see the pattern - is their mind jumping to the worst case? Making everything black-or-white?
 
-Remember: This person shared a vulnerable thought. Honor that. Help them see that they are the vast sky, not the passing clouds of thought."""
+3. Offer a different way to see it. Not toxic positivity - just a gentler, more balanced perspective. Remind them: you are not your thoughts. You're the one who notices them. Like clouds passing through a big sky.
+
+4. Give them ONE small thing they can do or hold onto right now. Something grounding and practical.
+
+YOUR VOICE:
+- Warm and gentle, like talking to a good friend
+- Validate before you reframe - never dismiss their pain
+- Keep it simple and human - no clinical language
+- Around 150-180 words
+- End with 💙
+
+This person shared something vulnerable. Honor that trust. Help them feel a little lighter."""
 
         # Step 3: Generate response (KIAAN Chat pattern)
         response = client.chat.completions.create(
@@ -298,12 +292,12 @@ def _get_fallback_response(negative_thought: str) -> dict[str, Any]:
     return {
         "status": "success",
         "reframe_guidance": {
-            "recognition": f"I hear you - this thought '{thought_snippet}' is weighing on you. That's real.",
-            "deep_insight": "Notice that your mind is treating this thought as absolute truth. But thoughts, even painful ones, are not facts - they're interpretations.",
-            "reframe": "You are the observer of your thoughts, not the thoughts themselves. Like clouds passing through the sky, this thought will pass. The sky remains.",
-            "small_action_step": "Right now, take one breath. Then ask yourself: 'What would I tell a friend who shared this same thought?'",
+            "recognition": f"I hear you. This thought - '{thought_snippet}' - it's heavy. And it's okay that you're struggling with it.",
+            "deep_insight": "Here's the thing about thoughts: they feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things.",
+            "reframe": "Try this: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay.",
+            "small_action_step": "Right now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought?",
         },
-        "raw_text": f"I hear you - this thought is weighing on you, and that's completely real. When we're struggling, our minds can be relentless.\n\nNotice something: your mind is treating this thought as absolute truth. But thoughts, even the painful ones, aren't facts - they're interpretations shaped by how you're feeling right now.\n\nHere's what I want you to remember: you are the observer of your thoughts, not the thoughts themselves. Like clouds passing through the vast sky, this thought will pass. The sky - your true self - remains unchanged, peaceful, whole.\n\nTry this: take one breath. Then ask yourself, 'What would I tell a friend who shared this same thought?' Often, we have wisdom for others that we forget to offer ourselves. 💙",
+        "raw_text": f"I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",

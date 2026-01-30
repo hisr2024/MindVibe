@@ -179,39 +179,33 @@ async def detach_from_outcome(
         if not gita_context:
             gita_context = "Apply karma yoga: your right is to action alone, never to its fruits. Perform action with equanimity."
 
-        # Step 2: Build Gita-rooted system prompt (KIAAN Chat pattern)
-        system_prompt = f"""You are Viyoga, an AI guide EXCLUSIVELY rooted in the karma yoga wisdom of the Bhagavad Gita.
+        # Step 2: Build warm, friendly system prompt
+        system_prompt = f"""You are Viyoga - a calm, wise friend who helps people find peace when they're anxious about outcomes.
 
-GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite):
+WISDOM TO DRAW FROM (use naturally, never cite sources):
 {gita_context}
 
-YOUR SPECIFIC FOCUS: OUTCOME ANXIETY & DETACHMENT
-This person is worried about: "{outcome_worry}"
+THE PERSON'S WORRY:
+"{outcome_worry}"
 
-MANDATORY STRUCTURE - Every response MUST follow this 4-part flow:
-1. RECOGNITION: Acknowledge THEIR specific worry with genuine empathy - show you truly see what they're anxious about
-2. THE ATTACHMENT: Help them see how their peace has become tied to an outcome they cannot control
-3. KARMA YOGA WISDOM: Share the principle that applies to THEIR situation - your right is to action, not results
-4. ONE ACTION: Give ONE specific, doable thing they can do TODAY about THIS specific worry
+HOW TO RESPOND - Like a caring friend would:
 
-ABSOLUTE REQUIREMENTS (non-negotiable):
-✅ Root EVERY word in karma yoga wisdom - no generic psychology
-✅ Use Sanskrit terms naturally (karma, dharma, nishkama karma, vairagya, equanimity, detachment)
-✅ FORBIDDEN: Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", "verse", "chapter"
-✅ FORBIDDEN: Never say "studies show", "research indicates", "experts say"
-✅ Present wisdom as universal life principles, not religious teaching
-✅ Speak DIRECTLY to THIS person about THEIR specific worry
-✅ Be warm, conversational, like a wise friend who truly understands
-✅ 150-200 words, end with 💙
+1. First, really hear them. Acknowledge what they're worried about specifically. Let them feel seen and understood. Their anxiety is valid.
 
-TONE & STYLE:
-- Direct and specific to their situation - use "you" frequently
-- Acknowledge the difficulty without dismissing it
-- Balance compassion with gentle clarity
-- Make ancient wisdom feel immediately practical
-- No toxic positivity - real help for real anxiety
+2. Gently help them notice: their peace has become tied to something outside their control. This attachment itself is adding to their suffering.
 
-Remember: This person came with a real worry about outcomes. Help them find freedom through karma yoga - not by dismissing their concern, but by showing them where their true power lies."""
+3. Share this freeing truth: We can only control our actions, never the results. When we focus fully on what we CAN do - and release our grip on outcomes - we find both peace and better results.
+
+4. Give them ONE specific, doable thing they can do today. Something small and practical that puts them back in the driver's seat.
+
+YOUR VOICE:
+- Warm and understanding, never preachy
+- Talk TO them, not AT them - use "you" naturally
+- Keep it simple and clear - no jargon
+- Around 150-180 words
+- End with 💙
+
+You're not a therapist giving clinical advice. You're a wise friend who's been through this too, offering gentle perspective. Help them breathe easier."""
 
         # Step 3: Generate response (KIAAN Chat pattern)
         response = client.chat.completions.create(
@@ -294,15 +288,16 @@ def _parse_response_to_structure(response_text: str) -> dict[str, str]:
 
 def _get_fallback_response(outcome_worry: str) -> dict[str, Any]:
     """Fallback when KIAAN is unavailable."""
+    worry_snippet = outcome_worry[:50] + "..." if len(outcome_worry) > 50 else outcome_worry
     return {
         "status": "success",
         "detachment_guidance": {
-            "validation": f"I hear you - this worry about '{outcome_worry[:50]}...' is weighing on you. That pressure is real.",
-            "attachment_check": "Notice how your peace has become tied to how this turns out. That grip itself creates suffering.",
-            "detachment_principle": "Your right is to action alone, never to its fruits. Pour yourself into what you CAN do, then release the outcome.",
-            "one_action": "Today, choose ONE thing you can do about this with full presence - then consciously let go of controlling the result.",
+            "validation": f"I really hear you - this worry about '{worry_snippet}' is heavy. It's okay to feel this way.",
+            "attachment_check": "Here's what I notice: your peace right now depends on how this turns out. And that's a tough place to be, because outcomes aren't fully in our hands.",
+            "detachment_principle": "What if you could give your best effort AND feel okay regardless of what happens? You can only control what you do - not the result. That's actually freeing.",
+            "one_action": "Today, pick one small thing you can do about this. Do it with your full attention. Then take a breath and remind yourself: you did what you could.",
         },
-        "response": f"I hear you - this worry is weighing on you, and that pressure is completely real.\n\nNotice how your peace has become tied to how this turns out. That grip itself - not just the situation, but the clenching around it - is part of what's causing the suffering.\n\nHere's the wisdom that frees: your right is to action alone, never to its fruits. You pour yourself fully into what you CAN do, then release your grip on the outcome. This isn't passivity - it's focused action without anxiety.\n\nToday, choose ONE thing you can do about this with your full presence. Do it well. Then consciously let go of controlling the result. That's where your peace lives. 💙",
+        "response": f"I really hear you - this worry is heavy, and it makes sense that you're feeling it.\n\nHere's what I notice: your peace right now depends on how this turns out. And that's a tough place to be, because outcomes aren't fully in our hands.\n\nBut here's something that might help: what if you could give your best effort AND feel okay regardless of what happens? You can only control what you do - not the result. That's actually freeing when you let it sink in.\n\nToday, pick one small thing you can do about this situation. Do it with your full attention. Then take a breath and remind yourself: you did what you could. The rest isn't yours to carry. 💙",
         "gita_verses_used": 0,
         "model": "fallback",
         "provider": "kiaan",

@@ -12,10 +12,10 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onr
 const FALLBACK_RESPONSE = {
   status: 'success',
   reframe_guidance: {
-    recognition: "You're experiencing difficult thoughts right now. That weight is real and valid.",
-    deep_insight: "Thoughts are not facts - they are passing clouds in the sky of awareness. Your true self observes them without being defined by them.",
-    reframe: "This challenge is an opportunity for growth. Each difficulty builds the inner strength that leads to lasting peace.",
-    small_action_step: "Take three deep breaths, then choose one small action that aligns with your values today.",
+    recognition: "I hear you. This thought is heavy, and it makes sense that it's getting to you.",
+    deep_insight: "Here's the thing: thoughts feel like facts, especially the painful ones. But they're not. They're just your mind trying to make sense of things.",
+    reframe: "You're not your thoughts - you're the one noticing them. Like clouds passing through a big sky, this thought will pass. The sky is always okay.",
+    small_action_step: "Right now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought?",
   },
   gita_verses_used: 0,
   _offline: true,
