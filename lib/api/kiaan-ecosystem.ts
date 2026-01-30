@@ -77,6 +77,19 @@ export const KIAAN_TOOLS: KiaanTool[] = [
     enabled: true
   },
   {
+    id: 'relationship-compass',
+    name: 'Relationship Compass',
+    description: 'Navigate relationship conflicts with wisdom',
+    category: 'relational',
+    endpoint: '/api/relationship-compass/guide',
+    route: '/tools/relationship-compass',
+    icon: '🧭',
+    usesGitaVerses: true,
+    usesValidation: true,
+    color: '#F43F5E',
+    enabled: true
+  },
+  {
     id: 'karmic-tree',
     name: 'Karmic Tree',
     description: 'Visualize your growth journey',

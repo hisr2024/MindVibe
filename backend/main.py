@@ -677,7 +677,7 @@ print("\n[Ardha] Attempting to import Ardha router...")
 try:
     from backend.routes.ardha import router as ardha_router
     app.include_router(ardha_router)
-    print("✅ [SUCCESS] Ardha router loaded with Gita integration")
+    print("✅ [SUCCESS] Ardha router loaded with KIAAN integration")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Ardha router: {e}")
 
@@ -686,9 +686,18 @@ print("\n[Viyoga] Attempting to import Viyoga router...")
 try:
     from backend.routes.viyoga import router as viyoga_router
     app.include_router(viyoga_router)
-    print("✅ [SUCCESS] Viyoga router loaded with Gita integration")
+    print("✅ [SUCCESS] Viyoga router loaded with KIAAN integration")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
+
+# Load Relationship Compass router
+print("\n[Relationship Compass] Attempting to import Relationship Compass router...")
+try:
+    from backend.routes.relationship_compass import router as relationship_compass_router
+    app.include_router(relationship_compass_router)
+    print("✅ [SUCCESS] Relationship Compass router loaded with KIAAN integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Relationship Compass router: {e}")
 
 # Load Daily Analysis router
 print("\n[Daily Analysis] Attempting to import Daily Analysis router...")

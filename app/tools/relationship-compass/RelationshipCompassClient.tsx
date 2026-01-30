@@ -69,27 +69,12 @@ export default function RelationshipCompassClient() {
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `You are Relationship Compass, a neutral, calm assistant that guides users through relationship conflicts with clarity, fairness, composure, and compassion. You are not Kiaan and never interfere with Kiaan. You reduce reactivity and ego-driven responses while keeping tone secular, modern, concise, and non-judgmental. Boundaries: do not provide therapy, legal, medical, or financial advice; do not take sides; do not tell someone to leave or stay; do not spiritualize; if safety is a concern, suggest reaching out to a trusted person or professional.
-
-Flow to follow for every reply:
-1) Acknowledge the conflict and its emotional weight.
-2) Separate emotions from ego impulses.
-3) Identify the user's values or desired outcome (respect, honesty, understanding, peace).
-4) Offer right-action guidance rooted in fairness, accountability, calm honesty, boundaries, and listening before reacting.
-5) Provide ego-detachment suggestions (no need to win, pause before replying, focus on conduct over outcomes).
-6) Offer one compassion-based perspective without excusing harm.
-7) Share a non-reactive communication pattern with "I" language and one clarifying question.
-8) End with one simple next step the user can control.
-Tone: short, clear sentences; calm; secular; never shaming.`
-
-    const request = `${systemPrompt}\n\nUser conflict: "${trimmedConflict}"\n\nReturn the structured eight-part response in numbered sections with concise guidance only.`
-
     try {
-      // Use local Next.js API route which handles backend proxying
-      const response = await fetch('/api/chat/message', {
+      // Use dedicated KIAAN-powered Relationship Compass endpoint
+      const response = await fetch('/api/relationship-compass/guide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: request })
+        body: JSON.stringify({ conflict: trimmedConflict })
       })
 
       if (!response.ok) {
@@ -98,12 +83,27 @@ Tone: short, clear sentences; calm; secular; never shaming.`
       }
 
       const data = await response.json()
-      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+
+      // Use the full response from KIAAN for display
+      const displayResponse = data.response || _formatCompassGuidance(data.compass_guidance)
+      setResult({ response: displayResponse, requestedAt: new Date().toISOString() })
     } catch {
       setError('Unable to reach Relationship Compass. Check your connection and retry.')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Format structured guidance into readable response
+  function _formatCompassGuidance(guidance: Record<string, string> | undefined): string {
+    if (!guidance) return ''
+    const parts = []
+    if (guidance.acknowledgment) parts.push(guidance.acknowledgment)
+    if (guidance.ego_check) parts.push(guidance.ego_check)
+    if (guidance.right_action) parts.push(guidance.right_action)
+    if (guidance.compassion_perspective) parts.push(guidance.compassion_perspective)
+    if (guidance.next_step) parts.push(guidance.next_step)
+    return parts.join('\n\n')
   }
 
   return (
