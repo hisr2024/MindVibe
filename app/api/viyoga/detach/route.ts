@@ -12,10 +12,10 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onr
 const FALLBACK_RESPONSE = {
   status: 'success',
   detachment_guidance: {
-    validation: "Your concern about outcomes is understandable. The weight of expectations can feel heavy.",
-    attachment_check: "Notice how your mind is focused on results rather than the process of action itself.",
-    detachment_principle: "Your responsibility is to act with full effort and intention, then release attachment to results. What is meant to come will come through right action.",
-    one_action: "Take one small step today with complete focus, letting go of how it will be received.",
+    validation: "I hear you - this worry is heavy, and it makes total sense that you're feeling it.",
+    attachment_check: "Here's what I notice: your peace right now depends on how this turns out. That's a tough place to be.",
+    detachment_principle: "What if you could give your best effort AND feel okay no matter what happens? You can only control what you do - not the result. That's actually freeing.",
+    one_action: "Today, pick one small thing you can do about this. Do it with your full attention. Then take a breath and let go of the rest.",
   },
   gita_verses_used: 0,
   _offline: true,

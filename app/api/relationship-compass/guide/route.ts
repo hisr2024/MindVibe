@@ -12,16 +12,13 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onr
 const FALLBACK_RESPONSE = {
   status: 'success',
   compass_guidance: {
-    acknowledgment: "I sense the weight of this relationship challenge you're carrying.",
-    ego_check: "In moments of conflict, the ego seeks to win. But true strength lies in understanding.",
-    values_identification: "Consider what matters most to you: respect, honesty, peace, connection.",
-    right_action: "Right action (dharma) in relationships means being honest while remaining kind.",
-    detachment_suggestion: "Release the need to be right. Focus on being present and compassionate.",
-    compassion_perspective: "The other person is also struggling in their own way. See their humanity.",
-    communication_pattern: "Try: 'I feel... when... because... I need...' This invites dialogue, not defense.",
-    next_step: "Before responding, take three breaths and ask yourself: 'What would love do here?'",
+    acknowledgment: "I hear you - this relationship struggle is weighing on you. That pain is real.",
+    underneath: "Here's something about conflict: underneath, there's usually an unmet need - to feel heard, respected, or understood. What do you really need here?",
+    clarity: "Doing the right thing doesn't mean winning. It means being honest AND kind - even when that's hard.",
+    path_forward: "Try this: 'I feel [emotion] when [situation] because [what I need]. What I'm hoping for is [request].' It opens doors instead of closing them.",
+    reminder: "When emotions run high, remember: the goal isn't to be right. It's to understand and be understood.",
   },
-  response: "Take a gentle breath with me... I hear the weight of this relationship challenge you're carrying. In moments of conflict, our ego often wants to win, to be right. But true strength in relationships comes not from winning, but from understanding.\n\nConsider what truly matters to you here: respect, honesty, peace, or connection? Right action (dharma) in relationships means having the courage to be honest while remaining kind.\n\nRelease the need to be right. The other person is also struggling in their own way - can you see the shared humanity beneath the conflict?\n\nBefore responding, take three breaths and ask yourself: 'What would love do here?' 💙",
+  response: "I hear you. This relationship struggle is weighing on you, and that pain is real.\n\nHere's something about conflict: underneath the arguments and hurt feelings, there's usually an unmet need - to feel heard, respected, or truly understood. What do you really need here?\n\nDoing the right thing doesn't mean winning. It means being honest AND kind - even when that's really hard.\n\nWhen you're ready, try this: 'I feel [your emotion] when [the situation] because [what you need]. What I'm hoping for is [your request].' It opens doors instead of closing them.\n\nAnd when emotions run high, remember: the goal isn't to be right. It's to understand and be understood. That's where peace lives. 💙",
   gita_verses_used: 0,
   _offline: true,
 }
