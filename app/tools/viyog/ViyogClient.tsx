@@ -69,8 +69,8 @@ export default function ViyogClient() {
     setError(null)
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/viyoga/detach`, {
+      // Use local API route to proxy requests to backend (avoids CORS issues)
+      const response = await fetch('/api/viyoga/detach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ outcome_worry: trimmedConcern })
