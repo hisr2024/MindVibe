@@ -14,17 +14,24 @@ CREATE INDEX IF NOT EXISTS idx_journey_templates_free ON journey_templates(is_fr
 
 -- Mark the first featured journey as free (Transform Anger / Krodha)
 -- This allows users to test the journey feature without subscribing
+-- Note: PostgreSQL doesn't support LIMIT in UPDATE, so we use a subquery
 UPDATE journey_templates
 SET is_free = true
-WHERE slug LIKE '%anger%' OR slug LIKE '%krodha%'
-LIMIT 1;
+WHERE id = (
+    SELECT id FROM journey_templates
+    WHERE slug LIKE '%anger%' OR slug LIKE '%krodha%'
+    LIMIT 1
+);
 
 -- If no anger/krodha journey exists, mark any first featured journey as free
 UPDATE journey_templates
 SET is_free = true
-WHERE is_featured = true
-  AND NOT EXISTS (SELECT 1 FROM journey_templates WHERE is_free = true)
-LIMIT 1;
+WHERE id = (
+    SELECT id FROM journey_templates
+    WHERE is_featured = true
+      AND NOT EXISTS (SELECT 1 FROM journey_templates WHERE is_free = true)
+    LIMIT 1
+);
 
 -- Add comment for documentation
 COMMENT ON COLUMN journey_templates.is_free IS 'Whether this journey is free for all users (one should be marked free for testing)';
