@@ -315,7 +315,33 @@ async def startup():
         except Exception as seed_error:
             print(f"⚠️ Subscription plan seeding had issues: {seed_error}")
             # Don't fail startup - but log the warning
-        
+
+        # Step 5: Initialize KIAAN Learning System (v4.1 Autonomous Gita Wisdom)
+        print("\n🕉️ Initializing KIAAN Learning System...")
+        try:
+            from backend.services.kiaan_learning_engine import (
+                get_kiaan_learning_engine,
+                initialize_learning_system,
+            )
+            learning_engine = get_kiaan_learning_engine()
+
+            # Start the automatic scheduler
+            learning_engine.start_scheduler()
+
+            # Run initial acquisition if knowledge base is empty
+            import asyncio
+            asyncio.create_task(learning_engine.run_initial_acquisition())
+
+            stats = learning_engine.get_statistics()
+            print(f"✅ KIAAN Learning System ready")
+            print(f"   • Knowledge base: {stats.get('validated_items', 0)} validated wisdom items")
+            print(f"   • Auto-scheduler: Running (every 6 hours)")
+            print(f"   • Sources: YouTube, Audio Platforms, Web")
+            print(f"   • Compliance: Strict Bhagavad Gita only")
+        except Exception as learning_error:
+            print(f"⚠️ KIAAN Learning System initialization had issues: {learning_error}")
+            # Don't fail startup - learning is supplementary
+
     except Exception as exc:
         failed_meta = migrations_module.LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
@@ -651,7 +677,7 @@ print("\n[Ardha] Attempting to import Ardha router...")
 try:
     from backend.routes.ardha import router as ardha_router
     app.include_router(ardha_router)
-    print("✅ [SUCCESS] Ardha router loaded with Gita integration")
+    print("✅ [SUCCESS] Ardha router loaded with KIAAN integration")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Ardha router: {e}")
 
@@ -660,9 +686,18 @@ print("\n[Viyoga] Attempting to import Viyoga router...")
 try:
     from backend.routes.viyoga import router as viyoga_router
     app.include_router(viyoga_router)
-    print("✅ [SUCCESS] Viyoga router loaded with Gita integration")
+    print("✅ [SUCCESS] Viyoga router loaded with KIAAN integration")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
+
+# Load Relationship Compass router
+print("\n[Relationship Compass] Attempting to import Relationship Compass router...")
+try:
+    from backend.routes.relationship_compass import router as relationship_compass_router
+    app.include_router(relationship_compass_router)
+    print("✅ [SUCCESS] Relationship Compass router loaded with KIAAN integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Relationship Compass router: {e}")
 
 # Load Daily Analysis router
 print("\n[Daily Analysis] Attempting to import Daily Analysis router...")
@@ -695,6 +730,22 @@ try:
     print("   • GET    /api/kiaan/quantum-dive/history - Analysis history")
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Quantum Dive router: {e}")
+
+# Load KIAAN Learning router (Autonomous Gita Wisdom Acquisition v4.1)
+print("\n[KIAAN Learning] Attempting to import KIAAN Learning router...")
+try:
+    from backend.routes.kiaan_learning import router as kiaan_learning_router
+    app.include_router(kiaan_learning_router)
+    print("✅ [SUCCESS] KIAAN Learning router loaded (Autonomous Gita Wisdom Acquisition)")
+    print("   • GET    /api/kiaan/learning/status - Learning system status")
+    print("   • POST   /api/kiaan/learning/acquire - Trigger content acquisition")
+    print("   • POST   /api/kiaan/learning/scheduler/start - Start auto-scheduler")
+    print("   • POST   /api/kiaan/learning/scheduler/stop - Stop auto-scheduler")
+    print("   • POST   /api/kiaan/learning/wisdom/add - Add manual wisdom")
+    print("   • GET    /api/kiaan/learning/wisdom/search - Search knowledge base")
+    print("   • GET    /api/kiaan/learning/health - Health check")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load KIAAN Learning router: {e}")
 
 # Load Weekly Assessment router
 print("\n[Weekly Assessment] Attempting to import Weekly Assessment router...")

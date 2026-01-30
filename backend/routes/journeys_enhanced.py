@@ -18,7 +18,7 @@ Provides endpoints for the multi-journey Wisdom Journey system:
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -43,6 +43,7 @@ from backend.services.subscription_service import (
     get_user_tier,
     get_or_create_free_subscription,
 )
+from backend.models import UserJourney
 
 logger = logging.getLogger(__name__)
 
@@ -240,106 +241,64 @@ async def get_journey_access(
         raise
     except Exception as e:
         logger.error(f"Error checking journey access: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to check journey access")
+        # Return a graceful fallback response instead of 500 error
+        # This allows users to still see and start free journeys even if there are DB issues
+        return JourneyAccessResponse(
+            has_access=True,  # Allow free journey access
+            tier="free",
+            active_journeys=0,
+            journey_limit=1,
+            remaining=1,
+            is_unlimited=False,
+            can_start_more=True,
+            is_trial=True,
+            trial_days_limit=3,
+            upgrade_url="/pricing",
+            upgrade_cta="Upgrade for Full Access",
+        )
 
 
 # =============================================================================
-# DEMO JOURNEY TEMPLATES (shown when database not seeded)
+# DEMO JOURNEY TEMPLATES (loaded from shared JSON file)
 # =============================================================================
 
-DEMO_JOURNEY_TEMPLATES = [
-    {
-        "id": "demo-krodha-001",
-        "slug": "transform-anger-demo",
-        "title": "Transform Anger (Krodha)",
-        "description": "A 14-day journey to transform destructive anger into constructive energy through Gita wisdom. Learn to recognize triggers, practice patience, and cultivate inner peace.",
-        "primary_enemy_tags": ["krodha"],
-        "duration_days": 14,
-        "difficulty": 2,
-        "is_featured": True,
-        "is_free": True,  # FREE for all users to test the journey feature
-        "icon_name": "flame",
-        "color_theme": "red",
-    },
-    {
-        "id": "demo-kama-001",
-        "slug": "master-desire-demo",
-        "title": "Mastering Desire (Kama)",
-        "description": "A 21-day journey to understand and master desires. Transform cravings into purposeful aspirations aligned with your dharma.",
-        "primary_enemy_tags": ["kama"],
-        "duration_days": 21,
-        "difficulty": 3,
-        "is_featured": True,
-        "is_free": False,
-        "icon_name": "heart",
-        "color_theme": "pink",
-    },
-    {
-        "id": "demo-lobha-001",
-        "slug": "overcome-greed-demo",
-        "title": "Contentment Over Greed (Lobha)",
-        "description": "A 14-day journey to cultivate santosha (contentment) and release the grip of greed. Find abundance in simplicity.",
-        "primary_enemy_tags": ["lobha"],
-        "duration_days": 14,
-        "difficulty": 2,
-        "is_featured": False,
-        "is_free": False,
-        "icon_name": "coins",
-        "color_theme": "amber",
-    },
-    {
-        "id": "demo-moha-001",
-        "slug": "clarity-attachment-demo",
-        "title": "Clarity Over Attachment (Moha)",
-        "description": "A 21-day journey to see through delusion and attachment. Develop viveka (discrimination) and find clarity.",
-        "primary_enemy_tags": ["moha"],
-        "duration_days": 21,
-        "difficulty": 3,
-        "is_featured": False,
-        "is_free": False,
-        "icon_name": "cloud",
-        "color_theme": "purple",
-    },
-    {
-        "id": "demo-mada-001",
-        "slug": "humility-pride-demo",
-        "title": "Humility Over Ego (Mada)",
-        "description": "A 14-day journey to dissolve ego and cultivate true humility. Recognize the Self beyond the small self.",
-        "primary_enemy_tags": ["mada"],
-        "duration_days": 14,
-        "difficulty": 2,
-        "is_featured": False,
-        "is_free": False,
-        "icon_name": "crown",
-        "color_theme": "orange",
-    },
-    {
-        "id": "demo-matsarya-001",
-        "slug": "joy-envy-demo",
-        "title": "Joy Over Envy (Matsarya)",
-        "description": "A 14-day journey to transform envy into mudita (sympathetic joy). Celebrate others' success as your own.",
-        "primary_enemy_tags": ["matsarya"],
-        "duration_days": 14,
-        "difficulty": 2,
-        "is_featured": False,
-        "is_free": False,
-        "icon_name": "eye",
-        "color_theme": "emerald",
-    },
-    {
-        "id": "demo-complete-001",
-        "slug": "complete-transformation-demo",
-        "title": "Complete Inner Transformation",
-        "description": "A comprehensive 30-day journey addressing all six inner enemies. The ultimate path to self-mastery and liberation.",
-        "primary_enemy_tags": ["kama", "krodha", "lobha", "moha", "mada", "matsarya"],
-        "duration_days": 30,
-        "difficulty": 4,
-        "is_featured": True,
-        "is_free": False,
-        "icon_name": "sparkles",
-        "color_theme": "indigo",
-    },
-]
+def _load_demo_templates() -> list[dict]:
+    """
+    Load demo journey templates from shared JSON file.
+
+    Single source of truth: data/journey_templates.json
+    This ensures frontend and backend use identical fallback templates.
+    """
+    import json
+    from pathlib import Path
+
+    templates_path = Path(__file__).parent.parent.parent / "data" / "journey_templates.json"
+
+    try:
+        with open(templates_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("templates", [])
+    except Exception as e:
+        logger.warning(f"Failed to load journey templates from {templates_path}: {e}")
+        # Minimal fallback if file is missing
+        return [
+            {
+                "id": "demo-krodha-001",
+                "slug": "transform-anger-demo",
+                "title": "Transform Anger (Krodha)",
+                "description": "A 14-day journey to transform destructive anger into constructive energy through Gita wisdom.",
+                "primary_enemy_tags": ["krodha"],
+                "duration_days": 14,
+                "difficulty": 2,
+                "is_featured": True,
+                "icon_name": "flame",
+                "color_theme": "red",
+            }
+        ]
+
+
+# Load templates at module initialization
+DEMO_JOURNEY_TEMPLATES = _load_demo_templates()
 
 
 # =============================================================================
@@ -664,7 +623,6 @@ async def get_or_generate_today_step(
 
     try:
         # Verify ownership
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -698,8 +656,8 @@ async def get_or_generate_today_step(
 async def complete_step(
     request: Request,
     user_journey_id: str,
-    day_index: int,
-    body: CompleteStepRequest,
+    day_index: int = Path(..., ge=1, description="Day index (1-indexed, must be positive)"),
+    body: CompleteStepRequest = None,
     db: AsyncSession = Depends(get_db),
     access: tuple = Depends(require_wisdom_journeys),
 ) -> dict[str, Any]:
@@ -715,7 +673,6 @@ async def complete_step(
 
     try:
         # Verify ownership
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -764,7 +721,6 @@ async def pause_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -799,7 +755,6 @@ async def resume_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -836,7 +791,6 @@ async def abandon_journey(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:
@@ -876,7 +830,6 @@ async def get_journey_history(
     engine = get_journey_engine()
 
     try:
-        from backend.models import UserJourney
         journey = await db.get(UserJourney, user_journey_id)
 
         if not journey:

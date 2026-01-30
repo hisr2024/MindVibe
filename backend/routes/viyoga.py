@@ -1,202 +1,70 @@
-"""Viyoga Detachment Coach with complete Bhagavad Gita wisdom integration.
+"""Viyoga Detachment Coach - KIAAN AI Ecosystem Integration.
 
-This router provides outcome anxiety reduction assistance powered by all 700 verses
-of the Bhagavad Gita, focusing on karma yoga and detachment principles.
+This router provides outcome anxiety reduction assistance powered by KIAAN Core
+and the complete 700-verse Bhagavad Gita wisdom database, focusing on karma yoga.
+
+Viyoga acts as a wise friend who truly understands your specific situation,
+helping shift from result-focused anxiety to grounded, present-moment action.
 """
 
 from __future__ import annotations
 
-import json
 import logging
-import os
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from openai import (
-    APIError,
-    AuthenticationError,
-    BadRequestError,
-    OpenAI,
-    RateLimitError,
-)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.services.wisdom_kb import WisdomKnowledgeBase
+from backend.services.kiaan_core import kiaan_core
 
 logger = logging.getLogger(__name__)
 
-api_key = os.getenv("OPENAI_API_KEY", "").strip()
-model_name = os.getenv("GUIDANCE_MODEL", "gpt-4o-mini")
-client = OpenAI(api_key=api_key) if api_key else None
-
-# Default Gita principles when verse search fails
-DEFAULT_GITA_PRINCIPLES = "Apply universal principles of nishkama karma (desireless action), vairagya (detachment), and samatva (equanimity in success and failure)."
-
 router = APIRouter(prefix="/api/viyoga", tags=["viyoga"])
 
-# Verse scoring constants for prioritization
-PRIORITY_VERSE_SCORE = 0.95  # For verse 2.47 (most famous karma yoga verse)
-KEY_VERSE_SCORE = 0.9        # For other important karma yoga verses
-THEME_VERSE_SCORE = 0.75     # For thematically relevant verses
 
+def _build_viyoga_prompt(outcome_worry: str, gita_wisdom: str) -> str:
+    """Build a detailed, personalized Viyoga prompt that feels like a wise friend.
 
-async def get_detachment_verses(db: AsyncSession, concern: str, limit: int = 5) -> list[dict[str, Any]]:
+    This prompt ensures KIAAN responds with deep understanding of the specific
+    situation, not generic advice.
     """
-    Get karma yoga verses for outcome detachment coaching.
-    
-    Focuses on verses about nishkama karma (desireless action), detachment from results,
-    and equanimity in success and failure.
-    
-    Key verses:
-    - 2.47: Nishkama karma - You have right to action, not fruits (MOST FAMOUS)
-    - 2.48: Yoga is skill in action, equanimity
-    - 3.19: Perform duty without attachment to achieve the highest
-    - 4.20: Free from attachment to results, always content
-    - 5.10: Acts without attachment, untouched by sin
-    - 18.66: Surrender all dharmas to me, I will free you
-    
-    Args:
-        db: Database session
-        concern: The outcome worry or concern
-        limit: Maximum number of verses to return (default 5)
-        
-    Returns:
-        List of relevant verse results with scores
-    """
-    from backend.services.gita_service import GitaService
-    
-    kb = WisdomKnowledgeBase()
-    
-    # Priority 1: Get key karma yoga verses
-    key_karma_verses = [
-        (2, 47),   # THE most famous verse on nishkama karma
-        (2, 48),   # Equanimity in success/failure
-        (3, 19),   # Perform duty without attachment
-        (4, 20),   # Free from attachment to results
-        (5, 10),   # Acts without attachment
-        (18, 66),  # Ultimate surrender
-        (2, 38),   # Treating pleasure and pain equally
-        (2, 50),   # Yoga is skill in actions
-        (3, 30),   # Dedicating all actions
-        (6, 1),    # True renunciate performs duty
-    ]
-    
-    key_verse_results = []
-    for chapter, verse_num in key_karma_verses:
-        try:
-            verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
-            if verse:
-                # Higher score for the most important verse (2.47)
-                score = PRIORITY_VERSE_SCORE if verse_num == 47 and chapter == 2 else KEY_VERSE_SCORE
-                key_verse_results.append({
-                    "verse": verse,
-                    "score": score,
-                    "sanitized_text": kb.sanitize_text(verse.english)
-                })
-        except Exception as e:
-            logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
-    
-    # Priority 2: Search by theme for additional context
-    theme_search_results = []
-    try:
-        # Search for karma yoga and detachment themes
-        search_query = f"{concern} karma action detachment duty equanimity results"
-        theme_search_results = await kb.search_relevant_verses_full_db(
-            db=db,
-            query=search_query,
-            theme="selfless_action",
-            limit=3
-        )
-    except Exception as e:
-        logger.debug(f"Theme search failed: {e}")
-    
-    # Priority 3: Search by mental health application
-    application_search_results = []
-    try:
-        # Search for outcome anxiety and perfectionism tags
-        for app in ["outcome_anxiety", "perfectionism", "anxiety_management"]:
-            try:
-                results = await GitaService.search_by_mental_health_application(db, app, limit=2)
-                for verse in results:
-                    application_search_results.append({
-                        "verse": verse,
-                        "score": THEME_VERSE_SCORE,
-                        "sanitized_text": kb.sanitize_text(verse.english)
-                    })
-            except Exception as e:
-                logger.debug(f"Application search for {app} failed: {e}")
-    except Exception as e:
-        logger.debug(f"Application search failed: {e}")
-    
-    # Combine all sources, prioritizing key karma yoga verses
-    all_results = key_verse_results[:6] + theme_search_results + application_search_results
-    
-    # Remove duplicates (by verse_id)
-    seen_ids = set()
-    unique_results = []
-    for result in all_results:
-        verse = result.get("verse")
-        if verse:
-            verse_id = f"{verse.chapter}.{verse.verse}"
-            if verse_id not in seen_ids:
-                seen_ids.add(verse_id)
-                unique_results.append(result)
-    
-    # Sort by score and return top N
-    unique_results.sort(key=lambda x: x.get("score", 0), reverse=True)
-    return unique_results[:limit]
+    return f"""You are Viyoga, a wise and compassionate friend who helps people release outcome anxiety.
 
+IMPORTANT: You are NOT giving generic advice. You are speaking DIRECTLY to THIS person about THEIR specific worry:
+"{outcome_worry}"
 
-async def _generate_response(
-    *,
-    system_prompt: str,
-    user_payload: dict[str, Any],
-    expect_json: bool,
-    temperature: float = 0.4,
-    max_tokens: int = 500,
-) -> tuple[dict[str, Any] | None, str | None]:
-    """Generate OpenAI response with error handling."""
-    if not client:
-        logger.error("Viyoga engine unavailable: missing OpenAI API key")
-        raise HTTPException(status_code=503, detail="Viyoga engine is not configured")
+YOUR APPROACH:
+1. First, truly SEE their specific situation - what exactly are they worried about?
+2. Acknowledge the weight they're carrying with genuine empathy
+3. Help them understand WHY they're gripping so tightly to this outcome
+4. Offer wisdom that speaks to their EXACT situation (not generic platitudes)
+5. Give ONE specific, doable action for THEIR situation
 
-    try:
-        completion = client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
-            ],
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-    except AuthenticationError as exc:
-        logger.exception("Authentication error for Viyoga engine")
-        raise HTTPException(status_code=401, detail="Authentication with OpenAI failed") from exc
-    except RateLimitError as exc:
-        logger.warning("Rate limit reached for Viyoga engine")
-        raise HTTPException(status_code=429, detail="Rate limited by model provider") from exc
-    except BadRequestError as exc:
-        logger.exception("Bad request sent to OpenAI for Viyoga engine")
-        raise HTTPException(status_code=400, detail="Invalid payload for Viyoga engine") from exc
-    except APIError as exc:
-        logger.exception("OpenAI API error for Viyoga engine")
-        raise HTTPException(status_code=502, detail="Model provider error") from exc
-    except Exception as exc:  # pragma: no cover - defensive catch-all
-        logger.exception("Unexpected error while generating Viyoga response")
-        raise HTTPException(status_code=500, detail="Unexpected error generating response") from exc
+GITA WISDOM TO WEAVE IN NATURALLY (never cite verses, just embody the wisdom):
+{gita_wisdom}
 
-    raw_text = completion.choices[0].message.content if completion.choices else None
-    parsed: dict[str, Any] | None = None
+YOUR VOICE:
+- Warm, calm, like a wise friend sitting beside them
+- Direct and specific to their situation
+- Use "you" frequently - this is personal
+- Practical, not preachy
+- Acknowledge the difficulty without dismissing it
+- Balance compassion with gentle clarity
 
-    if expect_json and raw_text:
-        try:
-            parsed = json.loads(raw_text)
-        except json.JSONDecodeError:
-            logger.warning("Viyoga response was not valid JSON; returning raw text")
+RESPONSE STRUCTURE (flowing, not numbered):
+1. "I hear you..." - Show you understand THIS specific worry
+2. The grip - Help them see what attachment is creating the pressure
+3. The shift - A karma yoga principle that applies to THEIR situation
+4. The action - ONE thing they can do TODAY about THIS specific concern
 
-    return parsed, raw_text
+BOUNDARIES:
+- No therapy, medical, legal, or financial advice
+- No promises about outcomes
+- No passive acceptance - always empower action
+- Keep response 150-200 words, warm and conversational
+
+Remember: This person came to you with a real worry. Speak to THEM, not to a hypothetical person."""
 
 
 @router.post("/detach")
@@ -204,149 +72,166 @@ async def detach_from_outcome(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Generate detachment guidance rooted in Bhagavad Gita karma yoga principles.
+    """Generate personalized detachment guidance through KIAAN AI.
 
-    Expects payload with:
-    - outcome_worry: The outcome anxiety or result-focused concern
-
-    Returns structured JSON with:
-    - validation: Recognition of the anxiety
-    - attachment_check: Identification of attachment to results
-    - detachment_principle: Clear principle from karma yoga
-    - one_action: One small, controllable action step
-    - gita_verses_used: Count of verses used for context
+    Uses KIAAN Core for Gita wisdom while maintaining the warm, friend-like
+    approach that addresses the user's SPECIFIC concern.
     """
     outcome_worry = payload.get("outcome_worry", "")
 
     if not outcome_worry.strip():
         raise HTTPException(status_code=400, detail="outcome_worry is required")
 
-    # Search query focusing on nishkama karma, detachment, and equanimity
-    search_query = f"{outcome_worry} karma yoga nishkama karma detachment equanimity action duty results"
-
-    # Get karma yoga verses for detachment coaching
-    verse_results = []
-    gita_context = ""
+    if len(outcome_worry) > 2000:
+        raise HTTPException(status_code=400, detail="Input too long (max 2000 characters)")
 
     try:
-        # Use dedicated function for karma yoga verses
-        verse_results = await get_detachment_verses(db, outcome_worry, limit=5)
+        # Get relevant Gita wisdom from KIAAN's knowledge base
+        # We use the viyoga_detachment context to get karma yoga verses
+        gita_wisdom = await _get_gita_wisdom_for_detachment(db, outcome_worry)
 
-        # Build Gita context for the prompt (internal use only)
-        if verse_results:
-            for v in verse_results:
-                verse_obj = v.get("verse")
-                if verse_obj:
-                    # Handle both verse_number (WisdomVerse, _GitaVerseWrapper) and verse (GitaVerse) attributes
-                    # This fallback pattern matches the existing pattern in guidance.py for compatibility
-                    verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
-                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
-                    # Use principle if available, otherwise use context
-                    # This fallback ensures we get the best available explanatory text
-                    principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
-                    if principle:
-                        gita_context += f"Principle: {principle}\n"
+        # Build the personalized prompt
+        full_prompt = _build_viyoga_prompt(outcome_worry, gita_wisdom)
 
-        logger.info(f"Viyoga - Found {len(verse_results)} karma yoga verses for outcome detachment")
-        logger.debug(f"Gita context built: {gita_context[:200]}...")
-    except Exception as e:
-        logger.error(f"Error fetching Gita verses for Viyoga: {e}")
-        gita_context = ""
+        # Use KIAAN Core with our detailed prompt
+        kiaan_response = await kiaan_core.get_kiaan_response(
+            message=full_prompt,
+            user_id=None,
+            db=db,
+            context="viyoga_detachment",
+            stream=False,
+            language=None,
+        )
 
-    # Use default principles if no Gita context was built
-    if not gita_context:
-        gita_context = DEFAULT_GITA_PRINCIPLES
+        response_text = kiaan_response.get("response", "")
+        verses_used = kiaan_response.get("verses_used", [])
+        model = kiaan_response.get("model", "gpt-4o-mini")
 
-    # System prompt with Gita wisdom integration
-    VIYOGA_WITH_GITA_PROMPT = f"""
-VIYOGA DETACHMENT COACH - Powered by Bhagavad Gita Karma Yoga
+        # Parse into structured format while keeping the full response
+        detachment_guidance = _parse_response_to_structure(response_text)
 
-You are Viyoga, a calm guide helping shift from outcome anxiety to grounded action.
-Your guidance is rooted in the timeless principles of karma yoga from 700 verses.
+        logger.info(f"Viyoga - personalized response generated, {len(verses_used)} verses")
 
-GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite verse numbers):
-{gita_context}
-
-CRITICAL RULES:
-- Apply karma yoga wisdom naturally as universal life principles
-- NEVER mention "Bhagavad Gita", "Chapter X.Y", "verse numbers", "Krishna", or "Arjuna"
-- Use Gita terminology naturally: karma (action), dharma (duty), nishkama karma (desireless action),
-  vairagya (detachment), samatva (equanimity), buddhi (discernment), kartavya (what must be done)
-- NO citations like "studies show" or "research indicates"
-- Keep tone calm, grounded, validating, and action-focused
-- Be concise - 1-2 sentences per field
-
-OUTPUT FORMAT - Return ONLY this JSON structure:
-{{
-  "validation": "<Acknowledge the outcome anxiety without judgment, 1-2 sentences>",
-  "attachment_check": "<Identify the attachment to results creating pressure, 1-2 sentences>",
-  "detachment_principle": "<Clear karma yoga principle about action without attachment, 1-2 sentences>",
-  "one_action": "<One small, controllable action they can take now, 1 sentence>"
-}}
-
-EXAMPLES:
-{{
-  "validation": "The pressure to get this right is weighing heavily on you. Outcome anxiety is real and exhausting.",
-  "attachment_check": "You're tying your worth to how this turns out, which creates fear before action even begins.",
-  "detachment_principle": "Your responsibility is to the action itself, not to control the result. Do your duty with full effort, then release the outcome.",
-  "one_action": "Choose one step you can take today with full focus, letting go of how it will be received."
-}}
-
-{{
-  "validation": "Worrying about what others will think is consuming your energy. That fear is understandable.",
-  "attachment_check": "Your mind is focused on judgment and approval rather than the work itself.",
-  "detachment_principle": "Act from your inner clarity and duty, not from fear of opinion. Results come from effort, not anxiety.",
-  "one_action": "Before starting, set one clear intention for your work, independent of others' reactions."
-}}
-
-{{
-  "validation": "The stakes feel high, and the fear of failing is paralyzing. This weight is very real.",
-  "attachment_check": "You're holding tightly to a specific outcome, which makes every step feel fragile.",
-  "detachment_principle": "Success and failure are temporary. What matters is showing up with integrity and doing what must be done.",
-  "one_action": "Take the next small step without trying to predict or control what comes after."
-}}
-
-BOUNDARIES:
-- NOT a therapist, NOT crisis support
-- If severe distress appears, include: "Please reach out to a trusted person or professional for support."
-- Do NOT encourage passivity or fate-based thinking - emphasize action with detachment
-- Stay separate from KIAAN - do not interfere with its purpose
-"""
-
-    # Normalize the payload for the model
-    normalized_payload = {
-        "outcome_worry": outcome_worry,
-        "guidance_focus": "Shift from outcome anxiety to grounded, detached action"
-    }
-
-    parsed, raw_text = await _generate_response(
-        system_prompt=VIYOGA_WITH_GITA_PROMPT,
-        user_payload=normalized_payload,
-        expect_json=True,
-        temperature=0.4,
-        max_tokens=500,
-    )
-
-    # Extract fields from response
-    response_data: dict[str, str] | None = None
-    if parsed:
-        validation = parsed.get("validation", "")
-        attachment_check = parsed.get("attachment_check", "")
-        detachment_principle = parsed.get("detachment_principle", "")
-        one_action = parsed.get("one_action", "")
-
-        response_data = {
-            "validation": validation,
-            "attachment_check": attachment_check,
-            "detachment_principle": detachment_principle,
-            "one_action": one_action,
+        return {
+            "status": "success",
+            "detachment_guidance": detachment_guidance,
+            "response": response_text,  # Full conversational response
+            "gita_verses_used": len(verses_used),
+            "model": model,
+            "provider": "kiaan",
         }
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Viyoga error: {e}")
+        return _get_fallback_response(outcome_worry)
+
+
+async def _get_gita_wisdom_for_detachment(db: AsyncSession, concern: str) -> str:
+    """Get relevant Gita wisdom for the user's specific concern."""
+    try:
+        from backend.services.wisdom_kb import WisdomKnowledgeBase
+        from backend.services.gita_service import GitaService
+
+        kb = WisdomKnowledgeBase()
+
+        # Key karma yoga verses
+        key_verses = [
+            (2, 47),   # You have the right to action, not the fruits
+            (2, 48),   # Perform action with equanimity
+            (3, 19),   # Perform duty without attachment
+            (6, 1),    # True renunciate performs duty
+        ]
+
+        wisdom_parts = []
+        for chapter, verse_num in key_verses[:3]:
+            try:
+                verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+                if verse and verse.english:
+                    wisdom_parts.append(f"- {kb.sanitize_text(verse.english)}")
+            except Exception:
+                pass
+
+        if wisdom_parts:
+            return "\n".join(wisdom_parts)
+
+        return """- Your right is to action alone, never to its fruits
+- Perform action with equanimity, abandoning attachment to success or failure
+- One who performs their duty without attachment reaches the highest"""
+
+    except Exception as e:
+        logger.warning(f"Could not fetch Gita wisdom: {e}")
+        return """- Your right is to action alone, never to its fruits
+- Perform action with equanimity, abandoning attachment to success or failure
+- One who performs their duty without attachment reaches the highest"""
+
+
+def _parse_response_to_structure(response_text: str) -> dict[str, str]:
+    """Parse KIAAN's conversational response into structured format."""
+    lines = response_text.strip().split('\n')
+    sections = []
+    current = []
+
+    for line in lines:
+        if line.strip():
+            current.append(line.strip())
+        elif current:
+            sections.append(' '.join(current))
+            current = []
+    if current:
+        sections.append(' '.join(current))
+
+    # Clean emoji
+    if sections:
+        sections[-1] = sections[-1].replace('💙', '').strip()
+
+    if len(sections) >= 4:
+        return {
+            "validation": sections[0],
+            "attachment_check": sections[1],
+            "detachment_principle": sections[2],
+            "one_action": sections[3],
+        }
+    elif len(sections) >= 2:
+        return {
+            "validation": sections[0],
+            "attachment_check": "",
+            "detachment_principle": sections[1] if len(sections) > 1 else "",
+            "one_action": sections[-1] if len(sections) > 2 else "",
+        }
+    else:
+        return {
+            "validation": response_text,
+            "attachment_check": "",
+            "detachment_principle": "",
+            "one_action": "",
+        }
+
+
+def _get_fallback_response(outcome_worry: str) -> dict[str, Any]:
+    """Return a warm fallback response when KIAAN is unavailable."""
     return {
-        "status": "success" if parsed else "partial_success",
-        "detachment_guidance": response_data,
-        "gita_verses_used": len(verse_results),
-        "raw_text": raw_text,
-        "model": model_name,
-        "provider": "viyoga",
+        "status": "success",
+        "detachment_guidance": {
+            "validation": f"I hear you - worrying about '{outcome_worry[:50]}...' is weighing on you. That pressure is real.",
+            "attachment_check": "Notice how tightly you're holding onto a specific outcome. That grip itself creates suffering.",
+            "detachment_principle": "Your power lies in what you do, not in controlling what happens after. The action is yours; the result never was.",
+            "one_action": "Right now, choose ONE thing you can do today with full presence - then consciously release your grip on how it turns out.",
+        },
+        "response": f"I hear you - this worry about the outcome is weighing heavily on you, and that pressure is completely understandable.\n\nNotice how tightly you're holding onto how this needs to turn out. That grip itself is part of what's causing the suffering - not just the situation, but the clenching around it.\n\nHere's what I want you to remember: your power lies in what you DO, not in controlling what happens after. The action is yours; the result never was.\n\nSo here's what I'd suggest: choose ONE thing you can do today about this - just one step, with your full presence. Do it well. Then consciously release your grip on how it turns out. That's where your peace lives.",
+        "gita_verses_used": 0,
+        "model": "fallback",
+        "provider": "kiaan",
+    }
+
+
+@router.get("/health")
+async def viyoga_health():
+    """Health check for Viyoga service."""
+    return {
+        "status": "ok",
+        "service": "viyoga-detach",
+        "provider": "kiaan",
+        "ecosystem": "KIAAN AI",
     }

@@ -1,6 +1,24 @@
 /**
  * Wisdom Journey Service
  * API integration for personalized wisdom journeys
+ *
+ * @deprecated This service is DEPRECATED. Use journeysEnhancedService.ts instead.
+ *
+ * MIGRATION GUIDE:
+ * ----------------
+ * Old function                -> New function (journeysEnhancedService.ts)
+ * getActiveJourney()          -> getActiveJourneys()
+ * generateJourney()           -> startJourneys()
+ * markStepComplete()          -> completeStep()
+ * getJourneyRecommendations() -> getCatalog()
+ *
+ * The Enhanced service provides:
+ * - Multi-journey support
+ * - Encrypted reflections (mental health data protection)
+ * - Better error handling
+ * - Premium feature detection
+ *
+ * This service will be removed in a future release.
  */
 
 import { apiFetch } from '@/lib/api'
@@ -69,6 +87,23 @@ function setCached<T>(key: string, data: T): void {
   }
 }
 
+// HTTP status codes that should not be retried (client errors)
+const NON_RETRYABLE_STATUS_CODES = [400, 401, 403, 404, 422]
+
+/**
+ * Check if an error is a non-retryable HTTP error
+ */
+function isNonRetryableError(error: Error): boolean {
+  // Check if error has a status property (custom error with HTTP status)
+  const errorWithStatus = error as Error & { status?: number }
+  if (errorWithStatus.status && NON_RETRYABLE_STATUS_CODES.includes(errorWithStatus.status)) {
+    return true
+  }
+
+  // Fallback: check message for status codes (for backwards compatibility)
+  return NON_RETRYABLE_STATUS_CODES.some((code) => error.message.includes(String(code)))
+}
+
 /**
  * Retry a function with exponential backoff
  */
@@ -85,8 +120,8 @@ async function withRetry<T>(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error))
 
-      // Don't retry on 4xx errors (client errors)
-      if (lastError.message.includes('401') || lastError.message.includes('403') || lastError.message.includes('404')) {
+      // Don't retry on client errors (4xx)
+      if (isNonRetryableError(lastError)) {
         throw lastError
       }
 
@@ -194,8 +229,9 @@ export async function getActiveJourney(userId: string): Promise<WisdomJourney | 
       }
 
       return journey
-    } catch (error) {
-      console.error('Error fetching active journey:', error)
+    } catch {
+      // Silently return null - offline mode or network error
+      // The UI will handle the null case appropriately
       return null
     }
   })
@@ -274,13 +310,12 @@ export async function markStepComplete(
       return
     }
 
-    // Log warning but don't throw - allow graceful degradation
-    console.warn('Progress update returned non-success status:', response.status)
+    // Non-success status - allow graceful degradation
+    // The progress will sync when connection is restored
     clearCache()
-  } catch (error) {
-    // Network error - log but don't throw
-    console.error('Network error during progress update:', error)
-    // Still clear cache to allow refetch
+  } catch {
+    // Network error - allow graceful degradation
+    // Progress tracked locally, will sync when online
     clearCache()
   }
 }
@@ -404,15 +439,13 @@ export async function getJourneyRecommendations(
 
       // If empty array returned, use defaults (don't cache defaults)
       if (!recommendations || recommendations.length === 0) {
-        console.log('No recommendations from API, using defaults')
         return DEFAULT_RECOMMENDATIONS
       }
 
       setCached(cacheKey, recommendations)
       return recommendations
-    } catch (error) {
-      console.error('Error fetching recommendations:', error)
-      // Return defaults instead of throwing
+    } catch {
+      // Return defaults on error - graceful degradation
       return DEFAULT_RECOMMENDATIONS
     }
   })

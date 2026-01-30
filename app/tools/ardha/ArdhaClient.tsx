@@ -70,8 +70,8 @@ export default function ArdhaClient() {
     setError(null)
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/ardha/reframe`, {
+      // Use local API route to proxy requests to backend (avoids CORS issues)
+      const response = await fetch('/api/ardha/reframe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ negative_thought: trimmedThought })

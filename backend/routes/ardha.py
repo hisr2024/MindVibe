@@ -1,189 +1,70 @@
-"""Ardha Reframing Engine with complete Bhagavad Gita wisdom integration.
+"""Ardha Reframing Engine - KIAAN AI Ecosystem Integration.
 
-This router provides cognitive reframing assistance powered by all 700 verses
-of the Bhagavad Gita, helping transform negative thoughts into balanced perspectives.
+This router provides cognitive reframing assistance powered by KIAAN Core
+and the complete 700-verse Bhagavad Gita wisdom database.
+
+Ardha acts as a wise friend who truly understands your specific thought,
+helping transform negative thinking into balanced, empowering perspectives.
 """
 
 from __future__ import annotations
 
-import json
 import logging
-import os
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from openai import (
-    APIError,
-    AuthenticationError,
-    BadRequestError,
-    OpenAI,
-    RateLimitError,
-)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.services.wisdom_kb import WisdomKnowledgeBase
+from backend.services.kiaan_core import kiaan_core
 
 logger = logging.getLogger(__name__)
 
-api_key = os.getenv("OPENAI_API_KEY", "").strip()
-model_name = os.getenv("GUIDANCE_MODEL", "gpt-4o-mini")
-client = OpenAI(api_key=api_key) if api_key else None
-
-# Default Gita principles when verse search fails
-DEFAULT_GITA_PRINCIPLES = "Apply universal principles of sthitaprajna (stability of mind), viveka (discrimination), and samatva (equanimity)."
-
 router = APIRouter(prefix="/api/ardha", tags=["ardha"])
 
-# Sthitaprajna section constants
-STHITAPRAJNA_START = 54  # Chapter 2, verse 54 - beginning of sthitaprajna (steady wisdom) teaching
-STHITAPRAJNA_END = 72    # Chapter 2, verse 72 - end of sthitaprajna section
 
+def _build_ardha_prompt(negative_thought: str, gita_wisdom: str) -> str:
+    """Build a detailed, personalized Ardha prompt that feels like a wise friend.
 
-async def get_reframing_verses(db: AsyncSession, negative_thought: str, limit: int = 5) -> list[dict[str, Any]]:
+    This prompt ensures KIAAN responds with deep understanding of the specific
+    thought pattern, not generic reframing advice.
     """
-    Get sthitaprajna (steady wisdom) verses for cognitive reframing.
-    
-    Focuses on verses about equanimity, emotional regulation, and mental stability,
-    particularly from Chapter 2:54-72 (sthitaprajna section).
-    
-    Key verses:
-    - 2.56: Unaffected by adversity, free from cravings
-    - 2.57: Without attachment, balanced in joy and sorrow
-    - 2.62-63: Chain of desire leading to loss of wisdom
-    - 6.5: Elevate yourself by your own mind
-    - Others from equanimity and self-mastery themes
-    
-    Args:
-        db: Database session
-        negative_thought: The negative thought to reframe
-        limit: Maximum number of verses to return (default 5)
-        
-    Returns:
-        List of relevant verse results with scores
-    """
-    from backend.services.gita_service import GitaService
-    
-    kb = WisdomKnowledgeBase()
-    
-    # Priority 1: Try to get specific sthitaprajna verses (2.54-2.72)
-    sthitaprajna_verses = []
-    try:
-        # Get verses from Chapter 2, verses 54-72 (sthitaprajna section)
-        for verse_num in range(STHITAPRAJNA_START, STHITAPRAJNA_END + 1):
-            verse = await GitaService.get_verse_by_reference(db, chapter=2, verse=verse_num)
-            if verse:
-                sthitaprajna_verses.append({
-                    "verse": verse,
-                    "score": 0.9,  # High priority for these specific verses
-                    "sanitized_text": kb.sanitize_text(verse.english)
-                })
-    except Exception as e:
-        logger.warning(f"Could not fetch sthitaprajna verses: {e}")
-    
-    # Priority 2: Get key individual verses for equanimity
-    key_verses = [
-        (2, 56), (2, 57), (2, 62), (2, 63),  # Sthitaprajna core
-        (6, 5), (6, 6),  # Self-elevation
-        (2, 14), (2, 15),  # Enduring dualities
-        (12, 13), (12, 14), (12, 15),  # Devotion and equanimity
-    ]
-    
-    key_verse_results = []
-    for chapter, verse_num in key_verses:
-        try:
-            verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
-            if verse:
-                key_verse_results.append({
-                    "verse": verse,
-                    "score": 0.85,
-                    "sanitized_text": kb.sanitize_text(verse.english)
-                })
-        except Exception as e:
-            logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
-    
-    # Priority 3: Search by theme for additional context
-    theme_search_results = []
-    try:
-        # Search for equanimity and mind-control themes
-        search_query = f"{negative_thought} equanimity mind stability discernment balance"
-        theme_search_results = await kb.search_relevant_verses_full_db(
-            db=db,
-            query=search_query,
-            theme="equanimity",
-            limit=3
-        )
-    except Exception as e:
-        logger.debug(f"Theme search failed: {e}")
-    
-    # Combine all sources, prioritizing sthitaprajna verses
-    all_results = sthitaprajna_verses[:3] + key_verse_results[:5] + theme_search_results
-    
-    # Remove duplicates (by verse_id)
-    seen_ids = set()
-    unique_results = []
-    for result in all_results:
-        verse = result.get("verse")
-        if verse:
-            verse_id = f"{verse.chapter}.{verse.verse}"
-            if verse_id not in seen_ids:
-                seen_ids.add(verse_id)
-                unique_results.append(result)
-    
-    # Sort by score and return top N
-    unique_results.sort(key=lambda x: x.get("score", 0), reverse=True)
-    return unique_results[:limit]
+    return f"""You are Ardha, a wise and compassionate friend who helps people transform negative thoughts.
 
+IMPORTANT: You are NOT giving generic advice. You are speaking DIRECTLY to THIS person about THEIR specific thought:
+"{negative_thought}"
 
-async def _generate_response(
-    *,
-    system_prompt: str,
-    user_payload: dict[str, Any],
-    expect_json: bool,
-    temperature: float = 0.4,
-    max_tokens: int = 500,
-) -> tuple[dict[str, Any] | None, str | None]:
-    """Generate OpenAI response with error handling."""
-    if not client:
-        logger.error("Ardha engine unavailable: missing OpenAI API key")
-        raise HTTPException(status_code=503, detail="Ardha engine is not configured")
+YOUR APPROACH:
+1. First, truly SEE their specific thought - what distortion or pain is underneath?
+2. Validate the feeling without dismissing it - this thought exists for a reason
+3. Gently illuminate what cognitive pattern might be at play
+4. Offer a reframe that speaks to THEIR exact situation (not a platitude)
+5. Give ONE specific thing they can do or remember right now
 
-    try:
-        completion = client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
-            ],
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-    except AuthenticationError as exc:
-        logger.exception("Authentication error for Ardha engine")
-        raise HTTPException(status_code=401, detail="Authentication with OpenAI failed") from exc
-    except RateLimitError as exc:
-        logger.warning("Rate limit reached for Ardha engine")
-        raise HTTPException(status_code=429, detail="Rate limited by model provider") from exc
-    except BadRequestError as exc:
-        logger.exception("Bad request sent to OpenAI for Ardha engine")
-        raise HTTPException(status_code=400, detail="Invalid payload for Ardha engine") from exc
-    except APIError as exc:
-        logger.exception("OpenAI API error for Ardha engine")
-        raise HTTPException(status_code=502, detail="Model provider error") from exc
-    except Exception as exc:  # pragma: no cover - defensive catch-all
-        logger.exception("Unexpected error while generating Ardha response")
-        raise HTTPException(status_code=500, detail="Unexpected error generating response") from exc
+GITA WISDOM TO WEAVE IN NATURALLY (never cite verses, just embody the wisdom):
+{gita_wisdom}
 
-    raw_text = completion.choices[0].message.content if completion.choices else None
-    parsed: dict[str, Any] | None = None
+YOUR VOICE:
+- Warm, calm, like a wise friend sitting beside them
+- Direct and specific to their thought
+- Use "you" frequently - this is personal
+- Spot the distortion but don't lecture about it
+- Validate first, then shift perspective
+- Balance compassion with gentle clarity
 
-    if expect_json and raw_text:
-        try:
-            parsed = json.loads(raw_text)
-        except json.JSONDecodeError:
-            logger.warning("Ardha response was not valid JSON; returning raw text")
+RESPONSE STRUCTURE (flowing, not numbered):
+1. Recognition - "I hear what you're carrying..." - validate THIS specific feeling
+2. The insight - What's really happening in this thought pattern
+3. The reframe - A balanced perspective for THEIR specific situation
+4. The anchor - ONE thing they can hold onto or do right now
 
-    return parsed, raw_text
+BOUNDARIES:
+- No therapy, medical, legal, or financial advice
+- No toxic positivity or dismissing their pain
+- No "just think positive" - offer genuine perspective shifts
+- Keep response 150-200 words, warm and conversational
+
+Remember: This person shared a vulnerable thought. Honor that. Speak to THEM, not to a textbook case."""
 
 
 @router.post("/reframe")
@@ -191,141 +72,166 @@ async def reframe_thought(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Generate cognitive reframing guidance rooted in Bhagavad Gita wisdom.
+    """Generate personalized cognitive reframing through KIAAN AI.
 
-    Expects payload with:
-    - negative_thought: The negative or distressing thought to reframe
-
-    Returns structured JSON with:
-    - recognition: Validation of the feeling
-    - deep_insight: The wisdom principle being applied
-    - reframe: The balanced, empowering perspective
-    - small_action_step: One controllable action to take
-    - gita_verses_used: Count of verses used for context
+    Uses KIAAN Core for Gita wisdom while maintaining the warm, friend-like
+    approach that addresses the user's SPECIFIC negative thought.
     """
     negative_thought = payload.get("negative_thought", "")
 
     if not negative_thought.strip():
         raise HTTPException(status_code=400, detail="negative_thought is required")
 
-    # Search query focusing on equanimity, clarity, and self-mastery
-    search_query = f"{negative_thought} equanimity clarity mind stability self-knowledge detachment"
-
-    # Get sthitaprajna verses for cognitive reframing
-    verse_results = []
-    gita_context = ""
+    if len(negative_thought) > 2000:
+        raise HTTPException(status_code=400, detail="Input too long (max 2000 characters)")
 
     try:
-        # Use dedicated function for sthitaprajna verses
-        verse_results = await get_reframing_verses(db, negative_thought, limit=5)
+        # Get relevant Gita wisdom from KIAAN's knowledge base
+        gita_wisdom = await _get_gita_wisdom_for_reframing(db, negative_thought)
 
-        # Build Gita context for the prompt (internal use only)
-        if verse_results:
-            for v in verse_results:
-                verse_obj = v.get("verse")
-                if verse_obj:
-                    # Handle both verse_number (WisdomVerse, _GitaVerseWrapper) and verse (GitaVerse) attributes
-                    # This fallback pattern matches the existing pattern in guidance.py for compatibility
-                    verse_num = getattr(verse_obj, 'verse_number', None) or getattr(verse_obj, 'verse', None)
-                    gita_context += f"\nChapter {verse_obj.chapter}, Verse {verse_num}:\n{verse_obj.english}\n"
-                    # Use principle if available, otherwise use context
-                    # This fallback ensures we get the best available explanatory text
-                    principle = getattr(verse_obj, 'principle', None) or getattr(verse_obj, 'context', '')
-                    if principle:
-                        gita_context += f"Principle: {principle}\n"
+        # Build the personalized prompt
+        full_prompt = _build_ardha_prompt(negative_thought, gita_wisdom)
 
-        logger.info(f"Ardha - Found {len(verse_results)} sthitaprajna verses for thought reframing")
-        logger.debug(f"Gita context built: {gita_context[:200]}...")
-    except Exception as e:
-        logger.error(f"Error fetching Gita verses for Ardha: {e}")
-        gita_context = ""
+        # Use KIAAN Core with our detailed prompt
+        kiaan_response = await kiaan_core.get_kiaan_response(
+            message=full_prompt,
+            user_id=None,
+            db=db,
+            context="ardha_reframe",
+            stream=False,
+            language=None,
+        )
 
-    # Use default principles if no Gita context was built
-    if not gita_context:
-        gita_context = DEFAULT_GITA_PRINCIPLES
+        response_text = kiaan_response.get("response", "")
+        verses_used = kiaan_response.get("verses_used", [])
+        model = kiaan_response.get("model", "gpt-4o-mini")
 
-    # System prompt with Gita wisdom integration
-    ARDHA_WITH_GITA_PROMPT = f"""
-ARDHA REFRAMING ENGINE - Powered by Bhagavad Gita Wisdom
+        # Parse into structured format while keeping the full response
+        reframe_guidance = _parse_response_to_structure(response_text)
 
-You are Ardha, a calm, wise voice helping transform negative thoughts into balanced perspectives.
-Your guidance is rooted in the timeless wisdom of 700 verses while remaining modern and accessible.
+        logger.info(f"Ardha - personalized response generated, {len(verses_used)} verses")
 
-GITA WISDOM FOR THIS SITUATION (use internally, NEVER cite verse numbers):
-{gita_context}
-
-CRITICAL RULES:
-- Apply Gita wisdom naturally as universal life principles
-- NEVER mention "Bhagavad Gita", "Chapter X.Y", "verse numbers", "Krishna", or "Arjuna"
-- Use Gita terminology naturally: dharma (duty), karma (action), buddhi (discernment),
-  viveka (discrimination), samatva (equanimity), vairagya (detachment), sthitaprajna (stability of mind)
-- NO citations like "studies show" or "research indicates"
-- Keep tone warm, grounded, non-preachy, and emotionally validating
-- Be concise - 1-2 sentences per field
-
-OUTPUT FORMAT - Return ONLY this JSON structure:
-{{
-  "recognition": "<Validate the feeling without dilution, 1-2 sentences>",
-  "deep_insight": "<The wisdom principle being applied, 1-2 sentences>",
-  "reframe": "<Balanced, empowering perspective rooted in Gita wisdom, 1-2 sentences>",
-  "small_action_step": "<One doable action within their control, 1 sentence>"
-}}
-
-EXAMPLES:
-{{
-  "recognition": "You're feeling inadequate, like you're falling short. That weight is real.",
-  "deep_insight": "Growth happens through steady effort, not perfection. Your worth isn't measured by outcomes alone.",
-  "reframe": "Each mistake is a step toward clarity and strength. You're building resilience through action, not avoiding it.",
-  "small_action_step": "Take one small action today that aligns with your values, regardless of the result."
-}}
-
-{{
-  "recognition": "The fear of failure is overwhelming. You're worried you'll disappoint yourself and others.",
-  "deep_insight": "True strength lies in doing your duty without attachment to how things turn out.",
-  "reframe": "Focus on what you can control—your effort and intention—and let go of what you cannot.",
-  "small_action_step": "Before your next task, take three deep breaths and set one clear intention."
-}}
-
-BOUNDARIES:
-- NOT a therapist, NOT crisis support
-- If severe distress or self-harm is evident, include: "Please reach out to a trusted person or professional for support."
-- Stay separate from KIAAN - do not interfere with its purpose
-"""
-
-    # Normalize the payload for the model
-    normalized_payload = {
-        "negative_thought": negative_thought,
-        "guidance_focus": "Transform this thought into a balanced, empowering perspective"
-    }
-
-    parsed, raw_text = await _generate_response(
-        system_prompt=ARDHA_WITH_GITA_PROMPT,
-        user_payload=normalized_payload,
-        expect_json=True,
-        temperature=0.4,
-        max_tokens=500,
-    )
-
-    # Extract fields from response
-    response_data: dict[str, str] | None = None
-    if parsed:
-        recognition = parsed.get("recognition", "")
-        deep_insight = parsed.get("deep_insight", "")
-        reframe = parsed.get("reframe", "")
-        small_action_step = parsed.get("small_action_step", "")
-
-        response_data = {
-            "recognition": recognition,
-            "deep_insight": deep_insight,
-            "reframe": reframe,
-            "small_action_step": small_action_step,
+        return {
+            "status": "success",
+            "reframe_guidance": reframe_guidance,
+            "raw_text": response_text,  # Full conversational response
+            "gita_verses_used": len(verses_used),
+            "model": model,
+            "provider": "kiaan",
         }
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Ardha error: {e}")
+        return _get_fallback_response(negative_thought)
+
+
+async def _get_gita_wisdom_for_reframing(db: AsyncSession, thought: str) -> str:
+    """Get relevant Gita wisdom for the user's specific thought."""
+    try:
+        from backend.services.wisdom_kb import WisdomKnowledgeBase
+        from backend.services.gita_service import GitaService
+
+        kb = WisdomKnowledgeBase()
+
+        # Key sthitaprajna (steady wisdom) verses
+        key_verses = [
+            (2, 56),   # Unaffected by adversity
+            (2, 57),   # Without attachment, balanced
+            (6, 5),    # Elevate yourself by your own mind
+            (2, 14),   # Endure the dualities
+        ]
+
+        wisdom_parts = []
+        for chapter, verse_num in key_verses[:3]:
+            try:
+                verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
+                if verse and verse.english:
+                    wisdom_parts.append(f"- {kb.sanitize_text(verse.english)}")
+            except Exception:
+                pass
+
+        if wisdom_parts:
+            return "\n".join(wisdom_parts)
+
+        return """- One whose mind remains undisturbed by adversity, who does not crave pleasure, free from attachment and fear
+- The mind can be the soul's friend or its enemy; elevate yourself through your own effort
+- Sensations of heat and cold, pleasure and pain, come and go; learn to endure them"""
+
+    except Exception as e:
+        logger.warning(f"Could not fetch Gita wisdom: {e}")
+        return """- One whose mind remains undisturbed by adversity, who does not crave pleasure, free from attachment and fear
+- The mind can be the soul's friend or its enemy; elevate yourself through your own effort
+- Sensations of heat and cold, pleasure and pain, come and go; learn to endure them"""
+
+
+def _parse_response_to_structure(response_text: str) -> dict[str, str]:
+    """Parse KIAAN's conversational response into structured format."""
+    lines = response_text.strip().split('\n')
+    sections = []
+    current = []
+
+    for line in lines:
+        if line.strip():
+            current.append(line.strip())
+        elif current:
+            sections.append(' '.join(current))
+            current = []
+    if current:
+        sections.append(' '.join(current))
+
+    # Clean emoji
+    if sections:
+        sections[-1] = sections[-1].replace('💙', '').strip()
+
+    if len(sections) >= 4:
+        return {
+            "recognition": sections[0],
+            "deep_insight": sections[1],
+            "reframe": sections[2],
+            "small_action_step": sections[3],
+        }
+    elif len(sections) >= 2:
+        return {
+            "recognition": sections[0],
+            "deep_insight": "",
+            "reframe": sections[1] if len(sections) > 1 else "",
+            "small_action_step": sections[-1] if len(sections) > 2 else "",
+        }
+    else:
+        return {
+            "recognition": response_text,
+            "deep_insight": "",
+            "reframe": "",
+            "small_action_step": "",
+        }
+
+
+def _get_fallback_response(negative_thought: str) -> dict[str, Any]:
+    """Return a warm fallback response when KIAAN is unavailable."""
+    thought_snippet = negative_thought[:50] + "..." if len(negative_thought) > 50 else negative_thought
     return {
-        "status": "success" if parsed else "partial_success",
-        "reframe_guidance": response_data,
-        "gita_verses_used": len(verse_results),
-        "raw_text": raw_text,
-        "model": model_name,
-        "provider": "ardha",
+        "status": "success",
+        "reframe_guidance": {
+            "recognition": f"I hear you - this thought '{thought_snippet}' is weighing on you. That's real, and it makes sense you'd feel this way.",
+            "deep_insight": "Notice that your mind is treating a thought as absolute truth. But thoughts, even painful ones, are not facts - they're interpretations shaped by how you feel right now.",
+            "reframe": "What if this situation, as difficult as it is, contains something you haven't seen yet? Not toxic positivity - just the recognition that your current lens isn't the only one.",
+            "small_action_step": "Right now, take one breath. Then ask yourself: 'What would I tell a friend who shared this same thought with me?'",
+        },
+        "raw_text": f"I hear you - this thought is weighing on you, and that makes complete sense. When we're struggling, our minds can be relentless.\n\nHere's what I notice: your mind is treating this thought as absolute truth. But thoughts, even the painful ones, aren't facts - they're interpretations shaped by how you're feeling right now.\n\nWhat if this situation, difficult as it is, contains something you haven't seen yet? I'm not asking you to 'think positive' - just to notice that your current lens isn't the only one available.\n\nHere's something to try: take one breath. Then ask yourself, 'What would I tell a friend who shared this same thought with me?' Often, we have wisdom for others that we forget to offer ourselves.",
+        "gita_verses_used": 0,
+        "model": "fallback",
+        "provider": "kiaan",
+    }
+
+
+@router.get("/health")
+async def ardha_health():
+    """Health check for Ardha service."""
+    return {
+        "status": "ok",
+        "service": "ardha-reframe",
+        "provider": "kiaan",
+        "ecosystem": "KIAAN AI",
     }

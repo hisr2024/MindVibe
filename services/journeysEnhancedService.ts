@@ -8,6 +8,9 @@
  * - Provider tracking
  */
 
+// Import shared journey templates - single source of truth for frontend/backend consistency
+import journeyTemplatesData from '../data/journey_templates.json'
+
 // Use relative path for Vercel proxy (avoids CORS), direct URL only for local dev
 function getApiBaseUrl(): string {
   if (typeof window === 'undefined') {
@@ -194,9 +197,24 @@ export interface PremiumError {
 // Helper Functions
 // =============================================================================
 
+/**
+ * Get authentication token from storage.
+ *
+ * SECURITY NOTE: localStorage is vulnerable to XSS attacks.
+ * This function exists for backward compatibility but should be migrated
+ * to use httpOnly cookies for better security. See backend/routes/auth.py
+ * which sets httpOnly cookies - the fetch() calls should use credentials: 'include'
+ * to send these cookies automatically instead of Authorization headers.
+ *
+ * TODO: Migrate to httpOnly cookies for token storage (priority: HIGH)
+ * - Update fetch calls to use credentials: 'include'
+ * - Remove localStorage token storage in useAuth hook
+ * - Keep this function as fallback during migration period
+ */
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null
 
+  // SECURITY: localStorage tokens are XSS vulnerable - prefer httpOnly cookies
   // Try multiple token storage locations (matching lib/api.ts pattern)
   return (
     localStorage.getItem('mindvibe_access_token') ||  // Primary - set by useAuth hook
@@ -245,13 +263,35 @@ function getHeaders(): HeadersInit {
 }
 
 /**
+ * Parse a cookie value by name from the document.cookie string.
+ * More robust than regex-only approach.
+ *
+ * @param name - Cookie name to find
+ * @returns Cookie value or null if not found
+ */
+function getCookieValue(name: string): string | null {
+  if (typeof document === 'undefined') return null
+
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [cookieName, ...valueParts] = cookie.trim().split('=')
+    if (cookieName === name) {
+      const value = valueParts.join('=') // Handle values containing '='
+      return value ? decodeURIComponent(value) : null
+    }
+  }
+  return null
+}
+
+/**
  * Get CSRF token from cookie for state-changing requests.
  */
 function getCsrfToken(): string | null {
-  if (typeof document === 'undefined') return null
-  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) : null
+  return getCookieValue('csrf_token')
 }
+
+// HTTP methods that require CSRF protection (state-changing operations)
+const CSRF_PROTECTED_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'] as const
 
 /**
  * Standard fetch options with credentials for httpOnly cookie authentication
@@ -261,8 +301,8 @@ function getFetchOptions(options: RequestInit = {}): RequestInit {
   const method = (options.method || 'GET').toUpperCase()
   const headers = new Headers(options.headers as HeadersInit || {})
 
-  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+  // Add CSRF token for state-changing requests
+  if (CSRF_PROTECTED_METHODS.includes(method as typeof CSRF_PROTECTED_METHODS[number])) {
     const csrfToken = getCsrfToken()
     if (csrfToken) {
       headers.set('X-CSRF-Token', csrfToken)
@@ -340,8 +380,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
         ? error.detail
         : error.detail?.message || 'Authentication required. Please log in.'
 
-      console.warn('[JourneysService] Authentication error:', message)
-
       // Dispatch event so other components can react (e.g., show login modal)
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('auth-required', {
@@ -368,8 +406,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
       const detail = error.detail || {}
       const errorCode = detail.error || 'service_unavailable'
       const message = detail.message || 'Service temporarily unavailable. Please try again.'
-
-      console.warn('[JourneysService] Service unavailable:', errorCode, message)
 
       throw new ServiceUnavailableError(errorCode, message)
     }
@@ -398,101 +434,17 @@ export async function getJourneyAccess(): Promise<JourneyAccess> {
   return handleResponse<JourneyAccess>(response)
 }
 
-// Default journey templates - MUST MATCH backend/routes/journeys_enhanced.py DEMO_JOURNEY_TEMPLATES
-// This ensures frontend/backend consistency when database is not seeded
-const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = [
-  {
-    id: 'demo-krodha-001',
-    slug: 'transform-anger-demo',
-    title: 'Transform Anger (Krodha)',
-    description: 'A 14-day journey to transform destructive anger into constructive energy through Gita wisdom. Learn to recognize triggers, practice patience, and cultivate inner peace.',
-    primary_enemy_tags: ['krodha'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: true,
-    is_free: true,  // FREE for all users to test the journey feature
-    icon_name: 'flame',
-    color_theme: 'red',
-  },
-  {
-    id: 'demo-kama-001',
-    slug: 'master-desire-demo',
-    title: 'Mastering Desire (Kama)',
-    description: 'A 21-day journey to understand and master desires. Transform cravings into purposeful aspirations aligned with your dharma.',
-    primary_enemy_tags: ['kama'],
-    duration_days: 21,
-    difficulty: 3,
-    is_featured: true,
-    is_free: false,
-    icon_name: 'heart',
-    color_theme: 'pink',
-  },
-  {
-    id: 'demo-lobha-001',
-    slug: 'overcome-greed-demo',
-    title: 'Contentment Over Greed (Lobha)',
-    description: 'A 14-day journey to cultivate santosha (contentment) and release the grip of greed. Find abundance in simplicity.',
-    primary_enemy_tags: ['lobha'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: false,
-    is_free: false,
-    icon_name: 'coins',
-    color_theme: 'amber',
-  },
-  {
-    id: 'demo-moha-001',
-    slug: 'clarity-attachment-demo',
-    title: 'Clarity Over Attachment (Moha)',
-    description: 'A 21-day journey to see through delusion and attachment. Develop viveka (discrimination) and find clarity.',
-    primary_enemy_tags: ['moha'],
-    duration_days: 21,
-    difficulty: 3,
-    is_featured: false,
-    is_free: false,
-    icon_name: 'cloud',
-    color_theme: 'purple',
-  },
-  {
-    id: 'demo-mada-001',
-    slug: 'humility-pride-demo',
-    title: 'Humility Over Ego (Mada)',
-    description: 'A 14-day journey to dissolve ego and cultivate true humility. Recognize the Self beyond the small self.',
-    primary_enemy_tags: ['mada'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: false,
-    is_free: false,
-    icon_name: 'crown',
-    color_theme: 'orange',
-  },
-  {
-    id: 'demo-matsarya-001',
-    slug: 'joy-envy-demo',
-    title: 'Joy Over Envy (Matsarya)',
-    description: 'A 14-day journey to transform envy into mudita (sympathetic joy). Celebrate others\' success as your own.',
-    primary_enemy_tags: ['matsarya'],
-    duration_days: 14,
-    difficulty: 2,
-    is_featured: false,
-    is_free: false,
-    icon_name: 'eye',
-    color_theme: 'emerald',
-  },
-  {
-    id: 'demo-complete-001',
-    slug: 'complete-transformation-demo',
-    title: 'Complete Inner Transformation',
-    description: 'A comprehensive 30-day journey addressing all six inner enemies. The ultimate path to self-mastery and liberation.',
-    primary_enemy_tags: ['kama', 'krodha', 'lobha', 'moha', 'mada', 'matsarya'],
-    duration_days: 30,
-    difficulty: 4,
-    is_featured: true,
-    is_free: false,
-    icon_name: 'sparkles',
-    color_theme: 'indigo',
-  },
-]
+// =============================================================================
+// DEFAULT JOURNEY TEMPLATES - Single source of truth: data/journey_templates.json
+// =============================================================================
+
+/**
+ * Default journey templates loaded from shared JSON file.
+ * Used as fallback when backend is unavailable or database not seeded.
+ *
+ * Single source of truth: data/journey_templates.json
+ */
+const DEFAULT_CATALOG_TEMPLATES: JourneyTemplate[] = journeyTemplatesData.templates as JourneyTemplate[]
 
 /**
  * Get all available journey templates (catalog)
@@ -509,28 +461,20 @@ export async function getCatalog(): Promise<JourneyTemplate[]> {
 
     // If the response is a server error, return default templates
     if (!response.ok && response.status >= 500) {
-      console.warn('[getCatalog] Server error, using default templates')
       return DEFAULT_CATALOG_TEMPLATES
-    }
-
-    // Check if this is fallback/demo data from backend
-    const isFallback = response.headers.get('X-MindVibe-Fallback') === 'demo-templates'
-    if (isFallback) {
-      console.warn('[getCatalog] Backend returned demo templates - database may not be seeded')
     }
 
     const data = await handleResponse<JourneyTemplate[]>(response)
 
     // If empty array, return defaults
     if (!data || data.length === 0) {
-      console.warn('[getCatalog] Empty catalog, using default templates')
       return DEFAULT_CATALOG_TEMPLATES
     }
 
     return data
-  } catch (error) {
-    console.warn('[getCatalog] Failed to fetch catalog:', error)
-    return DEFAULT_CATALOG_TEMPLATES // Return default templates on errors
+  } catch {
+    // Return default templates on errors - graceful degradation
+    return DEFAULT_CATALOG_TEMPLATES
   }
 }
 
@@ -551,7 +495,6 @@ export async function startJourneys(
   const userId = getUserId()
 
   if (!token && !userId) {
-    console.warn('[JourneysService] No auth credentials found for startJourneys')
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('auth-required', {
         detail: { message: 'Please log in to start a journey', redirectTo: window.location.pathname }
@@ -571,19 +514,15 @@ export async function startJourneys(
     }))
     return handleResponse<UserJourney[]>(response)
   } catch (error) {
-    // Re-throw known error types with additional context
-    if (error instanceof AuthenticationError) {
+    // Re-throw all known error types - let callers handle appropriately
+    if (
+      error instanceof AuthenticationError ||
+      error instanceof ServiceUnavailableError ||
+      error instanceof PremiumFeatureError
+    ) {
       throw error
     }
-    if (error instanceof ServiceUnavailableError) {
-      console.error('[JourneysService] Service unavailable when starting journeys:', error.errorCode)
-      throw error
-    }
-    if (error instanceof PremiumFeatureError) {
-      throw error
-    }
-    // Wrap unknown errors
-    console.error('[JourneysService] Failed to start journeys:', error)
+    // Re-throw unknown errors for caller to handle
     throw error
   }
 }

@@ -57,7 +57,28 @@ from backend.services.kiaan_model_provider import (
     LLAMA_CPP_AVAILABLE,
 )
 
+# Import learning engine for autonomous knowledge acquisition
+from backend.services.kiaan_learning_engine import (
+    get_kiaan_learning_engine,
+    KIAANLearningEngine,
+)
+
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# CONFIGURATION CONSTANTS
+# =============================================================================
+
+# Default model for KIAAN AI operations
+# Using GPT-4o-mini for cost optimization (75% cheaper than GPT-4)
+DEFAULT_KIAAN_MODEL = "gpt-4o-mini"
+
+# Maximum cache entries to prevent memory leaks
+DEFAULT_MAX_CACHE_ENTRIES = 1000
+
+# Mood trend threshold for significant changes
+MOOD_TREND_THRESHOLD = 1.0
 
 
 # =============================================================================
@@ -68,12 +89,20 @@ class OfflineWisdomCache:
     """
     Local cache of wisdom responses for offline operation.
     Stores pre-generated responses and common wisdom patterns.
+
+    Memory Safety: Uses LRU eviction to prevent unbounded memory growth.
+    Default max size is 1000 entries (~10MB assuming ~10KB per response).
     """
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    # Maximum number of entries to keep in memory cache (prevents memory leak)
+    MAX_CACHE_ENTRIES = DEFAULT_MAX_CACHE_ENTRIES
+
+    def __init__(self, cache_dir: Optional[str] = None, max_entries: int = DEFAULT_MAX_CACHE_ENTRIES):
         self.cache_dir = Path(cache_dir or Path.home() / ".mindvibe" / "wisdom_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.memory_cache: dict[str, dict] = {}
+        self._max_entries = max_entries
+        self._access_order: list[str] = []  # Track access order for LRU eviction
         self._load_cache()
 
     def _load_cache(self) -> None:
@@ -106,18 +135,43 @@ class OfflineWisdomCache:
         return hashlib.sha256(content.encode()).hexdigest()[:32]
 
     def get(self, message: str, context: str) -> Optional[dict]:
-        """Get cached response if available."""
+        """Get cached response if available. Updates LRU access order."""
         key = self._generate_key(message, context)
-        return self.memory_cache.get(key)
+        result = self.memory_cache.get(key)
+        if result is not None:
+            # Update LRU access order (move to end = most recently used)
+            if key in self._access_order:
+                self._access_order.remove(key)
+            self._access_order.append(key)
+        return result
+
+    def _evict_lru(self) -> None:
+        """Evict least recently used entries when cache exceeds max size."""
+        while len(self.memory_cache) >= self._max_entries and self._access_order:
+            oldest_key = self._access_order.pop(0)
+            if oldest_key in self.memory_cache:
+                del self.memory_cache[oldest_key]
+                logger.debug(f"Evicted LRU cache entry: {oldest_key[:8]}...")
 
     def set(self, message: str, context: str, response: dict) -> None:
-        """Cache a response for future offline use."""
+        """Cache a response for future offline use. Implements LRU eviction."""
         key = self._generate_key(message, context)
+
+        # Evict old entries if cache is full (prevents memory leak)
+        if key not in self.memory_cache:
+            self._evict_lru()
+
         self.memory_cache[key] = {
             "response": response,
             "cached_at": datetime.now().isoformat(),
             "context": context
         }
+
+        # Update LRU access order
+        if key in self._access_order:
+            self._access_order.remove(key)
+        self._access_order.append(key)
+
         # Periodically save to disk
         if len(self.memory_cache) % 10 == 0:
             self._save_cache()
@@ -399,6 +453,21 @@ class KIAANCore:
         self._offline_mode = False
         self._last_connectivity_check = None
 
+        # Learning Engine for autonomous knowledge acquisition (v4.0)
+        # Enables KIAAN to learn from user queries and external sources
+        self._learning_engine: KIAANLearningEngine | None = None
+
+    @property
+    def learning_engine(self) -> KIAANLearningEngine:
+        """Lazy initialization of learning engine."""
+        if self._learning_engine is None:
+            try:
+                self._learning_engine = get_kiaan_learning_engine()
+                logger.info("KIAAN Learning Engine initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize learning engine: {e}")
+        return self._learning_engine
+
     @property
     def provider_manager(self):
         """Lazy initialization of provider manager for multi-provider fallback."""
@@ -409,6 +478,46 @@ class KIAANCore:
                 logger.warning(f"Failed to initialize ProviderManager: {e}")
                 self._provider_manager = None
         return self._provider_manager
+
+    async def acquire_gita_content(self, force: bool = False) -> dict:
+        """
+        Trigger background acquisition of Gita content from external sources.
+
+        This fetches authentic Gita teachings from:
+        - YouTube (ISKCON, Swami Mukundananda, Gaur Gopal Das, etc.)
+        - Audio platforms (Spotify, Apple Music, Gaana, JioSaavn podcasts)
+        - Web sources (IIT Kanpur Gita Supersite, holy-bhagavad-gita.org, etc.)
+
+        All content is validated for strict Bhagavad Gita compliance.
+
+        Args:
+            force: Force acquisition even if interval hasn't elapsed
+
+        Returns:
+            Acquisition statistics
+        """
+        try:
+            if self.learning_engine:
+                return await self.learning_engine.acquire_new_content(force=force)
+            return {"status": "skipped", "reason": "learning_engine_not_initialized"}
+        except Exception as e:
+            logger.error(f"Content acquisition failed: {e}")
+            return {"status": "error", "error": str(e)}
+
+    def get_learning_statistics(self) -> dict:
+        """
+        Get statistics about the KIAAN learning system.
+
+        Returns:
+            Dictionary with learning stats (wisdom items, patterns, etc.)
+        """
+        try:
+            if self.learning_engine:
+                return self.learning_engine.get_statistics()
+            return {"status": "not_initialized"}
+        except Exception as e:
+            logger.error(f"Failed to get learning statistics: {e}")
+            return {"status": "error", "error": str(e)}
 
     def get_quick_gita_wisdom(self, mood: str) -> dict[str, Any]:
         """
@@ -872,6 +981,23 @@ EXAMPLES:
         # Step 2: Build wisdom context from verses
         wisdom_context = self._build_verse_context(verses)
 
+        # Step 2b: Enhance with learned wisdom from knowledge base (v4.0 Learning Engine)
+        # This adds supplementary teachings from external sources (videos, audio, texts)
+        try:
+            if self.learning_engine:
+                learned_wisdom = self.learning_engine.get_relevant_wisdom(
+                    message, limit=3, language=language
+                )
+                if learned_wisdom:
+                    learned_context = "\n\n--- Supplementary Gita Wisdom ---\n"
+                    for lw in learned_wisdom:
+                        source_info = f" (Source: {lw.source_name})" if lw.source_name else ""
+                        learned_context += f"• {lw.content[:300]}...{source_info}\n"
+                    wisdom_context += learned_context
+                    logger.debug(f"Enhanced with {len(learned_wisdom)} learned wisdom items")
+        except Exception as le_error:
+            logger.warning(f"Learning engine enhancement failed (non-critical): {le_error}")
+
         # Step 3: Generate response with multi-provider fallback (v3.1)
         # Priority: ProviderManager (OpenAI/Sarvam/Compatible) -> Legacy OpenAI -> Offline
         system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
@@ -1003,6 +1129,19 @@ EXAMPLES:
                 "context": context,
                 "original_query": message
             })
+
+        # Step 7: Learn from this query (v4.0 Learning Engine)
+        # This improves KIAAN's understanding of user patterns and preferences
+        try:
+            if self.learning_engine and response_text:
+                self.learning_engine.learn_from_query(
+                    query=message,
+                    successful=validation.get("valid", False),
+                    rating=None  # User rating can be added later via feedback endpoint
+                )
+                logger.debug(f"Learned from query: '{message[:50]}...'")
+        except Exception as learn_error:
+            logger.warning(f"Learning from query failed (non-critical): {learn_error}")
 
         return {
             "response": response_text,
@@ -1340,6 +1479,19 @@ Speak of sadhana - the beautiful, ongoing practice of becoming more aligned with
 Celebrate their growth, no matter how small. Offer compassion for their struggles.
 Begin: "Let's pause together and honor the path you've walked this week..."
 Remind them: Every step on this journey is sacred, even the stumbling ones."""
+
+        elif context == "relationship_compass":
+            base_prompt += """
+
+SACRED CONTEXT - RELATIONSHIP NAVIGATION (Relationship Compass):
+You are guiding them through the sacred art of navigating relationship challenges with wisdom.
+Help them move from reactivity to response, from ego to dharma, from conflict to understanding.
+Speak of right action (dharma) in relationships - the courage to be honest while remaining kind.
+Guide them toward compassion (daya) for self and others, even in difficult moments.
+Begin: "Let's breathe together as we explore this relationship challenge with gentle eyes..."
+Remind them: True strength in relationships comes not from winning, but from understanding.
+Help them see beyond the conflict to the shared humanity underneath.
+Offer guidance on communication rooted in clarity, boundaries, and compassion."""
 
         return base_prompt
 
