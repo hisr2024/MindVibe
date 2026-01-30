@@ -241,7 +241,21 @@ async def get_journey_access(
         raise
     except Exception as e:
         logger.error(f"Error checking journey access: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to check journey access")
+        # Return a graceful fallback response instead of 500 error
+        # This allows users to still see and start free journeys even if there are DB issues
+        return JourneyAccessResponse(
+            has_access=True,  # Allow free journey access
+            tier="free",
+            active_journeys=0,
+            journey_limit=1,
+            remaining=1,
+            is_unlimited=False,
+            can_start_more=True,
+            is_trial=True,
+            trial_days_limit=3,
+            upgrade_url="/pricing",
+            upgrade_cta="Upgrade for Full Access",
+        )
 
 
 # =============================================================================

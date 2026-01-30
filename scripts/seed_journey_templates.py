@@ -41,6 +41,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 3,
         "is_featured": True,
+        "is_free": True,  # FREE for all users - allows everyone to try the feature
         "icon_name": "flame",
         "color_theme": "red",
     },
@@ -52,6 +53,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 21,
         "difficulty": 4,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "cloud",
         "color_theme": "purple",
     },
@@ -63,6 +65,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 3,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "crown",
         "color_theme": "orange",
     },
@@ -74,6 +77,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 21,
         "difficulty": 4,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "heart",
         "color_theme": "rose",
     },
@@ -85,6 +89,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 3,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "coins",
         "color_theme": "amber",
     },
@@ -96,6 +101,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 14,
         "difficulty": 3,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "eye",
         "color_theme": "emerald",
     },
@@ -107,6 +113,7 @@ JOURNEY_TEMPLATES = [
         "duration_days": 30,
         "difficulty": 5,
         "is_featured": True,
+        "is_free": False,
         "icon_name": "sparkles",
         "color_theme": "indigo",
     },
@@ -859,12 +866,12 @@ async def seed_journey_templates():
                 text("""
                     INSERT INTO journey_templates (
                         id, slug, title, description, primary_enemy_tags,
-                        duration_days, difficulty, is_active, is_featured,
+                        duration_days, difficulty, is_active, is_featured, is_free,
                         icon_name, color_theme, created_at, updated_at
                     )
                     VALUES (
                         :id, :slug, :title, :description, CAST(:primary_enemy_tags AS jsonb),
-                        :duration_days, :difficulty, true, :is_featured,
+                        :duration_days, :difficulty, true, :is_featured, :is_free,
                         :icon_name, :color_theme, NOW(), NOW()
                     )
                     ON CONFLICT (slug) DO UPDATE SET
@@ -874,6 +881,7 @@ async def seed_journey_templates():
                         duration_days = EXCLUDED.duration_days,
                         difficulty = EXCLUDED.difficulty,
                         is_featured = EXCLUDED.is_featured,
+                        is_free = EXCLUDED.is_free,
                         icon_name = EXCLUDED.icon_name,
                         color_theme = EXCLUDED.color_theme,
                         is_active = true,
@@ -889,6 +897,7 @@ async def seed_journey_templates():
                     "duration_days": template["duration_days"],
                     "difficulty": template["difficulty"],
                     "is_featured": template["is_featured"],
+                    "is_free": template.get("is_free", False),
                     "icon_name": template.get("icon_name"),
                     "color_theme": template.get("color_theme"),
                 },
