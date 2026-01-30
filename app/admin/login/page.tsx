@@ -90,6 +90,7 @@ export default function AdminLogin() {
                   <input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -107,6 +108,7 @@ export default function AdminLogin() {
                   <input
                     id="password"
                     type="password"
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -127,6 +129,7 @@ export default function AdminLogin() {
                 <input
                   id="mfa"
                   type="text"
+                  autoComplete="one-time-code"
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value)}
                   required
