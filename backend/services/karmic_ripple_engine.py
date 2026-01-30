@@ -896,6 +896,7 @@ class KarmicRippleEngine:
                 "domain": ripple.affected_domain,
                 "timeframe": ripple.timeframe.value,
                 "reversibility": ripple.reversibility,
+                "valence": ripple.valence,
             })
 
         return {

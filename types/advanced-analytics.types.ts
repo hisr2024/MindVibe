@@ -196,6 +196,7 @@ export interface RippleCircle {
   domain: string
   timeframe: RippleTimeframe
   reversibility: number
+  valence: 'positive' | 'negative' | 'neutral'
 }
 
 // =============================================================================
