@@ -540,8 +540,45 @@ async def start_journeys(
     except HTTPException:
         raise
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error starting journeys: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to start journeys")
+
+        # Provide specific error messages based on the error type
+        if "relation" in error_msg or "does not exist" in error_msg or "no such table" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_setup_required",
+                    "message": "Wisdom Journeys is being set up. Database tables need to be created. "
+                               "Please contact support or try again later.",
+                    "_admin_note": "Run: python scripts/seed_journey_templates.py --seed",
+                }
+            )
+        elif "foreign key" in error_msg or "violates" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_constraint_error",
+                    "message": "Journey templates need to be seeded. Please try again later.",
+                    "_admin_note": "Run: python scripts/seed_journey_templates.py --seed",
+                }
+            )
+        elif "connection" in error_msg or "timeout" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_connection_error",
+                    "message": "Unable to connect to the database. Please try again in a moment.",
+                }
+            )
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "journey_creation_failed",
+                    "message": "Failed to start journeys. Please try again.",
+                }
+            )
 
 
 @router.get("/active", response_model=list[UserJourneyResponse])
@@ -563,8 +600,16 @@ async def get_active_journeys(
         return [UserJourneyResponse(**j) for j in journeys]
 
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error getting active journeys: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get active journeys")
+
+        if "relation" in error_msg or "does not exist" in error_msg:
+            # Return empty list if tables don't exist yet (graceful degradation)
+            return []
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "fetch_failed", "message": "Failed to get active journeys"}
+        )
 
 
 # =============================================================================
@@ -596,8 +641,21 @@ async def get_today_agenda(
         return TodayAgendaResponse(**agenda)
 
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error getting today's agenda: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get today's agenda")
+
+        if "relation" in error_msg or "does not exist" in error_msg:
+            # Return empty agenda if tables don't exist yet (graceful degradation)
+            return TodayAgendaResponse(
+                steps=[],
+                priority_step=None,
+                active_journey_count=0,
+                message="Start a journey to see your daily wisdom agenda.",
+            )
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "fetch_failed", "message": "Failed to get today's agenda"}
+        )
 
 
 @router.post("/{user_journey_id}/today", response_model=StepResponse)
