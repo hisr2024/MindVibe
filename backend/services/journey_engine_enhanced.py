@@ -21,9 +21,11 @@ Security:
 """
 
 import datetime
+import json
 import logging
 import os
 import uuid
+from pathlib import Path
 from typing import Any
 
 # Optional encryption support - graceful fallback if cryptography not available
@@ -84,6 +86,42 @@ from backend.services.journey_coach import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# DEMO TEMPLATES HELPER
+# =============================================================================
+
+
+def _load_demo_templates() -> dict[str, dict]:
+    """
+    Load demo journey templates from shared JSON file.
+
+    Returns a dict mapping template ID to template data.
+    Used when database templates are not available.
+    """
+    templates_path = Path(__file__).parent.parent.parent / "data" / "journey_templates.json"
+
+    try:
+        with open(templates_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            templates = data.get("templates", [])
+            return {t["id"]: t for t in templates}
+    except Exception as e:
+        logger.warning(f"Failed to load demo templates: {e}")
+        return {}
+
+
+# Cache demo templates at module load
+_DEMO_TEMPLATES_CACHE: dict[str, dict] | None = None
+
+
+def get_demo_templates() -> dict[str, dict]:
+    """Get demo templates (cached after first load)."""
+    global _DEMO_TEMPLATES_CACHE
+    if _DEMO_TEMPLATES_CACHE is None:
+        _DEMO_TEMPLATES_CACHE = _load_demo_templates()
+    return _DEMO_TEMPLATES_CACHE
 
 
 # =============================================================================
@@ -1057,8 +1095,37 @@ class EnhancedJourneyEngine:
 
             # Verify template exists and is active
             template = await db.get(JourneyTemplate, template_id)
-            if not template or not template.is_active:
-                logger.warning(f"Template {template_id} not found or inactive")
+
+            # If template not in DB, check if it's a demo template
+            if not template:
+                demo_templates = get_demo_templates()
+                if template_id in demo_templates:
+                    demo_data = demo_templates[template_id]
+                    logger.info(f"Creating template from demo data: {template_id}")
+
+                    # Create JourneyTemplate from demo data
+                    template = JourneyTemplate(
+                        id=template_id,  # Keep the demo ID for consistency
+                        slug=demo_data.get("slug", template_id),
+                        title=demo_data.get("title", "Journey"),
+                        description=demo_data.get("description"),
+                        primary_enemy_tags=demo_data.get("primary_enemy_tags", []),
+                        duration_days=demo_data.get("duration_days", 14),
+                        difficulty=demo_data.get("difficulty", 3),
+                        is_active=True,
+                        is_featured=demo_data.get("is_featured", False),
+                        is_free=demo_data.get("is_free", False),
+                        icon_name=demo_data.get("icon_name"),
+                        color_theme=demo_data.get("color_theme"),
+                    )
+                    db.add(template)
+                    await db.flush()  # Flush to get the ID
+                    logger.info(f"Created template {template.slug} from demo data")
+                else:
+                    logger.warning(f"Template {template_id} not found in DB or demos")
+                    continue
+            elif not template.is_active:
+                logger.warning(f"Template {template_id} is inactive")
                 continue
 
             # Create user journey
