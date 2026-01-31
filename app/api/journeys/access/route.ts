@@ -60,6 +60,13 @@ export async function GET(request: NextRequest) {
 
       clearTimeout(timeoutId)
 
+      if (response.status === 401) {
+        return NextResponse.json(
+          { error: 'authentication_required', message: 'Please log in to view your journey access' },
+          { status: 401 }
+        )
+      }
+
       if (!response.ok) {
         console.warn(`[journeys/access] Backend returned ${response.status}, using default access`)
         return NextResponse.json(DEFAULT_ACCESS)

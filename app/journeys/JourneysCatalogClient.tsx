@@ -450,6 +450,7 @@ export default function JourneysCatalogClient() {
   const [infoMessage, setInfoMessage] = useState<string | null>(null)
   const [queuedJourneys, setQueuedJourneys] = useState<QueuedJourneyStart[]>([])
   const [syncing, setSyncing] = useState(false)
+  const [authRequired, setAuthRequired] = useState(false)
 
   // Load queued journeys on mount
   useEffect(() => {
@@ -485,6 +486,10 @@ export default function JourneysCatalogClient() {
         journeysService.getCatalog(),
         journeysService.getJourneyAccess().catch((err) => {
           console.warn('Failed to load access info:', err)
+          if (journeysService.isAuthError(err)) {
+            setAuthRequired(true)
+            setInfoMessage('Please log in to start a wisdom journey.')
+          }
           // Return a fallback that allows free journeys and shows proper upgrade prompts
           // This ensures users can always access free content even if the access API fails
           return {
@@ -608,6 +613,12 @@ export default function JourneysCatalogClient() {
     // Guard against double-clicks and race conditions
     if (selectedIds.size === 0 || starting) return
 
+    if (authRequired) {
+      setError('Please log in to start a journey.')
+      setInfoMessage(null)
+      return
+    }
+
     // Check access before starting
     if (!access?.has_access) {
       setPaywallVariant('no_access')
@@ -626,6 +637,13 @@ export default function JourneysCatalogClient() {
       router.push('/journeys/today')
     } catch (err: unknown) {
       console.error('Failed to start journeys:', err)
+
+      if (journeysService.isAuthError(err)) {
+        setAuthRequired(true)
+        setInfoMessage(null)
+        setError('Please log in to start a journey.')
+        return
+      }
 
       // Handle premium errors
       if (journeysService.isPremiumError(err)) {
