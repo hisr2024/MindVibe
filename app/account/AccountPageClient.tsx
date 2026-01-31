@@ -280,6 +280,7 @@ export default function AccountPageClient() {
                   <input
                     id="name"
                     type="text"
+                    autoComplete="name"
                     value={createForm.name}
                     onChange={event => setCreateForm({ ...createForm, name: event.target.value })}
                     disabled={isSubmitting}
@@ -294,6 +295,7 @@ export default function AccountPageClient() {
                   <input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     value={createForm.email}
                     onChange={event => setCreateForm({ ...createForm, email: event.target.value })}
                     disabled={isSubmitting}
@@ -308,6 +310,7 @@ export default function AccountPageClient() {
                   <input
                     id="password"
                     type="password"
+                    autoComplete="new-password"
                     value={createForm.password}
                     onChange={event => setCreateForm({ ...createForm, password: event.target.value })}
                     disabled={isSubmitting}
@@ -339,6 +342,7 @@ export default function AccountPageClient() {
                   <input
                     id="login-email"
                     type="email"
+                    autoComplete="email"
                     value={loginForm.email}
                     onChange={event => setLoginForm({ ...loginForm, email: event.target.value.toLowerCase() })}
                     disabled={isSubmitting}
@@ -353,6 +357,7 @@ export default function AccountPageClient() {
                   <input
                     id="login-password"
                     type="password"
+                    autoComplete="current-password"
                     value={loginForm.password}
                     onChange={event => setLoginForm({ ...loginForm, password: event.target.value })}
                     disabled={isSubmitting}
