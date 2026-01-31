@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
-import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
+import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -38,14 +39,15 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
 type ViyogResult = {
   response: string
+  sections: Record<string, string>
   requestedAt: string
   gitaVerses?: number
 }
 
 const flowSteps = [
-  'Name the outcome worry in one line.',
-  'Detach from result; pick one present action.',
-  'Run the 60-second clarity pause if urgency is high.',
+  'Share your outcome worry - name the weight you carry.',
+  'Receive sacred Karma Yoga transmission with Sanskrit wisdom.',
+  'Practice witness consciousness (Sakshi Bhava) with guided steps.',
 ]
 
 export default function ViyogClient() {
@@ -82,31 +84,24 @@ export default function ViyogClient() {
       }
 
       const data = await response.json()
-      
-      // Parse structured response
+
+      // Parse structured response - supports both legacy and ultra-deep sections
       const guidance = data.detachment_guidance
-      if (guidance) {
-        const formattedResponse = `**Validation**
-${guidance.validation}
+      const fullResponse = data.response || ''
 
-**Attachment Check**
-${guidance.attachment_check}
-
-**Detachment Principle**
-${guidance.detachment_principle}
-
-**One Action**
-${guidance.one_action}`
-
-        setResult({ 
-          response: formattedResponse, 
+      if (guidance && typeof guidance === 'object') {
+        // Store both sections and full response
+        setResult({
+          response: fullResponse,
+          sections: guidance,
           requestedAt: new Date().toISOString(),
           gitaVerses: data.gita_verses_used || 0
         })
-      } else if (data.raw_text) {
-        // Fallback to raw text if structured parsing failed
-        setResult({ 
-          response: data.raw_text, 
+      } else if (fullResponse) {
+        // Fallback to full response only
+        setResult({
+          response: fullResponse,
+          sections: {},
           requestedAt: new Date().toISOString(),
           gitaVerses: data.gita_verses_used || 0
         })
@@ -194,33 +189,21 @@ ${guidance.one_action}`
               )}
             </div>
 
-            {/* Response */}
-            {result && (
-              <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
-                <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-orange-50">Viyoga&apos;s response</span>
-                    {result.gitaVerses && result.gitaVerses > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-orange-300 border border-orange-400/30">
-                        <span>🕉️</span>
-                        <span>Gita Wisdom ({result.gitaVerses} verses)</span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <VoiceResponseButton
-                      text={result.response.replace(/\*\*/g, '')}
-                      language={language}
-                      size="sm"
-                      variant="accent"
-                    />
-                    <span>{new Date(result.requestedAt).toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
-                  {result.response}
-                </div>
-              </div>
+            {/* Sacred Loading State */}
+            {loading && (
+              <WisdomLoadingState tool="viyoga" />
+            )}
+
+            {/* Ultra-Deep Wisdom Response */}
+            {result && !loading && (
+              <WisdomResponseCard
+                tool="viyoga"
+                sections={result.sections}
+                fullResponse={result.response}
+                gitaVersesUsed={result.gitaVerses}
+                timestamp={result.requestedAt}
+                language={language}
+              />
             )}
           </section>
 
