@@ -197,8 +197,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     # Log the full exception for debugging
     logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
 
-    # For wisdom-journey endpoints, return a more graceful response
-    if "/wisdom-journey/" in request.url.path:
+    # For journey endpoints, return a more graceful response
+    if "/journeys/" in request.url.path:
         return JSONResponse(
             status_code=200,  # Return 200 to allow frontend fallback
             content={
@@ -793,44 +793,25 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Translation router: {e}")
 
-# Load Wisdom Journey router (Quantum Enhancement #1)
-print("\n[Wisdom Journey] Attempting to import Wisdom Journey router...")
+# Load Journey router (Rebuilt fresh)
+print("\n[Journeys] Attempting to import Journey router...")
 try:
-    from backend.routes.wisdom_journey import router as wisdom_journey_router
-    app.include_router(wisdom_journey_router)
-    print("✅ [SUCCESS] Wisdom Journey router loaded (Quantum Enhancement)")
-    print("   • POST   /api/wisdom-journey/generate - Generate personalized journey")
-    print("   • GET    /api/wisdom-journey/active - Get active journey")
-    print("   • GET    /api/wisdom-journey/{id} - Get journey details")
-    print("   • POST   /api/wisdom-journey/{id}/progress - Mark step complete")
-    print("   • PUT    /api/wisdom-journey/{id}/pause - Pause journey")
-    print("   • PUT    /api/wisdom-journey/{id}/resume - Resume journey")
-    print("   • DELETE /api/wisdom-journey/{id} - Delete journey")
-    print("   • GET    /api/wisdom-journey/recommendations/list - Get recommendations")
-except Exception as e:
-    print(f"❌ [ERROR] Failed to load Wisdom Journey router: {e}")
-
-# Load Enhanced Journeys router (Ṣaḍ-Ripu / Six Inner Enemies)
-print("\n[Enhanced Journeys] Attempting to import Enhanced Journeys router...")
-try:
-    from backend.routes.journeys_enhanced import router as journeys_enhanced_router
-    from backend.routes.journeys_enhanced import admin_router as journeys_admin_router
-    app.include_router(journeys_enhanced_router)
-    app.include_router(journeys_admin_router)
-    print("✅ [SUCCESS] Enhanced Journeys router loaded (Ṣaḍ-Ripu)")
+    from backend.routes.journeys import router as journeys_router
+    app.include_router(journeys_router)
+    print("✅ [SUCCESS] Journey router loaded")
     print("   • GET    /api/journeys/catalog - Journey templates catalog")
-    print("   • POST   /api/journeys/start - Start multiple journeys")
     print("   • GET    /api/journeys/active - Get active journeys")
-    print("   • GET    /api/journeys/today - Today's agenda (all journeys)")
-    print("   • POST   /api/journeys/{id}/today - Get/generate today's step")
-    print("   • POST   /api/journeys/{id}/steps/{day}/complete - Complete step")
+    print("   • POST   /api/journeys/start - Start a new journey")
+    print("   • GET    /api/journeys/{id} - Get journey details")
     print("   • POST   /api/journeys/{id}/pause - Pause journey")
     print("   • POST   /api/journeys/{id}/resume - Resume journey")
     print("   • POST   /api/journeys/{id}/abandon - Abandon journey")
-    print("   • GET    /api/journeys/{id}/history - Journey history")
-    print("   • GET    /api/admin/ai/providers/status - Provider health (admin)")
+    print("   • GET    /api/journeys/{id}/today - Get today's step")
+    print("   • POST   /api/journeys/{id}/steps/{day}/complete - Complete step")
+    print("   • GET    /api/journeys/today - Today's agenda")
+    print("   • GET    /api/journeys/access - Check access limits")
 except Exception as e:
-    print(f"❌ [ERROR] Failed to load Enhanced Journeys router: {e}")
+    print(f"❌ [ERROR] Failed to load Journey router: {e}")
 
 # Load Sync router (Quantum Enhancement #2)
 print("\n[Sync] Attempting to import Sync router...")

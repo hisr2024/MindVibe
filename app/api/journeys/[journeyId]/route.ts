@@ -1,7 +1,7 @@
 /**
- * Active Journeys API Route
+ * Journey Detail API Route
  *
- * Proxies requests to the backend API for getting user's active journeys.
+ * Proxies requests to the backend API for getting journey details.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -9,8 +9,13 @@ import { cookies } from 'next/headers'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
-export async function GET(request: NextRequest) {
+interface RouteParams {
+  params: Promise<{ journeyId: string }>
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { journeyId } = await params
     const cookieStore = await cookies()
     const accessToken = cookieStore.get('access_token')?.value
     const xAuthUid = request.headers.get('X-Auth-UID')
@@ -27,7 +32,7 @@ export async function GET(request: NextRequest) {
       headers['X-Auth-UID'] = xAuthUid
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/journeys/active`, {
+    const response = await fetch(`${BACKEND_URL}/api/journeys/${journeyId}`, {
       method: 'GET',
       headers,
     })
@@ -36,13 +41,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
-    console.error('Error fetching active journeys:', error)
+    console.error('Error fetching journey:', error)
     return NextResponse.json(
       {
         success: false,
-        data: [],
-        count: 0,
-        error: 'Failed to fetch active journeys',
+        error: 'Failed to fetch journey',
       },
       { status: 500 }
     )
