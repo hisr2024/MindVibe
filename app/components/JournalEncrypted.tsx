@@ -145,6 +145,7 @@ export default function JournalEncrypted() {
             <span className="font-semibold text-orange-50">Passphrase</span>
             <input
               type="password"
+              autoComplete="off"
               value={pass}
               onChange={e => setPass(e.target.value)}
               className="mt-1 block w-64 rounded-2xl border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"

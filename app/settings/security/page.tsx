@@ -301,6 +301,7 @@ export default function SecuritySettingsPage() {
                           inputMode="numeric"
                           pattern="[0-9]*"
                           maxLength={6}
+                          autoComplete="one-time-code"
                           value={regenerateCode}
                           onChange={(e) => setRegenerateCode(e.target.value.replace(/\D/g, ''))}
                           className="w-full px-4 py-2 bg-black/20 border border-orange-500/30 rounded-lg text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
@@ -408,6 +409,7 @@ export default function SecuritySettingsPage() {
                           inputMode="numeric"
                           pattern="[0-9]*"
                           maxLength={6}
+                          autoComplete="one-time-code"
                           value={disableCode}
                           onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, ''))}
                           className="w-full px-4 py-2 bg-black/20 border border-orange-500/30 rounded-lg text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
@@ -420,6 +422,7 @@ export default function SecuritySettingsPage() {
                         </label>
                         <input
                           type="password"
+                          autoComplete="current-password"
                           value={disablePassword}
                           onChange={(e) => setDisablePassword(e.target.value)}
                           className="w-full px-4 py-2 bg-black/20 border border-orange-500/30 rounded-lg text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
@@ -548,6 +551,7 @@ export default function SecuritySettingsPage() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
+                autoComplete="one-time-code"
                 value={verifyCode}
                 onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
                 className="w-48 px-6 py-4 bg-black/20 border border-orange-500/30 rounded-xl text-center text-2xl font-mono text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50 tracking-widest"
