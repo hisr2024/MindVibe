@@ -543,32 +543,15 @@ async def start_journeys(
         error_msg = str(e).lower()
         logger.error(f"Error starting journeys: {e}", exc_info=True)
 
-        # Provide specific error messages based on the exception type
-        if "journey_templates" in error_msg and ("does not exist" in error_msg or "relation" in error_msg):
+        # Provide specific error messages based on the error type
+        if "relation" in error_msg or "does not exist" in error_msg or "no such table" in error_msg:
             raise HTTPException(
                 status_code=503,
                 detail={
-                    "error": "database_not_migrated",
-                    "message": "Journey system is being set up. Please run database migrations.",
-                    "technical": "journey_templates table not found",
-                }
-            )
-        elif "user_journeys" in error_msg and ("does not exist" in error_msg or "relation" in error_msg):
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_not_migrated",
-                    "message": "Journey system is being set up. Please run database migrations.",
-                    "technical": "user_journeys table not found",
-                }
-            )
-        elif "is_free" in error_msg or "deleted_at" in error_msg:
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_schema_outdated",
-                    "message": "Journey system needs an update. Please run the latest database migrations.",
-                    "technical": f"Missing column: {error_msg[:100]}",
+                    "error": "database_setup_required",
+                    "message": "Wisdom Journeys is being set up. Database tables need to be created. "
+                               "Please contact support or try again later.",
+                    "_admin_note": "Run: python scripts/seed_journey_templates.py --seed",
                 }
             )
         elif "foreign key" in error_msg or "violates" in error_msg:
@@ -576,11 +559,11 @@ async def start_journeys(
                 status_code=503,
                 detail={
                     "error": "database_constraint_error",
-                    "message": "Unable to start journey due to a data issue. Please try again.",
-                    "technical": f"Constraint error: {error_msg[:100]}",
+                    "message": "Journey templates need to be seeded. Please try again later.",
+                    "_admin_note": "Run: python scripts/seed_journey_templates.py --seed",
                 }
             )
-        elif "connection" in error_msg or "connect" in error_msg:
+        elif "connection" in error_msg or "timeout" in error_msg:
             raise HTTPException(
                 status_code=503,
                 detail={
@@ -588,23 +571,12 @@ async def start_journeys(
                     "message": "Unable to connect to the database. Please try again in a moment.",
                 }
             )
-        elif "user not found" in error_msg:
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "error": "user_not_found",
-                    "message": "Your user account was not found. Please log out and sign in again.",
-                    "technical": str(e)[:200],
-                }
-            )
         else:
-            # Generic error with more context
             raise HTTPException(
                 status_code=500,
                 detail={
-                    "error": "journey_start_failed",
+                    "error": "journey_creation_failed",
                     "message": "Failed to start journeys. Please try again.",
-                    "technical": str(e)[:200] if e else "Unknown error",
                 }
             )
 
@@ -631,21 +603,12 @@ async def get_active_journeys(
         error_msg = str(e).lower()
         logger.error(f"Error getting active journeys: {e}", exc_info=True)
 
-        if "does not exist" in error_msg or "relation" in error_msg:
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_not_migrated",
-                    "message": "Journey system is being set up. Please try again later.",
-                }
-            )
+        if "relation" in error_msg or "does not exist" in error_msg:
+            # Return empty list if tables don't exist yet (graceful degradation)
+            return []
         raise HTTPException(
             status_code=500,
-            detail={
-                "error": "get_journeys_failed",
-                "message": "Failed to get active journeys. Please try again.",
-                "technical": str(e)[:200] if e else "Unknown error",
-            }
+            detail={"error": "fetch_failed", "message": "Failed to get active journeys"}
         )
 
 
@@ -681,21 +644,17 @@ async def get_today_agenda(
         error_msg = str(e).lower()
         logger.error(f"Error getting today's agenda: {e}", exc_info=True)
 
-        if "does not exist" in error_msg or "relation" in error_msg:
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "database_not_migrated",
-                    "message": "Journey system is being set up. Please try again later.",
-                }
+        if "relation" in error_msg or "does not exist" in error_msg:
+            # Return empty agenda if tables don't exist yet (graceful degradation)
+            return TodayAgendaResponse(
+                steps=[],
+                priority_step=None,
+                active_journey_count=0,
+                message="Start a journey to see your daily wisdom agenda.",
             )
         raise HTTPException(
             status_code=500,
-            detail={
-                "error": "get_agenda_failed",
-                "message": "Failed to get today's agenda. Please try again.",
-                "technical": str(e)[:200] if e else "Unknown error",
-            }
+            detail={"error": "fetch_failed", "message": "Failed to get today's agenda"}
         )
 
 

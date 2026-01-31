@@ -1,25 +1,23 @@
 /**
  * Today's Agenda API Route
- * Proxies to backend to get today's steps across all active journeys
+ * Proxies to backend with proper error handling
+ *
+ * This route handles GET /api/journeys/today
+ * Returns today's steps across all active journeys
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_TIMEOUT_MS = 15000 // Longer timeout as this may generate content
 
-function safeJsonResponse(data: unknown, status = 200): NextResponse {
-  try {
-    return NextResponse.json(data, { status })
-  } catch {
-    return new NextResponse(JSON.stringify({
-      steps: [],
-      priority_step: null,
-      message: 'Unable to load today\'s agenda. Please try again.',
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
+// Default empty agenda response
+const DEFAULT_AGENDA = {
+  steps: [],
+  priority_step: null,
+  active_journey_count: 0,
+  message: 'No active journeys. Start a journey to begin your wisdom path.',
+  _offline: true,
 }
 
 export async function GET(request: NextRequest) {
@@ -37,7 +35,6 @@ export async function GET(request: NextRequest) {
       headers.set('X-Auth-UID', uidHeader)
     }
 
-    // Forward cookies for httpOnly cookie auth
     const cookieHeader = request.headers.get('Cookie')
     if (cookieHeader) {
       headers.set('Cookie', cookieHeader)
@@ -45,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s for AI generation
+      const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS)
 
       const response = await fetch(`${BACKEND_URL}/api/journeys/today`, {
         method: 'GET',
@@ -56,38 +53,36 @@ export async function GET(request: NextRequest) {
 
       clearTimeout(timeoutId)
 
-      if (!response.ok) {
-        // Return empty agenda on auth errors
-        if (response.status === 401) {
-          console.warn('User not authenticated for today agenda')
-          return safeJsonResponse({
-            steps: [],
-            priority_step: null,
-            message: 'Please log in to view your daily wisdom.',
-          })
-        }
+      if (response.status === 401) {
+        return NextResponse.json(
+          { error: 'authentication_required', message: 'Please log in to view your daily agenda' },
+          { status: 401 }
+        )
+      }
 
-        const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
-        console.error(`Backend today agenda returned ${response.status}:`, error)
-        return NextResponse.json(error, { status: response.status })
+      if (!response.ok) {
+        console.warn(`[journeys/today] Backend returned ${response.status}, returning empty agenda`)
+        return NextResponse.json(DEFAULT_AGENDA, {
+          headers: { 'X-MindVibe-Fallback': 'empty' },
+        })
       }
 
       const data = await response.json()
-      return safeJsonResponse(data)
+      return NextResponse.json(data)
+
     } catch (error) {
-      console.error('Error fetching today agenda from backend:', error)
-      return safeJsonResponse({
-        steps: [],
-        priority_step: null,
-        message: 'Unable to load today\'s wisdom. Please try again.',
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('[journeys/today] Request timeout')
+      } else {
+        console.error('[journeys/today] Error fetching from backend:', error)
+      }
+      // Return empty agenda on network error
+      return NextResponse.json(DEFAULT_AGENDA, {
+        headers: { 'X-MindVibe-Offline': 'true' },
       })
     }
   } catch (outerError) {
-    console.error('Critical error in today GET handler:', outerError)
-    return safeJsonResponse({
-      steps: [],
-      priority_step: null,
-      message: 'An unexpected error occurred.',
-    })
+    console.error('[journeys/today] Critical error:', outerError)
+    return NextResponse.json(DEFAULT_AGENDA)
   }
 }

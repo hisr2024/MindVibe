@@ -260,9 +260,33 @@ async def check_wisdom_journeys_access(
         return False, 0, 0
 
     # Count active journeys for this user
-    # IMPORTANT: Uses WisdomJourney model (not UserJourney) - this is the model
-    # used by the Wisdom Journey feature routes
+    # Counts BOTH legacy (WisdomJourney) and enhanced (UserJourney) models
+    # to support migration from old to new journey system
     active_count = 0
+    legacy_journeys = []
+    enhanced_journeys = []
+
+    # 1. Count enhanced journeys (UserJourney - new system)
+    try:
+        from backend.models import UserJourney, UserJourneyStatus
+
+        stmt = select(UserJourney).where(
+            and_(
+                UserJourney.user_id == user_id,
+                UserJourney.status == UserJourneyStatus.ACTIVE,
+                UserJourney.deleted_at.is_(None),  # Respect soft deletes
+            )
+        )
+        result = await db.execute(stmt)
+        enhanced_journeys = list(result.scalars().all())
+        active_count += len(enhanced_journeys)
+        logger.debug(f"Found {len(enhanced_journeys)} enhanced active journeys for user {user_id}")
+
+    except Exception as e:
+        # Table might not exist yet - this is ok during migration
+        logger.debug(f"Could not count enhanced journeys (table may not exist): {e}")
+
+    # 2. Count legacy journeys (WisdomJourney - old system)
     try:
         from backend.models import WisdomJourney, JourneyStatus
 
@@ -274,22 +298,29 @@ async def check_wisdom_journeys_access(
             )
         )
         result = await db.execute(stmt)
-        active_journeys = list(result.scalars().all())
-        active_count = len(active_journeys)
+        legacy_journeys = list(result.scalars().all())
+        active_count += len(legacy_journeys)
+        logger.debug(f"Found {len(legacy_journeys)} legacy active journeys for user {user_id}")
 
-        # Check trial day enforcement for free tier
-        is_trial = is_wisdom_journeys_trial(tier)
-        if is_trial and active_journeys:
+    except Exception as e:
+        # Table might not exist - this is ok
+        logger.debug(f"Could not count legacy journeys (table may not exist): {e}")
+
+    # 3. Check trial day enforcement for free tier (legacy journeys only)
+    is_trial = is_wisdom_journeys_trial(tier)
+    if is_trial and legacy_journeys:
+        try:
+            from backend.models import JourneyStatus as LegacyStatus
             trial_days = get_wisdom_journeys_trial_days(tier)
             if trial_days > 0:
                 now = datetime.now(UTC)
-                for journey in active_journeys:
+                for journey in legacy_journeys:
                     # Check if journey has exceeded trial days
                     if journey.created_at:
                         days_active = (now - journey.created_at).days
                         if days_active > trial_days:
                             # Auto-pause journeys that exceed trial limit
-                            journey.status = JourneyStatus.PAUSED
+                            journey.status = LegacyStatus.PAUSED
                             logger.info(
                                 f"Trial journey {journey.id} paused after {days_active} days "
                                 f"(limit: {trial_days} days)"
@@ -297,11 +328,10 @@ async def check_wisdom_journeys_access(
                             active_count -= 1
 
                 await db.commit()
+        except Exception as e:
+            logger.warning(f"Failed to enforce trial limits: {e}")
 
-    except Exception as e:
-        logger.warning(f"Failed to count active journeys: {e}")
-        active_count = 0
-
+    logger.info(f"Total active journeys for user {user_id}: {active_count} (enhanced: {len(enhanced_journeys)}, legacy: {len(legacy_journeys)})")
     return True, active_count, journey_limit
 
 

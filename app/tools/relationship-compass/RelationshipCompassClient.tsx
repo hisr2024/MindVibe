@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -42,14 +43,16 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 
 type RelationshipCompassResult = {
   response: string
+  sections: Record<string, string>
   requestedAt: string
+  gitaVerses?: number
 }
 
 const triggerPatterns = [
-  'Fights, arguments, or tense conversations',
-  'Requests for how to respond before replying to a heated message',
-  'Wanting to "win" or "prove a point"',
-  'Feeling defensive, judged, or misunderstood'
+  'Svadhyaya - when you need honest self-reflection in conflict',
+  'Daya & Karuna - developing deep compassion for both sides',
+  'Dharma - discovering right action aligned with your highest self',
+  'Kshama - when forgiveness is needed but feels impossible'
 ]
 
 export default function RelationshipCompassClient() {
@@ -84,9 +87,29 @@ export default function RelationshipCompassClient() {
 
       const data = await response.json()
 
-      // Use the full response from KIAAN for display
-      const displayResponse = data.response || _formatCompassGuidance(data.compass_guidance)
-      setResult({ response: displayResponse, requestedAt: new Date().toISOString() })
+      // Parse structured response - supports both legacy and ultra-deep sections
+      const guidance = data.compass_guidance
+      const fullResponse = data.response || _formatCompassGuidance(guidance)
+
+      if (guidance && typeof guidance === 'object') {
+        // Store both sections and full response
+        setResult({
+          response: fullResponse,
+          sections: guidance,
+          requestedAt: new Date().toISOString(),
+          gitaVerses: data.gita_verses_used || 0
+        })
+      } else if (fullResponse) {
+        // Fallback to full response only
+        setResult({
+          response: fullResponse,
+          sections: {},
+          requestedAt: new Date().toISOString(),
+          gitaVerses: data.gita_verses_used || 0
+        })
+      } else {
+        setError('Relationship Compass could not generate a response. Please try again.')
+      }
     } catch {
       setError('Unable to reach Relationship Compass. Check your connection and retry.')
     } finally {
@@ -179,17 +202,21 @@ export default function RelationshipCompassClient() {
               )}
             </div>
 
-            {/* Response */}
-            {result && (
-              <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
-                <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <span className="font-semibold text-orange-50">Relationship Compass response</span>
-                  <span>{new Date(result.requestedAt).toLocaleString()}</span>
-                </div>
-                <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
-                  {result.response}
-                </div>
-              </div>
+            {/* Sacred Loading State */}
+            {loading && (
+              <WisdomLoadingState tool="relationship_compass" />
+            )}
+
+            {/* Ultra-Deep Wisdom Response */}
+            {result && !loading && (
+              <WisdomResponseCard
+                tool="relationship_compass"
+                sections={result.sections}
+                fullResponse={result.response}
+                gitaVersesUsed={result.gitaVerses}
+                timestamp={result.requestedAt}
+                language="en-IN"
+              />
             )}
           </section>
 

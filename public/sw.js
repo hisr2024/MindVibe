@@ -12,7 +12,7 @@
  * the network connection is lost (decoherence), ensuring uninterrupted user experience.
  */
 
-const CACHE_VERSION = 'mindvibe-v14.3-journeys';
+const CACHE_VERSION = 'mindvibe-v14.4-journeys';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
@@ -27,19 +27,26 @@ const STATIC_ASSETS = [
 ];
 
 // Optional assets to attempt caching (won't fail install if missing)
+// NOTE: Do NOT include '/' here as it redirects to '/introduction' and cannot be cached
+// NOTE: Do NOT include '/favicon.ico' if it doesn't exist (causes 404)
 const OPTIONAL_ASSETS = [
-  '/',
   '/offline',
-  '/favicon.ico',
+  '/introduction', // The actual landing page after redirect
 ];
 
 // API endpoints to cache (for offline access)
+// Note: Only GET requests are cached. POST/PUT/DELETE are passed through with offline fallback.
 const CACHEABLE_API_ENDPOINTS = [
   '/api/chat/about',
   '/api/chat/health',
   '/api/gita/verses',
   '/api/wisdom',
   '/api/kiaan',
+  // Journeys API - catalog is cached, other endpoints have offline fallback
+  '/api/journeys/catalog',
+  '/api/journeys/access',
+  '/api/journeys/active',
+  '/api/journeys/today',
 ];
 
 // Maximum cache sizes (to prevent excessive storage use)
@@ -195,8 +202,23 @@ async function handleAPIRequest(request) {
       return networkResponse
     } catch (error) {
       console.error('[Service Worker] Network fetch failed for non-GET request:', error)
-      // Return a 200 with offline flag for wisdom-journey endpoints to enable graceful degradation
-      if (request.url.includes('/wisdom-journey/')) {
+      // Return a 200 with offline flag for journey endpoints to enable graceful degradation
+      if (request.url.includes('/wisdom-journey/') || request.url.includes('/api/journeys/')) {
+        // Handle specific journey operations offline
+        if (request.url.includes('/start')) {
+          return new Response(
+            JSON.stringify({
+              _offline: true,
+              error: 'offline',
+              message: 'Journey start queued for when you reconnect.',
+              queued: true,
+            }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          )
+        }
         return new Response(
           JSON.stringify({
             _offline: true,
@@ -268,8 +290,35 @@ async function handleAPIRequest(request) {
       return cachedResponse
     }
     
-    // Return offline fallback - use 200 for wisdom-journey to enable graceful degradation
-    if (request.url.includes('/wisdom-journey/')) {
+    // Return offline fallback - use 200 for wisdom-journey and journeys to enable graceful degradation
+    if (request.url.includes('/wisdom-journey/') || request.url.includes('/api/journeys/')) {
+      // Provide endpoint-specific offline responses
+      if (request.url.includes('/catalog')) {
+        // Return empty catalog with offline flag - frontend has fallback templates
+        return new Response(
+          JSON.stringify([]),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-MindVibe-Offline': 'true',
+            },
+          }
+        )
+      }
+      if (request.url.includes('/active') || request.url.includes('/today')) {
+        // Return empty active journeys
+        return new Response(
+          JSON.stringify(request.url.includes('/today') ? { steps: [], priority_step: null, _offline: true } : []),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-MindVibe-Offline': 'true',
+            },
+          }
+        )
+      }
       return new Response(
         JSON.stringify({
           _offline: true,

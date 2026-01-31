@@ -10,3 +10,4 @@ export { KarmaPlant, type KarmaPlantProps, type KarmaFootprintState } from './Ka
 export { KarmicTreeClient, type KarmicTreeClientProps } from './KarmicTreeClient'
 export { ResetPlanCard, type ResetPlanCardProps, type ResetPlanStep } from './ResetPlanCard'
 export { ProgressResetTool } from './ProgressResetTool'
+export { default as WisdomResponseCard, WisdomLoadingState } from './WisdomResponseCard'
