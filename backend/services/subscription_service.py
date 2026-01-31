@@ -63,19 +63,41 @@ async def get_or_create_free_subscription(
     db: AsyncSession, user_id: str
 ) -> UserSubscription:
     """Get existing subscription or create a free tier subscription for a user.
-    
+
     Args:
         db: Database session.
         user_id: The user's ID.
-        
+
     Returns:
         UserSubscription: The user's subscription (existing or newly created).
+
+    Raises:
+        ValueError: If user does not exist in database.
     """
+    from sqlalchemy import or_
+
     # Check for existing subscription
     subscription = await get_user_subscription(db, user_id)
     if subscription:
         return subscription
-    
+
+    # CRITICAL: Verify user exists before creating subscription
+    # The user_subscriptions table has FK to users - INSERT fails if user doesn't exist
+    user_check = await db.execute(
+        select(User).where(
+            or_(User.id == user_id, User.auth_uid == user_id)
+        )
+    )
+    user = user_check.scalar_one_or_none()
+    if not user:
+        logger.error(f"User {user_id} not found in database - cannot create subscription")
+        raise ValueError(
+            f"User not found: {user_id}. Please ensure user account exists."
+        )
+
+    # Use the correct user ID (in case we matched by auth_uid)
+    actual_user_id = user.id
+
     # Get the free plan (create if it doesn't exist for robustness)
     free_plan = await get_plan_by_tier(db, SubscriptionTier.FREE)
     if not free_plan:
@@ -107,10 +129,10 @@ async def get_or_create_free_subscription(
         await db.refresh(free_plan)
         logger.info("Created FREE subscription plan on-the-fly")
     
-    # Create subscription for the user
+    # Create subscription for the user (use actual_user_id in case we matched by auth_uid)
     now = datetime.now(UTC)
     subscription = UserSubscription(
-        user_id=user_id,
+        user_id=actual_user_id,
         plan_id=free_plan.id,
         status=SubscriptionStatus.ACTIVE,
         current_period_start=now,
@@ -119,8 +141,8 @@ async def get_or_create_free_subscription(
     db.add(subscription)
     await db.commit()
     await db.refresh(subscription)
-    
-    logger.info(f"Created free tier subscription for user {user_id}")
+
+    logger.info(f"Created free tier subscription for user {actual_user_id}")
     return subscription
 
 

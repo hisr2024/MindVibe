@@ -588,6 +588,15 @@ async def start_journeys(
                     "message": "Unable to connect to the database. Please try again in a moment.",
                 }
             )
+        elif "user not found" in error_msg:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "error": "user_not_found",
+                    "message": "Your user account was not found. Please log out and sign in again.",
+                    "technical": str(e)[:200],
+                }
+            )
         else:
             # Generic error with more context
             raise HTTPException(
