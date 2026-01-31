@@ -14,6 +14,7 @@ import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
 import { BreathingOrb } from '@/components/animations/BreathingOrb'
 import { ConfettiEffect } from '@/components/animations/ConfettiEffect'
 import { getBriefErrorMessage } from '@/lib/api-client'
+import { apiFetch } from '@/lib/api'
 import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
 import { springConfigs } from '@/lib/animations/spring-configs'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
@@ -56,9 +57,8 @@ export default function KarmaResetClient() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
 
-        const response = await fetch('/api/karma-reset/kiaan/health', {
+        const response = await apiFetch('/api/karma-reset/kiaan/health', {
           method: 'GET',
-          credentials: 'include',
           signal: controller.signal,
         })
         
@@ -87,7 +87,8 @@ export default function KarmaResetClient() {
     }
 
     try {
-      const response = await fetch('/api/karma-reset/kiaan/generate', {
+      // Use apiFetch to automatically include CSRF token for POST requests
+      const response = await apiFetch('/api/karma-reset/kiaan/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +98,6 @@ export default function KarmaResetClient() {
           feeling: whoFelt,
           repair_type: repairType,
         }),
-        credentials: 'include',
       })
 
       if (!response.ok) {
