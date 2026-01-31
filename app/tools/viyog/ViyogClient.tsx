@@ -42,6 +42,7 @@ type ViyogResult = {
   sections: Record<string, string>
   requestedAt: string
   gitaVerses?: number
+  citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
 }
 
 const flowSteps = [
@@ -55,6 +56,7 @@ export default function ViyogClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ViyogResult | null>('viyog_detachment', null)
+  const [sessionId, setSessionId] = useLocalState<string>('viyog_session', '')
 
   // Voice integration
   const { language } = useLanguage()
@@ -62,6 +64,21 @@ export default function ViyogClient() {
   useEffect(() => {
     if (error) setError(null)
   }, [concern, error])
+
+  useEffect(() => {
+    if (!sessionId && typeof window !== 'undefined') {
+      setSessionId(window.crypto.randomUUID())
+    }
+  }, [sessionId, setSessionId])
+
+  const mapSections = (sections: Record<string, string>) => {
+    const normalized: Record<string, string> = {}
+    Object.entries(sections).forEach(([key, value]) => {
+      if (!value) return
+      normalized[key] = value
+    })
+    return normalized
+  }
 
   async function requestDetachment() {
     const trimmedConcern = sanitizeInput(concern.trim())
@@ -71,11 +88,17 @@ export default function ViyogClient() {
     setError(null)
 
     try {
-      // Use local API route to proxy requests to backend (avoids CORS issues)
-      const response = await fetch('/api/viyoga/detach', {
+      const activeSessionId = sessionId || window.crypto.randomUUID()
+      if (!sessionId) setSessionId(activeSessionId)
+
+      const response = await fetch('/api/viyoga/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outcome_worry: trimmedConcern })
+        body: JSON.stringify({
+          message: trimmedConcern,
+          sessionId: activeSessionId,
+          mode: 'full',
+        })
       })
 
       if (!response.ok) {
@@ -84,30 +107,22 @@ export default function ViyogClient() {
       }
 
       const data = await response.json()
+      const responseText = typeof data.assistant === 'string' ? data.assistant : ''
+      const sections = data.sections && typeof data.sections === 'object' ? data.sections : {}
+      const citations = Array.isArray(data.citations) ? data.citations : []
 
-      // Parse structured response - supports both legacy and ultra-deep sections
-      const guidance = data.detachment_guidance
-      const fullResponse = data.response || ''
-
-      if (guidance && typeof guidance === 'object') {
-        // Store both sections and full response
-        setResult({
-          response: fullResponse,
-          sections: guidance,
-          requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0
-        })
-      } else if (fullResponse) {
-        // Fallback to full response only
-        setResult({
-          response: fullResponse,
-          sections: {},
-          requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0
-        })
-      } else {
+      if (!responseText) {
         setError('Viyoga could not generate a response. Please try again.')
+        return
       }
+
+      setResult({
+        response: responseText,
+        sections: mapSections(sections),
+        requestedAt: new Date().toISOString(),
+        gitaVerses: citations.length,
+        citations,
+      })
     } catch {
       setError('Unable to reach Viyoga. Check your connection and try again.')
     } finally {
@@ -203,6 +218,7 @@ export default function ViyogClient() {
                 gitaVersesUsed={result.gitaVerses}
                 timestamp={result.requestedAt}
                 language={language}
+                citations={result.citations}
               />
             )}
           </section>

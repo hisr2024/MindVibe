@@ -37,7 +37,7 @@ interface WisdomResponseCardProps {
   timestamp: string
   language?: string
   analysisMode?: AnalysisMode
-  sources?: Array<{ file: string; reference: string }>
+  citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
 }
 
 // Section configurations for each tool
@@ -46,6 +46,12 @@ const SECTION_CONFIG = {
     icon: '🎯',
     name: 'Viyoga',
     sectionMeta: {
+      sacred_recognition: { title: 'Sacred Recognition', icon: '🙏', order: 1 },
+      anatomy_of_attachment: { title: 'Anatomy of Attachment', icon: '🔗', order: 2 },
+      gita_core_transmission: { title: 'Gita Core Transmission', icon: '🕉️', order: 3 },
+      sakshi_practice_60s: { title: 'Sakshi Practice (60s)', icon: '👁️', order: 4 },
+      karma_yoga_step_today: { title: 'Karma Yoga Step (Today)', icon: '⚡', order: 5 },
+      one_question: { title: 'One Question', icon: '❓', order: 6 },
       honoring_pain: { title: 'Sacred Recognition', icon: '🙏', order: 1 },
       sacred_acknowledgment: { title: 'Sacred Recognition', icon: '🙏', order: 1 },
       understanding_attachment: { title: 'Anatomy of Attachment', icon: '🔗', order: 2 },
@@ -213,12 +219,12 @@ export default function WisdomResponseCard({
   gitaVersesUsed = 0,
   timestamp,
   language = 'en-IN',
-  analysisMode = 'quick',
-  sources = [],
+  analysisMode = 'standard',
+  citations = [],
 }: WisdomResponseCardProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [showFullText, setShowFullText] = useState(false)
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle')
+  const [copyLabel, setCopyLabel] = useState('Copy')
 
   const config = SECTION_CONFIG[tool]
   const accentColorMap = {
@@ -295,10 +301,11 @@ export default function WisdomResponseCard({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(fullResponse)
-      setCopyStatus('copied')
-      window.setTimeout(() => setCopyStatus('idle'), 1500)
+      setCopyLabel('Copied')
+      window.setTimeout(() => setCopyLabel('Copy'), 1500)
     } catch {
-      setCopyStatus('idle')
+      setCopyLabel('Copy failed')
+      window.setTimeout(() => setCopyLabel('Copy'), 1500)
     }
   }
 
@@ -333,6 +340,12 @@ export default function WisdomResponseCard({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="text-[10px] px-2 py-1 rounded border border-gray-600/50 text-gray-400 hover:text-white hover:border-gray-500 transition"
+          >
+            {copyLabel}
+          </button>
           <VoiceResponseButton
             text={fullResponse.replace(/\*\*/g, '')}
             language={language}
@@ -436,18 +449,26 @@ export default function WisdomResponseCard({
         </div>
       )}
 
-      {sources.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-gray-700/50">
-          <h4 className="text-xs font-semibold text-gray-300 mb-2">Sources</h4>
-          <ul className="space-y-1 text-xs text-gray-400">
-            {sources.map((source, index) => (
-              <li key={`${source.reference}-${index}`}>
-                {source.reference} · {source.file}
-              </li>
-            ))}
-          </ul>
+      {citations.length > 0 && (
+        <div className="mt-5 rounded-xl border border-gray-700/50 bg-black/40 p-3 text-xs text-gray-400">
+          <span className="text-gray-300 font-semibold">Sources:</span>{' '}
+          {citations.map((citation, index) => {
+            const reference = citation.reference_if_any ? ` (${citation.reference_if_any})` : ''
+            return (
+              <span key={`${citation.chunk_id}-${index}`}>
+                {citation.source_file}{reference}{index < citations.length - 1 ? '; ' : ''}
+              </span>
+            )
+          })}
         </div>
       )}
+
+      {/* Sacred Closing */}
+      <div className="mt-6 pt-4 border-t border-gray-700/50 text-center">
+        <p className="text-xs text-gray-500 italic">
+          🙏 This wisdom transmission draws from 5000 years of Bhagavad Gita teachings
+        </p>
+      </div>
     </div>
   )
 }
