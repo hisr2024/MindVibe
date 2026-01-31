@@ -18,6 +18,13 @@ interface WisdomSection {
   title: string
   content: string
   icon?: string
+  order?: number
+}
+
+interface SectionMeta {
+  title: string
+  icon: string
+  order: number
 }
 
 interface WisdomResponseCardProps {
@@ -229,7 +236,8 @@ export default function WisdomResponseCard({
   // Parse sections into ordered array
   const parsedSections: WisdomSection[] = Object.entries(sections)
     .map(([key, content]) => {
-      const meta = config.sectionMeta[key as keyof typeof config.sectionMeta] || {
+      const sectionMeta = config.sectionMeta as Record<string, SectionMeta>
+      const meta: SectionMeta = sectionMeta[key] || {
         title: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
         icon: '📿',
         order: 99,
