@@ -646,23 +646,75 @@ ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRA
             return f"I'm struggling with this relationship situation: {user_input}"
 
     def _parse_response(self, tool: WellnessTool, response_text: str) -> dict[str, str]:
-        """Parse the response into structured sections."""
-        lines = response_text.strip().split('\n')
-        sections = []
-        current = []
+        """Parse the response into structured sections with smart detection.
 
-        for line in lines:
-            if line.strip():
-                current.append(line.strip())
-            elif current:
+        Uses multiple strategies:
+        1. Numbered section detection (1., 2., etc.)
+        2. Header detection (keywords like "Sacred", "Teaching", etc.)
+        3. Paragraph-based fallback
+        """
+        import re
+
+        # Clean the response
+        text = response_text.strip()
+
+        # Remove emoji from end
+        text = text.replace('💙', '').strip()
+
+        # Strategy 1: Try to detect numbered sections (1., 2., 3., etc.)
+        numbered_pattern = r'(?:^|\n)(?:\*\*)?(\d+)[.\)]\s*(?:\*\*)?'
+        numbered_matches = list(re.finditer(numbered_pattern, text))
+
+        if len(numbered_matches) >= 3:
+            # Good numbered structure found - split by numbers
+            sections = []
+            for i, match in enumerate(numbered_matches):
+                start = match.end()
+                end = numbered_matches[i + 1].start() if i + 1 < len(numbered_matches) else len(text)
+                section_text = text[start:end].strip()
+                # Clean up section text
+                section_text = re.sub(r'^[A-Z\s]+:', '', section_text, count=1).strip()  # Remove header labels
+                section_text = ' '.join(section_text.split())  # Normalize whitespace
+                if section_text:
+                    sections.append(section_text)
+        else:
+            # Strategy 2: Split by paragraph breaks and filter substantive content
+            paragraphs = text.split('\n\n')
+            sections = []
+            current = []
+
+            for para in paragraphs:
+                para = para.strip()
+                if para:
+                    # Check if this is a new logical section (starts with header-like text or significant content)
+                    if len(para) > 50:  # Substantive paragraph
+                        if current:
+                            sections.append(' '.join(current))
+                            current = []
+                        sections.append(' '.join(para.split()))
+                    else:
+                        current.append(' '.join(para.split()))
+
+            if current:
                 sections.append(' '.join(current))
-                current = []
-        if current:
-            sections.append(' '.join(current))
 
-        # Remove emoji from last section
-        if sections:
-            sections[-1] = sections[-1].replace('💙', '').strip()
+            # If we still have too few sections, do simple line-based splitting
+            if len(sections) < 3:
+                lines = text.split('\n')
+                sections = []
+                current = []
+
+                for line in lines:
+                    if line.strip():
+                        current.append(line.strip())
+                    elif current:
+                        sections.append(' '.join(current))
+                        current = []
+                if current:
+                    sections.append(' '.join(current))
+
+        # Filter out very short sections (likely artifacts)
+        sections = [s for s in sections if len(s) > 30]
 
         # Return tool-specific section structure
         if tool == WellnessTool.VIYOGA:
@@ -673,22 +725,51 @@ ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRA
             return self._parse_compass_sections(sections)
 
     def _parse_viyoga_sections(self, sections: list[str]) -> dict[str, str]:
-        """Parse Viyoga response sections."""
-        if len(sections) >= 4:
-            return {
-                "validation": sections[0],
-                "attachment_check": sections[1],
-                "detachment_principle": sections[2],
-                "one_action": sections[3],
-            }
+        """Parse Viyoga response sections into ultra-deep structure.
+
+        Maps AI response sections to:
+        - honoring_pain: Sacred Recognition - acknowledges the user's specific worry with warmth
+        - understanding_attachment: Anatomy of Attachment - deep analysis of phala-sakti
+        - karma_yoga_liberation: Complete Karma Yoga Teaching - multi-layered transmission
+        - witness_consciousness: Sakshi Bhava Practice - witness consciousness guidance
+        - practical_wisdom: Sacred Practice - specific actionable guidance for their situation
+        - eternal_anchor: Eternal Truth - timeless reminder of completeness
+        """
+        # Ultra-deep section keys in order
+        section_keys = [
+            "honoring_pain",           # Section 1: Sacred Recognition
+            "understanding_attachment", # Section 2: Five Layers of Attachment
+            "karma_yoga_liberation",    # Section 3: Complete Karma Yoga Teaching
+            "witness_consciousness",    # Section 4: Sakshi Bhava Practice
+            "practical_wisdom",         # Section 5: Sacred Practice
+            "eternal_anchor",           # Section 6: Eternal Truth
+        ]
+
+        result = {key: "" for key in section_keys}
+
+        if len(sections) >= 6:
+            # Full ultra-deep response - map all sections
+            for i, key in enumerate(section_keys):
+                if i < len(sections):
+                    result[key] = sections[i]
+        elif len(sections) >= 4:
+            # Medium response - map to essential sections
+            result["honoring_pain"] = sections[0]
+            result["understanding_attachment"] = sections[1]
+            result["karma_yoga_liberation"] = sections[2]
+            result["practical_wisdom"] = sections[3]
+            if len(sections) >= 5:
+                result["eternal_anchor"] = sections[4]
         elif len(sections) >= 2:
-            return {
-                "validation": sections[0],
-                "attachment_check": "",
-                "detachment_principle": sections[1] if len(sections) > 1 else "",
-                "one_action": sections[2] if len(sections) > 2 else "",
-            }
-        return {"validation": sections[0] if sections else "", "attachment_check": "", "detachment_principle": "", "one_action": ""}
+            # Short response - map to core sections
+            result["honoring_pain"] = sections[0]
+            result["karma_yoga_liberation"] = sections[1] if len(sections) > 1 else ""
+            result["practical_wisdom"] = sections[2] if len(sections) > 2 else ""
+        elif sections:
+            # Single section - use as acknowledgment
+            result["honoring_pain"] = sections[0]
+
+        return result
 
     def _parse_ardha_sections(self, sections: list[str]) -> dict[str, str]:
         """Parse Ardha response sections."""
@@ -738,16 +819,34 @@ ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRA
         return defaults.get(tool, "Draw from timeless wisdom about inner peace and right action.")
 
     def _get_fallback_response(self, tool: WellnessTool, user_input: str) -> WellnessResponse:
-        """Get a fallback response when the model is unavailable."""
-        input_snippet = user_input[:50] + "..." if len(user_input) > 50 else user_input
+        """Get a fallback response when the model is unavailable.
+
+        Uses ultra-deep section keys with personalized, friend-like content
+        that acknowledges the user's specific situation.
+        """
+        input_snippet = user_input[:100] if len(user_input) <= 100 else user_input[:100] + "..."
+        input_short = user_input[:50] if len(user_input) <= 50 else user_input[:50] + "..."
 
         if tool == WellnessTool.VIYOGA:
-            content = f"I really hear you - this worry is heavy, and it makes sense that you're feeling it.\n\nHere's what I notice: your peace right now depends on how this turns out. That's a tough place to be, because outcomes aren't fully in our hands.\n\nBut here's something that might help: what if you could give your best effort AND feel okay regardless of what happens? You can only control what you do - not the result. That's actually freeing when you let it sink in.\n\nToday, pick one small thing you can do about this situation. Do it with your full attention. Then take a breath and remind yourself: you did what you could. The rest isn't yours to carry. 💙"
+            content = f"""Dear friend, I bow to the courage it takes to name your fear. This worry about "{input_short}" - I truly see it, and I feel the weight you're carrying. Your anxiety isn't weakness; it reveals how deeply you care about this outcome. You are not alone in this struggle.
+
+Ancient wisdom teaches us that suffering arises not from outcomes themselves, but from our attachment to them - what the sages call "phala-sakti" (attachment to fruits). Your mind has become entangled with a future that hasn't yet unfolded. While this is profoundly human, it is also the root of your unease. When we bind our peace to things we cannot control, we create our own suffering.
+
+The timeless teaching of Karma Yoga offers profound liberation: "Karmanye vadhikaraste, ma phaleshu kadachana" - You have the right to your actions alone, never to their fruits. This is not passive resignation, but active surrender. Imagine an archer who draws the bow with complete focus, aims with full presence, and releases with perfect technique. Once released, the arrow's path is no longer the archer's to control. Your dharma is in the action itself - the effort, the intention, the presence - not in where the arrow lands.
+
+Ancient wisdom also reveals: You are not your anxiety - you are the awareness watching it. This is "sakshi bhava" - witness consciousness. Notice: "I am having thoughts about this outcome." Feel the space between "I" and "these thoughts." In that space lives your true nature - peaceful, complete, unshaken. This witness has watched countless worries arise and dissolve. It remains untouched.
+
+Here is your sacred practice for this moment: Before taking any action related to "{input_short}", pause. Place your hand on your heart. Take three slow breaths - each one releasing attachment. Then say to yourself: "I offer my best effort as sacred service. The outcome belongs to the universe." Now act with complete presence, as if this action is the only action that matters. After, release. "It is done. I am free."
+
+Carry this eternal truth: You are already complete, exactly as you are, regardless of any outcome. No result can add to you. No result can diminish you. You are the infinite sky; outcomes are merely clouds passing through - light ones, dark ones, storm clouds. They pass. The sky remains. You have always been the sky. 💙"""
+
             sections = {
-                "validation": f"I really hear you - this worry about '{input_snippet}' is heavy. It's okay to feel this way.",
-                "attachment_check": "Your peace right now depends on how this turns out. That's a tough place to be.",
-                "detachment_principle": "What if you could give your best effort AND feel okay no matter what happens? You can only control what you do - not the result.",
-                "one_action": "Today, pick one small thing you can do about this. Do it with your full attention. Then let go of the rest.",
+                "honoring_pain": f"Dear friend, I bow to the courage it takes to name your fear. This worry about \"{input_short}\" - I truly see it, and I feel the weight you're carrying. Your anxiety isn't weakness; it reveals how deeply you care about this outcome. Every seeker who ever lived has stood where you stand now. You are not alone in this struggle.",
+                "understanding_attachment": f"Ancient wisdom names this pattern: \"phala-sakti\" - the binding force of attachment to outcomes. Your peace has become conditional: \"I can only be okay IF {input_short} turns out well.\" This creates suffering not once but many times - in fearful anticipation, in obsessive planning, in the waiting, even after the outcome arrives. The liberating insight: The outcome itself has never caused your suffering - only the attachment to it. Like gripping water, the tighter we hold, the faster it escapes. Open hands receive everything.",
+                "karma_yoga_liberation": "The timeless teaching of Karma Yoga offers profound liberation: \"Karmanye vadhikaraste, ma phaleshu kadachana\" - You have the right to your actions alone, never to their fruits. This is \"nishkama karma\" - desireless action. NOT indifference (you still care deeply), NOT passivity (you still act with full commitment), BUT freedom from the tyranny of results. The archer who releases attachment to the target enters a flow state where aim becomes perfect. Attachment creates trembling; surrender creates steadiness.",
+                "witness_consciousness": "Ancient wisdom reveals: You are not your anxiety - you are the awareness watching it. This is \"sakshi bhava\" - witness consciousness. Practice: \"I notice I am having thoughts about this outcome.\" Feel the space between \"I\" and \"these thoughts.\" In that gap lives your true nature - vast, peaceful, untouched. You are the \"drashtri\" - the Seer, the unchanging witness. Like a mountain unmoved by weather, your awareness remains steady while thoughts and worries pass like clouds.",
+                "practical_wisdom": f"Here is your sacred practice for this moment: Before taking any action related to \"{input_short}\", pause. Place your hand on your heart. Take three deep breaths - each one releasing attachment. Then say: \"I offer my best effort as sacred service. The outcome belongs to the universe.\" Act with complete presence, as if this action is the only one that matters. After, release: \"It is done. I am free.\" This is \"ishvara pranidhana\" - surrender to the higher.",
+                "eternal_anchor": "Carry this eternal truth: You are already complete, exactly as you are, regardless of any outcome. Your worth was never meant to be measured by results - it is your birthright. \"Yogastha kuru karmani\" - Established in your true self, perform action. You are the infinite sky; outcomes are merely clouds - light ones, dark ones, storm clouds. They pass. The sky remains. You have always been the sky. You will always be the sky.",
             }
         elif tool == WellnessTool.ARDHA:
             content = f"I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙"
