@@ -201,15 +201,22 @@ class TestArdhaReframing:
         self, wellness_model, mock_db, sample_negative_thought
     ):
         """Test that Ardha response includes CBT framework reference."""
-        # Mock the provider manager to avoid actual API calls
-        with patch.object(wellness_model, 'provider_manager', None):
-            with patch.object(wellness_model, 'client', None):
-                result = await wellness_model.generate_response(
-                    tool=WellnessTool.ARDHA,
-                    user_input=sample_negative_thought,
-                    db=mock_db,
-                    analysis_mode=AnalysisMode.STANDARD,
-                )
+        # Mock the private attributes to avoid actual API calls
+        original_provider = wellness_model._provider_manager
+        original_client = getattr(wellness_model, 'client', None)
+        try:
+            wellness_model._provider_manager = None
+            wellness_model.client = None
+            result = await wellness_model.generate_response(
+                tool=WellnessTool.ARDHA,
+                user_input=sample_negative_thought,
+                db=mock_db,
+                analysis_mode=AnalysisMode.STANDARD,
+            )
+        finally:
+            wellness_model._provider_manager = original_provider
+            if original_client is not None:
+                wellness_model.client = original_client
 
         # Even with fallback, should have psychological framework
         assert result.psychological_framework != "" or result.model == "fallback"
