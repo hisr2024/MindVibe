@@ -10,22 +10,19 @@ Provides decorators and dependencies for enforcing subscription-based access con
 
 import logging
 import os
-from functools import wraps
-from typing import Callable, Optional
 
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.models import User, SubscriptionStatus
+from backend.models import SubscriptionStatus, User
 from backend.services.subscription_service import (
-    get_user_subscription,
-    get_or_create_free_subscription,
-    check_kiaan_quota,
-    check_journal_access,
     check_feature_access,
+    check_journal_access,
+    check_kiaan_quota,
     check_wisdom_journeys_access,
+    get_or_create_free_subscription,
     get_user_tier,
 )
 
@@ -40,11 +37,11 @@ DEFAULT_DEVELOPER_EMAILS: set[str] = set()
 
 # Additional developer emails from environment variable
 # Format: comma-separated list of emails (e.g., DEVELOPER_EMAILS=dev1@example.com,dev2@example.com)
-_env_developer_emails = set(
+_env_developer_emails = {
     email.strip().lower()
     for email in os.getenv("DEVELOPER_EMAILS", "").split(",")
     if email.strip()
-)
+}
 
 # Combined developer emails (hardcoded + environment variable)
 DEVELOPER_EMAILS = DEFAULT_DEVELOPER_EMAILS | _env_developer_emails
@@ -203,30 +200,30 @@ class SubscriptionRequired:
                     "subscription_status": subscription.status.value,
                 },
             )
-        
+
         return user_id
 
 
 class KiaanQuotaRequired:
     """Dependency that enforces KIAAN question quota.
-    
+
     Free tier users are limited to 10 questions per month.
     """
-    
+
     async def __call__(
         self,
         request: Request,
         db: AsyncSession = Depends(get_db),
     ) -> tuple[str, int, int]:
         """Check that user has remaining KIAAN quota.
-        
+
         Args:
             request: The FastAPI request.
             db: Database session.
-            
+
         Returns:
             tuple: (user_id, usage_count, usage_limit)
-            
+
         Raises:
             HTTPException: If user has exceeded their quota.
         """
@@ -257,7 +254,7 @@ class KiaanQuotaRequired:
                     "upgrade_url": "/subscription/upgrade",
                 },
             )
-        
+
         return user_id, usage_count, usage_limit
 
 
@@ -311,7 +308,7 @@ class JournalAccessRequired:
                     "upgrade_url": "/subscription/upgrade",
                 },
             )
-        
+
         return user_id
 
 
@@ -367,7 +364,7 @@ class WisdomJourneysAccessRequired:
                     "error": "user_not_found",
                     "message": "Your user account was not found. Please log out and sign in again.",
                 },
-            )
+            ) from None
 
         # Check for developer bypass - gives full unlimited access
         if await is_developer(db, user_id):
@@ -484,7 +481,7 @@ class FeatureRequired:
                     "upgrade_url": "/subscription/upgrade",
                 },
             )
-        
+
         return user_id
 
 
@@ -518,15 +515,15 @@ def require_wisdom_journeys_with_limit(requested_count: int = 1) -> WisdomJourne
 
 def require_feature(feature_name: str) -> FeatureRequired:
     """Factory function to create a feature access dependency.
-    
+
     Usage:
         @router.get("/analytics")
         async def get_analytics(user_id: str = Depends(require_feature("advanced_analytics"))):
             ...
-    
+
     Args:
         feature_name: The name of the feature to check.
-        
+
     Returns:
         FeatureRequired: A dependency that checks for the specified feature.
     """
