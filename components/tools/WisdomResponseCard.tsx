@@ -203,7 +203,7 @@ export default function WisdomResponseCard({
   const [showFullText, setShowFullText] = useState(false)
 
   const config = SECTION_CONFIG[tool]
-  const accentColorClass = {
+  const accentColorMap = {
     orange: {
       border: 'border-orange-500/20',
       bg: 'bg-orange-500/5',
@@ -231,7 +231,8 @@ export default function WisdomResponseCard({
       glow: 'shadow-rose-500/10',
       button: 'from-rose-400 via-[#ff6b8a] to-rose-200',
     },
-  }[config.accentColor]
+  }
+  const accentColorClass = accentColorMap[config.accentColor as keyof typeof accentColorMap] || accentColorMap.orange
 
   // Parse sections into ordered array
   const parsedSections: WisdomSection[] = Object.entries(sections)
