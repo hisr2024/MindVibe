@@ -286,3 +286,188 @@ async def learning_health() -> dict[str, Any]:
             "status": "error",
             "error": str(e)
         }
+
+
+# =============================================================================
+# 24/7 DAEMON ENDPOINTS
+# =============================================================================
+
+def get_daemon():
+    """Get the 24/7 learning daemon instance."""
+    try:
+        from backend.services.kiaan_learning_daemon import get_learning_daemon
+        return get_learning_daemon()
+    except Exception as e:
+        logger.error(f"Failed to get learning daemon: {e}")
+        raise HTTPException(status_code=500, detail="Learning daemon not available")
+
+
+@router.get("/daemon/status")
+async def get_daemon_status() -> dict[str, Any]:
+    """
+    Get the status of the 24/7 learning daemon.
+
+    Returns:
+        - status: Current daemon state (running, stopped, paused, etc.)
+        - uptime: How long the daemon has been running
+        - workers_active: Number of active content workers
+        - config: Current daemon configuration
+    """
+    daemon = get_daemon()
+    return daemon.get_status()
+
+
+@router.get("/daemon/health")
+async def get_daemon_health() -> dict[str, Any]:
+    """
+    Get detailed health status of the 24/7 learning daemon.
+
+    Returns:
+        - status: Current state
+        - uptime_seconds: Uptime in seconds
+        - last_successful_fetch: Timestamp of last successful fetch
+        - last_error: Most recent error (if any)
+        - total_items_acquired: Total items stored
+        - sources_healthy: Health status of each source
+        - memory_usage_mb: Current memory usage
+    """
+    daemon = get_daemon()
+    health = daemon.get_health_status()
+
+    return {
+        "status": health.status.value,
+        "uptime_seconds": health.uptime_seconds,
+        "last_successful_fetch": (
+            health.last_successful_fetch.isoformat()
+            if health.last_successful_fetch else None
+        ),
+        "last_error": health.last_error,
+        "total_items_acquired": health.total_items_acquired,
+        "total_errors": health.total_errors,
+        "current_retry_count": health.current_retry_count,
+        "sources_healthy": health.sources_healthy,
+        "memory_usage_mb": health.memory_usage_mb,
+        "timestamp": health.timestamp.isoformat(),
+    }
+
+
+@router.get("/daemon/metrics")
+async def get_daemon_metrics() -> dict[str, Any]:
+    """
+    Get comprehensive metrics from the 24/7 learning daemon.
+
+    Returns detailed metrics for observability:
+        - Fetch counts (total, successful, failed)
+        - Items processed (fetched, validated, stored, rejected)
+        - Per-source breakdown (YouTube, Audio, Web)
+        - Error tracking
+        - Uptime information
+    """
+    daemon = get_daemon()
+    return daemon.get_metrics()
+
+
+@router.post("/daemon/start")
+async def start_daemon() -> dict[str, Any]:
+    """
+    Start the 24/7 learning daemon.
+
+    This starts continuous content acquisition from all sources.
+    The daemon runs automatically and fetches content at configured intervals:
+        - YouTube: Every 30 minutes
+        - Audio: Every 1 hour
+        - Web: Every 1 hour
+
+    All content is validated for strict Bhagavad Gita compliance.
+    """
+    daemon = get_daemon()
+
+    try:
+        await daemon.start()
+        return {
+            "status": "success",
+            "message": "24/7 Learning Daemon started",
+            "daemon_status": daemon.get_status(),
+        }
+    except Exception as e:
+        logger.error(f"Failed to start daemon: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Failed to start daemon",
+        }
+
+
+@router.post("/daemon/stop")
+async def stop_daemon() -> dict[str, Any]:
+    """
+    Stop the 24/7 learning daemon.
+
+    This gracefully stops all content workers and the health monitor.
+    The daemon can be restarted later.
+    """
+    daemon = get_daemon()
+
+    try:
+        await daemon.stop()
+        return {
+            "status": "success",
+            "message": "24/7 Learning Daemon stopped",
+            "daemon_status": daemon.get_status(),
+        }
+    except Exception as e:
+        logger.error(f"Failed to stop daemon: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Failed to stop daemon",
+        }
+
+
+@router.post("/daemon/pause")
+async def pause_daemon() -> dict[str, Any]:
+    """
+    Pause the 24/7 learning daemon.
+
+    This pauses content fetching but keeps the daemon running.
+    Use resume to continue fetching.
+    """
+    daemon = get_daemon()
+
+    try:
+        await daemon.pause()
+        return {
+            "status": "success",
+            "message": "24/7 Learning Daemon paused",
+            "daemon_status": daemon.get_status(),
+        }
+    except Exception as e:
+        logger.error(f"Failed to pause daemon: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+        }
+
+
+@router.post("/daemon/resume")
+async def resume_daemon() -> dict[str, Any]:
+    """
+    Resume the 24/7 learning daemon from paused state.
+
+    This resumes content fetching.
+    """
+    daemon = get_daemon()
+
+    try:
+        await daemon.resume()
+        return {
+            "status": "success",
+            "message": "24/7 Learning Daemon resumed",
+            "daemon_status": daemon.get_status(),
+        }
+    except Exception as e:
+        logger.error(f"Failed to resume daemon: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+        }

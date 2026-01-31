@@ -316,30 +316,36 @@ async def startup():
             print(f"⚠️ Subscription plan seeding had issues: {seed_error}")
             # Don't fail startup - but log the warning
 
-        # Step 5: Initialize KIAAN Learning System (v4.1 Autonomous Gita Wisdom)
-        print("\n🕉️ Initializing KIAAN Learning System...")
+        # Step 5: Initialize KIAAN 24/7 Learning Daemon (Autonomous Gita Wisdom)
+        print("\n🕉️ Initializing KIAAN 24/7 Learning Daemon...")
         try:
-            from backend.services.kiaan_learning_engine import (
-                get_kiaan_learning_engine,
-                initialize_learning_system,
-            )
-            learning_engine = get_kiaan_learning_engine()
+            from backend.services.kiaan_learning_daemon import get_learning_daemon
 
-            # Start the automatic scheduler
-            learning_engine.start_scheduler()
+            daemon = get_learning_daemon()
 
-            # Run initial acquisition if knowledge base is empty
+            # Start the 24/7 daemon
             import asyncio
-            asyncio.create_task(learning_engine.run_initial_acquisition())
+            asyncio.create_task(daemon.start())
 
-            stats = learning_engine.get_statistics()
-            print(f"✅ KIAAN Learning System ready")
-            print(f"   • Knowledge base: {stats.get('validated_items', 0)} validated wisdom items")
-            print(f"   • Auto-scheduler: Running (every 6 hours)")
+            print(f"✅ KIAAN 24/7 Learning Daemon starting")
+            print(f"   • Mode: CONTINUOUS (24/7)")
+            print(f"   • YouTube fetch interval: 30 minutes")
+            print(f"   • Audio fetch interval: 1 hour")
+            print(f"   • Web fetch interval: 1 hour")
+            print(f"   • Auto-recovery: Enabled (exponential backoff)")
+            print(f"   • Health monitoring: Enabled")
             print(f"   • Sources: YouTube, Audio Platforms, Web")
             print(f"   • Compliance: Strict Bhagavad Gita only")
-        except Exception as learning_error:
-            print(f"⚠️ KIAAN Learning System initialization had issues: {learning_error}")
+        except Exception as daemon_error:
+            print(f"⚠️ KIAAN Learning Daemon initialization had issues: {daemon_error}")
+            # Fallback to legacy scheduler
+            try:
+                from backend.services.kiaan_learning_engine import get_kiaan_learning_engine
+                learning_engine = get_kiaan_learning_engine()
+                learning_engine.start_scheduler()
+                print(f"✅ Fallback: KIAAN Learning Scheduler started (every 6 hours)")
+            except Exception as fallback_error:
+                print(f"⚠️ KIAAN Learning System fallback failed: {fallback_error}")
             # Don't fail startup - learning is supplementary
 
     except Exception as exc:
@@ -357,6 +363,24 @@ async def startup():
 async def shutdown():
     """Cleanup resources on application shutdown."""
     print("\n🛑 MINDVIBE - SHUTDOWN SEQUENCE")
+
+    # Stop KIAAN 24/7 Learning Daemon
+    try:
+        from backend.services.kiaan_learning_daemon import get_learning_daemon
+        daemon = get_learning_daemon()
+        await daemon.stop()
+        print("✅ KIAAN 24/7 Learning Daemon stopped")
+    except Exception as e:
+        print(f"⚠️ Error stopping KIAAN daemon: {e}")
+
+    # Stop legacy scheduler if running
+    try:
+        from backend.services.kiaan_learning_engine import get_kiaan_learning_engine
+        learning_engine = get_kiaan_learning_engine()
+        learning_engine.stop_scheduler()
+        print("✅ KIAAN Learning Scheduler stopped")
+    except Exception as e:
+        print(f"⚠️ Error stopping KIAAN scheduler: {e}")
 
     # Dispose database engine
     try:
