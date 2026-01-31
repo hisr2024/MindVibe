@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { VoiceResponseButton } from '@/components/voice'
 
 /**
@@ -422,12 +422,12 @@ export function WisdomLoadingState({ tool }: { tool: 'viyoga' | 'ardha' | 'relat
   const messages = loadingMessages[tool]
 
   // Cycle through messages
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setMessageIndex(prev => (prev + 1) % messages.length)
     }, 2000)
     return () => clearInterval(interval)
-  })
+  }, [messages.length])
 
   return (
     <div className="rounded-2xl bg-black/40 border border-amber-500/20 p-8 text-center">
