@@ -27,7 +27,7 @@ interface SectionMeta {
   order: number
 }
 
-type AnalysisMode = 'standard' | 'deep_dive' | 'quantum_dive'
+type AnalysisMode = 'quick' | 'deep' | 'quantum'
 
 interface WisdomResponseCardProps {
   tool: 'viyoga' | 'ardha' | 'relationship_compass'
@@ -76,36 +76,13 @@ const SECTION_CONFIG = {
     icon: '🔄',
     name: 'Ardha',
     sectionMeta: {
-      // Standard mode sections
-      sacred_witness: { title: 'Sacred Witnessing', icon: '👁️', order: 1 },
-      recognition: { title: 'Recognition', icon: '👁️', order: 1 },
-      architecture_of_mind: { title: 'Architecture of Mind', icon: '🧠', order: 2 },
-      complete_anatomy_thought: { title: 'Anatomy of Thought', icon: '🧠', order: 2 },
-      deep_insight: { title: 'Deep Insight', icon: '💡', order: 2 },
-      sthitaprajna_teaching: { title: 'Sthitaprajna Teaching', icon: '🏔️', order: 3 },
-      complete_teaching_sthitaprajna: { title: 'Complete Sthitaprajna', icon: '🏔️', order: 3 },
-      sacred_reframe: { title: 'Sacred Reframe', icon: '🔄', order: 4 },
-      reframe: { title: 'Reframe', icon: '🔄', order: 4 },
-      sakshi_bhava_practice: { title: 'Witness Practice', icon: '🧘', order: 5 },
-      practice_of_witness: { title: 'Practice of Witness', icon: '🧘', order: 5 },
-      small_action_step: { title: 'Small Action Step', icon: '🚶', order: 5 },
-      eternal_truth: { title: 'Eternal Truth', icon: '✨', order: 6 },
-
-      // Deep Dive mode sections
-      acknowledgment: { title: 'Full Acknowledgment', icon: '🤝', order: 1 },
-      root_cause_analysis: { title: 'Root Cause Analysis', icon: '🔍', order: 2 },
-      multi_perspective: { title: 'Multi-Perspective Understanding', icon: '🔮', order: 3 },
-      comprehensive_reframe: { title: 'Comprehensive Reframe', icon: '🔄', order: 4 },
-      solution_pathways: { title: 'Solution Pathways', icon: '🛤️', order: 5 },
-      empowering_closure: { title: 'Empowering Closure', icon: '💫', order: 6 },
-
-      // Quantum Dive mode sections
-      sacred_witnessing: { title: 'Sacred Witnessing', icon: '🙏', order: 1 },
-      five_dimensional_analysis: { title: 'Five-Dimensional Analysis', icon: '🌀', order: 2 },
-      root_pattern_archaeology: { title: 'Root Pattern Archaeology', icon: '⛏️', order: 3 },
-      quantum_reframing: { title: 'Quantum Reframing', icon: '⚛️', order: 4 },
-      transformation_blueprint: { title: 'Transformation Blueprint', icon: '📜', order: 5 },
-      life_purpose_integration: { title: 'Life Purpose Integration', icon: '🌟', order: 6 },
+      sacred_witnessing: { title: 'Sacred Witnessing', icon: '👁️', order: 1 },
+      anatomy_of_the_thought: { title: 'Anatomy of the Thought', icon: '🧠', order: 2 },
+      gita_core_reframe: { title: 'Gita Core Reframe', icon: '📜', order: 3 },
+      stabilizing_awareness: { title: 'Stabilizing Awareness', icon: '🧘', order: 4 },
+      one_grounded_reframe: { title: 'One Grounded Reframe', icon: '🔄', order: 5 },
+      one_small_action: { title: 'One Small Action', icon: '🚶', order: 6 },
+      one_question: { title: 'One Question', icon: '❓', order: 7 },
     },
     accentColor: 'purple',
   },
@@ -177,9 +154,9 @@ const SANSKRIT_TERMS: Record<string, string> = {
 
 // Analysis mode display names and badges
 const ANALYSIS_MODE_DISPLAY: Record<AnalysisMode, { name: string; icon: string; color: string }> = {
-  standard: { name: 'Quick Reframe', icon: '⚡', color: 'from-blue-500/20 to-cyan-400/20 border-blue-400/30 text-blue-300' },
-  deep_dive: { name: 'Deep Dive', icon: '🔍', color: 'from-indigo-500/20 to-violet-400/20 border-indigo-400/30 text-indigo-300' },
-  quantum_dive: { name: 'Quantum Dive', icon: '🌌', color: 'from-purple-500/20 to-pink-400/20 border-purple-400/30 text-purple-300' },
+  quick: { name: 'Quick Reframe', icon: '⚡', color: 'from-blue-500/20 to-cyan-400/20 border-blue-400/30 text-blue-300' },
+  deep: { name: 'Deep Dive', icon: '🔍', color: 'from-indigo-500/20 to-violet-400/20 border-indigo-400/30 text-indigo-300' },
+  quantum: { name: 'Quantum Dive', icon: '🌌', color: 'from-purple-500/20 to-pink-400/20 border-purple-400/30 text-purple-300' },
 }
 
 function highlightSanskrit(text: string): React.ReactNode[] {
@@ -375,6 +352,13 @@ export default function WisdomResponseCard({
             size="sm"
             variant="accent"
           />
+          <button
+            onClick={handleCopy}
+            className="text-[10px] px-2 py-1 rounded border border-gray-600/50 text-gray-300 hover:text-white hover:border-gray-500 transition"
+            aria-label="Copy Ardha response"
+          >
+            {copyStatus === 'copied' ? 'Copied' : 'Copy'}
+          </button>
         </div>
       </div>
 
