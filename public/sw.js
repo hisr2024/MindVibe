@@ -12,7 +12,7 @@
  * the network connection is lost (decoherence), ensuring uninterrupted user experience.
  */
 
-const CACHE_VERSION = 'mindvibe-v14.4-journeys';
+const CACHE_VERSION = 'mindvibe-v14.5-audio-fix';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
@@ -170,6 +170,25 @@ self.addEventListener('fetch', (event) => {
 
   // Skip cross-origin requests to avoid redirect issues
   if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // Skip audio/media requests - they use range requests (206 partial content)
+  // which cannot be cached properly and cause playback issues
+  const isMediaRequest =
+    url.pathname.endsWith('.mp3') ||
+    url.pathname.endsWith('.wav') ||
+    url.pathname.endsWith('.ogg') ||
+    url.pathname.endsWith('.m4a') ||
+    url.pathname.endsWith('.aac') ||
+    url.pathname.endsWith('.webm') ||
+    url.pathname.endsWith('.mp4') ||
+    request.headers.get('Range') !== null ||
+    request.destination === 'audio' ||
+    request.destination === 'video'
+
+  if (isMediaRequest) {
+    // Let browser handle audio/video natively for proper streaming
     return
   }
 

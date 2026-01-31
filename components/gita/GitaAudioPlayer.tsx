@@ -119,7 +119,7 @@ function formatTime(seconds: number): string {
 export function GitaAudioPlayer({
   className = '',
   defaultChapter = 1,
-  defaultLanguage = 'sanskrit',
+  defaultLanguage = 'english', // Default to English (most reliable - LibriVox)
   defaultSoundscape,
   showChapterList = true,
   showSoundscapes = true,
@@ -128,8 +128,14 @@ export function GitaAudioPlayer({
   onChapterChange,
   onLanguageChange
 }: GitaAudioPlayerProps) {
-  // Engine instance
-  const [engine] = useState(() => getGitaAudioEngine())
+  // Engine instance - create with config
+  const [engine] = useState(() => {
+    const eng = getGitaAudioEngine()
+    return eng
+  })
+
+  // Initialization state
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Playback state
   const [state, setState] = useState<GitaPlaybackState>({
@@ -147,7 +153,9 @@ export function GitaAudioPlayer({
     playbackMode: 'continuous',
     soundscapeId: defaultSoundscape || null,
     ambientVolume: 0.25,
-    error: null
+    error: null,
+    audioAvailable: false,
+    currentSource: null
   })
 
   // UI state
@@ -163,27 +171,47 @@ export function GitaAudioPlayer({
     [state.currentChapter]
   )
 
-  // Available languages (filtered to those with audio)
-  const availableLanguages = useMemo(() =>
-    GITA_AUDIO_SOURCES.map(s => s.language),
-    []
-  )
+  // Available languages (only those with working audio)
+  const availableLanguages = useMemo(() => {
+    // Only return languages that have actual working audio
+    return ['english', 'sanskrit'] as GitaLanguage[]
+  }, [])
 
-  // Initialize engine
+  // Initialize engine properly
   useEffect(() => {
-    engine.initialize()
+    let mounted = true
 
-    // Set up state listener
-    const originalConfig = (engine as any).config
-    ;(engine as any).config = {
-      ...originalConfig,
-      onStateChange: (newState: GitaPlaybackState) => {
-        setState(newState)
+    const initEngine = async () => {
+      try {
+        // Set up state listener before initializing
+        ;(engine as any).config = {
+          ...(engine as any).config,
+          onStateChange: (newState: GitaPlaybackState) => {
+            if (mounted) {
+              setState(newState)
+            }
+          },
+          onError: (error: string) => {
+            console.error('GitaAudioPlayer: Engine error:', error)
+          },
+          onAudioLoad: (url: string) => {
+            console.log('GitaAudioPlayer: Audio loaded:', url)
+          }
+        }
+
+        await engine.initialize()
+        if (mounted) {
+          setIsInitialized(true)
+        }
+      } catch (error) {
+        console.error('GitaAudioPlayer: Failed to initialize', error)
       }
     }
 
+    initEngine()
+
     return () => {
-      // Cleanup
+      mounted = false
     }
   }, [engine])
 
