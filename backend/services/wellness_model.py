@@ -79,7 +79,13 @@ class WellnessModel:
     TOOL_KEYWORDS = {
         WellnessTool.VIYOGA: "karma yoga nishkama karma detachment action fruits results outcome anxiety equanimity vairagya",
         WellnessTool.ARDHA: "sthitaprajna steady wisdom equanimity mind control thoughts buddhi viveka discrimination peace",
-        WellnessTool.RELATIONSHIP_COMPASS: "dharma right action daya compassion kshama forgiveness ahimsa non-harm satya truth relationships",
+        WellnessTool.RELATIONSHIP_COMPASS: (
+            "dharma right action daya compassion kshama forgiveness ahimsa non-harm satya truth relationships "
+            "sama-darshana equal vision friend foe maitri friendship karuna mercy love attachment raga dvesha "
+            "ahamkara ego tyaga surrender family duty svadharma conflict harmony peace understanding "
+            "anger krodha hurt pain sorrow suffering healing reconciliation wisdom connection bond "
+            "sarva-bhuta-hite welfare all beings respect honor communication speaking truth priya vachana"
+        ),
     }
 
     # Tool-specific Gita focus areas
@@ -98,9 +104,19 @@ class WellnessModel:
         },
         WellnessTool.RELATIONSHIP_COMPASS: {
             "name": "Relationship Compass",
-            "gita_principle": "Dharma & Daya - Right action with compassion",
-            "core_teaching": "Perform your duty with equanimity, treating friend and foe alike",
-            "focus": "Navigating conflict through dharmic action",
+            "gita_principle": "Dharma, Daya & Kshama - Right action, compassion, and forgiveness",
+            "core_teaching": "The wise one treats friend and foe alike, sees the divine in all beings, and acts from their highest self",
+            "focus": "Navigating the sacred terrain of human connection through Gita psychology",
+            "sections": [
+                "Sacred Witnessing (deep acknowledgment)",
+                "Mirror of Relationship (svadhyaya - self-study)",
+                "The Other's Inner World (daya/karuna - compassion)",
+                "The Dharmic Path (right action)",
+                "Ego Illumination (ahamkara awareness)",
+                "Sacred Communication (priya vachana)",
+                "Teaching of Kshama (forgiveness)",
+                "Eternal Anchor (purnatva - completeness)",
+            ],
         },
     }
 
@@ -1201,24 +1217,58 @@ Please help me see what's really happening underneath and guide me to a new pers
         return {"recognition": sections[0] if sections else "", "deep_insight": "", "reframe": "", "small_action_step": ""}
 
     def _parse_compass_sections(self, sections: list[str]) -> dict[str, str]:
-        """Parse Relationship Compass response sections."""
-        if len(sections) >= 5:
-            return {
-                "acknowledgment": sections[0],
-                "underneath": sections[1],
-                "clarity": sections[2],
-                "path_forward": sections[3],
-                "reminder": sections[4],
-            }
+        """Parse Relationship Compass response sections into ultra-deep 8-part structure.
+
+        Maps AI response sections to:
+        - sacred_witnessing: Deep acknowledgment of relationship pain
+        - mirror_of_relationship: What the conflict reveals about inner patterns (svadhyaya)
+        - others_inner_world: Compassionate understanding of the other (daya/karuna)
+        - dharmic_path: Right action aligned with highest self (dharma)
+        - ego_illumination: How ahamkara perpetuates conflict
+        - sacred_communication: Practical words and approach (priya vachana)
+        - forgiveness_teaching: Liberation through kshama
+        - eternal_anchor: Timeless truth of completeness (purnatva)
+        """
+        # Ultra-deep section keys in order
+        section_keys = [
+            "sacred_witnessing",       # Section 1: Deep acknowledgment
+            "mirror_of_relationship",  # Section 2: Inner reflection (svadhyaya)
+            "others_inner_world",      # Section 3: Compassionate understanding (daya)
+            "dharmic_path",            # Section 4: Right action (dharma)
+            "ego_illumination",        # Section 5: Seeing beyond ego (ahamkara)
+            "sacred_communication",    # Section 6: Practical guidance (priya vachana)
+            "forgiveness_teaching",    # Section 7: Kshama teaching
+            "eternal_anchor",          # Section 8: Eternal truth (purnatva)
+        ]
+
+        result = {key: "" for key in section_keys}
+
+        if len(sections) >= 8:
+            # Full ultra-deep response - map all sections
+            for i, key in enumerate(section_keys):
+                if i < len(sections):
+                    result[key] = sections[i]
+        elif len(sections) >= 5:
+            # Medium response - map to key sections
+            result["sacred_witnessing"] = sections[0]
+            result["mirror_of_relationship"] = sections[1]
+            result["others_inner_world"] = sections[2] if len(sections) > 2 else ""
+            result["dharmic_path"] = sections[3] if len(sections) > 3 else ""
+            result["sacred_communication"] = sections[4] if len(sections) > 4 else ""
+            if len(sections) >= 6:
+                result["forgiveness_teaching"] = sections[5]
+            if len(sections) >= 7:
+                result["eternal_anchor"] = sections[6]
         elif len(sections) >= 3:
-            return {
-                "acknowledgment": sections[0],
-                "underneath": sections[1] if len(sections) > 1 else "",
-                "clarity": sections[2] if len(sections) > 2 else "",
-                "path_forward": "",
-                "reminder": "",
-            }
-        return {"acknowledgment": sections[0] if sections else "", "underneath": "", "clarity": "", "path_forward": "", "reminder": ""}
+            # Short response - map to core sections
+            result["sacred_witnessing"] = sections[0]
+            result["dharmic_path"] = sections[1]
+            result["eternal_anchor"] = sections[2] if len(sections) > 2 else ""
+        elif sections:
+            # Single section - use as acknowledgment
+            result["sacred_witnessing"] = sections[0]
+
+        return result
 
     def _get_default_wisdom(self, tool: WellnessTool) -> str:
         """Get default wisdom context when database is unavailable."""
