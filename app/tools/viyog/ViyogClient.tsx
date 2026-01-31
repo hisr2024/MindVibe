@@ -226,13 +226,13 @@ export default function ViyogClient() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyoga</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Viyoga guides outcome worries back into steady, actionable steps. It validates your anxiety, identifies attachment, offers a detachment principle, and ends with one controllable action.
+                Viyoga is your friend in moments of outcome anxiety. It acknowledges your specific worry with warmth, explores the deeper layers of attachment, transmits the sacred teaching of Karma Yoga, and guides you through witness consciousness practice - all rooted in 5000 years of Bhagavad Gita wisdom.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
-                <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
+                <h4 className="text-xs font-semibold text-orange-50 mb-2">Sacred Transmission</h4>
                 <p className="text-xs text-orange-100/70">
-                  Validation → Attachment Check → Detachment Principle → One action
+                  Sacred Recognition → Anatomy of Attachment → Karma Yoga Liberation → Witness Consciousness → Sacred Practice → Eternal Anchor
                 </p>
               </div>
             </div>
