@@ -96,6 +96,9 @@ function getNestedValue(obj: TranslationObject, key: string): string | undefined
   return typeof current === 'string' ? current : undefined
 }
 
+const LANGUAGE_SOURCE_ATTR = 'languageSource'
+const CLIENT_LANGUAGE_SOURCE = 'client'
+
 // Get initial language synchronously - runs during component initialization
 function getInitialLanguage(): Language {
   if (typeof window === 'undefined') return 'en'
@@ -109,7 +112,8 @@ function getInitialLanguage(): Language {
 
     // Then check if the inline script already set a language on the document
     const docLang = document.documentElement.lang as Language
-    if (docLang && LANGUAGES[docLang]) {
+    const langSource = document.documentElement.dataset[LANGUAGE_SOURCE_ATTR]
+    if (langSource !== CLIENT_LANGUAGE_SOURCE && docLang && LANGUAGES[docLang]) {
       return docLang
     }
 
@@ -175,6 +179,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const dir = LANGUAGES[language].dir
     document.documentElement.dir = dir
     document.documentElement.lang = language
+    document.documentElement.dataset[LANGUAGE_SOURCE_ATTR] = CLIENT_LANGUAGE_SOURCE
 
     loadTranslations(language).then(() => {
       setIsInitialized(true)
@@ -189,6 +194,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const dir = LANGUAGES[newLang].dir
     document.documentElement.dir = dir
     document.documentElement.lang = newLang
+    document.documentElement.dataset[LANGUAGE_SOURCE_ATTR] = CLIENT_LANGUAGE_SOURCE
     
     await loadTranslations(newLang)
     

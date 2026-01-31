@@ -49,6 +49,13 @@ const CACHEABLE_API_ENDPOINTS = [
   '/api/journeys/today',
 ];
 
+// Avoid caching user-specific journey endpoints to prevent stale auth state
+const NON_CACHEABLE_JOURNEY_ENDPOINTS = [
+  '/api/journeys/access',
+  '/api/journeys/active',
+  '/api/journeys/today',
+];
+
 // Maximum cache sizes (to prevent excessive storage use)
 const MAX_CACHE_SIZE = {
   dynamic: 50,  // 50 dynamic pages
@@ -265,6 +272,16 @@ async function handleAPIRequest(request) {
   }
 
   try {
+    const shouldCache = !NON_CACHEABLE_JOURNEY_ENDPOINTS.some((route) =>
+      request.url.includes(route)
+    )
+
+    if (!shouldCache) {
+      console.log('[Service Worker] Fetching user-specific API:', request.url)
+      const networkResponse = await fetch(request)
+      return networkResponse
+    }
+
     // Try cache first (only for GET requests)
     const cachedResponse = await caches.match(request)
 
