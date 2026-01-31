@@ -2814,7 +2814,12 @@ class UserJourney(SoftDeleteMixin, Base):
 
     # Status
     status: Mapped[UserJourneyStatus] = mapped_column(
-        Enum(UserJourneyStatus, native_enum=False, length=32),
+        Enum(
+            UserJourneyStatus,
+            native_enum=False,
+            length=32,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         default=UserJourneyStatus.ACTIVE,
         index=True,
     )

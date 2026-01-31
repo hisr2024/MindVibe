@@ -1090,14 +1090,18 @@ class EnhancedJourneyEngine:
         journeys: list[UserJourney] = []
 
         # IDEMPOTENCY FIX: Check for existing active journeys for these templates
+        # Use FOR UPDATE lock to prevent race conditions when multiple requests
+        # try to start the same journey simultaneously
         existing_result = await db.execute(
-            select(UserJourney).where(
+            select(UserJourney)
+            .where(
                 and_(
                     UserJourney.user_id == user_id,
                     UserJourney.journey_template_id.in_(journey_template_ids),
                     UserJourney.status == UserJourneyStatus.ACTIVE,
                 )
             )
+            .with_for_update()
         )
         existing_journeys = {j.journey_template_id: j for j in existing_result.scalars().all()}
 

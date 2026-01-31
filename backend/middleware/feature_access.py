@@ -13,6 +13,7 @@ import os
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
@@ -97,8 +98,21 @@ async def is_developer(db: AsyncSession, user_id: str) -> bool:
         logger.info(f"[is_developer] No developer/admin access for user {user_id}")
         return False
 
+    except SQLAlchemyError as e:
+        # Database errors should be logged at error level - don't mask them
+        logger.error(
+            f"[is_developer] Database error checking developer status for {user_id}: {e}",
+            exc_info=True
+        )
+        # Return False but note this is a database issue, not "user is not developer"
+        # Consider: could re-raise here if we want to surface DB issues to caller
+        return False
     except Exception as e:
-        logger.warning(f"Error checking developer status: {e}", exc_info=True)
+        # Unexpected errors - log at error level with full traceback
+        logger.error(
+            f"[is_developer] Unexpected error checking developer status for {user_id}: {e}",
+            exc_info=True
+        )
         return False
 
 

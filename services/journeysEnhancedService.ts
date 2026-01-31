@@ -806,21 +806,32 @@ export function hasQueuedJourneys(): boolean {
 }
 
 // Auto-sync when coming back online
+// Note: Module-level listeners are intentionally persistent - they run once per session
+// and handle offline queue syncing globally. Error handling is critical to prevent
+// unhandled promise rejections.
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     console.log('[JourneyQueue] Back online, syncing queued journeys...')
-    syncQueuedJourneys().then(result => {
-      if (result.processed > 0) {
-        console.log(`[JourneyQueue] Synced ${result.processed} queued journeys`)
-      }
-    })
+    syncQueuedJourneys()
+      .then(result => {
+        if (result.processed > 0) {
+          console.log(`[JourneyQueue] Synced ${result.processed} queued journeys`)
+        }
+      })
+      .catch(error => {
+        // Log but don't throw - this is a background operation
+        console.error('[JourneyQueue] Failed to sync queued journeys:', error)
+      })
   })
 
   // Also sync when the window regains focus
   window.addEventListener('focus', () => {
     if (navigator.onLine && hasQueuedJourneys()) {
       console.log('[JourneyQueue] Window focused, checking queue...')
-      syncQueuedJourneys()
+      syncQueuedJourneys().catch(error => {
+        // Log but don't throw - this is a background operation
+        console.error('[JourneyQueue] Failed to sync on focus:', error)
+      })
     }
   })
 }
