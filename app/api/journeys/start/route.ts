@@ -1,9 +1,10 @@
 /**
  * Journey Start API Route
- * Proxies to backend with proper error handling and offline fallback
+ * Proxies to backend with proper error handling, retry logic, and offline fallback
  *
  * This route handles POST /api/journeys/start
  * - Forwards auth headers to backend
+ * - Implements retry with exponential backoff for transient failures
  * - Provides graceful degradation when backend is unavailable
  * - Returns proper error responses for auth failures
  */
@@ -14,6 +15,25 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onr
 
 // Default timeout for backend requests (10 seconds)
 const BACKEND_TIMEOUT_MS = 10000
+
+// Retry configuration for transient failures
+const MAX_RETRIES = 3
+const INITIAL_BACKOFF_MS = 500 // Start with 500ms, then 1000ms, then 2000ms
+
+/**
+ * Sleep for a given number of milliseconds
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+ * Check if an error is retryable (transient)
+ */
+function isRetryableError(status: number): boolean {
+  // Retry on 502 (Bad Gateway), 503 (Service Unavailable), 504 (Gateway Timeout)
+  return status === 502 || status === 503 || status === 504
+}
 
 interface StartJourneysRequest {
   journey_ids: string[]
@@ -112,113 +132,156 @@ export async function POST(request: NextRequest) {
       headers.set('X-CSRF-Token', csrfToken)
     }
 
-    try {
-      // Create abort controller for timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS)
+    // Retry loop with exponential backoff for transient failures
+    let lastError: Error | null = null
+    let lastStatus = 0
 
-      const response = await fetch(`${BACKEND_URL}/api/journeys/start`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-        signal: controller.signal,
-        cache: 'no-store',
-      })
-
-      clearTimeout(timeoutId)
-
-      // Handle specific error codes from backend
-      if (response.status === 401) {
-        return createErrorResponse(
-          401,
-          'authentication_required',
-          'Please log in to start a journey'
-        )
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      // Wait before retry (skip on first attempt)
+      if (attempt > 0) {
+        const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1)
+        console.log(`[journeys/start] Retry attempt ${attempt}/${MAX_RETRIES} after ${backoffMs}ms`)
+        await sleep(backoffMs)
       }
 
-      if (response.status === 403) {
-        const errorData = await response.json().catch(() => ({}))
-        return NextResponse.json(
-          {
-            error: 'premium_feature',
-            message: errorData.message || 'This feature requires a premium subscription',
-            detail: errorData.detail,
-          },
-          { status: 403 }
-        )
-      }
+      try {
+        // Create abort controller for timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS)
 
-      if (response.status === 404) {
-        return createErrorResponse(
-          404,
-          'templates_not_found',
-          'The selected journey templates were not found. Please try selecting different journeys.'
-        )
-      }
+        const response = await fetch(`${BACKEND_URL}/api/journeys/start`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+          signal: controller.signal,
+          cache: 'no-store',
+        })
 
-      if (response.status === 503) {
-        const errorData = await response.json().catch(() => ({}))
-        return NextResponse.json(
-          {
-            error: 'service_unavailable',
-            message: errorData.message || 'Wisdom Journeys is being set up. Please try again in a moment.',
-            _offline: true,
-          },
-          { status: 503 }
-        )
-      }
+        clearTimeout(timeoutId)
+        lastStatus = response.status
 
-      if (!response.ok) {
-        // Try to get error details from backend
-        let errorMessage = 'Failed to start journeys'
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.detail || errorData.message || errorMessage
-        } catch {
-          // Use default message
-        }
-
-        console.error(`[journeys/start] Backend error: ${response.status} - ${errorMessage}`)
-
-        return createErrorResponse(
-          response.status >= 500 ? 503 : response.status,
-          'backend_error',
-          errorMessage
-        )
-      }
-
-      // Success - forward the response
-      const data = await response.json()
-      return NextResponse.json(data, { status: 200 })
-
-    } catch (error) {
-      // Network/timeout errors
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          console.error('[journeys/start] Request timeout')
-          return NextResponse.json(
-            {
-              error: 'timeout',
-              message: 'Request timed out. The server may be busy. Please try again.',
-              _offline: true,
-            },
-            { status: 504 }
+        // Handle specific error codes from backend (non-retryable)
+        if (response.status === 401) {
+          return createErrorResponse(
+            401,
+            'authentication_required',
+            'Please log in to start a journey'
           )
         }
 
-        console.error('[journeys/start] Network error:', error.message)
-      }
+        if (response.status === 403) {
+          const errorData = await response.json().catch(() => ({}))
+          return NextResponse.json(
+            {
+              error: 'premium_feature',
+              message: errorData.message || 'This feature requires a premium subscription',
+              detail: errorData.detail,
+            },
+            { status: 403 }
+          )
+        }
 
-      // Return offline-compatible error response
-      return NextResponse.json(
-        {
-          error: 'network_error',
-          message: 'Unable to connect to the server. Please check your connection and try again.',
-          _offline: true,
-        },
-        { status: 503 }
-      )
+        if (response.status === 404) {
+          return createErrorResponse(
+            404,
+            'templates_not_found',
+            'The selected journey templates were not found. Please try selecting different journeys.'
+          )
+        }
+
+        // Check if this is a retryable error and we have retries left
+        if (isRetryableError(response.status) && attempt < MAX_RETRIES) {
+          console.warn(`[journeys/start] Retryable error ${response.status}, will retry...`)
+          continue // Try again
+        }
+
+        // No more retries for 503 - return queue-friendly response
+        if (response.status === 503) {
+          const errorData = await response.json().catch(() => ({}))
+          return NextResponse.json(
+            {
+              error: 'service_unavailable',
+              message: errorData.message || 'Wisdom Journeys is being set up. Please try again in a moment.',
+              _offline: true,
+              _can_queue: true, // Signal to frontend that this can be queued
+              _retry_after: 30, // Suggest retry after 30 seconds
+            },
+            { status: 503 }
+          )
+        }
+
+        if (!response.ok) {
+          // Try to get error details from backend
+          let errorMessage = 'Failed to start journeys'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.detail || errorData.message || errorMessage
+          } catch {
+            // Use default message
+          }
+
+          console.error(`[journeys/start] Backend error: ${response.status} - ${errorMessage}`)
+
+          return createErrorResponse(
+            response.status >= 500 ? 503 : response.status,
+            'backend_error',
+            errorMessage
+          )
+        }
+
+        // Success - forward the response
+        const data = await response.json()
+        if (attempt > 0) {
+          console.log(`[journeys/start] Success after ${attempt + 1} attempts`)
+        }
+        return NextResponse.json(data, { status: 200 })
+
+      } catch (error) {
+        lastError = error as Error
+
+        // Network/timeout errors - potentially retryable
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            console.warn(`[journeys/start] Request timeout on attempt ${attempt + 1}`)
+            // Timeouts are retryable
+            if (attempt < MAX_RETRIES) {
+              continue
+            }
+            return NextResponse.json(
+              {
+                error: 'timeout',
+                message: 'Request timed out. The server may be busy. Please try again.',
+                _offline: true,
+                _can_queue: true,
+                _retry_after: 30,
+              },
+              { status: 504 }
+            )
+          }
+
+          console.warn(`[journeys/start] Network error on attempt ${attempt + 1}:`, error.message)
+          // Network errors are retryable
+          if (attempt < MAX_RETRIES) {
+            continue
+          }
+        }
+      }
     }
+
+    // All retries exhausted
+    console.error(`[journeys/start] All ${MAX_RETRIES + 1} attempts failed. Last status: ${lastStatus}, Last error: ${lastError?.message}`)
+
+    // Return offline-compatible error response with queue capability
+    return NextResponse.json(
+      {
+        error: 'network_error',
+        message: 'Unable to connect to the server after multiple attempts. Your journey will be queued and started when connection is restored.',
+        _offline: true,
+        _can_queue: true,
+        _retry_after: 60,
+      },
+      { status: 503 }
+    )
   } catch (outerError) {
     console.error('[journeys/start] Unexpected error:', outerError)
     return NextResponse.json(
