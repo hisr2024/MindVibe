@@ -661,6 +661,171 @@ export async function getProviderStatus(): Promise<ProviderStatus> {
 }
 
 // =============================================================================
+// Offline Queue for Journey Starts
+// =============================================================================
+
+const JOURNEY_QUEUE_KEY = 'mindvibe_journey_queue'
+
+export interface QueuedJourneyStart {
+  id: string
+  journey_ids: string[]
+  personalization?: Personalization
+  queued_at: string
+  retry_count: number
+  last_error?: string
+}
+
+/**
+ * Get all queued journey starts
+ */
+export function getQueuedJourneys(): QueuedJourneyStart[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const data = localStorage.getItem(JOURNEY_QUEUE_KEY)
+    return data ? JSON.parse(data) : []
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Add a journey start to the offline queue
+ */
+export function queueJourneyStart(
+  journeyIds: string[],
+  personalization?: Personalization
+): QueuedJourneyStart {
+  const queued: QueuedJourneyStart = {
+    id: `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    journey_ids: journeyIds,
+    personalization,
+    queued_at: new Date().toISOString(),
+    retry_count: 0,
+  }
+
+  const queue = getQueuedJourneys()
+  queue.push(queued)
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(JOURNEY_QUEUE_KEY, JSON.stringify(queue))
+  }
+
+  return queued
+}
+
+/**
+ * Remove a journey start from the queue
+ */
+export function removeFromQueue(queueId: string): void {
+  const queue = getQueuedJourneys().filter(q => q.id !== queueId)
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(JOURNEY_QUEUE_KEY, JSON.stringify(queue))
+  }
+}
+
+/**
+ * Update a queued journey start (e.g., increment retry count)
+ */
+function updateQueuedJourney(queueId: string, updates: Partial<QueuedJourneyStart>): void {
+  const queue = getQueuedJourneys().map(q =>
+    q.id === queueId ? { ...q, ...updates } : q
+  )
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(JOURNEY_QUEUE_KEY, JSON.stringify(queue))
+  }
+}
+
+/**
+ * Process a single queued journey start
+ * Returns true if successfully processed, false otherwise
+ */
+async function processQueuedJourney(queued: QueuedJourneyStart): Promise<boolean> {
+  try {
+    await startJourneys(queued.journey_ids, queued.personalization)
+    removeFromQueue(queued.id)
+    return true
+  } catch (error) {
+    // Don't keep retrying indefinitely
+    if (queued.retry_count >= 5) {
+      removeFromQueue(queued.id)
+      console.error(`[JourneyQueue] Removing queued journey after 5 failed attempts: ${queued.id}`)
+      return false
+    }
+
+    updateQueuedJourney(queued.id, {
+      retry_count: queued.retry_count + 1,
+      last_error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return false
+  }
+}
+
+/**
+ * Process all queued journey starts
+ * Returns the number of successfully processed journeys
+ */
+export async function syncQueuedJourneys(): Promise<{
+  processed: number
+  failed: number
+  remaining: number
+}> {
+  const queue = getQueuedJourneys()
+  if (queue.length === 0) {
+    return { processed: 0, failed: 0, remaining: 0 }
+  }
+
+  let processed = 0
+  let failed = 0
+
+  for (const queued of queue) {
+    const success = await processQueuedJourney(queued)
+    if (success) {
+      processed++
+    } else {
+      failed++
+    }
+  }
+
+  const remaining = getQueuedJourneys().length
+
+  // Dispatch event so UI can update
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('journey-queue-sync', {
+      detail: { processed, failed, remaining }
+    }))
+  }
+
+  return { processed, failed, remaining }
+}
+
+/**
+ * Check if there are queued journeys pending
+ */
+export function hasQueuedJourneys(): boolean {
+  return getQueuedJourneys().length > 0
+}
+
+// Auto-sync when coming back online
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('[JourneyQueue] Back online, syncing queued journeys...')
+    syncQueuedJourneys().then(result => {
+      if (result.processed > 0) {
+        console.log(`[JourneyQueue] Synced ${result.processed} queued journeys`)
+      }
+    })
+  })
+
+  // Also sync when the window regains focus
+  window.addEventListener('focus', () => {
+    if (navigator.onLine && hasQueuedJourneys()) {
+      console.log('[JourneyQueue] Window focused, checking queue...')
+      syncQueuedJourneys()
+    }
+  })
+}
+
+// =============================================================================
 // Utility Functions
 // =============================================================================
 

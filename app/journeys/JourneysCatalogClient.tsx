@@ -18,12 +18,16 @@ import {
   Star,
   Zap,
   X,
+  RefreshCw,
+  Clock,
+  WifiOff,
 } from 'lucide-react'
 import * as journeysService from '@/services/journeysEnhancedService'
 import type {
   JourneyTemplate,
   Personalization,
   JourneyAccess,
+  QueuedJourneyStart,
 } from '@/services/journeysEnhancedService'
 
 // Enemy icons mapping
@@ -322,6 +326,85 @@ function PersonalizationModal({ isOpen, onClose, onSave }: PersonalizationModalP
 }
 
 // =============================================================================
+// Queued Journeys Banner
+// =============================================================================
+
+interface QueueBannerProps {
+  queuedJourneys: QueuedJourneyStart[]
+  onSync: () => void
+  onDismiss: (id: string) => void
+  syncing: boolean
+}
+
+function QueueBanner({ queuedJourneys, onSync, onDismiss, syncing }: QueueBannerProps) {
+  if (queuedJourneys.length === 0) return null
+
+  return (
+    <div className="mb-6 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10 p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20">
+          <Clock className="h-5 w-5 text-amber-400" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold text-amber-100">
+              {queuedJourneys.length} Journey{queuedJourneys.length > 1 ? 's' : ''} Queued
+            </h4>
+            {!navigator.onLine && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-300">
+                <WifiOff className="h-3 w-3" />
+                Offline
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-sm text-amber-100/70">
+            Your journey will start automatically when the server is available.
+          </p>
+
+          {/* List queued journeys */}
+          <div className="mt-3 space-y-2">
+            {queuedJourneys.map((q) => (
+              <div
+                key={q.id}
+                className="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-400/70" />
+                  <span className="text-sm text-amber-100/80">
+                    {q.journey_ids.length} journey{q.journey_ids.length > 1 ? 's' : ''}
+                  </span>
+                  {q.retry_count > 0 && (
+                    <span className="text-xs text-amber-100/50">
+                      (retry {q.retry_count}/5)
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => onDismiss(q.id)}
+                  className="rounded p-1 text-amber-100/40 hover:bg-amber-500/20 hover:text-amber-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Sync button */}
+          <button
+            onClick={onSync}
+            disabled={syncing || !navigator.onLine}
+            className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-300 transition-colors hover:bg-amber-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Retry Now'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// =============================================================================
 // Premium Badge Component
 // =============================================================================
 
@@ -365,6 +448,30 @@ export default function JourneysCatalogClient() {
   const [personalization, setPersonalization] = useState<Personalization | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [infoMessage, setInfoMessage] = useState<string | null>(null)
+  const [queuedJourneys, setQueuedJourneys] = useState<QueuedJourneyStart[]>([])
+  const [syncing, setSyncing] = useState(false)
+
+  // Load queued journeys on mount
+  useEffect(() => {
+    setQueuedJourneys(journeysService.getQueuedJourneys())
+  }, [])
+
+  // Listen for queue sync events
+  useEffect(() => {
+    function handleQueueSync(event: CustomEvent<{ processed: number; failed: number; remaining: number }>) {
+      setQueuedJourneys(journeysService.getQueuedJourneys())
+      if (event.detail.processed > 0) {
+        setInfoMessage(`Successfully started ${event.detail.processed} queued journey${event.detail.processed > 1 ? 's' : ''}!`)
+        // Navigate to today's agenda if all processed
+        if (event.detail.remaining === 0) {
+          setTimeout(() => router.push('/journeys/today'), 1500)
+        }
+      }
+    }
+
+    window.addEventListener('journey-queue-sync', handleQueueSync as EventListener)
+    return () => window.removeEventListener('journey-queue-sync', handleQueueSync as EventListener)
+  }, [router])
 
   useEffect(() => {
     loadData()
@@ -470,6 +577,33 @@ export default function JourneysCatalogClient() {
     })
   }
 
+  async function handleSyncQueue() {
+    setSyncing(true)
+    setError(null)
+    try {
+      const result = await journeysService.syncQueuedJourneys()
+      setQueuedJourneys(journeysService.getQueuedJourneys())
+
+      if (result.processed > 0) {
+        setInfoMessage(`Successfully started ${result.processed} queued journey${result.processed > 1 ? 's' : ''}!`)
+        if (result.remaining === 0) {
+          setTimeout(() => router.push('/journeys/today'), 1500)
+        }
+      } else if (result.failed > 0) {
+        setInfoMessage('Server is still unavailable. Your journeys remain queued and will start automatically when connection is restored.')
+      }
+    } catch (err) {
+      console.error('Queue sync failed:', err)
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  function handleDismissQueue(queueId: string) {
+    journeysService.removeFromQueue(queueId)
+    setQueuedJourneys(journeysService.getQueuedJourneys())
+  }
+
   async function handleStartJourneys() {
     if (selectedIds.size === 0) return
 
@@ -503,16 +637,29 @@ export default function JourneysCatalogClient() {
         return
       }
 
-      // Handle demo preview and service unavailable - show as info, not error
+      // Handle demo preview and service unavailable - queue for later
       const errorMessage = err instanceof Error ? err.message : String(err)
       if (errorMessage.includes('demo_preview_only') || errorMessage.includes('preview mode')) {
         setError(null)
         setInfoMessage('🚀 Wisdom Journeys is in preview mode! The full feature with personalized AI content is launching soon. Stay tuned!')
         return
       }
-      if (errorMessage.includes('service_unavailable') || errorMessage.includes('being set up')) {
+
+      // Service unavailable - offer to queue
+      if (
+        journeysService.isServiceError(err) ||
+        errorMessage.includes('service_unavailable') ||
+        errorMessage.includes('being set up') ||
+        errorMessage.includes('network_error') ||
+        errorMessage.includes('timeout')
+      ) {
+        // Queue the journey start for later
+        journeysService.queueJourneyStart(Array.from(selectedIds), personalization || undefined)
+        setQueuedJourneys(journeysService.getQueuedJourneys())
+        setSelectedIds(new Set()) // Clear selection
+
         setError(null)
-        setInfoMessage('🔧 Wisdom Journeys is being set up. Please check back in a few minutes!')
+        setInfoMessage('🔄 Server is temporarily unavailable. Your journey has been queued and will start automatically when connection is restored.')
         return
       }
 
@@ -636,10 +783,18 @@ export default function JourneysCatalogClient() {
           )}
         </div>
 
+        {/* Queued Journeys Banner */}
+        <QueueBanner
+          queuedJourneys={queuedJourneys}
+          onSync={handleSyncQueue}
+          onDismiss={handleDismissQueue}
+          syncing={syncing}
+        />
+
         {/* Info Message (preview mode, setup, etc.) */}
         {infoMessage && (
-          <div className="mb-6 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10 p-4 text-center">
-            <p className="text-base font-medium text-amber-200">{infoMessage}</p>
+          <div className="mb-6 rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 p-4 text-center">
+            <p className="text-base font-medium text-emerald-200">{infoMessage}</p>
           </div>
         )}
 
