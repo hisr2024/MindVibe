@@ -1137,6 +1137,8 @@ class EnhancedJourneyEngine:
                 current_day_index=1,
                 personalization=personalization or {},
             )
+            # Set the template relationship manually (avoids lazy loading issues)
+            journey.template = template
             db.add(journey)
             journeys.append(journey)
 
@@ -1144,8 +1146,12 @@ class EnhancedJourneyEngine:
 
         await db.commit()
 
+        # Refresh journeys to get DB-generated values, but keep template relationship
         for j in journeys:
+            template_backup = j.template  # Keep the template we already have
             await db.refresh(j)
+            if template_backup and not j.template:
+                j.template = template_backup  # Restore if refresh cleared it
 
         return journeys
 

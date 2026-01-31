@@ -540,8 +540,64 @@ async def start_journeys(
     except HTTPException:
         raise
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error starting journeys: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to start journeys")
+
+        # Provide specific error messages based on the exception type
+        if "journey_templates" in error_msg and ("does not exist" in error_msg or "relation" in error_msg):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_migrated",
+                    "message": "Journey system is being set up. Please run database migrations.",
+                    "technical": "journey_templates table not found",
+                }
+            )
+        elif "user_journeys" in error_msg and ("does not exist" in error_msg or "relation" in error_msg):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_migrated",
+                    "message": "Journey system is being set up. Please run database migrations.",
+                    "technical": "user_journeys table not found",
+                }
+            )
+        elif "is_free" in error_msg or "deleted_at" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_schema_outdated",
+                    "message": "Journey system needs an update. Please run the latest database migrations.",
+                    "technical": f"Missing column: {error_msg[:100]}",
+                }
+            )
+        elif "foreign key" in error_msg or "violates" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_constraint_error",
+                    "message": "Unable to start journey due to a data issue. Please try again.",
+                    "technical": f"Constraint error: {error_msg[:100]}",
+                }
+            )
+        elif "connection" in error_msg or "connect" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_connection_error",
+                    "message": "Unable to connect to the database. Please try again in a moment.",
+                }
+            )
+        else:
+            # Generic error with more context
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "journey_start_failed",
+                    "message": "Failed to start journeys. Please try again.",
+                    "technical": str(e)[:200] if e else "Unknown error",
+                }
+            )
 
 
 @router.get("/active", response_model=list[UserJourneyResponse])
@@ -563,8 +619,25 @@ async def get_active_journeys(
         return [UserJourneyResponse(**j) for j in journeys]
 
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error getting active journeys: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get active journeys")
+
+        if "does not exist" in error_msg or "relation" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_migrated",
+                    "message": "Journey system is being set up. Please try again later.",
+                }
+            )
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "get_journeys_failed",
+                "message": "Failed to get active journeys. Please try again.",
+                "technical": str(e)[:200] if e else "Unknown error",
+            }
+        )
 
 
 # =============================================================================
@@ -596,8 +669,25 @@ async def get_today_agenda(
         return TodayAgendaResponse(**agenda)
 
     except Exception as e:
+        error_msg = str(e).lower()
         logger.error(f"Error getting today's agenda: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get today's agenda")
+
+        if "does not exist" in error_msg or "relation" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "database_not_migrated",
+                    "message": "Journey system is being set up. Please try again later.",
+                }
+            )
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "get_agenda_failed",
+                "message": "Failed to get today's agenda. Please try again.",
+                "technical": str(e)[:200] if e else "Unknown error",
+            }
+        )
 
 
 @router.post("/{user_journey_id}/today", response_model=StepResponse)
