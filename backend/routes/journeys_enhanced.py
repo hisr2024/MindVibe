@@ -56,25 +56,77 @@ admin_router = APIRouter(prefix="/api/admin/ai", tags=["admin-ai"])
 # =============================================================================
 
 
+class PersonalizationSettings(BaseModel):
+    """Journey personalization settings."""
+    pace: str | None = Field(
+        default="daily",
+        description="Journey pace: daily, every_other_day, or weekly"
+    )
+    time_budget_minutes: int | None = Field(
+        default=None,
+        ge=5,
+        le=120,
+        description="Daily time budget in minutes (5-120)"
+    )
+    focus_tags: list[str] | None = Field(
+        default=None,
+        max_length=10,
+        description="Focus areas to emphasize"
+    )
+    preferred_tone: str | None = Field(
+        default="gentle",
+        description="Tone of guidance: gentle, direct, or inspiring"
+    )
+    provider_preference: str | None = Field(
+        default="auto",
+        description="AI provider preference: auto, openai, sarvam, or oai_compat"
+    )
+
+
+class CheckInData(BaseModel):
+    """Check-in data for step completion."""
+    intensity: int = Field(..., ge=0, le=10, description="Intensity level 0-10")
+    label: str = Field(..., max_length=100, description="Check-in prompt label")
+
+
 class StartJourneysRequest(BaseModel):
     """Request to start one or more journeys."""
     journey_ids: list[str] = Field(..., min_length=1, max_length=5)
-    personalization: dict[str, Any] | None = Field(
+    personalization: PersonalizationSettings | None = Field(
         default=None,
-        description="Personalization settings: pace, time_budget_minutes, focus_tags, preferred_tone, provider_preference"
+        description="Personalization settings for the journeys"
     )
 
 
 class CompleteStepRequest(BaseModel):
     """Request to mark a step as complete."""
-    check_in: dict[str, Any] | None = Field(
+    check_in: CheckInData | None = Field(
         default=None,
-        description="Check-in data: {intensity: 0-10, label: string}"
+        description="Check-in data with intensity (0-10) and label"
     )
     reflection_response: str | None = Field(
         default=None,
         max_length=10000,
         description="User reflection text (will be encrypted)"
+    )
+
+
+class CompleteStepResponse(BaseModel):
+    """Response for step completion."""
+    step_state_id: str = Field(..., description="Step state identifier")
+    day_index: int = Field(..., description="Day index that was completed")
+    completed: bool = Field(..., description="Whether step is now complete")
+    check_in: dict[str, Any] | None = Field(
+        default=None,
+        description="Check-in data with timestamp"
+    )
+    journey_completed: bool = Field(
+        default=False,
+        description="Whether the entire journey is now complete"
+    )
+    already_completed: bool = Field(
+        default=False,
+        description="Whether step was already completed (idempotent return)"
     )
 
 
@@ -501,11 +553,14 @@ async def start_journeys(
     engine = get_journey_engine()
 
     try:
+        # Convert PersonalizationSettings to dict for engine
+        personalization_dict = body.personalization.model_dump() if body.personalization else None
+
         journeys = await engine.start_journeys(
             db=db,
             user_id=user_id,
             journey_template_ids=body.journey_ids,
-            personalization=body.personalization,
+            personalization=personalization_dict,
         )
 
         # Check if any journeys were created
@@ -709,7 +764,7 @@ async def get_or_generate_today_step(
 # =============================================================================
 
 
-@router.post("/{user_journey_id}/steps/{day_index}/complete")
+@router.post("/{user_journey_id}/steps/{day_index}/complete", response_model=CompleteStepResponse)
 @limiter.limit("100/hour")
 async def complete_step(
     request: Request,
@@ -718,7 +773,7 @@ async def complete_step(
     body: CompleteStepRequest = None,
     db: AsyncSession = Depends(get_db),
     access: tuple = Depends(require_wisdom_journeys),
-) -> dict[str, Any]:
+) -> CompleteStepResponse:
     """
     Mark a journey step as complete with check-in and reflection.
 
@@ -739,15 +794,18 @@ async def complete_step(
         if journey.user_id != user_id:
             raise HTTPException(status_code=403, detail="Not authorized to update this journey")
 
+        # Convert Pydantic model to dict for engine
+        check_in_data = body.check_in.model_dump() if body and body.check_in else None
+
         result = await engine.complete_step(
             db=db,
             user_journey_id=user_journey_id,
             day_index=day_index,
-            check_in=body.check_in,
-            reflection_response=body.reflection_response,
+            check_in=check_in_data,
+            reflection_response=body.reflection_response if body else None,
         )
 
-        return result
+        return CompleteStepResponse(**result)
 
     except HTTPException:
         raise
