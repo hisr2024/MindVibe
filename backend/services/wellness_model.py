@@ -1,29 +1,47 @@
 """
 Wellness Model - Unified AI Model for Viyoga, Ardha, and Relationship Compass.
 
-This module provides a unified pattern for wellness tools:
+ENHANCED VERSION v2.0 - Multi-Provider AI Integration with Deep Psychological Analysis
+
+This module provides a unified pattern for wellness tools with:
+- Multi-provider support (OpenAI + Sarvam with automatic fallback)
+- Deep psychological analysis frameworks (CBT, ACT, Behavioral Psychology)
+- Comprehensive Gita wisdom integration
+- Analysis modes for all tools (standard, deep_dive, quantum_dive)
+- Redis caching for performance
+- Graceful degradation with fallback responses
 
 PATTERN:
-1. PROBLEM ACKNOWLEDGED - Recognize the user's specific situation
-2. PROBLEM ANALYZED - Deep understanding of the underlying issue
+1. PROBLEM ACKNOWLEDGED - Recognize the user's specific situation with empathy
+2. PSYCHOLOGICAL ANALYSIS - Apply behavioral science frameworks
 3. GITA VERSES SEARCHED - Find best suited verses from 700+ verse database
-4. GITA-BASED IMPLEMENTATION - Provide solution strictly through Bhagavad Gita wisdom
+4. WISDOM SYNTHESIS - Blend psychology + Gita wisdom for comprehensive solution
+5. ACTIONABLE GUIDANCE - Practical steps grounded in both science and wisdom
 
-Each tool uses the same core model but with different Gita focus areas:
-- Viyoga: Detachment through Karma Yoga (action without attachment)
-- Ardha: Reframing through Sthitaprajna (steady wisdom)
-- Relationship Compass: Guidance through Dharma & Daya (right action & compassion)
+Each tool uses the same core model but with different focus areas:
+- Viyoga: Detachment through Karma Yoga + Acceptance & Commitment Therapy
+- Ardha: Reframing through Sthitaprajna + Cognitive Behavioral Therapy
+- Relationship Compass: Dharma & Daya + Attachment Theory + Communication Psychology
 """
 
 from __future__ import annotations
 
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
-from openai import OpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Multi-provider AI integration
+from backend.services.ai.providers.provider_manager import (
+    get_provider_manager,
+    AIProviderError,
+)
+
+# Redis caching for performance
+from backend.services.redis_cache_enhanced import redis_cache
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +69,7 @@ class AnalysisMode(Enum):
 
 @dataclass
 class WellnessResponse:
-    """Structured response from the wellness model."""
+    """Structured response from the wellness model with enhanced metadata."""
     content: str
     sections: dict[str, str]
     gita_verses_used: int
@@ -59,54 +77,269 @@ class WellnessResponse:
     model: str = "gpt-4o-mini"
     provider: str = "kiaan"
     analysis_mode: str = "standard"  # standard, deep_dive, or quantum_dive
+    # Enhanced metadata for v2.0
+    psychological_framework: str = ""  # CBT, ACT, Attachment Theory, etc.
+    behavioral_insights: list[str] = field(default_factory=list)
+    cached: bool = False
+    latency_ms: float = 0.0
+
+
+# =============================================================================
+# PSYCHOLOGICAL ANALYSIS FRAMEWORKS
+# =============================================================================
+
+class PsychologicalFramework:
+    """
+    Psychological frameworks integrated with Gita wisdom for comprehensive analysis.
+
+    These frameworks are used to enhance understanding while Gita wisdom
+    provides the spiritual grounding and transformation path.
+    """
+
+    # CBT-based cognitive distortion patterns
+    COGNITIVE_DISTORTIONS = {
+        "all_or_nothing": {
+            "pattern": "Seeing things in black-or-white categories",
+            "gita_remedy": "Samatvam (equanimity) - recognizing the spectrum of experience",
+            "indicators": ["always", "never", "completely", "totally", "nothing", "everything"],
+        },
+        "catastrophizing": {
+            "pattern": "Expecting the worst possible outcome",
+            "gita_remedy": "Vairagya (detachment) - releasing grip on imagined futures",
+            "indicators": ["disaster", "terrible", "worst", "ruined", "end of"],
+        },
+        "mind_reading": {
+            "pattern": "Assuming you know what others think without evidence",
+            "gita_remedy": "Sama-darshana (equal vision) - seeing beyond projections",
+            "indicators": ["thinks I'm", "probably believes", "must think", "looking at me"],
+        },
+        "emotional_reasoning": {
+            "pattern": "Believing feelings reflect reality",
+            "gita_remedy": "Sakshi bhava (witness consciousness) - observing emotions as temporary",
+            "indicators": ["feel like", "it feels", "because I feel"],
+        },
+        "should_statements": {
+            "pattern": "Rigid rules about how self/others must behave",
+            "gita_remedy": "Svadharma (one's unique duty) - honoring individual paths",
+            "indicators": ["should", "must", "have to", "supposed to", "ought to"],
+        },
+        "personalization": {
+            "pattern": "Taking excessive responsibility for external events",
+            "gita_remedy": "Nishkama karma (desireless action) - releasing attachment to outcomes",
+            "indicators": ["my fault", "because of me", "I caused", "blame myself"],
+        },
+        "fortune_telling": {
+            "pattern": "Predicting negative outcomes without evidence",
+            "gita_remedy": "Karma yoga - focusing on effort, not results",
+            "indicators": ["will fail", "won't work", "going to be", "will never"],
+        },
+        "labeling": {
+            "pattern": "Attaching fixed labels to self or others",
+            "gita_remedy": "Atman awareness - recognizing eternal, unlabeled essence",
+            "indicators": ["I am a", "they are just", "such a", "always been"],
+        },
+    }
+
+    # Attachment theory patterns (for RelationshipCompass)
+    ATTACHMENT_PATTERNS = {
+        "anxious": {
+            "characteristics": "Fear of abandonment, need for reassurance, hypervigilance",
+            "gita_wisdom": "Atma-tripti (self-contentment) - completeness within yourself",
+            "healing_focus": "Building inner security through self-connection",
+        },
+        "avoidant": {
+            "characteristics": "Discomfort with closeness, independence over intimacy",
+            "gita_wisdom": "Sangha (sacred connection) - safe interdependence",
+            "healing_focus": "Gradual opening through small vulnerable moments",
+        },
+        "disorganized": {
+            "characteristics": "Conflicting desires for closeness and distance",
+            "gita_wisdom": "Yoga (union) - integrating conflicting parts of self",
+            "healing_focus": "Creating safety through predictable, boundaried connection",
+        },
+        "secure": {
+            "characteristics": "Comfortable with intimacy and independence",
+            "gita_wisdom": "Purnatva (fullness) - complete in self, open to others",
+            "healing_focus": "Maintaining balance and supporting partner's growth",
+        },
+    }
+
+    # ACT (Acceptance & Commitment Therapy) processes (for Viyoga)
+    ACT_PROCESSES = {
+        "acceptance": {
+            "description": "Opening up to experience without struggle",
+            "gita_parallel": "Vairagya - accepting what is without attachment",
+            "practice": "Acknowledging outcomes we cannot control",
+        },
+        "defusion": {
+            "description": "Seeing thoughts as mental events, not facts",
+            "gita_parallel": "Sakshi bhava - witness consciousness",
+            "practice": "Noticing 'I am having the thought that...'",
+        },
+        "present_moment": {
+            "description": "Contacting the here and now",
+            "gita_parallel": "Dhyana - meditative awareness",
+            "practice": "Breath awareness, sensory grounding",
+        },
+        "self_as_context": {
+            "description": "Awareness as the unchanging observer",
+            "gita_parallel": "Atman - the eternal witness",
+            "practice": "Recognizing 'I am the one who notices'",
+        },
+        "values": {
+            "description": "Clarifying what matters most",
+            "gita_parallel": "Dharma - sacred duty and purpose",
+            "practice": "Identifying intrinsic motivations",
+        },
+        "committed_action": {
+            "description": "Taking effective action aligned with values",
+            "gita_parallel": "Nishkama karma - action without attachment",
+            "practice": "Small steps toward meaningful goals",
+        },
+    }
+
+    # Behavioral patterns for analysis
+    BEHAVIORAL_INDICATORS = {
+        "avoidance": ["avoiding", "escape", "run from", "hide", "procrastinate"],
+        "rumination": ["keep thinking", "can't stop", "over and over", "replay"],
+        "catastrophizing": ["worst case", "disaster", "terrible", "unbearable"],
+        "perfectionism": ["perfect", "flawless", "mistake-free", "100%"],
+        "people_pleasing": ["make everyone happy", "disappoint", "approval"],
+        "control_seeking": ["control", "manage", "make sure", "guarantee"],
+    }
+
+    @classmethod
+    def detect_cognitive_distortions(cls, text: str) -> list[dict[str, str]]:
+        """Detect cognitive distortions in user input."""
+        text_lower = text.lower()
+        detected = []
+
+        for distortion_name, distortion_info in cls.COGNITIVE_DISTORTIONS.items():
+            for indicator in distortion_info["indicators"]:
+                if indicator in text_lower:
+                    detected.append({
+                        "distortion": distortion_name.replace("_", " ").title(),
+                        "pattern": distortion_info["pattern"],
+                        "gita_remedy": distortion_info["gita_remedy"],
+                    })
+                    break  # Only add once per distortion type
+
+        return detected
+
+    @classmethod
+    def detect_behavioral_patterns(cls, text: str) -> list[str]:
+        """Detect behavioral patterns in user input."""
+        text_lower = text.lower()
+        detected = []
+
+        for pattern, indicators in cls.BEHAVIORAL_INDICATORS.items():
+            for indicator in indicators:
+                if indicator in text_lower:
+                    detected.append(pattern)
+                    break
+
+        return detected
+
+    @classmethod
+    def get_act_guidance(cls, issue_type: str) -> dict[str, str]:
+        """Get ACT-based guidance for an issue type."""
+        # Map issue types to relevant ACT processes
+        issue_to_act = {
+            "outcome_anxiety": ["acceptance", "defusion", "present_moment"],
+            "attachment": ["acceptance", "self_as_context", "values"],
+            "control": ["acceptance", "defusion", "committed_action"],
+            "future_worry": ["present_moment", "defusion", "acceptance"],
+        }
+
+        relevant_processes = issue_to_act.get(issue_type, ["acceptance", "defusion"])
+        guidance = {}
+
+        for process_name in relevant_processes:
+            if process_name in cls.ACT_PROCESSES:
+                process = cls.ACT_PROCESSES[process_name]
+                guidance[process_name] = {
+                    "description": process["description"],
+                    "gita_parallel": process["gita_parallel"],
+                    "practice": process["practice"],
+                }
+
+        return guidance
 
 
 class WellnessModel:
     """
     Unified AI Model for wellness tools - powered by Bhagavad Gita wisdom.
 
-    RESPONSE PATTERN:
-    1. ACKNOWLEDGE - Recognize the user's specific problem/situation
-    2. ANALYZE - Understand what's really happening underneath
-    3. SEARCH GITA - Find best suited verses for this situation
-    4. IMPLEMENT - Provide solution strictly through Gita wisdom
+    ENHANCED VERSION v2.0 - Multi-Provider AI with Psychological Analysis
 
-    All responses mention the user's specific situation and are rooted
-    exclusively in Bhagavad Gita teachings.
+    RESPONSE PATTERN:
+    1. ACKNOWLEDGE - Recognize the user's specific problem/situation with deep empathy
+    2. ANALYZE - Apply psychological frameworks (CBT, ACT, Attachment Theory)
+    3. SEARCH GITA - Find best suited verses for this situation (700+ verse database)
+    4. SYNTHESIZE - Blend psychological insight with Gita wisdom
+    5. IMPLEMENT - Provide comprehensive, actionable solution
+
+    FEATURES:
+    - Multi-provider support (OpenAI + Sarvam with automatic fallback)
+    - Analysis modes for all tools (standard, deep_dive, quantum_dive)
+    - Psychological framework integration (CBT, ACT, Attachment Theory)
+    - Behavioral pattern detection and insight
+    - Redis caching for performance
+    - Graceful degradation with meaningful fallbacks
+
+    All responses mention the user's specific situation and blend
+    psychological science with Bhagavad Gita teachings.
     """
 
     # Tool-specific search keywords for finding relevant Gita verses
     TOOL_KEYWORDS = {
-        WellnessTool.VIYOGA: "karma yoga nishkama karma detachment action fruits results outcome anxiety equanimity vairagya",
-        WellnessTool.ARDHA: "sthitaprajna steady wisdom equanimity mind control thoughts buddhi viveka discrimination peace",
+        WellnessTool.VIYOGA: (
+            "karma yoga nishkama karma detachment action fruits results outcome anxiety equanimity vairagya "
+            "acceptance surrender control release letting go peace freedom liberation attachment "
+            "phala sakti fruit attachment result focus effort action yoga samatva balance"
+        ),
+        WellnessTool.ARDHA: (
+            "sthitaprajna steady wisdom equanimity mind control thoughts buddhi viveka discrimination peace "
+            "cognitive reframe thought pattern chitta vritti mental modification witness observer sakshi "
+            "kutastha unchanging anvil thoughts clouds sky awareness consciousness"
+        ),
         WellnessTool.RELATIONSHIP_COMPASS: (
             "dharma right action daya compassion kshama forgiveness ahimsa non-harm satya truth relationships "
             "sama-darshana equal vision friend foe maitri friendship karuna mercy love attachment raga dvesha "
             "ahamkara ego tyaga surrender family duty svadharma conflict harmony peace understanding "
             "anger krodha hurt pain sorrow suffering healing reconciliation wisdom connection bond "
-            "sarva-bhuta-hite welfare all beings respect honor communication speaking truth priya vachana"
+            "sarva-bhuta-hite welfare all beings respect honor communication speaking truth priya vachana "
+            "attachment style anxious avoidant secure intimacy trust vulnerability boundaries"
         ),
     }
 
-    # Tool-specific Gita focus areas
+    # Tool-specific Gita focus areas with psychological integration
     TOOL_GITA_FOCUS = {
         WellnessTool.VIYOGA: {
             "name": "Viyoga",
             "gita_principle": "Karma Yoga - The yoga of selfless action",
             "core_teaching": "Your right is to action alone, never to its fruits (Karmanye vadhikaraste)",
             "focus": "Detachment from outcomes through focused action",
+            "psychological_framework": "Acceptance & Commitment Therapy (ACT)",
+            "psychology_integration": "ACT's acceptance and defusion align with Viyoga's teaching on releasing attachment to outcomes",
+            "key_processes": ["acceptance", "defusion", "present_moment", "values", "committed_action"],
         },
         WellnessTool.ARDHA: {
             "name": "Ardha",
             "gita_principle": "Sthitaprajna - The person of steady wisdom",
             "core_teaching": "The wise one is undisturbed by dualities, unmoved by praise or blame",
             "focus": "Reframing thoughts through observer consciousness",
+            "psychological_framework": "Cognitive Behavioral Therapy (CBT)",
+            "psychology_integration": "CBT's cognitive restructuring aligns with Ardha's teaching on witnessing and reframing thoughts",
+            "key_processes": ["cognitive_restructuring", "thought_challenging", "behavioral_activation"],
         },
         WellnessTool.RELATIONSHIP_COMPASS: {
             "name": "Relationship Compass",
             "gita_principle": "Dharma, Daya & Kshama - Right action, compassion, and forgiveness",
             "core_teaching": "The wise one treats friend and foe alike, sees the divine in all beings, and acts from their highest self",
             "focus": "Navigating the sacred terrain of human connection through Gita psychology",
+            "psychological_framework": "Attachment Theory + Communication Psychology",
+            "psychology_integration": "Attachment theory's insights on relational patterns complement Gita's teachings on dharma and compassion",
             "sections": [
                 "Sacred Witnessing (deep acknowledgment)",
                 "Mirror of Relationship (svadhyaya - self-study)",
@@ -121,17 +354,50 @@ class WellnessModel:
     }
 
     def __init__(self):
-        """Initialize the wellness model."""
-        api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        self.client = OpenAI(api_key=api_key) if api_key else None
-        self.gita_kb = None
+        """Initialize the wellness model with multi-provider support."""
+        # Multi-provider AI integration (v2.0)
+        self._provider_manager = None
+        self._init_provider_manager()
 
+        # Legacy OpenAI client as backup
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        try:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=api_key) if api_key else None
+        except ImportError:
+            self.client = None
+            logger.warning("OpenAI client not available for legacy fallback")
+
+        # Gita knowledge base
+        self.gita_kb = None
         try:
             from backend.services.wisdom_kb import WisdomKnowledgeBase
             self.gita_kb = WisdomKnowledgeBase()
-            logger.info("✅ WellnessModel: Gita knowledge base loaded (700+ verses)")
+            logger.info("✅ WellnessModel v2.0: Gita knowledge base loaded (700+ verses)")
         except Exception as e:
             logger.warning(f"⚠️ WellnessModel: Gita KB unavailable: {e}")
+
+        # Psychological framework analyzer
+        self.psych_framework = PsychologicalFramework()
+
+        logger.info("✅ WellnessModel v2.0 initialized with multi-provider AI + psychological analysis")
+
+    def _init_provider_manager(self) -> None:
+        """Initialize the multi-provider manager."""
+        try:
+            self._provider_manager = get_provider_manager()
+            providers = self._provider_manager.list_providers()
+            logger.info(f"✅ WellnessModel: ProviderManager initialized with providers: {providers}")
+        except Exception as e:
+            logger.warning(f"⚠️ WellnessModel: ProviderManager unavailable: {e}")
+            self._provider_manager = None
+
+    @property
+    def provider_manager(self):
+        """Lazy access to provider manager."""
+        if self._provider_manager is None:
+            self._init_provider_manager()
+        return self._provider_manager
 
     async def generate_response(
         self,
@@ -139,90 +405,355 @@ class WellnessModel:
         user_input: str,
         db: AsyncSession,
         analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
+        language: str | None = None,
     ) -> WellnessResponse:
         """
-        Generate a wellness response using Bhagavad Gita wisdom.
+        Generate a wellness response using Bhagavad Gita wisdom + psychological analysis.
 
-        Pattern:
-        1. ACKNOWLEDGE the user's specific problem/situation
-        2. ANALYZE what's really happening underneath
-        3. SEARCH best suited Gita verses for this situation
-        4. IMPLEMENT solution strictly through Gita wisdom
+        ENHANCED PATTERN (v2.0):
+        1. ACKNOWLEDGE the user's specific problem/situation with deep empathy
+        2. ANALYZE using psychological frameworks (detect patterns, distortions)
+        3. SEARCH best suited Gita verses for this situation (700+ verse database)
+        4. SYNTHESIZE psychological insight with Gita wisdom
+        5. IMPLEMENT comprehensive solution with actionable guidance
 
         Args:
             tool: Which wellness tool (Viyoga/Ardha/Relationship Compass)
             user_input: The user's specific problem/situation
             db: Database session for fetching Gita verses
             analysis_mode: Depth of analysis (STANDARD, DEEP_DIVE, QUANTUM_DIVE)
-                - STANDARD: Quick 4-section reframe
-                - DEEP_DIVE: Comprehensive problem analysis and multi-layer reframe
+                - STANDARD: Quick 4-section response with core insights
+                - DEEP_DIVE: Comprehensive analysis with root cause exploration
                 - QUANTUM_DIVE: Multi-dimensional exploration across all life aspects
+            language: Optional language code for response (hi, ta, te, etc.)
 
         Returns:
-            WellnessResponse with Gita-grounded content and structured sections
+            WellnessResponse with Gita-grounded content, structured sections,
+            and psychological insights
         """
-        if not self.client:
-            logger.error("WellnessModel: OpenAI client not configured")
+        import time
+        start_time = time.time()
+
+        # Check cache first for performance (v2.0)
+        cache_key = f"{tool.value}:{analysis_mode.value}:{hash(user_input)}"
+        cached_response = self._check_cache(cache_key)
+        if cached_response:
+            logger.info(f"✅ Cache HIT for {tool.value} response")
+            cached_response.cached = True
+            return cached_response
+
+        # STEP 1: Psychological analysis (v2.0 enhancement)
+        psych_insights = self._analyze_psychological_patterns(tool, user_input)
+        behavioral_patterns = psych_insights.get("behavioral_patterns", [])
+        cognitive_distortions = psych_insights.get("cognitive_distortions", [])
+        psychological_framework = self.TOOL_GITA_FOCUS[tool].get("psychological_framework", "")
+
+        logger.info(
+            f"🧠 Psychological analysis for {tool.value}: "
+            f"distortions={len(cognitive_distortions)}, patterns={behavioral_patterns}"
+        )
+
+        # STEP 2: SEARCH - Find best suited Gita verses (more for deeper analysis)
+        verse_limit = self._get_verse_limit(analysis_mode)
+        gita_context, verse_count = await self._fetch_gita_wisdom(
+            tool, user_input, db, verse_limit=verse_limit
+        )
+        logger.info(f"📖 Found {verse_count} Gita verses for {tool.value} ({analysis_mode.value} mode)")
+
+        # STEP 3: Build enhanced system prompt with psychological integration
+        system_prompt = self._build_enhanced_system_prompt(
+            tool=tool,
+            user_input=user_input,
+            gita_context=gita_context,
+            analysis_mode=analysis_mode,
+            psych_insights=psych_insights,
+            language=language,
+        )
+
+        # STEP 4: Generate response using multi-provider system
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": self._format_user_message(tool, user_input, analysis_mode)}
+        ]
+
+        max_tokens = self._get_max_tokens(analysis_mode)
+        content = None
+        provider_used = "fallback"
+        model_used = "fallback"
+
+        # Try multi-provider manager first (v2.0)
+        if self.provider_manager:
+            try:
+                logger.info(f"🤖 Using ProviderManager for {tool.value} ({analysis_mode.value})")
+                response = await self.provider_manager.chat(
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=max_tokens,
+                )
+                content = response.content
+                provider_used = response.provider
+                model_used = response.model
+                logger.info(f"✅ Response from {provider_used}/{model_used}")
+
+            except AIProviderError as e:
+                logger.warning(f"ProviderManager failed: {e}, trying legacy client")
+
+        # Fallback to legacy OpenAI client
+        if not content and self.client:
+            try:
+                logger.info("Using legacy OpenAI client as fallback")
+                timeout = self._get_timeout(analysis_mode)
+                response = self.client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=max_tokens,
+                    timeout=timeout,
+                )
+                if response and response.choices and len(response.choices) > 0:
+                    response_msg = response.choices[0].message
+                    if response_msg:
+                        content = response_msg.content
+                        provider_used = "openai"
+                        model_used = "gpt-4o-mini"
+            except Exception as e:
+                logger.error(f"Legacy OpenAI client failed: {e}")
+
+        # Final fallback
+        if not content:
+            logger.warning(f"All providers failed for {tool.value}, using fallback response")
             return self._get_fallback_response(tool, user_input, analysis_mode)
 
-        try:
-            # STEP 1 & 2: Will be handled by the AI with proper prompting
+        # STEP 5: Parse and structure response
+        sections = self._parse_response(tool, content, analysis_mode)
 
-            # STEP 3: SEARCH - Find best suited Gita verses (more verses for deeper dives)
-            verse_limit = 7 if analysis_mode == AnalysisMode.STANDARD else (10 if analysis_mode == AnalysisMode.DEEP_DIVE else 12)
-            gita_context, verse_count = await self._fetch_gita_wisdom(tool, user_input, db, verse_limit=verse_limit)
-            logger.info(f"📖 Found {verse_count} Gita verses for {tool.value} ({analysis_mode.value} mode)")
+        # Calculate latency
+        latency_ms = (time.time() - start_time) * 1000
 
-            # STEP 4: IMPLEMENT - Generate Gita-based response
-            system_prompt = self._build_system_prompt(tool, user_input, gita_context, analysis_mode)
+        result = WellnessResponse(
+            content=content,
+            sections=sections,
+            gita_verses_used=verse_count,
+            tool=tool,
+            model=model_used,
+            provider=provider_used,
+            analysis_mode=analysis_mode.value,
+            psychological_framework=psychological_framework,
+            behavioral_insights=behavioral_patterns,
+            cached=False,
+            latency_ms=latency_ms,
+        )
 
-            # Adjust model and tokens based on analysis depth
-            # Deeper dives need more tokens for comprehensive responses
-            model = "gpt-4o-mini"
-            if analysis_mode == AnalysisMode.QUANTUM_DIVE:
-                max_tokens = 2500  # Quantum dive: ultra-comprehensive
-                timeout = 90.0
-            elif analysis_mode == AnalysisMode.DEEP_DIVE:
-                max_tokens = 1800  # Deep dive: comprehensive
-                timeout = 60.0
+        # Cache the successful response
+        self._cache_response(cache_key, result)
+
+        logger.info(
+            f"✅ {tool.value} response generated in {latency_ms:.0f}ms "
+            f"({provider_used}/{model_used}, {verse_count} verses)"
+        )
+
+        return result
+
+    def _analyze_psychological_patterns(
+        self,
+        tool: WellnessTool,
+        user_input: str,
+    ) -> dict[str, Any]:
+        """
+        Analyze user input for psychological patterns.
+
+        Returns insights based on the tool type:
+        - Ardha: Cognitive distortions (CBT)
+        - Viyoga: ACT processes relevant to their concern
+        - RelationshipCompass: Attachment patterns and communication styles
+        """
+        result: dict[str, Any] = {
+            "cognitive_distortions": [],
+            "behavioral_patterns": [],
+            "act_guidance": {},
+            "attachment_indicators": [],
+        }
+
+        # Detect cognitive distortions (primarily for Ardha, but useful for all)
+        result["cognitive_distortions"] = self.psych_framework.detect_cognitive_distortions(user_input)
+
+        # Detect behavioral patterns
+        result["behavioral_patterns"] = self.psych_framework.detect_behavioral_patterns(user_input)
+
+        # Tool-specific analysis
+        if tool == WellnessTool.VIYOGA:
+            # Determine the type of outcome anxiety
+            user_lower = user_input.lower()
+            if any(w in user_lower for w in ["control", "manage", "guarantee"]):
+                issue_type = "control"
+            elif any(w in user_lower for w in ["future", "what if", "might happen"]):
+                issue_type = "future_worry"
+            elif any(w in user_lower for w in ["attached", "need", "must have"]):
+                issue_type = "attachment"
             else:
-                max_tokens = 1000  # Standard: concise
-                timeout = 45.0
+                issue_type = "outcome_anxiety"
+            result["act_guidance"] = self.psych_framework.get_act_guidance(issue_type)
 
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": self._format_user_message(tool, user_input, analysis_mode)}
-                ],
-                temperature=0.7,
-                max_tokens=max_tokens,
-                timeout=timeout,
-            )
+        elif tool == WellnessTool.RELATIONSHIP_COMPASS:
+            # Detect attachment style indicators
+            user_lower = user_input.lower()
+            attachment_indicators = []
+            if any(w in user_lower for w in ["abandoned", "leave me", "not enough", "clingy"]):
+                attachment_indicators.append("anxious_attachment")
+            if any(w in user_lower for w in ["space", "too close", "suffocating", "independent"]):
+                attachment_indicators.append("avoidant_attachment")
+            if any(w in user_lower for w in ["confused", "push pull", "hot cold"]):
+                attachment_indicators.append("disorganized_attachment")
+            result["attachment_indicators"] = attachment_indicators
 
-            content = None
-            if response and response.choices and len(response.choices) > 0:
-                response_msg = response.choices[0].message
-                if response_msg:
-                    content = response_msg.content
+        return result
 
-            if not content:
-                return self._get_fallback_response(tool, user_input, analysis_mode)
+    def _get_verse_limit(self, analysis_mode: AnalysisMode) -> int:
+        """Get verse limit based on analysis depth."""
+        limits = {
+            AnalysisMode.STANDARD: 7,
+            AnalysisMode.DEEP_DIVE: 10,
+            AnalysisMode.QUANTUM_DIVE: 12,
+        }
+        return limits.get(analysis_mode, 7)
 
-            # Parse response into sections based on analysis mode
-            sections = self._parse_response(tool, content, analysis_mode)
+    def _get_max_tokens(self, analysis_mode: AnalysisMode) -> int:
+        """Get max tokens based on analysis depth."""
+        tokens = {
+            AnalysisMode.STANDARD: 1000,
+            AnalysisMode.DEEP_DIVE: 1800,
+            AnalysisMode.QUANTUM_DIVE: 2500,
+        }
+        return tokens.get(analysis_mode, 1000)
 
-            return WellnessResponse(
-                content=content,
-                sections=sections,
-                gita_verses_used=verse_count,
-                tool=tool,
-                analysis_mode=analysis_mode.value,
-            )
+    def _get_timeout(self, analysis_mode: AnalysisMode) -> float:
+        """Get timeout based on analysis depth."""
+        timeouts = {
+            AnalysisMode.STANDARD: 45.0,
+            AnalysisMode.DEEP_DIVE: 60.0,
+            AnalysisMode.QUANTUM_DIVE: 90.0,
+        }
+        return timeouts.get(analysis_mode, 45.0)
 
+    def _check_cache(self, cache_key: str) -> WellnessResponse | None:
+        """Check Redis cache for a previous response."""
+        try:
+            cached = redis_cache.get(f"wellness:{cache_key}")
+            if cached:
+                # Reconstruct WellnessResponse from cached data
+                return WellnessResponse(
+                    content=cached.get("content", ""),
+                    sections=cached.get("sections", {}),
+                    gita_verses_used=cached.get("gita_verses_used", 0),
+                    tool=WellnessTool(cached.get("tool", "ardha")),
+                    model=cached.get("model", "cached"),
+                    provider=cached.get("provider", "cache"),
+                    analysis_mode=cached.get("analysis_mode", "standard"),
+                    psychological_framework=cached.get("psychological_framework", ""),
+                    behavioral_insights=cached.get("behavioral_insights", []),
+                    cached=True,
+                )
         except Exception as e:
-            logger.exception(f"WellnessModel error for {tool.value} ({analysis_mode.value}): {e}")
-            return self._get_fallback_response(tool, user_input, analysis_mode)
+            logger.debug(f"Cache check failed: {e}")
+        return None
+
+    def _cache_response(self, cache_key: str, response: WellnessResponse) -> None:
+        """Cache a successful response."""
+        try:
+            cache_data = {
+                "content": response.content,
+                "sections": response.sections,
+                "gita_verses_used": response.gita_verses_used,
+                "tool": response.tool.value,
+                "model": response.model,
+                "provider": response.provider,
+                "analysis_mode": response.analysis_mode,
+                "psychological_framework": response.psychological_framework,
+                "behavioral_insights": response.behavioral_insights,
+            }
+            redis_cache.set(f"wellness:{cache_key}", cache_data, ttl=3600)  # 1 hour TTL
+        except Exception as e:
+            logger.debug(f"Cache set failed: {e}")
+
+    def _build_enhanced_system_prompt(
+        self,
+        tool: WellnessTool,
+        user_input: str,
+        gita_context: str,
+        analysis_mode: AnalysisMode,
+        psych_insights: dict[str, Any],
+        language: str | None = None,
+    ) -> str:
+        """Build enhanced system prompt with psychological framework integration."""
+        # Get base prompt from existing method
+        base_prompt = self._build_system_prompt(tool, user_input, gita_context, analysis_mode)
+
+        # Add psychological framework context
+        psych_context = self._build_psychological_context(tool, psych_insights)
+
+        # Add language instruction if specified
+        language_instruction = ""
+        if language and language != "en":
+            language_map = {
+                "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "bn": "Bengali",
+                "mr": "Marathi", "gu": "Gujarati", "kn": "Kannada", "ml": "Malayalam",
+                "pa": "Punjabi", "sa": "Sanskrit", "es": "Spanish", "fr": "French",
+                "de": "German", "pt": "Portuguese", "ja": "Japanese", "zh": "Chinese",
+            }
+            lang_name = language_map.get(language, language)
+            language_instruction = f"\n\nRESPOND IN {lang_name}. Keep Sanskrit terms (dharma, karma, yoga) but explain in {lang_name}."
+
+        # Combine all components
+        enhanced_prompt = f"""{base_prompt}
+
+{psych_context}
+{language_instruction}
+
+IMPORTANT: Blend psychological insight with Gita wisdom seamlessly.
+The user should feel understood on both scientific AND spiritual levels.
+Never use clinical jargon directly - translate psychological concepts into
+warm, accessible language while maintaining their therapeutic value."""
+
+        return enhanced_prompt
+
+    def _build_psychological_context(
+        self,
+        tool: WellnessTool,
+        psych_insights: dict[str, Any],
+    ) -> str:
+        """Build psychological context section for the prompt."""
+        parts = ["--- PSYCHOLOGICAL ANALYSIS (Internal Use - Inform Response) ---"]
+
+        # Cognitive distortions
+        distortions = psych_insights.get("cognitive_distortions", [])
+        if distortions:
+            parts.append("\nDETECTED COGNITIVE PATTERNS:")
+            for d in distortions[:3]:  # Limit to top 3
+                parts.append(f"  • {d['distortion']}: {d['pattern']}")
+                parts.append(f"    Gita Remedy: {d['gita_remedy']}")
+
+        # Behavioral patterns
+        behaviors = psych_insights.get("behavioral_patterns", [])
+        if behaviors:
+            parts.append(f"\nBEHAVIORAL PATTERNS: {', '.join(behaviors)}")
+
+        # Tool-specific insights
+        if tool == WellnessTool.VIYOGA:
+            act_guidance = psych_insights.get("act_guidance", {})
+            if act_guidance:
+                parts.append("\nACT PROCESSES TO EMPHASIZE:")
+                for process_name, process_info in list(act_guidance.items())[:3]:
+                    parts.append(f"  • {process_name.title()}: {process_info.get('gita_parallel', '')}")
+
+        elif tool == WellnessTool.RELATIONSHIP_COMPASS:
+            attachment = psych_insights.get("attachment_indicators", [])
+            if attachment:
+                parts.append(f"\nATTACHMENT INDICATORS: {', '.join(attachment)}")
+                parts.append("  Address with: Atma-tripti (inner completeness), secure connection principles")
+
+        parts.append("\n--- END PSYCHOLOGICAL ANALYSIS ---")
+
+        return "\n".join(parts)
 
     async def _fetch_gita_wisdom(
         self,
