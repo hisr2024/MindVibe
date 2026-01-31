@@ -1,14 +1,23 @@
-"""Ardha Reframing Assistant - KIAAN AI Integration (WellnessModel Pattern).
+"""Ardha Reframing Assistant - KIAAN AI Integration (WellnessModel Pattern v2.0).
 
-This router provides cognitive reframing using the unified WellnessModel:
-Question → Understanding → Bhagavad Gita-grounded Answer
+ENHANCED VERSION with Multi-Provider AI + Psychological Analysis
 
-Ardha focuses on sthitaprajna (steady wisdom) principles for thought transformation.
+This router provides cognitive reframing using the enhanced WellnessModel:
+Question → Psychological Analysis → Gita Wisdom → Comprehensive Solution
+
+Ardha focuses on sthitaprajna (steady wisdom) principles + CBT cognitive restructuring.
 
 ANALYSIS MODES:
-- standard: Quick 4-section reframe (recognition, insight, reframe, action step)
-- deep_dive: Comprehensive problem analysis with root cause exploration and multi-perspective reframing
+- standard: Quick 4-section reframe with cognitive pattern detection
+- deep_dive: Comprehensive analysis with root cause exploration, CBT integration, multi-perspective reframing
 - quantum_dive: Multi-dimensional analysis across emotional, cognitive, relational, physical, and spiritual dimensions
+
+ENHANCEMENTS (v2.0):
+- Multi-provider AI (OpenAI + Sarvam with automatic fallback)
+- Cognitive distortion detection (CBT framework)
+- Behavioral pattern analysis
+- Psychological framework integration
+- Multi-language support
 """
 
 from __future__ import annotations
@@ -25,6 +34,7 @@ from backend.services.wellness_model import (
     WellnessModel,
     WellnessTool,
     get_wellness_model,
+    PsychologicalFramework,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,29 +55,33 @@ async def reframe_thought(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Generate cognitive reframing using the unified WellnessModel.
+    """Generate cognitive reframing using the enhanced WellnessModel v2.0.
 
-    Pattern: Question → Understanding → Bhagavad Gita-grounded Answer
+    ENHANCED PATTERN:
+    Question → Psychological Analysis → Gita Wisdom → Comprehensive Solution
 
     1. Receive user's negative thought/problem
-    2. Determine analysis mode (standard, deep_dive, or quantum_dive)
-    3. Fetch relevant Gita verses (sthitaprajna focus)
-    4. Generate warm, friendly, Gita-rooted response with appropriate depth
+    2. Detect cognitive distortions and behavioral patterns (CBT framework)
+    3. Determine analysis mode (standard, deep_dive, or quantum_dive)
+    4. Fetch relevant Gita verses (sthitaprajna focus)
+    5. Generate response blending psychology + Gita wisdom
 
     Request body:
         negative_thought: str - The thought or situation to reframe
         analysis_mode: str - One of "standard", "deep_dive", or "quantum_dive" (default: "standard")
+        language: str - Optional language code (hi, ta, te, etc.)
 
     Returns:
-        - standard mode: 4 sections (recognition, deep_insight, reframe, small_action_step)
-        - deep_dive mode: 6 sections (acknowledgment, root_cause_analysis, multi_perspective,
-                                       comprehensive_reframe, solution_pathways, empowering_closure)
-        - quantum_dive mode: 6 sections (sacred_witnessing, five_dimensional_analysis,
-                                          root_pattern_archaeology, quantum_reframing,
-                                          transformation_blueprint, life_purpose_integration)
+        - reframe_guidance: Structured sections based on analysis mode
+        - cognitive_insights: Detected cognitive distortions and Gita remedies
+        - behavioral_patterns: Identified behavioral tendencies
+        - psychological_framework: CBT (Cognitive Behavioral Therapy)
+        - gita_verses_used: Number of verses incorporated
+        - model/provider: AI model and provider used
     """
     negative_thought = payload.get("negative_thought", "")
     analysis_mode_str = payload.get("analysis_mode", "standard")
+    language = payload.get("language")
 
     if not negative_thought.strip():
         raise HTTPException(status_code=400, detail="negative_thought is required")
@@ -87,15 +101,21 @@ async def reframe_thought(
         return _get_fallback_response(negative_thought, analysis_mode)
 
     try:
-        # Use the unified WellnessModel with analysis mode
+        # Detect cognitive distortions (v2.0 enhancement)
+        cognitive_distortions = PsychologicalFramework.detect_cognitive_distortions(negative_thought)
+        behavioral_patterns = PsychologicalFramework.detect_behavioral_patterns(negative_thought)
+
+        # Use the enhanced WellnessModel with analysis mode
         result = await wellness_model.generate_response(
             tool=WellnessTool.ARDHA,
             user_input=negative_thought,
             db=db,
             analysis_mode=analysis_mode,
+            language=language,
         )
 
-        return {
+        # Build enhanced response
+        response = {
             "status": "success",
             "reframe_guidance": result.sections,
             "raw_text": result.content,
@@ -103,7 +123,31 @@ async def reframe_thought(
             "model": result.model,
             "provider": result.provider,
             "analysis_mode": result.analysis_mode,
+            # Enhanced v2.0 fields
+            "psychological_framework": result.psychological_framework or "Cognitive Behavioral Therapy (CBT)",
+            "cognitive_insights": {
+                "distortions_detected": [
+                    {
+                        "name": d["distortion"],
+                        "pattern": d["pattern"],
+                        "gita_remedy": d["gita_remedy"],
+                    }
+                    for d in cognitive_distortions[:3]
+                ],
+                "total_distortions": len(cognitive_distortions),
+            },
+            "behavioral_patterns": behavioral_patterns,
+            "cached": result.cached,
+            "latency_ms": result.latency_ms,
         }
+
+        logger.info(
+            f"✅ Ardha reframe: {analysis_mode.value} mode, "
+            f"{len(cognitive_distortions)} distortions detected, "
+            f"{result.gita_verses_used} verses used"
+        )
+
+        return response
 
     except Exception as e:
         logger.exception(f"Ardha error: {e}")
