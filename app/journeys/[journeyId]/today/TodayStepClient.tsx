@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import type { Transition, Variants } from 'framer-motion'
 import Link from 'next/link'
 import { FadeIn } from '@/components/ui'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -31,29 +32,33 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemTransition: Transition = {
+  type: 'spring',
+  stiffness: 300,
+  damping: 25,
+}
+
+const celebrationTransition: Transition = {
+  type: 'spring',
+  stiffness: 200,
+  damping: 15,
+}
+
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 25,
-    },
+    transition: itemTransition,
   },
 }
 
-const celebrationVariants = {
+const celebrationVariants: Variants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 200,
-      damping: 15,
-    },
+    transition: celebrationTransition,
   },
 }
 
