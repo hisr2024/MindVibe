@@ -20,7 +20,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, validates
 
 
 class SubscriptionTier(str, enum.Enum):
@@ -2861,6 +2861,14 @@ class UserJourney(SoftDeleteMixin, Base):
     step_states: Mapped[list["UserJourneyStepState"]] = relationship(
         "UserJourneyStepState", back_populates="user_journey", cascade="all, delete-orphan"
     )
+
+    @validates("status")
+    def _normalize_status(self, _key: str, value: UserJourneyStatus | str) -> str:
+        if isinstance(value, UserJourneyStatus):
+            return value.value
+        if isinstance(value, str):
+            return value.lower()
+        return value
 
 
 class UserJourneyStepState(SoftDeleteMixin, Base):
