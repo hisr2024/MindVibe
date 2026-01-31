@@ -37,12 +37,45 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   return [state, setState]
 }
 
+type AnalysisMode = 'standard' | 'deep_dive' | 'quantum_dive'
+
 type ArdhaResult = {
   response: string
   sections: Record<string, string>
   requestedAt: string
   gitaVerses?: number
+  analysisMode?: AnalysisMode
 }
+
+const ANALYSIS_MODES: {
+  id: AnalysisMode
+  name: string
+  description: string
+  icon: string
+  depth: string
+}[] = [
+  {
+    id: 'standard',
+    name: 'Quick Reframe',
+    description: 'Fast 4-step reframe for immediate relief',
+    icon: '⚡',
+    depth: '~30 seconds',
+  },
+  {
+    id: 'deep_dive',
+    name: 'Deep Dive',
+    description: 'Comprehensive analysis with root cause exploration',
+    icon: '🔍',
+    depth: '~1 minute',
+  },
+  {
+    id: 'quantum_dive',
+    name: 'Quantum Dive',
+    description: 'Multi-dimensional exploration across all life aspects',
+    icon: '🌌',
+    depth: '~2 minutes',
+  },
+]
 
 const pillars = [
   'Sacred witnessing - honor the courage to examine thoughts.',
@@ -56,6 +89,7 @@ export default function ArdhaClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ArdhaResult | null>('ardha_reframe', null)
+  const [analysisMode, setAnalysisMode] = useLocalState<AnalysisMode>('ardha_analysis_mode', 'standard')
 
   // Voice integration
   const { language } = useLanguage()
@@ -76,7 +110,10 @@ export default function ArdhaClient() {
       const response = await fetch('/api/ardha/reframe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ negative_thought: trimmedThought })
+        body: JSON.stringify({
+          negative_thought: trimmedThought,
+          analysis_mode: analysisMode,
+        })
       })
 
       if (!response.ok) {
@@ -86,17 +123,18 @@ export default function ArdhaClient() {
 
       const data = await response.json()
 
-      // Parse structured response - supports both legacy and ultra-deep sections
+      // Parse structured response - supports standard, deep_dive, and quantum_dive modes
       const guidance = data.reframe_guidance
-      const fullResponse = data.response || ''
+      const fullResponse = data.response || data.raw_text || ''
 
       if (guidance && typeof guidance === 'object') {
-        // Store both sections and full response
+        // Store sections, response, and analysis mode
         setResult({
           response: fullResponse,
           sections: guidance,
           requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0
+          gitaVerses: data.gita_verses_used || 0,
+          analysisMode: data.analysis_mode || analysisMode,
         })
       } else if (fullResponse) {
         // Fallback to full response only
@@ -104,7 +142,8 @@ export default function ArdhaClient() {
           response: fullResponse,
           sections: {},
           requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0
+          gitaVerses: data.gita_verses_used || 0,
+          analysisMode: data.analysis_mode || analysisMode,
         })
       } else {
         setError('Ardha could not generate a response. Please try again.')
@@ -172,14 +211,49 @@ export default function ArdhaClient() {
               />
               <p id="thought-hint" className="sr-only">Describe the negative thought you want to reframe</p>
 
+              {/* Analysis Mode Selector */}
+              <div className="mt-4 space-y-2">
+                <label className="text-xs font-semibold text-orange-100/80">Analysis Depth</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {ANALYSIS_MODES.map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setAnalysisMode(mode.id)}
+                      disabled={loading}
+                      className={`
+                        relative p-3 rounded-xl border text-left transition-all
+                        ${analysisMode === mode.id
+                          ? 'border-orange-400/60 bg-orange-500/15 ring-1 ring-orange-400/30'
+                          : 'border-orange-500/20 bg-black/30 hover:border-orange-500/40 hover:bg-black/40'
+                        }
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                      `}
+                      aria-pressed={analysisMode === mode.id}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg" role="img" aria-hidden="true">{mode.icon}</span>
+                        <span className="text-sm font-medium text-orange-50">{mode.name}</span>
+                      </div>
+                      <p className="text-xs text-orange-100/60 leading-relaxed">{mode.description}</p>
+                      <span className="absolute top-2 right-2 text-[10px] text-orange-100/40">{mode.depth}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-3 mt-4">
                 <button
                   onClick={requestReframe}
                   disabled={!thought.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
-                  aria-label={loading ? 'Processing...' : 'Reframe with Ardha'}
+                  aria-label={loading ? 'Processing...' : `Reframe with Ardha (${ANALYSIS_MODES.find(m => m.id === analysisMode)?.name})`}
                 >
-                  {loading ? <span>Ardha is reflecting...</span> : <span>Reframe with Ardha</span>}
+                  {loading ? (
+                    <span>Ardha is {analysisMode === 'quantum_dive' ? 'diving deep' : analysisMode === 'deep_dive' ? 'analyzing' : 'reflecting'}...</span>
+                  ) : (
+                    <span>Reframe with Ardha</span>
+                  )}
                 </button>
               </div>
 
@@ -204,6 +278,7 @@ export default function ArdhaClient() {
                 gitaVersesUsed={result.gitaVerses}
                 timestamp={result.requestedAt}
                 language={language}
+                analysisMode={result.analysisMode || analysisMode}
               />
             )}
           </section>

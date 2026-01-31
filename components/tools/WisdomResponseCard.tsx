@@ -27,6 +27,8 @@ interface SectionMeta {
   order: number
 }
 
+type AnalysisMode = 'standard' | 'deep_dive' | 'quantum_dive'
+
 interface WisdomResponseCardProps {
   tool: 'viyoga' | 'ardha' | 'relationship_compass'
   sections: Record<string, string>
@@ -34,6 +36,7 @@ interface WisdomResponseCardProps {
   gitaVersesUsed?: number
   timestamp: string
   language?: string
+  analysisMode?: AnalysisMode
 }
 
 // Section configurations for each tool
@@ -66,6 +69,7 @@ const SECTION_CONFIG = {
     icon: '🔄',
     name: 'Ardha',
     sectionMeta: {
+      // Standard mode sections
       sacred_witness: { title: 'Sacred Witnessing', icon: '👁️', order: 1 },
       recognition: { title: 'Recognition', icon: '👁️', order: 1 },
       architecture_of_mind: { title: 'Architecture of Mind', icon: '🧠', order: 2 },
@@ -79,6 +83,22 @@ const SECTION_CONFIG = {
       practice_of_witness: { title: 'Practice of Witness', icon: '🧘', order: 5 },
       small_action_step: { title: 'Small Action Step', icon: '🚶', order: 5 },
       eternal_truth: { title: 'Eternal Truth', icon: '✨', order: 6 },
+
+      // Deep Dive mode sections
+      acknowledgment: { title: 'Full Acknowledgment', icon: '🤝', order: 1 },
+      root_cause_analysis: { title: 'Root Cause Analysis', icon: '🔍', order: 2 },
+      multi_perspective: { title: 'Multi-Perspective Understanding', icon: '🔮', order: 3 },
+      comprehensive_reframe: { title: 'Comprehensive Reframe', icon: '🔄', order: 4 },
+      solution_pathways: { title: 'Solution Pathways', icon: '🛤️', order: 5 },
+      empowering_closure: { title: 'Empowering Closure', icon: '💫', order: 6 },
+
+      // Quantum Dive mode sections
+      sacred_witnessing: { title: 'Sacred Witnessing', icon: '🙏', order: 1 },
+      five_dimensional_analysis: { title: 'Five-Dimensional Analysis', icon: '🌀', order: 2 },
+      root_pattern_archaeology: { title: 'Root Pattern Archaeology', icon: '⛏️', order: 3 },
+      quantum_reframing: { title: 'Quantum Reframing', icon: '⚛️', order: 4 },
+      transformation_blueprint: { title: 'Transformation Blueprint', icon: '📜', order: 5 },
+      life_purpose_integration: { title: 'Life Purpose Integration', icon: '🌟', order: 6 },
     },
     accentColor: 'purple',
   },
@@ -136,6 +156,23 @@ const SANSKRIT_TERMS: Record<string, string> = {
   'atma-tripti': 'Self-contentment - inner completeness',
   'purnatva': 'Fullness / wholeness',
   'dharma': 'Right action / sacred duty',
+  // Additional terms for deep dive & quantum dive
+  'samskara': 'Deep impressions - mental patterns from past experiences',
+  'tapas': 'Purifying fire - transformation through challenge',
+  'atman': 'The eternal self - unchanging essence',
+  'rasa': 'Emotional essence - the flavor of experience',
+  'sharira': 'The body - physical vessel',
+  'sangha': 'Community - connection to others',
+  'karma yoga': 'Path of selfless action',
+  'vritti': 'Thought wave - mental fluctuation',
+  'samatvam': 'Equanimity in all situations',
+}
+
+// Analysis mode display names and badges
+const ANALYSIS_MODE_DISPLAY: Record<AnalysisMode, { name: string; icon: string; color: string }> = {
+  standard: { name: 'Quick Reframe', icon: '⚡', color: 'from-blue-500/20 to-cyan-400/20 border-blue-400/30 text-blue-300' },
+  deep_dive: { name: 'Deep Dive', icon: '🔍', color: 'from-indigo-500/20 to-violet-400/20 border-indigo-400/30 text-indigo-300' },
+  quantum_dive: { name: 'Quantum Dive', icon: '🌌', color: 'from-purple-500/20 to-pink-400/20 border-purple-400/30 text-purple-300' },
 }
 
 function highlightSanskrit(text: string): React.ReactNode[] {
@@ -198,6 +235,7 @@ export default function WisdomResponseCard({
   gitaVersesUsed = 0,
   timestamp,
   language = 'en-IN',
+  analysisMode = 'standard',
 }: WisdomResponseCardProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [showFullText, setShowFullText] = useState(false)
@@ -284,7 +322,14 @@ export default function WisdomResponseCard({
             <h3 className={`font-semibold ${accentColorClass.accent}`}>
               {config.name}&apos;s Transmission
             </h3>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              {/* Analysis Mode Badge (for Ardha) */}
+              {tool === 'ardha' && analysisMode && ANALYSIS_MODE_DISPLAY[analysisMode] && (
+                <span className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${ANALYSIS_MODE_DISPLAY[analysisMode].color} px-2.5 py-0.5 text-[10px] font-semibold border`}>
+                  <span>{ANALYSIS_MODE_DISPLAY[analysisMode].icon}</span>
+                  <span>{ANALYSIS_MODE_DISPLAY[analysisMode].name}</span>
+                </span>
+              )}
               {gitaVersesUsed > 0 && (
                 <span className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${accentColorClass.badge} px-2.5 py-0.5 text-[10px] font-semibold border`}>
                   <span>🕉️</span>

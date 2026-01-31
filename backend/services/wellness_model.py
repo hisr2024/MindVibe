@@ -36,6 +36,20 @@ class WellnessTool(Enum):
     RELATIONSHIP_COMPASS = "relationship_compass"
 
 
+class AnalysisMode(Enum):
+    """Analysis depth modes for Ardha reframing.
+
+    STANDARD: Quick reframe with recognition, insight, reframe, and action step
+    DEEP_DIVE: Thorough analysis with problem acknowledgment, root cause analysis,
+               multi-perspective understanding, and comprehensive reframing
+    QUANTUM_DIVE: Ultra-deep multi-dimensional analysis exploring emotional,
+                  cognitive, relational, spiritual, and existential layers
+    """
+    STANDARD = "standard"
+    DEEP_DIVE = "deep_dive"
+    QUANTUM_DIVE = "quantum_dive"
+
+
 @dataclass
 class WellnessResponse:
     """Structured response from the wellness model."""
@@ -45,6 +59,7 @@ class WellnessResponse:
     tool: WellnessTool
     model: str = "gpt-4o-mini"
     provider: str = "kiaan"
+    analysis_mode: str = "standard"  # standard, deep_dive, or quantum_dive
 
 
 class WellnessModel:
@@ -108,6 +123,7 @@ class WellnessModel:
         tool: WellnessTool,
         user_input: str,
         db: AsyncSession,
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
     ) -> WellnessResponse:
         """
         Generate a wellness response using Bhagavad Gita wisdom.
@@ -122,33 +138,51 @@ class WellnessModel:
             tool: Which wellness tool (Viyoga/Ardha/Relationship Compass)
             user_input: The user's specific problem/situation
             db: Database session for fetching Gita verses
+            analysis_mode: Depth of analysis (STANDARD, DEEP_DIVE, QUANTUM_DIVE)
+                - STANDARD: Quick 4-section reframe
+                - DEEP_DIVE: Comprehensive problem analysis and multi-layer reframe
+                - QUANTUM_DIVE: Multi-dimensional exploration across all life aspects
 
         Returns:
             WellnessResponse with Gita-grounded content and structured sections
         """
         if not self.client:
             logger.error("WellnessModel: OpenAI client not configured")
-            return self._get_fallback_response(tool, user_input)
+            return self._get_fallback_response(tool, user_input, analysis_mode)
 
         try:
             # STEP 1 & 2: Will be handled by the AI with proper prompting
 
-            # STEP 3: SEARCH - Find best suited Gita verses
-            gita_context, verse_count = await self._fetch_gita_wisdom(tool, user_input, db)
-            logger.info(f"📖 Found {verse_count} Gita verses for {tool.value}")
+            # STEP 3: SEARCH - Find best suited Gita verses (more verses for deeper dives)
+            verse_limit = 7 if analysis_mode == AnalysisMode.STANDARD else (10 if analysis_mode == AnalysisMode.DEEP_DIVE else 12)
+            gita_context, verse_count = await self._fetch_gita_wisdom(tool, user_input, db, verse_limit=verse_limit)
+            logger.info(f"📖 Found {verse_count} Gita verses for {tool.value} ({analysis_mode.value} mode)")
 
             # STEP 4: IMPLEMENT - Generate Gita-based response
-            system_prompt = self._build_system_prompt(tool, user_input, gita_context)
+            system_prompt = self._build_system_prompt(tool, user_input, gita_context, analysis_mode)
+
+            # Adjust model and tokens based on analysis depth
+            # Deeper dives need more tokens for comprehensive responses
+            model = "gpt-4o-mini"
+            if analysis_mode == AnalysisMode.QUANTUM_DIVE:
+                max_tokens = 2500  # Quantum dive: ultra-comprehensive
+                timeout = 90.0
+            elif analysis_mode == AnalysisMode.DEEP_DIVE:
+                max_tokens = 1800  # Deep dive: comprehensive
+                timeout = 60.0
+            else:
+                max_tokens = 1000  # Standard: concise
+                timeout = 45.0
 
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": self._format_user_message(tool, user_input)}
+                    {"role": "user", "content": self._format_user_message(tool, user_input, analysis_mode)}
                 ],
                 temperature=0.7,
-                max_tokens=1000,  # Ultra deep comprehensive transmissions
-                timeout=45.0,  # Extended timeout for longer responses
+                max_tokens=max_tokens,
+                timeout=timeout,
             )
 
             content = None
@@ -158,30 +192,38 @@ class WellnessModel:
                     content = response_msg.content
 
             if not content:
-                return self._get_fallback_response(tool, user_input)
+                return self._get_fallback_response(tool, user_input, analysis_mode)
 
-            # Parse response into sections
-            sections = self._parse_response(tool, content)
+            # Parse response into sections based on analysis mode
+            sections = self._parse_response(tool, content, analysis_mode)
 
             return WellnessResponse(
                 content=content,
                 sections=sections,
                 gita_verses_used=verse_count,
                 tool=tool,
+                analysis_mode=analysis_mode.value,
             )
 
         except Exception as e:
-            logger.exception(f"WellnessModel error for {tool.value}: {e}")
-            return self._get_fallback_response(tool, user_input)
+            logger.exception(f"WellnessModel error for {tool.value} ({analysis_mode.value}): {e}")
+            return self._get_fallback_response(tool, user_input, analysis_mode)
 
     async def _fetch_gita_wisdom(
         self,
         tool: WellnessTool,
         user_input: str,
         db: AsyncSession,
+        verse_limit: int = 7,
     ) -> tuple[str, int]:
         """
         STEP 3: Search best suited Gita verses for the user's situation.
+
+        Args:
+            tool: Which wellness tool
+            user_input: User's problem/situation
+            db: Database session
+            verse_limit: Max number of verses to fetch (higher for deeper dives)
 
         Returns:
             Tuple of (gita_wisdom_context, verse_count)
@@ -196,17 +238,17 @@ class WellnessModel:
 
             # Search Gita database for relevant verses
             verse_results = await self.gita_kb.search_relevant_verses(
-                db=db, query=search_query, limit=7
+                db=db, query=search_query, limit=verse_limit
             )
 
             # Fallback search if not enough results
             if len(verse_results) < 3:
                 verse_results = await self.gita_kb.search_with_fallback(
-                    db=db, query=search_query, limit=7
+                    db=db, query=search_query, limit=verse_limit
                 )
 
             # Build wisdom context from found verses
-            gita_context = self._build_gita_context(tool, verse_results)
+            gita_context = self._build_gita_context(tool, verse_results, limit=verse_limit)
             logger.info(f"✅ WellnessModel: Found {len(verse_results)} Gita verses for {tool.value}")
 
             return gita_context, len(verse_results)
@@ -281,14 +323,21 @@ Apply this wisdom directly to the user's specific situation."""
         tool: WellnessTool,
         user_input: str,
         gita_context: str,
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
     ) -> str:
-        """Build the system prompt for the given tool."""
+        """Build the system prompt for the given tool and analysis mode."""
         gita_focus = self.TOOL_GITA_FOCUS[tool]
 
         if tool == WellnessTool.VIYOGA:
             return self._build_viyoga_prompt(gita_focus, user_input, gita_context)
         elif tool == WellnessTool.ARDHA:
-            return self._build_ardha_prompt(gita_focus, user_input, gita_context)
+            # Use different prompts based on analysis depth
+            if analysis_mode == AnalysisMode.QUANTUM_DIVE:
+                return self._build_ardha_quantum_dive_prompt(gita_focus, user_input, gita_context)
+            elif analysis_mode == AnalysisMode.DEEP_DIVE:
+                return self._build_ardha_deep_dive_prompt(gita_focus, user_input, gita_context)
+            else:
+                return self._build_ardha_prompt(gita_focus, user_input, gita_context)
         else:
             return self._build_compass_prompt(gita_focus, user_input, gita_context)
 
@@ -499,6 +548,269 @@ VOICE: Ancient master transmitting sacred knowledge of the mind with profound te
 
 ESSENTIAL: This is INITIATION into the deepest truth of mind. Frame as "Ancient wisdom reveals...", "The sages discovered...", "This sacred transmission shows..." NEVER use therapy/CBT language. Make the reader feel they are receiving the most sacred teaching on the nature of mind."""
 
+    def _build_ardha_deep_dive_prompt(
+        self,
+        gita_focus: dict,
+        user_input: str,
+        gita_context: str,
+    ) -> str:
+        """Build Ardha DEEP DIVE prompt - Comprehensive Problem Analysis and Reframing.
+
+        This mode provides:
+        1. Full problem acknowledgment with validation
+        2. Root cause analysis - what's really underneath
+        3. Multi-perspective understanding of the situation
+        4. Comprehensive Gita-based reframing with solutions
+        5. Practical implementation steps
+        """
+        return f"""You are Ardha in DEEP DIVE mode - a master analyst and wisdom guide who helps people FULLY UNDERSTAND their problems before transforming them. You combine the precision of a skilled counselor with the depth of ancient Bhagavad Gita wisdom.
+
+{gita_context}
+
+THE USER'S PROBLEM/SITUATION:
+"{user_input}"
+
+RESPOND WITH THIS COMPREHENSIVE DEEP DIVE STRUCTURE:
+
+1. FULL ACKNOWLEDGMENT (Complete Problem Recognition)
+   - Begin: "I hear you completely, and I want you to know that what you're experiencing is real and valid."
+   - Mirror back their EXACT situation/problem with precision and empathy
+   - Validate the difficulty: Acknowledge the weight and challenge of what they're facing
+   - Normalize: Connect them to the universal human experience - they are not alone in this struggle
+   - Honor their courage: Recognize the strength it takes to examine this problem directly
+   - The sacred space: Create safety for them to explore deeper
+
+2. PROBLEM ANALYSIS - ROOT CAUSE EXPLORATION (Understanding What's Really Happening)
+   - THE SURFACE LAYER: What is the immediate problem as stated?
+   - THE EMOTIONAL LAYER: What emotions are tangled with this problem? (fear, shame, grief, anger, anxiety)
+   - THE BELIEF LAYER: What core beliefs might be fueling this problem?
+     * "I'm not good enough" patterns
+     * "I need to be perfect" patterns
+     * "I'm unworthy of love/success" patterns
+     * "The world is unsafe" patterns
+   - THE PATTERN LAYER: Is this a recurring theme in their life? What cycles are repeating?
+   - THE NEED LAYER: What unmet need is crying out through this problem?
+     * Need for safety and security
+     * Need for belonging and connection
+     * Need for significance and worth
+     * Need for growth and meaning
+   - THE ROOT: What is the deepest source of this suffering?
+   - Present these insights with compassion, not clinical detachment
+
+3. MULTI-PERSPECTIVE UNDERSTANDING (Seeing the Whole Picture)
+   - THEIR CURRENT PERSPECTIVE: How they see the situation now (validate this)
+   - THE FEAR'S PERSPECTIVE: What is the fear trying to protect them from?
+   - THE WISDOM PERSPECTIVE: What might a wise elder see in this situation?
+   - THE FUTURE SELF PERSPECTIVE: What would their healed future self say about this?
+   - THE GITA'S PERSPECTIVE: How does ancient wisdom illuminate this situation?
+     * Apply specific Gita teachings to their exact problem
+     * Draw on concepts of "chitta-vritti" (thought modifications), "viveka" (discrimination), and "sthitaprajna" (steady wisdom)
+   - INTEGRATION: Weave these perspectives into a more complete understanding
+   - The profound insight: Most suffering comes from seeing only ONE perspective
+
+4. COMPREHENSIVE REFRAMING (Transforming Understanding into New Possibility)
+   - THE COGNITIVE REFRAME: Challenge and reshape the thought pattern
+     * "What if the opposite of this thought were also true?"
+     * "What evidence exists against this thought?"
+     * "Is this thought a FACT or an INTERPRETATION?"
+   - THE EMOTIONAL REFRAME: Transform the emotional relationship to the problem
+     * This emotion is information, not identity
+     * Feelings pass like weather - they do not define you
+   - THE SPIRITUAL REFRAME: See the problem through the lens of growth
+     * "Tapas" - Every challenge is an opportunity for refinement
+     * Every obstacle contains hidden wisdom
+     * The difficulty itself is the teacher
+   - THE IDENTITY REFRAME: Separate self from problem
+     * "Sakshi bhava" - You are the witness of this problem, not the problem itself
+     * Your essence remains untouched by any circumstance
+   - THE PRACTICAL REFRAME: Convert problem into actionable steps
+     * What is within your control? Focus there.
+     * What is outside your control? Practice letting go.
+
+5. SOLUTION PATHWAYS (Practical Steps Forward)
+   - IMMEDIATE ACTION: One thing they can do RIGHT NOW (today)
+   - SHORT-TERM STRATEGY: What to do this week
+   - MINDSET ANCHOR: A phrase or practice to return to when the old thought arises
+     * Example: "I notice I'm having the thought that... I choose to remember that..."
+   - WISDOM PRACTICE: A specific Gita-based practice for this situation
+     * Could be breath work, witness consciousness practice, or dharmic action
+   - SELF-COMPASSION RITUAL: How to treat themselves with kindness through this
+   - PROGRESS MARKERS: How will they know things are shifting?
+
+6. EMPOWERING CLOSURE (Anchoring the New Understanding)
+   - Summarize the key insights discovered in this deep dive
+   - Affirm their capacity to navigate this
+   - The Gita truth: They are already complete - this problem does not diminish their essence
+   - "Kutastha" - Like an anvil that remains unchanged despite being struck, their true self remains untouched
+   - Offer hope grounded in wisdom, not false positivity
+   - End with an invitation to practice the new understanding
+
+VOICE: Warm, insightful, analytical yet deeply compassionate. Like a wise friend who is also a skilled guide. Use Gita concepts naturally (viveka, sthitaprajna, sakshi bhava, tapas, dharma, kutastha) with accessible explanations. 800-1000 words total. End with 💙
+
+ESSENTIAL: This is DEEP ANALYSIS, not quick advice. Take time to truly understand the problem from multiple angles before reframing. The user should feel FULLY SEEN and UNDERSTOOD before receiving guidance. Balance psychological insight with spiritual wisdom. Never use clinical jargon - keep it human and warm."""
+
+    def _build_ardha_quantum_dive_prompt(
+        self,
+        gita_focus: dict,
+        user_input: str,
+        gita_context: str,
+    ) -> str:
+        """Build Ardha QUANTUM DIVE prompt - Multi-Dimensional Analysis Across All Life Aspects.
+
+        This mode provides the deepest possible exploration:
+        1. Complete acknowledgment with sacred witnessing
+        2. Five-dimensional analysis (emotional, cognitive, relational, physical, spiritual)
+        3. Root pattern archaeology - tracing to origin
+        4. Quantum reframe across all life dimensions
+        5. Transformation blueprint with specific practices
+        6. Integration into life purpose and meaning
+        """
+        return f"""You are Ardha in QUANTUM DIVE mode - the deepest level of wisdom transmission. You are a master who sees across ALL dimensions of human experience - emotional, mental, relational, physical, and spiritual. You help people understand how their problem connects to EVERY aspect of their life and transform it at the deepest level.
+
+{gita_context}
+
+THE USER'S PROBLEM/SITUATION:
+"{user_input}"
+
+RESPOND WITH THIS QUANTUM DIVE MULTI-DIMENSIONAL STRUCTURE:
+
+1. SACRED WITNESSING (Complete Acknowledgment and Holding)
+   - Begin: "I bow to the depth of what you're bringing forward. This is sacred ground."
+   - Create a container of complete safety and non-judgment
+   - Mirror their situation back with precision, showing you truly SEE them
+   - Acknowledge the FULL weight of what they're carrying
+   - Validate the complexity: Life's challenges are rarely simple
+   - Honor the courage required to dive this deep
+   - Sacred truth: "The fact that you're willing to look at this so deeply shows remarkable self-awareness and courage."
+
+2. FIVE-DIMENSIONAL PROBLEM ANALYSIS (Complete Life Mapping)
+
+   A. THE EMOTIONAL DIMENSION:
+      - What emotions are present? (surface and hidden)
+      - What emotion might be UNDER the obvious emotion? (anger often covers fear, etc.)
+      - Where in your body do you feel this?
+      - What emotional patterns from the past might be activated?
+      - "Rasa" - the emotional essence of this experience
+      - What does this emotion need to be heard and honored?
+
+   B. THE COGNITIVE DIMENSION:
+      - What thoughts repeat around this situation?
+      - What story is the mind telling? Is this story true?
+      - What "chitta-vritti" (mental modifications) are most active?
+      - What core beliefs are being triggered?
+      - What assumptions are embedded in this problem?
+      - Where might the mind be distorting reality?
+      - "Manas" (the thinking mind) analysis: What patterns need examination?
+
+   C. THE RELATIONAL DIMENSION:
+      - How does this problem affect your key relationships?
+      - What relational patterns might be contributing?
+      - How do you show up differently when this problem is active?
+      - What unmet relational needs might be connected?
+      - "Sangha" - How does this affect your connection to community/others?
+      - Are there relationship dynamics that need attention?
+
+   D. THE PHYSICAL/PRACTICAL DIMENSION:
+      - How does this show up in your body? (tension, exhaustion, posture)
+      - How is this affecting your daily life practically?
+      - What behaviors does this problem produce?
+      - What is this costing you in terms of time, energy, health?
+      - "Sharira" (body) awareness: The body keeps score
+      - What practical circumstances need addressing?
+
+   E. THE SPIRITUAL/EXISTENTIAL DIMENSION:
+      - What does this challenge mean in the larger context of your life?
+      - What might life be teaching you through this?
+      - "Dharma" - What is your sacred duty in relation to this challenge?
+      - "Karma" - What actions are you being called to take?
+      - What higher purpose might emerge from navigating this?
+      - How does this connect to your deepest values and life direction?
+      - "Atman" - How does your eternal essence relate to this temporary challenge?
+
+3. ROOT PATTERN ARCHAEOLOGY (Tracing to the Source)
+   - THE ORIGIN POINT: When did this pattern first appear in your life?
+   - THE ORIGINAL WOUND: What early experience might have planted this seed?
+   - THE SURVIVAL STRATEGY: How did this pattern once serve you? (It likely protected you)
+   - THE OUTGROWING: Why is this pattern no longer serving you now?
+   - THE GENERATIONAL THREAD: Did this pattern exist in your family before you?
+   - THE SACRED WOUND: How might this very wound become the source of your greatest gift?
+   - "Samskara" - The deep impressions in consciousness that shape our reactions
+   - The liberating insight: Understanding the origin begins to dissolve the pattern
+
+4. QUANTUM REFRAMING (Transformation Across All Dimensions)
+
+   A. EMOTIONAL QUANTUM SHIFT:
+      - From feeling overwhelmed BY the emotion → to becoming the compassionate witness OF the emotion
+      - The emotion is not you; it is something you experience
+      - "Sakshi bhava" applied: "I have this feeling, but I am not this feeling"
+      - New relationship: Welcome the emotion as a messenger, not an enemy
+
+   B. COGNITIVE QUANTUM SHIFT:
+      - From believing thoughts are reality → to seeing thoughts as mental events
+      - "Viveka" (discrimination): Separating truth from interpretation
+      - From one perspective → to multiple perspectives (as explored above)
+      - From fixed mindset → to growth mindset: "This is teaching me something valuable"
+
+   C. RELATIONAL QUANTUM SHIFT:
+      - From needing others to change → to focusing on your own transformation
+      - From seeking external validation → to finding inner wholeness first
+      - "Nishkama karma" in relationships: Love without attachment to outcome
+      - New paradigm: What you offer from fullness, not what you seek from lack
+
+   D. PHYSICAL/PRACTICAL QUANTUM SHIFT:
+      - From avoidance behaviors → to conscious, dharmic action
+      - From problem-focused → to solution-focused
+      - "Karma yoga" applied: What RIGHT ACTION can you take now?
+      - The body as ally: Practices that support nervous system regulation
+
+   E. SPIRITUAL/EXISTENTIAL QUANTUM SHIFT:
+      - From "Why is this happening TO me?" → to "What is this teaching me?"
+      - From victim of circumstance → to student of life
+      - "Tapas" (refinement through challenge): This difficulty is forging you
+      - The ultimate reframe: "Sthitaprajna" - becoming one of steady wisdom THROUGH this challenge
+
+5. TRANSFORMATION BLUEPRINT (Comprehensive Practices)
+
+   A. DAILY PRACTICE (5-10 minutes):
+      - Morning: Set intention aligned with your reframe
+      - Breath practice: 3 conscious breaths when old pattern arises
+      - Evening: Reflect on one moment you responded from the new understanding
+
+   B. WEEKLY PRACTICE:
+      - Journal prompt for deeper processing
+      - One specific action that embodies the new pattern
+      - Self-compassion ritual: How to be gentle with yourself through this change
+
+   C. ONGOING ANCHOR:
+      - A phrase or "mantra" to return to: specific to their situation
+      - A body-based grounding practice
+      - A Gita wisdom to meditate on
+
+   D. SUPPORT STRUCTURES:
+      - What resources or support might help?
+      - When to seek additional help (therapy, community, etc.)
+      - How to build resilience for when the old pattern returns (it will)
+
+   E. PROGRESS INDICATORS:
+      - How will you know transformation is happening?
+      - What small signs might you notice first?
+      - How to celebrate progress without perfectionism
+
+6. INTEGRATION INTO LIFE PURPOSE (The Sacred Gift)
+   - Every challenge, fully integrated, becomes a source of wisdom
+   - "Wounded healer" teaching: Your healing will help others heal
+   - How might this journey serve your larger purpose?
+   - What gifts are emerging from this darkness?
+   - The Gita's ultimate teaching: You are already whole, already free
+   - "Kutastha" - unchanging through all experiences
+   - "Atman" - your eternal essence untouched by any problem
+   - This problem is temporary; your wisdom is permanent
+   - Final transmission: "You are not here to escape this challenge, but to be transformed BY engaging with it fully. The very thing that seems to be your obstacle contains the seeds of your greatest growth. Trust the process. You are held."
+
+VOICE: Profound, multi-dimensional, deeply compassionate yet analytically precise. Like an ancient sage who is also a master psychologist. Seamlessly weave Gita wisdom (chitta-vritti, viveka, sthitaprajna, sakshi bhava, samskara, tapas, dharma, karma, nishkama karma, kutastha, atman) with psychological insight. 1200-1500 words total. End with 💙
+
+ESSENTIAL: This is the DEEPEST level of analysis. Leave no dimension unexplored. The user should experience a complete paradigm shift in how they see their problem. Balance depth with accessibility - be profound but never obscure. This is a life-changing transmission."""
+
     def _build_compass_prompt(
         self,
         gita_focus: dict,
@@ -636,16 +948,39 @@ VOICE: Ancient master guide, profoundly compassionate, seeing all perspectives w
 
 ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRANSMISSION. Frame as "Ancient wisdom reveals...", "The sages who navigated love discovered...", "This sacred teaching on relationships shows..." If safety concern (abuse, violence), gently and firmly suggest professional support while honoring their pain."""
 
-    def _format_user_message(self, tool: WellnessTool, user_input: str) -> str:
-        """Format the user message for the given tool."""
+    def _format_user_message(
+        self,
+        tool: WellnessTool,
+        user_input: str,
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
+    ) -> str:
+        """Format the user message for the given tool and analysis mode."""
         if tool == WellnessTool.VIYOGA:
             return f"I'm worried about: {user_input}"
         elif tool == WellnessTool.ARDHA:
-            return f"I keep thinking: {user_input}"
+            if analysis_mode == AnalysisMode.QUANTUM_DIVE:
+                return f"""I'm bringing this problem/situation for the deepest possible exploration:
+
+"{user_input}"
+
+Please analyze this across all dimensions of my life and help me transform it completely."""
+            elif analysis_mode == AnalysisMode.DEEP_DIVE:
+                return f"""I want to truly understand this problem before reframing it:
+
+"{user_input}"
+
+Please help me see what's really happening underneath and guide me to a new perspective."""
+            else:
+                return f"I keep thinking: {user_input}"
         else:
             return f"I'm struggling with this relationship situation: {user_input}"
 
-    def _parse_response(self, tool: WellnessTool, response_text: str) -> dict[str, str]:
+    def _parse_response(
+        self,
+        tool: WellnessTool,
+        response_text: str,
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
+    ) -> dict[str, str]:
         """Parse the response into structured sections with smart detection.
 
         Uses multiple strategies:
@@ -720,7 +1055,7 @@ ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRA
         if tool == WellnessTool.VIYOGA:
             return self._parse_viyoga_sections(sections)
         elif tool == WellnessTool.ARDHA:
-            return self._parse_ardha_sections(sections)
+            return self._parse_ardha_sections(sections, analysis_mode)
         else:
             return self._parse_compass_sections(sections)
 
@@ -771,8 +1106,85 @@ ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRA
 
         return result
 
-    def _parse_ardha_sections(self, sections: list[str]) -> dict[str, str]:
-        """Parse Ardha response sections."""
+    def _parse_ardha_sections(
+        self,
+        sections: list[str],
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
+    ) -> dict[str, str]:
+        """Parse Ardha response sections based on analysis mode.
+
+        STANDARD mode: 4 sections (recognition, deep_insight, reframe, small_action_step)
+        DEEP_DIVE mode: 6 sections (acknowledgment, root_cause_analysis, multi_perspective,
+                                    comprehensive_reframe, solution_pathways, empowering_closure)
+        QUANTUM_DIVE mode: 6 sections (sacred_witnessing, five_dimensional_analysis,
+                                       root_pattern_archaeology, quantum_reframing,
+                                       transformation_blueprint, life_purpose_integration)
+        """
+        if analysis_mode == AnalysisMode.QUANTUM_DIVE:
+            # Quantum dive: 6 deep sections
+            section_keys = [
+                "sacred_witnessing",
+                "five_dimensional_analysis",
+                "root_pattern_archaeology",
+                "quantum_reframing",
+                "transformation_blueprint",
+                "life_purpose_integration",
+            ]
+            result = {key: "" for key in section_keys}
+
+            if len(sections) >= 6:
+                for i, key in enumerate(section_keys):
+                    if i < len(sections):
+                        result[key] = sections[i]
+            elif len(sections) >= 4:
+                result["sacred_witnessing"] = sections[0]
+                result["five_dimensional_analysis"] = sections[1]
+                result["quantum_reframing"] = sections[2]
+                result["transformation_blueprint"] = sections[3]
+                if len(sections) >= 5:
+                    result["life_purpose_integration"] = sections[4]
+            elif sections:
+                result["sacred_witnessing"] = sections[0]
+                if len(sections) > 1:
+                    result["five_dimensional_analysis"] = sections[1]
+                if len(sections) > 2:
+                    result["quantum_reframing"] = sections[2]
+
+            return result
+
+        elif analysis_mode == AnalysisMode.DEEP_DIVE:
+            # Deep dive: 6 comprehensive sections
+            section_keys = [
+                "acknowledgment",
+                "root_cause_analysis",
+                "multi_perspective",
+                "comprehensive_reframe",
+                "solution_pathways",
+                "empowering_closure",
+            ]
+            result = {key: "" for key in section_keys}
+
+            if len(sections) >= 6:
+                for i, key in enumerate(section_keys):
+                    if i < len(sections):
+                        result[key] = sections[i]
+            elif len(sections) >= 4:
+                result["acknowledgment"] = sections[0]
+                result["root_cause_analysis"] = sections[1]
+                result["comprehensive_reframe"] = sections[2]
+                result["solution_pathways"] = sections[3]
+                if len(sections) >= 5:
+                    result["empowering_closure"] = sections[4]
+            elif sections:
+                result["acknowledgment"] = sections[0]
+                if len(sections) > 1:
+                    result["root_cause_analysis"] = sections[1]
+                if len(sections) > 2:
+                    result["comprehensive_reframe"] = sections[2]
+
+            return result
+
+        # Standard mode: 4 sections
         if len(sections) >= 4:
             return {
                 "recognition": sections[0],
@@ -818,7 +1230,12 @@ ESSENTIAL: NEVER take sides. NEVER use relationship clichés. This is SACRED TRA
         }
         return defaults.get(tool, "Draw from timeless wisdom about inner peace and right action.")
 
-    def _get_fallback_response(self, tool: WellnessTool, user_input: str) -> WellnessResponse:
+    def _get_fallback_response(
+        self,
+        tool: WellnessTool,
+        user_input: str,
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
+    ) -> WellnessResponse:
         """Get a fallback response when the model is unavailable.
 
         Uses ultra-deep section keys with personalized, friend-like content
@@ -849,13 +1266,75 @@ Carry this eternal truth: You are already complete, exactly as you are, regardle
                 "eternal_anchor": "Carry this eternal truth: You are already complete, exactly as you are, regardless of any outcome. Your worth was never meant to be measured by results - it is your birthright. \"Yogastha kuru karmani\" - Established in your true self, perform action. You are the infinite sky; outcomes are merely clouds - light ones, dark ones, storm clouds. They pass. The sky remains. You have always been the sky. You will always be the sky.",
             }
         elif tool == WellnessTool.ARDHA:
-            content = f"I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙"
-            sections = {
-                "recognition": f"I hear you. This thought - '{input_snippet}' - it's heavy. And it's okay that you're struggling with it.",
-                "deep_insight": "Thoughts feel like facts, especially the painful ones. But they're not. They're just your mind trying to make sense of things.",
-                "reframe": "You're not your thoughts - you're the one noticing them. Like clouds passing through a big sky, this thought will pass.",
-                "small_action_step": "Take one slow breath. Then ask yourself: what would you say to a friend with this same thought?",
-            }
+            if analysis_mode == AnalysisMode.QUANTUM_DIVE:
+                content = f"""I bow to the depth of what you're bringing forward. This is sacred ground.
+
+What you're experiencing - "{input_short}" - touches multiple dimensions of your life. Let me hold space for this fully.
+
+THE EMOTIONAL DIMENSION: Beneath the surface of this thought, there are likely deeper emotions - perhaps fear, perhaps grief, perhaps a longing to be truly seen and understood. These emotions are not your enemies; they are messengers carrying important information about your needs.
+
+THE COGNITIVE DIMENSION: Your mind has created a story around this situation. But here's a liberating truth: thoughts are mental events, not facts. The ancient wisdom calls these "chitta-vritti" - modifications of the mind-stuff. You are not these thoughts; you are the vast awareness that witnesses them arise and dissolve.
+
+THE RELATIONAL DIMENSION: How we relate to ourselves when we're struggling matters immensely. Are you meeting yourself with harsh judgment, or with the same compassion you'd offer a dear friend?
+
+THE SPIRITUAL DIMENSION: Every challenge carries within it the seeds of transformation. The sages called this "tapas" - the fire of difficulty that refines us. What might life be teaching you through this experience?
+
+THE PATTERN: This moment connects to a larger pattern in your life. Understanding the origin helps dissolve the grip. Ask yourself: when did you first learn to respond this way?
+
+THE QUANTUM REFRAME: You are not your problem. You are the vast, unchanging awareness - "kutastha" - that has witnessed every thought, every emotion, every experience of your life, and remains untouched, unharmed, complete. This challenge is temporary; your essential nature is permanent.
+
+PRACTICE: Today, when this thought arises, try: "I notice I am having the thought that {input_short}. I am the awareness noticing this thought. In this awareness, I am already at peace."
+
+You are held. You are whole. You are the infinite sky through which all weather passes. 💙"""
+
+                sections = {
+                    "sacred_witnessing": f"I bow to the depth of what you're bringing forward. This situation - \"{input_short}\" - deserves to be truly seen and honored. The fact that you're willing to explore this so deeply shows remarkable self-awareness and courage.",
+                    "five_dimensional_analysis": f"This challenge touches multiple dimensions of your life. EMOTIONAL: What feelings lie beneath - fear, grief, longing? COGNITIVE: What \"chitta-vritti\" (thought modifications) repeat? RELATIONAL: How are you treating yourself through this? PHYSICAL: Where does this live in your body? SPIRITUAL: What might life be teaching you through this experience?",
+                    "root_pattern_archaeology": "This moment connects to deeper patterns. \"Samskara\" - the impressions that shape our reactions - formed long ago. When did you first learn to respond this way? The pattern once protected you. Now it may be ready to be released.",
+                    "quantum_reframing": f"THE QUANTUM SHIFT: From \"I am this problem\" to \"I am the awareness witnessing this challenge.\" Your essence - \"atman\" - remains untouched by any circumstance. What if this thought were a cloud, and you were the vast sky? What if the sky has never been harmed by any cloud?",
+                    "transformation_blueprint": f"PRACTICE: When \"{input_short}\" arises, say: \"I notice I am having the thought that... I am the awareness noticing this thought. In this awareness, I am already at peace.\" Morning: Set intention to respond from wisdom. Evening: Reflect on one moment you responded from your new understanding.",
+                    "life_purpose_integration": "Every challenge, fully integrated, becomes a source of wisdom. \"Tapas\" - the fire of difficulty - is forging you into something stronger. You are not here to escape this challenge but to be transformed by engaging with it fully. You are held. You are whole.",
+                }
+
+            elif analysis_mode == AnalysisMode.DEEP_DIVE:
+                content = f"""I hear you completely, and I want you to know that what you're experiencing is real and valid.
+
+What you're going through - "{input_short}" - carries weight. Let me acknowledge that fully before we explore together.
+
+WHAT'S HAPPENING UNDERNEATH:
+On the surface, there's a thought pattern that's causing pain. But beneath this surface, there's often something deeper: perhaps a core belief about yourself or the world, perhaps an unmet need crying out to be seen, perhaps an old wound that this situation has touched.
+
+The ancient wisdom speaks of "chitta-vritti" - the modifications of the mind. When we're in pain, the mind often tells us the harshest possible interpretation. It evolved for survival, not for truth. But here's the liberating insight: these thoughts are not facts. They are mental events - arising, staying for a while, and passing.
+
+MULTIPLE PERSPECTIVES:
+Your current view is one perspective, and it's valid. But what might a wise elder see in this situation? What would your healed future self say? What if there were evidence that this thought isn't the complete picture?
+
+THE REFRAME:
+You are not your thoughts - you are the awareness that notices them. This is "sakshi bhava" - witness consciousness. The very fact that you can observe these thoughts proves you are separate from them. You are the vast sky; these thoughts are passing clouds.
+
+PRACTICAL PATH FORWARD:
+When this thought arises, try: "I notice I'm having the thought that..." Feel the tiny but powerful shift from being IN the thought to observing it. Take three slow breaths. Ask yourself what you would say to a friend struggling with this same thought. You deserve that same gentleness.
+
+You are already whole. This challenge does not diminish you. 💙"""
+
+                sections = {
+                    "acknowledgment": f"I hear you completely. What you're experiencing - \"{input_snippet}\" - is real and valid. The weight you're carrying deserves to be acknowledged. You're not alone in this struggle.",
+                    "root_cause_analysis": f"Beneath the surface thought, there's often something deeper: core beliefs, unmet needs, old wounds being touched. The mind evolved for survival, not truth - it broadcasts worst-case scenarios. But thoughts are \"chitta-vritti\" - mental modifications, not facts. They arise and pass like weather.",
+                    "multi_perspective": "Your current view is valid, but what might a wise elder see? What would your healed future self say? What if there were evidence contradicting the harsh interpretation? Most suffering comes from seeing only one perspective.",
+                    "comprehensive_reframe": f"THE REFRAME: You are not this thought - you are the awareness that notices it. \"Sakshi bhava\" - witness consciousness. The very fact that you can observe this thought proves you are separate from it. You are the vast sky; \"{input_short}\" is a passing cloud.",
+                    "solution_pathways": "PRACTICE: When this thought arises, say \"I notice I'm having the thought that...\" Take three slow breaths. Ask what you'd say to a friend with this same thought. You deserve that same gentleness. One small step today: choose one response from wisdom rather than reactivity.",
+                    "empowering_closure": "You are already whole. This challenge does not diminish your essential nature. \"Kutastha\" - like an anvil struck countless times, your true self remains unchanged. The clouds will pass. The sky remains. You have always been the sky.",
+                }
+
+            else:
+                # Standard mode
+                content = f"I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙"
+                sections = {
+                    "recognition": f"I hear you. This thought - '{input_snippet}' - it's heavy. And it's okay that you're struggling with it.",
+                    "deep_insight": "Thoughts feel like facts, especially the painful ones. But they're not. They're just your mind trying to make sense of things.",
+                    "reframe": "You're not your thoughts - you're the one noticing them. Like clouds passing through a big sky, this thought will pass.",
+                    "small_action_step": "Take one slow breath. Then ask yourself: what would you say to a friend with this same thought?",
+                }
         else:
             content = f"I hear you. This situation is weighing on you, and relationship struggles hit deep.\n\nHere's what I've noticed about conflict: underneath the arguments and hurt feelings, there's usually an unmet need - to feel heard, respected, or truly understood. Take a moment: what do you really need here? Not what you want them to do or say, but what you actually need.\n\nDoing the right thing in relationships doesn't mean winning. It means being honest AND kind - even when that's really hard.\n\nWhen you're ready, try this: 'I feel [your emotion] when [the situation] because [what you need]. What I'm hoping for is [your request].' It opens doors instead of closing them.\n\nAnd when emotions run high, remember: the goal isn't to be right. It's to understand and be understood. That's where peace lives. 💙"
             sections = {
@@ -872,6 +1351,7 @@ Carry this eternal truth: You are already complete, exactly as you are, regardle
             gita_verses_used=0,
             tool=tool,
             model="fallback",
+            analysis_mode=analysis_mode.value,
         )
 
 
