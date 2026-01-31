@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 // Test mocks for redirect pages
@@ -30,37 +30,47 @@ describe('Karma Footprint Page', () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
     
-    expect(screen.getByText('Karma Footprint')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Karma Footprint')).toBeInTheDocument()
+    })
   })
 
   it('renders the subtitle correctly', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
 
-    expect(screen.getByText(/Track your daily actions/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(/Track your daily actions/i)).toBeInTheDocument()
+    })
   })
 
   it('renders the action input form', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
     
-    expect(screen.getByLabelText(/what action do you want to reflect on/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByLabelText(/what action do you want to reflect on/i)).toBeInTheDocument()
+    })
   })
 
   it('renders impact selection options', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
     
-    expect(screen.getByText('Positive')).toBeInTheDocument()
-    expect(screen.getByText('Neutral')).toBeInTheDocument()
-    expect(screen.getByText('Growth')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Positive')).toBeInTheDocument()
+      expect(screen.getByText('Neutral')).toBeInTheDocument()
+      expect(screen.getByText('Growth')).toBeInTheDocument()
+    })
   })
 
   it('renders the analyze button', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
     
-    expect(screen.getByText('Analyze Footprint')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Analyze Footprint')).toBeInTheDocument()
+    })
   })
 
   it('renders KarmicTreeClient widget', async () => {
@@ -68,17 +78,21 @@ describe('Karma Footprint Page', () => {
     render(<KarmaFootprintPage />)
 
     // KarmicTreeClient shows loading state or tree content
-    const treeElements = screen.getAllByText(/Karmic Tree/i)
-    expect(treeElements.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      const treeElements = screen.getAllByText(/Karmic Tree/i)
+      expect(treeElements.length).toBeGreaterThan(0)
+    })
   })
 
   it('renders related tools links', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
 
-    expect(screen.getByText('Emotional Reset')).toBeInTheDocument()
-    expect(screen.getByText('Full Karmic Tree View')).toBeInTheDocument()
-    expect(screen.getByText('Sacred Reflections Journal')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Emotional Reset')).toBeInTheDocument()
+      expect(screen.getByText('Full Karmic Tree View')).toBeInTheDocument()
+      expect(screen.getByText('Sacred Reflections Journal')).toBeInTheDocument()
+    })
   })
 
   it('has accessible form elements', async () => {
@@ -86,14 +100,18 @@ describe('Karma Footprint Page', () => {
     render(<KarmaFootprintPage />)
     
     // Check radiogroup for impact selection
-    expect(screen.getByRole('radiogroup', { name: /action impact type/i })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByRole('radiogroup', { name: /action impact type/i })).toBeInTheDocument()
+    })
   })
 
   it('renders back navigation link', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
     
-    expect(screen.getByText('← Back to dashboard')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('← Back to dashboard')).toBeInTheDocument()
+    })
   })
 })
 

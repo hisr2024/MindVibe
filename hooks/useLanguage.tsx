@@ -49,7 +49,18 @@ interface LanguageContextType {
   isInitialized: boolean
 }
 
-const LanguageContext = createContext<LanguageContextType | null>(null)
+const DEFAULT_LANGUAGE: Language = 'en'
+
+const defaultLanguageContext: LanguageContextType = {
+  language: DEFAULT_LANGUAGE,
+  setLanguage: () => undefined,
+  t: (key: string, fallback?: string) => fallback ?? key,
+  config: LANGUAGES[DEFAULT_LANGUAGE],
+  isRTL: false,
+  isInitialized: false,
+}
+
+const LanguageContext = createContext<LanguageContextType>(defaultLanguageContext)
 
 // Cache for loaded translations
 const translationCache: Map<Language, TranslationObject> = new Map()
@@ -240,11 +251,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext)
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
-  }
-  return context
+  return useContext(LanguageContext)
 }
 
 export default useLanguage

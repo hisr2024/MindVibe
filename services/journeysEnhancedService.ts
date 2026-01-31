@@ -512,6 +512,12 @@ export async function startJourneys(
         personalization,
       }),
     }))
+    if (response.status === 202) {
+      const detail = await response.json().catch(() => ({}))
+      const errorCode = detail.error || 'service_unavailable'
+      const message = detail.message || 'Service temporarily unavailable. Please try again.'
+      throw new ServiceUnavailableError(errorCode, message)
+    }
     return handleResponse<UserJourney[]>(response)
   } catch (error) {
     // Re-throw all known error types - let callers handle appropriately

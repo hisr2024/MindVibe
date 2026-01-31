@@ -57,11 +57,13 @@ describe('LanguageSelector Component', () => {
   });
 
   describe('Rendering - Compact Mode', () => {
-    it('should render compact version with globe icon', () => {
+    it('should render compact version with globe icon', async () => {
       renderWithProvider(<LanguageSelector compact={true} />);
       
-      const button = screen.getByRole('button', { name: /select language/i });
-      expect(button).toBeInTheDocument();
+      await waitFor(() => {
+        const button = screen.getByRole('button', { name: /select language/i });
+        expect(button).toBeInTheDocument();
+      });
     });
 
     it('should display current language code', async () => {
@@ -97,17 +99,21 @@ describe('LanguageSelector Component', () => {
   });
 
   describe('Rendering - Full Mode', () => {
-    it('should render full version with label', () => {
+    it('should render full version with label', async () => {
       renderWithProvider(<LanguageSelector compact={false} />);
       
-      expect(screen.getByText(/response language/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/response language/i)).toBeInTheDocument();
+      });
     });
 
-    it('should display helper text', () => {
+    it('should display helper text', async () => {
       renderWithProvider(<LanguageSelector compact={false} />);
       
-      expect(screen.getByText(/KIAAN will respond in/i)).toBeInTheDocument();
-      expect(screen.getByText(/You can type in any language/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/KIAAN will respond in/i)).toBeInTheDocument();
+        expect(screen.getByText(/You can type in any language/i)).toBeInTheDocument();
+      });
     });
 
     it('should display current language name', async () => {
@@ -393,11 +399,13 @@ describe('LanguageSelector Component', () => {
   });
 
   describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
+    it('should have proper ARIA labels', async () => {
       renderWithProvider(<LanguageSelector compact={true} />);
       
-      const button = screen.getByRole('button', { name: /select language/i });
-      expect(button).toHaveAttribute('aria-label', 'Select language');
+      await waitFor(() => {
+        const button = screen.getByRole('button', { name: /select language/i });
+        expect(button).toHaveAttribute('aria-label', 'Select language');
+      });
     });
 
     it('should support keyboard navigation', async () => {
@@ -462,11 +470,13 @@ describe('LanguageSelector Component', () => {
       });
     });
 
-    it('should handle custom className prop', () => {
+    it('should handle custom className prop', async () => {
       renderWithProvider(<LanguageSelector compact={true} className="custom-class" />);
-      
-      const container = screen.getByRole('button', { name: /select language/i }).closest('.language-selector-dropdown');
-      expect(container).toHaveClass('custom-class');
+
+      await waitFor(() => {
+        const container = screen.getByRole('button', { name: /select language/i }).closest('.language-selector-dropdown');
+        expect(container).toHaveClass('custom-class');
+      });
     });
 
     it('should not break with undefined onLanguageChange', async () => {
