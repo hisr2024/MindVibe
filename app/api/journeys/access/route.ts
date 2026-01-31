@@ -1,86 +1,52 @@
 /**
- * Journey Access API Route
- * Proxies to backend with proper error handling
- *
- * This route handles GET /api/journeys/access
- * Returns the user's journey access/subscription status
+ * Journey Access Check API Route
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
-const BACKEND_TIMEOUT_MS = 10000
-
-// Default access for when backend is unavailable
-const DEFAULT_ACCESS = {
-  has_access: true,
-  tier: 'trial',
-  active_journeys: 0,
-  journey_limit: 1,
-  remaining: 1,
-  is_unlimited: false,
-  can_start_more: true,
-  is_trial: true,
-  trial_days_limit: 3,
-  upgrade_url: '/pricing',
-  upgrade_cta: 'Upgrade for Full Access',
-  _offline: true,
-}
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
 export async function GET(request: NextRequest) {
   try {
-    const headers = new Headers()
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get('access_token')?.value
+    const xAuthUid = request.headers.get('X-Auth-UID')
 
-    // Forward auth headers
-    const authHeader = request.headers.get('Authorization')
-    if (authHeader) {
-      headers.set('Authorization', authHeader)
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     }
 
-    const uidHeader = request.headers.get('X-Auth-UID')
-    if (uidHeader) {
-      headers.set('X-Auth-UID', uidHeader)
+    if (accessToken) {
+      headers['Cookie'] = `access_token=${accessToken}`
     }
 
-    const cookieHeader = request.headers.get('Cookie')
-    if (cookieHeader) {
-      headers.set('Cookie', cookieHeader)
+    if (xAuthUid) {
+      headers['X-Auth-UID'] = xAuthUid
     }
 
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS)
+    const response = await fetch(`${BACKEND_URL}/api/journeys/access`, {
+      method: 'GET',
+      headers,
+    })
 
-      const response = await fetch(`${BACKEND_URL}/api/journeys/access`, {
-        method: 'GET',
-        headers,
-        cache: 'no-store',
-        signal: controller.signal,
-      })
+    const data = await response.json()
 
-      clearTimeout(timeoutId)
-
-      if (response.status === 401) {
-        return NextResponse.json(
-          { error: 'authentication_required', message: 'Please log in to view your journey access' },
-          { status: 401 }
-        )
-      }
-
-      if (!response.ok) {
-        console.warn(`[journeys/access] Backend returned ${response.status}, using default access`)
-        return NextResponse.json(DEFAULT_ACCESS)
-      }
-
-      const data = await response.json()
-      return NextResponse.json(data)
-
-    } catch (error) {
-      console.error('[journeys/access] Error fetching from backend:', error)
-      return NextResponse.json(DEFAULT_ACCESS)
-    }
-  } catch (outerError) {
-    console.error('[journeys/access] Critical error:', outerError)
-    return NextResponse.json(DEFAULT_ACCESS)
+    return NextResponse.json(data, { status: response.status })
+  } catch (error) {
+    console.error('Error checking journey access:', error)
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          has_access: true,
+          active_count: 0,
+          limit: 5,
+          remaining_slots: 5,
+          is_trial: false,
+        },
+      },
+      { status: 200 }
+    )
   }
 }

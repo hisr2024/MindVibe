@@ -1,86 +1,52 @@
 /**
- * Journey Today Step API Route
- * Proxies to backend to get/generate today's step for a specific journey
+ * Today's Step API Route
+ *
+ * Proxies requests to the backend API for getting today's journey step.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
 interface RouteParams {
   params: Promise<{ journeyId: string }>
 }
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
-  const { journeyId } = await params
-
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const headers = new Headers()
-    headers.set('Content-Type', 'application/json')
+    const { journeyId } = await params
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get('access_token')?.value
+    const xAuthUid = request.headers.get('X-Auth-UID')
 
-    // Forward auth headers
-    const authHeader = request.headers.get('Authorization')
-    if (authHeader) {
-      headers.set('Authorization', authHeader)
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     }
 
-    const uidHeader = request.headers.get('X-Auth-UID')
-    if (uidHeader) {
-      headers.set('X-Auth-UID', uidHeader)
+    if (accessToken) {
+      headers['Cookie'] = `access_token=${accessToken}`
     }
 
-    // Forward cookies for httpOnly cookie auth
-    const cookieHeader = request.headers.get('Cookie')
-    if (cookieHeader) {
-      headers.set('Cookie', cookieHeader)
+    if (xAuthUid) {
+      headers['X-Auth-UID'] = xAuthUid
     }
 
-    // Forward CSRF token
-    const csrfToken = request.headers.get('X-CSRF-Token')
-    if (csrfToken) {
-      headers.set('X-CSRF-Token', csrfToken)
-    }
+    const response = await fetch(`${BACKEND_URL}/api/journeys/${journeyId}/today`, {
+      method: 'GET',
+      headers,
+    })
 
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60s for AI generation
+    const data = await response.json()
 
-      const response = await fetch(`${BACKEND_URL}/api/journeys/${journeyId}/today`, {
-        method: 'POST',
-        headers,
-        cache: 'no-store',
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId)
-
-      const data = await response.json().catch(() => ({ detail: 'Unknown error' }))
-
-      if (!response.ok) {
-        console.error(`Backend journey today returned ${response.status}:`, data)
-        return NextResponse.json(data, { status: response.status })
-      }
-
-      return NextResponse.json(data)
-    } catch (error) {
-      console.error('Error fetching journey today from backend:', error)
-
-      if (error instanceof Error && error.name === 'AbortError') {
-        return NextResponse.json(
-          { detail: 'Request timed out while generating your wisdom step. Please try again.' },
-          { status: 504 }
-        )
-      }
-
-      return NextResponse.json(
-        { detail: 'Failed to connect to journey service. Please try again.' },
-        { status: 503 }
-      )
-    }
-  } catch (outerError) {
-    console.error('Critical error in journey today POST handler:', outerError)
+    return NextResponse.json(data, { status: response.status })
+  } catch (error) {
+    console.error('Error fetching today\'s step:', error)
     return NextResponse.json(
-      { detail: 'An unexpected error occurred.' },
+      {
+        success: false,
+        error: 'Failed to fetch today\'s step',
+      },
       { status: 500 }
     )
   }

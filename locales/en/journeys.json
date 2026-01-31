@@ -1,91 +1,74 @@
 {
-  "catalog": {
-    "title": "Wisdom Journeys",
-    "subtitle": "Transform Your Inner Challenges",
-    "description": "Multi-day guided paths to overcome the six inner enemies with Bhagavad Gita wisdom",
-    "startJourney": "Start Journey",
-    "continueJourney": "Continue Journey",
-    "viewDetails": "View Details",
-    "days": "{count} Days",
-    "difficulty": {
-      "1": "Beginner",
-      "2": "Intermediate",
-      "3": "Advanced",
-      "4": "Master"
-    },
-    "featured": "Featured",
-    "premium": "Premium Feature"
+  "title": "Wisdom Journeys",
+  "subtitle": "Transform your inner world by overcoming the six inner enemies (Sad-Ripu). Select one or more journeys to begin your path to inner peace.",
+  "featured": "Featured Journeys",
+  "all": "All Journeys",
+  "active": "Your Active Journeys",
+  "empty": {
+    "title": "No Journeys Available",
+    "description": "Check back soon for new wisdom journeys."
   },
-  "templates": {
-    "transform-anger-demo": {
-      "title": "Transform Anger (Krodha)",
-      "description": "A 14-day journey to transform destructive anger into constructive energy through Gita wisdom. Learn to recognize triggers, practice patience, and cultivate inner peace."
+  "trial": {
+    "title": "Free Trial Access",
+    "description": "Try 1 journey for 3 days free! Experience the transformation.",
+    "upgrade": "Upgrade for Full Access"
+  },
+  "card": {
+    "start": "Start Journey",
+    "continue": "Continue Journey",
+    "locked": "Complete or pause an active journey to start this one",
+    "free": "Free",
+    "featured": "Featured",
+    "inProgress": "In Progress",
+    "day": "Day {{current}} of {{total}}"
+  },
+  "step": {
+    "title": "Today's Journey Step",
+    "backToJourneys": "Back to Journeys",
+    "complete": "Complete Day {{day}}",
+    "completing": "Completing...",
+    "completed": {
+      "title": "Day {{day}} Complete!",
+      "message": "Great work! Come back tomorrow for your next step.",
+      "viewAll": "View All Journeys"
     },
-    "master-desire-demo": {
-      "title": "Mastering Desire (Kama)",
-      "description": "A 21-day journey to understand and master desires. Transform cravings into purposeful aspirations aligned with your dharma."
-    },
-    "overcome-greed-demo": {
-      "title": "Contentment Over Greed (Lobha)",
-      "description": "A 14-day journey to cultivate santosha (contentment) and release the grip of greed. Find abundance in simplicity."
-    },
-    "clarity-attachment-demo": {
-      "title": "Clarity Over Attachment (Moha)",
-      "description": "A 21-day journey to see through delusion and attachment. Develop viveka (discrimination) and find clarity."
-    },
-    "humility-pride-demo": {
-      "title": "Humility Over Ego (Mada)",
-      "description": "A 14-day journey to dissolve ego and cultivate true humility. Recognize the Self beyond the small self."
-    },
-    "joy-envy-demo": {
-      "title": "Joy Over Envy (Matsarya)",
-      "description": "A 14-day journey to transform jealousy into appreciative joy (mudita). Celebrate others' success as your own."
-    },
-    "six-enemies-demo": {
-      "title": "Conquer All Six Enemies",
-      "description": "A comprehensive 30-day journey addressing all six inner enemies. The ultimate path to self-mastery and liberation."
+    "journeyComplete": {
+      "title": "Journey Complete!",
+      "message": "Congratulations on completing {{title}}! You've taken a meaningful step toward inner peace.",
+      "startAnother": "Start Another Journey"
     }
   },
-  "status": {
-    "active": "Active",
-    "paused": "Paused",
-    "completed": "Completed",
-    "abandoned": "Abandoned"
+  "sections": {
+    "teaching": "Today's Teaching",
+    "reflection": "Guided Reflection",
+    "practice": "Practice",
+    "commitment": "Today's Micro Commitment"
   },
-  "progress": {
-    "daysCompleted": "{completed} of {total} days completed",
-    "percentComplete": "{percent}% complete",
-    "currentDay": "Day {day}",
-    "congratulations": "Congratulations! Journey Complete"
+  "checkIn": {
+    "label": "Your Reflection (optional)",
+    "placeholder": "Write your thoughts, insights, or feelings..."
   },
-  "actions": {
-    "pause": "Pause Journey",
-    "resume": "Resume Journey",
-    "abandon": "Abandon Journey",
-    "complete": "Mark Complete"
-  },
-  "today": {
-    "title": "Today's Agenda",
-    "noActiveJourneys": "No active journeys. Start a new journey to begin your transformation.",
-    "stepReady": "Today's step is ready",
-    "alreadyCompleted": "Already completed today",
-    "reflection": "Reflection",
-    "reflectionPlaceholder": "Share your thoughts and feelings about today's practice..."
-  },
-  "errors": {
-    "loadFailed": "Failed to load journeys. Please try again.",
-    "startFailed": "Failed to start journey. Please try again.",
-    "completeFailed": "Failed to save progress. Please try again.",
-    "notAuthenticated": "Please log in to access Wisdom Journeys."
+  "difficulty": {
+    "1": "Beginner",
+    "2": "Easy",
+    "3": "Moderate",
+    "4": "Challenging",
+    "5": "Advanced"
   },
   "enemies": {
     "kama": "Desire (Kama)",
     "krodha": "Anger (Krodha)",
     "lobha": "Greed (Lobha)",
     "moha": "Attachment (Moha)",
-    "mada": "Pride (Mada)",
+    "mada": "Ego (Mada)",
     "matsarya": "Envy (Matsarya)",
-    "mixed": "Mixed Journey",
+    "mixed": "Combined Journey",
     "general": "General Wisdom"
+  },
+  "errors": {
+    "loadFailed": "Failed to load journeys. Please try again.",
+    "startFailed": "Failed to start journey. Please try again.",
+    "completeFailed": "Failed to complete step. Please try again.",
+    "networkError": "Network error. Please check your connection."
   }
 }

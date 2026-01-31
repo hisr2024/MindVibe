@@ -1,11 +1,11 @@
-import JourneysCatalogClient from './JourneysCatalogClient'
+import JourneysClient from './JourneysClient'
 
 export const metadata = {
-  title: 'Wisdom Journeys | MindVibe — Transform Your Inner World',
+  title: 'Wisdom Journeys | KIAAN — MindVibe Companion',
   description:
-    'Embark on personalized wisdom journeys to overcome the six inner enemies. AI-powered paths through ancient Gita wisdom for desire, anger, greed, attachment, pride, and envy.',
+    'Transform your inner world by overcoming the six inner enemies (Sad-Ripu). Select one or more journeys to begin your path to inner peace through Bhagavad Gita wisdom.'
 }
 
 export default function JourneysPage() {
-  return <JourneysCatalogClient />
+  return <JourneysClient />
 }
