@@ -2,12 +2,17 @@
 Wellness Model - Unified AI Model for Viyoga, Ardha, and Relationship Compass.
 
 This module provides a unified pattern for wellness tools:
-Question → Understanding → Bhagavad Gita-grounded Answer
 
-Each tool uses the same core model but with different focus areas:
-- Viyoga: Outcome anxiety & detachment (karma yoga)
-- Ardha: Thought reframing (sthitaprajna - steady wisdom)
-- Relationship Compass: Conflict navigation (dharma & compassion)
+PATTERN:
+1. PROBLEM ACKNOWLEDGED - Recognize the user's specific situation
+2. PROBLEM ANALYZED - Deep understanding of the underlying issue
+3. GITA VERSES SEARCHED - Find best suited verses from 700+ verse database
+4. GITA-BASED IMPLEMENTATION - Provide solution strictly through Bhagavad Gita wisdom
+
+Each tool uses the same core model but with different Gita focus areas:
+- Viyoga: Detachment through Karma Yoga (action without attachment)
+- Ardha: Reframing through Sthitaprajna (steady wisdom)
+- Relationship Compass: Guidance through Dharma & Daya (right action & compassion)
 """
 
 from __future__ import annotations
@@ -44,39 +49,44 @@ class WellnessResponse:
 
 class WellnessModel:
     """
-    Unified AI Model for wellness tools.
+    Unified AI Model for wellness tools - powered by Bhagavad Gita wisdom.
 
-    Provides a consistent pattern:
-    1. RECEIVE: User shares their question/concern
-    2. UNDERSTAND: Fetch relevant Gita wisdom for context
-    3. RESPOND: Generate warm, friendly, Gita-grounded answer
+    RESPONSE PATTERN:
+    1. ACKNOWLEDGE - Recognize the user's specific problem/situation
+    2. ANALYZE - Understand what's really happening underneath
+    3. SEARCH GITA - Find best suited verses for this situation
+    4. IMPLEMENT - Provide solution strictly through Gita wisdom
 
-    All responses feel like talking to a wise, caring friend.
+    All responses mention the user's specific situation and are rooted
+    exclusively in Bhagavad Gita teachings.
     """
 
     # Tool-specific search keywords for finding relevant Gita verses
     TOOL_KEYWORDS = {
-        WellnessTool.VIYOGA: "karma yoga detachment action results outcome anxiety equanimity",
-        WellnessTool.ARDHA: "equanimity mind stability wisdom balance thoughts peace sthitaprajna",
-        WellnessTool.RELATIONSHIP_COMPASS: "dharma compassion forgiveness relationships conflict ego peace",
+        WellnessTool.VIYOGA: "karma yoga nishkama karma detachment action fruits results outcome anxiety equanimity vairagya",
+        WellnessTool.ARDHA: "sthitaprajna steady wisdom equanimity mind control thoughts buddhi viveka discrimination peace",
+        WellnessTool.RELATIONSHIP_COMPASS: "dharma right action daya compassion kshama forgiveness ahimsa non-harm satya truth relationships",
     }
 
-    # Tool-specific personalities
-    TOOL_PERSONALITIES = {
+    # Tool-specific Gita focus areas
+    TOOL_GITA_FOCUS = {
         WellnessTool.VIYOGA: {
             "name": "Viyoga",
-            "role": "a calm, wise friend who helps people find peace when they're anxious about outcomes",
-            "focus": "outcome anxiety and finding peace through focused action",
+            "gita_principle": "Karma Yoga - The yoga of selfless action",
+            "core_teaching": "Your right is to action alone, never to its fruits (Karmanye vadhikaraste)",
+            "focus": "Detachment from outcomes through focused action",
         },
         WellnessTool.ARDHA: {
             "name": "Ardha",
-            "role": "a gentle, understanding friend who helps people see their thoughts more clearly",
-            "focus": "reframing difficult thoughts and finding mental clarity",
+            "gita_principle": "Sthitaprajna - The person of steady wisdom",
+            "core_teaching": "The wise one is undisturbed by dualities, unmoved by praise or blame",
+            "focus": "Reframing thoughts through observer consciousness",
         },
         WellnessTool.RELATIONSHIP_COMPASS: {
             "name": "Relationship Compass",
-            "role": "a wise, caring friend who helps people navigate relationship challenges with clarity and compassion",
-            "focus": "relationship conflicts and finding understanding over victory",
+            "gita_principle": "Dharma & Daya - Right action with compassion",
+            "core_teaching": "Perform your duty with equanimity, treating friend and foe alike",
+            "focus": "Navigating conflict through dharmic action",
         },
     }
 
@@ -89,7 +99,7 @@ class WellnessModel:
         try:
             from backend.services.wisdom_kb import WisdomKnowledgeBase
             self.gita_kb = WisdomKnowledgeBase()
-            logger.info("✅ WellnessModel: Gita knowledge base loaded")
+            logger.info("✅ WellnessModel: Gita knowledge base loaded (700+ verses)")
         except Exception as e:
             logger.warning(f"⚠️ WellnessModel: Gita KB unavailable: {e}")
 
@@ -100,30 +110,36 @@ class WellnessModel:
         db: AsyncSession,
     ) -> WellnessResponse:
         """
-        Generate a wellness response using the unified model.
+        Generate a wellness response using Bhagavad Gita wisdom.
 
-        Pattern: Question → Understanding → Gita-grounded Answer
+        Pattern:
+        1. ACKNOWLEDGE the user's specific problem/situation
+        2. ANALYZE what's really happening underneath
+        3. SEARCH best suited Gita verses for this situation
+        4. IMPLEMENT solution strictly through Gita wisdom
 
         Args:
-            tool: Which wellness tool is being used
-            user_input: The user's question/concern
+            tool: Which wellness tool (Viyoga/Ardha/Relationship Compass)
+            user_input: The user's specific problem/situation
             db: Database session for fetching Gita verses
 
         Returns:
-            WellnessResponse with content and structured sections
+            WellnessResponse with Gita-grounded content and structured sections
         """
         if not self.client:
             logger.error("WellnessModel: OpenAI client not configured")
             return self._get_fallback_response(tool, user_input)
 
         try:
-            # STEP 1: UNDERSTAND - Fetch relevant Gita wisdom
-            gita_context, verse_count = await self._fetch_gita_wisdom(tool, user_input, db)
+            # STEP 1 & 2: Will be handled by the AI with proper prompting
 
-            # STEP 2: BUILD - Create the prompt with personality and wisdom
+            # STEP 3: SEARCH - Find best suited Gita verses
+            gita_context, verse_count = await self._fetch_gita_wisdom(tool, user_input, db)
+            logger.info(f"📖 Found {verse_count} Gita verses for {tool.value}")
+
+            # STEP 4: IMPLEMENT - Generate Gita-based response
             system_prompt = self._build_system_prompt(tool, user_input, gita_context)
 
-            # STEP 3: RESPOND - Generate warm, friendly response
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -131,7 +147,7 @@ class WellnessModel:
                     {"role": "user", "content": self._format_user_message(tool, user_input)}
                 ],
                 temperature=0.7,
-                max_tokens=400,
+                max_tokens=500,
                 timeout=30.0,
             )
 
@@ -165,46 +181,59 @@ class WellnessModel:
         db: AsyncSession,
     ) -> tuple[str, int]:
         """
-        Fetch relevant Gita verses for the given tool and input.
+        STEP 3: Search best suited Gita verses for the user's situation.
 
         Returns:
-            Tuple of (gita_context_string, verse_count)
+            Tuple of (gita_wisdom_context, verse_count)
         """
         if not self.gita_kb or not db:
             return self._get_default_wisdom(tool), 0
 
         try:
-            # Build search query with tool-specific keywords
+            # Build search query combining user's situation with tool-specific Gita keywords
             tool_keywords = self.TOOL_KEYWORDS.get(tool, "")
             search_query = f"{user_input} {tool_keywords}"
 
-            # Search for relevant verses
+            # Search Gita database for relevant verses
             verse_results = await self.gita_kb.search_relevant_verses(
                 db=db, query=search_query, limit=7
             )
 
-            # Fallback if not enough results
+            # Fallback search if not enough results
             if len(verse_results) < 3:
                 verse_results = await self.gita_kb.search_with_fallback(
                     db=db, query=search_query, limit=7
                 )
 
-            # Build context from verses
-            gita_context = self._build_gita_context(verse_results)
-            logger.info(f"✅ WellnessModel: Found {len(verse_results)} verses for {tool.value}")
+            # Build wisdom context from found verses
+            gita_context = self._build_gita_context(tool, verse_results)
+            logger.info(f"✅ WellnessModel: Found {len(verse_results)} Gita verses for {tool.value}")
 
             return gita_context, len(verse_results)
 
         except Exception as e:
-            logger.error(f"Error fetching Gita verses: {e}")
+            logger.error(f"Error searching Gita verses: {e}")
             return self._get_default_wisdom(tool), 0
 
-    def _build_gita_context(self, verse_results: list[dict], limit: int = 5) -> str:
-        """Build a wisdom context string from verse results."""
-        if not verse_results:
-            return "Draw from timeless wisdom about inner peace, right action, and self-understanding."
+    def _build_gita_context(self, tool: WellnessTool, verse_results: list[dict], limit: int = 5) -> str:
+        """Build Gita wisdom context from verse search results."""
+        gita_focus = self.TOOL_GITA_FOCUS[tool]
 
-        context_parts = ["WISDOM TO DRAW FROM (use naturally, never cite sources):", ""]
+        if not verse_results:
+            return f"""GITA WISDOM TO APPLY:
+Core Principle: {gita_focus['gita_principle']}
+Teaching: {gita_focus['core_teaching']}
+
+Apply this wisdom directly to the user's specific situation."""
+
+        context_parts = [
+            f"BHAGAVAD GITA WISDOM FOR THIS SITUATION:",
+            f"Focus: {gita_focus['gita_principle']}",
+            f"Core Teaching: {gita_focus['core_teaching']}",
+            "",
+            "RELEVANT VERSES FOUND (apply these teachings, never cite verse numbers):",
+            ""
+        ]
 
         for i, result in enumerate(verse_results[:limit], 1):
             verse = result.get("verse")
@@ -212,24 +241,38 @@ class WellnessModel:
 
             if verse:
                 # Extract verse data
-                english = getattr(verse, 'english', '') or verse.get('english', '') if isinstance(verse, dict) else getattr(verse, 'english', '')
-                context = getattr(verse, 'context', '') or verse.get('context', '') if isinstance(verse, dict) else getattr(verse, 'context', '')
-                theme = getattr(verse, 'theme', '') or verse.get('theme', '') if isinstance(verse, dict) else getattr(verse, 'theme', '')
+                if hasattr(verse, 'english'):
+                    english = verse.english or ""
+                    context = verse.context or ""
+                    theme = verse.theme or ""
+                elif isinstance(verse, dict):
+                    english = verse.get('english', '')
+                    context = verse.get('context', '')
+                    theme = verse.get('theme', '')
+                else:
+                    continue
 
-                # Sanitize religious terms
+                # Sanitize religious terms for universal appeal
                 if english:
-                    english = english.replace("Krishna", "the teacher").replace("Arjuna", "the seeker")
-                    english = english[:300]  # Limit length
+                    english = english.replace("Krishna", "the wise teacher")
+                    english = english.replace("Arjuna", "the seeker")
+                    english = english[:350]
 
-                context_parts.append(f"Wisdom #{i}:")
+                context_parts.append(f"Gita Teaching #{i}:")
                 if english:
-                    context_parts.append(f"  Teaching: {english}")
+                    context_parts.append(f"  \"{english}\"")
                 if context:
-                    context_parts.append(f"  Principle: {context}")
+                    context_parts.append(f"  Meaning: {context}")
                 if theme:
                     formatted_theme = theme.replace('_', ' ').title()
                     context_parts.append(f"  Theme: {formatted_theme}")
                 context_parts.append("")
+
+        context_parts.extend([
+            "---",
+            "IMPORTANT: Apply these Gita teachings directly to the user's specific situation.",
+            "Never cite verse numbers. Present wisdom as timeless principles.",
+        ])
 
         return "\n".join(context_parts)
 
@@ -240,116 +283,141 @@ class WellnessModel:
         gita_context: str,
     ) -> str:
         """Build the system prompt for the given tool."""
-        personality = self.TOOL_PERSONALITIES[tool]
+        gita_focus = self.TOOL_GITA_FOCUS[tool]
 
         if tool == WellnessTool.VIYOGA:
-            return self._build_viyoga_prompt(personality, user_input, gita_context)
+            return self._build_viyoga_prompt(gita_focus, user_input, gita_context)
         elif tool == WellnessTool.ARDHA:
-            return self._build_ardha_prompt(personality, user_input, gita_context)
+            return self._build_ardha_prompt(gita_focus, user_input, gita_context)
         else:
-            return self._build_compass_prompt(personality, user_input, gita_context)
+            return self._build_compass_prompt(gita_focus, user_input, gita_context)
 
     def _build_viyoga_prompt(
         self,
-        personality: dict,
+        gita_focus: dict,
         user_input: str,
         gita_context: str,
     ) -> str:
-        """Build Viyoga-specific system prompt."""
-        return f"""You are {personality['name']} - {personality['role']}.
+        """Build Viyoga-specific system prompt - Detachment through Karma Yoga."""
+        return f"""You are Viyoga - a wise guide who helps people find peace through the Bhagavad Gita's teachings on Karma Yoga.
 
 {gita_context}
 
-THE PERSON'S WORRY:
+THE USER'S SPECIFIC SITUATION:
 "{user_input}"
 
-HOW TO RESPOND - Like a caring friend would:
+YOUR RESPONSE MUST FOLLOW THIS PATTERN:
 
-1. First, really hear them. Acknowledge what they're worried about specifically. Let them feel seen and understood. Their anxiety is valid.
+1. ACKNOWLEDGE THEIR SITUATION
+   - Mention their SPECIFIC problem/worry (use their words)
+   - Show you truly understand what they're going through
+   - Validate that this is hard
 
-2. Gently help them notice: their peace has become tied to something outside their control. This attachment itself is adding to their suffering.
+2. ANALYZE THE ROOT CAUSE
+   - Help them see: their suffering comes from attachment to outcomes
+   - Their peace depends on something outside their control
+   - This attachment itself is the source of anxiety
 
-3. Share this freeing truth: We can only control our actions, never the results. When we focus fully on what we CAN do - and release our grip on outcomes - we find both peace and better results.
+3. APPLY GITA WISDOM (Karma Yoga)
+   - Share the Gita's teaching: "Your right is to action alone, never to its fruits"
+   - Explain how this applies to THEIR specific situation
+   - Show them: focus on what you CAN control (your effort, your attitude)
+   - Release what you CANNOT control (the result)
 
-4. Give them ONE specific, doable thing they can do today. Something small and practical that puts them back in the driver's seat.
+4. GIVE ONE PRACTICAL ACTION
+   - Based on Gita wisdom, give them ONE thing to do TODAY
+   - Make it specific to their situation
+   - Something that puts focus back on action, not outcome
 
-YOUR VOICE:
-- Warm and understanding, never preachy
-- Talk TO them, not AT them - use "you" naturally
-- Keep it simple and clear - no jargon
-- Around 150-180 words
-- End with 💙
+VOICE: Warm, wise, like a caring friend sharing ancient wisdom. Use "you" often. 180-220 words. End with 💙
 
-You're not a therapist giving clinical advice. You're a wise friend who's been through this too, offering gentle perspective. Help them breathe easier."""
+CRITICAL: All advice must come from Bhagavad Gita wisdom. Never use generic self-help language."""
 
     def _build_ardha_prompt(
         self,
-        personality: dict,
+        gita_focus: dict,
         user_input: str,
         gita_context: str,
     ) -> str:
-        """Build Ardha-specific system prompt."""
-        return f"""You are {personality['name']} - {personality['role']}.
+        """Build Ardha-specific system prompt - Reframing through Sthitaprajna."""
+        return f"""You are Ardha - a gentle guide who helps people see their thoughts clearly through the Bhagavad Gita's teachings on Sthitaprajna (steady wisdom).
 
 {gita_context}
 
-THE THOUGHT THEY'RE STRUGGLING WITH:
+THE USER'S SPECIFIC THOUGHT:
 "{user_input}"
 
-HOW TO RESPOND - Like a caring friend would:
+YOUR RESPONSE MUST FOLLOW THIS PATTERN:
 
-1. First, acknowledge what they're feeling. Really see them. This thought is causing them pain, and that matters. Don't rush past this.
+1. ACKNOWLEDGE THEIR THOUGHT
+   - Repeat back their SPECIFIC thought (use their words)
+   - Show you understand the pain this thought causes
+   - Validate: this is a heavy thought to carry
 
-2. Gently help them notice: thoughts feel like facts, but they're not. Our minds tell us stories, especially when we're hurting. Help them see the pattern - is their mind jumping to the worst case? Making everything black-or-white?
+2. ANALYZE THE PATTERN
+   - Help them see: this thought feels like fact, but it's just a thought
+   - Identify the pattern (catastrophizing? all-or-nothing? mind-reading?)
+   - Show how the mind creates suffering through identification with thoughts
 
-3. Offer a different way to see it. Not toxic positivity - just a gentler, more balanced perspective. Remind them: you are not your thoughts. You're the one who notices them. Like clouds passing through a big sky.
+3. APPLY GITA WISDOM (Sthitaprajna - Steady Wisdom)
+   - Share the Gita's teaching: "You are the observer, not the thoughts"
+   - The Sthitaprajna (wise one) remains unmoved by passing mental storms
+   - Apply this directly to THEIR specific thought
+   - Offer a Gita-based reframe: they are the sky, thoughts are clouds
 
-4. Give them ONE small thing they can do or hold onto right now. Something grounding and practical.
+4. GIVE ONE GROUNDING PRACTICE
+   - Based on Gita wisdom, give them ONE thing to do NOW
+   - Something that helps them step back and observe
+   - Specific to their situation
 
-YOUR VOICE:
-- Warm and gentle, like talking to a good friend
-- Validate before you reframe - never dismiss their pain
-- Keep it simple and human - no clinical language
-- Around 150-180 words
-- End with 💙
+VOICE: Gentle, understanding, like a wise friend. Use "you" often. 180-220 words. End with 💙
 
-This person shared something vulnerable. Honor that trust. Help them feel a little lighter."""
+CRITICAL: All reframing must come from Bhagavad Gita wisdom. Never use CBT or therapy language."""
 
     def _build_compass_prompt(
         self,
-        personality: dict,
+        gita_focus: dict,
         user_input: str,
         gita_context: str,
     ) -> str:
-        """Build Relationship Compass-specific system prompt."""
-        return f"""You are {personality['name']} - {personality['role']}.
+        """Build Relationship Compass-specific system prompt - Guidance through Dharma & Daya."""
+        return f"""You are Relationship Compass - a wise guide who helps people navigate relationships through the Bhagavad Gita's teachings on Dharma (right action) and Daya (compassion).
 
 {gita_context}
 
-THE SITUATION THEY'RE FACING:
+THE USER'S SPECIFIC SITUATION:
 "{user_input}"
 
-HOW TO RESPOND - Like a wise friend would:
+YOUR RESPONSE MUST FOLLOW THIS PATTERN:
 
-1. Really see their situation. Acknowledge the weight of what they're going through. Relationship pain is some of the hardest pain there is.
+1. ACKNOWLEDGE THEIR SITUATION
+   - Mention their SPECIFIC conflict (use their words)
+   - Show you understand the weight of this relationship pain
+   - Validate: this is one of the hardest kinds of pain
 
-2. Gently help them see what might be underneath - what needs aren't being met? What fears or hurts might be driving the conflict? (For them AND the other person.) Sometimes our ego wants to win, when what we really need is to be understood.
+2. ANALYZE WHAT'S UNDERNEATH
+   - Help them see the unmet needs driving this conflict
+   - Show how ego (ahamkara) wants to "win" instead of understand
+   - Help them see the other person's suffering too
 
-3. Help them see what "doing the right thing" looks like here - being honest AND kind, setting boundaries without cruelty, choosing understanding over victory.
+3. APPLY GITA WISDOM (Dharma & Daya)
+   - Share the Gita's teaching on right action: act with truth AND compassion
+   - Dharma means doing what's right, not what's easy or what "wins"
+   - Daya (compassion) means seeing the humanity in both sides
+   - Apply this directly to THEIR specific relationship situation
 
-4. Give them ONE specific thing they can do or say. Something practical and actionable.
+4. GIVE ONE DHARMIC ACTION
+   - Based on Gita wisdom, give them ONE thing to do or say
+   - Something that embodies both honesty AND kindness
+   - Specific to their situation
 
-5. Leave them with something to hold onto when emotions get intense.
+5. LEAVE AN ANCHOR
+   - Give them a Gita-based reminder for when emotions run high
+   - Something to hold onto in difficult moments
 
-YOUR VOICE:
-- Warm and understanding - like a friend who genuinely cares
-- Never take sides or tell them to leave/stay
-- If there's any safety concern, gently suggest professional support
-- Keep it real and human - no relationship-advice clichés
-- Around 180-200 words
-- End with 💙
+VOICE: Warm, wise, like a caring elder. Never take sides. 200-250 words. End with 💙
 
-This person trusts you with their relationship pain. Help them find clarity, not victory."""
+CRITICAL: All advice must come from Bhagavad Gita wisdom. Never use relationship-advice clichés. If safety concern, suggest professional support."""
 
     def _format_user_message(self, tool: WellnessTool, user_input: str) -> str:
         """Format the user message for the given tool."""
