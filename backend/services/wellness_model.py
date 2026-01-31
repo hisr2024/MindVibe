@@ -21,7 +21,6 @@ import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 from openai import OpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -269,7 +268,7 @@ Teaching: {gita_focus['core_teaching']}
 Apply this wisdom directly to the user's specific situation."""
 
         context_parts = [
-            f"BHAGAVAD GITA WISDOM FOR THIS SITUATION:",
+            "BHAGAVAD GITA WISDOM FOR THIS SITUATION:",
             f"Focus: {gita_focus['gita_principle']}",
             f"Core Teaching: {gita_focus['core_teaching']}",
             "",
@@ -279,7 +278,7 @@ Apply this wisdom directly to the user's specific situation."""
 
         for i, result in enumerate(verse_results[:limit], 1):
             verse = result.get("verse")
-            score = result.get("score", 0.0)
+            # Note: score is available in result.get("score", 0.0) if needed for ranking
 
             if verse:
                 # Extract verse data
@@ -343,7 +342,7 @@ Apply this wisdom directly to the user's specific situation."""
 
     def _build_viyoga_prompt(
         self,
-        gita_focus: dict,
+        _gita_focus: dict,  # Reserved for future use, kept for API consistency
         user_input: str,
         gita_context: str,
     ) -> str:
@@ -435,7 +434,7 @@ ESSENTIAL: This is a TRANSMISSION, not advice. Frame as "Ancient wisdom reveals.
 
     def _build_ardha_prompt(
         self,
-        gita_focus: dict,
+        _gita_focus: dict,  # Reserved for future use, kept for API consistency
         user_input: str,
         gita_context: str,
     ) -> str:
@@ -550,7 +549,7 @@ ESSENTIAL: This is INITIATION into the deepest truth of mind. Frame as "Ancient 
 
     def _build_ardha_deep_dive_prompt(
         self,
-        gita_focus: dict,
+        _gita_focus: dict,  # Reserved for future use, kept for API consistency
         user_input: str,
         gita_context: str,
     ) -> str:
@@ -651,7 +650,7 @@ ESSENTIAL: This is DEEP ANALYSIS, not quick advice. Take time to truly understan
 
     def _build_ardha_quantum_dive_prompt(
         self,
-        gita_focus: dict,
+        _gita_focus: dict,  # Reserved for future use, kept for API consistency
         user_input: str,
         gita_context: str,
     ) -> str:
@@ -813,7 +812,7 @@ ESSENTIAL: This is the DEEPEST level of analysis. Leave no dimension unexplored.
 
     def _build_compass_prompt(
         self,
-        gita_focus: dict,
+        _gita_focus: dict,  # Reserved for future use, kept for API consistency
         user_input: str,
         gita_context: str,
     ) -> str:
@@ -1080,7 +1079,7 @@ Please help me see what's really happening underneath and guide me to a new pers
             "eternal_anchor",           # Section 6: Eternal Truth
         ]
 
-        result = {key: "" for key in section_keys}
+        result = dict.fromkeys(section_keys, "")
 
         if len(sections) >= 6:
             # Full ultra-deep response - map all sections
@@ -1130,7 +1129,7 @@ Please help me see what's really happening underneath and guide me to a new pers
                 "transformation_blueprint",
                 "life_purpose_integration",
             ]
-            result = {key: "" for key in section_keys}
+            result = dict.fromkeys(section_keys, "")
 
             if len(sections) >= 6:
                 for i, key in enumerate(section_keys):
@@ -1162,7 +1161,7 @@ Please help me see what's really happening underneath and guide me to a new pers
                 "solution_pathways",
                 "empowering_closure",
             ]
-            result = {key: "" for key in section_keys}
+            result = dict.fromkeys(section_keys, "")
 
             if len(sections) >= 6:
                 for i, key in enumerate(section_keys):
@@ -1289,9 +1288,9 @@ You are held. You are whole. You are the infinite sky through which all weather 
 
                 sections = {
                     "sacred_witnessing": f"I bow to the depth of what you're bringing forward. This situation - \"{input_short}\" - deserves to be truly seen and honored. The fact that you're willing to explore this so deeply shows remarkable self-awareness and courage.",
-                    "five_dimensional_analysis": f"This challenge touches multiple dimensions of your life. EMOTIONAL: What feelings lie beneath - fear, grief, longing? COGNITIVE: What \"chitta-vritti\" (thought modifications) repeat? RELATIONAL: How are you treating yourself through this? PHYSICAL: Where does this live in your body? SPIRITUAL: What might life be teaching you through this experience?",
+                    "five_dimensional_analysis": "This challenge touches multiple dimensions of your life. EMOTIONAL: What feelings lie beneath - fear, grief, longing? COGNITIVE: What \"chitta-vritti\" (thought modifications) repeat? RELATIONAL: How are you treating yourself through this? PHYSICAL: Where does this live in your body? SPIRITUAL: What might life be teaching you through this experience?",
                     "root_pattern_archaeology": "This moment connects to deeper patterns. \"Samskara\" - the impressions that shape our reactions - formed long ago. When did you first learn to respond this way? The pattern once protected you. Now it may be ready to be released.",
-                    "quantum_reframing": f"THE QUANTUM SHIFT: From \"I am this problem\" to \"I am the awareness witnessing this challenge.\" Your essence - \"atman\" - remains untouched by any circumstance. What if this thought were a cloud, and you were the vast sky? What if the sky has never been harmed by any cloud?",
+                    "quantum_reframing": "THE QUANTUM SHIFT: From \"I am this problem\" to \"I am the awareness witnessing this challenge.\" Your essence - \"atman\" - remains untouched by any circumstance. What if this thought were a cloud, and you were the vast sky? What if the sky has never been harmed by any cloud?",
                     "transformation_blueprint": f"PRACTICE: When \"{input_short}\" arises, say: \"I notice I am having the thought that... I am the awareness noticing this thought. In this awareness, I am already at peace.\" Morning: Set intention to respond from wisdom. Evening: Reflect on one moment you responded from your new understanding.",
                     "life_purpose_integration": "Every challenge, fully integrated, becomes a source of wisdom. \"Tapas\" - the fire of difficulty - is forging you into something stronger. You are not here to escape this challenge but to be transformed by engaging with it fully. You are held. You are whole.",
                 }
@@ -1319,7 +1318,7 @@ You are already whole. This challenge does not diminish you. 💙"""
 
                 sections = {
                     "acknowledgment": f"I hear you completely. What you're experiencing - \"{input_snippet}\" - is real and valid. The weight you're carrying deserves to be acknowledged. You're not alone in this struggle.",
-                    "root_cause_analysis": f"Beneath the surface thought, there's often something deeper: core beliefs, unmet needs, old wounds being touched. The mind evolved for survival, not truth - it broadcasts worst-case scenarios. But thoughts are \"chitta-vritti\" - mental modifications, not facts. They arise and pass like weather.",
+                    "root_cause_analysis": "Beneath the surface thought, there's often something deeper: core beliefs, unmet needs, old wounds being touched. The mind evolved for survival, not truth - it broadcasts worst-case scenarios. But thoughts are \"chitta-vritti\" - mental modifications, not facts. They arise and pass like weather.",
                     "multi_perspective": "Your current view is valid, but what might a wise elder see? What would your healed future self say? What if there were evidence contradicting the harsh interpretation? Most suffering comes from seeing only one perspective.",
                     "comprehensive_reframe": f"THE REFRAME: You are not this thought - you are the awareness that notices it. \"Sakshi bhava\" - witness consciousness. The very fact that you can observe this thought proves you are separate from it. You are the vast sky; \"{input_short}\" is a passing cloud.",
                     "solution_pathways": "PRACTICE: When this thought arises, say \"I notice I'm having the thought that...\" Take three slow breaths. Ask what you'd say to a friend with this same thought. You deserve that same gentleness. One small step today: choose one response from wisdom rather than reactivity.",
@@ -1328,7 +1327,7 @@ You are already whole. This challenge does not diminish you. 💙"""
 
             else:
                 # Standard mode
-                content = f"I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙"
+                content = "I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙"
                 sections = {
                     "recognition": f"I hear you. This thought - '{input_snippet}' - it's heavy. And it's okay that you're struggling with it.",
                     "deep_insight": "Thoughts feel like facts, especially the painful ones. But they're not. They're just your mind trying to make sense of things.",
@@ -1336,7 +1335,7 @@ You are already whole. This challenge does not diminish you. 💙"""
                     "small_action_step": "Take one slow breath. Then ask yourself: what would you say to a friend with this same thought?",
                 }
         else:
-            content = f"I hear you. This situation is weighing on you, and relationship struggles hit deep.\n\nHere's what I've noticed about conflict: underneath the arguments and hurt feelings, there's usually an unmet need - to feel heard, respected, or truly understood. Take a moment: what do you really need here? Not what you want them to do or say, but what you actually need.\n\nDoing the right thing in relationships doesn't mean winning. It means being honest AND kind - even when that's really hard.\n\nWhen you're ready, try this: 'I feel [your emotion] when [the situation] because [what you need]. What I'm hoping for is [your request].' It opens doors instead of closing them.\n\nAnd when emotions run high, remember: the goal isn't to be right. It's to understand and be understood. That's where peace lives. 💙"
+            content = "I hear you. This situation is weighing on you, and relationship struggles hit deep.\n\nHere's what I've noticed about conflict: underneath the arguments and hurt feelings, there's usually an unmet need - to feel heard, respected, or truly understood. Take a moment: what do you really need here? Not what you want them to do or say, but what you actually need.\n\nDoing the right thing in relationships doesn't mean winning. It means being honest AND kind - even when that's really hard.\n\nWhen you're ready, try this: 'I feel [your emotion] when [the situation] because [what you need]. What I'm hoping for is [your request].' It opens doors instead of closing them.\n\nAnd when emotions run high, remember: the goal isn't to be right. It's to understand and be understood. That's where peace lives. 💙"
             sections = {
                 "acknowledgment": f"I hear you - this situation with '{input_snippet}' is really weighing on you. Relationship struggles hit deep.",
                 "underneath": "Underneath most conflicts, there's an unmet need - to feel heard, respected, or understood. What do you really need here?",
