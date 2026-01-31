@@ -163,7 +163,7 @@ export function DashboardMusicWidget({
               <Music className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">MindVibe Music</h3>
+              <h3 className="text-base font-semibold text-white">KIAAN Vibes</h3>
               <p className="text-xs text-white/50">
                 {isPlaying ? getCurrentDescription() : 'Tap to start'}
               </p>
@@ -280,7 +280,7 @@ export function DashboardMusicWidget({
 
       {/* Footer */}
       <Link
-        href="/sounds"
+        href="/kiaan-vibe"
         className="flex items-center justify-between p-3 border-t border-white/5 hover:bg-white/5 transition-colors"
       >
         <span className="text-xs text-white/50">Full Experience</span>

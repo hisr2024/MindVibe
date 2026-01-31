@@ -444,7 +444,7 @@ export function MeditationPlayer({ className = '' }: MeditationPlayerProps) {
       {/* Audio Files Note */}
       <div className="p-4 border-t border-white/5 bg-white/[0.02]">
         <p className="text-xs text-white/30 text-center">
-          Add meditation music files to <code className="text-white/40">/public/audio/meditation/</code>
+          Add audio files to <code className="text-white/40">/public/audio/meditation/</code>
         </p>
       </div>
     </div>

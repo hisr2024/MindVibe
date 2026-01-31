@@ -247,7 +247,7 @@ export function MeditationMusicPlayer({
               <Brain className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">Meditation Music</h3>
+              <h3 className="text-lg font-semibold text-white">KIAAN Vibes</h3>
               <p className="text-xs text-white/50">Brainwave entrainment for deep practice</p>
             </div>
           </div>
