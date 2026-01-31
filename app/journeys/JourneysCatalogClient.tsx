@@ -605,7 +605,8 @@ export default function JourneysCatalogClient() {
   }
 
   async function handleStartJourneys() {
-    if (selectedIds.size === 0) return
+    // Guard against double-clicks and race conditions
+    if (selectedIds.size === 0 || starting) return
 
     // Check access before starting
     if (!access?.has_access) {

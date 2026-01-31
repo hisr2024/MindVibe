@@ -186,6 +186,49 @@ class ProviderStatusResponse(BaseModel):
     providers: dict[str, dict[str, Any]]
 
 
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+
+async def verify_journey_ownership(
+    db: AsyncSession,
+    user_journey_id: str,
+    user_id: str,
+    lock_for_update: bool = False,
+) -> UserJourney:
+    """
+    Verify that a journey exists and belongs to the user.
+
+    Args:
+        db: Database session
+        user_journey_id: The journey ID to verify
+        user_id: The expected owner's user ID
+        lock_for_update: If True, acquires FOR UPDATE lock (use for write operations)
+
+    Returns:
+        UserJourney: The verified journey object
+
+    Raises:
+        HTTPException: 404 if journey not found, 403 if user doesn't own it
+    """
+    query = select(UserJourney).where(UserJourney.id == user_journey_id)
+
+    if lock_for_update:
+        query = query.with_for_update()
+
+    result = await db.execute(query)
+    journey = result.scalar_one_or_none()
+
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
+    if journey.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this journey")
+
+    return journey
+
+
 class JourneyAccessResponse(BaseModel):
     """Wisdom Journeys access information for the current user."""
     has_access: bool
@@ -735,14 +778,8 @@ async def get_or_generate_today_step(
     engine = get_journey_engine()
 
     try:
-        # Verify ownership
-        journey = await db.get(UserJourney, user_journey_id)
-
-        if not journey:
-            raise HTTPException(status_code=404, detail="Journey not found")
-
-        if journey.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to access this journey")
+        # Verify ownership with lock (write operation - generates/caches step)
+        await verify_journey_ownership(db, user_journey_id, user_id, lock_for_update=True)
 
         # Get step
         step = await engine.get_journey_step(db, user_journey_id)
@@ -785,19 +822,13 @@ async def complete_step(
     engine = get_journey_engine()
 
     try:
-        # Verify ownership
-        journey = await db.get(UserJourney, user_journey_id)
-
-        if not journey:
-            raise HTTPException(status_code=404, detail="Journey not found")
-
-        if journey.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to update this journey")
+        # Verify ownership with lock (write operation)
+        await verify_journey_ownership(db, user_journey_id, user_id, lock_for_update=True)
 
         # Convert Pydantic model to dict for engine
         check_in_data = body.check_in.model_dump() if body and body.check_in else None
 
-        result = await engine.complete_step(
+        step_result = await engine.complete_step(
             db=db,
             user_journey_id=user_journey_id,
             day_index=day_index,
@@ -805,7 +836,7 @@ async def complete_step(
             reflection_response=body.reflection_response if body else None,
         )
 
-        return CompleteStepResponse(**result)
+        return CompleteStepResponse(**step_result)
 
     except HTTPException:
         raise
@@ -837,13 +868,8 @@ async def pause_journey(
     engine = get_journey_engine()
 
     try:
-        journey = await db.get(UserJourney, user_journey_id)
-
-        if not journey:
-            raise HTTPException(status_code=404, detail="Journey not found")
-
-        if journey.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
+        # Verify ownership with lock (write operation)
+        await verify_journey_ownership(db, user_journey_id, user_id, lock_for_update=True)
 
         await engine.pause_journey(db, user_journey_id)
         return {"status": "paused", "journey_id": user_journey_id}
@@ -871,13 +897,8 @@ async def resume_journey(
     engine = get_journey_engine()
 
     try:
-        journey = await db.get(UserJourney, user_journey_id)
-
-        if not journey:
-            raise HTTPException(status_code=404, detail="Journey not found")
-
-        if journey.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
+        # Verify ownership with lock (write operation)
+        await verify_journey_ownership(db, user_journey_id, user_id, lock_for_update=True)
 
         await engine.resume_journey(db, user_journey_id)
         return {"status": "active", "journey_id": user_journey_id}
@@ -907,13 +928,8 @@ async def abandon_journey(
     engine = get_journey_engine()
 
     try:
-        journey = await db.get(UserJourney, user_journey_id)
-
-        if not journey:
-            raise HTTPException(status_code=404, detail="Journey not found")
-
-        if journey.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
+        # Verify ownership with lock (write operation)
+        await verify_journey_ownership(db, user_journey_id, user_id, lock_for_update=True)
 
         await engine.abandon_journey(db, user_journey_id)
         return {"status": "abandoned", "journey_id": user_journey_id}
@@ -946,13 +962,8 @@ async def get_journey_history(
     engine = get_journey_engine()
 
     try:
-        journey = await db.get(UserJourney, user_journey_id)
-
-        if not journey:
-            raise HTTPException(status_code=404, detail="Journey not found")
-
-        if journey.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
+        # Verify ownership (read-only, no lock needed)
+        await verify_journey_ownership(db, user_journey_id, user_id, lock_for_update=False)
 
         return await engine.get_journey_history(db, user_journey_id)
 
