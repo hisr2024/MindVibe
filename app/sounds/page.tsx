@@ -1,17 +1,17 @@
 'use client'
 
 /**
- * Sounds Page - Natural Ultra HD Meditation Music
+ * Sounds Page - Natural Ultra HD Meditation Music & Bhagavad Gita Audio
  *
  * ॐ श्री कृष्णाय नमः
  *
- * Clean, minimal meditation music player.
+ * Clean, minimal meditation music player with Gita audio integration.
  * Natural, authentic sounds - no gimmicks.
  */
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Headphones } from 'lucide-react'
+import { ArrowLeft, Headphones, BookOpen, Music2, ChevronRight, Sparkles } from 'lucide-react'
 import { SimpleMusicPlayer } from '@/components/music'
 
 export default function SoundsPage() {
@@ -70,6 +70,71 @@ export default function SoundsPage() {
             className="mb-8"
           >
             <SimpleMusicPlayer />
+          </motion.section>
+
+          {/* Bhagavad Gita Audio Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8"
+          >
+            <Link href="/gita-audio">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-rose-500/20 border border-orange-500/20 p-5 group hover:border-orange-500/40 transition-all cursor-pointer">
+                {/* Background glow */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl group-hover:bg-orange-500/30 transition-colors" />
+
+                <div className="relative flex items-center gap-4">
+                  {/* Icon */}
+                  <motion.div
+                    className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/30 to-amber-500/30 flex items-center justify-center"
+                    animate={{
+                      boxShadow: [
+                        '0 0 10px rgba(249, 115, 22, 0.2)',
+                        '0 0 20px rgba(249, 115, 22, 0.4)',
+                        '0 0 10px rgba(249, 115, 22, 0.2)'
+                      ]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <span className="text-2xl">ॐ</span>
+                  </motion.div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-bold text-white">Bhagavad Gita Audio</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 text-[10px] font-medium">
+                        NEW
+                      </span>
+                    </div>
+                    <p className="text-sm text-amber-200/70 font-sanskrit mb-1">श्रीमद्भगवद्गीता</p>
+                    <p className="text-xs text-white/50">
+                      Listen in Sanskrit, Hindi, Telugu & more with ambient sounds
+                    </p>
+                  </div>
+
+                  {/* Arrow */}
+                  <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all" />
+                </div>
+
+                {/* Features */}
+                <div className="relative mt-4 flex gap-3">
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 text-xs text-white/50">
+                    <BookOpen className="w-3 h-3" />
+                    <span>18 Chapters</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 text-xs text-white/50">
+                    <Music2 className="w-3 h-3" />
+                    <span>Ambient Layers</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 text-xs text-white/50">
+                    <Sparkles className="w-3 h-3" />
+                    <span>6+ Languages</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
           </motion.section>
 
           {/* Info Section */}
