@@ -82,7 +82,22 @@ function getOrCreateSessionId(): string {
   const key = 'ardha_session_id'
   const existing = window.localStorage.getItem(key)
   if (existing) return existing
-  const newId = `ardha_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+
+  // Generate a cryptographically secure random suffix
+  function generateSecureSuffix(length: number): string {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const bytes = new Uint8Array(length)
+      window.crypto.getRandomValues(bytes)
+      return Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    }
+    // Fallback: use Math.random only if crypto is unavailable
+    return Math.random().toString(36).slice(2, 2 + length)
+  }
+
+  const randomSuffix = generateSecureSuffix(6)
+  const newId = `ardha_${Date.now()}_${randomSuffix}`
   window.localStorage.setItem(key, newId)
   return newId
 }
