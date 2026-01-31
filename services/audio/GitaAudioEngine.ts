@@ -25,7 +25,9 @@ import {
   getAudioSourceByLanguage,
   getChapterAudioUrl,
   getAmbientSound,
+  getAmbientSoundUrl,
   getPrimaryLanguage,
+  toProxyUrl,
   type RealAudioSource,
   type AmbientSound
 } from '@/lib/constants/gita-audio-sources'
@@ -509,8 +511,9 @@ export class GitaAudioEngine {
 
     try {
       const audio = new Audio()
-      audio.crossOrigin = 'anonymous'
-      audio.src = sound.url
+      // Use proxied URL to bypass CORS restrictions
+      const proxyUrl = getAmbientSoundUrl(soundId) || toProxyUrl(sound.url)
+      audio.src = proxyUrl
       audio.loop = sound.loopable
       audio.volume = this.state.ambientVolume * 0.5
 

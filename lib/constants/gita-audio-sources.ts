@@ -227,6 +227,19 @@ export const ALL_AUDIO_SOURCES: RealAudioSource[] = [
 // ============ Helper Functions ============
 
 /**
+ * Convert external URL to proxy URL to bypass CORS
+ * This is necessary because Internet Archive doesn't send CORS headers
+ */
+export function toProxyUrl(externalUrl: string): string {
+  // In production, use our proxy API
+  if (typeof window !== 'undefined') {
+    return `/api/audio/proxy?url=${encodeURIComponent(externalUrl)}`
+  }
+  // Server-side, return original URL
+  return externalUrl
+}
+
+/**
  * Get audio source by language
  */
 export function getAudioSourceByLanguage(language: GitaLanguage): RealAudioSource | undefined {
@@ -241,9 +254,26 @@ export function getAudioSourceById(id: string): RealAudioSource | undefined {
 }
 
 /**
- * Get chapter audio URL
+ * Get chapter audio URL (proxied for CORS)
  */
 export function getChapterAudioUrl(
+  language: GitaLanguage,
+  chapter: number
+): string | undefined {
+  const source = getAudioSourceByLanguage(language)
+  if (!source) return undefined
+
+  const chapterAudio = source.chapters.find(c => c.chapter === chapter)
+  if (!chapterAudio?.url) return undefined
+
+  // Return proxied URL to bypass CORS
+  return toProxyUrl(chapterAudio.url)
+}
+
+/**
+ * Get chapter audio URL without proxy (for direct access if needed)
+ */
+export function getChapterAudioUrlDirect(
   language: GitaLanguage,
   chapter: number
 ): string | undefined {
@@ -255,10 +285,19 @@ export function getChapterAudioUrl(
 }
 
 /**
- * Get ambient sound by ID
+ * Get ambient sound by ID (proxied for CORS)
  */
 export function getAmbientSound(id: string): AmbientSound | undefined {
   return AMBIENT_SOUNDS.find(s => s.id === id)
+}
+
+/**
+ * Get ambient sound URL (proxied for CORS)
+ */
+export function getAmbientSoundUrl(id: string): string | undefined {
+  const sound = getAmbientSound(id)
+  if (!sound?.url) return undefined
+  return toProxyUrl(sound.url)
 }
 
 /**
@@ -288,6 +327,9 @@ export default {
   ALL_AUDIO_SOURCES,
   getAudioSourceByLanguage,
   getChapterAudioUrl,
+  getChapterAudioUrlDirect,
   getAmbientSound,
-  getPrimaryLanguage
+  getAmbientSoundUrl,
+  getPrimaryLanguage,
+  toProxyUrl
 }
