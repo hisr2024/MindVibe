@@ -73,6 +73,7 @@ from backend.models import (
     UserJourneyStepState,
     UserJourneyStatus,
     GitaVerse,
+    User,
 )
 from backend.services.gita_corpus_adapter import (
     GitaCorpusAdapter,
@@ -1067,7 +1068,25 @@ class EnhancedJourneyEngine:
 
         Returns:
             List of created/existing UserJourney instances
+
+        Raises:
+            ValueError: If user does not exist in database
         """
+        # CRITICAL: Verify user exists before creating journeys
+        # The user_journeys table has a FK to users - if user doesn't exist, INSERT fails
+        user_check = await db.execute(
+            select(User.id).where(
+                or_(User.id == user_id, User.auth_uid == user_id)
+            )
+        )
+        user_exists = user_check.scalar_one_or_none()
+        if not user_exists:
+            logger.error(f"User {user_id} not found in database - cannot create journey")
+            raise ValueError(
+                f"User not found: {user_id}. Please ensure user account exists. "
+                "If you recently signed up, please try logging out and back in."
+            )
+
         journeys: list[UserJourney] = []
 
         # IDEMPOTENCY FIX: Check for existing active journeys for these templates
@@ -1137,6 +1156,8 @@ class EnhancedJourneyEngine:
                 current_day_index=1,
                 personalization=personalization or {},
             )
+            # Set the template relationship manually (avoids lazy loading issues)
+            journey.template = template
             db.add(journey)
             journeys.append(journey)
 
@@ -1144,8 +1165,12 @@ class EnhancedJourneyEngine:
 
         await db.commit()
 
+        # Refresh journeys to get DB-generated values, but keep template relationship
         for j in journeys:
+            template_backup = j.template  # Keep the template we already have
             await db.refresh(j)
+            if template_backup and not j.template:
+                j.template = template_backup  # Restore if refresh cleared it
 
         return journeys
 

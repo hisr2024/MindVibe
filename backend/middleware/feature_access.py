@@ -356,7 +356,18 @@ class WisdomJourneysAccessRequired:
         user_id = await get_current_user_id(request)
 
         # Ensure user has a subscription
-        await get_or_create_free_subscription(db, user_id)
+        try:
+            await get_or_create_free_subscription(db, user_id)
+        except ValueError as e:
+            # User not found in database
+            logger.error(f"User not found when checking journey access: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "error": "user_not_found",
+                    "message": "Your user account was not found. Please log out and sign in again.",
+                },
+            )
 
         # Check for developer bypass - gives full unlimited access
         if await is_developer(db, user_id):
