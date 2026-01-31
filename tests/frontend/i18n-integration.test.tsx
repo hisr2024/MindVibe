@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LanguageProvider, useLanguage, type Language } from '@/hooks/useLanguage';
 import React from 'react';
@@ -314,7 +314,9 @@ describe('i18n Integration Tests', () => {
       const event = new CustomEvent('localeChanged', {
         detail: { locale: 'ja' as Language }
       });
-      window.dispatchEvent(event);
+      await act(async () => {
+        window.dispatchEvent(event);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('language')).toHaveTextContent('ja');
@@ -345,18 +347,19 @@ describe('i18n Integration Tests', () => {
       'es', 'fr', 'de', 'pt', 'ja', 'zh-CN'
     ];
 
-    it('should support all 17 languages', () => {
-      allLanguages.forEach(lang => {
+    it('should support all 17 languages', async () => {
+      for (const lang of allLanguages) {
         localStorage.setItem('preferredLocale', lang);
-        
+
         const { unmount } = renderWithProvider(<TestComponent />);
-        
-        // The component should render without errors
-        expect(screen.getByTestId('language')).toBeTruthy();
-        
+
+        await waitFor(() => {
+          expect(screen.getByTestId('language')).toBeTruthy();
+        });
+
         unmount();
         localStorage.clear();
-      });
+      }
     });
 
     it('should correctly set language names for all languages', async () => {

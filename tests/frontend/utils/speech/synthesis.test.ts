@@ -8,6 +8,16 @@ import { SpeechSynthesisService } from '@/utils/speech/synthesis'
 describe('SpeechSynthesisService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: {
+        speak: vi.fn(),
+        pause: vi.fn(),
+        resume: vi.fn(),
+        cancel: vi.fn(),
+        getVoices: vi.fn(() => []),
+      },
+      writable: true,
+    })
   })
 
   describe('constructor', () => {

@@ -23,6 +23,13 @@ const mockRecognition = {
 describe('SpeechRecognitionService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    const MockSpeechRecognition = function () {
+      return mockRecognition
+    }
+    Object.defineProperty(window, 'SpeechRecognition', {
+      value: MockSpeechRecognition,
+      writable: true,
+    })
     
     // Reset mock
     mockRecognition.lang = ''

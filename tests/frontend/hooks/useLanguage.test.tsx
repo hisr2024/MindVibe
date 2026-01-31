@@ -445,16 +445,13 @@ describe('useLanguage Hook', () => {
   });
 
   describe('Context Usage', () => {
-    it('should throw error when used outside provider', () => {
-      // Suppress console.error for this test
-      const originalError = console.error;
-      console.error = vi.fn();
+    it('should provide fallback values when used outside provider', () => {
+      const { result } = renderHook(() => useLanguage());
 
-      expect(() => {
-        renderHook(() => useLanguage());
-      }).toThrow('useLanguage must be used within a LanguageProvider');
-
-      console.error = originalError;
+      expect(result.current.language).toBe('en');
+      expect(result.current.config.name).toBe('English');
+      expect(result.current.isInitialized).toBe(false);
+      expect(result.current.t('app.name', 'Fallback')).toBe('Fallback');
     });
   });
 });

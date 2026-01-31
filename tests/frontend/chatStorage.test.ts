@@ -58,7 +58,9 @@ describe('chatStorage', () => {
 
     it('should return empty array on invalid JSON', () => {
       localStorageMock.setItem('kiaan-chat-messages', 'invalid json')
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const messages = loadChatMessages()
+      errorSpy.mockRestore()
       expect(messages).toEqual([])
     })
   })

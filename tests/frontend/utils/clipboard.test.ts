@@ -55,6 +55,8 @@ describe('clipboard utilities', () => {
 
     it('should call onError when copy fails', async () => {
       const onError = vi.fn()
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const writeText = vi.fn().mockRejectedValue(new Error('Copy failed'))
 
       Object.defineProperty(navigator, 'clipboard', {
@@ -66,6 +68,8 @@ describe('clipboard utilities', () => {
 
       expect(result).toBe(false)
       expect(onError).toHaveBeenCalled()
+      warnSpy.mockRestore()
+      errorSpy.mockRestore()
     })
   })
 })

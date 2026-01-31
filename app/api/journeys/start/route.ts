@@ -77,6 +77,23 @@ function createErrorResponse(
   )
 }
 
+function createQueueResponse(
+  message: string,
+  error = 'service_unavailable',
+  retryAfter = 30
+): NextResponse<ErrorResponse & { _can_queue?: boolean; _retry_after?: number }> {
+  return NextResponse.json(
+    {
+      error,
+      message,
+      _offline: true,
+      _can_queue: true,
+      _retry_after: retryAfter,
+    },
+    { status: 202 }
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
@@ -198,15 +215,10 @@ export async function POST(request: NextRequest) {
         // No more retries for 503 - return queue-friendly response
         if (response.status === 503) {
           const errorData = await response.json().catch(() => ({}))
-          return NextResponse.json(
-            {
-              error: 'service_unavailable',
-              message: errorData.message || 'Wisdom Journeys is being set up. Please try again in a moment.',
-              _offline: true,
-              _can_queue: true, // Signal to frontend that this can be queued
-              _retry_after: 30, // Suggest retry after 30 seconds
-            },
-            { status: 503 }
+          return createQueueResponse(
+            errorData.message || 'Wisdom Journeys is being set up. Please try again in a moment.',
+            'service_unavailable',
+            30
           )
         }
 
@@ -222,8 +234,12 @@ export async function POST(request: NextRequest) {
 
           console.error(`[journeys/start] Backend error: ${response.status} - ${errorMessage}`)
 
+          if (response.status >= 500) {
+            return createQueueResponse(errorMessage, 'backend_error', 60)
+          }
+
           return createErrorResponse(
-            response.status >= 500 ? 503 : response.status,
+            response.status,
             'backend_error',
             errorMessage
           )
@@ -247,15 +263,10 @@ export async function POST(request: NextRequest) {
             if (attempt < MAX_RETRIES) {
               continue
             }
-            return NextResponse.json(
-              {
-                error: 'timeout',
-                message: 'Request timed out. The server may be busy. Please try again.',
-                _offline: true,
-                _can_queue: true,
-                _retry_after: 30,
-              },
-              { status: 504 }
+            return createQueueResponse(
+              'Request timed out. The server may be busy. Please try again.',
+              'timeout',
+              30
             )
           }
 
@@ -272,15 +283,10 @@ export async function POST(request: NextRequest) {
     console.error(`[journeys/start] All ${MAX_RETRIES + 1} attempts failed. Last status: ${lastStatus}, Last error: ${lastError?.message}`)
 
     // Return offline-compatible error response with queue capability
-    return NextResponse.json(
-      {
-        error: 'network_error',
-        message: 'Unable to connect to the server after multiple attempts. Your journey will be queued and started when connection is restored.',
-        _offline: true,
-        _can_queue: true,
-        _retry_after: 60,
-      },
-      { status: 503 }
+    return createQueueResponse(
+      'Unable to connect to the server after multiple attempts. Your journey will be queued and started when connection is restored.',
+      'network_error',
+      60
     )
   } catch (outerError) {
     console.error('[journeys/start] Unexpected error:', outerError)

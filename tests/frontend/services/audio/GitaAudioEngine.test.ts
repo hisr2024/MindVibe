@@ -102,6 +102,7 @@ const originalAudio = globalThis.Audio
 beforeEach(() => {
   // Mock Audio constructor
   globalThis.Audio = MockAudio as any
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
 
   // Mock window
   if (typeof window === 'undefined') {
@@ -112,7 +113,7 @@ beforeEach(() => {
 afterEach(() => {
   // Restore original Audio
   globalThis.Audio = originalAudio
-  vi.clearAllMocks()
+  vi.restoreAllMocks()
 })
 
 // ============ Test Suites ============

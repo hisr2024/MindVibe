@@ -636,8 +636,6 @@ export default function JourneysCatalogClient() {
       // Navigate to today's agenda
       router.push('/journeys/today')
     } catch (err: unknown) {
-      console.error('Failed to start journeys:', err)
-
       if (journeysService.isAuthError(err)) {
         setAuthRequired(true)
         setInfoMessage(null)
@@ -665,13 +663,15 @@ export default function JourneysCatalogClient() {
       }
 
       // Service unavailable - offer to queue
-      if (
+      const isServiceIssue = (
         journeysService.isServiceError(err) ||
         errorMessage.includes('service_unavailable') ||
         errorMessage.includes('being set up') ||
         errorMessage.includes('network_error') ||
         errorMessage.includes('timeout')
-      ) {
+      )
+
+      if (isServiceIssue) {
         // Queue the journey start for later
         journeysService.queueJourneyStart(Array.from(selectedIds), personalization || undefined)
         setQueuedJourneys(journeysService.getQueuedJourneys())
@@ -682,6 +682,7 @@ export default function JourneysCatalogClient() {
         return
       }
 
+      console.error('Failed to start journeys:', err)
       setInfoMessage(null)
       setError(err instanceof Error ? err.message : 'Failed to start journeys')
     } finally {
