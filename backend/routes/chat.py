@@ -96,6 +96,13 @@ def sanitize_input(text: str) -> str:
     return text.strip()
 
 
+class ConversationMessage(BaseModel):
+    """Single message in conversation history."""
+    role: str = Field(..., description="Role of the message sender (user or assistant)")
+    content: str = Field(..., description="Message content")
+    timestamp: str | None = Field(None, description="Message timestamp")
+
+
 class ChatMessage(BaseModel):
     """Chat message model with validation."""
     message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
@@ -103,6 +110,11 @@ class ChatMessage(BaseModel):
     session_id: str | None = Field(None, description="Session ID for conversation continuity")
     context: str | None = Field(None, description="Conversation context (e.g., 'general', 'anxiety', 'grief')")
     mood: str | None = Field(None, description="User's current mood")
+    conversation_history: list[ConversationMessage] | None = Field(
+        None,
+        description="Previous messages in conversation for context awareness",
+        max_length=20  # Limit to last 20 messages for performance
+    )
 
     @field_validator('message')
     @classmethod
@@ -591,6 +603,16 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             # Extract primary language code (e.g., 'en' from 'en-US,en;q=0.9')
             language = accept_language.split(',')[0].split('-')[0].split(';')[0].strip()
         
+        # Build conversation history context for multi-turn understanding
+        conversation_context = None
+        if chat.conversation_history:
+            # Extract the relevant conversation history for context
+            conversation_context = "\n".join([
+                f"{'User' if msg.role == 'user' else 'KIAAN'}: {msg.content}"
+                for msg in chat.conversation_history[-6:]  # Last 6 messages for context
+            ])
+            logger.debug(f"Conversation context with {len(chat.conversation_history)} messages")
+
         # Use KIAAN core service for consistent ecosystem-wide wisdom
         from backend.services.kiaan_core import kiaan_core
 
@@ -598,8 +620,9 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             message=message,
             user_id=user_id,
             db=db,
-            context="general",
-            language=language  # Pass language for direct response generation
+            context=chat.context or "general",
+            language=language,  # Pass language for direct response generation
+            conversation_context=conversation_context  # Pass conversation history for context awareness
         )
         
         response = kiaan_result["response"]

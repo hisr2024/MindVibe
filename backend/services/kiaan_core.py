@@ -902,12 +902,13 @@ EXAMPLES:
         stream: bool = False,
         language: str | None = None,
         force_offline: bool = False,
+        conversation_context: str | None = None,
     ) -> dict[str, Any]:
         """
         Generate KIAAN response with Gita verses from database (Quantum Coherence v3.0).
 
         This is the central wisdom engine used by ALL ecosystem tools.
-        NOW WITH FULL OFFLINE SUPPORT.
+        NOW WITH FULL OFFLINE SUPPORT AND CONVERSATION CONTEXT AWARENESS.
 
         Enhancements:
         - Uses GPT-4o-mini (75% cost savings)
@@ -918,6 +919,7 @@ EXAMPLES:
         - Conversational detection for empathetic responses
         - OFFLINE SUPPORT via local LLM models (v3.0)
         - Automatic fallback to cached/template responses
+        - CONVERSATION CONTEXT AWARENESS (v4.0) - maintains thought process across turns
 
         Args:
             message: User message or context
@@ -927,6 +929,7 @@ EXAMPLES:
             stream: Enable streaming responses (default: False)
             language: Language code for response
             force_offline: Force offline mode even when online
+            conversation_context: Previous conversation messages for context-aware responses
 
         Returns:
             dict with response, verses_used, validation, and context
@@ -1000,7 +1003,7 @@ EXAMPLES:
 
         # Step 3: Generate response with multi-provider fallback (v3.1)
         # Priority: ProviderManager (OpenAI/Sarvam/Compatible) -> Legacy OpenAI -> Offline
-        system_prompt = self._build_system_prompt(wisdom_context, message, context, language)
+        system_prompt = self._build_system_prompt(wisdom_context, message, context, language, conversation_context)
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": message}
@@ -1068,10 +1071,10 @@ EXAMPLES:
 
             except TokenLimitExceededError as e:
                 logger.error(f"KIAAN Core: Token limit exceeded: {e}")
-                # Try with smaller context
+                # Try with smaller context (but preserve language and conversation_context)
                 verses = verses[:5]
                 wisdom_context = self._build_verse_context(verses)
-                system_prompt = self._build_system_prompt(wisdom_context, message, context)
+                system_prompt = self._build_system_prompt(wisdom_context, message, context, language, conversation_context)
 
                 try:
                     response = await self.optimizer.create_completion_with_retry(
@@ -1364,8 +1367,23 @@ Create natural pauses with "..." to let words breathe.
 RULES: Be warm, serene, nurturing. Never cite Gita/Krishna/Arjuna. 100-150 words.
 Remember: Every word is a gift of peace. Speak soul to soul."""
 
-    def _build_system_prompt(self, wisdom_context: str, message: str, context: str, language: str | None = None) -> str:
-        """Build system prompt based on context type and language with divine consciousness."""
+    def _build_system_prompt(
+        self,
+        wisdom_context: str,
+        message: str,
+        context: str,
+        language: str | None = None,
+        conversation_context: str | None = None
+    ) -> str:
+        """Build system prompt based on context type, language, and conversation history with divine consciousness.
+
+        Args:
+            wisdom_context: Relevant Gita verses and teachings
+            message: Current user message
+            context: Context type (general, ardha_reframe, etc.)
+            language: Response language
+            conversation_context: Previous conversation for multi-turn understanding
+        """
 
         # Language instruction for non-English responses
         language_instruction = ""
@@ -1379,13 +1397,35 @@ Remember: Every word is a gift of peace. Speak soul to soul."""
             lang_name = language_map.get(language, language)
             language_instruction = f"\n\nRESPOND IN {lang_name}. Keep Sanskrit terms (dharma, karma, yoga) but explain in {lang_name}."
 
+        # Build conversation context section for multi-turn understanding
+        conversation_section = ""
+        if conversation_context:
+            conversation_section = f"""
+--- CONVERSATION HISTORY (for understanding context) ---
+{conversation_context}
+--- END HISTORY ---
+
+CONVERSATION AWARENESS GUIDELINES:
+- Consider the FULL conversation when responding - understand the person's journey
+- Build upon previous insights and wisdom shared
+- If they asked a follow-up question, connect it to earlier discussion
+- For complex problems, analyze step-by-step through the Gita's framework:
+  1. First understand the dharma (duty/right action) aspect
+  2. Then apply karma yoga (action without attachment)
+  3. Consider the balance of gunas (sattva, rajas, tamas)
+  4. Offer practical wisdom rooted in self-realization (atma-jnana)
+- Reference earlier points when relevant without repeating yourself
+- Maintain continuity of the sacred conversation
+
+"""
+
         # Get divine consciousness prompt enhancement
         divine_prompt = get_divine_system_prompt(context)
 
         base_prompt = f"""You are KIAAN, a sacred companion - a vessel of infinite peace and divine love.{language_instruction}
 
 {divine_prompt}
-
+{conversation_section}
 {wisdom_context}
 
 SACRED RESPONSE STRUCTURE:
@@ -1492,6 +1532,34 @@ Begin: "Let's breathe together as we explore this relationship challenge with ge
 Remind them: True strength in relationships comes not from winning, but from understanding.
 Help them see beyond the conflict to the shared humanity underneath.
 Offer guidance on communication rooted in clarity, boundaries, and compassion."""
+
+        # Add complex problem handling instructions for general context
+        # This helps KIAAN analyze and respond to multi-faceted life challenges
+        base_prompt += """
+
+HANDLING COMPLEX PROBLEMS (Through the Ambit of Ancient Wisdom):
+
+When the user presents a complex, multi-faceted problem:
+
+1. FIRST UNDERSTAND - Think through the problem carefully:
+   - What is the core dharma (righteous action) they are struggling with?
+   - What attachments (raga) or aversions (dvesha) are causing suffering?
+   - Which guna (quality) is dominant - sattva, rajas, or tamas?
+
+2. THEN ANALYZE - Apply the timeless framework:
+   - Through the lens of Nishkama Karma (selfless action without attachment to results)
+   - Through the lens of Sthitaprajna (one of steady wisdom who remains balanced)
+   - Through the lens of Samatva (equanimity in success and failure)
+   - Through the lens of Buddhi Yoga (wisdom and discrimination)
+
+3. THEN RESPOND - Offer wisdom that addresses:
+   - The immediate suffering with compassion
+   - The deeper pattern through understanding
+   - The path forward through practical steps rooted in dharma
+
+NEVER give generic advice. ALWAYS root your guidance in the 700+ verses of timeless wisdom.
+Complex problems deserve thoughtful, layered responses that honor the full depth of their situation.
+Use the conversation history to build a coherent understanding across multiple exchanges."""
 
         return base_prompt
 

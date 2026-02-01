@@ -17,7 +17,10 @@ function KiaanChatPageInner() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('detailed');
+  const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('summary'); // Summary view is primary
+
+  // Session tracking for conversation continuity
+  const [sessionId] = useState(() => crypto.randomUUID());
 
   // Handle mood context from Quick Check-in
   useEffect(() => {
@@ -56,11 +59,20 @@ function KiaanChatPageInner() {
     setIsLoading(true);
 
     try {
+      // Build conversation history for context awareness (last 10 messages)
+      const conversationHistory = messages.slice(-10).map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text,
+        timestamp: m.timestamp
+      }));
+
       const response = await apiCall('/api/chat/message', {
         method: 'POST',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: text.trim(),
-          language: language || 'en'
+          language: language || 'en',
+          session_id: sessionId,
+          conversation_history: conversationHistory
         }),
       });
 
@@ -96,7 +108,7 @@ function KiaanChatPageInner() {
     } finally {
       setIsLoading(false);
     }
-  }, [language]);
+  }, [language, sessionId, messages]);
 
   const handleSaveToJournal = useCallback(async (text: string) => {
     if (typeof window === 'undefined') return;
@@ -207,24 +219,26 @@ function KiaanChatPageInner() {
           {/* View Mode Toggle */}
           <div className="flex items-center gap-1 rounded-lg border border-orange-500/20 bg-white/5 p-1">
             <button
-              onClick={() => setViewMode('detailed')}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
-                viewMode === 'detailed'
-                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
-                  : 'text-orange-100/70 hover:text-orange-50'
-              }`}
-            >
-              Detailed
-            </button>
-            <button
               onClick={() => setViewMode('summary')}
               className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
                 viewMode === 'summary'
                   ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
                   : 'text-orange-100/70 hover:text-orange-50'
               }`}
+              title="Quick summary of the wisdom"
             >
               Summary
+            </button>
+            <button
+              onClick={() => setViewMode('detailed')}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                viewMode === 'detailed'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
+                  : 'text-orange-100/70 hover:text-orange-50'
+              }`}
+              title="In-depth understanding from ancient wisdom"
+            >
+              Wisdom View
             </button>
           </div>
 

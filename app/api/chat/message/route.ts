@@ -35,7 +35,7 @@ const FALLBACK_RESPONSES = [
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message, language = 'en', context } = body
+    const { message, language = 'en', context, session_id, conversation_history } = body
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -50,6 +50,13 @@ export async function POST(request: NextRequest) {
       .replace(/\\/g, '')
       .slice(0, 2000)
 
+    // Sanitize conversation history if provided
+    const sanitizedHistory = conversation_history?.map((msg: { role: string; content: string; timestamp: string }) => ({
+      role: msg.role,
+      content: msg.content?.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000) || '',
+      timestamp: msg.timestamp
+    })) || []
+
     try {
       // Call the backend chat endpoint
       const response = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -63,6 +70,8 @@ export async function POST(request: NextRequest) {
           message: sanitizedMessage,
           language,
           context,
+          session_id,
+          conversation_history: sanitizedHistory,
         }),
       })
 
@@ -84,7 +93,7 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text().catch(() => 'Unknown error')
       console.error(`[Chat API] Backend returned ${response.status}: ${errorText}`)
 
-      // If rate limited, return appropriate error
+      // Handle specific HTTP error codes
       if (response.status === 429) {
         return NextResponse.json(
           {
@@ -93,6 +102,26 @@ export async function POST(request: NextRequest) {
           },
           { status: 429 }
         )
+      }
+
+      if (response.status === 403) {
+        return NextResponse.json(
+          {
+            error: 'Access denied. Please try again or contact support.',
+            success: false,
+          },
+          { status: 403 }
+        )
+      }
+
+      if (response.status === 404) {
+        console.error('[Chat API] Backend endpoint not found - check API routes')
+        // Fall through to use fallback
+      }
+
+      if (response.status === 503) {
+        console.warn('[Chat API] Backend service unavailable - using fallback')
+        // Fall through to use fallback
       }
 
       // For other errors, fall through to fallback
