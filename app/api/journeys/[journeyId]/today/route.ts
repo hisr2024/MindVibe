@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { buildJourneyHeaders } from '../../headers'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
@@ -16,21 +16,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { journeyId } = await params
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get('access_token')?.value
-    const xAuthUid = request.headers.get('X-Auth-UID')
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-
-    if (accessToken) {
-      headers['Cookie'] = `access_token=${accessToken}`
-    }
-
-    if (xAuthUid) {
-      headers['X-Auth-UID'] = xAuthUid
-    }
+    const headers = await buildJourneyHeaders(request)
 
     const response = await fetch(`${BACKEND_URL}/api/journeys/${journeyId}/today`, {
       method: 'GET',

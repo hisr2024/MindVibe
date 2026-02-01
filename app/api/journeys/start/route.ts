@@ -5,27 +5,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { buildJourneyHeaders } from '../headers'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get('access_token')?.value
-    const xAuthUid = request.headers.get('X-Auth-UID')
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-
-    if (accessToken) {
-      headers['Cookie'] = `access_token=${accessToken}`
-    }
-
-    if (xAuthUid) {
-      headers['X-Auth-UID'] = xAuthUid
-    }
+    const headers = await buildJourneyHeaders(request)
 
     const body = await request.json()
 
