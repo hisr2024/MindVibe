@@ -38,11 +38,6 @@ export default function PlaylistsPage() {
 
   const allTracks = getAllTracks()
 
-  // Load playlists on mount
-  useEffect(() => {
-    loadPlaylists()
-  }, [])
-
   const loadPlaylists = async () => {
     setLoading(true)
     try {
@@ -54,6 +49,12 @@ export default function PlaylistsPage() {
     }
     setLoading(false)
   }
+
+  // Load playlists on mount
+  useEffect(() => {
+    loadPlaylists()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleCreatePlaylist = async () => {
     if (!newPlaylistName.trim()) return

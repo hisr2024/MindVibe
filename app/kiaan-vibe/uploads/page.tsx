@@ -34,17 +34,12 @@ const ACCEPTED_EXTENSIONS = '.mp3,.m4a,.wav,.ogg,.webm'
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
 
 export default function UploadsPage() {
-  const { currentTrack, play, setQueue, addToQueue } = usePlayerStore()
+  const { currentTrack, play, setQueue } = usePlayerStore()
   const [uploads, setUploads] = useState<UploadedTrackMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Load uploads on mount
-  useEffect(() => {
-    loadUploads()
-  }, [])
 
   const loadUploads = async () => {
     setLoading(true)
@@ -59,6 +54,12 @@ export default function UploadsPage() {
     }
     setLoading(false)
   }
+
+  // Load uploads on mount
+  useEffect(() => {
+    loadUploads()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
