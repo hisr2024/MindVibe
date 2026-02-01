@@ -13,11 +13,12 @@ import type {
   ListJourneysParams,
   ApiError,
 } from '@/types/journey.types';
-import { apiFetch } from '@/lib/api';
 
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEYS_ENDPOINT = '/api/journeys';
 
 // =============================================================================
@@ -144,6 +145,8 @@ async function apiRequest<T>(
   endpoint: string,
   body?: unknown
 ): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+
   const options: RequestInit = {
     method,
     headers: getAuthHeaders(),
