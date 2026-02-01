@@ -3,7 +3,7 @@ from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
-from backend.deps import get_db, get_current_user
+from backend.deps import get_db, get_current_user_or_create
 from backend.models import Mood
 from backend.schemas import MoodIn, MoodOut
 
@@ -43,7 +43,7 @@ def get_micro_response(score: int) -> str:
 async def create_mood(
     payload: MoodIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user),
+    user_id: str = Depends(get_current_user_or_create),
 ) -> dict:
     """Create a new mood entry for the authenticated user."""
     try:
