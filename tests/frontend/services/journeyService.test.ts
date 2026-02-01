@@ -361,8 +361,13 @@ describe('JourneyService', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle network errors', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    it('should handle network errors after retries', async () => {
+      // Mock 4 failed network errors (initial + 3 retries)
+      mockFetch
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'));
 
       try {
         await listJourneys();
@@ -371,8 +376,10 @@ describe('JourneyService', () => {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('NETWORK_ERROR');
         expect((error as JourneyServiceError).statusCode).toBe(0);
+        // Verify it attempted retries
+        expect(mockFetch).toHaveBeenCalledTimes(4);
       }
-    });
+    }, 20000); // Extended timeout for retries
 
     it('should handle JSON parse errors', async () => {
       mockFetch.mockResolvedValueOnce({
@@ -421,7 +428,8 @@ describe('JourneyService', () => {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('UNAUTHORIZED');
         expect((error as JourneyServiceError).statusCode).toBe(401);
-        expect((error as JourneyServiceError).message).toBe('Authentication required');
+        // User-friendly message for 401
+        expect((error as JourneyServiceError).message).toBe('Please sign in to access your journeys');
       }
     });
 
@@ -430,7 +438,7 @@ describe('JourneyService', () => {
         ok: false,
         status: 403,
         json: async () => ({
-          detail: { error: 'FORBIDDEN', message: 'You do not have permission' },
+          detail: { error: 'UNAUTHORIZED', message: 'You are not authorized to access this journey' },
         }),
       });
 
@@ -439,7 +447,8 @@ describe('JourneyService', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error) {
         expect(error).toBeInstanceOf(JourneyServiceError);
-        expect((error as JourneyServiceError).code).toBe('FORBIDDEN');
+        // Backend returns UNAUTHORIZED code for 403 (authorization errors)
+        expect((error as JourneyServiceError).code).toBe('UNAUTHORIZED');
         expect((error as JourneyServiceError).statusCode).toBe(403);
       }
     });
@@ -482,14 +491,18 @@ describe('JourneyService', () => {
       }
     });
 
-    it('should handle 502 Bad Gateway error', async () => {
-      mockFetch.mockResolvedValueOnce({
+    it('should handle 502 Bad Gateway error after retries', async () => {
+      // Mock 4 failed attempts (initial + 3 retries)
+      const errorResponse = {
         ok: false,
         status: 502,
-        json: async () => ({
-          detail: 'Bad Gateway',
-        }),
-      });
+        json: async () => ({ detail: 'Bad Gateway' }),
+      };
+      mockFetch
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse);
 
       try {
         await listJourneys();
@@ -497,17 +510,25 @@ describe('JourneyService', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).statusCode).toBe(502);
+        // Verify it attempted retries
+        expect(mockFetch).toHaveBeenCalledTimes(4);
       }
-    });
+    }, 20000); // Extended timeout for retries
 
-    it('should handle 503 Service Unavailable error', async () => {
-      mockFetch.mockResolvedValueOnce({
+    it('should handle 503 Service Unavailable error after retries', async () => {
+      // Mock 4 failed attempts (initial + 3 retries)
+      const errorResponse = {
         ok: false,
         status: 503,
         json: async () => ({
           detail: { error: 'SERVICE_UNAVAILABLE', message: 'Service temporarily unavailable' },
         }),
-      });
+      };
+      mockFetch
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse);
 
       try {
         await listJourneys();
@@ -516,8 +537,32 @@ describe('JourneyService', () => {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('SERVICE_UNAVAILABLE');
         expect((error as JourneyServiceError).statusCode).toBe(503);
+        // Verify it attempted retries
+        expect(mockFetch).toHaveBeenCalledTimes(4);
       }
-    });
+    }, 20000); // Extended timeout for retries
+
+    it('should recover from transient 503 errors on retry', async () => {
+      // First 2 calls fail with 503, third succeeds
+      const errorResponse = {
+        ok: false,
+        status: 503,
+        json: async () => ({ detail: 'Service temporarily unavailable' }),
+      };
+      const successResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({ items: [], total: 0, limit: 50, offset: 0 }),
+      };
+      mockFetch
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(errorResponse)
+        .mockResolvedValueOnce(successResponse);
+
+      const result = await listJourneys();
+      expect(result.items).toEqual([]);
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    }, 15000); // Extended timeout for retries
 
     it('should handle string error detail', async () => {
       mockFetch.mockResolvedValueOnce({
@@ -554,8 +599,13 @@ describe('JourneyService', () => {
       }
     });
 
-    it('should handle timeout errors', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Timeout'));
+    it('should handle timeout errors after retries', async () => {
+      // Mock 4 failed network errors (initial + 3 retries)
+      mockFetch
+        .mockRejectedValueOnce(new Error('Timeout'))
+        .mockRejectedValueOnce(new Error('Timeout'))
+        .mockRejectedValueOnce(new Error('Timeout'))
+        .mockRejectedValueOnce(new Error('Timeout'));
 
       try {
         await listJourneys();
@@ -563,8 +613,26 @@ describe('JourneyService', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('NETWORK_ERROR');
+        // Verify it attempted retries
+        expect(mockFetch).toHaveBeenCalledTimes(4);
       }
-    });
+    }, 20000); // Extended timeout for retries
+
+    it('should recover from network error on retry', async () => {
+      // First call fails with network error, second succeeds
+      const successResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({ items: [], total: 0, limit: 50, offset: 0 }),
+      };
+      mockFetch
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce(successResponse);
+
+      const result = await listJourneys();
+      expect(result.items).toEqual([]);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    }, 10000); // Extended timeout for retry
   });
 
   describe('Service Object Export', () => {
