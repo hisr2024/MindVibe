@@ -1907,13 +1907,19 @@ You are already whole. This challenge does not diminish you. 💙"""
                 }
 
             else:
-                # Standard mode
-                content = "I hear you. This thought you're carrying - it's heavy. And it makes sense that it's getting to you.\n\nHere's something that might help: thoughts feel like absolute truth, especially the painful ones. But thoughts aren't facts. They're just your mind trying to make sense of things, often in the hardest possible way.\n\nTry this perspective: you're not your thoughts. You're the one noticing them. Like clouds drifting across a big sky - the clouds come and go, but the sky is always there, always okay. That sky is you.\n\nRight now, take one slow breath. Then ask yourself: what would you say to a friend who told you they had this same thought? We often have gentler words for others than we give ourselves. 💙"
+                # Standard mode - with Gita wisdom integration
+                content = f"""I hear you, dear friend. This thought you're carrying - "{input_short}" - it's heavy. And it makes sense that it's weighing on you.
+
+Ancient wisdom reveals something liberating: thoughts feel like absolute truth, especially the painful ones. But the Gita teaches about "chitta-vritti" - the modifications of the mind. These are mental events, not facts. They're just your mind trying to make sense of things, often in the hardest possible way.
+
+Here's the profound truth: You are not your thoughts - you are the "sakshi" (witness) who observes them. This is "sthitaprajna" - the person of steady wisdom. Like clouds drifting across a vast sky - the clouds come and go, but the sky is always there, always peaceful. That eternal sky is your true nature. "Kutastha" - the unchanging one.
+
+Practice this right now: Take one slow breath. As you exhale, remember: "I am not this thought. I am the awareness that notices it." Then ask yourself: what would you say to a dear friend who carried this same thought? Offer yourself that same compassion - this is "daya" towards yourself. You deserve that gentleness. 💙"""
                 sections = {
-                    "recognition": f"I hear you. This thought - '{input_snippet}' - it's heavy. And it's okay that you're struggling with it.",
-                    "deep_insight": "Thoughts feel like facts, especially the painful ones. But they're not. They're just your mind trying to make sense of things.",
-                    "reframe": "You're not your thoughts - you're the one noticing them. Like clouds passing through a big sky, this thought will pass.",
-                    "small_action_step": "Take one slow breath. Then ask yourself: what would you say to a friend with this same thought?",
+                    "recognition": f"I hear you, dear friend. This thought - \"{input_snippet}\" - it's heavy, and it's okay to struggle with it. Your courage in facing it is itself an act of wisdom.",
+                    "deep_insight": "Ancient wisdom teaches about \"chitta-vritti\" - the modifications of the mind. Thoughts feel like facts, especially painful ones. But they are mental events, not truth. They arise from conditioning, not from your essence.",
+                    "reframe": "You are not this thought - you are the \"sakshi\" (witness) who observes it. Like clouds passing through an infinite sky, this thought will pass. The sky - your true nature - remains untouched. This is \"sthitaprajna\" - steady wisdom.",
+                    "small_action_step": "Take one slow breath. Say: \"I am the awareness that notices this thought.\" Then ask: what would you tell a dear friend with this same thought? Offer yourself that same \"daya\" (compassion).",
                 }
         else:
             # Relationship Compass - Ultra-deep fallback with Gita wisdom
