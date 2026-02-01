@@ -173,7 +173,7 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     description: 'The yoga of the distinction between the field and the knower.',
     theme: 'Field and Knower',
     yogaType: 'Jnana Yoga',
-    verseCount: 34,
+    verseCount: 35,
     duration: '14:00',
     color: 'from-rose-500 to-red-600',
     verses: [],
