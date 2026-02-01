@@ -163,7 +163,7 @@ export function GlobalMusicPlayer({
 
             <div>
               <h3 className="text-sm font-medium text-white">
-                {isPlaying ? 'Now Playing' : 'MindVibe Music'}
+                {isPlaying ? 'Now Playing' : 'KIAAN Vibes'}
               </h3>
               <p className="text-xs text-white/50">
                 {state.ambientEnabled && state.currentAmbientMode && AMBIENT_MODES[state.currentAmbientMode].name}

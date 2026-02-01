@@ -243,7 +243,7 @@ export function FloatingSoundPlayer({
                 {/* Actions */}
                 <div className="flex gap-2">
                   <Link
-                    href="/sounds"
+                    href="/kiaan-vibe"
                     className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                     onClick={() => onExpand?.()}
                   >

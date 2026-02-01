@@ -236,7 +236,7 @@ export function MeditationMusicPlayerWidget({
                     <Music className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Meditation Music</h2>
+                    <h2 className="text-lg font-semibold text-white">KIAAN Vibes</h2>
                     <p className="text-xs text-white/50">Soul soothing tracks</p>
                   </div>
                 </div>
@@ -494,7 +494,7 @@ export function MeditationMusicPlayerWidget({
                       ) : (
                         <>
                           <Upload className="w-4 h-4" />
-                          <span className="text-xs font-medium">Upload Your Meditation Music</span>
+                          <span className="text-xs font-medium">Upload Your Audio</span>
                         </>
                       )}
                     </button>
@@ -507,7 +507,7 @@ export function MeditationMusicPlayerWidget({
                         <Music className="w-10 h-10 text-white/10 mx-auto mb-3" />
                         <p className="text-sm text-white/30">No tracks in this category</p>
                         {activeCategory === 'uploaded' && (
-                          <p className="text-xs text-white/20 mt-1">Upload your meditation music above</p>
+                          <p className="text-xs text-white/20 mt-1">Upload your audio above</p>
                         )}
                       </div>
                     ) : (
@@ -651,7 +651,7 @@ export function MeditationMusicPlayerWidget({
               {/* Track Info */}
               <div className="flex flex-col min-w-0 max-w-36">
                 <span className="text-xs font-medium text-white truncate">
-                  {playerState.currentTrack?.title || 'Meditation Music'}
+                  {playerState.currentTrack?.title || 'KIAAN Vibes'}
                 </span>
                 <span className="text-[10px] text-white/40">
                   {playerState.isPlaying ? 'Playing' : 'Tap to open'}

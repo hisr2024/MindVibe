@@ -74,7 +74,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     id: 'kiaan-vibe',
     icon: '🕉️',
     title: 'KIAAN Vibe',
-    description: 'Sacred sounds & music',
+    description: 'Gita verses • Meditation • Uploads',
     gradient: 'from-violet-400/30 to-orange-400/30',
     href: '/kiaan-vibe',
     badge: 'new',
