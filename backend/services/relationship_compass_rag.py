@@ -495,21 +495,132 @@ def build_citation_list(chunks: Iterable[GitaChunk]) -> list[dict[str, str]]:
     return citations
 
 
-def call_openai(messages: list[dict[str, str]]) -> str | None:
+async def call_ai_provider(messages: list[dict[str, str]]) -> str | None:
+    """Call AI provider with multi-provider fallback support (like KIAAN Chat)."""
+    # Try multi-provider manager first
+    try:
+        from backend.services.ai.providers.provider_manager import get_provider_manager, AIProviderError
+        provider_manager = get_provider_manager()
+        if provider_manager:
+            logger.info("Using ProviderManager for Relationship Compass")
+            response = await provider_manager.chat(
+                messages=messages,
+                temperature=0.2,
+                max_tokens=800,
+            )
+            if response and response.content:
+                logger.info(f"✅ Response from {response.provider}/{response.model}")
+                return response.content
+    except Exception as e:
+        logger.warning(f"ProviderManager failed: {e}, trying legacy client")
+
+    # Fallback to legacy OpenAI client
+    return call_openai_sync(messages)
+
+
+def call_openai_sync(messages: list[dict[str, str]]) -> str | None:
+    """Synchronous OpenAI call as fallback."""
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
+        logger.warning("OPENAI_API_KEY not set for Relationship Compass")
         return None
 
-    client = OpenAI(api_key=api_key)
     try:
+        client = OpenAI(api_key=api_key)
         response = client.chat.completions.create(
             model=CHAT_MODEL,
             messages=messages,
             temperature=0.2,
+            max_tokens=800,
+            timeout=30.0,
         )
-    except Exception as exc:  # noqa: BLE001
+        content = response.choices[0].message.content if response.choices else None
+        if content:
+            logger.info("✅ Response from legacy OpenAI client")
+        return content or None
+    except Exception as exc:
         logger.error("Relationship Compass OpenAI error: %s", exc)
         return None
 
-    content = response.choices[0].message.content if response.choices else None
-    return content or None
+
+def call_openai(messages: list[dict[str, str]]) -> str | None:
+    """Call OpenAI (sync wrapper for backwards compatibility)."""
+    return call_openai_sync(messages)
+
+
+def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str, user_message: str) -> str:
+    """Generate a Gita-based response using retrieved chunks when AI is unavailable.
+
+    This provides meaningful guidance based on the retrieved verses even when
+    AI providers are not available, similar to KIAAN's fallback mechanism.
+    """
+    if not chunks:
+        return build_insufficient_response()
+
+    # Extract key teachings from top chunks
+    teachings = []
+    verse_refs = []
+    for chunk in chunks[:5]:
+        verse_refs.append(chunk.verse)
+        # Extract English portion from text
+        text = chunk.text
+        if "English:" in text:
+            english = text.split("English:")[1].split("\n")[0].strip()
+            if english:
+                teachings.append(english)
+
+    # Build response sections based on retrieved wisdom
+    sections = []
+
+    # Sacred Acknowledgement
+    sections.append("# Sacred Acknowledgement")
+    sections.append("I bow to the tender heart that brought you here seeking clarity. Your willingness to reflect on this situation shows profound courage. Every awakened soul throughout time has faced moments exactly like this one. You are not alone.")
+    sections.append("")
+
+    # Inner Conflict Mirror
+    sections.append("# Inner Conflict Mirror")
+    sections.append("Ancient wisdom teaches: 'Yatha drishti, tatha srishti' - as you see, so you create. Let us gently explore what this situation reveals about your inner landscape. What do you truly need beneath the surface of this conflict? Understanding yourself is the first dharmic step.")
+    sections.append("")
+
+    # Gita Teachings Used
+    sections.append("# Gita Teachings Used")
+    if teachings:
+        sections.append(f"The Bhagavad Gita offers this timeless wisdom for your situation ({', '.join(verse_refs[:3])}):")
+        sections.append("")
+        for i, teaching in enumerate(teachings[:3], 1):
+            sections.append(f"{i}. {teaching}")
+    else:
+        sections.append("The Gita teaches us that true peace comes from understanding our dharma (right action) in relationships, practicing kshama (forgiveness), and maintaining sama-darshana (equal vision) towards all beings.")
+    sections.append("")
+
+    # Dharma Options
+    sections.append("# Dharma Options")
+    sections.append("Consider these three dharmic paths:")
+    sections.append("")
+    sections.append(f"1. **Practice Svadhyaya (Self-Study)** ({verse_refs[0] if verse_refs else '2:48'}): Before responding or reacting, pause to understand your own needs and fears. What wound is being touched here?")
+    sections.append("")
+    sections.append(f"2. **Embrace Kshama (Forgiveness)** ({verse_refs[1] if len(verse_refs) > 1 else '12:13'}): Forgiveness is not condoning harm - it is freeing yourself from the prison of resentment. This is a gift to yourself.")
+    sections.append("")
+    sections.append(f"3. **Apply Sama-Darshana (Equal Vision)** ({verse_refs[2] if len(verse_refs) > 2 else '6:32'}): See the divine struggling in the other person too. They act from their own conditioning, wounds, and fears.")
+    sections.append("")
+
+    # Sacred Speech
+    sections.append("# Sacred Speech")
+    sections.append("The Gita teaches 'satyam bruyat priyam bruyat' - speak truth that is pleasant and beneficial. When ready, try: 'When [situation], I feel [emotion], because I need [underlying need]. What I'm hoping for is [request].'")
+    sections.append("")
+
+    # Detachment Anchor
+    sections.append("# Detachment Anchor")
+    sections.append(f"({verse_refs[0] if verse_refs else '2:47'}): 'Karmanye vadhikaraste' - You have the right to action, not to the fruits. Your dharma is to act with integrity; the outcome is not yours to control. Release attachment to how this must resolve.")
+    sections.append("")
+
+    # One Next Step
+    sections.append("# One Next Step")
+    sections.append(f"Today, practice one act of witnessing ({verse_refs[1] if len(verse_refs) > 1 else '6:5'}): When emotions arise about this situation, simply notice them without judgment. Say internally: 'I see you, feeling. I am not you.'")
+    sections.append("")
+
+    # One Gentle Question
+    sections.append("# One Gentle Question")
+    sections.append("What would your wisest self do here - not your wounded self, not your ego, not your fear?")
+
+    return "\n".join(sections)

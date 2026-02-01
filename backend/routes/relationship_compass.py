@@ -62,6 +62,8 @@ from backend.services.relationship_compass_rag import (
     build_context_block,
     build_insufficient_response,
     call_openai,
+    call_ai_provider,
+    generate_gita_based_response,
     expand_and_retrieve,
     extract_sections,
     merge_chunks,
@@ -409,7 +411,8 @@ async def get_relationship_guidance_gita_only(
         f"{context_block}"
     )
 
-    response_text = call_openai(
+    # Try async multi-provider first, then sync fallback
+    response_text = await call_ai_provider(
         [
             {"role": "system", "content": RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT},
             *history_messages,
@@ -424,13 +427,13 @@ async def get_relationship_guidance_gita_only(
     else:
         is_valid, errors = False, ["No response from model"]
 
-    if not is_valid:
+    if not is_valid and response_text:
         fix_instruction = (
             "FORMAT + CITATION FIX: Follow the exact heading order, include citations where required, "
             "and ensure all verse references appear in the provided [GITA_CORE_WISDOM_CONTEXT]. "
             "If context is insufficient, return the insufficient-context format."
         )
-        response_text = call_openai(
+        response_text = await call_ai_provider(
             [
                 {"role": "system", "content": RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT},
                 {"role": "user", "content": base_user_message},
@@ -440,10 +443,11 @@ async def get_relationship_guidance_gita_only(
         if response_text:
             is_valid, errors = validate_response(response_text, allowed_citations)
 
+    # If AI providers failed, use Gita-based fallback response (like KIAAN Chat)
     if not response_text or not is_valid:
-        logger.warning("Relationship Compass validation failed: %s", errors)
-        response_text = build_insufficient_response()
-        sections = extract_sections(response_text, HEADINGS_INSUFFICIENT)
+        logger.warning("Relationship Compass AI failed, using Gita-based fallback: %s", errors)
+        response_text = generate_gita_based_response(merged_chunks, relationship_type, message)
+        sections = extract_sections(response_text, HEADINGS_SUFFICIENT)
         append_message(
             CompassMessage(
                 session_id=session_id,
@@ -457,7 +461,8 @@ async def get_relationship_guidance_gita_only(
             "response": response_text,
             "sections": sections,
             "citations": citations,
-            "contextSufficient": False,
+            "contextSufficient": True,  # We have context, just AI unavailable
+            "fallback": True,
         }
 
     sections = extract_sections(response_text, HEADINGS_SUFFICIENT)
