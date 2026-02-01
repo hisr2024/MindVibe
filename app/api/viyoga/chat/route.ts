@@ -132,7 +132,14 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json()
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch (parseError) {
+    console.error('[Viyoga Chat] JSON parse error:', parseError)
+    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+  }
+
   const message = typeof body.message === 'string' ? body.message.trim() : ''
   const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
   const mode = body.mode as ChatMode | undefined
@@ -141,59 +148,91 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
   }
 
-  await ensureSession(sessionId)
-  const history = await getRecentMessages(sessionId, 20)
-  await appendMessage({
-    sessionId,
-    role: 'user',
-    content: message,
-    createdAt: new Date().toISOString(),
-  })
-
-  let retrieval = await retrieveGitaChunks(message, 6)
-  if (retrieval.confidence < 0.15 || retrieval.chunks.length < 2) {
-    retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
+  // Storage operations - graceful degradation on serverless platforms
+  let history: { role: string; content: string }[] = []
+  try {
+    await ensureSession(sessionId)
+    history = await getRecentMessages(sessionId, 20)
+    await appendMessage({
+      sessionId,
+      role: 'user',
+      content: message,
+      createdAt: new Date().toISOString(),
+    })
+  } catch (storageError) {
+    // Storage may fail on serverless - continue without history
+    console.warn('[Viyoga Chat] Storage unavailable (serverless?), continuing without history:', storageError)
   }
 
-  const contextBlock = buildContextBlock(retrieval.chunks)
-  const historyMessages = history.map(entry => ({
-    role: entry.role,
-    content: entry.content,
-  }))
+  // Main processing with comprehensive error handling
+  try {
+    let retrieval = await retrieveGitaChunks(message, 6)
+    if (retrieval.confidence < 0.15 || retrieval.chunks.length < 2) {
+      retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
+    }
 
-  const responseText =
-    (await callOpenAI([
-      { role: 'system', content: VIYOGA_SYSTEM_PROMPT },
-      ...historyMessages,
-      { role: 'user', content: message },
-      { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
-    ])) || buildFallbackTransmission(message, retrieval.chunks)
+    const contextBlock = buildContextBlock(retrieval.chunks)
+    const historyMessages = history.map(entry => ({
+      role: entry.role,
+      content: entry.content,
+    }))
 
-  const sections = parseTransmissionSections(responseText)
-  if (!Object.keys(sections).length) {
-    sections.gita_core_transmission = responseText
+    const responseText =
+      (await callOpenAI([
+        { role: 'system', content: VIYOGA_SYSTEM_PROMPT },
+        ...historyMessages,
+        { role: 'user', content: message },
+        { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
+      ])) || buildFallbackTransmission(message, retrieval.chunks)
+
+    const sections = parseTransmissionSections(responseText)
+    if (!Object.keys(sections).length) {
+      sections.gita_core_transmission = responseText
+    }
+    const citations = retrieval.chunks.map(chunk => ({
+      source_file: chunk.sourceFile,
+      reference_if_any: chunk.reference,
+      chunk_id: chunk.id,
+    }))
+
+    // Save assistant response - ignore errors on serverless
+    try {
+      await appendMessage({
+        sessionId,
+        role: 'assistant',
+        content: responseText,
+        createdAt: new Date().toISOString(),
+        citations,
+      })
+    } catch (saveError) {
+      console.warn('[Viyoga Chat] Failed to save assistant response:', saveError)
+    }
+
+    return NextResponse.json({
+      assistant: responseText,
+      sections,
+      citations,
+      retrieval: {
+        strategy: retrieval.strategy,
+        confidence: retrieval.confidence,
+      },
+    })
+  } catch (processingError) {
+    console.error('[Viyoga Chat] Processing error:', processingError)
+
+    // Return fallback response even on error
+    const fallbackResponse = buildFallbackTransmission(message, [])
+    const fallbackSections = parseTransmissionSections(fallbackResponse)
+
+    return NextResponse.json({
+      assistant: fallbackResponse,
+      sections: fallbackSections,
+      citations: [],
+      retrieval: {
+        strategy: 'fallback',
+        confidence: 0,
+      },
+      _error: 'Processing failed, using fallback response',
+    })
   }
-  const citations = retrieval.chunks.map(chunk => ({
-    source_file: chunk.sourceFile,
-    reference_if_any: chunk.reference,
-    chunk_id: chunk.id,
-  }))
-
-  await appendMessage({
-    sessionId,
-    role: 'assistant',
-    content: responseText,
-    createdAt: new Date().toISOString(),
-    citations,
-  })
-
-  return NextResponse.json({
-    assistant: responseText,
-    sections,
-    citations,
-    retrieval: {
-      strategy: retrieval.strategy,
-      confidence: retrieval.confidence,
-    },
-  })
 }
