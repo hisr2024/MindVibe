@@ -52,7 +52,7 @@ const getChapterAudioUrl = (language: GitaLanguageOption, chapterNumber: number)
   return {
     url: chapterAudio.url,
     actualLanguage: language === 'sanskrit' ? 'sanskrit' : fallback,
-    isFallback: language !== 'sanskrit' && fallback !== language
+    isFallback: language !== 'sanskrit'
   }
 }
 
