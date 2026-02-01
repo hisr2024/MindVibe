@@ -9,6 +9,12 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { Track, RepeatMode, PlayerStore, PersistedPlayerState } from './types'
 import { getPersistedState, persistState } from './persistence'
+import {
+  markTrackUnavailable,
+  markTrackAvailable,
+  hasSystemicAudioIssues,
+  resetFailureCounter,
+} from './meditation-library'
 
 // Initial state
 const initialState = {
@@ -25,6 +31,9 @@ const initialState = {
   shuffle: false,
   muted: false,
   playHistory: [] as string[],
+  // Error state for user-friendly error handling
+  audioError: null as string | null,
+  hasAudioIssues: false,
 }
 
 // Audio element (singleton)
@@ -289,6 +298,26 @@ export const usePlayerStore = create<PlayerStore>()(
       set({ muted: !state.muted })
     },
 
+    // ============ Error Handling ============
+
+    clearAudioError: () => {
+      set({ audioError: null, hasAudioIssues: false })
+    },
+
+    retryPlayback: async () => {
+      // Reset the failure counter and clear errors
+      resetFailureCounter()
+      set({ audioError: null, hasAudioIssues: false })
+
+      // Try to play the current track again
+      const state = get()
+      if (state.currentTrack) {
+        await get().play(state.currentTrack)
+      } else if (state.queue.length > 0) {
+        await get().play(state.queue[0])
+      }
+    },
+
     // ============ Persistence ============
 
     loadPersistedState: async () => {
@@ -337,22 +366,44 @@ if (typeof window !== 'undefined') {
       const errorCode = audio.error?.code
       const errorMessage = audio.error?.message || 'Unknown error'
 
-      console.error('[Audio] Error loading track:', {
+      console.warn('[Audio] Error loading track:', {
         track: currentTrack?.title,
         src: currentTrack?.src,
         errorCode,
-        errorMessage,
+        errorMessage: errorCode === 4 ? 'MEDIA_ELEMENT_ERROR: Format error or source unavailable' : errorMessage,
       })
+
+      // Mark this track as unavailable to avoid retrying
+      if (currentTrack?.id) {
+        markTrackUnavailable(currentTrack.id)
+      }
+
+      // Check if we're having systemic issues (many consecutive failures)
+      if (hasSystemicAudioIssues()) {
+        console.warn('[Audio] Multiple consecutive failures detected - stopping auto-retry')
+        usePlayerStore.setState({
+          isPlaying: false,
+          isLoading: false,
+          audioError: 'Unable to load audio tracks. This may be due to network issues or audio source availability. Please try again later.',
+          hasAudioIssues: true,
+        })
+        return // Don't try to skip to next track
+      }
 
       usePlayerStore.setState({ isPlaying: false, isLoading: false })
 
-      // If track failed to load, try next track in queue
+      // If track failed to load, try next track in queue (but not infinitely)
       const state = usePlayerStore.getState()
       if (state.queue.length > 1 && state.queueIndex < state.queue.length - 1) {
-        console.log('[Audio] Skipping to next track due to error')
+        console.log('[Audio] Trying next track in queue...')
         setTimeout(() => {
           usePlayerStore.getState().next()
-        }, 1000)
+        }, 500) // Reduced delay
+      } else {
+        // No more tracks to try
+        usePlayerStore.setState({
+          audioError: 'Unable to load this track. The audio source may be temporarily unavailable.',
+        })
       }
     })
 
@@ -361,7 +412,17 @@ if (typeof window !== 'undefined') {
     })
 
     audio.addEventListener('canplay', () => {
-      usePlayerStore.setState({ isLoading: false })
+      const currentTrack = usePlayerStore.getState().currentTrack
+      // Mark track as available on successful load
+      if (currentTrack?.id) {
+        markTrackAvailable(currentTrack.id)
+      }
+      // Clear any previous errors
+      usePlayerStore.setState({
+        isLoading: false,
+        audioError: null,
+        hasAudioIssues: false,
+      })
     })
 
     // Media Session API handlers
