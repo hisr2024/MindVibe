@@ -5,14 +5,18 @@ This router provides Gita-inspired reframing with OpenAI integration.
 
 Key Features:
 - Direct OpenAI integration for reliable response generation
-- Optional RAG enhancement when verses are available
-- Graceful fallback to core Gita principles when RAG unavailable
+- RAG enhancement when embeddings are available (primary)
+- JSON-based verse search using full 700+ Gita verses (secondary)
+- Core wisdom fallback for edge cases
 - Session memory for contextual conversations
 """
 
 from __future__ import annotations
 
+import json
 import logging
+import os
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -25,6 +29,20 @@ from backend.services.openai_optimizer import openai_optimizer
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/ardha", tags=["ardha"])
+
+# Load complete Gita verses from JSON (701 verses)
+GITA_VERSES: list[dict[str, Any]] = []
+GITA_VERSES_PATH = Path(__file__).parent.parent.parent / "data" / "gita" / "gita_verses_complete.json"
+
+try:
+    if GITA_VERSES_PATH.exists():
+        with open(GITA_VERSES_PATH, "r", encoding="utf-8") as f:
+            GITA_VERSES = json.load(f)
+        logger.info(f"✅ Ardha: Loaded {len(GITA_VERSES)} Gita verses from JSON")
+    else:
+        logger.warning(f"⚠️ Ardha: Gita verses file not found at {GITA_VERSES_PATH}")
+except Exception as e:
+    logger.error(f"❌ Ardha: Failed to load Gita verses: {e}")
 
 SESSION_MEMORY: dict[str, list[dict[str, str]]] = {}
 MAX_SESSION_TURNS = 10
@@ -97,10 +115,15 @@ async def reframe_thought(
             detail="AI service temporarily unavailable. Please try again later."
         )
 
-    # Try to get RAG-enhanced context if available
+    # Try to get Gita context using multiple strategies:
+    # 1. RAG with embeddings (best quality)
+    # 2. JSON keyword search (good quality, always available)
+    # 3. Core wisdom fallback (minimal)
     gita_context = CORE_GITA_WISDOM
     sources: list[dict[str, str]] = []
+    context_source = "core_wisdom"
 
+    # Strategy 1: Try RAG with embeddings
     try:
         from backend.services.rag_service import rag_service
         if rag_service.ready:
@@ -109,15 +132,22 @@ async def reframe_thought(
                 max_score = max((v.get("similarity_score", 0.0) for v in verses), default=0.0)
                 if max_score >= LOW_CONFIDENCE_THRESHOLD:
                     gita_context, sources = _build_gita_context(verses)
+                    context_source = "rag"
                     logger.info(f"Ardha: Using RAG context with {len(verses)} verses (max_score={max_score:.2f})")
-                else:
-                    logger.info(f"Ardha: RAG scores too low ({max_score:.2f}), using core wisdom")
-            else:
-                logger.info("Ardha: No RAG results, using core wisdom")
-        else:
-            logger.info("Ardha: RAG service not ready, using core wisdom")
     except Exception as rag_error:
-        logger.warning(f"Ardha: RAG search failed ({rag_error}), using core wisdom fallback")
+        logger.warning(f"Ardha: RAG search failed ({rag_error})")
+
+    # Strategy 2: If RAG didn't work, use JSON keyword search (701 verses)
+    if context_source == "core_wisdom" and GITA_VERSES:
+        json_verses = _search_gita_json(thought, limit=8, depth=depth)
+        if json_verses:
+            gita_context, sources = _build_json_verse_context(json_verses)
+            context_source = "json"
+            logger.info(f"Ardha: Using JSON search with {len(json_verses)} verses from 701 total")
+
+    # Log final context source
+    if context_source == "core_wisdom":
+        logger.info("Ardha: Using core wisdom fallback (8 essential verses)")
 
     # Build messages for OpenAI
     session_memory = _get_session_memory(session_id)
@@ -214,6 +244,176 @@ def _build_gita_context(verses: list[dict[str, Any]]) -> tuple[str, list[dict[st
     return "\n".join(lines), sources
 
 
+# Mental health keywords mapped to Gita themes and chapters
+MENTAL_HEALTH_KEYWORDS = {
+    # Anxiety and worry
+    "anxiety": ["fear", "worry", "anxious", "nervous", "panic", "stress"],
+    "fear": ["afraid", "scared", "terror", "dread", "phobia"],
+    # Depression and sadness
+    "sadness": ["sad", "depressed", "unhappy", "miserable", "grief", "sorrow", "despair"],
+    "hopeless": ["hopelessness", "give up", "no hope", "pointless", "meaningless"],
+    # Anger and frustration
+    "anger": ["angry", "rage", "furious", "frustrated", "irritated", "annoyed", "mad"],
+    "resentment": ["bitter", "grudge", "revenge", "hate", "hatred"],
+    # Attachment and loss
+    "attachment": ["attached", "clingy", "possessive", "losing", "loss", "let go"],
+    "relationship": ["family", "friend", "partner", "spouse", "parent", "child", "love"],
+    # Self-doubt and inadequacy
+    "doubt": ["self-doubt", "uncertain", "confused", "indecisive", "unsure"],
+    "inadequacy": ["not good enough", "failure", "worthless", "inferior", "incompetent"],
+    # Work and duty
+    "work": ["job", "career", "workplace", "office", "boss", "colleague", "profession"],
+    "duty": ["responsibility", "obligation", "dharma", "role", "purpose"],
+    # Mind and thoughts
+    "mind": ["thoughts", "thinking", "mental", "restless", "overthinking", "rumination"],
+    "control": ["discipline", "willpower", "temptation", "addiction", "habit"],
+    # Peace and equanimity
+    "peace": ["calm", "serenity", "tranquility", "stillness", "quiet"],
+    "balance": ["equanimity", "stable", "steady", "centered", "grounded"],
+}
+
+# Chapter themes for targeted verse selection
+CHAPTER_THEMES = {
+    1: ["grief", "despair", "moral_conflict", "confusion", "overwhelm"],
+    2: ["self_knowledge", "equanimity", "immortality", "duty", "wisdom", "steady_mind"],
+    3: ["action", "duty", "selfless_service", "work", "karma"],
+    4: ["knowledge", "wisdom", "sacrifice", "renunciation"],
+    5: ["renunciation", "detachment", "peace", "action"],
+    6: ["meditation", "mind_control", "yoga", "discipline", "restlessness"],
+    7: ["divine_knowledge", "faith", "devotion"],
+    8: ["supreme", "death", "liberation"],
+    9: ["devotion", "faith", "surrender"],
+    10: ["divine_glories", "manifestation"],
+    11: ["cosmic_vision", "awe", "fear"],
+    12: ["devotion", "love", "compassion", "qualities"],
+    13: ["knowledge", "field", "knower", "discrimination"],
+    14: ["gunas", "qualities", "nature", "transcendence"],
+    15: ["supreme_being", "tree", "world"],
+    16: ["divine_demonic", "qualities", "virtues", "vices"],
+    17: ["faith", "food", "sacrifice", "austerity"],
+    18: ["liberation", "renunciation", "duty", "surrender", "conclusion"],
+}
+
+
+def _search_gita_json(query: str, limit: int = 8, depth: str = "quick") -> list[dict[str, Any]]:
+    """Search 701 Gita verses using keyword matching and mental health relevance.
+
+    This provides a reliable search over all verses when RAG embeddings aren't available.
+
+    Args:
+        query: User's thought/query
+        limit: Maximum verses to return
+        depth: Analysis depth (quick=fewer, deep/quantum=more verses)
+
+    Returns:
+        List of matching verses with relevance scores
+    """
+    if not GITA_VERSES:
+        return []
+
+    query_lower = query.lower()
+    query_words = set(query_lower.split())
+
+    # Expand query with related mental health keywords
+    expanded_keywords = set(query_words)
+    for category, keywords in MENTAL_HEALTH_KEYWORDS.items():
+        for keyword in keywords:
+            if keyword in query_lower:
+                expanded_keywords.add(category)
+                expanded_keywords.update(keywords)
+
+    # Score each verse
+    scored_verses: list[tuple[float, dict[str, Any]]] = []
+
+    for verse in GITA_VERSES:
+        score = 0.0
+
+        # Check mental health applications
+        mh_apps = verse.get("mental_health_applications", [])
+        for app in mh_apps:
+            if app.lower() in expanded_keywords or any(k in app.lower() for k in expanded_keywords):
+                score += 2.0
+
+        # Check theme
+        theme = verse.get("theme", "").lower()
+        if any(k in theme for k in expanded_keywords):
+            score += 1.5
+
+        # Check English translation
+        english = verse.get("english", "").lower()
+        for word in expanded_keywords:
+            if len(word) > 3 and word in english:
+                score += 0.5
+
+        # Check principle
+        principle = verse.get("principle", "").lower()
+        for word in expanded_keywords:
+            if len(word) > 3 and word in principle:
+                score += 0.3
+
+        # Boost important chapters for mental health (2, 3, 6, 12, 18)
+        chapter = verse.get("chapter", 0)
+        if chapter in [2, 6, 12, 18]:
+            score *= 1.3
+        elif chapter == 3:
+            score *= 1.2
+
+        if score > 0:
+            scored_verses.append((score, verse))
+
+    # Sort by score and return top results
+    scored_verses.sort(key=lambda x: x[0], reverse=True)
+
+    # Adjust limit based on depth
+    if depth == "quantum":
+        limit = min(limit + 4, 12)
+    elif depth == "deep":
+        limit = min(limit + 2, 10)
+
+    return [v for _, v in scored_verses[:limit]]
+
+
+def _build_json_verse_context(verses: list[dict[str, Any]]) -> tuple[str, list[dict[str, str]]]:
+    """Build context from JSON verses for OpenAI.
+
+    Args:
+        verses: List of verses from JSON search
+
+    Returns:
+        Tuple of (context string, source references)
+    """
+    lines = ["[GITA_CORE_WISDOM_CONTEXT]"]
+    lines.append(f"Retrieved {len(verses)} relevant verses from the complete Bhagavad Gita (701 verses):\n")
+    sources: list[dict[str, str]] = []
+
+    for verse in verses:
+        chapter = verse.get("chapter", 0)
+        verse_num = verse.get("verse", 0)
+        reference = f"BG {chapter}.{verse_num}"
+        file_path = f"data/gita/gita_verses_complete.json"
+
+        english = verse.get("english", "")
+        sanskrit = verse.get("sanskrit", "").split("\n")[0] if verse.get("sanskrit") else ""
+        theme = verse.get("theme", "")
+        principle = verse.get("principle", "")
+        mh_apps = verse.get("mental_health_applications", [])
+
+        lines.append(f"- Reference: {reference}")
+        if sanskrit:
+            lines.append(f"  Sanskrit: {sanskrit[:100]}...")
+        lines.append(f"  Translation: {english}")
+        if principle:
+            lines.append(f"  Principle: {principle}")
+        if mh_apps:
+            lines.append(f"  Mental Health Applications: {', '.join(mh_apps[:5])}")
+        lines.append("")
+
+        sources.append({"file": file_path, "reference": reference})
+
+    lines.append("[/GITA_CORE_WISDOM_CONTEXT]")
+    return "\n".join(lines), sources
+
+
 def _get_session_memory(session_id: str) -> list[dict[str, str]]:
     return SESSION_MEMORY.get(session_id, [])
 
@@ -302,7 +502,7 @@ def _is_emoji(char: str) -> bool:
 
 @router.get("/health")
 async def ardha_health():
-    """Health check with OpenAI status."""
+    """Health check with OpenAI and verse availability status."""
     openai_ready = openai_optimizer.ready and openai_optimizer.client is not None
 
     # Try to check RAG status
@@ -313,10 +513,20 @@ async def ardha_health():
     except Exception:
         pass
 
+    # Determine wisdom source
+    if rag_ready:
+        wisdom_source = "rag_embeddings"
+    elif GITA_VERSES:
+        wisdom_source = "json_701_verses"
+    else:
+        wisdom_source = "core_8_verses"
+
     return {
         "status": "ok" if openai_ready else "degraded",
         "service": "ardha",
         "openai_ready": openai_ready,
         "rag_ready": rag_ready,
+        "json_verses_loaded": len(GITA_VERSES),
+        "wisdom_source": wisdom_source,
         "model": openai_optimizer.default_model if openai_ready else None,
     }
