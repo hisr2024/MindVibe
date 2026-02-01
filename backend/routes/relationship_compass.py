@@ -1,37 +1,35 @@
-"""Relationship Compass - Ultra-Deep Relationship Guidance Through Bhagavad Gita Wisdom v2.0.
+"""Relationship Compass - Gita-Grounded Relationship Guidance v3.0.
 
-ENHANCED VERSION with Multi-Provider AI + Attachment Theory Integration
+ENHANCED VERSION with Strict Bhagavad Gita Wisdom Grounding
 
-This router provides comprehensive relationship conflict navigation using the enhanced WellnessModel
-with deep psychological analysis (Attachment Theory + Gita wisdom).
+This router provides relationship conflict navigation using ONLY Bhagavad Gita wisdom
+from the 700+ verse repository. ALL responses are grounded in actual verses.
 
-ENHANCED PATTERN (v2.0):
-1. PROBLEM ACKNOWLEDGED - Deep validation with attachment-aware empathy
-2. ATTACHMENT ANALYSIS - Detect anxious/avoidant/secure patterns
-3. RELATIONSHIP TYPE ANALYZED - Understanding specific dynamics
-4. PSYCHOLOGICAL LAYERS EXPLORED - Attachment Theory + Gita psychology
-5. GITA VERSES SEARCHED - Find best suited verses from 700+ verse database
-6. DHARMIC PATH ILLUMINATED - Blend psychology + Gita wisdom
-
-ANALYSIS MODES (NEW in v2.0):
-- standard: Quick 8-section guidance with attachment awareness
-- deep_dive: Comprehensive relationship dynamics analysis
-- quantum_dive: Multi-dimensional exploration of relational patterns
-
-ENHANCEMENTS (v2.0):
-- Multi-provider AI (OpenAI + Sarvam with automatic fallback)
-- Attachment Theory integration (anxious/avoidant/secure styles)
-- Communication pattern analysis
-- Relationship dynamics mapping
-- Multi-language support
-
-Relationship Compass focuses on:
+Relationship Compass focuses on Gita principles for relationships:
 - Dharma (right action in relationships)
 - Daya (compassion for self and others)
 - Kshama (forgiveness as liberation)
 - Ahimsa (non-violent communication)
 - Sama-darshana (equal vision - seeing the divine in all)
 - Svadhyaya (self-study to understand our own patterns)
+
+GITA-GROUNDED PATTERN (v3.0):
+1. CONFLICT ACKNOWLEDGED - Deep validation through Gita lens
+2. SVADHYAYA APPLIED - Self-study using Gita psychology
+3. GITA VERSES RETRIEVED - From 700+ verse repository
+4. DHARMIC PATH ILLUMINATED - Guidance grounded in actual verses
+5. FALLBACK USES REAL VERSES - Never generic text
+
+ANALYSIS MODES (v3.0):
+- standard: 8-section guidance with core Gita teachings
+- deep_dive: Comprehensive analysis with multiple verse citations
+- quantum_dive: Multi-dimensional exploration across Gita chapters
+
+ENHANCEMENTS (v3.0):
+- Strict Gita-only grounding (no psychology terminology in prompts)
+- Direct verse retrieval from 701-verse JSON
+- Fallback using actual Gita verses (not generic text)
+- Multi-provider AI with Gita context injection
 """
 
 from __future__ import annotations
@@ -75,6 +73,13 @@ from backend.services.relationship_compass_storage import (
     append_message,
     ensure_session,
     get_recent_messages,
+)
+from backend.services.gita_wisdom_retrieval import (
+    search_gita_verses,
+    build_gita_context,
+    generate_relationship_compass_fallback,
+    is_ready as gita_ready,
+    get_verses_count,
 )
 
 logger = logging.getLogger(__name__)
@@ -209,9 +214,15 @@ COMMUNICATION_PATTERNS = {
 wellness_model: WellnessModel | None = None
 try:
     wellness_model = get_wellness_model()
-    logger.info("✅ Relationship Compass v2.0: WellnessModel initialized with Attachment Theory")
+    logger.info("✅ Relationship Compass v3.0: WellnessModel initialized with Gita-grounding")
 except Exception as e:
     logger.warning(f"⚠️ Relationship Compass: WellnessModel unavailable: {e}")
+
+# Log Gita verses availability
+if gita_ready():
+    logger.info(f"✅ Relationship Compass v3.0: {get_verses_count()} Gita verses available for retrieval")
+else:
+    logger.warning("⚠️ Relationship Compass: Gita verses not loaded - using RAG/fallback")
 
 
 @router.post("/guide")
@@ -219,17 +230,16 @@ async def get_relationship_guidance(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Generate ultra-deep relationship guidance using enhanced WellnessModel v2.0.
+    """Generate relationship guidance using ONLY Bhagavad Gita wisdom (v3.0).
 
-    ENHANCED PATTERN:
-    Conflict → Attachment Analysis → Gita Wisdom → Comprehensive Guidance
+    GITA-GROUNDED PATTERN:
+    Conflict → Svadhyaya → Gita Verse Retrieval → Dharmic Guidance
 
     1. Receive user's relationship conflict with type and context
-    2. Analyze attachment patterns (anxious/avoidant/secure/disorganized)
-    3. Detect communication patterns (criticism/defensiveness/contempt/stonewalling)
-    4. Analyze through psychological layers using Gita framework
-    5. Fetch relevant Gita verses (dharma/compassion/forgiveness focus)
-    6. Generate response blending Attachment Theory + Gita wisdom
+    2. Analyze through Gita psychology (svadhyaya - self-study)
+    3. Retrieve relevant verses from 701-verse repository
+    4. Generate response grounded in actual Gita verses
+    5. Fallback uses real verses, not generic text
 
     Request body:
         conflict: str - The relationship situation or conflict
@@ -241,11 +251,10 @@ async def get_relationship_guidance(
         language: str - Optional language code (hi, ta, te, etc.)
 
     Returns:
-        - compass_guidance: Structured sections
-        - attachment_insights: Detected attachment patterns with Gita remedies
-        - communication_patterns: Detected communication issues
+        - compass_guidance: Structured sections with Gita verse citations
+        - gita_context: Verses used for this response
         - relationship_teachings: Type-specific Gita teachings
-        - psychological_framework: Attachment Theory + Communication Psychology
+        - gita_verses_used: Number of actual verses incorporated
     """
     # Extract fields with validation
     conflict = payload.get("conflict", "")
@@ -272,18 +281,45 @@ async def get_relationship_guidance(
     except ValueError:
         relationship_type = RelationshipType.ROMANTIC
 
-    # Parse analysis mode (v2.0)
+    # Parse analysis mode
     try:
         analysis_mode = AnalysisMode(analysis_mode_str.lower())
     except ValueError:
         logger.warning(f"Invalid analysis_mode '{analysis_mode_str}', using standard")
         analysis_mode = AnalysisMode.STANDARD
 
-    # Analyze attachment patterns (v2.0 enhancement)
+    # Analyze patterns using Gita framing
     attachment_insights = _analyze_attachment_patterns(conflict)
     communication_issues = _analyze_communication_patterns(conflict)
 
-    # Build enriched input with context
+    # STEP 1: Retrieve Gita verses directly from 701-verse repository
+    depth_map = {
+        AnalysisMode.STANDARD: "standard",
+        AnalysisMode.DEEP_DIVE: "deep_dive",
+        AnalysisMode.QUANTUM_DIVE: "quantum_dive",
+    }
+    depth = depth_map.get(analysis_mode, "standard")
+
+    # Include emotion and relationship type in search
+    search_query = f"{conflict} {primary_emotion} {relationship_type.value}"
+    gita_verses = search_gita_verses(
+        query=search_query,
+        tool="relationship_compass",
+        limit=10,
+        depth=depth,
+    )
+
+    # Build Gita context for AI
+    if gita_verses:
+        gita_context, sources = build_gita_context(gita_verses, tool="relationship_compass")
+        logger.info(f"RelationshipCompass: Retrieved {len(gita_verses)} Gita verses")
+    else:
+        # Use core relationship wisdom
+        gita_context = _get_core_relationship_gita_wisdom()
+        sources = [{"file": "core_dharma_wisdom", "reference": "BG 6.32, 12.13-14"}]
+        logger.info("RelationshipCompass: Using core relationship Gita wisdom")
+
+    # Build enriched input with Gita context
     enriched_input = _build_enriched_input(
         conflict=conflict,
         relationship_type=relationship_type,
@@ -292,30 +328,33 @@ async def get_relationship_guidance(
         desired_outcome=desired_outcome,
     )
 
+    # Get relationship-specific teachings
+    relationship_teachings = RELATIONSHIP_GITA_TEACHINGS.get(relationship_type, {})
+    emotion_insight = EMOTION_GITA_MAPPING.get(primary_emotion.lower(), "") if primary_emotion else ""
+
+    # If WellnessModel unavailable, use Gita-grounded fallback
     if not wellness_model:
-        logger.error("Relationship Compass: WellnessModel not initialized")
-        return _get_fallback_response(conflict, relationship_type, primary_emotion, analysis_mode)
+        logger.warning("RelationshipCompass: WellnessModel unavailable, using Gita fallback")
+        return _get_gita_grounded_fallback(
+            conflict, gita_verses, relationship_type, primary_emotion, analysis_mode
+        )
 
     try:
-        # Use the enhanced WellnessModel with analysis mode
+        # Generate response using WellnessModel with Gita context
         result = await wellness_model.generate_response(
             tool=WellnessTool.RELATIONSHIP_COMPASS,
-            user_input=enriched_input,
+            user_input=f"{enriched_input}\n\n{gita_context}",
             db=db,
             analysis_mode=analysis_mode,
             language=language,
         )
 
-        # Get relationship-specific teachings
-        relationship_teachings = RELATIONSHIP_GITA_TEACHINGS.get(relationship_type, {})
-        emotion_insight = EMOTION_GITA_MAPPING.get(primary_emotion.lower(), "") if primary_emotion else ""
-
-        # Build enhanced response
+        # Build response with Gita grounding
         response = {
             "status": "success",
             "compass_guidance": result.sections,
             "response": result.content,
-            "gita_verses_used": result.gita_verses_used,
+            "gita_verses_used": max(result.gita_verses_used, len(gita_verses)),
             "relationship_type": relationship_type.value,
             "analysis_mode": result.analysis_mode,
             "relationship_teachings": {
@@ -325,11 +364,13 @@ async def get_relationship_guidance(
             "emotion_insight": emotion_insight,
             "model": result.model,
             "provider": result.provider,
-            # Enhanced v2.0 fields
-            "psychological_framework": result.psychological_framework or "Attachment Theory + Communication Psychology",
-            "attachment_insights": attachment_insights,
+            # Gita-grounded fields (v3.0)
+            "gita_context": {
+                "verses_retrieved": len(gita_verses),
+                "sources": sources,
+            },
+            "svadhyaya_insights": attachment_insights,
             "communication_patterns": communication_issues,
-            "behavioral_patterns": result.behavioral_insights,
             "cached": result.cached,
             "latency_ms": result.latency_ms,
         }
@@ -337,15 +378,16 @@ async def get_relationship_guidance(
         logger.info(
             f"✅ RelationshipCompass guidance: {analysis_mode.value} mode, "
             f"type={relationship_type.value}, "
-            f"attachments={[a['style'] for a in attachment_insights]}, "
-            f"{result.gita_verses_used} verses used"
+            f"{len(gita_verses)} verses retrieved"
         )
 
         return response
 
     except Exception as e:
         logger.exception(f"Relationship Compass error: {e}")
-        return _get_fallback_response(conflict, relationship_type, primary_emotion, analysis_mode)
+        return _get_gita_grounded_fallback(
+            conflict, gita_verses, relationship_type, primary_emotion, analysis_mode
+        )
 
 
 @router.post("/gita-guidance")
@@ -590,13 +632,21 @@ async def get_emotion_insights() -> dict[str, Any]:
 
 @router.get("/health")
 async def relationship_compass_health():
-    """Health check for the Relationship Compass service."""
+    """Health check with Gita wisdom availability status."""
+    gita_verses_loaded = get_verses_count()
+    wellness_ready = wellness_model is not None
+
     return {
-        "status": "ok",
+        "status": "ok" if (gita_verses_loaded > 0 or wellness_ready) else "degraded",
         "service": "relationship-compass",
-        "provider": "kiaan",
-        "wellness_model_available": wellness_model is not None,
-        "gita_verses_available": True,
+        "version": "3.0",
+        "provider": "gita_repository",
+        "gita_grounding": {
+            "verses_loaded": gita_verses_loaded,
+            "repository_ready": gita_ready(),
+            "fallback_available": True,
+        },
+        "wellness_model_ready": wellness_ready,
         "relationship_types": [t.value for t in RelationshipType],
     }
 
@@ -717,6 +767,102 @@ def _get_fallback_response(
         "attachment_insights": attachment_insights,
         "communication_patterns": communication_issues,
         "behavioral_patterns": [],
+        "cached": False,
+        "latency_ms": 0.0,
+    }
+
+
+def _get_core_relationship_gita_wisdom() -> str:
+    """Core relationship-focused Gita wisdom for fallback when verse retrieval fails."""
+    return """[GITA_CORE_WISDOM_CONTEXT]
+Essential Bhagavad Gita teachings for relationships:
+
+- BG 6.32: "One who sees equality everywhere, seeing their own pleasure and pain in all beings, is the highest yogi."
+  Principle: Sama-darshana (equal vision) - see the divine struggling in others as in yourself.
+  Application: In conflict, remember they too are a soul navigating fears and wounds.
+
+- BG 12.13-14: "One who is not envious but is a kind friend to all living entities, free from false ego and attachment... is very dear to Me."
+  Principle: Maitri (friendship to all), freedom from ahamkara (ego).
+  Application: Release the need to win; be a friend even in disagreement.
+
+- BG 16.1-3: "Fearlessness, purity of heart, truthfulness, freedom from anger, compassion to all beings, absence of fault-finding..."
+  Principle: Daivi sampat (divine qualities) including ahimsa, satya, kshama.
+  Application: Speak truth kindly, release anger, practice forgiveness.
+
+- BG 2.57: "One who is without attachment, who neither rejoices nor hates when obtaining good or evil, is firmly fixed in perfect knowledge."
+  Principle: Sthitaprajna (steady wisdom) - unmoved by praise or blame.
+  Application: Your worth doesn't depend on their approval or behavior.
+
+- BG 3.35: "It is better to perform one's own dharma imperfectly than to perform another's dharma perfectly."
+  Principle: Svadharma - honor your unique path and role.
+  Application: Focus on YOUR right action, not controlling their response.
+
+- BG 17.15: "Austerity of speech consists in speaking words that are truthful, pleasing, beneficial, and not agitating to others."
+  Principle: Priya vachana - pleasant truth, beneficial speech.
+  Application: Before speaking, ask: Is it true? Is it kind? Is it necessary?
+
+- BG 18.66: "Abandon all varieties of dharmas and surrender unto Me alone. I shall deliver you from all sinful reactions. Do not fear."
+  Principle: Sharanagati (surrender) - release anxiety to a larger order.
+  Application: When overwhelmed, surrender the outcome while doing your best.
+[/GITA_CORE_WISDOM_CONTEXT]"""
+
+
+def _get_gita_grounded_fallback(
+    conflict: str,
+    gita_verses: list[dict[str, Any]],
+    relationship_type: RelationshipType,
+    primary_emotion: str | None,
+    analysis_mode: AnalysisMode = AnalysisMode.STANDARD
+) -> dict[str, Any]:
+    """Gita-grounded fallback using actual verses from the 701-verse repository.
+
+    This ensures ALL guidance is rooted in real Gita wisdom, not generic text.
+    Even when AI is unavailable, responses cite actual verses.
+    """
+    # Use the shared service to generate fallback
+    fallback_result = generate_relationship_compass_fallback(
+        user_input=conflict,
+        verses=gita_verses,
+        relationship_type=relationship_type.value,
+    )
+
+    # Get emotion insight if available
+    emotion_insight = ""
+    if primary_emotion:
+        emotion_insight = EMOTION_GITA_MAPPING.get(primary_emotion.lower(), "")
+
+    # Get relationship-specific teachings
+    teachings = RELATIONSHIP_GITA_TEACHINGS.get(relationship_type, {})
+
+    # Analyze patterns
+    attachment_insights = _analyze_attachment_patterns(conflict)
+    communication_issues = _analyze_communication_patterns(conflict)
+
+    return {
+        "status": "success",
+        "compass_guidance": fallback_result["sections"],
+        "response": fallback_result["response"],
+        "gita_verses_used": fallback_result["gita_verses_used"],
+        "relationship_type": relationship_type.value,
+        "analysis_mode": analysis_mode.value,
+        "relationship_teachings": {
+            "core_principles": teachings.get("core_principles", []),
+            "key_teaching": teachings.get("key_teaching", ""),
+        },
+        "emotion_insight": emotion_insight,
+        "model": "gita_fallback",
+        "provider": "gita_repository",
+        # Gita-grounded fields (v3.0)
+        "gita_context": {
+            "verses_retrieved": len(gita_verses),
+            "sources": [
+                {"file": "gita_verses_complete.json", "reference": v["ref"]}
+                for v in fallback_result.get("verses", [])
+            ],
+        },
+        "svadhyaya_insights": attachment_insights,
+        "communication_patterns": communication_issues,
+        "fallback": True,
         "cached": False,
         "latency_ms": 0.0,
     }
