@@ -42,6 +42,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Optional
 
+from backend.database import get_async_session
+from backend.models import ContentSourceType as DBContentSourceType
+from backend.services.db_knowledge_store import DatabaseKnowledgeStore, get_db_knowledge_store
+
 logger = logging.getLogger(__name__)
 
 
@@ -461,46 +465,83 @@ class ContentAcquisitionWorker:
             )
 
     async def _process_items(self, engine, source_items: dict) -> dict:
-        """Process and store fetched items."""
+        """
+        Process and store fetched items to both JSON cache and database.
+
+        This method ensures learned wisdom is stored in:
+        1. JSON file (legacy, for fast local access)
+        2. PostgreSQL database (for KIAAN Wisdom Core integration)
+        """
         from backend.services.kiaan_learning_engine import ContentType, LearnedWisdom
         import uuid
 
-        stats = {"fetched": 0, "validated": 0, "stored": 0, "rejected": 0}
+        stats = {"fetched": 0, "validated": 0, "stored": 0, "rejected": 0, "db_stored": 0}
+
+        # Map content types to database source types
+        content_type_map = {
+            ContentType.VIDEO: DBContentSourceType.YOUTUBE,
+            ContentType.AUDIO: DBContentSourceType.AUDIO,
+            ContentType.TEXT: DBContentSourceType.WEB,
+        }
+
+        # Get database store
+        db_store = get_db_knowledge_store()
 
         # Process YouTube items
         for item in source_items.get("youtube", []):
             stats["fetched"] += 1
-            result = self._process_single_item(engine, item, ContentType.VIDEO)
+            result = await self._process_single_item_with_db(
+                engine, db_store, item, ContentType.VIDEO, content_type_map
+            )
             if result == "stored":
                 stats["stored"] += 1
                 stats["validated"] += 1
+            elif result == "db_stored":
+                stats["stored"] += 1
+                stats["validated"] += 1
+                stats["db_stored"] += 1
             elif result == "rejected":
                 stats["rejected"] += 1
 
         # Process audio items
         for item in source_items.get("audio", []):
             stats["fetched"] += 1
-            result = self._process_single_item(engine, item, ContentType.AUDIO)
+            result = await self._process_single_item_with_db(
+                engine, db_store, item, ContentType.AUDIO, content_type_map
+            )
             if result == "stored":
                 stats["stored"] += 1
                 stats["validated"] += 1
+            elif result == "db_stored":
+                stats["stored"] += 1
+                stats["validated"] += 1
+                stats["db_stored"] += 1
             elif result == "rejected":
                 stats["rejected"] += 1
 
         # Process web items
         for item in source_items.get("web", []):
             stats["fetched"] += 1
-            result = self._process_single_item(engine, item, ContentType.TEXT)
+            result = await self._process_single_item_with_db(
+                engine, db_store, item, ContentType.TEXT, content_type_map
+            )
             if result == "stored":
                 stats["stored"] += 1
                 stats["validated"] += 1
+            elif result == "db_stored":
+                stats["stored"] += 1
+                stats["validated"] += 1
+                stats["db_stored"] += 1
             elif result == "rejected":
                 stats["rejected"] += 1
+
+        if stats["db_stored"] > 0:
+            logger.info(f"Stored {stats['db_stored']} items to Wisdom Core database")
 
         return stats
 
     def _process_single_item(self, engine, item: dict, content_type) -> str:
-        """Process a single content item."""
+        """Process a single content item (legacy JSON storage only)."""
         try:
             from backend.services.kiaan_learning_engine import LearnedWisdom
             import uuid
@@ -538,6 +579,148 @@ class ContentAcquisitionWorker:
 
             # Store
             if engine.store.add_wisdom(wisdom):
+                return "stored"
+            else:
+                return "duplicate"
+
+        except Exception as e:
+            logger.error(f"Error processing item: {e}")
+            return "error"
+
+    async def _process_single_item_with_db(
+        self,
+        engine,
+        db_store: DatabaseKnowledgeStore,
+        item: dict,
+        content_type,
+        content_type_map: dict
+    ) -> str:
+        """
+        Process a single content item and store to both JSON and database.
+
+        This ensures learned wisdom is available in:
+        1. JSON file (fast local cache for offline/fallback)
+        2. PostgreSQL database (for KIAAN Wisdom Core integration)
+
+        Returns:
+            "db_stored" - Stored to both JSON and database
+            "stored" - Stored to JSON only (db duplicate or error)
+            "duplicate" - Already exists
+            "rejected" - Failed validation
+            "error" - Processing error
+        """
+        try:
+            from backend.services.kiaan_learning_engine import LearnedWisdom
+            import uuid
+
+            # Extract content for validation
+            content = f"{item.get('title', '')} {item.get('description', '')}"
+
+            # Validate
+            validation = engine.validator.validate_content(
+                content,
+                item.get('url', '')
+            )
+
+            if not validation["is_valid"]:
+                return "rejected"
+
+            wisdom_id = str(uuid.uuid4())
+            source_name = item.get('source', item.get('channel', 'Unknown'))
+            source_url = item.get('url', '')
+            language = item.get('language', 'en')
+            chapter_refs = validation["chapter_refs"]
+            verse_refs = validation["verse_refs"]
+            themes = validation["keywords_found"]
+            shad_ripu_tags = validation.get("shad_ripu_tags", [])
+            keywords = validation["keywords_found"]
+            quality_score = validation["confidence"]
+
+            # Create wisdom object for JSON storage
+            wisdom = LearnedWisdom(
+                id=wisdom_id,
+                content=content,
+                source_type=content_type,
+                source_url=source_url,
+                source_name=source_name,
+                language=language,
+                chapter_refs=chapter_refs,
+                verse_refs=verse_refs,
+                themes=themes,
+                shad_ripu_tags=shad_ripu_tags,
+                keywords=keywords,
+                quality_score=quality_score,
+                validation_status="validated",
+                learned_at=datetime.now(),
+                metadata={"original_item": item, "daemon_acquired": True}
+            )
+
+            # Store to JSON (legacy)
+            json_stored = engine.store.add_wisdom(wisdom)
+
+            # Store to database (new - Wisdom Core integration)
+            db_stored = False
+            try:
+                async for db in get_async_session():
+                    db_source_type = content_type_map.get(content_type, DBContentSourceType.WEB)
+
+                    # Determine mental health domain from themes
+                    primary_domain = None
+                    mental_health_apps = []
+                    domain_mapping = {
+                        "peace": "anxiety",
+                        "calm": "anxiety",
+                        "equanimity": "stress",
+                        "anger": "anger",
+                        "patience": "anger",
+                        "forgiveness": "anger",
+                        "hope": "depression",
+                        "joy": "depression",
+                        "purpose": "self_doubt",
+                        "courage": "fear",
+                        "strength": "fear",
+                        "wisdom": "confusion",
+                        "clarity": "confusion",
+                        "detachment": "anxiety",
+                        "surrender": "stress",
+                        "devotion": "loneliness",
+                        "compassion": "grief",
+                        "acceptance": "grief",
+                    }
+
+                    for theme in themes:
+                        theme_lower = theme.lower()
+                        if theme_lower in domain_mapping:
+                            if not primary_domain:
+                                primary_domain = domain_mapping[theme_lower]
+                            mental_health_apps.append(theme_lower)
+
+                    result = await db_store.add_wisdom(
+                        db=db,
+                        content=content,
+                        source_type=db_source_type.value,
+                        source_name=source_name,
+                        source_url=source_url if source_url else None,
+                        language=language,
+                        chapter_refs=chapter_refs,
+                        verse_refs=[[v[0], v[1]] for v in verse_refs] if verse_refs else [],
+                        themes=themes,
+                        shad_ripu_tags=shad_ripu_tags,
+                        keywords=keywords,
+                        quality_score=quality_score,
+                        primary_domain=primary_domain,
+                        mental_health_applications=mental_health_apps if mental_health_apps else None,
+                        metadata={"daemon_acquired": True, "original_source": item.get('source', 'unknown')},
+                    )
+                    db_stored = result is not None
+                    break
+
+            except Exception as db_error:
+                logger.warning(f"Database storage failed (JSON storage continues): {db_error}")
+
+            if json_stored and db_stored:
+                return "db_stored"
+            elif json_stored:
                 return "stored"
             else:
                 return "duplicate"
