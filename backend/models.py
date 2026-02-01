@@ -3088,3 +3088,60 @@ class KiaanChatSession(Base):
     avg_response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     total_tokens_used: Mapped[int | None] = mapped_column(Integer, nullable=True)
     was_helpful: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+
+# =============================================================================
+# Personal Journeys - Simple CRUD Feature
+# =============================================================================
+
+
+class PersonalJourneyStatus(str, enum.Enum):
+    """Status of a personal journey."""
+
+    DRAFT = "draft"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
+
+
+class PersonalJourney(SoftDeleteMixin, Base):
+    """
+    User's personal journey for tracking goals and progress.
+
+    A simple CRUD entity that users can create, update, and manage.
+    """
+
+    __tablename__ = "personal_journeys"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    owner_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+
+    # Core fields
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[PersonalJourneyStatus] = mapped_column(
+        Enum(PersonalJourneyStatus, native_enum=False, length=32),
+        default=PersonalJourneyStatus.DRAFT,
+        index=True,
+    )
+
+    # Optional fields
+    cover_image_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    tags: Mapped[list | None] = mapped_column(JSON, nullable=True, default=list)
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+    __table_args__ = (
+        # Index for efficient list queries by owner
+        {"extend_existing": True},
+    )

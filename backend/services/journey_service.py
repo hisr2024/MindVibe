@@ -1,8 +1,8 @@
 """
-Journey Service - Core business logic for Wisdom Journeys.
+Journey Service - Business logic for Personal Journeys CRUD operations.
 
-This service handles all journey-related operations with proper error handling,
-caching, and database transactions.
+Provides methods for creating, reading, updating, and deleting personal journeys
+with proper validation, authorization, and error handling.
 """
 
 from __future__ import annotations
@@ -10,30 +10,27 @@ from __future__ import annotations
 import datetime
 import logging
 import uuid
-from typing import Any
+from typing import Any, Literal
 
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, func, desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from backend.models import (
-    JourneyTemplate,
-    JourneyTemplateStep,
-    UserJourney,
-    UserJourneyStepState,
-    UserJourneyStatus,
-    User,
-)
+from backend.models import PersonalJourney, PersonalJourneyStatus
 
 logger = logging.getLogger(__name__)
+
+# Type aliases
+SortField = Literal["created_at", "updated_at", "title"]
+SortOrder = Literal["asc", "desc"]
 
 
 class JourneyServiceError(Exception):
     """Base exception for journey service errors."""
 
-    def __init__(self, message: str, code: str = "JOURNEY_ERROR"):
+    def __init__(self, message: str, code: str = "JOURNEY_ERROR", status_code: int = 500):
         self.message = message
         self.code = code
+        self.status_code = status_code
         super().__init__(message)
 
 
@@ -41,703 +38,338 @@ class JourneyNotFoundError(JourneyServiceError):
     """Raised when a journey is not found."""
 
     def __init__(self, journey_id: str):
-        super().__init__(f"Journey not found: {journey_id}", "JOURNEY_NOT_FOUND")
-
-
-class TemplateNotFoundError(JourneyServiceError):
-    """Raised when a journey template is not found."""
-
-    def __init__(self, template_id: str):
-        super().__init__(f"Template not found: {template_id}", "TEMPLATE_NOT_FOUND")
-
-
-class JourneyLimitExceededError(JourneyServiceError):
-    """Raised when user exceeds their journey limit."""
-
-    def __init__(self, limit: int):
         super().__init__(
-            f"You can only have {limit} active journeys at a time",
-            "JOURNEY_LIMIT_EXCEEDED"
+            f"Journey not found: {journey_id}",
+            "JOURNEY_NOT_FOUND",
+            404
         )
 
 
-class JourneyAlreadyStartedError(JourneyServiceError):
-    """Raised when user tries to start a journey they already have active."""
+class JourneyValidationError(JourneyServiceError):
+    """Raised when journey data fails validation."""
 
-    def __init__(self, template_slug: str):
+    def __init__(self, message: str):
+        super().__init__(message, "VALIDATION_ERROR", 400)
+
+
+class JourneyAuthorizationError(JourneyServiceError):
+    """Raised when user is not authorized to access a journey."""
+
+    def __init__(self):
         super().__init__(
-            f"You already have an active journey for: {template_slug}",
-            "JOURNEY_ALREADY_STARTED"
-        )
-
-
-class StepAlreadyCompletedError(JourneyServiceError):
-    """Raised when user tries to complete a step that's already done."""
-
-    def __init__(self, day_index: int):
-        super().__init__(
-            f"Day {day_index} is already completed",
-            "STEP_ALREADY_COMPLETED"
+            "You are not authorized to access this journey",
+            "UNAUTHORIZED",
+            403
         )
 
 
 class JourneyService:
     """
-    Service class for managing wisdom journeys.
+    Service class for managing personal journeys.
 
-    Provides methods for:
-    - Fetching journey catalog
-    - Starting/pausing/resuming/abandoning journeys
-    - Completing journey steps
-    - Getting journey progress
+    Provides CRUD operations with:
+    - Input validation
+    - Authorization checks
+    - Proper error handling
+    - Query optimization
     """
 
-    # Default journey limit for free users
-    DEFAULT_JOURNEY_LIMIT = 1
-    # Premium journey limit
-    PREMIUM_JOURNEY_LIMIT = 5
+    # Valid status values
+    VALID_STATUSES = {"draft", "active", "completed", "archived"}
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    # =========================================================================
-    # CATALOG OPERATIONS
-    # =========================================================================
-
-    async def get_catalog(
-        self,
-        include_inactive: bool = False
-    ) -> list[dict[str, Any]]:
-        """
-        Get all available journey templates.
-
-        Args:
-            include_inactive: Whether to include inactive templates (admin only)
-
-        Returns:
-            List of journey template dictionaries
-        """
-        try:
-            query = select(JourneyTemplate).options(
-                selectinload(JourneyTemplate.steps)
-            )
-
-            if not include_inactive:
-                query = query.where(JourneyTemplate.is_active == True)
-
-            query = query.order_by(
-                JourneyTemplate.is_featured.desc(),
-                JourneyTemplate.created_at.desc()
-            )
-
-            result = await self.session.execute(query)
-            templates = result.scalars().all()
-
-            return [self._template_to_dict(t) for t in templates]
-
-        except Exception as e:
-            logger.error(f"Error fetching journey catalog: {e}")
-            raise JourneyServiceError(
-                "Failed to fetch journey catalog",
-                "CATALOG_FETCH_ERROR"
-            )
-
-    async def get_template_by_slug(self, slug: str) -> JourneyTemplate | None:
-        """Get a journey template by its slug."""
-        query = select(JourneyTemplate).where(
-            JourneyTemplate.slug == slug,
-            JourneyTemplate.is_active == True
-        ).options(selectinload(JourneyTemplate.steps))
-
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
-
-    async def get_template_by_id(self, template_id: str) -> JourneyTemplate | None:
-        """Get a journey template by its ID."""
-        query = select(JourneyTemplate).where(
-            JourneyTemplate.id == template_id
-        ).options(selectinload(JourneyTemplate.steps))
-
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
-
-    # =========================================================================
-    # USER JOURNEY OPERATIONS
-    # =========================================================================
-
-    async def get_active_journeys(
-        self,
-        user_id: str
-    ) -> list[dict[str, Any]]:
-        """
-        Get all active journeys for a user.
-
-        Args:
-            user_id: The user's ID
-
-        Returns:
-            List of active journey dictionaries with progress info
-        """
-        try:
-            query = select(UserJourney).where(
-                UserJourney.user_id == user_id,
-                UserJourney.status == UserJourneyStatus.ACTIVE.value,
-                UserJourney.deleted_at.is_(None)
-            ).options(
-                selectinload(UserJourney.template),
-                selectinload(UserJourney.step_states)
-            ).order_by(UserJourney.created_at.desc())
-
-            result = await self.session.execute(query)
-            journeys = result.scalars().all()
-
-            return [await self._journey_to_dict(j) for j in journeys]
-
-        except Exception as e:
-            logger.error(f"Error fetching active journeys for user {user_id}: {e}")
-            raise JourneyServiceError(
-                "Failed to fetch active journeys",
-                "ACTIVE_JOURNEYS_FETCH_ERROR"
-            )
-
-    async def get_journey(
-        self,
-        journey_id: str,
-        user_id: str
-    ) -> dict[str, Any]:
-        """
-        Get a specific journey with full details.
-
-        Args:
-            journey_id: The journey ID
-            user_id: The user's ID (for authorization)
-
-        Returns:
-            Journey dictionary with all details
-        """
-        journey = await self._get_user_journey(journey_id, user_id)
-        return await self._journey_to_dict(journey, include_steps=True)
-
-    async def start_journey(
+    async def list_journeys(
         self,
         user_id: str,
-        template_slug: str,
-        personalization: dict[str, Any] | None = None,
-        journey_limit: int | None = None
+        *,
+        status: str | None = None,
+        search: str | None = None,
+        sort_by: SortField = "updated_at",
+        sort_order: SortOrder = "desc",
+        limit: int = 50,
+        offset: int = 0,
     ) -> dict[str, Any]:
         """
-        Start a new journey for a user.
+        List journeys for a user with filtering and pagination.
 
         Args:
-            user_id: The user's ID
-            template_slug: The template slug to start
-            personalization: Optional personalization settings
-            journey_limit: Maximum active journeys allowed (None = default)
+            user_id: The owner's user ID
+            status: Optional status filter
+            search: Optional search term for title
+            sort_by: Field to sort by
+            sort_order: Sort direction
+            limit: Maximum results to return
+            offset: Number of results to skip
 
         Returns:
-            The newly created journey dictionary
+            Dict with 'items' (list of journeys) and 'total' (count)
         """
-        try:
-            # Get the template
-            template = await self.get_template_by_slug(template_slug)
-            if not template:
-                raise TemplateNotFoundError(template_slug)
-
-            # Check if user already has this journey active
-            existing_query = select(UserJourney).where(
-                UserJourney.user_id == user_id,
-                UserJourney.journey_template_id == template.id,
-                UserJourney.status == UserJourneyStatus.ACTIVE.value,
-                UserJourney.deleted_at.is_(None)
-            )
-            existing_result = await self.session.execute(existing_query)
-            if existing_result.scalar_one_or_none():
-                raise JourneyAlreadyStartedError(template_slug)
-
-            # Check journey limit
-            limit = journey_limit or self.DEFAULT_JOURNEY_LIMIT
-            active_count = await self._count_active_journeys(user_id)
-            if active_count >= limit:
-                raise JourneyLimitExceededError(limit)
-
-            # Create the journey
-            journey = UserJourney(
-                id=str(uuid.uuid4()),
-                user_id=user_id,
-                journey_template_id=template.id,
-                status=UserJourneyStatus.ACTIVE.value,
-                current_day_index=1,
-                personalization=personalization or {},
-                started_at=datetime.datetime.now(datetime.UTC)
-            )
-
-            self.session.add(journey)
-            await self.session.commit()
-            await self.session.refresh(journey)
-
-            # Load relationships
-            query = select(UserJourney).where(
-                UserJourney.id == journey.id
-            ).options(
-                selectinload(UserJourney.template).selectinload(JourneyTemplate.steps),
-                selectinload(UserJourney.step_states)
-            )
-            result = await self.session.execute(query)
-            journey = result.scalar_one()
-
-            logger.info(f"User {user_id} started journey {journey.id} ({template_slug})")
-
-            return await self._journey_to_dict(journey)
-
-        except JourneyServiceError:
-            raise
-        except Exception as e:
-            logger.error(f"Error starting journey for user {user_id}: {e}")
-            await self.session.rollback()
-            raise JourneyServiceError(
-                "Failed to start journey",
-                "JOURNEY_START_ERROR"
-            )
-
-    async def pause_journey(
-        self,
-        journey_id: str,
-        user_id: str
-    ) -> dict[str, Any]:
-        """Pause a journey."""
-        journey = await self._get_user_journey(journey_id, user_id)
-
-        if journey.status != UserJourneyStatus.ACTIVE.value:
-            raise JourneyServiceError(
-                "Only active journeys can be paused",
-                "INVALID_JOURNEY_STATE"
-            )
-
-        journey.status = UserJourneyStatus.PAUSED.value
-        journey.paused_at = datetime.datetime.now(datetime.UTC)
-        journey.updated_at = datetime.datetime.now(datetime.UTC)
-
-        await self.session.commit()
-        logger.info(f"User {user_id} paused journey {journey_id}")
-
-        return await self._journey_to_dict(journey)
-
-    async def resume_journey(
-        self,
-        journey_id: str,
-        user_id: str
-    ) -> dict[str, Any]:
-        """Resume a paused journey."""
-        journey = await self._get_user_journey(journey_id, user_id)
-
-        if journey.status != UserJourneyStatus.PAUSED.value:
-            raise JourneyServiceError(
-                "Only paused journeys can be resumed",
-                "INVALID_JOURNEY_STATE"
-            )
-
-        journey.status = UserJourneyStatus.ACTIVE.value
-        journey.paused_at = None
-        journey.updated_at = datetime.datetime.now(datetime.UTC)
-
-        await self.session.commit()
-        logger.info(f"User {user_id} resumed journey {journey_id}")
-
-        return await self._journey_to_dict(journey)
-
-    async def abandon_journey(
-        self,
-        journey_id: str,
-        user_id: str
-    ) -> dict[str, Any]:
-        """Abandon a journey (soft delete)."""
-        journey = await self._get_user_journey(journey_id, user_id)
-
-        if journey.status == UserJourneyStatus.COMPLETED.value:
-            raise JourneyServiceError(
-                "Cannot abandon a completed journey",
-                "INVALID_JOURNEY_STATE"
-            )
-
-        journey.status = UserJourneyStatus.ABANDONED.value
-        journey.updated_at = datetime.datetime.now(datetime.UTC)
-
-        await self.session.commit()
-        logger.info(f"User {user_id} abandoned journey {journey_id}")
-
-        return await self._journey_to_dict(journey)
-
-    # =========================================================================
-    # STEP OPERATIONS
-    # =========================================================================
-
-    async def get_today_step(
-        self,
-        journey_id: str,
-        user_id: str
-    ) -> dict[str, Any]:
-        """
-        Get today's step for a journey.
-
-        Returns the current step content, or generates it if needed.
-        """
-        journey = await self._get_user_journey(journey_id, user_id)
-
-        if journey.status != UserJourneyStatus.ACTIVE.value:
-            raise JourneyServiceError(
-                "Journey is not active",
-                "JOURNEY_NOT_ACTIVE"
-            )
-
-        # Get or create step state for current day
-        step_state = await self._get_or_create_step_state(
-            journey,
-            journey.current_day_index
+        # Build base query
+        query = select(PersonalJourney).where(
+            PersonalJourney.owner_id == user_id,
+            PersonalJourney.deleted_at.is_(None)
         )
 
-        # Get template step info
-        template_step = None
-        if journey.template and journey.template.steps:
-            for step in journey.template.steps:
-                if step.day_index == journey.current_day_index:
-                    template_step = step
-                    break
+        # Apply status filter
+        if status:
+            if status not in self.VALID_STATUSES:
+                raise JourneyValidationError(f"Invalid status: {status}")
+            query = query.where(PersonalJourney.status == status)
 
-        return self._step_state_to_dict(step_state, template_step, journey.template)
+        # Apply search filter
+        if search:
+            search_term = f"%{search}%"
+            query = query.where(PersonalJourney.title.ilike(search_term))
 
-    async def complete_step(
-        self,
-        journey_id: str,
-        user_id: str,
-        day_index: int,
-        reflection: str | None = None,
-        check_in_data: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
-        """
-        Mark a journey step as complete.
+        # Get total count before pagination
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = await self.session.execute(count_query)
+        total = total_result.scalar() or 0
 
-        Args:
-            journey_id: The journey ID
-            user_id: The user's ID
-            day_index: The day index to complete
-            reflection: Optional reflection text
-            check_in_data: Optional check-in data (mood scale, etc.)
-
-        Returns:
-            Updated journey with progress
-        """
-        journey = await self._get_user_journey(journey_id, user_id)
-
-        if journey.status != UserJourneyStatus.ACTIVE.value:
-            raise JourneyServiceError(
-                "Journey is not active",
-                "JOURNEY_NOT_ACTIVE"
-            )
-
-        # Validate day index
-        if day_index != journey.current_day_index:
-            raise JourneyServiceError(
-                f"You must complete day {journey.current_day_index} first",
-                "INVALID_DAY_INDEX"
-            )
-
-        # Get step state
-        step_state = await self._get_or_create_step_state(journey, day_index)
-
-        if step_state.completed_at is not None:
-            raise StepAlreadyCompletedError(day_index)
-
-        # Update step state
-        now = datetime.datetime.now(datetime.UTC)
-        step_state.completed_at = now
-        step_state.updated_at = now
-
-        if reflection:
-            # Store reflection (in production, this should be encrypted)
-            step_state.reflection_encrypted = {
-                "text": reflection,
-                "encrypted": False  # TODO: Implement encryption
-            }
-
-        if check_in_data:
-            step_state.check_in = check_in_data
-
-        # Check if journey is complete
-        total_days = journey.template.duration_days if journey.template else 14
-
-        if day_index >= total_days:
-            # Journey complete!
-            journey.status = UserJourneyStatus.COMPLETED.value
-            journey.completed_at = now
-            logger.info(f"User {user_id} completed journey {journey_id}")
+        # Apply sorting
+        sort_column = getattr(PersonalJourney, sort_by, PersonalJourney.updated_at)
+        if sort_order == "desc":
+            query = query.order_by(desc(sort_column).nulls_last())
         else:
-            # Advance to next day
-            journey.current_day_index = day_index + 1
+            query = query.order_by(asc(sort_column).nulls_last())
 
-        journey.updated_at = now
+        # Apply pagination
+        query = query.limit(min(limit, 100)).offset(offset)
 
-        await self.session.commit()
+        # Execute query
+        result = await self.session.execute(query)
+        journeys = result.scalars().all()
 
-        return await self._journey_to_dict(journey)
+        return {
+            "items": [self._journey_to_dict(j) for j in journeys],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
 
-    async def get_today_agenda(
-        self,
-        user_id: str
-    ) -> list[dict[str, Any]]:
+    async def get_journey(self, journey_id: str, user_id: str) -> dict[str, Any]:
         """
-        Get today's agenda for all active journeys.
+        Get a single journey by ID.
 
-        Returns a list of today's steps across all active journeys.
+        Args:
+            journey_id: The journey ID
+            user_id: The requesting user's ID (for authorization)
+
+        Returns:
+            Journey data as dict
+
+        Raises:
+            JourneyNotFoundError: If journey doesn't exist
+            JourneyAuthorizationError: If user doesn't own the journey
         """
-        active_journeys = await self.get_active_journeys(user_id)
+        journey = await self._get_journey_or_404(journey_id)
+        self._check_ownership(journey, user_id)
+        return self._journey_to_dict(journey)
 
-        agenda = []
-        for journey in active_journeys:
-            try:
-                step = await self.get_today_step(journey["id"], user_id)
-                agenda.append({
-                    "journey": journey,
-                    "today_step": step
-                })
-            except Exception as e:
-                logger.warning(f"Error getting today's step for journey {journey['id']}: {e}")
-                # Include journey but mark step as unavailable
-                agenda.append({
-                    "journey": journey,
-                    "today_step": None,
-                    "error": str(e)
-                })
-
-        return agenda
-
-    # =========================================================================
-    # PRIVATE HELPERS
-    # =========================================================================
-
-    async def _get_user_journey(
+    async def create_journey(
         self,
-        journey_id: str,
-        user_id: str
-    ) -> UserJourney:
-        """Get a journey and verify ownership."""
-        query = select(UserJourney).where(
-            UserJourney.id == journey_id,
-            UserJourney.deleted_at.is_(None)
-        ).options(
-            selectinload(UserJourney.template).selectinload(JourneyTemplate.steps),
-            selectinload(UserJourney.step_states)
+        user_id: str,
+        *,
+        title: str,
+        description: str | None = None,
+        status: str = "draft",
+        cover_image_url: str | None = None,
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Create a new journey.
+
+        Args:
+            user_id: The owner's user ID
+            title: Journey title (required)
+            description: Optional description
+            status: Initial status (default: draft)
+            cover_image_url: Optional cover image URL
+            tags: Optional list of tags
+
+        Returns:
+            Created journey data as dict
+
+        Raises:
+            JourneyValidationError: If data is invalid
+        """
+        # Validate title
+        title = title.strip()
+        if not title:
+            raise JourneyValidationError("Title is required")
+        if len(title) > 255:
+            raise JourneyValidationError("Title must be 255 characters or less")
+
+        # Validate status
+        if status not in self.VALID_STATUSES:
+            raise JourneyValidationError(f"Invalid status: {status}")
+
+        # Validate description length
+        if description and len(description) > 5000:
+            raise JourneyValidationError("Description must be 5000 characters or less")
+
+        # Validate cover image URL
+        if cover_image_url and len(cover_image_url) > 512:
+            raise JourneyValidationError("Cover image URL must be 512 characters or less")
+
+        # Validate tags
+        if tags:
+            if len(tags) > 10:
+                raise JourneyValidationError("Maximum 10 tags allowed")
+            tags = [t.strip()[:50] for t in tags if t.strip()]
+
+        # Create journey
+        journey = PersonalJourney(
+            id=str(uuid.uuid4()),
+            owner_id=user_id,
+            title=title,
+            description=description,
+            status=PersonalJourneyStatus(status),
+            cover_image_url=cover_image_url,
+            tags=tags or [],
+            created_at=datetime.datetime.now(datetime.UTC),
         )
 
+        self.session.add(journey)
+        await self.session.commit()
+        await self.session.refresh(journey)
+
+        logger.info(f"Created journey {journey.id} for user {user_id}")
+        return self._journey_to_dict(journey)
+
+    async def update_journey(
+        self,
+        journey_id: str,
+        user_id: str,
+        *,
+        title: str | None = None,
+        description: str | None = None,
+        status: str | None = None,
+        cover_image_url: str | None = None,
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Update an existing journey.
+
+        Args:
+            journey_id: The journey ID
+            user_id: The requesting user's ID
+            title: New title (optional)
+            description: New description (optional)
+            status: New status (optional)
+            cover_image_url: New cover image URL (optional)
+            tags: New tags (optional)
+
+        Returns:
+            Updated journey data as dict
+
+        Raises:
+            JourneyNotFoundError: If journey doesn't exist
+            JourneyAuthorizationError: If user doesn't own the journey
+            JourneyValidationError: If data is invalid
+        """
+        journey = await self._get_journey_or_404(journey_id)
+        self._check_ownership(journey, user_id)
+
+        # Update title
+        if title is not None:
+            title = title.strip()
+            if not title:
+                raise JourneyValidationError("Title cannot be empty")
+            if len(title) > 255:
+                raise JourneyValidationError("Title must be 255 characters or less")
+            journey.title = title
+
+        # Update description
+        if description is not None:
+            if len(description) > 5000:
+                raise JourneyValidationError("Description must be 5000 characters or less")
+            journey.description = description
+
+        # Update status
+        if status is not None:
+            if status not in self.VALID_STATUSES:
+                raise JourneyValidationError(f"Invalid status: {status}")
+            journey.status = PersonalJourneyStatus(status)
+
+        # Update cover image URL
+        if cover_image_url is not None:
+            if cover_image_url and len(cover_image_url) > 512:
+                raise JourneyValidationError("Cover image URL must be 512 characters or less")
+            journey.cover_image_url = cover_image_url or None
+
+        # Update tags
+        if tags is not None:
+            if len(tags) > 10:
+                raise JourneyValidationError("Maximum 10 tags allowed")
+            journey.tags = [t.strip()[:50] for t in tags if t.strip()]
+
+        journey.updated_at = datetime.datetime.now(datetime.UTC)
+
+        await self.session.commit()
+        await self.session.refresh(journey)
+
+        logger.info(f"Updated journey {journey_id} by user {user_id}")
+        return self._journey_to_dict(journey)
+
+    async def delete_journey(self, journey_id: str, user_id: str) -> None:
+        """
+        Soft delete a journey.
+
+        Args:
+            journey_id: The journey ID
+            user_id: The requesting user's ID
+
+        Raises:
+            JourneyNotFoundError: If journey doesn't exist
+            JourneyAuthorizationError: If user doesn't own the journey
+        """
+        journey = await self._get_journey_or_404(journey_id)
+        self._check_ownership(journey, user_id)
+
+        # Soft delete
+        journey.deleted_at = datetime.datetime.now(datetime.UTC)
+        await self.session.commit()
+
+        logger.info(f"Deleted journey {journey_id} by user {user_id}")
+
+    async def _get_journey_or_404(self, journey_id: str) -> PersonalJourney:
+        """Get a journey by ID or raise 404."""
+        query = select(PersonalJourney).where(
+            PersonalJourney.id == journey_id,
+            PersonalJourney.deleted_at.is_(None)
+        )
         result = await self.session.execute(query)
         journey = result.scalar_one_or_none()
 
         if not journey:
             raise JourneyNotFoundError(journey_id)
 
-        if journey.user_id != user_id:
-            # Security: Don't reveal that the journey exists
-            raise JourneyNotFoundError(journey_id)
-
         return journey
 
-    async def _count_active_journeys(self, user_id: str) -> int:
-        """Count user's active journeys."""
-        query = select(func.count()).select_from(UserJourney).where(
-            UserJourney.user_id == user_id,
-            UserJourney.status == UserJourneyStatus.ACTIVE.value,
-            UserJourney.deleted_at.is_(None)
-        )
-        result = await self.session.execute(query)
-        return result.scalar() or 0
-
-    async def _get_or_create_step_state(
-        self,
-        journey: UserJourney,
-        day_index: int
-    ) -> UserJourneyStepState:
-        """Get or create a step state for a specific day."""
-        # Check if step state exists
-        for state in journey.step_states:
-            if state.day_index == day_index:
-                return state
-
-        # Create new step state
-        step_state = UserJourneyStepState(
-            id=str(uuid.uuid4()),
-            user_journey_id=journey.id,
-            day_index=day_index,
-            delivered_at=datetime.datetime.now(datetime.UTC),
-            verse_refs=[],
-            kiaan_step_json=self._generate_step_content(journey, day_index)
-        )
-
-        self.session.add(step_state)
-        await self.session.flush()
-
-        return step_state
-
-    def _generate_step_content(
-        self,
-        journey: UserJourney,
-        day_index: int
-    ) -> dict[str, Any]:
-        """
-        Generate step content for a day.
-
-        In a full implementation, this would call KIAAN AI.
-        For now, returns template-based content.
-        """
-        template_step = None
-        if journey.template and journey.template.steps:
-            for step in journey.template.steps:
-                if step.day_index == day_index:
-                    template_step = step
-                    break
-
-        if template_step:
-            return {
-                "step_title": template_step.step_title or f"Day {day_index}",
-                "today_focus": journey.template.primary_enemy_tags[0] if journey.template.primary_enemy_tags else "general",
-                "verse_refs": template_step.static_verse_refs or [],
-                "teaching": template_step.teaching_hint or "Continue your journey of inner transformation.",
-                "guided_reflection": [
-                    template_step.reflection_prompt or "How do you feel today?",
-                    "What challenges have you faced?",
-                    "What insights have you gained?"
-                ],
-                "practice": {
-                    "name": "Daily Reflection",
-                    "instructions": [
-                        "Find a quiet space",
-                        "Take 5 deep breaths",
-                        template_step.practice_prompt or "Reflect on today's teaching"
-                    ],
-                    "duration_minutes": 10
-                },
-                "micro_commitment": "Today, I commit to practicing awareness.",
-                "check_in_prompt": {
-                    "scale": "1-10",
-                    "label": "How connected do you feel to your inner peace?"
-                }
-            }
-
-        # Default content if no template step
-        return {
-            "step_title": f"Day {day_index}",
-            "today_focus": "general",
-            "verse_refs": [],
-            "teaching": "Continue your journey toward inner peace.",
-            "guided_reflection": [
-                "How do you feel today?",
-                "What are you grateful for?",
-                "What is one thing you can do differently today?"
-            ],
-            "practice": {
-                "name": "Daily Meditation",
-                "instructions": [
-                    "Find a quiet space",
-                    "Close your eyes",
-                    "Focus on your breath for 5 minutes"
-                ],
-                "duration_minutes": 5
-            },
-            "micro_commitment": "I commit to being present in this moment.",
-            "check_in_prompt": {
-                "scale": "1-10",
-                "label": "How at peace do you feel right now?"
-            }
-        }
-
-    def _template_to_dict(self, template: JourneyTemplate) -> dict[str, Any]:
-        """Convert a template to a dictionary."""
-        return {
-            "id": template.id,
-            "slug": template.slug,
-            "title": template.title,
-            "description": template.description,
-            "duration_days": template.duration_days,
-            "difficulty": template.difficulty,
-            "difficulty_label": self._difficulty_to_label(template.difficulty),
-            "primary_enemy_tags": template.primary_enemy_tags or [],
-            "is_featured": template.is_featured,
-            "is_free": template.is_free,
-            "icon_name": template.icon_name,
-            "color_theme": template.color_theme,
-            "step_count": len(template.steps) if template.steps else template.duration_days
-        }
-
-    async def _journey_to_dict(
-        self,
-        journey: UserJourney,
-        include_steps: bool = False
-    ) -> dict[str, Any]:
-        """Convert a journey to a dictionary."""
-        total_days = journey.template.duration_days if journey.template else 14
-        completed_days = len([
-            s for s in journey.step_states
-            if s.completed_at is not None
-        ])
-        progress = round((completed_days / total_days) * 100, 1) if total_days > 0 else 0
-
-        result = {
-            "id": journey.id,
-            "status": journey.status,
-            "current_day_index": journey.current_day_index,
-            "total_days": total_days,
-            "completed_days": completed_days,
-            "progress": progress,
-            "started_at": journey.started_at.isoformat() if journey.started_at else None,
-            "completed_at": journey.completed_at.isoformat() if journey.completed_at else None,
-            "paused_at": journey.paused_at.isoformat() if journey.paused_at else None,
-            "personalization": journey.personalization or {},
-            "template": self._template_to_dict(journey.template) if journey.template else None
-        }
-
-        if include_steps:
-            result["steps"] = [
-                self._step_state_to_dict(s, None, journey.template)
-                for s in sorted(journey.step_states, key=lambda x: x.day_index)
-            ]
-
-        return result
-
-    def _step_state_to_dict(
-        self,
-        step_state: UserJourneyStepState,
-        template_step: JourneyTemplateStep | None,
-        template: JourneyTemplate | None
-    ) -> dict[str, Any]:
-        """Convert a step state to a dictionary."""
-        return {
-            "id": step_state.id,
-            "day_index": step_state.day_index,
-            "is_completed": step_state.completed_at is not None,
-            "completed_at": step_state.completed_at.isoformat() if step_state.completed_at else None,
-            "delivered_at": step_state.delivered_at.isoformat() if step_state.delivered_at else None,
-            "verse_refs": step_state.verse_refs or [],
-            "content": step_state.kiaan_step_json,
-            "check_in": step_state.check_in,
-            "has_reflection": step_state.reflection_encrypted is not None,
-            "template_info": {
-                "step_title": template_step.step_title if template_step else None,
-                "teaching_hint": template_step.teaching_hint if template_step else None,
-            } if template_step else None
-        }
+    def _check_ownership(self, journey: PersonalJourney, user_id: str) -> None:
+        """Check if user owns the journey."""
+        if journey.owner_id != user_id:
+            raise JourneyAuthorizationError()
 
     @staticmethod
-    def _difficulty_to_label(difficulty: int) -> str:
-        """Convert difficulty number to label."""
-        labels = {
-            1: "Beginner",
-            2: "Easy",
-            3: "Moderate",
-            4: "Challenging",
-            5: "Advanced"
+    def _journey_to_dict(journey: PersonalJourney) -> dict[str, Any]:
+        """Convert a journey model to a dictionary."""
+        return {
+            "id": journey.id,
+            "owner_id": journey.owner_id,
+            "title": journey.title,
+            "description": journey.description,
+            "status": journey.status.value if isinstance(journey.status, PersonalJourneyStatus) else journey.status,
+            "cover_image_url": journey.cover_image_url,
+            "tags": journey.tags or [],
+            "created_at": journey.created_at.isoformat() if journey.created_at else None,
+            "updated_at": journey.updated_at.isoformat() if journey.updated_at else None,
         }
-        return labels.get(difficulty, "Moderate")
 
 
-# Factory function
 def get_journey_service(session: AsyncSession) -> JourneyService:
-    """Create a JourneyService instance."""
+    """Factory function to create a JourneyService instance."""
     return JourneyService(session)

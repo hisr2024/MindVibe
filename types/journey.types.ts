@@ -1,8 +1,5 @@
 /**
- * Journey Types - TypeScript definitions for the Wisdom Journeys feature.
- *
- * These types map to the backend API responses and are used throughout
- * the frontend for type safety.
+ * Journey Types - TypeScript definitions for the Personal Journeys feature.
  */
 
 // =============================================================================
@@ -10,232 +7,151 @@
 // =============================================================================
 
 /**
- * Status of a user's journey instance.
+ * Status of a personal journey.
  */
-export type JourneyStatus = 'active' | 'paused' | 'completed' | 'abandoned';
+export type JourneyStatus = 'draft' | 'active' | 'completed' | 'archived';
 
 /**
- * Pace preference for journey steps.
+ * Fields that can be used for sorting.
  */
-export type JourneyPace = 'daily' | 'every_other_day' | 'weekly';
+export type JourneySortField = 'created_at' | 'updated_at' | 'title';
 
 /**
- * Tone preference for KIAAN responses.
+ * Sort direction.
  */
-export type JourneyTone = 'gentle' | 'direct' | 'inspiring';
-
-/**
- * Inner enemy tags (Sad-Ripu).
- */
-export type InnerEnemyTag =
-  | 'kama'      // Desire/Lust
-  | 'krodha'    // Anger
-  | 'lobha'     // Greed
-  | 'moha'      // Attachment/Delusion
-  | 'mada'      // Ego/Pride
-  | 'matsarya'  // Envy/Jealousy
-  | 'mixed'     // Combined journey
-  | 'general';  // General wisdom
-
-// =============================================================================
-// TEMPLATE TYPES
-// =============================================================================
-
-/**
- * A journey template from the catalog.
- */
-export interface JourneyTemplate {
-  id: string;
-  slug: string;
-  title: string;
-  description: string | null;
-  duration_days: number;
-  difficulty: number;
-  difficulty_label: string;
-  primary_enemy_tags: InnerEnemyTag[];
-  is_featured: boolean;
-  is_free: boolean;
-  icon_name: string | null;
-  color_theme: string | null;
-  step_count: number;
-}
+export type SortOrder = 'asc' | 'desc';
 
 // =============================================================================
 // JOURNEY TYPES
 // =============================================================================
 
 /**
- * Personalization settings for a journey.
- */
-export interface JourneyPersonalization {
-  pace?: JourneyPace;
-  time_budget_minutes?: number;
-  focus_tags?: InnerEnemyTag[];
-  preferred_tone?: JourneyTone;
-  provider_preference?: 'auto' | 'openai' | 'sarvam' | 'oai_compat';
-}
-
-/**
- * A user's journey instance.
+ * A personal journey entity.
  */
 export interface Journey {
   id: string;
+  owner_id: string;
+  title: string;
+  description: string | null;
   status: JourneyStatus;
-  current_day_index: number;
-  total_days: number;
-  completed_days: number;
-  progress: number;
-  started_at: string | null;
-  completed_at: string | null;
-  paused_at: string | null;
-  personalization: JourneyPersonalization;
-  template: JourneyTemplate | null;
-  steps?: JourneyStep[];
+  cover_image_url: string | null;
+  tags: string[];
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 /**
- * Check-in data for a step.
+ * Paginated list of journeys.
  */
-export interface StepCheckIn {
-  intensity?: number;
-  label?: string;
-  timestamp?: string;
-}
-
-/**
- * Verse reference for a step.
- */
-export interface VerseRef {
-  chapter: number;
-  verse: number;
-}
-
-/**
- * Practice instructions for a step.
- */
-export interface StepPractice {
-  name: string;
-  instructions: string[];
-  duration_minutes: number;
-}
-
-/**
- * Check-in prompt configuration.
- */
-export interface CheckInPrompt {
-  scale: string;
-  label: string;
-}
-
-/**
- * AI-generated step content from KIAAN.
- */
-export interface StepContent {
-  step_title: string;
-  today_focus: InnerEnemyTag;
-  verse_refs: VerseRef[];
-  teaching: string;
-  guided_reflection: string[];
-  practice: StepPractice;
-  micro_commitment: string;
-  check_in_prompt: CheckInPrompt;
-  safety_note?: string;
-}
-
-/**
- * A journey step with state and content.
- */
-export interface JourneyStep {
-  id: string;
-  day_index: number;
-  is_completed: boolean;
-  completed_at: string | null;
-  delivered_at: string | null;
-  verse_refs: VerseRef[];
-  content: StepContent | null;
-  check_in: StepCheckIn | null;
-  has_reflection: boolean;
-  template_info: {
-    step_title: string | null;
-    teaching_hint: string | null;
-  } | null;
-}
-
-// =============================================================================
-// AGENDA TYPES
-// =============================================================================
-
-/**
- * A single item in the today's agenda.
- */
-export interface AgendaItem {
-  journey: Journey;
-  today_step: JourneyStep | null;
-  error?: string;
-}
-
-// =============================================================================
-// ACCESS TYPES
-// =============================================================================
-
-/**
- * User's journey access information.
- */
-export interface JourneyAccess {
-  has_access: boolean;
-  active_count: number;
+export interface JourneyListResponse {
+  items: Journey[];
+  total: number;
   limit: number;
-  remaining_slots: number;
-  is_trial: boolean;
+  offset: number;
 }
-
-// =============================================================================
-// API RESPONSE TYPES
-// =============================================================================
-
-/**
- * Standard API response wrapper.
- */
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  error_code?: string;
-}
-
-/**
- * List response with count.
- */
-export interface ListResponse<T> {
-  success: boolean;
-  data: T[];
-  count: number;
-}
-
-// Specific response types
-export type CatalogResponse = ListResponse<JourneyTemplate>;
-export type ActiveJourneysResponse = ListResponse<Journey>;
-export type TodayAgendaResponse = ListResponse<AgendaItem>;
-export type JourneyResponse = ApiResponse<Journey>;
-export type StepResponse = ApiResponse<JourneyStep>;
-export type AccessResponse = ApiResponse<JourneyAccess>;
 
 // =============================================================================
 // REQUEST TYPES
 // =============================================================================
 
 /**
- * Request to start a new journey.
+ * Request to create a new journey.
  */
-export interface StartJourneyRequest {
-  template_slug: string;
-  personalization?: JourneyPersonalization;
+export interface CreateJourneyRequest {
+  title: string;
+  description?: string | null;
+  status?: JourneyStatus;
+  cover_image_url?: string | null;
+  tags?: string[];
 }
 
 /**
- * Request to complete a journey step.
+ * Request to update an existing journey.
  */
-export interface CompleteStepRequest {
-  reflection?: string;
-  check_in?: StepCheckIn;
+export interface UpdateJourneyRequest {
+  title?: string;
+  description?: string | null;
+  status?: JourneyStatus;
+  cover_image_url?: string | null;
+  tags?: string[];
+}
+
+/**
+ * Query parameters for listing journeys.
+ */
+export interface ListJourneysParams {
+  status?: JourneyStatus;
+  search?: string;
+  sort_by?: JourneySortField;
+  sort_order?: SortOrder;
+  limit?: number;
+  offset?: number;
+}
+
+// =============================================================================
+// ERROR TYPES
+// =============================================================================
+
+/**
+ * API error response structure.
+ */
+export interface ApiError {
+  error: string;
+  message: string;
+}
+
+// =============================================================================
+// UI STATE TYPES
+// =============================================================================
+
+/**
+ * Form state for journey creation/editing.
+ */
+export interface JourneyFormState {
+  title: string;
+  description: string;
+  status: JourneyStatus;
+  cover_image_url: string;
+  tags: string[];
+}
+
+/**
+ * Initial form state.
+ */
+export const INITIAL_JOURNEY_FORM: JourneyFormState = {
+  title: '',
+  description: '',
+  status: 'draft',
+  cover_image_url: '',
+  tags: [],
+};
+
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
+/**
+ * Get display label for journey status.
+ */
+export function getStatusLabel(status: JourneyStatus): string {
+  const labels: Record<JourneyStatus, string> = {
+    draft: 'Draft',
+    active: 'Active',
+    completed: 'Completed',
+    archived: 'Archived',
+  };
+  return labels[status];
+}
+
+/**
+ * Get status color for UI display.
+ */
+export function getStatusColor(status: JourneyStatus): string {
+  const colors: Record<JourneyStatus, string> = {
+    draft: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+    active: 'bg-green-500/20 text-green-400 border-green-500/30',
+    completed: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    archived: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  };
+  return colors[status];
 }
