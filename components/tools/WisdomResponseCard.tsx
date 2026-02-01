@@ -366,13 +366,6 @@ export default function WisdomResponseCard({
             size="sm"
             variant="accent"
           />
-          <button
-            onClick={handleCopy}
-            className="text-[10px] px-2 py-1 rounded border border-gray-600/50 text-gray-300 hover:text-white hover:border-gray-500 transition"
-            aria-label="Copy Ardha response"
-          >
-            {copyStatus === 'copied' ? 'Copied' : 'Copy'}
-          </button>
         </div>
       </div>
 
