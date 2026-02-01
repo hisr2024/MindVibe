@@ -1,12 +1,12 @@
 """
 Additional model utilities for MindVibe backend.
 
-NOTE: Main models are defined in backend/models.py
-This file contains utility documentation and examples.
+NOTE: Main models are defined in backend/models/base.py and re-exported
+from backend/models/__init__.py for convenient imports.
 
 SOFT DELETE PATTERN
 -------------------
-All user-facing models should use the SoftDeleteMixin from backend/models.py:
+All user-facing models should use the SoftDeleteMixin from backend.models:
 
     from backend.models import Base, SoftDeleteMixin
 
@@ -28,8 +28,8 @@ Usage in queries:
     # Or use the class method
     stmt = MyModel.not_deleted(select(MyModel))
 
-See backend/models.py for the full SoftDeleteMixin implementation.
+See backend/models/base.py for the full SoftDeleteMixin implementation.
 """
 
 # This file is intentionally mostly documentation.
-# Main model definitions are in backend/models.py
+# Main model definitions are in backend/models/base.py
