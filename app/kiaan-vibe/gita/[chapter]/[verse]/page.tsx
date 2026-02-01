@@ -4,17 +4,18 @@
  * KIAAN Vibe - Verse Detail
  *
  * Full verse with Sanskrit, transliteration, and translation.
+ * Uses natural divine voice (Google Neural2/Sarvam AI) for TTS.
  */
 
-import { useState, useEffect, use, useCallback } from 'react'
+import { useState, useEffect, use, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Copy, Check, Play, Pause, ChevronLeft, ChevronRight, Share2, Volume2 } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Play, Pause, ChevronLeft, ChevronRight, Share2, Volume2, Loader2 } from 'lucide-react'
 import { getVerse, getVerseMultiLang, GITA_CHAPTERS_META, SUPPORTED_LANGUAGES, getAvailableLanguages } from '@/lib/kiaan-vibe/gita'
 import type { GitaVerse } from '@/lib/kiaan-vibe/types'
 
-// Language code mapping for browser TTS
+// Language code mapping for TTS (both API and browser fallback)
 const TTS_LANGUAGE_MAP: Record<string, string> = {
   en: 'en-US',
   hi: 'hi-IN',
@@ -27,6 +28,11 @@ const TTS_LANGUAGE_MAP: Record<string, string> = {
   kn: 'kn-IN',
   ml: 'ml-IN',
   pa: 'pa-IN',
+}
+
+// Voice type based on content - wisdom for sacred texts
+const getVoiceType = (section: 'sanskrit' | 'translation'): string => {
+  return section === 'sanskrit' ? 'wisdom' : 'calm'
 }
 
 interface PageProps {
@@ -45,14 +51,27 @@ export default function VerseDetailPage({ params }: PageProps) {
   const [copied, setCopied] = useState(false)
   const [showAllTranslations, setShowAllTranslations] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false)
   const [playingSection, setPlayingSection] = useState<'sanskrit' | 'translation' | null>(null)
+
+  // Refs for audio management
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioUrlRef = useRef<string | null>(null)
 
   const chapterMeta = GITA_CHAPTERS_META.find((c) => c.number === chapterNumber)
   const langInfo = SUPPORTED_LANGUAGES[languageCode] || SUPPORTED_LANGUAGES['en']
 
-  // Cleanup speech synthesis on unmount
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current)
+        audioUrlRef.current = null
+      }
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel()
       }
@@ -61,41 +80,127 @@ export default function VerseDetailPage({ params }: PageProps) {
 
   // Stop playing when verse changes
   useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel()
-      setIsPlaying(false)
-      setPlayingSection(null)
     }
+    setIsPlaying(false)
+    setPlayingSection(null)
+    setIsLoadingAudio(false)
   }, [chapterNumber, verseNumber])
 
-  const handlePlayVerse = useCallback((text: string, section: 'sanskrit' | 'translation', lang: string) => {
+  /**
+   * Play verse using natural divine voice from backend TTS API.
+   * Falls back to browser TTS if API fails.
+   */
+  const handlePlayVerse = useCallback(async (text: string, section: 'sanskrit' | 'translation', lang: string) => {
+    // If already playing this section, stop it
+    if (isPlaying && playingSection === section) {
+      if (audioRef.current) {
+        audioRef.current.pause()
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+      setIsPlaying(false)
+      setPlayingSection(null)
+      return
+    }
+
+    // Stop any existing playback
+    if (audioRef.current) {
+      audioRef.current.pause()
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+    }
+
+    setIsLoadingAudio(true)
+    setPlayingSection(section)
+
+    try {
+      // Try backend TTS API for natural divine voice (Google Neural2/Sarvam AI)
+      const response = await fetch('/api/voice/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          language: lang === 'sa' ? 'hi' : lang, // Sanskrit uses Hindi voice
+          voice_type: getVoiceType(section),
+          speed: 0.92, // Slightly slower for sacred text clarity
+        }),
+      })
+
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || ''
+
+        if (contentType.includes('audio/')) {
+          // Got audio from backend - use natural divine voice
+          const audioBlob = await response.blob()
+
+          // Cleanup previous audio URL
+          if (audioUrlRef.current) {
+            URL.revokeObjectURL(audioUrlRef.current)
+          }
+
+          const audioUrl = URL.createObjectURL(audioBlob)
+          audioUrlRef.current = audioUrl
+
+          const audio = new Audio(audioUrl)
+          audioRef.current = audio
+
+          audio.onplay = () => {
+            setIsPlaying(true)
+            setIsLoadingAudio(false)
+          }
+
+          audio.onended = () => {
+            setIsPlaying(false)
+            setPlayingSection(null)
+          }
+
+          audio.onerror = () => {
+            console.warn('[GitaVerse] Audio playback failed, trying browser TTS')
+            useBrowserTTS(text, section, lang)
+          }
+
+          await audio.play()
+          return
+        }
+      }
+
+      // Fallback to browser TTS if API returns fallback indicator or fails
+      useBrowserTTS(text, section, lang)
+
+    } catch (error) {
+      console.warn('[GitaVerse] API TTS failed, using browser fallback:', error)
+      useBrowserTTS(text, section, lang)
+    }
+  }, [isPlaying, playingSection])
+
+  /**
+   * Browser TTS fallback when API is unavailable
+   */
+  const useBrowserTTS = useCallback((text: string, section: 'sanskrit' | 'translation', lang: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       console.warn('[GitaVerse] Speech synthesis not supported')
+      setIsLoadingAudio(false)
+      setPlayingSection(null)
       return
     }
 
     const synth = window.speechSynthesis
-
-    // If already playing this section, stop it
-    if (isPlaying && playingSection === section) {
-      synth.cancel()
-      setIsPlaying(false)
-      setPlayingSection(null)
-      return
-    }
-
-    // Cancel any existing speech
-    synth.cancel()
-
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = TTS_LANGUAGE_MAP[lang] || 'en-US'
-    utterance.rate = 0.9 // Slightly slower for clarity
+    utterance.rate = 0.9
     utterance.pitch = 1.0
     utterance.volume = 1.0
 
     utterance.onstart = () => {
       setIsPlaying(true)
-      setPlayingSection(section)
+      setIsLoadingAudio(false)
     }
 
     utterance.onend = () => {
@@ -106,10 +211,11 @@ export default function VerseDetailPage({ params }: PageProps) {
     utterance.onerror = () => {
       setIsPlaying(false)
       setPlayingSection(null)
+      setIsLoadingAudio(false)
     }
 
     synth.speak(utterance)
-  }, [isPlaying, playingSection])
+  }, [])
 
   useEffect(() => {
     const loadVerse = async () => {
@@ -245,14 +351,20 @@ export default function VerseDetailPage({ params }: PageProps) {
             <p className="text-xs uppercase tracking-wider text-orange-400">Sanskrit</p>
             <button
               onClick={() => handlePlayVerse(verse.sanskrit || '', 'sanskrit', 'sa')}
+              disabled={isLoadingAudio && playingSection === 'sanskrit'}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 playingSection === 'sanskrit'
                   ? 'bg-orange-500 text-white'
                   : 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-              }`}
+              } ${isLoadingAudio && playingSection === 'sanskrit' ? 'opacity-70 cursor-wait' : ''}`}
               aria-label={playingSection === 'sanskrit' ? 'Stop playing Sanskrit' : 'Play Sanskrit'}
             >
-              {playingSection === 'sanskrit' ? (
+              {isLoadingAudio && playingSection === 'sanskrit' ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Loading...
+                </>
+              ) : playingSection === 'sanskrit' && isPlaying ? (
                 <>
                   <Pause className="w-3.5 h-3.5" />
                   Stop
@@ -342,14 +454,20 @@ export default function VerseDetailPage({ params }: PageProps) {
             {verse.translations[languageCode] && (
               <button
                 onClick={() => handlePlayVerse(verse.translations[languageCode], 'translation', languageCode)}
+                disabled={isLoadingAudio && playingSection === 'translation'}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   playingSection === 'translation'
                     ? 'bg-white/20 text-white'
                     : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
-                }`}
+                } ${isLoadingAudio && playingSection === 'translation' ? 'opacity-70 cursor-wait' : ''}`}
                 aria-label={playingSection === 'translation' ? 'Stop playing translation' : 'Play translation'}
               >
-                {playingSection === 'translation' ? (
+                {isLoadingAudio && playingSection === 'translation' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading Divine Voice...
+                  </>
+                ) : playingSection === 'translation' && isPlaying ? (
                   <>
                     <Pause className="w-4 h-4" />
                     Stop Listening
