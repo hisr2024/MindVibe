@@ -97,7 +97,27 @@ export default function ArdhaPage() {
       })
 
       const data = await response.json()
-      setResult({ response: data.response, requestedAt: new Date().toISOString() })
+
+      // Handle error responses
+      if (!response.ok) {
+        const errorMessage = data.error || 'An unexpected error occurred.'
+        const status = data.status || 'error'
+
+        if (status === 'service_unavailable' || response.status === 503) {
+          setError('Ardha is currently unavailable. Please ensure the AI service is configured.')
+        } else if (status === 'rate_limited') {
+          setError('Too many requests. Please wait a moment.')
+        } else {
+          setError(errorMessage)
+        }
+        return
+      }
+
+      if (data.response) {
+        setResult({ response: data.response, requestedAt: new Date().toISOString() })
+      } else {
+        setError('Ardha could not generate a response. Please try again.')
+      }
     } catch (error) {
       setError(getErrorMessage(error))
     } finally {
