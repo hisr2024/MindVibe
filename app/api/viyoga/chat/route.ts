@@ -5,7 +5,7 @@ import { appendMessage, ensureSession, getRecentMessages } from '@/lib/viyoga/st
 
 type ChatMode = 'brief' | 'full' | 'verse'
 
-const OPENAI_MODEL = process.env.VIYOGA_CHAT_MODEL || 'gpt-4.1-mini'
+const OPENAI_MODEL = process.env.VIYOGA_CHAT_MODEL || 'gpt-4o-mini'
 
 function buildContextBlock(chunks: { sourceFile: string; reference?: string; text: string }[]) {
   if (!chunks.length) return '[GITA_CORE_WISDOM_CONTEXT]\n(No relevant context retrieved.)\n[/GITA_CORE_WISDOM_CONTEXT]'
@@ -97,35 +97,38 @@ One Question
 What is the smallest action you can offer today without asking it to guarantee the outcome?`
 }
 
-async function callOpenAI(input: { role: string; content: string }[]) {
+async function callOpenAI(messages: { role: string; content: string }[]) {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) return null
 
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      input,
-      temperature: 0.4,
-    }),
-  })
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        messages,
+        temperature: 0.4,
+        max_tokens: 2000,
+      }),
+    })
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('[Viyoga Chat] OpenAI error:', errorText)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('[Viyoga Chat] OpenAI error:', errorText)
+      return null
+    }
+
+    const payload = await response.json()
+    const content = payload?.choices?.[0]?.message?.content
+    return typeof content === 'string' ? content : null
+  } catch (error) {
+    console.error('[Viyoga Chat] OpenAI request failed:', error)
     return null
   }
-
-  const payload = await response.json()
-  const output = Array.isArray(payload.output) ? payload.output : []
-  const assistant = output.find((item: { role?: string }) => item.role === 'assistant')
-  const content = Array.isArray(assistant?.content) ? assistant.content : []
-  const textBlock = content.find((item: { type?: string }) => item.type === 'output_text')
-  return typeof textBlock?.text === 'string' ? textBlock.text : null
 }
 
 export async function POST(request: NextRequest) {
