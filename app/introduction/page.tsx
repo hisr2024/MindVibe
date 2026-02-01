@@ -16,7 +16,7 @@ import {
   NamasteIcon,
 } from '@/components/divine'
 import { DivineConsciousnessProvider } from '@/contexts/DivineConsciousnessContext'
-import { useAudio } from '@/contexts/AudioContext'
+import { useUISound } from '@/hooks/useUISound'
 import Link from 'next/link'
 
 // Animation variants for consistent motion
@@ -102,7 +102,7 @@ export default function IntroductionPage() {
   const [isPageReady, setIsPageReady] = useState(false)
 
   // Audio hook for sound effects
-  const { playSound, playOm, playSingingBowl, playChime, playBell } = useAudio()
+  const { playSound, playOm, playSingingBowl, playChime, playBell } = useUISound()
 
   // Check if user has seen today's darshan
   useEffect(() => {

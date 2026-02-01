@@ -23,7 +23,7 @@
 
 import React, { forwardRef, useCallback, useState } from 'react'
 import Link from 'next/link'
-import { useAudio, type UISound } from '@/contexts/AudioContext'
+import { useUISound, type UISound } from '@/hooks/useUISound'
 
 // Simple utility for class name merging
 function cn(...classes: (string | boolean | undefined | null)[]): string {
@@ -40,7 +40,7 @@ interface SoundButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const SoundButton = forwardRef<HTMLButtonElement, SoundButtonProps>(
   ({ sound = 'click', variant = 'default', size = 'md', onClick, className, children, disabled, ...props }, ref) => {
-    const { playSound } = useAudio()
+    const { playSound } = useUISound()
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!disabled) {
@@ -92,7 +92,7 @@ interface SoundIconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElem
 
 export const SoundIconButton = forwardRef<HTMLButtonElement, SoundIconButtonProps>(
   ({ sound = 'click', size = 'md', onClick, className, children, disabled, ...props }, ref) => {
-    const { playSound } = useAudio()
+    const { playSound } = useUISound()
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!disabled) {
@@ -133,7 +133,7 @@ interface SoundLinkProps extends React.ComponentProps<typeof Link> {
 }
 
 export function SoundLink({ sound = 'transition', onClick, children, ...props }: SoundLinkProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     playSound(sound)
@@ -168,7 +168,7 @@ export function SoundToggle({
   className = '',
   label
 }: SoundToggleProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleChange = () => {
     if (!disabled) {
@@ -222,7 +222,7 @@ export function SoundCheckbox({
   className = '',
   label
 }: SoundCheckboxProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleChange = () => {
     if (!disabled) {
@@ -273,7 +273,7 @@ export function SoundCard({
   children,
   ...props
 }: SoundCardProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (interactive) {
@@ -309,7 +309,7 @@ interface SoundInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const SoundInput = forwardRef<HTMLInputElement, SoundInputProps>(
   ({ focusSound = 'click', typeSound = false, onFocus, onBlur, className, ...props }, ref) => {
-    const { playSound } = useAudio()
+    const { playSound } = useUISound()
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       playSound(focusSound)
@@ -345,7 +345,7 @@ interface SoundTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaEl
 
 export const SoundTextarea = forwardRef<HTMLTextAreaElement, SoundTextareaProps>(
   ({ focusSound = 'click', onFocus, className, ...props }, ref) => {
-    const { playSound } = useAudio()
+    const { playSound } = useUISound()
 
     const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
       playSound(focusSound)
@@ -391,7 +391,7 @@ export function SoundSlider({
   className = '',
   label
 }: SoundSliderProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
   const [lastSoundValue, setLastSoundValue] = useState(value)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -452,7 +452,7 @@ export function SoundTabs({
   sound = 'transition',
   className = ''
 }: SoundTabsProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleTabClick = (tabId: string) => {
     if (tabId !== activeTab) {
@@ -499,7 +499,7 @@ export function SoundAccordion({
   className = ''
 }: SoundAccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleToggle = () => {
     playSound(isOpen ? 'close' : 'open')
@@ -550,7 +550,7 @@ export function SoundSelect({
   placeholder = 'Select...',
   className = ''
 }: SoundSelectProps) {
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     playSound(sound)
@@ -586,7 +586,7 @@ interface MeditationBellButtonProps {
 }
 
 export function MeditationBellButton({ onBell, className }: MeditationBellButtonProps) {
-  const { playBell } = useAudio()
+  const { playBell } = useUISound()
 
   const handleClick = () => {
     playBell()
@@ -614,7 +614,7 @@ interface SingingBowlButtonProps {
 }
 
 export function SingingBowlButton({ onBowl, className }: SingingBowlButtonProps) {
-  const { playSingingBowl } = useAudio()
+  const { playSingingBowl } = useUISound()
 
   const handleClick = () => {
     playSingingBowl()
@@ -642,7 +642,7 @@ interface OmButtonProps {
 }
 
 export function OmButton({ onOm, className }: OmButtonProps) {
-  const { playOm } = useAudio()
+  const { playOm } = useUISound()
 
   const handleClick = () => {
     playOm()
@@ -670,7 +670,7 @@ interface GongButtonProps {
 }
 
 export function GongButton({ onGong, className }: GongButtonProps) {
-  const { playGong } = useAudio()
+  const { playGong } = useUISound()
 
   const handleClick = () => {
     playGong()

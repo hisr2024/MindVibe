@@ -32,7 +32,15 @@ import {
   Plus,
   X
 } from 'lucide-react'
-import { useAudio, type AmbientSoundscape } from '@/contexts/AudioContext'
+// Stub hook for ambient audio (feature to be reimplemented in new player)
+function useAudioStub() {
+  return {
+    state: { ambientActive: false, ambientSoundscape: null, ambientVolume: 0.5 },
+    startAmbient: (_soundscape: string) => {},
+    stopAmbient: () => {},
+    playSound: (_s: string) => {},
+  }
+}
 
 // ============ Types ============
 
@@ -228,8 +236,8 @@ function SoundMixerItem({
   )
 }
 
-// Map presets to audio manager soundscapes
-const PRESET_TO_AMBIENT: Record<string, AmbientSoundscape> = {
+// Map presets to audio manager soundscapes (stub - feature to be reimplemented)
+const PRESET_TO_AMBIENT: Record<string, string> = {
   'Rainforest': 'forest',
   'Temple Morning': 'temple',
   'Ocean Night': 'ocean',
@@ -247,8 +255,9 @@ export function AmbientSoundscapeControl({
   compact = false,
   className = ''
 }: AmbientSoundscapeControlProps) {
-  // Connect to audio context
-  const { startAmbient, stopAmbient, setAmbientVolume, state: audioState, playSound } = useAudio()
+  // Connect to audio context (stubbed - feature to be reimplemented in new player)
+  const { startAmbient, stopAmbient, state: audioState, playSound } = useAudioStub()
+  const setAmbientVolume = (_v: number) => {}
 
   const [playing, setPlaying] = useState(isActive)
   const [activeSounds, setActiveSounds] = useState<ActiveSound[]>([])
@@ -258,8 +267,8 @@ export function AmbientSoundscapeControl({
 
   // Sync with audio state
   useEffect(() => {
-    setPlaying(audioState.ambientEnabled)
-  }, [audioState.ambientEnabled])
+    setPlaying(audioState.ambientActive)
+  }, [audioState.ambientActive])
 
   const handleToggle = useCallback(async () => {
     const newState = !playing

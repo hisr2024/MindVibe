@@ -1,0 +1,63 @@
+{
+  "languageCode": "en",
+  "languageName": "English",
+  "chapters": [
+    {
+      "chapterNumber": 1,
+      "nameSanskrit": "अर्जुनविषादयोग",
+      "nameEnglish": "Arjuna's Grief",
+      "description": "Arjuna's dilemma on the battlefield of Kurukshetra",
+      "verseCount": 47,
+      "verses": [
+        {
+          "verseNumber": 1,
+          "sanskrit": "धृतराष्ट्र उवाच | धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः | मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय ||",
+          "transliteration": "dhṛtarāṣṭra uvāca | dharmakṣetre kurukṣetre samavetā yuyutsavaḥ | māmakāḥ pāṇḍavāścaiva kimakurvata sañjaya ||",
+          "translation": "Dhritarashtra said: O Sanjaya, assembled on the holy field of Kurukshetra, eager to fight, what did my sons and the sons of Pandu do?"
+        },
+        {
+          "verseNumber": 2,
+          "sanskrit": "सञ्जय उवाच | दृष्ट्वा तु पाण्डवानीकं व्यूढं दुर्योधनस्तदा | आचार्यमुपसङ्गम्य राजा वचनमब्रवीत् ||",
+          "transliteration": "sañjaya uvāca | dṛṣṭvā tu pāṇḍavānīkaṃ vyūḍhaṃ duryodhanastadā | ācāryamupasaṅgamya rājā vacanamabravīt ||",
+          "translation": "Sanjaya said: Having seen the army of the Pandavas arrayed in battle formation, King Duryodhana approached his teacher and spoke these words."
+        }
+      ]
+    },
+    {
+      "chapterNumber": 2,
+      "nameSanskrit": "सांख्ययोग",
+      "nameEnglish": "The Yoga of Knowledge",
+      "description": "Krishna teaches Arjuna about the eternal soul and the path of knowledge",
+      "verseCount": 72,
+      "verses": [
+        {
+          "verseNumber": 1,
+          "sanskrit": "सञ्जय उवाच | तं तथा कृपयाविष्टमश्रुपूर्णाकुलेक्षणम् | विषीदन्तमिदं वाक्यमुवाच मधुसूदनः ||",
+          "transliteration": "sañjaya uvāca | taṃ tathā kṛpayāviṣṭamaśrupūrṇākulekṣaṇam | viṣīdantamidaṃ vākyamuvāca madhusūdanaḥ ||",
+          "translation": "Sanjaya said: To him who was thus overcome with pity, whose eyes were filled with tears and bewildered, Madhusudana (Krishna) spoke these words."
+        },
+        {
+          "verseNumber": 47,
+          "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन | मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि ||",
+          "transliteration": "karmaṇyevādhikāraste mā phaleṣu kadācana | mā karmaphalaheturbhūrmā te saṅgo'stvakarmaṇi ||",
+          "translation": "You have the right to work only, but never to its fruits. Let not the fruits of action be your motive, nor let your attachment be to inaction."
+        }
+      ]
+    },
+    {
+      "chapterNumber": 3,
+      "nameSanskrit": "कर्मयोग",
+      "nameEnglish": "The Yoga of Action",
+      "description": "Krishna explains the importance of selfless action",
+      "verseCount": 43,
+      "verses": [
+        {
+          "verseNumber": 1,
+          "sanskrit": "अर्जुन उवाच | ज्यायसी चेत्कर्मणस्ते मता बुद्धिर्जनार्दन | तत्किं कर्मणि घोरे मां नियोजयसि केशव ||",
+          "transliteration": "arjuna uvāca | jyāyasī cetkarmaṇaste matā buddhirjanārdana | tatkiṃ karmaṇi ghore māṃ niyojayasi keśava ||",
+          "translation": "Arjuna said: O Janardana, if You consider knowledge superior to action, why then do You urge me to engage in this terrible action, O Keshava?"
+        }
+      ]
+    }
+  ]
+}

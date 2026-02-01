@@ -18,7 +18,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
-import { useAudio } from '@/contexts/AudioContext'
+import { useUISound } from '@/hooks/useUISound'
 
 type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error'
 
@@ -66,10 +66,12 @@ export default function MobileVoicePage() {
     playSound,
     playOm,
     playSingingBowl,
-    startBinaural,
-    stopBinaural,
-    state: audioState
-  } = useAudio()
+  } = useUISound()
+
+  // Stub functions for binaural (removed feature)
+  const startBinaural = () => {}
+  const stopBinaural = () => {}
+  const audioState = { binauralActive: false }
 
   // Voice input hook
   const {

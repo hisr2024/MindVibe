@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ToolsSheet } from './ToolsSheet'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { useAudio } from '@/contexts/AudioContext'
+import { useUISound } from '@/hooks/useUISound'
 
 export interface NavTab {
   id: string
@@ -152,7 +152,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
   const [toolsSheetOpen, setToolsSheetOpen] = useState(false)
   const { t } = useLanguage()
   const { triggerHaptic } = useHapticFeedback()
-  const { playSound } = useAudio()
+  const { playSound } = useUISound()
 
   // Get translated label for tab
   const getTabLabel = useMemo(() => {

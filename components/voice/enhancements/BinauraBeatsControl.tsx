@@ -27,7 +27,19 @@ import {
   Eye
 } from 'lucide-react'
 import type { ConsciousnessLayer } from '@/services/voice/elite/QuantumDiveEngine'
-import { useAudio, type BrainwavePreset as AudioBrainwavePreset } from '@/contexts/AudioContext'
+
+// Stub type for backward compatibility (binaural features removed from old player)
+type AudioBrainwavePreset = 'focus' | 'meditation' | 'deep_sleep' | 'creativity' | 'healing'
+
+// Stub hook for binaural audio (feature to be reimplemented in new player)
+function useAudioStub() {
+  return {
+    state: { binauralActive: false, binauralPreset: null, binauralVolume: 0.5 },
+    startBinaural: (_preset: AudioBrainwavePreset, _volume?: number) => {},
+    stopBinaural: () => {},
+    playSound: (_s: string) => {},
+  }
+}
 
 // ============ Types ============
 
@@ -147,8 +159,10 @@ export function BinauraBeatsControl({
   compact = false,
   className = ''
 }: BinauraBeatsControlProps) {
-  // Connect to audio context
-  const { startBinaural, stopBinaural, setBinauralVolume, state: audioState, playSound } = useAudio()
+  // Connect to audio context (stubbed - feature to be reimplemented in new player)
+  const { startBinaural, stopBinaural, state: audioState } = useAudioStub()
+  const setBinauralVolume = (_v: number) => {}
+  const playSound = (_s: string) => {}
 
   const [playing, setPlaying] = useState(isActive)
   const [selectedPreset, setSelectedPreset] = useState<BrainwavePreset>(
@@ -178,8 +192,8 @@ export function BinauraBeatsControl({
 
   // Sync with audio state
   useEffect(() => {
-    setPlaying(audioState.binauralEnabled)
-  }, [audioState.binauralEnabled])
+    setPlaying(audioState.binauralActive)
+  }, [audioState.binauralActive])
 
   const handleToggle = useCallback(async () => {
     const newState = !playing
