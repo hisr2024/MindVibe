@@ -21,12 +21,11 @@ import type {
   CompleteStepRequest,
   JourneyPersonalization,
 } from '@/types/journey.types';
+import { apiFetch } from '@/lib/api';
 
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEYS_ENDPOINT = '/api/journeys';
 
 // Cache duration in milliseconds
@@ -84,22 +83,22 @@ function parseErrorResponse(response: Response, body: Record<string, unknown>): 
 // =============================================================================
 
 /**
- * Get authentication headers.
+ * Get auth UID from local storage for X-Auth-UID fallback.
  */
-function getAuthHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+function getAuthUid(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
 
-  // Try to get user ID from localStorage (for X-Auth-UID header)
-  if (typeof window !== 'undefined') {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      headers['X-Auth-UID'] = userId;
+  const storedUser = localStorage.getItem('mindvibe_auth_user');
+  if (storedUser) {
+    try {
+      const parsed = JSON.parse(storedUser) as { id?: string };
+      if (parsed?.id) return parsed.id;
+    } catch (error) {
+      console.warn('[JourneyService] Failed to parse stored auth user', error);
     }
   }
 
-  return headers;
+  return undefined;
 }
 
 /**
@@ -110,12 +109,11 @@ async function apiRequest<T>(
   endpoint: string,
   body?: unknown
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
   const options: RequestInit = {
     method,
-    headers: getAuthHeaders(),
-    credentials: 'include', // Include cookies for auth
+    headers: {
+      'Content-Type': 'application/json',
+    },
   };
 
   if (body) {
@@ -123,7 +121,7 @@ async function apiRequest<T>(
   }
 
   try {
-    const response = await fetch(url, options);
+    const response = await apiFetch(endpoint, options, getAuthUid());
     const data = await response.json();
 
     if (!response.ok) {
