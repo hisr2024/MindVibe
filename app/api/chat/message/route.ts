@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text().catch(() => 'Unknown error')
       console.error(`[Chat API] Backend returned ${response.status}: ${errorText}`)
 
-      // If rate limited, return appropriate error
+      // Handle specific HTTP error codes
       if (response.status === 429) {
         return NextResponse.json(
           {
@@ -102,6 +102,26 @@ export async function POST(request: NextRequest) {
           },
           { status: 429 }
         )
+      }
+
+      if (response.status === 403) {
+        return NextResponse.json(
+          {
+            error: 'Access denied. Please try again or contact support.',
+            success: false,
+          },
+          { status: 403 }
+        )
+      }
+
+      if (response.status === 404) {
+        console.error('[Chat API] Backend endpoint not found - check API routes')
+        // Fall through to use fallback
+      }
+
+      if (response.status === 503) {
+        console.warn('[Chat API] Backend service unavailable - using fallback')
+        // Fall through to use fallback
       }
 
       // For other errors, fall through to fallback

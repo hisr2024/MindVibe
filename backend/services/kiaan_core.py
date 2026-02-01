@@ -1071,10 +1071,10 @@ EXAMPLES:
 
             except TokenLimitExceededError as e:
                 logger.error(f"KIAAN Core: Token limit exceeded: {e}")
-                # Try with smaller context
+                # Try with smaller context (but preserve language and conversation_context)
                 verses = verses[:5]
                 wisdom_context = self._build_verse_context(verses)
-                system_prompt = self._build_system_prompt(wisdom_context, message, context)
+                system_prompt = self._build_system_prompt(wisdom_context, message, context, language, conversation_context)
 
                 try:
                     response = await self.optimizer.create_completion_with_retry(
