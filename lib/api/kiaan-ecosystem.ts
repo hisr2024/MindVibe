@@ -81,7 +81,7 @@ export const KIAAN_TOOLS: KiaanTool[] = [
     name: 'Relationship Compass',
     description: 'Navigate relationship conflicts with wisdom',
     category: 'relational',
-    endpoint: '/api/relationship-compass/guide',
+    endpoint: '/api/relationship-compass/gita-guidance',
     route: '/tools/relationship-compass',
     icon: '🧭',
     usesGitaVerses: true,
