@@ -71,6 +71,38 @@ class GitaChunk:
     text: str
     commentary: str
     embedding: np.ndarray
+    keywords: tuple[str, ...] = ()
+
+
+# Keyword weights for relationship-relevant terms
+KEYWORD_WEIGHTS = {
+    "anger": 2.0, "krodha": 2.0, "forgiveness": 2.0, "kshama": 2.0,
+    "compassion": 2.0, "daya": 2.0, "karuna": 2.0,
+    "truth": 1.5, "satya": 1.5, "speech": 1.5,
+    "control": 1.5, "mind": 1.5, "self": 1.5,
+    "ego": 2.0, "ahamkara": 2.0,
+    "equanimity": 2.0, "sama": 1.5, "equal": 1.5,
+    "attachment": 2.0, "raga": 1.5, "detachment": 2.0,
+    "duty": 1.5, "dharma": 2.0, "svadharma": 2.0,
+    "fear": 1.5, "bhaya": 1.5, "fearless": 1.5,
+    "jealousy": 1.5, "envy": 1.5,
+    "resentment": 1.5, "hatred": 1.5, "dvesha": 1.5,
+    "ahimsa": 2.0, "nonviolence": 2.0, "harm": 1.5,
+    "steadiness": 1.5, "patience": 1.5, "peace": 1.5,
+    "love": 2.0, "prema": 1.5, "affection": 1.5,
+    "relationship": 2.0, "family": 1.5, "friend": 1.5,
+    "sorrow": 1.5, "grief": 1.5, "suffering": 1.5, "dukha": 1.5,
+    "liberation": 1.5, "moksha": 1.5, "freedom": 1.5,
+    "wisdom": 1.5, "jnana": 1.5, "knowledge": 1.5,
+    "action": 1.5, "karma": 1.5, "work": 1.5,
+    "surrender": 1.5, "devotion": 1.5, "bhakti": 1.5,
+    "conflict": 2.0, "battle": 1.0,
+    "emotion": 1.5, "feeling": 1.5, "heart": 1.5,
+    "desire": 1.5, "kama": 1.5, "craving": 1.5,
+    "renunciation": 1.5, "tyaga": 1.5,
+    "atman": 2.0, "soul": 1.5,
+    "meditation": 1.5, "yoga": 1.5, "discipline": 1.5,
+}
 
 
 @dataclass
@@ -81,9 +113,10 @@ class RetrievalResult:
 
 
 class RelationshipCompassIndex:
-    def __init__(self, chunks: list[GitaChunk], model: str) -> None:
+    def __init__(self, chunks: list[GitaChunk], model: str, index_type: str = "embedding") -> None:
         self.chunks = chunks
         self.model = model
+        self.index_type = index_type
 
     @classmethod
     def load(cls) -> "RelationshipCompassIndex | None":
@@ -100,19 +133,36 @@ class RelationshipCompassIndex:
         try:
             meta = dict(conn.execute("SELECT key, value FROM metadata").fetchall())
             model = meta.get("model", EMBEDDING_MODEL)
-            rows = conn.execute(
-                """
-                SELECT chunk_id, chapter, verse, source_file, tags, language, chunk_type, text, commentary, embedding
-                FROM gita_chunks
-                """
-            ).fetchall()
+            index_type = meta.get("index_type", "embedding")
+
+            # Check if keywords column exists
+            cursor = conn.execute("PRAGMA table_info(gita_chunks)")
+            columns = [col[1] for col in cursor.fetchall()]
+            has_keywords = "keywords" in columns
+
+            if has_keywords:
+                rows = conn.execute(
+                    """
+                    SELECT chunk_id, chapter, verse, source_file, tags, language, chunk_type, text, commentary, embedding, keywords
+                    FROM gita_chunks
+                    """
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT chunk_id, chapter, verse, source_file, tags, language, chunk_type, text, commentary, embedding
+                    FROM gita_chunks
+                    """
+                ).fetchall()
         finally:
             conn.close()
 
         chunks: list[GitaChunk] = []
         for row in rows:
             tags = json.loads(row[4]) if row[4] else []
-            embedding = np.array(json.loads(row[9]), dtype=np.float32)
+            embedding_data = json.loads(row[9]) if row[9] else []
+            embedding = np.array(embedding_data, dtype=np.float32) if embedding_data else np.array([], dtype=np.float32)
+            keywords = tuple(json.loads(row[10])) if has_keywords and len(row) > 10 and row[10] else ()
             chunks.append(
                 GitaChunk(
                     chunk_id=row[0],
@@ -125,10 +175,12 @@ class RelationshipCompassIndex:
                     text=row[7] or "",
                     commentary=row[8] or "",
                     embedding=embedding,
+                    keywords=keywords,
                 )
             )
 
-        return cls(chunks=chunks, model=model)
+        logger.info("Loaded Relationship Compass index: %d chunks, type=%s", len(chunks), index_type)
+        return cls(chunks=chunks, model=model, index_type=index_type)
 
 
 _cached_index: RelationshipCompassIndex | None = None
@@ -160,20 +212,120 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / denom)
 
 
+def extract_query_keywords(query: str) -> set[str]:
+    """Extract keywords from query for matching."""
+    # Simple tokenization
+    words = re.findall(r'\b[a-zA-Z]{3,}\b', query.lower())
+    # Filter common stop words
+    stop_words = {
+        'the', 'and', 'for', 'that', 'this', 'with', 'are', 'was', 'were',
+        'been', 'being', 'have', 'has', 'had', 'does', 'did', 'will', 'would',
+        'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need',
+        'from', 'into', 'upon', 'about', 'after', 'before', 'between', 'under',
+        'over', 'such', 'than', 'too', 'very', 'just', 'only', 'also', 'even',
+        'said', 'says', 'one', 'two', 'three', 'who', 'what', 'which', 'where',
+        'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more',
+        'most', 'other', 'some', 'any', 'not', 'nor', 'but', 'yet', 'still',
+        'then', 'thus', 'here', 'there', 'their', 'them', 'they', 'these',
+        'those', 'your', 'you', 'his', 'her', 'him', 'its', 'own', 'same',
+        'feel', 'feeling', 'want', 'like', 'know', 'think', 'get', 'make',
+    }
+    return {word for word in words if word not in stop_words}
+
+
+def score_chunk_by_keywords(chunk: GitaChunk, query_keywords: set[str]) -> float:
+    """Score a chunk based on keyword matching."""
+    score = 0.0
+
+    # Match against chunk keywords
+    chunk_keywords = set(chunk.keywords)
+    for kw in query_keywords:
+        if kw in chunk_keywords:
+            weight = KEYWORD_WEIGHTS.get(kw, 1.0)
+            score += weight
+
+    # Match against tags
+    chunk_tags_lower = {tag.lower().replace('_', ' ').replace('-', ' ') for tag in chunk.tags}
+    for tag in chunk_tags_lower:
+        for kw in query_keywords:
+            if kw in tag:
+                weight = KEYWORD_WEIGHTS.get(kw, 1.0)
+                score += weight * 1.5
+
+    # Match against text content (lower weight)
+    text_lower = chunk.text.lower()
+    for kw in query_keywords:
+        if kw in text_lower:
+            weight = KEYWORD_WEIGHTS.get(kw, 1.0)
+            score += weight * 0.5
+
+    return score
+
+
+def retrieve_chunks_keyword(query: str, relationship_type: str, k: int = 18) -> RetrievalResult:
+    """Retrieve chunks using keyword-based matching."""
+    index = get_index()
+    if not index:
+        return RetrievalResult(chunks=[], confidence=0.0, strategy="missing-index")
+
+    # Build expanded query keywords
+    expanded_query = f"{query} relationship {relationship_type} " + " ".join(RELATIONSHIP_TAGS[:6])
+    query_keywords = extract_query_keywords(expanded_query)
+
+    if not query_keywords:
+        return RetrievalResult(chunks=[], confidence=0.0, strategy="no-keywords")
+
+    # Score all chunks
+    scored: list[tuple[GitaChunk, float]] = []
+    for chunk in index.chunks:
+        score = score_chunk_by_keywords(chunk, query_keywords)
+        if score > 0:
+            scored.append((chunk, score))
+
+    # Sort by score
+    scored.sort(key=lambda item: item[1], reverse=True)
+    top = scored[:k]
+
+    # Calculate confidence (normalized)
+    max_possible_score = len(query_keywords) * 2.0 * 3  # max weight * 3 match types
+    confidence = (top[0][1] / max_possible_score) if top else 0.0
+    confidence = min(confidence, 1.0)
+
+    # Ensure minimum confidence for keyword matches
+    if top and confidence < 0.3:
+        confidence = 0.3
+
+    return RetrievalResult(chunks=[item[0] for item in top], confidence=confidence, strategy="keywords")
+
+
 def retrieve_chunks(query: str, relationship_type: str, k: int = 18) -> RetrievalResult:
     index = get_index()
     if not index:
         return RetrievalResult(chunks=[], confidence=0.0, strategy="missing-index")
 
+    # Use keyword retrieval if index is keyword-based or if embeddings aren't available
+    if index.index_type == "keyword":
+        return retrieve_chunks_keyword(query, relationship_type, k)
+
     expanded_query = f"{query} relationship {relationship_type} " + " ".join(RELATIONSHIP_TAGS)
     embedding = embed_query(expanded_query, index.model)
+
+    # Fall back to keyword retrieval if embedding fails
     if embedding is None:
-        return RetrievalResult(chunks=[], confidence=0.0, strategy="missing-embeddings")
+        logger.info("Embedding unavailable, falling back to keyword retrieval")
+        return retrieve_chunks_keyword(query, relationship_type, k)
 
     scored: list[tuple[GitaChunk, float]] = []
     for chunk in index.chunks:
+        if chunk.embedding.size == 0:
+            continue
         score = cosine_similarity(embedding, chunk.embedding)
         scored.append((chunk, score))
+
+    # If no embeddings found, fall back to keyword retrieval
+    if not scored:
+        logger.info("No embeddings in index, falling back to keyword retrieval")
+        return retrieve_chunks_keyword(query, relationship_type, k)
 
     scored.sort(key=lambda item: item[1], reverse=True)
     top = scored[:k]
@@ -343,21 +495,212 @@ def build_citation_list(chunks: Iterable[GitaChunk]) -> list[dict[str, str]]:
     return citations
 
 
-def call_openai(messages: list[dict[str, str]]) -> str | None:
+async def call_ai_provider(messages: list[dict[str, str]]) -> str | None:
+    """Call AI provider with multi-provider fallback support (like KIAAN Chat)."""
+    # Try multi-provider manager first
+    try:
+        from backend.services.ai.providers.provider_manager import get_provider_manager, AIProviderError
+        provider_manager = get_provider_manager()
+        if provider_manager:
+            logger.info("Using ProviderManager for Relationship Compass")
+            response = await provider_manager.chat(
+                messages=messages,
+                temperature=0.2,
+                max_tokens=800,
+            )
+            if response and response.content:
+                logger.info(f"✅ Response from {response.provider}/{response.model}")
+                return response.content
+    except Exception as e:
+        logger.warning(f"ProviderManager failed: {e}, trying legacy client")
+
+    # Fallback to legacy OpenAI client
+    return call_openai_sync(messages)
+
+
+def call_openai_sync(messages: list[dict[str, str]]) -> str | None:
+    """Synchronous OpenAI call as fallback."""
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
+        logger.warning("OPENAI_API_KEY not set for Relationship Compass")
         return None
 
-    client = OpenAI(api_key=api_key)
     try:
+        client = OpenAI(api_key=api_key)
         response = client.chat.completions.create(
             model=CHAT_MODEL,
             messages=messages,
             temperature=0.2,
+            max_tokens=800,
+            timeout=30.0,
         )
-    except Exception as exc:  # noqa: BLE001
+        content = response.choices[0].message.content if response.choices else None
+        if content:
+            logger.info("✅ Response from legacy OpenAI client")
+        return content or None
+    except Exception as exc:
         logger.error("Relationship Compass OpenAI error: %s", exc)
         return None
 
-    content = response.choices[0].message.content if response.choices else None
-    return content or None
+
+def call_openai(messages: list[dict[str, str]]) -> str | None:
+    """Call OpenAI (sync wrapper for backwards compatibility)."""
+    return call_openai_sync(messages)
+
+
+def extract_verse_wisdom(chunk: GitaChunk) -> dict[str, str]:
+    """Extract structured wisdom from a Gita chunk."""
+    result = {
+        "verse_ref": chunk.verse,
+        "english": "",
+        "theme": "",
+        "principle": "",
+        "tags": chunk.tags,
+    }
+
+    text = chunk.text
+    # Extract English teaching
+    if "English:" in text:
+        english = text.split("English:")[1].split("\n")[0].strip()
+        # Clean up quote marks
+        english = english.strip('"').strip()
+        result["english"] = english
+
+    # Extract theme and principle from commentary
+    commentary = chunk.commentary or ""
+    if "Theme:" in commentary:
+        theme = commentary.split("Theme:")[1].split("Principle:")[0].strip()
+        result["theme"] = theme.replace("_", " ").title()
+    if "Principle:" in commentary:
+        principle = commentary.split("Principle:")[-1].strip()
+        result["principle"] = principle
+
+    return result
+
+
+def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str, user_message: str) -> str:
+    """Generate a Gita-based response deeply rooted in retrieved verse wisdom.
+
+    This creates meaningful guidance using actual Gita teachings from the 700+ verse
+    repository, similar to KIAAN Chat's approach of grounding every response in
+    authentic scripture wisdom.
+    """
+    if not chunks:
+        return build_insufficient_response()
+
+    # Extract rich wisdom from top chunks
+    wisdom_items = [extract_verse_wisdom(chunk) for chunk in chunks[:8]]
+    teachings = [w for w in wisdom_items if w["english"]]
+    verse_refs = [w["verse_ref"] for w in wisdom_items if w["verse_ref"]]
+
+    # Collect themes and tags for understanding the retrieved context
+    all_tags = set()
+    for w in wisdom_items:
+        all_tags.update(tag.lower().replace("_", " ") for tag in w["tags"])
+
+    # Determine relationship-specific context
+    relationship_contexts = {
+        "romantic": "partner, beloved, spouse",
+        "family": "family member, parent, child, sibling",
+        "friendship": "friend, companion",
+        "workplace": "colleague, work relationship",
+        "self": "yourself, inner self",
+        "other": "this person",
+    }
+    rel_context = relationship_contexts.get(relationship_type, "this person")
+
+    # Build response sections deeply grounded in retrieved Gita wisdom
+    sections = []
+
+    # Sacred Acknowledgement - grounded in retrieved themes
+    sections.append("# Sacred Acknowledgement")
+    ack_teaching = teachings[0]["english"] if teachings else ""
+    if "compassion" in all_tags or "karuna" in all_tags or "daya" in all_tags:
+        sections.append(f"I witness the pain you carry with deep daya (compassion). The timeless wisdom reminds us: '{ack_teaching[:150]}...' Your willingness to seek understanding rather than simply reacting reveals your inner strength. This moment of reflection is itself an act of dharma.")
+    elif "anger" in all_tags or "krodha" in all_tags:
+        sections.append(f"I honor the intensity of what you're feeling. The ancient teachings speak directly to this: '{ack_teaching[:150]}...' Anger often masks deeper wounds - fear, hurt, unmet needs. Your awareness of this conflict is the first step toward clarity.")
+    else:
+        sections.append(f"I bow to the tender heart that brought you here. The eternal wisdom teaches: '{ack_teaching[:150]}...' Every awakened soul throughout time has faced moments exactly like this. You are not alone in this struggle.")
+    sections.append("")
+
+    # Inner Conflict Mirror - using actual verse teachings
+    sections.append("# Inner Conflict Mirror")
+    if len(teachings) > 1:
+        mirror_teaching = teachings[1]["english"]
+        sections.append(f"The Gita reveals a profound truth ({verse_refs[1] if len(verse_refs) > 1 else '2:62'}): '{mirror_teaching[:200]}' This speaks directly to your situation with {rel_context}. What wound is being touched here? What do you truly need beneath the surface - to be seen? Understood? Respected? Safe?")
+    else:
+        sections.append("Ancient wisdom teaches: all outer conflicts are mirrors of inner ones. The Gita's teaching of svadhyaya (self-study) invites us to look within first. What do you truly need beneath the surface of this conflict?")
+    sections.append("")
+
+    # Gita Teachings Used - comprehensive verse integration
+    sections.append("# Gita Teachings Used")
+    sections.append(f"These verses from the Bhagavad Gita ({', '.join(verse_refs[:4])}) illuminate your path:")
+    sections.append("")
+    for i, wisdom in enumerate(teachings[:4], 1):
+        if wisdom["english"]:
+            theme_note = f" [{wisdom['theme']}]" if wisdom["theme"] else ""
+            sections.append(f"{i}. ({wisdom['verse_ref']}){theme_note}: \"{wisdom['english'][:180]}...\"")
+            sections.append("")
+    sections.append("")
+
+    # Dharma Options - grounded in specific retrieved wisdom
+    sections.append("# Dharma Options")
+    sections.append("Drawing from these teachings, consider three dharmic paths:")
+    sections.append("")
+
+    # Option 1 - based on first relevant teaching
+    opt1_ref = verse_refs[0] if verse_refs else "2:47"
+    opt1_teaching = teachings[0]["english"][:100] if teachings else "Focus on action, release attachment to results"
+    sections.append(f"1. **Karma Yoga Path** ({opt1_ref}): '{opt1_teaching}...' Applied here: Focus on YOUR actions and intentions, not on controlling {rel_context}'s response. What right action can you take today, regardless of outcome?")
+    sections.append("")
+
+    # Option 2 - based on second teaching or forgiveness theme
+    opt2_ref = verse_refs[1] if len(verse_refs) > 1 else "12:13"
+    if len(teachings) > 1:
+        opt2_teaching = teachings[1]["english"][:100]
+    else:
+        opt2_teaching = "One who is free from malice toward all beings, friendly and compassionate"
+    sections.append(f"2. **Kshama (Forgiveness) Path** ({opt2_ref}): '{opt2_teaching}...' Applied here: Forgiveness is not condoning harm - it is YOUR liberation. It means releasing the poison of resentment so YOU can be free.")
+    sections.append("")
+
+    # Option 3 - equal vision
+    opt3_ref = verse_refs[2] if len(verse_refs) > 2 else "6:32"
+    if len(teachings) > 2:
+        opt3_teaching = teachings[2]["english"][:100]
+    else:
+        opt3_teaching = "One who sees equality everywhere, seeing their own self in all beings"
+    sections.append(f"3. **Sama-Darshana (Equal Vision) Path** ({opt3_ref}): '{opt3_teaching}...' Applied here: See the divine struggling in {rel_context} too. They act from their own wounds, fears, and conditioning - not to hurt you, but because they suffer too.")
+    sections.append("")
+
+    # Sacred Speech - with verse grounding
+    sections.append("# Sacred Speech")
+    speech_ref = verse_refs[3] if len(verse_refs) > 3 else "17:15"
+    sections.append(f"The Gita teaches ({speech_ref}): 'Speech that causes no distress, that is truthful, pleasant, and beneficial.' When you're ready to speak:")
+    sections.append("")
+    sections.append("Try this dharmic formula: 'When [specific situation happens], I feel [your emotion], because I need [underlying need]. What I'm hoping we can explore together is [request, not demand].'")
+    sections.append("")
+    sections.append("Before speaking, pause and ask: Am I speaking from my wound or my wisdom? Will these words bring us closer to peace?")
+    sections.append("")
+
+    # Detachment Anchor - with core teaching
+    sections.append("# Detachment Anchor")
+    anchor_ref = verse_refs[0] if verse_refs else "2:47"
+    anchor_teaching = teachings[0]["english"] if teachings else "You have the right to action alone, never to the fruits"
+    sections.append(f"({anchor_ref}): '{anchor_teaching[:150]}...'")
+    sections.append("")
+    sections.append(f"Your dharma is to act with integrity toward {rel_context}; the outcome is not yours to control. Release attachment to HOW this must resolve. Trust that right action, performed without attachment, creates right results in ways you cannot foresee.")
+    sections.append("")
+
+    # One Next Step - specific action from teachings
+    sections.append("# One Next Step")
+    step_ref = verse_refs[1] if len(verse_refs) > 1 else "6:5"
+    sections.append(f"Today, practice witness consciousness ({step_ref}): When emotions arise about this situation, simply observe them without becoming them. Say internally: 'I see you, anger/hurt/fear. I am not you - I am the one who witnesses.'")
+    sections.append("")
+    sections.append("This is sakshi bhava - the observer stance that the Gita teaches as the gateway to equanimity.")
+    sections.append("")
+
+    # One Gentle Question
+    sections.append("# One Gentle Question")
+    sections.append(f"If you were at complete peace with yourself - needing nothing from {rel_context} to feel whole - how would you respond to this situation? What would your highest self do here?")
+
+    return "\n".join(sections)
