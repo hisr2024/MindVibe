@@ -29,7 +29,7 @@ from sqlalchemy.sql import func
 
 # Import base from main models
 try:
-    from backend.database import Base
+    from backend.models import Base
 except ImportError:
     from sqlalchemy.orm import declarative_base
     Base = declarative_base()

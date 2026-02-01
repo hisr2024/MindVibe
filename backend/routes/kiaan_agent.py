@@ -25,7 +25,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.database import get_db
+from backend.deps import get_db
 from backend.deps import get_current_user_flexible
 from backend.services.kiaan_agent_orchestrator import (
     KIAANAgentOrchestrator,

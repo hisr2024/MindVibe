@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const BACKEND_TIMEOUT = 60000 // 60 seconds timeout for AI processing
 
 // Valid depth modes

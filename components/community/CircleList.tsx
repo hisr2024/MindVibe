@@ -69,13 +69,24 @@ export function CircleList({
       const params = new URLSearchParams()
       if (selectedCategory) params.append('category', selectedCategory)
 
-      const response = await fetch(`/api/community/circles?${params}`)
+      // Add timeout to prevent hanging
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
+
+      const response = await fetch(`/api/community/circles?${params}`, {
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+
       if (!response.ok) throw new Error('Failed to fetch circles')
 
       const data = await response.json()
       setCircles(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load circles')
+      const message = err instanceof Error
+        ? (err.name === 'AbortError' ? 'Request timed out' : err.message)
+        : 'Failed to load circles'
+      setError(message)
     } finally {
       setLoading(false)
     }

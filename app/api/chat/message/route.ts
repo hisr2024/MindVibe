@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // Fallback wisdom responses when backend is unavailable
 const FALLBACK_RESPONSES = [
