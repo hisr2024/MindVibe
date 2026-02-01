@@ -35,6 +35,7 @@
     "date-fns": "^2.30.0",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.25",
+    "idb": "^8.0.3",
     "jspdf": "^4.0.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.468.0",
@@ -49,7 +50,8 @@
     "recharts": "^2.15.4",
     "simplebar": "^6.3.0",
     "simplebar-react": "^2.4.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

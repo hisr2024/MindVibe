@@ -22,7 +22,7 @@ import {
   Volume2,
   type LucideIcon
 } from 'lucide-react'
-import type { GitaSoundscape } from '@/lib/constants/gita-audio'
+import type { GitaSoundscape } from '@/lib/kiaan-vibe/types'
 
 export interface GitaSoundscapeCardProps {
   soundscape: GitaSoundscape

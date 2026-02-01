@@ -1,0 +1,63 @@
+{
+  "languageCode": "sa",
+  "languageName": "संस्कृत",
+  "chapters": [
+    {
+      "chapterNumber": 1,
+      "nameSanskrit": "अर्जुनविषादयोग",
+      "nameEnglish": "Arjuna Vishada Yoga",
+      "description": "अर्जुनस्य विषादः",
+      "verseCount": 47,
+      "verses": [
+        {
+          "verseNumber": 1,
+          "sanskrit": "धृतराष्ट्र उवाच | धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः | मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय ||",
+          "transliteration": "dhṛtarāṣṭra uvāca | dharmakṣetre kurukṣetre samavetā yuyutsavaḥ | māmakāḥ pāṇḍavāścaiva kimakurvata sañjaya ||",
+          "translation": "धृतराष्ट्र उवाच — धर्मक्षेत्रे कुरुक्षेत्रे समवेताः युयुत्सवः मामकाः पाण्डवाश्चैव किम् अकुर्वत सञ्जय"
+        },
+        {
+          "verseNumber": 2,
+          "sanskrit": "सञ्जय उवाच | दृष्ट्वा तु पाण्डवानीकं व्यूढं दुर्योधनस्तदा | आचार्यमुपसङ्गम्य राजा वचनमब्रवीत् ||",
+          "transliteration": "sañjaya uvāca | dṛṣṭvā tu pāṇḍavānīkaṃ vyūḍhaṃ duryodhanastadā | ācāryamupasaṅgamya rājā vacanamabravīt ||",
+          "translation": "सञ्जय उवाच — दृष्ट्वा तु पाण्डवानीकम् व्यूढम् दुर्योधनः तदा आचार्यम् उपसङ्गम्य राजा वचनम् अब्रवीत्"
+        }
+      ]
+    },
+    {
+      "chapterNumber": 2,
+      "nameSanskrit": "सांख्ययोग",
+      "nameEnglish": "Sankhya Yoga",
+      "description": "ज्ञानयोगः",
+      "verseCount": 72,
+      "verses": [
+        {
+          "verseNumber": 1,
+          "sanskrit": "सञ्जय उवाच | तं तथा कृपयाविष्टमश्रुपूर्णाकुलेक्षणम् | विषीदन्तमिदं वाक्यमुवाच मधुसूदनः ||",
+          "transliteration": "sañjaya uvāca | taṃ tathā kṛpayāviṣṭamaśrupūrṇākulekṣaṇam | viṣīdantamidaṃ vākyamuvāca madhusūdanaḥ ||",
+          "translation": "सञ्जय उवाच — तम् तथा कृपया आविष्टम् अश्रुपूर्ण आकुलेक्षणम् विषीदन्तम् इदम् वाक्यम् उवाच मधुसूदनः"
+        },
+        {
+          "verseNumber": 47,
+          "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन | मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि ||",
+          "transliteration": "karmaṇyevādhikāraste mā phaleṣu kadācana | mā karmaphalaheturbhūrmā te saṅgo'stvakarmaṇi ||",
+          "translation": "कर्मणि एव अधिकारः ते मा फलेषु कदाचन | मा कर्मफलहेतुः भूः मा ते सङ्गः अस्तु अकर्मणि ||"
+        }
+      ]
+    },
+    {
+      "chapterNumber": 3,
+      "nameSanskrit": "कर्मयोग",
+      "nameEnglish": "Karma Yoga",
+      "description": "कर्मयोगः",
+      "verseCount": 43,
+      "verses": [
+        {
+          "verseNumber": 1,
+          "sanskrit": "अर्जुन उवाच | ज्यायसी चेत्कर्मणस्ते मता बुद्धिर्जनार्दन | तत्किं कर्मणि घोरे मां नियोजयसि केशव ||",
+          "transliteration": "arjuna uvāca | jyāyasī cetkarmaṇaste matā buddhirjanārdana | tatkiṃ karmaṇi ghore māṃ niyojayasi keśava ||",
+          "translation": "अर्जुन उवाच — ज्यायसी चेत् कर्मणः ते मता बुद्धिः जनार्दन | तत् किम् कर्मणि घोरे माम् नियोजयसि केशव ||"
+        }
+      ]
+    }
+  ]
+}

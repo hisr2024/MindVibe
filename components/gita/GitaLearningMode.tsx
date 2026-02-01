@@ -35,7 +35,7 @@ import {
   type GitaLearningSettings,
   GITA_CHAPTERS,
   DEFAULT_LEARNING_SETTINGS
-} from '@/lib/constants/gita-audio'
+} from '@/lib/kiaan-vibe'
 
 export interface GitaLearningModeProps {
   chapter: number

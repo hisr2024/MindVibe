@@ -9,7 +9,7 @@
 
 import { motion } from 'framer-motion'
 import { Play, Pause, BookOpen, Clock } from 'lucide-react'
-import type { GitaChapter } from '@/lib/constants/gita-audio'
+import type { GitaChapter } from '@/lib/kiaan-vibe/types'
 
 export interface GitaChapterCardProps {
   chapter: GitaChapter

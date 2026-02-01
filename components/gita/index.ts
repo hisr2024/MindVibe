@@ -6,7 +6,6 @@
  * Export all Bhagavad Gita related components
  */
 
-export { GitaAudioPlayer, type GitaAudioPlayerProps } from './GitaAudioPlayer'
 export { GitaChapterCard } from './GitaChapterCard'
 export { GitaSoundscapeCard } from './GitaSoundscapeCard'
 export { GitaVerseDisplay } from './GitaVerseDisplay'
