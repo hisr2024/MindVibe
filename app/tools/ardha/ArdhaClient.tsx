@@ -194,14 +194,29 @@ export default function ArdhaClient() {
         })
       })
 
+      const data = await response.json()
+
+      // Handle error responses with appropriate messages
       if (!response.ok) {
-        setError('Ardha is having trouble connecting right now. Please try again in a moment.')
+        const errorMessage = data.error || 'An unexpected error occurred.'
+        const status = data.status || 'error'
+
+        // Provide user-friendly error messages based on status
+        if (status === 'service_unavailable' || response.status === 503) {
+          setError('Ardha is currently unavailable. Please ensure the AI service is configured and try again.')
+        } else if (status === 'rate_limited' || response.status === 429) {
+          setError('Too many requests. Please wait a moment before trying again.')
+        } else if (status === 'timeout' || response.status === 504) {
+          setError('The request took too long. Please try with a shorter thought or the Quick Reframe option.')
+        } else if (status === 'connection_error') {
+          setError('Unable to connect to Ardha. Please check your internet connection.')
+        } else {
+          setError(errorMessage)
+        }
         return
       }
 
-      const data = await response.json()
-
-      // Parse structured response - supports standard, deep_dive, and quantum_dive modes
+      // Parse structured response
       const fullResponse = data.response || ''
 
       if (fullResponse) {
@@ -213,9 +228,10 @@ export default function ArdhaClient() {
           depth: data.depth || analysisMode,
         })
       } else {
-        setError('Ardha could not generate a response. Please try again.')
+        setError('Ardha could not generate a response. Please try again with a different thought.')
       }
-    } catch {
+    } catch (err) {
+      console.error('Ardha request failed:', err)
       setError('Unable to reach Ardha. Check your connection and try again.')
     } finally {
       setLoading(false)

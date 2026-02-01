@@ -1,35 +1,21 @@
 /**
  * Ardha Reframe API Route
  * Proxies reframing requests to the backend Ardha service
- * Handles CORS, error fallbacks, and response formatting
+ * Handles CORS, error handling, and response formatting
  *
  * Supports three depths:
- * - quick: Fast reframe
- * - deep: Comprehensive reframing
- * - quantum: Multi-dimensional reframing
+ * - quick: Fast reframe (~30 seconds)
+ * - deep: Comprehensive reframing (~1 minute)
+ * - quantum: Multi-dimensional reframing (~2 minutes)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_TIMEOUT = 60000 // 60 seconds timeout for AI processing
 
 // Valid depth modes
 type DepthMode = 'quick' | 'deep' | 'quantum'
-
-const FALLBACK_RESPONSE = `Sacred Witnessing
-I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.
-Anatomy of the Thought
-I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.
-Gita Core Reframe
-I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.
-Stabilizing Awareness
-I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.
-One Grounded Reframe
-I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.
-One Small Action
-Take one slow breath and wait for the Gita context to load.
-One Question
-Would you like me to retrieve more Gita wisdom for this?`
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,7 +42,10 @@ export async function POST(request: NextRequest) {
       .slice(0, 2000)
 
     try {
-      // Call the backend Ardha endpoint with analysis mode
+      // Call the backend Ardha endpoint with extended timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT)
+
       const response = await fetch(`${BACKEND_URL}/api/ardha/reframe`, {
         method: 'POST',
         headers: {
@@ -68,44 +57,98 @@ export async function POST(request: NextRequest) {
           depth,
           sessionId,
         }),
+        signal: controller.signal,
       })
 
-      if (response.ok) {
-        const data = await response.json()
+      clearTimeout(timeoutId)
+
+      // Parse response
+      const data = await response.json().catch(() => ({}))
+
+      if (response.ok && data.response) {
         return NextResponse.json({
-          response: data.response || '',
+          response: data.response,
           sources: data.sources || [],
           depth,
         })
       }
 
-      // Log the error for debugging
-      const errorText = await response.text().catch(() => 'Unknown error')
-      console.error(`[Ardha API] Backend returned ${response.status}: ${errorText}`)
-
-      // If rate limited, return appropriate error
+      // Handle specific error codes from backend
       if (response.status === 429) {
         return NextResponse.json(
           {
             error: 'Too many requests. Please wait a moment and try again.',
-            status: 'error',
+            status: 'rate_limited',
           },
           { status: 429 }
         )
       }
 
-      // For other errors, fall through to fallback
+      if (response.status === 503) {
+        console.error('[Ardha API] Backend service unavailable:', data.detail)
+        return NextResponse.json(
+          {
+            error: data.detail || 'AI service is temporarily unavailable. Please try again later.',
+            status: 'service_unavailable',
+          },
+          { status: 503 }
+        )
+      }
+
+      if (response.status === 400) {
+        return NextResponse.json(
+          {
+            error: data.detail || 'Invalid request. Please check your input.',
+            status: 'bad_request',
+          },
+          { status: 400 }
+        )
+      }
+
+      // Log unexpected errors
+      console.error(`[Ardha API] Backend returned ${response.status}:`, data)
+
+      return NextResponse.json(
+        {
+          error: data.detail || 'An unexpected error occurred. Please try again.',
+          status: 'error',
+        },
+        { status: response.status || 500 }
+      )
+
     } catch (backendError) {
-      console.warn('[Ardha API] Backend connection failed:', backendError)
+      // Handle timeout
+      if (backendError instanceof Error && backendError.name === 'AbortError') {
+        console.error('[Ardha API] Request timeout')
+        return NextResponse.json(
+          {
+            error: 'Request timed out. The AI is taking longer than expected. Please try again.',
+            status: 'timeout',
+          },
+          { status: 504 }
+        )
+      }
+
+      // Handle network errors
+      console.error('[Ardha API] Backend connection failed:', backendError)
+      return NextResponse.json(
+        {
+          error: 'Unable to connect to the AI service. Please check your connection and try again.',
+          status: 'connection_error',
+        },
+        { status: 503 }
+      )
     }
 
-    // Use fallback response when backend is unavailable
-    return NextResponse.json({ response: FALLBACK_RESPONSE, sources: [], depth })
   } catch (error) {
     console.error('[Ardha API] Error:', error)
-
-    // Always return a helpful response
-    return NextResponse.json({ response: FALLBACK_RESPONSE, sources: [], depth: 'quick' })
+    return NextResponse.json(
+      {
+        error: 'An unexpected error occurred. Please try again.',
+        status: 'error',
+      },
+      { status: 500 }
+    )
   }
 }
 
