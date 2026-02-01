@@ -37,11 +37,12 @@ Relationship Compass focuses on:
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import Any
 from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
@@ -51,6 +52,27 @@ from backend.services.wellness_model import (
     WellnessTool,
     get_wellness_model,
     PsychologicalFramework,
+)
+from backend.services.relationship_compass_prompt import RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT
+from backend.services.relationship_compass_rag import (
+    HEADINGS_INSUFFICIENT,
+    HEADINGS_SUFFICIENT,
+    build_allowed_citations,
+    build_citation_list,
+    build_context_block,
+    build_insufficient_response,
+    call_openai,
+    expand_and_retrieve,
+    extract_sections,
+    merge_chunks,
+    retrieve_chunks,
+    validate_response,
+)
+from backend.services.relationship_compass_storage import (
+    CompassMessage,
+    append_message,
+    ensure_session,
+    get_recent_messages,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,6 +97,14 @@ class RelationshipGuideRequest(BaseModel):
     context: str | None = Field(None, max_length=1000, description="Additional context about the relationship history")
     primary_emotion: str | None = Field(None, max_length=100, description="Primary emotion (hurt, anger, confusion, etc.)")
     desired_outcome: str | None = Field(None, max_length=500, description="What they hope to achieve")
+
+
+class GitaGuidanceRequest(BaseModel):
+    """Request schema for Gita-only relationship guidance."""
+    model_config = ConfigDict(populate_by_name=True)
+    message: str = Field(..., min_length=1, max_length=3000, description="User message")
+    session_id: str = Field(..., min_length=1, max_length=128, alias="sessionId")
+    relationship_type: str = Field("other", alias="relationshipType")
 
 
 # Relationship-specific Gita teachings mapping
@@ -314,6 +344,138 @@ async def get_relationship_guidance(
     except Exception as e:
         logger.exception(f"Relationship Compass error: {e}")
         return _get_fallback_response(conflict, relationship_type, primary_emotion, analysis_mode)
+
+
+@router.post("/gita-guidance")
+async def get_relationship_guidance_gita_only(
+    payload: GitaGuidanceRequest,
+) -> dict[str, Any]:
+    """Gita-only relationship guidance using strict RAG over the 700+ verse repository."""
+    message = payload.message.strip()
+    session_id = payload.session_id.strip()
+    relationship_type = (payload.relationship_type or "other").strip().lower()
+
+    if not message:
+        raise HTTPException(status_code=400, detail="message is required")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="sessionId is required")
+
+    ensure_session(session_id)
+    history = get_recent_messages(session_id, 20)
+
+    append_message(
+        CompassMessage(
+            session_id=session_id,
+            role="user",
+            content=message,
+            created_at=datetime.utcnow().isoformat(),
+        )
+    )
+
+    base_result = retrieve_chunks(message, relationship_type, k=18)
+    retrieval = expand_and_retrieve(message, relationship_type, base_result)
+    merged_chunks = merge_chunks(retrieval, limit=20)
+    context_block = build_context_block(merged_chunks)
+    context_sufficient = bool(merged_chunks) and retrieval.confidence >= 0.2
+
+    citations = build_citation_list(merged_chunks)
+
+    if not context_sufficient:
+        response_text = build_insufficient_response()
+        sections = extract_sections(response_text, HEADINGS_INSUFFICIENT)
+        append_message(
+            CompassMessage(
+                session_id=session_id,
+                role="assistant",
+                content=response_text,
+                created_at=datetime.utcnow().isoformat(),
+                citations=citations,
+            )
+        )
+        return {
+            "response": response_text,
+            "sections": sections,
+            "citations": citations,
+            "contextSufficient": False,
+        }
+
+    history_messages = [
+        {"role": entry.get("role", "user"), "content": entry.get("content", "")}
+        for entry in history
+    ]
+    base_user_message = (
+        f"Relationship type: {relationship_type}\n"
+        f"User message: {message}\n\n"
+        f"{context_block}"
+    )
+
+    response_text = call_openai(
+        [
+            {"role": "system", "content": RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT},
+            *history_messages,
+            {"role": "user", "content": base_user_message},
+        ]
+    )
+
+    allowed_citations = build_allowed_citations(merged_chunks)
+
+    if response_text:
+        is_valid, errors = validate_response(response_text, allowed_citations)
+    else:
+        is_valid, errors = False, ["No response from model"]
+
+    if not is_valid:
+        fix_instruction = (
+            "FORMAT + CITATION FIX: Follow the exact heading order, include citations where required, "
+            "and ensure all verse references appear in the provided [GITA_CORE_WISDOM_CONTEXT]. "
+            "If context is insufficient, return the insufficient-context format."
+        )
+        response_text = call_openai(
+            [
+                {"role": "system", "content": RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT},
+                {"role": "user", "content": base_user_message},
+                {"role": "user", "content": fix_instruction},
+            ]
+        )
+        if response_text:
+            is_valid, errors = validate_response(response_text, allowed_citations)
+
+    if not response_text or not is_valid:
+        logger.warning("Relationship Compass validation failed: %s", errors)
+        response_text = build_insufficient_response()
+        sections = extract_sections(response_text, HEADINGS_INSUFFICIENT)
+        append_message(
+            CompassMessage(
+                session_id=session_id,
+                role="assistant",
+                content=response_text,
+                created_at=datetime.utcnow().isoformat(),
+                citations=citations,
+            )
+        )
+        return {
+            "response": response_text,
+            "sections": sections,
+            "citations": citations,
+            "contextSufficient": False,
+        }
+
+    sections = extract_sections(response_text, HEADINGS_SUFFICIENT)
+    append_message(
+        CompassMessage(
+            session_id=session_id,
+            role="assistant",
+            content=response_text,
+            created_at=datetime.utcnow().isoformat(),
+            citations=citations,
+        )
+    )
+    return {
+        "response": response_text,
+        "sections": sections,
+        "citations": citations,
+        "contextSufficient": True,
+    }
 
 
 def _analyze_attachment_patterns(conflict: str) -> list[dict[str, Any]]:

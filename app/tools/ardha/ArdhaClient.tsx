@@ -37,41 +37,111 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   return [state, setState]
 }
 
-type AnalysisMode = 'standard' | 'deep_dive' | 'quantum_dive'
+const ARDHA_SECTION_HEADINGS = [
+  'Sacred Witnessing',
+  'Anatomy of the Thought',
+  'Gita Core Reframe',
+  'Stabilizing Awareness',
+  'One Grounded Reframe',
+  'One Small Action',
+  'One Question',
+]
+
+function parseArdhaSections(response: string): Record<string, string> {
+  const sections: Record<string, string> = {}
+  let currentHeading: string | null = null
+
+  response.split('\n').forEach((line) => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+
+    const headingMatch = ARDHA_SECTION_HEADINGS.find(
+      (heading) => heading.toLowerCase() === trimmed.toLowerCase()
+    )
+
+    if (headingMatch) {
+      currentHeading = headingMatch
+      sections[slugifyHeading(headingMatch)] = ''
+    } else if (currentHeading) {
+      const key = slugifyHeading(currentHeading)
+      sections[key] = sections[key]
+        ? `${sections[key]} ${trimmed}`
+        : trimmed
+    }
+  })
+
+  return sections
+}
+
+function slugifyHeading(heading: string): string {
+  return heading.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z_]/g, '')
+}
+
+function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return 'anonymous'
+  const key = 'ardha_session_id'
+  const existing = window.localStorage.getItem(key)
+  if (existing) return existing
+
+  // Generate a cryptographically secure random suffix
+  function generateSecureSuffix(length: number): string {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const bytes = new Uint8Array(length)
+      window.crypto.getRandomValues(bytes)
+      return Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    }
+    // Fallback: use Math.random only if crypto is unavailable
+    return Math.random().toString(36).slice(2, 2 + length)
+  }
+
+  const randomSuffix = generateSecureSuffix(6)
+  const newId = `ardha_${Date.now()}_${randomSuffix}`
+  window.localStorage.setItem(key, newId)
+  return newId
+}
+
+type DepthMode = 'quick' | 'deep' | 'quantum'
+
+type SourceRef = {
+  file: string
+  reference: string
+}
 
 type ArdhaResult = {
   response: string
   sections: Record<string, string>
   requestedAt: string
-  gitaVerses?: number
-  analysisMode?: AnalysisMode
+  sources?: SourceRef[]
+  depth?: DepthMode
 }
 
 const ANALYSIS_MODES: {
-  id: AnalysisMode
+  id: DepthMode
   name: string
   description: string
   icon: string
   depth: string
 }[] = [
   {
-    id: 'standard',
+    id: 'quick',
     name: 'Quick Reframe',
-    description: 'Fast 4-step reframe for immediate relief',
+    description: 'Fast reframe for immediate grounding',
     icon: '⚡',
     depth: '~30 seconds',
   },
   {
-    id: 'deep_dive',
+    id: 'deep',
     name: 'Deep Dive',
-    description: 'Comprehensive analysis with root cause exploration',
+    description: 'Comprehensive analysis with deeper clarity',
     icon: '🔍',
     depth: '~1 minute',
   },
   {
-    id: 'quantum_dive',
+    id: 'quantum',
     name: 'Quantum Dive',
-    description: 'Multi-dimensional exploration across all life aspects',
+    description: 'Multi-dimensional reframing across all life aspects',
     icon: '🌌',
     depth: '~2 minutes',
   },
@@ -89,7 +159,7 @@ export default function ArdhaClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<ArdhaResult | null>('ardha_reframe', null)
-  const [analysisMode, setAnalysisMode] = useLocalState<AnalysisMode>('ardha_analysis_mode', 'standard')
+  const [analysisMode, setAnalysisMode] = useLocalState<DepthMode>('ardha_analysis_mode', 'quick')
 
   // Voice integration
   const { language } = useLanguage()
@@ -97,6 +167,13 @@ export default function ArdhaClient() {
   useEffect(() => {
     if (error) setError(null)
   }, [thought, error])
+
+  useEffect(() => {
+    const validModes: DepthMode[] = ['quick', 'deep', 'quantum']
+    if (!validModes.includes(analysisMode)) {
+      setAnalysisMode('quick')
+    }
+  }, [analysisMode, setAnalysisMode])
 
   async function requestReframe() {
     const trimmedThought = sanitizeInput(thought.trim())
@@ -111,8 +188,9 @@ export default function ArdhaClient() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          negative_thought: trimmedThought,
-          analysis_mode: analysisMode,
+          thought: trimmedThought,
+          depth: analysisMode,
+          sessionId: getOrCreateSessionId(),
         })
       })
 
@@ -124,26 +202,15 @@ export default function ArdhaClient() {
       const data = await response.json()
 
       // Parse structured response - supports standard, deep_dive, and quantum_dive modes
-      const guidance = data.reframe_guidance
-      const fullResponse = data.response || data.raw_text || ''
+      const fullResponse = data.response || ''
 
-      if (guidance && typeof guidance === 'object') {
-        // Store sections, response, and analysis mode
+      if (fullResponse) {
         setResult({
           response: fullResponse,
-          sections: guidance,
+          sections: parseArdhaSections(fullResponse),
           requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0,
-          analysisMode: data.analysis_mode || analysisMode,
-        })
-      } else if (fullResponse) {
-        // Fallback to full response only
-        setResult({
-          response: fullResponse,
-          sections: {},
-          requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0,
-          analysisMode: data.analysis_mode || analysisMode,
+          sources: data.sources || [],
+          depth: data.depth || analysisMode,
         })
       } else {
         setError('Ardha could not generate a response. Please try again.')
@@ -250,7 +317,7 @@ export default function ArdhaClient() {
                   aria-label={loading ? 'Processing...' : `Reframe with Ardha (${ANALYSIS_MODES.find(m => m.id === analysisMode)?.name})`}
                 >
                   {loading ? (
-                    <span>Ardha is {analysisMode === 'quantum_dive' ? 'diving deep' : analysisMode === 'deep_dive' ? 'analyzing' : 'reflecting'}...</span>
+                    <span>Ardha is {analysisMode === 'quantum' ? 'diving deep' : analysisMode === 'deep' ? 'analyzing' : 'reflecting'}...</span>
                   ) : (
                     <span>Reframe with Ardha</span>
                   )}
@@ -275,10 +342,10 @@ export default function ArdhaClient() {
                 tool="ardha"
                 sections={result.sections}
                 fullResponse={result.response}
-                gitaVersesUsed={result.gitaVerses}
                 timestamp={result.requestedAt}
                 language={language}
-                analysisMode={result.analysisMode || analysisMode}
+                analysisMode={result.depth || analysisMode}
+                sources={result.sources}
               />
             )}
           </section>
@@ -306,7 +373,7 @@ export default function ArdhaClient() {
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
                 <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
                 <p className="text-xs text-orange-100/70">
-                  Recognition → Insight → Reframe → One action
+                  Sacred Witnessing → Anatomy → Gita Reframe → Awareness → One reframe → One action → One question
                 </p>
               </div>
             </div>

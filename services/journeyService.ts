@@ -13,12 +13,11 @@ import type {
   ListJourneysParams,
   ApiError,
 } from '@/types/journey.types';
+import { apiFetch } from '@/lib/api';
 
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEYS_ENDPOINT = '/api/journeys';
 
 // =============================================================================
@@ -71,22 +70,70 @@ function parseErrorResponse(response: Response, body: unknown): JourneyServiceEr
 // =============================================================================
 
 /**
- * Get authentication headers.
+ * Get auth UID from local storage for X-Auth-UID fallback.
  */
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
-  // Try to get user ID from localStorage (for X-Auth-UID header)
+  // Attach bearer token from localStorage (fallback for auth cookie)
   if (typeof window !== 'undefined') {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      headers['X-Auth-UID'] = userId;
+    const accessToken =
+      localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token');
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    // Try to get user ID from stored auth user (for X-Auth-UID header)
+    const storedUser = localStorage.getItem('mindvibe_auth_user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser) as { id?: string };
+        if (parsedUser.id) {
+          headers['X-Auth-UID'] = parsedUser.id;
+        }
+      } catch {
+        // Ignore malformed storage entries
+      }
+    }
+
+    // Legacy fallback
+    const legacyUserId = localStorage.getItem('userId');
+    if (!headers['X-Auth-UID'] && legacyUserId) {
+      headers['X-Auth-UID'] = legacyUserId;
     }
   }
 
   return headers;
+}
+
+/**
+ * Get auth UID from local storage for API fallback.
+ */
+function getAuthUid(): string | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const storedUser = localStorage.getItem('mindvibe_auth_user');
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser) as { id?: string };
+      if (parsedUser.id) {
+        return parsedUser.id;
+      }
+    } catch {
+      // Ignore malformed storage entries
+    }
+  }
+
+  const legacyUserId = localStorage.getItem('userId');
+  if (legacyUserId) {
+    return legacyUserId;
+  }
+
+  return undefined;
 }
 
 /**
@@ -97,8 +144,6 @@ async function apiRequest<T>(
   endpoint: string,
   body?: unknown
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
   const options: RequestInit = {
     method,
     headers: getAuthHeaders(),

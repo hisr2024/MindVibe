@@ -201,7 +201,7 @@ export function FloatingMusicPlayer({
             {/* Footer */}
             <div className="p-2 border-t border-white/5 flex items-center justify-between">
               <a
-                href="/sounds"
+                href="/kiaan-vibe"
                 className="flex-1 p-2 rounded-lg text-[10px] text-violet-400/70 hover:text-violet-300 hover:bg-violet-500/10 text-center"
               >
                 Full Experience →

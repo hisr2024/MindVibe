@@ -162,6 +162,16 @@ class VoiceService {
       throw new Error(`Voice synthesis failed: ${errorText}`)
     }
 
+    const contentType = response.headers.get('content-type') || ''
+    if (!contentType.includes('audio/') && !contentType.includes('application/octet-stream')) {
+      const payload = await response.json().catch(() => null)
+      const message =
+        payload?.message ||
+        payload?.error ||
+        'Voice synthesis returned a non-audio response'
+      throw new Error(message)
+    }
+
     const blob = await response.blob()
 
     // Verify we got actual audio data

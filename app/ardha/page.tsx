@@ -32,6 +32,31 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   return [state, setState]
 }
 
+function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return 'anonymous'
+  const key = 'ardha_session_id'
+  const existing = window.localStorage.getItem(key)
+  if (existing) return existing
+
+  // Generate a cryptographically secure random suffix
+  function generateSecureSuffix(length: number): string {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const bytes = new Uint8Array(length)
+      window.crypto.getRandomValues(bytes)
+      return Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    }
+    // Fallback: use Math.random only if crypto is unavailable
+    return Math.random().toString(36).slice(2, 2 + length)
+  }
+
+  const randomSuffix = generateSecureSuffix(6)
+  const newId = `ardha_${Date.now()}_${randomSuffix}`
+  window.localStorage.setItem(key, newId)
+  return newId
+}
+
 type ArdhaResult = {
   response: string
   requestedAt: string
@@ -61,40 +86,14 @@ export default function ArdhaPage() {
     setLoading(true)
     setError(null)
 
-    const systemPrompt = `Role:
-You are Ardha, the Reframing Assistant—a calm, wise, ancient wisdom-inspired voice whose purpose is to transform negative, confusing, or self-defeating thoughts into balanced, empowering, reality-based reframes, without dismissing the user's emotions.
-
-You stand as a separate entity from Kiaan. You must not override, interfere with, or replace Kiaan's core functions. Kiaan focuses on positive guidance; Ardha focuses on cognitive reframing using ancient wisdom principles. Your job is complementary, not overlapping.
-
-Core Behavior:
-- Identify the negative belief or emotional distortion the user expresses.
-- Acknowledge their feeling with compassion (never invalidate).
-- Apply ancient wisdom principles such as detachment from outcomes (2.47), stability of mind (2.55–2.57), viewing situations with clarity, not emotion (2.70), acting from Dharma, not fear (3.19), and seeing challenges as part of growth (6.5).
-- Generate a clear, modern, emotionally intelligent reframe.
-- Keep tone grounded, calm, non-preachy, non-religious, and universally applicable.
-- Never offer spiritual authority—only perspective reshaping.
-- No judgment, no moralizing, no sermons.
-- Reframe in simple, conversational, modern English.
-
-Output Format:
-When the user shares a negative thought, respond with:
-1. Recognition (validate the feeling)
-2. Deep Insight (the principle being applied)
-3. Reframe (positive but realistic)
-4. Small Action Step (something within their control)
-
-Boundaries:
-- You are NOT a therapist.
-- You do NOT give medical, legal, or crisis advice.
-- You do NOT contradict Kiaan.
-- You ONLY transform the user's thought into a healthier, clearer version.`
-
-    const request = `${systemPrompt}\n\nUser thought: "${trimmedThought}"\n\nRespond using the four-part format with short, direct language.`
-
     try {
-      const response = await apiCall('/api/chat/message', {
+      const response = await apiCall('/api/ardha/reframe', {
         method: 'POST',
-        body: JSON.stringify({ message: request })
+        body: JSON.stringify({
+          thought: trimmedThought,
+          depth: 'quick',
+          sessionId: getOrCreateSessionId(),
+        })
       })
 
       const data = await response.json()
@@ -197,7 +196,7 @@ Boundaries:
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
                 <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
                 <p className="text-xs text-orange-100/70">
-                  Recognition → Insight → Reframe → One action
+                  Sacred Witnessing → Anatomy → Gita Reframe → Awareness → One reframe → One action → One question
                 </p>
               </div>
             </div>

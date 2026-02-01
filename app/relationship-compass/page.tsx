@@ -68,118 +68,64 @@ const EMOTIONS = [
 
 // Section display configuration for beautiful rendering
 const SECTION_CONFIG: Record<string, { title: string; icon: string; gradient: string }> = {
-  sacred_witnessing: {
-    title: 'Sacred Witnessing',
+  'Sacred Acknowledgement': {
+    title: 'Sacred Acknowledgement',
     icon: '🙏',
     gradient: 'from-amber-500/20 to-orange-500/10'
   },
-  mirror_of_relationship: {
-    title: 'Mirror of Relationship',
+  'Inner Conflict Mirror': {
+    title: 'Inner Conflict Mirror',
     icon: '🪞',
     gradient: 'from-purple-500/20 to-indigo-500/10'
   },
-  others_inner_world: {
-    title: "The Other's Inner World",
-    icon: '💫',
+  'Gita Teachings Used': {
+    title: 'Gita Teachings Used',
+    icon: '📜',
     gradient: 'from-blue-500/20 to-cyan-500/10'
   },
-  dharmic_path: {
-    title: 'The Dharmic Path',
-    icon: '🛤️',
+  'Dharma Options': {
+    title: 'Dharma Options',
+    icon: '⚖️',
     gradient: 'from-emerald-500/20 to-teal-500/10'
   },
-  ego_illumination: {
-    title: 'Ego Illumination',
-    icon: '💡',
-    gradient: 'from-yellow-500/20 to-amber-500/10'
-  },
-  sacred_communication: {
-    title: 'Sacred Communication',
+  'Sacred Speech': {
+    title: 'Sacred Speech',
     icon: '🗣️',
     gradient: 'from-rose-500/20 to-pink-500/10'
   },
-  forgiveness_teaching: {
-    title: 'The Teaching of Kshama',
-    icon: '🕊️',
-    gradient: 'from-sky-500/20 to-blue-500/10'
-  },
-  eternal_anchor: {
-    title: 'Eternal Anchor',
+  'Detachment Anchor': {
+    title: 'Detachment Anchor',
     icon: '⚓',
     gradient: 'from-orange-500/20 to-red-500/10'
   },
-  // Fallback section names from older format
-  acknowledgment: {
-    title: 'Acknowledgment',
-    icon: '🙏',
+  'One Next Step': {
+    title: 'One Next Step',
+    icon: '🪷',
     gradient: 'from-amber-500/20 to-orange-500/10'
   },
-  underneath: {
-    title: 'What Lies Beneath',
-    icon: '🔍',
-    gradient: 'from-purple-500/20 to-indigo-500/10'
+  'One Gentle Question': {
+    title: 'One Gentle Question',
+    icon: '❓',
+    gradient: 'from-sky-500/20 to-blue-500/10'
   },
-  clarity: {
-    title: 'Finding Clarity',
-    icon: '✨',
-    gradient: 'from-blue-500/20 to-cyan-500/10'
+  'What I Need From the Gita Repository': {
+    title: 'What I Need From the Gita Repository',
+    icon: '📚',
+    gradient: 'from-violet-500/20 to-purple-500/10'
   },
-  path_forward: {
-    title: 'The Path Forward',
-    icon: '🛤️',
-    gradient: 'from-emerald-500/20 to-teal-500/10'
-  },
-  reminder: {
-    title: 'A Gentle Reminder',
-    icon: '💫',
-    gradient: 'from-orange-500/20 to-red-500/10'
-  },
-}
-
-// Gita teachings per relationship type
-const GITA_TEACHINGS: Record<string, { principle: string; sanskrit: string; meaning: string }> = {
-  romantic: {
-    principle: 'Nishkama Prema',
-    sanskrit: 'निष्काम प्रेम',
-    meaning: 'Love without selfish attachment - seeing the divine in your partner',
-  },
-  family: {
-    principle: 'Svadharma',
-    sanskrit: 'स्वधर्म',
-    meaning: 'Sacred duty - honoring family while maintaining inner equanimity',
-  },
-  friendship: {
-    principle: 'Maitri',
-    sanskrit: 'मैत्री',
-    meaning: 'Unconditional friendship - being a friend to all beings',
-  },
-  workplace: {
-    principle: 'Karma Yoga',
-    sanskrit: 'कर्मयोग',
-    meaning: 'Work as worship - excellence in action without attachment to results',
-  },
-  self: {
-    principle: 'Atma-jnana',
-    sanskrit: 'आत्मज्ञान',
-    meaning: 'Self-knowledge - you are complete, eternal, unchanging',
-  },
-  community: {
-    principle: 'Lokasangraha',
-    sanskrit: 'लोकसंग्रह',
-    meaning: 'Welfare of the world - acting for the good of all beings',
+  Citations: {
+    title: 'Citations',
+    icon: '🔖',
+    gradient: 'from-slate-500/20 to-gray-500/10'
   },
 }
 
 type CompassResult = {
   response: string
-  compass_guidance: Record<string, string>
+  sections: Record<string, string>
   relationship_type: string
-  relationship_teachings?: {
-    core_principles: string[]
-    key_teaching: string
-  }
-  emotion_insight?: string
-  gita_verses_used: number
+  citations: { source: string; chapter: string; verse: string; chunk_id: string }[]
+  contextSufficient: boolean
   requestedAt: string
 }
 
@@ -194,42 +140,62 @@ export default function RelationshipCompassPage() {
   const [result, setResult] = useLocalState<CompassResult | null>('relationship_compass_result', null)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [activeSection, setActiveSection] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useLocalState<string>('relationship_compass_session_id', '')
 
   // Clear error when input changes
   useEffect(() => {
     if (error) setError(null)
   }, [conflict, relationshipType, primaryEmotion, error])
 
+  useEffect(() => {
+    if (!sessionId) {
+      setSessionId(crypto.randomUUID())
+    }
+  }, [sessionId, setSessionId])
+
   const requestCompass = useCallback(async () => {
     const trimmedConflict = sanitizeInput(conflict.trim())
-    if (!trimmedConflict) return
+    if (!trimmedConflict || !sessionId) return
 
     setLoading(true)
     setError(null)
 
+    const relationshipTypeMap: Record<string, string> = {
+      romantic: 'partner',
+      family: 'family',
+      friendship: 'friend',
+      workplace: 'work',
+      self: 'other',
+      community: 'other',
+    }
+
+    const enrichedMessage = [
+      trimmedConflict,
+      primaryEmotion ? `Primary emotion: ${primaryEmotion}` : '',
+      context.trim() ? `Context: ${context.trim()}` : '',
+      desiredOutcome.trim() ? `Desired outcome: ${desiredOutcome.trim()}` : '',
+    ].filter(Boolean).join('\n')
+
     try {
-      const response = await apiCall('/api/relationship-compass/guide', {
+      const response = await apiCall('/api/relationship-compass/gita-guidance', {
         method: 'POST',
         body: JSON.stringify({
-          conflict: trimmedConflict,
-          relationship_type: relationshipType,
-          primary_emotion: primaryEmotion || undefined,
-          context: context.trim() || undefined,
-          desired_outcome: desiredOutcome.trim() || undefined,
+          message: enrichedMessage,
+          sessionId,
+          relationshipType: relationshipTypeMap[relationshipType] || 'other',
         }),
         timeout: 60000, // Extended timeout for deep analysis
       })
 
       const data = await response.json()
 
-      if (data.status === 'success') {
+      if (data.response) {
         setResult({
           response: data.response,
-          compass_guidance: data.compass_guidance,
-          relationship_type: data.relationship_type,
-          relationship_teachings: data.relationship_teachings,
-          emotion_insight: data.emotion_insight,
-          gita_verses_used: data.gita_verses_used,
+          sections: data.sections || {},
+          relationship_type: relationshipType,
+          citations: data.citations || [],
+          contextSufficient: data.contextSufficient === true,
           requestedAt: new Date().toISOString(),
         })
         setActiveSection(null) // Reset active section
@@ -241,10 +207,9 @@ export default function RelationshipCompassPage() {
     } finally {
       setLoading(false)
     }
-  }, [conflict, relationshipType, primaryEmotion, context, desiredOutcome])
+  }, [conflict, relationshipType, sessionId, primaryEmotion, context, desiredOutcome])
 
   const selectedRelType = RELATIONSHIP_TYPES.find(t => t.value === relationshipType)
-  const gitaTeaching = GITA_TEACHINGS[relationshipType]
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
@@ -258,7 +223,7 @@ export default function RelationshipCompassPage() {
                 Relationship Compass
               </h1>
               <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-                Navigate the sacred terrain of human connection with dharma (right action), daya (compassion), and kshama (forgiveness).
+                Receive relationship guidance grounded only in retrieved Bhagavad Gita verses and commentary.
               </p>
             </div>
             <div className="flex flex-col gap-2 items-end">
@@ -433,11 +398,11 @@ export default function RelationshipCompassPage() {
                         <span className="text-lg">🧭</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-orange-50">Relationship Compass Guidance</h3>
+                        <h3 className="font-semibold text-orange-50">Relationship Compass&apos;s Transmission</h3>
                         <p className="text-xs text-orange-100/60">
-                          {result.gita_verses_used > 0
-                            ? `Drawing from ${result.gita_verses_used} Gita verses`
-                            : 'Rooted in Bhagavad Gita wisdom'}
+                          {result.citations.length > 0
+                            ? `Drawing from ${result.citations.length} cited Gita sources`
+                            : 'Awaiting retrieved Gita sources'}
                         </p>
                       </div>
                     </div>
@@ -446,30 +411,12 @@ export default function RelationshipCompassPage() {
                     </span>
                   </div>
 
-                  {/* Emotion Insight */}
-                  {result.emotion_insight && (
-                    <div className="mb-4 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                      <p className="text-sm text-purple-100/90 italic leading-relaxed">
-                        "{result.emotion_insight}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Key Teaching */}
-                  {result.relationship_teachings?.key_teaching && (
-                    <div className="mb-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                      <p className="text-sm text-orange-100/90 leading-relaxed">
-                        <span className="font-semibold text-orange-200">Gita Teaching: </span>
-                        {result.relationship_teachings.key_teaching}
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 {/* Structured Sections */}
-                {result.compass_guidance && Object.keys(result.compass_guidance).length > 0 && (
+                {result.sections && Object.keys(result.sections).length > 0 && (
                   <div className="space-y-3">
-                    {Object.entries(result.compass_guidance).map(([key, content]) => {
+                    {Object.entries(result.sections).map(([key, content]) => {
                       if (!content || content.trim().length === 0) return null
                       const config = SECTION_CONFIG[key] || {
                         title: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
@@ -530,6 +477,18 @@ export default function RelationshipCompassPage() {
                     </div>
                   </div>
                 </details>
+
+                {result.citations.length > 0 && (
+                  <div className="rounded-xl border border-orange-500/20 bg-black/40 p-4 text-xs text-orange-100/70">
+                    <span className="font-semibold text-orange-100">Sources:</span>{' '}
+                    {result.citations.map((citation, index) => (
+                      <span key={`${citation.chunk_id}-${index}`}>
+                        {citation.source} ({citation.chapter}:{citation.verse})
+                        {index < result.citations.length - 1 ? '; ' : ''}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -537,21 +496,14 @@ export default function RelationshipCompassPage() {
           {/* Right: Info Sidebar */}
           <section className="space-y-4">
             {/* Current Relationship Type Info */}
-            {selectedRelType && gitaTeaching && (
+            {selectedRelType && (
               <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10]/90 to-[#0b0a0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3">
                   <span className="text-2xl">{selectedRelType.icon}</span>
                   <div>
                     <h3 className="font-semibold text-orange-50">{selectedRelType.label}</h3>
                     <p className="text-xs text-orange-100/60">{selectedRelType.description}</p>
                   </div>
-                </div>
-                <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-orange-300 font-semibold">{gitaTeaching.principle}</span>
-                    <span className="text-orange-200/70 text-sm">({gitaTeaching.sanskrit})</span>
-                  </div>
-                  <p className="text-sm text-orange-100/80 leading-relaxed">{gitaTeaching.meaning}</p>
                 </div>
               </div>
             )}
@@ -561,14 +513,11 @@ export default function RelationshipCompassPage() {
               <h3 className="text-sm font-semibold text-orange-50 mb-4">How the Compass Works</h3>
               <ol className="space-y-3 text-sm text-orange-100/85">
                 {[
-                  'Deep acknowledgment of your pain',
-                  'Mirror reflection - what this reveals within',
-                  'Compassionate view of the other',
-                  'Dharmic path - right action from highest self',
-                  'Ego illumination - seeing beyond reactions',
-                  'Sacred communication guidance',
-                  'Kshama - the path of forgiveness',
-                  'Eternal anchor - your unchanging truth',
+                  'Retrieve Bhagavad Gita verses and commentary from the repository',
+                  'Inject the retrieved context verbatim into the prompt',
+                  'Return guidance only when citations are present',
+                  'Validate format, headings, and citation placement',
+                  'Fallback to insufficient-context mode when retrieval is thin',
                 ].map((step, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-[#ffb347] text-xs font-bold text-slate-950 shrink-0">
@@ -582,21 +531,28 @@ export default function RelationshipCompassPage() {
 
             {/* Core Principles */}
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-4">Gita's Core Teachings for Relationships</h3>
+              <h3 className="text-sm font-semibold text-orange-50 mb-4">Retrieval Focus Tags</h3>
               <div className="space-y-3">
                 {[
-                  { sanskrit: 'धर्म', term: 'Dharma', meaning: 'Right action aligned with your highest self' },
-                  { sanskrit: 'दया', term: 'Daya', meaning: 'Deep compassion for self and others' },
-                  { sanskrit: 'क्षमा', term: 'Kshama', meaning: 'Forgiveness as liberation, not condoning' },
-                  { sanskrit: 'अहिंसा', term: 'Ahimsa', meaning: 'Non-violent truth in communication' },
-                  { sanskrit: 'समदर्शन', term: 'Sama-darshana', meaning: 'Equal vision - seeing the divine in all' },
-                ].map((teaching, idx) => (
-                  <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-black/30 border border-orange-500/10">
-                    <span className="text-orange-300 font-semibold text-lg">{teaching.sanskrit}</span>
-                    <div>
-                      <span className="font-medium text-orange-100">{teaching.term}</span>
-                      <p className="text-xs text-orange-100/60">{teaching.meaning}</p>
-                    </div>
+                  'anger',
+                  'forgiveness',
+                  'compassion',
+                  'truth',
+                  'speech',
+                  'self-control',
+                  'ego',
+                  'equanimity',
+                  'attachment',
+                  'duty',
+                  'fear',
+                  'jealousy',
+                  'resentment',
+                  'non-harm',
+                  'steadiness',
+                  'patience',
+                ].map((tag) => (
+                  <div key={tag} className="flex items-center gap-3 p-3 rounded-xl bg-black/30 border border-orange-500/10">
+                    <span className="text-orange-300 font-semibold text-sm">{tag}</span>
                   </div>
                 ))}
               </div>

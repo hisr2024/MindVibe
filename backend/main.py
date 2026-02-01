@@ -48,7 +48,7 @@ ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "CORS_ALLOWED_ORIGINS",
-        "https://mind-vibe-universal.vercel.app,http://localhost:3000,http://localhost:3001"
+        "https://mind-vibe-universal.vercel.app,https://www.mindvibe.life,https://mindvibe.life,http://localhost:3000,http://localhost:3001"
     ).split(",")
 ]
 
@@ -61,6 +61,7 @@ ALLOWED_HEADERS = [
     "user-agent",
     "x-requested-with",
     "x-csrf-token",
+    "x-auth-uid",
     "cache-control",
 ]
 
@@ -926,6 +927,7 @@ print("\n[Moods] Attempting to import Moods router...")
 try:
     from backend.routes.moods import router as moods_router
     app.include_router(moods_router, prefix="/api")
+    app.include_router(moods_router)
     print("✅ [SUCCESS] Moods router loaded")
     print("   • POST   /api/moods - Submit mood entry")
     print("   • GET    /api/moods/micro-response - Get mood analysis")

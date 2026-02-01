@@ -46,6 +46,8 @@ type RelationshipCompassResult = {
   sections: Record<string, string>
   requestedAt: string
   gitaVerses?: number
+  citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
+  contextSufficient?: boolean
 }
 
 const triggerPatterns = [
@@ -60,24 +62,34 @@ export default function RelationshipCompassClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useLocalState<RelationshipCompassResult | null>('relationship_compass', null)
+  const [sessionId, setSessionId] = useLocalState<string>('relationship_compass_session', '')
 
   useEffect(() => {
     if (error) setError(null)
   }, [conflict, error])
 
+  useEffect(() => {
+    if (!sessionId) {
+      setSessionId(crypto.randomUUID())
+    }
+  }, [sessionId, setSessionId])
+
   async function requestCompass() {
     const trimmedConflict = sanitizeInput(conflict.trim())
-    if (!trimmedConflict) return
+    if (!trimmedConflict || !sessionId) return
 
     setLoading(true)
     setError(null)
 
     try {
-      // Use dedicated KIAAN-powered Relationship Compass endpoint
-      const response = await fetch('/api/relationship-compass/guide', {
+      const response = await fetch('/api/relationship-compass/gita-guidance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conflict: trimmedConflict })
+        body: JSON.stringify({
+          message: trimmedConflict,
+          sessionId,
+          relationshipType: 'other'
+        })
       })
 
       if (!response.ok) {
@@ -88,8 +100,15 @@ export default function RelationshipCompassClient() {
       const data = await response.json()
 
       // Parse structured response - supports both legacy and ultra-deep sections
-      const guidance = data.compass_guidance
+      const guidance = data.sections
       const fullResponse = data.response || _formatCompassGuidance(guidance)
+      const citations = Array.isArray(data.citations)
+        ? data.citations.map((citation: { source?: string; source_file?: string; chapter?: string; verse?: string; chunk_id?: string }) => ({
+          source_file: citation.source_file || citation.source || 'Unknown source',
+          reference_if_any: citation.chapter && citation.verse ? `${citation.chapter}:${citation.verse}` : undefined,
+          chunk_id: citation.chunk_id || 'unknown',
+        }))
+        : []
 
       if (guidance && typeof guidance === 'object') {
         // Store both sections and full response
@@ -97,7 +116,9 @@ export default function RelationshipCompassClient() {
           response: fullResponse,
           sections: guidance,
           requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0
+          gitaVerses: citations.length,
+          citations,
+          contextSufficient: data.contextSufficient
         })
       } else if (fullResponse) {
         // Fallback to full response only
@@ -105,7 +126,9 @@ export default function RelationshipCompassClient() {
           response: fullResponse,
           sections: {},
           requestedAt: new Date().toISOString(),
-          gitaVerses: data.gita_verses_used || 0
+          gitaVerses: citations.length,
+          citations,
+          contextSufficient: data.contextSufficient
         })
       } else {
         setError('Relationship Compass could not generate a response. Please try again.')
@@ -120,12 +143,7 @@ export default function RelationshipCompassClient() {
   // Format structured guidance into readable response
   function _formatCompassGuidance(guidance: Record<string, string> | undefined): string {
     if (!guidance) return ''
-    const parts = []
-    if (guidance.acknowledgment) parts.push(guidance.acknowledgment)
-    if (guidance.ego_check) parts.push(guidance.ego_check)
-    if (guidance.right_action) parts.push(guidance.right_action)
-    if (guidance.compassion_perspective) parts.push(guidance.compassion_perspective)
-    if (guidance.next_step) parts.push(guidance.next_step)
+    const parts = Object.entries(guidance).map(([title, content]) => `${title}\n${content}`)
     return parts.join('\n\n')
   }
 
@@ -216,6 +234,7 @@ export default function RelationshipCompassClient() {
                 gitaVersesUsed={result.gitaVerses}
                 timestamp={result.requestedAt}
                 language="en-IN"
+                citations={result.citations}
               />
             )}
           </section>

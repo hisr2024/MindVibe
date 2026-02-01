@@ -1,7 +1,3 @@
-/**
- * Relationship Compass Guide API Route (Gita-only proxy)
- */
-
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
@@ -34,20 +30,12 @@ const FALLBACK_RESPONSE = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const message = typeof body.message === 'string'
-      ? body.message.trim()
-      : typeof body.conflict === 'string'
-        ? body.conflict.trim()
-        : ''
-    const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : crypto.randomUUID()
-    const relationshipTypeRaw = typeof body.relationshipType === 'string'
-      ? body.relationshipType.trim()
-      : typeof body.relationship_type === 'string'
-        ? body.relationship_type.trim()
-        : 'other'
+    const message = typeof body.message === 'string' ? body.message.trim() : ''
+    const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
+    const relationshipType = typeof body.relationshipType === 'string' ? body.relationshipType.trim() : 'other'
 
-    if (!message) {
-      return NextResponse.json({ error: 'message is required' }, { status: 400 })
+    if (!message || !sessionId) {
+      return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
     }
 
     const controller = new AbortController()
@@ -63,7 +51,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           message,
           sessionId,
-          relationshipType: relationshipTypeRaw
+          relationshipType
         }),
         signal: controller.signal
       })
@@ -72,7 +60,7 @@ export async function POST(request: NextRequest) {
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error')
-        console.error(`[Relationship Compass Guide] Backend returned ${response.status}: ${errorText}`)
+        console.error(`[Relationship Compass Gita] Backend returned ${response.status}: ${errorText}`)
         return NextResponse.json(FALLBACK_RESPONSE)
       }
 
@@ -81,14 +69,14 @@ export async function POST(request: NextRequest) {
     } catch (backendError) {
       clearTimeout(timeoutId)
       if (backendError instanceof Error && backendError.name === 'AbortError') {
-        console.warn('[Relationship Compass Guide] Request timeout')
+        console.warn('[Relationship Compass Gita] Request timeout')
       } else {
-        console.warn('[Relationship Compass Guide] Backend connection failed:', backendError)
+        console.warn('[Relationship Compass Gita] Backend connection failed:', backendError)
       }
       return NextResponse.json(FALLBACK_RESPONSE)
     }
   } catch (error) {
-    console.error('[Relationship Compass Guide] Error:', error)
+    console.error('[Relationship Compass Gita] Error:', error)
     return NextResponse.json(FALLBACK_RESPONSE)
   }
 }
@@ -97,7 +85,7 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     service: 'relationship-compass',
-    endpoint: 'guide',
+    endpoint: 'gita-guidance',
     timestamp: new Date().toISOString()
   })
 }
