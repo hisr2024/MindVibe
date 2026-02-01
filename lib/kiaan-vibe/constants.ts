@@ -21,7 +21,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '15:30',
     color: 'from-slate-500 to-gray-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-1.mp3',
   },
   {
     number: 2,
@@ -35,7 +34,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '25:00',
     color: 'from-amber-500 to-orange-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-2.mp3',
   },
   {
     number: 3,
@@ -49,7 +47,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '18:00',
     color: 'from-orange-500 to-red-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-3.mp3',
   },
   {
     number: 4,
@@ -63,7 +60,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '17:30',
     color: 'from-yellow-500 to-amber-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-4.mp3',
   },
   {
     number: 5,
@@ -77,7 +73,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '12:00',
     color: 'from-lime-500 to-green-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-5.mp3',
   },
   {
     number: 6,
@@ -91,7 +86,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '20:00',
     color: 'from-emerald-500 to-teal-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-6.mp3',
   },
   {
     number: 7,
@@ -105,7 +99,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '13:00',
     color: 'from-cyan-500 to-blue-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-7.mp3',
   },
   {
     number: 8,
@@ -119,7 +112,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '12:30',
     color: 'from-blue-500 to-indigo-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-8.mp3',
   },
   {
     number: 9,
@@ -133,7 +125,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '15:00',
     color: 'from-indigo-500 to-purple-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-9.mp3',
   },
   {
     number: 10,
@@ -147,7 +138,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '18:00',
     color: 'from-violet-500 to-purple-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-10.mp3',
   },
   {
     number: 11,
@@ -161,7 +151,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '22:00',
     color: 'from-purple-500 to-pink-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-11.mp3',
   },
   {
     number: 12,
@@ -175,7 +164,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '10:00',
     color: 'from-pink-500 to-rose-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-12.mp3',
   },
   {
     number: 13,
@@ -189,7 +177,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '14:00',
     color: 'from-rose-500 to-red-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-13.mp3',
   },
   {
     number: 14,
@@ -203,7 +190,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '11:30',
     color: 'from-red-500 to-orange-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-14.mp3',
   },
   {
     number: 15,
@@ -217,7 +203,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '9:00',
     color: 'from-amber-500 to-yellow-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-15.mp3',
   },
   {
     number: 16,
@@ -231,7 +216,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '10:30',
     color: 'from-teal-500 to-cyan-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-16.mp3',
   },
   {
     number: 17,
@@ -245,7 +229,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '12:00',
     color: 'from-green-500 to-emerald-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-17.mp3',
   },
   {
     number: 18,
@@ -259,7 +242,6 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     duration: '30:00',
     color: 'from-fuchsia-500 to-purple-600',
     verses: [],
-    audioSrc: '/audio/gita/chapter-18.mp3',
   },
 ]
 

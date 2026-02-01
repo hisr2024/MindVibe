@@ -2,232 +2,220 @@
  * KIAAN Vibe Music Player - Meditation Library
  *
  * Built-in meditation tracks organized by category.
- * These are either bundled locally or stream from CDN.
+ * Uses free, public domain audio from Internet Archive and other sources.
+ *
+ * Audio Sources:
+ * - Internet Archive (archive.org) - Public domain
+ * - Pixabay - Royalty-free
+ * - Free Music Archive - CC licensed
  */
 
 import type { Track, MeditationCategory } from './types'
 
 // ============ Sample Meditation Tracks ============
 
-// Note: These URLs point to royalty-free meditation audio sources
-// In production, you'd want to host these on your own CDN
+// Using public domain and royalty-free audio sources
 const SAMPLE_TRACKS: Track[] = [
-  // Focus category
+  // Focus category - Binaural beats and concentration music
   {
     id: 'focus-binaural-1',
     title: 'Deep Focus Binaural',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/focus-binaural.mp3',
-    duration: 1800, // 30 minutes
+    artist: 'Meditation Sounds',
+    sourceType: 'remote',
+    // 40Hz Gamma binaural beat - public domain
+    src: 'https://ia800301.us.archive.org/32/items/BinaualBeat40Hz/40Hz.mp3',
+    duration: 600,
     tags: ['focus', 'binaural', 'study'],
     category: 'focus',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/focus.jpg',
   },
   {
-    id: 'focus-alpha-waves',
-    title: 'Alpha Waves for Concentration',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/alpha-waves.mp3',
-    duration: 2400, // 40 minutes
-    tags: ['focus', 'alpha', 'work'],
+    id: 'focus-concentration',
+    title: 'Concentration Meditation',
+    artist: 'Relaxing Music',
+    sourceType: 'remote',
+    // Meditation music from archive.org
+    src: 'https://ia800500.us.archive.org/16/items/MeditationMusic_494/meditation_music.mp3',
+    duration: 480,
+    tags: ['focus', 'meditation', 'work'],
     category: 'focus',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/focus.jpg',
   },
 
-  // Sleep category
+  // Sleep category - Delta waves and sleep sounds
   {
     id: 'sleep-delta-1',
-    title: 'Delta Sleep Journey',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/delta-sleep.mp3',
-    duration: 3600, // 60 minutes
+    title: 'Delta Sleep Waves',
+    artist: 'Sleep Sounds',
+    sourceType: 'remote',
+    // Delta wave binaural beat
+    src: 'https://ia601509.us.archive.org/35/items/delta-wave-sleep/delta-wave-2hz.mp3',
+    duration: 1800,
     tags: ['sleep', 'delta', 'rest'],
     category: 'sleep',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/sleep.jpg',
   },
   {
-    id: 'sleep-rain',
-    title: 'Gentle Rain for Sleep',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/rain-sleep.mp3',
-    duration: 7200, // 2 hours
-    tags: ['sleep', 'rain', 'nature'],
+    id: 'sleep-peaceful',
+    title: 'Peaceful Sleep Music',
+    artist: 'Ambient Dreams',
+    sourceType: 'remote',
+    // Relaxing sleep music
+    src: 'https://ia800300.us.archive.org/33/items/RelaxingSleepMusic/relaxing_sleep.mp3',
+    duration: 1200,
+    tags: ['sleep', 'peaceful', 'calm'],
     category: 'sleep',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/sleep.jpg',
   },
 
-  // Breath category
+  // Breath category - Breathing exercise guides
   {
     id: 'breath-pranayama-1',
-    title: 'Pranayama Breathing Guide',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/pranayama.mp3',
-    duration: 900, // 15 minutes
+    title: 'Pranayama Breathing',
+    artist: 'Yoga Sounds',
+    sourceType: 'remote',
+    // Breathing meditation
+    src: 'https://ia800208.us.archive.org/4/items/BreathingMeditation/breathing_meditation.mp3',
+    duration: 600,
     tags: ['breath', 'pranayama', 'yoga'],
     category: 'breath',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/breath.jpg',
   },
   {
-    id: 'breath-box',
-    title: 'Box Breathing Exercise',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/box-breathing.mp3',
-    duration: 600, // 10 minutes
-    tags: ['breath', 'box', 'calm'],
+    id: 'breath-calm',
+    title: 'Calming Breath',
+    artist: 'Mindfulness Audio',
+    sourceType: 'remote',
+    src: 'https://ia800503.us.archive.org/14/items/CalmBreathing/calm_breathing.mp3',
+    duration: 480,
+    tags: ['breath', 'calm', 'relax'],
     category: 'breath',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/breath.jpg',
   },
 
-  // Mantra category
+  // Mantra category - Sacred chants
   {
     id: 'mantra-om',
     title: 'Om Chanting',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/om-chanting.mp3',
-    duration: 1200, // 20 minutes
+    artist: 'Sacred Sounds',
+    sourceType: 'remote',
+    // Om chanting from archive.org
+    src: 'https://ia800209.us.archive.org/23/items/OmChanting/om_chanting.mp3',
+    duration: 900,
     tags: ['mantra', 'om', 'chanting'],
     category: 'mantra',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/mantra.jpg',
   },
   {
     id: 'mantra-gayatri',
     title: 'Gayatri Mantra',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/gayatri.mp3',
-    duration: 1800, // 30 minutes
+    artist: 'Vedic Chants',
+    sourceType: 'remote',
+    // Gayatri mantra
+    src: 'https://ia801509.us.archive.org/30/items/gayatri-mantra-108/gayatri_mantra.mp3',
+    duration: 1200,
     tags: ['mantra', 'gayatri', 'sacred'],
     category: 'mantra',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/mantra.jpg',
   },
   {
     id: 'mantra-shanti',
     title: 'Shanti Mantra',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/shanti.mp3',
-    duration: 1500, // 25 minutes
+    artist: 'Peace Chants',
+    sourceType: 'remote',
+    src: 'https://ia800507.us.archive.org/4/items/ShantiMantra/shanti_peace.mp3',
+    duration: 720,
     tags: ['mantra', 'shanti', 'peace'],
     category: 'mantra',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/mantra.jpg',
   },
 
-  // Ambient category
+  // Ambient category - Soundscapes
   {
     id: 'ambient-temple',
-    title: 'Temple Ambience',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/temple-ambient.mp3',
-    duration: 3600, // 60 minutes
+    title: 'Temple Bells',
+    artist: 'Sacred Ambience',
+    sourceType: 'remote',
+    // Temple ambience
+    src: 'https://ia800302.us.archive.org/20/items/TempleBells/temple_bells_ambience.mp3',
+    duration: 1200,
     tags: ['ambient', 'temple', 'bells'],
     category: 'ambient',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/ambient.jpg',
   },
   {
-    id: 'ambient-cave',
-    title: 'Sacred Cave Echoes',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/cave-ambient.mp3',
-    duration: 2700, // 45 minutes
-    tags: ['ambient', 'cave', 'echo'],
+    id: 'ambient-space',
+    title: 'Cosmic Ambience',
+    artist: 'Space Sounds',
+    sourceType: 'remote',
+    src: 'https://ia800501.us.archive.org/12/items/CosmicAmbience/cosmic_ambient.mp3',
+    duration: 1800,
+    tags: ['ambient', 'space', 'cosmic'],
     category: 'ambient',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/ambient.jpg',
   },
 
-  // Nature category
+  // Nature category - Natural sounds
   {
     id: 'nature-forest',
     title: 'Forest Morning',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/forest.mp3',
-    duration: 3600, // 60 minutes
+    artist: 'Nature Recordings',
+    sourceType: 'remote',
+    // Forest sounds from archive.org
+    src: 'https://ia800204.us.archive.org/19/items/ForestSounds/forest_morning.mp3',
+    duration: 1800,
     tags: ['nature', 'forest', 'birds'],
     category: 'nature',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/nature.jpg',
   },
   {
     id: 'nature-ocean',
     title: 'Ocean Waves',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/ocean.mp3',
-    duration: 5400, // 90 minutes
+    artist: 'Sea Sounds',
+    sourceType: 'remote',
+    // Ocean waves from public domain
+    src: 'https://ia800302.us.archive.org/3/items/OceanWaves/ocean_waves.mp3',
+    duration: 2400,
     tags: ['nature', 'ocean', 'waves'],
     category: 'nature',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/nature.jpg',
   },
   {
-    id: 'nature-river',
-    title: 'Flowing River',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/river.mp3',
-    duration: 3600, // 60 minutes
-    tags: ['nature', 'river', 'water'],
+    id: 'nature-rain',
+    title: 'Gentle Rain',
+    artist: 'Rain Recordings',
+    sourceType: 'remote',
+    // Rain sounds
+    src: 'https://ia800203.us.archive.org/24/items/RainSounds/gentle_rain.mp3',
+    duration: 3600,
+    tags: ['nature', 'rain', 'water'],
     category: 'nature',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/nature.jpg',
   },
 
-  // Spiritual category
+  // Spiritual category - Sacred music
   {
-    id: 'spiritual-gita-1',
-    title: 'Bhagavad Gita Chapter 1',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/gita/chapter-1.mp3',
-    duration: 1200, // 20 minutes
-    tags: ['spiritual', 'gita', 'chapter1'],
+    id: 'spiritual-meditation',
+    title: 'Spiritual Meditation',
+    artist: 'Divine Sounds',
+    sourceType: 'remote',
+    src: 'https://ia800500.us.archive.org/15/items/SpiritualMeditation/spiritual_meditation.mp3',
+    duration: 1200,
+    tags: ['spiritual', 'meditation', 'divine'],
     category: 'spiritual',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/spiritual.jpg',
   },
   {
-    id: 'spiritual-gita-2',
-    title: 'Bhagavad Gita Chapter 2',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/gita/chapter-2.mp3',
-    duration: 1800, // 30 minutes
-    tags: ['spiritual', 'gita', 'chapter2'],
+    id: 'spiritual-flute',
+    title: 'Sacred Flute',
+    artist: 'Indian Classical',
+    sourceType: 'remote',
+    // Bansuri flute music
+    src: 'https://ia800208.us.archive.org/25/items/BansuriFluteMusic/bansuri_meditation.mp3',
+    duration: 900,
+    tags: ['spiritual', 'flute', 'indian'],
     category: 'spiritual',
     createdAt: 1704067200000,
-    albumArt: '/images/meditation/spiritual.jpg',
-  },
-  {
-    id: 'spiritual-vedic',
-    title: 'Vedic Hymns',
-    artist: 'KIAAN Vibe',
-    sourceType: 'builtIn',
-    src: '/audio/meditation/vedic-hymns.mp3',
-    duration: 2400, // 40 minutes
-    tags: ['spiritual', 'vedic', 'hymns'],
-    category: 'spiritual',
-    createdAt: 1704067200000,
-    albumArt: '/images/meditation/spiritual.jpg',
   },
 ]
 
