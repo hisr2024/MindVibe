@@ -118,6 +118,34 @@ function getAuthHeaders(): Record<string, string> {
     }
   }
 
+  return headers;
+}
+
+/**
+ * Get auth UID from local storage for API fallback.
+ */
+function getAuthUid(): string | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const storedUser = localStorage.getItem('mindvibe_auth_user');
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser) as { id?: string };
+      if (parsedUser.id) {
+        return parsedUser.id;
+      }
+    } catch {
+      // Ignore malformed storage entries
+    }
+  }
+
+  const legacyUserId = localStorage.getItem('userId');
+  if (legacyUserId) {
+    return legacyUserId;
+  }
+
   return undefined;
 }
 
@@ -131,9 +159,7 @@ async function apiRequest<T>(
 ): Promise<T> {
   const options: RequestInit = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
   };
 
   if (body) {
