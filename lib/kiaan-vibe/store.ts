@@ -333,8 +333,27 @@ if (typeof window !== 'undefined') {
     })
 
     audio.addEventListener('error', (e) => {
-      console.error('[Audio] Error:', e)
+      const currentTrack = usePlayerStore.getState().currentTrack
+      const errorCode = audio.error?.code
+      const errorMessage = audio.error?.message || 'Unknown error'
+
+      console.error('[Audio] Error loading track:', {
+        track: currentTrack?.title,
+        src: currentTrack?.src,
+        errorCode,
+        errorMessage,
+      })
+
       usePlayerStore.setState({ isPlaying: false, isLoading: false })
+
+      // If track failed to load, try next track in queue
+      const state = usePlayerStore.getState()
+      if (state.queue.length > 1 && state.queueIndex < state.queue.length - 1) {
+        console.log('[Audio] Skipping to next track due to error')
+        setTimeout(() => {
+          usePlayerStore.getState().next()
+        }, 1000)
+      }
     })
 
     audio.addEventListener('waiting', () => {
