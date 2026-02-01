@@ -52,6 +52,10 @@ from backend.services.gita_wisdom_retrieval import (
     is_ready as gita_ready,
     get_verses_count,
 )
+from backend.services.gita_ai_analyzer import (
+    get_gita_ai_analyzer,
+    AttachmentAnalysis,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +68,14 @@ try:
     logger.info("✅ Viyoga v3.0: WellnessModel initialized with Gita-grounding")
 except Exception as e:
     logger.warning(f"⚠️ Viyoga: WellnessModel unavailable: {e}")
+
+# Initialize AI-powered Gita analyzer
+gita_ai_analyzer = None
+try:
+    gita_ai_analyzer = get_gita_ai_analyzer()
+    logger.info("✅ Viyoga v3.1: AI-powered Gita analyzer initialized")
+except Exception as e:
+    logger.warning(f"⚠️ Viyoga: AI analyzer unavailable, using fallback: {e}")
 
 # Log Gita verses availability
 if gita_ready():
@@ -117,8 +129,29 @@ async def detach_from_outcome(
         logger.warning(f"Invalid analysis_mode '{analysis_mode_str}', using standard")
         analysis_mode = AnalysisMode.STANDARD
 
-    # Analyze attachment pattern using Gita framing
-    attachment_analysis = _analyze_attachment_pattern(outcome_worry)
+    # Analyze attachment pattern using AI-powered Gita analyzer (v3.1)
+    # This replaces the old regex/keyword matching with OpenAI + Core Wisdom
+    if gita_ai_analyzer:
+        try:
+            ai_attachment = await gita_ai_analyzer.analyze_attachment_pattern(outcome_worry)
+            attachment_analysis = {
+                "type": ai_attachment.attachment_type,
+                "description": ai_attachment.description,
+                "gita_teaching": ai_attachment.gita_teaching,
+                "primary_verse": ai_attachment.primary_verse,
+                "verse_text": ai_attachment.verse_text,
+                "remedy": ai_attachment.remedy,
+                "confidence": ai_attachment.confidence,
+                "secondary_patterns": ai_attachment.secondary_patterns,
+                "ai_powered": True,
+            }
+            logger.info(f"Viyoga: AI attachment analysis: {ai_attachment.attachment_type} (confidence: {ai_attachment.confidence})")
+        except Exception as e:
+            logger.warning(f"AI attachment analysis failed, using fallback: {e}")
+            attachment_analysis = _analyze_attachment_pattern(outcome_worry)
+    else:
+        # Fallback to keyword matching if AI analyzer unavailable
+        attachment_analysis = _analyze_attachment_pattern(outcome_worry)
 
     # STEP 1: Retrieve Gita verses directly from 701-verse repository
     depth_map = {
@@ -366,8 +399,25 @@ async def viyoga_chat(
         gita_context = VIYOGA_CORE_GITA_WISDOM
         sources = [{"file": "core_karma_yoga", "reference": "BG 2.47-2.50"}]
 
-    # Analyze attachment pattern
-    attachment_analysis = _analyze_attachment_pattern(message)
+    # Analyze attachment pattern using AI-powered Gita analyzer (v3.1)
+    if gita_ai_analyzer:
+        try:
+            ai_attachment = await gita_ai_analyzer.analyze_attachment_pattern(message)
+            attachment_analysis = {
+                "type": ai_attachment.attachment_type,
+                "description": ai_attachment.description,
+                "gita_teaching": ai_attachment.gita_teaching,
+                "primary_verse": ai_attachment.primary_verse,
+                "verse_text": ai_attachment.verse_text,
+                "remedy": ai_attachment.remedy,
+                "confidence": ai_attachment.confidence,
+                "ai_powered": True,
+            }
+        except Exception as e:
+            logger.warning(f"AI attachment analysis failed in chat: {e}")
+            attachment_analysis = _analyze_attachment_pattern(message)
+    else:
+        attachment_analysis = _analyze_attachment_pattern(message)
 
     # Build citations from actual verses
     citations = [
@@ -441,19 +491,30 @@ async def viyoga_chat(
 
 @router.get("/health")
 async def viyoga_health():
-    """Health check with Gita wisdom availability status."""
+    """Health check with Gita wisdom and AI analyzer availability status."""
     gita_verses_loaded = get_verses_count()
     wellness_ready = wellness_model is not None
+    ai_analyzer_ready = gita_ai_analyzer is not None
 
     return {
         "status": "ok" if (gita_verses_loaded > 0 or wellness_ready) else "degraded",
         "service": "viyoga",
-        "version": "3.0",
+        "version": "3.1",  # Updated for AI-powered analysis
         "provider": "gita_repository",
         "gita_grounding": {
             "verses_loaded": gita_verses_loaded,
             "repository_ready": gita_ready(),
             "fallback_available": True,
+        },
+        "ai_analysis": {
+            "ai_analyzer_ready": ai_analyzer_ready,
+            "analysis_method": "openai_gita_wisdom" if ai_analyzer_ready else "keyword_fallback",
+            "features": [
+                "attachment_pattern_analysis",
+                "emotion_recognition",
+                "relationship_detection",
+                "communication_analysis",
+            ] if ai_analyzer_ready else ["keyword_matching_fallback"],
         },
         "wellness_model_ready": wellness_ready,
     }
