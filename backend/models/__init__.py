@@ -75,6 +75,12 @@ from backend.models.base import (
     GitaKeyword,
     GitaVerseKeyword,
     GitaVerseUsage,
+    # KIAAN Learning System models
+    ContentSourceType,
+    ValidationStatus,
+    LearnedWisdom,
+    UserQueryPattern,
+    ContentSourceRegistry,
     # Subscription models
     SubscriptionPlan,
     UserSubscription,
@@ -214,6 +220,12 @@ __all__ = [
     "GitaKeyword",
     "GitaVerseKeyword",
     "GitaVerseUsage",
+    # KIAAN Learning System models
+    "ContentSourceType",
+    "ValidationStatus",
+    "LearnedWisdom",
+    "UserQueryPattern",
+    "ContentSourceRegistry",
     # Subscription models
     "SubscriptionPlan",
     "UserSubscription",
