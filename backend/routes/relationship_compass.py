@@ -1,6 +1,6 @@
-"""Relationship Compass - Gita-Grounded Relationship Guidance v3.0.
+"""Relationship Compass - Gita-Grounded Relationship Guidance v3.1.
 
-ENHANCED VERSION with Strict Bhagavad Gita Wisdom Grounding
+ENHANCED VERSION with Strict Bhagavad Gita Wisdom Grounding + OpenAI-Powered Analysis
 
 This router provides relationship conflict navigation using ONLY Bhagavad Gita wisdom
 from the 700+ verse repository. ALL responses are grounded in actual verses.
@@ -13,20 +13,28 @@ Relationship Compass focuses on Gita principles for relationships:
 - Sama-darshana (equal vision - seeing the divine in all)
 - Svadhyaya (self-study to understand our own patterns)
 
-GITA-GROUNDED PATTERN (v3.0):
-1. CONFLICT ACKNOWLEDGED - Deep validation through Gita lens
-2. SVADHYAYA APPLIED - Self-study using Gita psychology
-3. GITA VERSES RETRIEVED - From 700+ verse repository
-4. DHARMIC PATH ILLUMINATED - Guidance grounded in actual verses
-5. FALLBACK USES REAL VERSES - Never generic text
+GITA-GROUNDED PATTERN (v3.1):
+1. AI-POWERED ANALYSIS - Deep conflict understanding using OpenAI API with Gita psychology
+2. CONFLICT ACKNOWLEDGED - Deep validation through Gita lens
+3. SVADHYAYA APPLIED - Self-study using Gita psychology (krodha, raga, moha, etc.)
+4. ENHANCED VERSE RETRIEVAL - AI-informed query building for better RAG results
+5. DHARMIC PATH ILLUMINATED - Guidance grounded in actual verses
+6. FALLBACK USES REAL VERSES - Never generic text
 
-ANALYSIS MODES (v3.0):
+ANALYSIS MODES (v3.1):
 - standard: 8-section guidance with core Gita teachings
 - deep_dive: Comprehensive analysis with multiple verse citations
 - quantum_dive: Multi-dimensional exploration across Gita chapters
 
-ENHANCEMENTS (v3.0):
-- Strict Gita-only grounding (no psychology terminology in prompts)
+NEW IN v3.1 - OpenAI API Integration for Deep Analysis:
+- AI-powered emotional analysis mapped to Gita concepts (krodha, raga, bhaya, moha)
+- Attachment pattern detection with Gita wisdom (Atma-tripti, Sangha, Purnatva)
+- Communication analysis with Gita alternatives (Satya with Priya, Sama-darshana)
+- Enhanced verse retrieval using AI-generated search queries
+- All analysis grounded in the 701-verse Gita repository
+
+ENHANCEMENTS (v3.0 retained):
+- Strict Gita-only grounding (no generic psychology in prompts)
 - Direct verse retrieval from 701-verse JSON
 - Fallback using actual Gita verses (not generic text)
 - Multi-provider AI with Gita context injection
@@ -80,6 +88,12 @@ from backend.services.gita_wisdom_retrieval import (
     generate_relationship_compass_fallback,
     is_ready as gita_ready,
     get_verses_count,
+)
+from backend.services.relationship_compass_analysis import (
+    analyze_conflict_with_ai_async,
+    build_enhanced_search_query,
+    analysis_to_dict,
+    ConflictAnalysis,
 )
 
 logger = logging.getLogger(__name__)
@@ -288,11 +302,62 @@ async def get_relationship_guidance(
         logger.warning(f"Invalid analysis_mode '{analysis_mode_str}', using standard")
         analysis_mode = AnalysisMode.STANDARD
 
-    # Analyze patterns using Gita framing
+    # STEP 1: AI-powered deep conflict analysis using OpenAI API
+    # This provides nuanced understanding beyond simple keyword matching
+    ai_analysis = await analyze_conflict_with_ai_async(
+        conflict=conflict,
+        relationship_type=relationship_type.value,
+        context=context,
+        primary_emotion=primary_emotion,
+    )
+
+    logger.info(
+        f"RelationshipCompass AI Analysis: "
+        f"emotion={ai_analysis.primary_emotion}, "
+        f"attachment={ai_analysis.attachment_style}, "
+        f"confidence={ai_analysis.confidence:.2f}, "
+        f"depth={ai_analysis.analysis_depth}"
+    )
+
+    # Use AI analysis for enhanced pattern insights
     attachment_insights = _analyze_attachment_patterns(conflict)
     communication_issues = _analyze_communication_patterns(conflict)
 
-    # STEP 1: Retrieve Gita verses directly from 701-verse repository
+    # Merge AI insights with rule-based analysis
+    if ai_analysis.analysis_depth == "ai_enhanced":
+        # Enhance attachment insights with AI analysis
+        if ai_analysis.attachment_style and ai_analysis.attachment_style != "unknown":
+            ai_attachment_insight = {
+                "style": ai_analysis.attachment_style,
+                "characteristics": ", ".join(ai_analysis.attachment_indicators[:3]),
+                "gita_wisdom": ATTACHMENT_PATTERNS.get(ai_analysis.attachment_style, {}).get(
+                    "gita_wisdom", ""
+                ),
+                "healing_focus": ATTACHMENT_PATTERNS.get(ai_analysis.attachment_style, {}).get(
+                    "healing_focus", ""
+                ),
+                "triggers": ai_analysis.attachment_triggers,
+                "source": "ai_analysis",
+            }
+            # Prepend AI insight for priority
+            attachment_insights = [ai_attachment_insight] + [
+                i for i in attachment_insights if i.get("style") != ai_analysis.attachment_style
+            ]
+
+        # Enhance communication insights with AI analysis
+        if ai_analysis.problematic_patterns:
+            for pattern in ai_analysis.problematic_patterns:
+                if pattern in COMMUNICATION_PATTERNS:
+                    ai_comm_insight = {
+                        "pattern": pattern,
+                        "gita_alternative": COMMUNICATION_PATTERNS[pattern]["gita_alternative"],
+                        "source": "ai_analysis",
+                    }
+                    # Add if not already present
+                    if not any(c.get("pattern") == pattern for c in communication_issues):
+                        communication_issues.append(ai_comm_insight)
+
+    # STEP 2: Retrieve Gita verses directly from 701-verse repository
     depth_map = {
         AnalysisMode.STANDARD: "standard",
         AnalysisMode.DEEP_DIVE: "deep_dive",
@@ -300,8 +365,18 @@ async def get_relationship_guidance(
     }
     depth = depth_map.get(analysis_mode, "standard")
 
-    # Include emotion and relationship type in search
-    search_query = f"{conflict} {primary_emotion} {relationship_type.value}"
+    # Build enhanced search query using AI analysis for better verse retrieval
+    if ai_analysis.analysis_depth == "ai_enhanced" and ai_analysis.confidence >= 0.5:
+        search_query = build_enhanced_search_query(
+            conflict=conflict,
+            analysis=ai_analysis,
+            relationship_type=relationship_type.value,
+        )
+        logger.info(f"RelationshipCompass: Using AI-enhanced search query")
+    else:
+        # Fallback to basic search query
+        search_query = f"{conflict} {primary_emotion or ''} {relationship_type.value}"
+
     gita_verses = search_gita_verses(
         query=search_query,
         tool="relationship_compass",
@@ -349,7 +424,7 @@ async def get_relationship_guidance(
             language=language,
         )
 
-        # Build response with Gita grounding
+        # Build response with Gita grounding and AI analysis
         response = {
             "status": "success",
             "compass_guidance": result.sections,
@@ -371,6 +446,22 @@ async def get_relationship_guidance(
             },
             "svadhyaya_insights": attachment_insights,
             "communication_patterns": communication_issues,
+            # AI Analysis fields (v3.1 - OpenAI-powered deep analysis)
+            "ai_analysis": {
+                "enabled": ai_analysis.analysis_depth == "ai_enhanced",
+                "primary_emotion": ai_analysis.primary_emotion,
+                "secondary_emotions": ai_analysis.secondary_emotions,
+                "emotional_intensity": ai_analysis.emotional_intensity,
+                "attachment_style": ai_analysis.attachment_style,
+                "attachment_triggers": ai_analysis.attachment_triggers,
+                "communication_style": ai_analysis.communication_style,
+                "power_dynamic": ai_analysis.power_dynamic,
+                "core_unmet_needs": ai_analysis.core_unmet_needs,
+                "underlying_fears": ai_analysis.underlying_fears,
+                "gita_concepts": ai_analysis.gita_concepts,
+                "recommended_teachings": ai_analysis.recommended_teachings,
+                "confidence": ai_analysis.confidence,
+            },
             "cached": result.cached,
             "latency_ms": result.latency_ms,
         }
@@ -394,7 +485,13 @@ async def get_relationship_guidance(
 async def get_relationship_guidance_gita_only(
     payload: GitaGuidanceRequest,
 ) -> dict[str, Any]:
-    """Gita-only relationship guidance using strict RAG over the 700+ verse repository."""
+    """Gita-only relationship guidance using strict RAG over the 700+ verse repository.
+
+    Enhanced with OpenAI-powered conflict analysis (v3.1) for:
+    - Deep emotional understanding
+    - Nuanced attachment pattern detection
+    - Better verse retrieval through AI-enhanced search queries
+    """
     message = payload.message.strip()
     session_id = payload.session_id.strip()
     relationship_type = (payload.relationship_type or "other").strip().lower()
@@ -416,7 +513,31 @@ async def get_relationship_guidance_gita_only(
         )
     )
 
-    base_result = retrieve_chunks(message, relationship_type, k=18)
+    # AI-powered conflict analysis for enhanced understanding
+    ai_analysis = await analyze_conflict_with_ai_async(
+        conflict=message,
+        relationship_type=relationship_type,
+    )
+
+    logger.info(
+        f"RelationshipCompass Gita-Guidance AI Analysis: "
+        f"emotion={ai_analysis.primary_emotion}, "
+        f"attachment={ai_analysis.attachment_style}, "
+        f"confidence={ai_analysis.confidence:.2f}"
+    )
+
+    # Build enhanced query for verse retrieval if AI analysis was successful
+    if ai_analysis.analysis_depth == "ai_enhanced" and ai_analysis.confidence >= 0.5:
+        enhanced_query = build_enhanced_search_query(
+            conflict=message,
+            analysis=ai_analysis,
+            relationship_type=relationship_type,
+        )
+        base_result = retrieve_chunks(enhanced_query, relationship_type, k=18)
+        logger.info("RelationshipCompass: Using AI-enhanced query for verse retrieval")
+    else:
+        base_result = retrieve_chunks(message, relationship_type, k=18)
+
     retrieval = expand_and_retrieve(message, relationship_type, base_result)
     merged_chunks = merge_chunks(retrieval, limit=20)
     context_block = build_context_block(merged_chunks)
@@ -505,6 +626,15 @@ async def get_relationship_guidance_gita_only(
             "citations": citations,
             "contextSufficient": True,  # We have context, just AI unavailable
             "fallback": True,
+            # AI Analysis (v3.1) - included even in fallback
+            "ai_analysis": {
+                "enabled": ai_analysis.analysis_depth == "ai_enhanced",
+                "primary_emotion": ai_analysis.primary_emotion,
+                "attachment_style": ai_analysis.attachment_style,
+                "gita_concepts": ai_analysis.gita_concepts,
+                "recommended_teachings": ai_analysis.recommended_teachings,
+                "confidence": ai_analysis.confidence,
+            },
         }
 
     sections = extract_sections(response_text, HEADINGS_SUFFICIENT)
@@ -522,6 +652,24 @@ async def get_relationship_guidance_gita_only(
         "sections": sections,
         "citations": citations,
         "contextSufficient": True,
+        # AI Analysis fields (v3.1 - OpenAI-powered Gita-grounded analysis)
+        "ai_analysis": {
+            "enabled": ai_analysis.analysis_depth == "ai_enhanced",
+            "primary_emotion": ai_analysis.primary_emotion,
+            "secondary_emotions": ai_analysis.secondary_emotions,
+            "emotional_intensity": ai_analysis.emotional_intensity,
+            "attachment_style": ai_analysis.attachment_style,
+            "attachment_triggers": ai_analysis.attachment_triggers,
+            "communication_style": ai_analysis.communication_style,
+            "problematic_patterns": ai_analysis.problematic_patterns,
+            "communication_needs": ai_analysis.communication_needs,
+            "power_dynamic": ai_analysis.power_dynamic,
+            "core_unmet_needs": ai_analysis.core_unmet_needs,
+            "underlying_fears": ai_analysis.underlying_fears,
+            "gita_concepts": ai_analysis.gita_concepts,
+            "recommended_teachings": ai_analysis.recommended_teachings,
+            "confidence": ai_analysis.confidence,
+        },
     }
 
 
@@ -632,19 +780,34 @@ async def get_emotion_insights() -> dict[str, Any]:
 
 @router.get("/health")
 async def relationship_compass_health():
-    """Health check with Gita wisdom availability status."""
+    """Health check with Gita wisdom and AI analysis availability status."""
+    import os
     gita_verses_loaded = get_verses_count()
     wellness_ready = wellness_model is not None
+    openai_key_present = bool(os.getenv("OPENAI_API_KEY", "").strip())
 
     return {
         "status": "ok" if (gita_verses_loaded > 0 or wellness_ready) else "degraded",
         "service": "relationship-compass",
-        "version": "3.0",
+        "version": "3.1",
         "provider": "gita_repository",
         "gita_grounding": {
             "verses_loaded": gita_verses_loaded,
             "repository_ready": gita_ready(),
             "fallback_available": True,
+        },
+        # NEW in v3.1: OpenAI-powered analysis status
+        "ai_analysis": {
+            "enabled": openai_key_present,
+            "model": os.getenv("RELATIONSHIP_COMPASS_ANALYSIS_MODEL", "gpt-4o-mini"),
+            "capabilities": [
+                "emotional_analysis",
+                "attachment_pattern_detection",
+                "communication_analysis",
+                "gita_concept_mapping",
+                "enhanced_verse_retrieval",
+            ] if openai_key_present else ["rule_based_fallback"],
+            "fallback": "rule_based_gita_grounded",
         },
         "wellness_model_ready": wellness_ready,
         "relationship_types": [t.value for t in RelationshipType],
