@@ -794,25 +794,19 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Translation router: {e}")
 
-# Load Journey router (Rebuilt fresh)
-print("\n[Journeys] Attempting to import Journey router...")
+# Load Journeys router (Production CRUD)
+print("\n[Journeys] Attempting to import Journeys router...")
 try:
     from backend.routes.journeys import router as journeys_router
     app.include_router(journeys_router)
-    print("✅ [SUCCESS] Journey router loaded")
-    print("   • GET    /api/journeys/catalog - Journey templates catalog")
-    print("   • GET    /api/journeys/active - Get active journeys")
-    print("   • POST   /api/journeys/start - Start a new journey")
-    print("   • GET    /api/journeys/{id} - Get journey details")
-    print("   • POST   /api/journeys/{id}/pause - Pause journey")
-    print("   • POST   /api/journeys/{id}/resume - Resume journey")
-    print("   • POST   /api/journeys/{id}/abandon - Abandon journey")
-    print("   • GET    /api/journeys/{id}/today - Get today's step")
-    print("   • POST   /api/journeys/{id}/steps/{day}/complete - Complete step")
-    print("   • GET    /api/journeys/today - Today's agenda")
-    print("   • GET    /api/journeys/access - Check access limits")
+    print("✅ [SUCCESS] Journeys router loaded")
+    print("   • GET    /api/journeys - List journeys")
+    print("   • POST   /api/journeys - Create journey")
+    print("   • GET    /api/journeys/{id} - Get journey")
+    print("   • PUT    /api/journeys/{id} - Update journey")
+    print("   • DELETE /api/journeys/{id} - Delete journey")
 except Exception as e:
-    print(f"❌ [ERROR] Failed to load Journey router: {e}")
+    print(f"❌ [ERROR] Failed to load Journeys router: {e}")
 
 # Load Sync router (Quantum Enhancement #2)
 print("\n[Sync] Attempting to import Sync router...")
