@@ -29,6 +29,11 @@ interface SectionMeta {
 
 type AnalysisMode = 'quick' | 'deep' | 'quantum'
 
+interface SourceRef {
+  file: string
+  reference?: string
+}
+
 interface WisdomResponseCardProps {
   tool: 'viyoga' | 'ardha' | 'relationship_compass'
   sections: Record<string, string>
@@ -38,6 +43,7 @@ interface WisdomResponseCardProps {
   language?: string
   analysisMode?: AnalysisMode
   citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
+  sources?: SourceRef[]
 }
 
 // Section configurations for each tool
@@ -219,14 +225,22 @@ export default function WisdomResponseCard({
   gitaVersesUsed = 0,
   timestamp,
   language = 'en-IN',
-  analysisMode = 'standard',
+  analysisMode = 'quick',
   citations = [],
+  sources = [],
 }: WisdomResponseCardProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [showFullText, setShowFullText] = useState(false)
   const [copyLabel, setCopyLabel] = useState('Copy')
 
   const config = SECTION_CONFIG[tool]
+  const resolvedCitations = citations.length
+    ? citations
+    : sources.map((source, index) => ({
+      source_file: source.file,
+      reference_if_any: source.reference,
+      chunk_id: `${source.file}-${index}`,
+    }))
   const accentColorMap = {
     orange: {
       border: 'border-orange-500/20',
@@ -449,14 +463,14 @@ export default function WisdomResponseCard({
         </div>
       )}
 
-      {citations.length > 0 && (
+      {resolvedCitations.length > 0 && (
         <div className="mt-5 rounded-xl border border-gray-700/50 bg-black/40 p-3 text-xs text-gray-400">
           <span className="text-gray-300 font-semibold">Sources:</span>{' '}
-          {citations.map((citation, index) => {
+          {resolvedCitations.map((citation, index) => {
             const reference = citation.reference_if_any ? ` (${citation.reference_if_any})` : ''
             return (
               <span key={`${citation.chunk_id}-${index}`}>
-                {citation.source_file}{reference}{index < citations.length - 1 ? '; ' : ''}
+                {citation.source_file}{reference}{index < resolvedCitations.length - 1 ? '; ' : ''}
               </span>
             )
           })}
