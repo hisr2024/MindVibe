@@ -91,11 +91,31 @@ function getAuthHeaders(): Record<string, string> {
     'Content-Type': 'application/json',
   };
 
-  // Try to get user ID from localStorage (for X-Auth-UID header)
+  // Attach bearer token from localStorage (fallback for auth cookie)
   if (typeof window !== 'undefined') {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      headers['X-Auth-UID'] = userId;
+    const accessToken =
+      localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token');
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    // Try to get user ID from stored auth user (for X-Auth-UID header)
+    const storedUser = localStorage.getItem('mindvibe_auth_user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser) as { id?: string };
+        if (parsedUser.id) {
+          headers['X-Auth-UID'] = parsedUser.id;
+        }
+      } catch {
+        // Ignore malformed storage entries
+      }
+    }
+
+    // Legacy fallback
+    const legacyUserId = localStorage.getItem('userId');
+    if (!headers['X-Auth-UID'] && legacyUserId) {
+      headers['X-Auth-UID'] = legacyUserId;
     }
   }
 
