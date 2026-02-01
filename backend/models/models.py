@@ -1,16 +1,35 @@
-# Add at the top with other imports
-import datetime
+"""
+Additional model utilities for MindVibe backend.
 
-from sqlalchemy import Column, DateTime
+NOTE: Main models are defined in backend/models.py
+This file contains utility documentation and examples.
 
-# Add this field to your base model class
-deleted_at = Column(DateTime, nullable=True)
+SOFT DELETE PATTERN
+-------------------
+All user-facing models should use the SoftDeleteMixin from backend/models.py:
 
+    from backend.models import Base, SoftDeleteMixin
 
-# Add these methods to your base model class
-def soft_delete(self):
-    self.deleted_at = datetime.datetime.utcnow()
+    class MyModel(SoftDeleteMixin, Base):
+        __tablename__ = "my_table"
+        ...
 
+The SoftDeleteMixin provides:
+- deleted_at: Timestamp field that is None for active records
+- soft_delete(): Method to mark record as deleted
+- restore(): Method to restore a soft-deleted record
+- not_deleted(): Class method to filter out deleted records from queries
 
-def restore(self):
-    self.deleted_at = None
+Usage in queries:
+
+    # Get only non-deleted records
+    stmt = select(MyModel).where(MyModel.deleted_at.is_(None))
+
+    # Or use the class method
+    stmt = MyModel.not_deleted(select(MyModel))
+
+See backend/models.py for the full SoftDeleteMixin implementation.
+"""
+
+# This file is intentionally mostly documentation.
+# Main model definitions are in backend/models.py

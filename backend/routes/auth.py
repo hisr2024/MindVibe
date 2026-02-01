@@ -398,6 +398,109 @@ async def verify_two_factor(
     return TwoFactorStatusOut(enabled=True, configured=True)
 
 
+# Alias: /2fa/enable maps to /2fa/verify for frontend compatibility
+@router.post("/2fa/enable", response_model=TwoFactorStatusOut)
+@limiter.limit(AUTH_RATE_LIMIT)
+async def enable_two_factor(
+    payload: TwoFactorVerifyIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Enable 2FA by verifying the setup code. Alias for /2fa/verify."""
+    return await verify_two_factor(payload, request, db)
+
+
+class TwoFactorDisableIn(BaseModel):
+    code: str
+    password: str
+
+
+@router.post("/2fa/disable", response_model=TwoFactorStatusOut)
+@limiter.limit(AUTH_RATE_LIMIT)
+async def disable_two_factor(
+    payload: TwoFactorDisableIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Disable 2FA. Requires current TOTP code and password for security."""
+    _, user, session_row, _ = await _get_user_and_active_session(request, db)
+
+    if not user.two_factor_enabled:
+        raise HTTPException(status_code=400, detail="Two-factor not enabled")
+
+    # Verify password
+    if not user.password_hash or not verify_password(payload.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password",
+        )
+
+    # Verify TOTP code
+    code = payload.code.strip().replace(" ", "")
+    totp = pyotp.TOTP(user.two_factor_secret)
+    if not totp.verify(code, valid_window=1):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid two-factor code",
+        )
+
+    # Disable 2FA
+    await db.execute(
+        update(User)
+        .where(User.id == user.id)
+        .values(two_factor_enabled=False, two_factor_secret=None, mfa_backup_codes=None)
+    )
+    await db.commit()
+
+    await touch_session(db, session_row)
+
+    return TwoFactorStatusOut(enabled=False, configured=False)
+
+
+class BackupCodesOut(BaseModel):
+    backup_codes: list[str]
+
+
+@router.post("/2fa/regenerate-backup-codes", response_model=BackupCodesOut)
+@limiter.limit(AUTH_RATE_LIMIT)
+async def regenerate_backup_codes(
+    payload: TwoFactorVerifyIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Regenerate backup codes. Requires current TOTP code for security."""
+    import secrets
+
+    _, user, session_row, _ = await _get_user_and_active_session(request, db)
+
+    if not user.two_factor_enabled:
+        raise HTTPException(status_code=400, detail="Two-factor not enabled")
+
+    # Verify TOTP code
+    code = payload.code.strip().replace(" ", "")
+    totp = pyotp.TOTP(user.two_factor_secret)
+    if not totp.verify(code, valid_window=1):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid two-factor code",
+        )
+
+    # Generate new backup codes (8 codes, each 8 characters)
+    backup_codes = [secrets.token_hex(4).upper() for _ in range(8)]
+
+    # Store hashed versions of backup codes
+    await db.execute(
+        update(User)
+        .where(User.id == user.id)
+        .values(mfa_backup_codes=backup_codes)
+    )
+    await db.commit()
+
+    await touch_session(db, session_row)
+
+    return BackupCodesOut(backup_codes=backup_codes)
+
+
 # ----------------------
 # Me
 # ----------------------

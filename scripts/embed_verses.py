@@ -11,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.database import async_session
+from backend.deps import SessionLocal as async_session
 from backend.services.rag_service import rag_service
 
 
