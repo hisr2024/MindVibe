@@ -409,16 +409,31 @@ export default function EliteVoicePage() {
         setError(null) // Clear any previous error
         return // Success - no need to continue
       } catch (verifyErr: any) {
-        console.warn('[KIAAN Voice] Microphone access test result:', verifyErr.name, verifyErr.message)
+        const errorMessage = verifyErr.message?.toLowerCase() || ''
+        const isDismissal = errorMessage.includes('dismissed') || errorMessage.includes('dismiss')
 
-        // Only set denied if we get a definitive denial
+        // Log at appropriate level - dismissals are expected, not errors
+        if (isDismissal) {
+          console.log('[KIAAN Voice] Permission prompt was dismissed by user - they can try again')
+        } else {
+          console.warn('[KIAAN Voice] Microphone access test result:', verifyErr.name, verifyErr.message)
+        }
+
+        // Only set denied if we get a definitive denial (not a dismissal)
         if (verifyErr.name === 'NotAllowedError' || verifyErr.name === 'PermissionDeniedError') {
-          // Check if this might be a dismissal vs actual block
-          // Some browsers throw NotAllowedError even when user just hasn't responded yet
-          if (permState.status === 'prompt') {
-            console.log('[KIAAN Voice] User may not have responded to prompt yet')
+          // Check if this is a dismissal vs actual denial
+          if (isDismissal || permState.status === 'prompt') {
+            // User dismissed the prompt or hasn't responded yet
+            // Don't show an error - just keep prompt state so they can try again
+            console.log('[KIAAN Voice] Keeping prompt state - user can try again when ready')
             setMicPermission('prompt')
+            // Don't set an error for dismissals - it's not an error, just user choice
+            if (!isDismissal) {
+              // Only clear error, don't set one
+              setError(null)
+            }
           } else {
+            // Actual denial - user explicitly blocked
             setMicPermission('denied')
             setError('Microphone access is blocked. Please click the lock icon in your address bar, allow microphone, and refresh.')
           }

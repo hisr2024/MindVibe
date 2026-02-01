@@ -119,6 +119,10 @@ export interface PlayerState {
 
   // History
   playHistory: string[] // track IDs
+
+  // Error state for user-friendly error handling
+  audioError: string | null
+  hasAudioIssues: boolean
 }
 
 export interface PlayerActions {
@@ -146,6 +150,10 @@ export interface PlayerActions {
   setRepeatMode: (mode: RepeatMode) => void
   toggleShuffle: () => void
   toggleMute: () => void
+
+  // Error handling
+  clearAudioError: () => void
+  retryPlayback: () => Promise<void>
 
   // State loading
   loadPersistedState: () => Promise<void>

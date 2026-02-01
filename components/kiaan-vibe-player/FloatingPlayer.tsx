@@ -27,6 +27,8 @@ import {
   X,
   ListMusic,
   Music2,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
@@ -51,6 +53,8 @@ export function FloatingPlayer() {
     repeatMode,
     shuffle,
     muted,
+    audioError,
+    hasAudioIssues,
     play,
     pause,
     toggle,
@@ -63,6 +67,8 @@ export function FloatingPlayer() {
     toggleShuffle,
     toggleMute,
     removeFromQueue,
+    clearAudioError,
+    retryPlayback,
   } = usePlayerStore()
 
   // Calculate progress percentage
@@ -260,6 +266,34 @@ export function FloatingPlayer() {
                 />
               </div>
             </div>
+
+            {/* Audio Error Display */}
+            {audioError && (
+              <div className="mt-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <p className="text-xs text-amber-200 flex-1">{audioError}</p>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => retryPlayback()}
+                      className="p-1.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 transition-colors"
+                      aria-label="Retry playback"
+                      title="Retry"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => clearAudioError()}
+                      className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white/50 transition-colors"
+                      aria-label="Dismiss error"
+                      title="Dismiss"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Expanded Controls */}
