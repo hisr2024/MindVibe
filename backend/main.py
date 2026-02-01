@@ -715,6 +715,15 @@ try:
 except Exception as e:
     print(f"❌ [ERROR] Failed to load Viyoga router: {e}")
 
+# Load Gita AI Analysis router (OpenAI-powered pattern analysis)
+print("\n[Gita AI Analysis] Attempting to import Gita AI Analysis router...")
+try:
+    from backend.routes.gita_ai_analysis import router as gita_ai_analysis_router
+    app.include_router(gita_ai_analysis_router)
+    print("✅ [SUCCESS] Gita AI Analysis router loaded with OpenAI + Core Wisdom integration")
+except Exception as e:
+    print(f"❌ [ERROR] Failed to load Gita AI Analysis router: {e}")
+
 # Load Relationship Compass router
 print("\n[Relationship Compass] Attempting to import Relationship Compass router...")
 try:

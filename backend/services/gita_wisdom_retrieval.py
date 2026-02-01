@@ -3,6 +3,9 @@
 This service provides direct access to the 701 Bhagavad Gita verses stored in JSON,
 with keyword-based search optimized for mental health applications.
 
+ENHANCED v2.0: Now includes AI-powered analysis integration via gita_ai_analyzer.
+Keyword matching serves as fallback when AI is unavailable.
+
 Used by:
 - Viyoga (Detachment Coach) - Karma Yoga focused verses
 - Relationship Compass - Dharma/Daya/Kshama focused verses
@@ -436,3 +439,171 @@ def get_verses_count() -> int:
 def is_ready() -> bool:
     """Check if the retrieval service is ready."""
     return len(GITA_VERSES) > 0
+
+
+# =============================================================================
+# AI-POWERED ANALYSIS INTEGRATION (v2.0)
+# =============================================================================
+
+async def analyze_relationship_with_ai(user_input: str) -> dict[str, any]:
+    """
+    Analyze relationship dynamics using AI-powered Gita wisdom analyzer.
+
+    REPLACES: RELATIONSHIP_KEYWORDS dictionary matching with OpenAI + Core Wisdom
+
+    Args:
+        user_input: User's relationship concern
+
+    Returns:
+        Dictionary with AI-analyzed relationship insights grounded in Gita
+    """
+    try:
+        from backend.services.gita_ai_analyzer import get_gita_ai_analyzer
+
+        analyzer = get_gita_ai_analyzer()
+        analysis = await analyzer.analyze_relationship(user_input)
+
+        return {
+            "relationship_type": analysis.relationship_type,
+            "dominant_emotion": analysis.dominant_emotion,
+            "dharma_lens": analysis.dharma_lens,
+            "primary_verse": analysis.primary_verse,
+            "verse_text": analysis.verse_text,
+            "core_principle": analysis.core_principle,
+            "healing_insight": analysis.healing_insight,
+            "action_steps": analysis.action_steps,
+            "ai_powered": True,
+        }
+    except Exception as e:
+        logger.warning(f"AI relationship analysis failed, using keyword fallback: {e}")
+        return _fallback_relationship_keyword_analysis(user_input)
+
+
+def _fallback_relationship_keyword_analysis(user_input: str) -> dict[str, any]:
+    """Fallback to keyword-based relationship analysis when AI unavailable."""
+    input_lower = user_input.lower()
+
+    # Detect relationship type using RELATIONSHIP_KEYWORDS
+    detected_type = "other"
+    for rel_type, keywords in RELATIONSHIP_KEYWORDS.items():
+        if any(kw in input_lower for kw in keywords):
+            if rel_type in ["family", "romantic", "friendship", "workplace"]:
+                detected_type = rel_type
+                break
+
+    # Detect dominant emotion
+    emotion_order = ["anger", "hurt", "fear", "guilt", "jealousy", "resentment", "grief"]
+    detected_emotion = "confusion"
+    for emotion in emotion_order:
+        if emotion in RELATIONSHIP_KEYWORDS:
+            if any(kw in input_lower for kw in RELATIONSHIP_KEYWORDS[emotion]):
+                detected_emotion = emotion
+                break
+
+    # Get relevant verse
+    verses = search_gita_verses(user_input, tool="relationship_compass", limit=3)
+    if verses:
+        verse = verses[0]
+        verse_ref = f"BG {verse.get('chapter', 6)}.{verse.get('verse', 32)}"
+        verse_text = verse.get("english", "")[:200]
+    else:
+        verse_ref = "BG 6.32"
+        verse_text = "One who sees equality everywhere is the highest yogi."
+
+    return {
+        "relationship_type": detected_type,
+        "dominant_emotion": detected_emotion,
+        "dharma_lens": "Every relationship is an opportunity for spiritual growth",
+        "primary_verse": verse_ref,
+        "verse_text": verse_text,
+        "core_principle": "sama-darshana",
+        "healing_insight": "See the divine struggling in the other person",
+        "action_steps": [
+            "Practice witness consciousness",
+            "Speak with truth and kindness",
+            "Release attachment to outcomes",
+        ],
+        "ai_powered": False,
+    }
+
+
+async def analyze_emotion_with_ai(
+    mood_score: int,
+    tags: list[str] | None = None,
+    note: str | None = None,
+) -> dict[str, any]:
+    """
+    Analyze emotional state using AI-powered Gita wisdom analyzer.
+
+    REPLACES: Hardcoded emotion categories with OpenAI + Core Wisdom
+
+    Args:
+        mood_score: 1-10 mood score
+        tags: Optional mood tags
+        note: Optional mood note
+
+    Returns:
+        Dictionary with AI-analyzed emotional insights grounded in Gita
+    """
+    try:
+        from backend.services.gita_ai_analyzer import get_gita_ai_analyzer
+
+        analyzer = get_gita_ai_analyzer()
+        analysis = await analyzer.analyze_emotion(
+            mood_score=mood_score,
+            tags=tags,
+            note=note,
+        )
+
+        return {
+            "primary_emotion": analysis.primary_emotion,
+            "gita_mapping": analysis.gita_mapping,
+            "intensity": analysis.intensity,
+            "description": analysis.description,
+            "recommended_verse": analysis.recommended_verse,
+            "verse_text": analysis.verse_text,
+            "healing_path": analysis.healing_path,
+            "activities": analysis.activities,
+            "ai_powered": True,
+        }
+    except Exception as e:
+        logger.warning(f"AI emotion analysis failed, using fallback: {e}")
+        return _fallback_emotion_analysis(mood_score, tags or [], note or "")
+
+
+def _fallback_emotion_analysis(
+    mood_score: int,
+    tags: list[str],
+    note: str,
+) -> dict[str, any]:
+    """Fallback emotion analysis when AI unavailable."""
+    normalized_tags = [t.lower() for t in tags]
+
+    # Simple emotion detection
+    if any(t in normalized_tags for t in ["anxious", "stressed", "worried"]):
+        emotion = "anxious"
+        gita_mapping = "chinta"
+    elif mood_score <= 3 or any(t in normalized_tags for t in ["sad", "low", "down"]):
+        emotion = "melancholic"
+        gita_mapping = "vishada"
+    elif mood_score >= 8 and any(t in normalized_tags for t in ["energetic", "excited"]):
+        emotion = "energized"
+        gita_mapping = "utsaha"
+    elif mood_score >= 7:
+        emotion = "calm"
+        gita_mapping = "shanti"
+    else:
+        emotion = "balanced"
+        gita_mapping = "samatvam"
+
+    return {
+        "primary_emotion": emotion,
+        "gita_mapping": gita_mapping,
+        "intensity": 0.5,
+        "description": f"Emotional state indicating {gita_mapping}",
+        "recommended_verse": "BG 2.48",
+        "verse_text": "Equanimity is called yoga.",
+        "healing_path": "Practice witness consciousness",
+        "activities": ["Meditation", "Read verses", "Journal"],
+        "ai_powered": False,
+    }
