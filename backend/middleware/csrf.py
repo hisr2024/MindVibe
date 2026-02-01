@@ -154,6 +154,14 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         
         # For state-changing methods, validate CSRF token (unless exempt)
         if method in CSRF_PROTECTED_METHODS and not is_exempt:
+            # Skip CSRF when no auth cookies are present (token/header auth or anonymous)
+            if not request.cookies.get("access_token") and not request.cookies.get(CSRF_COOKIE_NAME):
+                return await call_next(request)
+
+            # Skip CSRF for token-based or header-authenticated API calls
+            if request.headers.get("Authorization") or request.headers.get("X-Auth-UID"):
+                return await call_next(request)
+
             # Get token from header
             header_token = request.headers.get(CSRF_HEADER_NAME)
             

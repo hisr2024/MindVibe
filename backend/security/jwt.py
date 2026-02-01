@@ -1,7 +1,7 @@
 """JWT token utilities."""
 
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
@@ -14,8 +14,8 @@ def create_access_token(user_id: str, session_id: str) -> str:
     payload = {
         "sub": user_id,
         "sid": session_id,
-        "exp": datetime.now(UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
-        "iat": datetime.now(UTC),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        "iat": datetime.now(timezone.utc),
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 

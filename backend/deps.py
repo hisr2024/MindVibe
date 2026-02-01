@@ -119,6 +119,62 @@ async def get_current_user_optional(
         return None
 
 
+async def get_current_user_or_create(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> str:
+    """Get current user from JWT, X-Auth-UID, or create a dev-anon user."""
+    auth_header = request.headers.get("Authorization")
+    token = None
+
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+    else:
+        token = request.cookies.get("access_token")
+
+    if token:
+        try:
+            payload = decode_access_token(token)
+            user_id = payload.get("sub")
+
+            if user_id:
+                stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
+                result = await db.execute(stmt)
+                user = result.scalar_one_or_none()
+                if user:
+                    return str(user_id)
+        except Exception:
+            pass
+
+    x_auth_uid = request.headers.get("X-Auth-UID")
+    auth_uid = (x_auth_uid or "").strip()
+
+    if auth_uid and auth_uid not in {"undefined", "null"}:
+        stmt = select(User).where(User.auth_uid == auth_uid, User.deleted_at.is_(None))
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user:
+            user = User(auth_uid=auth_uid, locale="en")
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+
+        return str(user.id)
+
+    # Fallback to dev-anon user for local/dev workflows
+    stmt = select(User).where(User.auth_uid == "dev-anon", User.deleted_at.is_(None))
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = User(auth_uid="dev-anon", locale="en")
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    return str(user.id)
+
 async def get_current_user_flexible(
     request: Request,
     db: AsyncSession = Depends(get_db),

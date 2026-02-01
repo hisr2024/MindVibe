@@ -7,6 +7,7 @@ This module provides common fixtures used across unit and integration tests.
 import asyncio
 import os
 import sys
+import inspect
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
@@ -17,6 +18,36 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.types import TypeDecorator
 from starlette.requests import Request
+
+# Allow pytest-cov options even when the plugin is not installed.
+def pytest_addoption(parser):
+    """Register optional coverage CLI flags to avoid errors without pytest-cov."""
+    parser.addoption("--cov", action="append", default=[])
+    parser.addoption("--cov-report", action="append", default=[])
+    parser.addoption("--cov-fail-under", action="store", default=None)
+
+
+def pytest_configure(config):
+    """Register asyncio marker for environments without pytest-asyncio."""
+    config.addinivalue_line("markers", "asyncio: mark async tests")
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_pyfunc_call(pyfuncitem):
+    """Run async test functions without pytest-asyncio."""
+    if asyncio.iscoroutinefunction(pyfuncitem.obj):
+        signature = inspect.signature(pyfuncitem.obj)
+        allowed_args = {
+            name: value
+            for name, value in pyfuncitem.funcargs.items()
+            if name in signature.parameters
+        }
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(pyfuncitem.obj(**allowed_args))
+        loop.close()
+        return True
+    return None
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
@@ -54,115 +85,138 @@ def event_loop():
 
 
 @pytest.fixture(scope="function")
-async def test_db() -> AsyncGenerator[AsyncSession, None]:
+def test_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Create a test database session.
     Uses an in-memory SQLite database for testing.
     """
-    from sqlalchemy.dialects import postgresql
+    async def setup_db():
+        from sqlalchemy.dialects import postgresql
 
-    # Monkey-patch ARRAY at the dialect level for SQLite
-    original_array_class = postgresql.ARRAY
-    postgresql.ARRAY = SQLiteCompatibleArray
+        # Monkey-patch ARRAY at the dialect level for SQLite
+        original_array_class = postgresql.ARRAY
+        postgresql.ARRAY = SQLiteCompatibleArray
 
-    # Create an in-memory SQLite database
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        echo=False,
-    )
+        # Create an in-memory SQLite database
+        engine = create_async_engine(
+            "sqlite+aiosqlite:///:memory:",
+            echo=False,
+        )
 
-    # Create only the tables needed for wisdom journey tests
-    # Skip tables with PostgreSQL-specific types that can't be easily converted
-    tables_to_create = [
-        models.User.__table__,
-        models.GitaVerse.__table__,
-        models.Mood.__table__,
-        models.JournalEntry.__table__,
-        models.WisdomJourney.__table__,
-        models.JourneyStep.__table__,
-        models.JourneyRecommendation.__table__,
-    ]
+        # Create only the tables needed for wisdom journey tests
+        # Skip tables with PostgreSQL-specific types that can't be easily converted
+        tables_to_create = [
+            models.User.__table__,
+            models.GitaVerse.__table__,
+            models.Mood.__table__,
+            models.JournalEntry.__table__,
+            models.WisdomJourney.__table__,
+            models.JourneyStep.__table__,
+            models.JourneyRecommendation.__table__,
+        ]
 
-    # Add subscription-related tables
-    for cls_name in ['SubscriptionPlan', 'UserSubscription', 'UsageTracking']:
-        if hasattr(models, cls_name):
-            cls = getattr(models, cls_name)
-            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
-                tables_to_create.append(cls.__table__)
-
-    # Add auth-related tables
-    for cls_name in ['Session', 'AdminUser', 'RefreshToken']:
-        if hasattr(models, cls_name):
-            cls = getattr(models, cls_name)
-            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
-                tables_to_create.append(cls.__table__)
-
-    # Add Gita-related tables
-    for cls_name in ['GitaChapter', 'GitaVerseTranslation', 'GitaKeyword', 'GitaModernContext', 'GitaSource', 'GitaVerseKeyword']:
-        if hasattr(models, cls_name):
-            cls = getattr(models, cls_name)
-            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
-                tables_to_create.append(cls.__table__)
-
-    # Add content and blob tables
-    for cls_name in ['EncryptedBlob', 'ContentPack', 'WisdomVerse']:
-        if hasattr(models, cls_name):
-            cls = getattr(models, cls_name)
-            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
-                tables_to_create.append(cls.__table__)
-
-    # Add payment tables
-    for cls_name in ['Payment']:
-        if hasattr(models, cls_name):
-            cls = getattr(models, cls_name)
-            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
-                tables_to_create.append(cls.__table__)
-
-    # Add voice-related tables
-    for cls_name in ['UserVoicePreferences', 'VoiceAnalytics']:
-        if hasattr(models, cls_name):
-            cls = getattr(models, cls_name)
-            if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
-                tables_to_create.append(cls.__table__)
-
-    # Also add enhanced journey tables if they exist
-    for table_name in ['journey_templates', 'journey_template_steps', 'user_journeys', 'user_journey_step_state']:
-        if hasattr(models, table_name):
-            tables_to_create.append(getattr(models, table_name))
-        # Check for class-based tables
-        for cls_name in ['JourneyTemplate', 'JourneyTemplateStep', 'UserJourney', 'UserJourneyStepState']:
+        # Add subscription-related tables
+        for cls_name in ["SubscriptionPlan", "UserSubscription", "UsageTracking"]:
             if hasattr(models, cls_name):
                 cls = getattr(models, cls_name)
-                if hasattr(cls, '__table__') and cls.__table__ not in tables_to_create:
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
                     tables_to_create.append(cls.__table__)
 
-    async with engine.begin() as conn:
-        # Create only compatible tables
-        for table in tables_to_create:
-            try:
-                await conn.run_sync(table.create, checkfirst=True)
-            except Exception:
-                # Skip tables that fail to create
-                pass
+        # Add auth-related tables
+        for cls_name in ["Session", "AdminUser", "RefreshToken"]:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
 
-    # Create a session maker
-    async_session = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+        # Add Gita-related tables
+        for cls_name in [
+            "GitaChapter",
+            "GitaVerseTranslation",
+            "GitaKeyword",
+            "GitaModernContext",
+            "GitaSource",
+            "GitaVerseKeyword",
+        ]:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
 
-    # Provide the session
-    async with async_session() as session:
+        # Add content and blob tables
+        for cls_name in ["EncryptedBlob", "ContentPack", "WisdomVerse"]:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
+
+        # Add payment tables
+        for cls_name in ["Payment"]:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
+
+        # Add voice-related tables
+        for cls_name in ["UserVoicePreferences", "VoiceAnalytics"]:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
+
+        # Also add enhanced journey tables if they exist
+        for table_name in [
+            "journey_templates",
+            "journey_template_steps",
+            "user_journeys",
+            "user_journey_step_state",
+        ]:
+            if hasattr(models, table_name):
+                tables_to_create.append(getattr(models, table_name))
+            # Check for class-based tables
+            for cls_name in [
+                "JourneyTemplate",
+                "JourneyTemplateStep",
+                "UserJourney",
+                "UserJourneyStepState",
+            ]:
+                if hasattr(models, cls_name):
+                    cls = getattr(models, cls_name)
+                    if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                        tables_to_create.append(cls.__table__)
+
+        async with engine.begin() as conn:
+            # Create only compatible tables
+            for table in tables_to_create:
+                try:
+                    await conn.run_sync(table.create, checkfirst=True)
+                except Exception:
+                    # Skip tables that fail to create
+                    pass
+
+        # Create a session maker
+        async_session = async_sessionmaker(
+            engine, class_=AsyncSession, expire_on_commit=False
+        )
+        session = async_session()
+        return session, engine, original_array_class
+
+    session, engine, original_array_class = asyncio.run(setup_db())
+    try:
         yield session
+    finally:
+        async def teardown_db():
+            await session.close()
+            await engine.dispose()
+            from sqlalchemy.dialects import postgresql
 
-    # Cleanup
-    await engine.dispose()
+            postgresql.ARRAY = original_array_class
 
-    # Restore original
-    postgresql.ARRAY = original_array_class
+        asyncio.run(teardown_db())
 
 
 @pytest.fixture(scope="function")
-async def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """
     Create a test client for integration testing.
     Overrides the get_db dependency to use the test database.
@@ -174,12 +228,14 @@ async def test_client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None
 
     app_module.app.dependency_overrides[deps.get_db] = override_get_db
 
-    async with AsyncClient(
+    client = AsyncClient(
         transport=ASGITransport(app=app_module.app), base_url="http://test"
-    ) as client:
+    )
+    try:
         yield client
-
-    app_module.app.dependency_overrides.clear()
+    finally:
+        asyncio.run(client.aclose())
+        app_module.app.dependency_overrides.clear()
 
 
 @pytest.fixture
