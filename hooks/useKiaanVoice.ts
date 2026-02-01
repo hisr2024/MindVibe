@@ -136,6 +136,9 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
     try {
       // Use voice query API for better voice-specific responses
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
+
       const response = await fetch('/api/voice/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -145,7 +148,9 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
           context: 'voice',
           include_audio: false,  // We'll use browser TTS
         }),
+        signal: controller.signal,
       })
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error('Failed to get KIAAN response')
@@ -158,6 +163,9 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     } catch (err) {
       // Fallback to chat API if voice API fails
       try {
+        const fallbackController = new AbortController()
+        const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), 20000) // 20s timeout for fallback
+
         const fallbackResponse = await fetch('/api/chat/message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -166,7 +174,9 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
             language,
             context: 'voice',
           }),
+          signal: fallbackController.signal,
         })
+        clearTimeout(fallbackTimeoutId)
 
         if (fallbackResponse.ok) {
           const fallbackData = await fallbackResponse.json()

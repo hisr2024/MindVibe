@@ -331,7 +331,10 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
       setInputText('')
 
       try {
-        // Call divine conversation API
+        // Call divine conversation API with timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
+
         const response = await fetch('/api/kiaan/divine-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -340,7 +343,9 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
             user_id: userId,
             session_id: currentSessionId,
           }),
+          signal: controller.signal,
         })
+        clearTimeout(timeoutId)
 
         if (!response.ok) {
           throw new Error('Failed to get response')
@@ -513,7 +518,10 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
           )
         )
 
-        // Call divine voice synthesis API
+        // Call divine voice synthesis API with timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 60000) // 60s timeout for voice synthesis
+
         const response = await fetch('/api/voice/divine/synthesize', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -522,7 +530,9 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
             style: 'friendly',
             language: 'en',
           }),
+          signal: controller.signal,
         })
+        clearTimeout(timeoutId)
 
         if (!response.ok) {
           throw new Error('Voice synthesis failed')
