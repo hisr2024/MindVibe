@@ -48,6 +48,17 @@ import {
   type MeditationStep
 } from '@/utils/voice/meditationGuide'
 
+// Daily Rituals imports
+import {
+  generateMorningRitual,
+  generateEveningRitual,
+  getTimeAppropriateRitual,
+  recordRitualCompletion,
+  getRitualStreak,
+  type DailyRitual,
+  type RitualDuration
+} from '@/utils/voice/dailyRituals'
+
 // Crisis Detection imports
 import {
   detectCrisis,
@@ -63,15 +74,55 @@ import {
   getProactiveCheckIn,
   getEmotionAdaptiveVoice,
   getEmotionalIntro,
+  getMantras,
+  getMantraByPurpose,
   generateSleepStory,
   generateAffirmations,
   getAffirmationWithWisdom,
   playBellSound,
   playOmSound,
   getAmbienceOptions,
+  type Mantra,
   type SleepStory,
   type AmbienceType
 } from '@/utils/voice/kiaanAdvancedFeatures'
+
+// Sanskrit Pronunciation imports
+import {
+  getVersePronunciation,
+  getAvailableVerses,
+  generatePronunciationLesson,
+  savePronunciationProgress,
+  type VersePronunciation
+} from '@/utils/voice/sanskritPronunciation'
+
+// Verse Memorization imports
+import {
+  getMemorizationSession,
+  getAllMemorizationVerses,
+  getMemorizationVerse,
+  startLearningVerse,
+  recordReview,
+  generateMemorizationPractice,
+  getMemorizationStats,
+  type MemorizationCard,
+  type RecallQuality
+} from '@/utils/voice/verseMemorization'
+
+// Binaural Beats imports
+import {
+  startBinauralSession,
+  stopBinauralBeat,
+  getBinauralPresets,
+  getBinauralPreset,
+  getRecommendedPreset,
+  getCurrentSession,
+  isBinauralPlaying,
+  getBinauralIntroSpeech,
+  getHeadphoneReminder,
+  cleanupAudio as cleanupBinauralAudio,
+  type BinauralPreset
+} from '@/utils/voice/binauralBeats'
 
 // Spiritual Features imports
 import {
@@ -101,6 +152,9 @@ import {
   type KarmaAnalysis,
   type DharmaProfile
 } from '@/utils/voice/spiritualFeatures'
+
+// Emotional Visualization Component
+import EmotionalVisualization from '@/components/voice/EmotionalVisualization'
 
 // Voice Service for High-Quality TTS
 import voiceService from '@/services/voiceService'
@@ -161,11 +215,20 @@ export default function EliteVoicePage() {
   const [memoryInitialized, setMemoryInitialized] = useState(false)
   const [showMemoryPanel, setShowMemoryPanel] = useState(false)
 
+  // Daily Rituals state
+  const [showRitualPicker, setShowRitualPicker] = useState(false)
+  const [currentRitual, setCurrentRitual] = useState<DailyRitual | null>(null)
+  const [ritualStep, setRitualStep] = useState(0)
+  const ritualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Crisis detection state
   const [showCrisisSupport, setShowCrisisSupport] = useState(false)
   const [currentCrisis, setCurrentCrisis] = useState<CrisisAssessment | null>(null)
 
   // Advanced features state
+  const [showMantraPicker, setShowMantraPicker] = useState(false)
+  const [currentMantra, setCurrentMantra] = useState<Mantra | null>(null)
+  const [mantraCount, setMantraCount] = useState(0)
   const [sleepStoryMode, setSleepStoryMode] = useState(false)
   const [currentSleepStory, setCurrentSleepStory] = useState<SleepStory | null>(null)
   const [sleepStorySegment, setSleepStorySegment] = useState(0)
@@ -175,6 +238,21 @@ export default function EliteVoicePage() {
 
   // Audio context for ambience
   const audioContextRef = useRef<AudioContext | null>(null)
+
+  // Sanskrit Pronunciation state
+  const [showPronunciationPicker, setShowPronunciationPicker] = useState(false)
+  const [currentPronunciation, setCurrentPronunciation] = useState<VersePronunciation | null>(null)
+  const [pronunciationStep, setPronunciationStep] = useState(0)
+
+  // Verse Memorization state
+  const [showMemorizationPicker, setShowMemorizationPicker] = useState(false)
+  const [currentMemorizationVerse, setCurrentMemorizationVerse] = useState<MemorizationCard | null>(null)
+  const [memorizationReviewMode, setMemorizationReviewMode] = useState(false)
+
+  // Binaural Beats state
+  const [showBinauralPicker, setShowBinauralPicker] = useState(false)
+  const [activeBinauralPreset, setActiveBinauralPreset] = useState<BinauralPreset | null>(null)
+  const [binauralPlaying, setBinauralPlaying] = useState(false)
 
   // Voice Persona state
   const [showPersonaPicker, setShowPersonaPicker] = useState(false)
@@ -199,6 +277,9 @@ export default function EliteVoicePage() {
   const [gunaQuestionIndex, setGunaQuestionIndex] = useState(0)
   const [gunaAnswers, setGunaAnswers] = useState<Record<string, 'sattva' | 'rajas' | 'tamas'>>({})
   const [gunaProfile, setGunaProfile] = useState<GunaProfile | null>(null)
+
+  // Emotional Visualization state
+  const [showEmotionalJourney, setShowEmotionalJourney] = useState(false)
 
   // Accountability state
   const [showAccountability, setShowAccountability] = useState(false)
@@ -1363,28 +1444,41 @@ export default function EliteVoicePage() {
       meditationTimerRef.current = null
     }
 
-    // 6. Clear self-healing timer
+    // 6. Clear ritual timers
+    if (ritualTimerRef.current) {
+      clearTimeout(ritualTimerRef.current)
+      ritualTimerRef.current = null
+    }
+
+    // 7. Clear self-healing timer
     if (selfHealingTimerRef.current) {
       clearTimeout(selfHealingTimerRef.current)
       selfHealingTimerRef.current = null
     }
 
-    // 7. Stop listening if active
+    // 8. Stop listening if active
     if (isListening) {
       stopListening()
     }
 
-    // 8. Stop any HTML5 Audio elements that might be playing
+    // 9. Stop any HTML5 Audio elements that might be playing
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
       audioRef.current.src = '' // Clear source to ensure full stop
     }
 
-    // 9. Clear response state
+    // 10. Stop binaural beats if playing
+    if (binauralPlaying) {
+      stopBinauralBeat()
+      setBinauralPlaying(false)
+      setActiveBinauralPreset(null)
+    }
+
+    // 11. Clear response state
     setResponse('')
 
-    // 10. Set state to idle/wakeword
+    // 12. Set state to idle/wakeword
     setState(wakeWordEnabled ? 'wakeword' : 'idle')
 
     console.log('[KIAAN Voice] All voice activity stopped')
@@ -1789,6 +1883,136 @@ export default function EliteVoicePage() {
   }
 
   // ============================================
+  // DAILY RITUALS FUNCTIONS
+  // ============================================
+
+  async function startDailyRitual(type: 'morning' | 'evening', duration: RitualDuration = 'standard') {
+    console.log('[KIAAN Voice] Starting daily ritual:', type)
+
+    // Disable other modes
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+    if (wakeWordEnabled) {
+      stopWakeWord()
+      setWakeWordEnabled(false)
+    }
+
+    const ritual = type === 'morning'
+      ? generateMorningRitual(duration)
+      : generateEveningRitual(duration)
+
+    setCurrentRitual(ritual)
+    setRitualStep(0)
+    setShowRitualPicker(false)
+
+    playOmChime()
+
+    // Run the ritual
+    await runRitualStep(ritual, 0)
+  }
+
+  async function runRitualStep(ritual: DailyRitual, stepIndex: number) {
+    if (stepIndex >= ritual.steps.length) {
+      await completeRitual(ritual)
+      return
+    }
+
+    const step = ritual.steps[stepIndex]
+    setRitualStep(stepIndex)
+
+    if (step.bellSound) {
+      playOmChime()
+      await new Promise(resolve => setTimeout(resolve, 800))
+    }
+
+    if (step.text) {
+      const voiceSettings = step.type === 'breathing'
+        ? { rate: 0.8, pitch: 0.95, volume: voiceVolume }
+        : { rate: 0.85, pitch: 1.0, volume: voiceVolume }
+      await speakResponseWithEmotion(step.text, voiceSettings)
+    }
+
+    ritualTimerRef.current = setTimeout(() => {
+      runRitualStep(ritual, stepIndex + 1)
+    }, step.duration * 1000)
+  }
+
+  async function completeRitual(ritual: DailyRitual) {
+    playOmChime()
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    await speakResponseWithEmotion(ritual.closingBlessing, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    playOmChime()
+    recordRitualCompletion(ritual.type)
+
+    setCurrentRitual(null)
+    setRitualStep(0)
+    setState('idle')
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(
+        `Completed ${ritual.title}`,
+        ritual.closingBlessing,
+        true
+      )
+    }
+  }
+
+  function stopRitual() {
+    if (ritualTimerRef.current) {
+      clearTimeout(ritualTimerRef.current)
+      ritualTimerRef.current = null
+    }
+    if (synthesisRef.current) synthesisRef.current.cancel()
+    setCurrentRitual(null)
+    setRitualStep(0)
+    setState('idle')
+  }
+
+  // ============================================
+  // MANTRA CHANTING FUNCTIONS
+  // ============================================
+
+  async function startMantraChanting(mantra: Mantra) {
+    console.log('[KIAAN Voice] Starting mantra:', mantra.transliteration)
+
+    if (conversationMode) setConversationMode(false)
+    if (meditationMode) stopMeditation()
+
+    setCurrentMantra(mantra)
+    setMantraCount(0)
+    setShowMantraPicker(false)
+
+    playOmChime()
+
+    // Introduce the mantra
+    const intro = `We will chant ${mantra.transliteration} together. ${mantra.meaning}. This mantra is for ${mantra.purpose}. We will repeat it ${mantra.repetitions} times. After I chant, you may repeat silently or aloud.`
+    await speakResponseWithEmotion(intro, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Chant the mantra
+    for (let i = 0; i < mantra.repetitions; i++) {
+      setMantraCount(i + 1)
+      await speakResponseWithEmotion(mantra.transliteration, { rate: 0.7, pitch: 0.9, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, mantra.pauseBetween * 1000))
+    }
+
+    // Closing
+    playOmChime()
+    await speakResponseWithEmotion('Om Shanti. The vibration of the mantra continues within you.', { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+
+    setCurrentMantra(null)
+    setMantraCount(0)
+    setState('idle')
+
+    if (memoryInitialized) {
+      await recordKiaanConversation(`Chanted ${mantra.transliteration} ${mantra.repetitions} times`, 'Mantra practice completed', true)
+    }
+  }
+
+  // ============================================
   // SLEEP STORY FUNCTIONS
   // ============================================
 
@@ -1860,6 +2084,129 @@ export default function EliteVoicePage() {
     await speakResponseWithEmotion('Carry these truths with you. You are worthy. You are enough.', { rate: 0.85, pitch: 1.0, volume: voiceVolume })
 
     setTimeout(() => setShowAffirmation(false), 5000)
+  }
+
+  // ============================================
+  // SANSKRIT PRONUNCIATION FUNCTIONS
+  // ============================================
+
+  async function startPronunciationLesson(verseId: string) {
+    console.log('[KIAAN Voice] Starting pronunciation lesson:', verseId)
+
+    const verse = getVersePronunciation(verseId)
+    if (!verse) {
+      await speakResponse('I could not find that verse for pronunciation practice.')
+      return
+    }
+
+    setCurrentPronunciation(verse)
+    setPronunciationStep(0)
+    setShowPronunciationPicker(false)
+
+    playOmChime()
+
+    const lesson = generatePronunciationLesson(verseId)
+    for (const line of lesson) {
+      await speakResponseWithEmotion(line, { rate: 0.8, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 1500))
+    }
+
+    savePronunciationProgress({
+      verseId,
+      attempts: 1,
+      lastPracticed: new Date(),
+      confidence: 50,
+      masteredSyllables: [],
+      difficultSyllables: []
+    })
+
+    setCurrentPronunciation(null)
+    setState('idle')
+  }
+
+  // ============================================
+  // VERSE MEMORIZATION FUNCTIONS
+  // ============================================
+
+  async function startMemorizationSession(verseId: string) {
+    console.log('[KIAAN Voice] Starting memorization:', verseId)
+
+    const verse = getMemorizationVerse(verseId)
+    if (!verse) {
+      await speakResponse('I could not find that verse for memorization.')
+      return
+    }
+
+    startLearningVerse(verseId)
+    setCurrentMemorizationVerse(verse)
+    setMemorizationReviewMode(true)
+    setShowMemorizationPicker(false)
+
+    playOmChime()
+
+    const practice = generateMemorizationPractice(verseId)
+    for (const line of practice) {
+      await speakResponseWithEmotion(line, { rate: 0.85, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    setCurrentMemorizationVerse(null)
+    setMemorizationReviewMode(false)
+    setState('idle')
+  }
+
+  async function recordMemorizationReview(quality: RecallQuality) {
+    if (!currentMemorizationVerse) return
+
+    const result = recordReview(currentMemorizationVerse.verseId, quality)
+    const qualityText = quality >= 4 ? 'Excellent recall!' : quality >= 3 ? 'Good effort!' : 'Keep practicing, you will master this.'
+    await speakResponse(`${qualityText} Next review in ${result.interval} days.`)
+
+    setCurrentMemorizationVerse(null)
+    setMemorizationReviewMode(false)
+  }
+
+  // ============================================
+  // BINAURAL BEATS FUNCTIONS
+  // ============================================
+
+  async function startBinauralBeats(presetName: string) {
+    console.log('[KIAAN Voice] Starting binaural beats:', presetName)
+
+    const preset = getBinauralPreset(presetName)
+    if (!preset) {
+      await speakResponse('I could not find that binaural preset.')
+      return
+    }
+
+    setShowBinauralPicker(false)
+
+    // Headphone reminder
+    await speakResponse(getHeadphoneReminder())
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Introduction
+    const intro = getBinauralIntroSpeech(presetName)
+    for (const line of intro) {
+      await speakResponseWithEmotion(line, { rate: 0.9, pitch: 1.0, volume: voiceVolume })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    // Start the binaural beat
+    const started = await startBinauralSession(presetName)
+    if (started) {
+      setActiveBinauralPreset(preset)
+      setBinauralPlaying(true)
+    } else {
+      await speakResponse('I could not start the binaural session. Please try again.')
+    }
+  }
+
+  function stopBinauralBeats() {
+    stopBinauralBeat()
+    setBinauralPlaying(false)
+    setActiveBinauralPreset(null)
+    playSound('click')
   }
 
   // ============================================
@@ -2770,6 +3117,127 @@ export default function EliteVoicePage() {
             </div>
           )}
 
+          {/* Binaural Beats Active Indicator */}
+          {binauralPlaying && activeBinauralPreset && (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 border border-cyan-400/40 shadow-lg shadow-cyan-500/10">
+                <div className="relative">
+                  <span className="text-2xl">🎧</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <div className="text-cyan-200 font-semibold text-sm">{activeBinauralPreset.name}</div>
+                  <div className="text-cyan-300/70 text-xs">{activeBinauralPreset.type} waves • {activeBinauralPreset.beatFrequency}Hz</div>
+                </div>
+                <button
+                  onClick={stopBinauralBeats}
+                  className="ml-2 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Sanskrit Pronunciation Picker Modal */}
+          {showPronunciationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-teal-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-teal-100">Sanskrit Pronunciation</h3>
+                    <p className="text-teal-200/60 text-sm mt-1">Learn correct shloka pronunciation</p>
+                  </div>
+                  <button onClick={() => setShowPronunciationPicker(false)} className="text-teal-300/60 hover:text-teal-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {getAvailableVerses().map((verse) => (
+                    <button
+                      key={verse.verseId}
+                      onClick={() => startPronunciationLesson(verse.verseId)}
+                      className="w-full p-4 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-teal-100">{verse.reference}</div>
+                      <div className="text-xs text-teal-300/60 mt-1">Difficulty: {verse.difficulty}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verse Memorization Picker Modal */}
+          {showMemorizationPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-emerald-100">Verse Memorization</h3>
+                    <p className="text-emerald-200/60 text-sm mt-1">Spaced repetition for deep learning</p>
+                  </div>
+                  <button onClick={() => setShowMemorizationPicker(false)} className="text-emerald-300/60 hover:text-emerald-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                {(() => {
+                  const stats = getMemorizationStats()
+                  return (
+                    <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <div className="text-emerald-200 text-sm">Progress: {stats.totalVersesMastered} mastered • {stats.reviewsDueToday} due today • {stats.currentStreak} day streak</div>
+                    </div>
+                  )
+                })()}
+                <div className="space-y-3">
+                  {getAllMemorizationVerses().map((verse) => (
+                    <button
+                      key={verse.verseId}
+                      onClick={() => startMemorizationSession(verse.verseId)}
+                      className="w-full p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-emerald-100">{verse.reference}</div>
+                      <div className="text-xs text-emerald-300/70 mt-1 line-clamp-2">{verse.translation}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Binaural Beats Picker Modal */}
+          {showBinauralPicker && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-cyan-100">Binaural Beats</h3>
+                    <p className="text-cyan-200/60 text-sm mt-1">Alpha/theta waves for meditation</p>
+                  </div>
+                  <button onClick={() => setShowBinauralPicker(false)} className="text-cyan-300/60 hover:text-cyan-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="mb-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 text-sm">
+                  Use headphones for best effect. Each ear receives a different frequency.
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {getBinauralPresets().map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => startBinauralBeats(preset.name)}
+                      className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all text-left"
+                    >
+                      <div className="font-semibold text-cyan-100">{preset.name}</div>
+                      <div className="text-xs text-cyan-300/60 mt-1">{preset.type} • {preset.beatFrequency}Hz</div>
+                      <div className="text-xs text-cyan-300/40 mt-1">{preset.recommendedDuration}min</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Voice Persona Picker Modal */}
           {showPersonaPicker && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
@@ -2857,6 +3325,21 @@ export default function EliteVoicePage() {
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Emotional Journey Modal */}
+          {showEmotionalJourney && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-slate-900 border border-orange-500/30 rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-orange-100">Your Emotional Journey</h3>
+                  <button onClick={() => setShowEmotionalJourney(false)} className="text-orange-300/60 hover:text-orange-300 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <EmotionalVisualization height={350} showInsights={true} />
               </div>
             </div>
           )}
