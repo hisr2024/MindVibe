@@ -102,7 +102,18 @@ export default function ViyogClient() {
       })
 
       if (!response.ok) {
-        setError('Viyoga is having trouble connecting right now. Please try again in a moment.')
+        // Handle specific HTTP error codes
+        if (response.status === 401 || response.status === 403) {
+          setError('Session expired. Please refresh the page and try again.')
+        } else if (response.status === 429) {
+          setError('Too many requests. Please wait a moment before trying again.')
+        } else if (response.status === 503) {
+          setError('Viyoga is temporarily unavailable. Please try again in a few minutes.')
+        } else if (response.status >= 500) {
+          setError('Viyoga encountered an issue. Please try again.')
+        } else {
+          setError('Unable to process your request. Please try again.')
+        }
         return
       }
 

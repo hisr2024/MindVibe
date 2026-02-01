@@ -248,6 +248,119 @@ def _get_fallback_response(
     }
 
 
+@router.post("/chat")
+async def viyoga_chat(
+    payload: dict[str, Any],
+    db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
+    """Chat endpoint for Viyoga Detachment Coach.
+
+    This endpoint is called by the ViyogClient frontend component.
+    It wraps the detachment functionality in a chat-friendly interface.
+
+    Request body:
+        message: str - The user's message/worry
+        sessionId: str - Session identifier for conversation continuity
+        mode: str - Response mode ('full' for comprehensive response)
+
+    Returns:
+        - assistant: The full response text
+        - sections: Structured guidance sections
+        - citations: List of Gita verse citations used
+    """
+    message = payload.get("message", "")
+    session_id = payload.get("sessionId", "")
+    mode = payload.get("mode", "full")
+
+    if not message.strip():
+        logger.warning("Viyoga chat: empty message received")
+        return {
+            "assistant": "",
+            "sections": {},
+            "citations": [],
+            "error": "Message is required"
+        }
+
+    if len(message) > 2000:
+        logger.warning(f"Viyoga chat: message too long ({len(message)} chars)")
+        return {
+            "assistant": "",
+            "sections": {},
+            "citations": [],
+            "error": "Message too long (max 2000 characters)"
+        }
+
+    # Determine analysis mode based on request mode
+    analysis_mode = AnalysisMode.STANDARD
+    if mode == "full" or mode == "deep":
+        analysis_mode = AnalysisMode.DEEP_DIVE
+
+    if not wellness_model:
+        logger.warning("Viyoga chat: WellnessModel not initialized, using fallback")
+        fallback = _get_fallback_response(message, analysis_mode)
+        return {
+            "assistant": fallback.get("response", ""),
+            "sections": fallback.get("detachment_guidance", {}),
+            "citations": [],
+        }
+
+    try:
+        # Analyze attachment pattern
+        attachment_analysis = _analyze_attachment_pattern(message)
+        act_guidance = PsychologicalFramework.get_act_guidance(attachment_analysis["type"])
+
+        # Generate response using WellnessModel
+        result = await wellness_model.generate_response(
+            tool=WellnessTool.VIYOGA,
+            user_input=message,
+            db=db,
+            analysis_mode=analysis_mode,
+        )
+
+        # Build citations placeholder (gita_verses_used is count, not list)
+        citations = []
+        if result.gita_verses_used > 0:
+            # Add a generic citation indicating Gita wisdom was used
+            citations.append({
+                "source_file": "bhagavad_gita",
+                "reference_if_any": f"Karma Yoga wisdom ({result.gita_verses_used} verses integrated)",
+                "chunk_id": "karma_yoga_compilation",
+            })
+
+        logger.info(
+            f"✅ Viyoga chat: session={session_id[:8] if session_id else 'none'}..., "
+            f"attachment_type={attachment_analysis['type']}, "
+            f"verses={result.gita_verses_used}"
+        )
+
+        return {
+            "assistant": result.content,
+            "sections": result.sections or {},
+            "citations": citations,
+            "attachment_analysis": attachment_analysis,
+            "act_insights": {
+                "relevant_processes": [
+                    {
+                        "process": name,
+                        "description": info.get("description", ""),
+                        "gita_parallel": info.get("gita_parallel", ""),
+                    }
+                    for name, info in act_guidance.items()
+                ],
+            },
+        }
+
+    except Exception as e:
+        logger.exception(f"Viyoga chat error: {e}")
+        # Return fallback response on error
+        fallback = _get_fallback_response(message, analysis_mode)
+        return {
+            "assistant": fallback.get("response", ""),
+            "sections": fallback.get("detachment_guidance", {}),
+            "citations": [],
+        }
+
+
 @router.get("/health")
 async def viyoga_health():
     """Health check."""

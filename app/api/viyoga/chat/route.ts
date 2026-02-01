@@ -76,7 +76,7 @@ function parseTransmissionSections(text: string) {
 }
 
 function buildFallbackTransmission(message: string, chunks: { text: string }[]) {
-  const contextSnippet = chunks[0]?.text || 'I don’t have that in my Gita repository context yet—let me fetch it.'
+  const contextSnippet = chunks[0]?.text || "I don't have that in my Gita repository context yet - let me fetch it."
 
   return `Sacred Recognition
 I hear the weight in "${message}". Your concern is valid, and you are not alone in carrying it.
@@ -148,16 +148,24 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
 }
 
 export async function POST(request: NextRequest) {
+  // Parse request body with explicit error handling
+  let body: Record<string, unknown>
   try {
-    const body = await request.json()
-    const message = typeof body.message === 'string' ? body.message.trim() : ''
-    const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
-    const mode = body.mode as ChatMode | undefined
+    body = await request.json()
+  } catch (parseError) {
+    console.error('[Viyoga Chat] JSON parse error:', parseError)
+    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+  }
 
-    if (!message || !sessionId) {
-      return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
-    }
+  const message = typeof body.message === 'string' ? body.message.trim() : ''
+  const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
+  const mode = body.mode as ChatMode | undefined
 
+  if (!message || !sessionId) {
+    return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
+  }
+
+  try {
     // Initialize session and history with error handling
     try {
       await ensureSession(sessionId)
