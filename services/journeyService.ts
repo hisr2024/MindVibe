@@ -85,16 +85,36 @@ function parseErrorResponse(response: Response, body: Record<string, unknown>): 
 /**
  * Get auth UID from local storage for X-Auth-UID fallback.
  */
-function getAuthUid(): string | undefined {
-  if (typeof window === 'undefined') return undefined;
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
 
-  const storedUser = localStorage.getItem('mindvibe_auth_user');
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser) as { id?: string };
-      if (parsed?.id) return parsed.id;
-    } catch (error) {
-      console.warn('[JourneyService] Failed to parse stored auth user', error);
+  // Attach bearer token from localStorage (fallback for auth cookie)
+  if (typeof window !== 'undefined') {
+    const accessToken =
+      localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token');
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    // Try to get user ID from stored auth user (for X-Auth-UID header)
+    const storedUser = localStorage.getItem('mindvibe_auth_user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser) as { id?: string };
+        if (parsedUser.id) {
+          headers['X-Auth-UID'] = parsedUser.id;
+        }
+      } catch {
+        // Ignore malformed storage entries
+      }
+    }
+
+    // Legacy fallback
+    const legacyUserId = localStorage.getItem('userId');
+    if (!headers['X-Auth-UID'] && legacyUserId) {
+      headers['X-Auth-UID'] = legacyUserId;
     }
   }
 
