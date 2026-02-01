@@ -21,12 +21,11 @@ import type {
   CompleteStepRequest,
   JourneyPersonalization,
 } from '@/types/journey.types';
+import { apiFetch } from '@/lib/api';
 
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEYS_ENDPOINT = '/api/journeys';
 
 // Cache duration in milliseconds
@@ -84,7 +83,7 @@ function parseErrorResponse(response: Response, body: Record<string, unknown>): 
 // =============================================================================
 
 /**
- * Get authentication headers.
+ * Get auth UID from local storage for X-Auth-UID fallback.
  */
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
@@ -119,7 +118,7 @@ function getAuthHeaders(): Record<string, string> {
     }
   }
 
-  return headers;
+  return undefined;
 }
 
 /**
@@ -130,12 +129,11 @@ async function apiRequest<T>(
   endpoint: string,
   body?: unknown
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
   const options: RequestInit = {
     method,
-    headers: getAuthHeaders(),
-    credentials: 'include', // Include cookies for auth
+    headers: {
+      'Content-Type': 'application/json',
+    },
   };
 
   if (body) {
@@ -143,7 +141,7 @@ async function apiRequest<T>(
   }
 
   try {
-    const response = await fetch(url, options);
+    const response = await apiFetch(endpoint, options, getAuthUid());
     const data = await response.json();
 
     if (!response.ok) {
