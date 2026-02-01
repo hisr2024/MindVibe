@@ -71,6 +71,38 @@ class GitaChunk:
     text: str
     commentary: str
     embedding: np.ndarray
+    keywords: tuple[str, ...] = ()
+
+
+# Keyword weights for relationship-relevant terms
+KEYWORD_WEIGHTS = {
+    "anger": 2.0, "krodha": 2.0, "forgiveness": 2.0, "kshama": 2.0,
+    "compassion": 2.0, "daya": 2.0, "karuna": 2.0,
+    "truth": 1.5, "satya": 1.5, "speech": 1.5,
+    "control": 1.5, "mind": 1.5, "self": 1.5,
+    "ego": 2.0, "ahamkara": 2.0,
+    "equanimity": 2.0, "sama": 1.5, "equal": 1.5,
+    "attachment": 2.0, "raga": 1.5, "detachment": 2.0,
+    "duty": 1.5, "dharma": 2.0, "svadharma": 2.0,
+    "fear": 1.5, "bhaya": 1.5, "fearless": 1.5,
+    "jealousy": 1.5, "envy": 1.5,
+    "resentment": 1.5, "hatred": 1.5, "dvesha": 1.5,
+    "ahimsa": 2.0, "nonviolence": 2.0, "harm": 1.5,
+    "steadiness": 1.5, "patience": 1.5, "peace": 1.5,
+    "love": 2.0, "prema": 1.5, "affection": 1.5,
+    "relationship": 2.0, "family": 1.5, "friend": 1.5,
+    "sorrow": 1.5, "grief": 1.5, "suffering": 1.5, "dukha": 1.5,
+    "liberation": 1.5, "moksha": 1.5, "freedom": 1.5,
+    "wisdom": 1.5, "jnana": 1.5, "knowledge": 1.5,
+    "action": 1.5, "karma": 1.5, "work": 1.5,
+    "surrender": 1.5, "devotion": 1.5, "bhakti": 1.5,
+    "conflict": 2.0, "battle": 1.0,
+    "emotion": 1.5, "feeling": 1.5, "heart": 1.5,
+    "desire": 1.5, "kama": 1.5, "craving": 1.5,
+    "renunciation": 1.5, "tyaga": 1.5,
+    "atman": 2.0, "soul": 1.5,
+    "meditation": 1.5, "yoga": 1.5, "discipline": 1.5,
+}
 
 
 @dataclass
@@ -81,9 +113,10 @@ class RetrievalResult:
 
 
 class RelationshipCompassIndex:
-    def __init__(self, chunks: list[GitaChunk], model: str) -> None:
+    def __init__(self, chunks: list[GitaChunk], model: str, index_type: str = "embedding") -> None:
         self.chunks = chunks
         self.model = model
+        self.index_type = index_type
 
     @classmethod
     def load(cls) -> "RelationshipCompassIndex | None":
@@ -100,19 +133,36 @@ class RelationshipCompassIndex:
         try:
             meta = dict(conn.execute("SELECT key, value FROM metadata").fetchall())
             model = meta.get("model", EMBEDDING_MODEL)
-            rows = conn.execute(
-                """
-                SELECT chunk_id, chapter, verse, source_file, tags, language, chunk_type, text, commentary, embedding
-                FROM gita_chunks
-                """
-            ).fetchall()
+            index_type = meta.get("index_type", "embedding")
+
+            # Check if keywords column exists
+            cursor = conn.execute("PRAGMA table_info(gita_chunks)")
+            columns = [col[1] for col in cursor.fetchall()]
+            has_keywords = "keywords" in columns
+
+            if has_keywords:
+                rows = conn.execute(
+                    """
+                    SELECT chunk_id, chapter, verse, source_file, tags, language, chunk_type, text, commentary, embedding, keywords
+                    FROM gita_chunks
+                    """
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT chunk_id, chapter, verse, source_file, tags, language, chunk_type, text, commentary, embedding
+                    FROM gita_chunks
+                    """
+                ).fetchall()
         finally:
             conn.close()
 
         chunks: list[GitaChunk] = []
         for row in rows:
             tags = json.loads(row[4]) if row[4] else []
-            embedding = np.array(json.loads(row[9]), dtype=np.float32)
+            embedding_data = json.loads(row[9]) if row[9] else []
+            embedding = np.array(embedding_data, dtype=np.float32) if embedding_data else np.array([], dtype=np.float32)
+            keywords = tuple(json.loads(row[10])) if has_keywords and len(row) > 10 and row[10] else ()
             chunks.append(
                 GitaChunk(
                     chunk_id=row[0],
@@ -125,10 +175,12 @@ class RelationshipCompassIndex:
                     text=row[7] or "",
                     commentary=row[8] or "",
                     embedding=embedding,
+                    keywords=keywords,
                 )
             )
 
-        return cls(chunks=chunks, model=model)
+        logger.info("Loaded Relationship Compass index: %d chunks, type=%s", len(chunks), index_type)
+        return cls(chunks=chunks, model=model, index_type=index_type)
 
 
 _cached_index: RelationshipCompassIndex | None = None
@@ -160,20 +212,120 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / denom)
 
 
+def extract_query_keywords(query: str) -> set[str]:
+    """Extract keywords from query for matching."""
+    # Simple tokenization
+    words = re.findall(r'\b[a-zA-Z]{3,}\b', query.lower())
+    # Filter common stop words
+    stop_words = {
+        'the', 'and', 'for', 'that', 'this', 'with', 'are', 'was', 'were',
+        'been', 'being', 'have', 'has', 'had', 'does', 'did', 'will', 'would',
+        'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need',
+        'from', 'into', 'upon', 'about', 'after', 'before', 'between', 'under',
+        'over', 'such', 'than', 'too', 'very', 'just', 'only', 'also', 'even',
+        'said', 'says', 'one', 'two', 'three', 'who', 'what', 'which', 'where',
+        'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more',
+        'most', 'other', 'some', 'any', 'not', 'nor', 'but', 'yet', 'still',
+        'then', 'thus', 'here', 'there', 'their', 'them', 'they', 'these',
+        'those', 'your', 'you', 'his', 'her', 'him', 'its', 'own', 'same',
+        'feel', 'feeling', 'want', 'like', 'know', 'think', 'get', 'make',
+    }
+    return {word for word in words if word not in stop_words}
+
+
+def score_chunk_by_keywords(chunk: GitaChunk, query_keywords: set[str]) -> float:
+    """Score a chunk based on keyword matching."""
+    score = 0.0
+
+    # Match against chunk keywords
+    chunk_keywords = set(chunk.keywords)
+    for kw in query_keywords:
+        if kw in chunk_keywords:
+            weight = KEYWORD_WEIGHTS.get(kw, 1.0)
+            score += weight
+
+    # Match against tags
+    chunk_tags_lower = {tag.lower().replace('_', ' ').replace('-', ' ') for tag in chunk.tags}
+    for tag in chunk_tags_lower:
+        for kw in query_keywords:
+            if kw in tag:
+                weight = KEYWORD_WEIGHTS.get(kw, 1.0)
+                score += weight * 1.5
+
+    # Match against text content (lower weight)
+    text_lower = chunk.text.lower()
+    for kw in query_keywords:
+        if kw in text_lower:
+            weight = KEYWORD_WEIGHTS.get(kw, 1.0)
+            score += weight * 0.5
+
+    return score
+
+
+def retrieve_chunks_keyword(query: str, relationship_type: str, k: int = 18) -> RetrievalResult:
+    """Retrieve chunks using keyword-based matching."""
+    index = get_index()
+    if not index:
+        return RetrievalResult(chunks=[], confidence=0.0, strategy="missing-index")
+
+    # Build expanded query keywords
+    expanded_query = f"{query} relationship {relationship_type} " + " ".join(RELATIONSHIP_TAGS[:6])
+    query_keywords = extract_query_keywords(expanded_query)
+
+    if not query_keywords:
+        return RetrievalResult(chunks=[], confidence=0.0, strategy="no-keywords")
+
+    # Score all chunks
+    scored: list[tuple[GitaChunk, float]] = []
+    for chunk in index.chunks:
+        score = score_chunk_by_keywords(chunk, query_keywords)
+        if score > 0:
+            scored.append((chunk, score))
+
+    # Sort by score
+    scored.sort(key=lambda item: item[1], reverse=True)
+    top = scored[:k]
+
+    # Calculate confidence (normalized)
+    max_possible_score = len(query_keywords) * 2.0 * 3  # max weight * 3 match types
+    confidence = (top[0][1] / max_possible_score) if top else 0.0
+    confidence = min(confidence, 1.0)
+
+    # Ensure minimum confidence for keyword matches
+    if top and confidence < 0.3:
+        confidence = 0.3
+
+    return RetrievalResult(chunks=[item[0] for item in top], confidence=confidence, strategy="keywords")
+
+
 def retrieve_chunks(query: str, relationship_type: str, k: int = 18) -> RetrievalResult:
     index = get_index()
     if not index:
         return RetrievalResult(chunks=[], confidence=0.0, strategy="missing-index")
 
+    # Use keyword retrieval if index is keyword-based or if embeddings aren't available
+    if index.index_type == "keyword":
+        return retrieve_chunks_keyword(query, relationship_type, k)
+
     expanded_query = f"{query} relationship {relationship_type} " + " ".join(RELATIONSHIP_TAGS)
     embedding = embed_query(expanded_query, index.model)
+
+    # Fall back to keyword retrieval if embedding fails
     if embedding is None:
-        return RetrievalResult(chunks=[], confidence=0.0, strategy="missing-embeddings")
+        logger.info("Embedding unavailable, falling back to keyword retrieval")
+        return retrieve_chunks_keyword(query, relationship_type, k)
 
     scored: list[tuple[GitaChunk, float]] = []
     for chunk in index.chunks:
+        if chunk.embedding.size == 0:
+            continue
         score = cosine_similarity(embedding, chunk.embedding)
         scored.append((chunk, score))
+
+    # If no embeddings found, fall back to keyword retrieval
+    if not scored:
+        logger.info("No embeddings in index, falling back to keyword retrieval")
+        return retrieve_chunks_keyword(query, relationship_type, k)
 
     scored.sort(key=lambda item: item[1], reverse=True)
     top = scored[:k]

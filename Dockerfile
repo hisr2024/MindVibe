@@ -11,10 +11,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend, migrations, and data directories
+# Copy backend, migrations, data directories, and scripts
 COPY backend/ ./backend/
 COPY migrations/ ./migrations/
 COPY data/ ./data/
+COPY scripts/ ./scripts/
+
+# Build the Relationship Compass index
+RUN python scripts/build-relationship-compass-index-local.py
 
 # Expose port and add health check
 EXPOSE 8000
