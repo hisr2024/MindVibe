@@ -3334,7 +3334,12 @@ class PersonalJourney(SoftDeleteMixin, Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[PersonalJourneyStatus] = mapped_column(
-        Enum(PersonalJourneyStatus, native_enum=False, length=32),
+        Enum(
+            PersonalJourneyStatus,
+            native_enum=False,
+            length=32,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         default=PersonalJourneyStatus.DRAFT,
         index=True,
     )
