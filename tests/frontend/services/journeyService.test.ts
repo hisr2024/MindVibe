@@ -364,13 +364,13 @@ describe('JourneyService', () => {
     it('should handle network errors', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(listJourneys()).rejects.toThrow(JourneyServiceError);
-
       try {
         await listJourneys();
+        expect(true).toBe(false); // Should not reach here
       } catch (error) {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('NETWORK_ERROR');
+        expect((error as JourneyServiceError).statusCode).toBe(0);
       }
     });
 
@@ -402,6 +402,167 @@ describe('JourneyService', () => {
         expect((error as JourneyServiceError).code).toBe('VALIDATION_ERROR');
         expect((error as JourneyServiceError).message).toBe('Invalid input');
         expect((error as JourneyServiceError).statusCode).toBe(400);
+      }
+    });
+
+    it('should handle 401 Unauthorized error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({
+          detail: { error: 'UNAUTHORIZED', message: 'Authentication required' },
+        }),
+      });
+
+      try {
+        await listJourneys();
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).code).toBe('UNAUTHORIZED');
+        expect((error as JourneyServiceError).statusCode).toBe(401);
+        expect((error as JourneyServiceError).message).toBe('Authentication required');
+      }
+    });
+
+    it('should handle 403 Forbidden error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        json: async () => ({
+          detail: { error: 'FORBIDDEN', message: 'You do not have permission' },
+        }),
+      });
+
+      try {
+        await getJourney('protected-journey');
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).code).toBe('FORBIDDEN');
+        expect((error as JourneyServiceError).statusCode).toBe(403);
+      }
+    });
+
+    it('should handle 404 Not Found error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({
+          detail: { error: 'JOURNEY_NOT_FOUND', message: 'Journey does not exist' },
+        }),
+      });
+
+      try {
+        await getJourney('missing-journey');
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).code).toBe('JOURNEY_NOT_FOUND');
+        expect((error as JourneyServiceError).statusCode).toBe(404);
+      }
+    });
+
+    it('should handle 500 Internal Server Error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({
+          detail: { error: 'SERVER_ERROR', message: 'Internal server error' },
+        }),
+      });
+
+      try {
+        await createJourney({ title: 'Test' });
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).code).toBe('SERVER_ERROR');
+        expect((error as JourneyServiceError).statusCode).toBe(500);
+      }
+    });
+
+    it('should handle 502 Bad Gateway error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        json: async () => ({
+          detail: 'Bad Gateway',
+        }),
+      });
+
+      try {
+        await listJourneys();
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).statusCode).toBe(502);
+      }
+    });
+
+    it('should handle 503 Service Unavailable error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({
+          detail: { error: 'SERVICE_UNAVAILABLE', message: 'Service temporarily unavailable' },
+        }),
+      });
+
+      try {
+        await listJourneys();
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).code).toBe('SERVICE_UNAVAILABLE');
+        expect((error as JourneyServiceError).statusCode).toBe(503);
+      }
+    });
+
+    it('should handle string error detail', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({
+          detail: 'Simple error message',
+        }),
+      });
+
+      try {
+        await createJourney({ title: '' });
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).message).toBe('Simple error message');
+        expect((error as JourneyServiceError).statusCode).toBe(400);
+      }
+    });
+
+    it('should handle empty error response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      });
+
+      try {
+        await listJourneys();
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).statusCode).toBe(500);
+      }
+    });
+
+    it('should handle timeout errors', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Timeout'));
+
+      try {
+        await listJourneys();
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(JourneyServiceError);
+        expect((error as JourneyServiceError).code).toBe('NETWORK_ERROR');
       }
     });
   });
