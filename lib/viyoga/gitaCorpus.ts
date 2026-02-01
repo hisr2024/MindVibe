@@ -8,7 +8,7 @@ export type GitaChunk = {
   text: string
 }
 
-const DEFAULT_GITA_PATHS = ['gita_core', 'data/gita/gita_verses_starter.json']
+const DEFAULT_GITA_PATHS = ['data/gita/gita_verses_complete.json', 'data/gita/gita_verses_starter.json']
 const SUPPORTED_EXTENSIONS = new Set(['.md', '.txt', '.json'])
 const MAX_CHUNK_SIZE = 900
 

@@ -97,9 +97,17 @@ One Question
 What is the smallest action you can offer today without asking it to guarantee the outcome?`
 }
 
+const OPENAI_TIMEOUT_MS = 30000 // 30 second timeout
+
 async function callOpenAI(messages: { role: string; content: string }[]) {
   const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) return null
+  if (!apiKey) {
+    console.warn('[Viyoga Chat] OPENAI_API_KEY not set, using fallback')
+    return null
+  }
+
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS)
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -114,7 +122,10 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
         temperature: 0.4,
         max_tokens: 2000,
       }),
+      signal: controller.signal,
     })
+
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -126,74 +137,126 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
     const content = payload?.choices?.[0]?.message?.content
     return typeof content === 'string' ? content : null
   } catch (error) {
-    console.error('[Viyoga Chat] OpenAI request failed:', error)
+    clearTimeout(timeoutId)
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[Viyoga Chat] OpenAI request timed out')
+    } else {
+      console.error('[Viyoga Chat] OpenAI request failed:', error)
+    }
     return null
   }
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json()
-  const message = typeof body.message === 'string' ? body.message.trim() : ''
-  const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
-  const mode = body.mode as ChatMode | undefined
+  try {
+    const body = await request.json()
+    const message = typeof body.message === 'string' ? body.message.trim() : ''
+    const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
+    const mode = body.mode as ChatMode | undefined
 
-  if (!message || !sessionId) {
-    return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
+    if (!message || !sessionId) {
+      return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
+    }
+
+    // Initialize session and history with error handling
+    try {
+      await ensureSession(sessionId)
+    } catch (storageError) {
+      console.warn('[Viyoga Chat] Storage initialization failed, continuing without history:', storageError)
+    }
+
+    let history: { role: string; content: string }[] = []
+    try {
+      const recentMessages = await getRecentMessages(sessionId, 20)
+      history = recentMessages.map(entry => ({
+        role: entry.role,
+        content: entry.content,
+      }))
+    } catch (historyError) {
+      console.warn('[Viyoga Chat] Failed to load history:', historyError)
+    }
+
+    try {
+      await appendMessage({
+        sessionId,
+        role: 'user',
+        content: message,
+        createdAt: new Date().toISOString(),
+      })
+    } catch (appendError) {
+      console.warn('[Viyoga Chat] Failed to save user message:', appendError)
+    }
+
+    // Retrieve Gita context with fallback
+    type RetrievalType = { chunks: { sourceFile: string; reference?: string; text: string; id: string }[]; confidence: number; strategy: string }
+    let retrieval: RetrievalType = { chunks: [], confidence: 0, strategy: 'fallback' }
+    try {
+      const result = await retrieveGitaChunks(message, 6)
+      retrieval = result
+      if (result.confidence < 0.15 || result.chunks.length < 2) {
+        retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
+      }
+    } catch (retrievalError) {
+      console.error('[Viyoga Chat] Retrieval failed:', retrievalError)
+      // Continue with empty chunks - fallback response will be used
+    }
+
+    const contextBlock = buildContextBlock(retrieval.chunks)
+
+    // Generate response with fallback
+    const responseText =
+      (await callOpenAI([
+        { role: 'system', content: VIYOGA_SYSTEM_PROMPT },
+        ...history,
+        { role: 'user', content: message },
+        { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
+      ])) || buildFallbackTransmission(message, retrieval.chunks)
+
+    const sections = parseTransmissionSections(responseText)
+    if (!Object.keys(sections).length) {
+      sections.gita_core_transmission = responseText
+    }
+    const citations = retrieval.chunks.map(chunk => ({
+      source_file: chunk.sourceFile,
+      reference_if_any: chunk.reference,
+      chunk_id: chunk.id,
+    }))
+
+    // Save assistant response (non-blocking)
+    try {
+      await appendMessage({
+        sessionId,
+        role: 'assistant',
+        content: responseText,
+        createdAt: new Date().toISOString(),
+        citations,
+      })
+    } catch (saveError) {
+      console.warn('[Viyoga Chat] Failed to save assistant message:', saveError)
+    }
+
+    return NextResponse.json({
+      assistant: responseText,
+      sections,
+      citations,
+      retrieval: {
+        strategy: retrieval.strategy,
+        confidence: retrieval.confidence,
+      },
+    })
+  } catch (error) {
+    console.error('[Viyoga Chat] Unexpected error:', error)
+    // Return a graceful fallback response instead of 500
+    const fallbackResponse = buildFallbackTransmission('your concern', [])
+    const fallbackSections = parseTransmissionSections(fallbackResponse)
+    return NextResponse.json({
+      assistant: fallbackResponse,
+      sections: fallbackSections,
+      citations: [],
+      retrieval: {
+        strategy: 'error-fallback',
+        confidence: 0,
+      },
+    })
   }
-
-  await ensureSession(sessionId)
-  const history = await getRecentMessages(sessionId, 20)
-  await appendMessage({
-    sessionId,
-    role: 'user',
-    content: message,
-    createdAt: new Date().toISOString(),
-  })
-
-  let retrieval = await retrieveGitaChunks(message, 6)
-  if (retrieval.confidence < 0.15 || retrieval.chunks.length < 2) {
-    retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
-  }
-
-  const contextBlock = buildContextBlock(retrieval.chunks)
-  const historyMessages = history.map(entry => ({
-    role: entry.role,
-    content: entry.content,
-  }))
-
-  const responseText =
-    (await callOpenAI([
-      { role: 'system', content: VIYOGA_SYSTEM_PROMPT },
-      ...historyMessages,
-      { role: 'user', content: message },
-      { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
-    ])) || buildFallbackTransmission(message, retrieval.chunks)
-
-  const sections = parseTransmissionSections(responseText)
-  if (!Object.keys(sections).length) {
-    sections.gita_core_transmission = responseText
-  }
-  const citations = retrieval.chunks.map(chunk => ({
-    source_file: chunk.sourceFile,
-    reference_if_any: chunk.reference,
-    chunk_id: chunk.id,
-  }))
-
-  await appendMessage({
-    sessionId,
-    role: 'assistant',
-    content: responseText,
-    createdAt: new Date().toISOString(),
-    citations,
-  })
-
-  return NextResponse.json({
-    assistant: responseText,
-    sections,
-    citations,
-    retrieval: {
-      strategy: retrieval.strategy,
-      confidence: retrieval.confidence,
-    },
-  })
 }
