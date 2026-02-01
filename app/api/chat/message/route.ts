@@ -35,7 +35,7 @@ const FALLBACK_RESPONSES = [
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message, language = 'en', context } = body
+    const { message, language = 'en', context, session_id, conversation_history } = body
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -50,6 +50,13 @@ export async function POST(request: NextRequest) {
       .replace(/\\/g, '')
       .slice(0, 2000)
 
+    // Sanitize conversation history if provided
+    const sanitizedHistory = conversation_history?.map((msg: { role: string; content: string; timestamp: string }) => ({
+      role: msg.role,
+      content: msg.content?.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000) || '',
+      timestamp: msg.timestamp
+    })) || []
+
     try {
       // Call the backend chat endpoint
       const response = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -63,6 +70,8 @@ export async function POST(request: NextRequest) {
           message: sanitizedMessage,
           language,
           context,
+          session_id,
+          conversation_history: sanitizedHistory,
         }),
       })
 

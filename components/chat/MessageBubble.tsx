@@ -213,7 +213,10 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
                 </span>
               )}
               <div className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">
-                {isAISummary ? 'Key Insights' : 'Quick View'}
+                {viewMode === 'summary'
+                  ? (isAISummary ? 'Key Insights' : 'Quick Summary')
+                  : 'Wisdom View - In Depth Understanding'
+                }
               </div>
             </div>
             <button
@@ -232,7 +235,10 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   </svg>
-                  Intelligently summarized from the full response
+                  {viewMode === 'summary'
+                    ? 'Intelligently summarized from the full wisdom'
+                    : 'Full in-depth understanding from ancient wisdom'
+                  }
                 </div>
               )}
             </div>
