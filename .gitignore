@@ -79,3 +79,9 @@ mobile/ios/**/*.xcworkspace
 *.db
 *.sqlite
 *.sqlite3
+
+# Runtime data stores (auto-generated)
+data/viyoga/store.json
+data/viyoga/gita_index.json
+data/relationship_compass/gita_index.sqlite
+data/relationship_compass/store.json

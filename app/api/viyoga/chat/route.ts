@@ -76,7 +76,7 @@ function parseTransmissionSections(text: string) {
 }
 
 function buildFallbackTransmission(message: string, chunks: { text: string }[]) {
-  const contextSnippet = chunks[0]?.text || 'I don’t have that in my Gita repository context yet—let me fetch it.'
+  const contextSnippet = chunks[0]?.text || "I don't have that in my Gita repository context yet - let me fetch it."
 
   return `Sacred Recognition
 I hear the weight in "${message}". Your concern is valid, and you are not alone in carrying it.
@@ -97,9 +97,17 @@ One Question
 What is the smallest action you can offer today without asking it to guarantee the outcome?`
 }
 
+const OPENAI_TIMEOUT_MS = 30000 // 30 second timeout
+
 async function callOpenAI(messages: { role: string; content: string }[]) {
   const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) return null
+  if (!apiKey) {
+    console.warn('[Viyoga Chat] OPENAI_API_KEY not set, using fallback')
+    return null
+  }
+
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS)
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -114,7 +122,10 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
         temperature: 0.4,
         max_tokens: 2000,
       }),
+      signal: controller.signal,
     })
+
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -126,12 +137,18 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
     const content = payload?.choices?.[0]?.message?.content
     return typeof content === 'string' ? content : null
   } catch (error) {
-    console.error('[Viyoga Chat] OpenAI request failed:', error)
+    clearTimeout(timeoutId)
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[Viyoga Chat] OpenAI request timed out')
+    } else {
+      console.error('[Viyoga Chat] OpenAI request failed:', error)
+    }
     return null
   }
 }
 
 export async function POST(request: NextRequest) {
+  // Parse request body with explicit error handling
   let body: Record<string, unknown>
   try {
     body = await request.json()
@@ -148,39 +165,57 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
   }
 
-  // Storage operations - graceful degradation on serverless platforms
-  let history: { role: string; content: string }[] = []
   try {
-    await ensureSession(sessionId)
-    history = await getRecentMessages(sessionId, 20)
-    await appendMessage({
-      sessionId,
-      role: 'user',
-      content: message,
-      createdAt: new Date().toISOString(),
-    })
-  } catch (storageError) {
-    // Storage may fail on serverless - continue without history
-    console.warn('[Viyoga Chat] Storage unavailable (serverless?), continuing without history:', storageError)
-  }
+    // Initialize session and history with error handling
+    try {
+      await ensureSession(sessionId)
+    } catch (storageError) {
+      console.warn('[Viyoga Chat] Storage initialization failed, continuing without history:', storageError)
+    }
 
-  // Main processing with comprehensive error handling
-  try {
-    let retrieval = await retrieveGitaChunks(message, 6)
-    if (retrieval.confidence < 0.15 || retrieval.chunks.length < 2) {
-      retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
+    let history: { role: string; content: string }[] = []
+    try {
+      const recentMessages = await getRecentMessages(sessionId, 20)
+      history = recentMessages.map(entry => ({
+        role: entry.role,
+        content: entry.content,
+      }))
+    } catch (historyError) {
+      console.warn('[Viyoga Chat] Failed to load history:', historyError)
+    }
+
+    try {
+      await appendMessage({
+        sessionId,
+        role: 'user',
+        content: message,
+        createdAt: new Date().toISOString(),
+      })
+    } catch (appendError) {
+      console.warn('[Viyoga Chat] Failed to save user message:', appendError)
+    }
+
+    // Retrieve Gita context with fallback
+    type RetrievalType = { chunks: { sourceFile: string; reference?: string; text: string; id: string }[]; confidence: number; strategy: string }
+    let retrieval: RetrievalType = { chunks: [], confidence: 0, strategy: 'fallback' }
+    try {
+      const result = await retrieveGitaChunks(message, 6)
+      retrieval = result
+      if (result.confidence < 0.15 || result.chunks.length < 2) {
+        retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
+      }
+    } catch (retrievalError) {
+      console.error('[Viyoga Chat] Retrieval failed:', retrievalError)
+      // Continue with empty chunks - fallback response will be used
     }
 
     const contextBlock = buildContextBlock(retrieval.chunks)
-    const historyMessages = history.map(entry => ({
-      role: entry.role,
-      content: entry.content,
-    }))
 
+    // Generate response with fallback
     const responseText =
       (await callOpenAI([
         { role: 'system', content: VIYOGA_SYSTEM_PROMPT },
-        ...historyMessages,
+        ...history,
         { role: 'user', content: message },
         { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
       ])) || buildFallbackTransmission(message, retrieval.chunks)
@@ -195,7 +230,7 @@ export async function POST(request: NextRequest) {
       chunk_id: chunk.id,
     }))
 
-    // Save assistant response - ignore errors on serverless
+    // Save assistant response (non-blocking)
     try {
       await appendMessage({
         sessionId,
@@ -205,7 +240,7 @@ export async function POST(request: NextRequest) {
         citations,
       })
     } catch (saveError) {
-      console.warn('[Viyoga Chat] Failed to save assistant response:', saveError)
+      console.warn('[Viyoga Chat] Failed to save assistant message:', saveError)
     }
 
     return NextResponse.json({
@@ -217,22 +252,19 @@ export async function POST(request: NextRequest) {
         confidence: retrieval.confidence,
       },
     })
-  } catch (processingError) {
-    console.error('[Viyoga Chat] Processing error:', processingError)
-
-    // Return fallback response even on error
-    const fallbackResponse = buildFallbackTransmission(message, [])
+  } catch (error) {
+    console.error('[Viyoga Chat] Unexpected error:', error)
+    // Return a graceful fallback response instead of 500
+    const fallbackResponse = buildFallbackTransmission('your concern', [])
     const fallbackSections = parseTransmissionSections(fallbackResponse)
-
     return NextResponse.json({
       assistant: fallbackResponse,
       sections: fallbackSections,
       citations: [],
       retrieval: {
-        strategy: 'fallback',
+        strategy: 'error-fallback',
         confidence: 0,
       },
-      _error: 'Processing failed, using fallback response',
     })
   }
 }
