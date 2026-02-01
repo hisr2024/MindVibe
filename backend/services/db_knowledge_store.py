@@ -149,7 +149,7 @@ class DatabaseKnowledgeStore:
             primary_domain=primary_domain,
             secondary_domains=secondary_domains,
             mental_health_applications=mental_health_applications,
-            metadata=metadata or {},
+            extra_metadata=metadata or {},
             learned_at=datetime.utcnow(),
         )
 
@@ -548,7 +548,7 @@ class DatabaseKnowledgeStore:
             url=url,
             fetch_interval_seconds=fetch_interval_seconds,
             credibility_rating=credibility_rating,
-            metadata=metadata or {},
+            extra_metadata=metadata or {},
         )
 
         try:

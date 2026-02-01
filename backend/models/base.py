@@ -675,8 +675,8 @@ class LearnedWisdom(SoftDeleteMixin, Base):
         TIMESTAMP(timezone=True), nullable=True
     )
 
-    # Metadata
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Extra metadata (named extra_metadata because 'metadata' is reserved by SQLAlchemy)
+    extra_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     learned_at: Mapped[datetime.datetime] = mapped_column(
@@ -781,8 +781,8 @@ class ContentSourceRegistry(SoftDeleteMixin, Base):
         Integer, nullable=False, default=5
     )  # 1-10 scale
 
-    # Metadata
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Extra metadata (named extra_metadata because 'metadata' is reserved by SQLAlchemy)
+    extra_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime.datetime] = mapped_column(

@@ -695,7 +695,7 @@ class KnowledgeStore:
                         learned_at=datetime.fromisoformat(item["learned_at"]),
                         usage_count=item.get("usage_count", 0),
                         last_used=datetime.fromisoformat(item["last_used"]) if item.get("last_used") else None,
-                        metadata=item.get("metadata", {}),
+                        extra_metadata=item.get("extra_metadata", item.get("metadata", {})),
                     )
                     for item in data
                 }
@@ -777,7 +777,7 @@ class KnowledgeStore:
                     "learned_at": w.learned_at.isoformat(),
                     "usage_count": w.usage_count,
                     "last_used": w.last_used.isoformat() if w.last_used else None,
-                    "metadata": w.metadata,
+                    "extra_metadata": w.extra_metadata,
                 }
                 for w in self._wisdom_cache.values()
             ]
