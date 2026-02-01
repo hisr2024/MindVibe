@@ -18,6 +18,18 @@ import type {
 } from '@/types/journey.types'
 import { getStatusLabel, getStatusColor } from '@/types/journey.types'
 
+/**
+ * Check if user has any authentication tokens stored.
+ * This is a quick client-side check - actual auth verification happens on API call.
+ */
+function hasAuthToken(): boolean {
+  if (typeof window === 'undefined') return false
+  const token = localStorage.getItem('mindvibe_access_token') ||
+    localStorage.getItem('access_token') ||
+    localStorage.getItem('mindvibe_auth_user')
+  return !!token
+}
+
 // Animation variants
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -205,6 +217,7 @@ export default function JourneysListClient() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isAuthError, setIsAuthError] = useState(false)
   const [statusFilter, setStatusFilter] = useState<JourneyStatus | ''>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<JourneySortField>('updated_at')
@@ -212,9 +225,18 @@ export default function JourneysListClient() {
 
   // Load journeys
   const loadJourneys = useCallback(async () => {
+    // Quick check for auth token before making API call
+    if (!hasAuthToken()) {
+      setLoading(false)
+      setIsAuthError(true)
+      setError('Please sign in to view your journeys.')
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
+      setIsAuthError(false)
 
       const result = await journeyService.list({
         status: statusFilter || undefined,
@@ -227,10 +249,25 @@ export default function JourneysListClient() {
       setJourneys(result.items)
       setTotal(result.total)
     } catch (err) {
-      const message = err instanceof JourneyServiceError
-        ? err.message
-        : 'Failed to load journeys. Please try again.'
-      setError(message)
+      if (err instanceof JourneyServiceError) {
+        // Handle authentication errors specifically
+        if (err.isAuthError()) {
+          setIsAuthError(true)
+          setError('Please sign in to view your journeys.')
+        } else if (err.isForbiddenError()) {
+          setError('You do not have permission to access these journeys.')
+        } else if (err.isServerError()) {
+          setError('Our servers are experiencing issues. Please try again in a moment.')
+        } else {
+          setError(err.message)
+        }
+      } else {
+        setError('Failed to load journeys. Please try again.')
+      }
+      // Don't log auth errors to console - they're expected for unauthenticated users
+      if (!(err instanceof JourneyServiceError && err.isAuthError())) {
+        console.warn('[JourneysListClient] Error loading journeys:', err)
+      }
     } finally {
       setLoading(false)
     }
@@ -329,18 +366,31 @@ export default function JourneysListClient() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-red-500/30 bg-red-900/20 p-4 text-center text-red-400"
+            className={`rounded-xl border p-4 text-center ${
+              isAuthError
+                ? 'border-amber-500/30 bg-amber-900/20 text-amber-400'
+                : 'border-red-500/30 bg-red-900/20 text-red-400'
+            }`}
           >
-            {error}
-            <button
-              onClick={() => {
-                setError(null)
-                loadJourneys()
-              }}
-              className="ml-2 underline hover:text-red-300"
-            >
-              Retry
-            </button>
+            <p className="mb-3">{error}</p>
+            {isAuthError ? (
+              <Link
+                href="/onboarding"
+                className="inline-block rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-black hover:bg-amber-400"
+              >
+                Sign In
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  setError(null)
+                  loadJourneys()
+                }}
+                className="underline hover:text-red-300"
+              >
+                Retry
+              </button>
+            )}
           </motion.div>
         )}
 
