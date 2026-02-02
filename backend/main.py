@@ -82,15 +82,15 @@ elif DATABASE_URL.startswith("postgresql://"):
 def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
     """Build asyncpg connect args to honor sslmode/ssl query params.
 
-    Render Postgres instances require TLS by default.  When using asyncpg, the
-    ``sslmode=require`` query parameter from the connection string is ignored
-    unless we translate it into the ``ssl`` flag expected by asyncpg.  This
-    helper preserves explicit ``sslmode``/``ssl`` values while defaulting to a
-    secure connection with full certificate verification.
+    Render Postgres instances require TLS by default but use self-signed
+    certificates. When using asyncpg, the ``sslmode=require`` query parameter
+    from the connection string is ignored unless we translate it into the
+    ``ssl`` flag expected by asyncpg.
 
-    Security Note: By default, this uses verify-full mode with certificate
-    verification enabled. Only use require-no-verify for development or when
-    connecting to databases with self-signed certificates.
+    Auto-detection:
+    - Render environment: defaults to 'require' (SSL without cert verification)
+    - Other environments: defaults to 'require' for compatibility
+    - Override with DB_SSL_MODE environment variable
     """
     import ssl as ssl_module
     from urllib.parse import parse_qs, urlparse
@@ -102,9 +102,14 @@ def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
 
     ssl_pref = os.getenv("DB_SSL_MODE") or query_params.get("sslmode", [None])[0] or query_params.get("ssl", [None])[0]
 
-    # Default to verify-full for maximum security
+    # Auto-detect Render environment (Render sets RENDER=true)
+    is_render = os.getenv("RENDER", "").lower() == "true"
+
+    # Default to 'require' for Render (self-signed certs) and general compatibility
     if not ssl_pref:
-        ssl_pref = "verify-full"
+        ssl_pref = "require"
+        if is_render:
+            logger.info("Render environment detected - using SSL without certificate verification")
 
     ssl_pref = ssl_pref.lower()
 
