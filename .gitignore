@@ -83,5 +83,7 @@ mobile/ios/**/*.xcworkspace
 # Runtime data stores (auto-generated)
 data/viyoga/store.json
 data/viyoga/gita_index.json
-data/relationship_compass/gita_index.sqlite
 data/relationship_compass/store.json
+
+# Allow Relationship Compass index (required for production)
+!data/relationship_compass/gita_index.sqlite
