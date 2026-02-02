@@ -28,6 +28,9 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
 
     Render PostgreSQL uses self-signed certificates, so we need to
     disable certificate verification while still using SSL encryption.
+
+    IMPORTANT: On Render, we ALWAYS disable certificate verification
+    because Render uses self-signed certificates that fail verification.
     """
     parsed = urlparse(db_url)
     query_params = parse_qs(parsed.query)
@@ -38,23 +41,30 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
         query_params.get("ssl", [None])[0]
     )
 
-    # Auto-detect Render environment
+    # Auto-detect Render environment (Render sets RENDER=true)
     is_render = os.getenv("RENDER", "").lower() == "true"
 
-    # Default to 'require' (SSL without cert verification) for Render compatibility
+    # CRITICAL: On Render, ALWAYS disable certificate verification
+    # Render uses self-signed certificates that will fail verification
+    if is_render:
+        logger.info("Render environment detected - forcing SSL without certificate verification")
+        ssl_context = ssl_module.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl_module.CERT_NONE
+        return {"ssl": ssl_context}
+
+    # Default to 'require' (SSL without cert verification) for compatibility
     if not ssl_pref:
         ssl_pref = "require"
 
     ssl_pref = ssl_pref.lower()
 
-    # Full verification
+    # Full verification (only for non-Render environments with proper certs)
     if ssl_pref in {"verify-ca", "verify-full"}:
         return {"ssl": ssl_module.create_default_context()}
 
     # Require SSL but skip certificate verification (for self-signed certs)
     if ssl_pref in {"require", "required", "require-no-verify", "true", "1"}:
-        if is_render:
-            logger.info("Render environment: Using SSL without certificate verification")
         ssl_context = ssl_module.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl_module.CERT_NONE
