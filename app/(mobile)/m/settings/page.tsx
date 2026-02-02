@@ -103,12 +103,7 @@ function SettingRow({
         }
       }}
       disabled={disabled}
-      className={`
-        w-full flex items-center gap-3 px-4 py-3
-        border-b border-white/[0.04] last:border-b-0
-        ${disabled ? 'opacity-50' : ''}
-        ${danger ? 'text-red-400' : 'text-white'}
-      `}
+      className={`w-full flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] last:border-b-0 ${disabled ? 'opacity-50' : ''} ${danger ? 'text-red-400' : 'text-white'}`}
     >
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${danger ? 'bg-red-500/10' : 'bg-white/[0.06]'}`}>
         {icon}
@@ -150,11 +145,7 @@ function ToggleSwitch({ enabled, onChange, disabled = false }: ToggleSwitchProps
         }
       }}
       disabled={disabled}
-      className={`
-        relative w-12 h-7 rounded-full transition-colors
-        ${enabled ? 'bg-orange-500' : 'bg-white/[0.1]'}
-        ${disabled ? 'opacity-50' : ''}
-      `}
+      className={`relative w-12 h-7 rounded-full transition-colors ${enabled ? 'bg-orange-500' : 'bg-white/[0.1]'} ${disabled ? 'opacity-50' : ''}`}
     >
       <motion.div
         animate={{ x: enabled ? 22 : 2 }}
@@ -460,11 +451,7 @@ export default function MobileSettingsPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="
-                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50
-                w-[90%] max-w-sm p-6 rounded-2xl
-                bg-[#1a1a1f] border border-white/[0.08]
-              "
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-white/[0.08]"
             >
               <div className="text-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3">
@@ -479,20 +466,14 @@ export default function MobileSettingsPage() {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="
-                    flex-1 py-3 rounded-xl
-                    bg-white/[0.06] text-white font-medium
-                  "
+                  className="flex-1 py-3 rounded-xl bg-white/[0.06] text-white font-medium"
                 >
                   Cancel
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="
-                    flex-1 py-3 rounded-xl
-                    bg-orange-500 text-white font-medium
-                  "
+                  className="flex-1 py-3 rounded-xl bg-orange-500 text-white font-medium"
                 >
                   Log Out
                 </motion.button>
@@ -517,11 +498,7 @@ export default function MobileSettingsPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="
-                fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50
-                w-[90%] max-w-sm p-6 rounded-2xl
-                bg-[#1a1a1f] border border-red-500/20
-              "
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-red-500/20"
             >
               <div className="text-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
@@ -538,11 +515,7 @@ export default function MobileSettingsPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowDeleteConfirm(false)}
                   disabled={isDeleting}
-                  className="
-                    flex-1 py-3 rounded-xl
-                    bg-white/[0.06] text-white font-medium
-                    disabled:opacity-50
-                  "
+                  className="flex-1 py-3 rounded-xl bg-white/[0.06] text-white font-medium disabled:opacity-50"
                 >
                   Cancel
                 </motion.button>
@@ -550,12 +523,7 @@ export default function MobileSettingsPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleDeleteAccount}
                   disabled={isDeleting}
-                  className="
-                    flex-1 py-3 rounded-xl
-                    bg-red-500 text-white font-medium
-                    disabled:opacity-50
-                    flex items-center justify-center gap-2
-                  "
+                  className="flex-1 py-3 rounded-xl bg-red-500 text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isDeleting ? (
                     <>

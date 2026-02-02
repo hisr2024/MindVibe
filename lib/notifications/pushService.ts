@@ -261,7 +261,7 @@ class PushNotificationService {
       // Subscribe
       const subscription = await this.swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey,
+        applicationServerKey: applicationServerKey as BufferSource,
       })
 
       this.state.isSubscribed = true
@@ -366,14 +366,14 @@ class PushNotificationService {
           body: payload.body,
           icon: payload.icon || '/icons/icon-192x192.png',
           badge: payload.badge || '/icons/badge-72x72.png',
-          image: payload.image,
           tag: payload.tag,
           data: payload.data,
           actions: payload.actions,
           requireInteraction: payload.requireInteraction,
           silent: payload.silent,
           timestamp: payload.timestamp,
-        })
+          ...(payload.image && { image: payload.image }),
+        } as NotificationOptions)
       } else {
         // Fallback to native Notification API
         new Notification(payload.title, {
@@ -385,7 +385,7 @@ class PushNotificationService {
           requireInteraction: payload.requireInteraction,
           silent: payload.silent,
           timestamp: payload.timestamp,
-        })
+        } as NotificationOptions)
       }
     } catch (error) {
       console.error('[PushService] Failed to show notification:', error)

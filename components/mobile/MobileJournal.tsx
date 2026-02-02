@@ -108,7 +108,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
     ref
   ) {
     const { triggerHaptic } = useHapticFeedback()
-    const { isKeyboardVisible, keyboardHeight } = useKeyboardVisibility()
+    const { isVisible: isKeyboardVisible, height: keyboardHeight } = useKeyboardVisibility()
     const { language } = useLanguage()
 
     const [title, setTitle] = useState(initialEntry?.title || '')
@@ -133,9 +133,11 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
       stopListening,
     } = useVoiceInput({
       language,
-      onResult: (text) => {
-        setBody((prev) => prev + (prev ? ' ' : '') + text)
-        triggerHaptic('selection')
+      onTranscript: (text, isFinal) => {
+        if (isFinal) {
+          setBody((prev) => prev + (prev ? ' ' : '') + text)
+          triggerHaptic('selection')
+        }
       },
     })
 
@@ -176,8 +178,8 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
       queueOfflineOperation(
         'journal',
         initialEntry?.id ? 'update' : 'create',
-        entry.id,
-        entry
+        entry.id as string,
+        entry as unknown as Record<string, unknown>
       )
 
       setSaveStatus('saved')

@@ -186,13 +186,7 @@ export default function MobileJourneysPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search journeys..."
-                className="
-                  w-full px-4 py-3 mb-4 rounded-xl
-                  bg-white/[0.06] border border-white/[0.08]
-                  text-white text-sm
-                  placeholder:text-slate-500
-                  outline-none focus:border-orange-500/40
-                "
+                className="w-full px-4 py-3 mb-4 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white text-sm placeholder:text-slate-500 outline-none focus:border-orange-500/40"
                 autoFocus
               />
             </motion.div>
@@ -211,14 +205,7 @@ export default function MobileJourneysPage() {
                   key={category.id}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleCategoryChange(category.id)}
-                  className={`
-                    flex items-center gap-2 px-4 py-2 rounded-xl
-                    whitespace-nowrap transition-all
-                    ${isSelected
-                      ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300'
-                      : 'bg-white/[0.04] border border-white/[0.08] text-slate-400'
-                    }
-                  `}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap transition-all ${isSelected ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300' : 'bg-white/[0.04] border border-white/[0.08] text-slate-400'}`}
                 >
                   <Icon className="w-4 h-4" />
                   <span className="text-sm font-medium">{category.label}</span>
@@ -238,11 +225,7 @@ export default function MobileJourneysPage() {
                   key={journey.id}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleJourneyPress(journey.id)}
-                  className="
-                    w-full p-4 rounded-2xl text-left
-                    bg-gradient-to-br from-orange-500/10 to-amber-500/5
-                    border border-orange-500/20
-                  "
+                  className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20"
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
@@ -312,11 +295,7 @@ export default function MobileJourneysPage() {
                   transition={{ delay: index * 0.05 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleJourneyPress(journey.id)}
-                  className="
-                    w-full p-4 rounded-2xl text-left
-                    bg-white/[0.02] border border-white/[0.06]
-                    hover:bg-white/[0.04]
-                  "
+                  className="w-full p-4 rounded-2xl text-left bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04]"
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center flex-shrink-0">
@@ -345,10 +324,7 @@ export default function MobileJourneysPage() {
                           <Star className="w-3 h-3 text-amber-400" />
                           <span>{journey.rating.toFixed(1)}</span>
                         </div>
-                        <span className={`
-                          text-[10px] px-2 py-0.5 rounded-full border
-                          ${difficultyColors[journey.difficulty]}
-                        `}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${difficultyColors[journey.difficulty]}`}>
                           {journey.difficulty}
                         </span>
                       </div>
