@@ -4,23 +4,24 @@ import os
 import sys
 from pathlib import Path
 
+# Add parent directory to sys.path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from backend.models import Base, GitaVerse
-
-# Add parent directory to sys.path for imports
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 # Configure DATABASE_URL from environment variable with Render.com compatibility
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://")
+    DATABASE_URL = normalize_database_url(DATABASE_URL)
 else:
     DATABASE_URL = "postgresql+asyncpg://navi:navi@db:5432/navi"
 
-# Create async engine and session maker
-engine = create_async_engine(DATABASE_URL)
+# Create async engine and session maker with SSL support
+engine = create_ssl_engine(DATABASE_URL)
 AsyncSessionLocal = async_sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False
 )

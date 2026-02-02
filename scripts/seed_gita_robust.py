@@ -11,12 +11,13 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from backend.models import GitaVerse
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -98,13 +99,10 @@ async def seed_all_verses():
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         raise ValueError("DATABASE_URL environment variable not set")
-    
-    # Convert postgres:// to postgresql+asyncpg://
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    
-    # Create engine and session
-    engine = create_async_engine(database_url, echo=False)
+
+    # Normalize URL for asyncpg and create SSL-enabled engine
+    database_url = normalize_database_url(database_url)
+    engine = create_ssl_engine(database_url)
     async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
     print("=" * 70)

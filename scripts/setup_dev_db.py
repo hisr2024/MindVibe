@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 
 # Import models AFTER setting up the path
 from backend import models
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 
 async def main():
@@ -37,16 +38,16 @@ async def main():
     print("=" * 60)
     print(f"\nDatabase URL: {database_url}")
 
-    # Create engine
-    connect_args = {}
+    # Create engine with SSL support for PostgreSQL
     if "sqlite" in database_url:
-        connect_args["check_same_thread"] = False
-
-    engine = create_async_engine(
-        database_url,
-        echo=False,
-        connect_args=connect_args,
-    )
+        engine = create_async_engine(
+            database_url,
+            echo=False,
+            connect_args={"check_same_thread": False},
+        )
+    else:
+        database_url = normalize_database_url(database_url)
+        engine = create_ssl_engine(database_url)
 
     print("\nCreating tables from SQLAlchemy models...")
 

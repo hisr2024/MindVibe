@@ -16,11 +16,11 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from backend.models import WisdomVerse
 from backend.services.domain_mapper import DomainMapper
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 
 async def migrate_verse_domains() -> None:
@@ -31,9 +31,10 @@ async def migrate_verse_domains() -> None:
         "sqlite+aiosqlite:///./mindvibe.db",
     )
 
-    # Create async engine
-    engine = create_async_engine(database_url, echo=True)
-    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    # Normalize URL and create SSL-enabled engine
+    database_url = normalize_database_url(database_url)
+    engine = create_ssl_engine(database_url, echo=True)
+    async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     print("Starting domain migration for WisdomVerse records...")
     print(f"Database URL: {database_url}")

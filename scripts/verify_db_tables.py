@@ -2,8 +2,14 @@
 
 import asyncio
 import os
+import sys
+from pathlib import Path
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 
 async def verify_tables():
@@ -11,11 +17,10 @@ async def verify_tables():
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         raise ValueError("DATABASE_URL environment variable not set")
-    
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    
-    engine = create_async_engine(database_url)
+
+    database_url = normalize_database_url(database_url)
+
+    engine = create_ssl_engine(database_url)
     
     async with engine.connect() as conn:
         # List all tables

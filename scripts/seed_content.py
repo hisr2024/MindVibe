@@ -15,12 +15,13 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import insert, select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from backend.models import Base, ContentPack
+from scripts.db_utils import create_ssl_engine
 
 DATA_EN = {
     "version": 1,
@@ -89,7 +90,7 @@ DATA_HI = {
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql+asyncpg://mindvibe:password@db:5432/mindvibe"
 )
-engine = create_async_engine(DATABASE_URL, echo=False)
+engine = create_ssl_engine(DATABASE_URL)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 

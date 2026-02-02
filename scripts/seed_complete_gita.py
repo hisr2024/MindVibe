@@ -37,12 +37,13 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import insert, select, text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from backend.models import Base, GitaVerse
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 # Data file paths
 DATA_DIR = Path(__file__).parent.parent / "data" / "gita"
@@ -56,13 +57,10 @@ RAPID_API_HOST = "bhagavad-gita3.p.rapidapi.com"
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 
-# Fix Render.com DATABASE_URL to use asyncpg
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL.startswith("postgresql://") and "asyncpg" not in DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+# Normalize URL for asyncpg
+DATABASE_URL = normalize_database_url(DATABASE_URL)
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+engine = create_ssl_engine(DATABASE_URL)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 # Chapter metadata (18 chapters with verse counts)

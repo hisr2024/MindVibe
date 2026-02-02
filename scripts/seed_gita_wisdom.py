@@ -11,17 +11,15 @@ This script populates the database with:
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
-# Database configuration
-import os
 
 from backend.models import (
     Base,
@@ -32,14 +30,12 @@ from backend.models import (
     GitaVerse,
     GitaVerseKeyword,
 )
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 
-# Fix Render.com DATABASE_URL to use asyncpg
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL.startswith("postgresql://") and "asyncpg" not in DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+# Normalize URL for asyncpg
+DATABASE_URL = normalize_database_url(DATABASE_URL)
 
 
 # Authentic sources data
@@ -373,8 +369,8 @@ async def main():
     print("=" * 60)
     print()
 
-    # Create async engine
-    engine = create_async_engine(DATABASE_URL, echo=False)
+    # Create async engine with SSL support
+    engine = create_ssl_engine(DATABASE_URL)
 
     # Create tables
     async with engine.begin() as conn:

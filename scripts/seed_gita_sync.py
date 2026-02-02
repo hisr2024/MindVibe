@@ -1,5 +1,5 @@
 """
-Synchronous Gita verse seeding script - Safe for Render. com
+Synchronous Gita verse seeding script - Safe for Render.com
 Seeds all 700 verses from data/gita/gita_verses_complete.json
 """
 import json
@@ -13,28 +13,30 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from backend.models import GitaVerse
+from scripts.db_utils import get_sync_ssl_connect_args
 
 
 def seed_gita_verses():
     """Seed all 700 Gita verses from JSON file."""
-    
+
     print("🌱 Starting Gita Verse Seeding...")
     print("=" * 70)
-    
+
     # Get database URL
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print("❌ ERROR: DATABASE_URL environment variable not set")
         sys.exit(1)
-    
+
     # Convert postgres:// to postgresql:// for SQLAlchemy
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-    
+
     print(f"✅ Database URL configured")
-    
-    # Create engine and session
-    engine = create_engine(db_url, echo=False)
+
+    # Create engine with SSL support
+    ssl_args = get_sync_ssl_connect_args(db_url)
+    engine = create_engine(db_url, echo=False, connect_args=ssl_args)
     Session = sessionmaker(bind=engine)
     
     # Load JSON file

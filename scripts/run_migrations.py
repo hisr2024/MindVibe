@@ -21,9 +21,8 @@ sys.path.insert(0, str(project_root))
 from dotenv import load_dotenv
 load_dotenv(project_root / ".env")
 
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from backend.core.migrations import apply_sql_migrations, get_migration_status
+from scripts.db_utils import create_ssl_engine, get_ssl_connect_args, normalize_database_url
 
 
 async def main():
@@ -33,16 +32,17 @@ async def main():
     print(f"Database URL: {database_url[:50]}...")
     print("-" * 60)
 
-    # Create engine
-    connect_args = {}
+    # Create engine with SSL support for PostgreSQL
     if "sqlite" in database_url:
-        connect_args["check_same_thread"] = False
-
-    engine = create_async_engine(
-        database_url,
-        echo=False,
-        connect_args=connect_args,
-    )
+        from sqlalchemy.ext.asyncio import create_async_engine
+        engine = create_async_engine(
+            database_url,
+            echo=False,
+            connect_args={"check_same_thread": False},
+        )
+    else:
+        database_url = normalize_database_url(database_url)
+        engine = create_ssl_engine(database_url)
 
     # Check current status
     print("\nChecking migration status...")

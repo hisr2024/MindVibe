@@ -21,11 +21,12 @@ from typing import Any, Tuple, List
 from datetime import datetime
 
 from sqlalchemy import select, func, text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 import os
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from backend.models import Base, GitaVerse
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 # Canonical verse counts per chapter (as per authentic Bhagavad Gita)
 CANONICAL_COUNTS = {
@@ -237,13 +238,9 @@ async def seed_verses(verses: list) -> Tuple[int, int, int]:
     # Setup database connection
     database_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
     
-    # Fix Render.com DATABASE_URL
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    
-    engine = create_async_engine(database_url, echo=False)
+    # Normalize URL and create SSL-enabled engine
+    database_url = normalize_database_url(database_url)
+    engine = create_ssl_engine(database_url)
     Session = async_sessionmaker(engine, expire_on_commit=False)
     
     seeded = 0
@@ -341,12 +338,12 @@ async def verify_database() -> dict:
     
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    
-    engine = create_async_engine(database_url, echo=False)
+
+    # Normalize URL and create SSL-enabled engine
+    database_url = normalize_database_url(database_url)
+    engine = create_ssl_engine(database_url)
     Session = async_sessionmaker(engine, expire_on_commit=False)
-    
+
     print("\n" + "="*60)
     print("✅ VERIFICATION PHASE")
     print("="*60)
