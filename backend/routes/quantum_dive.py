@@ -564,16 +564,49 @@ async def _get_daily_analyses(
     )
     analyses = result.scalars().all()
 
-    return [
-        {
+    daily_data = []
+    for a in analyses:
+        # Extract emotions from insights or emotional_summary
+        emotions = []
+        concerns = []
+
+        # Parse insights for emotions and concerns
+        insights = a.insights or []
+        if isinstance(insights, list):
+            for insight in insights:
+                if isinstance(insight, dict):
+                    # Look for emotion indicators
+                    insight_text = str(insight.get("content", "") or insight.get("text", "")).lower()
+                    if any(e in insight_text for e in ["sad", "angry", "anxious", "stressed", "frustrated"]):
+                        emotions.append(insight_text.split()[0] if insight_text else "mixed")
+                    if any(e in insight_text for e in ["happy", "calm", "peaceful", "content", "grateful"]):
+                        emotions.append(insight_text.split()[0] if insight_text else "positive")
+                    # Check for concerns
+                    if insight.get("type") == "concern" or "concern" in insight_text:
+                        concerns.append(insight.get("content", insight_text)[:50])
+                elif isinstance(insight, str):
+                    emotions.append(insight.lower())
+
+        # Infer emotions from mood score if no direct emotions found
+        if not emotions and a.overall_mood_score is not None:
+            if a.overall_mood_score >= 7:
+                emotions = ["content", "peaceful"]
+            elif a.overall_mood_score >= 5:
+                emotions = ["neutral"]
+            else:
+                emotions = ["stressed"]
+
+        daily_data.append({
             "date": a.analysis_date,
             "mood_score": a.overall_mood_score,
-            "emotions": a.detected_emotions or [],
-            "concerns": a.concerns or [],
-            "recommended_verses": a.recommended_verses or []
-        }
-        for a in analyses
-    ]
+            "emotions": emotions,
+            "concerns": concerns,
+            "recommended_verses": a.recommended_verses or [],
+            "emotional_summary": a.emotional_summary or "",
+            "insights": insights
+        })
+
+    return daily_data
 
 
 async def _get_weekly_reflections(
@@ -777,8 +810,20 @@ def _analyze_manomaya(
     weekly_data: list[dict[str, Any]]
 ) -> dict[str, Any]:
     """Analyze mental/emotional layer."""
-    emotions = [e for d in daily_data for e in d.get("emotions", [])]
-    negative_emotions = [e for e in emotions if e.lower() in [
+    # Safely extract emotions as strings
+    emotions = []
+    for d in daily_data:
+        raw_emotions = d.get("emotions", [])
+        if isinstance(raw_emotions, list):
+            for e in raw_emotions:
+                if isinstance(e, str):
+                    emotions.append(e)
+                elif isinstance(e, dict):
+                    emotions.append(str(e.get("name", e.get("emotion", "unknown"))))
+        elif isinstance(raw_emotions, dict):
+            emotions.extend(str(k) for k in raw_emotions.keys())
+
+    negative_emotions = [e for e in emotions if str(e).lower() in [
         "sad", "angry", "anxious", "fearful", "frustrated", "stressed"
     ]]
 
@@ -827,8 +872,20 @@ def _analyze_anandamaya(
         if isinstance(d.get("gratitude"), list)
     )
 
-    emotions = [e for d in daily_data for e in d.get("emotions", [])]
-    positive_emotions = [e for e in emotions if e.lower() in [
+    # Safely extract emotions as strings
+    emotions = []
+    for d in daily_data:
+        raw_emotions = d.get("emotions", [])
+        if isinstance(raw_emotions, list):
+            for e in raw_emotions:
+                if isinstance(e, str):
+                    emotions.append(e)
+                elif isinstance(e, dict):
+                    emotions.append(str(e.get("name", e.get("emotion", "unknown"))))
+        elif isinstance(raw_emotions, dict):
+            emotions.extend(str(k) for k in raw_emotions.keys())
+
+    positive_emotions = [e for e in emotions if str(e).lower() in [
         "happy", "calm", "peaceful", "content", "grateful", "joyful"
     ]]
 
