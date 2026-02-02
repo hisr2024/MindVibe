@@ -230,12 +230,11 @@ export default function MobileSettingsPage() {
 
       if (response.ok) {
         const data = await response.json()
-        // If the response includes a download URL or token, use it
-        if (data.download_url) {
-          window.location.href = data.download_url
-        } else if (data.token) {
+        // Backend returns download_token - use it to fetch the actual data
+        const token = data.download_token || data.token
+        if (token) {
           // Fetch the actual data using the token
-          const downloadResponse = await apiFetch(`/api/gdpr/data-export/${data.token}`)
+          const downloadResponse = await apiFetch(`/api/gdpr/data-export/${token}`)
           if (downloadResponse.ok) {
             const exportData = await downloadResponse.json()
             const blob = new Blob([JSON.stringify(exportData.data || exportData, null, 2)], { type: 'application/json' })
