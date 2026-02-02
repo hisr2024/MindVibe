@@ -42,7 +42,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Optional
 
-from backend.database import get_async_session
+from backend.deps import get_db as get_async_session
 from backend.models import ContentSourceType as DBContentSourceType
 from backend.services.db_knowledge_store import DatabaseKnowledgeStore, get_db_knowledge_store
 

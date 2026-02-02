@@ -17,7 +17,10 @@ from datetime import datetime
 import logging
 
 from backend.deps import get_db, get_current_user_flexible
-from backend.models import Mood, Journal, WisdomJourney
+from backend.models import Mood, JournalEntry, WisdomJourney
+
+# Alias for backward compatibility
+Journal = JournalEntry
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 logger = logging.getLogger(__name__)

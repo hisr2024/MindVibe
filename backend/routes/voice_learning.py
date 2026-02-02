@@ -347,9 +347,14 @@ async def get_memories(
 
 # ===== Sentiment Analysis =====
 
+class AnalyzeSentimentRequest(BaseModel):
+    """Request model for sentiment analysis."""
+    text: str = Field(..., min_length=1, max_length=2000)
+
+
 @router.post("/sentiment/analyze")
 async def analyze_sentiment(
-    text: str = Field(..., min_length=1, max_length=2000),
+    payload: AnalyzeSentimentRequest,
     user_id: str = Depends(get_current_user_flexible),
 ) -> Dict[str, Any]:
     """
@@ -359,7 +364,7 @@ async def analyze_sentiment(
     """
     sentiment_service = get_sentiment_service()
 
-    result = await sentiment_service.analyze(text, user_id)
+    result = await sentiment_service.analyze(payload.text, user_id)
 
     return {
         "primary_emotion": result.primary_emotion.value,
