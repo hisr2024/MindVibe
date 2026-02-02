@@ -207,11 +207,7 @@ export default function MobileHomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="
-            p-4 rounded-2xl
-            bg-gradient-to-br from-white/[0.06] to-white/[0.02]
-            border border-white/[0.08]
-          ">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/[0.08]">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-medium text-slate-300">How are you feeling?</h2>
               {selectedMood && (
@@ -228,20 +224,10 @@ export default function MobileHomePage() {
                     key={mood.id}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleMoodSelect(mood.id)}
-                    className={`
-                      flex-1 flex flex-col items-center gap-1 py-3 rounded-xl
-                      transition-all duration-200
-                      ${isSelected
-                        ? `bg-gradient-to-br ${mood.color} shadow-lg`
-                        : 'bg-white/[0.04] hover:bg-white/[0.08]'
-                      }
-                    `}
+                    className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${mood.color} shadow-lg` : 'bg-white/[0.04] hover:bg-white/[0.08]'}`}
                   >
                     <span className="text-2xl">{mood.emoji}</span>
-                    <span className={`
-                      text-[10px] font-medium
-                      ${isSelected ? 'text-white' : 'text-slate-400'}
-                    `}>
+                    <span className={`text-[10px] font-medium ${isSelected ? 'text-white' : 'text-slate-400'}`}>
                       {mood.label}
                     </span>
                   </motion.button>
@@ -258,11 +244,7 @@ export default function MobileHomePage() {
           transition={{ delay: 0.15 }}
           className="grid grid-cols-3 gap-3"
         >
-          <div className="
-            p-3 rounded-xl text-center
-            bg-gradient-to-br from-orange-500/10 to-amber-500/5
-            border border-orange-500/20
-          ">
+          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Zap className="w-4 h-4 text-orange-400" />
               <span className="text-xl font-bold text-orange-400">{dashboardData.streak}</span>
@@ -270,11 +252,7 @@ export default function MobileHomePage() {
             <p className="text-[10px] text-slate-400">Day Streak</p>
           </div>
 
-          <div className="
-            p-3 rounded-xl text-center
-            bg-gradient-to-br from-purple-500/10 to-pink-500/5
-            border border-purple-500/20
-          ">
+          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
             <div className="flex items-center justify-center gap-1 mb-1">
               <PenLine className="w-4 h-4 text-purple-400" />
               <span className="text-xl font-bold text-purple-400">{dashboardData.journalEntries}</span>
@@ -282,11 +260,7 @@ export default function MobileHomePage() {
             <p className="text-[10px] text-slate-400">Reflections</p>
           </div>
 
-          <div className="
-            p-3 rounded-xl text-center
-            bg-gradient-to-br from-cyan-500/10 to-blue-500/5
-            border border-cyan-500/20
-          ">
+          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-cyan-500/10 to-blue-500/5 border border-cyan-500/20">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Sparkles className="w-4 h-4 text-cyan-400" />
               <span className="text-xl font-bold text-cyan-400">{dashboardData.insightsCount}</span>
@@ -305,11 +279,7 @@ export default function MobileHomePage() {
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={() => handleQuickAction(`/m/journeys/${dashboardData.activeJourney?.id}`)}
-              className="
-                w-full p-4 rounded-2xl text-left
-                bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10
-                border border-cyan-500/20
-              "
+              className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -360,12 +330,7 @@ export default function MobileHomePage() {
                 transition={{ delay: 0.3 + index * 0.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleQuickAction(action.href)}
-                className={`
-                  p-4 rounded-2xl text-left
-                  bg-gradient-to-br ${action.gradient}
-                  border border-white/[0.06]
-                  active:border-white/[0.12]
-                `}
+                className={`p-4 rounded-2xl text-left bg-gradient-to-br ${action.gradient} border border-white/[0.06] active:border-white/[0.12]`}
               >
                 <action.icon className={`w-6 h-6 ${action.iconColor} mb-2`} />
                 <h3 className="text-sm font-semibold text-white">{action.label}</h3>
@@ -384,11 +349,7 @@ export default function MobileHomePage() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => handleQuickAction('/m/wisdom/daily')}
-            className="
-              w-full p-4 rounded-2xl text-left
-              bg-gradient-to-br from-teal-500/10 to-emerald-500/5
-              border border-teal-500/20
-            "
+            className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-teal-500/20"
           >
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-teal-500/20 flex items-center justify-center">

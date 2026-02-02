@@ -90,7 +90,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
     ref
   ) {
     const { triggerHaptic } = useHapticFeedback()
-    const { isKeyboardVisible, keyboardHeight } = useKeyboardVisibility()
+    const { isVisible: isKeyboardVisible, height: keyboardHeight } = useKeyboardVisibility()
     const { isOnline } = useNetworkStatus()
     const { language } = useLanguage()
 
@@ -113,8 +113,10 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
       error: voiceError,
     } = useVoiceInput({
       language,
-      onResult: (text) => {
-        setInputText((prev) => prev + ' ' + text)
+      onTranscript: (text, isFinal) => {
+        if (isFinal) {
+          setInputText((prev) => prev + ' ' + text)
+        }
       },
     })
 
@@ -280,12 +282,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                         setInputText(prompt)
                         inputRef.current?.focus()
                       }}
-                      className="
-                        w-full px-4 py-3
-                        bg-white/[0.04] border border-white/[0.08]
-                        rounded-xl text-left text-sm text-slate-300
-                        active:scale-[0.98] transition-transform
-                      "
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-left text-sm text-slate-300 active:scale-[0.98] transition-transform"
                     >
                       {prompt}
                     </motion.button>
@@ -381,12 +378,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleCopy(message.id, message.text)}
-                          className="
-                            w-8 h-8 rounded-full
-                            bg-white/[0.06] border border-white/[0.08]
-                            flex items-center justify-center
-                            active:bg-white/[0.1]
-                          "
+                          className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:bg-white/[0.1]"
                           aria-label="Copy message"
                         >
                           {copiedId === message.id ? (
@@ -397,16 +389,11 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                         </motion.button>
 
                         {/* Share button */}
-                        {typeof navigator !== 'undefined' && navigator.share && (
+                        {typeof navigator !== 'undefined' && 'share' in navigator && (
                           <motion.button
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleShare(message.text)}
-                            className="
-                              w-8 h-8 rounded-full
-                              bg-white/[0.06] border border-white/[0.08]
-                              flex items-center justify-center
-                              active:bg-white/[0.1]
-                            "
+                            className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:bg-white/[0.1]"
                             aria-label="Share message"
                           >
                             <Share2 className="w-4 h-4 text-slate-400" />
@@ -418,12 +405,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                           <motion.button
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleSaveToJournal(message.text)}
-                            className="
-                              px-3 h-8 rounded-full
-                              bg-orange-500/10 border border-orange-500/30
-                              flex items-center justify-center gap-1.5
-                              active:bg-orange-500/20
-                            "
+                            className="px-3 h-8 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center gap-1.5 active:bg-orange-500/20"
                             aria-label="Save to journal"
                           >
                             <BookOpen className="w-4 h-4 text-orange-400" />
@@ -435,12 +417,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                         {message.sender === 'assistant' && (
                           <motion.button
                             whileTap={{ scale: 0.9 }}
-                            className="
-                              w-8 h-8 rounded-full
-                              bg-white/[0.06] border border-white/[0.08]
-                              flex items-center justify-center
-                              active:bg-white/[0.1]
-                            "
+                            className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:bg-white/[0.1]"
                             aria-label="Listen to message"
                           >
                             <Volume2 className="w-4 h-4 text-slate-400" />
@@ -517,11 +494,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         )}
 
         {/* Input area */}
-        <div className="
-          px-4 py-3
-          bg-[#0b0b0f]/95 backdrop-blur-xl
-          border-t border-white/[0.06]
-        ">
+        <div className="px-4 py-3 bg-[#0b0b0f]/95 backdrop-blur-xl border-t border-white/[0.06]">
           {/* Voice input indicator */}
           <AnimatePresence>
             {isListening && (
@@ -556,16 +529,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 placeholder={placeholder}
                 disabled={isLoading}
                 rows={1}
-                className="
-                  w-full px-4 py-3 pr-12
-                  bg-white/[0.06] border border-white/[0.08]
-                  rounded-2xl
-                  text-white text-base
-                  placeholder:text-slate-500
-                  resize-none
-                  focus:outline-none focus:border-orange-500/40
-                  disabled:opacity-50
-                "
+                className="w-full px-4 py-3 pr-12 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-white text-base placeholder:text-slate-500 resize-none focus:outline-none focus:border-orange-500/40 disabled:opacity-50"
                 style={{
                   maxHeight: 120,
                   fontSize: '16px', // Prevent zoom on iOS
@@ -577,16 +541,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handleVoiceToggle}
-                  className={`
-                    absolute right-2 bottom-2
-                    w-8 h-8 rounded-full
-                    flex items-center justify-center
-                    transition-colors
-                    ${isListening
-                      ? 'bg-red-500 text-white'
-                      : 'bg-white/[0.08] text-slate-400'
-                    }
-                  `}
+                  className={`absolute right-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-red-500 text-white' : 'bg-white/[0.08] text-slate-400'}`}
                   aria-label={isListening ? 'Stop listening' : 'Start voice input'}
                 >
                   {isListening ? (
@@ -603,23 +558,11 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
               whileTap={{ scale: 0.9 }}
               onClick={handleSend}
               disabled={!inputText.trim() || isLoading}
-              className={`
-                w-12 h-12 rounded-full
-                flex items-center justify-center
-                transition-all
-                ${inputText.trim()
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-400 shadow-lg shadow-orange-500/30'
-                  : 'bg-white/[0.06] border border-white/[0.08]'
-                }
-                disabled:opacity-50
-              `}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${inputText.trim() ? 'bg-gradient-to-r from-orange-500 to-amber-400 shadow-lg shadow-orange-500/30' : 'bg-white/[0.06] border border-white/[0.08]'} disabled:opacity-50`}
               aria-label="Send message"
             >
               <Send
-                className={`
-                  w-5 h-5
-                  ${inputText.trim() ? 'text-white' : 'text-slate-500'}
-                `}
+                className={`w-5 h-5 ${inputText.trim() ? 'text-white' : 'text-slate-500'}`}
               />
             </motion.button>
           </div>

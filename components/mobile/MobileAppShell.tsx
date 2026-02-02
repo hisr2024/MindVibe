@@ -150,7 +150,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
     const router = useRouter()
     const pathname = usePathname()
     const { triggerHaptic } = useHapticFeedback()
-    const { isOnline, effectiveType } = useNetworkStatus()
+    const { isOnline, connectionType } = useNetworkStatus()
     const { user, isAuthenticated } = useAuth()
 
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -375,7 +375,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
         )}
 
         {/* Network quality indicator (for slow connections) */}
-        {isOnline && effectiveType && ['slow-2g', '2g'].includes(effectiveType) && (
+        {isOnline && connectionType && ['slow-2g', '2g'].includes(connectionType) && (
           <div className="fixed bottom-20 left-4 right-4 z-40">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
