@@ -8,7 +8,9 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { v4 as uuidv4 } from 'uuid'
+
+// Generate UUID using crypto API (browser-native)
+const generateId = () => crypto.randomUUID()
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { MobileKiaanChat, ChatMessage } from '@/components/mobile/MobileKiaanChat'
@@ -62,7 +64,7 @@ export default function MobileKiaanPage() {
 
   // Send message to KIAAN
   const handleSendMessage = useCallback(async (text: string) => {
-    const messageId = uuidv4()
+    const messageId = generateId()
     const timestamp = new Date().toISOString()
 
     // Optimistically add user message
@@ -106,7 +108,7 @@ export default function MobileKiaanPage() {
 
         // Add assistant response
         const assistantMessage: ChatMessage = {
-          id: data.message_id || uuidv4(),
+          id: data.message_id || generateId(),
           sender: 'assistant',
           text: data.response,
           timestamp: new Date().toISOString(),

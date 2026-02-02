@@ -8,7 +8,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { v4 as uuidv4 } from 'uuid'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { MobileJournal, JournalEntry } from '@/components/mobile/MobileJournal'
