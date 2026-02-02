@@ -72,7 +72,7 @@ async def generate_json(data: list[dict]):
 @router.get("/users")
 async def export_users(
     request: Request,
-    format: str = Query("csv", regex="^(csv|json)$"),
+    format: str = Query("csv", pattern="^(csv|json)$"),
     include_subscription: bool = True,
     admin: AdminContext = Depends(get_current_admin),
     _: None = Depends(PermissionChecker(AdminPermission.DATA_EXPORT)),
@@ -158,7 +158,7 @@ async def export_users(
 @router.get("/subscriptions")
 async def export_subscriptions(
     request: Request,
-    format: str = Query("csv", regex="^(csv|json)$"),
+    format: str = Query("csv", pattern="^(csv|json)$"),
     admin: AdminContext = Depends(get_current_admin),
     _: None = Depends(PermissionChecker(AdminPermission.DATA_EXPORT)),
     db: AsyncSession = Depends(get_db),
@@ -231,7 +231,7 @@ async def export_subscriptions(
 @router.get("/payments")
 async def export_payments(
     request: Request,
-    format: str = Query("csv", regex="^(csv|json)$"),
+    format: str = Query("csv", pattern="^(csv|json)$"),
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     admin: AdminContext = Depends(get_current_admin),
@@ -311,7 +311,7 @@ async def export_payments(
 @router.get("/analytics")
 async def export_analytics(
     request: Request,
-    format: str = Query("csv", regex="^(csv|json)$"),
+    format: str = Query("csv", pattern="^(csv|json)$"),
     admin: AdminContext = Depends(get_current_admin),
     _: None = Depends(PermissionChecker(AdminPermission.DATA_EXPORT)),
     db: AsyncSession = Depends(get_db),
