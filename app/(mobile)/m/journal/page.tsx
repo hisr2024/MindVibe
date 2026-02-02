@@ -53,23 +53,33 @@ export default function MobileJournalPage() {
     setIsSaving(true)
 
     try {
-      const response = await apiFetch('/api/journal', {
+      // Use blob endpoint for simple journal storage
+      // The backend's /journal/blob endpoint accepts a JSON string
+      const journalData = {
+        type: 'journal_entry',
+        title: entry.title,
+        content: entry.body,
+        tags: entry.tags,
+        mood: entry.mood,
+        created_at: entry.createdAt,
+        updated_at: entry.updatedAt,
+      }
+
+      const response = await apiFetch('/api/journal/blob', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: entry.title,
-          body: entry.body,
-          tags: entry.tags,
-          mood: entry.mood,
+          blob_json: JSON.stringify(journalData),
         }),
       })
 
       if (response.ok) {
         triggerHaptic('success')
-        // Navigate back or show success
-        router.push('/m/journal/list')
+        // Navigate back
+        router.back()
       } else {
-        throw new Error('Failed to save entry')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Failed to save entry')
       }
     } catch (error) {
       console.error('Failed to save journal entry:', error)

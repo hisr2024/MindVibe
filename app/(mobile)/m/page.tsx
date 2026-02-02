@@ -35,13 +35,13 @@ import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { apiFetch } from '@/lib/api'
 
-// Mood options with emojis and colors
+// Mood options with emojis and colors - score maps to backend (-2 to 2 scale)
 const MOOD_OPTIONS = [
-  { id: 'great', label: 'Great', icon: Smile, emoji: '😊', color: 'from-green-500 to-emerald-400' },
-  { id: 'good', label: 'Good', icon: Sun, emoji: '🙂', color: 'from-yellow-500 to-amber-400' },
-  { id: 'okay', label: 'Okay', icon: Meh, emoji: '😐', color: 'from-blue-500 to-cyan-400' },
-  { id: 'low', label: 'Low', icon: CloudRain, emoji: '😔', color: 'from-purple-500 to-indigo-400' },
-  { id: 'struggling', label: 'Struggling', icon: Frown, emoji: '😢', color: 'from-red-500 to-pink-400' },
+  { id: 'great', label: 'Great', icon: Smile, emoji: '😊', color: 'from-green-500 to-emerald-400', score: 2 },
+  { id: 'good', label: 'Good', icon: Sun, emoji: '🙂', color: 'from-yellow-500 to-amber-400', score: 1 },
+  { id: 'okay', label: 'Okay', icon: Meh, emoji: '😐', color: 'from-blue-500 to-cyan-400', score: 0 },
+  { id: 'low', label: 'Low', icon: CloudRain, emoji: '😔', color: 'from-purple-500 to-indigo-400', score: -1 },
+  { id: 'struggling', label: 'Struggling', icon: Frown, emoji: '😢', color: 'from-red-500 to-pink-400', score: -2 },
 ]
 
 // Quick action cards
@@ -155,11 +155,15 @@ export default function MobileHomePage() {
     setSelectedMood(moodId)
     setShowMoodSelector(false)
 
+    // Find the mood option to get the score
+    const moodOption = MOOD_OPTIONS.find(m => m.id === moodId)
+    if (!moodOption) return
+
     try {
       await apiFetch('/api/moods', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mood: moodId }),
+        body: JSON.stringify({ score: moodOption.score }),
       })
     } catch (error) {
       console.error('Failed to save mood:', error)

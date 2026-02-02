@@ -215,26 +215,37 @@ export default function MobileSettingsPage() {
     }
   }, [triggerHaptic])
 
-  // Handle data export
+  // Handle data export (GDPR compliant)
   const handleExportData = useCallback(async () => {
     setIsExporting(true)
     triggerHaptic('medium')
 
     try {
-      const response = await apiFetch('/api/compliance/export', {
+      // Request data export - backend returns a token for download
+      const response = await apiFetch('/api/gdpr/data-export', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'json' }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        // Download the data
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `mindvibe-data-${new Date().toISOString().split('T')[0]}.json`
-        a.click()
-        URL.revokeObjectURL(url)
+        // Backend returns download_token - use it to fetch the actual data
+        const token = data.download_token || data.token
+        if (token) {
+          // Fetch the actual data using the token
+          const downloadResponse = await apiFetch(`/api/gdpr/data-export/${token}`)
+          if (downloadResponse.ok) {
+            const exportData = await downloadResponse.json()
+            const blob = new Blob([JSON.stringify(exportData.data || exportData, null, 2)], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `mindvibe-data-${new Date().toISOString().split('T')[0]}.json`
+            a.click()
+            URL.revokeObjectURL(url)
+          }
+        }
         triggerHaptic('success')
       } else {
         throw new Error('Export failed')
@@ -247,21 +258,25 @@ export default function MobileSettingsPage() {
     }
   }, [triggerHaptic])
 
-  // Handle account deletion
+  // Handle account deletion (GDPR compliant)
   const handleDeleteAccount = useCallback(async () => {
     setIsDeleting(true)
     triggerHaptic('heavy')
 
     try {
-      const response = await apiFetch('/api/compliance/delete-account', {
-        method: 'DELETE',
+      // Use GDPR delete-account endpoint
+      const response = await apiFetch('/api/gdpr/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: true }),
       })
 
       if (response.ok) {
         await logout()
         router.push('/')
       } else {
-        throw new Error('Deletion failed')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Deletion failed')
       }
     } catch (error) {
       console.error('Deletion failed:', error)

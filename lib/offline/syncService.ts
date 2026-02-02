@@ -275,37 +275,78 @@ class OfflineSyncService {
 
   /**
    * Sync a single operation
+   *
+   * Note: Backend endpoints have limited support:
+   * - mood: POST only (create)
+   * - journal: POST to /journal/blob (create as JSON blob)
+   * - journey_progress: Endpoint not implemented
+   * - chat_message: Endpoint not implemented
    */
   private async syncOperation(operation: SyncOperation): Promise<void> {
-    const endpoints: Record<SyncEntityType, string> = {
-      mood: '/api/moods',
-      journal: '/api/journal',
-      journey_progress: '/api/journeys/progress',
-      chat_message: '/api/chat/messages',
+    // Map entity types to their supported operations and endpoints
+    const entityConfig: Record<SyncEntityType, {
+      endpoint: string
+      supportedOps: SyncOperationType[]
+      customCreate?: (data: Record<string, unknown>) => Record<string, unknown>
+    }> = {
+      mood: {
+        endpoint: '/api/moods',
+        supportedOps: ['create'], // Backend only supports create
+      },
+      journal: {
+        endpoint: '/api/journal/blob',
+        supportedOps: ['create'], // Using blob endpoint for simple storage
+        customCreate: (data) => ({
+          blob_json: JSON.stringify({
+            type: 'journal_entry',
+            ...data,
+            synced_at: new Date().toISOString(),
+          }),
+        }),
+      },
+      journey_progress: {
+        endpoint: '/api/journeys', // Fallback - progress stored in journey update
+        supportedOps: [], // Not implemented in backend
+      },
+      chat_message: {
+        endpoint: '/api/chat/history', // Chat history endpoint
+        supportedOps: [], // Full CRUD not implemented
+      },
     }
 
-    const endpoint = endpoints[operation.entityType]
-    if (!endpoint) {
+    const config = entityConfig[operation.entityType]
+    if (!config) {
       throw new Error(`Unknown entity type: ${operation.entityType}`)
+    }
+
+    // Check if operation is supported
+    if (!config.supportedOps.includes(operation.operationType)) {
+      console.warn(`[OfflineSync] ${operation.operationType} not supported for ${operation.entityType}, skipping`)
+      return // Silently skip unsupported operations
     }
 
     let response: Response
 
     switch (operation.operationType) {
-      case 'create':
-        response = await apiFetch(endpoint, {
+      case 'create': {
+        const payload = config.customCreate
+          ? config.customCreate(operation.data)
+          : {
+              ...operation.data,
+              _clientId: operation.id,
+              _clientTimestamp: operation.timestamp,
+            }
+
+        response = await apiFetch(config.endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...operation.data,
-            _clientId: operation.id,
-            _clientTimestamp: operation.timestamp,
-          }),
+          body: JSON.stringify(payload),
         })
         break
+      }
 
       case 'update':
-        response = await apiFetch(`${endpoint}/${operation.entityId}`, {
+        response = await apiFetch(`${config.endpoint}/${operation.entityId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -316,7 +357,7 @@ class OfflineSyncService {
         break
 
       case 'delete':
-        response = await apiFetch(`${endpoint}/${operation.entityId}`, {
+        response = await apiFetch(`${config.endpoint}/${operation.entityId}`, {
           method: 'DELETE',
         })
         break
@@ -331,6 +372,12 @@ class OfflineSyncService {
         const serverData = await response.json()
         this.addConflict(operation, serverData)
         throw new Error('Conflict detected')
+      }
+
+      // Handle 404/405 gracefully for unsupported operations
+      if (response.status === 404 || response.status === 405) {
+        console.warn(`[OfflineSync] Endpoint not available for ${operation.entityType}:${operation.operationType}`)
+        return // Silently skip if endpoint doesn't exist
       }
 
       const errorData = await response.json().catch(() => ({}))
