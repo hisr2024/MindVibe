@@ -206,7 +206,7 @@ async def _record_version(
     db.add(version_row)
 
 
-@router.post("/entries", response_model=JournalEntryOut)
+@router.post("/entries", response_model=JournalEntryOut, status_code=status.HTTP_201_CREATED)
 async def create_entry(
     request: Request,
     payload: JournalEntryCreate,

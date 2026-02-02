@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 from typing import Optional, Literal
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 
 
@@ -231,11 +231,11 @@ class Settings(BaseSettings):
         ]
         return all(checks)
 
-    class Config:
-        """Pydantic config."""
-        env_file = ".env"
-        case_sensitive = True
-        extra = "ignore"  # Allow extra env vars without raising errors
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore",  # Allow extra env vars without raising errors
+    )
 
 
 settings = Settings()

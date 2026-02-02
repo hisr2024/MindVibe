@@ -71,7 +71,7 @@ except Exception as e:
 
 try:
     from backend.services.gita_analytics import GitaAnalyticsService
-    gita_analytics = GitaAnalyticsService
+    gita_analytics = GitaAnalyticsService()
     logger.info("✅ Gita analytics loaded")
 except Exception as e:
     logger.warning(f"⚠️ Gita analytics unavailable: {e}")
@@ -481,7 +481,7 @@ async def start_session(request: Request) -> dict[str, Any]:
 
 @router.post("/message/stream")
 @limiter.limit(CHAT_RATE_LIMIT)
-async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)):
+async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSession = Depends(get_db)) -> StreamingResponse:
     """
     Streaming endpoint for instant KIAAN responses.
     Returns Server-Sent Events (SSE) for real-time response display.

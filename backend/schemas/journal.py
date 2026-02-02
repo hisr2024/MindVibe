@@ -34,7 +34,7 @@ class JournalEntryUpdate(BaseModel):
 
 class JournalEntryOut(BaseModel):
     """Journal entry output model with encrypted content."""
-    model_config = {"ser_json_timedelta": "iso8601"}
+    model_config = {"ser_json_timedelta": "iso8601", "from_attributes": True}
 
     id: str
     encrypted_title: Optional[EncryptedPayload | dict]

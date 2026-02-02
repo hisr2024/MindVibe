@@ -27,7 +27,7 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from backend.services.gita_ai_analyzer import (
     get_gita_ai_analyzer,
@@ -63,8 +63,9 @@ class EmotionAnalysisRequest(BaseModel):
     tags: list[str] = Field(default=[], description="Mood tags")
     note: str = Field(default="", max_length=1000, description="Optional mood note")
 
-    @validator("tags")
-    def validate_tags(cls, v):
+    @field_validator("tags")
+    @classmethod
+    def validate_tags(cls, v: list[str]) -> list[str]:
         """Limit and sanitize tags."""
         return [t.strip()[:50] for t in v[:10]]  # Max 10 tags, 50 chars each
 

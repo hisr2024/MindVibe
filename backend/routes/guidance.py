@@ -517,12 +517,12 @@ async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happen
     return unique_results[:limit]
 
 
-@router.post("/karma-reset/generate")
-async def generate_karma_reset(
+@router.post("/karma-reset/generate-with-gita")
+async def generate_karma_reset_with_gita(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> EngineResult:
-    """Generate structured Karma Reset guidance as a crisp 4-part plan.
+    """Generate structured Karma Reset guidance with Gita verses as a crisp 4-part plan.
 
     Expects payload with:
     - what_happened: Description of the misstep or moment
