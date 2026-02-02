@@ -27,9 +27,10 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from backend.models import GitaVerse
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 # Mental health categories used in the system
 MENTAL_HEALTH_CATEGORIES = [
@@ -206,13 +207,9 @@ async def apply_tags(
         "postgresql+asyncpg://navi:navi@db:5432/navi",
     )
 
-    # Fix Render.com DATABASE_URL to use asyncpg
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-    engine = create_async_engine(database_url, echo=False)
+    # Normalize URL and create SSL-enabled engine
+    database_url = normalize_database_url(database_url)
+    engine = create_ssl_engine(database_url)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     updated_count = 0

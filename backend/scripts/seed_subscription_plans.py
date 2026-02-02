@@ -12,9 +12,12 @@ Plans created:
 
 import asyncio
 import os
+import ssl as ssl_module
 import sys
 from decimal import Decimal
 from pathlib import Path
+from typing import Any, Dict
+from urllib.parse import parse_qs, urlparse
 
 # Add the project root to the path
 # Path: backend/scripts/seed_subscription_plans.py -> parents[2] = project root
@@ -25,6 +28,52 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
 from backend.models import Base, SubscriptionPlan, SubscriptionTier
+
+
+def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
+    """Build SSL connect args for asyncpg.
+
+    Render PostgreSQL uses self-signed certificates, so we need to
+    disable certificate verification while still using SSL encryption.
+    """
+    parsed = urlparse(db_url)
+    query_params = parse_qs(parsed.query)
+
+    ssl_pref = (
+        os.getenv("DB_SSL_MODE") or
+        query_params.get("sslmode", [None])[0] or
+        query_params.get("ssl", [None])[0]
+    )
+
+    # Auto-detect Render environment
+    is_render = os.getenv("RENDER", "").lower() == "true"
+
+    # Default to 'require' (SSL without cert verification) for Render compatibility
+    if not ssl_pref:
+        ssl_pref = "require"
+
+    ssl_pref = ssl_pref.lower()
+
+    # Full verification
+    if ssl_pref in {"verify-ca", "verify-full"}:
+        return {"ssl": ssl_module.create_default_context()}
+
+    # Require SSL but skip certificate verification (for self-signed certs)
+    if ssl_pref in {"require", "required", "require-no-verify", "true", "1"}:
+        ssl_context = ssl_module.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl_module.CERT_NONE
+        return {"ssl": ssl_context}
+
+    # Disable SSL
+    if ssl_pref in {"disable", "false", "0"}:
+        return {"ssl": False}
+
+    # Default: SSL without verification for compatibility
+    ssl_context = ssl_module.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl_module.CERT_NONE
+    return {"ssl": ssl_context}
 
 
 # Plan definitions
@@ -148,7 +197,11 @@ async def seed_subscription_plans(db_url: str | None = None) -> None:
     elif db_url.startswith("postgresql://") and "asyncpg" not in db_url:
         db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     
-    engine = create_async_engine(db_url, echo=False)
+    engine = create_async_engine(
+        db_url,
+        echo=False,
+        connect_args=_get_ssl_connect_args(db_url)
+    )
     session_maker = async_sessionmaker(engine, expire_on_commit=False)
     
     # Create tables if they don't exist

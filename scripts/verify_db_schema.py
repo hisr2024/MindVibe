@@ -19,34 +19,30 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 
 async def verify_schema() -> bool:
     """
     Verify that the gita_verses table has all required columns.
-    
+
     Returns:
         bool: True if schema is valid, False otherwise
     """
     # Get database URL from environment
     database_url = os.getenv("DATABASE_URL", "")
-    
+
     if not database_url:
         print("❌ DATABASE_URL environment variable not set")
         return False
-    
-    # Fix Render.com DATABASE_URL to use asyncpg
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    
-    # Create engine
-    engine = create_async_engine(database_url, echo=False)
+
+    # Normalize URL for asyncpg and create SSL-enabled engine
+    database_url = normalize_database_url(database_url)
+    engine = create_ssl_engine(database_url)
     
     try:
         async with engine.begin() as conn:

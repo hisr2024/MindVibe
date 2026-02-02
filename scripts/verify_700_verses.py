@@ -200,21 +200,18 @@ async def verify_database() -> tuple[bool, list[str]]:
         print("=" * 66)
         return False, errors
 
-    # Fix Render.com DATABASE_URL to use asyncpg
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-
     print(f"Database: {database_url.split('@')[1] if '@' in database_url else database_url[:50]}...\n")
 
     try:
         from sqlalchemy import select, text
-        from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+        from sqlalchemy.ext.asyncio import async_sessionmaker
 
         from backend.models import GitaVerse
+        from scripts.db_utils import create_ssl_engine, normalize_database_url
 
-        engine = create_async_engine(database_url, echo=False)
+        # Normalize URL and create SSL-enabled engine
+        database_url = normalize_database_url(database_url)
+        engine = create_ssl_engine(database_url)
         Session = async_sessionmaker(engine, expire_on_commit=False)
 
         async with Session() as session:

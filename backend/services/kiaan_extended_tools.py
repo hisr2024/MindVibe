@@ -474,7 +474,11 @@ class DatabaseQueryTool(BaseTool):
         except ImportError:
             return {"error": "asyncpg not installed"}
 
-        conn = await asyncpg.connect(db_url, timeout=30)
+        # Get SSL context for Render PostgreSQL compatibility
+        from backend.deps import _get_ssl_connect_args
+        ssl_args = _get_ssl_connect_args(db_url)
+        ssl_ctx = ssl_args.get("ssl", False)
+        conn = await asyncpg.connect(db_url, timeout=30, ssl=ssl_ctx)
         try:
             if params:
                 rows = await conn.fetch(query, *params.values())

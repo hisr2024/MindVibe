@@ -18,10 +18,11 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from backend.models import Base
 from backend.services.wisdom_kb import WisdomKnowledgeBase
+from scripts.db_utils import create_ssl_engine, normalize_database_url
 
 
 async def warm_verse_cache() -> None:
@@ -32,19 +33,16 @@ async def warm_verse_cache() -> None:
         "postgresql+asyncpg://navi:navi@db:5432/navi",
     )
 
-    # Fix Render.com DATABASE_URL to use asyncpg
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif database_url.startswith("postgresql://") and "asyncpg" not in database_url:
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # Normalize URL for asyncpg
+    database_url = normalize_database_url(database_url)
 
     print("=" * 70)
     print("🕉️  KIAAN VERSE CACHE WARMING")
     print("=" * 70)
     print(f"📍 Database: {database_url[:60]}...")
 
-    # Create async engine
-    engine = create_async_engine(database_url, echo=False)
+    # Create async engine with SSL support
+    engine = create_ssl_engine(database_url)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     # Ensure tables exist
