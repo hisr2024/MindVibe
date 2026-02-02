@@ -202,10 +202,15 @@ export default function JourneyDetailPage() {
       <main className="relative z-10 px-4 py-8 max-w-4xl mx-auto">
         {/* Success Modal */}
         {showSuccess && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="success-title"
+          >
             <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-md mx-4 text-center">
-              <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-2xl font-bold text-white mb-2">Step Complete!</h2>
+              <div className="text-6xl mb-4" aria-hidden="true">🎉</div>
+              <h2 id="success-title" className="text-2xl font-bold text-white mb-2">Step Complete!</h2>
               <p className="text-white/60">
                 Beautiful work on today&apos;s practice. Your reflection has been saved.
               </p>
@@ -214,8 +219,8 @@ export default function JourneyDetailPage() {
         )}
 
         {/* Day Navigation */}
-        <div className="mb-6 overflow-x-auto pb-2">
-          <div className="flex gap-2 min-w-max">
+        <nav className="mb-6 overflow-x-auto pb-2" aria-label="Journey day navigation">
+          <div className="flex gap-2 min-w-max" role="list">
             {Array.from({ length: journey.total_days }, (_, i) => i + 1).map((day) => {
               const isCompleted = day < journey.current_day ||
                 (day === journey.current_day && currentStep?.is_completed)
@@ -228,6 +233,8 @@ export default function JourneyDetailPage() {
                   key={day}
                   onClick={() => isAccessible && loadStep(day)}
                   disabled={!isAccessible}
+                  aria-label={`Day ${day}${isCompleted ? ', completed' : ''}${isCurrent ? ', current' : ''}${!isAccessible ? ', locked' : ''}`}
+                  aria-current={isSelected ? 'step' : undefined}
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all
                     ${isSelected
@@ -246,7 +253,7 @@ export default function JourneyDetailPage() {
               )
             })}
           </div>
-        </div>
+        </nav>
 
         {/* Step Content */}
         {currentStep ? (
@@ -337,6 +344,7 @@ export default function JourneyDetailPage() {
                     value={reflection}
                     onChange={(e) => setReflection(e.target.value)}
                     placeholder="Write your reflection here... (optional)"
+                    aria-label="Your reflection on today's practice"
                     className="w-full h-32 p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 resize-none"
                   />
                 )}
@@ -358,6 +366,8 @@ export default function JourneyDetailPage() {
                 <button
                   onClick={handleCompleteStep}
                   disabled={isSubmitting}
+                  aria-busy={isSubmitting}
+                  aria-label={isSubmitting ? 'Completing step...' : `Complete day ${currentStep.day_index} step`}
                   className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Completing...' : 'Complete Today\'s Step'}

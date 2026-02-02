@@ -9,7 +9,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useLanguage } from '@/hooks/useLanguage'
 import {
   ENEMY_INFO,
   ENEMY_ORDER,
@@ -309,8 +308,6 @@ function TemplateCard({
 // =============================================================================
 
 export default function JourneyEnginePage() {
-  const { t } = useLanguage()
-
   // State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
