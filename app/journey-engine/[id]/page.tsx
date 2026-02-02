@@ -309,17 +309,17 @@ export default function JourneyDetailPage() {
                 <h3 className="text-sm font-semibold text-green-400 uppercase tracking-wide mb-3">
                   Today&apos;s Practice
                 </h3>
-                {currentStep.practice.description && (
+                {typeof currentStep.practice.description === 'string' && currentStep.practice.description && (
                   <p className="text-white/90 leading-relaxed mb-4">
-                    {String(currentStep.practice.description)}
+                    {currentStep.practice.description}
                   </p>
                 )}
-                {currentStep.practice.steps && Array.isArray(currentStep.practice.steps) && (
+                {Array.isArray(currentStep.practice.steps) && currentStep.practice.steps.length > 0 && (
                   <ul className="space-y-2">
-                    {(currentStep.practice.steps as string[]).map((step, idx) => (
+                    {currentStep.practice.steps.map((step, idx) => (
                       <li key={idx} className="text-white/80 flex gap-2">
                         <span className="text-green-400">{idx + 1}.</span>
-                        {step}
+                        {String(step)}
                       </li>
                     ))}
                   </ul>
