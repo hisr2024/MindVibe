@@ -40,13 +40,13 @@ def seed_gita_verses():
     Session = sessionmaker(bind=engine)
     
     # Load JSON file
-    json_path = Path(__file__).parent.parent / "data" / "gita" / "gita_verses_complete. json"
-    
+    json_path = Path(__file__).parent.parent / "data" / "gita" / "gita_verses_complete.json"
+
     if not json_path.exists():
         print(f"❌ ERROR: JSON file not found at {json_path}")
         sys.exit(1)
-    
-    print(f"📖 Loading verses from {json_path. name}...")
+
+    print(f"📖 Loading verses from {json_path.name}...")
     
     try:
         with open(json_path, "r", encoding="utf-8") as f:
@@ -125,17 +125,17 @@ def seed_gita_verses():
         print("=" * 70)
         
         # Verify final count
-        total = session.execute(select(GitaVerse)). scalars().all()
+        total = session.execute(select(GitaVerse)).scalars().all()
         print(f"\n✅ Total verses in database: {len(total)}/700")
-        
+
         if len(total) == 700:
             print("\n🎉 SUCCESS! All 700 Gita verses are now in the database!")
         else:
             print(f"\n⚠️  WARNING: Expected 700 verses, found {len(total)}")
-        
+
     except Exception as e:
         print(f"\n❌ ERROR during seeding: {e}")
-        session. rollback()
+        session.rollback()
         sys.exit(1)
     finally:
         session.close()
