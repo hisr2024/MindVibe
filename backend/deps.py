@@ -1,13 +1,18 @@
 """Dependency injection for FastAPI routes"""
 
 import os
-from typing import AsyncGenerator, Optional
+import ssl as ssl_module
+from typing import AsyncGenerator, Optional, Any, Dict
+from urllib.parse import parse_qs, urlparse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy import select
 from fastapi import Depends, HTTPException, Request, status
+import logging
 
 from backend.security.jwt import decode_access_token
 from backend.models import User
+
+logger = logging.getLogger(__name__)
 
 # Database setup
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
@@ -17,7 +22,61 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+
+def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
+    """Build SSL connect args for asyncpg.
+
+    Render PostgreSQL uses self-signed certificates, so we need to
+    disable certificate verification while still using SSL encryption.
+    """
+    parsed = urlparse(db_url)
+    query_params = parse_qs(parsed.query)
+
+    ssl_pref = (
+        os.getenv("DB_SSL_MODE") or
+        query_params.get("sslmode", [None])[0] or
+        query_params.get("ssl", [None])[0]
+    )
+
+    # Auto-detect Render environment
+    is_render = os.getenv("RENDER", "").lower() == "true"
+
+    # Default to 'require' (SSL without cert verification) for Render compatibility
+    if not ssl_pref:
+        ssl_pref = "require"
+
+    ssl_pref = ssl_pref.lower()
+
+    # Full verification
+    if ssl_pref in {"verify-ca", "verify-full"}:
+        return {"ssl": ssl_module.create_default_context()}
+
+    # Require SSL but skip certificate verification (for self-signed certs)
+    if ssl_pref in {"require", "required", "require-no-verify", "true", "1"}:
+        if is_render:
+            logger.info("Render environment: Using SSL without certificate verification")
+        ssl_context = ssl_module.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl_module.CERT_NONE
+        return {"ssl": ssl_context}
+
+    # Disable SSL
+    if ssl_pref in {"disable", "false", "0"}:
+        return {"ssl": False}
+
+    # Default: SSL without verification for compatibility
+    ssl_context = ssl_module.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl_module.CERT_NONE
+    return {"ssl": ssl_context}
+
+
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    future=True,
+    connect_args=_get_ssl_connect_args(DATABASE_URL)
+)
 SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
