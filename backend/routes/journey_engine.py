@@ -52,8 +52,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.auth import get_current_user
-from backend.database import get_db
+from backend.deps import get_current_user, get_db
 from backend.services.journey_engine import (
     JourneyEngineService,
     MultiJourneyManager,
@@ -390,14 +389,14 @@ async def list_journeys(
     limit: int = Query(20, ge=1, le=100, description="Page size"),
     offset: int = Query(0, ge=0, description="Offset"),
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """
     List user's journeys.
 
     Returns all journeys for the authenticated user, optionally filtered by status.
     """
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     stats, total = await service.list_user_journeys(
         user_id=user_id,
@@ -434,7 +433,7 @@ async def list_journeys(
 async def start_journey(
     request: StartJourneyRequest,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -442,7 +441,7 @@ async def start_journey(
 
     Users can have up to 5 active journeys simultaneously.
     """
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         personalization = None
@@ -488,10 +487,10 @@ async def start_journey(
 async def get_journey(
     journey_id: str,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get detailed information about a specific journey."""
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         stats = await service.get_journey(user_id, journey_id)
@@ -518,11 +517,11 @@ async def get_journey(
 async def pause_journey(
     journey_id: str,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Pause an active journey."""
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         await service.pause_journey(user_id, journey_id)
@@ -554,11 +553,11 @@ async def pause_journey(
 async def resume_journey(
     journey_id: str,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Resume a paused journey."""
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         await service.resume_journey(user_id, journey_id)
@@ -590,11 +589,11 @@ async def resume_journey(
 async def abandon_journey(
     journey_id: str,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Abandon a journey (mark as abandoned, not deleted)."""
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         await service.abandon_journey(user_id, journey_id)
@@ -631,14 +630,14 @@ async def abandon_journey(
 async def get_current_step(
     journey_id: str,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """
     Get the current step for a journey.
 
     Returns null if journey is paused or completed.
     """
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         step = await service.get_current_step(user_id, journey_id)
@@ -682,10 +681,10 @@ async def get_step(
     journey_id: str,
     day_index: int,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get a specific step by day index."""
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         step = await service.get_step(user_id, journey_id, day_index)
@@ -729,7 +728,7 @@ async def complete_step(
     day_index: int,
     request: CompleteStepRequest,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -737,7 +736,7 @@ async def complete_step(
 
     Marks the step as complete and optionally saves the user's reflection.
     """
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     try:
         result = await service.complete_step(
@@ -773,14 +772,14 @@ async def complete_step(
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """
     Get user's journey dashboard.
 
     Includes active journeys, enemy progress, recommendations, and today's steps.
     """
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     dashboard = await service.get_dashboard(user_id)
 
@@ -887,10 +886,10 @@ async def list_enemies():
 async def get_enemy_progress(
     enemy: str,
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get user's progress against a specific inner enemy."""
-    user_id = current_user["user_id"]
+    user_id = current_user
 
     # Validate enemy
     enemy_lower = enemy.lower()
@@ -919,14 +918,14 @@ async def get_enemy_progress(
 @router.get("/enemies/{enemy}/radar")
 async def get_enemy_radar(
     service: JourneyEngineService = Depends(get_journey_service),
-    current_user: dict = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ) -> dict[str, int]:
     """
     Get radar chart data for enemy mastery visualization.
 
     Returns mastery levels (0-100) for all six enemies.
     """
-    user_id = current_user["user_id"]
+    user_id = current_user
     tracker = EnemyProgressTracker(service.db)
     return await tracker.get_radar_data(user_id)
 

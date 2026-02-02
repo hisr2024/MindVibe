@@ -156,6 +156,7 @@ class GeneratedStep:
             "verse_selector": self.verse_selector,
             "static_verse_refs": self.static_verse_refs,
             "safety_notes": self.safety_notes,
+            "modern_example": self.modern_example,
         }
 
 

@@ -40,10 +40,27 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from contextlib import asynccontextmanager
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.database import get_db_session
+from backend.deps import SessionLocal
+
+
+@asynccontextmanager
+async def get_db_session():
+    """Context manager for database sessions in scripts."""
+    async with SessionLocal() as session:
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+
 from backend.models import JourneyTemplate, JourneyTemplateStep
 from backend.services.journey_engine.template_generator import (
     JourneyTemplateGenerator,
