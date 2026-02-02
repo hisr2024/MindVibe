@@ -2,10 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
+from pydantic import BaseModel
 
 from backend.deps import get_db, get_current_user_or_create
 from backend.models import Mood
 from backend.schemas import MoodIn, MoodOut
+
+
+class MicroResponseOut(BaseModel):
+    """Response model for mood micro-response."""
+    score: int
+    category: str
+    response: str
 
 router = APIRouter(prefix="/moods", tags=["moods"])
 
@@ -39,12 +47,12 @@ def get_micro_response(score: int) -> str:
     return MOOD_MICRO_RESPONSES.get(category, MOOD_MICRO_RESPONSES["neutral"])
 
 
-@router.post("", response_model=MoodOut)
+@router.post("", response_model=MoodOut, status_code=status.HTTP_201_CREATED)
 async def create_mood(
     payload: MoodIn,
     db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user_or_create),
-) -> dict:
+) -> MoodOut:
     """Create a new mood entry for the authenticated user."""
     try:
         res = await db.execute(
@@ -85,10 +93,10 @@ async def create_mood(
     }
 
 
-@router.get("/micro-response")
+@router.get("/micro-response", response_model=MicroResponseOut)
 async def get_mood_micro_response(
     score: int = Query(..., ge=1, le=10, description="Mood score on a 1-10 scale")
-) -> dict:
+) -> MicroResponseOut:
     """Get KIAAN's empathetic micro-response for a mood score.
 
     Args:

@@ -144,8 +144,9 @@ def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
     return {"ssl": ssl_module.create_default_context()}
 
 
-engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args_for_ssl(DATABASE_URL))
-SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+# Import engine and SessionLocal from deps.py to ensure single database connection pool
+# This avoids duplicate engines with potentially different SSL configurations
+from backend.deps import engine, SessionLocal
 
 app = FastAPI(
     title="MindVibe API",
@@ -942,7 +943,6 @@ startup_logger.info("\n[Moods] Attempting to import Moods router...")
 try:
     from backend.routes.moods import router as moods_router
     app.include_router(moods_router, prefix="/api")
-    app.include_router(moods_router)
     startup_logger.info("✅ [SUCCESS] Moods router loaded")
     startup_logger.info("   • POST   /api/moods - Submit mood entry")
     startup_logger.info("   • GET    /api/moods/micro-response - Get mood analysis")
