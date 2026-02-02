@@ -497,14 +497,9 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Auth router: {e}")
 
-# Load 2FA router
-startup_logger.info("\n[2FA] Attempting to import 2FA router...")
-try:
-    from backend.routes.two_factor_auth import router as tfa_router
-    app.include_router(tfa_router)
-    startup_logger.info("✅ [SUCCESS] 2FA router loaded")
-except Exception as e:
-    startup_logger.info(f"❌ [ERROR] Failed to load 2FA router: {e}")
+# NOTE: 2FA endpoints are included in auth.py router (no separate import needed)
+# The two_factor_auth.py module exists for reference but endpoints are in auth.py
+startup_logger.info("\n[2FA] 2FA endpoints included in Auth router")
 
 # Load Profile router
 startup_logger.info("\n[Profile] Attempting to import Profile router...")

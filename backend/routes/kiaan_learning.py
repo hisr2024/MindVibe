@@ -180,7 +180,7 @@ async def stop_scheduler() -> dict[str, Any]:
         }
 
 
-@router.post("/wisdom/add")
+@router.post("/wisdom/add", status_code=201)
 @limiter.limit("10/hour")
 async def add_manual_wisdom(
     request: Request,
