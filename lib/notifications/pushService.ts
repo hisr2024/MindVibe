@@ -248,38 +248,47 @@ class PushNotificationService {
     }
 
     try {
-      // Get VAPID public key from server
-      const keyResponse = await apiFetch('/api/notifications/vapid-key')
-      if (!keyResponse.ok) {
-        throw new Error('Failed to get VAPID key')
+      // Try to get VAPID public key from server
+      // If backend doesn't support push notifications, fall back to local-only notifications
+      let serverPushEnabled = false
+      try {
+        const keyResponse = await apiFetch('/api/notifications/vapid-key')
+        if (keyResponse.ok) {
+          const { public_key } = await keyResponse.json()
+
+          // Convert base64 to Uint8Array
+          const applicationServerKey = this.urlBase64ToUint8Array(public_key)
+
+          // Subscribe to server push
+          const subscription = await this.swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey as BufferSource,
+          })
+
+          this.state.subscription = this.serializeSubscription(subscription)
+
+          // Register subscription with server
+          await apiFetch('/api/notifications/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              subscription: this.state.subscription,
+            }),
+          })
+          serverPushEnabled = true
+        }
+      } catch (serverError) {
+        // Server push not available, continue with local notifications only
+        console.log('[PushService] Server push not available, using local notifications only')
       }
-      const { public_key } = await keyResponse.json()
 
-      // Convert base64 to Uint8Array
-      const applicationServerKey = this.urlBase64ToUint8Array(public_key)
-
-      // Subscribe
-      const subscription = await this.swRegistration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey as BufferSource,
-      })
-
+      // Enable notifications (local-only if server push failed)
       this.state.isSubscribed = true
-      this.state.subscription = this.serializeSubscription(subscription)
-
-      // Register subscription with server
-      await apiFetch('/api/notifications/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subscription: this.state.subscription,
-        }),
-      })
-
       this.state.preferences.enabled = true
       await this.savePreferences()
       this.notifyListeners()
 
+      console.log(`[PushService] Notifications enabled (server push: ${serverPushEnabled})`)
       return true
     } catch (error) {
       console.error('[PushService] Subscription failed:', error)
@@ -292,7 +301,13 @@ class PushNotificationService {
    */
   public async unsubscribe(): Promise<boolean> {
     if (!this.swRegistration) {
-      return false
+      // Still disable notifications locally
+      this.state.isSubscribed = false
+      this.state.subscription = null
+      this.state.preferences.enabled = false
+      await this.savePreferences()
+      this.notifyListeners()
+      return true
     }
 
     try {
@@ -300,14 +315,19 @@ class PushNotificationService {
       if (subscription) {
         await subscription.unsubscribe()
 
-        // Notify server
-        await apiFetch('/api/notifications/unsubscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            endpoint: subscription.endpoint,
-          }),
-        })
+        // Try to notify server (ignore failures - server may not support notifications)
+        try {
+          await apiFetch('/api/notifications/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              endpoint: subscription.endpoint,
+            }),
+          })
+        } catch {
+          // Server notification failed, but local unsubscribe succeeded
+          console.log('[PushService] Server unsubscribe failed, but local unsubscribe succeeded')
+        }
       }
 
       this.state.isSubscribed = false

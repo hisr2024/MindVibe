@@ -77,19 +77,23 @@ export default function MobileJourneysPage() {
       setIsLoading(true)
 
       try {
+        // Fetch active journeys (user's in-progress journeys)
+        // Fetch all journeys for catalog (available to start)
         const [activeResponse, availableResponse] = await Promise.all([
-          apiFetch('/api/journeys/active'),
-          apiFetch('/api/journeys/catalog'),
+          apiFetch('/api/journeys?status=active'),
+          apiFetch('/api/journeys'),
         ])
 
         if (activeResponse.ok) {
           const data = await activeResponse.json()
-          setActiveJourneys(data.journeys || [])
+          setActiveJourneys(data.items || data.journeys || [])
         }
 
         if (availableResponse.ok) {
           const data = await availableResponse.json()
-          setAvailableJourneys(data.journeys || [])
+          // Filter out active journeys from available list
+          const activeIds = new Set((data.items || data.journeys || []).filter((j: { status?: string }) => j.status === 'active').map((j: { id: string }) => j.id))
+          setAvailableJourneys((data.items || data.journeys || []).filter((j: { id: string; status?: string }) => j.status !== 'active'))
         }
       } catch (error) {
         console.error('Failed to fetch journeys:', error)
@@ -128,18 +132,18 @@ export default function MobileJourneysPage() {
     // Re-fetch journeys
     try {
       const [activeResponse, availableResponse] = await Promise.all([
-        apiFetch('/api/journeys/active'),
-        apiFetch('/api/journeys/catalog'),
+        apiFetch('/api/journeys?status=active'),
+        apiFetch('/api/journeys'),
       ])
 
       if (activeResponse.ok) {
         const data = await activeResponse.json()
-        setActiveJourneys(data.journeys || [])
+        setActiveJourneys(data.items || data.journeys || [])
       }
 
       if (availableResponse.ok) {
         const data = await availableResponse.json()
-        setAvailableJourneys(data.journeys || [])
+        setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
       }
     } catch (error) {
       console.error('Failed to refresh journeys:', error)
