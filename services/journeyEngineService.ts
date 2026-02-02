@@ -1,26 +1,27 @@
 /**
  * Journey Engine Service - Frontend service for the Six Enemies (Shadripu) Journey System.
  *
- * Provides a clean API for interacting with the journey engine backend,
- * including templates, user journeys, steps, and enemy progress tracking.
+ * Provides a clean API for interacting with the journey engine backend.
+ * All types match backend response models in backend/routes/journey_engine.py
  */
 
 import type {
   JourneyTemplate,
-  JourneyStats,
-  DailyStep,
-  EnemyProgress,
+  JourneyResponse,
+  StepResponse,
+  EnemyProgressResponse,
   EnemyRadarData,
-  JourneyDashboard,
+  DashboardResponse,
   StartJourneyRequest,
   CompleteStepRequest,
   ListTemplatesParams,
   ListJourneysParams,
   TemplateListResponse,
   JourneyListResponse,
-  StepCompletionResponse,
-  EnemyType,
-  ModernExample,
+  CompletionResponse,
+  ExampleResponse,
+  ExampleListResponse,
+  EnemyInfoResponse,
 } from '@/types/journeyEngine.types';
 
 // =============================================================================
@@ -59,7 +60,7 @@ export class JourneyEngineError extends Error {
   }
 
   isMaxJourneysError(): boolean {
-    return this.code === 'MAX_ACTIVE_JOURNEYS';
+    return this.code === 'MAX_ACTIVE_JOURNEYS' || this.message.includes('5 active');
   }
 }
 
@@ -181,14 +182,15 @@ async function apiRequest<T>(
 
 /**
  * List available journey templates.
+ * GET /api/journey-engine/templates
  */
 export async function listTemplates(params: ListTemplatesParams = {}): Promise<TemplateListResponse> {
   const searchParams = new URLSearchParams();
 
   if (params.enemy) searchParams.set('enemy', params.enemy);
-  if (params.difficulty !== undefined) searchParams.set('difficulty', String(params.difficulty));
-  if (params.is_free !== undefined) searchParams.set('is_free', String(params.is_free));
-  if (params.is_featured !== undefined) searchParams.set('is_featured', String(params.is_featured));
+  if (params.difficulty_max !== undefined) searchParams.set('difficulty_max', String(params.difficulty_max));
+  if (params.free_only !== undefined) searchParams.set('free_only', String(params.free_only));
+  if (params.featured_only !== undefined) searchParams.set('featured_only', String(params.featured_only));
   if (params.limit !== undefined) searchParams.set('limit', String(params.limit));
   if (params.offset !== undefined) searchParams.set('offset', String(params.offset));
 
@@ -202,6 +204,7 @@ export async function listTemplates(params: ListTemplatesParams = {}): Promise<T
 
 /**
  * Get a specific template by ID.
+ * GET /api/journey-engine/templates/{template_id}
  */
 export async function getTemplate(templateId: string): Promise<JourneyTemplate> {
   return apiRequest<JourneyTemplate>('GET', `${JOURNEY_ENGINE_ENDPOINT}/templates/${templateId}`);
@@ -211,14 +214,14 @@ export async function getTemplate(templateId: string): Promise<JourneyTemplate> 
  * Get featured templates for home display.
  */
 export async function getFeaturedTemplates(): Promise<JourneyTemplate[]> {
-  const response = await listTemplates({ is_featured: true, limit: 6 });
+  const response = await listTemplates({ featured_only: true, limit: 6 });
   return response.templates;
 }
 
 /**
  * Get templates by enemy type.
  */
-export async function getTemplatesByEnemy(enemy: EnemyType): Promise<JourneyTemplate[]> {
+export async function getTemplatesByEnemy(enemy: string): Promise<JourneyTemplate[]> {
   const response = await listTemplates({ enemy, limit: 10 });
   return response.templates;
 }
@@ -229,11 +232,12 @@ export async function getTemplatesByEnemy(enemy: EnemyType): Promise<JourneyTemp
 
 /**
  * List user's journeys.
+ * GET /api/journey-engine/journeys
  */
 export async function listJourneys(params: ListJourneysParams = {}): Promise<JourneyListResponse> {
   const searchParams = new URLSearchParams();
 
-  if (params.status) searchParams.set('status', params.status);
+  if (params.status_filter) searchParams.set('status_filter', params.status_filter);
   if (params.limit !== undefined) searchParams.set('limit', String(params.limit));
   if (params.offset !== undefined) searchParams.set('offset', String(params.offset));
 
@@ -247,37 +251,42 @@ export async function listJourneys(params: ListJourneysParams = {}): Promise<Jou
 
 /**
  * Get a specific journey.
+ * GET /api/journey-engine/journeys/{journey_id}
  */
-export async function getJourney(journeyId: string): Promise<JourneyStats> {
-  return apiRequest<JourneyStats>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}`);
+export async function getJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}`);
 }
 
 /**
  * Start a new journey from a template.
+ * POST /api/journey-engine/journeys
  */
-export async function startJourney(request: StartJourneyRequest): Promise<JourneyStats> {
-  return apiRequest<JourneyStats>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys`, request);
+export async function startJourney(request: StartJourneyRequest): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys`, request);
 }
 
 /**
  * Pause an active journey.
+ * POST /api/journey-engine/journeys/{journey_id}/pause
  */
-export async function pauseJourney(journeyId: string): Promise<JourneyStats> {
-  return apiRequest<JourneyStats>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/pause`);
+export async function pauseJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/pause`);
 }
 
 /**
  * Resume a paused journey.
+ * POST /api/journey-engine/journeys/{journey_id}/resume
  */
-export async function resumeJourney(journeyId: string): Promise<JourneyStats> {
-  return apiRequest<JourneyStats>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/resume`);
+export async function resumeJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/resume`);
 }
 
 /**
  * Abandon a journey.
+ * DELETE /api/journey-engine/journeys/{journey_id}
  */
-export async function abandonJourney(journeyId: string): Promise<void> {
-  await apiRequest<void>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/abandon`);
+export async function abandonJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('DELETE', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}`);
 }
 
 // =============================================================================
@@ -286,27 +295,30 @@ export async function abandonJourney(journeyId: string): Promise<void> {
 
 /**
  * Get the current step for a journey.
+ * GET /api/journey-engine/journeys/{journey_id}/steps/current
  */
-export async function getCurrentStep(journeyId: string): Promise<DailyStep | null> {
-  return apiRequest<DailyStep | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/current`);
+export async function getCurrentStep(journeyId: string): Promise<StepResponse | null> {
+  return apiRequest<StepResponse | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/current`);
 }
 
 /**
  * Get a specific step by day index.
+ * GET /api/journey-engine/journeys/{journey_id}/steps/{day_index}
  */
-export async function getStep(journeyId: string, dayIndex: number): Promise<DailyStep> {
-  return apiRequest<DailyStep>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/${dayIndex}`);
+export async function getStep(journeyId: string, dayIndex: number): Promise<StepResponse> {
+  return apiRequest<StepResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/${dayIndex}`);
 }
 
 /**
  * Complete a step.
+ * POST /api/journey-engine/journeys/{journey_id}/steps/{day_index}/complete
  */
 export async function completeStep(
   journeyId: string,
   dayIndex: number,
   request: CompleteStepRequest = {}
-): Promise<StepCompletionResponse> {
-  return apiRequest<StepCompletionResponse>(
+): Promise<CompletionResponse> {
+  return apiRequest<CompletionResponse>(
     'POST',
     `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/${dayIndex}/complete`,
     request
@@ -319,9 +331,10 @@ export async function completeStep(
 
 /**
  * Get the user's journey dashboard.
+ * GET /api/journey-engine/dashboard
  */
-export async function getDashboard(): Promise<JourneyDashboard> {
-  return apiRequest<JourneyDashboard>('GET', `${JOURNEY_ENGINE_ENDPOINT}/dashboard`);
+export async function getDashboard(): Promise<DashboardResponse> {
+  return apiRequest<DashboardResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/dashboard`);
 }
 
 // =============================================================================
@@ -330,23 +343,48 @@ export async function getDashboard(): Promise<JourneyDashboard> {
 
 /**
  * List all enemies with basic info.
+ * GET /api/journey-engine/enemies
  */
-export async function listEnemies(): Promise<Array<{ type: EnemyType; name: string; sanskrit: string; description: string }>> {
-  return apiRequest('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies`);
+export async function listEnemies(): Promise<EnemyInfoResponse[]> {
+  return apiRequest<EnemyInfoResponse[]>('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies`);
 }
 
 /**
  * Get progress for a specific enemy.
+ * GET /api/journey-engine/enemies/{enemy}
  */
-export async function getEnemyProgress(enemy: EnemyType): Promise<EnemyProgress> {
-  return apiRequest<EnemyProgress>('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies/${enemy}`);
+export async function getEnemyProgress(enemy: string): Promise<EnemyProgressResponse | null> {
+  return apiRequest<EnemyProgressResponse | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies/${enemy}`);
 }
 
 /**
  * Get radar chart data for all enemies.
+ * GET /api/journey-engine/enemies/{enemy}/radar
+ * Note: Backend route is /enemies/{enemy}/radar - we call it for each enemy
+ * and aggregate, OR we can call dashboard which includes enemy_progress
  */
 export async function getEnemyRadar(): Promise<EnemyRadarData> {
-  return apiRequest<EnemyRadarData>('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies/radar`);
+  // The dashboard endpoint includes enemy_progress with mastery_level
+  // We can extract radar data from there
+  const dashboard = await getDashboard();
+
+  const radarData: EnemyRadarData = {
+    kama: 0,
+    krodha: 0,
+    lobha: 0,
+    moha: 0,
+    mada: 0,
+    matsarya: 0,
+  };
+
+  for (const progress of dashboard.enemy_progress) {
+    const enemy = progress.enemy as keyof EnemyRadarData;
+    if (enemy in radarData) {
+      radarData[enemy] = progress.mastery_level;
+    }
+  }
+
+  return radarData;
 }
 
 // =============================================================================
@@ -355,16 +393,18 @@ export async function getEnemyRadar(): Promise<EnemyRadarData> {
 
 /**
  * Get modern examples for an enemy.
+ * GET /api/journey-engine/examples/{enemy}
  */
-export async function getExamples(enemy: EnemyType, limit: number = 4): Promise<ModernExample[]> {
-  return apiRequest<ModernExample[]>('GET', `${JOURNEY_ENGINE_ENDPOINT}/examples/${enemy}?limit=${limit}`);
+export async function getExamples(enemy: string, limit: number = 4): Promise<ExampleListResponse> {
+  return apiRequest<ExampleListResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/examples/${enemy}?limit=${limit}`);
 }
 
 /**
  * Get a random example for an enemy.
+ * GET /api/journey-engine/examples/{enemy}/random
  */
-export async function getRandomExample(enemy: EnemyType): Promise<ModernExample> {
-  return apiRequest<ModernExample>('GET', `${JOURNEY_ENGINE_ENDPOINT}/examples/${enemy}/random`);
+export async function getRandomExample(enemy: string): Promise<ExampleResponse | null> {
+  return apiRequest<ExampleResponse | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/examples/${enemy}/random`);
 }
 
 // =============================================================================

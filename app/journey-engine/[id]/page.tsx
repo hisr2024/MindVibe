@@ -12,8 +12,8 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ENEMY_INFO,
-  type JourneyStats,
-  type DailyStep,
+  type JourneyResponse,
+  type StepResponse,
   type EnemyType,
   getJourneyStatusLabel,
 } from '@/types/journeyEngine.types'
@@ -27,8 +27,8 @@ export default function JourneyDetailPage() {
   // State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [journey, setJourney] = useState<JourneyStats | null>(null)
-  const [currentStep, setCurrentStep] = useState<DailyStep | null>(null)
+  const [journey, setJourney] = useState<JourneyResponse | null>(null)
+  const [currentStep, setCurrentStep] = useState<StepResponse | null>(null)
   const [reflection, setReflection] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -47,7 +47,7 @@ export default function JourneyDetailPage() {
 
       setJourney(journeyData)
       setCurrentStep(stepData)
-      setSelectedDay(stepData?.day_index || journeyData.current_day_index)
+      setSelectedDay(stepData?.day_index || journeyData.current_day)
     } catch (err) {
       if (err instanceof JourneyEngineError) {
         if (err.isAuthError()) {
@@ -75,7 +75,7 @@ export default function JourneyDetailPage() {
       const step = await journeyEngineService.getStep(journeyId, dayIndex)
       setCurrentStep(step)
       setSelectedDay(dayIndex)
-      setReflection(step.user_reflection || '')
+      setReflection('')
     } catch (err) {
       if (err instanceof JourneyEngineError) {
         setError(err.message)
@@ -97,16 +97,22 @@ export default function JourneyDetailPage() {
 
       setShowSuccess(true)
 
-      if (result.journey_completed) {
+      if (result.journey_complete) {
         setTimeout(() => {
           router.push('/journey-engine')
         }, 3000)
-      } else if (result.next_step) {
-        setTimeout(() => {
+      } else if (result.next_day !== null) {
+        setTimeout(async () => {
           setShowSuccess(false)
-          setCurrentStep(result.next_step)
-          setSelectedDay(result.next_step?.day_index || null)
-          setReflection('')
+          // Load the next step
+          try {
+            const nextStep = await journeyEngineService.getStep(journeyId, result.next_day!)
+            setCurrentStep(nextStep)
+            setSelectedDay(result.next_day)
+            setReflection('')
+          } catch {
+            loadData()
+          }
         }, 2000)
       } else {
         setTimeout(() => {
@@ -124,7 +130,7 @@ export default function JourneyDetailPage() {
   }
 
   // Get enemy info for this journey
-  const primaryEnemy = journey?.enemy_tags?.[0] as EnemyType | undefined
+  const primaryEnemy = journey?.primary_enemies?.[0] as EnemyType | undefined
   const enemyInfo = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
 
   if (isLoading) {
@@ -171,9 +177,9 @@ export default function JourneyDetailPage() {
             &larr; All Journeys
           </Link>
           <div className="text-center">
-            <h1 className="text-lg font-semibold text-white">{journey.template_title}</h1>
+            <h1 className="text-lg font-semibold text-white">{journey.title}</h1>
             <p className="text-xs text-white/50">
-              Day {journey.current_day_index} of {journey.duration_days} | {journey.progress_percent}% complete
+              Day {journey.current_day} of {journey.total_days} | {journey.progress_percentage}% complete
             </p>
           </div>
           <span className={`text-xs px-2 py-1 rounded-full ${
@@ -188,7 +194,7 @@ export default function JourneyDetailPage() {
       <div className="relative z-10 h-1 bg-white/10">
         <div
           className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
-          style={{ width: `${journey.progress_percent}%` }}
+          style={{ width: `${journey.progress_percentage}%` }}
         />
       </div>
 
@@ -210,12 +216,12 @@ export default function JourneyDetailPage() {
         {/* Day Navigation */}
         <div className="mb-6 overflow-x-auto pb-2">
           <div className="flex gap-2 min-w-max">
-            {Array.from({ length: journey.duration_days }, (_, i) => i + 1).map((day) => {
-              const isCompleted = day < journey.current_day_index ||
-                (day === journey.current_day_index && currentStep?.is_completed)
-              const isCurrent = day === journey.current_day_index
+            {Array.from({ length: journey.total_days }, (_, i) => i + 1).map((day) => {
+              const isCompleted = day < journey.current_day ||
+                (day === journey.current_day && currentStep?.is_completed)
+              const isCurrent = day === journey.current_day
               const isSelected = day === selectedDay
-              const isAccessible = day <= journey.current_day_index
+              const isAccessible = day <= journey.current_day
 
               return (
                 <button
@@ -265,84 +271,83 @@ export default function JourneyDetailPage() {
             </div>
 
             {/* Teaching */}
-            {currentStep.teaching_hint && (
+            {currentStep.teaching && (
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-sm font-semibold text-purple-400 uppercase tracking-wide mb-3">
                   Today&apos;s Teaching
                 </h3>
-                <p className="text-white/90 leading-relaxed">{currentStep.teaching_hint}</p>
+                <p className="text-white/90 leading-relaxed">{currentStep.teaching}</p>
               </div>
             )}
 
             {/* Gita Verse */}
-            {currentStep.verse && (
+            {currentStep.verses && currentStep.verses.length > 0 && (
               <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
                 <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wide mb-3">
                   Bhagavad Gita Wisdom
                 </h3>
                 <div className="text-xs text-amber-300/70 mb-2">
-                  Chapter {currentStep.verse.chapter}, Verse {currentStep.verse.verse}
+                  Chapter {currentStep.verses[0].chapter}, Verse {currentStep.verses[0].verse}
                 </div>
-                {currentStep.verse.sanskrit && (
-                  <p className="text-amber-200/80 font-serif italic mb-3">{currentStep.verse.sanskrit}</p>
+                {currentStep.verses[0].sanskrit && (
+                  <p className="text-amber-200/80 font-serif italic mb-3">{currentStep.verses[0].sanskrit}</p>
                 )}
-                <p className="text-white/90 leading-relaxed">&ldquo;{currentStep.verse.english}&rdquo;</p>
+                <p className="text-white/90 leading-relaxed">&ldquo;{currentStep.verses[0].english}&rdquo;</p>
               </div>
             )}
 
-            {/* Modern Example */}
-            {currentStep.modern_example && (
-              <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wide mb-3">
-                  Real-Life Example
-                </h3>
-                <p className="text-white/80 mb-4">{currentStep.modern_example.scenario}</p>
-                <div className="p-4 bg-white/5 rounded-xl">
-                  <div className="text-sm text-white/60 mb-1">The Antidote:</div>
-                  <p className="text-white/90">{currentStep.modern_example.practical_antidote}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Practice Prompt */}
-            {currentStep.practice_prompt && (
+            {/* Practice */}
+            {currentStep.practice && Object.keys(currentStep.practice).length > 0 && (
               <div className="p-6 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20">
                 <h3 className="text-sm font-semibold text-green-400 uppercase tracking-wide mb-3">
                   Today&apos;s Practice
                 </h3>
-                <p className="text-white/90 leading-relaxed">{currentStep.practice_prompt}</p>
+                {currentStep.practice.description && (
+                  <p className="text-white/90 leading-relaxed mb-4">
+                    {String(currentStep.practice.description)}
+                  </p>
+                )}
+                {currentStep.practice.steps && Array.isArray(currentStep.practice.steps) && (
+                  <ul className="space-y-2">
+                    {(currentStep.practice.steps as string[]).map((step, idx) => (
+                      <li key={idx} className="text-white/80 flex gap-2">
+                        <span className="text-green-400">{idx + 1}.</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
 
-            {/* Reflection Prompt */}
-            {currentStep.reflection_prompt && (
+            {/* Reflection Prompts */}
+            {currentStep.guided_reflection && currentStep.guided_reflection.length > 0 && (
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-sm font-semibold text-purple-400 uppercase tracking-wide mb-3">
-                  Reflection Question
+                  Guided Reflection
                 </h3>
-                <p className="text-white/90 mb-4">{currentStep.reflection_prompt}</p>
+                <ul className="space-y-3 mb-4">
+                  {currentStep.guided_reflection.map((prompt, idx) => (
+                    <li key={idx} className="text-white/90">{prompt}</li>
+                  ))}
+                </ul>
 
-                {!currentStep.is_completed ? (
+                {!currentStep.is_completed && (
                   <textarea
                     value={reflection}
                     onChange={(e) => setReflection(e.target.value)}
                     placeholder="Write your reflection here... (optional)"
                     className="w-full h-32 p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 resize-none"
                   />
-                ) : currentStep.user_reflection ? (
-                  <div className="p-4 bg-white/5 rounded-xl">
-                    <div className="text-xs text-white/50 mb-2">Your reflection:</div>
-                    <p className="text-white/80 italic">{currentStep.user_reflection}</p>
-                  </div>
-                ) : null}
+                )}
               </div>
             )}
 
-            {/* Safety Notes */}
-            {currentStep.safety_notes && (
+            {/* Safety Note */}
+            {currentStep.safety_note && (
               <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
                 <p className="text-amber-300 text-sm">
-                  <span className="font-semibold">Note:</span> {currentStep.safety_notes}
+                  <span className="font-semibold">Note:</span> {currentStep.safety_note}
                 </p>
               </div>
             )}

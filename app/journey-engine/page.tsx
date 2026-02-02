@@ -15,9 +15,9 @@ import {
   ENEMY_ORDER,
   type EnemyType,
   type JourneyTemplate,
-  type JourneyStats,
+  type JourneyResponse,
   type EnemyRadarData,
-  type JourneyDashboard,
+  type DashboardResponse,
   getJourneyStatusLabel,
   getJourneyStatusColor,
   getDifficultyLabel,
@@ -194,30 +194,30 @@ function EnemyCard({
 // JOURNEY CARD COMPONENT
 // =============================================================================
 
-function JourneyCard({ journey, onAction }: { journey: JourneyStats; onAction: (action: string) => void }) {
+function JourneyCard({ journey, onAction }: { journey: JourneyResponse; onAction: (action: string) => void }) {
   return (
     <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h3 className="font-semibold text-white">{journey.template_title}</h3>
+          <h3 className="font-semibold text-white">{journey.title}</h3>
           <div className="flex items-center gap-2 mt-1">
             <span className={`text-xs px-2 py-0.5 rounded-full border ${getJourneyStatusColor(journey.status)}`}>
               {getJourneyStatusLabel(journey.status)}
             </span>
             <span className="text-xs text-white/50">
-              Day {journey.current_day_index} of {journey.duration_days}
+              Day {journey.current_day} of {journey.total_days}
             </span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-white">{journey.progress_percent}%</div>
+          <div className="text-2xl font-bold text-white">{Math.round(journey.progress_percentage)}%</div>
         </div>
       </div>
 
       <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-3">
         <div
           className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all"
-          style={{ width: `${journey.progress_percent}%` }}
+          style={{ width: `${journey.progress_percentage}%` }}
         />
       </div>
 
@@ -225,7 +225,7 @@ function JourneyCard({ journey, onAction }: { journey: JourneyStats; onAction: (
         {journey.status === 'active' && (
           <>
             <Link
-              href={`/journey-engine/${journey.id}`}
+              href={`/journey-engine/${journey.journey_id}`}
               className="flex-1 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-lg text-center hover:from-purple-500 hover:to-indigo-500 transition-all"
             >
               Continue
@@ -264,7 +264,7 @@ function TemplateCard({
   onStart: () => void
   disabled: boolean
 }) {
-  const primaryEnemy = template.primary_enemy_tags[0]
+  const primaryEnemy = template.primary_enemy_tags[0] as EnemyType | undefined
   const enemyInfo = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
 
   return (
@@ -314,7 +314,7 @@ export default function JourneyEnginePage() {
   // State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [dashboard, setDashboard] = useState<JourneyDashboard | null>(null)
+  const [dashboard, setDashboard] = useState<DashboardResponse | null>(null)
   const [radarData, setRadarData] = useState<EnemyRadarData | null>(null)
   const [templates, setTemplates] = useState<JourneyTemplate[]>([])
   const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null)
@@ -454,23 +454,23 @@ export default function JourneyEnginePage() {
             </div>
 
             {/* Stats Row */}
-            {dashboard?.stats && (
+            {dashboard && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-3xl font-bold text-white">{dashboard.stats.total_journeys_started}</div>
-                  <div className="text-sm text-white/50">Journeys Started</div>
+                  <div className="text-3xl font-bold text-white">{dashboard.active_journeys.length}</div>
+                  <div className="text-sm text-white/50">Active Journeys</div>
                 </div>
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-3xl font-bold text-green-400">{dashboard.stats.total_journeys_completed}</div>
+                  <div className="text-3xl font-bold text-green-400">{dashboard.completed_journeys}</div>
                   <div className="text-sm text-white/50">Completed</div>
                 </div>
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-3xl font-bold text-amber-400">{dashboard.stats.current_streak_days}</div>
+                  <div className="text-3xl font-bold text-amber-400">{dashboard.current_streak}</div>
                   <div className="text-sm text-white/50">Day Streak</div>
                 </div>
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className="text-3xl font-bold text-purple-400">{dashboard.stats.total_steps_completed}</div>
-                  <div className="text-sm text-white/50">Steps Completed</div>
+                  <div className="text-3xl font-bold text-purple-400">{dashboard.total_days_practiced}</div>
+                  <div className="text-sm text-white/50">Days Practiced</div>
                 </div>
               </div>
             )}
@@ -510,9 +510,9 @@ export default function JourneyEnginePage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       {dashboard.active_journeys.map((journey) => (
                         <JourneyCard
-                          key={journey.id}
+                          key={journey.journey_id}
                           journey={journey}
-                          onAction={(action) => handleJourneyAction(journey.id, action)}
+                          onAction={(action) => handleJourneyAction(journey.journey_id, action)}
                         />
                       ))}
                     </div>
@@ -520,18 +520,18 @@ export default function JourneyEnginePage() {
                 )}
 
                 {/* Today's Steps */}
-                {dashboard?.todays_steps && dashboard.todays_steps.length > 0 && (
+                {dashboard?.today_steps && dashboard.today_steps.length > 0 && (
                   <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30">
                     <h3 className="text-lg font-semibold text-white mb-3">Today&apos;s Steps</h3>
                     <div className="space-y-2">
-                      {dashboard.todays_steps.map((step) => (
+                      {dashboard.today_steps.map((step) => (
                         <div
                           key={`${step.journey_id}-${step.day_index}`}
                           className="flex items-center justify-between p-3 rounded-lg bg-white/5"
                         >
                           <div>
                             <div className="font-medium text-white">{step.step_title}</div>
-                            <div className="text-sm text-white/50">{step.journey_title} - Day {step.day_index}</div>
+                            <div className="text-sm text-white/50">Day {step.day_index}</div>
                           </div>
                           {step.is_completed ? (
                             <span className="text-green-400">Completed</span>

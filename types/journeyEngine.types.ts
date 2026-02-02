@@ -8,6 +8,8 @@
  * - Moha (Attachment/Delusion)
  * - Mada (Pride/Ego)
  * - Matsarya (Jealousy/Envy)
+ *
+ * NOTE: Types match backend response models in backend/routes/journey_engine.py
  */
 
 // =============================================================================
@@ -30,10 +32,10 @@ export type UserJourneyStatus = 'active' | 'paused' | 'completed' | 'abandoned';
 export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
 
 // =============================================================================
-// ENEMY METADATA
+// ENEMY METADATA (Frontend Only - for UI display)
 // =============================================================================
 
-export interface EnemyInfo {
+export interface EnemyDisplayInfo {
   type: EnemyType;
   name: string;
   sanskrit: string;
@@ -45,7 +47,7 @@ export interface EnemyInfo {
   antidote: string;
 }
 
-export const ENEMY_INFO: Record<EnemyType, EnemyInfo> = {
+export const ENEMY_INFO: Record<EnemyType, EnemyDisplayInfo> = {
   kama: {
     type: 'kama',
     name: 'Desire',
@@ -117,121 +119,97 @@ export const ENEMY_INFO: Record<EnemyType, EnemyInfo> = {
 export const ENEMY_ORDER: EnemyType[] = ['kama', 'krodha', 'lobha', 'moha', 'mada', 'matsarya'];
 
 // =============================================================================
-// TEMPLATE TYPES
+// TEMPLATE TYPES (matches backend TemplateResponse)
 // =============================================================================
 
 export interface JourneyTemplate {
   id: string;
   slug: string;
   title: string;
-  description: string;
-  primary_enemy_tags: EnemyType[];
+  description: string | null;
+  primary_enemy_tags: string[];
   duration_days: number;
-  difficulty: DifficultyLevel;
-  is_active: boolean;
+  difficulty: number;
   is_featured: boolean;
   is_free: boolean;
   icon_name: string | null;
   color_theme: string | null;
-  steps_count: number;
-}
-
-export interface JourneyTemplateStep {
-  id: string;
-  day_index: number;
-  step_title: string | null;
-  teaching_hint: string | null;
-  reflection_prompt: string | null;
-  practice_prompt: string | null;
-  verse_selector: Record<string, unknown> | null;
-  static_verse_refs: Array<{ chapter: number; verse: number }> | null;
-  safety_notes: string | null;
 }
 
 // =============================================================================
-// USER JOURNEY TYPES
+// USER JOURNEY TYPES (matches backend JourneyResponse)
 // =============================================================================
 
-export interface UserJourney {
-  id: string;
-  template_id: string;
-  template_title: string;
+export interface JourneyResponse {
+  journey_id: string;
   template_slug: string;
+  title: string;
   status: UserJourneyStatus;
-  current_day_index: number;
-  duration_days: number;
-  progress_percent: number;
-  started_at: string;
-  completed_at: string | null;
-  paused_at: string | null;
-  enemy_tags: EnemyType[];
+  current_day: number;
+  total_days: number;
+  progress_percentage: number;
+  days_completed: number;
+  started_at: string | null;
+  last_activity: string | null;
+  primary_enemies: string[];
+  streak_days: number;
 }
 
-export interface JourneyStats {
-  id: string;
-  template_id: string;
-  template_title: string;
-  template_slug: string;
-  status: UserJourneyStatus;
-  current_day_index: number;
-  duration_days: number;
-  progress_percent: number;
-  started_at: string;
-  completed_at: string | null;
-  paused_at: string | null;
-  completed_steps: number;
-  enemy_tags: EnemyType[];
-}
+// Alias for backwards compatibility
+export type JourneyStats = JourneyResponse;
 
 // =============================================================================
-// STEP TYPES
+// STEP TYPES (matches backend StepResponse)
 // =============================================================================
 
-export interface DailyStep {
-  day_index: number;
-  step_title: string;
-  teaching_hint: string;
-  reflection_prompt: string;
-  practice_prompt: string;
-  verse: GitaVerse | null;
-  modern_example: ModernExample | null;
-  is_completed: boolean;
-  completed_at: string | null;
-  user_reflection: string | null;
-  safety_notes: string | null;
-}
-
-export interface GitaVerse {
+export interface VerseContent {
   chapter: number;
   verse: number;
   sanskrit: string | null;
-  transliteration: string | null;
+  hindi: string | null;
   english: string;
+  transliteration: string | null;
+  theme: string | null;
 }
 
-export interface ModernExample {
-  category: string;
-  scenario: string;
-  how_enemy_manifests: string;
-  gita_verse_ref: string;
-  gita_wisdom: string;
-  practical_antidote: string;
-  reflection_question: string;
+export interface StepResponse {
+  step_id: string;
+  journey_id: string;
+  day_index: number;
+  step_title: string;
+  teaching: string;
+  guided_reflection: string[];
+  practice: Record<string, unknown>;
+  verse_refs: Array<{ chapter: number; verse: number }>;
+  verses: VerseContent[];
+  micro_commitment: string | null;
+  check_in_prompt: Record<string, string> | null;
+  safety_note: string | null;
+  is_completed: boolean;
+  completed_at: string | null;
 }
 
+// Alias for backwards compatibility
+export type DailyStep = StepResponse;
+
 // =============================================================================
-// ENEMY PROGRESS TYPES
+// ENEMY PROGRESS TYPES (matches backend EnemyProgressResponse)
 // =============================================================================
 
-export interface EnemyProgress {
-  enemy: EnemyType;
+export interface EnemyProgressResponse {
+  enemy: string;
   enemy_label: string;
-  total_journeys: number;
-  completed_journeys: number;
-  active_journeys: number;
-  total_steps_completed: number;
-  mastery_level: number; // 0-100
+  journeys_started: number;
+  journeys_completed: number;
+  total_days_practiced: number;
+  current_streak: number;
+  best_streak: number;
+  last_practice: string | null;
+  mastery_level: number;
 }
+
+// Alias for backwards compatibility
+export type EnemyProgress = EnemyProgressResponse;
 
 export interface EnemyRadarData {
   kama: number;
@@ -243,86 +221,130 @@ export interface EnemyRadarData {
 }
 
 // =============================================================================
-// DASHBOARD TYPES
+// ENEMY INFO TYPE (matches backend EnemyInfo)
 // =============================================================================
 
-export interface JourneyDashboard {
-  active_journeys: JourneyStats[];
-  todays_steps: TodayStep[];
-  enemy_progress: Record<EnemyType, EnemyProgress>;
-  recommendations: JourneyTemplate[];
-  stats: DashboardStats;
+export interface EnemyInfoResponse {
+  enemy: string;
+  sanskrit: string;
+  english: string;
+  description: string;
+  label: string;
+  key_verse: { chapter: number; verse: number };
+  themes: string[];
+  antidotes: string[];
+  modern_contexts: string[];
 }
 
-export interface TodayStep {
-  journey_id: string;
-  journey_title: string;
-  day_index: number;
-  step_title: string;
-  is_completed: boolean;
+// =============================================================================
+// DASHBOARD TYPES (matches backend DashboardResponse)
+// =============================================================================
+
+export interface DashboardResponse {
+  active_journeys: JourneyResponse[];
+  completed_journeys: number;
+  total_days_practiced: number;
+  current_streak: number;
+  enemy_progress: EnemyProgressResponse[];
+  recommended_templates: Record<string, unknown>[];
+  today_steps: StepResponse[];
 }
 
-export interface DashboardStats {
-  total_journeys_started: number;
-  total_journeys_completed: number;
-  current_streak_days: number;
-  total_steps_completed: number;
+// Alias for backwards compatibility
+export type JourneyDashboard = DashboardResponse;
+
+// =============================================================================
+// COMPLETION RESPONSE (matches backend CompletionResponse)
+// =============================================================================
+
+export interface CompletionResponse {
+  success: boolean;
+  day_completed: number;
+  journey_complete: boolean;
+  next_day: number | null;
+  progress_percentage: number;
+}
+
+// Alias for backwards compatibility
+export type StepCompletionResponse = CompletionResponse;
+
+// =============================================================================
+// EXAMPLE TYPES (matches backend ExampleResponse)
+// =============================================================================
+
+export interface ExampleResponse {
+  enemy: string;
+  category: string;
+  scenario: string;
+  how_enemy_manifests: string;
+  gita_verse_ref: { chapter: number; verse: number };
+  gita_wisdom: string;
+  practical_antidote: string;
+  reflection_question: string;
+}
+
+// Alias for backwards compatibility
+export type ModernExample = ExampleResponse;
+
+export interface ExampleListResponse {
+  examples: ExampleResponse[];
+  total: number;
+  enemy: string;
 }
 
 // =============================================================================
 // REQUEST TYPES
 // =============================================================================
 
+export interface PersonalizationSettings {
+  pace?: string;
+  time_budget_minutes?: number;
+  focus_tags?: string[];
+  preferred_tone?: string;
+  provider_preference?: string;
+}
+
 export interface StartJourneyRequest {
   template_id: string;
-  personalization?: {
-    focus_area?: string;
-    preferred_time?: string;
-    notification_enabled?: boolean;
-  };
+  personalization?: PersonalizationSettings;
 }
 
 export interface CompleteStepRequest {
   reflection?: string;
-  mood_after?: number;
-  insights?: string[];
+  check_in?: Record<string, unknown>;
 }
 
 export interface ListTemplatesParams {
-  enemy?: EnemyType;
-  difficulty?: DifficultyLevel;
-  is_free?: boolean;
-  is_featured?: boolean;
+  enemy?: string;
+  difficulty_max?: number;
+  free_only?: boolean;
+  featured_only?: boolean;
   limit?: number;
   offset?: number;
 }
 
 export interface ListJourneysParams {
-  status?: UserJourneyStatus;
+  status_filter?: UserJourneyStatus;
   limit?: number;
   offset?: number;
 }
 
 // =============================================================================
-// RESPONSE TYPES
+// RESPONSE TYPES (matches backend list responses)
 // =============================================================================
 
 export interface TemplateListResponse {
   templates: JourneyTemplate[];
   total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface JourneyListResponse {
-  journeys: JourneyStats[];
+  journeys: JourneyResponse[];
   total: number;
-}
-
-export interface StepCompletionResponse {
-  success: boolean;
-  message: string;
-  new_progress: number;
-  journey_completed: boolean;
-  next_step: DailyStep | null;
+  limit: number;
+  offset: number;
 }
 
 // =============================================================================
@@ -358,29 +380,29 @@ export function getJourneyStatusColor(status: UserJourneyStatus): string {
 /**
  * Get difficulty label
  */
-export function getDifficultyLabel(difficulty: DifficultyLevel): string {
-  const labels: Record<DifficultyLevel, string> = {
+export function getDifficultyLabel(difficulty: number): string {
+  const labels: Record<number, string> = {
     1: 'Beginner',
     2: 'Easy',
     3: 'Moderate',
     4: 'Challenging',
     5: 'Advanced',
   };
-  return labels[difficulty];
+  return labels[difficulty] || 'Unknown';
 }
 
 /**
  * Get difficulty color
  */
-export function getDifficultyColor(difficulty: DifficultyLevel): string {
-  const colors: Record<DifficultyLevel, string> = {
+export function getDifficultyColor(difficulty: number): string {
+  const colors: Record<number, string> = {
     1: 'text-green-400',
     2: 'text-emerald-400',
     3: 'text-amber-400',
     4: 'text-orange-400',
     5: 'text-red-400',
   };
-  return colors[difficulty];
+  return colors[difficulty] || 'text-gray-400';
 }
 
 /**
