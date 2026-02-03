@@ -1,11 +1,18 @@
 """
 AI Provider Manager - Runtime provider selection with automatic fallback.
 
+ENHANCED VERSION v2.0 - Integrated with KIAAN AI Gita Core Wisdom Filter
+
 Manages multiple AI providers and provides:
 - Runtime provider selection based on configuration
 - Automatic fallback on retryable failures
 - Health checking and latency tracking
 - Provider usage tracking for analytics
+- **GITA WISDOM FILTER** - ALL responses pass through Bhagavad Gita Core Wisdom
+
+ALL AI RESPONSES ARE FILTERED THROUGH GITA CORE WISDOM:
+Every response from OpenAI, Sarvam, or any other provider passes through
+the GitaWisdomFilter to ensure responses are grounded in Bhagavad Gita teachings.
 """
 
 import asyncio
@@ -26,6 +33,23 @@ from .sarvam_provider import SarvamProvider
 from .oai_compat_provider import OpenAICompatibleProvider
 
 logger = logging.getLogger(__name__)
+
+# Gita Wisdom Filter - imported lazily to avoid circular imports
+_gita_filter = None
+
+
+def _get_gita_filter():
+    """Lazy import of Gita wisdom filter to avoid circular imports."""
+    global _gita_filter
+    if _gita_filter is None:
+        try:
+            from backend.services.gita_wisdom_filter import get_gita_wisdom_filter
+            _gita_filter = get_gita_wisdom_filter()
+            logger.info("ProviderManager: Gita Wisdom Filter integrated")
+        except Exception as e:
+            logger.warning(f"ProviderManager: Gita Wisdom Filter unavailable: {e}")
+            _gita_filter = False  # Mark as unavailable
+    return _gita_filter if _gita_filter else None
 
 
 class ProviderManager:
@@ -174,9 +198,15 @@ class ProviderManager:
         response_format: dict[str, str] | None = None,
         preference: str | None = None,
         max_retries: int = 2,
+        apply_gita_filter: bool = True,
+        tool_type: str = "general",
+        user_context: str = "",
     ) -> ProviderResponse:
         """
-        Generate chat completion with automatic fallback.
+        Generate chat completion with automatic fallback and Gita wisdom filtering.
+
+        ALL RESPONSES PASS THROUGH GITA CORE WISDOM FILTER by default.
+        This ensures every AI response is grounded in Bhagavad Gita teachings.
 
         Args:
             messages: Chat messages
@@ -185,9 +215,12 @@ class ProviderManager:
             response_format: Optional format specification
             preference: Provider preference
             max_retries: Maximum retry attempts per provider
+            apply_gita_filter: Whether to filter response through Gita wisdom (default: True)
+            tool_type: Tool type for context-aware filtering (ardha, viyoga, etc.)
+            user_context: Original user input for better verse matching
 
         Returns:
-            ProviderResponse with content and provider info
+            ProviderResponse with Gita-filtered content and provider info
 
         Raises:
             AIProviderError: If all providers fail
@@ -228,6 +261,43 @@ class ProviderManager:
                         max_tokens=max_tokens,
                         response_format=response_format,
                     )
+
+                    # GITA WISDOM FILTER: Apply to all responses
+                    if apply_gita_filter and response.content:
+                        gita_filter = _get_gita_filter()
+                        if gita_filter:
+                            try:
+                                filter_result = await gita_filter.filter_response(
+                                    content=response.content,
+                                    tool_type=tool_type,
+                                    user_context=user_context,
+                                )
+                                # Update response with filtered content
+                                response = ProviderResponse(
+                                    content=filter_result.content,
+                                    provider=response.provider,
+                                    model=response.model,
+                                    prompt_tokens=response.prompt_tokens,
+                                    completion_tokens=response.completion_tokens,
+                                    total_tokens=response.total_tokens,
+                                    latency_ms=response.latency_ms,
+                                    metadata={
+                                        **(response.metadata or {}),
+                                        "gita_filter_applied": True,
+                                        "gita_wisdom_score": filter_result.wisdom_score,
+                                        "gita_verses_found": len(filter_result.verses_referenced),
+                                        "gita_concepts_found": len(filter_result.gita_concepts_found),
+                                        "gita_enhanced": filter_result.enhancement_applied,
+                                    },
+                                )
+                                logger.info(
+                                    f"Gita filter applied: score={filter_result.wisdom_score:.2f}, "
+                                    f"tool={tool_type}"
+                                )
+                            except Exception as filter_error:
+                                logger.warning(f"Gita filter error (continuing): {filter_error}")
+                                # Continue with unfiltered response if filter fails
+
                     return response
 
                 except AIProviderError as e:
@@ -252,6 +322,45 @@ class ProviderManager:
             retryable=False,
         )
 
+    async def chat_with_gita_wisdom(
+        self,
+        messages: list[dict[str, str]],
+        tool_type: str = "general",
+        user_context: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 500,
+        response_format: dict[str, str] | None = None,
+        preference: str | None = None,
+    ) -> ProviderResponse:
+        """
+        Generate chat completion with guaranteed Gita wisdom grounding.
+
+        This method ALWAYS applies the Gita wisdom filter and provides
+        additional context for tool-specific filtering.
+
+        Args:
+            messages: Chat messages
+            tool_type: Type of tool (ardha, viyoga, relationship_compass, etc.)
+            user_context: Original user input for relevant verse matching
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens in response
+            response_format: Optional format specification
+            preference: Provider preference
+
+        Returns:
+            ProviderResponse with Gita-grounded content
+        """
+        return await self.chat(
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            response_format=response_format,
+            preference=preference,
+            apply_gita_filter=True,
+            tool_type=tool_type,
+            user_context=user_context,
+        )
+
     async def chat_with_tracking(
         self,
         messages: list[dict[str, str]],
@@ -259,13 +368,19 @@ class ProviderManager:
         max_tokens: int = 500,
         response_format: dict[str, str] | None = None,
         preference: str | None = None,
+        apply_gita_filter: bool = True,
+        tool_type: str = "general",
+        user_context: str = "",
     ) -> tuple[ProviderResponse, dict[str, Any]]:
         """
-        Generate chat completion with usage tracking.
+        Generate chat completion with usage tracking and Gita wisdom filtering.
+
+        ALL RESPONSES PASS THROUGH GITA CORE WISDOM FILTER by default.
 
         Returns:
             Tuple of (response, tracking_info)
-            tracking_info includes provider_used, model_used, latency_ms
+            tracking_info includes provider_used, model_used, latency_ms,
+            and Gita filter metadata
         """
         response = await self.chat(
             messages=messages,
@@ -273,6 +388,9 @@ class ProviderManager:
             max_tokens=max_tokens,
             response_format=response_format,
             preference=preference,
+            apply_gita_filter=apply_gita_filter,
+            tool_type=tool_type,
+            user_context=user_context,
         )
 
         tracking = {
@@ -282,6 +400,9 @@ class ProviderManager:
             "prompt_tokens": response.prompt_tokens,
             "completion_tokens": response.completion_tokens,
             "total_tokens": response.total_tokens,
+            # Gita filter tracking
+            "gita_filter_applied": response.metadata.get("gita_filter_applied", False) if response.metadata else False,
+            "gita_wisdom_score": response.metadata.get("gita_wisdom_score") if response.metadata else None,
         }
 
         return response, tracking

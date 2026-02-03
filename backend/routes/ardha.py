@@ -1,5 +1,7 @@
 """Ardha Reframing Assistant - OpenAI-powered Gita reframing.
 
+ENHANCED VERSION v2.0 - Integrated with KIAAN AI Gita Core Wisdom Filter
+
 Ardha is a witnessed reframing tool rooted in Bhagavad Gita core wisdom.
 This router provides Gita-inspired reframing with OpenAI integration.
 
@@ -9,6 +11,11 @@ Key Features:
 - JSON-based verse search using full 700+ Gita verses (secondary)
 - Core wisdom fallback for edge cases
 - Session memory for contextual conversations
+- **GITA WISDOM FILTER** - All responses pass through Gita Core Wisdom
+
+ALL RESPONSES PASS THROUGH GITA CORE WISDOM:
+Every response is filtered through the GitaWisdomFilter to ensure
+guidance is grounded in Bhagavad Gita teachings on witnessed reframing.
 """
 
 from __future__ import annotations
@@ -27,6 +34,23 @@ from backend.services.ardha_prompts import ARDHA_SYSTEM_PROMPT
 from backend.services.openai_optimizer import openai_optimizer
 
 logger = logging.getLogger(__name__)
+
+# Gita Wisdom Filter - lazy import to avoid circular dependencies
+_gita_filter = None
+
+
+def _get_gita_filter():
+    """Lazy import of Gita wisdom filter."""
+    global _gita_filter
+    if _gita_filter is None:
+        try:
+            from backend.services.gita_wisdom_filter import get_gita_wisdom_filter
+            _gita_filter = get_gita_wisdom_filter()
+            logger.info("Ardha: Gita Wisdom Filter integrated")
+        except Exception as e:
+            logger.warning(f"Ardha: Gita Wisdom Filter unavailable: {e}")
+            _gita_filter = False
+    return _gita_filter if _gita_filter else None
 
 router = APIRouter(prefix="/api/ardha", tags=["ardha"])
 
@@ -177,8 +201,8 @@ async def reframe_thought(
             },
         )
 
-    # Generate response using OpenAI
-    response_text = await _generate_reframe(messages, max_tokens=max_tokens)
+    # Generate response using OpenAI with Gita wisdom filtering
+    response_text = await _generate_reframe(messages, max_tokens=max_tokens, user_thought=thought)
     response_text = _sanitize_response(response_text)
 
     # Store in session memory
@@ -432,15 +456,40 @@ def _format_session_memory(memory: list[dict[str, str]]) -> str:
     return "\n".join(lines)
 
 
-async def _generate_reframe(messages: list[dict[str, str]], max_tokens: int = 600) -> str:
-    """Generate reframe using OpenAI.
+async def _apply_gita_filter(content: str, user_context: str = "") -> str:
+    """Apply Gita wisdom filter to AI-generated content."""
+    gita_filter = _get_gita_filter()
+    if gita_filter and content:
+        try:
+            filter_result = await gita_filter.filter_response(
+                content=content,
+                tool_type="ardha",
+                user_context=user_context,
+                enhance_if_needed=True,
+            )
+            logger.debug(f"Ardha Gita filter: score={filter_result.wisdom_score:.2f}")
+            return filter_result.content
+        except Exception as e:
+            logger.warning(f"Ardha Gita filter error (continuing): {e}")
+    return content
+
+
+async def _generate_reframe(
+    messages: list[dict[str, str]],
+    max_tokens: int = 600,
+    user_thought: str = ""
+) -> str:
+    """Generate reframe using OpenAI with Gita wisdom filtering.
+
+    ALL RESPONSES PASS THROUGH GITA CORE WISDOM FILTER.
 
     Args:
         messages: Chat messages for OpenAI
         max_tokens: Maximum tokens for response (varies by depth)
+        user_thought: Original user thought for Gita filter context
 
     Returns:
-        Generated reframe response
+        Generated reframe response grounded in Gita wisdom
 
     Raises:
         HTTPException: If OpenAI fails after retries
@@ -465,7 +514,10 @@ async def _generate_reframe(messages: list[dict[str, str]], max_tokens: int = 60
         if completion.choices and completion.choices[0].message:
             content = completion.choices[0].message.content or ""
             if content.strip():
-                return content
+                # GITA WISDOM FILTER: Apply filter to the response
+                filtered_content = await _apply_gita_filter(content, user_thought)
+                logger.info("Ardha: Gita filter applied to reframe response")
+                return filtered_content
 
         # If no content, log and raise
         logger.error("Ardha: OpenAI returned empty response")
