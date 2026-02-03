@@ -46,9 +46,9 @@ type ViyogResult = {
 }
 
 const flowSteps = [
-  'Share your outcome worry - name the weight you carry.',
-  'Receive sacred Karma Yoga transmission with Sanskrit wisdom.',
-  'Practice witness consciousness (Sakshi Bhava) with guided steps.',
+  'Share what\'s weighing on you - name the worry you\'re carrying.',
+  'Get a fresh perspective on what you can and can\'t control.',
+  'Walk away with one concrete thing you can do today.',
 ]
 
 export default function ViyogClient() {
@@ -147,8 +147,8 @@ export default function ViyogClient() {
         {/* Header */}
         <ToolHeader
           icon="🎯"
-          title="Viyoga - Detachment Coach"
-          subtitle="Shift from result-focused anxiety to grounded action. Viyoga eases outcome pressure without touching KIAAN."
+          title="Viyoga - Outcome Anxiety Support"
+          subtitle="Shift from worrying about results to focused action. Get practical help when you're stuck overthinking outcomes."
           backLink={{ label: 'Back to home', href: '/' }}
         />
 
@@ -156,17 +156,17 @@ export default function ViyogClient() {
         <div className="grid gap-4 md:grid-cols-2">
           <ToolActionCard
             icon="⏱️"
-            title="Launch 60s Clarity Pause"
-            description="A quick reset when outcome anxiety feels overwhelming."
-            ctaLabel="Start Pause"
+            title="60-Second Reset"
+            description="A quick mental reset when worry about outcomes feels overwhelming."
+            ctaLabel="Start Reset"
             href="/tools/viyog#clarity-pause"
             gradient="from-cyan-500/10 to-blue-500/10"
           />
           <ToolActionCard
             icon="🔄"
-            title="Detachment Check-In"
-            description="Share what's weighing on you and get grounded guidance."
-            ctaLabel="Share Concern"
+            title="Talk It Through"
+            description="Share what's on your mind and get a fresh perspective."
+            ctaLabel="Share What's Up"
             onClick={() => document.getElementById('concern-input')?.focus()}
             gradient="from-orange-500/10 to-amber-500/10"
           />
@@ -179,7 +179,7 @@ export default function ViyogClient() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <div className="flex items-center justify-between mb-3">
                 <label htmlFor="concern-input" className="text-sm font-semibold text-orange-100">
-                  Share the outcome worry
+                  What outcome are you worried about?
                 </label>
                 <VoiceInputButton
                   language={language}
@@ -191,20 +191,20 @@ export default function ViyogClient() {
                 id="concern-input"
                 value={concern}
                 onChange={e => setConcern(e.target.value)}
-                placeholder="Speak or type your concern. Example: I'm afraid the presentation will flop."
+                placeholder="Tell me what's on your mind. Example: I'm worried my presentation won't go well and everyone will think I'm not good at my job."
                 className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="concern-hint"
               />
-              <p id="concern-hint" className="sr-only">Describe the outcome you are worried about</p>
+              <p id="concern-hint" className="sr-only">Describe what you're worried about</p>
 
               <div className="flex flex-wrap gap-3 mt-4">
                 <button
                   onClick={requestDetachment}
                   disabled={!concern.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
-                  aria-label={loading ? 'Processing...' : 'Shift with Viyoga'}
+                  aria-label={loading ? 'Processing...' : 'Get Fresh Perspective'}
                 >
-                  {loading ? <span>Viyoga is centering...</span> : <span>Shift with Viyoga</span>}
+                  {loading ? <span>Thinking...</span> : <span>Get Fresh Perspective</span>}
                 </button>
               </div>
 
@@ -215,12 +215,12 @@ export default function ViyogClient() {
               )}
             </div>
 
-            {/* Sacred Loading State */}
+            {/* Loading State */}
             {loading && (
-              <WisdomLoadingState tool="viyoga" />
+              <WisdomLoadingState tool="viyoga" secularMode={true} />
             )}
 
-            {/* Ultra-Deep Wisdom Response */}
+            {/* Response Card */}
             {result && !loading && (
               <WisdomResponseCard
                 tool="viyoga"
@@ -230,6 +230,7 @@ export default function ViyogClient() {
                 timestamp={result.requestedAt}
                 language={language}
                 citations={result.citations}
+                secularMode={true}
               />
             )}
           </section>
@@ -253,20 +254,20 @@ export default function ViyogClient() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyoga</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Viyoga is your friend in moments of outcome anxiety. It acknowledges your specific worry with warmth, explores the deeper layers of attachment, transmits the sacred teaching of Karma Yoga, and guides you through witness consciousness practice - all rooted in 5000 years of Bhagavad Gita wisdom.
+                Viyoga is your friend when you're stuck worrying about outcomes. It acknowledges what you're going through, helps you see the pattern of where your energy is going, and shifts your focus back to what you can actually control - your effort and actions right now.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
-                <h4 className="text-xs font-semibold text-orange-50 mb-2">Sacred Transmission</h4>
+                <h4 className="text-xs font-semibold text-orange-50 mb-2">How It Works</h4>
                 <p className="text-xs text-orange-100/70">
-                  Sacred Recognition → Anatomy of Attachment → Karma Yoga Liberation → Witness Consciousness → Sacred Practice → Eternal Anchor
+                  Acknowledge → Understand the Pattern → Shift Perspective → Quick Reset → One Action → Reflect
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Note:</strong> Viyoga does not provide therapy, crisis support, or make promises about outcomes. It simply redirects anxious energy toward calm action.
+                <strong className="text-orange-50">Note:</strong> Viyoga is here for everyday worries about outcomes - it's not a substitute for therapy, crisis support, or professional help. It simply helps redirect anxious energy toward calm action.
               </p>
             </div>
 

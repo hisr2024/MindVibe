@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { VIYOGA_SYSTEM_PROMPT } from '@/lib/viyoga/systemPrompt'
+import { VIYOGA_SYSTEM_PROMPT, VIYOGA_SECULAR_PROMPT, VIYOGA_HEADINGS_SECULAR, VIYOGA_HEADINGS_GITA } from '@/lib/viyoga/systemPrompt'
 import { retrieveGitaChunks, getExpandedQuery } from '@/lib/viyoga/retrieval'
 import { appendMessage, ensureSession, getRecentMessages } from '@/lib/viyoga/storage'
 
@@ -30,24 +30,16 @@ function buildModeInstruction(mode: ChatMode | undefined) {
   return 'Give grounded, actionable guidance with balanced depth.'
 }
 
-function parseTransmissionSections(text: string) {
-  const headings = [
-    'Sacred Recognition',
-    'Anatomy of Attachment',
-    'Gita Core Transmission',
-    'Sakshi Practice (60s)',
-    'Karma Yoga Step (Today)',
-    'One Question',
-  ]
+function parseTransmissionSections(text: string, secularMode = true) {
+  // Use appropriate headings based on mode
+  const headings = secularMode ? VIYOGA_HEADINGS_SECULAR : VIYOGA_HEADINGS_GITA
 
-  const sectionKeyMap: Record<string, string> = {
-    'Sacred Recognition': 'sacred_recognition',
-    'Anatomy of Attachment': 'anatomy_of_attachment',
-    'Gita Core Transmission': 'gita_core_transmission',
-    'Sakshi Practice (60s)': 'sakshi_practice_60s',
-    'Karma Yoga Step (Today)': 'karma_yoga_step_today',
-    'One Question': 'one_question',
-  }
+  // Map headings to snake_case keys
+  const sectionKeyMap: Record<string, string> = {}
+  headings.forEach(h => {
+    const key = h.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+    sectionKeyMap[h.toLowerCase()] = key
+  })
 
   const sections: Record<string, string> = {}
   let currentHeading: string | null = null
@@ -55,14 +47,26 @@ function parseTransmissionSections(text: string) {
 
   const flush = () => {
     if (!currentHeading) return
-    const key = sectionKeyMap[currentHeading]
+    const key = sectionKeyMap[currentHeading.toLowerCase()] || currentHeading.toLowerCase().replace(/[^a-z0-9]+/g, '_')
     sections[key] = buffer.join('\n').trim()
     buffer.length = 0
   }
 
+  // Normalize heading for flexible matching
+  const normalizeHeading = (line: string): string | null => {
+    let cleaned = line.trim()
+    cleaned = cleaned.replace(/^#+\s*/, '') // Remove # markdown
+    cleaned = cleaned.replace(/^\*\*|\*\*$/g, '') // Remove **bold**
+    cleaned = cleaned.replace(/:$/, '') // Remove trailing colon
+    cleaned = cleaned.trim()
+
+    const cleanedLower = cleaned.toLowerCase()
+    const matched = headings.find(h => h.toLowerCase() === cleanedLower)
+    return matched || null
+  }
+
   text.split('\n').forEach(line => {
-    const normalized = line.replace(/^#+\s*/, '').replace(/:$/, '').trim()
-    const matchedHeading = headings.find(heading => heading.toLowerCase() === normalized.toLowerCase())
+    const matchedHeading = normalizeHeading(line)
     if (matchedHeading) {
       flush()
       currentHeading = matchedHeading
@@ -75,7 +79,29 @@ function parseTransmissionSections(text: string) {
   return sections
 }
 
-function buildFallbackTransmission(message: string, chunks: { text: string }[]) {
+function buildFallbackTransmission(message: string, chunks: { text: string }[], secularMode = true) {
+  if (secularMode) {
+    // Modern, friendly fallback - no spiritual references
+    return `**I Get It**
+I can hear the worry in what you're sharing. It makes total sense that you're feeling anxious about this - when something matters to us, of course we want it to work out. That's completely human.
+
+**What's Really Going On**
+Here's what I'm noticing: you're spending energy trying to control an outcome that isn't fully in your hands. The result depends on many factors - some you can influence, others you simply can't. And that uncertainty feels uncomfortable.
+
+**A Different Way to See This**
+What if you shifted focus from "will this work out?" to "what's the best I can do right now?" You can't guarantee outcomes, but you CAN show up with intention and effort. That's actually where your power lives - not in the result, but in the doing.
+
+**Try This Right Now**
+Take 3 slow breaths. Then ask yourself: "What's ONE small thing I can do in the next 10 minutes that's completely within my control?" Don't think about whether it will "work" - just identify one action you can take.
+
+**One Thing You Can Do**
+Pick that one small action and do it today. Not because it guarantees success, but because it's what you can offer right now. Focus on doing it well, not on what happens after.
+
+**Something to Consider**
+What would change if you measured success by the quality of your effort, rather than the outcome?`
+  }
+
+  // Original Gita-based fallback
   const contextSnippet = chunks[0]?.text || "I don't have that in my Gita repository context yet - let me fetch it."
 
   return `Sacred Recognition
@@ -160,6 +186,8 @@ export async function POST(request: NextRequest) {
   const message = typeof body.message === 'string' ? body.message.trim() : ''
   const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
   const mode = body.mode as ChatMode | undefined
+  // Secular mode is ON by default - modern, friendly responses without spiritual terms
+  const secularMode = body.secularMode !== false
 
   if (!message || !sessionId) {
     return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
@@ -211,16 +239,19 @@ export async function POST(request: NextRequest) {
 
     const contextBlock = buildContextBlock(retrieval.chunks)
 
+    // Use secular or Gita prompt based on mode
+    const systemPrompt = secularMode ? VIYOGA_SECULAR_PROMPT : VIYOGA_SYSTEM_PROMPT
+
     // Generate response with fallback
     const responseText =
       (await callOpenAI([
-        { role: 'system', content: VIYOGA_SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt },
         ...history,
         { role: 'user', content: message },
         { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
-      ])) || buildFallbackTransmission(message, retrieval.chunks)
+      ])) || buildFallbackTransmission(message, retrieval.chunks, secularMode)
 
-    const sections = parseTransmissionSections(responseText)
+    const sections = parseTransmissionSections(responseText, secularMode)
     if (!Object.keys(sections).length) {
       sections.gita_core_transmission = responseText
     }
@@ -247,6 +278,7 @@ export async function POST(request: NextRequest) {
       assistant: responseText,
       sections,
       citations,
+      secularMode,
       retrieval: {
         strategy: retrieval.strategy,
         confidence: retrieval.confidence,
@@ -254,13 +286,14 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[Viyoga Chat] Unexpected error:', error)
-    // Return a graceful fallback response instead of 500
-    const fallbackResponse = buildFallbackTransmission('your concern', [])
-    const fallbackSections = parseTransmissionSections(fallbackResponse)
+    // Return a graceful fallback response instead of 500 - secular mode by default
+    const fallbackResponse = buildFallbackTransmission('your concern', [], true)
+    const fallbackSections = parseTransmissionSections(fallbackResponse, true)
     return NextResponse.json({
       assistant: fallbackResponse,
       sections: fallbackSections,
       citations: [],
+      secularMode: true,
       retrieval: {
         strategy: 'error-fallback',
         confidence: 0,

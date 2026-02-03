@@ -126,6 +126,57 @@ KARMA YOGA CORE PRINCIPLES (Use only when context supports):
 - Prasada: Grace flows when we release control
 """
 
+
+# Secular, modern, friendly prompt - uses Gita wisdom internally but presents in everyday language
+VIYOGA_SECULAR_PROMPT = """You are a supportive guide who helps people release anxiety about outcomes and find peace through focused action.
+
+Your Approach:
+- Be warm and understanding, like a wise friend who's been through this
+- Use everyday language - no spiritual terms, no jargon, no citations
+- Never dismiss someone's worries - they're valid
+- Focus on what they CAN control (their effort) rather than what they can't (results)
+- Be practical and actionable, not preachy
+
+What Makes You Different:
+You draw from timeless wisdom about letting go of what we can't control and focusing on what we can. But you present it in modern, relatable language. No references to sources, no quotes - just practical wisdom in plain language.
+
+Core Principles (apply these internally, never mention them):
+- We suffer when we're attached to specific outcomes we can't control
+- Peace comes from giving our best effort and releasing our grip on results
+- The future is shaped by present action, not present worry
+- Our worth isn't determined by outcomes - we're more than our successes or failures
+- Focus on excellence of effort, not perfection of results
+
+OUTPUT FORMAT - Use these EXACT section headings:
+
+**I Get It**
+Acknowledge what they're worried about. Show you understand why outcomes feel so important. Be genuine, not clinical. 2-3 sentences max.
+
+**What's Really Going On**
+Help them see the pattern - they're attached to controlling something they can't fully control. Name it without judgment: wanting to control results, tying their worth to outcomes, worrying about what others will think, etc.
+
+**A Different Way to See This**
+Reframe the situation. Shift focus from "what if it fails" to "what can I do right now." The only thing we truly control is the quality of our effort, not results. Make this feel freeing, not like pressure.
+
+**Try This Right Now** (60 seconds)
+Give them a quick, practical exercise they can do immediately to shift out of worry-mode. Something simple like taking 3 breaths and asking "what's ONE thing I can do right now?" Keep it under 60 seconds.
+
+**One Thing You Can Do**
+A single, concrete action step for today. Focus on EFFORT and DOING, not on achieving a specific result. Make it small and achievable.
+
+**Something to Consider**
+End with ONE reflective question that invites them to let go a bit. Not a heavy question - something that opens up space for peace.
+
+Important Rules:
+- Never mention any religious texts, spiritual teachings, or philosophical sources
+- Never use Sanskrit or foreign terms
+- Never quote or cite anything
+- Keep the tone conversational and supportive
+- Don't provide therapy, legal, medical, or financial advice
+- If someone expresses self-harm thoughts, gently encourage professional support
+"""
+
+
 # Core Karma Yoga verses for fallback (essential 8 verses for detachment)
 VIYOGA_CORE_GITA_WISDOM = """[GITA_CORE_WISDOM_CONTEXT]
 Essential Karma Yoga teachings from the Bhagavad Gita for detachment:
@@ -163,6 +214,34 @@ Essential Karma Yoga teachings from the Bhagavad Gita for detachment:
   Application: When anxiety overwhelms, surrender the entire situation to a larger order.
 [/GITA_CORE_WISDOM_CONTEXT]"""
 
+
+# Secular section headings
+VIYOGA_HEADINGS_SECULAR = [
+    "I Get It",
+    "What's Really Going On",
+    "A Different Way to See This",
+    "Try This Right Now",
+    "One Thing You Can Do",
+    "Something to Consider",
+]
+
+VIYOGA_HEADINGS_SECULAR_INSUFFICIENT = [
+    "I Get It",
+    "Tell Me More",
+]
+
+# Original Gita-based section headings
+VIYOGA_HEADINGS_GITA = [
+    "Honoring Your Concern",
+    "Understanding the Attachment",
+    "Karma Yoga Teaching",
+    "The Shift to Effort",
+    "One Eternal Truth",
+    "One Sacred Action",
+    "One Releasing Question",
+]
+
+
 # Attachment type to Gita teaching mapping
 ATTACHMENT_TO_GITA = {
     "control": {
@@ -194,5 +273,40 @@ ATTACHMENT_TO_GITA = {
         "teaching": "All outcome anxiety is phala-sakti - attachment to fruits. This is the root cause of suffering that karma yoga addresses.",
         "verse": "BG 2.47",
         "remedy": "Redirect anxious energy into the quality of your action right now",
+    },
+}
+
+
+# Secular mapping of attachment types (for display without spiritual language)
+ATTACHMENT_TO_SECULAR = {
+    "control": {
+        "pattern": "Wanting to control the outcome",
+        "insight": "You're spending energy trying to control something that isn't fully in your control. The result depends on many factors - some you influence, many you don't.",
+        "shift": "Shift your focus to what you CAN control: the quality of your effort, your preparation, your attitude.",
+    },
+    "future_worry": {
+        "pattern": "Worrying about a future that hasn't happened",
+        "insight": "Your mind is living in a future that doesn't exist yet. That worry doesn't change the outcome - it just steals peace from the present.",
+        "shift": "Come back to now. What's one thing you can do TODAY that moves you in the right direction?",
+    },
+    "outcome_dependency": {
+        "pattern": "Tying your worth to the result",
+        "insight": "You're making the outcome mean something about YOU - your worth, your competence, your value. But you're more than any single result.",
+        "shift": "Separate your worth from the outcome. You can give your best AND be okay regardless of what happens.",
+    },
+    "perfectionism": {
+        "pattern": "Needing it to be perfect",
+        "insight": "Perfectionism is often fear in disguise - fear that 'good enough' won't be good enough. But perfect outcomes don't exist.",
+        "shift": "Aim for excellence in effort, not perfection in results. Done with care beats perfect but never finished.",
+    },
+    "approval_seeking": {
+        "pattern": "Worrying about what others will think",
+        "insight": "You're giving others the power to determine your peace. Their approval feels necessary, but it's actually outside your control.",
+        "shift": "Focus on acting in alignment with your own values. You can't control perceptions - only your integrity.",
+    },
+    "outcome_anxiety": {
+        "pattern": "General anxiety about results",
+        "insight": "You're carrying the weight of 'what if?' The uncertainty feels unbearable. But worrying doesn't reduce uncertainty - it just adds suffering.",
+        "shift": "Channel that anxious energy into action. What's the next small step you can take right now?",
     },
 }
