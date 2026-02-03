@@ -53,6 +53,20 @@ const SECTION_CONFIG = {
     icon: '🎯',
     name: 'Viyoga',
     sectionMeta: {
+      // Secular/Modern sections (default mode)
+      'I Get It': { title: 'I Get It', icon: '💚', order: 1 },
+      i_get_it: { title: 'I Get It', icon: '💚', order: 1 },
+      "What's Really Going On": { title: "What's Really Going On", icon: '💡', order: 2 },
+      whats_really_going_on: { title: "What's Really Going On", icon: '💡', order: 2 },
+      'A Different Way to See This': { title: 'A Different Way to See This', icon: '🔄', order: 3 },
+      a_different_way_to_see_this: { title: 'A Different Way to See This', icon: '🔄', order: 3 },
+      'Try This Right Now': { title: 'Try This Right Now', icon: '⏱️', order: 4 },
+      try_this_right_now: { title: 'Try This Right Now', icon: '⏱️', order: 4 },
+      'One Thing You Can Do': { title: 'One Thing You Can Do', icon: '✨', order: 5 },
+      one_thing_you_can_do: { title: 'One Thing You Can Do', icon: '✨', order: 5 },
+      'Something to Consider': { title: 'Something to Consider', icon: '💭', order: 6 },
+      something_to_consider: { title: 'Something to Consider', icon: '💭', order: 6 },
+      // Legacy/Gita sections (for backwards compatibility)
       sacred_recognition: { title: 'Sacred Recognition', icon: '🙏', order: 1 },
       anatomy_of_attachment: { title: 'Anatomy of Attachment', icon: '🔗', order: 2 },
       gita_core_transmission: { title: 'Gita Core Transmission', icon: '🕉️', order: 3 },
@@ -507,14 +521,14 @@ export default function WisdomResponseCard({
   )
 }
 
-// Sacred Loading Animation Component
-export function WisdomLoadingState({ tool }: { tool: 'viyoga' | 'ardha' | 'relationship_compass' }) {
+// Loading Animation Component
+export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga' | 'ardha' | 'relationship_compass'; secularMode?: boolean }) {
   const loadingMessages = {
     viyoga: [
-      'Centering in Karma Yoga...',
-      'Releasing attachment to outcomes...',
-      'Channeling ancient wisdom...',
-      'Preparing sacred transmission...',
+      'Taking a moment to understand...',
+      'Thinking about what might help...',
+      'Finding a helpful perspective...',
+      'Preparing thoughtful guidance...',
     ],
     ardha: [
       'Stilling the mind...',
@@ -541,15 +555,22 @@ export function WisdomLoadingState({ tool }: { tool: 'viyoga' | 'ardha' | 'relat
     return () => clearInterval(interval)
   }, [messages.length])
 
+  // Use secular styling for viyoga and relationship_compass
+  const useSecularStyle = secularMode && (tool === 'viyoga' || tool === 'relationship_compass')
+  const symbol = useSecularStyle ? '💚' : '🕉️'
+  const subtitleText = useSecularStyle
+    ? 'Finding the right words for your situation...'
+    : 'Searching sacred verses for your situation...'
+
   return (
     <div className="rounded-2xl bg-black/40 border border-amber-500/20 p-8 text-center">
-      {/* Sacred Symbol Animation */}
+      {/* Symbol Animation */}
       <div className="relative w-20 h-20 mx-auto mb-6">
         <div className="absolute inset-0 rounded-full border-2 border-amber-500/30 animate-ping" />
         <div className="absolute inset-2 rounded-full border-2 border-amber-400/40 animate-pulse" />
         <div className="absolute inset-4 rounded-full border border-amber-300/50 animate-spin" style={{ animationDuration: '3s' }} />
         <div className="absolute inset-0 flex items-center justify-center text-3xl">
-          🕉️
+          {symbol}
         </div>
       </div>
 
@@ -558,7 +579,7 @@ export function WisdomLoadingState({ tool }: { tool: 'viyoga' | 'ardha' | 'relat
         {messages[messageIndex]}
       </p>
       <p className="text-xs text-amber-100/50 mt-2">
-        Searching sacred verses for your situation...
+        {subtitleText}
       </p>
 
       {/* Progress dots */}
