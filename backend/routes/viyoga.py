@@ -193,12 +193,14 @@ async def detach_from_outcome(
 
     try:
         # Generate response using WellnessModel with Gita context
+        # secular_mode uses modern, friendly language while still using Gita wisdom internally
         result = await wellness_model.generate_response(
             tool=WellnessTool.VIYOGA,
             user_input=f"{outcome_worry}\n\n{gita_context}",
             db=db,
             analysis_mode=analysis_mode,
             language=language,
+            secular_mode=secular_mode,
         )
 
         # Get Gita teaching for attachment type
@@ -526,11 +528,13 @@ async def viyoga_chat(
 
     try:
         # Generate response using WellnessModel with Gita context
+        # secular_mode uses modern, friendly language while still using Gita wisdom internally
         result = await wellness_model.generate_response(
             tool=WellnessTool.VIYOGA,
             user_input=f"{message}\n\n{gita_context}",
             db=db,
             analysis_mode=analysis_mode,
+            secular_mode=secular_mode,
         )
 
         # Get Gita teaching for attachment type

@@ -58,6 +58,7 @@ const SECTION_CONFIG = {
       i_get_it: { title: 'I Get It', icon: '💚', order: 1 },
       "What's Really Going On": { title: "What's Really Going On", icon: '💡', order: 2 },
       whats_really_going_on: { title: "What's Really Going On", icon: '💡', order: 2 },
+      what_s_really_going_on: { title: "What's Really Going On", icon: '💡', order: 2 },
       'A Different Way to See This': { title: 'A Different Way to See This', icon: '🔄', order: 3 },
       a_different_way_to_see_this: { title: 'A Different Way to See This', icon: '🔄', order: 3 },
       'Try This Right Now': { title: 'Try This Right Now', icon: '⏱️', order: 4 },

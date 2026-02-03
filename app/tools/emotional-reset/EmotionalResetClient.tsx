@@ -25,8 +25,8 @@ export default function EmotionalResetClient() {
         <FadeIn>
           <ToolHeader
             icon="💫"
-          title="Emotional Reset"
-          subtitle="A calming 7-step flow to process emotions, find inner peace, and reset your mental state with timeless ancient wisdom."
+            title="Emotional Reset"
+            subtitle="A calming 7-step flow to process emotions, find inner peace, and reset your mental state with gentle guidance."
             backLink={{ label: 'Back to dashboard', href: '/dashboard' }}
           />
         </FadeIn>
@@ -47,7 +47,7 @@ export default function EmotionalResetClient() {
               title="Quick Breathing Exercise"
               description="A 60-second breathing reset for immediate calm."
               ctaLabel="Start Breathing"
-              href="/tools/viyog#clarity-pause"
+              href="/tools/emotional-reset#reset-wizard"
               gradient="from-blue-500/10 to-cyan-500/10"
             />
           </div>
@@ -93,7 +93,7 @@ export default function EmotionalResetClient() {
                 href="/tools/viyog"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
               >
-                Viyoga - Detachment Coach
+                Viyoga - Outcome Anxiety Support
               </Link>
               <Link
                 href="/emotional-reset"

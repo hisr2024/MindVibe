@@ -550,7 +550,7 @@ export function EmotionalResetWizard({
           </div>
           <div>
             <h2 className="font-semibold text-orange-50">Emotional Reset</h2>
-            <p className="text-xs text-orange-100/60">KIAAN Guided Flow</p>
+            <p className="text-xs text-orange-100/60">Guided Wellness Flow</p>
           </div>
         </div>
         {onClose && (

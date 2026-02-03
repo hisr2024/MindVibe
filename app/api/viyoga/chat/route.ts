@@ -37,7 +37,8 @@ function parseTransmissionSections(text: string, secularMode = true) {
   // Map headings to snake_case keys
   const sectionKeyMap: Record<string, string> = {}
   headings.forEach(h => {
-    const key = h.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+    // Remove apostrophes first, then replace other non-alphanumeric with underscore
+    const key = h.toLowerCase().replace(/'/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
     sectionKeyMap[h.toLowerCase()] = key
   })
 
@@ -47,7 +48,8 @@ function parseTransmissionSections(text: string, secularMode = true) {
 
   const flush = () => {
     if (!currentHeading) return
-    const key = sectionKeyMap[currentHeading.toLowerCase()] || currentHeading.toLowerCase().replace(/[^a-z0-9]+/g, '_')
+    // Use mapped key or generate one (removing apostrophes first)
+    const key = sectionKeyMap[currentHeading.toLowerCase()] || currentHeading.toLowerCase().replace(/'/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
     sections[key] = buffer.join('\n').trim()
     buffer.length = 0
   }
