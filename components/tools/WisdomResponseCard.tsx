@@ -390,8 +390,8 @@ export default function WisdomResponseCard({
         </div>
       </div>
 
-      {/* Section Controls */}
-      {parsedSections.length > 1 && (
+      {/* Section Controls - only show when we have sections */}
+      {parsedSections.length > 1 && !showFullText && (
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={expandAll}
@@ -419,8 +419,8 @@ export default function WisdomResponseCard({
       )}
 
       {/* Content */}
-      {showFullText ? (
-        /* Full Text View */
+      {showFullText || parsedSections.length === 0 ? (
+        /* Full Text View - also shown when no sections parsed */
         <div className={`whitespace-pre-wrap text-sm ${accentColorClass.text} leading-relaxed`}>
           {secularMode ? fullResponse : highlightSanskrit(fullResponse)}
         </div>
