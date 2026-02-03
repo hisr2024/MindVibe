@@ -1,6 +1,8 @@
 """
 Emotional Reset Service (Quantum Coherence v2.0)
 
+ENHANCED VERSION v2.1 - Integrated with KIAAN AI Gita Core Wisdom Filter
+
 Implements the 7-step KIAAN Emotional Reset guided flow:
 - Step 1: Welcome & Intention (user shares what's on their mind)
 - Step 2: Assessment (AI provides 2-3 sentence insights)
@@ -15,6 +17,10 @@ Quantum Coherence Enhancements:
 - Automatic retries with exponential backoff
 - Token optimization (reduced max_tokens)
 - Enhanced error handling
+
+ALL RESPONSES PASS THROUGH GITA CORE WISDOM:
+Every AI-generated response is filtered through the GitaWisdomFilter to ensure
+guidance is grounded in Bhagavad Gita teachings on emotional wellness.
 
 Integrates with existing KIAAN crisis detection and WisdomKnowledgeBase.
 """
@@ -35,6 +41,23 @@ from backend.services.safety_validator import SafetyValidator
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 logger = logging.getLogger(__name__)
+
+# Gita Wisdom Filter - lazy import to avoid circular dependencies
+_gita_filter = None
+
+
+def _get_gita_filter():
+    """Lazy import of Gita wisdom filter."""
+    global _gita_filter
+    if _gita_filter is None:
+        try:
+            from backend.services.gita_wisdom_filter import get_gita_wisdom_filter
+            _gita_filter = get_gita_wisdom_filter()
+            logger.info("EmotionalResetService: Gita Wisdom Filter integrated")
+        except Exception as e:
+            logger.warning(f"EmotionalResetService: Gita Wisdom Filter unavailable: {e}")
+            _gita_filter = False
+    return _gita_filter if _gita_filter else None
 
 # Rate limiting constants
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
@@ -271,9 +294,28 @@ class EmotionalResetService:
         """
         return self.safety_validator.detect_crisis(message)
 
+    async def _apply_gita_filter(self, content: str, user_context: str = "") -> str:
+        """Apply Gita wisdom filter to AI-generated content."""
+        gita_filter = _get_gita_filter()
+        if gita_filter and content:
+            try:
+                filter_result = await gita_filter.filter_response(
+                    content=content,
+                    tool_type="emotional_reset",
+                    user_context=user_context,
+                    enhance_if_needed=True,
+                )
+                logger.debug(f"Gita filter: score={filter_result.wisdom_score:.2f}")
+                return filter_result.content
+            except Exception as e:
+                logger.warning(f"Gita filter error (continuing): {e}")
+        return content
+
     async def assess_emotions(self, user_input: str) -> dict[str, Any]:
         """
         Generate emotional assessment based on user input (Step 2) with quantum coherence.
+
+        ALL RESPONSES ARE FILTERED THROUGH GITA CORE WISDOM.
 
         Args:
             user_input: User's description of their emotions
@@ -285,24 +327,27 @@ class EmotionalResetService:
             return self._get_fallback_assessment(user_input)
 
         try:
-            prompt = f"""You are a compassionate wellness guide. A user shared: "{user_input}"
+            # Enhanced prompt with Gita wisdom context
+            prompt = f"""You are a compassionate wellness guide, inspired by ancient wisdom on emotional balance.
+
+A user shared: "{user_input}"
 
 Provide a brief, empathetic assessment in 2-3 sentences that:
-1. Validates their feelings
+1. Validates their feelings (as the Gita teaches, emotions are natural messengers)
 2. Identifies the core emotion(s) they're experiencing
-3. Gently reframes the situation with hope
+3. Gently reframes the situation with hope (equanimity is always accessible)
 
-Keep it warm, conversational, and under 100 words. Do not use religious terms or citations.
+Keep it warm, conversational, and under 100 words. Use secular-friendly language.
 End with 💙"""
 
             response = await self.optimizer.create_completion_with_retry(
                 messages=[
-                    {"role": "system", "content": "You are a compassionate guide focused on emotional wellness."},
+                    {"role": "system", "content": "You are a compassionate guide focused on emotional wellness, drawing on timeless wisdom about the nature of mind and emotions."},
                     {"role": "user", "content": prompt}
                 ],
-                model="gpt-4o-mini",  # Upgraded from gpt-4
+                model="gpt-4o-mini",
                 temperature=0.7,
-                max_tokens=150,  # Optimized from 200
+                max_tokens=150,
             )
 
             # Safe null check for OpenAI response
@@ -311,6 +356,9 @@ End with 💙"""
                 response_msg = response.choices[0].message
                 if response_msg and response_msg.content:
                     content = response_msg.content
+
+            # GITA WISDOM FILTER: Apply filter to assessment
+            content = await self._apply_gita_filter(content, user_input)
 
             # Extract emotions using simple keyword matching
             emotions = self._extract_emotions(user_input)
@@ -412,11 +460,13 @@ End with 💙"""
         """
         Generate release visualization text (Step 4) with quantum coherence.
 
+        ALL RESPONSES ARE FILTERED THROUGH GITA CORE WISDOM.
+
         Args:
             emotions: List of emotions identified in assessment
 
         Returns:
-            Guided visualization text
+            Guided visualization text grounded in Gita wisdom
         """
         if not self.optimizer.ready:
             return self._get_fallback_visualization(emotions)
@@ -424,20 +474,23 @@ End with 💙"""
         try:
             emotion_text = ", ".join(emotions) if emotions else "your current feelings"
 
+            # Enhanced prompt with Gita wisdom context
             prompt = f"""Create a brief, calming visualization for releasing: {emotion_text}
 
 Write 3-4 sentences using nature metaphors (like a flowing stream, wind, or sunrise).
-Be gentle, poetic, and hopeful. Do not use religious terms.
+Drawing from the wisdom that the mind can be both friend and foe (BG 6.5), guide the user
+to witness and release without force.
+Be gentle, poetic, and hopeful. Use secular-friendly language.
 Keep it under 80 words. End with 💙"""
 
             response = await self.optimizer.create_completion_with_retry(
                 messages=[
-                    {"role": "system", "content": "You are a gentle guide creating calming visualizations."},
+                    {"role": "system", "content": "You are a gentle guide creating calming visualizations, inspired by timeless wisdom on the nature of mind and letting go."},
                     {"role": "user", "content": prompt}
                 ],
-                model="gpt-4o-mini",  # Upgraded from gpt-4
+                model="gpt-4o-mini",
                 temperature=0.8,
-                max_tokens=120,  # Optimized from 150
+                max_tokens=120,
             )
 
             # Safe null check for OpenAI response
@@ -446,7 +499,13 @@ Keep it under 80 words. End with 💙"""
                 message = response.choices[0].message
                 if message:
                     content = message.content
-            return content or self._get_fallback_visualization(emotions)
+
+            if not content:
+                return self._get_fallback_visualization(emotions)
+
+            # GITA WISDOM FILTER: Apply filter to visualization
+            content = await self._apply_gita_filter(content, emotion_text)
+            return content
 
         except Exception as e:
             logger.error(f"OpenAI visualization error: {type(e).__name__}: {e}")
@@ -555,12 +614,14 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         """
         Generate personalized affirmations (Step 6) with quantum coherence.
 
+        ALL RESPONSES ARE FILTERED THROUGH GITA CORE WISDOM.
+
         Args:
             emotions: List of identified emotions
             themes: List of identified themes
 
         Returns:
-            List of 3-5 personalized affirmations
+            List of 3-5 personalized affirmations grounded in Gita wisdom
         """
         if not self.optimizer.ready:
             return self._get_fallback_affirmations(emotions)
@@ -569,25 +630,33 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
             emotion_text = ", ".join(emotions) if emotions else "general wellbeing"
             theme_text = ", ".join(themes) if themes else "life challenges"
 
+            # Enhanced prompt with Gita wisdom context
             prompt = f"""Create 4 personalized affirmations for someone experiencing: {emotion_text}
 Related to: {theme_text}
+
+Drawing from timeless wisdom:
+- Equanimity in success and failure (samatva)
+- Focus on action, not outcome (nishkama karma)
+- The mind as friend, not foe (sthitaprajna)
+- Inner strength and completeness (atma-tripti)
 
 Make them:
 - Present tense ("I am" or "I choose")
 - Empowering but realistic
 - Warm and compassionate
 - 10-20 words each
+- Secular-friendly language
 
-Do not use religious terms. Return only the 4 affirmations, each on a new line."""
+Return only the 4 affirmations, each on a new line."""
 
             response = await self.optimizer.create_completion_with_retry(
                 messages=[
-                    {"role": "system", "content": "You create personalized, empowering affirmations."},
+                    {"role": "system", "content": "You create personalized, empowering affirmations rooted in timeless wisdom about inner strength and emotional balance."},
                     {"role": "user", "content": prompt}
                 ],
-                model="gpt-4o-mini",  # Upgraded from gpt-4
+                model="gpt-4o-mini",
                 temperature=0.8,
-                max_tokens=180,  # Optimized from 200
+                max_tokens=180,
             )
 
             # Safe null check for OpenAI response
@@ -596,6 +665,10 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
                 response_msg = response.choices[0].message
                 if response_msg and response_msg.content:
                     content = response_msg.content
+
+            # GITA WISDOM FILTER: Apply filter to full affirmations content
+            content = await self._apply_gita_filter(content, f"{emotion_text} {theme_text}")
+
             affirmations = [
                 line.strip().lstrip("•-1234567890. ")
                 for line in content.strip().split("\n")
