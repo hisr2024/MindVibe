@@ -56,6 +56,21 @@ HEADINGS_INSUFFICIENT = [
     "Citations",
 ]
 
+# Secular, modern, friendly headings (no spiritual language)
+HEADINGS_SECULAR = [
+    "I Hear You",
+    "What Might Be Happening",
+    "The Other Side",
+    "What You Could Try",
+    "A Way to Say It",
+    "One Small Step",
+]
+
+HEADINGS_SECULAR_INSUFFICIENT = [
+    "I Hear You",
+    "Let Me Understand Better",
+]
+
 CITATION_PATTERN = re.compile(r"\b(\d{1,2}:\d{1,2})\b")
 
 
@@ -702,5 +717,150 @@ def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str
     # One Gentle Question
     sections.append("# One Gentle Question")
     sections.append(f"If you were at complete peace with yourself - needing nothing from {rel_context} to feel whole - how would you respond to this situation? What would your highest self do here?")
+
+    return "\n".join(sections)
+
+
+def build_secular_insufficient_response() -> str:
+    """Build a secular response when more context is needed."""
+    return "\n".join([
+        "# I Hear You",
+        "I can tell this is weighing on you, and I want to help you navigate this.",
+        "",
+        "# Let Me Understand Better",
+        "Could you share a bit more about what's happening? For example:",
+        "- What specific situation or conversation triggered these feelings?",
+        "- How long has this been going on?",
+        "- What outcome are you hoping for?",
+        "",
+        "The more context you share, the more helpful my suggestions can be.",
+    ])
+
+
+def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, user_message: str) -> str:
+    """Generate a modern, friendly response using wisdom internally but without spiritual language.
+
+    This creates practical relationship guidance that's informed by timeless wisdom
+    but presented in everyday, secular language that anyone can relate to.
+    """
+    if not chunks:
+        return build_secular_insufficient_response()
+
+    # Extract wisdom themes to inform our advice (but never mention them)
+    wisdom_items = [extract_verse_wisdom(chunk) for chunk in chunks[:8]]
+    all_tags = set()
+    for w in wisdom_items:
+        all_tags.update(tag.lower().replace("_", " ") for tag in w["tags"])
+
+    # Determine relationship context
+    relationship_contexts = {
+        "romantic": ("your partner", "they", "them"),
+        "family": ("your family member", "they", "them"),
+        "friendship": ("your friend", "they", "them"),
+        "workplace": ("your colleague", "they", "them"),
+        "self": ("yourself", "you", "your"),
+        "other": ("this person", "they", "them"),
+    }
+    rel_name, pronoun, obj_pronoun = relationship_contexts.get(relationship_type, ("this person", "they", "them"))
+
+    # Detect emotional themes from tags to tailor advice
+    is_anger = any(t in all_tags for t in ["anger", "krodha", "resentment", "hatred"])
+    is_hurt = any(t in all_tags for t in ["suffering", "pain", "grief", "sorrow"])
+    is_fear = any(t in all_tags for t in ["fear", "anxiety", "worry"])
+    is_forgiveness = any(t in all_tags for t in ["forgiveness", "compassion", "karuna"])
+    is_communication = any(t in all_tags for t in ["speech", "truth", "communication"])
+
+    sections = []
+
+    # I Hear You - Validation
+    sections.append("# I Hear You")
+    if is_anger:
+        sections.append(f"What you're feeling makes total sense. When someone we care about does something that feels unfair or hurtful, anger is a natural response. It's actually your mind's way of saying \"this matters to me\" and \"something isn't right here.\" Don't judge yourself for feeling this way.")
+    elif is_hurt:
+        sections.append(f"I can hear how much this is affecting you. When we're hurt by someone close to us, it can feel like the rug has been pulled out from under us. Your feelings are completely valid - this kind of pain runs deep precisely because the relationship matters to you.")
+    elif is_fear:
+        sections.append(f"It sounds like there's a lot of uncertainty here, and that can be really unsettling. Fear in relationships often comes from caring deeply and not wanting to lose something important. What you're feeling is understandable.")
+    else:
+        sections.append(f"I hear you. Relationship challenges can feel overwhelming, especially when you're right in the middle of them. The fact that you're taking time to reflect on this instead of just reacting shows a lot of self-awareness.")
+    sections.append("")
+
+    # What Might Be Happening - Insight
+    sections.append("# What Might Be Happening")
+    sections.append("A few things that might be at play here:")
+    sections.append("")
+
+    if is_anger:
+        sections.append(f"- **Unmet needs**: Anger often signals that something important to us isn't being acknowledged. What do you really need here - respect? To be heard? Fairness?")
+        sections.append(f"- **Accumulated frustration**: Sometimes what feels like a big reaction is actually built up from smaller moments over time.")
+        sections.append(f"- **Feeling powerless**: Anger can be our mind's way of trying to regain a sense of control when we feel helpless.")
+    elif is_hurt:
+        sections.append(f"- **Expectations vs. reality**: We often have unspoken expectations of how people should treat us. When reality doesn't match, it hurts.")
+        sections.append(f"- **Past experiences**: Sometimes current situations trigger old wounds. The pain might feel bigger than the situation because it's connected to something deeper.")
+        sections.append(f"- **Need for validation**: Feeling hurt often connects to wanting to be seen, valued, or understood.")
+    else:
+        sections.append(f"- **Different perspectives**: You and {rel_name} might be seeing the same situation very differently. Neither view is necessarily \"wrong.\"")
+        sections.append(f"- **Underlying needs**: Conflicts often aren't about what they seem to be on the surface. What's the deeper need here?")
+        sections.append(f"- **Communication patterns**: Sometimes how we communicate (or don't) creates misunderstandings that snowball.")
+    sections.append("")
+
+    # The Other Side - Perspective
+    sections.append("# The Other Side")
+    sections.append(f"Without excusing any hurtful behavior, it might help to consider: {rel_name} is also a person navigating their own fears, insecurities, and past experiences. People often act from their own pain, not from a desire to hurt us.")
+    sections.append("")
+    sections.append("Some questions to consider:")
+    sections.append(f"- What might {pronoun} be feeling or fearing in this situation?")
+    sections.append(f"- Is there any possibility {pronoun}'re unaware of how their actions are affecting you?")
+    sections.append(f"- What pressure or stress might {pronoun} be under that you might not fully see?")
+    sections.append("")
+    sections.append("This isn't about justifying bad behavior - it's about understanding that helps you respond more effectively.")
+    sections.append("")
+
+    # What You Could Try - Practical suggestions
+    sections.append("# What You Could Try")
+    sections.append("Here are a few approaches that might help:")
+    sections.append("")
+
+    if is_communication or is_anger:
+        sections.append("1. **Take a breather first**: Before having a conversation, give yourself time to move from reactive to responsive. A calm conversation is 10x more productive than one driven by raw emotion.")
+        sections.append("")
+        sections.append("2. **Focus on what you can control**: You can't control how someone else behaves, but you can control how you respond. Ask yourself: \"What would the version of me I'm proud of do here?\"")
+        sections.append("")
+        sections.append("3. **Lead with curiosity, not accusations**: Instead of \"You always...\" try \"Help me understand...\" People get defensive when they feel attacked, which usually makes things worse.")
+    elif is_forgiveness:
+        sections.append("1. **Separate the person from the action**: The person who hurt you is flawed (like all of us), but they're also more than their worst moments. This doesn't excuse the behavior - it just helps you process it.")
+        sections.append("")
+        sections.append("2. **Forgiveness is for you**: Holding onto resentment is like drinking poison and expecting someone else to suffer. Forgiveness doesn't mean what happened was okay - it means you're choosing to let go for your own peace.")
+        sections.append("")
+        sections.append("3. **Set boundaries if needed**: You can forgive someone and still set healthy boundaries. Understanding why someone hurt you doesn't mean you have to accept ongoing harmful behavior.")
+    else:
+        sections.append("1. **Name what you actually need**: Get specific about what you're hoping for. \"I need to feel respected\" is clearer than \"I want things to be better.\"")
+        sections.append("")
+        sections.append("2. **Pick the right moment**: Timing matters. Choose a moment when both of you can be present and calm, not in the heat of conflict or when either of you is stressed/tired.")
+        sections.append("")
+        sections.append("3. **Listen to understand, not to respond**: When they talk, really listen. Try to understand their point of view before crafting your rebuttal. People feel it when you genuinely try to understand them.")
+    sections.append("")
+
+    # A Way to Say It - Communication script
+    sections.append("# A Way to Say It")
+    sections.append("When you're ready, here's a template that tends to work well:")
+    sections.append("")
+    sections.append(f"*\"Hey, can we talk about something that's been on my mind? When [specific situation], I felt [your emotion - use 'I' statements]. I think it's because [your underlying need]. I'm not looking to argue - I just want us to understand each other better. What was going on for you in that moment?\"*")
+    sections.append("")
+    sections.append("Some tips:")
+    sections.append("- Start soft. The first 3 minutes of a conversation often predict how it'll go.")
+    sections.append("- Use \"I feel\" instead of \"You made me feel\" - it's less accusatory.")
+    sections.append("- Ask genuine questions and actually listen to the answers.")
+    sections.append("")
+
+    # One Small Step - Actionable next step
+    sections.append("# One Small Step")
+    if is_anger:
+        sections.append("For today, try this: When you notice anger about this situation rising, pause and take 3 slow breaths. Then ask yourself: \"What do I actually need here?\" Sometimes just naming the need takes away some of anger's intensity.")
+    elif is_hurt:
+        sections.append("For today, try this: Write down what you're feeling without censoring yourself. Sometimes getting thoughts out of our head and onto paper helps us see them more clearly. You might discover what you really need from this situation.")
+    elif is_forgiveness:
+        sections.append(f"For today, try this: See if you can hold two truths at once - \"what {pronoun} did hurt me\" AND \"{pronoun}'re a flawed human doing their best.\" You don't have to choose. Both can be true.")
+    else:
+        sections.append(f"For today, try this: Before your next interaction with {rel_name}, take a moment to set an intention. Not an outcome you're hoping for, but a way of being. Something like: \"I'm going to stay curious\" or \"I'm going to listen more than I speak.\"")
 
     return "\n".join(sections)

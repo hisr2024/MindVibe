@@ -44,6 +44,7 @@ interface WisdomResponseCardProps {
   analysisMode?: AnalysisMode
   citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
   sources?: SourceRef[]
+  secularMode?: boolean  // If true, hide spiritual references in UI
 }
 
 // Section configurations for each tool
@@ -96,6 +97,15 @@ const SECTION_CONFIG = {
     icon: '🧭',
     name: 'Relationship Compass',
     sectionMeta: {
+      // Secular/Modern sections (default mode)
+      'I Hear You': { title: 'I Hear You', icon: '💜', order: 1 },
+      'What Might Be Happening': { title: 'What Might Be Happening', icon: '💡', order: 2 },
+      'The Other Side': { title: 'The Other Side', icon: '🤝', order: 3 },
+      'What You Could Try': { title: 'What You Could Try', icon: '✨', order: 4 },
+      'A Way to Say It': { title: 'A Way to Say It', icon: '💬', order: 5 },
+      'One Small Step': { title: 'One Small Step', icon: '👣', order: 6 },
+      'Let Me Understand Better': { title: 'Let Me Understand Better', icon: '❓', order: 7 },
+      // Legacy/Gita sections (for backwards compatibility)
       'Sacred Acknowledgement': { title: 'Sacred Acknowledgement', icon: '🙏', order: 1 },
       'Inner Conflict Mirror': { title: 'Inner Conflict Mirror', icon: '🪞', order: 2 },
       'Gita Teachings Used': { title: 'Gita Teachings Used', icon: '📜', order: 3 },
@@ -238,6 +248,7 @@ export default function WisdomResponseCard({
   analysisMode = 'quick',
   citations = [],
   sources = [],
+  secularMode = false,
 }: WisdomResponseCardProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [showFullText, setShowFullText] = useState(false)
@@ -351,7 +362,7 @@ export default function WisdomResponseCard({
                   <span>{ANALYSIS_MODE_DISPLAY[analysisMode].name}</span>
                 </span>
               )}
-              {gitaVersesUsed > 0 && (
+              {gitaVersesUsed > 0 && !secularMode && (
                 <span className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${accentColorClass.badge} px-2.5 py-0.5 text-[10px] font-semibold border`}>
                   <span>🕉️</span>
                   <span>Gita Wisdom ({gitaVersesUsed} verses)</span>
@@ -411,7 +422,7 @@ export default function WisdomResponseCard({
       {showFullText ? (
         /* Full Text View */
         <div className={`whitespace-pre-wrap text-sm ${accentColorClass.text} leading-relaxed`}>
-          {highlightSanskrit(fullResponse)}
+          {secularMode ? fullResponse : highlightSanskrit(fullResponse)}
         </div>
       ) : (
         /* Sectioned View */
@@ -447,7 +458,7 @@ export default function WisdomResponseCard({
                   }`}
                 >
                   <div className={`px-4 pb-4 text-sm ${accentColorClass.text} leading-relaxed`}>
-                    {highlightSanskrit(section.content)}
+                    {secularMode ? section.content : highlightSanskrit(section.content)}
                   </div>
                 </div>
 
@@ -466,7 +477,7 @@ export default function WisdomResponseCard({
         </div>
       )}
 
-      {resolvedCitations.length > 0 && (
+      {resolvedCitations.length > 0 && !secularMode && (
         <div className="mt-5 rounded-xl border border-gray-700/50 bg-black/40 p-3 text-xs text-gray-400">
           <span className="text-gray-300 font-semibold">Sources:</span>{' '}
           {resolvedCitations.map((citation, index) => {
@@ -480,11 +491,17 @@ export default function WisdomResponseCard({
         </div>
       )}
 
-      {/* Sacred Closing */}
+      {/* Closing */}
       <div className="mt-6 pt-4 border-t border-gray-700/50 text-center">
-        <p className="text-xs text-gray-500 italic">
-          🙏 This wisdom transmission draws from 5000 years of Bhagavad Gita teachings
-        </p>
+        {secularMode ? (
+          <p className="text-xs text-gray-500 italic">
+            💙 Here to help you navigate this with clarity and compassion
+          </p>
+        ) : (
+          <p className="text-xs text-gray-500 italic">
+            🙏 This wisdom transmission draws from 5000 years of Bhagavad Gita teachings
+          </p>
+        )}
       </div>
     </div>
   )
@@ -506,10 +523,10 @@ export function WisdomLoadingState({ tool }: { tool: 'viyoga' | 'ardha' | 'relat
       'Preparing sacred transmission...',
     ],
     relationship_compass: [
-      'Invoking Dharma wisdom...',
-      'Cultivating Daya (compassion)...',
-      'Seeking Sama-darshana (equal vision)...',
-      'Preparing sacred transmission...',
+      'Understanding your situation...',
+      'Considering different perspectives...',
+      'Finding practical solutions...',
+      'Preparing thoughtful guidance...',
     ],
   }
 
