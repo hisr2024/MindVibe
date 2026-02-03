@@ -392,9 +392,35 @@ def build_context_block(chunks: Iterable[GitaChunk]) -> str:
 
 
 def extract_sections(text: str, headings: list[str]) -> dict[str, str]:
+    """Extract sections from response text with flexible heading matching.
+
+    Handles multiple heading formats:
+    - # Heading
+    - ## Heading
+    - **Heading**
+    - Heading:
+    - Heading
+    """
     section_map: dict[str, str] = {}
     current_heading: str | None = None
     buffer: list[str] = []
+
+    # Create lowercase lookup for flexible matching
+    headings_lower = {h.lower(): h for h in headings}
+
+    def normalize_heading(line: str) -> str | None:
+        """Try to match a line to one of our headings."""
+        # Remove markdown formatting
+        cleaned = line.strip()
+        cleaned = cleaned.lstrip("#").strip()  # Remove # or ##
+        cleaned = cleaned.strip("*").strip()   # Remove ** bold markers
+        cleaned = cleaned.rstrip(":").strip()  # Remove trailing colon
+
+        # Check if it matches any heading (case-insensitive)
+        cleaned_lower = cleaned.lower()
+        if cleaned_lower in headings_lower:
+            return headings_lower[cleaned_lower]
+        return None
 
     def flush() -> None:
         if current_heading is None:
@@ -403,10 +429,10 @@ def extract_sections(text: str, headings: list[str]) -> dict[str, str]:
         buffer.clear()
 
     for line in text.splitlines():
-        normalized = line.strip().lstrip("#").strip()
-        if normalized in headings:
+        matched_heading = normalize_heading(line)
+        if matched_heading:
             flush()
-            current_heading = normalized
+            current_heading = matched_heading
             continue
         if current_heading:
             buffer.append(line)

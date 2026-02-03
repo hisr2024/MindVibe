@@ -555,6 +555,15 @@ async def get_relationship_guidance_gita_only(
     context_block = build_context_block(merged_chunks)
     context_sufficient = bool(merged_chunks) and retrieval.confidence >= 0.2
 
+    # Log Gita wisdom retrieval for verification
+    logger.info(
+        f"RelationshipCompass Gita Wisdom: "
+        f"retrieved={len(merged_chunks)} verses, "
+        f"confidence={retrieval.confidence:.2f}, "
+        f"strategy={retrieval.strategy}, "
+        f"context_sufficient={context_sufficient}"
+    )
+
     # Choose headings based on mode
     headings_sufficient = HEADINGS_SECULAR if secular_mode else HEADINGS_SUFFICIENT
     headings_insufficient = HEADINGS_SECULAR_INSUFFICIENT if secular_mode else HEADINGS_INSUFFICIENT
