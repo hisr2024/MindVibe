@@ -111,14 +111,15 @@ const SECTION_CONFIG = {
     icon: '🧭',
     name: 'Relationship Compass',
     sectionMeta: {
-      // Secular/Modern sections (default mode)
+      // Wisdom-infused sections (default mode - includes Gita wisdom in accessible way)
       'I Hear You': { title: 'I Hear You', icon: '💜', order: 1 },
       'What Might Be Happening': { title: 'What Might Be Happening', icon: '💡', order: 2 },
       'The Other Side': { title: 'The Other Side', icon: '🤝', order: 3 },
       'What You Could Try': { title: 'What You Could Try', icon: '✨', order: 4 },
       'A Way to Say It': { title: 'A Way to Say It', icon: '💬', order: 5 },
-      'One Small Step': { title: 'One Small Step', icon: '👣', order: 6 },
-      'Let Me Understand Better': { title: 'Let Me Understand Better', icon: '❓', order: 7 },
+      'Gita Wisdom': { title: 'Gita Wisdom', icon: '🙏', order: 6 },
+      'One Small Step': { title: 'One Small Step', icon: '👣', order: 7 },
+      'Let Me Understand Better': { title: 'Let Me Understand Better', icon: '❓', order: 8 },
       // Legacy/Gita sections (for backwards compatibility)
       'Sacred Acknowledgement': { title: 'Sacred Acknowledgement', icon: '🙏', order: 1 },
       'Inner Conflict Mirror': { title: 'Inner Conflict Mirror', icon: '🪞', order: 2 },
@@ -507,15 +508,9 @@ export default function WisdomResponseCard({
 
       {/* Closing */}
       <div className="mt-6 pt-4 border-t border-gray-700/50 text-center">
-        {secularMode ? (
-          <p className="text-xs text-gray-500 italic">
-            💙 Here to help you navigate this with clarity and compassion
-          </p>
-        ) : (
-          <p className="text-xs text-gray-500 italic">
-            🙏 This wisdom transmission draws from 5000 years of Bhagavad Gita teachings
-          </p>
-        )}
+        <p className="text-xs text-gray-500 italic">
+          💙 Here to help you navigate this with clarity and compassion
+        </p>
       </div>
     </div>
   )
