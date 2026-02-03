@@ -56,13 +56,14 @@ HEADINGS_INSUFFICIENT = [
     "Citations",
 ]
 
-# Secular, modern, friendly headings (no spiritual language)
+# Wisdom-infused, modern, friendly headings (includes Gita wisdom in accessible way)
 HEADINGS_SECULAR = [
     "I Hear You",
     "What Might Be Happening",
     "The Other Side",
     "What You Could Try",
     "A Way to Say It",
+    "Gita Wisdom",
     "One Small Step",
 ]
 
@@ -876,6 +877,49 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
     sections.append("- Start soft. The first 3 minutes of a conversation often predict how it'll go.")
     sections.append("- Use \"I feel\" instead of \"You made me feel\" - it's less accusatory.")
     sections.append("- Ask genuine questions and actually listen to the answers.")
+    sections.append("")
+
+    # Gita Wisdom - One relevant verse in accessible language
+    sections.append("# Gita Wisdom")
+    sections.append("")
+
+    # Select the most relevant verse based on emotional themes
+    if is_anger and teachings:
+        # Find verse about anger/self-control
+        wisdom = teachings[0]
+        verse_ref = wisdom["verse_ref"] or "2:62-63"
+        sections.append(f"**{verse_ref}** - The Gita teaches that when we dwell on things that upset us, attachment grows. From attachment comes desire, and from unfulfilled desire comes anger. Anger clouds our judgment and leads to confusion.")
+        sections.append("")
+        sections.append(f"What this means for you: Your anger is valid, but notice how it might be keeping you stuck. The ancient wisdom suggests that the path to peace isn't about suppressing anger - it's about not feeding it with endless mental replays. You can acknowledge the hurt without letting it consume you.")
+    elif is_hurt and teachings:
+        # Find verse about equanimity in pain
+        wisdom = teachings[0]
+        verse_ref = wisdom["verse_ref"] or "2:14"
+        sections.append(f"**{verse_ref}** - The Gita reminds us that pleasure and pain come and go like summer and winter - they are temporary visitors, not permanent residents. The wise person learns to bear them without being overwhelmed.")
+        sections.append("")
+        sections.append(f"What this means for you: This pain is real, and it hurts. But it won't last forever. You've survived difficult moments before, and you'll survive this one too. The teaching isn't about denying your feelings - it's about trusting that you're stronger than any single moment of suffering.")
+    elif is_forgiveness and teachings:
+        # Find verse about forgiveness/compassion
+        wisdom = teachings[0]
+        verse_ref = wisdom["verse_ref"] or "12:13-14"
+        sections.append(f"**{verse_ref}** - The Gita describes the ideal person as one who is free from malice toward all beings, who is friendly and compassionate. Such a person is dear to the divine - not because they're perfect, but because they've chosen love over resentment.")
+        sections.append("")
+        sections.append(f"What this means for you: Kshama (forgiveness) in the Gita isn't about saying what happened was okay. It's about freeing yourself from the prison of resentment. When you forgive, you're not letting {obj_pronoun} off the hook - you're letting yourself off the hook of carrying this weight.")
+    elif is_fear and teachings:
+        # Find verse about fearlessness
+        wisdom = teachings[0]
+        verse_ref = wisdom["verse_ref"] or "2:20"
+        sections.append(f"**{verse_ref}** - The Gita teaches that your true self - your innermost essence - cannot be harmed, broken, or diminished by any external circumstance. The soul is eternal and unchanging.")
+        sections.append("")
+        sections.append(f"What this means for you: Whatever you're afraid of losing in this relationship, your core worth remains intact. You are not defined by this situation. The fear you feel is natural, but at your center, there's a place that remains steady and whole, regardless of how this unfolds.")
+    else:
+        # Default: karma yoga - focus on what you can control
+        verse_ref = "2:47"
+        if teachings and teachings[0]["verse_ref"]:
+            verse_ref = teachings[0]["verse_ref"]
+        sections.append(f"**{verse_ref}** - Perhaps the Gita's most famous teaching: \"You have the right to perform your actions, but you are not entitled to the fruits of your actions.\" Focus on doing the right thing; release attachment to how others respond.")
+        sections.append("")
+        sections.append(f"What this means for you: You can't control how {rel_name} will react or whether this situation will resolve the way you hope. But you can control how YOU show up - with integrity, honesty, and compassion. Do your part well, and let go of trying to control the outcome. That's where peace lives.")
     sections.append("")
 
     # One Small Step - Actionable next step
