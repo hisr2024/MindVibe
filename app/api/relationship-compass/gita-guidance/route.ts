@@ -3,56 +3,52 @@ import { NextRequest, NextResponse } from 'next/server'
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const REQUEST_TIMEOUT = 60000
 
+// Secular fallback response - modern, friendly, no religious references
 const FALLBACK_RESPONSE = {
-  response: `# Sacred Acknowledgement
-I witness the pain you carry with deep daya (compassion). The Gita teaches us (2:47): "Karmanye vadhikaraste, ma phaleshu kadachana" - You have the right to your actions alone, never to the fruits. Your willingness to seek understanding reveals your inner strength.
+  response: `# I Hear You
+I can tell this is weighing on you. Relationship challenges can feel overwhelming, especially when you're right in the middle of them. The fact that you're taking time to reflect on this instead of just reacting shows a lot of self-awareness.
 
-# Inner Conflict Mirror
-Ancient wisdom teaches: all outer conflicts are mirrors of inner ones. The Gita's teaching of svadhyaya (self-study) invites us to look within first. What do you truly need beneath the surface of this conflict - to be seen? Understood? Respected?
+# What Might Be Happening
+A few things that might be at play here:
+- **Unmet needs**: Conflicts often aren't about what they seem on the surface. What do you really need - respect? To be heard? Understanding?
+- **Different perspectives**: You and the other person might be seeing the same situation very differently. Neither view is necessarily "wrong."
+- **Communication patterns**: Sometimes how we communicate creates misunderstandings that snowball.
 
-# Gita Teachings Used
-The Bhagavad Gita (2:47, 6:5, 12:13) illuminates relationship wisdom:
-1. (2:47) Focus on your actions, not outcomes you cannot control
-2. (6:5) "One must elevate, not degrade, oneself. The mind can be the friend or enemy of the self."
-3. (12:13) "One who is free from malice toward all beings, friendly and compassionate..."
+# The Other Side
+Without excusing any hurtful behavior, it might help to consider: the other person is also navigating their own fears, insecurities, and past experiences. People often act from their own pain, not from a desire to hurt us.
 
-# Dharma Options
-Consider three dharmic paths:
-1. **Karma Yoga Path** (2:47): Focus on YOUR actions and intentions, not on controlling the other's response.
-2. **Kshama (Forgiveness) Path** (12:13): Forgiveness is YOUR liberation - releasing resentment so YOU can be free.
-3. **Sama-Darshana (Equal Vision) Path** (6:32): See the divine struggling in them too - they act from their own wounds.
+Some questions to consider:
+- What might they be feeling or fearing in this situation?
+- Is there any possibility they're unaware of how their actions are affecting you?
 
-# Sacred Speech
-The Gita teaches (17:15): "Speech that causes no distress, that is truthful, pleasant, and beneficial."
-Try this: "When [situation], I feel [emotion], because I need [need]. What I'm hoping is [request]."
+# What You Could Try
+Here are a few approaches that might help:
 
-# Detachment Anchor
-(2:47): Your dharma is to act with integrity; the outcome is not yours to control. Release attachment to HOW this must resolve.
+1. **Take a breather first**: Before having a conversation, give yourself time to move from reactive to responsive. A calm conversation is 10x more productive than one driven by raw emotion.
 
-# One Next Step
-Today, practice witness consciousness (6:5): When emotions arise, simply observe them. Say: "I see you, feeling. I am not you - I am the one who witnesses."
+2. **Focus on what you can control**: You can't control how someone else behaves, but you can control how you respond. Ask yourself: "What would the version of me I'm proud of do here?"
 
-# One Gentle Question
-If you were at complete peace with yourself - needing nothing from this person to feel whole - how would you respond?`,
+3. **Lead with curiosity, not accusations**: Instead of "You always..." try "Help me understand..." People get defensive when they feel attacked.
+
+# A Way to Say It
+When you're ready, here's a template that tends to work well:
+
+*"Hey, can we talk about something that's been on my mind? When [specific situation], I felt [your emotion]. I think it's because [your underlying need]. I'm not looking to argue - I just want us to understand each other better. What was going on for you in that moment?"*
+
+# One Small Step
+For today, try this: Before your next interaction, take a moment to set an intention. Not an outcome you're hoping for, but a way of being. Something like: "I'm going to stay curious" or "I'm going to listen more than I speak."`,
   sections: {
-    'Sacred Acknowledgement': 'I witness the pain you carry with deep daya (compassion). The Gita teaches us (2:47): "Karmanye vadhikaraste, ma phaleshu kadachana" - You have the right to your actions alone, never to the fruits. Your willingness to seek understanding reveals your inner strength.',
-    'Inner Conflict Mirror': "Ancient wisdom teaches: all outer conflicts are mirrors of inner ones. The Gita's teaching of svadhyaya (self-study) invites us to look within first. What do you truly need beneath the surface of this conflict - to be seen? Understood? Respected?",
-    'Gita Teachings Used': '1. (2:47) Focus on your actions, not outcomes you cannot control\n2. (6:5) "One must elevate, not degrade, oneself."\n3. (12:13) "One who is free from malice toward all beings..."',
-    'Dharma Options': '1. **Karma Yoga Path** (2:47): Focus on YOUR actions and intentions.\n2. **Kshama (Forgiveness) Path** (12:13): Forgiveness is YOUR liberation.\n3. **Sama-Darshana (Equal Vision) Path** (6:32): See the divine in them too.',
-    'Sacred Speech': 'Try: "When [situation], I feel [emotion], because I need [need]. What I\'m hoping is [request]."',
-    'Detachment Anchor': '(2:47): Your dharma is to act with integrity; the outcome is not yours to control.',
-    'One Next Step': 'Today, practice witness consciousness (6:5): When emotions arise, simply observe them.',
-    'One Gentle Question': 'If you were at complete peace with yourself - needing nothing from this person to feel whole - how would you respond?'
+    'I Hear You': 'I can tell this is weighing on you. Relationship challenges can feel overwhelming, especially when you\'re right in the middle of them. The fact that you\'re taking time to reflect on this instead of just reacting shows a lot of self-awareness.',
+    'What Might Be Happening': 'A few things that might be at play here:\n- **Unmet needs**: Conflicts often aren\'t about what they seem on the surface. What do you really need - respect? To be heard? Understanding?\n- **Different perspectives**: You and the other person might be seeing the same situation very differently.\n- **Communication patterns**: Sometimes how we communicate creates misunderstandings that snowball.',
+    'The Other Side': 'Without excusing any hurtful behavior, it might help to consider: the other person is also navigating their own fears, insecurities, and past experiences. People often act from their own pain, not from a desire to hurt us.',
+    'What You Could Try': '1. **Take a breather first**: Before having a conversation, give yourself time to move from reactive to responsive.\n\n2. **Focus on what you can control**: You can\'t control how someone else behaves, but you can control how you respond.\n\n3. **Lead with curiosity, not accusations**: Instead of "You always..." try "Help me understand..."',
+    'A Way to Say It': '*"Hey, can we talk about something? When [situation], I felt [emotion]. I think it\'s because [need]. I\'m not looking to argue - I just want us to understand each other better."*',
+    'One Small Step': 'For today: Before your next interaction, set an intention. Not an outcome you\'re hoping for, but a way of being. Something like: "I\'m going to stay curious" or "I\'m going to listen more than I speak."'
   },
-  citations: [
-    { chapter: '2', verse: '47', source: 'Bhagavad Gita', chunk_id: 'fallback_2_47' },
-    { chapter: '6', verse: '5', source: 'Bhagavad Gita', chunk_id: 'fallback_6_5' },
-    { chapter: '12', verse: '13', source: 'Bhagavad Gita', chunk_id: 'fallback_12_13' },
-    { chapter: '6', verse: '32', source: 'Bhagavad Gita', chunk_id: 'fallback_6_32' },
-    { chapter: '17', verse: '15', source: 'Bhagavad Gita', chunk_id: 'fallback_17_15' }
-  ],
+  citations: [],
   contextSufficient: true,
-  fallback: true
+  fallback: true,
+  secularMode: true
 }
 
 export async function POST(request: NextRequest) {

@@ -59,17 +59,24 @@ from backend.services.wellness_model import (
     get_wellness_model,
     PsychologicalFramework,
 )
-from backend.services.relationship_compass_prompt import RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT
+from backend.services.relationship_compass_prompt import (
+    RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT,
+    RELATIONSHIP_COMPASS_SECULAR_PROMPT,
+)
 from backend.services.relationship_compass_rag import (
     HEADINGS_INSUFFICIENT,
     HEADINGS_SUFFICIENT,
+    HEADINGS_SECULAR,
+    HEADINGS_SECULAR_INSUFFICIENT,
     build_allowed_citations,
     build_citation_list,
     build_context_block,
     build_insufficient_response,
+    build_secular_insufficient_response,
     call_openai,
     call_ai_provider,
     generate_gita_based_response,
+    generate_secular_response,
     expand_and_retrieve,
     extract_sections,
     merge_chunks,
@@ -121,11 +128,13 @@ class RelationshipGuideRequest(BaseModel):
 
 
 class GitaGuidanceRequest(BaseModel):
-    """Request schema for Gita-only relationship guidance."""
+    """Request schema for relationship guidance."""
     model_config = ConfigDict(populate_by_name=True)
     message: str = Field(..., min_length=1, max_length=3000, description="User message")
     session_id: str = Field(..., min_length=1, max_length=128, alias="sessionId")
     relationship_type: str = Field("other", alias="relationshipType")
+    # Secular mode: modern, friendly responses without spiritual language (default: True)
+    secular_mode: bool = Field(True, alias="secularMode")
 
 
 # Relationship-specific Gita teachings mapping
@@ -485,16 +494,18 @@ async def get_relationship_guidance(
 async def get_relationship_guidance_gita_only(
     payload: GitaGuidanceRequest,
 ) -> dict[str, Any]:
-    """Gita-only relationship guidance using strict RAG over the 700+ verse repository.
+    """Relationship guidance with optional secular mode (default: secular).
 
-    Enhanced with OpenAI-powered conflict analysis (v3.1) for:
-    - Deep emotional understanding
-    - Nuanced attachment pattern detection
-    - Better verse retrieval through AI-enhanced search queries
+    Secular mode (default): Modern, friendly, practical advice without religious references.
+    Gita mode: Traditional guidance with verse citations and spiritual language.
+
+    Both modes use the same underlying wisdom from the 700+ verse repository,
+    but present it differently based on user preference.
     """
     message = payload.message.strip()
     session_id = payload.session_id.strip()
     relationship_type = (payload.relationship_type or "other").strip().lower()
+    secular_mode = payload.secular_mode  # Default True - modern, friendly responses
 
     if not message:
         raise HTTPException(status_code=400, detail="message is required")
@@ -520,10 +531,11 @@ async def get_relationship_guidance_gita_only(
     )
 
     logger.info(
-        f"RelationshipCompass Gita-Guidance AI Analysis: "
+        f"RelationshipCompass Analysis: "
         f"emotion={ai_analysis.primary_emotion}, "
         f"attachment={ai_analysis.attachment_style}, "
-        f"confidence={ai_analysis.confidence:.2f}"
+        f"confidence={ai_analysis.confidence:.2f}, "
+        f"secular_mode={secular_mode}"
     )
 
     # Build enhanced query for verse retrieval if AI analysis was successful
@@ -534,7 +546,7 @@ async def get_relationship_guidance_gita_only(
             relationship_type=relationship_type,
         )
         base_result = retrieve_chunks(enhanced_query, relationship_type, k=18)
-        logger.info("RelationshipCompass: Using AI-enhanced query for verse retrieval")
+        logger.info("RelationshipCompass: Using AI-enhanced query for wisdom retrieval")
     else:
         base_result = retrieve_chunks(message, relationship_type, k=18)
 
@@ -543,18 +555,23 @@ async def get_relationship_guidance_gita_only(
     context_block = build_context_block(merged_chunks)
     context_sufficient = bool(merged_chunks) and retrieval.confidence >= 0.2
 
-    citations = build_citation_list(merged_chunks)
+    # Choose headings based on mode
+    headings_sufficient = HEADINGS_SECULAR if secular_mode else HEADINGS_SUFFICIENT
+    headings_insufficient = HEADINGS_SECULAR_INSUFFICIENT if secular_mode else HEADINGS_INSUFFICIENT
+
+    # Don't return citations in secular mode (no references to show)
+    citations = [] if secular_mode else build_citation_list(merged_chunks)
 
     if not context_sufficient:
-        response_text = build_insufficient_response()
-        sections = extract_sections(response_text, HEADINGS_INSUFFICIENT)
+        response_text = build_secular_insufficient_response() if secular_mode else build_insufficient_response()
+        sections = extract_sections(response_text, headings_insufficient)
         append_message(
             CompassMessage(
                 session_id=session_id,
                 role="assistant",
                 content=response_text,
                 created_at=datetime.utcnow().isoformat(),
-                citations=citations,
+                citations=citations if not secular_mode else None,
             )
         )
         return {
@@ -562,89 +579,107 @@ async def get_relationship_guidance_gita_only(
             "sections": sections,
             "citations": citations,
             "contextSufficient": False,
+            "secularMode": secular_mode,
         }
 
     history_messages = [
         {"role": entry.get("role", "user"), "content": entry.get("content", "")}
         for entry in history
     ]
-    base_user_message = (
-        f"Relationship type: {relationship_type}\n"
-        f"User message: {message}\n\n"
-        f"{context_block}"
-    )
+
+    # Choose prompt based on mode
+    system_prompt = RELATIONSHIP_COMPASS_SECULAR_PROMPT if secular_mode else RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT
+
+    # For secular mode, don't expose the Gita context to the user-facing prompt
+    if secular_mode:
+        base_user_message = (
+            f"Relationship type: {relationship_type}\n"
+            f"User's situation: {message}\n\n"
+            f"Use the following wisdom themes to inform your advice (but NEVER mention these sources, verses, or any spiritual language):\n"
+            f"{context_block}"
+        )
+    else:
+        base_user_message = (
+            f"Relationship type: {relationship_type}\n"
+            f"User message: {message}\n\n"
+            f"{context_block}"
+        )
 
     # Try async multi-provider first, then sync fallback
     response_text = await call_ai_provider(
         [
-            {"role": "system", "content": RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             *history_messages,
             {"role": "user", "content": base_user_message},
         ]
     )
 
-    allowed_citations = build_allowed_citations(merged_chunks)
-
-    if response_text:
-        is_valid, errors = validate_response(response_text, allowed_citations)
+    # Validation differs by mode
+    if secular_mode:
+        # For secular mode, just check we have a response with content
+        is_valid = bool(response_text and len(response_text.strip()) > 100)
+        errors = [] if is_valid else ["Response too short or empty"]
     else:
-        is_valid, errors = False, ["No response from model"]
-
-    if not is_valid and response_text:
-        fix_instruction = (
-            "FORMAT + CITATION FIX: Follow the exact heading order, include citations where required, "
-            "and ensure all verse references appear in the provided [GITA_CORE_WISDOM_CONTEXT]. "
-            "If context is insufficient, return the insufficient-context format."
-        )
-        response_text = await call_ai_provider(
-            [
-                {"role": "system", "content": RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT},
-                {"role": "user", "content": base_user_message},
-                {"role": "user", "content": fix_instruction},
-            ]
-        )
+        allowed_citations = build_allowed_citations(merged_chunks)
         if response_text:
             is_valid, errors = validate_response(response_text, allowed_citations)
+        else:
+            is_valid, errors = False, ["No response from model"]
 
-    # If AI providers failed, use Gita-based fallback response (like KIAAN Chat)
+        if not is_valid and response_text:
+            fix_instruction = (
+                "FORMAT + CITATION FIX: Follow the exact heading order, include citations where required, "
+                "and ensure all verse references appear in the provided [GITA_CORE_WISDOM_CONTEXT]. "
+                "If context is insufficient, return the insufficient-context format."
+            )
+            response_text = await call_ai_provider(
+                [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": base_user_message},
+                    {"role": "user", "content": fix_instruction},
+                ]
+            )
+            if response_text:
+                is_valid, errors = validate_response(response_text, allowed_citations)
+
+    # If AI providers failed, use fallback response
     if not response_text or not is_valid:
-        logger.warning("Relationship Compass AI failed, using Gita-based fallback: %s", errors)
-        response_text = generate_gita_based_response(merged_chunks, relationship_type, message)
-        sections = extract_sections(response_text, HEADINGS_SUFFICIENT)
+        logger.warning("Relationship Compass AI failed, using fallback: %s", errors)
+        response_text = generate_secular_response(merged_chunks, relationship_type, message) if secular_mode else generate_gita_based_response(merged_chunks, relationship_type, message)
+        sections = extract_sections(response_text, headings_sufficient)
         append_message(
             CompassMessage(
                 session_id=session_id,
                 role="assistant",
                 content=response_text,
                 created_at=datetime.utcnow().isoformat(),
-                citations=citations,
+                citations=citations if not secular_mode else None,
             )
         )
         return {
             "response": response_text,
             "sections": sections,
             "citations": citations,
-            "contextSufficient": True,  # We have context, just AI unavailable
+            "contextSufficient": True,
             "fallback": True,
-            # AI Analysis (v3.1) - included even in fallback
+            "secularMode": secular_mode,
+            # AI Analysis - included even in fallback (internal insights)
             "ai_analysis": {
                 "enabled": ai_analysis.analysis_depth == "ai_enhanced",
                 "primary_emotion": ai_analysis.primary_emotion,
                 "attachment_style": ai_analysis.attachment_style,
-                "gita_concepts": ai_analysis.gita_concepts,
-                "recommended_teachings": ai_analysis.recommended_teachings,
                 "confidence": ai_analysis.confidence,
             },
         }
 
-    sections = extract_sections(response_text, HEADINGS_SUFFICIENT)
+    sections = extract_sections(response_text, headings_sufficient)
     append_message(
         CompassMessage(
             session_id=session_id,
             role="assistant",
             content=response_text,
             created_at=datetime.utcnow().isoformat(),
-            citations=citations,
+            citations=citations if not secular_mode else None,
         )
     )
     return {
@@ -652,7 +687,8 @@ async def get_relationship_guidance_gita_only(
         "sections": sections,
         "citations": citations,
         "contextSufficient": True,
-        # AI Analysis fields (v3.1 - OpenAI-powered Gita-grounded analysis)
+        "secularMode": secular_mode,
+        # AI Analysis (internal - not exposed as spiritual concepts in secular mode)
         "ai_analysis": {
             "enabled": ai_analysis.analysis_depth == "ai_enhanced",
             "primary_emotion": ai_analysis.primary_emotion,
@@ -666,8 +702,6 @@ async def get_relationship_guidance_gita_only(
             "power_dynamic": ai_analysis.power_dynamic,
             "core_unmet_needs": ai_analysis.core_unmet_needs,
             "underlying_fears": ai_analysis.underlying_fears,
-            "gita_concepts": ai_analysis.gita_concepts,
-            "recommended_teachings": ai_analysis.recommended_teachings,
             "confidence": ai_analysis.confidence,
         },
     }

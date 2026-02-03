@@ -48,13 +48,14 @@ type RelationshipCompassResult = {
   gitaVerses?: number
   citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
   contextSufficient?: boolean
+  secularMode?: boolean
 }
 
 const triggerPatterns = [
-  'Svadhyaya - when you need honest self-reflection in conflict',
-  'Daya & Karuna - developing deep compassion for both sides',
-  'Dharma - discovering right action aligned with your highest self',
-  'Kshama - when forgiveness is needed but feels impossible'
+  'Conflicts with partner, family, or friends that feel stuck',
+  'When you want to understand both sides of a disagreement',
+  'Figuring out the right thing to do in a tough situation',
+  'When you know you need to have a difficult conversation'
 ]
 
 export default function RelationshipCompassClient() {
@@ -118,7 +119,8 @@ export default function RelationshipCompassClient() {
           requestedAt: new Date().toISOString(),
           gitaVerses: citations.length,
           citations,
-          contextSufficient: data.contextSufficient
+          contextSufficient: data.contextSufficient,
+          secularMode: data.secularMode !== false  // Default to true
         })
       } else if (fullResponse) {
         // Fallback to full response only
@@ -128,7 +130,8 @@ export default function RelationshipCompassClient() {
           requestedAt: new Date().toISOString(),
           gitaVerses: citations.length,
           citations,
-          contextSufficient: data.contextSufficient
+          contextSufficient: data.contextSufficient,
+          secularMode: data.secularMode !== false  // Default to true
         })
       } else {
         setError('Relationship Compass could not generate a response. Please try again.')
@@ -154,7 +157,7 @@ export default function RelationshipCompassClient() {
         <ToolHeader
           icon="🧭"
           title="Relationship Compass"
-          subtitle="Navigate relationship challenges with clarity, fairness, and compassion. KIAAN remains untouched."
+          subtitle="Navigate relationship challenges with clarity, fairness, and compassion."
           backLink={{ label: 'Back to home', href: '/' }}
         />
 
@@ -201,9 +204,9 @@ export default function RelationshipCompassClient() {
                   onClick={requestCompass}
                   disabled={!conflict.trim() || loading}
                   className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
-                  aria-label={loading ? 'Processing...' : 'Guide me with Relationship Compass'}
+                  aria-label={loading ? 'Processing...' : 'Get Guidance'}
                 >
-                  {loading ? <span>Balancing guidance...</span> : <span>Guide me with Relationship Compass</span>}
+                  {loading ? <span>Thinking...</span> : <span>Get Guidance</span>}
                 </button>
                 <Link
                   href="/kiaan/chat"
@@ -235,6 +238,7 @@ export default function RelationshipCompassClient() {
                 timestamp={result.requestedAt}
                 language="en-IN"
                 citations={result.citations}
+                secularMode={result.secularMode !== false}
               />
             )}
           </section>
@@ -243,9 +247,9 @@ export default function RelationshipCompassClient() {
           <section className="space-y-4">
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-orange-50">When to use this</h3>
+                <h3 className="text-sm font-semibold text-orange-50">Good for</h3>
                 <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-orange-100/70">
-                  Trigger detection
+                  Use cases
                 </span>
               </div>
 
@@ -260,9 +264,9 @@ export default function RelationshipCompassClient() {
             </div>
 
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
+              <h4 className="text-xs font-semibold text-orange-50 mb-2">What you&apos;ll get</h4>
               <p className="text-xs text-orange-100/70 leading-relaxed">
-                Acknowledge → Separate ego → Name values → Right action → Detach → Add compassion → Suggest phrasing → One next step
+                Validation → Insight → Other perspective → Practical suggestions → Conversation script → One actionable step
               </p>
             </div>
 
