@@ -406,6 +406,7 @@ class WellnessModel:
         db: AsyncSession,
         analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
         language: str | None = None,
+        secular_mode: bool = True,
     ) -> WellnessResponse:
         """
         Generate a wellness response using Bhagavad Gita wisdom + psychological analysis.
@@ -426,6 +427,7 @@ class WellnessModel:
                 - DEEP_DIVE: Comprehensive analysis with root cause exploration
                 - QUANTUM_DIVE: Multi-dimensional exploration across all life aspects
             language: Optional language code for response (hi, ta, te, etc.)
+            secular_mode: If True (default), use modern friendly language without spiritual terms
 
         Returns:
             WellnessResponse with Gita-grounded content, structured sections,
@@ -468,6 +470,7 @@ class WellnessModel:
             analysis_mode=analysis_mode,
             psych_insights=psych_insights,
             language=language,
+            secular_mode=secular_mode,
         )
 
         # STEP 4: Generate response using multi-provider system
@@ -683,12 +686,17 @@ class WellnessModel:
         analysis_mode: AnalysisMode,
         psych_insights: dict[str, Any],
         language: str | None = None,
+        secular_mode: bool = True,
     ) -> str:
         """Build enhanced system prompt with psychological framework integration."""
-        # Get base prompt from existing method
-        base_prompt = self._build_system_prompt(tool, user_input, gita_context, analysis_mode)
+        # Use secular prompt if in secular mode
+        if secular_mode:
+            base_prompt = self._build_secular_system_prompt(tool, user_input, gita_context, analysis_mode)
+        else:
+            # Get base prompt from existing method (Gita-focused)
+            base_prompt = self._build_system_prompt(tool, user_input, gita_context, analysis_mode)
 
-        # Add psychological framework context
+        # Add psychological framework context (simplified for secular mode)
         psych_context = self._build_psychological_context(tool, psych_insights)
 
         # Add language instruction if specified
@@ -701,10 +709,24 @@ class WellnessModel:
                 "de": "German", "pt": "Portuguese", "ja": "Japanese", "zh": "Chinese",
             }
             lang_name = language_map.get(language, language)
-            language_instruction = f"\n\nRESPOND IN {lang_name}. Keep Sanskrit terms (dharma, karma, yoga) but explain in {lang_name}."
+            if secular_mode:
+                language_instruction = f"\n\nRESPOND IN {lang_name}. Use everyday language."
+            else:
+                language_instruction = f"\n\nRESPOND IN {lang_name}. Keep Sanskrit terms (dharma, karma, yoga) but explain in {lang_name}."
 
-        # Combine all components
-        enhanced_prompt = f"""{base_prompt}
+        # Combine all components with appropriate guidance
+        if secular_mode:
+            enhanced_prompt = f"""{base_prompt}
+
+{psych_context}
+{language_instruction}
+
+IMPORTANT: Use the psychological insights to inform your response.
+Present wisdom in modern, friendly, everyday language.
+Never use spiritual terms, Sanskrit words, or citations.
+The user should feel understood and receive practical, actionable guidance."""
+        else:
+            enhanced_prompt = f"""{base_prompt}
 
 {psych_context}
 {language_instruction}
@@ -886,6 +908,145 @@ Apply this wisdom directly to the user's specific situation."""
                 return self._build_ardha_prompt(gita_focus, user_input, gita_context)
         else:
             return self._build_compass_prompt(gita_focus, user_input, gita_context)
+
+    def _build_secular_system_prompt(
+        self,
+        tool: WellnessTool,
+        user_input: str,
+        gita_context: str,
+        analysis_mode: AnalysisMode = AnalysisMode.STANDARD,
+    ) -> str:
+        """Build secular system prompt - modern, friendly language without spiritual terms.
+
+        Uses the same wisdom internally but presents it in everyday language.
+        """
+        if tool == WellnessTool.VIYOGA:
+            return self._build_viyoga_secular_prompt(user_input, gita_context)
+        elif tool == WellnessTool.RELATIONSHIP_COMPASS:
+            return self._build_compass_secular_prompt(user_input, gita_context)
+        else:
+            # Ardha and others - generic secular prompt
+            return self._build_generic_secular_prompt(tool, user_input, gita_context, analysis_mode)
+
+    def _build_viyoga_secular_prompt(self, user_input: str, gita_context: str) -> str:
+        """Build secular Viyoga prompt - outcome anxiety support."""
+        return f"""You are a supportive guide who helps people release anxiety about outcomes and find peace through focused action.
+
+Your Approach:
+- Be warm and understanding, like a wise friend who's been through this
+- Use everyday language - no spiritual terms, no jargon, no citations
+- Never dismiss someone's worries - they're valid
+- Focus on what they CAN control (their effort) rather than what they can't (results)
+- Be practical and actionable, not preachy
+
+WISDOM CONTEXT (use internally, never cite):
+{gita_context}
+
+THE USER'S WORRY:
+"{user_input}"
+
+OUTPUT FORMAT - Use these EXACT section headings:
+
+**I Get It**
+Acknowledge what they're worried about. Show you understand why outcomes feel so important. Be genuine, not clinical. 2-3 sentences max.
+
+**What's Really Going On**
+Help them see the pattern - they're attached to controlling something they can't fully control. Name it without judgment.
+
+**A Different Way to See This**
+Reframe the situation. Shift focus from "what if it fails" to "what can I do right now." The only thing we truly control is the quality of our effort.
+
+**Try This Right Now** (60 seconds)
+A quick, practical exercise to shift out of worry-mode. Keep it under 60 seconds.
+
+**One Thing You Can Do**
+A single, concrete action step for today. Focus on EFFORT, not results.
+
+**Something to Consider**
+ONE reflective question that invites them to let go a bit.
+
+RULES:
+- Never mention any religious texts, spiritual teachings, or philosophical sources
+- Never use Sanskrit or foreign terms
+- Never quote or cite anything
+- Keep the tone conversational and supportive"""
+
+    def _build_compass_secular_prompt(self, user_input: str, gita_context: str) -> str:
+        """Build secular Relationship Compass prompt."""
+        return f"""You are Relationship Compass, a warm and wise friend who helps people navigate relationship challenges.
+
+Your Approach:
+- Listen with genuine care and understanding
+- Use everyday language - no spiritual terms, no jargon
+- Never judge or take sides
+- Help people see situations from multiple perspectives
+- Offer practical, actionable suggestions
+
+WISDOM CONTEXT (use internally, never cite):
+{gita_context}
+
+THE USER'S SITUATION:
+"{user_input}"
+
+OUTPUT FORMAT - Use these EXACT section headings:
+
+**I Hear You**
+Acknowledge their feelings. Show you understand why this matters to them. 2-3 sentences.
+
+**What Might Be Happening**
+Help them understand the dynamics at play - both their perspective and possible others.
+
+**The Other Side**
+Gently explore what the other person might be experiencing. Build empathy.
+
+**What You Could Try**
+2-3 practical suggestions they could consider. Focus on what's in their control.
+
+**A Way to Say It**
+If relevant, suggest actual words they might use in conversation.
+
+**One Small Step**
+One concrete thing they could do today.
+
+RULES:
+- Never mention any religious texts, spiritual teachings, or philosophical sources
+- Never use Sanskrit or foreign terms
+- Never quote or cite anything
+- Keep the tone warm and supportive"""
+
+    def _build_generic_secular_prompt(
+        self,
+        tool: WellnessTool,
+        user_input: str,
+        gita_context: str,
+        analysis_mode: AnalysisMode,
+    ) -> str:
+        """Build generic secular prompt for other tools."""
+        return f"""You are a supportive wellness guide who helps people with their emotional and mental well-being.
+
+Your Approach:
+- Be warm, understanding, and non-judgmental
+- Use everyday language - no spiritual terms or jargon
+- Be practical and actionable
+- Validate feelings while offering fresh perspectives
+
+WISDOM CONTEXT (use internally, never cite):
+{gita_context}
+
+THE USER'S CONCERN:
+"{user_input}"
+
+Provide a thoughtful, supportive response that:
+1. Acknowledges what they're feeling
+2. Helps them understand what's happening
+3. Offers a fresh perspective
+4. Gives practical, actionable guidance
+
+RULES:
+- Never mention any religious texts, spiritual teachings, or philosophical sources
+- Never use Sanskrit or foreign terms
+- Never quote or cite anything
+- Keep the tone conversational and supportive"""
 
     def _build_viyoga_prompt(
         self,
