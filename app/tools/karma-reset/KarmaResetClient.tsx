@@ -245,18 +245,8 @@ export default function KarmaResetClient() {
                 )}
               </div>
               <p className="text-lg text-orange-100/80 mb-4">
-                A compassionate ritual to acknowledge impact, repair harm, and move forward with wisdom.
+                A gentle process to acknowledge impact, repair connections, and move forward with clarity.
               </p>
-              
-              {/* KIAAN Badge */}
-              {kiaanMetadata && (
-                <KiaanBadge
-                  versesUsed={kiaanMetadata.verses_used}
-                  validationPassed={kiaanMetadata.validation_passed}
-                  validationScore={kiaanMetadata.validation_score}
-                  className="mb-4"
-                />
-              )}
             </div>
 
             {/* Input Form */}
@@ -386,7 +376,7 @@ export default function KarmaResetClient() {
                     disabled={loading}
                     className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 hover:from-orange-600 hover:via-[#ff8820] hover:to-orange-400 disabled:from-gray-500 disabled:via-gray-600 disabled:to-gray-500 text-slate-950 font-semibold text-lg transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-[1.02]"
                   >
-                    {loading ? 'Generating wisdom...' : 'Generate Reset Guidance'}
+                    {loading ? 'Creating your reset...' : 'Get Reset Guidance'}
                   </button>
                 </form>
               </div>

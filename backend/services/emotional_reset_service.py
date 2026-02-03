@@ -98,8 +98,8 @@ class EmotionalResetService:
             "guidance": "Imagine placing your worries on a leaf floating down a gentle stream. Watch as the current carries them away, one by one...",
         },
         5: {
-            "title": "Wisdom Integration",
-            "guidance": "Here's some timeless wisdom to carry with you...",
+            "title": "A Fresh Perspective",
+            "guidance": "Here are some helpful insights to carry with you...",
         },
         6: {
             "title": "Personal Affirmations",
@@ -107,7 +107,7 @@ class EmotionalResetService:
         },
         7: {
             "title": "Session Complete",
-            "guidance": "You've taken a powerful step in caring for your emotional well-being. Here's a summary of your journey...",
+            "guidance": "You've taken a meaningful step in caring for your emotional well-being. Here's a summary of your journey...",
         },
     }
 
@@ -285,7 +285,7 @@ class EmotionalResetService:
             return self._get_fallback_assessment(user_input)
 
         try:
-            prompt = f"""You are KIAAN, a compassionate AI wellness guide. A user shared: "{user_input}"
+            prompt = f"""You are a compassionate wellness guide. A user shared: "{user_input}"
 
 Provide a brief, empathetic assessment in 2-3 sentences that:
 1. Validates their feelings
@@ -297,7 +297,7 @@ End with 💙"""
 
             response = await self.optimizer.create_completion_with_retry(
                 messages=[
-                    {"role": "system", "content": "You are KIAAN, a compassionate AI guide focused on emotional wellness."},
+                    {"role": "system", "content": "You are a compassionate guide focused on emotional wellness."},
                     {"role": "user", "content": prompt}
                 ],
                 model="gpt-4o-mini",  # Upgraded from gpt-4
@@ -662,7 +662,7 @@ Do not use religious terms. Return only the 4 affirmations, each on a new line."
             "next_steps": [
                 "Practice the breathing exercise whenever you feel unsettled",
                 "Revisit your affirmations each morning",
-                "Return to KIAAN whenever you need support",
+                "Come back whenever you need a reset",
             ],
             "closing_message": "You've completed your emotional reset. Be gentle with yourself today. 💙",
         }

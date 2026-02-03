@@ -153,38 +153,35 @@ class KarmaResetService:
     ) -> str:
         """
         Build a wisdom context string from Gita verses.
-        
+
         Formats verses into a context string that can be used to enhance
         karma reset guidance without exposing religious terminology.
-        
+
         Args:
             verse_results: List of verse results from get_reset_verses()
             repair_type: Type of repair action
-            
+
         Returns:
             Formatted context string for guidance generation
         """
         if not verse_results:
             return ""
-        
+
         normalized_type = self._normalize_repair_type(repair_type)
-        
-        # Build context header
+
+        # Build context header - modern language
         context_parts = [
-            f"Ancient wisdom for {normalized_type.replace('_', ' ')}:",
+            f"Helpful insights for {normalized_type.replace('_', ' ')}:",
             ""
         ]
-        
-        # Add verse wisdom (using sanitized text)
+
+        # Add wisdom (using sanitized text, no citations)
         for i, result in enumerate(verse_results[:3], 1):  # Limit to top 3
-            verse = result.get("verse", {})
             sanitized_text = result.get("sanitized_text", "")
-            
+
             if sanitized_text:
-                # Extract verse identifier
-                verse_id = verse.get("verse_id", f"{i}")
-                context_parts.append(f"Verse {verse_id}: {sanitized_text}")
-        
+                context_parts.append(f"Insight {i}: {sanitized_text}")
+
         return "\n".join(context_parts)
     
     async def validate_reset_guidance(
