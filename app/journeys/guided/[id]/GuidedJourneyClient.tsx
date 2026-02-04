@@ -170,22 +170,22 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
       {step.practice && Object.keys(step.practice).length > 0 && (
         <section className="rounded-xl border border-green-500/30 bg-green-900/10 p-5">
           <h3 className="text-sm font-semibold text-green-400 mb-3">Today&apos;s Practice</h3>
-          {step.practice.name && (
-            <p className="font-medium text-white mb-2">{step.practice.name as string}</p>
+          {typeof step.practice.name === 'string' && (
+            <p className="font-medium text-white mb-2">{step.practice.name}</p>
           )}
-          {step.practice.instructions && Array.isArray(step.practice.instructions) && (
+          {Array.isArray(step.practice.instructions) && (
             <ol className="space-y-2">
-              {(step.practice.instructions as string[]).map((instruction, idx) => (
+              {step.practice.instructions.map((instruction, idx) => (
                 <li key={idx} className="flex gap-3 text-white/90">
                   <span className="text-green-400 font-medium">{idx + 1}.</span>
-                  <span>{instruction}</span>
+                  <span>{String(instruction)}</span>
                 </li>
               ))}
             </ol>
           )}
-          {step.practice.duration_minutes && (
+          {typeof step.practice.duration_minutes === 'number' && (
             <p className="mt-3 text-sm text-green-400/70">
-              Duration: {step.practice.duration_minutes as number} minutes
+              Duration: {step.practice.duration_minutes} minutes
             </p>
           )}
         </section>
