@@ -213,8 +213,26 @@ async def global_exception_handler(request: Request, exc: Exception):
     # Log the full exception for debugging
     logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
 
+    # Get origin for CORS headers
+    origin = request.headers.get("origin", "")
+    if origin in ALLOWED_ORIGINS:
+        cors_origin = origin
+    elif origin.replace("https://www.", "https://") in ALLOWED_ORIGINS:
+        cors_origin = origin  # Allow www variant
+    elif origin.replace("https://", "https://www.") in ALLOWED_ORIGINS:
+        cors_origin = origin  # Allow non-www variant
+    else:
+        cors_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
+
+    cors_headers = {
+        "Access-Control-Allow-Origin": cors_origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
+    }
+
     # For journey endpoints, return a more graceful response
-    if "/journeys/" in request.url.path:
+    if "/journeys/" in request.url.path or "/journey-engine/" in request.url.path:
         return JSONResponse(
             status_code=200,  # Return 200 to allow frontend fallback
             content={
@@ -222,6 +240,7 @@ async def global_exception_handler(request: Request, exc: Exception):
                 "message": "Service temporarily unavailable. Please try again.",
                 "_offline": True,
             },
+            headers=cors_headers,
         )
 
     # For other endpoints, return standard 500 with details
@@ -231,6 +250,7 @@ async def global_exception_handler(request: Request, exc: Exception):
             "detail": "Internal server error",
             "message": str(exc) if os.getenv("DEBUG", "false").lower() == "true" else "An unexpected error occurred",
         },
+        headers=cors_headers,
     )
 
 app.add_middleware(
