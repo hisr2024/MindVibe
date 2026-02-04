@@ -781,7 +781,20 @@ async def get_dashboard(
     """
     user_id = current_user
 
-    dashboard = await service.get_dashboard(user_id)
+    try:
+        dashboard = await service.get_dashboard(user_id)
+    except Exception as e:
+        logger.error(f"Dashboard error for user {user_id}: {e}", exc_info=True)
+        # Return empty dashboard on error instead of 500
+        return DashboardResponse(
+            active_journeys=[],
+            completed_journeys=0,
+            total_days_practiced=0,
+            current_streak=0,
+            enemy_progress=[],
+            recommended_templates=[],
+            today_steps=[],
+        )
 
     return DashboardResponse(
         active_journeys=[
