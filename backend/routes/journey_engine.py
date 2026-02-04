@@ -865,6 +865,96 @@ async def get_dashboard(
     )
 
 
+@router.get("/debug/my-journeys")
+async def debug_my_journeys(
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Debug endpoint to see all journeys for the current user."""
+    from sqlalchemy import select, text
+    from backend.models import UserJourney
+
+    user_id = current_user
+
+    # Raw count without deleted_at filter
+    raw_count_result = await db.execute(
+        text("SELECT COUNT(*) FROM user_journeys WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    )
+    raw_count = raw_count_result.scalar() or 0
+
+    # Count with deleted_at filter
+    active_count_result = await db.execute(
+        text("""
+            SELECT COUNT(*) FROM user_journeys
+            WHERE user_id = :user_id
+            AND status = 'active'
+            AND (deleted_at IS NULL OR deleted_at > NOW())
+        """),
+        {"user_id": user_id}
+    )
+    active_count = active_count_result.scalar() or 0
+
+    # Get all journeys
+    journeys_result = await db.execute(
+        text("""
+            SELECT id, journey_template_id, status, current_day_index,
+                   created_at, deleted_at
+            FROM user_journeys
+            WHERE user_id = :user_id
+            ORDER BY created_at DESC
+            LIMIT 20
+        """),
+        {"user_id": user_id}
+    )
+    journeys = [
+        {
+            "id": row[0],
+            "template_id": row[1],
+            "status": row[2],
+            "current_day": row[3],
+            "created_at": str(row[4]) if row[4] else None,
+            "deleted_at": str(row[5]) if row[5] else None,
+        }
+        for row in journeys_result.fetchall()
+    ]
+
+    return {
+        "user_id": user_id,
+        "raw_total_count": raw_count,
+        "active_count": active_count,
+        "journeys": journeys,
+    }
+
+
+@router.delete("/debug/clear-all-journeys")
+async def debug_clear_all_journeys(
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Debug endpoint to soft-delete all journeys for the current user."""
+    from sqlalchemy import text
+
+    user_id = current_user
+
+    # Soft delete all journeys
+    result = await db.execute(
+        text("""
+            UPDATE user_journeys
+            SET deleted_at = NOW(), status = 'abandoned'
+            WHERE user_id = :user_id AND deleted_at IS NULL
+        """),
+        {"user_id": user_id}
+    )
+    await db.commit()
+
+    return {
+        "message": "All journeys cleared",
+        "user_id": user_id,
+        "journeys_cleared": result.rowcount,
+    }
+
+
 # =============================================================================
 # ENEMY ENDPOINTS
 # =============================================================================
