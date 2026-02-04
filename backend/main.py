@@ -58,6 +58,9 @@ ALLOWED_ORIGINS = [
     ).split(",")
 ]
 
+# Log CORS configuration at startup for debugging
+startup_logger.info(f"✅ CORS allowed origins: {ALLOWED_ORIGINS}")
+
 # Explicitly list allowed headers (wildcards don't work with credentials: 'include')
 ALLOWED_HEADERS = [
     "content-type",
