@@ -58,6 +58,9 @@ ALLOWED_ORIGINS = [
     ).split(",")
 ]
 
+# Log CORS configuration at startup for debugging
+startup_logger.info(f"✅ CORS allowed origins: {ALLOWED_ORIGINS}")
+
 # Explicitly list allowed headers (wildcards don't work with credentials: 'include')
 ALLOWED_HEADERS = [
     "content-type",
@@ -210,8 +213,26 @@ async def global_exception_handler(request: Request, exc: Exception):
     # Log the full exception for debugging
     logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
 
+    # Get origin for CORS headers
+    origin = request.headers.get("origin", "")
+    if origin in ALLOWED_ORIGINS:
+        cors_origin = origin
+    elif origin.replace("https://www.", "https://") in ALLOWED_ORIGINS:
+        cors_origin = origin  # Allow www variant
+    elif origin.replace("https://", "https://www.") in ALLOWED_ORIGINS:
+        cors_origin = origin  # Allow non-www variant
+    else:
+        cors_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
+
+    cors_headers = {
+        "Access-Control-Allow-Origin": cors_origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
+    }
+
     # For journey endpoints, return a more graceful response
-    if "/journeys/" in request.url.path:
+    if "/journeys/" in request.url.path or "/journey-engine/" in request.url.path:
         return JSONResponse(
             status_code=200,  # Return 200 to allow frontend fallback
             content={
@@ -219,6 +240,7 @@ async def global_exception_handler(request: Request, exc: Exception):
                 "message": "Service temporarily unavailable. Please try again.",
                 "_offline": True,
             },
+            headers=cors_headers,
         )
 
     # For other endpoints, return standard 500 with details
@@ -228,6 +250,7 @@ async def global_exception_handler(request: Request, exc: Exception):
             "detail": "Internal server error",
             "message": str(exc) if os.getenv("DEBUG", "false").lower() == "true" else "An unexpected error occurred",
         },
+        headers=cors_headers,
     )
 
 app.add_middleware(
@@ -253,34 +276,57 @@ app.add_middleware(
 async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
     origin = request.headers.get("origin")
 
-    # Check if origin is allowed
+    # Check if origin is allowed - be more flexible with www/non-www variants
     if origin and origin in ALLOWED_ORIGINS:
         allowed_origin = origin
+    elif origin:
+        # Check for www/non-www variant
+        if origin.startswith("https://www."):
+            non_www = origin.replace("https://www.", "https://")
+            if non_www in ALLOWED_ORIGINS:
+                allowed_origin = origin  # Allow the www variant
+            else:
+                allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
+        elif origin.startswith("https://"):
+            www_variant = origin.replace("https://", "https://www.")
+            if www_variant in ALLOWED_ORIGINS:
+                allowed_origin = origin  # Allow the non-www variant
+            else:
+                allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
+        else:
+            allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
     else:
         # Fallback to first allowed origin (for non-browser clients)
-        # SECURITY: Never use wildcard - reject if no valid origin
-        if not ALLOWED_ORIGINS:
-            allowed_origin = "https://mind-vibe-universal.vercel.app"  # Default production origin
-        else:
-            allowed_origin = ALLOWED_ORIGINS[0]
+        allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
+
+    cors_headers = {
+        "Access-Control-Allow-Origin": allowed_origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
+    }
 
     if request.method == "OPTIONS":
         return JSONResponse(
             content={"status": "ok"},
-            headers={
-                "Access-Control-Allow-Origin": allowed_origin,
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
-            },
+            headers=cors_headers,
         )
 
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = allowed_origin
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = ", ".join(ALLOWED_HEADERS)
-    return response
+    try:
+        response = await call_next(request)
+        # Add CORS headers to successful response
+        for key, value in cors_headers.items():
+            response.headers[key] = value
+        return response
+    except Exception as e:
+        # Ensure CORS headers are added even when errors occur
+        logger = logging.getLogger("mindvibe.cors")
+        logger.error(f"Error in request processing: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"},
+            headers=cors_headers,
+        )
 
 @app.on_event("startup")
 async def startup():
