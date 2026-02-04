@@ -482,29 +482,40 @@ export default function JourneysPageClient() {
 
   // Load data
   const loadData = useCallback(async () => {
-    if (!hasAuthToken()) {
-      setLoading(false)
-      setIsAuthError(true)
-      setError('Please sign in to access your journeys.')
-      return
-    }
-
     try {
       setLoading(true)
       setError(null)
       setIsAuthError(false)
 
-      // Load dashboard and templates in parallel
-      const [dashboardData, templatesData] = await Promise.all([
-        journeyEngineService.getDashboard(),
-        journeyEngineService.listTemplates({
-          enemy: selectedEnemy || undefined,
-          limit: showAllTemplates ? 50 : 6,
-        }),
+      // Always load templates (no auth required)
+      const templatesPromise = journeyEngineService.listTemplates({
+        enemy: selectedEnemy || undefined,
+        limit: showAllTemplates ? 50 : 6,
+      })
+
+      // Only load dashboard if user has auth token
+      let dashboardPromise: Promise<DashboardResponse | null> = Promise.resolve(null)
+      if (hasAuthToken()) {
+        dashboardPromise = journeyEngineService.getDashboard().catch((err) => {
+          console.warn('[JourneysPageClient] Dashboard load failed:', err)
+          if (err instanceof JourneyEngineError && err.isAuthError()) {
+            setIsAuthError(true)
+          }
+          return null
+        })
+      } else {
+        setIsAuthError(true)
+      }
+
+      const [templatesData, dashboardData] = await Promise.all([
+        templatesPromise,
+        dashboardPromise,
       ])
 
-      setDashboard(dashboardData)
       setTemplates(templatesData.templates)
+      if (dashboardData) {
+        setDashboard(dashboardData)
+      }
     } catch (err) {
       if (err instanceof JourneyEngineError) {
         if (err.isAuthError()) {
