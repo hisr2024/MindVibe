@@ -824,6 +824,23 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Journeys router: {e}")
 
+# Load Journey Engine router (Guided Journeys - Six Enemies / Shadripu)
+startup_logger.info("\n[Journey Engine] Attempting to import Journey Engine router...")
+try:
+    from backend.routes.journey_engine import router as journey_engine_router
+    app.include_router(journey_engine_router, prefix="/api/journey-engine")
+    startup_logger.info("✅ [SUCCESS] Journey Engine router loaded (Six Enemies / Shadripu)")
+    startup_logger.info("   • GET    /api/journey-engine/templates - List journey templates")
+    startup_logger.info("   • GET    /api/journey-engine/templates/{id} - Get template")
+    startup_logger.info("   • GET    /api/journey-engine/journeys - List user journeys")
+    startup_logger.info("   • POST   /api/journey-engine/journeys - Start journey")
+    startup_logger.info("   • GET    /api/journey-engine/journeys/{id}/steps/current - Get current step")
+    startup_logger.info("   • POST   /api/journey-engine/journeys/{id}/steps/{day}/complete - Complete step")
+    startup_logger.info("   • GET    /api/journey-engine/dashboard - Get user dashboard")
+    startup_logger.info("   • GET    /api/journey-engine/enemies - List enemies with info")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Journey Engine router: {e}")
+
 # Load Sync router (Quantum Enhancement #2)
 startup_logger.info("\n[Sync] Attempting to import Sync router...")
 try:
