@@ -399,6 +399,11 @@ class JourneyEngineService:
             MaxActiveJourneysError: If user has too many active journeys
             TemplateNotFoundError: If template doesn't exist
         """
+        # Auto-cleanup orphaned journeys first (those with no valid template)
+        cleaned = await self.cleanup_orphaned_journeys(user_id)
+        if cleaned > 0:
+            logger.info(f"Auto-cleaned {cleaned} orphaned journeys for user {user_id}")
+
         # Check active journey limit
         active_count = await self._count_active_journeys(user_id)
         logger.info(f"User {user_id} has {active_count} active journeys (max: {self.MAX_ACTIVE_JOURNEYS})")
@@ -730,6 +735,72 @@ class JourneyEngineService:
         result = await self.db.execute(query)
         count = result.scalar() or 0
         logger.info(f"Active journey count for user {user_id}: {count}")
+        return count
+
+    async def cleanup_orphaned_journeys(self, user_id: str) -> int:
+        """
+        Clean up orphaned journeys (those with no valid template).
+
+        Returns count of journeys cleaned up.
+        """
+        from sqlalchemy import text
+
+        # Find journeys with no valid template (orphaned)
+        orphaned_query = (
+            select(UserJourney)
+            .outerjoin(JourneyTemplate, UserJourney.journey_template_id == JourneyTemplate.id)
+            .where(
+                UserJourney.user_id == user_id,
+                UserJourney.deleted_at.is_(None),
+                or_(
+                    UserJourney.journey_template_id.is_(None),
+                    JourneyTemplate.id.is_(None),
+                    JourneyTemplate.deleted_at.isnot(None),
+                )
+            )
+        )
+        result = await self.db.execute(orphaned_query)
+        orphaned_journeys = result.scalars().all()
+
+        count = 0
+        for journey in orphaned_journeys:
+            journey.deleted_at = datetime.utcnow()
+            journey.status = UserJourneyStatus.ABANDONED.value
+            count += 1
+            logger.info(f"Cleaned up orphaned journey {journey.id} for user {user_id}")
+
+        if count > 0:
+            await self.db.flush()
+            logger.info(f"Cleaned up {count} orphaned journeys for user {user_id}")
+
+        return count
+
+    async def force_clear_all_journeys(self, user_id: str) -> int:
+        """
+        Force soft-delete ALL journeys for a user.
+
+        Use this when user reports stuck state and needs a clean slate.
+        """
+        query = (
+            select(UserJourney)
+            .where(
+                UserJourney.user_id == user_id,
+                UserJourney.deleted_at.is_(None),
+            )
+        )
+        result = await self.db.execute(query)
+        journeys = result.scalars().all()
+
+        count = 0
+        for journey in journeys:
+            journey.deleted_at = datetime.utcnow()
+            journey.status = UserJourneyStatus.ABANDONED.value
+            count += 1
+
+        if count > 0:
+            await self.db.flush()
+            logger.info(f"Force-cleared {count} journeys for user {user_id}")
+
         return count
 
     async def _get_user_journey(self, user_id: str, journey_id: str) -> UserJourney:

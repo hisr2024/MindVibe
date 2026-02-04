@@ -474,6 +474,8 @@ export default function JourneysPageClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAuthError, setIsAuthError] = useState(false)
+  const [isStuckError, setIsStuckError] = useState(false)
+  const [isFixing, setIsFixing] = useState(false)
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null)
   const [templates, setTemplates] = useState<JourneyTemplate[]>([])
   const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null)
@@ -558,9 +560,42 @@ export default function JourneysPageClient() {
         ? err.message
         : 'Failed to start journey. Please try again.'
       setError(message)
+      // Detect stuck state: error says "active journeys" but dashboard shows none
+      if (message.toLowerCase().includes('active journeys') && (!dashboard || dashboard.active_journeys.length === 0)) {
+        setIsStuckError(true)
+      }
       triggerHaptic('error')
     } finally {
       setStartingJourney(null)
+    }
+  }
+
+  // Handle fixing stuck journeys
+  const handleFixStuckJourneys = async () => {
+    try {
+      setIsFixing(true)
+      setError(null)
+
+      const result = await journeyEngineService.fixStuckJourneys()
+
+      triggerHaptic('success')
+      setIsStuckError(false)
+      setError(null)
+
+      // Reload data after fix
+      await loadData()
+
+      // Show success message briefly
+      setError(`Fixed! Cleared ${result.orphaned_cleaned || 0} orphaned journeys. You can now start a new journey.`)
+      setTimeout(() => setError(null), 5000)
+    } catch (err) {
+      const message = err instanceof JourneyEngineError
+        ? err.message
+        : 'Failed to fix stuck journeys. Please try again.'
+      setError(message)
+      triggerHaptic('error')
+    } finally {
+      setIsFixing(false)
     }
   }
 
@@ -675,15 +710,33 @@ export default function JourneysPageClient() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="rounded-xl border border-red-500/30 bg-red-900/20 p-4 text-center text-red-400"
+              className={`rounded-xl border p-4 text-center ${
+                error.includes('Fixed!') || error.includes('Cleared')
+                  ? 'border-green-500/30 bg-green-900/20 text-green-400'
+                  : 'border-red-500/30 bg-red-900/20 text-red-400'
+              }`}
             >
               <p>{error}</p>
-              <button
-                onClick={() => setError(null)}
-                className="mt-2 text-sm underline hover:text-red-300"
-              >
-                Dismiss
-              </button>
+              <div className="mt-2 flex items-center justify-center gap-3">
+                {isStuckError && (
+                  <button
+                    onClick={handleFixStuckJourneys}
+                    disabled={isFixing}
+                    className="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-medium text-black hover:bg-amber-400 disabled:opacity-50"
+                  >
+                    {isFixing ? 'Fixing...' : 'Fix Stuck Journeys'}
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setError(null)
+                    setIsStuckError(false)
+                  }}
+                  className="text-sm underline hover:opacity-80"
+                >
+                  Dismiss
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -955,6 +955,53 @@ async def debug_clear_all_journeys(
     }
 
 
+@router.post("/fix-stuck-journeys")
+async def fix_stuck_journeys(
+    service: JourneyEngineService = Depends(get_journey_service),
+    current_user: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Fix stuck journey state by clearing all orphaned and problematic journeys.
+
+    Call this endpoint if you see "You have X active journeys" error but
+    the dashboard shows 0 active journeys.
+    """
+    user_id = current_user
+
+    try:
+        # First try to clean orphaned journeys
+        orphaned_count = await service.cleanup_orphaned_journeys(user_id)
+
+        # If still stuck, force clear all journeys
+        remaining_count = await service._count_active_journeys(user_id)
+
+        if remaining_count >= service.MAX_ACTIVE_JOURNEYS:
+            # Force clear all - user requested fix
+            cleared_count = await service.force_clear_all_journeys(user_id)
+            await db.commit()
+
+            return {
+                "message": "All journeys cleared to fix stuck state",
+                "orphaned_cleaned": orphaned_count,
+                "force_cleared": cleared_count,
+                "status": "fixed",
+            }
+
+        await db.commit()
+
+        return {
+            "message": "Orphaned journeys cleaned",
+            "orphaned_cleaned": orphaned_count,
+            "remaining_active": remaining_count,
+            "status": "cleaned",
+        }
+
+    except Exception as e:
+        logger.error(f"Error fixing stuck journeys for user {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to fix stuck journeys")
+
+
 # =============================================================================
 # ENEMY ENDPOINTS
 # =============================================================================

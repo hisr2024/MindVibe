@@ -338,6 +338,30 @@ export async function getDashboard(): Promise<DashboardResponse> {
 }
 
 // =============================================================================
+// FIX OPERATIONS
+// =============================================================================
+
+/**
+ * Response from fixing stuck journeys.
+ */
+export interface FixStuckJourneysResponse {
+  message: string;
+  orphaned_cleaned?: number;
+  force_cleared?: number;
+  remaining_active?: number;
+  status: 'fixed' | 'cleaned';
+}
+
+/**
+ * Fix stuck journey state (orphaned or phantom journeys).
+ * Call this when user sees "5 active journeys" error but dashboard shows 0.
+ * POST /api/journey-engine/fix-stuck-journeys
+ */
+export async function fixStuckJourneys(): Promise<FixStuckJourneysResponse> {
+  return apiRequest<FixStuckJourneysResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/fix-stuck-journeys`);
+}
+
+// =============================================================================
 // ENEMY PROGRESS OPERATIONS
 // =============================================================================
 
@@ -433,6 +457,9 @@ export const journeyEngineService = {
 
   // Dashboard
   getDashboard,
+
+  // Fix operations
+  fixStuckJourneys,
 
   // Enemies
   listEnemies,
