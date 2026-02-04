@@ -57,6 +57,12 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/wisdom-journey/catalog",
     "/api/wisdom-journey/recommendations",
     "/api/wisdom-journey/active",
+    # Journey Engine - cross-origin API, uses Bearer token auth
+    "/api/journey-engine/templates",
+    "/api/journey-engine/journeys",
+    "/api/journey-engine/dashboard",
+    "/api/journey-engine/enemies",
+    "/api/journey-engine/examples",
 }
 
 # Methods that require CSRF protection

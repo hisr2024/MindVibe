@@ -401,10 +401,11 @@ class JourneyEngineService:
         """
         # Check active journey limit
         active_count = await self._count_active_journeys(user_id)
+        logger.info(f"User {user_id} has {active_count} active journeys (max: {self.MAX_ACTIVE_JOURNEYS})")
         if active_count >= self.MAX_ACTIVE_JOURNEYS:
             raise MaxActiveJourneysError(
-                f"Maximum {self.MAX_ACTIVE_JOURNEYS} active journeys allowed. "
-                "Please complete or pause an existing journey."
+                f"You have {active_count} active journeys (maximum {self.MAX_ACTIVE_JOURNEYS} allowed). "
+                "Please complete or abandon an existing journey first."
             )
 
         # Verify template exists
@@ -721,13 +722,15 @@ class JourneyEngineService:
 
     async def _count_active_journeys(self, user_id: str) -> int:
         """Count user's active journeys."""
-        query = select(func.count()).where(
+        query = select(func.count()).select_from(UserJourney).where(
             UserJourney.user_id == user_id,
             UserJourney.status == UserJourneyStatus.ACTIVE.value,
             UserJourney.deleted_at.is_(None),
         )
         result = await self.db.execute(query)
-        return result.scalar() or 0
+        count = result.scalar() or 0
+        logger.info(f"Active journey count for user {user_id}: {count}")
+        return count
 
     async def _get_user_journey(self, user_id: str, journey_id: str) -> UserJourney:
         """Get and validate user journey ownership."""
