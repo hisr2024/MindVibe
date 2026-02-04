@@ -63,6 +63,8 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/journey-engine/dashboard",
     "/api/journey-engine/enemies",
     "/api/journey-engine/examples",
+    "/api/journey-engine/fix-stuck-journeys",
+    "/api/journey-engine/debug",
 }
 
 # Methods that require CSRF protection
