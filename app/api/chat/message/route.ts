@@ -8,27 +8,27 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-// Fallback wisdom responses when backend is unavailable
+// Fallback wellness responses when backend is unavailable
 const FALLBACK_RESPONSES = [
   {
-    response: "The Gita teaches us that peace comes from within. Take a deep breath, and know that you are exactly where you need to be right now. I am KIAAN, and I'm here with you.",
-    verse: { chapter: 2, verse: 48, text: "Perform actions, O Arjuna, being steadfast in yoga, abandoning attachment." },
+    response: "Peace comes from within. Take a deep breath, and know that you are exactly where you need to be right now. I am KIAAN, and I'm here with you.",
+    verse: null,
   },
   {
-    response: "Remember, you have the right to your actions, but not to the fruits of your actions. Focus on what you can control, and release what you cannot. KIAAN is here to guide you.",
-    verse: { chapter: 2, verse: 47, text: "You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions." },
+    response: "Focus on what you can control, and gently release what you cannot. Your effort matters most -- the outcomes will follow in their own time. KIAAN is here to guide you.",
+    verse: null,
   },
   {
-    response: "In moments of challenge, the wise remain undisturbed. Your inner peace is your greatest strength. I am KIAAN, your companion on this journey of self-discovery.",
-    verse: { chapter: 2, verse: 56, text: "One who is not disturbed by misery and has no desire for happiness, free from attachment, fear, and anger, is called a sage of steady mind." },
+    response: "In moments of challenge, remember that your inner calm is your greatest strength. You have the resilience to move through this. I am KIAAN, your companion on this journey.",
+    verse: null,
   },
   {
-    response: "The soul is eternal and unchanging. Whatever difficulties you face are temporary. Your true self remains at peace. I am here with the wisdom of the Gita.",
-    verse: { chapter: 2, verse: 20, text: "The soul is never born nor dies at any time. It is unborn, eternal, ever-existing, and primeval." },
+    response: "Whatever difficulties you face are temporary. Beneath the surface, there is a steady, grounded part of you that remains at peace. I'm here with you.",
+    verse: null,
   },
   {
-    response: "Krishna says: Whenever you feel lost, remember that I am always with you. You are never alone on this journey. KIAAN carries this eternal message to you.",
-    verse: { chapter: 18, verse: 66, text: "Abandon all varieties of dharmas and simply surrender unto Me. I shall deliver you from all sinful reactions. Do not fear." },
+    response: "Whenever you feel lost, remember that you are never truly alone. Reach out, breathe, and take things one step at a time. KIAAN is here to support you.",
+    verse: null,
   },
 ]
 
@@ -84,8 +84,7 @@ export async function POST(request: NextRequest) {
           verse: data.verse,
           verses_used: data.verses_used,
           emotion: data.detected_emotion || data.emotion,
-          gita_wisdom: true,
-          gita_powered: data.gita_powered || true,
+          ai_powered: true,
         })
       }
 
@@ -136,7 +135,7 @@ export async function POST(request: NextRequest) {
       success: true,
       response: fallback.response,
       verse: fallback.verse,
-      gita_wisdom: true,
+      ai_powered: true,
       _offline: true,
     })
   } catch (error) {
@@ -148,7 +147,7 @@ export async function POST(request: NextRequest) {
       success: true,
       response: fallback.response,
       verse: fallback.verse,
-      gita_wisdom: true,
+      ai_powered: true,
       _offline: true,
     })
   }

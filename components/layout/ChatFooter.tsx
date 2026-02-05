@@ -243,7 +243,7 @@ export function ChatFooter() {
           >
             <button
               onClick={toggleOpen}
-              className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 shadow-lg shadow-orange-500/40 transition-all hover:scale-110 hover:shadow-xl hover:shadow-orange-500/60 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-950 md:h-16 md:w-16"
+              className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 shadow-lg shadow-black/30 transition-all hover:scale-110 hover:shadow-xl hover:shadow-black/40 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-950 md:h-16 md:w-16"
               aria-label="Open KIAAN chat"
               title="Chat with KIAAN"
             >
@@ -294,7 +294,7 @@ export function ChatFooter() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="fixed bottom-8 right-8 z-[60] hidden w-[380px] md:block"
           >
-            <div className="flex flex-col h-[60vh] max-h-[500px] md:h-[600px] md:max-h-none rounded-2xl border border-orange-500/20 bg-slate-950/95 backdrop-blur-lg shadow-2xl shadow-orange-500/20 overflow-hidden">
+            <div className="flex flex-col h-[60vh] max-h-[500px] md:h-[600px] md:max-h-none rounded-2xl border border-orange-500/20 bg-slate-950/95 backdrop-blur-lg shadow-lg shadow-black/30 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -355,7 +355,7 @@ export function ChatFooter() {
                     </div>
                     <h4 className="text-sm font-semibold text-orange-50 mb-2">Welcome to KIAAN</h4>
                     <p className="text-xs text-orange-100/70 max-w-[260px] mx-auto">
-                      Share what's on your mind. I'm here to offer warm, grounded guidance rooted in timeless wisdom.
+                      Share what's on your mind. I'm here to listen, support, and offer thoughtful guidance.
                     </p>
                   </div>
                 )}

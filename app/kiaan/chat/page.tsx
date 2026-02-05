@@ -183,7 +183,7 @@ function KiaanChatPageInner() {
               {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
             <p className="mt-2 text-sm text-orange-100/80 md:text-base">
-              {t('kiaan.chat.subtitle', 'Your calm, privacy-first mental wellness companion powered by ancient wisdom')}
+              {t('kiaan.chat.subtitle', 'Your calm, privacy-first mental wellness companion')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -225,7 +225,7 @@ function KiaanChatPageInner() {
                   ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
                   : 'text-orange-100/70 hover:text-orange-50'
               }`}
-              title="Quick summary of the wisdom"
+              title="Quick summary"
             >
               Summary
             </button>
@@ -236,9 +236,9 @@ function KiaanChatPageInner() {
                   ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
                   : 'text-orange-100/70 hover:text-orange-50'
               }`}
-              title="In-depth understanding from ancient wisdom"
+              title="Full detailed response"
             >
-              Wisdom View
+              Full View
             </button>
           </div>
 
@@ -261,9 +261,9 @@ function KiaanChatPageInner() {
             <button
               onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
               className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105"
-              title="Send to Sacred Reflections"
+              title="Save to Journal"
             >
-              ✨ Send to Sacred Reflections
+              ✨ Save to Journal
             </button>
           </div>
         </div>
@@ -319,7 +319,7 @@ function KiaanChatPageInner() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">📖</span>
             <div>
-              <h3 className="font-semibold text-amber-50">Sacred Reflections</h3>
+              <h3 className="font-semibold text-amber-50">Journal</h3>
               <p className="text-sm text-amber-100/70">Journal your thoughts</p>
             </div>
           </div>
@@ -356,7 +356,7 @@ function KiaanChatPageInner() {
       <div className="rounded-3xl border border-orange-500/15 bg-[#0b0b0f] p-5 shadow-[0_20px_80px_rgba(255,115,39,0.12)] md:p-6">
         <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
         <p className="mt-3 text-sm leading-relaxed text-orange-100/80">
-          KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.
+          KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.
         </p>
       </div>
     </main>
