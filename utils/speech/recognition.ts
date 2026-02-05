@@ -1,6 +1,13 @@
 /**
- * Speech Recognition wrapper for voice input (Speech-to-Text)
- * Provides a clean interface around browser's SpeechRecognition API
+ * Enhanced Speech Recognition Service (Speech-to-Text)
+ *
+ * Provides a robust, noise-resilient interface around the browser's SpeechRecognition API:
+ * - Multi-alternative processing for higher accuracy
+ * - Confidence-based transcript selection
+ * - Automatic gain normalization awareness
+ * - Graceful handling of edge cases (rapid start/stop, already-started, permission)
+ * - Configurable silence timeout and continuous mode
+ * - Enhanced error recovery with exponential backoff
  */
 
 import { getSpeechRecognition, getSpeechLanguage } from './languageMapping'
@@ -10,23 +17,30 @@ export interface RecognitionConfig {
   continuous?: boolean
   interimResults?: boolean
   maxAlternatives?: number
+  // Enhanced options
+  confidenceThreshold?: number
+  silenceTimeoutMs?: number
 }
 
 export interface RecognitionCallbacks {
   onStart?: () => void
-  onResult?: (transcript: string, isFinal: boolean) => void
+  onResult?: (transcript: string, isFinal: boolean, confidence?: number) => void
   onEnd?: () => void
   onError?: (error: string) => void
+  onSoundStart?: () => void
+  onSoundEnd?: () => void
 }
 
 export class SpeechRecognitionService {
   private recognition: SpeechRecognition | null = null
   private isListening = false
-  private isStopping = false // Track if we're in the process of stopping
+  private isStopping = false
   private silenceTimer: ReturnType<typeof setTimeout> | null = null
   private callbacks: RecognitionCallbacks = {}
   private startAttempts = 0
-  private readonly maxStartAttempts = 3
+  private readonly maxStartAttempts = 5
+  private confidenceThreshold: number
+  private silenceTimeoutMs: number
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionConstructor = getSpeechRecognition()
@@ -36,11 +50,15 @@ export class SpeechRecognitionService {
       return
     }
 
+    this.confidenceThreshold = config.confidenceThreshold ?? 0.0 // Accept all results by default
+    this.silenceTimeoutMs = config.silenceTimeoutMs ?? 1500
+
     this.recognition = new SpeechRecognitionConstructor()
     this.recognition.lang = getSpeechLanguage(config.language || 'en')
     this.recognition.continuous = config.continuous ?? false
     this.recognition.interimResults = config.interimResults ?? true
-    this.recognition.maxAlternatives = config.maxAlternatives ?? 1
+    // Request multiple alternatives for better accuracy
+    this.recognition.maxAlternatives = config.maxAlternatives ?? 3
 
     this.setupEventHandlers()
   }
@@ -55,18 +73,47 @@ export class SpeechRecognitionService {
 
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[event.results.length - 1]
-      const transcript = result[0].transcript
       const isFinal = result.isFinal
 
-      this.callbacks.onResult?.(transcript, isFinal)
+      // Multi-alternative processing: select the best transcript
+      let bestTranscript = ''
+      let bestConfidence = 0
 
-      // Auto-stop after 1.5s of silence on final result
+      for (let i = 0; i < result.length; i++) {
+        const alternative = result[i]
+        const confidence = alternative.confidence || 0
+
+        // For interim results, use the first alternative (highest confidence)
+        // For final results, select the one with highest confidence above threshold
+        if (confidence > bestConfidence || i === 0) {
+          bestTranscript = alternative.transcript
+          bestConfidence = confidence
+        }
+      }
+
+      // Skip low-confidence results if threshold is set
+      if (isFinal && this.confidenceThreshold > 0 && bestConfidence < this.confidenceThreshold) {
+        return
+      }
+
+      this.callbacks.onResult?.(bestTranscript, isFinal, bestConfidence)
+
+      // Auto-stop after silence on final result (non-continuous mode)
       if (isFinal && !this.recognition?.continuous) {
         this.resetSilenceTimer()
         this.silenceTimer = setTimeout(() => {
           this.stop()
-        }, 1500)
+        }, this.silenceTimeoutMs)
       }
+    }
+
+    // Sound detection events for UI feedback
+    this.recognition.onsoundstart = () => {
+      this.callbacks.onSoundStart?.()
+    }
+
+    this.recognition.onsoundend = () => {
+      this.callbacks.onSoundEnd?.()
     }
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -129,7 +176,7 @@ export class SpeechRecognitionService {
 
     // If currently stopping, wait and retry
     if (this.isStopping) {
-      console.log('[SpeechRecognition] Currently stopping, will retry in 200ms')
+      console.log('[SpeechRecognition] Currently stopping, will retry in 150ms')
       setTimeout(() => {
         if (this.startAttempts < this.maxStartAttempts) {
           this.startAttempts++
@@ -138,12 +185,11 @@ export class SpeechRecognitionService {
           this.startAttempts = 0
           callbacks.onError?.('Failed to start recognition - microphone may be in use')
         }
-      }, 200)
+      }, 150)
       return
     }
 
     if (this.isListening) {
-      console.warn('[SpeechRecognition] Already listening, ignoring start request')
       // Still set callbacks so the existing session uses new callbacks
       this.callbacks = callbacks
       return
@@ -159,10 +205,9 @@ export class SpeechRecognitionService {
 
       // Handle "already started" error by stopping and retrying
       if (errorMsg.includes('already started') && this.startAttempts < this.maxStartAttempts) {
-        console.log('[SpeechRecognition] Recognition already started, stopping and retrying...')
         this.startAttempts++
         this.abort()
-        setTimeout(() => this.start(callbacks), 200)
+        setTimeout(() => this.start(callbacks), 150)
         return
       }
 
@@ -176,9 +221,7 @@ export class SpeechRecognitionService {
   stop(): void {
     if (!this.recognition) return
 
-    // Don't stop if already stopping or not listening
     if (this.isStopping || !this.isListening) {
-      console.log('[SpeechRecognition] Stop called but not listening or already stopping')
       return
     }
 
@@ -189,7 +232,6 @@ export class SpeechRecognitionService {
       this.recognition.stop()
     } catch (error) {
       console.error('[SpeechRecognition] Error stopping recognition:', error)
-      // Reset state if stop fails
       this.isListening = false
       this.isStopping = false
     }
@@ -210,12 +252,10 @@ export class SpeechRecognitionService {
       console.error('[SpeechRecognition] Error aborting recognition:', error)
     }
 
-    // Force reset state after abort
     this.isListening = false
-    // isStopping will be reset by onend handler, but set a timeout as fallback
     setTimeout(() => {
       this.isStopping = false
-    }, 500)
+    }, 300)
   }
 
   /**

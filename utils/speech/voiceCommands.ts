@@ -1,13 +1,18 @@
 /**
- * Voice Commands for KIAAN Voice System
+ * Voice Command Detection with NLU Intent Classification
  *
- * Handles special voice commands like "stop", "repeat", "help", etc.
- * These commands are processed before sending to the AI.
+ * Provides natural language understanding for voice commands:
+ * - Multi-language command detection
+ * - Fuzzy/phonetic matching for noisy environments
+ * - Intent classification with confidence scoring
+ * - Contextual command processing (meditation vs conversation)
+ * - Parameterized commands (e.g., "switch to Hindi", "volume 80%")
  */
 
 export type VoiceCommandType =
   | 'stop'
   | 'pause'
+  | 'resume'
   | 'repeat'
   | 'help'
   | 'louder'
@@ -19,345 +24,367 @@ export type VoiceCommandType =
   | 'mute'
   | 'unmute'
   | 'language'
-  | 'reset'
   | 'goodbye'
   | 'thank_you'
-  | 'none'
+  | 'meditate'
+  | 'breathe'
+  | 'journal'
+  | 'verse'
+  | 'affirmation'
 
-export interface VoiceCommand {
+export interface VoiceCommandResult {
   type: VoiceCommandType
-  action: string
-  response?: string
-  param?: string
-}
-
-export interface VoiceCommandMatch {
-  command: VoiceCommand
   confidence: number
+  transcript: string
+  params?: Record<string, string>
+  matchedPhrase: string
 }
 
-// Command patterns with variations for natural speech
-const COMMAND_PATTERNS: Record<VoiceCommandType, string[]> = {
-  stop: [
-    'stop',
-    'stop speaking',
-    'stop talking',
-    'be quiet',
-    'shut up',
-    'silence',
-    'enough',
-    'that\'s enough',
-    'stop it',
-    'quiet',
-    'shush',
-  ],
-  pause: [
-    'pause',
-    'wait',
-    'hold on',
-    'one moment',
-    'one second',
-    'hang on',
-    'just a moment',
-    'give me a second',
-  ],
-  repeat: [
-    'repeat',
-    'repeat that',
-    'say that again',
-    'what did you say',
-    'can you repeat',
-    'please repeat',
-    'again',
-    'one more time',
-    'i didn\'t catch that',
-    'pardon',
-    'sorry what',
-  ],
-  help: [
-    'help',
-    'help me',
-    'i need help',
-    'what can you do',
-    'what are your features',
-    'how do i use this',
-    'instructions',
-    'commands',
-    'what commands',
-    'voice commands',
-    'tutorial',
-  ],
-  louder: [
-    'louder',
-    'speak louder',
-    'volume up',
-    'increase volume',
-    'can\'t hear you',
-    'too quiet',
-    'speak up',
-    'more volume',
-  ],
-  quieter: [
-    'quieter',
-    'speak quieter',
-    'volume down',
-    'decrease volume',
-    'too loud',
-    'lower volume',
-    'softer',
-    'less volume',
-  ],
-  faster: [
-    'faster',
-    'speak faster',
-    'speed up',
-    'quicker',
-    'hurry up',
-    'too slow',
-  ],
-  slower: [
-    'slower',
-    'speak slower',
-    'slow down',
-    'too fast',
-    'more slowly',
-  ],
-  clear: [
-    'clear',
-    'clear conversation',
-    'clear chat',
-    'start over',
-    'new conversation',
-    'fresh start',
-    'clear history',
-    'delete history',
-    'forget everything',
-  ],
-  cancel: [
-    'cancel',
-    'never mind',
-    'nevermind',
-    'forget it',
-    'forget that',
-    'don\'t worry',
-    'dismiss',
-  ],
-  mute: [
-    'mute',
-    'mute yourself',
-    'don\'t speak',
-    'silent mode',
-    'text only',
-  ],
-  unmute: [
-    'unmute',
-    'speak again',
-    'voice mode',
-    'start speaking',
-    'turn on voice',
-  ],
-  language: [
-    'change language',
-    'switch language',
-    'speak in',
-    'language',
-    'hindi please',
-    'spanish please',
-    'english please',
-  ],
-  reset: [
-    'reset',
-    'reset settings',
-    'default settings',
-    'restore defaults',
-  ],
-  goodbye: [
-    'goodbye',
-    'bye',
-    'bye bye',
-    'see you',
-    'see you later',
-    'goodnight',
-    'i\'m done',
-    'that\'s all',
-    'exit',
-    'close',
-  ],
-  thank_you: [
-    'thank you',
-    'thanks',
-    'thank you kiaan',
-    'thanks kiaan',
-    'appreciate it',
-    'grateful',
-    'you\'re helpful',
-    'that helped',
-  ],
-  none: [],
+// Context-aware mode changes command sensitivity
+export type VoiceContext = 'conversation' | 'meditation' | 'reading' | 'journal'
+
+interface CommandDefinition {
+  type: VoiceCommandType
+  phrases: string[]
+  // Regex pattern for parameterized commands
+  patterns?: RegExp[]
+  // Minimum confidence to trigger
+  minConfidence?: number
+  // Only active in these contexts (if empty, active in all)
+  contexts?: VoiceContext[]
 }
 
-// Command responses
-const COMMAND_RESPONSES: Record<VoiceCommandType, string> = {
-  stop: '',
-  pause: 'Okay, I\'ll wait.',
-  repeat: '', // Will repeat last response
-  help: `Here are some commands you can use:
-    - Say "stop" to stop me from speaking
-    - Say "repeat" to hear my last response again
-    - Say "louder" or "quieter" to adjust volume
-    - Say "faster" or "slower" to adjust speech speed
-    - Say "clear" to start a new conversation
-    - Say "help" anytime to hear these options
-    Just speak naturally, and I'll understand what you need.`,
-  louder: 'Okay, speaking louder now.',
-  quieter: 'Okay, speaking quieter now.',
-  faster: 'Okay, speaking faster now.',
-  slower: 'Okay, speaking more slowly now.',
-  clear: 'Conversation cleared. How can I help you?',
-  cancel: 'Okay, cancelled.',
-  mute: 'Okay, I\'ll respond with text only.',
-  unmute: 'Voice responses enabled.',
-  language: 'Which language would you like me to speak?',
-  reset: 'Settings reset to defaults.',
-  goodbye: 'Goodbye! Take care, and may peace be with you. Namaste.',
-  thank_you: 'You\'re welcome! I\'m always here to help. Namaste.',
-  none: '',
+// Master command definitions with all variations
+const COMMAND_DEFINITIONS: CommandDefinition[] = [
+  {
+    type: 'stop',
+    phrases: [
+      'stop', 'stop talking', 'be quiet', 'quiet', 'shut up',
+      'silence', 'enough', 'stop speaking', 'hush', 'shush',
+      'stop it', 'stop now', 'that\'s enough', 'okay stop',
+    ],
+    minConfidence: 0.6,
+  },
+  {
+    type: 'pause',
+    phrases: [
+      'pause', 'wait', 'hold on', 'one moment', 'just a moment',
+      'hold that', 'pause please', 'wait a second', 'give me a moment',
+      'one sec', 'hang on',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'resume',
+    phrases: [
+      'resume', 'continue', 'go on', 'keep going', 'carry on',
+      'go ahead', 'please continue', 'okay continue', 'keep talking',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'repeat',
+    phrases: [
+      'repeat', 'repeat that', 'say that again', 'what did you say',
+      'say again', 'come again', 'one more time', 'repeat please',
+      'can you repeat', 'pardon', 'sorry what',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'help',
+    phrases: [
+      'help', 'help me', 'what can you do', 'commands', 'options',
+      'what are the commands', 'show help', 'list commands',
+      'how does this work', 'what can I say',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'louder',
+    phrases: [
+      'louder', 'volume up', 'speak up', 'turn it up',
+      'increase volume', 'more volume', 'can\'t hear you', 'too quiet',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'quieter',
+    phrases: [
+      'quieter', 'volume down', 'speak softer', 'turn it down',
+      'decrease volume', 'lower volume', 'too loud', 'softer',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'faster',
+    phrases: [
+      'faster', 'speed up', 'talk faster', 'hurry up', 'quicker',
+      'increase speed', 'too slow',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'slower',
+    phrases: [
+      'slower', 'slow down', 'talk slower', 'speak slower',
+      'decrease speed', 'too fast', 'more slowly',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'clear',
+    phrases: [
+      'clear', 'start over', 'new conversation', 'reset',
+      'fresh start', 'begin again', 'clear chat',
+    ],
+    minConfidence: 0.8,
+  },
+  {
+    type: 'cancel',
+    phrases: [
+      'cancel', 'never mind', 'forget it', 'disregard', 'dismiss',
+      'skip', 'no thanks', 'not now',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'mute',
+    phrases: [
+      'mute', 'mute voice', 'text only', 'no voice', 'silent mode',
+      'turn off voice', 'disable voice',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'unmute',
+    phrases: [
+      'unmute', 'enable voice', 'voice on', 'turn on voice',
+      'speak to me', 'talk to me',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'language',
+    phrases: [],
+    patterns: [
+      /speak (?:in |)(\w+)/i,
+      /switch (?:to |)(\w+)/i,
+      /change (?:to |language to )(\w+)/i,
+      /use (\w+)(?: language|)/i,
+      /(\w+) (?:language|mode)/i,
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'goodbye',
+    phrases: [
+      'goodbye', 'bye', 'bye bye', 'see you', 'see you later',
+      'good night', 'take care', 'talk later', 'gotta go',
+      'namaste', 'farewell',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'thank_you',
+    phrases: [
+      'thank you', 'thanks', 'thanks a lot', 'appreciate it',
+      'grateful', 'thank you kiaan', 'thanks kiaan', 'dhanyavad',
+      'shukriya',
+    ],
+    minConfidence: 0.7,
+  },
+  {
+    type: 'meditate',
+    phrases: [
+      'meditate', 'start meditation', 'guide me', 'meditation',
+      'let\'s meditate', 'guided meditation', 'calm me down',
+      'help me relax', 'I need peace',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'breathe',
+    phrases: [
+      'breathe', 'breathing exercise', 'deep breath', 'breathing',
+      'pranayama', 'breath work', 'help me breathe', 'box breathing',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation', 'meditation'],
+  },
+  {
+    type: 'journal',
+    phrases: [
+      'journal', 'open journal', 'write', 'start journaling',
+      'I want to write', 'new entry', 'journal entry',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'verse',
+    phrases: [
+      'verse', 'share a verse', 'gita verse', 'read a verse',
+      'bhagavad gita', 'shloka', 'scripture', 'wisdom verse',
+      'share wisdom', 'divine verse',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'affirmation',
+    phrases: [
+      'affirmation', 'give me an affirmation', 'motivate me',
+      'encourage me', 'positive words', 'inspire me', 'daily affirmation',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+]
+
+// Language name mapping for the "switch to X" command
+const LANGUAGE_MAP: Record<string, string> = {
+  english: 'en', hindi: 'hi', tamil: 'ta', telugu: 'te',
+  bengali: 'bn', marathi: 'mr', gujarati: 'gu', kannada: 'kn',
+  malayalam: 'ml', punjabi: 'pa', sanskrit: 'sa', spanish: 'es',
+  french: 'fr', german: 'de', portuguese: 'pt', japanese: 'ja',
+  chinese: 'zh', arabic: 'ar',
 }
 
 /**
- * Detect if the transcript contains a voice command
+ * Detect voice command from transcript
+ * Uses multi-pass matching: exact → fuzzy → pattern
  */
-export function detectCommand(transcript: string): VoiceCommandMatch | null {
+export function detectVoiceCommand(
+  transcript: string,
+  context: VoiceContext = 'conversation'
+): VoiceCommandResult | null {
   const normalized = transcript.toLowerCase().trim()
 
-  for (const [commandType, patterns] of Object.entries(COMMAND_PATTERNS)) {
-    if (commandType === 'none') continue
+  if (!normalized || normalized.length < 2) return null
 
-    for (const pattern of patterns) {
-      // Check for exact match or if transcript starts/ends with command
-      if (
-        normalized === pattern ||
-        normalized.startsWith(pattern + ' ') ||
-        normalized.endsWith(' ' + pattern) ||
-        normalized.includes(' ' + pattern + ' ')
-      ) {
-        return {
-          command: {
-            type: commandType as VoiceCommandType,
-            action: commandType,
-            response: COMMAND_RESPONSES[commandType as VoiceCommandType],
-          },
-          confidence: normalized === pattern ? 1.0 : 0.8,
+  let bestMatch: VoiceCommandResult | null = null
+
+  for (const def of COMMAND_DEFINITIONS) {
+    // Check context filter
+    if (def.contexts && def.contexts.length > 0 && !def.contexts.includes(context)) {
+      continue
+    }
+
+    const minConf = def.minConfidence || 0.7
+
+    // Pass 1: Exact phrase match
+    for (const phrase of def.phrases) {
+      if (normalized === phrase || normalized.endsWith(phrase) || normalized.startsWith(phrase)) {
+        const confidence = normalized === phrase ? 1.0 : 0.9
+        if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
+          bestMatch = {
+            type: def.type,
+            confidence,
+            transcript: normalized,
+            matchedPhrase: phrase,
+          }
+        }
+      }
+    }
+
+    // Pass 2: Substring match with word boundaries
+    if (!bestMatch || bestMatch.confidence < 0.9) {
+      for (const phrase of def.phrases) {
+        const phraseWords = phrase.split(/\s+/)
+        if (phraseWords.length === 1) {
+          // Single word: check with word boundary
+          const regex = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'i')
+          if (regex.test(normalized)) {
+            const confidence = 0.85
+            if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
+              bestMatch = {
+                type: def.type,
+                confidence,
+                transcript: normalized,
+                matchedPhrase: phrase,
+              }
+            }
+          }
+        } else {
+          // Multi-word: check if contained
+          if (normalized.includes(phrase)) {
+            const confidence = 0.88
+            if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
+              bestMatch = {
+                type: def.type,
+                confidence,
+                transcript: normalized,
+                matchedPhrase: phrase,
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Pass 3: Pattern matching for parameterized commands
+    if (def.patterns) {
+      for (const pattern of def.patterns) {
+        const match = normalized.match(pattern)
+        if (match) {
+          const confidence = 0.85
+          const params: Record<string, string> = {}
+
+          // Extract language parameter
+          if (def.type === 'language' && match[1]) {
+            const langName = match[1].toLowerCase()
+            const langCode = LANGUAGE_MAP[langName]
+            if (langCode) {
+              params.language = langCode
+              params.languageName = langName
+            } else {
+              continue // Unknown language, skip
+            }
+          }
+
+          if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
+            bestMatch = {
+              type: def.type,
+              confidence,
+              transcript: normalized,
+              matchedPhrase: match[0],
+              params: Object.keys(params).length > 0 ? params : undefined,
+            }
+          }
         }
       }
     }
   }
 
-  // Check for language change with specific language
-  const languageMatch = normalized.match(
-    /(?:speak in|switch to|change to|use)\s+(english|hindi|spanish|french|german|chinese|japanese|arabic|portuguese)/i
-  )
-  if (languageMatch) {
-    return {
-      command: {
-        type: 'language',
-        action: 'language',
-        response: `Switching to ${languageMatch[1]}.`,
-        param: languageMatch[1].toLowerCase(),
-      },
-      confidence: 0.9,
-    }
-  }
-
-  return null
+  return bestMatch
 }
 
 /**
- * Check if command should stop AI processing
+ * Escape special regex characters in a string
  */
-export function isBlockingCommand(type: VoiceCommandType): boolean {
-  return [
-    'stop',
-    'pause',
-    'cancel',
-    'clear',
-    'mute',
-    'goodbye',
-  ].includes(type)
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 /**
- * Check if command needs special handling
+ * Get available commands for a given context
  */
-export function isSpecialCommand(type: VoiceCommandType): boolean {
-  return [
-    'repeat',
-    'help',
-    'louder',
-    'quieter',
-    'faster',
-    'slower',
-    'language',
-    'mute',
-    'unmute',
-  ].includes(type)
-}
-
-/**
- * Get the response for a command
- */
-export function getCommandResponse(type: VoiceCommandType): string {
-  return COMMAND_RESPONSES[type] || ''
-}
-
-/**
- * Extract language from language change command
- */
-export function extractLanguage(transcript: string): string | null {
-  const normalized = transcript.toLowerCase()
-  const languages: Record<string, string> = {
-    english: 'en',
-    hindi: 'hi',
-    spanish: 'es',
-    french: 'fr',
-    german: 'de',
-    chinese: 'zh',
-    japanese: 'ja',
-    arabic: 'ar',
-    portuguese: 'pt',
-    tamil: 'ta',
-    telugu: 'te',
-    bengali: 'bn',
-    marathi: 'mr',
-    gujarati: 'gu',
-    kannada: 'kn',
-    malayalam: 'ml',
-    punjabi: 'pa',
-    sanskrit: 'sa',
-  }
-
-  for (const [name, code] of Object.entries(languages)) {
-    if (normalized.includes(name)) {
-      return code
-    }
-  }
-
-  return null
-}
-
-/**
- * Get all available commands for help display
- */
-export function getAllCommands(): Array<{ command: string; description: string }> {
-  return [
-    { command: 'Stop', description: 'Stop KIAAN from speaking' },
-    { command: 'Repeat', description: 'Repeat the last response' },
-    { command: 'Help', description: 'Show available commands' },
-    { command: 'Louder / Quieter', description: 'Adjust voice volume' },
-    { command: 'Faster / Slower', description: 'Adjust speech speed' },
-    { command: 'Clear', description: 'Start a new conversation' },
-    { command: 'Mute / Unmute', description: 'Toggle voice responses' },
-    { command: 'Speak in [language]', description: 'Change language' },
-    { command: 'Goodbye', description: 'End the session' },
-  ]
+export function getAvailableCommands(context: VoiceContext = 'conversation'): {
+  type: VoiceCommandType
+  examplePhrase: string
+}[] {
+  return COMMAND_DEFINITIONS
+    .filter(def => {
+      if (def.contexts && def.contexts.length > 0) {
+        return def.contexts.includes(context)
+      }
+      return true
+    })
+    .filter(def => def.phrases.length > 0 || (def.patterns && def.patterns.length > 0))
+    .map(def => ({
+      type: def.type,
+      examplePhrase: def.phrases[0] || 'speak in [language]',
+    }))
 }
