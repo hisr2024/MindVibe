@@ -245,13 +245,28 @@ export async function POST(request: NextRequest) {
     const systemPrompt = secularMode ? VIYOGA_SECULAR_PROMPT : VIYOGA_SYSTEM_PROMPT
 
     // Generate response with fallback
+    // OpenAI reasons independently about each user's specific concern
+    // Gita wisdom is provided as the guiding framework, not as copy-paste material
+    const messagesForAI: { role: string; content: string }[] = [
+      { role: 'system', content: systemPrompt },
+      ...history,
+      { role: 'user', content: message },
+    ]
+
+    if (secularMode) {
+      // Secular mode: Gita wisdom guides OpenAI's reasoning internally
+      // Provided as system context so AI uses it as a framework, not as content to parrot
+      const guidanceContext = retrieval.chunks.length > 0
+        ? `\n\nInternal guidance framework (use these principles to inform your reasoning, but present insights in your own modern language — never quote or reference these directly):\n${retrieval.chunks.map(c => c.text).join('\n')}`
+        : ''
+      messagesForAI.push({ role: 'system', content: `${buildModeInstruction(mode)}${guidanceContext}` })
+    } else {
+      // Gita mode: provide retrieved verses as supplementary wisdom context
+      messagesForAI.push({ role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` })
+    }
+
     const responseText =
-      (await callOpenAI([
-        { role: 'system', content: systemPrompt },
-        ...history,
-        { role: 'user', content: message },
-        { role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` },
-      ])) || buildFallbackTransmission(message, retrieval.chunks, secularMode)
+      (await callOpenAI(messagesForAI)) || buildFallbackTransmission(message, retrieval.chunks, secularMode)
 
     const sections = parseTransmissionSections(responseText, secularMode)
     if (!Object.keys(sections).length) {
