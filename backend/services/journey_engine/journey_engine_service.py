@@ -743,8 +743,6 @@ class JourneyEngineService:
 
         Returns count of journeys cleaned up.
         """
-        from sqlalchemy import text
-
         # Find journeys with no valid template (orphaned)
         orphaned_query = (
             select(UserJourney)
