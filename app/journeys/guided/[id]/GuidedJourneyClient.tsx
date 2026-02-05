@@ -33,7 +33,7 @@ import {
 } from '@/types/journeyEngine.types'
 
 // =============================================================================
-// VERSE DISPLAY COMPONENT
+// VERSE DISPLAY COMPONENT - Professional Sanskrit Verse Presentation
 // =============================================================================
 
 interface VerseDisplayProps {
@@ -41,60 +41,98 @@ interface VerseDisplayProps {
 }
 
 function VerseDisplay({ verse }: VerseDisplayProps) {
-  const [showSanskrit, setShowSanskrit] = useState(false)
+  const [showSanskrit, setShowSanskrit] = useState(true) // Show Sanskrit by default
+
+  // Format verse reference beautifully
+  const verseRef = `${verse.chapter}.${verse.verse}`
 
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-900/10 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-amber-400">
-          Bhagavad Gita {verse.chapter}.{verse.verse}
-        </span>
-        {verse.sanskrit && (
+    <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-transparent">
+      {/* Decorative corner accent */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-500/10 to-transparent" />
+
+      {/* Header */}
+      <div className="relative px-6 py-4 border-b border-amber-500/10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30">
+              <span className="text-amber-400 text-lg">ॐ</span>
+            </div>
+            <div>
+              <h4 className="text-amber-400 font-semibold">श्रीमद्भगवद्गीता</h4>
+              <p className="text-amber-400/60 text-xs">Śrīmad Bhagavad Gītā • Chapter {verse.chapter}, Verse {verse.verse}</p>
+            </div>
+          </div>
           <button
             onClick={() => setShowSanskrit(!showSanskrit)}
-            className="text-xs text-amber-400/70 hover:text-amber-400"
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors"
           >
             {showSanskrit ? 'Hide Sanskrit' : 'Show Sanskrit'}
           </button>
-        )}
+        </div>
       </div>
 
+      {/* Verse Number Display */}
+      <div className="px-6 pt-5 pb-3 text-center">
+        <p className="text-amber-500/80 font-devanagari text-xl tracking-wider">
+          ॥ {verseRef} ॥
+        </p>
+      </div>
+
+      {/* Sanskrit Text */}
       <AnimatePresence mode="wait">
         {showSanskrit && verse.sanskrit && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-4"
+            className="px-6 pb-4"
           >
-            <p className="text-lg text-amber-200 font-serif italic leading-relaxed">
-              {verse.sanskrit}
-            </p>
-            {verse.transliteration && (
-              <p className="mt-2 text-sm text-amber-400/70 italic">
-                {verse.transliteration}
+            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
+              <p className="text-xl text-amber-200 font-devanagari leading-relaxed text-center">
+                {verse.sanskrit}
               </p>
-            )}
+              {verse.transliteration && (
+                <p className="mt-3 text-sm text-amber-400/70 italic text-center">
+                  {verse.transliteration}
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <p className="text-white leading-relaxed">
-        {verse.english}
-      </p>
+      {/* Divider */}
+      <div className="mx-6 border-t border-amber-500/10" />
 
-      {verse.hindi && (
-        <p className="mt-3 text-white/70 text-sm">
-          {verse.hindi}
+      {/* English Translation */}
+      <div className="px-6 py-5">
+        <p className="text-white/90 leading-relaxed text-base">
+          {verse.english}
         </p>
+      </div>
+
+      {/* Hindi Translation */}
+      {verse.hindi && (
+        <>
+          <div className="mx-6 border-t border-amber-500/10" />
+          <div className="px-6 py-4">
+            <p className="text-white/70 text-sm leading-relaxed font-devanagari">
+              {verse.hindi}
+            </p>
+          </div>
+        </>
       )}
 
+      {/* Theme Tag */}
       {verse.theme && (
-        <div className="mt-3 flex items-center gap-2">
-          <span className="text-xs text-amber-400/50">Theme:</span>
-          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
-            {verse.theme}
-          </span>
+        <div className="px-6 pb-5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-amber-400/50">Theme:</span>
+            <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs text-amber-400 font-medium">
+              {verse.theme.replace(/_/g, ' ')}
+            </span>
+          </div>
         </div>
       )}
     </div>
@@ -126,24 +164,43 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Step Title */}
-      <div className="text-center">
-        <h2 className="text-xl font-bold text-white mb-2">{step.step_title}</h2>
-        <span className="text-sm text-white/50">Day {step.day_index}</span>
+    <div className="space-y-8">
+      {/* Step Header - Professional Look */}
+      <div className="text-center pb-6 border-b border-white/10">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <span className="text-xs font-medium text-amber-400">Day {step.day_index}</span>
+        </div>
+        <h2 className="text-2xl font-bold text-white tracking-tight">{step.step_title}</h2>
       </div>
 
-      {/* Teaching */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-        <h3 className="text-sm font-semibold text-amber-400 mb-3">Today&apos;s Teaching</h3>
-        <p className="text-white/90 leading-relaxed">{step.teaching}</p>
+      {/* Today's Teaching - Card Style */}
+      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/50 to-slate-900/50">
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-500 to-orange-500" />
+        <div className="p-6 pl-8">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <span className="text-amber-400">📖</span>
+            </div>
+            <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Today&apos;s Teaching</h3>
+          </div>
+          <p className="text-white/90 leading-relaxed text-lg">{step.teaching}</p>
+        </div>
       </section>
 
-      {/* Verses */}
+      {/* Wisdom from the Gita - Premium Verse Display */}
       {step.verses.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-amber-400 mb-3">Wisdom from the Gita</h3>
-          <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <span className="text-xl">🙏</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Wisdom from the Gita</h3>
+              <p className="text-xs text-white/50">Sacred verse for today&apos;s practice</p>
+            </div>
+          </div>
+          <div className="space-y-5">
             {step.verses.map((verse, idx) => (
               <VerseDisplay key={`${verse.chapter}-${verse.verse}-${idx}`} verse={verse} />
             ))}
@@ -151,72 +208,106 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
         </section>
       )}
 
-      {/* Guided Reflection */}
+      {/* Guided Reflection - Elegant Card */}
       {step.guided_reflection.length > 0 && (
-        <section className="rounded-xl border border-purple-500/30 bg-purple-900/10 p-5">
-          <h3 className="text-sm font-semibold text-purple-400 mb-3">Guided Reflection</h3>
-          <ul className="space-y-3">
-            {step.guided_reflection.map((prompt, idx) => (
-              <li key={idx} className="flex gap-3 text-white/90">
-                <span className="text-purple-400">•</span>
-                <span>{prompt}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* Practice */}
-      {step.practice && Object.keys(step.practice).length > 0 && (
-        <section className="rounded-xl border border-green-500/30 bg-green-900/10 p-5">
-          <h3 className="text-sm font-semibold text-green-400 mb-3">Today&apos;s Practice</h3>
-          {typeof step.practice.name === 'string' && (
-            <p className="font-medium text-white mb-2">{step.practice.name}</p>
-          )}
-          {Array.isArray(step.practice.instructions) && (
-            <ol className="space-y-2">
-              {step.practice.instructions.map((instruction, idx) => (
-                <li key={idx} className="flex gap-3 text-white/90">
-                  <span className="text-green-400 font-medium">{idx + 1}.</span>
-                  <span>{String(instruction)}</span>
+        <section className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-950/30 to-purple-900/10">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-500" />
+          <div className="p-6 pl-8">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <span className="text-purple-400">💭</span>
+              </div>
+              <h3 className="text-sm font-semibold text-purple-400 uppercase tracking-wider">Guided Reflection</h3>
+            </div>
+            <ul className="space-y-4">
+              {step.guided_reflection.map((prompt, idx) => (
+                <li key={idx} className="flex gap-4 text-white/90">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-xs text-purple-400 font-medium">
+                    {idx + 1}
+                  </span>
+                  <span className="leading-relaxed">{prompt}</span>
                 </li>
               ))}
-            </ol>
-          )}
-          {typeof step.practice.duration_minutes === 'number' && (
-            <p className="mt-3 text-sm text-green-400/70">
-              Duration: {step.practice.duration_minutes} minutes
-            </p>
-          )}
+            </ul>
+          </div>
         </section>
       )}
 
-      {/* Micro Commitment */}
+      {/* Today's Practice - Action Card */}
+      {step.practice && Object.keys(step.practice).length > 0 && (
+        <section className="relative overflow-hidden rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-950/30 to-green-900/10">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-500 to-emerald-500" />
+          <div className="p-6 pl-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                  <span className="text-green-400">🧘</span>
+                </div>
+                <h3 className="text-sm font-semibold text-green-400 uppercase tracking-wider">Today&apos;s Practice</h3>
+              </div>
+              {typeof step.practice.duration_minutes === 'number' && (
+                <span className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-xs text-green-400 font-medium">
+                  {step.practice.duration_minutes} min
+                </span>
+              )}
+            </div>
+            {typeof step.practice.name === 'string' && (
+              <p className="font-semibold text-white text-lg mb-4">{step.practice.name}</p>
+            )}
+            {Array.isArray(step.practice.instructions) && (
+              <ol className="space-y-3">
+                {step.practice.instructions.map((instruction, idx) => (
+                  <li key={idx} className="flex gap-4 text-white/90">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center text-xs text-green-400 font-bold">
+                      {idx + 1}
+                    </span>
+                    <span className="leading-relaxed">{String(instruction)}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Micro Commitment - Compact Badge Style */}
       {step.micro_commitment && (
-        <section className="rounded-xl border border-cyan-500/30 bg-cyan-900/10 p-5">
-          <h3 className="text-sm font-semibold text-cyan-400 mb-2">Micro Commitment</h3>
-          <p className="text-white/90">{step.micro_commitment}</p>
+        <section className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/30 to-cyan-900/10">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-500 to-blue-500" />
+          <div className="p-6 pl-8">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <span className="text-cyan-400">🎯</span>
+              </div>
+              <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Micro Commitment</h3>
+            </div>
+            <p className="text-white/90 leading-relaxed italic">&ldquo;{step.micro_commitment}&rdquo;</p>
+          </div>
         </section>
       )}
 
-      {/* Safety Note */}
+      {/* Safety Note - Subtle Warning */}
       {step.safety_note && (
-        <section className="rounded-xl border border-rose-500/30 bg-rose-900/10 p-4">
-          <p className="text-sm text-rose-300">
-            <span className="font-medium">Note:</span> {step.safety_note}
-          </p>
+        <section className="rounded-xl border border-rose-500/20 bg-rose-950/20 p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-rose-400">⚠️</span>
+            <p className="text-sm text-rose-300/90 leading-relaxed">
+              {step.safety_note}
+            </p>
+          </div>
         </section>
       )}
 
-      {/* Completion Section */}
+      {/* Completion Section - Premium CTA */}
       {!step.is_completed && (
-        <section className="space-y-4">
+        <section className="space-y-4 pt-4 border-t border-white/10">
           {/* Reflection toggle */}
           <button
             onClick={() => setShowReflectionInput(!showReflectionInput)}
-            className="w-full rounded-lg border border-white/10 bg-white/5 py-3 text-sm text-white/70 hover:bg-white/10"
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-4 text-sm text-white/70 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
           >
-            {showReflectionInput ? '− Hide Reflection' : '+ Add Reflection (Optional)'}
+            <span className="text-lg">{showReflectionInput ? '−' : '+'}</span>
+            <span>{showReflectionInput ? 'Hide Reflection' : 'Add Reflection (Optional)'}</span>
           </button>
 
           {/* Reflection input */}
@@ -231,36 +322,50 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
                   placeholder="Write your reflection here... What insights arose? How did the practice feel?"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 p-4 text-white placeholder-white/40 focus:border-amber-500/50 focus:outline-none resize-none"
-                  rows={4}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/50 p-5 text-white placeholder-white/40 focus:border-amber-500/50 focus:outline-none resize-none text-base leading-relaxed"
+                  rows={5}
                   maxLength={5000}
                 />
-                <p className="mt-1 text-xs text-white/40 text-right">
-                  {reflection.length}/5000
+                <p className="mt-2 text-xs text-white/40 text-right">
+                  {reflection.length}/5000 characters
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Complete button */}
+          {/* Complete button - Premium gradient */}
           <button
             onClick={handleComplete}
             disabled={isCompleting}
-            className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-4 text-lg font-semibold text-black transition-all hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
+            className="w-full rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_100%] py-5 text-lg font-bold text-black transition-all hover:bg-[position:100%_0] disabled:opacity-50 shadow-lg shadow-amber-500/20"
           >
-            {isCompleting ? 'Completing...' : 'Complete Today\'s Step'}
+            {isCompleting ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                Completing...
+              </span>
+            ) : (
+              'Complete Today\'s Step'
+            )}
           </button>
         </section>
       )}
 
-      {/* Already completed message */}
+      {/* Already completed - Success State */}
       {step.is_completed && (
-        <div className="rounded-xl border border-green-500/30 bg-green-900/20 p-6 text-center">
-          <div className="text-4xl mb-2">✓</div>
-          <p className="text-green-400 font-medium">Step Completed</p>
+        <div className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-950/50 to-green-900/20 p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500/50 flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl text-green-400">✓</span>
+          </div>
+          <p className="text-green-400 font-semibold text-lg">Step Completed</p>
           {step.completed_at && (
-            <p className="text-sm text-white/50 mt-1">
-              Completed {new Date(step.completed_at).toLocaleDateString()}
+            <p className="text-sm text-white/50 mt-2">
+              Completed on {new Date(step.completed_at).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
             </p>
           )}
         </div>
