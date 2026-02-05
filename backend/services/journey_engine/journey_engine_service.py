@@ -407,6 +407,27 @@ class JourneyEngineService:
         # Check active journey limit
         active_count = await self._count_active_journeys(user_id)
         logger.info(f"User {user_id} has {active_count} active journeys (max: {self.MAX_ACTIVE_JOURNEYS})")
+
+        # If still at max after orphan cleanup, check if dashboard shows these journeys
+        # If not (stuck state), force clear them automatically
+        if active_count >= self.MAX_ACTIVE_JOURNEYS:
+            # Get actual visible journeys from list query
+            visible_journeys, _ = await self.list_user_journeys(
+                user_id=user_id,
+                status_filter="active",
+                limit=self.MAX_ACTIVE_JOURNEYS,
+            )
+
+            # If count says max but list shows fewer, we have phantom journeys - auto-fix
+            if len(visible_journeys) < active_count:
+                logger.warning(
+                    f"User {user_id} has phantom journeys: count={active_count}, visible={len(visible_journeys)}. Auto-fixing."
+                )
+                force_cleared = await self.force_clear_all_journeys(user_id)
+                logger.info(f"Auto force-cleared {force_cleared} phantom journeys for user {user_id}")
+                # Recount after fix
+                active_count = await self._count_active_journeys(user_id)
+
         if active_count >= self.MAX_ACTIVE_JOURNEYS:
             raise MaxActiveJourneysError(
                 f"You have {active_count} active journeys (maximum {self.MAX_ACTIVE_JOURNEYS} allowed). "
