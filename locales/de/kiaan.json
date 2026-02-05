@@ -1,7 +1,7 @@
 {
   "welcome": {
     "title": "Willkommen bei KIAAN",
-    "subtitle": "Dein Wegweiser zu innerem Frieden",
+    "subtitle": "Your calm, modern mental wellness companion — always here, always supportive.",
     "description": "Ruhiger, datenschutzorientierter Begleiter für psychische Gesundheit mit Tagebuch, geführten Gesprächen und Dashboards."
   },
   "chat": {
@@ -17,8 +17,8 @@
       "title": "Wie kann ich dich heute begleiten?",
       "subtitle": "Teile, was dich beschäftigt"
     },
-    "disclaimer": "KIAAN teilt unterstützende Reflexionen, inspiriert von Weisheitstraditionen. Diese Gespräche und Übungen sind kein medizinischer Rat. Wenn du ernsthafte Bedenken hast oder dich unsicher fühlst, wende dich bitte an den Notdienst deines Landes oder einen zugelassenen Fachmann.",
-    "saveToJournal": "An Heilige Reflexionen senden",
+    "disclaimer": "KIAAN teilt unterstützende Reflexionen, for general wellness. Diese Gespräche und Übungen sind kein medizinischer Rat. Wenn du ernsthafte Bedenken hast oder dich unsicher fühlst, wende dich bitte an den Notdienst deines Landes oder einen zugelassenen Fachmann.",
+    "saveToJournal": "Save to Journal",
     "copy": "Kopieren",
     "copied": "Kopiert!",
     "copyFailed": "Fehlgeschlagen",

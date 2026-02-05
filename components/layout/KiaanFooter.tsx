@@ -312,7 +312,7 @@ export function KiaanFooter() {
                 </motion.div>
                 <div>
                   <h3 className="text-sm font-semibold text-orange-50">{t('kiaan.chat.title', 'KIAAN Chat')}</h3>
-                  <p className="text-[11px] text-orange-100/50">{t('kiaan.welcome.subtitle', 'Your Guide to Inner Peace')}</p>
+                  <p className="text-[11px] text-orange-100/50">{t('kiaan.welcome.subtitle', 'Your mental wellness companion')}</p>
                 </div>
               </div>
               <motion.button
@@ -352,7 +352,7 @@ export function KiaanFooter() {
                     🕉️
                   </motion.div>
                   <div>
-                    <p className="text-sm text-orange-100/80 font-medium">{t('kiaan.welcome.title', 'Welcome to KIAAN Chat')}</p>
+                    <p className="text-sm text-orange-100/80 font-medium">{t('kiaan.welcome.title', 'Welcome to KIAAN')}</p>
                     <p className="text-xs text-orange-100/50 mt-1">{t('kiaan.chat.emptyState.subtitle', 'How can I support you today?')}</p>
                   </div>
 

@@ -1,7 +1,7 @@
 {
   "welcome": {
     "title": "Welcome to KIAAN",
-    "subtitle": "A premium, animated companion shaped by Krishna's flute and peacock feather — always calm, always modern.",
+    "subtitle": "Your calm, modern mental wellness companion — always here, always supportive.",
     "description": "Calm, privacy-first mental health companion with journaling, guided chats, and dashboards."
   },
   "chat": {
@@ -17,8 +17,8 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Send to Sacred Reflections",
+    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
+    "saveToJournal": "Save to Journal",
     "copy": "Copy",
     "copied": "Copied!",
     "copyFailed": "Failed",

@@ -171,7 +171,7 @@ export function KiaanChat({
                 </div>
                 <h3 className="text-lg font-semibold text-orange-50 mb-2">Welcome to KIAAN</h3>
                 <p className="text-sm text-orange-100/70 max-w-sm">
-                  Share what&apos;s on your mind. I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.
+                  Share what&apos;s on your mind. I&apos;m here to listen, support, and offer thoughtful guidance.
                 </p>
               </div>
             ) : (
