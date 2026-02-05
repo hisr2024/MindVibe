@@ -192,11 +192,23 @@ async def detach_from_outcome(
         )
 
     try:
-        # Generate response using WellnessModel with Gita context
-        # secular_mode uses modern, friendly language while still using Gita wisdom internally
+        # Generate response using WellnessModel
+        # OpenAI reasons independently about each user's specific concern
+        # Gita wisdom is provided as the guiding framework, not as content to parrot
+        if secular_mode:
+            # Secular mode: Gita wisdom guides reasoning internally
+            ai_input = (
+                f"{outcome_worry}\n\n"
+                f"[Internal guidance — use these principles to inform your reasoning, "
+                f"present insights in modern language, never quote or reference directly]\n"
+                f"{gita_context}"
+            )
+        else:
+            ai_input = f"{outcome_worry}\n\n{gita_context}"
+
         result = await wellness_model.generate_response(
             tool=WellnessTool.VIYOGA,
-            user_input=f"{outcome_worry}\n\n{gita_context}",
+            user_input=ai_input,
             db=db,
             analysis_mode=analysis_mode,
             language=language,
@@ -527,11 +539,22 @@ async def viyoga_chat(
         }
 
     try:
-        # Generate response using WellnessModel with Gita context
-        # secular_mode uses modern, friendly language while still using Gita wisdom internally
+        # Generate response using WellnessModel
+        # OpenAI reasons independently about each user's specific concern
+        # Gita wisdom is provided as the guiding framework
+        if secular_mode:
+            ai_input = (
+                f"{message}\n\n"
+                f"[Internal guidance — use these principles to inform your reasoning, "
+                f"present insights in modern language, never quote or reference directly]\n"
+                f"{gita_context}"
+            )
+        else:
+            ai_input = f"{message}\n\n{gita_context}"
+
         result = await wellness_model.generate_response(
             tool=WellnessTool.VIYOGA,
-            user_input=f"{message}\n\n{gita_context}",
+            user_input=ai_input,
             db=db,
             analysis_mode=analysis_mode,
             secular_mode=secular_mode,
