@@ -3,11 +3,27 @@
 -- Description: Updates gita_verses with proper Sanskrit, transliteration, Hindi, and English for verses used in journeys
 
 -- =============================================================================
+-- STEP 1: Create unique constraint on (chapter, verse) if it doesn't exist
+-- This is required for ON CONFLICT to work
+-- =============================================================================
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'gita_verses_chapter_verse_unique'
+    ) THEN
+        ALTER TABLE gita_verses
+        ADD CONSTRAINT gita_verses_chapter_verse_unique
+        UNIQUE (chapter, verse);
+    END IF;
+END $$;
+
+-- =============================================================================
 -- CHAPTER 14, VERSE 17 - Used for Lobha (Greed) Journeys
 -- Three Modes of Nature (Gunas)
 -- =============================================================================
 
--- First, ensure the verse exists
 INSERT INTO gita_verses (chapter, verse, sanskrit, transliteration, hindi, english, theme, created_at, updated_at)
 VALUES (
     14,
