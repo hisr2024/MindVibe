@@ -39,8 +39,8 @@ export class SpeechRecognitionService {
   private callbacks: RecognitionCallbacks = {}
   private startAttempts = 0
   private readonly maxStartAttempts = 5
-  private confidenceThreshold: number
-  private silenceTimeoutMs: number
+  private confidenceThreshold: number = 0
+  private silenceTimeoutMs: number = 1500
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionConstructor = getSpeechRecognition()

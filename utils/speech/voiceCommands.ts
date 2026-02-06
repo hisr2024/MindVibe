@@ -388,3 +388,108 @@ export function getAvailableCommands(context: VoiceContext = 'conversation'): {
       examplePhrase: def.phrases[0] || 'speak in [language]',
     }))
 }
+
+// ============ Backward-compatible API ============
+// These functions maintain compatibility with consumers that use the
+// previous API shape (e.g., app/kiaan/voice/page.tsx)
+
+// Command descriptions for the help panel
+const COMMAND_DESCRIPTIONS: Record<string, string> = {
+  stop: 'Stop KIAAN from speaking',
+  pause: 'Pause the current response',
+  resume: 'Resume a paused response',
+  repeat: 'Repeat the last response',
+  help: 'Show available voice commands',
+  louder: 'Increase voice volume',
+  quieter: 'Decrease voice volume',
+  faster: 'Increase speech speed',
+  slower: 'Decrease speech speed',
+  clear: 'Clear conversation and start fresh',
+  cancel: 'Cancel the current action',
+  mute: 'Mute voice responses (text only)',
+  unmute: 'Enable voice responses',
+  language: 'Switch language (e.g., "speak in Hindi")',
+  goodbye: 'End the conversation',
+  thank_you: 'Express gratitude to KIAAN',
+  meditate: 'Start a guided meditation session',
+  breathe: 'Start a breathing exercise',
+  journal: 'Open the journal for writing',
+  verse: 'Hear a Bhagavad Gita verse',
+  affirmation: 'Receive a positive affirmation',
+}
+
+// Command response texts
+const COMMAND_RESPONSES: Record<string, string> = {
+  help: 'Here are the commands you can use: Say "stop" to stop me, "repeat" to hear again, "louder" or "quieter" for volume, "faster" or "slower" for speed, "meditate" for guided meditation, "breathe" for breathing exercises, "verse" for Gita wisdom, or "goodbye" to end our conversation.',
+  stop: 'Okay, I\'ll stop.',
+  pause: 'Paused. Say "resume" when you\'re ready.',
+  clear: 'Conversation cleared. How can I help you?',
+  mute: 'Voice muted. I\'ll respond with text only.',
+  unmute: 'Voice responses enabled.',
+  goodbye: 'Namaste. May peace be with you.',
+}
+
+// Commands that block further query processing
+const BLOCKING_COMMANDS: Set<VoiceCommandType> = new Set([
+  'stop', 'cancel', 'goodbye', 'mute', 'clear', 'pause',
+])
+
+/**
+ * Detect a voice command (backward-compatible wrapper)
+ * Returns the old API shape: { command: { type, param }, confidence }
+ */
+export function detectCommand(
+  query: string,
+  context: VoiceContext = 'conversation'
+): { command: { type: VoiceCommandType; param?: string }; confidence: number } | null {
+  const result = detectVoiceCommand(query, context)
+  if (!result) return null
+
+  return {
+    command: {
+      type: result.type,
+      param: result.params?.languageName || result.params?.language,
+    },
+    confidence: result.confidence,
+  }
+}
+
+/**
+ * Check if a command type blocks further query processing
+ */
+export function isBlockingCommand(type: VoiceCommandType): boolean {
+  return BLOCKING_COMMANDS.has(type)
+}
+
+/**
+ * Get a predefined response text for a command type
+ */
+export function getCommandResponse(type: VoiceCommandType | string): string {
+  return COMMAND_RESPONSES[type] || ''
+}
+
+/**
+ * Extract language from a transcript (e.g., "switch to Hindi" → "hi")
+ */
+export function extractLanguage(transcript: string): string | null {
+  const normalized = transcript.toLowerCase().trim()
+  for (const [name, code] of Object.entries(LANGUAGE_MAP)) {
+    if (normalized.includes(name)) {
+      return code
+    }
+  }
+  return null
+}
+
+/**
+ * Get all commands with descriptions for the help panel
+ * Returns the old API shape: Array<{ command: string, description: string }>
+ */
+export function getAllCommands(): { command: string; description: string }[] {
+  return COMMAND_DEFINITIONS
+    .filter(def => def.phrases.length > 0 || (def.patterns && def.patterns.length > 0))
+    .map(def => ({
+      command: def.phrases[0] || 'speak in [language]',
+      description: COMMAND_DESCRIPTIONS[def.type] || def.type,
+    }))
+}
