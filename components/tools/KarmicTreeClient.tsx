@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { MindVibeLockup } from '@/components/branding'
+import { apiFetch } from '@/lib/api'
 
 interface ActivityCounts {
   moods: number
@@ -207,7 +208,7 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
     const controller = new AbortController()
     const load = async () => {
       try {
-        const response = await fetch(`${apiBase}/api/analytics/karmic_tree`, {
+        const response = await apiFetch('/api/analytics/karmic_tree', {
           method: 'GET',
           signal: controller.signal,
           headers: { 'Content-Type': 'application/json' }

@@ -347,7 +347,7 @@ class VoiceService {
    * Get supported languages
    */
   async getSupportedLanguages(): Promise<SupportedLanguage[]> {
-    const response = await fetch('/api/voice/supported-languages')
+    const response = await apiFetch('/api/voice/supported-languages')
 
     if (!response.ok) {
       throw new Error(`Failed to get supported languages: ${response.statusText}`)

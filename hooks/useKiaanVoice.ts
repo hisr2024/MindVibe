@@ -18,6 +18,7 @@ import { useState, useCallback, useRef } from 'react'
 import { useVoiceInput } from './useVoiceInput'
 import { useVoiceOutput } from './useVoiceOutput'
 import { saveSacredReflection } from '@/utils/sacredReflections'
+import { apiFetch } from '@/lib/api'
 
 export type KiaanVoiceState =
   | 'idle'           // Ready to start
@@ -139,7 +140,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
 
-      const response = await fetch('/api/voice/query', {
+      const response = await apiFetch('/api/voice/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -166,7 +167,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
         const fallbackController = new AbortController()
         const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), 20000) // 20s timeout for fallback
 
-        const fallbackResponse = await fetch('/api/chat/message', {
+        const fallbackResponse = await apiFetch('/api/chat/message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

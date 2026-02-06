@@ -6,6 +6,7 @@ import { CircleList } from '@/components/community/CircleList'
 import { PostFeed } from '@/components/community/PostFeed'
 import { PostComposer } from '@/components/community/PostComposer'
 import { CrisisAlert } from '@/components/community/CrisisAlert'
+import { apiFetch } from '@/lib/api'
 import { useLanguage } from '@/hooks/useLanguage'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 
@@ -47,7 +48,7 @@ export default function CommunityPage() {
   const handleViewCircle = useCallback(async (circleId: number) => {
     try {
       // Fetch circle details
-      const circleRes = await fetch(`/api/community/circles/${circleId}`)
+      const circleRes = await apiFetch(`/api/community/circles/${circleId}`)
       if (circleRes.ok) {
         const circle = await circleRes.json()
         setSelectedCircle(circle)
@@ -55,7 +56,7 @@ export default function CommunityPage() {
 
       // Fetch posts for the circle
       setIsLoadingPosts(true)
-      const postsRes = await fetch(`/api/community/circles/${circleId}/posts`)
+      const postsRes = await apiFetch(`/api/community/circles/${circleId}/posts`)
       if (postsRes.ok) {
         const postsData = await postsRes.json()
         setPosts(postsData)
@@ -74,7 +75,7 @@ export default function CommunityPage() {
 
   const handleJoinCircle = async (circleId: number) => {
     try {
-      await fetch(`/api/community/circles/${circleId}/join`, { method: 'POST' })
+      await apiFetch(`/api/community/circles/${circleId}/join`, { method: 'POST' })
     } catch (err) {
       console.error('Failed to join circle:', err)
     }
@@ -84,7 +85,7 @@ export default function CommunityPage() {
     if (!selectedCircle) return
 
     try {
-      const res = await fetch('/api/community/posts', {
+      const res = await apiFetch('/api/community/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ circle_id: selectedCircle.id, content })
@@ -107,7 +108,7 @@ export default function CommunityPage() {
 
   const handleReact = async (postId: number, reactionType: string) => {
     try {
-      await fetch(`/api/community/posts/${postId}/react`, {
+      await apiFetch(`/api/community/posts/${postId}/react`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reaction: reactionType })

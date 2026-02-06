@@ -6,6 +6,7 @@ import { useChat } from '@/lib/ChatContext'
 import { getBriefErrorMessage } from '@/lib/api-client'
 import type { ChatMessage } from '@/lib/chatStorage'
 import { useLanguage } from '@/hooks/useLanguage'
+import { apiFetch } from '@/lib/api'
 
 // Generate unique ID with fallback for environments without crypto.randomUUID
 const generateId = (): string => {
@@ -95,9 +96,8 @@ export function ChatFooter() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
 
-        const response = await fetch('/api/chat/health', {
+        const response = await apiFetch('/api/chat/health', {
           method: 'GET',
-          credentials: 'include',
           signal: controller.signal,
         })
         
@@ -139,7 +139,7 @@ export function ChatFooter() {
 
     try {
       // Use KIAAN's existing chat endpoint
-      const response = await fetch('/api/chat/message', {
+      const response = await apiFetch('/api/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +149,6 @@ export function ChatFooter() {
           message: messageText,
           language: language || 'en',
         }),
-        credentials: 'include',
       })
 
       if (!response.ok) {

@@ -17,6 +17,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts'
+import { apiFetch } from '@/lib/api'
 
 interface VoiceOverview {
   total_queries_today: number
@@ -107,10 +108,10 @@ export default function AdminVoiceAnalyticsPage() {
 
     try {
       const [overviewRes, trendsRes, qualityRes, enhancementsRes] = await Promise.all([
-        fetch('/api/admin/voice/overview'),
-        fetch(`/api/admin/voice/trends?days=${selectedDays}`),
-        fetch(`/api/admin/voice/quality?days=${selectedDays}`),
-        fetch(`/api/admin/voice/enhancements?days=${selectedDays}`),
+        apiFetch('/api/admin/voice/overview'),
+        apiFetch(`/api/admin/voice/trends?days=${selectedDays}`),
+        apiFetch(`/api/admin/voice/quality?days=${selectedDays}`),
+        apiFetch(`/api/admin/voice/enhancements?days=${selectedDays}`),
       ])
 
       if (!overviewRes.ok || !trendsRes.ok || !qualityRes.ok || !enhancementsRes.ok) {

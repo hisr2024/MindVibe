@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MindVibeLockup } from '@/components/branding'
 import { AnimatedCard, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui'
+import { apiFetch } from '@/lib/api'
 
 interface ActivityCounts {
   moods: number
@@ -249,7 +250,7 @@ export default function KarmicTreeClient() {
     const controller = new AbortController()
     const load = async () => {
       try {
-        const response = await fetch(`${apiBase}/api/karmic-tree/progress`, {
+        const response = await apiFetch('/api/karmic-tree/progress', {
           method: 'GET',
           signal: controller.signal,
           headers: { 'Content-Type': 'application/json' }

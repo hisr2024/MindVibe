@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard, KarmaPlant, type KarmaFootprintState } from '@/components/tools'
+import { apiFetch } from '@/lib/api'
 import { FadeIn } from '@/components/ui'
 
 interface FootprintAnalysis {
@@ -57,8 +58,7 @@ export default function KarmaFootprintClient() {
     setError(null)
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/karma-footprint/analyze`, {
+      const response = await apiFetch('/api/karma-footprint/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
