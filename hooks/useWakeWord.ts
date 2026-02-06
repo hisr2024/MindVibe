@@ -57,10 +57,15 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     language = 'en',
     enabled = false,
     wakeWords,
-    onWakeWordDetected,
-    onError,
-    onStateChange,
   } = options
+
+  // Stable refs for callbacks to avoid re-creating the detector on every render
+  const onWakeWordDetectedRef = useRef(options.onWakeWordDetected)
+  const onErrorRef = useRef(options.onError)
+  const onStateChangeRef = useRef(options.onStateChange)
+  onWakeWordDetectedRef.current = options.onWakeWordDetected
+  onErrorRef.current = options.onError
+  onStateChangeRef.current = options.onStateChange
 
   // Initialize wake word detector
   useEffect(() => {
@@ -72,17 +77,17 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
       sensitivity,
       onWakeWordDetected: (event: WakeWordDetectionEvent) => {
         setLastDetection(event)
-        onWakeWordDetected?.(event)
+        onWakeWordDetectedRef.current?.(event)
       },
       onError: (err: string) => {
         setError(err)
         setIsActive(false)
-        onError?.(err)
+        onErrorRef.current?.(err)
       },
       onListeningStateChange: (state: WakeWordListeningState) => {
         setListeningState(state)
         setIsActive(state.isListening)
-        onStateChange?.(state)
+        onStateChangeRef.current?.(state)
       },
     })
 
@@ -92,7 +97,7 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
         detectorRef.current = null
       }
     }
-  }, [isSupported, language, wakeWords, sensitivity, onWakeWordDetected, onError, onStateChange])
+  }, [isSupported, language, wakeWords, sensitivity])
 
   // Update language when it changes
   useEffect(() => {
@@ -105,14 +110,14 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     if (!detectorRef.current || !isSupported) {
       const errorMsg = 'Wake word detection not supported in this browser'
       setError(errorMsg)
-      onError?.(errorMsg)
+      onErrorRef.current?.(errorMsg)
       return
     }
 
     setError(null)
     detectorRef.current.start()
     setIsActive(true)
-  }, [isSupported, onError])
+  }, [isSupported])
 
   const stop = useCallback(() => {
     if (detectorRef.current) {
