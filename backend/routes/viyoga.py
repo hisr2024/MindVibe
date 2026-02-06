@@ -1,32 +1,29 @@
-"""Viyoga Detachment Coach - Gita-Grounded Karma Yoga Guidance v3.0.
+"""Viyoga Detachment Coach - Gita-Grounded Karma Yoga Guidance v4.0.
 
-ENHANCED VERSION with Strict Gita Wisdom Grounding
+ENHANCED VERSION with AI-Powered Concern Analysis + Direct OpenAI Response Generation
 
-This router provides outcome anxiety reduction using ONLY Bhagavad Gita wisdom
+This router provides outcome anxiety reduction using Bhagavad Gita wisdom
 from the 700+ verse repository. ALL responses are grounded in actual verses.
+
+v4.0 PIPELINE (like Ardha and Relationship Compass):
+1. AI-POWERED CONCERN ANALYSIS - Deep understanding of user's specific situation
+2. ENHANCED VERSE RETRIEVAL - AI-informed search queries for better Gita matches
+3. ANALYSIS-AWARE PROMPT - Deep situational context injected into prompts
+4. DIRECT OPENAI CALL - Custom prompts with analysis context (not WellnessModel)
+5. GITA WISDOM FILTER - All responses filtered through Gita Core Wisdom
+6. GRACEFUL FALLBACK - WellnessModel backup, then verse-based fallback
 
 Viyoga focuses on Karma Yoga principles from the Gita:
 - Karmanye vadhikaraste (right to action, not fruits)
 - Nishkama Karma (desireless action)
 - Samatva (equanimity in success and failure)
 - Phala-sakti awareness (attachment to fruits)
-
-ANALYSIS MODES (v3.0):
-- standard: 7-section guidance with core Karma Yoga teaching
-- deep_dive: Comprehensive analysis with multiple verse references
-- quantum_dive: Multi-dimensional exploration across Gita chapters
-
-ENHANCEMENTS (v3.0):
-- Strict Gita-only grounding (no psychology terminology)
-- Direct verse retrieval from 701-verse JSON
-- System prompt enforcing repository-bound responses
-- Fallback using actual Gita verses (not generic text)
-- Multi-provider AI with Gita context injection
 """
 
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -48,6 +45,7 @@ from backend.services.viyoga_prompts import (
     ATTACHMENT_TO_SECULAR,
     VIYOGA_HEADINGS_SECULAR,
     VIYOGA_HEADINGS_GITA,
+    build_enhanced_viyoga_prompt,
 )
 from backend.services.gita_wisdom_retrieval import (
     search_gita_verses,
@@ -60,32 +58,62 @@ from backend.services.gita_ai_analyzer import (
     get_gita_ai_analyzer,
     AttachmentAnalysis,
 )
+from backend.services.viyoga_analysis import (
+    analyze_concern_with_ai_async,
+    build_enhanced_search_query,
+    build_analysis_context_for_prompt,
+    analysis_to_dict,
+    ConcernAnalysis,
+)
+from backend.services.openai_optimizer import openai_optimizer
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/viyoga", tags=["viyoga"])
 
-# Initialize WellnessModel
+# Gita Wisdom Filter - lazy import to avoid circular dependencies
+_gita_filter = None
+
+
+def _get_gita_filter():
+    """Lazy import of Gita wisdom filter."""
+    global _gita_filter
+    if _gita_filter is None:
+        try:
+            from backend.services.gita_wisdom_filter import get_gita_wisdom_filter
+            _gita_filter = get_gita_wisdom_filter()
+            logger.info("Viyoga v4.0: Gita Wisdom Filter integrated")
+        except Exception as e:
+            logger.warning(f"Viyoga: Gita Wisdom Filter unavailable: {e}")
+            _gita_filter = False
+    return _gita_filter if _gita_filter else None
+
+
+# Session memory for conversation continuity
+SESSION_MEMORY: dict[str, list[dict[str, str]]] = {}
+MAX_SESSION_TURNS = 10
+
+# Initialize WellnessModel (fallback)
 wellness_model: WellnessModel | None = None
 try:
     wellness_model = get_wellness_model()
-    logger.info("✅ Viyoga v3.0: WellnessModel initialized with Gita-grounding")
+    logger.info("Viyoga v4.0: WellnessModel initialized (fallback)")
 except Exception as e:
-    logger.warning(f"⚠️ Viyoga: WellnessModel unavailable: {e}")
+    logger.warning(f"Viyoga: WellnessModel unavailable: {e}")
 
-# Initialize AI-powered Gita analyzer
+# Initialize AI-powered Gita analyzer (legacy, kept for /detach endpoint)
 gita_ai_analyzer = None
 try:
     gita_ai_analyzer = get_gita_ai_analyzer()
-    logger.info("✅ Viyoga v3.1: AI-powered Gita analyzer initialized")
+    logger.info("Viyoga v4.0: AI-powered Gita analyzer initialized")
 except Exception as e:
-    logger.warning(f"⚠️ Viyoga: AI analyzer unavailable, using fallback: {e}")
+    logger.warning(f"Viyoga: AI analyzer unavailable, using fallback: {e}")
 
 # Log Gita verses availability
 if gita_ready():
-    logger.info(f"✅ Viyoga v3.0: {get_verses_count()} Gita verses available for retrieval")
+    logger.info(f"Viyoga v4.0: {get_verses_count()} Gita verses available for retrieval")
 else:
-    logger.warning("⚠️ Viyoga: Gita verses not loaded - using core wisdom fallback")
+    logger.warning("Viyoga: Gita verses not loaded - using core wisdom fallback")
 
 
 @router.post("/detach")
@@ -427,10 +455,15 @@ async def viyoga_chat(
     payload: dict[str, Any],
     db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
-    """Chat endpoint for Viyoga Detachment Coach - Gita-grounded (v3.0).
+    """Chat endpoint for Viyoga Detachment Coach - Enhanced v4.0.
 
-    This endpoint is called by the ViyogClient frontend component.
-    ALL responses are grounded in actual Bhagavad Gita verses.
+    v4.0 PIPELINE (same quality as Ardha and Relationship Compass):
+    1. AI-POWERED CONCERN ANALYSIS - Deep understanding of specific situation
+    2. ENHANCED VERSE RETRIEVAL - AI-informed search for better Gita matches
+    3. ANALYSIS-AWARE PROMPT - Situational context injected into system prompt
+    4. DIRECT OPENAI CALL - Custom prompt (not WellnessModel's internal prompt)
+    5. GITA WISDOM FILTER - Response filtered through Gita Core Wisdom
+    6. GRACEFUL FALLBACK - WellnessModel backup, then verse-based fallback
 
     Request body:
         message: str - The user's message/worry
@@ -439,14 +472,16 @@ async def viyoga_chat(
         secularMode: bool - If True (default), uses modern friendly language
 
     Returns:
-        - assistant: The full response text with Gita citations
+        - assistant: Deeply personalized response with Gita wisdom
         - sections: Structured guidance sections
         - citations: Actual Gita verse citations used
+        - concern_analysis: AI-powered understanding of their specific situation
     """
+    start_time = time.time()
+
     message = payload.get("message", "")
     session_id = payload.get("sessionId", "")
     mode = payload.get("mode", "full")
-    # Secular mode is ON by default - modern, friendly responses
     secular_mode = payload.get("secularMode", True)
 
     if not message.strip():
@@ -467,12 +502,11 @@ async def viyoga_chat(
             "error": "Message too long (max 2000 characters)"
         }
 
-    # Determine analysis mode based on request mode
+    # Determine analysis mode
     analysis_mode = AnalysisMode.STANDARD
     if mode == "full" or mode == "deep":
         analysis_mode = AnalysisMode.DEEP_DIVE
 
-    # ALWAYS retrieve Gita verses for context
     depth_map = {
         AnalysisMode.STANDARD: "standard",
         AnalysisMode.DEEP_DIVE: "deep_dive",
@@ -480,12 +514,54 @@ async def viyoga_chat(
     }
     depth = depth_map.get(analysis_mode, "standard")
 
-    gita_verses = search_gita_verses(
-        query=message,
-        tool="viyoga",
-        limit=8,
-        depth=depth,
+    # Get session history for continuity
+    session_history = _get_session_history(session_id)
+
+    # Build session context string for analysis
+    session_context = None
+    if session_history:
+        recent = session_history[-4:]
+        session_context = "\n".join(
+            f"{m['role']}: {m['content'][:200]}" for m in recent
+        )
+
+    # =========================================================================
+    # STEP 1: AI-POWERED CONCERN ANALYSIS (the key enhancement)
+    # This is what makes Viyoga understand your SPECIFIC situation deeply
+    # =========================================================================
+    concern_analysis = await analyze_concern_with_ai_async(
+        concern=message,
+        session_context=session_context,
     )
+
+    logger.info(
+        f"Viyoga v4.0 Analysis: "
+        f"worry='{concern_analysis.specific_worry[:40]}...', "
+        f"attachment={concern_analysis.attachment_type}, "
+        f"emotion={concern_analysis.primary_emotion}, "
+        f"confidence={concern_analysis.confidence:.2f}, "
+        f"depth={concern_analysis.analysis_depth}"
+    )
+
+    # =========================================================================
+    # STEP 2: ENHANCED VERSE RETRIEVAL using analysis insights
+    # =========================================================================
+    if concern_analysis.analysis_depth == "ai_enhanced" and concern_analysis.confidence >= 0.4:
+        enhanced_query = build_enhanced_search_query(message, concern_analysis)
+        gita_verses = search_gita_verses(
+            query=enhanced_query,
+            tool="viyoga",
+            limit=8,
+            depth=depth,
+        )
+        logger.info("Viyoga v4.0: Using AI-enhanced query for verse retrieval")
+    else:
+        gita_verses = search_gita_verses(
+            query=message,
+            tool="viyoga",
+            limit=8,
+            depth=depth,
+        )
 
     # Build Gita context
     if gita_verses:
@@ -493,26 +569,6 @@ async def viyoga_chat(
     else:
         gita_context = VIYOGA_CORE_GITA_WISDOM
         sources = [{"file": "core_karma_yoga", "reference": "BG 2.47-2.50"}]
-
-    # Analyze attachment pattern using AI-powered Gita analyzer (v3.1)
-    if gita_ai_analyzer:
-        try:
-            ai_attachment = await gita_ai_analyzer.analyze_attachment_pattern(message)
-            attachment_analysis = {
-                "type": ai_attachment.attachment_type,
-                "description": ai_attachment.description,
-                "gita_teaching": ai_attachment.gita_teaching,
-                "primary_verse": ai_attachment.primary_verse,
-                "verse_text": ai_attachment.verse_text,
-                "remedy": ai_attachment.remedy,
-                "confidence": ai_attachment.confidence,
-                "ai_powered": True,
-            }
-        except Exception as e:
-            logger.warning(f"AI attachment analysis failed in chat: {e}")
-            attachment_analysis = _analyze_attachment_pattern(message, secular_mode)
-    else:
-        attachment_analysis = _analyze_attachment_pattern(message, secular_mode)
 
     # Build citations from actual verses
     citations = [
@@ -524,71 +580,105 @@ async def viyoga_chat(
         for v in gita_verses[:5]
     ]
 
-    if not wellness_model:
-        logger.warning("Viyoga chat: WellnessModel unavailable, using Gita fallback")
-        fallback = _get_gita_grounded_fallback(
-            message, gita_verses, attachment_analysis, analysis_mode, secular_mode
-        )
-        return {
-            "assistant": fallback.get("response", ""),
-            "sections": fallback.get("detachment_guidance", {}),
-            "citations": citations,
-            "secularMode": secular_mode,
-            "attachment_analysis": attachment_analysis,
-            "karma_yoga_insight": fallback.get("karma_yoga_insight", {}),
-        }
+    # Build analysis context for prompt injection
+    analysis_context = build_analysis_context_for_prompt(concern_analysis)
 
-    try:
-        # Generate response using WellnessModel
-        # OpenAI reasons independently about each user's specific concern
-        # Gita wisdom is provided as the guiding framework
-        if secular_mode:
-            ai_input = (
-                f"{message}\n\n"
-                f"[Internal guidance — use these principles to inform your reasoning, "
-                f"present insights in modern language, never quote or reference directly]\n"
-                f"{gita_context}"
+    # Also build a simple attachment_analysis dict for backward compatibility
+    attachment_analysis = {
+        "type": concern_analysis.attachment_type or "outcome_anxiety",
+        "description": concern_analysis.specific_worry,
+        "primary_emotion": concern_analysis.primary_emotion,
+        "confidence": concern_analysis.confidence,
+        "ai_powered": concern_analysis.analysis_depth == "ai_enhanced",
+    }
+
+    # =========================================================================
+    # STEP 3: DIRECT OPENAI CALL with analysis-enriched prompt
+    # This is the same approach Ardha uses - direct OpenAI with custom prompts
+    # =========================================================================
+    response_text = None
+    model_used = "unknown"
+    provider_used = "unknown"
+
+    if openai_optimizer.ready and openai_optimizer.client:
+        try:
+            # Build enhanced messages with concern analysis context
+            messages = build_enhanced_viyoga_prompt(
+                concern=message,
+                analysis_context=analysis_context,
+                gita_context=gita_context,
+                secular_mode=secular_mode,
+                session_history=session_history,
             )
-        else:
-            ai_input = f"{message}\n\n{gita_context}"
 
-        result = await wellness_model.generate_response(
-            tool=WellnessTool.VIYOGA,
-            user_input=ai_input,
-            db=db,
-            analysis_mode=analysis_mode,
-            secular_mode=secular_mode,
-        )
+            # Determine max tokens based on mode
+            max_tokens_map = {"standard": 600, "deep_dive": 900, "quantum_dive": 1200}
+            max_tokens = max_tokens_map.get(depth, 600)
 
-        # Get Gita teaching for attachment type
-        gita_teaching = ATTACHMENT_TO_GITA.get(
-            attachment_analysis["type"],
-            ATTACHMENT_TO_GITA["outcome_anxiety"]
-        )
+            # Validate token limits before calling
+            openai_optimizer.validate_token_limits(messages, max_tokens)
 
-        logger.info(
-            f"✅ Viyoga chat: session={session_id[:8] if session_id else 'none'}..., "
-            f"attachment_type={attachment_analysis['type']}, "
-            f"verses={len(gita_verses)}, "
-            f"secular={secular_mode}"
-        )
+            completion = openai_optimizer.client.chat.completions.create(
+                model=openai_optimizer.default_model,
+                messages=messages,
+                temperature=0.4,
+                max_tokens=max_tokens,
+            )
 
-        return {
-            "assistant": result.content,
-            "sections": result.sections or {},
-            "citations": citations,
-            "secularMode": secular_mode,
-            "attachment_analysis": attachment_analysis,
-            "karma_yoga_insight": {
-                "teaching": gita_teaching.get("teaching", ""),
-                "verse": gita_teaching.get("verse", "BG 2.47"),
-                "remedy": gita_teaching.get("remedy", ""),
-            },
-        }
+            if completion.choices and completion.choices[0].message:
+                content = completion.choices[0].message.content or ""
+                if content.strip():
+                    # Apply Gita Wisdom Filter (like Ardha does)
+                    response_text = await _apply_gita_filter(content, message)
+                    model_used = openai_optimizer.default_model
+                    provider_used = "openai_direct"
 
-    except Exception as e:
-        logger.exception(f"Viyoga chat error: {e}")
-        # Return Gita-grounded fallback on error
+                    logger.info(
+                        f"Viyoga v4.0: Direct OpenAI response generated, "
+                        f"model={model_used}, tokens={completion.usage.total_tokens if completion.usage else 'unknown'}"
+                    )
+
+        except Exception as e:
+            logger.warning(f"Viyoga v4.0: Direct OpenAI failed ({e}), trying fallback")
+
+    # =========================================================================
+    # STEP 4: FALLBACK to WellnessModel if direct call failed
+    # =========================================================================
+    if not response_text and wellness_model:
+        try:
+            if secular_mode:
+                ai_input = (
+                    f"{message}\n\n"
+                    f"{analysis_context}\n\n"
+                    f"[Internal guidance — use these principles to inform your reasoning, "
+                    f"present insights in modern language, never quote or reference directly]\n"
+                    f"{gita_context}"
+                )
+            else:
+                ai_input = f"{message}\n\n{analysis_context}\n\n{gita_context}"
+
+            result = await wellness_model.generate_response(
+                tool=WellnessTool.VIYOGA,
+                user_input=ai_input,
+                db=db,
+                analysis_mode=analysis_mode,
+                secular_mode=secular_mode,
+            )
+
+            response_text = result.content
+            model_used = result.model
+            provider_used = "wellness_model"
+
+            logger.info("Viyoga v4.0: WellnessModel fallback used")
+
+        except Exception as e:
+            logger.warning(f"Viyoga v4.0: WellnessModel also failed: {e}")
+
+    # =========================================================================
+    # STEP 5: FINAL FALLBACK to verse-based response
+    # =========================================================================
+    if not response_text:
+        logger.warning("Viyoga v4.0: All AI providers failed, using Gita fallback")
         fallback = _get_gita_grounded_fallback(
             message, gita_verses, attachment_analysis, analysis_mode, secular_mode
         )
@@ -598,35 +688,212 @@ async def viyoga_chat(
             "citations": citations,
             "secularMode": secular_mode,
             "attachment_analysis": attachment_analysis,
+            "concern_analysis": analysis_to_dict(concern_analysis),
+            "karma_yoga_insight": fallback.get("karma_yoga_insight", {}),
+            "fallback": True,
         }
+
+    # Clean response
+    response_text = _sanitize_response(response_text)
+
+    # Parse sections from the response
+    if secular_mode:
+        sections = _extract_sections(response_text, VIYOGA_HEADINGS_SECULAR)
+    else:
+        sections = _extract_sections(response_text, VIYOGA_HEADINGS_GITA)
+
+    # Store in session memory
+    _store_session_history(session_id, message, response_text)
+
+    # Get Gita teaching for attachment type
+    gita_teaching = ATTACHMENT_TO_GITA.get(
+        attachment_analysis.get("type", "outcome_anxiety"),
+        ATTACHMENT_TO_GITA["outcome_anxiety"]
+    )
+
+    latency_ms = (time.time() - start_time) * 1000
+
+    logger.info(
+        f"Viyoga v4.0 chat: session={session_id[:8] if session_id else 'none'}..., "
+        f"attachment={attachment_analysis.get('type', 'unknown')}, "
+        f"emotion={concern_analysis.primary_emotion}, "
+        f"verses={len(gita_verses)}, "
+        f"provider={provider_used}, "
+        f"secular={secular_mode}, "
+        f"latency={latency_ms:.0f}ms"
+    )
+
+    return {
+        "assistant": response_text,
+        "sections": sections,
+        "citations": citations,
+        "secularMode": secular_mode,
+        "attachment_analysis": attachment_analysis,
+        "concern_analysis": analysis_to_dict(concern_analysis),
+        "karma_yoga_insight": {
+            "teaching": gita_teaching.get("teaching", ""),
+            "verse": gita_teaching.get("verse", "BG 2.47"),
+            "remedy": gita_teaching.get("remedy", ""),
+        },
+        "model": model_used,
+        "provider": provider_used,
+        "gita_verses_used": len(gita_verses),
+        "latency_ms": latency_ms,
+    }
+
+
+# =============================================================================
+# HELPER FUNCTIONS for v4.0 Enhanced Pipeline
+# =============================================================================
+
+async def _apply_gita_filter(content: str, user_context: str = "") -> str:
+    """Apply Gita wisdom filter to AI-generated content."""
+    gita_filter = _get_gita_filter()
+    if gita_filter and content:
+        try:
+            filter_result = await gita_filter.filter_response(
+                content=content,
+                tool_type="viyoga",
+                user_context=user_context,
+                enhance_if_needed=True,
+            )
+            logger.debug(f"Viyoga Gita filter: score={filter_result.wisdom_score:.2f}")
+            return filter_result.content
+        except Exception as e:
+            logger.warning(f"Viyoga Gita filter error (continuing): {e}")
+    return content
+
+
+def _get_session_history(session_id: str) -> list[dict[str, str]]:
+    """Get session history for conversation continuity."""
+    if not session_id:
+        return []
+    return SESSION_MEMORY.get(session_id, [])
+
+
+def _store_session_history(session_id: str, user_message: str, assistant_response: str) -> None:
+    """Store conversation turn in session memory."""
+    if not session_id:
+        return
+    entries = SESSION_MEMORY.get(session_id, [])
+    entries.append({"role": "user", "content": user_message})
+    entries.append({"role": "assistant", "content": assistant_response})
+    SESSION_MEMORY[session_id] = entries[-(MAX_SESSION_TURNS * 2):]
+
+
+def _extract_sections(response_text: str, headings: list[str]) -> dict[str, str]:
+    """Extract structured sections from the response text.
+
+    Parses response text looking for section headings (with or without ** markers)
+    and extracts the content between them.
+    """
+    sections: dict[str, str] = {}
+    if not response_text or not headings:
+        return sections
+
+    # Normalize heading patterns for matching
+    text = response_text
+
+    for i, heading in enumerate(headings):
+        # Create a key from the heading (lowercase, underscored)
+        key = heading.lower().replace(" ", "_").replace("'", "")
+
+        # Try multiple heading formats
+        patterns = [
+            f"**{heading}**",
+            f"*{heading}*",
+            heading,
+        ]
+
+        start_idx = -1
+        heading_len = 0
+        for pattern in patterns:
+            idx = text.find(pattern)
+            if idx >= 0:
+                start_idx = idx
+                heading_len = len(pattern)
+                break
+
+        if start_idx < 0:
+            continue
+
+        # Find where content starts (after heading + optional newlines)
+        content_start = start_idx + heading_len
+        while content_start < len(text) and text[content_start] in ("\n", "\r", " "):
+            content_start += 1
+
+        # Find where content ends (next heading or end of text)
+        content_end = len(text)
+        for next_heading in headings[i + 1:]:
+            for pattern in [f"**{next_heading}**", f"*{next_heading}*", next_heading]:
+                idx = text.find(pattern, content_start)
+                if idx >= 0:
+                    content_end = min(content_end, idx)
+                    break
+
+        content = text[content_start:content_end].strip()
+        if content:
+            sections[key] = content
+
+    return sections
+
+
+def _sanitize_response(response: str) -> str:
+    """Remove emojis and clean up the response text."""
+    cleaned = response.strip()
+    return "".join(char for char in cleaned if not _is_emoji(char))
+
+
+def _is_emoji(char: str) -> bool:
+    """Check if a character is an emoji."""
+    return (
+        "\U0001F300" <= char <= "\U0001FAFF"
+        or "\U00002700" <= char <= "\U000027BF"
+        or "\U0001F000" <= char <= "\U0001F02F"
+    )
 
 
 @router.get("/health")
 async def viyoga_health():
-    """Health check with Gita wisdom and AI analyzer availability status."""
+    """Health check with Gita wisdom, AI analysis, and direct OpenAI status."""
+    import os
     gita_verses_loaded = get_verses_count()
     wellness_ready = wellness_model is not None
     ai_analyzer_ready = gita_ai_analyzer is not None
+    openai_ready = openai_optimizer.ready and openai_optimizer.client is not None
 
     return {
-        "status": "ok" if (gita_verses_loaded > 0 or wellness_ready) else "degraded",
+        "status": "ok" if (openai_ready or wellness_ready) else "degraded",
         "service": "viyoga",
-        "version": "3.1",  # Updated for AI-powered analysis
+        "version": "4.0",
         "provider": "gita_repository",
+        "pipeline": {
+            "concern_analysis": openai_ready,
+            "enhanced_retrieval": openai_ready,
+            "direct_openai": openai_ready,
+            "gita_filter": _get_gita_filter() is not None,
+            "wellness_fallback": wellness_ready,
+            "verse_fallback": gita_verses_loaded > 0,
+        },
         "gita_grounding": {
             "verses_loaded": gita_verses_loaded,
             "repository_ready": gita_ready(),
             "fallback_available": True,
         },
         "ai_analysis": {
+            "concern_analysis_model": os.getenv("VIYOGA_ANALYSIS_MODEL", "gpt-4o-mini"),
+            "response_model": openai_optimizer.default_model if openai_ready else None,
             "ai_analyzer_ready": ai_analyzer_ready,
-            "analysis_method": "openai_gita_wisdom" if ai_analyzer_ready else "keyword_fallback",
             "features": [
-                "attachment_pattern_analysis",
+                "deep_concern_analysis",
+                "attachment_pattern_detection",
                 "emotion_recognition",
-                "relationship_detection",
-                "communication_analysis",
-            ] if ai_analyzer_ready else ["keyword_matching_fallback"],
+                "control_analysis",
+                "enhanced_verse_retrieval",
+                "analysis_aware_prompts",
+                "gita_wisdom_filter",
+                "session_memory",
+            ] if openai_ready else ["keyword_matching_fallback"],
         },
         "wellness_model_ready": wellness_ready,
     }
