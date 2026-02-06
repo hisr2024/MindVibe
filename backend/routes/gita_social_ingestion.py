@@ -13,6 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
 
+from backend.deps import get_current_user_flexible
 from backend.services.gita_social_ingestion import (
     IngestionRequest,
     BulkIngestionRequest,
@@ -58,10 +59,17 @@ class IngestionStatusResponse(BaseModel):
     failed: int
 
 
+class ValidateContentRequest(BaseModel):
+    """Request to validate content for Gita compliance."""
+    text: str = Field(..., min_length=20, max_length=50000, description="Content text to validate")
+
+
 # ─── Endpoints ───────────────────────────────────────────────────────────────
 
 @router.get("/trusted-sources", response_model=TrustedSourcesResponse)
-async def get_trusted_sources():
+async def get_trusted_sources(
+    user_id: str = Depends(get_current_user_flexible),
+):
     """Get the list of trusted content sources for Gita wisdom.
 
     Returns all verified channels, podcasts, websites, and social accounts
@@ -77,14 +85,15 @@ async def get_trusted_sources():
 
 @router.post("/validate", response_model=ComplianceCheckResponse)
 async def validate_content(
-    text: str = Field(..., min_length=20, max_length=50000, description="Content text to validate"),
+    request: ValidateContentRequest,
+    user_id: str = Depends(get_current_user_flexible),
 ):
     """Validate text content against Gita compliance rules.
 
     Checks if the provided content is aligned with Bhagavad Gita teachings
     and does not contain prohibited topics.
     """
-    compliance = validate_gita_compliance(text)
+    compliance = validate_gita_compliance(request.text)
 
     if compliance.is_compliant:
         message = f"Content is Gita-compliant (confidence: {compliance.confidence:.0%})"
@@ -97,7 +106,10 @@ async def validate_content(
 
 
 @router.post("/ingest", response_model=IngestionResult)
-async def ingest_content(request: IngestionRequest):
+async def ingest_content(
+    request: IngestionRequest,
+    user_id: str = Depends(get_current_user_flexible),
+):
     """Ingest a single piece of content from a social media source.
 
     The content URL is validated against trusted sources and checked
@@ -109,7 +121,10 @@ async def ingest_content(request: IngestionRequest):
 
 
 @router.post("/ingest/bulk", response_model=IngestionStatusResponse)
-async def ingest_bulk(request: BulkIngestionRequest):
+async def ingest_bulk(
+    request: BulkIngestionRequest,
+    user_id: str = Depends(get_current_user_flexible),
+):
     """Ingest multiple content sources in a single batch.
 
     Processes up to 50 sources. Each source is independently validated
@@ -144,6 +159,7 @@ async def ingest_bulk(request: BulkIngestionRequest):
 async def check_source(
     url: str = Query(..., min_length=10, description="URL to check"),
     platform: PlatformType = Query(..., description="Platform type"),
+    user_id: str = Depends(get_current_user_flexible),
 ):
     """Check if a URL is from a trusted source.
 
@@ -160,7 +176,9 @@ async def check_source(
 
 
 @router.get("/platforms")
-async def get_platforms():
+async def get_platforms(
+    user_id: str = Depends(get_current_user_flexible),
+):
     """Get supported platforms and content types.
 
     Returns the list of all supported social media platforms and

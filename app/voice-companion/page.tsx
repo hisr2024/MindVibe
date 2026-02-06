@@ -25,7 +25,6 @@ import Link from 'next/link'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useVoiceOutput } from '@/hooks/useVoiceOutput'
 import { useWakeWord } from '@/hooks/useWakeWord'
-import { apiFetch } from '@/lib/api'
 import { saveSacredReflection } from '@/utils/sacredReflections'
 import divineVoiceService from '@/services/divineVoiceService'
 import voiceCompanionService from '@/services/voiceCompanionService'
@@ -536,11 +535,11 @@ export default function VoiceCompanionPage() {
     else { setError(null); voiceInput.startListening(); setState('listening') }
   }
 
-  const toggleConversationMode = () => {
+  const toggleConversationMode = async () => {
     const newMode = !conversationMode
     setConversationMode(newMode)
     if (newMode && (state === 'idle' || state === 'wake-listening')) {
-      voiceCompanionService.startSession()
+      await voiceCompanionService.startSession()
       voiceInput.startListening()
       setState('listening')
     } else if (!newMode && voiceInput.isListening) {

@@ -136,10 +136,8 @@ class VoiceCompanionService {
   async endSession(): Promise<string | null> {
     if (!this.sessionId) return null
     try {
-      const response = await apiFetch('/api/voice/conversation/end', {
+      const response = await apiFetch(`/api/voice/conversation/end?session_id=${encodeURIComponent(this.sessionId)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: this.sessionId }),
       })
       this.sessionId = null
       if (!response.ok) return null
@@ -209,13 +207,11 @@ class VoiceCompanionService {
   /** Get a guided breathing exercise */
   async getBreathingExercise(pattern: string = 'peace_breath'): Promise<BreathingExercise> {
     try {
-      const response = await apiFetch('/api/voice/conversation/breathe', {
+      const params = new URLSearchParams()
+      if (this.sessionId) params.set('session_id', this.sessionId)
+      params.set('emotional_state', pattern)
+      const response = await apiFetch(`/api/voice/conversation/breathe?${params.toString()}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: this.sessionId,
-          pattern,
-        }),
       })
       if (response.ok) {
         const data = await response.json()
