@@ -38,7 +38,7 @@ export interface ChatAPIResponse {
   bot?: string
   version?: string
   model?: string
-  gita_powered?: boolean
+  ai_powered?: boolean
   verses_used?: string[]
   validation?: {
     valid: boolean

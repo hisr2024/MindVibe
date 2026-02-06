@@ -12,7 +12,7 @@ type Message = {
   timestamp: string
   status?: 'error'
   summary?: string
-  gitaPowered?: boolean
+  aiPowered?: boolean
 }
 
 const starterPrompts = [
@@ -51,7 +51,7 @@ export default function Chat() {
         text: data.response || 'I am here for you with a calm response.',
         timestamp: new Date().toISOString(),
         summary: data.summary || undefined,
-        gitaPowered: data.gita_powered || data.gita_wisdom || true
+        aiPowered: data.ai_powered || true
       }
       setMessages(prev => [...prev, assistant])
     } catch (error) {
@@ -84,7 +84,7 @@ export default function Chat() {
       localStorage.setItem('mindvibe_journal_entries', JSON.stringify(entries))
       
       // Show notification
-      setSavedNotification('Saved to Sacred Reflections! 📝')
+      setSavedNotification('Saved to Journal! 📝')
       setTimeout(() => setSavedNotification(null), 2000)
     } catch (error) {
       console.error('Failed to save to journal:', error)
@@ -139,7 +139,7 @@ export default function Chat() {
                   timestamp={message.timestamp}
                   status={message.status}
                   summary={message.summary}
-                  gitaPowered={message.gitaPowered}
+                  aiPowered={message.aiPowered}
                   onSaveToJournal={message.sender === 'assistant' ? handleSaveToJournal : undefined}
                 />
               ))}
