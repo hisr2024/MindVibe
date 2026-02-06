@@ -28,6 +28,15 @@ export function getCurrentLocale(): string {
 }
 
 /**
+ * Get CSRF token from cookie for state-changing requests.
+ */
+function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/**
  * Make an API call with proper error handling
  * @param endpoint API endpoint (e.g., '/api/chat/message')
  * @param options Request options
@@ -47,10 +56,21 @@ export async function apiCall(
   // Get current language preference
   const locale = getCurrentLocale();
 
+  // Add CSRF token for state-changing requests
+  const csrfHeaders: Record<string, string> = {}
+  const method = (options.method || 'GET').toUpperCase()
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+      csrfHeaders['X-CSRF-Token'] = csrfToken
+    }
+  }
+
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
       'Accept-Language': locale,
+      ...csrfHeaders,
       ...options.headers,
     },
     ...fetchOptions,
@@ -63,6 +83,7 @@ export async function apiCall(
 
     const response = await fetch(url, {
       ...defaultOptions,
+      credentials: 'include',
       signal: controller.signal,
     })
 

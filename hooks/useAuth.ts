@@ -10,12 +10,6 @@ export interface AuthUser {
   sessionId?: string
 }
 
-interface AuthTokens {
-  accessToken: string
-  expiresIn: number
-  sessionId: string
-}
-
 interface UseAuthResult {
   user: AuthUser | null
   loading: boolean
@@ -27,9 +21,8 @@ interface UseAuthResult {
   refreshSession: () => Promise<void>
 }
 
+// Only store non-sensitive user profile data in localStorage (no tokens!)
 const AUTH_USER_KEY = 'mindvibe_auth_user'
-const ACCESS_TOKEN_KEY = 'mindvibe_access_token'
-const SESSION_KEY = 'mindvibe_session_id'
 
 function getStoredUser(): AuthUser | null {
   if (typeof window === 'undefined') return null
@@ -42,25 +35,19 @@ function getStoredUser(): AuthUser | null {
   }
 }
 
-function storeAuthData(user: AuthUser, tokens: AuthTokens) {
+function storeUserProfile(user: AuthUser) {
   if (typeof window === 'undefined') return
   localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
-  localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken)
-  localStorage.setItem(SESSION_KEY, tokens.sessionId)
 }
 
 function clearAuthData() {
   if (typeof window === 'undefined') return
   localStorage.removeItem(AUTH_USER_KEY)
-  localStorage.removeItem(ACCESS_TOKEN_KEY)
-  localStorage.removeItem(SESSION_KEY)
-  // Also clear legacy session data
+  // Clear any legacy token storage from previous versions
+  localStorage.removeItem('mindvibe_access_token')
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('mindvibe_session_id')
   sessionStorage.removeItem('mindvibe_session_user')
-}
-
-export function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(ACCESS_TOKEN_KEY)
 }
 
 export function useAuth(): UseAuthResult {
@@ -68,11 +55,38 @@ export function useAuth(): UseAuthResult {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Initialize user from storage on mount
+  // Initialize: check stored profile, then verify session with backend
   useEffect(() => {
     const storedUser = getStoredUser()
-    setUser(storedUser)
-    setLoading(false)
+    if (storedUser) {
+      setUser(storedUser)
+    }
+
+    // Verify session is still valid via httpOnly cookie
+    apiFetch('/api/auth/me')
+      .then(async (response) => {
+        if (response.ok) {
+          const data = await response.json()
+          const verifiedUser: AuthUser = {
+            id: data.user_id,
+            email: data.email,
+            name: storedUser?.name || data.email.split('@')[0],
+            sessionId: data.session_id,
+          }
+          storeUserProfile(verifiedUser)
+          setUser(verifiedUser)
+        } else {
+          // Session invalid - clear stored data
+          clearAuthData()
+          setUser(null)
+        }
+      })
+      .catch(() => {
+        // Network error - keep stored user for offline display
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   const signup = useCallback(async (email: string, password: string, name?: string): Promise<AuthUser> => {
@@ -93,9 +107,7 @@ export function useAuth(): UseAuthResult {
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
       }
 
-      const signupData = await signupResponse.json()
-
-      // After signup, automatically login to get tokens
+      // After signup, automatically login to get session cookies
       const loginResponse = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -109,6 +121,7 @@ export function useAuth(): UseAuthResult {
 
       const loginData = await loginResponse.json()
 
+      // Backend sets httpOnly cookies automatically - we only store profile info
       const authUser: AuthUser = {
         id: loginData.user_id,
         email: loginData.email,
@@ -116,13 +129,7 @@ export function useAuth(): UseAuthResult {
         sessionId: loginData.session_id,
       }
 
-      const tokens: AuthTokens = {
-        accessToken: loginData.access_token,
-        expiresIn: loginData.expires_in,
-        sessionId: loginData.session_id,
-      }
-
-      storeAuthData(authUser, tokens)
+      storeUserProfile(authUser)
       setUser(authUser)
 
       // Dispatch event for other components
@@ -161,20 +168,15 @@ export function useAuth(): UseAuthResult {
 
       const data = await response.json()
 
+      // Backend sets httpOnly cookies automatically - we only store profile info
       const authUser: AuthUser = {
         id: data.user_id,
         email: data.email,
-        name: data.email.split('@')[0], // Will be updated from profile
+        name: data.email.split('@')[0],
         sessionId: data.session_id,
       }
 
-      const tokens: AuthTokens = {
-        accessToken: data.access_token,
-        expiresIn: data.expires_in,
-        sessionId: data.session_id,
-      }
-
-      storeAuthData(authUser, tokens)
+      storeUserProfile(authUser)
       setUser(authUser)
 
       // Dispatch event for other components
@@ -195,18 +197,12 @@ export function useAuth(): UseAuthResult {
     setError(null)
 
     try {
-      const token = getAccessToken()
-      if (token) {
-        // Call backend logout API
-        await apiFetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }).catch(() => {
-          // Ignore logout API errors - still clear local data
-        })
-      }
+      // Call backend logout API - httpOnly cookies sent automatically
+      await apiFetch('/api/auth/logout', {
+        method: 'POST',
+      }).catch(() => {
+        // Ignore logout API errors - still clear local data
+      })
     } finally {
       clearAuthData()
       setUser(null)
@@ -219,6 +215,7 @@ export function useAuth(): UseAuthResult {
 
   const refreshSession = useCallback(async () => {
     try {
+      // httpOnly refresh_token cookie is sent automatically
       const response = await apiFetch('/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -227,13 +224,7 @@ export function useAuth(): UseAuthResult {
       if (!response.ok) {
         throw new Error('Session refresh failed')
       }
-
-      const data = await response.json()
-
-      // Update stored token
-      if (typeof window !== 'undefined' && data.access_token) {
-        localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token)
-      }
+      // Backend sets new httpOnly access_token cookie automatically
     } catch (err) {
       // Session refresh failed, user needs to re-login
       clearAuthData()
@@ -242,7 +233,7 @@ export function useAuth(): UseAuthResult {
     }
   }, [])
 
-  // Listen for storage changes (cross-tab sync)
+  // Listen for storage changes (cross-tab sync of user profile)
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       if (event.key === AUTH_USER_KEY) {

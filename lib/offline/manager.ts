@@ -200,6 +200,7 @@ class OfflineManager {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: operation.data ? JSON.stringify(operation.data) : undefined,
     })
 

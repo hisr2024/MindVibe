@@ -103,6 +103,7 @@ export function useEnhancedVoiceOutput(
       const response = await fetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           language,

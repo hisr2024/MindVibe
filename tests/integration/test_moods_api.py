@@ -2,6 +2,7 @@
 Integration tests for the Moods API endpoints.
 
 Tests the mood tracking functionality including creating moods.
+All tests use JWT Bearer tokens for authentication (X-Auth-UID was removed).
 """
 
 import pytest
@@ -9,6 +10,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import User
+from tests.conftest import auth_headers_for
 
 
 class TestMoodsEndpoints:
@@ -28,8 +30,9 @@ class TestMoodsEndpoints:
         )
         test_db.add(user)
         await test_db.commit()
+        await test_db.refresh(user)
 
-        # Create a mood
+        # Create a mood using JWT Bearer token
         response = await test_client.post(
             "/moods",
             json={
@@ -37,7 +40,7 @@ class TestMoodsEndpoints:
                 "tags": ["happy", "energetic"],
                 "note": "Great day today!",
             },
-            headers={"x-auth-uid": "test-mood-user"},
+            headers=auth_headers_for(user.id),
         )
 
         assert response.status_code == 200
@@ -61,9 +64,10 @@ class TestMoodsEndpoints:
         )
         test_db.add(user)
         await test_db.commit()
+        await test_db.refresh(user)
 
         response = await test_client.post(
-            "/moods", json={"score": -1}, headers={"x-auth-uid": "test-mood-user-2"}
+            "/moods", json={"score": -1}, headers=auth_headers_for(user.id)
         )
 
         assert response.status_code == 200
@@ -85,35 +89,33 @@ class TestMoodsEndpoints:
         )
         test_db.add(user)
         await test_db.commit()
+        await test_db.refresh(user)
 
         # Score too high
         response = await test_client.post(
-            "/moods", json={"score": 5}, headers={"x-auth-uid": "test-mood-user-3"}
+            "/moods", json={"score": 5}, headers=auth_headers_for(user.id)
         )
 
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.asyncio
-    async def test_create_mood_creates_user_if_not_exists(
-        self, test_client: AsyncClient
-    ):
-        """Test that a user is created automatically if they don't exist."""
+    async def test_create_mood_requires_auth(self, test_client: AsyncClient):
+        """Test that creating a mood without authentication returns 401."""
         response = await test_client.post(
             "/moods",
             json={"score": 1, "tags": ["calm"]},
-            headers={"x-auth-uid": "new-user-auto-created"},
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert data["score"] == 1
+        assert response.status_code == 401
 
     @pytest.mark.asyncio
     async def test_create_mood_without_auth_header(self, test_client: AsyncClient):
-        """Test creating a mood without authentication header uses dev-anon."""
+        """Test creating a mood without authentication header returns 401.
+
+        Previously this used dev-anon auto-creation which has been removed
+        for security (shared anonymous account across all unauthenticated requests).
+        """
         response = await test_client.post("/moods", json={"score": 0})
 
-        # Should succeed with dev-anon user
-        assert response.status_code == 200
-        data = response.json()
-        assert data["score"] == 0
+        # Should fail - authentication is now required
+        assert response.status_code == 401

@@ -1163,6 +1163,7 @@ export default function EliteVoicePage() {
         const res = await fetch('/api/voice/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             query,
             language: language || 'en',

@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
+import { apiFetch } from '@/lib/api'
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -44,17 +45,31 @@ export default function WisdomRoomsPage() {
   const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
   const [alert, setAlert] = useState<string | null>(null)
   const [socket, setSocket] = useState<WebSocket | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
-  const token = useMemo(() => {
-    if (typeof window === 'undefined') return ''
-    return localStorage.getItem('access_token') || localStorage.getItem('admin_token') || ''
+  // Fetch current user identity from backend (auth via httpOnly cookie)
+  useEffect(() => {
+    async function fetchCurrentUser() {
+      try {
+        const response = await apiFetch('/api/auth/me')
+        if (response.ok) {
+          const data = await response.json()
+          setCurrentUserId(data.id || data.user_id || '')
+          setIsAuthenticated(true)
+        }
+      } catch {
+        // User is not authenticated - that's fine
+      }
+    }
+    fetchCurrentUser()
   }, [])
 
   useEffect(() => {
     async function loadRooms() {
       try {
-        const response = await fetch(`${apiUrl}/api/rooms`)
+        const response = await apiFetch('/api/rooms')
         if (!response.ok) throw new Error('Unable to load rooms')
         const data = await response.json()
         setRooms(data.length ? data : defaultRooms)
@@ -73,9 +88,9 @@ export default function WisdomRoomsPage() {
   }, [])
 
   useEffect(() => {
-    if (!activeRoomId || !rooms.length) return
+    if (!activeRoomId || !rooms.length || !isAuthenticated) return
     const room = rooms.find(r => r.id === activeRoomId || r.slug === activeRoomId)
-    if (!room || !token) {
+    if (!room) {
       setStatus('disconnected')
       return
     }
@@ -84,7 +99,8 @@ export default function WisdomRoomsPage() {
     setStatus('connecting')
     setAlert(null)
 
-    const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/api/rooms/${roomId}/ws?token=${encodeURIComponent(token)}`
+    // Auth is handled via httpOnly cookies sent automatically during WebSocket upgrade
+    const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/api/rooms/${roomId}/ws`
     const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
@@ -125,7 +141,7 @@ export default function WisdomRoomsPage() {
       ws.close()
       setSocket(null)
     }
-  }, [activeRoomId, rooms, token])
+  }, [activeRoomId, rooms, isAuthenticated])
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -153,8 +169,8 @@ export default function WisdomRoomsPage() {
   }
 
   const participantLabel = (userId: string) => {
-    if (!token) return userId
-    return userId === extractUserId(token) ? 'You' : userId.slice(0, 8)
+    if (!currentUserId) return userId
+    return userId === currentUserId ? 'You' : userId.slice(0, 8)
   }
 
   return (
@@ -226,13 +242,13 @@ export default function WisdomRoomsPage() {
                 <p className="text-orange-100/70 text-sm">No messages yet. Say hello to open the conversation.</p>
               )}
               {activeMessages.map(msg => (
-                <div key={msg.id} className={`flex ${msg.user_id === extractUserId(token) ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`flex ${msg.user_id === currentUserId ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-sm shadow-lg ${
-                    msg.user_id === extractUserId(token)
+                    msg.user_id === currentUserId
                       ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-orange-400/80 text-white'
                       : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
                   }`}>
-                    <p className="font-semibold mb-1">{msg.user_id === extractUserId(token) ? 'You' : 'Participant'}</p>
+                    <p className="font-semibold mb-1">{msg.user_id === currentUserId ? 'You' : 'Participant'}</p>
                     <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                     <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p>
                   </div>
@@ -263,13 +279,13 @@ export default function WisdomRoomsPage() {
             value={message}
             onChange={e => setMessage(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
-            placeholder={token ? 'Share something helpful for the room...' : 'Sign in to start sharing'}
-            disabled={!token}
+            placeholder={isAuthenticated ? 'Share something helpful for the room...' : 'Sign in to start sharing'}
+            disabled={!isAuthenticated}
             className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50 disabled:opacity-70"
           />
           <button
             onClick={sendMessage}
-            disabled={!message.trim() || !token || status !== 'connected'}
+            disabled={!message.trim() || !isAuthenticated || status !== 'connected'}
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20 w-full sm:w-auto"
           >
             {status === 'connected' ? 'Share warmly' : 'Connecting...'}
@@ -280,13 +296,3 @@ export default function WisdomRoomsPage() {
   )
 }
 
-function extractUserId(token: string): string {
-  if (!token) return ''
-  try {
-    const [, payload] = token.split('.')
-    const decoded = JSON.parse(atob(payload))
-    return decoded.sub || ''
-  } catch {
-    return ''
-  }
-}

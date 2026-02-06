@@ -53,7 +53,7 @@ from backend.models import (
     UserJourneyStepState,
     GitaVerse,
 )
-from backend.models.base import UserJourneyStatus
+from backend.models import UserJourneyStatus
 
 logger = logging.getLogger(__name__)
 

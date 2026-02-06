@@ -4,8 +4,7 @@
  * Handles Text-to-Speech API calls, audio caching, and playback management.
  * Supports 17 languages with multiple voice personas.
  *
- * Quantum Coherence: Voice transforms written wisdom into auditory vibrations,
- * creating multi-sensory resonance that deepens understanding.
+ * Authentication: Uses httpOnly cookies (sent automatically via apiFetch).
  */
 
 import { apiFetch } from '@/lib/api'
@@ -78,8 +77,6 @@ class VoiceService {
 
   /**
    * Generate cache key for audio using hash to prevent collisions.
-   * Fixed: Previously used substring which could cause cache collisions
-   * for similar texts. Now uses proper hashing.
    */
   private getCacheKey(options: SynthesizeOptions): string {
     const voiceType = options.voiceType || 'friendly'
@@ -118,15 +115,10 @@ class VoiceService {
   }
 
   /**
-   * Synthesize text to speech with ULTRA-NATURAL voice settings.
-   *
-   * Uses voice type-specific defaults for speed and pitch that are
-   * aligned with the backend TTS service for consistent natural delivery.
+   * Synthesize text to speech with natural voice settings.
+   * Auth is handled automatically via httpOnly cookies.
    */
-  async synthesize(
-    options: SynthesizeOptions,
-    userId: string
-  ): Promise<Blob> {
+  async synthesize(options: SynthesizeOptions): Promise<Blob> {
     const cacheKey = this.getCacheKey(options)
 
     // Check cache first
@@ -140,7 +132,7 @@ class VoiceService {
     const voiceType = options.voiceType || 'friendly'
     const defaults = VOICE_TYPE_DEFAULTS[voiceType]
 
-    // Call API with ULTRA-NATURAL voice settings aligned with backend
+    // Call API - httpOnly cookies sent automatically via credentials: 'include'
     const response = await apiFetch(
       '/api/voice/synthesize',
       {
@@ -153,8 +145,7 @@ class VoiceService {
           speed: options.speed !== undefined ? options.speed : defaults.speed,
           pitch: options.pitch !== undefined ? options.pitch : defaults.pitch
         })
-      },
-      userId
+      }
     )
 
     if (!response.ok) {
@@ -186,13 +177,13 @@ class VoiceService {
   }
 
   /**
-   * Get audio for a specific verse
+   * Get audio for a specific verse.
+   * Auth is handled automatically via httpOnly cookies.
    */
   async getVerseAudio(
     verseId: string,
     language: string = 'en',
-    includeCommentary: boolean = false,
-    userId: string
+    includeCommentary: boolean = false
   ): Promise<Blob> {
     const cacheKey = `verse:${verseId}:${language}:${includeCommentary}`
 
@@ -207,8 +198,7 @@ class VoiceService {
       `/api/voice/verse/${verseId}?language=${language}&include_commentary=${includeCommentary}`,
       {
         method: 'POST'
-      },
-      userId
+      }
     )
 
     if (!response.ok) {
@@ -222,66 +212,48 @@ class VoiceService {
   }
 
   /**
-   * Synthesize KIAAN message with ULTRA-NATURAL voice.
-   *
-   * Uses 'friendly' voice type with optimal settings for:
-   * - Human-like conversational delivery
-   * - Natural pacing that feels like talking to a wise friend
-   * - Subtle warmth without being artificially upbeat
+   * Synthesize KIAAN message with natural voice.
    */
   async synthesizeKiaanMessage(
     message: string,
-    language: string = 'en',
-    userId: string
+    language: string = 'en'
   ): Promise<Blob> {
     // Use voice type defaults for consistent natural speech
     const defaults = VOICE_TYPE_DEFAULTS.friendly
-    return this.synthesize(
-      {
-        text: message,
-        language,
-        voiceType: 'friendly',
-        speed: defaults.speed,  // 0.97 - Natural conversational pace
-        pitch: defaults.pitch   // 0.3 - Subtle warmth
-      },
-      userId
-    )
+    return this.synthesize({
+      text: message,
+      language,
+      voiceType: 'friendly',
+      speed: defaults.speed,  // 0.97 - Natural conversational pace
+      pitch: defaults.pitch   // 0.3 - Subtle warmth
+    })
   }
 
   /**
-   * Synthesize meditation guidance with ULTRA-NATURAL calming voice.
-   *
-   * Uses 'calm' voice type with optimal settings for:
-   * - Soothing delivery without robotic slowness
-   * - Grounded, peaceful tone that promotes relaxation
-   * - Natural breathing rhythm pauses
+   * Synthesize meditation guidance with calming voice.
    */
   async synthesizeMeditation(
     script: string,
-    language: string = 'en',
-    userId: string
+    language: string = 'en'
   ): Promise<Blob> {
     // Use voice type defaults for consistent natural speech
     const defaults = VOICE_TYPE_DEFAULTS.calm
-    return this.synthesize(
-      {
-        text: script,
-        language,
-        voiceType: 'calm',
-        speed: defaults.speed,  // 0.92 - Calm but natural pace
-        pitch: defaults.pitch   // -0.8 - Grounding warmth
-      },
-      userId
-    )
+    return this.synthesize({
+      text: script,
+      language,
+      voiceType: 'calm',
+      speed: defaults.speed,  // 0.92 - Calm but natural pace
+      pitch: defaults.pitch   // -0.8 - Grounding warmth
+    })
   }
 
   /**
-   * Batch download verse audios
+   * Batch download verse audios.
+   * Auth is handled automatically via httpOnly cookies.
    */
   async batchDownload(
     verseIds: string[],
-    language: string = 'en',
-    userId: string
+    language: string = 'en'
   ): Promise<BatchDownloadResult> {
     if (verseIds.length > 20) {
       throw new Error('Maximum 20 verses per batch')
@@ -296,8 +268,7 @@ class VoiceService {
           verse_ids: verseIds,
           language
         })
-      },
-      userId
+      }
     )
 
     if (!response.ok) {
@@ -308,10 +279,11 @@ class VoiceService {
   }
 
   /**
-   * Get user voice settings
+   * Get user voice settings.
+   * Auth is handled automatically via httpOnly cookies.
    */
-  async getSettings(userId: string): Promise<VoiceSettings> {
-    const response = await apiFetch('/api/voice/settings', {}, userId)
+  async getSettings(): Promise<VoiceSettings> {
+    const response = await apiFetch('/api/voice/settings')
 
     if (!response.ok) {
       throw new Error(`Failed to get voice settings: ${response.statusText}`)
@@ -322,20 +294,17 @@ class VoiceService {
   }
 
   /**
-   * Update user voice settings
+   * Update user voice settings.
+   * Auth is handled automatically via httpOnly cookies.
    */
-  async updateSettings(
-    settings: VoiceSettings,
-    userId: string
-  ): Promise<void> {
+  async updateSettings(settings: VoiceSettings): Promise<void> {
     const response = await apiFetch(
       '/api/voice/settings',
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings)
-      },
-      userId
+      }
     )
 
     if (!response.ok) {

@@ -26,7 +26,6 @@ interface Verse {
 }
 
 interface VoiceVerseReaderProps {
-  userId: string
   verse: Verse
   language?: string
   onFavorite?: (verseId: string) => void
@@ -36,7 +35,6 @@ interface VoiceVerseReaderProps {
 }
 
 export function VoiceVerseReader({
-  userId,
   verse,
   language = 'en',
   onFavorite,
@@ -141,7 +139,6 @@ export function VoiceVerseReader({
         {/* Voice Controls */}
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <VoiceButton
-            userId={userId}
             text={verse.translation}
             language={selectedLanguage}
             voiceType="wisdom"
@@ -163,7 +160,6 @@ export function VoiceVerseReader({
 
           {includeCommentary && verse.commentary && (
             <VoiceButton
-              userId={userId}
               text={`${verse.translation}... ${verse.commentary}`}
               language={selectedLanguage}
               voiceType="wisdom"

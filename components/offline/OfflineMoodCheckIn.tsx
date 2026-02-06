@@ -44,14 +44,12 @@ interface MoodData {
 }
 
 interface OfflineMoodCheckInProps {
-  userId: string
   onMoodSaved?: (moodId: string) => void
   showSyncStatus?: boolean
   compact?: boolean
 }
 
 export function OfflineMoodCheckIn({
-  userId,
   onMoodSaved,
   showSyncStatus = true,
   compact = false
@@ -124,8 +122,7 @@ export function OfflineMoodCheckIn({
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(moodData)
-            },
-            userId
+            }
           )
 
           const data = await response.json()

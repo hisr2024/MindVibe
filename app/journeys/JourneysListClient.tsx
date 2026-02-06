@@ -18,18 +18,6 @@ import type {
 } from '@/types/journey.types'
 import { getStatusLabel, getStatusColor } from '@/types/journey.types'
 
-/**
- * Check if user has any authentication tokens stored.
- * This is a quick client-side check - actual auth verification happens on API call.
- */
-function hasAuthToken(): boolean {
-  if (typeof window === 'undefined') return false
-  const token = localStorage.getItem('mindvibe_access_token') ||
-    localStorage.getItem('access_token') ||
-    localStorage.getItem('mindvibe_auth_user')
-  return !!token
-}
-
 // Animation variants
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -225,14 +213,6 @@ export default function JourneysListClient() {
 
   // Load journeys
   const loadJourneys = useCallback(async () => {
-    // Quick check for auth token before making API call
-    if (!hasAuthToken()) {
-      setLoading(false)
-      setIsAuthError(true)
-      setError('Please sign in to view your journeys.')
-      return
-    }
-
     try {
       setLoading(true)
       setError(null)

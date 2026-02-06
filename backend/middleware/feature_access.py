@@ -119,52 +119,39 @@ async def is_developer(db: AsyncSession, user_id: str) -> bool:
 async def get_current_user_id(request: Request) -> str:
     """Extract user ID from the request.
 
-    Supports multiple authentication methods:
+    Supports authentication methods:
     1. request.state.user_id - Set by auth middleware
     2. Authorization: Bearer <JWT> header
-    3. X-Auth-UID header - Fallback for frontend compatibility
+    3. access_token httpOnly cookie
 
     Returns:
         str: The user ID (UUID format or legacy integer as string).
     """
     # Check if user_id is set in request state (from auth middleware)
-    # Convert to string to ensure consistent type (supports both UUID and legacy int IDs)
     if hasattr(request.state, "user_id"):
-        logger.debug(f"[auth] Found user_id in request.state: {request.state.user_id}")
         return str(request.state.user_id)
 
     # Check authorization header (primary method)
     auth_header = request.headers.get("Authorization")
+    token = None
+
     if auth_header and auth_header.startswith("Bearer "):
-        # Import here to avoid circular imports
+        token = auth_header.split(" ", 1)[1].strip()
+    else:
+        # Fall back to httpOnly cookie
+        token = request.cookies.get("access_token")
+
+    if token:
         from backend.security.jwt import decode_access_token
         try:
-            token = auth_header.split(" ", 1)[1].strip()
             payload = decode_access_token(token)
             user_id = payload.get("sub")
             if user_id:
-                logger.debug(f"[auth] Authenticated via Bearer token: {user_id}")
                 return str(user_id)
         except Exception as e:
-            logger.warning(f"[auth] Bearer token validation failed: {e}")
-            # Fall through to try X-Auth-UID
+            logger.warning(f"[auth] Token validation failed: {e}")
 
-    # Check X-Auth-UID header (fallback for frontend compatibility)
-    x_auth_uid = request.headers.get("X-Auth-UID")
-    if x_auth_uid:
-        user_id = x_auth_uid.strip()
-        if user_id and user_id not in ("undefined", "null", ""):
-            logger.debug(f"[auth] Authenticated via X-Auth-UID header: {user_id}")
-            return str(user_id)
-
-    # Log the authentication failure for debugging
-    logger.warning(
-        f"[auth] Authentication failed - "
-        f"Authorization header: {'present' if auth_header else 'missing'}, "
-        f"X-Auth-UID: {'present' if x_auth_uid else 'missing'}"
-    )
-
-    # No valid authentication found - raise 401 Unauthorized
+    # No valid authentication found
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Authentication required. Please provide a valid Bearer token.",

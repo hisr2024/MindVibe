@@ -79,6 +79,7 @@ export default function CookieBanner({
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...prefs,
           anonymous_id: anonymousId,

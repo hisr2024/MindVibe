@@ -15,11 +15,11 @@ function getCsrfToken(): string | null {
  * The proxy rewrite in vercel.json routes /api/* to the backend
  *
  * Security features:
- * - Authentication: Uses httpOnly cookies (XSS-protected) as primary auth method
+ * - Authentication: Uses httpOnly cookies exclusively (XSS-protected)
  * - CSRF Protection: Automatically includes X-CSRF-Token header for state-changing requests
- * - Falls back to localStorage tokens for backward compatibility during migration
+ * - Credentials: Always included so httpOnly cookies are sent automatically
  */
-export async function apiFetch(path: string, options: RequestInit = {}, uid?: string) {
+export async function apiFetch(path: string, options: RequestInit = {}) {
   // Use relative path to go through Vercel proxy (avoids CORS issues)
   // The vercel.json rewrites /api/* to the backend server
   // Only use absolute URL for local development without Vercel
@@ -36,31 +36,6 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
   }
 
   const headers = new Headers(options.headers || {})
-
-  // DEPRECATED: localStorage token storage - migrate to httpOnly cookies
-  // Security Risk: Tokens in localStorage are vulnerable to XSS attacks.
-  // httpOnly cookies are sent automatically with credentials: 'include'
-  // This fallback will be removed in a future version.
-  if (typeof window !== 'undefined') {
-    const accessToken = localStorage.getItem('mindvibe_access_token')
-      || localStorage.getItem('access_token')
-    if (accessToken) {
-      headers.set('Authorization', `Bearer ${accessToken}`)
-      // Log deprecation warning in development only
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(
-          '[SECURITY] Using localStorage token (DEPRECATED). ' +
-          'Migrate to httpOnly cookies for XSS protection. ' +
-          'See: https://owasp.org/www-community/HttpOnly'
-        )
-      }
-    }
-  }
-
-  // Also set X-Auth-UID for flexible authentication fallback
-  if (uid) {
-    headers.set('X-Auth-UID', uid)
-  }
 
   // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
   const method = (options.method || 'GET').toUpperCase()
@@ -81,24 +56,17 @@ export async function apiFetch(path: string, options: RequestInit = {}, uid?: st
 }
 
 /**
- * Get the current access token if available
+ * Check if the user is authenticated by calling the backend.
  *
- * @deprecated This function uses localStorage which is vulnerable to XSS.
- * Prefer using httpOnly cookies for authentication.
- * The primary auth mechanism is httpOnly cookies sent with credentials: 'include'.
+ * Since auth tokens are stored in httpOnly cookies (not accessible to JS),
+ * the only reliable way to check auth status is to call the /api/auth/me endpoint.
+ * For synchronous checks, use the user state from the useAuth hook instead.
  */
-export function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token')
-}
-
-/**
- * Check if the user is authenticated
- *
- * Note: This only checks localStorage token presence. The primary auth mechanism
- * uses httpOnly cookies which cannot be checked from JavaScript (by design).
- * For accurate auth status, make an API call to verify session.
- */
-export function isAuthenticated(): boolean {
-  return !!getAccessToken()
+export async function checkAuthenticated(): Promise<boolean> {
+  try {
+    const response = await apiFetch('/api/auth/me')
+    return response.ok
+  } catch {
+    return false
+  }
 }

@@ -112,7 +112,6 @@ const getSpeechRecognition = (): SpeechRecognition | null => {
 }
 
 export interface UseDivineVoiceConversationOptions {
-  userId: string
   language?: string
   autoPlayAudio?: boolean
   onEmotionalStateChange?: (state: string, intensity: number) => void
@@ -120,9 +119,8 @@ export interface UseDivineVoiceConversationOptions {
   onError?: (error: Error) => void
 }
 
-export function useDivineVoiceConversation(options: UseDivineVoiceConversationOptions) {
+export function useDivineVoiceConversation(options: UseDivineVoiceConversationOptions = {}) {
   const {
-    userId,
     language = 'en',
     autoPlayAudio = true,
     onEmotionalStateChange,
@@ -202,8 +200,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
             language,
             voice_preference: 'calm',
           }),
-        },
-        userId
+        }
       )
 
       if (!response.ok) {
@@ -253,7 +250,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
     } finally {
       setIsProcessing(false)
     }
-  }, [userId, language, queueAudio, onPhaseChange, onError])
+  }, [language, queueAudio, onPhaseChange, onError])
 
   /**
    * Send a message in the conversation
@@ -298,8 +295,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
               include_breathing: includeBreathing,
               include_practice: includePractice,
             }),
-          },
-          userId
+          }
         )
 
         if (!response.ok) {
@@ -355,7 +351,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
         setIsProcessing(false)
       }
     },
-    [conversationState.sessionId, userId, language, queueAudio, onEmotionalStateChange, onPhaseChange, onError]
+    [conversationState.sessionId, language, queueAudio, onEmotionalStateChange, onPhaseChange, onError]
   )
 
   /**
@@ -373,8 +369,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
         `/api/voice/conversation/end?session_id=${conversationState.sessionId}`,
         {
           method: 'POST',
-        },
-        userId
+        }
       )
 
       if (!response.ok) {
@@ -424,7 +419,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
     } finally {
       setIsProcessing(false)
     }
-  }, [conversationState.sessionId, userId, queueAudio, onPhaseChange, onError])
+  }, [conversationState.sessionId, queueAudio, onPhaseChange, onError])
 
   /**
    * Get a guided breathing moment
@@ -440,8 +435,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
           }`,
           {
             method: 'POST',
-          },
-          userId
+          }
         )
 
         if (!response.ok) {
@@ -467,7 +461,7 @@ export function useDivineVoiceConversation(options: UseDivineVoiceConversationOp
         setIsProcessing(false)
       }
     },
-    [conversationState.sessionId, userId, queueAudio, onError]
+    [conversationState.sessionId, queueAudio, onError]
   )
 
   /**

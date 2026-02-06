@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { apiFetch } from '@/lib/api'
 
 export default function AdminLogin() {
   const router = useRouter()
@@ -18,7 +19,7 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/admin/auth/login', {
+      const response = await apiFetch('/api/admin/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -40,10 +41,7 @@ export default function AdminLogin() {
         return
       }
 
-      // Store token (in production, use secure storage)
-      localStorage.setItem('admin_token', data.access_token)
-      localStorage.setItem('admin_session_id', data.session_id)
-      
+      // Backend sets httpOnly cookies automatically - no localStorage token storage
       router.push('/admin')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
