@@ -65,7 +65,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
   const fetchPatterns = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analytics/advanced/pattern-analysis')
+      const response = await fetch('/api/analytics/advanced/pattern-analysis', { credentials: 'include' })
 
       if (!response.ok) {
         throw new Error('Failed to fetch pattern analysis')

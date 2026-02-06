@@ -74,6 +74,7 @@ export function CircleList({
       const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
 
       const response = await fetch(`/api/community/circles?${params}`, {
+        credentials: 'include',
         signal: controller.signal,
       })
       clearTimeout(timeoutId)

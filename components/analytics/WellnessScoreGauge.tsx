@@ -59,7 +59,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
   const fetchWellnessScore = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analytics/advanced/wellness-score')
+      const response = await fetch('/api/analytics/advanced/wellness-score', { credentials: 'include' })
 
       if (!response.ok) {
         throw new Error('Failed to fetch wellness score')

@@ -47,7 +47,7 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
   const fetchForecast = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/analytics/advanced/mood-predictions?forecast_days=${forecastDays}`)
+      const response = await fetch(`/api/analytics/advanced/mood-predictions?forecast_days=${forecastDays}`, { credentials: 'include' })
 
       if (!response.ok) {
         throw new Error('Failed to fetch mood forecast')

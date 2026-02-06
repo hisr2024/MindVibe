@@ -339,9 +339,9 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
         const response = await apiFetch('/api/kiaan/divine-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             message: text.trim(),
-            user_id: userId,
             session_id: currentSessionId,
           }),
           signal: controller.signal,
@@ -462,9 +462,10 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
 
             try {
               // Call transcription API
-              const response = await apiFetch('/api/voice/transcribe', {
+              const response = await apiFetch('/api/kiaan/transcribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ audio: base64Audio }),
               })
 
@@ -526,6 +527,7 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
         const response = await apiFetch('/api/voice/divine/synthesize', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             text,
             style: 'friendly',

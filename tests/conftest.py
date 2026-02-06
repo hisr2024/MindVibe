@@ -250,6 +250,22 @@ def test_auth_uid():
     return "test-user-123"
 
 
+def create_test_token(user_id: str) -> str:
+    """Create a JWT token for testing.
+
+    Uses the same signing mechanism as the backend so that
+    get_current_user() accepts the token during integration tests.
+    """
+    from backend.security.jwt import create_access_token
+    return create_access_token(user_id=str(user_id), session_id="test-session")
+
+
+def auth_headers_for(user_id: str) -> dict:
+    """Return Authorization headers with a valid JWT for the given user ID."""
+    token = create_test_token(str(user_id))
+    return {"Authorization": f"Bearer {token}"}
+
+
 @pytest.fixture
 def mock_request():
     """Create a mock Starlette Request for unit testing rate-limited endpoints.

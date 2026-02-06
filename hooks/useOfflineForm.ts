@@ -21,7 +21,6 @@ import { apiFetch } from '@/lib/api'
 export type FormStatus = 'idle' | 'saving' | 'success' | 'error' | 'queued'
 
 export interface OfflineFormOptions {
-  userId: string
   onSuccess?: (data: any) => void
   onError?: (error: Error) => void
   resetOnSuccess?: boolean
@@ -35,8 +34,8 @@ export interface OfflineFormSubmitOptions {
   entityId?: string
 }
 
-export function useOfflineForm<T = any>(options: OfflineFormOptions) {
-  const { userId, onSuccess, onError, resetOnSuccess = true } = options
+export function useOfflineForm<T = any>(options: OfflineFormOptions = {}) {
+  const { onSuccess, onError, resetOnSuccess = true } = options
 
   const [status, setStatus] = useState<FormStatus>('idle')
   const [error, setError] = useState<Error | null>(null)
@@ -61,8 +60,7 @@ export function useOfflineForm<T = any>(options: OfflineFormOptions) {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
-              },
-              userId
+              }
             )
 
             if (!response.ok) {
@@ -101,7 +99,7 @@ export function useOfflineForm<T = any>(options: OfflineFormOptions) {
         return { success: false, error: errorObj }
       }
     },
-    [isOnline, userId, onSuccess, onError]
+    [isOnline, onSuccess, onError]
   )
 
   const queueForOffline = async (submitOptions: OfflineFormSubmitOptions) => {

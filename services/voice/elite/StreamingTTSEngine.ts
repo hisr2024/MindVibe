@@ -341,6 +341,7 @@ export class StreamingTTSEngine {
     const response = await apiFetch('/api/voice/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         text,
         language: this.config.language,

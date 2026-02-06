@@ -145,6 +145,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
         // Best effort cleanup - don't await
         apiFetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
           method: 'POST',
+          credentials: 'include',
         }).catch(() => {})
       }
     }
@@ -158,6 +159,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await apiFetch('/api/voice-learning/session/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           initial_mood: initialMood,
         }),
@@ -196,6 +198,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     try {
       await apiFetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
         method: 'POST',
+        credentials: 'include',
       })
 
       sessionIdRef.current = null
@@ -222,6 +225,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await apiFetch('/api/voice-learning/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           context,
@@ -275,6 +279,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await apiFetch('/api/voice-learning/process-input', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           session_id: sessionIdRef.current,
@@ -318,6 +323,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       await apiFetch('/api/voice-learning/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           rating,
           response_hash: responseHash,
@@ -343,6 +349,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       await apiFetch('/api/voice-learning/playback-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           event_type: eventType,
           content_hash: contentHash,
@@ -383,6 +390,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await apiFetch('/api/voice-learning/memory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           memory_type: type,
           key,

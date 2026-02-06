@@ -3,16 +3,13 @@
  *
  * React hook for managing audio playback with voice synthesis.
  * Handles play/pause, progress tracking, and audio lifecycle.
- *
- * Quantum Coherence: Audio playback creates temporal resonance,
- * synchronizing user attention with wisdom vibrations.
+ * Auth is handled automatically via httpOnly cookies.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import voiceService, { type SynthesizeOptions } from '@/services/voiceService'
 
 interface UseVoiceOptions {
-  userId: string
   autoPlay?: boolean
   onComplete?: () => void
   onError?: (error: Error) => void
@@ -35,8 +32,8 @@ interface UseVoiceReturn {
   loadFromUrl: (url: string) => Promise<void>
 }
 
-export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
-  const { userId, autoPlay = false, onComplete, onError } = options
+export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
+  const { autoPlay = false, onComplete, onError } = options
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -144,8 +141,8 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
       setError(null)
 
       try {
-        // Get audio blob
-        const blob = await voiceService.synthesize(synthesizeOptions, userId)
+        // Get audio blob - auth via httpOnly cookies
+        const blob = await voiceService.synthesize(synthesizeOptions)
 
         // Create object URL
         const url = voiceService.createAudioUrl(blob)
@@ -173,7 +170,7 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
         if (onError) onError(error)
       }
     },
-    [userId, autoPlay, onError]
+    [autoPlay, onError]
   )
 
   // Load audio from URL
@@ -225,12 +222,13 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
 /**
  * useVerseAudio Hook
  *
- * Specialized hook for playing verse audio
+ * Specialized hook for playing verse audio.
+ * Auth is handled automatically via httpOnly cookies.
  */
 export function useVerseAudio(
   verseId: string | null,
   language: string = 'en',
-  options: Omit<UseVoiceOptions, 'userId'> & { userId: string }
+  options: UseVoiceOptions = {}
 ) {
   const voiceHook = useVoice(options)
   const [isLoadingVerse, setIsLoadingVerse] = useState(false)
@@ -245,8 +243,7 @@ export function useVerseAudio(
         const blob = await voiceService.getVerseAudio(
           verseId,
           language,
-          includeCommentary,
-          options.userId
+          includeCommentary
         )
 
         const url = voiceService.createAudioUrl(blob)
@@ -263,7 +260,7 @@ export function useVerseAudio(
         }
       }
     },
-    [verseId, language, options.userId, voiceHook, options.onError]
+    [verseId, language, voiceHook, options.onError]
   )
 
   return {

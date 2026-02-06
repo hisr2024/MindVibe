@@ -870,20 +870,15 @@ async def debug_my_journeys(
     db: AsyncSession = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
-    """Debug endpoint to see all journeys for the current user."""
-    from sqlalchemy import select, text
-    from backend.models import UserJourney
+    """Debug endpoint - disabled in production to prevent data exposure."""
+    import os
+    from fastapi import HTTPException as _HTTPException
+    if os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod"):
+        raise _HTTPException(status_code=404, detail="Not found")
+
+    from sqlalchemy import text
 
     user_id = current_user
-
-    # Raw count without deleted_at filter
-    raw_count_result = await db.execute(
-        text("SELECT COUNT(*) FROM user_journeys WHERE user_id = :user_id"),
-        {"user_id": user_id}
-    )
-    raw_count = raw_count_result.scalar() or 0
-
-    # Count with deleted_at filter
     active_count_result = await db.execute(
         text("""
             SELECT COUNT(*) FROM user_journeys
@@ -894,37 +889,7 @@ async def debug_my_journeys(
         {"user_id": user_id}
     )
     active_count = active_count_result.scalar() or 0
-
-    # Get all journeys
-    journeys_result = await db.execute(
-        text("""
-            SELECT id, journey_template_id, status, current_day_index,
-                   created_at, deleted_at
-            FROM user_journeys
-            WHERE user_id = :user_id
-            ORDER BY created_at DESC
-            LIMIT 20
-        """),
-        {"user_id": user_id}
-    )
-    journeys = [
-        {
-            "id": row[0],
-            "template_id": row[1],
-            "status": row[2],
-            "current_day": row[3],
-            "created_at": str(row[4]) if row[4] else None,
-            "deleted_at": str(row[5]) if row[5] else None,
-        }
-        for row in journeys_result.fetchall()
-    ]
-
-    return {
-        "user_id": user_id,
-        "raw_total_count": raw_count,
-        "active_count": active_count,
-        "journeys": journeys,
-    }
+    return {"user_id": user_id, "active_count": active_count}
 
 
 @router.delete("/debug/clear-all-journeys")
@@ -932,12 +897,15 @@ async def debug_clear_all_journeys(
     db: AsyncSession = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
-    """Debug endpoint to soft-delete all journeys for the current user."""
+    """Debug endpoint - disabled in production to prevent mass deletion."""
+    import os
+    from fastapi import HTTPException as _HTTPException
+    if os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod"):
+        raise _HTTPException(status_code=404, detail="Not found")
+
     from sqlalchemy import text
 
     user_id = current_user
-
-    # Soft delete all journeys
     result = await db.execute(
         text("""
             UPDATE user_journeys
@@ -947,12 +915,7 @@ async def debug_clear_all_journeys(
         {"user_id": user_id}
     )
     await db.commit()
-
-    return {
-        "message": "All journeys cleared",
-        "user_id": user_id,
-        "journeys_cleared": result.rowcount,
-    }
+    return {"message": "All journeys cleared", "journeys_cleared": result.rowcount}
 
 
 @router.post("/fix-stuck-journeys")

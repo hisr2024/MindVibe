@@ -141,13 +141,11 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
 
   // Fetch functions
   const refreshOverview = useCallback(async () => {
-    if (!userId) return
-
     setLoading((prev) => ({ ...prev, overview: true }))
     setErrors((prev) => ({ ...prev, overview: null }))
 
     try {
-      const data = await getAnalyticsOverview(userId, filters.dateRange)
+      const data = await getAnalyticsOverview(filters.dateRange)
       setOverview(data)
     } catch (error) {
       setErrors((prev) => ({
@@ -157,16 +155,14 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     } finally {
       setLoading((prev) => ({ ...prev, overview: false }))
     }
-  }, [userId, filters.dateRange])
+  }, [filters.dateRange])
 
   const refreshMoodTrends = useCallback(async () => {
-    if (!userId) return
-
     setLoading((prev) => ({ ...prev, moodTrends: true }))
     setErrors((prev) => ({ ...prev, moodTrends: null }))
 
     try {
-      const data = await getMoodTrends(userId, filters.period)
+      const data = await getMoodTrends(filters.period)
       setMoodTrends(data)
     } catch (error) {
       setErrors((prev) => ({
@@ -176,16 +172,14 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     } finally {
       setLoading((prev) => ({ ...prev, moodTrends: false }))
     }
-  }, [userId, filters.period])
+  }, [filters.period])
 
   const refreshJournalStats = useCallback(async () => {
-    if (!userId) return
-
     setLoading((prev) => ({ ...prev, journalStats: true }))
     setErrors((prev) => ({ ...prev, journalStats: null }))
 
     try {
-      const data = await getJournalStatistics(userId)
+      const data = await getJournalStatistics()
       setJournalStats(data)
     } catch (error) {
       setErrors((prev) => ({
@@ -195,16 +189,14 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     } finally {
       setLoading((prev) => ({ ...prev, journalStats: false }))
     }
-  }, [userId])
+  }, [])
 
   const refreshKIAANInsights = useCallback(async () => {
-    if (!userId) return
-
     setLoading((prev) => ({ ...prev, kiaanInsights: true }))
     setErrors((prev) => ({ ...prev, kiaanInsights: null }))
 
     try {
-      const data = await getKIAANInsights(userId)
+      const data = await getKIAANInsights()
       setKIAANInsights(data)
     } catch (error) {
       setErrors((prev) => ({
@@ -214,16 +206,14 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     } finally {
       setLoading((prev) => ({ ...prev, kiaanInsights: false }))
     }
-  }, [userId])
+  }, [])
 
   const refreshWeeklySummary = useCallback(async () => {
-    if (!userId) return
-
     setLoading((prev) => ({ ...prev, weeklySummary: true }))
     setErrors((prev) => ({ ...prev, weeklySummary: null }))
 
     try {
-      const data = await getWeeklySummary(userId)
+      const data = await getWeeklySummary()
       setWeeklySummary(data)
     } catch (error) {
       setErrors((prev) => ({
@@ -233,16 +223,14 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     } finally {
       setLoading((prev) => ({ ...prev, weeklySummary: false }))
     }
-  }, [userId])
+  }, [])
 
   const refreshAchievements = useCallback(async () => {
-    if (!userId) return
-
     setLoading((prev) => ({ ...prev, achievements: true }))
     setErrors((prev) => ({ ...prev, achievements: null }))
 
     try {
-      const data = await getAchievements(userId)
+      const data = await getAchievements()
       setAchievements(data)
     } catch (error) {
       setErrors((prev) => ({
@@ -252,7 +240,7 @@ export function useAnalytics(userId?: string): UseAnalyticsResult {
     } finally {
       setLoading((prev) => ({ ...prev, achievements: false }))
     }
-  }, [userId])
+  }, [])
 
   // Refresh all data
   const refresh = useCallback(async () => {

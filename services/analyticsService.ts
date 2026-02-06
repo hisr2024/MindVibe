@@ -61,7 +61,6 @@ function setCached<T>(key: string, data: T): void {
  * Get analytics overview metrics
  */
 export async function getAnalyticsOverview(
-  userId: string,
   dateRange?: DateRange
 ): Promise<OverviewMetrics> {
   const cacheKey = `overview_${dateRange?.start || 'all'}_${dateRange?.end || 'all'}`
@@ -75,8 +74,7 @@ export async function getAnalyticsOverview(
 
     const response = await apiFetch(
       `/api/analytics/overview?${params.toString()}`,
-      { method: 'GET' },
-      userId
+      { method: 'GET' }
     )
 
     if (response.ok) {
@@ -98,7 +96,6 @@ export async function getAnalyticsOverview(
  * Get mood trends data
  */
 export async function getMoodTrends(
-  userId: string,
   period: AnalyticsPeriod = 'weekly'
 ): Promise<MoodTrendData> {
   const cacheKey = `mood_trends_${period}`
@@ -108,8 +105,7 @@ export async function getMoodTrends(
   try {
     const response = await apiFetch(
       `/api/analytics/mood-trends?period=${period}`,
-      { method: 'GET' },
-      userId
+      { method: 'GET' }
     )
 
     if (response.ok) {
@@ -130,9 +126,7 @@ export async function getMoodTrends(
 /**
  * Get journal statistics
  */
-export async function getJournalStatistics(
-  userId: string
-): Promise<JournalStatistics> {
+export async function getJournalStatistics(): Promise<JournalStatistics> {
   const cacheKey = 'journal_stats'
   const cached = getCached<JournalStatistics>(cacheKey)
   if (cached) return cached
@@ -140,8 +134,7 @@ export async function getJournalStatistics(
   try {
     const response = await apiFetch(
       '/api/analytics/journal-stats',
-      { method: 'GET' },
-      userId
+      { method: 'GET' }
     )
 
     if (response.ok) {
@@ -162,9 +155,7 @@ export async function getJournalStatistics(
 /**
  * Get KIAAN insights data
  */
-export async function getKIAANInsights(
-  userId: string
-): Promise<KIAANInsightData> {
+export async function getKIAANInsights(): Promise<KIAANInsightData> {
   const cacheKey = 'kiaan_insights'
   const cached = getCached<KIAANInsightData>(cacheKey)
   if (cached) return cached
@@ -172,8 +163,7 @@ export async function getKIAANInsights(
   try {
     const response = await apiFetch(
       '/api/analytics/kiaan-insights',
-      { method: 'GET' },
-      userId
+      { method: 'GET' }
     )
 
     if (response.ok) {
@@ -195,7 +185,6 @@ export async function getKIAANInsights(
  * Get weekly summary
  */
 export async function getWeeklySummary(
-  userId: string,
   weekStart?: string
 ): Promise<WeeklySummaryData | null> {
   const cacheKey = `weekly_summary_${weekStart || 'current'}`
@@ -206,8 +195,7 @@ export async function getWeeklySummary(
     const params = weekStart ? `?weekStart=${weekStart}` : ''
     const response = await apiFetch(
       `/api/analytics/weekly-summary${params}`,
-      { method: 'GET' },
-      userId
+      { method: 'GET' }
     )
 
     if (response.ok) {
@@ -228,7 +216,7 @@ export async function getWeeklySummary(
 /**
  * Get achievements
  */
-export async function getAchievements(userId: string): Promise<Achievement[]> {
+export async function getAchievements(): Promise<Achievement[]> {
   const cacheKey = 'achievements'
   const cached = getCached<Achievement[]>(cacheKey)
   if (cached) return cached
@@ -236,8 +224,7 @@ export async function getAchievements(userId: string): Promise<Achievement[]> {
   try {
     const response = await apiFetch(
       '/api/analytics/achievements',
-      { method: 'GET' },
-      userId
+      { method: 'GET' }
     )
 
     if (response.ok) {
@@ -259,7 +246,6 @@ export async function getAchievements(userId: string): Promise<Achievement[]> {
  * Export data
  */
 export async function exportData(
-  userId: string,
   options: ExportOptions,
   onProgress?: (progress: ExportProgress) => void
 ): Promise<ExportProgress> {
@@ -275,8 +261,7 @@ export async function exportData(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
-      },
-      userId
+      }
     )
 
     if (response.ok) {

@@ -187,6 +187,7 @@ export async function classifyEmotionWithAI(moodData: MoodData): Promise<AIEmoti
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({
         mood_score: moodData.score,
         tags: moodData.tags || [],

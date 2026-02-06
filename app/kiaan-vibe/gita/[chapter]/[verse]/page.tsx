@@ -126,6 +126,7 @@ export default function VerseDetailPage({ params }: PageProps) {
       const response = await apiFetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           language: lang === 'sa' ? 'hi' : lang, // Sanskrit uses Hindi voice

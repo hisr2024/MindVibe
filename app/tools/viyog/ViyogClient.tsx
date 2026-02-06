@@ -38,12 +38,31 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   return [state, setState]
 }
 
+type ConcernAnalysis = {
+  specific_worry?: string
+  why_it_matters?: string
+  what_they_fear?: string
+  primary_emotion?: string
+  emotional_intensity?: string
+  attachment_type?: string
+  attachment_object?: string
+  root_cause?: string
+  detachment_approach?: string
+  effort_redirect?: string
+  in_their_control?: string[]
+  not_in_their_control?: string[]
+  confidence?: number
+  analysis_depth?: string
+}
+
 type ViyogResult = {
   response: string
   sections: Record<string, string>
   requestedAt: string
   gitaVerses?: number
   citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
+  concernAnalysis?: ConcernAnalysis | null
+  provider?: string
 }
 
 const flowSteps = [
@@ -132,8 +151,10 @@ export default function ViyogClient() {
         response: responseText,
         sections: mapSections(sections),
         requestedAt: new Date().toISOString(),
-        gitaVerses: citations.length,
+        gitaVerses: data.gita_verses_used || citations.length,
         citations,
+        concernAnalysis: data.concern_analysis || null,
+        provider: data.provider || data.retrieval?.strategy || 'unknown',
       })
     } catch {
       setError('Unable to reach Viyoga. Check your connection and try again.')
@@ -236,8 +257,75 @@ export default function ViyogClient() {
             )}
           </section>
 
-          {/* Right: Flow Steps and Info */}
+          {/* Right: Insight Card, Flow Steps and Info */}
           <section className="space-y-4">
+            {/* Concern Analysis Insight Card - shows when analysis is available */}
+            {result && !loading && result.concernAnalysis && result.concernAnalysis.analysis_depth === 'ai_enhanced' && (
+              <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-5 shadow-[0_15px_60px_rgba(255,180,50,0.08)]">
+                <h3 className="text-sm font-semibold text-amber-100 mb-3 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  What I See in Your Situation
+                </h3>
+                <div className="space-y-3 text-xs text-amber-100/80 leading-relaxed">
+                  {result.concernAnalysis.primary_emotion && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-amber-400/70 font-medium shrink-0 w-20">Feeling:</span>
+                      <span className="capitalize">
+                        {result.concernAnalysis.primary_emotion}
+                        {result.concernAnalysis.emotional_intensity && result.concernAnalysis.emotional_intensity !== 'moderate'
+                          ? ` (${result.concernAnalysis.emotional_intensity})`
+                          : ''}
+                      </span>
+                    </div>
+                  )}
+                  {result.concernAnalysis.attachment_object && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-amber-400/70 font-medium shrink-0 w-20">Attached to:</span>
+                      <span>{result.concernAnalysis.attachment_object}</span>
+                    </div>
+                  )}
+                  {result.concernAnalysis.root_cause && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-amber-400/70 font-medium shrink-0 w-20">Root:</span>
+                      <span>{result.concernAnalysis.root_cause}</span>
+                    </div>
+                  )}
+                  {result.concernAnalysis.effort_redirect && (
+                    <div className="p-2.5 rounded-xl bg-black/30 border border-amber-500/15 mt-2">
+                      <span className="text-amber-300/90 font-medium text-[11px] uppercase tracking-wider block mb-1">Redirect energy toward</span>
+                      <span className="text-amber-100/90">{result.concernAnalysis.effort_redirect}</span>
+                    </div>
+                  )}
+                  {result.concernAnalysis.in_their_control && result.concernAnalysis.in_their_control.length > 0 && (
+                    <div className="mt-2">
+                      <span className="text-emerald-400/80 font-medium text-[11px] uppercase tracking-wider block mb-1.5">In your control</span>
+                      <ul className="space-y-1">
+                        {result.concernAnalysis.in_their_control.slice(0, 3).map((item, i) => (
+                          <li key={i} className="flex items-start gap-1.5">
+                            <span className="text-emerald-400/60 mt-0.5 shrink-0">+</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {result.concernAnalysis.not_in_their_control && result.concernAnalysis.not_in_their_control.length > 0 && (
+                    <div className="mt-1">
+                      <span className="text-orange-400/80 font-medium text-[11px] uppercase tracking-wider block mb-1.5">Not in your control</span>
+                      <ul className="space-y-1">
+                        {result.concernAnalysis.not_in_their_control.slice(0, 3).map((item, i) => (
+                          <li key={i} className="flex items-start gap-1.5">
+                            <span className="text-orange-400/60 mt-0.5 shrink-0">-</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-4">The Flow</h3>
               <ol className="space-y-3 text-sm text-orange-100/85">
@@ -255,13 +343,13 @@ export default function ViyogClient() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyoga</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Viyoga is your friend when you're stuck worrying about outcomes. It acknowledges what you're going through, helps you see the pattern of where your energy is going, and shifts your focus back to what you can actually control - your effort and actions right now.
+                Viyoga is like a wise friend who actually listens. It deeply analyzes YOUR specific situation - understanding what you're attached to, why it matters to you, and what's really driving the anxiety. Then it helps you find freedom through focused action, guided by timeless Bhagavad Gita wisdom on detachment.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
                 <h4 className="text-xs font-semibold text-orange-50 mb-2">How It Works</h4>
                 <p className="text-xs text-orange-100/70">
-                  Acknowledge → Understand the Pattern → Shift Perspective → Quick Reset → One Action → Reflect
+                  Deep Understanding → Identify Attachment → See What You Control → Shift to Effort → One Action → Reflect
                 </p>
               </div>
             </div>

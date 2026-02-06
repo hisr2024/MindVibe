@@ -66,6 +66,7 @@ export function LanguageSettings({ onClose, className = '' }: LanguageSettingsPr
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             language: selectedLanguage,
             auto_translate: autoTranslate

@@ -23,8 +23,7 @@ startup_logger.info("=" * 80)
 
 # Set API key explicitly for this module
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
-startup_logger.info(f"✅ OPENAI_API_KEY found: {bool(OPENAI_API_KEY)}")
-startup_logger.info(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
+startup_logger.info(f"✅ OPENAI_API_KEY: {'configured' if OPENAI_API_KEY else 'missing'}")
 
 # Pass to OpenAI before import
 if OPENAI_API_KEY:
@@ -70,7 +69,6 @@ ALLOWED_HEADERS = [
     "user-agent",
     "x-requested-with",
     "x-csrf-token",
-    "x-auth-uid",
     "cache-control",
 ]
 
@@ -231,24 +229,13 @@ async def global_exception_handler(request: Request, exc: Exception):
         "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
     }
 
-    # For journey endpoints, return a more graceful response
-    if "/journeys/" in request.url.path or "/journey-engine/" in request.url.path:
-        return JSONResponse(
-            status_code=200,  # Return 200 to allow frontend fallback
-            content={
-                "error": "server_error",
-                "message": "Service temporarily unavailable. Please try again.",
-                "_offline": True,
-            },
-            headers=cors_headers,
-        )
-
-    # For other endpoints, return standard 500 with details
+    # Return proper HTTP status codes - never mask 500s as 200s
+    # The frontend should handle error status codes gracefully
     return JSONResponse(
-        status_code=500,
+        status_code=503,
         content={
-            "detail": "Internal server error",
-            "message": str(exc) if os.getenv("DEBUG", "false").lower() == "true" else "An unexpected error occurred",
+            "error": "service_unavailable",
+            "detail": "An unexpected error occurred. Please try again.",
         },
         headers=cors_headers,
     )
@@ -838,14 +825,14 @@ except Exception as e:
 startup_logger.info("\n[KIAAN Divine] Attempting to import KIAAN Divine router...")
 try:
     from backend.routes.kiaan_divine import router as kiaan_divine_router
-    app.include_router(kiaan_divine_router)
+    app.include_router(kiaan_divine_router, prefix="/api")
     startup_logger.info("✅ [SUCCESS] KIAAN Divine router loaded (Voice & Intelligence)")
-    startup_logger.info("   • POST   /kiaan/divine-chat - Divine conversation with emotion")
-    startup_logger.info("   • POST   /kiaan/synthesize - Voice synthesis with emotion")
-    startup_logger.info("   • POST   /kiaan/transcribe - Whisper speech recognition")
-    startup_logger.info("   • POST   /kiaan/soul-reading - Emotional/spiritual analysis")
-    startup_logger.info("   • POST   /kiaan/stop - Stop all voice synthesis")
-    startup_logger.info("   • GET    /kiaan/health - Health check")
+    startup_logger.info("   • POST   /api/kiaan/divine-chat - Divine conversation with emotion")
+    startup_logger.info("   • POST   /api/kiaan/synthesize - Voice synthesis with emotion")
+    startup_logger.info("   • POST   /api/kiaan/transcribe - Whisper speech recognition")
+    startup_logger.info("   • POST   /api/kiaan/soul-reading - Emotional/spiritual analysis")
+    startup_logger.info("   • POST   /api/kiaan/stop - Stop all voice synthesis")
+    startup_logger.info("   • GET    /api/kiaan/health - Health check")
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Divine router: {e}")
 

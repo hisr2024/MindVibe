@@ -252,7 +252,7 @@ class VoiceCompanionService {
   /** Get deep emotional/spiritual analysis */
   async getSoulReading(text: string): Promise<SoulReading | null> {
     try {
-      const response = await apiFetch('/kiaan/soul-reading', {
+      const response = await apiFetch('/api/kiaan/soul-reading', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, context: 'voice' }),

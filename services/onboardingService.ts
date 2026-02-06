@@ -18,7 +18,6 @@ const ONBOARDING_STORAGE_KEY = 'mindvibe_onboarding_progress'
  */
 export async function saveOnboardingProgress(
   data: Partial<OnboardingState>,
-  userId?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Save to localStorage as backup
@@ -27,18 +26,20 @@ export async function saveOnboardingProgress(
     const merged = { ...parsed, ...data, lastUpdated: new Date().toISOString() }
     localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(merged))
 
-    // Try to save to backend
-    if (userId) {
+    // Try to save to backend (auth via httpOnly cookies)
+    try {
       const response = await apiFetch('/api/onboarding/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: merged }),
-      }, userId)
+      })
 
       if (!response.ok) {
         // Log error but don't fail since we have localStorage backup
         console.warn('Failed to save onboarding progress to backend')
       }
+    } catch {
+      // Backend save failed, localStorage backup is sufficient
     }
 
     return { success: true }
@@ -54,20 +55,20 @@ export async function saveOnboardingProgress(
 /**
  * Get onboarding progress from backend or localStorage
  */
-export async function getOnboardingProgress(
-  userId?: string
-): Promise<OnboardingProgress | null> {
+export async function getOnboardingProgress(): Promise<OnboardingProgress | null> {
   try {
-    // Try to get from backend first
-    if (userId) {
+    // Try to get from backend first (auth via httpOnly cookies)
+    try {
       const response = await apiFetch('/api/onboarding/progress', {
         method: 'GET',
-      }, userId)
+      })
 
       if (response.ok) {
         const data = await response.json()
         if (data) return data
       }
+    } catch {
+      // Backend unavailable, fall through to localStorage
     }
 
     // Fall back to localStorage
@@ -75,7 +76,7 @@ export async function getOnboardingProgress(
     if (stored) {
       const parsed = JSON.parse(stored)
       return {
-        userId: userId || 'local',
+        userId: 'local',
         currentStep: parsed.currentStep || 0,
         isComplete: parsed.isComplete || false,
         data: parsed,
@@ -95,7 +96,6 @@ export async function getOnboardingProgress(
  */
 export async function completeOnboarding(
   data: OnboardingState,
-  userId?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const completeData: OnboardingState = {
@@ -112,17 +112,19 @@ export async function completeOnboarding(
     localStorage.setItem('mindvibe_profile', JSON.stringify(completeData.profile))
     localStorage.setItem('mindvibe_preferences', JSON.stringify(completeData.preferences))
 
-    // Try to save to backend
-    if (userId) {
+    // Try to save to backend (auth via httpOnly cookies)
+    try {
       const response = await apiFetch('/api/onboarding/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(completeData),
-      }, userId)
+      })
 
       if (!response.ok) {
         console.warn('Failed to complete onboarding on backend')
       }
+    } catch {
+      // Backend save failed, localStorage backup is sufficient
     }
 
     return { success: true }

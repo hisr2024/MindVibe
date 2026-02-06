@@ -244,7 +244,7 @@ describe('JourneyService', () => {
       await expect(createJourney({ title: '' })).rejects.toThrow(JourneyServiceError);
     });
 
-    it('should include auth header', async () => {
+    it('should include credentials for httpOnly cookie auth', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 201,
@@ -253,13 +253,11 @@ describe('JourneyService', () => {
 
       await createJourney({ title: 'Test' });
 
+      // Auth is now via httpOnly cookies (credentials: 'include') not X-Auth-UID header
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          headers: expect.objectContaining({
-            'X-Auth-UID': 'test-user-id',
-            'Content-Type': 'application/json',
-          }),
+          credentials: 'include',
         })
       );
     });

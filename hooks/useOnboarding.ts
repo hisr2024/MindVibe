@@ -92,7 +92,7 @@ export function useOnboarding(userId?: string): UseOnboardingResult {
     async function loadProgress() {
       setIsLoading(true)
       try {
-        const progress = await getOnboardingProgress(userId)
+        const progress = await getOnboardingProgress()
         if (progress?.data) {
           setState((prev) => ({
             ...prev,
@@ -110,18 +110,18 @@ export function useOnboarding(userId?: string): UseOnboardingResult {
     }
 
     loadProgress()
-  }, [userId])
+  }, [])
 
   // Auto-save on state changes (debounced)
   useEffect(() => {
     if (isLoading) return
 
     const timeoutId = setTimeout(() => {
-      saveOnboardingProgress(state, userId)
+      saveOnboardingProgress(state)
     }, 1000)
 
     return () => clearTimeout(timeoutId)
-  }, [state, userId, isLoading])
+  }, [state, isLoading])
 
   // Update profile
   const updateProfile = useCallback((data: Partial<ProfileData>) => {
@@ -218,7 +218,7 @@ export function useOnboarding(userId?: string): UseOnboardingResult {
     try {
       const newStep = Math.min(currentStep + 1, TOTAL_STEPS - 1)
       setState((prev) => ({ ...prev, currentStep: newStep }))
-      await saveOnboardingProgress({ ...state, currentStep: newStep }, userId)
+      await saveOnboardingProgress({ ...state, currentStep: newStep })
       return true
     } catch (error) {
       console.error('Failed to save progress:', error)
@@ -226,7 +226,7 @@ export function useOnboarding(userId?: string): UseOnboardingResult {
     } finally {
       setIsSaving(false)
     }
-  }, [currentStep, isLastStep, validateCurrentStep, state, userId])
+  }, [currentStep, isLastStep, validateCurrentStep, state])
 
   // Go to previous step
   const previousStep = useCallback(() => {
@@ -240,7 +240,7 @@ export function useOnboarding(userId?: string): UseOnboardingResult {
   const completeOnboardingFlow = useCallback(async (): Promise<boolean> => {
     setIsSaving(true)
     try {
-      const result = await completeOnboarding(state, userId)
+      const result = await completeOnboarding(state)
       if (result.success) {
         setState((prev) => ({
           ...prev,
@@ -256,7 +256,7 @@ export function useOnboarding(userId?: string): UseOnboardingResult {
     } finally {
       setIsSaving(false)
     }
-  }, [state, userId])
+  }, [state])
 
   // Reset onboarding
   const resetOnboarding = useCallback(() => {

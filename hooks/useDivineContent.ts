@@ -83,7 +83,7 @@ export function useDivineContent() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`);
+      const response = await fetch(`${API_BASE}${endpoint}`, { credentials: 'include' });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -107,6 +107,7 @@ export function useDivineContent() {
       const response = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(body),
       });
       if (!response.ok) {

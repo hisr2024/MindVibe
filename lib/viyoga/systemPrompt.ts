@@ -97,12 +97,13 @@ export const VIYOGA_HEADINGS_SECULAR = [
   'Something to Consider',
 ]
 
-// Section headings for Gita mode
+// Section headings for Gita mode (matches backend viyoga_prompts.py)
 export const VIYOGA_HEADINGS_GITA = [
-  'Sacred Recognition',
-  'Anatomy of Attachment',
-  'Gita Core Transmission',
-  'Sakshi Practice (60s)',
-  'Karma Yoga Step (Today)',
-  'One Question',
+  'Honoring Your Concern',
+  'Understanding the Attachment',
+  'Karma Yoga Teaching',
+  'The Shift to Effort',
+  'One Eternal Truth',
+  'One Sacred Action',
+  'One Releasing Question',
 ]

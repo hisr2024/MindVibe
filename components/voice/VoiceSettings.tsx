@@ -15,14 +15,12 @@ import { Volume2, Download, Settings as SettingsIcon, Loader2, CheckCircle2, Ale
 import voiceService, { type VoiceSettings, type SupportedLanguage } from '@/services/voiceService'
 
 interface VoiceSettingsProps {
-  userId: string
   onSettingsChange?: (settings: VoiceSettings) => void
   showTitle?: boolean
   compact?: boolean
 }
 
 export function VoiceSettings({
-  userId,
   onSettingsChange,
   showTitle = true,
   compact = false
@@ -53,7 +51,7 @@ export function VoiceSettings({
     setError(null)
 
     try {
-      const userSettings = await voiceService.getSettings(userId)
+      const userSettings = await voiceService.getSettings()
       setSettings(userSettings)
     } catch (err) {
       console.error('Failed to load voice settings:', err)
@@ -87,7 +85,7 @@ export function VoiceSettings({
     setError(null)
 
     try {
-      await voiceService.updateSettings(settings, userId)
+      await voiceService.updateSettings(settings)
       setSaveStatus('success')
 
       if (onSettingsChange) {

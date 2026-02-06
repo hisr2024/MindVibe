@@ -296,6 +296,7 @@ export function useEliteVoice(
         const res = await apiFetch('/api/voice/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             query,
             language,

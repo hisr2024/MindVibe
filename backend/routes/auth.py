@@ -203,7 +203,8 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
     stmt = select(User).where(User.email == payload.email.lower())
     existing = (await db.execute(stmt)).scalars().first()
     if existing:
-        raise HTTPException(status_code=409, detail="Email already registered")
+        # Use generic message to prevent account enumeration
+        raise HTTPException(status_code=409, detail="Unable to create account with this email")
 
     # Generate a unique auth_uid
     import secrets
@@ -233,12 +234,11 @@ async def login(
     stmt = select(User).where(User.email == email_norm)
     user = (await db.execute(stmt)).scalars().first()
 
-    # Check if account is locked
+    # Check if account is locked - use generic message to prevent account enumeration
     if user and user.locked_until and user.locked_until > datetime.now(UTC):
-        remaining = int((user.locked_until - datetime.now(UTC)).total_seconds() / 60)
         raise HTTPException(
-            status_code=status.HTTP_423_LOCKED,
-            detail=f"Account locked. Try again in {remaining} minutes.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
         )
 
     # Validate credentials
@@ -271,26 +271,31 @@ async def login(
 
     if user.two_factor_enabled:
         if not payload.two_factor_code:
+            # Use a specific error code so frontend can show 2FA input
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Two-factor code required",
+                detail="additional_verification_required",
             )
 
         code = payload.two_factor_code.strip().replace(" ", "")
         if not user.two_factor_secret:
+            # Internal misconfiguration - don't reveal details
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Two-factor secret missing",
+                detail="Invalid credentials",
             )
 
         totp = pyotp.TOTP(user.two_factor_secret)
         if not totp.verify(code, valid_window=1):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid two-factor code",
+                detail="Invalid credentials",
             )
 
-    session = await create_session(db, user_id=user.id, ip=None, ua=None)
+    # Bind session to client IP and User-Agent for security auditing
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("User-Agent")
+    session = await create_session(db, user_id=user.id, ip=client_ip, ua=user_agent)
     access_token = create_access_token(user_id=user.id, session_id=session.id)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
@@ -488,16 +493,21 @@ async def regenerate_backup_codes(
     # Generate new backup codes (8 codes, each 8 characters)
     backup_codes = [secrets.token_hex(4).upper() for _ in range(8)]
 
-    # Store hashed versions of backup codes
+    # Store bcrypt-hashed versions of backup codes for security
+    # If DB is compromised, plaintext codes won't be exposed
+    from backend.security.password_hash import hash_password
+    hashed_codes = [hash_password(code) for code in backup_codes]
+
     await db.execute(
         update(User)
         .where(User.id == user.id)
-        .values(mfa_backup_codes=backup_codes)
+        .values(mfa_backup_codes=hashed_codes)
     )
     await db.commit()
 
     await touch_session(db, session_row)
 
+    # Return plaintext codes to user (this is the only time they'll see them)
     return BackupCodesOut(backup_codes=backup_codes)
 
 

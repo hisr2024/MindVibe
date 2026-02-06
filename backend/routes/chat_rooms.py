@@ -268,15 +268,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
             token = parts[1]
             auth_method = "header"
 
-    # DEPRECATED FALLBACK: Query parameter (logs security warning)
-    if not token:
-        token = websocket.query_params.get("token")
-        if token:
-            auth_method = "query_param"
-            ws_logger.warning(
-                "WebSocket auth via query param (DEPRECATED) - token may be logged. "
-                "Migrate to Sec-WebSocket-Protocol header for security."
-            )
+    # Query parameter auth removed for security (tokens in URLs are logged)
+    # Use Sec-WebSocket-Protocol header exclusively
 
     if not token:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)

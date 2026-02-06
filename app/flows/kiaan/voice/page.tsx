@@ -248,6 +248,7 @@ export default function MobileVoicePage() {
       const res = await apiFetch('/api/voice/query/enhanced', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           query,
           language: language || 'en',
@@ -319,6 +320,7 @@ export default function MobileVoicePage() {
       const res = await apiFetch('/api/voice/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           language: language || 'en',
@@ -365,6 +367,7 @@ export default function MobileVoicePage() {
       await apiFetch(`/api/voice/history/${conversationId}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ was_helpful: helpful }),
       })
     } catch (err) {
