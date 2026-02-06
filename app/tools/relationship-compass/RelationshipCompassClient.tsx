@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { apiFetch } from '@/lib/api'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 
 // Sanitize user input to prevent prompt injection
@@ -83,7 +84,7 @@ export default function RelationshipCompassClient() {
     setError(null)
 
     try {
-      const response = await fetch('/api/relationship-compass/gita-guidance', {
+      const response = await apiFetch('/api/relationship-compass/gita-guidance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

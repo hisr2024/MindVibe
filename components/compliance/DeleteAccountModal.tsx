@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { apiFetch } from '@/lib/api'
 
 interface DeleteAccountModalProps {
   isOpen: boolean
@@ -34,7 +35,7 @@ export default function DeleteAccountModal({
     setErrorMessage('')
 
     try {
-      const response = await fetch('/api/gdpr/delete-account', {
+      const response = await apiFetch('/api/gdpr/delete-account', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ export default function DeleteAccountModal({
     setErrorMessage('')
 
     try {
-      const response = await fetch('/api/gdpr/delete-account/cancel', {
+      const response = await apiFetch('/api/gdpr/delete-account/cancel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

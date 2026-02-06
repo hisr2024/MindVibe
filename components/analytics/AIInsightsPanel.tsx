@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, RefreshCw } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 interface Insight {
   type: string
@@ -61,7 +62,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
   const fetchInsights = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analytics/advanced/ai-insights')
+      const response = await apiFetch('/api/analytics/advanced/ai-insights')
 
       if (!response.ok) {
         throw new Error('Failed to fetch AI insights')

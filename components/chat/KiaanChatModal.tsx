@@ -7,6 +7,7 @@ import type { Message } from './KiaanChat'
 import { CORE_TOOLS } from '@/lib/constants/tools'
 import { canUseVoiceInput } from '@/utils/browserSupport'
 import { useChat } from '@/lib/ChatContext'
+import { apiFetch } from '@/lib/api'
 
 interface KiaanChatModalProps {
   isOpen: boolean
@@ -65,7 +66,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
 
     try {
       // Use streaming endpoint for instant responses
-      const response = await fetch('/api/chat/message/stream', {
+      const response = await apiFetch('/api/chat/message/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +74,6 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
         body: JSON.stringify({
           message: messageText
         }),
-        credentials: 'include'
       })
 
       if (!response.ok) {
@@ -138,11 +138,10 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
 
       // Fallback to non-streaming endpoint
       try {
-        const fallbackResponse = await fetch('/api/chat/message', {
+        const fallbackResponse = await apiFetch('/api/chat/message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: messageText }),
-          credentials: 'include'
         })
 
         if (fallbackResponse.ok) {

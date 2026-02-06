@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { apiFetch } from '@/lib/api'
 
 interface DataExportButtonProps {
   format?: 'json' | 'csv'
@@ -23,7 +24,7 @@ export default function DataExportButton({
     setErrorMessage('')
 
     try {
-      const response = await fetch(`/api/gdpr/data-export?format=${format}`, {
+      const response = await apiFetch(`/api/gdpr/data-export?format=${format}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ export default function DataExportButton({
     setStatus('downloading')
 
     try {
-      const response = await fetch(`/api/gdpr/data-export/${downloadToken}`, {
+      const response = await apiFetch(`/api/gdpr/data-export/${downloadToken}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

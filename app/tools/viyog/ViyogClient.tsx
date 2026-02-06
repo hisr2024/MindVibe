@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
@@ -91,7 +92,7 @@ export default function ViyogClient() {
       const activeSessionId = sessionId || window.crypto.randomUUID()
       if (!sessionId) setSessionId(activeSessionId)
 
-      const response = await fetch('/api/viyoga/chat', {
+      const response = await apiFetch('/api/viyoga/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

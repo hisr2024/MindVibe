@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
@@ -184,7 +185,7 @@ export default function ArdhaClient() {
 
     try {
       // Use local API route to proxy requests to backend (avoids CORS issues)
-      const response = await fetch('/api/ardha/reframe', {
+      const response = await apiFetch('/api/ardha/reframe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

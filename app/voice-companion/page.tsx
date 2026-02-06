@@ -59,11 +59,20 @@ export default function VoiceCompanionPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const processingRef = useRef(false)
   const conversationModeRef = useRef(conversationMode)
+  const isMountedRef = useRef(true)
 
   // Keep ref in sync with state
   useEffect(() => {
     conversationModeRef.current = conversationMode
   }, [conversationMode])
+
+  // Cleanup on unmount - prevent setState on unmounted component
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+      divineVoiceService.stop()
+    }
+  }, [])
 
   // Voice Input
   const voiceInput = useVoiceInput({
@@ -83,19 +92,21 @@ export default function VoiceCompanionPage() {
   const voiceOutput = useVoiceOutput({
     language: 'en',
     rate: 0.95,
-    onStart: () => setState('speaking'),
+    onStart: () => { if (isMountedRef.current) setState('speaking') },
     onEnd: () => {
+      if (!isMountedRef.current) return
       setState('idle')
       // In conversation mode, auto-listen after KIAAN finishes
       if (conversationModeRef.current) {
         setTimeout(() => {
+          if (!isMountedRef.current) return
           voiceInput.startListening()
           setState('listening')
         }, 500)
       }
     },
     onError: () => {
-      setState('idle')
+      if (isMountedRef.current) setState('idle')
     },
   })
 
@@ -164,51 +175,53 @@ export default function VoiceCompanionPage() {
 
   // ─── Speak response ────────────────────────────────────────────────
 
+  // Helper: resume listening in conversation mode (safe for unmount)
+  const resumeListeningIfConversation = useCallback(() => {
+    if (!isMountedRef.current) return
+    if (conversationModeRef.current) {
+      setTimeout(() => {
+        if (!isMountedRef.current) return
+        voiceInput.startListening()
+        setState('listening')
+      }, 500)
+    }
+  }, [voiceInput])
+
   const speakResponse = useCallback(async (text: string) => {
     if (!autoSpeak) {
-      setState('idle')
-      if (conversationModeRef.current) {
-        setTimeout(() => {
-          voiceInput.startListening()
-          setState('listening')
-        }, 500)
-      }
+      if (isMountedRef.current) setState('idle')
+      resumeListeningIfConversation()
       return
     }
 
-    setState('speaking')
+    if (isMountedRef.current) setState('speaking')
 
     // Try divine voice first, fall back to browser TTS
     if (useDivineVoice) {
-      try {
-        const result = await divineVoiceService.synthesize({
-          text,
-          language: 'en',
-          style: 'friendly',
-          onEnd: () => {
-            setState('idle')
-            if (conversationModeRef.current) {
-              setTimeout(() => {
-                voiceInput.startListening()
-                setState('listening')
-              }, 500)
-            }
-          },
-          onError: () => {
-            // Fall back to browser TTS
-            voiceOutput.speak(text)
-          },
-        })
+      const result = await divineVoiceService.synthesize({
+        text,
+        language: 'en',
+        style: 'friendly',
+        onEnd: () => {
+          if (!isMountedRef.current) return
+          setState('idle')
+          resumeListeningIfConversation()
+        },
+        onError: () => {
+          if (!isMountedRef.current) return
+          // Fall back to browser TTS
+          voiceOutput.speak(text)
+        },
+      })
 
-        if (result.success) return
-      } catch {
-        // Fall through to browser TTS
-      }
+      if (result.success) return
     }
 
     // Browser TTS fallback
-    voiceOutput.speak(text)
-  }, [autoSpeak, useDivineVoice, voiceOutput, voiceInput])
+    if (isMountedRef.current) {
+      voiceOutput.speak(text)
+    }
+  }, [autoSpeak, useDivineVoice, voiceOutput, resumeListeningIfConversation])
 
   // ─── Handle user message ───────────────────────────────────────────
 
