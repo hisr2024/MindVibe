@@ -29,11 +29,19 @@ from backend.schemas.subscription import (
     CheckoutSessionOut,
     SubscriptionCancelRequest,
 )
+from backend.schemas.cost_calculator import (
+    CostCalculatorRequest,
+    CostCalculatorResponse,
+    TierCostBreakdownOut,
+)
 from backend.services.subscription_service import (
     get_all_plans,
     get_user_subscription,
     get_or_create_free_subscription,
     get_usage_stats,
+)
+from backend.services.subscription_cost_calculator import (
+    calculate_subscription_costs,
 )
 from backend.services.stripe_service import (
     create_checkout_session,
@@ -312,3 +320,58 @@ async def get_current_usage(
     stats = await get_usage_stats(db, user_id, "kiaan_questions")
     
     return UsageStatsOut(**stats)
+
+
+@router.post("/cost-calculator", response_model=CostCalculatorResponse)
+async def subscription_cost_calculator(
+    payload: CostCalculatorRequest | None = None,
+) -> CostCalculatorResponse:
+    """Calculate subscription costs based on OpenAI API usage with profit margins.
+
+    Analyzes each tier's OpenAI token costs, infrastructure overhead, and
+    target profit margins to produce a cost breakdown and suggested pricing.
+
+    This endpoint does not require authentication - it serves as a
+    pricing analysis tool for administrators.
+
+    Args:
+        payload: Optional parameters to customize the calculation.
+
+    Returns:
+        CostCalculatorResponse with per-tier breakdowns and summary.
+    """
+    params = payload or CostCalculatorRequest()
+
+    result = calculate_subscription_costs(
+        model=params.model,
+        avg_prompt_tokens=params.avg_prompt_tokens,
+        avg_completion_tokens=params.avg_completion_tokens,
+        profit_margins=params.profit_margins,
+        enterprise_estimated_questions=params.enterprise_estimated_questions,
+    )
+
+    return CostCalculatorResponse(
+        model=result.model,
+        avg_prompt_tokens=result.avg_prompt_tokens,
+        avg_completion_tokens=result.avg_completion_tokens,
+        cost_per_question=result.cost_per_question,
+        tiers=[
+            TierCostBreakdownOut(
+                tier=t.tier,
+                monthly_questions=t.monthly_questions,
+                openai_cost_per_question=t.openai_cost_per_question,
+                openai_cost_monthly=t.openai_cost_monthly,
+                infrastructure_cost_monthly=t.infrastructure_cost_monthly,
+                total_cost_monthly=t.total_cost_monthly,
+                profit_margin_pct=t.profit_margin_pct,
+                profit_amount_monthly=t.profit_amount_monthly,
+                suggested_price_monthly=t.suggested_price_monthly,
+                current_price_monthly=t.current_price_monthly,
+                current_margin_pct=t.current_margin_pct,
+                current_profit_monthly=t.current_profit_monthly,
+                is_profitable=t.is_profitable,
+            )
+            for t in result.tiers
+        ],
+        summary=result.summary,
+    )
