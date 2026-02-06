@@ -15,8 +15,8 @@ interface MessageBubbleProps {
   status?: 'error'
   onSaveToJournal?: (text: string) => void
   summary?: string
-  gitaPowered?: boolean  // New prop to indicate wisdom-powered response
-  verseReference?: string  // New prop for verse chapter reference (e.g., "Ch. 2-6")
+  aiPowered?: boolean  // Prop to indicate AI-powered response
+  verseReference?: string  // Optional reference tag
   viewMode?: 'detailed' | 'summary'
   messageId?: string  // Unique message ID for translation tracking
   autoTranslate?: boolean  // Whether to auto-translate this message
@@ -65,7 +65,7 @@ function buildSummary(text: string) {
   return summary
 }
 
-export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, gitaPowered = true, verseReference, viewMode = 'detailed', messageId, autoTranslate = false }: MessageBubbleProps) {
+export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, aiPowered = true, verseReference, viewMode = 'detailed', messageId, autoTranslate = false }: MessageBubbleProps) {
   const router = useRouter()
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
@@ -131,31 +131,29 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
           {timestamp ? new Date(timestamp).toLocaleTimeString() : ''}
         </span>
         
-        {/* Ancient Wisdom Badge for assistant messages */}
-        {sender === 'assistant' && gitaPowered && !status && (
+        {/* AI-Powered Badge for assistant messages */}
+        {sender === 'assistant' && aiPowered && !status && (
           <div className="relative">
             <div
               className="flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-orange-300 border border-orange-400/30 cursor-help"
               onMouseEnter={() => setShowVerseHover(true)}
               onMouseLeave={() => setShowVerseHover(false)}
               role="tooltip"
-              aria-label="This response is rooted in Ancient Wisdom"
+              aria-label="AI-powered wellness guidance"
             >
-              <span className="text-xs">🕉️</span>
-              <span>Ancient Wisdom</span>
+              <span className="text-xs">✨</span>
+              <span>AI Guided</span>
             </div>
-            
-            {/* Hover tooltip for verse reference */}
+
+            {/* Hover tooltip */}
             {showVerseHover && (
               <div className="absolute left-0 top-full mt-1 z-10 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-[11px] text-orange-50 shadow-lg border border-orange-500/30">
-                <div className="font-semibold text-orange-300 mb-0.5">Rooted in Ancient Wisdom</div>
+                <div className="font-semibold text-orange-300 mb-0.5">AI-Powered Wellness Guidance</div>
                 <div className="text-orange-100/70">
-                  {verseReference 
-                    ? `Drawing from verse ${verseReference}` 
-                    : 'Based on timeless teachings'}
+                  Thoughtful, personalized support
                 </div>
                 <div className="mt-1 pt-1 border-t border-orange-500/20 text-orange-200/60 text-[10px]">
-                  Every KIAAN response is validated for authenticity
+                  Every KIAAN response is crafted with care
                 </div>
               </div>
             )}
@@ -215,7 +213,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               <div className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">
                 {viewMode === 'summary'
                   ? (isAISummary ? 'Key Insights' : 'Quick Summary')
-                  : 'Wisdom View - In Depth Understanding'
+                  : 'Full View - In Depth Response'
                 }
               </div>
             </div>
@@ -236,8 +234,8 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   </svg>
                   {viewMode === 'summary'
-                    ? 'Intelligently summarized from the full wisdom'
-                    : 'Full in-depth understanding from ancient wisdom'
+                    ? 'Intelligently summarized for quick reading'
+                    : 'Full in-depth response'
                   }
                 </div>
               )}
@@ -258,7 +256,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
           {/* Voice Output Button */}
           <VoiceOutputButton text={text} language={language} />
 
-          {/* Send to Sacred Reflections button */}
+          {/* Save to Journal button */}
           {onSaveToJournal && (
             <button
               onClick={handleSaveToJournal}
@@ -267,14 +265,14 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
                   ? ''
                   : 'transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(255,115,39,0.2)]'
               }`}
-              aria-label="Send this response to Sacred Reflections"
+              aria-label="Save this response to Journal"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                 <polyline points="17 21 17 13 7 13 7 21" />
                 <polyline points="7 3 7 8 15 8" />
               </svg>
-              Send to Sacred Reflections
+              Save to Journal
             </button>
           )}
         </div>
