@@ -1,17 +1,16 @@
 /**
  * Voice components index
- * Exports all voice-related components for KIAAN ecosystem
+ * Exports all active voice-related components for KIAAN ecosystem
+ *
+ * Core Voice Companion v4 components (KiaanVoiceOrb, VoiceWaveform, ConversationInsights)
+ * are imported directly by the voice-companion page.
  */
 
 export { VoiceInputButton, type VoiceInputButtonProps } from './VoiceInputButton'
-export { KiaanVoiceInput, type KiaanVoiceInputProps, type VoiceInputMode } from './KiaanVoiceInput'
 export { VoiceResponseButton, type VoiceResponseButtonProps } from './VoiceResponseButton'
 export { VoiceOutputButton, type VoiceOutputButtonProps } from './VoiceOutputButton'
-export { WakeWordDetector, type WakeWordDetectorProps } from './WakeWordDetector'
-export { HandsFreeSession, type HandsFreeSessionProps } from './HandsFreeSession'
-export { VoiceSettingsPanel, type VoiceSettingsPanelProps, type VoiceSettings } from './VoiceSettingsPanel'
 
-// Voice Enhancements UI
+// Voice Enhancements UI (used by Quantum Dive and other KIAAN tools)
 export {
   // Individual Controls
   BinauraBeatsControl,
