@@ -215,6 +215,7 @@ export default function QuantumDivePage() {
       const response = await fetch(endpoint, {
         method: quick ? 'GET' : 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: quick ? undefined : JSON.stringify({
           time_range_weeks: 4,
           voice_optimized: true

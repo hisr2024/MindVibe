@@ -132,6 +132,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     ...options,
   })
 

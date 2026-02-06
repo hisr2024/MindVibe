@@ -144,6 +144,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
         // Best effort cleanup - don't await
         fetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
           method: 'POST',
+          credentials: 'include',
         }).catch(() => {})
       }
     }
@@ -157,6 +158,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await fetch('/api/voice-learning/session/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           initial_mood: initialMood,
         }),
@@ -195,6 +197,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     try {
       await fetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
         method: 'POST',
+        credentials: 'include',
       })
 
       sessionIdRef.current = null
@@ -221,6 +224,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await fetch('/api/voice-learning/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           context,
@@ -274,6 +278,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await fetch('/api/voice-learning/process-input', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           text,
           session_id: sessionIdRef.current,
@@ -317,6 +322,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       await fetch('/api/voice-learning/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           rating,
           response_hash: responseHash,
@@ -342,6 +348,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       await fetch('/api/voice-learning/playback-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           event_type: eventType,
           content_hash: contentHash,
@@ -359,7 +366,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
   // Refresh memories
   const refreshMemories = useCallback(async () => {
     try {
-      const response = await fetch('/api/voice-learning/memories')
+      const response = await fetch('/api/voice-learning/memories', { credentials: 'include' })
 
       if (response.ok) {
         const data = await response.json()
@@ -382,6 +389,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
       const response = await fetch('/api/voice-learning/memory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           memory_type: type,
           key,
@@ -404,7 +412,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
   // Refresh preferences
   const refreshPreferences = useCallback(async () => {
     try {
-      const response = await fetch('/api/voice-learning/preferences')
+      const response = await fetch('/api/voice-learning/preferences', { credentials: 'include' })
 
       if (response.ok) {
         const data = await response.json()
@@ -429,7 +437,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
   // Get insights
   const getInsights = useCallback(async (): Promise<Record<string, unknown> | null> => {
     try {
-      const response = await fetch('/api/voice-learning/insights')
+      const response = await fetch('/api/voice-learning/insights', { credentials: 'include' })
 
       if (response.ok) {
         return await response.json()
