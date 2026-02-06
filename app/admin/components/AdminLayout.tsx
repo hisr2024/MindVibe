@@ -13,6 +13,7 @@ const adminLinks = [
   { href: '/admin/announcements', label: 'Announcements', icon: '📢' },
   { href: '/admin/ab-tests', label: 'A/B Tests', icon: '🧪' },
   { href: '/admin/audit-logs', label: 'Audit Logs', icon: '📝' },
+  { href: '/admin/backend-logs', label: 'Backend Logs', icon: '🖥️' },
   { href: '/admin/export', label: 'Export', icon: '📤' },
   { href: '/admin/kiaan-analytics', label: 'KIAAN Analytics', icon: '🕉️' },
 ]
