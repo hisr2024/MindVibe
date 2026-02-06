@@ -382,6 +382,14 @@ export default function VoiceCompanionPage() {
     },
   })
 
+  // Stable refs for hook functions (avoids callback recreation when volume/frequencyData change at 60fps)
+  const voiceInputRef = useRef(voiceInput)
+  const voiceOutputRef = useRef(voiceOutput)
+  const audioAnalyzerRef = useRef(audioAnalyzer)
+  voiceInputRef.current = voiceInput
+  voiceOutputRef.current = voiceOutput
+  audioAnalyzerRef.current = audioAnalyzer
+
   // ─── Helpers ──────────────────────────────────────────────────────
 
   const idleState = useCallback((): CompanionState => wakeWordEnabled ? 'wake-listening' : 'idle', [wakeWordEnabled])
@@ -400,11 +408,11 @@ export default function VoiceCompanionPage() {
     if (!isMountedRef.current || !conversationModeRef.current) return
     setTimeout(() => {
       if (!isMountedRef.current) return
-      audioAnalyzer.start()
-      voiceInput.startListening()
+      audioAnalyzerRef.current.start()
+      voiceInputRef.current.startListening()
       setState('listening')
     }, 500)
-  }, [voiceInput, audioAnalyzer])
+  }, [])
 
   const speakResponse = useCallback(async (text: string) => {
     lastResponseRef.current = text
@@ -428,34 +436,52 @@ export default function VoiceCompanionPage() {
         },
         onError: () => {
           if (!isMountedRef.current) return
-          voiceOutput.speak(text)
+          voiceOutputRef.current.speak(text)
         },
       })
       if (result.success) return
     }
 
-    if (isMountedRef.current) voiceOutput.speak(text)
-  }, [autoSpeak, useDivineVoice, wakeWordEnabled, voiceOutput, resumeListeningIfConversation])
+    if (isMountedRef.current) voiceOutputRef.current.speak(text)
+  }, [autoSpeak, useDivineVoice, wakeWordEnabled, resumeListeningIfConversation])
 
   // ─── Stop All ─────────────────────────────────────────────────────
 
   const stopAll = useCallback(() => {
-    voiceInput.stopListening()
-    voiceOutput.cancel()
+    voiceInputRef.current.stopListening()
+    voiceOutputRef.current.cancel()
     divineVoiceService.stop()
-    audioAnalyzer.stop()
+    audioAnalyzerRef.current.stop()
     setBreathingSteps(null)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
     setConversationMode(false)
-  }, [wakeWordEnabled, voiceOutput, voiceInput, audioAnalyzer])
+  }, [wakeWordEnabled])
+
+  // ─── Breathing Exercise ───────────────────────────────────────────
+
+  const startBreathingExercise = useCallback(async () => {
+    setState('breathing')
+    addSystemMessage('Let\'s breathe together...', 'breathing')
+    const exercise = await voiceCompanionService.getBreathingExercise()
+    if (isMountedRef.current) setBreathingSteps(exercise.steps)
+  }, [addSystemMessage])
+
+  const clearConversation = useCallback(() => {
+    stopAll()
+    setMessages([])
+    setError(null)
+    setCurrentEmotion(undefined)
+    setBreathingSteps(null)
+    voiceCompanionService.endSession()
+  }, [stopAll])
 
   // ─── Voice Command Handler ────────────────────────────────────────
 
   const handleVoiceCommand = useCallback(async (commandType: string, params?: Record<string, string>) => {
     switch (commandType) {
       case 'stop': stopAll(); addSystemMessage('Stopped.'); break
-      case 'pause': voiceOutput.pause(); addSystemMessage('Taking a pause. Say "resume" when you\'re ready, friend.'); break
-      case 'resume': voiceOutput.resume(); addSystemMessage('Continuing...'); break
+      case 'pause': voiceOutputRef.current.pause(); addSystemMessage('Taking a pause. Say "resume" when you\'re ready, friend.'); break
+      case 'resume': voiceOutputRef.current.resume(); addSystemMessage('Continuing...'); break
 
       case 'repeat':
         if (lastResponseRef.current) { addSystemMessage('Let me say that again...'); await speakResponse(lastResponseRef.current) }
@@ -521,13 +547,13 @@ export default function VoiceCompanionPage() {
         if (params?.languageName) addSystemMessage(`Language: ${params.languageName}. (Multi-language support coming soon.)`)
         break
     }
-  }, [speakResponse, voiceOutput, stopAll, addSystemMessage, addKiaanMessage])
+  }, [speakResponse, stopAll, addSystemMessage, addKiaanMessage, startBreathingExercise, clearConversation])
 
   // ─── Handle User Input ────────────────────────────────────────────
 
   const handleUserInput = useCallback(async (text: string) => {
     // Stop audio analyzer when processing
-    audioAnalyzer.stop()
+    audioAnalyzerRef.current.stop()
 
     // Check for voice commands first
     const command = detectVoiceCommand(text)
@@ -574,16 +600,7 @@ export default function VoiceCompanionPage() {
     } finally {
       processingRef.current = false
     }
-  }, [handleVoiceCommand, speakResponse, addKiaanMessage, wakeWordEnabled, audioAnalyzer])
-
-  // ─── Breathing Exercise ───────────────────────────────────────────
-
-  const startBreathingExercise = useCallback(async () => {
-    setState('breathing')
-    addSystemMessage('Let\'s breathe together...', 'breathing')
-    const exercise = await voiceCompanionService.getBreathingExercise()
-    if (isMountedRef.current) setBreathingSteps(exercise.steps)
-  }, [addSystemMessage])
+  }, [handleVoiceCommand, speakResponse, addKiaanMessage, wakeWordEnabled])
 
   const onBreathingComplete = useCallback(() => {
     setBreathingSteps(null)
@@ -650,15 +667,6 @@ export default function VoiceCompanionPage() {
       if (!msg.saved) await saveMessage(msg)
     }
   }
-
-  const clearConversation = useCallback(() => {
-    stopAll()
-    setMessages([])
-    setError(null)
-    setCurrentEmotion(undefined)
-    setBreathingSteps(null)
-    voiceCompanionService.endSession()
-  }, [stopAll])
 
   const getSuggestions = (): string[] => {
     if (currentEmotion && ['anxiety', 'sadness', 'anger'].includes(currentEmotion)) return PROMPT_SUGGESTIONS.anxious

@@ -71,6 +71,18 @@ export function useAudioAnalyzer(): AudioAnalyzerData {
   }, [])
 
   const start = useCallback(async () => {
+    // Clean up any existing resources to prevent leaks on repeated start() calls
+    cancelAnimationFrame(rafRef.current)
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {})
+      audioContextRef.current = null
+    }
+    analyzerRef.current = null
+
     try {
       // Request microphone access
       const stream = await navigator.mediaDevices.getUserMedia({

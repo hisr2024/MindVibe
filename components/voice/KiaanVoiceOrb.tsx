@@ -79,14 +79,14 @@ const STATE_CONFIG: Record<OrbState, {
     pulseAnimation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
     glowOpacity: 0.2,
     ringColor: 'rgba(16,185,129,0.25)',
-    ringAnimation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+    ringAnimation: 'orbPing 2s cubic-bezier(0, 0, 0.2, 1) infinite',
   },
   listening: {
     baseScale: 1.05,
     pulseAnimation: 'none', // Volume-driven instead
     glowOpacity: 0.4,
     ringColor: 'rgba(249,115,22,0.3)',
-    ringAnimation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+    ringAnimation: 'orbPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
   },
   processing: {
     baseScale: 1,
@@ -100,7 +100,7 @@ const STATE_CONFIG: Record<OrbState, {
     pulseAnimation: 'orbSpeak 0.8s ease-in-out infinite',
     glowOpacity: 0.35,
     ringColor: 'rgba(168,85,247,0.25)',
-    ringAnimation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+    ringAnimation: 'orbPing 2s cubic-bezier(0, 0, 0.2, 1) infinite',
   },
   breathing: {
     baseScale: 1,
@@ -215,7 +215,7 @@ export default function KiaanVoiceOrb({
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        @keyframes ping {
+        @keyframes orbPing {
           75%, 100% { transform: scale(1.6); opacity: 0; }
         }
         @keyframes orbFloat {
