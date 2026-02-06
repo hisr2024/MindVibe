@@ -89,6 +89,13 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/subscriptions/current",
     "/api/subscriptions/tiers",
     "/api/subscriptions/usage",
+    # Gita Social Ingestion - uses Bearer token auth
+    "/api/gita-ingestion/validate",
+    "/api/gita-ingestion/ingest",
+    "/api/gita-ingestion/ingest/bulk",
+    "/api/gita-ingestion/check-source",
+    "/api/gita-ingestion/trusted-sources",
+    "/api/gita-ingestion/platforms",
 }
 
 # Methods that require CSRF protection

@@ -849,6 +849,21 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Divine router: {e}")
 
+# Load Gita Social Ingestion router (Social Media Data Pipeline)
+startup_logger.info("\n[Gita Ingestion] Attempting to import Gita Social Ingestion router...")
+try:
+    from backend.routes.gita_social_ingestion import router as gita_ingestion_router
+    app.include_router(gita_ingestion_router)
+    startup_logger.info("✅ [SUCCESS] Gita Social Ingestion router loaded")
+    startup_logger.info("   • GET    /api/gita-ingestion/trusted-sources - List trusted sources")
+    startup_logger.info("   • POST   /api/gita-ingestion/validate - Validate content compliance")
+    startup_logger.info("   • POST   /api/gita-ingestion/ingest - Ingest single source")
+    startup_logger.info("   • POST   /api/gita-ingestion/ingest/bulk - Bulk ingest sources")
+    startup_logger.info("   • GET    /api/gita-ingestion/check-source - Check if source is trusted")
+    startup_logger.info("   • GET    /api/gita-ingestion/platforms - Get supported platforms")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Gita Social Ingestion router: {e}")
+
 # Load Weekly Assessment router
 startup_logger.info("\n[Weekly Assessment] Attempting to import Weekly Assessment router...")
 try:
