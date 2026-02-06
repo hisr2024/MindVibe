@@ -16,7 +16,6 @@ import { useVoice } from '@/hooks/useVoice'
 import type { SynthesizeOptions } from '@/services/voiceService'
 
 interface VoicePlayerProps {
-  userId: string
   text?: string
   language?: string
   voiceType?: 'calm' | 'wisdom' | 'friendly'
@@ -30,7 +29,6 @@ interface VoicePlayerProps {
 }
 
 export function VoicePlayer({
-  userId,
   text,
   language = 'en',
   voiceType = 'friendly',
@@ -46,7 +44,6 @@ export function VoicePlayer({
   const [previousVolume, setPreviousVolume] = useState(1)
 
   const voice = useVoice({
-    userId,
     autoPlay,
     onComplete,
     onError
@@ -211,7 +208,6 @@ export function VoicePlayer({
  * Compact button that speaks text when clicked
  */
 interface VoiceButtonProps {
-  userId: string
   text: string
   language?: string
   voiceType?: 'calm' | 'wisdom' | 'friendly'
@@ -220,7 +216,6 @@ interface VoiceButtonProps {
 }
 
 export function VoiceButton({
-  userId,
   text,
   language = 'en',
   voiceType = 'friendly',
@@ -230,7 +225,6 @@ export function VoiceButton({
   const [isPlaying, setIsPlaying] = useState(false)
 
   const voice = useVoice({
-    userId,
     onComplete: () => setIsPlaying(false),
     onError: () => setIsPlaying(false)
   })

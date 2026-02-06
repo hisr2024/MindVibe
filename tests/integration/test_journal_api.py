@@ -2,6 +2,7 @@
 Integration tests for the Journal API endpoints.
 
 Tests the encrypted blob upload and retrieval functionality.
+All tests use JWT Bearer tokens for authentication (X-Auth-UID was removed).
 """
 
 import pytest
@@ -9,6 +10,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import User
+from tests.conftest import auth_headers_for
 
 
 class TestJournalEndpoints:
@@ -27,11 +29,12 @@ class TestJournalEndpoints:
         )
         test_db.add(user)
         await test_db.commit()
+        await test_db.refresh(user)
 
         response = await test_client.post(
             "/journal/blob",
             json={"blob_json": '{"encrypted": "journal data"}'},
-            headers={"x-auth-uid": "test-journal-user"},
+            headers=auth_headers_for(user.id),
         )
 
         assert response.status_code == 200
@@ -53,24 +56,27 @@ class TestJournalEndpoints:
         )
         test_db.add(user)
         await test_db.commit()
+        await test_db.refresh(user)
+
+        headers = auth_headers_for(user.id)
 
         # Upload first blob
         await test_client.post(
             "/journal/blob",
             json={"blob_json": '{"encrypted": "first entry"}'},
-            headers={"x-auth-uid": "test-journal-user-2"},
+            headers=headers,
         )
 
         # Upload second blob
         await test_client.post(
             "/journal/blob",
             json={"blob_json": '{"encrypted": "second entry"}'},
-            headers={"x-auth-uid": "test-journal-user-2"},
+            headers=headers,
         )
 
         # Get the latest - should return one of the blobs
         response = await test_client.get(
-            "/journal/blob/latest", headers={"x-auth-uid": "test-journal-user-2"}
+            "/journal/blob/latest", headers=headers
         )
 
         assert response.status_code == 200
@@ -96,9 +102,10 @@ class TestJournalEndpoints:
         )
         test_db.add(user)
         await test_db.commit()
+        await test_db.refresh(user)
 
         response = await test_client.get(
-            "/journal/blob/latest", headers={"x-auth-uid": "test-journal-user-3"}
+            "/journal/blob/latest", headers=auth_headers_for(user.id)
         )
 
         assert response.status_code == 200
@@ -106,19 +113,18 @@ class TestJournalEndpoints:
         assert data == {}
 
     @pytest.mark.asyncio
-    async def test_upload_blob_creates_user_if_not_exists(
-        self, test_client: AsyncClient
-    ):
-        """Test that a user is created automatically when uploading a blob."""
+    async def test_upload_blob_requires_auth(self, test_client: AsyncClient):
+        """Test that uploading a blob without authentication returns 401.
+
+        Previously this auto-created users via X-Auth-UID which has been
+        removed for security.
+        """
         response = await test_client.post(
             "/journal/blob",
             json={"blob_json": '{"encrypted": "new user data"}'},
-            headers={"x-auth-uid": "auto-created-journal-user"},
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert data["blob_json"] == '{"encrypted": "new user data"}'
+        assert response.status_code == 401
 
     @pytest.mark.asyncio
     async def test_user_isolation(
@@ -140,31 +146,36 @@ class TestJournalEndpoints:
         )
         test_db.add_all([user1, user2])
         await test_db.commit()
+        await test_db.refresh(user1)
+        await test_db.refresh(user2)
+
+        headers1 = auth_headers_for(user1.id)
+        headers2 = auth_headers_for(user2.id)
 
         # User 1 uploads a blob
         await test_client.post(
             "/journal/blob",
             json={"blob_json": '{"encrypted": "user1 data"}'},
-            headers={"x-auth-uid": "user1"},
+            headers=headers1,
         )
 
         # User 2 uploads a blob
         await test_client.post(
             "/journal/blob",
             json={"blob_json": '{"encrypted": "user2 data"}'},
-            headers={"x-auth-uid": "user2"},
+            headers=headers2,
         )
 
         # User 1 gets their latest blob
         response1 = await test_client.get(
-            "/journal/blob/latest", headers={"x-auth-uid": "user1"}
+            "/journal/blob/latest", headers=headers1
         )
         data1 = response1.json()
         assert data1["blob_json"] == '{"encrypted": "user1 data"}'
 
         # User 2 gets their latest blob
         response2 = await test_client.get(
-            "/journal/blob/latest", headers={"x-auth-uid": "user2"}
+            "/journal/blob/latest", headers=headers2
         )
         data2 = response2.json()
         assert data2["blob_json"] == '{"encrypted": "user2 data"}'

@@ -69,7 +69,6 @@ ALLOWED_HEADERS = [
     "user-agent",
     "x-requested-with",
     "x-csrf-token",
-    "x-auth-uid",
     "cache-control",
 ]
 
