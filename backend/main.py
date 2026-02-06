@@ -12,6 +12,10 @@ from urllib.parse import parse_qs, urlparse
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 startup_logger = logging.getLogger("mindvibe.startup")
 
+# Install in-memory log handler so backend logs are available via admin API
+from backend.routes.admin.backend_logs import install_log_handler
+install_log_handler()
+
 # CRITICAL: Load environment variables BEFORE anything else
 from dotenv import load_dotenv
 load_dotenv()
@@ -682,6 +686,15 @@ try:
     startup_logger.info("   • GET    /api/admin/voice/enhancements - Enhancement stats")
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Voice Analytics router: {e}")
+
+try:
+    from backend.routes.admin.backend_logs import router as admin_backend_logs_router
+    app.include_router(admin_backend_logs_router)
+    admin_routers_loaded.append("backend_logs")
+    startup_logger.info("   • GET    /api/admin/backend-logs - Backend application logs")
+    startup_logger.info("   • GET    /api/admin/backend-logs/stats - Log level statistics")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Admin Backend Logs router: {e}")
 
 if admin_routers_loaded:
     startup_logger.info(f"✅ [SUCCESS] Admin routers loaded: {', '.join(admin_routers_loaded)}")
