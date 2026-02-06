@@ -81,11 +81,27 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
     return {"ssl": ssl_context}
 
 
+# ---------------------------------------------------------------------------
+# Connection pool tuning for concurrent users.
+# Defaults are safe for 50–200 simultaneous users.  Adjust via env vars
+# when scaling beyond that or running multiple API instances.
+# ---------------------------------------------------------------------------
+_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "30"))          # base connections
+_MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "10"))     # burst connections
+_POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))   # recycle after 1h
+_POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))     # wait for connection
+
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     future=True,
-    connect_args=_get_ssl_connect_args(DATABASE_URL)
+    connect_args=_get_ssl_connect_args(DATABASE_URL),
+    # Connection pool settings
+    pool_size=_POOL_SIZE,
+    max_overflow=_MAX_OVERFLOW,
+    pool_pre_ping=True,         # verify connections are alive before use
+    pool_recycle=_POOL_RECYCLE,  # recycle stale connections (seconds)
+    pool_timeout=_POOL_TIMEOUT,  # seconds to wait for a free connection
 )
 SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
