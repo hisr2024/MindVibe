@@ -298,7 +298,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder="Share what's on your mind..."
               className="flex-1 bg-slate-800 text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[60px] max-h-[120px]"
               disabled={isLoading}

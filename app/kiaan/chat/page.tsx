@@ -42,6 +42,7 @@ function KiaanChatPageInner() {
         handleSendMessage(decodeURIComponent(message));
       }, 1000);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSendMessage is stable via useCallback, runs only on initial mount with mood params
   }, [searchParams]);
 
   const handleSendMessage = useCallback(async (text: string) => {

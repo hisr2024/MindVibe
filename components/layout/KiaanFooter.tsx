@@ -226,7 +226,7 @@ export function KiaanFooter() {
           )
         );
         triggerHaptic('success');
-      }, data.response.length * STREAMING_SPEED_MS_PER_CHAR);
+      }, (data.response?.length || 100) * STREAMING_SPEED_MS_PER_CHAR);
 
     } catch (error) {
       console.error('KIAAN chat error:', error);

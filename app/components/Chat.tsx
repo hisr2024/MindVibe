@@ -51,7 +51,7 @@ export default function Chat() {
         text: data.response || 'I am here for you with a calm response.',
         timestamp: new Date().toISOString(),
         summary: data.summary || undefined,
-        aiPowered: data.ai_powered || true
+        aiPowered: data.ai_powered ?? true
       }
       setMessages(prev => [...prev, assistant])
     } catch (error) {
