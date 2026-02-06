@@ -36,6 +36,8 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/auth/refresh",
     "/api/auth/forgot-password",
     "/api/auth/reset-password",
+    # Admin login - no session exists yet
+    "/api/admin/auth/login",
 }
 
 # Methods that require CSRF protection
