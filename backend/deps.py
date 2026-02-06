@@ -86,7 +86,7 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
 # Defaults are safe for 50–200 simultaneous users.  Adjust via env vars
 # when scaling beyond that or running multiple API instances.
 # ---------------------------------------------------------------------------
-_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "20"))          # base connections
+_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "30"))          # base connections
 _MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "10"))     # burst connections
 _POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))   # recycle after 1h
 _POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))     # wait for connection
