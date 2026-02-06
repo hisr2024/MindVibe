@@ -74,9 +74,13 @@ class DivineVoiceService {
   private currentAudio: HTMLAudioElement | null = null
   private unregisterAudio: (() => void) | null = null
   private baseUrl = '/api/voice/divine'
+  /** Circuit breaker: skip API when auth fails to avoid console spam */
+  private apiDisabled = false
+  private apiFailCount = 0
 
   /**
    * Synthesize speech with the Divine Voice Orchestrator.
+   * Returns immediately with success:false if API is unavailable (auth failure).
    */
   async synthesize(options: SynthesisOptions): Promise<SynthesisResult> {
     const {
@@ -91,8 +95,15 @@ class DivineVoiceService {
       onError,
     } = options
 
+    // Circuit breaker: if API failed with auth error, skip immediately
+    if (this.apiDisabled) {
+      const err = new Error('Divine voice API unavailable (auth required)')
+      onError?.(err)
+      return { success: false, error: err.message }
+    }
+
     // Stop any current playback
-    this.stop()
+    this.stopLocal()
 
     try {
       const response = await apiFetch(`${this.baseUrl}/synthesize`, {
@@ -109,8 +120,19 @@ class DivineVoiceService {
 
       if (!response.ok) {
         const errorText = await response.text()
+        // Track auth failures - disable API after first 401
+        if (response.status === 401 || response.status === 403) {
+          this.apiFailCount++
+          if (this.apiFailCount >= 1) {
+            this.apiDisabled = true
+            console.warn('[DivineVoice] API requires authentication - using browser voice. Login for neural TTS.')
+          }
+        }
         throw new Error(`Synthesis failed: ${errorText}`)
       }
+
+      // Reset failure tracking on success
+      this.apiFailCount = 0
 
       // Get metadata from headers
       const provider = response.headers.get('X-Provider') || 'unknown'
@@ -186,8 +208,15 @@ class DivineVoiceService {
       onError,
     } = options
 
-    // Stop any current playback
-    this.stop()
+    // Circuit breaker: if API failed with auth error, skip immediately
+    if (this.apiDisabled) {
+      const err = new Error('Divine voice API unavailable (auth required)')
+      onError?.(err)
+      return { success: false, error: err.message }
+    }
+
+    // Stop any current playback (local only, no API call)
+    this.stopLocal()
 
     try {
       const response = await apiFetch(`${this.baseUrl}/shloka`, {
@@ -203,6 +232,13 @@ class DivineVoiceService {
 
       if (!response.ok) {
         const errorText = await response.text()
+        if (response.status === 401 || response.status === 403) {
+          this.apiFailCount++
+          if (this.apiFailCount >= 1) {
+            this.apiDisabled = true
+            console.warn('[DivineVoice] API requires authentication - using browser voice. Login for neural TTS.')
+          }
+        }
         throw new Error(`Shloka synthesis failed: ${errorText}`)
       }
 
@@ -287,30 +323,34 @@ class DivineVoiceService {
   }
 
   /**
-   * Stop all voice playback.
+   * Stop local audio playback without calling the API.
+   * Used internally to stop current audio before starting new synthesis.
    */
-  stop(): void {
-    // Stop current audio
+  private stopLocal(): void {
     if (this.currentAudio) {
       this.currentAudio.pause()
       this.currentAudio.currentTime = 0
     }
-
     this.cleanup()
-
-    // Also call universal stop
     stopAllAudio()
+  }
 
-    // Call backend stop
-    apiFetch(`${this.baseUrl}/stop`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ synthesis_id: null }),
-    }).catch(() => {
-      // Ignore errors
-    })
+  /**
+   * Stop all voice playback (local + backend).
+   */
+  stop(): void {
+    this.stopLocal()
 
-    console.log('[DivineVoice] All voice stopped')
+    // Only call backend stop if API is available
+    if (!this.apiDisabled) {
+      apiFetch(`${this.baseUrl}/stop`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ synthesis_id: null }),
+      }).catch(() => {
+        // Ignore errors
+      })
+    }
   }
 
   /**

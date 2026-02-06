@@ -1,6 +1,14 @@
 /**
  * Speech Synthesis wrapper for voice output (Text-to-Speech)
+ *
  * Provides a clean interface around browser's SpeechSynthesis API
+ * with automatic selection of the highest quality voice available.
+ *
+ * Voice Quality Ranking (auto-selected):
+ * 1. Neural/Natural voices (Edge "Jenny Online", Chrome "Google US English")
+ * 2. Enhanced voices (Safari "Samantha Enhanced")
+ * 3. Online/Remote voices (localService: false)
+ * 4. Default system voice (last resort)
  */
 
 import { getSpeechLanguage } from './languageMapping'
@@ -20,12 +28,57 @@ export interface SynthesisCallbacks {
   onError?: (error: string) => void
 }
 
+// Voice quality scoring - higher is better
+const VOICE_QUALITY_PATTERNS: { pattern: RegExp; score: number }[] = [
+  // Neural/Natural voices (Edge, modern browsers) - best quality
+  { pattern: /Natural/i, score: 100 },
+  { pattern: /Neural/i, score: 95 },
+  // Google's cloud voices (Chrome) - excellent quality
+  { pattern: /Google.*English/i, score: 90 },
+  { pattern: /Google/i, score: 85 },
+  // Microsoft Online voices (Edge) - excellent quality
+  { pattern: /Online/i, score: 88 },
+  { pattern: /Microsoft.*Jenny/i, score: 92 },
+  { pattern: /Microsoft.*Aria/i, score: 91 },
+  { pattern: /Microsoft.*Guy/i, score: 89 },
+  { pattern: /Microsoft/i, score: 80 },
+  // Enhanced voices (macOS/iOS) - good quality
+  { pattern: /Enhanced/i, score: 75 },
+  { pattern: /Premium/i, score: 78 },
+  // Specific high-quality system voices
+  { pattern: /Samantha/i, score: 70 },
+  { pattern: /Karen/i, score: 68 },
+  { pattern: /Daniel/i, score: 65 },
+  { pattern: /Moira/i, score: 65 },
+  // Female voices tend to sound warmer for companion use
+  { pattern: /Female/i, score: 10 },
+]
+
+function scoreVoice(voice: SpeechSynthesisVoice): number {
+  let score = 0
+
+  // Pattern-based scoring
+  for (const { pattern, score: bonus } of VOICE_QUALITY_PATTERNS) {
+    if (pattern.test(voice.name)) {
+      score = Math.max(score, bonus)
+    }
+  }
+
+  // Remote/cloud voices are generally higher quality than local
+  if (!voice.localService) {
+    score += 15
+  }
+
+  return score
+}
+
 export class SpeechSynthesisService {
   private synthesis: SpeechSynthesis | null = null
   private currentUtterance: SpeechSynthesisUtterance | null = null
   private config: SynthesisConfig = {}
   private callbacks: SynthesisCallbacks = {}
-  private preferredVoiceName: string | null = null
+  private bestVoice: SpeechSynthesisVoice | null = null
+  private voicesLoaded = false
 
   constructor(config: SynthesisConfig = {}) {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -36,14 +89,52 @@ export class SpeechSynthesisService {
     this.synthesis = window.speechSynthesis
     this.config = {
       language: config.language || 'en',
-      rate: config.rate ?? 1.0,
-      pitch: config.pitch ?? 1.0,
+      rate: config.rate ?? 0.94,
+      pitch: config.pitch ?? 1.03,
       volume: config.volume ?? 1.0,
+    }
+
+    // Auto-select best voice (voices may load async)
+    this.selectBestVoice()
+    if (this.synthesis) {
+      this.synthesis.onvoiceschanged = () => this.selectBestVoice()
     }
   }
 
   /**
-   * Speak the given text
+   * Automatically select the highest quality voice for the configured language.
+   */
+  private selectBestVoice(): void {
+    if (!this.synthesis) return
+
+    const voices = this.synthesis.getVoices()
+    if (voices.length === 0) return
+
+    const targetLang = getSpeechLanguage(this.config.language || 'en')
+    const langPrefix = targetLang.split('-')[0]
+
+    // Filter voices matching our language
+    const matchingVoices = voices.filter(v =>
+      v.lang.startsWith(langPrefix)
+    )
+
+    if (matchingVoices.length === 0) return
+
+    // Score and sort - highest quality first
+    const scored = matchingVoices
+      .map(voice => ({ voice, score: scoreVoice(voice) }))
+      .sort((a, b) => b.score - a.score)
+
+    this.bestVoice = scored[0].voice
+    this.voicesLoaded = true
+
+    if (scored[0].score > 0) {
+      console.log(`[KIAAN TTS] Selected voice: "${this.bestVoice.name}" (score: ${scored[0].score}, remote: ${!this.bestVoice.localService})`)
+    }
+  }
+
+  /**
+   * Speak the given text with the best available voice
    */
   speak(text: string, callbacks: SynthesisCallbacks = {}): void {
     if (!this.synthesis) {
@@ -58,17 +149,13 @@ export class SpeechSynthesisService {
 
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = getSpeechLanguage(this.config.language || 'en')
-    utterance.rate = this.config.rate ?? 1.0
-    utterance.pitch = this.config.pitch ?? 1.0
+    utterance.rate = this.config.rate ?? 0.94
+    utterance.pitch = this.config.pitch ?? 1.03
     utterance.volume = this.config.volume ?? 1.0
 
-    // Apply preferred voice if set
-    if (this.preferredVoiceName && this.synthesis) {
-      const voices = this.synthesis.getVoices()
-      const voice = voices.find(v => v.name === this.preferredVoiceName)
-      if (voice) {
-        utterance.voice = voice
-      }
+    // Use the best quality voice we found
+    if (this.bestVoice) {
+      utterance.voice = this.bestVoice
     }
 
     utterance.onstart = () => {
@@ -161,12 +248,12 @@ export class SpeechSynthesisService {
    */
   setVoice(voiceName: string): void {
     if (!this.synthesis) return
-    
+
     const voices = this.synthesis.getVoices()
     const voice = voices.find(v => v.name === voiceName)
-    
+
     if (voice) {
-      this.preferredVoiceName = voiceName
+      this.bestVoice = voice
     }
   }
 
