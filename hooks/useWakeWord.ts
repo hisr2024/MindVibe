@@ -1,35 +1,57 @@
 /**
- * Hook for managing wake word detection
+ * Hook for managing ultra-sensitive wake word detection
+ *
+ * Features:
+ * - Configurable sensitivity levels (ultra/high/medium/low)
+ * - Real-time listening state reporting
+ * - Detection event details (confidence, match type, latency)
+ * - Automatic lifecycle management
  */
 
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { WakeWordDetector } from '@/utils/speech/wakeWord'
+import {
+  WakeWordDetector,
+  WakeWordDetectionEvent,
+  WakeWordListeningState,
+  type WakeWordSensitivity,
+} from '@/utils/speech/wakeWord'
 import { isSpeechRecognitionSupported } from '@/utils/speech/languageMapping'
 
 export interface UseWakeWordOptions {
   language?: string
   enabled?: boolean
   wakeWords?: string[]
-  onWakeWordDetected?: () => void
+  sensitivity?: WakeWordSensitivity
+  onWakeWordDetected?: (event: WakeWordDetectionEvent) => void
   onError?: (error: string) => void
+  onStateChange?: (state: WakeWordListeningState) => void
 }
 
 export interface UseWakeWordReturn {
   isActive: boolean
   isSupported: boolean
   error: string | null
+  sensitivity: WakeWordSensitivity
+  listeningState: WakeWordListeningState | null
+  lastDetection: WakeWordDetectionEvent | null
   start: () => void
   stop: () => void
   toggle: () => void
+  setSensitivity: (level: WakeWordSensitivity) => void
 }
 
 export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn {
   const [isActive, setIsActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSupported] = useState(() => isSpeechRecognitionSupported())
-  
+  const [sensitivity, setSensitivityState] = useState<WakeWordSensitivity>(
+    options.sensitivity || 'high'
+  )
+  const [listeningState, setListeningState] = useState<WakeWordListeningState | null>(null)
+  const [lastDetection, setLastDetection] = useState<WakeWordDetectionEvent | null>(null)
+
   const detectorRef = useRef<WakeWordDetector | null>(null)
   const {
     language = 'en',
@@ -37,6 +59,7 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     wakeWords,
     onWakeWordDetected,
     onError,
+    onStateChange,
   } = options
 
   // Initialize wake word detector
@@ -46,13 +69,20 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     detectorRef.current = new WakeWordDetector({
       language,
       wakeWords,
-      onWakeWordDetected: () => {
-        onWakeWordDetected?.()
+      sensitivity,
+      onWakeWordDetected: (event: WakeWordDetectionEvent) => {
+        setLastDetection(event)
+        onWakeWordDetected?.(event)
       },
-      onError: (err) => {
+      onError: (err: string) => {
         setError(err)
         setIsActive(false)
         onError?.(err)
+      },
+      onListeningStateChange: (state: WakeWordListeningState) => {
+        setListeningState(state)
+        setIsActive(state.isListening)
+        onStateChange?.(state)
       },
     })
 
@@ -62,7 +92,7 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
         detectorRef.current = null
       }
     }
-  }, [isSupported, language, wakeWords, onWakeWordDetected, onError])
+  }, [isSupported, language, wakeWords, sensitivity, onWakeWordDetected, onError, onStateChange])
 
   // Update language when it changes
   useEffect(() => {
@@ -99,7 +129,14 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     }
   }, [isActive, start, stop])
 
-  // Auto-start if enabled on mount - moved after callback definitions
+  const setSensitivity = useCallback((level: WakeWordSensitivity) => {
+    setSensitivityState(level)
+    if (detectorRef.current) {
+      detectorRef.current.setSensitivity(level)
+    }
+  }, [])
+
+  // Auto-start if enabled on mount
   useEffect(() => {
     if (enabled && isSupported && detectorRef.current && !isActive) {
       start()
@@ -110,8 +147,12 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     isActive,
     isSupported,
     error,
+    sensitivity,
+    listeningState,
+    lastDetection,
     start,
     stop,
     toggle,
+    setSensitivity,
   }
 }
