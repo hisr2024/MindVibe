@@ -11,7 +11,7 @@ const pages = [
 ]
 
 const voiceFeature = {
-  href: '/kiaan/voice',
+  href: '/voice-companion',
   title: 'KIAAN Voice',
   detail: 'Elite voice AI assistant with wake word detection, offline capability, and neural text-to-speech.',
   badge: 'New'

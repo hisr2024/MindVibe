@@ -198,7 +198,7 @@ function KiaanChatPageInner() {
             </Link>
             {/* Voice Mode Toggle */}
             <Link
-              href="/kiaan/voice"
+              href="/voice-companion"
               className="flex items-center gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:from-orange-500/20 hover:to-amber-500/20"
               title="Switch to Voice Mode"
             >

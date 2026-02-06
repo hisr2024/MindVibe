@@ -404,7 +404,7 @@ export default function QuantumDivePage() {
           </Link>
           <h1 className="text-lg font-semibold text-white">Quantum Dive</h1>
           <Link
-            href="/app/kiaan/voice"
+            href="/voice-companion"
             className="text-white/60 hover:text-white transition-colors"
           >
             Voice &rarr;

@@ -43,7 +43,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     title: 'KIAAN Voice',
     description: 'Voice-activated wisdom guide',
     gradient: 'from-orange-400/30 to-amber-400/30',
-    href: '/kiaan/voice',
+    href: '/voice-companion',
     badge: 'new',
   },
   {

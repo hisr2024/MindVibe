@@ -23,37 +23,8 @@ export { useVoiceInput, type UseVoiceInputOptions, type UseVoiceInputReturn } fr
 export { useVoiceOutput, type UseVoiceOutputOptions, type UseVoiceOutputReturn } from './useVoiceOutput'
 export { useEnhancedVoiceOutput, type UseEnhancedVoiceOutputOptions, type UseEnhancedVoiceOutputReturn } from './useEnhancedVoiceOutput'
 export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './useWakeWord'
-export { useKiaanVoice, type UseKiaanVoiceOptions, type UseKiaanVoiceReturn, type KiaanVoiceState, type KiaanVoiceMessage } from './useKiaanVoice'
-export {
-  useVoiceLearning,
-  useVoiceLearningWithKiaan,
-  type UseVoiceLearningOptions,
-  type UseVoiceLearningReturn,
-  type VoiceLearningSession,
-  type EnhancedResponse,
-  type SentimentAnalysis,
-  type UserPreference,
-} from './useVoiceLearning'
 export { useHapticFeedback } from './useHapticFeedback'
 export { useStreamingText, streamText } from './useStreamingText'
 export { usePrefersReducedMotion, getSafeAnimation } from './usePrefersReducedMotion'
 export { useDivineContent } from './useDivineContent'
 export { usePullToRefresh, type UsePullToRefreshOptions, type UsePullToRefreshReturn } from './usePullToRefresh'
-export {
-  useAdvancedVoiceLearning,
-  useAnalyticsDashboard,
-  useProactiveEngagement,
-  useOfflineSync,
-  useVoicePersonalization,
-  useSpiritualMemory,
-  useInteractionPatterns,
-  type DashboardSnapshot,
-  type ProactiveMessage,
-  type VoiceProfile,
-  type SpiritualSummary,
-  type QualityTrend,
-  type InteractionAnalytics,
-  type SyncStatus,
-  type OfflineFeedback,
-  type AdvancedVoiceLearningOptions,
-} from './useAdvancedVoiceLearning'
