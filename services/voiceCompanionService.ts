@@ -80,18 +80,24 @@ export interface VoiceProfile {
 
 class VoiceCompanionService {
   private sessionId: string | null = null
+  /** Circuit breaker: skip all API calls when auth fails to avoid console 401 spam */
+  private apiDisabled = false
 
   // ─── Conversation Sessions ──────────────────────────────────────
 
   /** Start a new divine conversation session */
   async startSession(language: string = 'en'): Promise<ConversationSession | null> {
+    if (this.apiDisabled) return null
     try {
       const response = await apiFetch('/api/voice/conversation/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language }),
       })
-      if (!response.ok) return null
+      if (!response.ok) {
+        this.checkAuthFailure(response.status)
+        return null
+      }
       const data = await response.json()
       this.sessionId = data.session_id || data.sessionId
       return {
@@ -107,6 +113,7 @@ class VoiceCompanionService {
 
   /** Send a message within the active session */
   async sendMessage(text: string, language: string = 'en'): Promise<CompanionMessage | null> {
+    if (this.apiDisabled) return null
     try {
       const response = await apiFetch('/api/voice/conversation/message', {
         method: 'POST',
@@ -117,7 +124,10 @@ class VoiceCompanionService {
           language,
         }),
       })
-      if (!response.ok) return null
+      if (!response.ok) {
+        this.checkAuthFailure(response.status)
+        return null
+      }
       const data = await response.json()
       return {
         response: data.response || data.message || 'I am here with you.',
@@ -153,6 +163,7 @@ class VoiceCompanionService {
 
   /** Stateless voice query - fallback when session management fails */
   async voiceQuery(text: string, context: string = 'voice', language: string = 'en'): Promise<CompanionMessage | null> {
+    if (this.apiDisabled) return null
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000)
@@ -179,6 +190,8 @@ class VoiceCompanionService {
         }
       }
 
+      this.checkAuthFailure(response.status)
+
       // Fallback to chat API
       const chatController = new AbortController()
       const chatTimeoutId = setTimeout(() => chatController.abort(), 20000)
@@ -196,6 +209,7 @@ class VoiceCompanionService {
           response: chatData.response || chatData.message || 'I am here with you.',
         }
       }
+      this.checkAuthFailure(chatResponse.status)
       return null
     } catch {
       return null
@@ -206,6 +220,7 @@ class VoiceCompanionService {
 
   /** Get a guided breathing exercise */
   async getBreathingExercise(pattern: string = 'peace_breath'): Promise<BreathingExercise> {
+    if (this.apiDisabled) return this.defaultBreathingExercise()
     try {
       const params = new URLSearchParams()
       if (this.sessionId) params.set('session_id', this.sessionId)
@@ -221,7 +236,10 @@ class VoiceCompanionService {
       // Fall through to default
     }
 
-    // Default breathing exercise (4-4-4-4 box breathing)
+    return this.defaultBreathingExercise()
+  }
+
+  private defaultBreathingExercise(): BreathingExercise {
     return {
       pattern: 'box_breathing',
       totalDuration: 48,
@@ -246,6 +264,7 @@ class VoiceCompanionService {
 
   /** Get deep emotional/spiritual analysis */
   async getSoulReading(text: string): Promise<SoulReading | null> {
+    if (this.apiDisabled) return null
     try {
       const response = await apiFetch('/api/kiaan/soul-reading', {
         method: 'POST',
@@ -263,12 +282,14 @@ class VoiceCompanionService {
 
   /** Start a voice learning session */
   async startLearningSession(): Promise<void> {
+    if (this.apiDisabled) return
     try {
-      await apiFetch('/api/voice-learning/session/start', {
+      const response = await apiFetch('/api/voice-learning/session/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       })
+      if (!response.ok) this.checkAuthFailure(response.status)
     } catch {
       // Non-fatal
     }
@@ -276,6 +297,7 @@ class VoiceCompanionService {
 
   /** Record a playback event for learning */
   async recordPlaybackEvent(event: 'play' | 'pause' | 'skip' | 'replay' | 'complete'): Promise<void> {
+    if (this.apiDisabled) return
     try {
       await apiFetch('/api/voice-learning/playback-event', {
         method: 'POST',
@@ -289,6 +311,7 @@ class VoiceCompanionService {
 
   /** Submit conversation feedback */
   async submitFeedback(rating: number, helpful: boolean): Promise<void> {
+    if (this.apiDisabled) return
     try {
       await apiFetch('/api/voice-learning/feedback', {
         method: 'POST',
@@ -308,6 +331,7 @@ class VoiceCompanionService {
 
   /** Get pending proactive messages for the user */
   async getProactiveMessages(): Promise<ProactiveMessage[]> {
+    if (this.apiDisabled) return []
     try {
       const response = await apiFetch('/api/voice-learning/advanced/engagement/pending')
       if (!response.ok) return []
@@ -322,6 +346,7 @@ class VoiceCompanionService {
 
   /** Start an enhancement session (binaural, ambient, breathing) */
   async startEnhancement(type: 'binaural' | 'spatial' | 'breathing' | 'ambient' | 'sleep' | 'meditation'): Promise<string | null> {
+    if (this.apiDisabled) return null
     try {
       const response = await apiFetch('/api/voice/enhancement/start', {
         method: 'POST',
@@ -340,6 +365,7 @@ class VoiceCompanionService {
 
   /** Submit a voice-based mood check-in */
   async submitCheckin(mood: number, energy: number, stress: number, isMorning: boolean = true): Promise<{ affirmation?: string; response?: string } | null> {
+    if (this.apiDisabled) return null
     try {
       const response = await apiFetch('/api/voice/checkin', {
         method: 'POST',
@@ -355,19 +381,32 @@ class VoiceCompanionService {
 
   // ─── Spiritual Progress ─────────────────────────────────────────
 
-  /** Get spiritual journey summary */
+  /** Get spiritual journey summary (requires auth) */
   async getSpiritualSummary(): Promise<{
     totalVerses: number
     breakthroughs: number
     growthScore: number
     teachingStyle: string
   } | null> {
+    if (this.apiDisabled) return null
     try {
       const response = await apiFetch('/api/voice-learning/advanced/spiritual/summary')
       if (!response.ok) return null
       return await response.json()
     } catch {
       return null
+    }
+  }
+
+  // ─── Circuit Breaker ─────────────────────────────────────────────
+
+  /** Disable all API calls after auth failure to prevent console 401 spam */
+  private checkAuthFailure(status: number): void {
+    if (status === 401 || status === 403) {
+      if (!this.apiDisabled) {
+        this.apiDisabled = true
+        console.warn('[VoiceCompanion] API requires authentication - using local wisdom. Login for full features.')
+      }
     }
   }
 
