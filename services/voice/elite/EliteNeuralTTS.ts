@@ -982,6 +982,12 @@ export class EliteNeuralTTS {
   destroy(): void {
     this.cancel()
 
+    // Clean up onvoiceschanged handler to prevent post-destroy callbacks
+    if (this.synthesis) {
+      this.synthesis.onvoiceschanged = null
+      this.synthesis = null
+    }
+
     if (this.postProcessContext && this.postProcessContext.state !== 'closed') {
       this.postProcessContext.close().catch(() => {})
     }
@@ -992,6 +998,8 @@ export class EliteNeuralTTS {
     this.presenceEQ = null
     this.deEsserFilter = null
     this.gainNode = null
+    this.currentAudioSource = null
+    this.currentAudioElement = null
   }
 }
 

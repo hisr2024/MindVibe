@@ -279,6 +279,16 @@ export class SpeechRecognitionService {
   destroy(): void {
     this.abort()
     this.callbacks = {}
-    this.recognition = null
+
+    // Clear event handlers to prevent post-destroy callbacks and memory leaks
+    if (this.recognition) {
+      this.recognition.onstart = null
+      this.recognition.onresult = null
+      this.recognition.onerror = null
+      this.recognition.onend = null
+      this.recognition.onsoundstart = null
+      this.recognition.onsoundend = null
+      this.recognition = null
+    }
   }
 }

@@ -318,6 +318,23 @@ export class NeuralWakeWordEngine {
       return
     }
 
+    // Guard against non-browser environments (SSR) and missing APIs
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      this.onError?.('Wake word detection requires a browser environment')
+      return
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      this.onError?.('Microphone access not available in this browser')
+      return
+    }
+
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+    if (!AudioContextClass) {
+      this.onError?.('AudioContext not supported in this browser')
+      return
+    }
+
     try {
       // Request microphone with noise suppression
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -330,8 +347,7 @@ export class NeuralWakeWordEngine {
         }
       })
 
-      // Create audio context
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      // Create audio context (AudioContextClass already validated above)
       this.audioContext = new AudioContextClass({ sampleRate: SAMPLE_RATE })
 
       // Create source
