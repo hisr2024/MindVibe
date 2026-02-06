@@ -462,20 +462,42 @@ async def check_kiaan_quota(db: AsyncSession, user_id: str) -> tuple[bool, int, 
 
 async def increment_kiaan_usage(db: AsyncSession, user_id: str) -> UsageTracking:
     """Increment the KIAAN questions usage count for a user.
-    
+
+    Uses SELECT FOR UPDATE to prevent race conditions when two requests
+    try to increment simultaneously (e.g. user double-clicks send).
+
     Args:
         db: Database session.
         user_id: The user's ID.
-        
+
     Returns:
         UsageTracking: The updated usage record.
     """
-    usage = await get_or_create_usage_record(db, user_id, "kiaan_questions")
+    # Ensure the record exists first
+    await get_or_create_usage_record(db, user_id, "kiaan_questions")
+
+    period_start, _ = _get_current_period()
+
+    # Lock the row to prevent concurrent increments
+    stmt = (
+        select(UsageTracking)
+        .where(
+            and_(
+                UsageTracking.user_id == user_id,
+                UsageTracking.feature == "kiaan_questions",
+                UsageTracking.period_start == period_start,
+            )
+        )
+        .with_for_update()
+    )
+    result = await db.execute(stmt)
+    usage = result.scalars().first()
+
     usage.usage_count += 1
     usage.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(usage)
-    
+
     logger.info(
         f"User {user_id} KIAAN usage: {usage.usage_count}/{usage.usage_limit}"
     )
@@ -551,18 +573,36 @@ async def upgrade_subscription(
     stripe_customer_id: Optional[str] = None,
 ) -> UserSubscription:
     """Upgrade or change a user's subscription plan.
-    
+
+    Uses SELECT FOR UPDATE to prevent race conditions when a Stripe webhook
+    and a direct API call both try to upgrade the same user simultaneously.
+
     Args:
         db: Database session.
         user_id: The user's ID.
         new_plan_id: The new plan's ID.
         stripe_subscription_id: Optional Stripe subscription ID.
         stripe_customer_id: Optional Stripe customer ID.
-        
+
     Returns:
         Updated UserSubscription.
     """
-    subscription = await get_user_subscription(db, user_id)
+    # Lock the subscription row to prevent concurrent upgrades
+    from sqlalchemy.orm import selectinload
+
+    stmt = (
+        select(UserSubscription)
+        .options(selectinload(UserSubscription.plan))
+        .where(
+            and_(
+                UserSubscription.user_id == user_id,
+                UserSubscription.deleted_at.is_(None),
+            )
+        )
+        .with_for_update()
+    )
+    result = await db.execute(stmt)
+    subscription = result.scalars().first()
     now = datetime.now(UTC)
     
     if subscription:
