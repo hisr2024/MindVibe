@@ -37,18 +37,6 @@ import {
 } from '@/types/journeyEngine.types'
 
 // =============================================================================
-// UTILITIES
-// =============================================================================
-
-function hasAuthToken(): boolean {
-  if (typeof window === 'undefined') return false
-  const token = localStorage.getItem('mindvibe_access_token') ||
-    localStorage.getItem('access_token') ||
-    localStorage.getItem('mindvibe_auth_user')
-  return !!token
-}
-
-// =============================================================================
 // RADAR CHART COMPONENT
 // =============================================================================
 
@@ -495,19 +483,16 @@ export default function JourneysPageClient() {
         limit: showAllTemplates ? 50 : 6,
       })
 
-      // Only load dashboard if user has auth token
-      let dashboardPromise: Promise<DashboardResponse | null> = Promise.resolve(null)
-      if (hasAuthToken()) {
-        dashboardPromise = journeyEngineService.getDashboard().catch((err) => {
+      // Attempt to load dashboard - auth is handled via httpOnly cookies.
+      // If user is not authenticated, the API returns 401 and we show auth prompt.
+      const dashboardPromise: Promise<DashboardResponse | null> =
+        journeyEngineService.getDashboard().catch((err) => {
           console.warn('[JourneysPageClient] Dashboard load failed:', err)
           if (err instanceof JourneyEngineError && err.isAuthError()) {
             setIsAuthError(true)
           }
           return null
         })
-      } else {
-        setIsAuthError(true)
-      }
 
       const [templatesData, dashboardData] = await Promise.all([
         templatesPromise,

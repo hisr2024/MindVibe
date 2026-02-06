@@ -14,11 +14,12 @@ import type {
   ApiError,
 } from '@/types/journey.types';
 
+import { apiFetch } from '@/lib/api';
+
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEYS_ENDPOINT = '/api/journeys';
 
 // Retry configuration for transient failures
@@ -197,73 +198,6 @@ function isRetryableStatus(status: number): boolean {
 // =============================================================================
 
 /**
- * Get auth UID from local storage for X-Auth-UID fallback.
- */
-function getAuthHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  // Attach bearer token from localStorage (fallback for auth cookie)
-  if (typeof window !== 'undefined') {
-    const accessToken =
-      localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token');
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    // Try to get user ID from stored auth user (for X-Auth-UID header)
-    const storedUser = localStorage.getItem('mindvibe_auth_user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser) as { id?: string };
-        if (parsedUser.id) {
-          headers['X-Auth-UID'] = parsedUser.id;
-        }
-      } catch {
-        // Ignore malformed storage entries
-      }
-    }
-
-    // Legacy fallback
-    const legacyUserId = localStorage.getItem('userId');
-    if (!headers['X-Auth-UID'] && legacyUserId) {
-      headers['X-Auth-UID'] = legacyUserId;
-    }
-  }
-
-  return headers;
-}
-
-/**
- * Get auth UID from local storage for API fallback.
- */
-function getAuthUid(): string | undefined {
-  if (typeof window === 'undefined') {
-    return undefined;
-  }
-
-  const storedUser = localStorage.getItem('mindvibe_auth_user');
-  if (storedUser) {
-    try {
-      const parsedUser = JSON.parse(storedUser) as { id?: string };
-      if (parsedUser.id) {
-        return parsedUser.id;
-      }
-    } catch {
-      // Ignore malformed storage entries
-    }
-  }
-
-  const legacyUserId = localStorage.getItem('userId');
-  if (legacyUserId) {
-    return legacyUserId;
-  }
-
-  return undefined;
-}
-
-/**
  * Make an authenticated API request with retry logic for transient failures.
  *
  * Automatically retries on 502, 503, 504 errors with exponential backoff.
@@ -275,14 +209,12 @@ async function apiRequest<T>(
   body?: unknown,
   options?: { journeyId?: string }
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
   let lastError: JourneyServiceError | null = null;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const requestOptions: RequestInit = {
       method,
-      headers: getAuthHeaders(),
-      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
     };
 
     if (body !== undefined) {
@@ -290,7 +222,8 @@ async function apiRequest<T>(
     }
 
     try {
-      const response = await fetch(url, requestOptions);
+      // Use apiFetch for proper auth (httpOnly cookies) and Vercel proxy routing
+      const response = await apiFetch(endpoint, requestOptions);
 
       // Handle 204 No Content
       if (response.status === 204) {

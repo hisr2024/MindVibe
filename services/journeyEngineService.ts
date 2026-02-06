@@ -74,39 +74,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function getAuthHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (typeof window !== 'undefined') {
-    const accessToken =
-      localStorage.getItem('mindvibe_access_token') || localStorage.getItem('access_token');
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    const storedUser = localStorage.getItem('mindvibe_auth_user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser) as { id?: string };
-        if (parsedUser.id) {
-          headers['X-Auth-UID'] = parsedUser.id;
-        }
-      } catch {
-        // Ignore
-      }
-    }
-
-    const legacyUserId = localStorage.getItem('userId');
-    if (!headers['X-Auth-UID'] && legacyUserId) {
-      headers['X-Auth-UID'] = legacyUserId;
-    }
-  }
-
-  return headers;
-}
-
 async function apiRequest<T>(
   method: string,
   endpoint: string,
@@ -114,7 +81,7 @@ async function apiRequest<T>(
 ): Promise<T> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      // Use apiFetch for proper auth (Bearer token, CSRF, cookies) and
+      // Use apiFetch for proper auth (httpOnly cookies, CSRF) and
       // Vercel proxy routing (relative paths in production, absolute in dev)
       const response = await apiFetch(endpoint, {
         method,

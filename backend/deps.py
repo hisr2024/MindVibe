@@ -53,32 +53,40 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
         ssl_context.verify_mode = ssl_module.CERT_NONE
         return {"ssl": ssl_context}
 
-    # Default to 'require' (SSL without cert verification) for compatibility
+    # Default to 'verify-full' for security (SSL with full cert verification)
     if not ssl_pref:
-        ssl_pref = "require"
+        ssl_pref = "verify-full"
 
     ssl_pref = ssl_pref.lower()
+    is_production = os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
 
-    # Full verification (only for non-Render environments with proper certs)
+    # Full verification (recommended for production)
     if ssl_pref in {"verify-ca", "verify-full"}:
         return {"ssl": ssl_module.create_default_context()}
 
     # Require SSL but skip certificate verification (for self-signed certs)
     if ssl_pref in {"require", "required", "require-no-verify", "true", "1"}:
+        if is_production:
+            logger.warning(
+                "SECURITY: DB SSL certificate verification disabled in production. "
+                "Set DB_SSL_MODE=verify-full and provide CA certificate for secure connections."
+            )
         ssl_context = ssl_module.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl_module.CERT_NONE
         return {"ssl": ssl_context}
 
-    # Disable SSL
+    # Disable SSL (only allowed in development)
     if ssl_pref in {"disable", "false", "0"}:
+        if is_production:
+            logger.critical(
+                "SECURITY: DB SSL is disabled in production! This is a critical security risk. "
+                "Set DB_SSL_MODE=verify-full to enable encrypted database connections."
+            )
         return {"ssl": False}
 
-    # Default: SSL without verification for compatibility
-    ssl_context = ssl_module.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl_module.CERT_NONE
-    return {"ssl": ssl_context}
+    # Default: full verification
+    return {"ssl": ssl_module.create_default_context()}
 
 
 # ---------------------------------------------------------------------------
@@ -208,127 +216,30 @@ async def get_current_user_or_create(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> str:
-    """Get current user from JWT, X-Auth-UID, or create a dev-anon user."""
-    auth_header = request.headers.get("Authorization")
-    token = None
+    """Get current user from JWT token.
 
-    if auth_header and auth_header.startswith("Bearer "):
-        token = auth_header.split(" ", 1)[1].strip()
-    else:
-        token = request.cookies.get("access_token")
+    SECURITY: This function now delegates to get_current_user() which only
+    accepts cryptographically signed JWT tokens. The previous X-Auth-UID
+    header bypass and dev-anon auto-creation have been removed because:
+    - X-Auth-UID allowed any client to impersonate any user
+    - dev-anon shared a single account across all unauthenticated requests
 
-    if token:
-        try:
-            payload = decode_access_token(token)
-            user_id = payload.get("sub")
-
-            if user_id:
-                stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
-                result = await db.execute(stmt)
-                user = result.scalar_one_or_none()
-                if user:
-                    return str(user_id)
-        except Exception:
-            pass
-
-    x_auth_uid = request.headers.get("X-Auth-UID")
-    auth_uid = (x_auth_uid or "").strip()
-
-    if auth_uid and auth_uid not in {"undefined", "null"}:
-        stmt = select(User).where(User.auth_uid == auth_uid, User.deleted_at.is_(None))
-        result = await db.execute(stmt)
-        user = result.scalar_one_or_none()
-
-        if not user:
-            user = User(auth_uid=auth_uid, locale="en")
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
-
-        return str(user.id)
-
-    # Fallback to dev-anon user for local/dev workflows
-    stmt = select(User).where(User.auth_uid == "dev-anon", User.deleted_at.is_(None))
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-
-    if not user:
-        user = User(auth_uid="dev-anon", locale="en")
-        db.add(user)
-        await db.commit()
-        await db.refresh(user)
-
-    return str(user.id)
+    All callers that previously relied on X-Auth-UID or anonymous access
+    now require proper JWT authentication.
+    """
+    return await get_current_user(request, db)
 
 async def get_current_user_flexible(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> str:
+    """Get the current authenticated user via JWT token.
+
+    SECURITY: This function now delegates to get_current_user() which only
+    accepts cryptographically signed JWT tokens (Bearer header or httpOnly cookie).
+
+    The previous X-Auth-UID header fallback has been removed because it allowed
+    any client to impersonate any user by setting a simple HTTP header.
+    All authentication now requires a valid, signed JWT token.
     """
-    Get the current authenticated user with flexible auth methods.
-
-    Supports multiple authentication methods in order of preference:
-    1. Authorization: Bearer <JWT token> - Standard JWT authentication
-    2. access_token httpOnly cookie - XSS-protected JWT authentication
-    3. X-Auth-UID header - User ID header (for frontend compatibility)
-
-    This is designed for endpoints that need to work with both JWT tokens
-    and direct user ID headers from the frontend.
-
-    Returns the user ID if valid, raises 401 if not authenticated.
-    """
-    # First, try JWT Bearer token authentication
-    auth_header = request.headers.get("Authorization")
-    token = None
-
-    if auth_header and auth_header.startswith("Bearer "):
-        token = auth_header.split(" ", 1)[1].strip()
-    else:
-        # Second, try httpOnly cookie (XSS-protected)
-        token = request.cookies.get("access_token")
-
-    if token:
-        try:
-            payload = decode_access_token(token)
-            user_id = payload.get("sub")
-
-            if user_id:
-                # Verify user exists and is not deleted
-                stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
-                result = await db.execute(stmt)
-                user = result.scalar_one_or_none()
-
-                if user:
-                    return str(user_id)
-        except Exception:
-            pass  # Fall through to try other auth methods
-
-    # Third, try X-Auth-UID header (frontend compatibility)
-    x_auth_uid = request.headers.get("X-Auth-UID")
-
-    if x_auth_uid:
-        user_id = x_auth_uid.strip()
-
-        if user_id and user_id != "undefined" and user_id != "null":
-            # Verify user exists and is not deleted
-            stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
-            result = await db.execute(stmt)
-            user = result.scalar_one_or_none()
-
-            if user:
-                return str(user_id)
-
-            # User doesn't exist - reject the request
-            # This prevents authentication bypass with arbitrary user IDs
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found. Please sign up or use a valid account.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-    # No valid authentication found
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated. Please provide a valid Bearer token, access_token cookie, or X-Auth-UID header.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    return await get_current_user(request, db)
