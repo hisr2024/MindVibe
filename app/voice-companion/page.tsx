@@ -383,8 +383,7 @@ export default function VoiceCompanionPage() {
     setBreathingSteps(null)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
     setConversationMode(false)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wakeWordEnabled, voiceOutput])
+  }, [wakeWordEnabled, voiceOutput, voiceInput])
 
   // ─── Voice Command Handler ────────────────────────────────────────
 
@@ -459,8 +458,7 @@ export default function VoiceCompanionPage() {
         if (params?.languageName) addSystemMessage(`Language: ${params.languageName}. (Multi-language coming soon.)`)
         break
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speakResponse, voiceOutput, stopAll, addSystemMessage, addKiaanMessage])
+  }, [speakResponse, voiceOutput, voiceInput, stopAll, addSystemMessage, addKiaanMessage])
 
   // ─── Handle User Input ────────────────────────────────────────────
 
@@ -478,31 +476,39 @@ export default function VoiceCompanionPage() {
     if (processingRef.current) return
     processingRef.current = true
 
-    const emotion = detectEmotion(text)
-    if (emotion) setCurrentEmotion(emotion)
+    try {
+      const emotion = detectEmotion(text)
+      if (emotion) setCurrentEmotion(emotion)
 
-    if (!command) {
-      setMessages(prev => [...prev, { id: `user-${Date.now()}`, role: 'user', content: text, timestamp: new Date(), emotion }])
+      if (!command) {
+        setMessages(prev => [...prev, { id: `user-${Date.now()}`, role: 'user', content: text, timestamp: new Date(), emotion }])
+      }
+
+      setState('processing')
+      setError(null)
+
+      // Try session-based message first, then stateless fallback
+      let result = await voiceCompanionService.sendMessage(text)
+      if (!result) {
+        const context = await getKiaanContextForResponse()
+        result = await voiceCompanionService.voiceQuery(text, context || 'voice')
+      }
+
+      const responseText = result?.response || FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
+      addKiaanMessage(responseText, { verse: result?.verse, emotion: result?.emotion })
+
+      try { await recordKiaanConversation(text, responseText) } catch { /* non-fatal */ }
+
+      await speakResponse(responseText)
+    } catch {
+      if (isMountedRef.current) {
+        setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+        setError('Could not process your message. Please try again.')
+      }
+    } finally {
+      processingRef.current = false
     }
-
-    setState('processing')
-    setError(null)
-
-    // Try session-based message first, then stateless fallback
-    let result = await voiceCompanionService.sendMessage(text)
-    if (!result) {
-      const context = await getKiaanContextForResponse()
-      result = await voiceCompanionService.voiceQuery(text, context || 'voice')
-    }
-
-    const responseText = result?.response || FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
-    addKiaanMessage(responseText, { verse: result?.verse, emotion: result?.emotion })
-
-    try { await recordKiaanConversation(text, responseText) } catch { /* non-fatal */ }
-
-    processingRef.current = false
-    await speakResponse(responseText)
-  }, [handleVoiceCommand, speakResponse, addKiaanMessage])
+  }, [handleVoiceCommand, speakResponse, addKiaanMessage, wakeWordEnabled])
 
   // ─── Breathing Exercise ───────────────────────────────────────────
 

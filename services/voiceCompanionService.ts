@@ -280,7 +280,7 @@ class VoiceCompanionService {
       await apiFetch('/api/voice-learning/playback-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event, session_id: this.sessionId }),
+        body: JSON.stringify({ event_type: event }),
       })
     } catch {
       // Non-fatal
@@ -295,9 +295,8 @@ class VoiceCompanionService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           rating,
-          helpful,
-          session_id: this.sessionId,
-          type: 'conversation',
+          feedback_type: 'conversation',
+          metadata: { helpful, session_id: this.sessionId },
         }),
       })
     } catch {
@@ -327,7 +326,7 @@ class VoiceCompanionService {
       const response = await apiFetch('/api/voice/enhancement/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type }),
+        body: JSON.stringify({ session_type: type }),
       })
       if (!response.ok) return null
       const data = await response.json()
@@ -340,12 +339,12 @@ class VoiceCompanionService {
   // ─── Daily Check-in ─────────────────────────────────────────────
 
   /** Submit a voice-based mood check-in */
-  async submitCheckin(mood: number, energy: number, stress: number): Promise<{ affirmation?: string; response?: string } | null> {
+  async submitCheckin(mood: number, energy: number, stress: number, isMorning: boolean = true): Promise<{ affirmation?: string; response?: string } | null> {
     try {
       const response = await apiFetch('/api/voice/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mood, energy_level: energy, stress_level: stress }),
+        body: JSON.stringify({ is_morning: isMorning, mood, energy_level: energy, stress_level: stress }),
       })
       if (!response.ok) return null
       return await response.json()
