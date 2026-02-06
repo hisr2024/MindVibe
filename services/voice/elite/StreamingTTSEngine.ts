@@ -15,6 +15,8 @@
  * - CPU usage during playback: < 5%
  */
 
+import { apiFetch } from '@/lib/api'
+
 // Chunk types
 export interface AudioChunk {
   id: string
@@ -336,7 +338,7 @@ export class StreamingTTSEngine {
       ? this.getAdaptiveQuality()
       : this.config.defaultQuality
 
-    const response = await fetch('/api/voice/synthesize', {
+    const response = await apiFetch('/api/voice/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -223,11 +223,11 @@ export default function VoiceCompanionPage() {
 
   // Cleanup on unmount
   useEffect(() => {
-    voiceCompanionService.startLearningSession()
+    voiceCompanionService.startLearningSession().catch(() => {})
     return () => {
       isMountedRef.current = false
-      divineVoiceService.stop()
-      voiceCompanionService.endSession()
+      try { divineVoiceService.stop() } catch { /* cleanup */ }
+      voiceCompanionService.endSession().catch(() => {})
     }
   }, [])
 
@@ -354,21 +354,25 @@ export default function VoiceCompanionPage() {
     if (isMountedRef.current) setState('speaking')
 
     if (useDivineVoice) {
-      const result = await divineVoiceService.synthesize({
-        text,
-        language: 'en',
-        style: 'friendly',
-        onEnd: () => {
-          if (!isMountedRef.current) return
-          setState(wakeWordEnabled ? 'wake-listening' : 'idle')
-          resumeListeningIfConversation()
-        },
-        onError: () => {
-          if (!isMountedRef.current) return
-          voiceOutput.speak(text)
-        },
-      })
-      if (result.success) return
+      try {
+        const result = await divineVoiceService.synthesize({
+          text,
+          language: 'en',
+          style: 'friendly',
+          onEnd: () => {
+            if (!isMountedRef.current) return
+            setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+            resumeListeningIfConversation()
+          },
+          onError: () => {
+            if (!isMountedRef.current) return
+            voiceOutput.speak(text)
+          },
+        })
+        if (result.success) return
+      } catch {
+        // Divine voice failed, fall through to browser TTS
+      }
     }
 
     if (isMountedRef.current) voiceOutput.speak(text)
@@ -415,7 +419,8 @@ export default function VoiceCompanionPage() {
       case 'unmute': setAutoSpeak(true); addSystemMessage('Voice enabled.'); break
 
       case 'goodbye': {
-        const farewell = await voiceCompanionService.endSession()
+        let farewell: string | null = null
+        try { farewell = await voiceCompanionService.endSession() } catch { /* non-fatal */ }
         const text = farewell || 'Namaste. May peace be with you always.'
         addKiaanMessage(text)
         await speakResponse(text)
@@ -440,7 +445,8 @@ export default function VoiceCompanionPage() {
 
       case 'verse': {
         setState('processing')
-        const result = await voiceCompanionService.voiceQuery('Share a Bhagavad Gita verse that I need to hear right now', 'verse')
+        let result = null
+        try { result = await voiceCompanionService.voiceQuery('Share a Bhagavad Gita verse that I need to hear right now', 'verse') } catch { /* fallback below */ }
         const text = result?.response || 'Chapter 2, Verse 47: You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions.'
         addKiaanMessage(text, { verse: result?.verse })
         await speakResponse(text)
@@ -519,16 +525,45 @@ export default function VoiceCompanionPage() {
   const startBreathingExercise = useCallback(async () => {
     setState('breathing')
     addSystemMessage('Starting breathing exercise...', 'breathing')
-    const exercise = await voiceCompanionService.getBreathingExercise()
-    if (isMountedRef.current) setBreathingSteps(exercise.steps)
+    try {
+      const exercise = await voiceCompanionService.getBreathingExercise()
+      if (isMountedRef.current && exercise?.steps) {
+        setBreathingSteps(exercise.steps)
+      } else if (isMountedRef.current) {
+        // Fallback breathing steps
+        setBreathingSteps([
+          { phase: 'inhale', duration: 4, instruction: 'Breathe in slowly...' },
+          { phase: 'hold', duration: 4, instruction: 'Hold your breath gently...' },
+          { phase: 'exhale', duration: 6, instruction: 'Breathe out slowly...' },
+          { phase: 'rest', duration: 2, instruction: 'Rest...' },
+          { phase: 'inhale', duration: 4, instruction: 'Breathe in again...' },
+          { phase: 'hold', duration: 4, instruction: 'Hold...' },
+          { phase: 'exhale', duration: 6, instruction: 'And release...' },
+          { phase: 'rest', duration: 2, instruction: 'Rest and be present...' },
+        ])
+      }
+    } catch {
+      if (isMountedRef.current) {
+        setBreathingSteps([
+          { phase: 'inhale', duration: 4, instruction: 'Breathe in slowly...' },
+          { phase: 'hold', duration: 4, instruction: 'Hold your breath gently...' },
+          { phase: 'exhale', duration: 6, instruction: 'Breathe out slowly...' },
+          { phase: 'rest', duration: 2, instruction: 'Rest...' },
+          { phase: 'inhale', duration: 4, instruction: 'Breathe in again...' },
+          { phase: 'hold', duration: 4, instruction: 'Hold...' },
+          { phase: 'exhale', duration: 6, instruction: 'And release...' },
+          { phase: 'rest', duration: 2, instruction: 'Rest and be present...' },
+        ])
+      }
+    }
   }, [addSystemMessage])
 
-  const onBreathingComplete = useCallback(() => {
+  const onBreathingComplete = useCallback(async () => {
     setBreathingSteps(null)
     const text = 'Beautiful. You have completed the breathing exercise. Notice how your body feels now - calmer, more grounded. The Gita teaches: when the mind is controlled, it rests in the Self alone. Carry this peace with you.'
     addKiaanMessage(text)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
-    speakResponse(text)
+    await speakResponse(text)
   }, [wakeWordEnabled, addKiaanMessage, speakResponse])
 
   // ─── UI Handlers ──────────────────────────────────────────────────
@@ -549,7 +584,7 @@ export default function VoiceCompanionPage() {
     const newMode = !conversationMode
     setConversationMode(newMode)
     if (newMode && (state === 'idle' || state === 'wake-listening')) {
-      await voiceCompanionService.startSession()
+      try { await voiceCompanionService.startSession() } catch { /* non-fatal */ }
       voiceInput.startListening()
       setState('listening')
     } else if (!newMode && voiceInput.isListening) {
@@ -566,8 +601,10 @@ export default function VoiceCompanionPage() {
   }
 
   const saveMessage = async (msg: Message) => {
-    const success = await saveSacredReflection(msg.content, msg.role === 'kiaan' ? 'kiaan' : 'user')
-    if (success) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, saved: true } : m))
+    try {
+      const success = await saveSacredReflection(msg.content, msg.role === 'kiaan' ? 'kiaan' : 'user')
+      if (success) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, saved: true } : m))
+    } catch { /* save failed silently */ }
   }
 
   const clearConversation = useCallback(() => {
@@ -576,13 +613,15 @@ export default function VoiceCompanionPage() {
     setError(null)
     setCurrentEmotion(undefined)
     setBreathingSteps(null)
-    voiceCompanionService.endSession()
+    voiceCompanionService.endSession().catch(() => {})
   }, [stopAll])
 
   const getSuggestions = (): string[] => {
     if (currentEmotion && ['anxiety', 'sadness', 'anger'].includes(currentEmotion)) return PROMPT_SUGGESTIONS.anxious
-    const profile = contextMemory.getProfile()
-    if (profile && profile.totalConversations > 3) return PROMPT_SUGGESTIONS.returning
+    try {
+      const profile = contextMemory.getProfile()
+      if (profile && profile.totalConversations > 3) return PROMPT_SUGGESTIONS.returning
+    } catch { /* contextMemory unavailable */ }
     return PROMPT_SUGGESTIONS.default
   }
 

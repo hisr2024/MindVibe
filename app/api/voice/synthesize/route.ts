@@ -22,13 +22,16 @@ export async function POST(request: NextRequest) {
     // Limit text length for safety
     const sanitizedText = text.slice(0, 5000)
 
+    // Forward auth headers from client to backend
+    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+    const authToken = request.headers.get('authorization')
+    if (authToken) authHeaders['Authorization'] = authToken
+
     try {
       // Try backend TTS first
       const response = await fetch(`${BACKEND_URL}/api/voice/synthesize`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authHeaders,
         body: JSON.stringify({
           text: sanitizedText,
           language,

@@ -50,13 +50,16 @@ export async function POST(request: NextRequest) {
       .replace(/\\/g, '')
       .slice(0, 2000)
 
+    // Forward auth headers from client to backend
+    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+    const authToken = request.headers.get('authorization')
+    if (authToken) authHeaders['Authorization'] = authToken
+
     try {
       // Try enhanced voice query endpoint first
       const response = await fetch(`${BACKEND_URL}/api/voice/query/enhanced`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authHeaders,
         body: JSON.stringify({
           query: sanitizedQuery,
           language,
@@ -80,9 +83,7 @@ export async function POST(request: NextRequest) {
       // Try regular chat endpoint as fallback
       const chatResponse = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authHeaders,
         body: JSON.stringify({
           message: sanitizedQuery,
           language,

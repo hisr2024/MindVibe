@@ -9,6 +9,7 @@
 
 import { useState, useEffect, use, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { apiFetch } from '@/lib/api'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Copy, Check, Play, Pause, ChevronLeft, ChevronRight, Share2, Volume2, Loader2 } from 'lucide-react'
@@ -122,7 +123,7 @@ export default function VerseDetailPage({ params }: PageProps) {
 
     try {
       // Try backend TTS API for natural divine voice (Google Neural2/Sarvam AI)
-      const response = await fetch('/api/voice/synthesize', {
+      const response = await apiFetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

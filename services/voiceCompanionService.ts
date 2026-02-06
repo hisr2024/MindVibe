@@ -97,7 +97,7 @@ class VoiceCompanionService {
       return {
         sessionId: this.sessionId!,
         phase: data.phase || 'greeting',
-        emotionalState: data.emotional_state,
+        emotionalState: data.emotional_analysis?.state || data.emotional_state || undefined,
         messageCount: 0,
       }
     } catch {
@@ -119,10 +119,13 @@ class VoiceCompanionService {
       })
       if (!response.ok) return null
       const data = await response.json()
+      // Map backend response shape to frontend CompanionMessage
+      const firstVerse = data.verses_used?.[0] || data.verse
+      const emotion = data.emotional_analysis?.state || data.emotion || data.detected_emotion
       return {
         response: data.response || data.message || 'I am here with you.',
-        verse: data.verse,
-        emotion: data.emotion || data.detected_emotion,
+        verse: firstVerse ? { chapter: firstVerse.chapter, verse: firstVerse.verse, text: firstVerse.text } : undefined,
+        emotion,
         practice: data.practice || data.suggested_practice,
         followUp: data.follow_up,
         ssml: data.ssml,
@@ -172,10 +175,12 @@ class VoiceCompanionService {
 
       if (response.ok) {
         const data = await response.json()
+        // Map backend response: "verses" (plural) → single verse for UI
+        const firstVerse = data.verses?.[0] || data.verse
         return {
           response: data.response || data.message || 'I am here with you.',
-          verse: data.verse,
-          emotion: data.detected_emotion,
+          verse: firstVerse ? { chapter: firstVerse.chapter, verse: firstVerse.verse, text: firstVerse.text } : undefined,
+          emotion: data.concern || data.detected_emotion,
         }
       }
 

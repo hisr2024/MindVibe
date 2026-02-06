@@ -188,7 +188,7 @@ class ContextMemoryManager {
    * Generate a unique user ID
    */
   private generateUserId(): string {
-    return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `user_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
   }
 
   /**
@@ -196,7 +196,9 @@ class ContextMemoryManager {
    */
   private saveProfile(): void {
     if (this.profile) {
-      localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(this.profile))
+      try {
+        localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(this.profile))
+      } catch { /* localStorage full or unavailable */ }
     }
   }
 
@@ -206,7 +208,9 @@ class ContextMemoryManager {
   private saveConversations(): void {
     // Keep only last 100 conversations in localStorage
     const recentConversations = this.conversations.slice(-100)
-    localStorage.setItem(STORAGE_KEYS.conversations, JSON.stringify(recentConversations))
+    try {
+      localStorage.setItem(STORAGE_KEYS.conversations, JSON.stringify(recentConversations))
+    } catch { /* localStorage full or unavailable */ }
   }
 
   /**
@@ -554,8 +558,10 @@ class ContextMemoryManager {
   clearAllMemory(): void {
     this.profile = this.createNewProfile()
     this.conversations = []
-    localStorage.removeItem(STORAGE_KEYS.profile)
-    localStorage.removeItem(STORAGE_KEYS.conversations)
+    try {
+      localStorage.removeItem(STORAGE_KEYS.profile)
+      localStorage.removeItem(STORAGE_KEYS.conversations)
+    } catch { /* localStorage unavailable */ }
     this.saveProfile()
     console.log('[KIAAN Memory] All memory cleared')
   }

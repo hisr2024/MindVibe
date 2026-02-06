@@ -112,10 +112,10 @@ class DivineVoiceService {
         throw new Error(`Synthesis failed: ${errorText}`)
       }
 
-      // Get metadata from headers
+      // Get metadata from headers (guard against NaN)
       const provider = response.headers.get('X-Provider') || 'unknown'
-      const qualityScore = parseFloat(response.headers.get('X-Quality-Score') || '0')
-      const latencyMs = parseFloat(response.headers.get('X-Latency-Ms') || '0')
+      const qualityScore = parseFloat(response.headers.get('X-Quality-Score') || '0') || 0
+      const latencyMs = parseFloat(response.headers.get('X-Latency-Ms') || '0') || 0
 
       // Create audio from blob
       const audioBlob = await response.blob()
@@ -206,9 +206,9 @@ class DivineVoiceService {
         throw new Error(`Shloka synthesis failed: ${errorText}`)
       }
 
-      // Get metadata
+      // Get metadata (guard against NaN)
       const provider = response.headers.get('X-Provider') || 'unknown'
-      const qualityScore = parseFloat(response.headers.get('X-Quality-Score') || '0')
+      const qualityScore = parseFloat(response.headers.get('X-Quality-Score') || '0') || 0
 
       // Create audio
       const audioBlob = await response.blob()

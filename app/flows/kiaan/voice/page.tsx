@@ -18,6 +18,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { apiFetch } from '@/lib/api'
 import { useUISound } from '@/hooks/useUISound'
 
 type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error'
@@ -244,7 +245,7 @@ export default function MobileVoicePage() {
 
     try {
       // Call enhanced voice query endpoint with analytics
-      const res = await fetch('/api/voice/query/enhanced', {
+      const res = await apiFetch('/api/voice/query/enhanced', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -315,7 +316,7 @@ export default function MobileVoicePage() {
 
     try {
       // Try server TTS first
-      const res = await fetch('/api/voice/message', {
+      const res = await apiFetch('/api/voice/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -361,7 +362,7 @@ export default function MobileVoicePage() {
     triggerHaptic('light')
 
     try {
-      await fetch(`/api/voice/history/${conversationId}/feedback`, {
+      await apiFetch(`/api/voice/history/${conversationId}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ was_helpful: helpful }),

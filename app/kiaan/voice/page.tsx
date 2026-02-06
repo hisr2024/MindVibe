@@ -19,6 +19,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { apiFetch } from '@/lib/api'
 import { useWakeWord } from '@/hooks/useWakeWord'
 import { LanguageSelector } from '@/components/chat/LanguageSelector'
 import { getBrowserName, isSecureContext, isSpeechRecognitionSupported } from '@/utils/browserSupport'
@@ -1160,7 +1161,7 @@ export default function EliteVoicePage() {
 
       if (isOnline) {
         // Online: use API
-        const res = await fetch('/api/voice/query', {
+        const res = await apiFetch('/api/voice/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
