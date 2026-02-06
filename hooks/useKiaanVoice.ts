@@ -14,7 +14,7 @@
 
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useVoiceInput } from './useVoiceInput'
 import { useVoiceOutput } from './useVoiceOutput'
 import { saveSacredReflection } from '@/utils/sacredReflections'
@@ -93,6 +93,15 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
   // Refs for tracking
   const processingRef = useRef(false)
+  const isMountedRef = useRef(true)
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Update state helper
   const updateState = useCallback((newState: KiaanVoiceState) => {
@@ -188,8 +197,10 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
       }
 
       const errorMsg = err instanceof Error ? err.message : 'Failed to connect to KIAAN'
-      setError(errorMsg)
-      updateState('error')
+      if (isMountedRef.current) {
+        setError(errorMsg)
+        updateState('error')
+      }
       onError?.(errorMsg)
       return null
     } finally {
@@ -206,7 +217,9 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
       content: text,
       timestamp: new Date(),
     }
-    setMessages(prev => [...prev, userMessage])
+    if (isMountedRef.current) {
+      setMessages(prev => [...prev, userMessage])
+    }
     onMessage?.(userMessage)
 
     // Save user message to reflections if enabled
@@ -218,7 +231,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     // Get KIAAN response
     const response = await sendToKiaan(text)
 
-    if (response) {
+    if (response && isMountedRef.current) {
       // Add KIAAN message
       const kiaanMessage: KiaanVoiceMessage = {
         id: `kiaan-${Date.now()}`,
@@ -233,14 +246,16 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
         kiaanMessage.savedToReflections = true
       }
 
-      setMessages(prev => [...prev, kiaanMessage])
-      onMessage?.(kiaanMessage)
+      if (isMountedRef.current) {
+        setMessages(prev => [...prev, kiaanMessage])
+        onMessage?.(kiaanMessage)
 
-      // Auto-speak if enabled
-      if (autoSpeak && voiceOutput.isSupported) {
-        voiceOutput.speak(response)
-      } else {
-        updateState('idle')
+        // Auto-speak if enabled
+        if (autoSpeak && voiceOutput.isSupported) {
+          voiceOutput.speak(response)
+        } else {
+          updateState('idle')
+        }
       }
     }
   }, [autoSpeak, autoSaveToReflections, sendToKiaan, voiceOutput, onMessage, updateState])

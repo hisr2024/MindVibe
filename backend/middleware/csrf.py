@@ -70,11 +70,11 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/voice/divine/stop",
     "/api/voice/divine/shloka",
     "/api/voice/divine/providers",
-    # Voice companion endpoints - use Bearer token auth
-    "/api/voice/companion/chat",
-    "/api/voice/companion/synthesize",
-    "/api/voice/companion/transcribe",
-    "/api/voice/companion/session",
+    # Voice conversation endpoints - use Bearer token auth
+    "/api/voice/conversation/start",
+    "/api/voice/conversation/message",
+    "/api/voice/conversation/end",
+    "/api/voice/conversation/breathe",
     # KIAAN endpoints - used from Next.js server-side and cross-origin
     "/kiaan/divine-chat",
     "/kiaan/synthesize",

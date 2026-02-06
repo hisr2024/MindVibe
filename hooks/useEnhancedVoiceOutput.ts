@@ -14,6 +14,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechSynthesisService } from '@/utils/speech/synthesis'
 import { isSpeechSynthesisSupported } from '@/utils/speech/languageMapping'
+import { apiFetch } from '@/lib/api'
 
 export interface UseEnhancedVoiceOutputOptions {
   language?: string
@@ -100,7 +101,7 @@ export function useEnhancedVoiceOutput(
     if (!useBackendTts) return false
 
     try {
-      const response = await fetch('/api/voice/synthesize', {
+      const response = await apiFetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -18,6 +18,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useVoiceInput } from './useVoiceInput'
 import { useVoiceOutput } from './useVoiceOutput'
 import { useWakeWord } from './useWakeWord'
+import { apiFetch } from '@/lib/api'
 
 // Voice states
 export type EliteVoiceState =
@@ -292,7 +293,7 @@ export function useEliteVoice(
 
       if (isOnline) {
         // Online: use API
-        const res = await fetch('/api/voice/query', {
+        const res = await apiFetch('/api/voice/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

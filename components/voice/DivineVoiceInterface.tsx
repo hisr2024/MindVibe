@@ -19,6 +19,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { stopAllAudio, initUniversalAudioStop } from '@/utils/audio/universalAudioStop'
+import { apiFetch } from '@/lib/api'
 
 // Types
 interface Message {
@@ -335,7 +336,7 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
 
-        const response = await fetch('/api/kiaan/divine-chat', {
+        const response = await apiFetch('/api/kiaan/divine-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -461,7 +462,7 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
 
             try {
               // Call transcription API
-              const response = await fetch('/api/voice/transcribe', {
+              const response = await apiFetch('/api/voice/transcribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ audio: base64Audio }),
@@ -522,7 +523,7 @@ const DivineVoiceInterface: React.FC<DivineVoiceInterfaceProps> = ({
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 60000) // 60s timeout for voice synthesis
 
-        const response = await fetch('/api/voice/divine/synthesize', {
+        const response = await apiFetch('/api/voice/divine/synthesize', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
