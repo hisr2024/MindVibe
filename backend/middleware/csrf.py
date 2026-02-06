@@ -65,6 +65,30 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/journey-engine/examples",
     "/api/journey-engine/fix-stuck-journeys",
     "/api/journey-engine/debug",
+    # Voice Divine endpoints - use Bearer token auth, called cross-origin
+    "/api/voice/divine/synthesize",
+    "/api/voice/divine/stop",
+    "/api/voice/divine/shloka",
+    "/api/voice/divine/providers",
+    # Voice companion endpoints - use Bearer token auth
+    "/api/voice/companion/chat",
+    "/api/voice/companion/synthesize",
+    "/api/voice/companion/transcribe",
+    "/api/voice/companion/session",
+    # KIAAN endpoints - used from Next.js server-side and cross-origin
+    "/kiaan/divine-chat",
+    "/kiaan/synthesize",
+    "/kiaan/transcribe",
+    "/kiaan/soul-reading",
+    "/kiaan/stop",
+    # Karmic tree - cross-origin API
+    "/api/karmic-tree/progress",
+    "/api/karmic-tree/achievements",
+    # Profile and subscriptions - cross-origin API
+    "/api/profile",
+    "/api/subscriptions/current",
+    "/api/subscriptions/tiers",
+    "/api/subscriptions/usage",
 }
 
 # Methods that require CSRF protection

@@ -14,6 +14,7 @@
  */
 
 import { stopAllAudio, registerAudioElement } from '@/utils/audio/universalAudioStop'
+import { apiFetch } from '@/lib/api'
 
 export type VoiceStyle = 'divine' | 'calm' | 'wisdom' | 'friendly' | 'chanting'
 export type ChandasType = 'anuṣṭubh' | 'triṣṭubh' | 'gāyatrī' | 'jagatī' | 'śārdūlavikrīḍita' | 'mandākrāntā' | 'vasantatilakā' | 'upajāti'
@@ -94,7 +95,7 @@ class DivineVoiceService {
     this.stop()
 
     try {
-      const response = await fetch(`${this.baseUrl}/synthesize`, {
+      const response = await apiFetch(`${this.baseUrl}/synthesize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -189,7 +190,7 @@ class DivineVoiceService {
     this.stop()
 
     try {
-      const response = await fetch(`${this.baseUrl}/shloka`, {
+      const response = await apiFetch(`${this.baseUrl}/shloka`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -301,7 +302,7 @@ class DivineVoiceService {
     stopAllAudio()
 
     // Call backend stop
-    fetch(`${this.baseUrl}/stop`, {
+    apiFetch(`${this.baseUrl}/stop`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ synthesis_id: null }),
@@ -317,7 +318,7 @@ class DivineVoiceService {
    */
   async getProviders(): Promise<ProvidersResponse | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/providers`)
+      const response = await apiFetch(`${this.baseUrl}/providers`)
       if (!response.ok) {
         throw new Error('Failed to get providers')
       }

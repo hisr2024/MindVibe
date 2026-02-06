@@ -24,6 +24,8 @@ import type {
   EnemyInfoResponse,
 } from '@/types/journeyEngine.types';
 
+import { apiFetch } from '@/lib/api';
+
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
@@ -110,14 +112,13 @@ async function apiRequest<T>(
   endpoint: string,
   body?: unknown
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(url, {
+      // Use apiFetch for proper auth (Bearer token, CSRF, cookies) and
+      // Vercel proxy routing (relative paths in production, absolute in dev)
+      const response = await apiFetch(endpoint, {
         method,
-        headers: getAuthHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
       });
 
