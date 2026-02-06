@@ -21,7 +21,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db
+from backend.deps import get_db, get_current_user
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 from backend.models import KiaanChatMessage, KiaanChatSession
 
@@ -468,9 +468,20 @@ kiaan = KIAAN()
 
 @router.post("/start")
 @limiter.limit(CHAT_RATE_LIMIT)
-async def start_session(request: Request) -> dict[str, Any]:
+async def start_session(request: Request, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+    # Try to identify the user (optional - chat works without auth)
+    user_id = None
+    try:
+        user_id = await get_current_user(request, db)
+    except Exception:
+        pass  # Anonymous session allowed
+
+    session_id = str(uuid.uuid4())
+    if user_id:
+        logger.info(f"Chat session started: {session_id} for user {user_id}")
+
     return {
-        "session_id": str(uuid.uuid4()),
+        "session_id": session_id,
         "message": "Welcome! I'm KIAAN, your guide to inner peace. How can I help you today? 💙",
         "bot": "KIAAN",
         "version": "15.0",
@@ -486,6 +497,13 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
     Streaming endpoint for instant KIAAN responses.
     Returns Server-Sent Events (SSE) for real-time response display.
     """
+    # Try to identify the user (optional - chat works without auth)
+    stream_user_id = None
+    try:
+        stream_user_id = await get_current_user(request, db)
+    except Exception:
+        pass  # Anonymous streaming allowed
+
     async def generate_stream() -> AsyncGenerator[str, None]:
         try:
             message = chat.message.strip()
@@ -502,7 +520,7 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                     from backend.services.kiaan_audit import kiaan_audit
                     triggered = [kw for kw in crisis_keywords if kw in message.lower()]
                     await kiaan_audit.log_crisis_event(
-                        user_id=None,  # Streaming endpoint doesn't track user
+                        user_id=stream_user_id,
                         session_id=request.headers.get('X-Session-ID'),
                         triggered_keywords=triggered,
                         ip_address=request.client.host if request.client else None,
@@ -525,7 +543,7 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
 
             async for chunk in kiaan_core.get_kiaan_response_streaming(
                 message=message,
-                user_id=None,  # Streaming doesn't track quota for speed
+                user_id=stream_user_id,
                 db=db,
                 context="general",
                 language=language

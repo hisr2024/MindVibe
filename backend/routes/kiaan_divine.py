@@ -8,17 +8,28 @@ This module provides the API endpoints for KIAAN's divine capabilities:
 4. Soul Reading - Deep emotional/spiritual analysis
 """
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List, Dict, Any
 import logging
 import base64
 import io
 
+from backend.deps import get_db, get_current_user
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/kiaan", tags=["KIAAN Divine"])
+
+
+async def _get_optional_user(request: Request, db: AsyncSession) -> Optional[str]:
+    """Try to identify user from JWT. Returns None if unauthenticated."""
+    try:
+        return await get_current_user(request, db)
+    except Exception:
+        return None
 
 
 # ============================================
@@ -93,7 +104,11 @@ class SoulReadingResponse(BaseModel):
 # ============================================
 
 @router.post("/divine-chat", response_model=ChatResponse)
-async def divine_chat(request: ChatRequest):
+async def divine_chat(
+    request: ChatRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+):
     """
     Have a divine conversation with KIAAN.
 
@@ -106,10 +121,13 @@ async def divine_chat(request: ChatRequest):
     try:
         from backend.services.divine_conversation_engine import conversation_engine
 
+        # Use authenticated user_id if available, fall back to "anonymous"
+        user_id = await _get_optional_user(http_request, db) or "anonymous"
+
         # Process the message
         response = await conversation_engine.process_message(
             user_message=request.message,
-            user_id=request.user_id,
+            user_id=user_id,
             session_id=request.session_id,
             voice_features=request.voice_features
         )
@@ -301,17 +319,24 @@ async def transcribe_voice(request: TranscribeRequest):
 # ============================================
 
 @router.post("/soul-reading", response_model=SoulReadingResponse)
-async def get_soul_reading(request: SoulReadingRequest):
+async def get_soul_reading(
+    request: SoulReadingRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+):
     """
     Get a complete soul reading - deep emotional and spiritual analysis.
     """
     try:
         from backend.services.kiaan_divine_intelligence import kiaan_intelligence
 
+        # Use authenticated user_id if available
+        user_id = await _get_optional_user(http_request, db)
+
         reading = kiaan_intelligence.get_complete_soul_reading(
             text=request.text,
             voice_features=request.voice_features,
-            user_id=request.user_id
+            user_id=user_id
         )
 
         return SoulReadingResponse(
@@ -385,11 +410,16 @@ async def stop_all_voice():
 # ============================================
 
 @router.get("/session/{session_id}")
-async def get_session_summary(session_id: str, user_id: str = "anonymous"):
+async def get_session_summary(
+    session_id: str,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+):
     """Get summary of a conversation session."""
     try:
         from backend.services.divine_conversation_engine import conversation_engine
 
+        user_id = await _get_optional_user(http_request, db) or "anonymous"
         summary = conversation_engine.get_conversation_summary(user_id, session_id)
         return summary
 
@@ -402,11 +432,16 @@ async def get_session_summary(session_id: str, user_id: str = "anonymous"):
 
 
 @router.delete("/session/{session_id}")
-async def end_session(session_id: str, user_id: str = "anonymous"):
+async def end_session(
+    session_id: str,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+):
     """End a conversation session."""
     try:
         from backend.services.divine_conversation_engine import conversation_engine
 
+        user_id = await _get_optional_user(http_request, db) or "anonymous"
         result = conversation_engine.end_session(user_id, session_id)
         return result
 

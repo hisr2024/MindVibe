@@ -26,16 +26,14 @@ function getCsrfToken(): string | null {
 
 /**
  * Start a new emotional reset session
- * @param token - Optional authentication token
  * @returns Promise with session data
  */
-export async function startEmotionalReset(token?: string): Promise<SessionResponse> {
+export async function startEmotionalReset(): Promise<SessionResponse> {
   const csrfToken = getCsrfToken()
   const response = await fetch(`${getApiUrl()}/api/emotional-reset/start`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
     },
     credentials: 'include',
@@ -54,21 +52,18 @@ export async function startEmotionalReset(token?: string): Promise<SessionRespon
  * @param sessionId - Current session ID
  * @param step - Current step number (1-7)
  * @param input - Optional user input (required for step 1)
- * @param token - Optional authentication token
  * @returns Promise with step response data
  */
 export async function processStep(
   sessionId: string,
   step: number,
   input?: string,
-  token?: string
 ): Promise<StepResponse> {
   const csrfToken = getCsrfToken()
   const response = await fetch(`${getApiUrl()}/api/emotional-reset/step`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
     },
     credentials: 'include',
@@ -100,12 +95,10 @@ export async function processStep(
 /**
  * Get existing session data for resume
  * @param sessionId - Session ID to retrieve
- * @param token - Optional authentication token
  * @returns Promise with session data
  */
 export async function getSession(
   sessionId: string,
-  token?: string
 ): Promise<SessionData> {
   const response = await fetch(
     `${getApiUrl()}/api/emotional-reset/session/${sessionId}`,
@@ -113,7 +106,6 @@ export async function getSession(
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
       },
       credentials: 'include',
     }
@@ -130,19 +122,16 @@ export async function getSession(
 /**
  * Complete the emotional reset session
  * @param sessionId - Session ID to complete
- * @param token - Optional authentication token
  * @returns Promise with completion response
  */
 export async function completeSession(
   sessionId: string,
-  token?: string
 ): Promise<CompleteResponse> {
   const csrfToken = getCsrfToken()
   const response = await fetch(`${getApiUrl()}/api/emotional-reset/complete`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
     },
     credentials: 'include',

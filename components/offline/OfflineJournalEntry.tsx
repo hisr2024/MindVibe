@@ -20,7 +20,6 @@ import { useOfflineForm } from '@/hooks/useOfflineForm'
 import { AlertCircle, CheckCircle2, Cloud, CloudOff, Loader2, Lock, Save } from 'lucide-react'
 
 interface OfflineJournalEntryProps {
-  userId: string
   onEntrySaved?: (entryId: string) => void
   showEncryptionStatus?: boolean
   autoSaveDrafts?: boolean
@@ -28,7 +27,6 @@ interface OfflineJournalEntryProps {
 }
 
 export function OfflineJournalEntry({
-  userId,
   onEntrySaved,
   showEncryptionStatus = true,
   autoSaveDrafts = true,
@@ -54,7 +52,6 @@ export function OfflineJournalEntry({
     isError,
     reset
   } = useOfflineForm({
-    userId,
     onSuccess: (data) => {
       if (onEntrySaved && data.id) {
         onEntrySaved(data.id)
@@ -102,7 +99,7 @@ export function OfflineJournalEntry({
         timestamp: new Date().toISOString()
       }
 
-      localStorage.setItem(`journal_draft_${userId}`, JSON.stringify(draft))
+      localStorage.setItem('journal_draft', JSON.stringify(draft))
       setAutoSaveStatus('saved')
 
       // Reset status after 2 seconds
@@ -115,7 +112,7 @@ export function OfflineJournalEntry({
 
   const loadDraftFromLocal = () => {
     try {
-      const draftJson = localStorage.getItem(`journal_draft_${userId}`)
+      const draftJson = localStorage.getItem('journal_draft')
       if (draftJson) {
         const draft = JSON.parse(draftJson)
         setContent(draft.content || '')
@@ -129,7 +126,7 @@ export function OfflineJournalEntry({
 
   const clearDraftFromLocal = () => {
     try {
-      localStorage.removeItem(`journal_draft_${userId}`)
+      localStorage.removeItem('journal_draft')
     } catch (err) {
       console.error('Failed to clear draft:', err)
     }

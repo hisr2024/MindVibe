@@ -28,7 +28,7 @@ from typing import Any
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models import EmotionalResetSession, MoodEntry, JournalEntry
+from backend.models import EmotionalResetSession, Mood, JournalEntry
 from backend.services.mood_analytics_engine import (
     EmotionVector,
     EmotionalQuadrant,
@@ -352,14 +352,14 @@ class EmotionalIntelligenceTracker:
 
         try:
             result = await db.execute(
-                select(MoodEntry)
+                select(Mood)
                 .where(
                     and_(
-                        MoodEntry.user_id == user_id,
-                        MoodEntry.created_at >= cutoff,
+                        Mood.user_id == user_id,
+                        Mood.at >= cutoff,
                     )
                 )
-                .order_by(MoodEntry.created_at)
+                .order_by(Mood.at)
             )
 
             moods = []

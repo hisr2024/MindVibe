@@ -825,14 +825,14 @@ except Exception as e:
 startup_logger.info("\n[KIAAN Divine] Attempting to import KIAAN Divine router...")
 try:
     from backend.routes.kiaan_divine import router as kiaan_divine_router
-    app.include_router(kiaan_divine_router)
+    app.include_router(kiaan_divine_router, prefix="/api")
     startup_logger.info("✅ [SUCCESS] KIAAN Divine router loaded (Voice & Intelligence)")
-    startup_logger.info("   • POST   /kiaan/divine-chat - Divine conversation with emotion")
-    startup_logger.info("   • POST   /kiaan/synthesize - Voice synthesis with emotion")
-    startup_logger.info("   • POST   /kiaan/transcribe - Whisper speech recognition")
-    startup_logger.info("   • POST   /kiaan/soul-reading - Emotional/spiritual analysis")
-    startup_logger.info("   • POST   /kiaan/stop - Stop all voice synthesis")
-    startup_logger.info("   • GET    /kiaan/health - Health check")
+    startup_logger.info("   • POST   /api/kiaan/divine-chat - Divine conversation with emotion")
+    startup_logger.info("   • POST   /api/kiaan/synthesize - Voice synthesis with emotion")
+    startup_logger.info("   • POST   /api/kiaan/transcribe - Whisper speech recognition")
+    startup_logger.info("   • POST   /api/kiaan/soul-reading - Emotional/spiritual analysis")
+    startup_logger.info("   • POST   /api/kiaan/stop - Stop all voice synthesis")
+    startup_logger.info("   • GET    /api/kiaan/health - Health check")
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Divine router: {e}")
 
