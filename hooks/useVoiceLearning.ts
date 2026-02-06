@@ -14,6 +14,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { apiFetch } from '@/lib/api'
 
 // ===== Types =====
 
@@ -142,7 +143,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     return () => {
       if (sessionIdRef.current) {
         // Best effort cleanup - don't await
-        fetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
+        apiFetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
           method: 'POST',
         }).catch(() => {})
       }
@@ -154,7 +155,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     setError(null)
 
     try {
-      const response = await fetch('/api/voice-learning/session/start', {
+      const response = await apiFetch('/api/voice-learning/session/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -193,7 +194,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     if (!sessionIdRef.current) return
 
     try {
-      await fetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
+      await apiFetch(`/api/voice-learning/session/${sessionIdRef.current}/end`, {
         method: 'POST',
       })
 
@@ -218,7 +219,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     setError(null)
 
     try {
-      const response = await fetch('/api/voice-learning/enhance', {
+      const response = await apiFetch('/api/voice-learning/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -271,7 +272,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     setError(null)
 
     try {
-      const response = await fetch('/api/voice-learning/process-input', {
+      const response = await apiFetch('/api/voice-learning/process-input', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -314,7 +315,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     metadata?: Record<string, unknown>
   ) => {
     try {
-      await fetch('/api/voice-learning/feedback', {
+      await apiFetch('/api/voice-learning/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -339,7 +340,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     durationMs?: number
   ) => {
     try {
-      await fetch('/api/voice-learning/playback-event', {
+      await apiFetch('/api/voice-learning/playback-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -359,7 +360,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
   // Refresh memories
   const refreshMemories = useCallback(async () => {
     try {
-      const response = await fetch('/api/voice-learning/memories')
+      const response = await apiFetch('/api/voice-learning/memories')
 
       if (response.ok) {
         const data = await response.json()
@@ -379,7 +380,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
     priority: string = 'medium'
   ) => {
     try {
-      const response = await fetch('/api/voice-learning/memory', {
+      const response = await apiFetch('/api/voice-learning/memory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -404,7 +405,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
   // Refresh preferences
   const refreshPreferences = useCallback(async () => {
     try {
-      const response = await fetch('/api/voice-learning/preferences')
+      const response = await apiFetch('/api/voice-learning/preferences')
 
       if (response.ok) {
         const data = await response.json()
@@ -429,7 +430,7 @@ export function useVoiceLearning(options: UseVoiceLearningOptions = {}): UseVoic
   // Get insights
   const getInsights = useCallback(async (): Promise<Record<string, unknown> | null> => {
     try {
-      const response = await fetch('/api/voice-learning/insights')
+      const response = await apiFetch('/api/voice-learning/insights')
 
       if (response.ok) {
         return await response.json()

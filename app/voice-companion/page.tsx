@@ -463,16 +463,20 @@ export default function VoiceCompanionPage() {
   // ─── Handle User Input ────────────────────────────────────────────
 
   const handleUserInput = useCallback(async (text: string) => {
-    // Check for voice commands first
+    // Only treat as a command if confidence is very high (0.9+)
+    // The coverage-scaled confidence in detectVoiceCommand ensures that
+    // command words embedded in longer sentences (e.g., "I want to stop feeling sad")
+    // get low confidence and flow through as conversation instead.
     const command = detectVoiceCommand(text)
-    if (command && command.confidence >= 0.8) {
+    const isCommand = command && command.confidence >= 0.9
+    if (isCommand) {
       setMessages(prev => [...prev, { id: `user-${Date.now()}`, role: 'user', content: text, timestamp: new Date(), type: 'command' }])
       await handleVoiceCommand(command.type, command.params)
       if (isBlockingCommand(command.type)) return
       if (['help', 'repeat', 'meditate', 'breathe', 'verse', 'affirmation', 'thank_you', 'goodbye'].includes(command.type)) return
     }
 
-    // Regular message processing
+    // Regular message processing - this is the primary conversation path
     if (processingRef.current) return
     processingRef.current = true
 
@@ -480,7 +484,7 @@ export default function VoiceCompanionPage() {
       const emotion = detectEmotion(text)
       if (emotion) setCurrentEmotion(emotion)
 
-      if (!command) {
+      if (!isCommand) {
         setMessages(prev => [...prev, { id: `user-${Date.now()}`, role: 'user', content: text, timestamp: new Date(), emotion }])
       }
 

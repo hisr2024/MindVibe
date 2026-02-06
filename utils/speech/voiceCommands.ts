@@ -255,6 +255,10 @@ const LANGUAGE_MAP: Record<string, string> = {
 /**
  * Detect voice command from transcript
  * Uses multi-pass matching: exact → fuzzy → pattern
+ *
+ * Key design: confidence is scaled by "coverage ratio" (phrase length / transcript length)
+ * so command words embedded inside longer conversational sentences don't hijack the flow.
+ * E.g., "stop" alone = command (1.0), but "I want to stop feeling sad" = conversation (0.3)
  */
 export function detectVoiceCommand(
   transcript: string,
@@ -276,8 +280,21 @@ export function detectVoiceCommand(
 
     // Pass 1: Exact phrase match
     for (const phrase of def.phrases) {
-      if (normalized === phrase || normalized.endsWith(phrase) || normalized.startsWith(phrase)) {
-        const confidence = normalized === phrase ? 1.0 : 0.9
+      if (normalized === phrase) {
+        // Full exact match - definitely a command
+        const confidence = 1.0
+        if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
+          bestMatch = {
+            type: def.type,
+            confidence,
+            transcript: normalized,
+            matchedPhrase: phrase,
+          }
+        }
+      } else if (normalized.startsWith(phrase + ' ') || normalized.endsWith(' ' + phrase)) {
+        // Starts/ends with phrase (with word boundary) - scale by coverage
+        const coverage = phrase.length / normalized.length
+        const confidence = 0.9 * Math.min(1.0, coverage * 3)
         if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
           bestMatch = {
             type: def.type,
@@ -289,15 +306,17 @@ export function detectVoiceCommand(
       }
     }
 
-    // Pass 2: Substring match with word boundaries
+    // Pass 2: Substring match with word boundaries (only if no strong match yet)
     if (!bestMatch || bestMatch.confidence < 0.9) {
       for (const phrase of def.phrases) {
         const phraseWords = phrase.split(/\s+/)
+        const coverage = phrase.length / normalized.length
+
         if (phraseWords.length === 1) {
           // Single word: check with word boundary
           const regex = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'i')
           if (regex.test(normalized)) {
-            const confidence = 0.85
+            const confidence = 0.85 * Math.min(1.0, coverage * 3)
             if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
               bestMatch = {
                 type: def.type,
@@ -310,7 +329,7 @@ export function detectVoiceCommand(
         } else {
           // Multi-word: check if contained
           if (normalized.includes(phrase)) {
-            const confidence = 0.88
+            const confidence = 0.88 * Math.min(1.0, coverage * 3)
             if (confidence >= minConf && (!bestMatch || confidence > bestMatch.confidence)) {
               bestMatch = {
                 type: def.type,
@@ -329,7 +348,8 @@ export function detectVoiceCommand(
       for (const pattern of def.patterns) {
         const match = normalized.match(pattern)
         if (match) {
-          const confidence = 0.85
+          const coverage = match[0].length / normalized.length
+          const confidence = 0.85 * Math.min(1.0, coverage * 3)
           const params: Record<string, string> = {}
 
           // Extract language parameter
