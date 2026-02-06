@@ -1,11 +1,257 @@
+/**
+ * Viyoga Chat API Route - Enhanced v4.0
+ *
+ * Now proxies to FastAPI backend for AI-powered concern analysis pipeline
+ * (same architecture as Ardha and Relationship Compass).
+ *
+ * v4.0 BACKEND PIPELINE:
+ * 1. AI-powered deep concern analysis (understands your SPECIFIC situation)
+ * 2. Enhanced Gita verse retrieval (AI-informed search queries)
+ * 3. Analysis-aware prompt construction (situational context in prompts)
+ * 4. Direct OpenAI call with custom prompts (not generic WellnessModel)
+ * 5. Gita wisdom filter on all responses
+ *
+ * FALLBACK: If backend is unavailable, falls back to frontend-based
+ * OpenAI call with original prompts (graceful degradation).
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
-import { VIYOGA_SYSTEM_PROMPT, VIYOGA_SECULAR_PROMPT, VIYOGA_HEADINGS_SECULAR, VIYOGA_HEADINGS_GITA } from '@/lib/viyoga/systemPrompt'
+import { VIYOGA_SECULAR_PROMPT, VIYOGA_SYSTEM_PROMPT, VIYOGA_HEADINGS_SECULAR, VIYOGA_HEADINGS_GITA } from '@/lib/viyoga/systemPrompt'
 import { retrieveGitaChunks, getExpandedQuery } from '@/lib/viyoga/retrieval'
 import { appendMessage, ensureSession, getRecentMessages } from '@/lib/viyoga/storage'
 
-type ChatMode = 'brief' | 'full' | 'verse'
-
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:8000'
+const BACKEND_TIMEOUT = 60000 // 60 seconds for AI analysis + response generation
+const OPENAI_TIMEOUT_MS = 30000
 const OPENAI_MODEL = process.env.VIYOGA_CHAT_MODEL || 'gpt-4o-mini'
+
+// Secular fallback response - generic but compassionate
+const FALLBACK_RESPONSE = {
+  assistant: `**I Get It**
+I can hear the worry in what you're sharing. It makes total sense that you're feeling anxious about this - when something matters to us, of course we want it to work out. That's completely human.
+
+**What's Really Going On**
+Here's what I'm noticing: you're spending energy trying to control an outcome that isn't fully in your hands. The result depends on many factors - some you can influence, others you simply can't. And that uncertainty feels uncomfortable.
+
+**A Different Way to See This**
+What if you shifted focus from "will this work out?" to "what's the best I can do right now?" You can't guarantee outcomes, but you CAN show up with intention and effort. That's actually where your power lives - not in the result, but in the doing.
+
+**Try This Right Now**
+Take 3 slow breaths. Then ask yourself: "What's ONE small thing I can do in the next 10 minutes that's completely within my control?" Don't think about whether it will "work" - just identify one action you can take.
+
+**One Thing You Can Do**
+Pick that one small action and do it today. Not because it guarantees success, but because it's what you can offer right now. Focus on doing it well, not on what happens after.
+
+**Something to Consider**
+What would change if you measured success by the quality of your effort, rather than the outcome?`,
+  sections: {
+    i_get_it: 'I can hear the worry in what you\'re sharing. It makes total sense that you\'re feeling anxious about this.',
+    whats_really_going_on: 'You\'re spending energy trying to control an outcome that isn\'t fully in your hands.',
+    a_different_way_to_see_this: 'What if you shifted focus from "will this work out?" to "what\'s the best I can do right now?"',
+    try_this_right_now: 'Take 3 slow breaths. Then ask: "What\'s ONE small thing I can do that\'s within my control?"',
+    one_thing_you_can_do: 'Pick one small action and do it today. Focus on doing it well, not on what happens after.',
+    something_to_consider: 'What would change if you measured success by the quality of your effort?',
+  },
+  citations: [],
+  secularMode: true,
+  fallback: true,
+}
+
+export async function POST(request: NextRequest) {
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    console.error('[Viyoga Chat] JSON parse error')
+    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+  }
+
+  const message = typeof body.message === 'string' ? body.message.trim() : ''
+  const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
+  const mode = typeof body.mode === 'string' ? body.mode : 'full'
+  const secularMode = body.secularMode !== false
+
+  if (!message || !sessionId) {
+    return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
+  }
+
+  // Sanitize input
+  const sanitizedMessage = message.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)
+
+  // Initialize session storage (non-blocking)
+  try { await ensureSession(sessionId) } catch { /* continue */ }
+  try {
+    await appendMessage({
+      sessionId,
+      role: 'user',
+      content: sanitizedMessage,
+      createdAt: new Date().toISOString(),
+    })
+  } catch { /* continue */ }
+
+  // =========================================================================
+  // PRIMARY PATH: Proxy to enhanced FastAPI backend (v4.0 pipeline)
+  // =========================================================================
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT)
+
+    const backendResponse = await fetch(`${BACKEND_URL}/api/viyoga/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        message: sanitizedMessage,
+        sessionId,
+        mode,
+        secularMode,
+      }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    const data = await backendResponse.json().catch(() => ({}))
+
+    if (backendResponse.ok && data.assistant) {
+      // Save assistant response to session storage
+      try {
+        await appendMessage({
+          sessionId,
+          role: 'assistant',
+          content: data.assistant,
+          createdAt: new Date().toISOString(),
+          citations: data.citations || [],
+        })
+      } catch { /* continue */ }
+
+      console.log(
+        '[Viyoga Chat v4.0] Backend response:',
+        `provider=${data.provider || 'unknown'},`,
+        `emotion=${data.concern_analysis?.primary_emotion || 'unknown'},`,
+        `attachment=${data.attachment_analysis?.type || 'unknown'},`,
+        `verses=${data.gita_verses_used || 0},`,
+        `latency=${data.latency_ms?.toFixed(0) || 'unknown'}ms`
+      )
+
+      return NextResponse.json({
+        assistant: data.assistant,
+        sections: data.sections || {},
+        citations: data.citations || [],
+        secularMode: data.secularMode ?? secularMode,
+        // Enhanced v4.0 fields
+        concern_analysis: data.concern_analysis || null,
+        attachment_analysis: data.attachment_analysis || null,
+        karma_yoga_insight: data.karma_yoga_insight || null,
+        retrieval: {
+          strategy: data.provider || 'backend_v4',
+          confidence: data.concern_analysis?.confidence || 0,
+        },
+      })
+    }
+
+    // Handle specific error codes
+    if (backendResponse.status === 429) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment and try again.' },
+        { status: 429 }
+      )
+    }
+
+    console.warn(
+      `[Viyoga Chat] Backend returned ${backendResponse.status}, falling back to frontend`
+    )
+  } catch (backendError) {
+    if (backendError instanceof Error && backendError.name === 'AbortError') {
+      console.warn('[Viyoga Chat] Backend request timed out, falling back to frontend')
+    } else {
+      console.warn('[Viyoga Chat] Backend unavailable, falling back to frontend:', backendError)
+    }
+  }
+
+  // =========================================================================
+  // FALLBACK PATH: Frontend-based OpenAI call (original v3 behavior)
+  // =========================================================================
+  try {
+    let history: { role: string; content: string }[] = []
+    try {
+      const recentMessages = await getRecentMessages(sessionId, 20)
+      history = recentMessages.map(entry => ({ role: entry.role, content: entry.content }))
+    } catch { /* continue */ }
+
+    // Retrieve Gita context
+    let retrieval = { chunks: [] as { sourceFile: string; reference?: string; text: string; id: string }[], confidence: 0, strategy: 'fallback' }
+    try {
+      const result = await retrieveGitaChunks(sanitizedMessage, 6)
+      retrieval = result
+      if (result.confidence < 0.15 || result.chunks.length < 2) {
+        retrieval = await retrieveGitaChunks(getExpandedQuery(sanitizedMessage), 12)
+      }
+    } catch { /* continue with empty */ }
+
+    const contextBlock = buildContextBlock(retrieval.chunks)
+    const systemPrompt = secularMode ? VIYOGA_SECULAR_PROMPT : VIYOGA_SYSTEM_PROMPT
+
+    const messagesForAI: { role: string; content: string }[] = [
+      { role: 'system', content: systemPrompt },
+      ...history,
+      { role: 'user', content: sanitizedMessage },
+    ]
+
+    if (secularMode) {
+      const guidanceContext = retrieval.chunks.length > 0
+        ? `\n\nInternal guidance framework (use these principles to inform your reasoning, but present insights in your own modern language):\n${retrieval.chunks.map(c => c.text).join('\n')}`
+        : ''
+      messagesForAI.push({ role: 'system', content: `Give grounded, actionable guidance with balanced depth.${guidanceContext}` })
+    } else {
+      messagesForAI.push({ role: 'user', content: `Give grounded, actionable guidance with balanced depth.\n\n${contextBlock}` })
+    }
+
+    const responseText = (await callOpenAI(messagesForAI)) || FALLBACK_RESPONSE.assistant
+
+    const headings = secularMode ? VIYOGA_HEADINGS_SECULAR : VIYOGA_HEADINGS_GITA
+    const sections = parseTransmissionSections(responseText, headings)
+    const citations = retrieval.chunks.map(chunk => ({
+      source_file: chunk.sourceFile,
+      reference_if_any: chunk.reference,
+      chunk_id: chunk.id,
+    }))
+
+    // Save assistant response
+    try {
+      await appendMessage({
+        sessionId,
+        role: 'assistant',
+        content: responseText,
+        createdAt: new Date().toISOString(),
+        citations,
+      })
+    } catch { /* continue */ }
+
+    return NextResponse.json({
+      assistant: responseText,
+      sections,
+      citations,
+      secularMode,
+      retrieval: {
+        strategy: retrieval.strategy,
+        confidence: retrieval.confidence,
+      },
+    })
+  } catch (error) {
+    console.error('[Viyoga Chat] Frontend fallback also failed:', error)
+    return NextResponse.json({
+      ...FALLBACK_RESPONSE,
+      retrieval: { strategy: 'error-fallback', confidence: 0 },
+    })
+  }
+}
+
+// =============================================================================
+// HELPER FUNCTIONS (retained for frontend fallback)
+// =============================================================================
 
 function buildContextBlock(chunks: { sourceFile: string; reference?: string; text: string }[]) {
   if (!chunks.length) return '[GITA_CORE_WISDOM_CONTEXT]\n(No relevant context retrieved.)\n[/GITA_CORE_WISDOM_CONTEXT]'
@@ -20,24 +266,9 @@ function buildContextBlock(chunks: { sourceFile: string; reference?: string; tex
   return `[GITA_CORE_WISDOM_CONTEXT]\n${lines.join('\n')}\n[/GITA_CORE_WISDOM_CONTEXT]`
 }
 
-function buildModeInstruction(mode: ChatMode | undefined) {
-  if (mode === 'brief') {
-    return 'Keep each section concise (2-3 sentences).'
-  }
-  if (mode === 'verse') {
-    return 'Emphasize direct verse language from context, quote exactly and keep commentary minimal.'
-  }
-  return 'Give grounded, actionable guidance with balanced depth.'
-}
-
-function parseTransmissionSections(text: string, secularMode = true) {
-  // Use appropriate headings based on mode
-  const headings = secularMode ? VIYOGA_HEADINGS_SECULAR : VIYOGA_HEADINGS_GITA
-
-  // Map headings to snake_case keys
+function parseTransmissionSections(text: string, headings: string[]) {
   const sectionKeyMap: Record<string, string> = {}
   headings.forEach(h => {
-    // Remove apostrophes first, then replace other non-alphanumeric with underscore
     const key = h.toLowerCase().replace(/'/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
     sectionKeyMap[h.toLowerCase()] = key
   })
@@ -48,18 +279,16 @@ function parseTransmissionSections(text: string, secularMode = true) {
 
   const flush = () => {
     if (!currentHeading) return
-    // Use mapped key or generate one (removing apostrophes first)
     const key = sectionKeyMap[currentHeading.toLowerCase()] || currentHeading.toLowerCase().replace(/'/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
     sections[key] = buffer.join('\n').trim()
     buffer.length = 0
   }
 
-  // Normalize heading for flexible matching
   const normalizeHeading = (line: string): string | null => {
     let cleaned = line.trim()
-    cleaned = cleaned.replace(/^#+\s*/, '') // Remove # markdown
-    cleaned = cleaned.replace(/^\*\*|\*\*$/g, '') // Remove **bold**
-    cleaned = cleaned.replace(/:$/, '') // Remove trailing colon
+    cleaned = cleaned.replace(/^#+\s*/, '')
+    cleaned = cleaned.replace(/^\*\*|\*\*$/g, '')
+    cleaned = cleaned.replace(/:$/, '')
     cleaned = cleaned.trim()
 
     const cleanedLower = cleaned.toLowerCase()
@@ -80,52 +309,6 @@ function parseTransmissionSections(text: string, secularMode = true) {
   flush()
   return sections
 }
-
-function buildFallbackTransmission(message: string, chunks: { text: string }[], secularMode = true) {
-  if (secularMode) {
-    // Modern, friendly fallback - no spiritual references
-    return `**I Get It**
-I can hear the worry in what you're sharing. It makes total sense that you're feeling anxious about this - when something matters to us, of course we want it to work out. That's completely human.
-
-**What's Really Going On**
-Here's what I'm noticing: you're spending energy trying to control an outcome that isn't fully in your hands. The result depends on many factors - some you can influence, others you simply can't. And that uncertainty feels uncomfortable.
-
-**A Different Way to See This**
-What if you shifted focus from "will this work out?" to "what's the best I can do right now?" You can't guarantee outcomes, but you CAN show up with intention and effort. That's actually where your power lives - not in the result, but in the doing.
-
-**Try This Right Now**
-Take 3 slow breaths. Then ask yourself: "What's ONE small thing I can do in the next 10 minutes that's completely within my control?" Don't think about whether it will "work" - just identify one action you can take.
-
-**One Thing You Can Do**
-Pick that one small action and do it today. Not because it guarantees success, but because it's what you can offer right now. Focus on doing it well, not on what happens after.
-
-**Something to Consider**
-What would change if you measured success by the quality of your effort, rather than the outcome?`
-  }
-
-  // Original Gita-based fallback
-  const contextSnippet = chunks[0]?.text || "I don't have that in my Gita repository context yet - let me fetch it."
-
-  return `Sacred Recognition
-I hear the weight in "${message}". Your concern is valid, and you are not alone in carrying it.
-
-Anatomy of Attachment
-Notice where the mind is clinging to an outcome as proof of safety or worth. That grip is what tightens the anxiety.
-
-Gita Core Transmission
-${contextSnippet}
-
-Sakshi Practice (60s)
-Close your eyes, breathe slowly, and name the worry as a passing wave. Repeat: "I am the witness, not the wave."
-
-Karma Yoga Step (Today)
-Choose one action you can complete today that is fully in your control. Do it with care, then release the result.
-
-One Question
-What is the smallest action you can offer today without asking it to guarantee the outcome?`
-}
-
-const OPENAI_TIMEOUT_MS = 30000 // 30 second timeout
 
 async function callOpenAI(messages: { role: string; content: string }[]) {
   const apiKey = process.env.OPENAI_API_KEY
@@ -172,149 +355,5 @@ async function callOpenAI(messages: { role: string; content: string }[]) {
       console.error('[Viyoga Chat] OpenAI request failed:', error)
     }
     return null
-  }
-}
-
-export async function POST(request: NextRequest) {
-  // Parse request body with explicit error handling
-  let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch (parseError) {
-    console.error('[Viyoga Chat] JSON parse error:', parseError)
-    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
-  }
-
-  const message = typeof body.message === 'string' ? body.message.trim() : ''
-  const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
-  const mode = body.mode as ChatMode | undefined
-  // Secular mode is ON by default - modern, friendly responses without spiritual terms
-  const secularMode = body.secularMode !== false
-
-  if (!message || !sessionId) {
-    return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
-  }
-
-  try {
-    // Initialize session and history with error handling
-    try {
-      await ensureSession(sessionId)
-    } catch (storageError) {
-      console.warn('[Viyoga Chat] Storage initialization failed, continuing without history:', storageError)
-    }
-
-    let history: { role: string; content: string }[] = []
-    try {
-      const recentMessages = await getRecentMessages(sessionId, 20)
-      history = recentMessages.map(entry => ({
-        role: entry.role,
-        content: entry.content,
-      }))
-    } catch (historyError) {
-      console.warn('[Viyoga Chat] Failed to load history:', historyError)
-    }
-
-    try {
-      await appendMessage({
-        sessionId,
-        role: 'user',
-        content: message,
-        createdAt: new Date().toISOString(),
-      })
-    } catch (appendError) {
-      console.warn('[Viyoga Chat] Failed to save user message:', appendError)
-    }
-
-    // Retrieve Gita context with fallback
-    type RetrievalType = { chunks: { sourceFile: string; reference?: string; text: string; id: string }[]; confidence: number; strategy: string }
-    let retrieval: RetrievalType = { chunks: [], confidence: 0, strategy: 'fallback' }
-    try {
-      const result = await retrieveGitaChunks(message, 6)
-      retrieval = result
-      if (result.confidence < 0.15 || result.chunks.length < 2) {
-        retrieval = await retrieveGitaChunks(getExpandedQuery(message), 12)
-      }
-    } catch (retrievalError) {
-      console.error('[Viyoga Chat] Retrieval failed:', retrievalError)
-      // Continue with empty chunks - fallback response will be used
-    }
-
-    const contextBlock = buildContextBlock(retrieval.chunks)
-
-    // Use secular or Gita prompt based on mode
-    const systemPrompt = secularMode ? VIYOGA_SECULAR_PROMPT : VIYOGA_SYSTEM_PROMPT
-
-    // Generate response with fallback
-    // OpenAI reasons independently about each user's specific concern
-    // Gita wisdom is provided as the guiding framework, not as copy-paste material
-    const messagesForAI: { role: string; content: string }[] = [
-      { role: 'system', content: systemPrompt },
-      ...history,
-      { role: 'user', content: message },
-    ]
-
-    if (secularMode) {
-      // Secular mode: Gita wisdom guides OpenAI's reasoning internally
-      // Provided as system context so AI uses it as a framework, not as content to parrot
-      const guidanceContext = retrieval.chunks.length > 0
-        ? `\n\nInternal guidance framework (use these principles to inform your reasoning, but present insights in your own modern language — never quote or reference these directly):\n${retrieval.chunks.map(c => c.text).join('\n')}`
-        : ''
-      messagesForAI.push({ role: 'system', content: `${buildModeInstruction(mode)}${guidanceContext}` })
-    } else {
-      // Gita mode: provide retrieved verses as supplementary wisdom context
-      messagesForAI.push({ role: 'user', content: `${buildModeInstruction(mode)}\n\n${contextBlock}` })
-    }
-
-    const responseText =
-      (await callOpenAI(messagesForAI)) || buildFallbackTransmission(message, retrieval.chunks, secularMode)
-
-    const sections = parseTransmissionSections(responseText, secularMode)
-    if (!Object.keys(sections).length) {
-      sections.gita_core_transmission = responseText
-    }
-    const citations = retrieval.chunks.map(chunk => ({
-      source_file: chunk.sourceFile,
-      reference_if_any: chunk.reference,
-      chunk_id: chunk.id,
-    }))
-
-    // Save assistant response (non-blocking)
-    try {
-      await appendMessage({
-        sessionId,
-        role: 'assistant',
-        content: responseText,
-        createdAt: new Date().toISOString(),
-        citations,
-      })
-    } catch (saveError) {
-      console.warn('[Viyoga Chat] Failed to save assistant message:', saveError)
-    }
-
-    return NextResponse.json({
-      assistant: responseText,
-      sections,
-      citations,
-      secularMode,
-      retrieval: {
-        strategy: retrieval.strategy,
-        confidence: retrieval.confidence,
-      },
-    })
-  } catch (error) {
-    console.error('[Viyoga Chat] Unexpected error:', error)
-    // Return a graceful fallback response instead of 500 - secular mode by default
-    const fallbackResponse = buildFallbackTransmission('your concern', [], true)
-    const fallbackSections = parseTransmissionSections(fallbackResponse, true)
-    return NextResponse.json({
-      assistant: fallbackResponse,
-      sections: fallbackSections,
-      citations: [],
-      secularMode: true,
-      retrieval: {
-        strategy: 'error-fallback',
-        confidence: 0,
-      },
-    })
   }
 }
