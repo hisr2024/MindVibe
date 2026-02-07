@@ -74,9 +74,32 @@ class DivineVoiceService {
   private currentAudio: HTMLAudioElement | null = null
   private unregisterAudio: (() => void) | null = null
   private baseUrl = '/api/voice/divine'
-  /** Circuit breaker: skip API when auth fails to avoid console spam */
+  /** Circuit breaker with timed recovery */
   private apiDisabled = false
   private apiFailCount = 0
+  private apiDisabledUntil = 0
+  private readonly CIRCUIT_COOLDOWN = 5 * 60 * 1000 // 5 min reset
+  /** Track blob URLs for memory leak prevention */
+  private activeBlobUrls = new Set<string>()
+
+  private isApiAvailable(): boolean {
+    if (!this.apiDisabled) return true
+    if (Date.now() >= this.apiDisabledUntil) {
+      this.apiDisabled = false
+      this.apiFailCount = 0
+      return true
+    }
+    return false
+  }
+
+  private tripCircuitBreaker(): void {
+    this.apiFailCount++
+    if (this.apiFailCount >= 1) {
+      this.apiDisabled = true
+      this.apiDisabledUntil = Date.now() + this.CIRCUIT_COOLDOWN
+      console.warn('[DivineVoice] API unavailable - circuit breaker open, retry in 5 min')
+    }
+  }
 
   /**
    * Synthesize speech with the Divine Voice Orchestrator.
@@ -95,9 +118,9 @@ class DivineVoiceService {
       onError,
     } = options
 
-    // Circuit breaker: if API failed with auth error, skip immediately
-    if (this.apiDisabled) {
-      const err = new Error('Divine voice API unavailable (auth required)')
+    // Circuit breaker with timed recovery
+    if (!this.isApiAvailable()) {
+      const err = new Error('Divine voice API unavailable (circuit breaker open)')
       onError?.(err)
       return { success: false, error: err.message }
     }
@@ -119,14 +142,8 @@ class DivineVoiceService {
       })
 
       if (!response.ok) {
-        // Track auth failures - disable API after first 401
         if (response.status === 401 || response.status === 403) {
-          this.apiFailCount++
-          if (this.apiFailCount >= 1) {
-            this.apiDisabled = true
-            console.warn('[DivineVoice] API requires authentication - using browser voice. Login for neural TTS.')
-          }
-          // Return failure directly (don't throw → avoids double error log in catch block)
+          this.tripCircuitBreaker()
           const err = new Error('Divine voice API unavailable (auth required)')
           onError?.(err)
           return { success: false, error: err.message }
@@ -135,17 +152,19 @@ class DivineVoiceService {
         throw new Error(`Synthesis failed: ${errorText}`)
       }
 
-      // Reset failure tracking on success
+      // Reset on success
       this.apiFailCount = 0
+      this.apiDisabled = false
 
       // Get metadata from headers
       const provider = response.headers.get('X-Provider') || 'unknown'
       const qualityScore = parseFloat(response.headers.get('X-Quality-Score') || '0')
       const latencyMs = parseFloat(response.headers.get('X-Latency-Ms') || '0')
 
-      // Create audio from blob
+      // Create audio from blob - track URL for leak prevention
       const audioBlob = await response.blob()
       const audioUrl = URL.createObjectURL(audioBlob)
+      this.activeBlobUrls.add(audioUrl)
 
       const audio = new Audio(audioUrl)
       audio.volume = volume
@@ -156,21 +175,18 @@ class DivineVoiceService {
 
       // Set up event handlers
       audio.onplay = () => {
-        console.log(`[DivineVoice] Playing (provider: ${provider}, quality: ${qualityScore})`)
         onStart?.()
       }
 
       audio.onended = () => {
-        console.log('[DivineVoice] Playback complete')
-        URL.revokeObjectURL(audioUrl)
+        this.revokeBlobUrl(audioUrl)
         this.cleanup()
         onEnd?.()
       }
 
       audio.onerror = () => {
         const error = new Error('Audio playback error')
-        console.error('[DivineVoice] Playback error')
-        URL.revokeObjectURL(audioUrl)
+        this.revokeBlobUrl(audioUrl)
         this.cleanup()
         onError?.(error)
       }
@@ -212,14 +228,12 @@ class DivineVoiceService {
       onError,
     } = options
 
-    // Circuit breaker: if API failed with auth error, skip immediately
-    if (this.apiDisabled) {
-      const err = new Error('Divine voice API unavailable (auth required)')
+    if (!this.isApiAvailable()) {
+      const err = new Error('Divine voice API unavailable (circuit breaker open)')
       onError?.(err)
       return { success: false, error: err.message }
     }
 
-    // Stop any current playback (local only, no API call)
     this.stopLocal()
 
     try {
@@ -236,11 +250,7 @@ class DivineVoiceService {
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          this.apiFailCount++
-          if (this.apiFailCount >= 1) {
-            this.apiDisabled = true
-            console.warn('[DivineVoice] API requires authentication - using browser voice. Login for neural TTS.')
-          }
+          this.tripCircuitBreaker()
           const err = new Error('Divine voice API unavailable (auth required)')
           onError?.(err)
           return { success: false, error: err.message }
@@ -249,13 +259,15 @@ class DivineVoiceService {
         throw new Error(`Shloka synthesis failed: ${errorText}`)
       }
 
-      // Get metadata
+      this.apiFailCount = 0
+      this.apiDisabled = false
+
       const provider = response.headers.get('X-Provider') || 'unknown'
       const qualityScore = parseFloat(response.headers.get('X-Quality-Score') || '0')
 
-      // Create audio
       const audioBlob = await response.blob()
       const audioUrl = URL.createObjectURL(audioBlob)
+      this.activeBlobUrls.add(audioUrl)
 
       const audio = new Audio(audioUrl)
       audio.volume = volume
@@ -264,20 +276,18 @@ class DivineVoiceService {
       this.currentAudio = audio
 
       audio.onplay = () => {
-        console.log(`[DivineVoice] Playing shloka (chandas: ${chandas}, provider: ${provider})`)
         onStart?.()
       }
 
       audio.onended = () => {
-        console.log('[DivineVoice] Shloka complete')
-        URL.revokeObjectURL(audioUrl)
+        this.revokeBlobUrl(audioUrl)
         this.cleanup()
         onEnd?.()
       }
 
       audio.onerror = () => {
         const error = new Error('Shloka playback error')
-        URL.revokeObjectURL(audioUrl)
+        this.revokeBlobUrl(audioUrl)
         this.cleanup()
         onError?.(error)
       }
@@ -420,12 +430,28 @@ class DivineVoiceService {
     }
   }
 
+  private revokeBlobUrl(url: string): void {
+    URL.revokeObjectURL(url)
+    this.activeBlobUrls.delete(url)
+  }
+
   private cleanup(): void {
     if (this.unregisterAudio) {
       this.unregisterAudio()
       this.unregisterAudio = null
     }
     this.currentAudio = null
+  }
+
+  /**
+   * Clean up all tracked blob URLs (call on page unload)
+   */
+  destroyAll(): void {
+    this.stopLocal()
+    for (const url of this.activeBlobUrls) {
+      URL.revokeObjectURL(url)
+    }
+    this.activeBlobUrls.clear()
   }
 }
 

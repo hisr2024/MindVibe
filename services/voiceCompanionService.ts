@@ -80,14 +80,25 @@ export interface VoiceProfile {
 
 class VoiceCompanionService {
   private sessionId: string | null = null
-  /** Circuit breaker: skip all API calls when auth fails to avoid console 401 spam */
+  /** Circuit breaker with timed recovery */
   private apiDisabled = false
+  private apiDisabledUntil = 0
+  private readonly CIRCUIT_COOLDOWN = 5 * 60 * 1000 // 5 min
+
+  private isApiAvailable(): boolean {
+    if (!this.apiDisabled) return true
+    if (Date.now() >= this.apiDisabledUntil) {
+      this.apiDisabled = false
+      return true
+    }
+    return false
+  }
 
   // ─── Conversation Sessions ──────────────────────────────────────
 
   /** Start a new divine conversation session */
   async startSession(language: string = 'en'): Promise<ConversationSession | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch('/api/voice/conversation/start', {
         method: 'POST',
@@ -113,7 +124,7 @@ class VoiceCompanionService {
 
   /** Send a message within the active session */
   async sendMessage(text: string, language: string = 'en'): Promise<CompanionMessage | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch('/api/voice/conversation/message', {
         method: 'POST',
@@ -163,7 +174,7 @@ class VoiceCompanionService {
 
   /** Stateless voice query - fallback when session management fails */
   async voiceQuery(text: string, context: string = 'voice', language: string = 'en'): Promise<CompanionMessage | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000)
@@ -220,7 +231,7 @@ class VoiceCompanionService {
 
   /** Get a guided breathing exercise */
   async getBreathingExercise(pattern: string = 'peace_breath'): Promise<BreathingExercise> {
-    if (this.apiDisabled) return this.defaultBreathingExercise()
+    if (!this.isApiAvailable()) return this.defaultBreathingExercise()
     try {
       const params = new URLSearchParams()
       if (this.sessionId) params.set('session_id', this.sessionId)
@@ -264,7 +275,7 @@ class VoiceCompanionService {
 
   /** Get deep emotional/spiritual analysis */
   async getSoulReading(text: string): Promise<SoulReading | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch('/api/kiaan/soul-reading', {
         method: 'POST',
@@ -282,7 +293,7 @@ class VoiceCompanionService {
 
   /** Start a voice learning session */
   async startLearningSession(): Promise<void> {
-    if (this.apiDisabled) return
+    if (!this.isApiAvailable()) return
     try {
       const response = await apiFetch('/api/voice-learning/session/start', {
         method: 'POST',
@@ -297,7 +308,7 @@ class VoiceCompanionService {
 
   /** Record a playback event for learning */
   async recordPlaybackEvent(event: 'play' | 'pause' | 'skip' | 'replay' | 'complete'): Promise<void> {
-    if (this.apiDisabled) return
+    if (!this.isApiAvailable()) return
     try {
       await apiFetch('/api/voice-learning/playback-event', {
         method: 'POST',
@@ -311,7 +322,7 @@ class VoiceCompanionService {
 
   /** Submit conversation feedback */
   async submitFeedback(rating: number, helpful: boolean): Promise<void> {
-    if (this.apiDisabled) return
+    if (!this.isApiAvailable()) return
     try {
       await apiFetch('/api/voice-learning/feedback', {
         method: 'POST',
@@ -331,7 +342,7 @@ class VoiceCompanionService {
 
   /** Get pending proactive messages for the user */
   async getProactiveMessages(): Promise<ProactiveMessage[]> {
-    if (this.apiDisabled) return []
+    if (!this.isApiAvailable()) return []
     try {
       const response = await apiFetch('/api/voice-learning/advanced/engagement/pending')
       if (!response.ok) return []
@@ -346,7 +357,7 @@ class VoiceCompanionService {
 
   /** Start an enhancement session (binaural, ambient, breathing) */
   async startEnhancement(type: 'binaural' | 'spatial' | 'breathing' | 'ambient' | 'sleep' | 'meditation'): Promise<string | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch('/api/voice/enhancement/start', {
         method: 'POST',
@@ -365,7 +376,7 @@ class VoiceCompanionService {
 
   /** Submit a voice-based mood check-in */
   async submitCheckin(mood: number, energy: number, stress: number, isMorning: boolean = true): Promise<{ affirmation?: string; response?: string } | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch('/api/voice/checkin', {
         method: 'POST',
@@ -388,7 +399,7 @@ class VoiceCompanionService {
     growthScore: number
     teachingStyle: string
   } | null> {
-    if (this.apiDisabled) return null
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch('/api/voice-learning/advanced/spiritual/summary')
       if (!response.ok) return null
@@ -400,12 +411,13 @@ class VoiceCompanionService {
 
   // ─── Circuit Breaker ─────────────────────────────────────────────
 
-  /** Disable all API calls after auth failure to prevent console 401 spam */
+  /** Trip circuit breaker with timed recovery on auth failure */
   private checkAuthFailure(status: number): void {
     if (status === 401 || status === 403) {
       if (!this.apiDisabled) {
         this.apiDisabled = true
-        console.warn('[VoiceCompanion] API requires authentication - using local wisdom. Login for full features.')
+        this.apiDisabledUntil = Date.now() + this.CIRCUIT_COOLDOWN
+        console.warn('[VoiceCompanion] API unavailable - circuit breaker open, retry in 5 min')
       }
     }
   }

@@ -25,8 +25,19 @@ export interface UseEnhancedVoiceOutputOptions {
   onError?: (error: string) => void
 }
 
-// Module-level circuit breaker: once backend TTS returns 401/403, skip it for all instances
+// Module-level circuit breaker with timed recovery (resets after 5 min)
 let backendTtsDisabled = false
+let backendTtsDisabledUntil = 0
+const BACKEND_TTS_COOLDOWN = 5 * 60 * 1000
+
+function isBackendTtsAvailable(): boolean {
+  if (!backendTtsDisabled) return true
+  if (Date.now() >= backendTtsDisabledUntil) {
+    backendTtsDisabled = false
+    return true
+  }
+  return false
+}
 
 export interface UseEnhancedVoiceOutputReturn {
   isSpeaking: boolean
@@ -100,7 +111,7 @@ export function useEnhancedVoiceOutput(
 
   // Try backend TTS
   const tryBackendTts = useCallback(async (text: string): Promise<boolean> => {
-    if (!useBackendTts || backendTtsDisabled) return false
+    if (!useBackendTts || !isBackendTtsAvailable()) return false
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 10000) // 10s timeout
@@ -124,6 +135,7 @@ export function useEnhancedVoiceOutput(
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           backendTtsDisabled = true
+          backendTtsDisabledUntil = Date.now() + BACKEND_TTS_COOLDOWN
         }
         return false
       }

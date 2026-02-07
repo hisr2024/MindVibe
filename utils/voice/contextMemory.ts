@@ -103,7 +103,50 @@ const TOPIC_KEYWORDS: Record<string, string[]> = {
 const STORAGE_KEYS = {
   profile: 'kiaan_user_profile',
   conversations: 'kiaan_conversations',
-  lastSync: 'kiaan_last_sync'
+  lastSync: 'kiaan_last_sync',
+  encKey: 'kiaan_enc_key',
+}
+
+// ─── AES-GCM Encryption for sensitive emotional data ────────────────────────
+
+async function getOrCreateEncryptionKey(): Promise<CryptoKey | null> {
+  try {
+    if (typeof crypto === 'undefined' || !crypto.subtle) return null
+    const stored = localStorage.getItem(STORAGE_KEYS.encKey)
+    if (stored) {
+      const keyData = Uint8Array.from(atob(stored), c => c.charCodeAt(0))
+      return crypto.subtle.importKey('raw', keyData, 'AES-GCM', true, ['encrypt', 'decrypt'])
+    }
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt'])
+    const exported = await crypto.subtle.exportKey('raw', key)
+    localStorage.setItem(STORAGE_KEYS.encKey, btoa(String.fromCharCode(...new Uint8Array(exported))))
+    return key
+  } catch { return null }
+}
+
+async function encryptData(data: string): Promise<string> {
+  const key = await getOrCreateEncryptionKey()
+  if (!key) return data
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const encoded = new TextEncoder().encode(data)
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded)
+  const combined = new Uint8Array(iv.length + new Uint8Array(encrypted).length)
+  combined.set(iv)
+  combined.set(new Uint8Array(encrypted), iv.length)
+  return 'ENC:' + btoa(String.fromCharCode(...combined))
+}
+
+async function decryptData(data: string): Promise<string> {
+  if (!data.startsWith('ENC:')) return data
+  const key = await getOrCreateEncryptionKey()
+  if (!key) return data
+  try {
+    const combined = Uint8Array.from(atob(data.slice(4)), c => c.charCodeAt(0))
+    const iv = combined.slice(0, 12)
+    const ciphertext = combined.slice(12)
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext)
+    return new TextDecoder().decode(decrypted)
+  } catch { return '{}' }
 }
 
 /**
@@ -121,26 +164,25 @@ class ContextMemoryManager {
     if (this.isInitialized) return
 
     try {
-      // Load profile from localStorage
+      // Load profile from localStorage (decrypt if encrypted)
       const storedProfile = localStorage.getItem(STORAGE_KEYS.profile)
       if (storedProfile) {
-        this.profile = JSON.parse(storedProfile)
-        // Convert date strings back to Date objects
+        const decrypted = await decryptData(storedProfile)
+        this.profile = JSON.parse(decrypted)
         if (this.profile) {
           this.profile.createdAt = new Date(this.profile.createdAt)
           this.profile.lastInteraction = new Date(this.profile.lastInteraction)
         }
       } else {
-        // Create new profile
         this.profile = this.createNewProfile()
         this.saveProfile()
       }
 
-      // Load recent conversations
+      // Load recent conversations (decrypt if encrypted)
       const storedConversations = localStorage.getItem(STORAGE_KEYS.conversations)
       if (storedConversations) {
-        this.conversations = JSON.parse(storedConversations)
-        // Convert date strings
+        const decrypted = await decryptData(storedConversations)
+        this.conversations = JSON.parse(decrypted)
         this.conversations = this.conversations.map(c => ({
           ...c,
           timestamp: new Date(c.timestamp)
@@ -192,21 +234,30 @@ class ContextMemoryManager {
   }
 
   /**
-   * Save profile to storage
+   * Save profile to storage (encrypted)
    */
   private saveProfile(): void {
     if (this.profile) {
-      localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(this.profile))
+      const data = JSON.stringify(this.profile)
+      encryptData(data).then(encrypted => {
+        localStorage.setItem(STORAGE_KEYS.profile, encrypted)
+      }).catch(() => {
+        localStorage.setItem(STORAGE_KEYS.profile, data)
+      })
     }
   }
 
   /**
-   * Save conversations to storage (keep last 100)
+   * Save conversations to storage (encrypted, keep last 100)
    */
   private saveConversations(): void {
-    // Keep only last 100 conversations in localStorage
     const recentConversations = this.conversations.slice(-100)
-    localStorage.setItem(STORAGE_KEYS.conversations, JSON.stringify(recentConversations))
+    const data = JSON.stringify(recentConversations)
+    encryptData(data).then(encrypted => {
+      localStorage.setItem(STORAGE_KEYS.conversations, encrypted)
+    }).catch(() => {
+      localStorage.setItem(STORAGE_KEYS.conversations, data)
+    })
   }
 
   /**
