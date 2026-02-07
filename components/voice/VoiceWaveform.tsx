@@ -39,14 +39,18 @@ export default function VoiceWaveform({
   simulateWhenInactive = false,
   state = 'idle',
 }: VoiceWaveformProps) {
-  // Extract evenly-spaced samples from frequency data
+  // Extract evenly-spaced samples from frequency data with smoothing
   const bars = useMemo(() => {
     if (frequencyData && frequencyData.length > 0) {
       const step = Math.max(1, Math.floor(frequencyData.length / barCount))
       const result: number[] = []
       for (let i = 0; i < barCount; i++) {
         const index = Math.min(i * step, frequencyData.length - 1)
-        result.push(frequencyData[index] / 255)
+        // 3-sample average for smoother bars (avoids flickering)
+        const prev = index > 0 ? frequencyData[index - 1] : frequencyData[index]
+        const curr = frequencyData[index]
+        const next = index < frequencyData.length - 1 ? frequencyData[index + 1] : curr
+        result.push((prev + curr + next) / (3 * 255))
       }
       return result
     }
@@ -82,7 +86,7 @@ export default function VoiceWaveform({
                 rx={barWidth / 2}
                 fill={color}
                 opacity={opacity}
-                style={{ transition: 'all 0.06s ease-out' }}
+                style={{ transition: 'height 0.08s ease-out, y 0.08s ease-out, opacity 0.1s ease-out' }}
               />
             )
           })}

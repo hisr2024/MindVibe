@@ -284,7 +284,9 @@ export function useEnhancedVoiceOutput(
   // Resume
   const resume = useCallback(() => {
     if (audioRef.current && isPaused) {
-      audioRef.current.play()
+      audioRef.current.play().catch(() => {
+        // Autoplay blocked — fall through silently
+      })
       setIsPaused(false)
     } else if (synthesisRef.current) {
       synthesisRef.current.resume()

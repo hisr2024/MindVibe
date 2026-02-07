@@ -71,7 +71,7 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
     return () => clearInterval(timer)
   }, [stepIndex, isActive, totalSteps, steps, handleComplete])
 
-  if (stepIndex >= totalSteps) return null
+  if (stepIndex >= totalSteps && !isActive) return null
 
   // SVG ring calculations
   const size = 200
@@ -157,24 +157,27 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
         </div>
       </div>
 
-      {/* Instruction */}
+      {/* Instruction + step counter */}
       <p className="text-xs text-white/40 mt-3 text-center max-w-[200px]">
         {step?.instruction}
       </p>
+      <p className="text-[10px] text-white/20 mt-1">
+        Step {stepIndex + 1} of {totalSteps}
+      </p>
 
       {/* Step dots */}
-      <div className="flex gap-1 mt-3">
+      <div className="flex gap-1 mt-2.5">
         {steps.map((_, i) => (
           <div
             key={i}
-            className="w-1 h-1 rounded-full transition-all duration-300"
+            className="w-1.5 h-1.5 rounded-full transition-all duration-300"
             style={{
               backgroundColor: i < stepIndex
                 ? '#34d399' // completed
                 : i === stepIndex
                   ? config.color // current
                   : 'rgba(255,255,255,0.15)', // upcoming
-              transform: i === stepIndex ? 'scale(1.5)' : 'scale(1)',
+              transform: i === stepIndex ? 'scale(1.3)' : 'scale(1)',
             }}
           />
         ))}
