@@ -47,6 +47,7 @@ import {
 import { getEmotionAdaptedParams, getRecommendedPersona, type VoicePersona } from '@/utils/voice/emotionVoiceAdapter'
 import { initializeWisdomCache } from '@/utils/voice/offlineWisdomCache'
 import { generateDivineResponse, wrapWithConversationalWarmth } from '@/utils/voice/divineDialogue'
+import wisdomAutoUpdate from '@/utils/voice/wisdomAutoUpdate'
 import { getProactivePrompts, acknowledgePrompt, resetProactiveSession, type ProactivePrompt } from '@/utils/voice/proactiveKiaan'
 import { storeMessage, startHistorySession, endHistorySession } from '@/utils/voice/conversationHistory'
 import type { OrbEmotion } from '@/components/voice/KiaanVoiceOrb'
@@ -440,6 +441,7 @@ export default function VoiceCompanionPage() {
   useEffect(() => {
     voiceCompanionService.startLearningSession()
     initializeWisdomCache().catch(() => {})
+    wisdomAutoUpdate.checkAndApplyUpdate().catch(() => {})
     startHistorySession().catch(() => {})
     resetProactiveSession()
     return () => {
