@@ -205,6 +205,100 @@ export async function getVerse(chapter: number, verse: number): Promise<CachedVe
   }
 }
 
+// ─── Dynamic Content Addition ───────────────────────────────────────────────
+// Used by the auto-update system and manual additions to expand the wisdom cache
+
+/**
+ * Add a new verse to the cache (used by auto-update and manual expansion)
+ */
+export async function addVerse(verse: CachedVerse): Promise<boolean> {
+  try {
+    const db = await openDB()
+    const tx = db.transaction('verses', 'readwrite')
+    tx.objectStore('verses').put(verse)
+    return new Promise((resolve) => {
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Add multiple verses in a single transaction
+ */
+export async function addVersesBatch(verses: CachedVerse[]): Promise<number> {
+  try {
+    const db = await openDB()
+    const tx = db.transaction('verses', 'readwrite')
+    const store = tx.objectStore('verses')
+    let count = 0
+    for (const verse of verses) {
+      store.put(verse)
+      count++
+    }
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+    return count
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * Add a new offline response to the cache
+ */
+export async function addResponse(response: CachedResponse): Promise<boolean> {
+  try {
+    const db = await openDB()
+    const tx = db.transaction('responses', 'readwrite')
+    tx.objectStore('responses').put(response)
+    return new Promise((resolve) => {
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Get total count of cached verses
+ */
+export async function getVerseCount(): Promise<number> {
+  try {
+    const db = await openDB()
+    const tx = db.transaction('verses', 'readonly')
+    return new Promise((resolve) => {
+      const req = tx.objectStore('verses').count()
+      req.onsuccess = () => resolve(req.result)
+      req.onerror = () => resolve(0)
+    })
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * Get total count of cached responses
+ */
+export async function getResponseCount(): Promise<number> {
+  try {
+    const db = await openDB()
+    const tx = db.transaction('responses', 'readonly')
+    return new Promise((resolve) => {
+      const req = tx.objectStore('responses').count()
+      req.onsuccess = () => resolve(req.result)
+      req.onerror = () => resolve(0)
+    })
+  } catch {
+    return 0
+  }
+}
+
 // ─── Pre-cached Essential Verses ─────────────────────────────────────────────
 // 108 most impactful verses for mental health and spiritual guidance
 

@@ -28,6 +28,8 @@ import {
   getGuideResponse,
   type LifeSituation,
 } from './staticWisdom'
+import { getChapterWisdom, getVersesForEmotion } from './gitaTeachings'
+import { getConversationalSourceReference } from './wisdomSources'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -284,6 +286,21 @@ function generateGuideResponse(emotion?: string, situation?: LifeSituation | nul
       text: getGuideResponse(situation),
       phase: 'guide',
       situation,
+      hasWisdom: true,
+    }
+  }
+
+  // Try expanded teachings database for richer wisdom
+  const chapterWisdom = getChapterWisdom(emotion)
+  if (chapterWisdom && Math.random() > 0.3) {
+    // Optionally append a source reference
+    const sourceRef = getConversationalSourceReference(emotion)
+    const text = sourceRef && Math.random() > 0.7
+      ? `${chapterWisdom} By the way, ${sourceRef}`
+      : chapterWisdom
+    return {
+      text,
+      phase: 'guide',
       hasWisdom: true,
     }
   }
