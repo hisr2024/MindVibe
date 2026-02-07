@@ -96,27 +96,106 @@ class VoiceCompanionService {
 
   // ─── Conversation Sessions ──────────────────────────────────────
 
-  /** Start a new divine conversation session (local-first until backend supports it) */
-  async startSession(_language: string = 'en'): Promise<ConversationSession | null> {
-    // Generate local session — backend conversation endpoints not yet available
-    this.sessionId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
-    return {
-      sessionId: this.sessionId,
-      phase: 'greeting',
-      messageCount: 0,
+  /** Start a new companion conversation session via backend */
+  async startSession(language: string = 'en'): Promise<ConversationSession | null> {
+    if (!this.isApiAvailable()) {
+      this.sessionId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+      return { sessionId: this.sessionId, phase: 'greeting', messageCount: 0 }
     }
+
+    try {
+      const response = await apiFetch('/api/companion/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        this.sessionId = data.session_id
+        return {
+          sessionId: data.session_id,
+          phase: data.phase || 'greeting',
+          emotionalState: undefined,
+          messageCount: 0,
+        }
+      }
+
+      this.checkAuthFailure(response.status)
+    } catch {
+      // Fallback to local session
+    }
+
+    this.sessionId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+    return { sessionId: this.sessionId, phase: 'greeting', messageCount: 0 }
   }
 
-  /** Send a message within the active session — delegates to voiceQuery */
+  /** Send a message within the active session via companion backend */
   async sendMessage(text: string, language: string = 'en'): Promise<CompanionMessage | null> {
+    if (!this.isApiAvailable() || !this.sessionId) {
+      return this.voiceQuery(text, 'voice', language)
+    }
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000)
+
+      const response = await apiFetch('/api/companion/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          message: text,
+          language,
+          content_type: 'text',
+        }),
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+
+      if (response.ok) {
+        const data = await response.json()
+        return {
+          response: data.response,
+          emotion: data.mood,
+        }
+      }
+
+      this.checkAuthFailure(response.status)
+    } catch {
+      // Fallback to voice query
+    }
+
     return this.voiceQuery(text, 'voice', language)
   }
 
   /** End the current conversation session with farewell */
   async endSession(): Promise<string | null> {
     if (!this.sessionId) return null
+
+    const sessionId = this.sessionId
     this.sessionId = null
-    return 'Namaste. May peace be with you.'
+
+    if (!this.isApiAvailable() || sessionId.startsWith('local_')) {
+      return 'Take care, friend. I am always here when you need me.'
+    }
+
+    try {
+      const response = await apiFetch('/api/companion/session/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return data.farewell || 'Take care, friend. I am always here when you need me.'
+      }
+    } catch {
+      // Silent fail
+    }
+
+    return 'Take care, friend. I am always here when you need me.'
   }
 
   // ─── Voice Query (Stateless Fallback) ───────────────────────────

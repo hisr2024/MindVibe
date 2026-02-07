@@ -1,0 +1,568 @@
+'use client'
+
+/**
+ * KIAAN Companion - Your Best Friend Chat
+ *
+ * A warm, conversational interface where KIAAN acts as the user's best friend.
+ * Features a modern chat UI with voice input, mood detection, contextual
+ * suggestions, and persistent conversation history.
+ *
+ * Design principles:
+ * - Feels like texting your best friend, not using an app
+ * - Warm colors, smooth animations, minimal chrome
+ * - Voice-first but text-friendly
+ * - Mood-adaptive background and UI elements
+ * - KIAAN remembers you across sessions
+ */
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import CompanionChatBubble from '@/components/companion/CompanionChatBubble'
+import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
+import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorder'
+import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
+import { apiFetch } from '@/lib/api'
+
+// ─── Types ──────────────────────────────────────────────────────────────
+
+interface Message {
+  id: string
+  role: 'user' | 'companion'
+  content: string
+  mood?: string | null
+  phase?: string | null
+  timestamp: Date
+}
+
+interface SessionState {
+  sessionId: string | null
+  phase: string
+  friendshipLevel: string
+  userName: string | null
+  isActive: boolean
+}
+
+// ─── Mood Background Colors ────────────────────────────────────────────
+
+const MOOD_BACKGROUNDS: Record<string, string> = {
+  happy: 'from-amber-50 via-yellow-50 to-orange-50',
+  sad: 'from-blue-50 via-indigo-50 to-blue-50',
+  anxious: 'from-purple-50 via-violet-50 to-purple-50',
+  angry: 'from-red-50 via-rose-50 to-red-50',
+  confused: 'from-orange-50 via-amber-50 to-yellow-50',
+  peaceful: 'from-emerald-50 via-green-50 to-teal-50',
+  hopeful: 'from-yellow-50 via-amber-50 to-yellow-50',
+  lonely: 'from-indigo-50 via-blue-50 to-indigo-50',
+  grateful: 'from-green-50 via-emerald-50 to-green-50',
+  neutral: 'from-gray-50 via-slate-50 to-gray-50',
+  excited: 'from-pink-50 via-rose-50 to-pink-50',
+  overwhelmed: 'from-slate-50 via-gray-50 to-slate-50',
+}
+
+// ─── Component ──────────────────────────────────────────────────────────
+
+export default function CompanionPage() {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [inputText, setInputText] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [currentMood, setCurrentMood] = useState('neutral')
+  const [session, setSession] = useState<SessionState>({
+    sessionId: null,
+    phase: 'connect',
+    friendshipLevel: 'new',
+    userName: null,
+    isActive: false,
+  })
+  const [isInitializing, setIsInitializing] = useState(true)
+  const [showSuggestions, setShowSuggestions] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // ─── Session Management ─────────────────────────────────────────────
+
+  const startSession = useCallback(async () => {
+    try {
+      setError(null)
+      const response = await apiFetch('/api/companion/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: 'en' }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSession({
+          sessionId: data.session_id,
+          phase: data.phase,
+          friendshipLevel: data.friendship_level,
+          userName: data.user_name,
+          isActive: true,
+        })
+
+        // Add greeting as first message
+        setMessages([
+          {
+            id: `greeting-${Date.now()}`,
+            role: 'companion',
+            content: data.greeting,
+            mood: 'neutral',
+            phase: 'connect',
+            timestamp: new Date(),
+          },
+        ])
+        setShowSuggestions(true)
+      } else {
+        // Fallback: create local session
+        createLocalSession()
+      }
+    } catch {
+      createLocalSession()
+    } finally {
+      setIsInitializing(false)
+    }
+  }, [])
+
+  const createLocalSession = useCallback(() => {
+    const localId = `local_${Date.now()}`
+    setSession({
+      sessionId: localId,
+      phase: 'connect',
+      friendshipLevel: 'new',
+      userName: null,
+      isActive: true,
+    })
+
+    const hour = new Date().getHours()
+    let greeting: string
+    if (hour >= 5 && hour < 12) {
+      greeting = "Good morning, friend! I'm KIAAN. Think of me as that friend who's always here - no judgment, no agenda. What's on your mind today?"
+    } else if (hour >= 12 && hour < 17) {
+      greeting = "Hey there! I'm KIAAN, your personal friend who never gets tired of listening. How's your day going?"
+    } else if (hour >= 17 && hour < 21) {
+      greeting = "Good evening! I'm KIAAN. The day's winding down - perfect time for a real conversation. How are you feeling?"
+    } else {
+      greeting = "Hey night owl! I'm KIAAN. Can't sleep, or just need someone to talk to? Either way, I'm right here."
+    }
+
+    setMessages([
+      {
+        id: `greeting-${Date.now()}`,
+        role: 'companion',
+        content: greeting,
+        mood: 'neutral',
+        phase: 'connect',
+        timestamp: new Date(),
+      },
+    ])
+    setShowSuggestions(true)
+    setIsInitializing(false)
+  }, [])
+
+  useEffect(() => {
+    startSession()
+  }, [startSession])
+
+  // ─── Message Sending ────────────────────────────────────────────────
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading || !session.sessionId) return
+
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: text.trim(),
+      timestamp: new Date(),
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setInputText('')
+    setIsLoading(true)
+    setShowSuggestions(false)
+    setError(null)
+
+    try {
+      // Try backend first
+      if (!session.sessionId.startsWith('local_')) {
+        const response = await apiFetch('/api/companion/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: session.sessionId,
+            message: text.trim(),
+            language: 'en',
+            content_type: 'text',
+          }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+
+          const companionMessage: Message = {
+            id: data.message_id || `companion-${Date.now()}`,
+            role: 'companion',
+            content: data.response,
+            mood: data.mood,
+            phase: data.phase,
+            timestamp: new Date(),
+          }
+
+          setMessages(prev => [...prev, companionMessage])
+          setCurrentMood(data.mood || 'neutral')
+          setSession(prev => ({ ...prev, phase: data.phase || prev.phase }))
+          setShowSuggestions(true)
+          setIsLoading(false)
+          return
+        }
+      }
+
+      // Fallback: use chat API
+      const chatResponse = await apiFetch('/api/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text.trim(),
+          language: 'en',
+          context: 'companion',
+        }),
+      })
+
+      if (chatResponse.ok) {
+        const chatData = await chatResponse.json()
+        const companionMessage: Message = {
+          id: `companion-${Date.now()}`,
+          role: 'companion',
+          content: chatData.response || chatData.message || "I'm here with you, friend. Tell me more.",
+          mood: chatData.detected_emotion || 'neutral',
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, companionMessage])
+        setCurrentMood(chatData.detected_emotion || 'neutral')
+      } else {
+        // Ultimate fallback: local response
+        addLocalFallbackResponse(text.trim())
+      }
+    } catch {
+      addLocalFallbackResponse(text.trim())
+    } finally {
+      setIsLoading(false)
+      setShowSuggestions(true)
+    }
+  }, [isLoading, session.sessionId])
+
+  const addLocalFallbackResponse = useCallback((userText: string) => {
+    const fallbacks = [
+      "I hear you, friend. Whatever you're going through, you don't have to face it alone. I'm right here.",
+      "Thank you for sharing that with me. It takes courage to open up, and I'm grateful you trust me.",
+      "I feel the weight in your words. Let's sit with that for a moment. There's no rush here.",
+      "You know what I love about you? You keep showing up. Even on the hard days. That says everything about who you are.",
+      "I'm listening, really listening. Not to fix you - you don't need fixing. Just to be here with you.",
+    ]
+    const response = fallbacks[Math.floor(Math.random() * fallbacks.length)]
+
+    setMessages(prev => [
+      ...prev,
+      {
+        id: `companion-${Date.now()}`,
+        role: 'companion',
+        content: response,
+        mood: 'neutral',
+        phase: 'connect',
+        timestamp: new Date(),
+      },
+    ])
+  }, [])
+
+  // ─── End Session ────────────────────────────────────────────────────
+
+  const endSession = useCallback(async () => {
+    if (!session.sessionId || session.sessionId.startsWith('local_')) {
+      setSession(prev => ({ ...prev, isActive: false }))
+      return
+    }
+
+    try {
+      const response = await apiFetch('/api/companion/session/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: session.sessionId }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `farewell-${Date.now()}`,
+            role: 'companion',
+            content: data.farewell,
+            mood: 'peaceful',
+            phase: 'empower',
+            timestamp: new Date(),
+          },
+        ])
+      }
+    } catch {
+      // Silent fail - not critical
+    }
+
+    setSession(prev => ({ ...prev, isActive: false }))
+  }, [session.sessionId])
+
+  // ─── Voice Input ────────────────────────────────────────────────────
+
+  const handleVoiceTranscription = useCallback((text: string) => {
+    sendMessage(text)
+  }, [sendMessage])
+
+  // ─── Keyboard Handling ──────────────────────────────────────────────
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage(inputText)
+    }
+  }, [inputText, sendMessage])
+
+  // ─── Auto-scroll ────────────────────────────────────────────────────
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // ─── Auto-resize textarea ──────────────────────────────────────────
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`
+    }
+  }, [inputText])
+
+  // ─── Handle suggestion selection ───────────────────────────────────
+
+  const handleSuggestion = useCallback((suggestion: string) => {
+    sendMessage(suggestion)
+  }, [sendMessage])
+
+  // ─── TTS (speak KIAAN's messages) ─────────────────────────────────
+
+  const speakMessage = useCallback(async (text: string) => {
+    // Use browser TTS as immediate option
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.rate = 0.9
+      utterance.pitch = 1.0
+      // Prefer a warm, natural voice
+      const voices = window.speechSynthesis.getVoices()
+      const preferred = voices.find(v =>
+        v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Natural')
+      )
+      if (preferred) utterance.voice = preferred
+      window.speechSynthesis.speak(utterance)
+    }
+  }, [])
+
+  // ─── Background gradient based on mood ────────────────────────────
+
+  const bgGradient = MOOD_BACKGROUNDS[currentMood] || MOOD_BACKGROUNDS.neutral
+
+  // ─── Render ───────────────────────────────────────────────────────
+
+  if (isInitializing) {
+    return (
+      <div className={`min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50 flex items-center justify-center`}>
+        <div className="text-center">
+          <CompanionMoodRing mood="neutral" size="lg" />
+          <p className="mt-4 text-gray-600 animate-pulse">KIAAN is getting ready...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`min-h-screen bg-gradient-to-br ${bgGradient} transition-colors duration-2000 flex flex-col`}>
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <CompanionMoodRing mood={currentMood} size="sm" isSpeaking={isLoading} />
+            <div>
+              <h1 className="text-base font-semibold text-gray-900 dark:text-white">KIAAN</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {isLoading ? 'Thinking...' : session.isActive ? 'Your best friend' : 'Session ended'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Friendship badge */}
+            <span className={`text-xs px-2 py-0.5 rounded-full ${
+              session.friendshipLevel === 'deep' ? 'bg-violet-100 text-violet-700' :
+              session.friendshipLevel === 'close' ? 'bg-indigo-100 text-indigo-700' :
+              session.friendshipLevel === 'familiar' ? 'bg-blue-100 text-blue-700' :
+              'bg-gray-100 text-gray-600'
+            }`}>
+              {session.friendshipLevel === 'deep' ? 'Best Friend' :
+               session.friendshipLevel === 'close' ? 'Close Friend' :
+               session.friendshipLevel === 'familiar' ? 'Friend' :
+               'New Friend'}
+            </span>
+
+            {session.isActive && (
+              <button
+                onClick={endSession}
+                className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded transition-colors"
+                title="End conversation"
+              >
+                End
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Messages Area */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          {messages.map((msg, i) => (
+            <CompanionChatBubble
+              key={msg.id}
+              id={msg.id}
+              role={msg.role}
+              content={msg.content}
+              mood={msg.mood}
+              phase={msg.phase}
+              timestamp={msg.timestamp}
+              isLatest={i === messages.length - 1}
+              onSpeak={msg.role === 'companion' ? speakMessage : undefined}
+            />
+          ))}
+
+          {/* Typing indicator */}
+          {isLoading && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-md">
+                <span className="text-white text-xs font-bold">K</span>
+              </div>
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="flex gap-1">
+                  {[0, 1, 2].map(i => (
+                    <div
+                      key={i}
+                      className="w-2 h-2 rounded-full bg-gray-400"
+                      style={{
+                        animation: `typing-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+      </main>
+
+      {/* Suggestions */}
+      {showSuggestions && session.isActive && !isLoading && (
+        <div className="max-w-2xl mx-auto w-full px-4 pb-2">
+          <CompanionSuggestions
+            mood={currentMood}
+            phase={session.phase}
+            isFirstMessage={messages.length <= 1}
+            onSelect={handleSuggestion}
+          />
+        </div>
+      )}
+
+      {/* Input Area */}
+      {session.isActive ? (
+        <footer className="sticky bottom-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-800/50">
+          <div className="max-w-2xl mx-auto px-4 py-3">
+            {error && (
+              <p className="text-xs text-red-500 mb-2">{error}</p>
+            )}
+            <div className="flex items-end gap-2">
+              {/* Voice recorder */}
+              <CompanionVoiceRecorder
+                onTranscription={handleVoiceTranscription}
+                isDisabled={!session.isActive}
+                isProcessing={isLoading}
+              />
+
+              {/* Text input */}
+              <div className="flex-1 relative">
+                <textarea
+                  ref={inputRef}
+                  value={inputText}
+                  onChange={e => setInputText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Talk to KIAAN..."
+                  rows={1}
+                  className="w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-700
+                             bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm
+                             text-gray-900 dark:text-white placeholder-gray-400
+                             focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300
+                             transition-all duration-200"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Send button */}
+              <button
+                onClick={() => sendMessage(inputText)}
+                disabled={!inputText.trim() || isLoading}
+                className={`p-2.5 rounded-full transition-all duration-200 ${
+                  inputText.trim() && !isLoading
+                    ? 'bg-gradient-to-r from-violet-500 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                }`}
+                aria-label="Send message"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-[10px] text-gray-400 text-center mt-2">
+              KIAAN is your friend, not a therapist. If you&apos;re in crisis, please call your local emergency line.
+            </p>
+          </div>
+        </footer>
+      ) : (
+        <footer className="sticky bottom-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200/50 p-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-sm text-gray-500 mb-3">This conversation has ended.</p>
+            <button
+              onClick={startSession}
+              className="px-6 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-full
+                         text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105"
+            >
+              Start New Conversation
+            </button>
+          </div>
+        </footer>
+      )}
+
+      {/* Typing animation styles */}
+      <style jsx global>{`
+        @keyframes typing-dot {
+          0%, 100% { transform: translateY(0); opacity: 0.4; }
+          50% { transform: translateY(-4px); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  )
+}
