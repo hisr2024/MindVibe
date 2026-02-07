@@ -102,11 +102,15 @@ export function useEnhancedVoiceOutput(
   const tryBackendTts = useCallback(async (text: string): Promise<boolean> => {
     if (!useBackendTts || backendTtsDisabled) return false
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000) // 10s timeout
+
     try {
       const response = await fetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        signal: controller.signal,
         body: JSON.stringify({
           text,
           language,
@@ -114,6 +118,8 @@ export function useEnhancedVoiceOutput(
           speed: rateRef.current,
         }),
       })
+
+      clearTimeout(timeout)
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
@@ -173,7 +179,8 @@ export function useEnhancedVoiceOutput(
 
       return false
     } catch {
-      return false
+      clearTimeout(timeout)
+      return false // Timeout or network error - fall back to browser TTS
     }
   }, [language, voiceType, useBackendTts, onStart, onEnd])
 
@@ -260,11 +267,16 @@ export function useEnhancedVoiceOutput(
     }
   }, [isPaused])
 
-  // Cancel
+  // Cancel - properly release audio resources to prevent memory leaks
   const cancel = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause()
-      audioRef.current.currentTime = 0
+      audioRef.current.removeAttribute('src')
+      audioRef.current = null
+    }
+    if (currentUrlRef.current) {
+      URL.revokeObjectURL(currentUrlRef.current)
+      currentUrlRef.current = null
     }
     if (synthesisRef.current) {
       synthesisRef.current.cancel()

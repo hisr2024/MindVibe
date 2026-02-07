@@ -14,8 +14,10 @@
  * observation (self-reflection) collapses them into clarity.
  */
 
-import type { MemoryEntry, MemorySummary } from './VectorConversationMemory'
-import type { EmotionDetection, PrimaryEmotion } from './EmotionAwareVoice'
+// Inline types (previously imported from deleted VectorConversationMemory and EmotionAwareVoice)
+type PrimaryEmotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'disgust' | 'neutral' | 'love' | 'peace' | 'anxiety' | 'confusion' | 'hope' | 'calm' | 'anxious' | string
+interface EmotionDetection { primary: PrimaryEmotion; confidence: number; secondary?: PrimaryEmotion; valence: number; arousal: number }
+interface MemorySummary { totalEntries: number; topTopics: string[]; emotionTrend: string; recentThemes: string[] }
 
 // ============ Types & Interfaces ============
 
