@@ -83,6 +83,18 @@ import {
 } from '@/utils/voice/divineFriendPersonality'
 import { assessCrisis, formatCrisisResources } from '@/utils/voice/crisisSupport'
 
+// ─── Voice Catalog (Premium multi-voice system) ──────────────────────────────
+import VoiceSelectorPanel from '@/components/voice/VoiceSelectorPanel'
+import {
+  getSavedVoice,
+  saveVoiceSelection,
+  getSavedLanguage,
+  saveLanguagePreference,
+  getBrowserLanguageCode,
+  type VoiceSpeaker,
+  type VoiceLanguage,
+} from '@/utils/voice/voiceCatalog'
+
 // ─── Gita Journey (Voice-guided chapter walkthrough) ─────────────────────────
 import GitaJourneyPanel from '@/components/voice/GitaJourneyPanel'
 import {
@@ -435,6 +447,13 @@ function VoiceCompanionInner() {
   } | null>(null)
   const [journeyPaused, setJourneyPaused] = useState(false)
 
+  // Voice catalog state
+  const [showVoiceSelector, setShowVoiceSelector] = useState(false)
+  const [selectedVoice, setSelectedVoice] = useState<VoiceSpeaker>(() => getSavedVoice())
+  const [voiceLanguage, setVoiceLanguage] = useState<VoiceLanguage>(() => getSavedLanguage())
+  const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(null)
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false)
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const processingRef = useRef(false)
@@ -709,12 +728,13 @@ function VoiceCompanionInner() {
     const adaptiveRate = getAdaptiveRate({ responseText: text, emotion: currentEmotion, baseRate: voiceParams.rate })
 
     // Tier 1: Divine Voice Service (Sarvam AI / Google Neural2 - highest quality)
+    // Use selected voice's backend config for language and style
     if (useDivineVoice) {
       try {
         const result = await divineVoiceService.synthesize({
           text: processedText,
-          language: 'en',
-          style: voiceParams.style as 'friendly' | 'divine' | 'calm' | 'wisdom' | 'chanting',
+          language: selectedVoice.backendConfig.language,
+          style: (selectedVoice.backendConfig.voiceType || voiceParams.style) as 'friendly' | 'divine' | 'calm' | 'wisdom' | 'chanting',
           volume: voiceParams.volume,
           onEnd: () => {
             if (!isMountedRef.current) return
@@ -738,7 +758,7 @@ function VoiceCompanionInner() {
     // Apply emotion-adaptive rate/pitch with adaptive rate for more natural sound
     voiceOutputRef.current.updateRate(adaptiveRate)
     if (isMountedRef.current) await voiceOutputRef.current.speak(processedText)
-  }, [autoSpeak, useDivineVoice, wakeWordEnabled, currentEmotion, voicePersona, resumeListeningIfConversation])
+  }, [autoSpeak, useDivineVoice, wakeWordEnabled, currentEmotion, voicePersona, selectedVoice, resumeListeningIfConversation])
 
   // ─── Stop All ─────────────────────────────────────────────────────
 
@@ -773,13 +793,13 @@ function VoiceCompanionInner() {
       const timeout = setTimeout(safeResolve, 90_000)
       const done = () => { clearTimeout(timeout); safeResolve() }
 
-      // Try divine voice (highest quality)
+      // Try divine voice (highest quality) - use selected voice config
       if (useDivineVoice) {
         try {
           const result = await divineVoiceService.synthesize({
             text: processed,
-            language: 'en',
-            style: 'wisdom',
+            language: selectedVoice.backendConfig.language,
+            style: selectedVoice.backendConfig.voiceType as 'friendly' | 'divine' | 'calm' | 'wisdom' | 'chanting',
             onEnd: done,
             onError: done,
           })
@@ -787,10 +807,12 @@ function VoiceCompanionInner() {
         } catch { /* fall through to browser TTS */ }
       }
 
-      // Fallback: browser Speech Synthesis
+      // Fallback: browser Speech Synthesis - use selected voice browser config
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         const utterance = new SpeechSynthesisUtterance(processed)
-        utterance.rate = speechRate
+        utterance.lang = getBrowserLanguageCode(selectedVoice.primaryLanguage)
+        utterance.rate = selectedVoice.browserConfig.rate
+        utterance.pitch = selectedVoice.browserConfig.pitch
         utterance.onend = done
         utterance.onerror = done
         window.speechSynthesis.speak(utterance)
@@ -798,7 +820,7 @@ function VoiceCompanionInner() {
         done()
       }
     })
-  }, [useDivineVoice, speechRate])
+  }, [useDivineVoice, speechRate, selectedVoice])
 
   const playJourneySession = useCallback(async (chapterNum: number) => {
     const session = getChapterSession(chapterNum)
@@ -930,6 +952,77 @@ function VoiceCompanionInner() {
     setShowJourney(false)
     playJourneySession(chapter)
   }, [playJourneySession])
+
+  // ─── Voice Selection Handlers ────────────────────────────────────
+
+  const handleSelectVoice = useCallback((voice: VoiceSpeaker) => {
+    setSelectedVoice(voice)
+    saveVoiceSelection(voice.id)
+    // Update speech rate from voice config
+    setSpeechRate(voice.browserConfig.rate)
+    // Update voice gender to match
+    setVoiceGender(voice.gender === 'auto' ? 'female' : voice.gender)
+  }, [])
+
+  const handleSelectLanguage = useCallback((lang: VoiceLanguage) => {
+    setVoiceLanguage(lang)
+    saveLanguagePreference(lang)
+  }, [])
+
+  const handlePreviewVoice = useCallback(async (voice: VoiceSpeaker) => {
+    // Stop any current preview
+    divineVoiceService.stop()
+    if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
+
+    if (previewingVoiceId === voice.id && isPreviewPlaying) {
+      setIsPreviewPlaying(false)
+      setPreviewingVoiceId(null)
+      return
+    }
+
+    setPreviewingVoiceId(voice.id)
+    setIsPreviewPlaying(true)
+
+    const onDone = () => {
+      setIsPreviewPlaying(false)
+      setPreviewingVoiceId(null)
+    }
+
+    // Try divine voice service first
+    if (useDivineVoice) {
+      try {
+        const result = await divineVoiceService.synthesize({
+          text: preprocessForTTS(voice.previewText),
+          language: voice.backendConfig.language,
+          style: voice.backendConfig.voiceType as 'friendly' | 'divine' | 'calm' | 'wisdom' | 'chanting',
+          onEnd: onDone,
+          onError: onDone,
+        })
+        if (result.success) return
+      } catch { /* fall through */ }
+    }
+
+    // Browser fallback
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const utterance = new SpeechSynthesisUtterance(preprocessForTTS(voice.previewText))
+      utterance.lang = getBrowserLanguageCode(voice.primaryLanguage)
+      utterance.rate = voice.browserConfig.rate
+      utterance.pitch = voice.browserConfig.pitch
+      utterance.onend = onDone
+      utterance.onerror = onDone
+
+      // Try to match voice patterns
+      const voices = window.speechSynthesis.getVoices()
+      for (const pattern of voice.browserConfig.voicePatterns) {
+        const match = voices.find(v => pattern.test(v.name))
+        if (match) { utterance.voice = match; break }
+      }
+
+      window.speechSynthesis.speak(utterance)
+    } else {
+      onDone()
+    }
+  }, [useDivineVoice, previewingVoiceId, isPreviewPlaying])
 
   // ─── Breathing Exercise ───────────────────────────────────────────
 
@@ -1594,6 +1687,9 @@ function VoiceCompanionInner() {
           <button onClick={() => setShowJourney(true)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white/50" aria-label="Gita Journey" title="Gita Journey">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           </button>
+          <button onClick={() => setShowVoiceSelector(true)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white/50" aria-label="Choose Voice" title={`Voice: ${selectedVoice.name}`}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
           {messages.length > 0 && (
             <button onClick={() => setShowInsights(true)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white/50" aria-label="Session insights" title="Session insights">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -1620,6 +1716,16 @@ function VoiceCompanionInner() {
               </button>
             </div>
           ))}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-white/70">Voice</span>
+            <button
+              onClick={() => { setShowSettings(false); setShowVoiceSelector(true) }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-mv-aurora/10 border border-mv-aurora/20 text-mv-aurora text-[11px] font-medium hover:bg-mv-aurora/20 transition-all"
+            >
+              <span>{selectedVoice.name}</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-white/70">Voice Persona</span>
             <div className="flex gap-1">
@@ -2089,6 +2195,19 @@ function VoiceCompanionInner() {
         onResume={resumeJourney}
         onSkip={skipJourneySegment}
         onStop={stopJourney}
+      />
+
+      {/* Voice Selector Panel */}
+      <VoiceSelectorPanel
+        isOpen={showVoiceSelector}
+        onClose={() => setShowVoiceSelector(false)}
+        selectedVoiceId={selectedVoice.id}
+        onSelectVoice={handleSelectVoice}
+        onPreviewVoice={handlePreviewVoice}
+        isPreviewPlaying={isPreviewPlaying}
+        previewingVoiceId={previewingVoiceId}
+        selectedLanguage={voiceLanguage}
+        onSelectLanguage={handleSelectLanguage}
       />
 
       {/* Accessibility: announce state changes to screen readers */}
