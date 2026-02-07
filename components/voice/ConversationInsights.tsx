@@ -55,7 +55,7 @@ export default function ConversationInsights({
       .map(m => ({
         emotion: m.emotion!,
         time: m.timestamp,
-        snippet: m.content.slice(0, 60) + (m.content.length > 60 ? '...' : ''),
+        snippet: (m.content || '').slice(0, 60) + ((m.content || '').length > 60 ? '...' : ''),
       }))
   }, [messages])
 

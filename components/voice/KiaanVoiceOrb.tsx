@@ -150,6 +150,7 @@ export default function KiaanVoiceOrb({
   // Respect prefers-reduced-motion for accessibility (WCAG 2.1)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setPrefersReducedMotion(mq.matches)
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)

@@ -84,6 +84,9 @@ export function useAudioAnalyzer(): AudioAnalyzerData {
     analyzerRef.current = null
 
     try {
+      // Guard: navigator.mediaDevices may not exist in all contexts
+      if (typeof navigator === 'undefined' || !navigator.mediaDevices) return
+
       // Request microphone access
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
