@@ -77,14 +77,22 @@ export interface UserJourneyProfile {
 
 // Emotion keywords for detection
 const EMOTION_KEYWORDS: Record<string, string[]> = {
-  anxiety: ['anxious', 'worried', 'nervous', 'fear', 'scared', 'panic', 'stress', 'overwhelmed', 'tense'],
-  sadness: ['sad', 'depressed', 'hopeless', 'lonely', 'empty', 'grief', 'loss', 'crying', 'tears', 'hurt'],
+  anxiety: ['anxious', 'worried', 'nervous', 'fear', 'scared', 'panic', 'stress', 'tense'],
+  sadness: ['sad', 'depressed', 'hopeless', 'empty', 'crying', 'tears', 'hurt', 'miserable'],
   anger: ['angry', 'frustrated', 'mad', 'furious', 'annoyed', 'irritated', 'resentful', 'rage'],
   confusion: ['confused', 'lost', 'uncertain', 'doubt', 'unsure', 'direction', 'purpose', 'meaning'],
-  peace: ['peaceful', 'calm', 'serene', 'content', 'grateful', 'blessed', 'thankful', 'happy'],
-  love: ['love', 'relationship', 'partner', 'family', 'friend', 'connection', 'care', 'affection'],
-  guilt: ['guilty', 'regret', 'shame', 'sorry', 'mistake', 'wrong', 'fault', 'blame'],
-  hope: ['hope', 'optimistic', 'better', 'improve', 'growth', 'change', 'forward', 'future']
+  peace: ['peaceful', 'calm', 'serene', 'content', 'happy', 'relaxed', 'centered'],
+  love: ['love', 'relationship', 'partner', 'connection', 'care', 'affection', 'heart'],
+  guilt: ['guilty', 'regret', 'sorry', 'mistake', 'wrong', 'fault'],
+  hope: ['hope', 'optimistic', 'better', 'improve', 'growth', 'change', 'forward', 'future'],
+  shame: ['ashamed', 'embarrassed', 'humiliated', 'disgrace', 'worthless', 'exposed'],
+  overwhelm: ['overwhelmed', 'too much', 'drowning', 'breaking down', 'falling apart', 'can\'t cope'],
+  grief: ['mourning', 'lost someone', 'death', 'died', 'passed away', 'funeral', 'miss them'],
+  betrayal: ['betrayed', 'cheated', 'backstabbed', 'lied to', 'deceived', 'broken trust'],
+  self_doubt: ['not good enough', 'imposter', 'can\'t do it', 'who am i', 'don\'t deserve'],
+  excitement: ['excited', 'amazing', 'incredible', 'thrilled', 'wonderful', 'great news'],
+  loneliness: ['alone', 'isolated', 'no one', 'nobody', 'disconnected', 'abandoned', 'lonely'],
+  gratitude: ['grateful', 'thankful', 'blessed', 'appreciate', 'fortunate'],
 }
 
 // Topic keywords for extraction
