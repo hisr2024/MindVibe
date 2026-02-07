@@ -211,20 +211,10 @@ class WisdomAutoUpdateService {
    * Fetch the update manifest from the backend
    */
   private async fetchManifest(): Promise<WisdomManifest | null> {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000)
-
-      const response = await apiFetch('/api/wisdom/manifest', {
-        signal: controller.signal,
-      })
-      clearTimeout(timeoutId)
-
-      if (!response.ok) return null
-      return await response.json()
-    } catch {
-      return null
-    }
+    // Backend wisdom/manifest endpoint is not yet deployed.
+    // Return null to skip update check and avoid 405 console errors.
+    // When the backend endpoint is ready, remove this early return.
+    return null
   }
 
   /**

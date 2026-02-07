@@ -60,33 +60,38 @@ export function useAuth(): UseAuthResult {
     const storedUser = getStoredUser()
     if (storedUser) {
       setUser(storedUser)
-    }
 
-    // Verify session is still valid via httpOnly cookie
-    apiFetch('/api/auth/me')
-      .then(async (response) => {
-        if (response.ok) {
-          const data = await response.json()
-          const verifiedUser: AuthUser = {
-            id: data.user_id,
-            email: data.email,
-            name: storedUser?.name || data.email.split('@')[0],
-            sessionId: data.session_id,
+      // Only verify session if there's a stored user profile.
+      // If no user ever logged in, there's no httpOnly session cookie
+      // to verify, so skip the /api/auth/me call to avoid 401 console noise.
+      apiFetch('/api/auth/me')
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.json()
+            const verifiedUser: AuthUser = {
+              id: data.user_id,
+              email: data.email,
+              name: storedUser?.name || data.email.split('@')[0],
+              sessionId: data.session_id,
+            }
+            storeUserProfile(verifiedUser)
+            setUser(verifiedUser)
+          } else {
+            // Session invalid - clear stored data
+            clearAuthData()
+            setUser(null)
           }
-          storeUserProfile(verifiedUser)
-          setUser(verifiedUser)
-        } else {
-          // Session invalid - clear stored data
-          clearAuthData()
-          setUser(null)
-        }
-      })
-      .catch(() => {
-        // Network error - keep stored user for offline display
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+        })
+        .catch(() => {
+          // Network error - keep stored user for offline display
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    } else {
+      // No stored user = not logged in, skip server verification
+      setLoading(false)
+    }
   }, [])
 
   const signup = useCallback(async (email: string, password: string, name?: string): Promise<AuthUser> => {
