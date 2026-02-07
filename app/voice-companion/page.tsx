@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * KIAAN Voice Companion v4 - The Divine Friend
+ * KIAAN Companion - The Divine Best Friend
  *
  * KIAAN speaks as Lord Krishna spoke to Arjuna - as the dearest, wisest,
  * most compassionate friend. Not a chatbot. A divine companion who uses
@@ -51,7 +51,16 @@ import {
 import { getEmotionAdaptedParams, getRecommendedPersona, type VoicePersona } from '@/utils/voice/emotionVoiceAdapter'
 import type { VoiceGender } from '@/utils/speech/synthesis'
 import { initializeWisdomCache } from '@/utils/voice/offlineWisdomCache'
-import { generateDivineResponse, wrapWithConversationalWarmth } from '@/utils/voice/divineDialogue'
+import {
+  generateCompanionResponse,
+  wrapWithCompanionIntelligence,
+  type CompanionResponse,
+} from '@/utils/voice/divineDialogue'
+import {
+  detectToolSuggestion,
+  getToolDiscoveryPrompt,
+  type ToolSuggestion,
+} from '@/utils/voice/ecosystemNavigator'
 import wisdomAutoUpdate from '@/utils/voice/wisdomAutoUpdate'
 import { getProactivePrompts, acknowledgePrompt, resetProactiveSession, type ProactivePrompt } from '@/utils/voice/proactiveKiaan'
 import { storeMessage, startHistorySession, endHistorySession } from '@/utils/voice/conversationHistory'
@@ -64,7 +73,7 @@ import { getMeditationForEmotion, type GuidedMeditation } from '@/utils/wisdom/m
 import { getStoryForEmotion } from '@/utils/wisdom/mahabharataStories'
 import { startQuiz, answerQuestion, getCurrentQuestion, getQuizResultMessage, type QuizSession } from '@/utils/wisdom/gitaQuiz'
 import { getDebateResponse } from '@/utils/wisdom/debateMode'
-import { getReframingResponse } from '@/utils/wisdom/cognitiveReframing'
+// Cognitive reframing is now integrated into the Companion Response Engine (divineDialogue.ts)
 import { summarizeConversation, shouldOfferSummary, type ConversationEntry } from '@/utils/voice/conversationSummarizer'
 import { hapticPulse, hapticVerse, hapticWisdom, hapticCelebration, hapticEmphasis } from '@/utils/voice/hapticFeedback'
 import { generateProgressReport, getSpokenProgressSummary } from '@/utils/voice/progressInsights'
@@ -127,6 +136,8 @@ interface Message {
   emotion?: string
   saved?: boolean
   type?: 'text' | 'breathing' | 'command' | 'affirmation'
+  /** Ecosystem tool suggestion attached to this message */
+  toolSuggestion?: ToolSuggestion | null
 }
 
 // ─── KIAAN: The Divine Friend ───────────────────────────────────────────────
@@ -221,18 +232,21 @@ const PROMPT_SUGGESTIONS = {
     'Tell me a Gita verse',
     'I need a friend right now',
     'Guide me in breathing',
+    'What tools can help me?',
   ],
   returning: [
     'I missed you, KIAAN',
     'How am I doing lately?',
     'Teach me something new',
     'Share your favorite verse',
+    'Show me my wellness toolkit',
   ],
   anxious: [
     'Help me find peace',
     'I feel overwhelmed',
     'Meditate with me',
     'Give me strength, KIAAN',
+    'I need an emotional reset',
   ],
 }
 
@@ -1369,6 +1383,17 @@ function VoiceCompanionInner() {
         return
       }
 
+      // Ecosystem Tool Discovery: "what tools", "show me tools", "wellness toolkit", "what can you do"
+      if (lower.includes('what tools') || lower.includes('wellness toolkit') || lower.includes('show me tools') || lower.includes('what can you do') || lower.includes('what features') || lower.includes('help me explore')) {
+        const discovery = getToolDiscoveryPrompt()
+        hapticWisdom()
+        const discoveryText = `Friend, I am so glad you asked! I have an entire ecosystem of wellness tools at my fingertips, and I would love to guide you to exactly what you need.\n\nHere is what we have:\n\n🌊 Emotional Reset — 7-step guided processing\n🔄 Ardha — Thought reframing with Gita wisdom\n🕊️ Viyoga — Detachment and outcome anxiety relief\n🧭 Relationship Compass — Navigate conflicts with clarity\n🔥 Karma Reset — Acknowledge, repair, and release guilt\n👣 Karma Footprint — Track your daily actions and impact\n🌳 Karmic Tree — Watch your growth blossom visually\n✍️ Sacred Reflections — Private encrypted journal\n📖 Gita Library — All 700 verses with translations\n💬 KIAAN Chat — Deeper text conversations\n🔮 Quantum Dive — Consciousness analysis across 5 layers\n🎵 KIAAN Vibe — Meditation music streaming\n⚔️ Journey Engine — Conquer the 6 inner enemies\n🏛️ Wisdom Rooms — Live community support\n🙏 Gita Journey — Voice-guided chapter walkthrough\n\nJust tell me what you are going through, and I will suggest the perfect tool. Or ask me about any of these by name!`
+        addKiaanMessage(discoveryText)
+        await speakResponse(`Friend, I am so glad you asked! I have an entire ecosystem of wellness tools. We have Emotional Reset for processing feelings, Ardha for thought reframing, Viyoga for letting go, Relationship Compass for conflicts, Sacred Reflections for private journaling, Gita Library for verse exploration, and many more. Just tell me what you are going through, and I will guide you to the perfect tool.`)
+        processingRef.current = false
+        return
+      }
+
       // Debate: "but what about", "I disagree", "debate"
       if (lower.includes('but what about') || lower.includes('i disagree') || lower.includes('debate') || lower.includes('different perspective')) {
         const debateResult = getDebateResponse(text)
@@ -1434,11 +1459,15 @@ function VoiceCompanionInner() {
       // Check if user describes a specific life situation
       const situationalResult = getSituationalResponse(text)
 
-      // ─── Cognitive Reframing Check ─────────────────────────────────
-      // Detect cognitive distortions in user's language
-      const reframingResult = getReframingResponse(text)
+      // ─── Collect conversation context for ecosystem navigation ────
+      const recentTopics = messages
+        .filter(m => m.role === 'user')
+        .slice(-5)
+        .map(m => m.emotion || '')
+        .filter(Boolean)
 
       // ─── Main Response Generation ─────────────────────────────────
+      // The Companion Engine orchestrates: phase dialogue + cognitive reframing + ecosystem tools
 
       // Try session-based message first, then stateless fallback, then offline cache
       let result = await voiceCompanionService.sendMessage(text)
@@ -1447,29 +1476,42 @@ function VoiceCompanionInner() {
         result = await voiceCompanionService.voiceQuery(text, context || 'voice')
       }
 
-      // Phase-based divine friend response
-      // Dynamic Wisdom (backend): wrap with conversational warmth for the current phase
-      // Static Wisdom (local): use divine dialogue engine for phase-appropriate friend response
       let responseText: string
+      let companionResult: CompanionResponse | null = null
+
       if (result?.response) {
-        // Dynamic Wisdom available - wrap backend AI response with friend warmth
-        responseText = wrapWithConversationalWarmth(result.response, turnCountRef.current, emotion)
+        // Dynamic Wisdom available — wrap with companion intelligence
+        // (detects tools + distortions even on backend responses)
+        companionResult = wrapWithCompanionIntelligence(
+          result.response, turnCountRef.current, text, emotion, recentTopics
+        )
+        responseText = companionResult.text
       } else if (situationalResult) {
         // Situational wisdom match - use targeted Gita verse for this life situation
         hapticVerse()
         responseText = situationalResult.response
-      } else if (reframingResult && turnCountRef.current >= 2) {
-        // Cognitive reframing - gently address distorted thinking (only after rapport built)
-        hapticWisdom()
-        responseText = reframingResult.response
+        // Still check for tool suggestions on situational responses
+        if (turnCountRef.current >= 3) {
+          const toolHint = detectToolSuggestion(text, emotion, recentTopics)
+          if (toolHint) {
+            companionResult = {
+              text: responseText, phase: 'guide', hasWisdom: true,
+              toolSuggestion: toolHint, distortion: null, hasToolSuggestion: true,
+            }
+          }
+        }
       } else {
-        // Static Wisdom - generate local response based on conversation phase
-        // Phase 1 CONNECT: empathy + question (no advice)
-        // Phase 2 UNDERSTAND: deeper questions + validation
-        // Phase 3 GUIDE: Gita wisdom woven naturally
-        // Phase 4 EMPOWER: help them find their own answers
-        const dialogue = generateDivineResponse(text, turnCountRef.current, emotion)
-        responseText = dialogue.text
+        // Unified Companion Response — the full brain:
+        // Phase dialogue + cognitive reframing + ecosystem tool suggestions
+        companionResult = generateCompanionResponse(
+          text, turnCountRef.current, emotion,
+          messages.filter(m => m.emotion).map(m => m.emotion!),
+          recentTopics,
+        )
+        responseText = companionResult.text
+
+        // Haptic feedback for cognitive reframing or wisdom
+        if (companionResult.distortion) hapticWisdom()
       }
 
       // ─── Personality Enrichment ──────────────────────────────────
@@ -1492,7 +1534,13 @@ function VoiceCompanionInner() {
       // Haptic feedback for verse sharing
       if (result?.verse) hapticVerse()
 
-      addKiaanMessage(responseText, { verse: result?.verse, emotion: result?.emotion || emotion })
+      // Attach tool suggestion to message for rendering the tool card
+      const toolSuggestion = companionResult?.toolSuggestion || null
+      addKiaanMessage(responseText, {
+        verse: result?.verse,
+        emotion: result?.emotion || emotion,
+        toolSuggestion,
+      })
 
       // Store in encrypted context memory + durable IndexedDB history
       try { await recordKiaanConversation(text, responseText) } catch { /* non-fatal */ }
@@ -1654,7 +1702,7 @@ function VoiceCompanionInner() {
           </Link>
           <div>
             <h1 className="text-base font-semibold text-white flex items-center gap-2">
-              KIAAN
+              KIAAN Companion
               {wakeWordEnabled && (
                 <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-all ${
                   state === 'wake-listening'
@@ -1670,7 +1718,7 @@ function VoiceCompanionInner() {
             </h1>
             <p className="text-[11px] text-white/40">
               {friendshipState.level >= 3 && friendshipState.userName
-                ? `${friendshipState.userName}'s Divine Friend`
+                ? `${friendshipState.userName}'s Divine Best Friend`
                 : friendshipState.levelName}
               {friendshipState.level >= 2 && <span className="ml-1.5 text-mv-sunrise/60">{'✦'.repeat(friendshipState.level)}</span>}
             </p>
@@ -2013,6 +2061,28 @@ function VoiceCompanionInner() {
                         </div>
                         <p className="text-xs text-white/50 italic mt-0.5 leading-relaxed">{msg.verse.text}</p>
                       </div>
+                    )}
+
+                    {/* Ecosystem Tool Suggestion Card */}
+                    {msg.toolSuggestion && (
+                      <Link
+                        href={msg.toolSuggestion.tool.route}
+                        className="mt-2.5 -mx-1 flex items-center gap-3 rounded-xl bg-gradient-to-r from-mv-sunrise/[0.08] to-mv-aurora/[0.06] border border-mv-sunrise/20 px-3 py-2.5 group hover:border-mv-sunrise/40 hover:from-mv-sunrise/[0.12] hover:to-mv-aurora/[0.1] transition-all"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-mv-sunrise/15 text-lg flex-shrink-0 group-hover:bg-mv-sunrise/25 transition-colors">
+                          {msg.toolSuggestion.tool.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-mv-sunrise/90 group-hover:text-mv-sunrise transition-colors">{msg.toolSuggestion.tool.name}</span>
+                            <span className="text-[8px] text-white/25 uppercase tracking-wider">suggested</span>
+                          </div>
+                          <p className="text-[10px] text-white/40 truncate mt-0.5">{msg.toolSuggestion.tool.friendDescription}</p>
+                        </div>
+                        <div className="flex-shrink-0 text-white/30 group-hover:text-mv-sunrise/70 transition-colors">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </div>
+                      </Link>
                     )}
 
                     <div className="flex items-center gap-2 mt-1.5">
