@@ -67,7 +67,9 @@ const EMOTIONS = [
 ] as const
 
 // Section display configuration for beautiful rendering
+// Includes both Gita-mode (primary) and secular-mode (fallback) headings
 const SECTION_CONFIG: Record<string, { title: string; icon: string; gradient: string }> = {
+  // Gita-mode sections (primary for this page)
   'Sacred Acknowledgement': {
     title: 'Sacred Acknowledgement',
     icon: '🙏',
@@ -118,6 +120,47 @@ const SECTION_CONFIG: Record<string, { title: string; icon: string; gradient: st
     icon: '🔖',
     gradient: 'from-slate-500/20 to-gray-500/10'
   },
+  // Secular-mode sections (fallback resilience)
+  'I Hear You': {
+    title: 'I Hear You',
+    icon: '💜',
+    gradient: 'from-amber-500/20 to-orange-500/10'
+  },
+  'What Might Be Happening': {
+    title: 'What Might Be Happening',
+    icon: '💡',
+    gradient: 'from-purple-500/20 to-indigo-500/10'
+  },
+  'The Other Side': {
+    title: 'The Other Side',
+    icon: '🤝',
+    gradient: 'from-blue-500/20 to-cyan-500/10'
+  },
+  'What You Could Try': {
+    title: 'What You Could Try',
+    icon: '✨',
+    gradient: 'from-emerald-500/20 to-teal-500/10'
+  },
+  'A Way to Say It': {
+    title: 'A Way to Say It',
+    icon: '💬',
+    gradient: 'from-rose-500/20 to-pink-500/10'
+  },
+  'Gita Wisdom': {
+    title: 'Gita Wisdom',
+    icon: '🙏',
+    gradient: 'from-orange-500/20 to-red-500/10'
+  },
+  'One Small Step': {
+    title: 'One Small Step',
+    icon: '👣',
+    gradient: 'from-amber-500/20 to-orange-500/10'
+  },
+  'Let Me Understand Better': {
+    title: 'Let Me Understand Better',
+    icon: '❓',
+    gradient: 'from-sky-500/20 to-blue-500/10'
+  },
 }
 
 type CompassResult = {
@@ -126,6 +169,7 @@ type CompassResult = {
   relationship_type: string
   citations: { source: string; chapter: string; verse: string; chunk_id: string }[]
   contextSufficient: boolean
+  secularMode: boolean
   requestedAt: string
 }
 
@@ -183,6 +227,7 @@ export default function RelationshipCompassPage() {
           message: enrichedMessage,
           sessionId,
           relationshipType: relationshipTypeMap[relationshipType] || 'other',
+          secularMode: false, // Gita page: full Sanskrit sections + citations
         }),
         timeout: 60000, // Extended timeout for deep analysis
       })
@@ -196,6 +241,7 @@ export default function RelationshipCompassPage() {
           relationship_type: relationshipType,
           citations: data.citations || [],
           contextSufficient: data.contextSufficient === true,
+          secularMode: data.secularMode === true,
           requestedAt: new Date().toISOString(),
         })
         setActiveSection(null) // Reset active section

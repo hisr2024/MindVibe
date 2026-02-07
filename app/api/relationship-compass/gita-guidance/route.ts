@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     const message = typeof body.message === 'string' ? body.message.trim() : ''
     const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : ''
     const relationshipType = typeof body.relationshipType === 'string' ? body.relationshipType.trim() : 'other'
+    const secularMode = typeof body.secularMode === 'boolean' ? body.secularMode : true // Default secular
 
     if (!message || !sessionId) {
       return NextResponse.json({ error: 'message and sessionId are required' }, { status: 400 })
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           message,
           sessionId,
-          relationshipType
+          relationshipType,
+          secularMode
         }),
         signal: controller.signal
       })
