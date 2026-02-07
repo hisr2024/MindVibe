@@ -127,15 +127,6 @@ export async function POST(request: NextRequest) {
         })
       } catch { /* continue */ }
 
-      console.log(
-        '[Viyoga Chat v4.0] Backend response:',
-        `provider=${data.provider || 'unknown'},`,
-        `emotion=${data.concern_analysis?.primary_emotion || 'unknown'},`,
-        `attachment=${data.attachment_analysis?.type || 'unknown'},`,
-        `verses=${data.gita_verses_used || 0},`,
-        `latency=${data.latency_ms?.toFixed(0) || 'unknown'}ms`
-      )
-
       return NextResponse.json({
         assistant: data.assistant,
         sections: data.sections || {},

@@ -395,7 +395,6 @@ if (typeof window !== 'undefined') {
       // If track failed to load, try next track in queue (but not infinitely)
       const state = usePlayerStore.getState()
       if (state.queue.length > 1 && state.queueIndex < state.queue.length - 1) {
-        console.log('[Audio] Trying next track in queue...')
         setTimeout(() => {
           usePlayerStore.getState().next()
         }, 500) // Reduced delay

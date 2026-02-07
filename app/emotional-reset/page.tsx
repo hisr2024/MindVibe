@@ -10,7 +10,6 @@ export default function EmotionalResetPage() {
 
   const handleComplete = () => {
     // Session completed successfully
-    console.log('Emotional Reset session completed')
   }
 
   const handleClose = () => {

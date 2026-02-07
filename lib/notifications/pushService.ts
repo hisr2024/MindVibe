@@ -104,7 +104,6 @@ class PushNotificationService {
     this.state.isSupported = 'serviceWorker' in navigator && 'PushManager' in window
 
     if (!this.state.isSupported) {
-      console.warn('[PushService] Push notifications not supported')
       return
     }
 
@@ -277,9 +276,8 @@ class PushNotificationService {
           })
           serverPushEnabled = true
         }
-      } catch (serverError) {
+      } catch {
         // Server push not available, continue with local notifications only
-        console.log('[PushService] Server push not available, using local notifications only')
       }
 
       // Enable notifications (local-only if server push failed)
@@ -288,7 +286,6 @@ class PushNotificationService {
       await this.savePreferences()
       this.notifyListeners()
 
-      console.log(`[PushService] Notifications enabled (server push: ${serverPushEnabled})`)
       return true
     } catch (error) {
       console.error('[PushService] Subscription failed:', error)
@@ -326,7 +323,6 @@ class PushNotificationService {
           })
         } catch {
           // Server notification failed, but local unsubscribe succeeded
-          console.log('[PushService] Server unsubscribe failed, but local unsubscribe succeeded')
         }
       }
 
@@ -376,7 +372,6 @@ class PushNotificationService {
 
     // Check quiet hours
     if (this.isQuietHours()) {
-      console.log('[PushService] Notification suppressed - quiet hours')
       return
     }
 

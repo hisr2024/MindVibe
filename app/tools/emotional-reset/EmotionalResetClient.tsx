@@ -11,7 +11,6 @@ export default function EmotionalResetClient() {
 
   const handleComplete = () => {
     // Session completed successfully
-    console.log('Emotional Reset session completed')
   }
 
   const handleClose = () => {

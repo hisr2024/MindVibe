@@ -14,8 +14,6 @@ export function ServiceWorkerRegistration() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('Service Worker registered:', registration)
-
           // Check for updates periodically
           setInterval(() => {
             registration.update().catch(() => {
@@ -29,9 +27,7 @@ export function ServiceWorkerRegistration() {
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New service worker available
-                  console.log('New service worker available')
-                  // You could show a notification to the user here
+                  // New service worker available - could show notification to user
                 }
               })
             }
@@ -44,9 +40,7 @@ export function ServiceWorkerRegistration() {
       // Listen for messages from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'SYNC_QUEUE') {
-          // Trigger sync in offline manager
-          console.log('Service worker requested sync')
-          // The offline manager will handle this automatically
+          // The offline manager will handle sync automatically
         }
       })
     }

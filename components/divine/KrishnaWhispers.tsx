@@ -299,10 +299,9 @@ export function KrishnaWhispers({
 
 // Hook for programmatic whispers
 export function useKrishnaWhispers() {
-  const showWhisper = useCallback((message: string, title?: string) => {
+  const showWhisper = useCallback((_message: string, _title?: string) => {
     // Implementation for programmatic whispers
     // This can be expanded to use a global state or event system
-    console.log('Krishna whispers:', message);
   }, []);
 
   return { showWhisper };

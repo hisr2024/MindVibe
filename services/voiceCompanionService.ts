@@ -96,78 +96,27 @@ class VoiceCompanionService {
 
   // ─── Conversation Sessions ──────────────────────────────────────
 
-  /** Start a new divine conversation session */
-  async startSession(language: string = 'en'): Promise<ConversationSession | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch('/api/voice/conversation/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language }),
-      })
-      if (!response.ok) {
-        this.checkAuthFailure(response.status)
-        return null
-      }
-      const data = await response.json()
-      this.sessionId = data.session_id || data.sessionId
-      return {
-        sessionId: this.sessionId!,
-        phase: data.phase || 'greeting',
-        emotionalState: data.emotional_state,
-        messageCount: 0,
-      }
-    } catch {
-      return null
+  /** Start a new divine conversation session (local-first until backend supports it) */
+  async startSession(_language: string = 'en'): Promise<ConversationSession | null> {
+    // Generate local session — backend conversation endpoints not yet available
+    this.sessionId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+    return {
+      sessionId: this.sessionId,
+      phase: 'greeting',
+      messageCount: 0,
     }
   }
 
-  /** Send a message within the active session */
+  /** Send a message within the active session — delegates to voiceQuery */
   async sendMessage(text: string, language: string = 'en'): Promise<CompanionMessage | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch('/api/voice/conversation/message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: this.sessionId,
-          message: text,
-          language,
-        }),
-      })
-      if (!response.ok) {
-        this.checkAuthFailure(response.status)
-        return null
-      }
-      const data = await response.json()
-      return {
-        response: data.response || data.message || 'I am here with you.',
-        verse: data.verse,
-        emotion: data.emotion || data.detected_emotion,
-        practice: data.practice || data.suggested_practice,
-        followUp: data.follow_up,
-        ssml: data.ssml,
-      }
-    } catch {
-      return null
-    }
+    return this.voiceQuery(text, 'voice', language)
   }
 
   /** End the current conversation session with farewell */
   async endSession(): Promise<string | null> {
     if (!this.sessionId) return null
-    try {
-      const response = await apiFetch(`/api/voice/conversation/end?session_id=${encodeURIComponent(this.sessionId)}`, {
-        method: 'POST',
-      })
-      this.sessionId = null
-      if (!response.ok) return null
-      const data = await response.json()
-      return data.farewell || data.message || 'Namaste. May peace be with you.'
-    } catch {
-      this.sessionId = null
-      return null
-    }
+    this.sessionId = null
+    return 'Namaste. May peace be with you.'
   }
 
   // ─── Voice Query (Stateless Fallback) ───────────────────────────
@@ -230,23 +179,7 @@ class VoiceCompanionService {
   // ─── Guided Breathing ───────────────────────────────────────────
 
   /** Get a guided breathing exercise */
-  async getBreathingExercise(pattern: string = 'peace_breath'): Promise<BreathingExercise> {
-    if (!this.isApiAvailable()) return this.defaultBreathingExercise()
-    try {
-      const params = new URLSearchParams()
-      if (this.sessionId) params.set('session_id', this.sessionId)
-      params.set('emotional_state', pattern)
-      const response = await apiFetch(`/api/voice/conversation/breathe?${params.toString()}`, {
-        method: 'POST',
-      })
-      if (response.ok) {
-        const data = await response.json()
-        if (data.steps) return data
-      }
-    } catch {
-      // Fall through to default
-    }
-
+  async getBreathingExercise(_pattern: string = 'peace_breath'): Promise<BreathingExercise> {
     return this.defaultBreathingExercise()
   }
 
@@ -273,140 +206,59 @@ class VoiceCompanionService {
 
   // ─── Soul Reading ───────────────────────────────────────────────
 
-  /** Get deep emotional/spiritual analysis */
-  async getSoulReading(text: string): Promise<SoulReading | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch('/api/kiaan/soul-reading', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, context: 'voice' }),
-      })
-      if (!response.ok) return null
-      return await response.json()
-    } catch {
-      return null
-    }
+  /** Get deep emotional/spiritual analysis (backend endpoint not yet available) */
+  async getSoulReading(_text: string): Promise<SoulReading | null> {
+    return null
   }
 
   // ─── Voice Learning ─────────────────────────────────────────────
 
-  /** Start a voice learning session */
+  /** Start a voice learning session (backend not yet available) */
   async startLearningSession(): Promise<void> {
-    if (!this.isApiAvailable()) return
-    try {
-      const response = await apiFetch('/api/voice-learning/session/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      })
-      if (!response.ok) this.checkAuthFailure(response.status)
-    } catch {
-      // Non-fatal
-    }
+    // No-op until backend voice-learning endpoints are available
   }
 
-  /** Record a playback event for learning */
-  async recordPlaybackEvent(event: 'play' | 'pause' | 'skip' | 'replay' | 'complete'): Promise<void> {
-    if (!this.isApiAvailable()) return
-    try {
-      await apiFetch('/api/voice-learning/playback-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_type: event }),
-      })
-    } catch {
-      // Non-fatal
-    }
+  /** Record a playback event for learning (backend not yet available) */
+  async recordPlaybackEvent(_event: 'play' | 'pause' | 'skip' | 'replay' | 'complete'): Promise<void> {
+    // No-op until backend voice-learning endpoints are available
   }
 
-  /** Submit conversation feedback */
-  async submitFeedback(rating: number, helpful: boolean): Promise<void> {
-    if (!this.isApiAvailable()) return
-    try {
-      await apiFetch('/api/voice-learning/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          rating,
-          feedback_type: 'conversation',
-          metadata: { helpful, session_id: this.sessionId },
-        }),
-      })
-    } catch {
-      // Non-fatal
-    }
+  /** Submit conversation feedback (backend not yet available) */
+  async submitFeedback(_rating: number, _helpful: boolean): Promise<void> {
+    // No-op until backend voice-learning endpoints are available
   }
 
   // ─── Proactive Engagement ───────────────────────────────────────
 
-  /** Get pending proactive messages for the user */
+  /** Get pending proactive messages for the user (backend not yet available) */
   async getProactiveMessages(): Promise<ProactiveMessage[]> {
-    if (!this.isApiAvailable()) return []
-    try {
-      const response = await apiFetch('/api/voice-learning/advanced/engagement/pending')
-      if (!response.ok) return []
-      const data = await response.json()
-      return data.messages || []
-    } catch {
-      return []
-    }
+    return []
   }
 
   // ─── Enhancement Sessions ───────────────────────────────────────
 
-  /** Start an enhancement session (binaural, ambient, breathing) */
-  async startEnhancement(type: 'binaural' | 'spatial' | 'breathing' | 'ambient' | 'sleep' | 'meditation'): Promise<string | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch('/api/voice/enhancement/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_type: type }),
-      })
-      if (!response.ok) return null
-      const data = await response.json()
-      return data.session_id
-    } catch {
-      return null
-    }
+  /** Start an enhancement session (backend not yet available) */
+  async startEnhancement(_type: 'binaural' | 'spatial' | 'breathing' | 'ambient' | 'sleep' | 'meditation'): Promise<string | null> {
+    return null
   }
 
   // ─── Daily Check-in ─────────────────────────────────────────────
 
-  /** Submit a voice-based mood check-in */
-  async submitCheckin(mood: number, energy: number, stress: number, isMorning: boolean = true): Promise<{ affirmation?: string; response?: string } | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch('/api/voice/checkin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_morning: isMorning, mood, energy_level: energy, stress_level: stress }),
-      })
-      if (!response.ok) return null
-      return await response.json()
-    } catch {
-      return null
-    }
+  /** Submit a voice-based mood check-in (backend not yet available) */
+  async submitCheckin(_mood: number, _energy: number, _stress: number, _isMorning: boolean = true): Promise<{ affirmation?: string; response?: string } | null> {
+    return null
   }
 
   // ─── Spiritual Progress ─────────────────────────────────────────
 
-  /** Get spiritual journey summary (requires auth) */
+  /** Get spiritual journey summary (backend not yet available) */
   async getSpiritualSummary(): Promise<{
     totalVerses: number
     breakthroughs: number
     growthScore: number
     teachingStyle: string
   } | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch('/api/voice-learning/advanced/spiritual/summary')
-      if (!response.ok) return null
-      return await response.json()
-    } catch {
-      return null
-    }
+    return null
   }
 
   // ─── Circuit Breaker ─────────────────────────────────────────────

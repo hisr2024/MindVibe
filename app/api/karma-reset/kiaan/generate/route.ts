@@ -134,7 +134,6 @@ export async function POST(request: NextRequest) {
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       if (attempt > 0) {
         const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1)
-        console.log(`[karma-reset/generate] Retry attempt ${attempt}/${MAX_RETRIES} after ${backoffMs}ms`)
         await sleep(backoffMs)
       }
 
@@ -158,9 +157,6 @@ export async function POST(request: NextRequest) {
 
         if (response.ok) {
           const data = await response.json()
-          if (attempt > 0) {
-            console.log(`[karma-reset/generate] Success after ${attempt + 1} attempts`)
-          }
           return NextResponse.json({
             reset_guidance: data.reset_guidance,
             kiaan_metadata: data.kiaan_metadata || {

@@ -118,9 +118,8 @@ export async function checkMicrophonePermission(): Promise<MicrophonePermissionS
           platform,
           browser
         }
-      } catch (permError) {
+      } catch {
         // Permissions API failed, fall through to alternative check
-        console.debug('Permissions API check failed:', permError)
       }
     }
 
@@ -203,8 +202,6 @@ export async function requestMicrophoneAccess(
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      console.log(`[Microphone] Attempt ${attempt + 1}/${maxRetries} on ${platform} ${browser}`)
-
       const stream = await navigator.mediaDevices.getUserMedia(defaultOptions)
 
       // Verify the stream has audio tracks
@@ -218,8 +215,6 @@ export async function requestMicrophoneAccess(
       if (workingTracks.length === 0) {
         throw new Error('Audio tracks are not active')
       }
-
-      console.log(`[Microphone] ✓ Success! Got ${audioTracks.length} audio track(s)`)
 
       return { success: true, stream }
 

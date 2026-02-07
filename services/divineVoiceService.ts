@@ -73,7 +73,7 @@ export interface ProvidersResponse {
 class DivineVoiceService {
   private currentAudio: HTMLAudioElement | null = null
   private unregisterAudio: (() => void) | null = null
-  private baseUrl = '/api/voice/divine'
+  private baseUrl = '/api/voice'
   /** Circuit breaker with timed recovery */
   private apiDisabled = false
   private apiFailCount = 0
@@ -134,9 +134,8 @@ class DivineVoiceService {
         body: JSON.stringify({
           text,
           language,
-          style,
-          is_sanskrit: isSanskrit,
-          ssml,
+          voice_type: style,
+          speed: 1.0,
         }),
       })
 
@@ -235,14 +234,18 @@ class DivineVoiceService {
     this.stopLocal()
 
     try {
-      const response = await apiFetch(`${this.baseUrl}/shloka`, {
+      // Use the same synthesize endpoint with Sanskrit language hint
+      const fullText = withMeaning && meaningText
+        ? `${shloka}\n\n${meaningText}`
+        : shloka
+      const response = await apiFetch(`${this.baseUrl}/synthesize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          shloka,
-          chandas,
-          with_meaning: withMeaning,
-          meaning_text: meaningText,
+          text: fullText,
+          language: 'sa',
+          voice_type: 'chanting',
+          speed: 0.9,
         }),
       })
 
@@ -354,30 +357,19 @@ class DivineVoiceService {
    */
   stop(): void {
     this.stopLocal()
-
-    // Only call backend stop if API is available
-    if (!this.apiDisabled) {
-      apiFetch(`${this.baseUrl}/stop`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ synthesis_id: null }),
-      }).catch(() => {
-        // Ignore errors
-      })
-    }
   }
 
   /**
    * Get available providers and their status.
    */
   async getProviders(): Promise<ProvidersResponse | null> {
-    if (!this.isApiAvailable()) return null
-    try {
-      const response = await apiFetch(`${this.baseUrl}/providers`)
-      if (!response.ok) return null
-      return response.json()
-    } catch {
-      return null
+    // Provider info is determined by the backend synthesize endpoint
+    return {
+      providers: {
+        sarvam_ai: { available: true, qualityScore: 9.5, bestFor: ['sanskrit', 'hindi'], voices: [] },
+        google_neural: { available: true, qualityScore: 9.0, bestFor: ['english'], voices: [] },
+      },
+      recommendation: { sanskrit: 'sarvam_ai', hindi: 'sarvam_ai', english: 'google_neural' },
     }
   }
 

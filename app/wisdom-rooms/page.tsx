@@ -76,8 +76,7 @@ export default function WisdomRoomsPage() {
         if (data.length) {
           setActiveRoomId(data[0].id)
         }
-      } catch (err) {
-        console.error(err)
+      } catch {
         setRooms(defaultRooms)
         setActiveRoomId(defaultRooms[0].slug)
         setAlert('Using default rooms because the server is offline. Messages will not persist until reconnected.')
