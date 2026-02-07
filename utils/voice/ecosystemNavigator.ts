@@ -411,13 +411,6 @@ export function getToolsForEmotion(emotion: string): EcosystemTool[] {
 }
 
 /**
- * Get a tool by its ID.
- */
-export function getToolById(id: string): EcosystemTool | undefined {
-  return ECOSYSTEM_TOOLS.find(t => t.id === id)
-}
-
-/**
  * Get a natural "Did you know?" style introduction to a random tool.
  * Used for proactive engagement when user seems open to exploration.
  */

@@ -28,9 +28,9 @@ import {
   getGuideResponse,
   type LifeSituation,
 } from './staticWisdom'
-import { getChapterWisdom, getVersesForEmotion } from './gitaTeachings'
+import { getChapterWisdom } from './gitaTeachings'
 import { getConversationalSourceReference } from './wisdomSources'
-import { detectToolSuggestion, type ToolSuggestion, type EcosystemTool } from './ecosystemNavigator'
+import { detectToolSuggestion, type ToolSuggestion } from './ecosystemNavigator'
 import { detectDistortions, type CognitiveDistortion } from '@/utils/wisdom/cognitiveReframing'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
