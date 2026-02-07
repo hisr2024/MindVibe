@@ -125,7 +125,7 @@ export class SpeechSynthesisService {
 
   constructor(config: SynthesisConfig = {}) {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      console.warn('SpeechSynthesis not supported in this browser')
+      // SpeechSynthesis not supported
       return
     }
 
@@ -172,9 +172,7 @@ export class SpeechSynthesisService {
     this.bestVoice = scored[0].voice
     this.voicesLoaded = true
 
-    if (scored[0].score > 0) {
-      console.log(`[KIAAN TTS] Selected voice: "${this.bestVoice.name}" (score: ${scored[0].score}, remote: ${!this.bestVoice.localService})`)
-    }
+    // Voice selected silently - no console output
   }
 
   /**

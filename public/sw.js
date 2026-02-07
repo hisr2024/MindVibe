@@ -1,168 +1,107 @@
 /**
- * MindVibe Service Worker (Quantum Coherence v14.0)
+ * MindVibe Service Worker v15.0 - Silent Production Grade
  *
- * Quantum Coherence Enhancements:
- * - Multi-tier caching strategy (static, dynamic, API, images)
- * - Intelligent cache trimming to prevent bloat
- * - Background sync for failed requests
- * - Push notifications support
- * - Comprehensive offline fallbacks
+ * Zero console output. Robust offline support. Intelligent caching.
  *
- * Quantum Analogy: The service worker maintains coherent state even when
- * the network connection is lost (decoherence), ensuring uninterrupted user experience.
+ * Caching Strategy:
+ * - Static assets: cache-first (30 days)
+ * - Dynamic pages: network-first, cache fallback
+ * - API responses: stale-while-revalidate (1 hour, 1 year for Gita verses)
+ * - Images: cache-first (30 days)
  */
 
-const CACHE_VERSION = 'mindvibe-v14.5-audio-fix';
+const CACHE_VERSION = 'mindvibe-v15.0-silent';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
 const CACHE_IMAGES = `${CACHE_VERSION}-images`;
 
-// Assets to cache immediately on install
-// Only include assets that are guaranteed to exist
 const STATIC_ASSETS = [
   '/manifest.json',
   '/kiaan-logo.svg',
   '/mindvibe-logo.svg',
 ];
 
-// Optional assets to attempt caching (won't fail install if missing)
-// NOTE: Do NOT include '/' here as it redirects to '/introduction' and cannot be cached
-// NOTE: Do NOT include '/favicon.ico' if it doesn't exist (causes 404)
 const OPTIONAL_ASSETS = [
   '/offline',
-  '/introduction', // The actual landing page after redirect
+  '/introduction',
 ];
 
-// API endpoints to cache (for offline access)
-// Note: Only GET requests are cached. POST/PUT/DELETE are passed through with offline fallback.
 const CACHEABLE_API_ENDPOINTS = [
   '/api/chat/about',
   '/api/chat/health',
   '/api/gita/verses',
   '/api/wisdom',
   '/api/kiaan',
-  // Journeys API - catalog is cached, other endpoints have offline fallback
   '/api/journeys/catalog',
   '/api/journeys/access',
   '/api/journeys/active',
   '/api/journeys/today',
 ];
 
-// Avoid caching user-specific journey endpoints to prevent stale auth state
 const NON_CACHEABLE_JOURNEY_ENDPOINTS = [
   '/api/journeys/access',
   '/api/journeys/active',
   '/api/journeys/today',
 ];
 
-// Maximum cache sizes (to prevent excessive storage use)
 const MAX_CACHE_SIZE = {
-  dynamic: 50,  // 50 dynamic pages
-  api: 100,     // 100 API responses
-  images: 100   // 100 images
+  dynamic: 50,
+  api: 100,
+  images: 100
 };
 
-// Cache duration in milliseconds (Quantum Coherence: optimized TTLs)
 const CACHE_DURATION = {
-  static: 30 * 24 * 60 * 60 * 1000,   // 30 days
-  dynamic: 7 * 24 * 60 * 60 * 1000,   // 7 days
-  api: 1 * 60 * 60 * 1000,            // 1 hour (synced with Redis)
-  images: 30 * 24 * 60 * 60 * 1000,   // 30 days
-  verses: 365 * 24 * 60 * 60 * 1000,  // 1 year for Gita verses
+  static: 30 * 24 * 60 * 60 * 1000,
+  dynamic: 7 * 24 * 60 * 60 * 1000,
+  api: 1 * 60 * 60 * 1000,
+  images: 30 * 24 * 60 * 60 * 1000,
+  verses: 365 * 24 * 60 * 60 * 1000,
 };
 
-/**
- * Cache a single asset with error handling
- * Returns true if cached successfully, false otherwise
- */
 async function cacheAsset(cache, url) {
   try {
     const response = await fetch(url, { cache: 'no-cache', redirect: 'follow' });
-    // Don't cache redirected responses - they cause issues
     if (response.ok && !response.redirected) {
       await cache.put(url, response);
-      console.log('[SW] Cached:', url);
       return true;
     }
-    if (response.redirected) {
-      console.warn('[SW] Skipping redirect response:', url);
-      return false;
-    }
-    console.warn('[SW] Failed to cache (non-ok response):', url, response.status);
     return false;
-  } catch (error) {
-    console.warn('[SW] Failed to cache:', url, error.message);
+  } catch {
     return false;
   }
 }
 
-/**
- * Install event - cache static assets
- */
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...', CACHE_VERSION);
-
   event.waitUntil(
     (async () => {
       try {
         const cache = await caches.open(CACHE_STATIC);
-        console.log('[SW] Caching static assets');
-
-        // Cache required assets (fail gracefully for each)
-        const staticResults = await Promise.allSettled(
-          STATIC_ASSETS.map(url => cacheAsset(cache, url))
-        );
-
-        // Cache optional assets (don't block on failures)
-        const optionalResults = await Promise.allSettled(
-          OPTIONAL_ASSETS.map(url => cacheAsset(cache, url))
-        );
-
-        const staticSuccessCount = staticResults.filter(r => r.status === 'fulfilled' && r.value).length;
-        const optionalSuccessCount = optionalResults.filter(r => r.status === 'fulfilled' && r.value).length;
-
-        console.log(`[SW] Cached ${staticSuccessCount}/${STATIC_ASSETS.length} static assets`);
-        console.log(`[SW] Cached ${optionalSuccessCount}/${OPTIONAL_ASSETS.length} optional assets`);
-        console.log('[SW] Installation complete');
-
-        return self.skipWaiting(); // Activate immediately
-      } catch (error) {
-        console.error('[SW] Installation error:', error);
-        // Still skip waiting to allow the SW to activate
+        await Promise.allSettled(STATIC_ASSETS.map(url => cacheAsset(cache, url)));
+        await Promise.allSettled(OPTIONAL_ASSETS.map(url => cacheAsset(cache, url)));
+        return self.skipWaiting();
+      } catch {
         return self.skipWaiting();
       }
     })()
   );
 });
 
-/**
- * Activate event - clean up old caches
- */
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...', CACHE_VERSION);
-
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
             .filter((cacheName) => {
-              // Delete old cache versions
               return cacheName.startsWith('mindvibe-') && cacheName !== CACHE_STATIC &&
                      cacheName !== CACHE_DYNAMIC && cacheName !== CACHE_API &&
                      cacheName !== CACHE_IMAGES;
             })
-            .map((cacheName) => {
-              console.log('[SW] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            })
+            .map((cacheName) => caches.delete(cacheName))
         );
       })
-      .then(() => {
-        console.log('[SW] Activation complete');
-        return self.clients.claim(); // Take control immediately
-      })
+      .then(() => self.clients.claim())
   );
 });
 
@@ -170,18 +109,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Skip chrome-extension and non-http(s) requests
-  if (!url.protocol.startsWith('http')) {
-    return
-  }
+  if (!url.protocol.startsWith('http')) return
+  if (url.origin !== self.location.origin) return
 
-  // Skip cross-origin requests to avoid redirect issues
-  if (url.origin !== self.location.origin) {
-    return
-  }
-
-  // Skip audio/media requests - they use range requests (206 partial content)
-  // which cannot be cached properly and cause playback issues
   const isMediaRequest =
     url.pathname.endsWith('.mp3') ||
     url.pathname.endsWith('.wav') ||
@@ -194,223 +124,123 @@ self.addEventListener('fetch', (event) => {
     request.destination === 'audio' ||
     request.destination === 'video'
 
-  if (isMediaRequest) {
-    // Let browser handle audio/video natively for proper streaming
-    return
-  }
+  if (isMediaRequest) return
 
-  // Skip navigation requests that might redirect (let browser handle them)
   if (request.mode === 'navigate') {
     event.respondWith(handleNavigationRequest(request))
     return
   }
 
-  // Handle API requests with cache-first strategy
   if (CACHEABLE_API_ENDPOINTS.some((route) => url.pathname.startsWith(route))) {
     event.respondWith(handleAPIRequest(request))
     return
   }
 
-  // Handle static resources with cache-first, network-fallback
   event.respondWith(handleStaticRequest(request))
 })
 
-/**
- * Handle API requests with cache-first, then network strategy
- * Note: Only GET requests can be cached
- */
 async function handleAPIRequest(request) {
-  // POST, PUT, DELETE requests cannot be cached - skip caching logic
   if (request.method !== 'GET') {
     try {
-      console.log('[Service Worker] Non-cacheable request (method: ' + request.method + '):', request.url)
-      const networkResponse = await fetch(request)
-      return networkResponse
-    } catch (error) {
-      console.error('[Service Worker] Network fetch failed for non-GET request:', error)
-      // Return a 200 with offline flag for journey endpoints to enable graceful degradation
+      return await fetch(request)
+    } catch {
       if (request.url.includes('/wisdom-journey/') || request.url.includes('/api/journeys/')) {
-        // Handle specific journey operations offline
         if (request.url.includes('/start')) {
           return new Response(
-            JSON.stringify({
-              _offline: true,
-              error: 'offline',
-              message: 'Journey start queued for when you reconnect.',
-              queued: true,
-            }),
-            {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' },
-            }
+            JSON.stringify({ _offline: true, error: 'offline', message: 'Journey start queued for when you reconnect.', queued: true }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
           )
         }
         return new Response(
-          JSON.stringify({
-            _offline: true,
-            completed: true,
-            message: 'Saved offline - will sync when connection restored',
-          }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          }
+          JSON.stringify({ _offline: true, completed: true, message: 'Saved offline - will sync when connection restored' }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
         )
       }
       return new Response(
-        JSON.stringify({
-          error: 'network_error',
-          message: 'Network request failed. Please try again.',
-          _offline: true,
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ error: 'network_error', message: 'Network request failed. Please try again.', _offline: true }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       )
     }
   }
 
   try {
-    const shouldCache = !NON_CACHEABLE_JOURNEY_ENDPOINTS.some((route) =>
-      request.url.includes(route)
-    )
+    const shouldCache = !NON_CACHEABLE_JOURNEY_ENDPOINTS.some((route) => request.url.includes(route))
 
     if (!shouldCache) {
-      console.log('[Service Worker] Fetching user-specific API:', request.url)
-      const networkResponse = await fetch(request)
-      return networkResponse
+      return await fetch(request)
     }
 
-    // Try cache first (only for GET requests)
     const cachedResponse = await caches.match(request)
 
     if (cachedResponse) {
-      // Check if cache is still fresh
       const cachedDate = new Date(cachedResponse.headers.get('date'))
       const now = new Date()
       const age = now - cachedDate
 
-      // Determine cache duration based on endpoint
       let maxAge = CACHE_DURATION.api
       if (request.url.includes('/gita/verses')) {
         maxAge = CACHE_DURATION.verses
-      } else if (request.url.includes('/chat')) {
-        maxAge = CACHE_DURATION.api
       }
 
       if (age < maxAge) {
-        console.log('[Service Worker] Serving from cache:', request.url)
         return cachedResponse
       }
     }
 
-    // Try network
-    console.log('[Service Worker] Fetching from network:', request.url)
     const networkResponse = await fetch(request)
 
-    // Only cache successful, non-redirected GET responses
     if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
       const cache = await caches.open(CACHE_API)
       cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
-  } catch (error) {
-    console.error('[Service Worker] Network fetch failed:', error)
-    
-    // Return cached response if available
+  } catch {
     const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      console.log('[Service Worker] Network failed, serving stale cache:', request.url)
-      return cachedResponse
-    }
-    
-    // Return offline fallback - use 200 for wisdom-journey and journeys to enable graceful degradation
+    if (cachedResponse) return cachedResponse
+
     if (request.url.includes('/wisdom-journey/') || request.url.includes('/api/journeys/')) {
-      // Provide endpoint-specific offline responses
       if (request.url.includes('/catalog')) {
-        // Return empty catalog with offline flag - frontend has fallback templates
-        return new Response(
-          JSON.stringify([]),
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-              'X-MindVibe-Offline': 'true',
-            },
-          }
-        )
+        return new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'X-MindVibe-Offline': 'true' },
+        })
       }
       if (request.url.includes('/active') || request.url.includes('/today')) {
-        // Return empty active journeys
         return new Response(
           JSON.stringify(request.url.includes('/today') ? { steps: [], priority_step: null, _offline: true } : []),
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-              'X-MindVibe-Offline': 'true',
-            },
-          }
+          { status: 200, headers: { 'Content-Type': 'application/json', 'X-MindVibe-Offline': 'true' } }
         )
       }
       return new Response(
-        JSON.stringify({
-          _offline: true,
-          message: 'You are currently offline. Using cached data.',
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ _offline: true, message: 'You are currently offline. Using cached data.' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       )
     }
     return new Response(
-      JSON.stringify({
-        error: 'offline',
-        message: 'You are currently offline. This content is not available in cache.',
-        _offline: true,
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: 'offline', message: 'You are currently offline. This content is not available in cache.', _offline: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }
 
-/**
- * Handle navigation requests (page loads) - network first to avoid redirect issues
- */
 async function handleNavigationRequest(request) {
   try {
-    // Always try network first for navigation to handle redirects properly
     const networkResponse = await fetch(request)
 
-    // Don't cache redirected responses or non-ok responses
     if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
       const cache = await caches.open(CACHE_DYNAMIC)
       cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
-  } catch (error) {
-    console.log('[Service Worker] Navigation fetch failed, trying cache:', request.url)
-
-    // Try cache on network failure
+  } catch {
     const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
-    }
+    if (cachedResponse) return cachedResponse
 
-    // Try offline page
     const offlineResponse = await caches.match('/offline')
-    if (offlineResponse) {
-      return offlineResponse
-    }
+    if (offlineResponse) return offlineResponse
 
-    // Final fallback
     return new Response('Offline - Please check your connection', {
       status: 503,
       statusText: 'Service Unavailable',
@@ -419,91 +249,59 @@ async function handleNavigationRequest(request) {
   }
 }
 
-/**
- * Handle static resource requests
- */
 async function handleStaticRequest(request) {
-  // POST requests cannot be cached - pass through to network
   if (request.method !== 'GET') {
     return fetch(request)
   }
 
   try {
-    // Try cache first
     const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
-    }
+    if (cachedResponse) return cachedResponse
 
-    // Try network
     const networkResponse = await fetch(request)
 
-    // Only cache successful, non-redirected responses
     if (networkResponse && networkResponse.ok && !networkResponse.redirected) {
       const cache = await caches.open(CACHE_DYNAMIC)
       cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
-  } catch (error) {
-    // Return cached response if available
+  } catch {
     const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
-    }
+    if (cachedResponse) return cachedResponse
 
-    // Return offline page or error
-    return new Response('Offline', {
-      status: 503,
-      statusText: 'Service Unavailable',
-    })
+    return new Response('Offline', { status: 503, statusText: 'Service Unavailable' })
   }
 }
 
-/**
- * Handle background sync (for when connection is restored)
- */
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-queued-operations') {
-    console.log('[Service Worker] Syncing queued operations')
     event.waitUntil(syncQueuedOperations())
   }
 })
 
-/**
- * Sync queued operations from IndexedDB
- */
 async function syncQueuedOperations() {
-  // This will be handled by the offline manager in the main thread
-  // Service worker just triggers the event
   const clients = await self.clients.matchAll()
   clients.forEach((client) => {
-    client.postMessage({
-      type: 'SYNC_QUEUE',
-      timestamp: Date.now(),
-    })
+    client.postMessage({ type: 'SYNC_QUEUE', timestamp: Date.now() })
   })
 }
 
-/**
- * Handle messages from the main thread
- */
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
   }
-  
+
   if (event.data && event.data.type === 'CACHE_URLS') {
     const urls = event.data.urls
     event.waitUntil(
       (async () => {
         const cache = await caches.open(CACHE_DYNAMIC);
-        // Cache each URL individually to prevent single failures from blocking all
         await Promise.allSettled(urls.map(url => cacheAsset(cache, url)));
       })()
     )
   }
-  
+
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       Promise.all([
@@ -512,7 +310,6 @@ self.addEventListener('message', (event) => {
         caches.delete(CACHE_API),
         caches.delete(CACHE_IMAGES)
       ]).then(() => {
-        // Recreate empty caches
         return Promise.all([
           caches.open(CACHE_STATIC),
           caches.open(CACHE_DYNAMIC),
@@ -523,5 +320,3 @@ self.addEventListener('message', (event) => {
     )
   }
 })
-
-console.log('[Service Worker] Loaded')

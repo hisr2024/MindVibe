@@ -513,7 +513,7 @@ export default function VoiceCompanionPage() {
         }, 120)
       }
     },
-    onError: (err) => console.warn('[Wake Word]', err),
+    onError: () => {},
   })
   const wakeWordRef = useRef(wakeWord)
   wakeWordRef.current = wakeWord

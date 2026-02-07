@@ -417,7 +417,6 @@ class VoiceCompanionService {
       if (!this.apiDisabled) {
         this.apiDisabled = true
         this.apiDisabledUntil = Date.now() + this.CIRCUIT_COOLDOWN
-        console.warn('[VoiceCompanion] API unavailable - circuit breaker open, retry in 5 min')
       }
     }
   }
