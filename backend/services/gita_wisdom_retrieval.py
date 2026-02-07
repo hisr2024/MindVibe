@@ -204,17 +204,21 @@ def search_gita_verses(
 
 
 def build_gita_context(verses: list[dict[str, Any]], tool: str = "general") -> tuple[str, list[dict[str, str]]]:
-    """Build context string from verses for AI prompt.
+    """Build rich context string from verses for AI prompt with strict Gita adherence.
+
+    Includes Sanskrit text, transliteration, word meanings, themes, principles,
+    and mental health applications for comprehensive Gita-grounded guidance.
 
     Args:
-        verses: List of verse dictionaries
+        verses: List of verse dictionaries from 701-verse repository
         tool: Tool requesting context ("viyoga", "relationship_compass", "general")
 
     Returns:
         Tuple of (context_string, source_references)
     """
     lines = ["[GITA_CORE_WISDOM_CONTEXT]"]
-    lines.append(f"Retrieved {len(verses)} relevant verses from the Bhagavad Gita (701 verses total):\n")
+    lines.append(f"Source: Bhagavad Gita 701-verse repository (static core wisdom)")
+    lines.append(f"Retrieved {len(verses)} relevant verses:\n")
     sources: list[dict[str, str]] = []
 
     for verse in verses:
@@ -224,21 +228,40 @@ def build_gita_context(verses: list[dict[str, Any]], tool: str = "general") -> t
         file_path = "data/gita/gita_verses_complete.json"
 
         english = verse.get("english", "")
-        sanskrit = verse.get("sanskrit", "").split("\n")[0] if verse.get("sanskrit") else ""
+        sanskrit = verse.get("sanskrit", "")
+        transliteration = verse.get("transliteration", "")
+        hindi = verse.get("hindi", "")
         theme = verse.get("theme", "")
         principle = verse.get("principle", "")
         mh_apps = verse.get("mental_health_applications", [])
+        word_meanings = verse.get("word_meanings", {})
 
         lines.append(f"- Reference: {reference}")
         if sanskrit:
-            lines.append(f"  Sanskrit: {sanskrit[:100]}...")
+            # Include first line of Sanskrit for authenticity
+            sanskrit_first = sanskrit.split("\n")[0].strip()
+            lines.append(f"  Sanskrit: {sanskrit_first[:150]}")
+        if transliteration:
+            translit_first = transliteration.split("\n")[0].strip()
+            lines.append(f"  Transliteration: {translit_first[:150]}")
         lines.append(f"  Translation: {english}")
+        if hindi:
+            hindi_first = hindi.split("\n")[0].strip()
+            lines.append(f"  Hindi: {hindi_first[:150]}")
         if principle:
-            lines.append(f"  Principle: {principle}")
+            lines.append(f"  Gita Principle: {principle}")
         if theme:
             lines.append(f"  Theme: {theme.replace('_', ' ').title()}")
         if mh_apps:
-            lines.append(f"  Applications: {', '.join(mh_apps[:5])}")
+            lines.append(f"  Mental Health Applications: {', '.join(mh_apps[:6])}")
+
+        # Include key word meanings for deeper understanding
+        if word_meanings and isinstance(word_meanings, dict):
+            key_words = list(word_meanings.items())[:5]
+            if key_words:
+                meanings_str = "; ".join(f"{k}: {v}" for k, v in key_words)
+                lines.append(f"  Key Terms: {meanings_str}")
+
         lines.append("")
 
         sources.append({"file": file_path, "reference": reference})

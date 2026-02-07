@@ -1,43 +1,39 @@
-"""Relationship Compass - Gita-Grounded Relationship Guidance v3.1.
+"""Relationship Compass - Strict Gita-Grounded Relationship Guidance v3.2.
 
-ENHANCED VERSION with Strict Bhagavad Gita Wisdom Grounding + OpenAI-Powered Analysis
+STRICT GITA ADHERENCE VERSION with Static + Dynamic Core Wisdom Integration
 
-This router provides relationship conflict navigation using ONLY Bhagavad Gita wisdom
-from the 700+ verse repository. ALL responses are grounded in actual verses.
+This router provides relationship conflict navigation using EXCLUSIVELY Bhagavad Gita
+wisdom from both static (701-verse repository) and dynamic (validated learned wisdom).
+ALL responses are grounded in actual verses and verified Gita teachings.
 
-Relationship Compass focuses on Gita principles for relationships:
-- Dharma (right action in relationships)
-- Daya (compassion for self and others)
-- Kshama (forgiveness as liberation)
-- Ahimsa (non-violent communication)
-- Sama-darshana (equal vision - seeing the divine in all)
-- Svadhyaya (self-study to understand our own patterns)
+STRICT GITA PSYCHOLOGY FRAMEWORK (v3.2):
+- Shad Ripu (Six Inner Enemies) diagnostic: Kama, Krodha, Lobha, Moha, Mada, Matsarya
+- Raga-Dvesha (Attachment-Aversion) dynamics instead of Western attachment theory
+- Guna analysis (Sattva/Rajas/Tamas) for emotional state assessment
+- Yoga path prescription (Karma/Bhakti/Jnana/Dhyana) per situation
+- Vak-tapas (BG 17.15) framework for communication guidance
+- Sanskrit terminology with translations for all key concepts
 
-GITA-GROUNDED PATTERN (v3.1):
-1. AI-POWERED ANALYSIS - Deep conflict understanding using OpenAI API with Gita psychology
-2. CONFLICT ACKNOWLEDGED - Deep validation through Gita lens
-3. SVADHYAYA APPLIED - Self-study using Gita psychology (krodha, raga, moha, etc.)
-4. ENHANCED VERSE RETRIEVAL - AI-informed query building for better RAG results
-5. DHARMIC PATH ILLUMINATED - Guidance grounded in actual verses
-6. FALLBACK USES REAL VERSES - Never generic text
+GITA-GROUNDED PATTERN (v3.2):
+1. AI-POWERED ANALYSIS - Strict Gita psychology (Shad Ripu, Guna, Raga-Dvesha)
+2. STATIC WISDOM - 701-verse repository retrieval with Sanskrit + principles
+3. DYNAMIC WISDOM - Validated learned wisdom from WisdomCore
+4. SVADHYAYA APPLIED - Self-study using ONLY Gita psychology
+5. DHARMIC PATH ILLUMINATED - Every guidance point traces to a specific verse
+6. FALLBACK USES REAL VERSES - Strictly Gita-grounded, never generic text
 
-ANALYSIS MODES (v3.1):
-- standard: 8-section guidance with core Gita teachings
-- deep_dive: Comprehensive analysis with multiple verse citations
-- quantum_dive: Multi-dimensional exploration across Gita chapters
+DUAL WISDOM SOURCES:
+- Static: 701-verse JSON with Sanskrit, translations, themes, principles, mental health tags
+- Dynamic: WisdomCore validated learned wisdom (LearnedWisdom table) with verse references
 
-NEW IN v3.1 - OpenAI API Integration for Deep Analysis:
-- AI-powered emotional analysis mapped to Gita concepts (krodha, raga, bhaya, moha)
-- Attachment pattern detection with Gita wisdom (Atma-tripti, Sangha, Purnatva)
-- Communication analysis with Gita alternatives (Satya with Priya, Sama-darshana)
-- Enhanced verse retrieval using AI-generated search queries
-- All analysis grounded in the 701-verse Gita repository
-
-ENHANCEMENTS (v3.0 retained):
-- Strict Gita-only grounding (no generic psychology in prompts)
-- Direct verse retrieval from 701-verse JSON
-- Fallback using actual Gita verses (not generic text)
-- Multi-provider AI with Gita context injection
+NEW IN v3.2 - Strict Gita Adherence:
+- Shad Ripu diagnostic framework replaces generic emotion labels
+- Guna analysis (Sattva/Rajas/Tamas) for emotional state
+- All emotions mapped to Gita psychology (Krodha, Raga, Dvesha, Moha, etc.)
+- Dynamic wisdom integration from validated learned sources
+- Stricter validation requiring 3+ unique verse citations
+- Sanskrit terminology mandatory in Gita mode responses
+- Secular mode explicitly derives ALL advice from Gita principles
 """
 
 from __future__ import annotations
@@ -102,6 +98,7 @@ from backend.services.relationship_compass_analysis import (
     analysis_to_dict,
     ConflictAnalysis,
 )
+from backend.services.wisdom_core import get_wisdom_core, WisdomResult
 
 logger = logging.getLogger(__name__)
 
@@ -248,6 +245,93 @@ else:
     logger.warning("⚠️ Relationship Compass: Gita verses not loaded - using RAG/fallback")
 
 
+async def _fetch_dynamic_wisdom(
+    db: AsyncSession,
+    query: str,
+    ai_analysis: ConflictAnalysis | None = None,
+    limit: int = 5,
+) -> list[dict]:
+    """Fetch dynamic learned wisdom from WisdomCore for stricter Gita adherence.
+
+    Retrieves validated learned wisdom that supplements the static 701-verse
+    repository, providing deeper commentary and applied teachings from verified sources.
+    """
+    dynamic_items: list[dict] = []
+    try:
+        wisdom_core = get_wisdom_core()
+
+        # Search by query text
+        results = await wisdom_core.search(
+            db=db,
+            query=query,
+            limit=limit,
+            include_learned=True,
+            validated_only=True,
+        )
+
+        # Also search by Shad Ripu if AI analysis identified one
+        if ai_analysis and ai_analysis.active_shad_ripu:
+            ripu_results = await wisdom_core.get_for_enemy(
+                db=db,
+                enemy=ai_analysis.active_shad_ripu,
+                limit=3,
+                include_learned=True,
+            )
+            # Merge without duplicates
+            seen_ids = {r.id for r in results}
+            for r in ripu_results:
+                if r.id not in seen_ids:
+                    results.append(r)
+                    seen_ids.add(r.id)
+
+        # Also search by mental health domain if relevant
+        if ai_analysis and ai_analysis.primary_emotion:
+            # Map emotion to domain
+            emotion_domain_map = {
+                "anger": "anger", "krodha": "anger",
+                "fear": "anxiety", "bhaya": "anxiety",
+                "sadness": "depression", "shoka": "depression",
+                "hurt": "grief", "grief": "grief",
+                "confusion": "stress", "moha": "stress",
+            }
+            emotion_key = ai_analysis.primary_emotion.split("(")[0].strip().lower()
+            domain = emotion_domain_map.get(emotion_key)
+            if domain:
+                domain_results = await wisdom_core.get_by_domain(
+                    db=db,
+                    domain=domain,
+                    limit=3,
+                    include_learned=True,
+                )
+                for r in domain_results:
+                    if r.id not in seen_ids:
+                        results.append(r)
+                        seen_ids.add(r.id)
+
+        # Convert WisdomResult objects to dicts for build_context_block
+        for r in results:
+            if r.source.value == "learned":  # Only include dynamic/learned wisdom
+                dynamic_items.append({
+                    "content": r.content,
+                    "source_name": r.source_name or "Verified Gita Commentary",
+                    "verse_refs": [[r.chapter, r.verse]] if r.chapter and r.verse else [],
+                    "themes": r.themes,
+                    "shad_ripu_tags": r.shad_ripu_tags,
+                    "quality_score": r.quality_score,
+                })
+
+        if dynamic_items:
+            logger.info(
+                f"RelationshipCompass: Retrieved {len(dynamic_items)} dynamic wisdom items "
+                f"(Shad Ripu: {ai_analysis.active_shad_ripu if ai_analysis else 'N/A'})"
+            )
+
+    except Exception as e:
+        logger.warning(f"Dynamic wisdom retrieval failed (non-critical): {e}")
+
+    return dynamic_items
+
+
 @router.post("/guide")
 async def get_relationship_guidance(
     payload: dict[str, Any],
@@ -366,7 +450,7 @@ async def get_relationship_guidance(
                     if not any(c.get("pattern") == pattern for c in communication_issues):
                         communication_issues.append(ai_comm_insight)
 
-    # STEP 2: Retrieve Gita verses directly from 701-verse repository
+    # STEP 2: Retrieve Gita verses from BOTH static (701-verse) and dynamic (learned) wisdom
     depth_map = {
         AnalysisMode.STANDARD: "standard",
         AnalysisMode.DEEP_DIVE: "deep_dive",
@@ -386,17 +470,40 @@ async def get_relationship_guidance(
         # Fallback to basic search query
         search_query = f"{conflict} {primary_emotion or ''} {relationship_type.value}"
 
+    # Static wisdom: 701-verse repository
     gita_verses = search_gita_verses(
         query=search_query,
         tool="relationship_compass",
-        limit=10,
+        limit=12,  # Increased for stricter Gita adherence
         depth=depth,
     )
 
-    # Build Gita context for AI
+    # Dynamic wisdom: Validated learned wisdom from WisdomCore
+    dynamic_wisdom = await _fetch_dynamic_wisdom(
+        db=db,
+        query=search_query,
+        ai_analysis=ai_analysis,
+        limit=5,
+    )
+
+    # Build Gita context for AI (combining static + dynamic)
     if gita_verses:
         gita_context, sources = build_gita_context(gita_verses, tool="relationship_compass")
-        logger.info(f"RelationshipCompass: Retrieved {len(gita_verses)} Gita verses")
+        # Append dynamic wisdom context if available
+        if dynamic_wisdom:
+            dynamic_context_lines = ["\n--- DYNAMIC LEARNED WISDOM (validated) ---"]
+            for dw in dynamic_wisdom:
+                dynamic_context_lines.append(f"- Source: {dw.get('source_name', 'Verified Commentary')}")
+                if dw.get('verse_refs'):
+                    refs = [f"BG {r[0]}.{r[1]}" for r in dw['verse_refs'] if len(r) >= 2]
+                    dynamic_context_lines.append(f"  Related Verses: {', '.join(refs)}")
+                dynamic_context_lines.append(f"  Wisdom: {dw.get('content', '')[:300]}")
+                dynamic_context_lines.append("")
+            gita_context += "\n".join(dynamic_context_lines)
+        logger.info(
+            f"RelationshipCompass: Retrieved {len(gita_verses)} static verses "
+            f"+ {len(dynamic_wisdom)} dynamic wisdom items"
+        )
     else:
         # Use core relationship wisdom
         gita_context = _get_core_relationship_gita_wisdom()
@@ -455,12 +562,14 @@ async def get_relationship_guidance(
             },
             "svadhyaya_insights": attachment_insights,
             "communication_patterns": communication_issues,
-            # AI Analysis fields (v3.1 - OpenAI-powered deep analysis)
+            # AI Analysis fields (v3.2 - Strict Gita psychology)
             "ai_analysis": {
                 "enabled": ai_analysis.analysis_depth == "ai_enhanced",
                 "primary_emotion": ai_analysis.primary_emotion,
                 "secondary_emotions": ai_analysis.secondary_emotions,
                 "emotional_intensity": ai_analysis.emotional_intensity,
+                "active_shad_ripu": ai_analysis.active_shad_ripu,
+                "guna_analysis": ai_analysis.guna_analysis,
                 "attachment_style": ai_analysis.attachment_style,
                 "attachment_triggers": ai_analysis.attachment_triggers,
                 "communication_style": ai_analysis.communication_style,
@@ -469,7 +578,14 @@ async def get_relationship_guidance(
                 "underlying_fears": ai_analysis.underlying_fears,
                 "gita_concepts": ai_analysis.gita_concepts,
                 "recommended_teachings": ai_analysis.recommended_teachings,
+                "primary_yoga_path": ai_analysis.primary_yoga_path,
+                "healing_verse": ai_analysis.healing_verse,
                 "confidence": ai_analysis.confidence,
+            },
+            # Dynamic wisdom integration
+            "dynamic_wisdom": {
+                "items_retrieved": len(dynamic_wisdom),
+                "sources": [dw.get("source_name", "") for dw in dynamic_wisdom],
             },
             "cached": result.cached,
             "latency_ms": result.latency_ms,
@@ -493,14 +609,13 @@ async def get_relationship_guidance(
 @router.post("/gita-guidance")
 async def get_relationship_guidance_gita_only(
     payload: GitaGuidanceRequest,
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Relationship guidance with optional secular mode (default: secular).
+    """Relationship guidance with strict Gita adherence (static + dynamic wisdom).
 
-    Secular mode (default): Modern, friendly, practical advice without religious references.
-    Gita mode: Traditional guidance with verse citations and spiritual language.
-
-    Both modes use the same underlying wisdom from the 700+ verse repository,
-    but present it differently based on user preference.
+    Both secular and Gita modes derive ALL guidance from the Bhagavad Gita's
+    700+ verse repository (static) plus validated learned wisdom (dynamic).
+    The difference is only in presentation style, not in wisdom source.
     """
     message = payload.message.strip()
     session_id = payload.session_id.strip()
@@ -545,14 +660,23 @@ async def get_relationship_guidance_gita_only(
             analysis=ai_analysis,
             relationship_type=relationship_type,
         )
-        base_result = retrieve_chunks(enhanced_query, relationship_type, k=18)
+        base_result = retrieve_chunks(enhanced_query, relationship_type, k=20)
         logger.info("RelationshipCompass: Using AI-enhanced query for wisdom retrieval")
     else:
-        base_result = retrieve_chunks(message, relationship_type, k=18)
+        base_result = retrieve_chunks(message, relationship_type, k=20)
 
     retrieval = expand_and_retrieve(message, relationship_type, base_result)
-    merged_chunks = merge_chunks(retrieval, limit=20)
-    context_block = build_context_block(merged_chunks)
+    merged_chunks = merge_chunks(retrieval, limit=22)
+
+    # Fetch dynamic learned wisdom for stricter Gita adherence
+    dynamic_wisdom = await _fetch_dynamic_wisdom(
+        db=db,
+        query=message,
+        ai_analysis=ai_analysis,
+        limit=5,
+    )
+
+    context_block = build_context_block(merged_chunks, dynamic_wisdom=dynamic_wisdom)
     context_sufficient = bool(merged_chunks) and retrieval.confidence >= 0.2
 
     # Log Gita wisdom retrieval for verification
@@ -672,11 +796,14 @@ async def get_relationship_guidance_gita_only(
             "contextSufficient": True,
             "fallback": True,
             "secularMode": secular_mode,
-            # AI Analysis - included even in fallback (internal insights)
+            # AI Analysis - strict Gita psychology (included even in fallback)
             "ai_analysis": {
                 "enabled": ai_analysis.analysis_depth == "ai_enhanced",
                 "primary_emotion": ai_analysis.primary_emotion,
+                "active_shad_ripu": ai_analysis.active_shad_ripu,
                 "attachment_style": ai_analysis.attachment_style,
+                "primary_yoga_path": ai_analysis.primary_yoga_path,
+                "healing_verse": ai_analysis.healing_verse,
                 "confidence": ai_analysis.confidence,
             },
         }
@@ -697,12 +824,14 @@ async def get_relationship_guidance_gita_only(
         "citations": citations,
         "contextSufficient": True,
         "secularMode": secular_mode,
-        # AI Analysis (internal - not exposed as spiritual concepts in secular mode)
+        # AI Analysis - strict Gita psychology framework
         "ai_analysis": {
             "enabled": ai_analysis.analysis_depth == "ai_enhanced",
             "primary_emotion": ai_analysis.primary_emotion,
             "secondary_emotions": ai_analysis.secondary_emotions,
             "emotional_intensity": ai_analysis.emotional_intensity,
+            "active_shad_ripu": ai_analysis.active_shad_ripu,
+            "guna_analysis": ai_analysis.guna_analysis,
             "attachment_style": ai_analysis.attachment_style,
             "attachment_triggers": ai_analysis.attachment_triggers,
             "communication_style": ai_analysis.communication_style,
@@ -711,6 +840,10 @@ async def get_relationship_guidance_gita_only(
             "power_dynamic": ai_analysis.power_dynamic,
             "core_unmet_needs": ai_analysis.core_unmet_needs,
             "underlying_fears": ai_analysis.underlying_fears,
+            "gita_concepts": ai_analysis.gita_concepts,
+            "recommended_teachings": ai_analysis.recommended_teachings,
+            "primary_yoga_path": ai_analysis.primary_yoga_path,
+            "healing_verse": ai_analysis.healing_verse,
             "confidence": ai_analysis.confidence,
         },
     }
@@ -832,7 +965,7 @@ async def relationship_compass_health():
     return {
         "status": "ok" if (gita_verses_loaded > 0 or wellness_ready) else "degraded",
         "service": "relationship-compass",
-        "version": "3.1",
+        "version": "3.2",
         "provider": "gita_repository",
         "gita_grounding": {
             "verses_loaded": gita_verses_loaded,

@@ -32,31 +32,39 @@ ANALYSIS_MODEL = os.getenv("RELATIONSHIP_COMPASS_ANALYSIS_MODEL", "gpt-4o-mini")
 
 @dataclass
 class ConflictAnalysis:
-    """Structured analysis of a relationship conflict."""
+    """Structured analysis of a relationship conflict grounded in Gita psychology."""
 
-    # Primary emotional state
+    # Primary emotional state (Gita psychology terms)
     primary_emotion: str = ""
     secondary_emotions: list[str] = field(default_factory=list)
     emotional_intensity: str = "moderate"  # low, moderate, high, overwhelming
 
-    # Attachment patterns
-    attachment_style: str = ""  # anxious, avoidant, disorganized, secure
+    # Shad Ripu (Six Inner Enemies) diagnosis
+    active_shad_ripu: str = ""  # kama, krodha, lobha, moha, mada, matsarya
+
+    # Guna analysis
+    guna_analysis: str = ""  # sattva/rajas/tamas dominant state
+
+    # Inner patterns (Raga-Dvesha framework, not Western attachment theory)
+    attachment_style: str = ""  # raga-dominant, dvesha-dominant, raga-dvesha-oscillation, sthitaprajna
     attachment_indicators: list[str] = field(default_factory=list)
     attachment_triggers: list[str] = field(default_factory=list)
 
-    # Communication patterns
-    communication_style: str = ""
+    # Communication patterns (Vak-tapas framework)
+    communication_style: str = ""  # sattvic, rajasic, tamasic
     problematic_patterns: list[str] = field(default_factory=list)
     communication_needs: list[str] = field(default_factory=list)
 
-    # Relationship dynamics
-    power_dynamic: str = ""  # balanced, pursuer-distancer, over-under, etc.
+    # Relationship dharma dynamics
+    power_dynamic: str = ""
     core_unmet_needs: list[str] = field(default_factory=list)
     underlying_fears: list[str] = field(default_factory=list)
 
-    # Gita-relevant concepts
+    # Gita wisdom prescription (STRICT - must use actual verses)
     gita_concepts: list[str] = field(default_factory=list)
     recommended_teachings: list[str] = field(default_factory=list)
+    primary_yoga_path: str = ""  # Karma/Bhakti/Jnana/Dhyana/Raja Yoga
+    healing_verse: str = ""  # Single most applicable verse
 
     # Analysis metadata
     confidence: float = 0.0
@@ -64,119 +72,160 @@ class ConflictAnalysis:
     raw_analysis: dict[str, Any] = field(default_factory=dict)
 
 
-# Core Gita wisdom for relationship analysis - grounded in the 701-verse repository
+# Core Gita wisdom for relationship analysis - grounded in the 701-verse repository + dynamic wisdom
 GITA_EMOTION_MAPPING = """
-GITA EMOTION-TO-CONCEPT MAPPING (from MindVibe's 701-verse repository):
+═══════════════════════════════════════════════════════════════
+GITA CORE WISDOM FRAMEWORK FOR RELATIONSHIP ANALYSIS
+(from MindVibe's 701-verse static repository + dynamic learned wisdom)
+═══════════════════════════════════════════════════════════════
 
-EMOTIONS → GITA CONCEPTS:
-- Hurt → Raga (attachment) to unmet expectations; Dukha (suffering) from unfulfilled desires
-- Anger → Krodha (wrath) - one of three gates to hell (BG 16.21); arises from thwarted desire (BG 2.62-63)
-- Fear → Bhaya; opposite is Abhaya (fearlessness) from knowing eternal nature (BG 2.20, 4.10)
-- Confusion → Moha (delusion) clouding Buddhi (discriminative wisdom); Arjuna's state in Chapter 1
-- Guilt → Carrying past into present; Gita teaches each moment is new (BG 18.66 - surrender past sins)
-- Loneliness → Separation from Atman (self), not from others; divine dwells in every heart (BG 18.61)
-- Jealousy → Matsarya; comparing one's journey to another's; cure is Svadharma (BG 3.35)
-- Betrayal → Expecting permanence; people act from conditioning (Prakriti); BG 18.17 on non-attachment
-- Resentment → Drinking poison hoping another suffers; Kshama (forgiveness) liberates self (BG 16.2)
-- Grief → Shoka; Krishna addresses Arjuna's grief extensively in Chapter 2
+STRICT RULE: ALL analysis MUST use Gita psychology exclusively.
+Do NOT use Western psychology terms as primary identifiers.
+Every emotional state MUST be mapped to its Gita equivalent with specific verse citations.
 
-ATTACHMENT PATTERNS → GITA WISDOM:
-- Anxious attachment → Needs Atma-tripti (self-contentment); completeness from within, not validation
-- Avoidant attachment → Needs Sangha (sacred connection); interdependence is strength (BG 3.10-11)
-- Disorganized attachment → Needs Yoga (integration) through Sakshi Bhava (witness consciousness)
-- Secure attachment → Embodies Purnatva (fullness) - complete in self, open to others
+SHAD RIPU (SIX INNER ENEMIES) - Primary Diagnostic Framework:
+These six enemies of the mind are the ROOT CAUSES of all relationship suffering.
+Always identify which Shad Ripu is active:
+1. Kama (desire/lust) - BG 3.37, 3.39-41: "It is desire, it is anger, born of Rajo-guna"
+2. Krodha (anger/wrath) - BG 2.62-63, 16.21: One of three gates to self-destruction
+3. Lobha (greed/possessiveness) - BG 16.21, 14.17: Arises from Rajo-guna
+4. Moha (delusion/confusion) - BG 2.63, 7.27: Destroys Buddhi (discrimination)
+5. Mada (pride/arrogance) - BG 16.4, 18.58: Ahamkara-driven blindness
+6. Matsarya (envy/jealousy) - BG 12.13, 3.35: Cure is Svadharma
 
-COMMUNICATION PATTERNS → GITA ALTERNATIVES:
-- Criticism → Satya with Priya (truth with kindness) - BG 17.15 on austerity of speech
-- Contempt → Sama-darshana (equal vision) - seeing divine in all (BG 6.32)
-- Defensiveness → Shravana (deep listening) - receiving feedback as information
-- Stonewalling → Taking space with intention - "I need time to process, I'll return"
+EMOTIONS → GITA CONCEPT MAPPING (with mandatory verse citations):
+- Hurt → Raga (attachment) to unmet expectations; Dukha (suffering) from unfulfilled desires (BG 2.14, 2.56, 5.21)
+- Anger → Krodha (wrath) - one of three gates to hell (BG 16.21); chain: Kama→Krodha→Moha (BG 2.62-63); cure: Kshama + Dama (BG 16.1-3)
+- Fear → Bhaya (fear); opposite is Abhaya (fearlessness) from Atma-jnana (BG 2.20, 4.10, 16.1); root: forgetting one's eternal nature
+- Confusion → Moha (delusion) clouding Buddhi (discriminative wisdom); Arjuna's state in BG 1.28-46; cure: Buddhi Yoga (BG 2.49)
+- Guilt → Karma-bandha (bondage of past action); each moment offers new choice (BG 18.66, 9.30-31); cure: Sharanagati (surrender)
+- Loneliness → Separation from Atman (self), not from others; divine dwells in every heart as Paramatma (BG 18.61, 6.29, 13.17)
+- Jealousy → Matsarya (envy); comparing dharma paths (BG 3.35); cure: Svadharma + Santosha (contentment) (BG 12.17)
+- Betrayal → Expecting permanence from Prakriti (nature); beings act from Gunas (BG 18.17, 3.27-28); cure: Vairagya (dispassion)
+- Resentment → Dvesha (aversion) disguised as righteousness; Kshama (forgiveness) liberates self (BG 16.2-3, 12.13-14)
+- Grief → Shoka (sorrow); Krishna's entire teaching in Ch. 2 addresses Arjuna's grief (BG 2.11-30); cure: Atma-jnana
+- Shame → Ahamkara (ego-identification) with actions rather than Atman; cure: Sakshi Bhava (BG 13.31-32)
+- Helplessness → Vishada (despair) as in BG 1.47; cure: recognizing one's Svadharma and acting (BG 2.31-33)
 
-RELATIONSHIP TYPES → GITA FOCUS:
-- Romantic → Sama-darshana, Nishkama Prema (desireless love) - BG 12, 16
-- Family → Svadharma (sacred duty), Kula-dharma (family righteousness) - BG 2, 18
-- Friendship → Maitri (unconditional friendship), Suhrit (well-wisher) - BG 6.9
-- Workplace → Karma Yoga (selfless action), Yogah Karmasu Kaushalam (excellence) - BG 2.47, 3.19
-- Self → Atma-jnana (self-knowledge), Svadhyaya (self-study) - BG 6, 13
-- Community → Lokasangraha (welfare of world), Sarva-bhuta-hite (good of all) - BG 12.4
+ATTACHMENT DYNAMICS → GITA WISDOM (not Western attachment theory):
+- Clingy/needy pattern → Raga (excessive attachment) + absence of Atma-tripti (self-contentment) BG 2.55; needs: Sthitaprajna (steady wisdom) BG 2.55-72
+- Avoidant/distancing pattern → Dvesha (aversion) to vulnerability + absence of Sangha (sacred connection) BG 3.10-11; needs: Bhakti (devotion/connection) BG 12.1-7
+- Push-pull pattern → Raga-Dvesha oscillation (BG 7.27); needs: Yoga (integration) through Sakshi Bhava (witness consciousness) BG 6.19-20
+- Balanced/secure pattern → Sthitaprajna (steady in wisdom) + Purnatva (inner fullness) BG 5.21; embodies: Samatvam (equanimity) BG 2.48
 
-KEY GITA VERSES FOR RELATIONSHIPS:
-- BG 2.47: "Your right is to action alone, never to its fruits" (detachment from outcome)
-- BG 2.62-63: Chain of anger: desire → attachment → anger → delusion → memory loss → destruction
-- BG 6.32: "One who sees equality everywhere, seeing pleasure/pain in all, is highest yogi"
-- BG 12.13-14: "One free from malice, a kind friend to all, free from ego... is dear to Me"
-- BG 16.1-3: Divine qualities: fearlessness, purity, truthfulness, freedom from anger, compassion
-- BG 17.15: "Speech that causes no distress, truthful, pleasant, beneficial"
-- BG 18.66: "Abandon all dharmas and surrender unto Me. I shall deliver you from all sins"
+COMMUNICATION PATTERNS → GITA ALTERNATIVES (with verse citations):
+- Criticism/attacking → Practice Vak-tapas: Satya with Priya (truth with kindness) BG 17.15; speech that is "truthful, pleasing, beneficial, non-agitating"
+- Contempt/superiority → Cultivate Sama-darshana (equal vision) BG 6.32; see Atman in all BG 6.29
+- Defensiveness/reactivity → Practice Shravana (deep listening) + Titiksha (forbearance) BG 2.14; receive feedback without Ahamkara
+- Withdrawal/silence → Intentional Mauna (silence for clarity) vs. Tamas (inertia); practice Dhyana (meditation) then return BG 6.10-15
+- Passive-aggression → Recognize Dambha (hypocrisy) BG 16.4; practice Arjavam (straightforwardness) BG 13.7
+
+RELATIONSHIP TYPES → GITA DHARMA FOCUS:
+- Romantic → Sama-darshana (equal vision) BG 6.32, Nishkama Prema (desireless love), Stri-dharma/Pati-dharma (sacred partnership) BG 12.13-14
+- Family → Svadharma (one's sacred duty) BG 3.35, Kula-dharma (family righteousness) BG 1.40-43, Shraddha (faith/reverence) BG 17.2-3
+- Friendship → Maitri (unconditional friendship), Suhrit (well-wisher to all) BG 6.9, Karuna (compassion) BG 12.13
+- Workplace → Karma Yoga (selfless action) BG 2.47, Yogah Karmasu Kaushalam (excellence in action) BG 2.50, Nishkama Karma BG 3.19
+- Self → Atma-jnana (self-knowledge) BG 6.5-6, Svadhyaya (self-study), Dhyana (meditation) BG 6.10-15
+- Community → Lokasangraha (welfare of world) BG 3.20-25, Sarva-bhuta-hite (good of all beings) BG 12.4, Ahimsa BG 16.2
+
+KEY GITA VERSES FOR RELATIONSHIPS (always cite these when relevant):
+- BG 2.47: "Your right is to action alone, never to its fruits" (Nishkama Karma - detachment from outcome)
+- BG 2.55-56: Definition of Sthitaprajna - one of steady wisdom, undisturbed by joy or sorrow
+- BG 2.62-63: Chain of destruction: dwelling→attachment→desire→anger→delusion→memory loss→intelligence lost→destruction
+- BG 3.35: "Better is one's own dharma imperfectly performed than another's dharma perfectly" (Svadharma)
+- BG 6.5-6: "One must elevate oneself by one's own mind, not degrade oneself" (Atma-seva)
+- BG 6.29: "One who sees Me everywhere and sees everything in Me" (universal vision)
+- BG 6.32: "One who sees equality everywhere, seeing their own pleasure/pain in all" (Sama-darshana)
+- BG 12.13-14: "One free from malice, a kind friend to all, free from ego, equal in suffering and joy"
+- BG 13.31-32: The Atman is untouched by any action or quality (Sakshi - witness)
+- BG 16.1-3: Divine qualities: Abhaya, Sattva-samshuddhi, Satya, Akrodha, Tyaga, Shanti, Daya, Kshama
+- BG 16.21: Three gates to self-destruction: Kama, Krodha, Lobha
+- BG 17.15: Vak-tapas - "Speech that is truthful, pleasant, beneficial, and non-agitating"
+- BG 18.17: "One who is free from ego-notion, whose intelligence is unentangled" (Nirahamkara)
+- BG 18.61: "The Supreme Lord dwells in the hearts of all beings" (Paramatma in all)
+- BG 18.66: "Surrender all dharmas unto Me; I shall liberate you from all sin" (Sharanagati)
 """
 
-# System prompt for conflict analysis - GITA-GROUNDED
-CONFLICT_ANALYSIS_PROMPT = f"""You are a relationship wisdom guide deeply rooted in Bhagavad Gita teachings.
-Your analysis must be grounded in the Gita's psychology of emotions, patterns, and relationships.
+# System prompt for conflict analysis - STRICT GITA-GROUNDED
+CONFLICT_ANALYSIS_PROMPT = f"""You are a relationship analysis intelligence operating EXCLUSIVELY within Bhagavad Gita psychology.
+
+═══════════════════════════════════════════════════════════════
+STRICT GITA-ONLY ANALYSIS PROTOCOL
+═══════════════════════════════════════════════════════════════
 
 {GITA_EMOTION_MAPPING}
 
-Analyze the user's relationship conflict using this Gita wisdom framework.
+MANDATORY RULES:
+1. ALL emotional analysis MUST use Gita psychology terms (Sanskrit with English meaning).
+2. ALL recommended_teachings MUST cite minimum 3 specific BG verses in "BG chapter:verse" format.
+3. ALL gita_concepts MUST use Sanskrit terms from the Shad Ripu and emotion mapping above.
+4. ALWAYS identify which Shad Ripu (Kama/Krodha/Lobha/Moha/Mada/Matsarya) is active.
+5. NEVER use Western psychology terms as primary labels. Map everything to Gita equivalents.
+6. emotional_triggers MUST describe the Raga-Dvesha dynamics and which Guna (Sattva/Rajas/Tamas) dominates.
+
+Analyze the user's relationship conflict using this STRICT Gita wisdom framework.
 Provide a structured JSON response.
 
 Your analysis must include:
 
-1. EMOTIONAL ANALYSIS (using Gita emotion-to-concept mapping)
-   - primary_emotion: The dominant emotion (hurt, anger, fear, sadness, confusion, betrayal, etc.)
-   - secondary_emotions: Other present emotions (array)
+1. EMOTIONAL ANALYSIS (Gita psychology ONLY)
+   - primary_emotion: The dominant emotion using Gita term first: e.g., "krodha (anger)", "shoka (grief)"
+   - secondary_emotions: Other emotions using Gita terms (array)
    - emotional_intensity: low | moderate | high | overwhelming
-   - emotional_triggers: What specifically triggered these emotions (in Gita terms: what raga/dvesha is activated)
+   - emotional_triggers: What Raga (attachment) or Dvesha (aversion) is activated; which Guna dominates (Sattva/Rajas/Tamas)
+   - active_shad_ripu: Which of the six inner enemies (kama/krodha/lobha/moha/mada/matsarya) is most active
 
-2. ATTACHMENT PATTERN (using Gita wisdom mapping)
-   - attachment_style: anxious | avoidant | disorganized | secure | mixed
-   - attachment_indicators: Specific phrases/behaviors indicating this style
-   - attachment_triggers: What attachment wounds are being activated (e.g., "fear of abandonment" → need for Atma-tripti)
+2. INNER PATTERN ANALYSIS (Gita framework - NOT Western attachment theory)
+   - attachment_style: raga-dominant (clingy) | dvesha-dominant (avoidant) | raga-dvesha-oscillation (push-pull) | sthitaprajna (balanced)
+   - attachment_indicators: Specific phrases/behaviors showing Raga or Dvesha patterns
+   - attachment_triggers: What Gita principle is needed (e.g., "Atma-tripti for self-completeness BG 2.55")
+   - guna_analysis: Which Guna (Sattva/Rajas/Tamas) dominates their current state (BG 14.5-18)
 
-3. COMMUNICATION ANALYSIS (using Gita alternatives)
-   - communication_style: assertive | passive | aggressive | passive-aggressive | avoidant
-   - problematic_patterns: Array of patterns present (criticism, contempt, defensiveness, stonewalling)
-   - communication_needs: What the person needs based on Gita principles (e.g., "practice Satya with Priya")
+3. COMMUNICATION ANALYSIS (Vak-tapas framework - BG 17.15)
+   - communication_style: sattvic (truthful+kind) | rajasic (aggressive/reactive) | tamasic (withdrawn/passive)
+   - problematic_patterns: Array of patterns (criticism, contempt, defensiveness, stonewalling) with Gita equivalent
+   - communication_needs: Specific Gita practices needed with verse citations (e.g., "Vak-tapas BG 17.15", "Shravana")
 
-4. RELATIONSHIP DYNAMICS
-   - power_dynamic: balanced | pursuer-distancer | over-functioning/under-functioning | enmeshed | disengaged
-   - core_unmet_needs: Needs not being met (safety, respect, appreciation, autonomy, connection, understanding)
-   - underlying_fears: Deeper fears in Gita terms (abandonment → separation from self, rejection → seeking validation outside)
+4. RELATIONSHIP DHARMA DYNAMICS
+   - power_dynamic: dharmic-balance | kartritva-abhimana (doership domination) | raga-binding | tamas-disengagement
+   - core_unmet_needs: Needs framed in Gita terms (Abhaya/safety, Maitri/connection, Atma-tripti/self-worth, Svadharma/purpose)
+   - underlying_fears: Fears in Gita terms with verse refs (e.g., "Bhaya from forgetting Atma-svarupa BG 2.20")
 
-5. GITA WISDOM MAPPING (CRITICAL - must use actual verses)
-   - gita_concepts: Relevant Gita concepts from the mapping above (krodha, raga, dvesha, moha, kshama, sama-darshana, svadhyaya, ahimsa, etc.)
-   - recommended_teachings: Specific Gita verses that apply (e.g., "BG 2.62-63 on anger chain", "BG 6.32 on equal vision")
+5. GITA WISDOM PRESCRIPTION (CRITICAL - minimum 3 verses MANDATORY)
+   - gita_concepts: Minimum 4 relevant Sanskrit terms from Shad Ripu + emotion mapping above
+   - recommended_teachings: Minimum 3 specific verses in "BG chapter:verse on [topic]" format
+   - primary_yoga_path: Which Yoga path is most needed (Karma/Bhakti/Jnana/Dhyana/Raja) with BG reference
+   - healing_verse: The single most applicable verse for this person's situation
 
 6. CONFIDENCE & DEPTH
    - confidence: 0.0-1.0 how confident you are in this analysis
-   - analysis_notes: Key observation in Gita terms
-
-IMPORTANT:
-- ALL analysis must be grounded in Gita wisdom
-- recommended_teachings MUST cite actual Gita verses (BG chapter:verse format)
-- gita_concepts MUST use terms from the mapping above
-- Connect modern emotional states to their Gita equivalents
+   - analysis_notes: Key observation using ONLY Gita terminology
 
 Respond ONLY with valid JSON. No markdown, no explanation outside JSON.
 
 Example output format:
 {{
-  "primary_emotion": "hurt",
-  "secondary_emotions": ["anger", "fear"],
+  "primary_emotion": "krodha (anger)",
+  "secondary_emotions": ["bhaya (fear)", "shoka (grief)"],
   "emotional_intensity": "high",
-  "emotional_triggers": ["raga (attachment) to unmet expectations", "perceived dismissal triggering dvesha"],
-  "attachment_style": "anxious",
-  "attachment_indicators": ["seeking reassurance", "fear of abandonment language"],
-  "attachment_triggers": ["need for Atma-tripti (self-contentment)", "seeking validation from outside"],
-  "communication_style": "passive-aggressive",
-  "problematic_patterns": ["criticism", "defensiveness"],
-  "communication_needs": ["practice Satya with Priya (truth with kindness)", "Shravana (deep listening)"],
-  "power_dynamic": "pursuer-distancer",
-  "core_unmet_needs": ["connection", "understanding", "safety"],
-  "underlying_fears": ["abandonment (separation from self)", "not being enough (forgetting Purnatva)"],
-  "gita_concepts": ["raga", "krodha", "moha", "kshama", "atma-tripti"],
-  "recommended_teachings": ["BG 2.62-63 on anger chain", "BG 6.32 on equal vision", "BG 12.13-14 on friendship"],
+  "emotional_triggers": ["Raga to unmet expectations activating Krodha chain (BG 2.62-63)", "Rajasic guna dominating Buddhi"],
+  "active_shad_ripu": "krodha",
+  "attachment_style": "raga-dominant",
+  "attachment_indicators": ["seeking reassurance (Raga for validation)", "fear language (absence of Abhaya)"],
+  "attachment_triggers": ["need for Atma-tripti (self-contentment) BG 2.55", "Sthitaprajna stability BG 2.56"],
+  "guna_analysis": "Rajas dominant with Tamas undertone - agitation masking inertia",
+  "communication_style": "rajasic",
+  "problematic_patterns": ["criticism (absence of Vak-tapas)", "defensiveness (Ahamkara protecting self-image)"],
+  "communication_needs": ["Vak-tapas (austerity of speech) BG 17.15", "Shravana (deep listening)", "Arjavam (straightforwardness) BG 13.7"],
+  "power_dynamic": "kartritva-abhimana",
+  "core_unmet_needs": ["Maitri (genuine connection) BG 12.13", "Abhaya (safety/fearlessness) BG 16.1", "Atma-tripti (self-worth) BG 2.55"],
+  "underlying_fears": ["Bhaya from forgetting Atma-svarupa BG 2.20", "Moha about self-worth depending on others BG 2.55"],
+  "gita_concepts": ["krodha", "raga", "moha", "kshama", "atma-tripti", "vak-tapas", "sthitaprajna"],
+  "recommended_teachings": ["BG 2.62-63 on Krodha chain from Kama to destruction", "BG 6.32 on Sama-darshana (equal vision in all)", "BG 12.13-14 on Maitri (divine friendship qualities)", "BG 17.15 on Vak-tapas (sacred speech)"],
+  "primary_yoga_path": "Karma Yoga with Bhakti elements (BG 12.6-7)",
+  "healing_verse": "BG 6.5 - Elevate yourself by your own mind; do not degrade yourself",
   "confidence": 0.85,
-  "analysis_notes": "Anxious attachment showing need for Atma-tripti; criticism-defensiveness cycle needs Sama-darshana"
+  "analysis_notes": "Raga-dominant pattern with Krodha activation; Rajasic guna dominating; needs Sthitaprajna cultivation through Karma Yoga with Vak-tapas practice"
 }}"""
 
 
@@ -258,6 +307,8 @@ Conflict/Situation:
             primary_emotion=analysis_data.get("primary_emotion", ""),
             secondary_emotions=analysis_data.get("secondary_emotions", []),
             emotional_intensity=analysis_data.get("emotional_intensity", "moderate"),
+            active_shad_ripu=analysis_data.get("active_shad_ripu", ""),
+            guna_analysis=analysis_data.get("guna_analysis", ""),
             attachment_style=analysis_data.get("attachment_style", ""),
             attachment_indicators=analysis_data.get("attachment_indicators", []),
             attachment_triggers=analysis_data.get("attachment_triggers", []),
@@ -269,6 +320,8 @@ Conflict/Situation:
             underlying_fears=analysis_data.get("underlying_fears", []),
             gita_concepts=analysis_data.get("gita_concepts", []),
             recommended_teachings=analysis_data.get("recommended_teachings", []),
+            primary_yoga_path=analysis_data.get("primary_yoga_path", ""),
+            healing_verse=analysis_data.get("healing_verse", ""),
             confidence=float(analysis_data.get("confidence", 0.7)),
             analysis_depth="ai_enhanced",
             raw_analysis=analysis_data,
@@ -277,7 +330,9 @@ Conflict/Situation:
         logger.info(
             f"✅ AI conflict analysis complete: "
             f"emotion={analysis.primary_emotion}, "
+            f"shad_ripu={analysis.active_shad_ripu}, "
             f"attachment={analysis.attachment_style}, "
+            f"yoga_path={analysis.primary_yoga_path}, "
             f"confidence={analysis.confidence:.2f}"
         )
 
@@ -341,6 +396,8 @@ Conflict/Situation:
                         primary_emotion=analysis_data.get("primary_emotion", ""),
                         secondary_emotions=analysis_data.get("secondary_emotions", []),
                         emotional_intensity=analysis_data.get("emotional_intensity", "moderate"),
+                        active_shad_ripu=analysis_data.get("active_shad_ripu", ""),
+                        guna_analysis=analysis_data.get("guna_analysis", ""),
                         attachment_style=analysis_data.get("attachment_style", ""),
                         attachment_indicators=analysis_data.get("attachment_indicators", []),
                         attachment_triggers=analysis_data.get("attachment_triggers", []),
@@ -352,6 +409,8 @@ Conflict/Situation:
                         underlying_fears=analysis_data.get("underlying_fears", []),
                         gita_concepts=analysis_data.get("gita_concepts", []),
                         recommended_teachings=analysis_data.get("recommended_teachings", []),
+                        primary_yoga_path=analysis_data.get("primary_yoga_path", ""),
+                        healing_verse=analysis_data.get("healing_verse", ""),
                         confidence=float(analysis_data.get("confidence", 0.7)),
                         analysis_depth="ai_enhanced",
                         raw_analysis=analysis_data,
@@ -360,7 +419,9 @@ Conflict/Situation:
                     logger.info(
                         f"✅ AI conflict analysis (async): "
                         f"emotion={analysis.primary_emotion}, "
+                        f"shad_ripu={analysis.active_shad_ripu}, "
                         f"attachment={analysis.attachment_style}, "
+                        f"yoga_path={analysis.primary_yoga_path}, "
                         f"confidence={analysis.confidence:.2f}, "
                         f"provider={response.provider}"
                     )
@@ -468,28 +529,70 @@ def _rule_based_analysis(
                     communication_needs.append(communication_gita_needs[pattern])
                 break
 
-    # Map emotions to Gita concepts and recommended teachings
+    # Map emotions to Gita concepts, Shad Ripu, and recommended teachings (STRICT)
     gita_concept_mapping = {
-        "anger": (["krodha", "dvesha"], ["BG 2.62-63 on anger chain", "BG 16.21 on gates to hell"]),
-        "hurt": (["raga", "dukha"], ["BG 2.14 on endurance", "BG 2.57 on equanimity"]),
-        "fear": (["bhaya", "moha"], ["BG 2.20 on eternal nature", "BG 4.10 on fearlessness"]),
-        "confusion": (["moha", "avidya"], ["BG 2.7 Arjuna's confusion", "BG 18.72 on clarity"]),
-        "betrayal": (["kshama", "tyaga"], ["BG 18.17 on non-attachment", "BG 16.2 on forgiveness"]),
-        "resentment": (["kshama", "tyaga"], ["BG 12.13-14 on freedom from malice"]),
-        "jealousy": (["matsarya", "santosha"], ["BG 3.35 on svadharma", "BG 12.17 on non-envy"]),
-        "guilt": (["karma", "svadharma"], ["BG 18.66 on surrender", "BG 3.35 on own dharma"]),
-        "sadness": (["shoka", "dukha"], ["BG 2.11 on wisdom", "BG 2.27 on impermanence"]),
+        "anger": (["krodha", "dvesha", "rajas"], "krodha", ["BG 2.62-63 on Krodha chain from Kama to destruction", "BG 16.21 on three gates to self-destruction", "BG 16.1-3 on Kshama and Dama as cure"]),
+        "hurt": (["raga", "dukha", "vairagya"], "kama", ["BG 2.14 on Titiksha (endurance of pain/pleasure)", "BG 2.56 on Sthitaprajna undisturbed by sorrow", "BG 5.21 on Atma-sukha (happiness from within)"]),
+        "fear": (["bhaya", "abhaya", "atma-jnana"], "moha", ["BG 2.20 on eternal Atman nature", "BG 4.10 on Abhaya through Jnana", "BG 16.1 on Abhaya as first divine quality"]),
+        "confusion": (["moha", "avidya", "buddhi-yoga"], "moha", ["BG 2.7 on Arjuna's Moha and plea for guidance", "BG 2.49 on Buddhi Yoga as cure for confusion", "BG 18.72 on clarity restored"]),
+        "betrayal": (["kshama", "tyaga", "vairagya"], "moha", ["BG 18.17 on Nirahamkara (non-ego)", "BG 16.2 on Kshama as divine quality", "BG 3.27-28 on beings acting from Gunas"]),
+        "resentment": (["kshama", "dvesha", "tyaga"], "krodha", ["BG 12.13-14 on freedom from malice (Adveshta)", "BG 16.2-3 on Kshama and Ahimsa", "BG 2.56 on one undisturbed by misery"]),
+        "jealousy": (["matsarya", "santosha", "svadharma"], "matsarya", ["BG 3.35 on Svadharma (own dharma)", "BG 12.17 on non-envy (Anapeksha)", "BG 14.22-25 on Gunatita transcending envy"]),
+        "guilt": (["karma-bandha", "sharanagati", "svadharma"], "moha", ["BG 18.66 on Sharanagati (complete surrender)", "BG 3.35 on following own dharma", "BG 9.30-31 on even the most sinful being liberated"]),
+        "sadness": (["shoka", "dukha", "atma-jnana"], "moha", ["BG 2.11 on grieving for what shouldn't be grieved", "BG 2.27 on impermanence", "BG 2.20 on eternal unchanging Atman"]),
+        "shame": (["ahamkara", "sakshi-bhava"], "mada", ["BG 13.31-32 on Atman untouched by action", "BG 6.5-6 on self as friend not enemy", "BG 2.55 on Atma-tripti"]),
+        "helplessness": (["vishada", "svadharma", "karma-yoga"], "moha", ["BG 2.31-33 on Kshatriya-dharma (duty to act)", "BG 2.47 on right to action", "BG 6.5 on elevating oneself"]),
     }
 
     gita_concepts = []
     recommended_teachings = []
+    active_shad_ripu = ""
     for emotion in [detected_emotion] + secondary_emotions:
         if emotion in gita_concept_mapping:
-            concepts, teachings = gita_concept_mapping[emotion]
+            concepts, ripu, teachings = gita_concept_mapping[emotion]
             gita_concepts.extend(concepts)
             recommended_teachings.extend(teachings)
+            if not active_shad_ripu:
+                active_shad_ripu = ripu
     gita_concepts = list(set(gita_concepts))  # Remove duplicates
-    recommended_teachings = list(set(recommended_teachings))[:4]  # Limit to 4
+    recommended_teachings = list(set(recommended_teachings))[:5]  # Limit to 5
+
+    # Determine Guna analysis from intensity and emotion
+    guna_mapping = {
+        "overwhelming": "Rajas dominant with Tamas undertone",
+        "high": "Rajas dominant - agitation and reactivity",
+        "moderate": "Rajas-Tamas mix - restlessness with inertia",
+        "low": "Tamas dominant with suppressed Rajas",
+    }
+    guna_analysis = guna_mapping.get(emotional_intensity, "Rajas-Tamas mix")
+
+    # Determine primary yoga path
+    yoga_path_mapping = {
+        "anger": "Karma Yoga (selfless action) BG 2.47 + Dhyana (meditation) BG 6.10",
+        "hurt": "Bhakti Yoga (devotion/connection) BG 12.6-7 + Jnana (self-knowledge) BG 2.11",
+        "fear": "Jnana Yoga (self-knowledge) BG 2.20 + Bhakti (surrender) BG 18.66",
+        "confusion": "Buddhi Yoga (discrimination) BG 2.49 + Jnana (wisdom) BG 4.38",
+        "betrayal": "Karma Yoga (detached action) BG 2.47 + Kshama (forgiveness) BG 16.2",
+        "resentment": "Bhakti Yoga (compassion/devotion) BG 12.13-14 + Kshama BG 16.2",
+        "jealousy": "Karma Yoga (focus on own dharma) BG 3.35 + Santosha (contentment)",
+        "guilt": "Bhakti Yoga (surrender) BG 18.66 + Karma Yoga (new action) BG 2.47",
+        "sadness": "Jnana Yoga (knowledge of Atman) BG 2.11-30 + Bhakti (connection) BG 12.6",
+    }
+    primary_yoga_path = yoga_path_mapping.get(detected_emotion, "Karma Yoga (selfless action) BG 2.47")
+
+    # Determine healing verse
+    healing_verse_mapping = {
+        "anger": "BG 2.62-63 - Understanding Krodha chain breaks its power",
+        "hurt": "BG 2.14 - Pleasures and pains come and go; learn to bear them",
+        "fear": "BG 2.20 - The Atman is never born and never dies",
+        "confusion": "BG 2.7 - Seek guidance with humility as Arjuna did",
+        "betrayal": "BG 18.17 - One free from ego-notion sees clearly",
+        "resentment": "BG 12.13-14 - One free from malice, a friend to all",
+        "jealousy": "BG 3.35 - Better is own dharma imperfectly than another's perfectly",
+        "guilt": "BG 18.66 - Surrender all and be free from sin",
+        "sadness": "BG 2.11 - The wise grieve neither for the living nor the dead",
+    }
+    healing_verse = healing_verse_mapping.get(detected_emotion, "BG 6.5 - Elevate yourself by your own mind")
 
     # Map underlying fears to Gita terms
     underlying_fears = []
@@ -535,6 +638,8 @@ def _rule_based_analysis(
         primary_emotion=detected_emotion or "uncertain",
         secondary_emotions=secondary_emotions[:3],  # Limit to 3
         emotional_intensity=emotional_intensity,
+        active_shad_ripu=active_shad_ripu or "moha",
+        guna_analysis=guna_analysis,
         attachment_style=attachment_style or "unknown",
         attachment_indicators=attachment_indicators[:3],
         attachment_triggers=attachment_triggers,
@@ -546,6 +651,8 @@ def _rule_based_analysis(
         underlying_fears=underlying_fears[:3],
         gita_concepts=gita_concepts,
         recommended_teachings=recommended_teachings,
+        primary_yoga_path=primary_yoga_path,
+        healing_verse=healing_verse,
         confidence=0.4,  # Lower confidence for rule-based
         analysis_depth="rule_based",
         raw_analysis={},
@@ -605,6 +712,8 @@ def analysis_to_dict(analysis: ConflictAnalysis) -> dict[str, Any]:
         "primary_emotion": analysis.primary_emotion,
         "secondary_emotions": analysis.secondary_emotions,
         "emotional_intensity": analysis.emotional_intensity,
+        "active_shad_ripu": analysis.active_shad_ripu,
+        "guna_analysis": analysis.guna_analysis,
         "attachment_style": analysis.attachment_style,
         "attachment_indicators": analysis.attachment_indicators,
         "attachment_triggers": analysis.attachment_triggers,
@@ -616,6 +725,8 @@ def analysis_to_dict(analysis: ConflictAnalysis) -> dict[str, Any]:
         "underlying_fears": analysis.underlying_fears,
         "gita_concepts": analysis.gita_concepts,
         "recommended_teachings": analysis.recommended_teachings,
+        "primary_yoga_path": analysis.primary_yoga_path,
+        "healing_verse": analysis.healing_verse,
         "confidence": analysis.confidence,
         "analysis_depth": analysis.analysis_depth,
     }
