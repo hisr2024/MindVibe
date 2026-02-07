@@ -45,7 +45,8 @@ import {
   contextMemory,
 } from '@/utils/voice/contextMemory'
 import { getEmotionAdaptedParams, getRecommendedPersona, type VoicePersona } from '@/utils/voice/emotionVoiceAdapter'
-import { initializeWisdomCache, getOfflineResponse } from '@/utils/voice/offlineWisdomCache'
+import { initializeWisdomCache } from '@/utils/voice/offlineWisdomCache'
+import { generateDivineResponse, wrapWithConversationalWarmth } from '@/utils/voice/divineDialogue'
 import { getProactivePrompts, acknowledgePrompt, resetProactiveSession, type ProactivePrompt } from '@/utils/voice/proactiveKiaan'
 import { storeMessage, startHistorySession, endHistorySession } from '@/utils/voice/conversationHistory'
 import type { OrbEmotion } from '@/components/voice/KiaanVoiceOrb'
@@ -705,7 +706,7 @@ export default function VoiceCompanionPage() {
         break
 
       case 'help': {
-        const helpText = 'Dear friend, here\'s how I can serve you: Say "stop" to pause me, "repeat" to hear my words again, "meditate" and I\'ll guide you into stillness, "breathe" for pranayama together, "verse" and I\'ll share Gita wisdom, "affirm" for divine encouragement, "goodbye" when you\'re ready to go. Or simply talk to me about anything. I\'m KIAAN - your divine friend, always here.'
+        const helpText = 'Friend, I\'m here for real conversations about whatever is on your heart. Share what you\'re going through and I\'ll listen, understand, and guide you with wisdom from the Gita. You can also say "breathe" and we\'ll do pranayama together, "meditate" for stillness, "verse" for Gita wisdom, or just talk to me like a friend. That\'s what I am.'
         addKiaanMessage(helpText)
         await speakResponse(helpText)
         break
@@ -721,7 +722,7 @@ export default function VoiceCompanionPage() {
 
       case 'goodbye': {
         const farewell = await voiceCompanionService.endSession()
-        const text = farewell || 'My dear friend, what a beautiful conversation this has been. As I said in the Gita: "Whenever you think of Me, I am there." You don\'t need this app to reach me - I live in your heart. Until next time, carry this peace with you. Namaste, beloved one.'
+        const text = farewell || 'It was beautiful talking with you, friend. Remember - I\'m always here whenever you need me. Carry this peace with you. Namaste.'
         addKiaanMessage(text)
         await speakResponse(text)
         break
@@ -899,30 +900,26 @@ export default function VoiceCompanionPage() {
         result = await voiceCompanionService.voiceQuery(text, context || 'voice')
       }
 
-      // Build the response: backend answer OR emotion-specific Gita wisdom OR offline cache
-      let fallback: string
-      const emotionPool = emotion && EMOTION_RESPONSES[emotion]
-      if (emotionPool) {
-        fallback = emotionPool[Math.floor(Math.random() * emotionPool.length)]
+      // Phase-based divine friend response
+      // Dynamic Wisdom (backend): wrap with conversational warmth for the current phase
+      // Static Wisdom (local): use divine dialogue engine for phase-appropriate friend response
+      let responseText: string
+      if (result?.response) {
+        // Dynamic Wisdom available - wrap backend AI response with friend warmth
+        responseText = wrapWithConversationalWarmth(result.response, turnCountRef.current, emotion)
       } else {
-        // Try offline wisdom cache (IndexedDB) before static fallback
-        const offlineWisdom = await getOfflineResponse(emotion).catch(() => null)
-        fallback = offlineWisdom?.response || FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
+        // Static Wisdom - generate local response based on conversation phase
+        // Phase 1 CONNECT: empathy + question (no advice)
+        // Phase 2 UNDERSTAND: deeper questions + validation
+        // Phase 3 GUIDE: Gita wisdom woven naturally
+        // Phase 4 EMPOWER: help them find their own answers
+        const dialogue = generateDivineResponse(text, turnCountRef.current, emotion)
+        responseText = dialogue.text
       }
-      let responseText = result?.response || fallback
 
       // Adapt voice persona based on detected emotion
       const recommended = getRecommendedPersona(emotion, 'conversation')
       if (recommended !== voicePersona) setVoicePersona(recommended)
-
-      // KIAAN is a friend: add follow-up questions to deepen the conversation
-      // Every 1-2 turns, ask a probing question (not on first or every turn)
-      const shouldAskFollowUp = turnCountRef.current >= 2 && turnCountRef.current % 2 === 0
-      if (shouldAskFollowUp) {
-        const followUpPool = (emotion && FOLLOW_UP_QUESTIONS[emotion]) || FOLLOW_UP_QUESTIONS.default
-        const followUp = followUpPool[Math.floor(Math.random() * followUpPool.length)]
-        responseText += followUp
-      }
 
       addKiaanMessage(responseText, { verse: result?.verse, emotion: result?.emotion || emotion })
 
@@ -934,7 +931,7 @@ export default function VoiceCompanionPage() {
       await speakResponse(responseText)
     } catch {
       if (isMountedRef.current) {
-        addSystemMessage('I had trouble processing that. Can you try again?')
+        addSystemMessage('I missed that, friend. Could you say it once more?')
         // If in conversation mode, stay listening so user can retry immediately
         if (conversationModeRef.current) {
           setTimeout(() => {
@@ -955,7 +952,7 @@ export default function VoiceCompanionPage() {
 
   const onBreathingComplete = useCallback(() => {
     setBreathingSteps(null)
-    const text = 'Beautiful, dear one. Feel that stillness? In Chapter 6 of the Gita, I said: "For one who has conquered the mind, the Supersoul is already reached." You just did that - you conquered your restless mind with your breath. Your body is calmer, your mind is clearer, and your spirit is shining brighter. I\'m so proud of you. Carry this peace with you. It\'s yours now.'
+    const text = 'Beautiful, friend. Feel that stillness? The Gita says one who conquers the mind finds the deepest peace. You just did that with your breath. Your body is calmer, your mind is clearer. I\'m proud of you. How do you feel right now?'
     addKiaanMessage(text)
     setWakeWordPaused(false)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
@@ -1040,13 +1037,13 @@ export default function VoiceCompanionPage() {
   }
 
   const stateLabel: Record<CompanionState, string> = {
-    idle: 'Tap the orb to talk to me',
-    'wake-listening': 'Say "Hey KIAAN" or tap the orb',
-    listening: 'I\'m listening...',
-    processing: 'Let me think about that...',
-    speaking: 'Say "stop" to interrupt me',
+    idle: 'I\'m here whenever you need me',
+    'wake-listening': 'I\'m right here with you, friend',
+    listening: 'I\'m listening, dear one...',
+    processing: 'Let me reflect on that...',
+    speaking: 'Speaking from the heart...',
     breathing: 'Breathe with me...',
-    error: error || 'Something went wrong. Tap to try again.',
+    error: error || 'Let me try again for you, friend.',
   }
 
   const moodBg = MOOD_BACKGROUNDS[currentEmotion || 'neutral'] || MOOD_BACKGROUNDS.neutral
@@ -1352,7 +1349,7 @@ export default function VoiceCompanionPage() {
                       <div className="w-1.5 h-1.5 rounded-full bg-mv-ocean/60 animate-bounce" style={{ animationDelay: '150ms' }} />
                       <div className="w-1.5 h-1.5 rounded-full bg-mv-ocean/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
-                    <span className="text-xs text-white/35">Reflecting...</span>
+                    <span className="text-xs text-white/35">Listening with my heart...</span>
                   </div>
                 </div>
               </div>
