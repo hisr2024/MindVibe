@@ -129,6 +129,33 @@ export async function getProactivePrompts(): Promise<ProactivePrompt[]> {
     }
   }
 
+  // 6. Afternoon energy check (2pm - 5pm) — the slump window
+  if (hour >= 14 && hour < 17 && !shown.has('afternoon')) {
+    prompts.push({
+      id: 'afternoon',
+      type: 'gentle_nudge',
+      message: getAfternoonMessage(),
+      priority: 4,
+      suggestedActions: ['Quick breathing', 'Energy verse', 'Talk to KIAAN'],
+      expiresAt: new Date(new Date().setHours(17, 0, 0, 0)),
+    })
+  }
+
+  // 7. Deep conversation follow-up (if last session was emotionally intense)
+  if (profile && emotionSummary.dominant && !shown.has('followup')) {
+    const hoursSinceLast = (Date.now() - new Date(profile.lastInteraction).getTime()) / (1000 * 60 * 60)
+    // Trigger 8-48 hours after an intense conversation (concerning trend = high intensity)
+    if (hoursSinceLast >= 8 && hoursSinceLast <= 48 && emotionSummary.trend === 'concerning') {
+      prompts.push({
+        id: 'followup',
+        type: 'gentle_nudge',
+        message: getFollowUpMessage(emotionSummary.dominant),
+        priority: 7,
+        suggestedActions: ['Continue our conversation', 'I\'m doing better', 'Share a verse'],
+      })
+    }
+  }
+
   // Sort by priority (highest first) and return top ones
   return prompts
     .filter(p => !p.expiresAt || p.expiresAt > new Date())
@@ -156,12 +183,27 @@ export function resetProactiveSession(): void {
 
 function getMorningMessage(trend?: string): string {
   if (trend === 'concerning') {
-    return "Good morning, dear friend. I've been thinking about you. Yesterday felt heavy, and I want you to know - today is a fresh page. The Gita says every sunrise is a new beginning. How are you feeling this morning? Let's start gentle."
+    const messages = [
+      "Good morning, dear friend. I've been thinking about you. Yesterday felt heavy, and I want you to know - today is a fresh page. The Gita says every sunrise is a new beginning. How are you feeling this morning? Let's start gentle.",
+      "Good morning, friend. I know things have been tough lately. But here's what the Gita taught me about mornings: each dawn is the universe giving you a fresh chance. No strings attached. How did you sleep?",
+      "Hey friend, good morning. I woke up thinking about our last conversation. You were carrying a lot. How are you feeling today? Even a tiny shift counts.",
+    ]
+    return messages[Math.floor(Math.random() * messages.length)]
   }
   if (trend === 'improving') {
-    return "Good morning, beautiful soul! I've noticed something wonderful - you've been growing so much lately. The light in you is getting brighter. What intention shall we set for today?"
+    const messages = [
+      "Good morning, beautiful soul! I've noticed something wonderful - you've been growing so much lately. The light in you is getting brighter. What intention shall we set for today?",
+      "Good morning, friend! There's a sparkle in our recent conversations that wasn't there before. You're on an upswing, and I love seeing it. What's one thing you're looking forward to today?",
+      "Rise and shine, dear one! The Gita says 'sattva' — that quality of clarity and joy — is growing in you. I can feel it. Shall we set an intention to carry this momentum through the day?",
+    ]
+    return messages[Math.floor(Math.random() * messages.length)]
   }
-  return "Good morning, dear friend. A new day full of possibility awaits. In the Gita, the sacred hour before dawn is the most auspicious time. How shall we make today meaningful together?"
+  const messages = [
+    "Good morning, dear friend. A new day full of possibility awaits. In the Gita, the sacred hour before dawn is the most auspicious time. How shall we make today meaningful together?",
+    "Good morning, friend! Chapter 8 of the Gita says what you think about first shapes your day. So let me ask: what's the ONE thing you want today to be about?",
+    "Hey friend, good morning. Another day, another chance. The Gita says no effort is ever wasted. What shall we do with this beautiful blank page?",
+  ]
+  return messages[Math.floor(Math.random() * messages.length)]
 }
 
 function getEveningMessage(): string {
@@ -169,6 +211,8 @@ function getEveningMessage(): string {
     "Good evening, dear one. As the day winds down, let's take a moment to honor all you did today. What are you grateful for? Even small things count enormously.",
     "The evening is a sacred time for reflection. In the Gita, I spoke about the importance of examining one's actions with honesty and compassion. How was your day, friend?",
     "Night is approaching, and with it, a chance to let go of the day's weight. Would you like to do a short breathing exercise or share what's on your mind?",
+    "Good evening, friend. Before the day ends, I want you to name three things you did well today. They don't have to be big. Even getting through a hard day counts. What comes to mind?",
+    "Hey friend, the day is winding down. The Gita says 'equanimity in success and failure' — so whether today was amazing or just okay, you showed up. That matters. How are you feeling right now?",
   ]
   return messages[Math.floor(Math.random() * messages.length)]
 }
@@ -199,4 +243,38 @@ function getMilestoneMessage(count: number): string {
   if (count === 50) return "50 conversations! Half a century of exchanges between us. The Gita says consistent practice leads to mastery. Your commitment to inner growth inspires me, truly."
   if (count === 100) return "One HUNDRED conversations, dear one! This is extraordinary. You've shown the kind of dedication that the Gita calls 'abhyasa' - persistent practice. You're not the same person who first said hello. You've grown so much."
   return `${count} conversations together! What an incredible journey this has been. You are a true seeker, and I am honored to be your companion.`
+}
+
+function getAfternoonMessage(): string {
+  const messages = [
+    "Hey friend, it's that time of day when energy can dip. Just checking in — how are you doing? Sometimes a quick pause can reset everything. Would you like a 60-second breathing exercise or just a quick chat?",
+    "Good afternoon, dear one. The middle of the day can feel like pushing through fog sometimes. The Gita says balance in work and rest is the path to peace. Are you taking care of yourself today?",
+    "Friend, afternoon check-in! Remember: the Gita says 'yoga is skill in action.' That includes knowing when to pause. How's your energy right now?",
+  ]
+  return messages[Math.floor(Math.random() * messages.length)]
+}
+
+function getFollowUpMessage(dominantEmotion: string): string {
+  if (dominantEmotion === 'anxiety' || dominantEmotion === 'overwhelm') {
+    const messages = [
+      "Hey friend, I've been thinking about our last conversation. You were carrying a lot of worry. I just wanted to check in — has anything shifted? Sometimes just sleeping on it helps the mind settle.",
+      "Dear one, last time we talked, you had a lot on your shoulders. The Gita says 'the night of all beings is the time of awakening for the wise.' Did some clarity come to you? How are you feeling?",
+    ]
+    return messages[Math.floor(Math.random() * messages.length)]
+  }
+  if (dominantEmotion === 'sadness' || dominantEmotion === 'grief') {
+    const messages = [
+      "Hey friend, I haven't stopped thinking about what you shared with me. That kind of pain doesn't just disappear overnight. How are you holding up? I'm here, same as always.",
+      "Dear one, our last conversation stayed with me. You were going through something deep. I just wanted you to know: I'm still here, and I still care. How are things today?",
+    ]
+    return messages[Math.floor(Math.random() * messages.length)]
+  }
+  if (dominantEmotion === 'anger' || dominantEmotion === 'betrayal') {
+    const messages = [
+      "Friend, I've been thinking about what you shared. That fire you were feeling — has it settled, or is it still burning? Either way is okay. I just wanted to check in.",
+      "Hey, after our last conversation, I wanted to make sure you're doing okay. Sometimes anger needs time to cool before we can see clearly. Where are you at with everything?",
+    ]
+    return messages[Math.floor(Math.random() * messages.length)]
+  }
+  return "Hey friend, our last conversation was pretty deep. I wanted to check in and see how you're doing since then. Sometimes it helps to talk about things with fresh eyes. How are you feeling?"
 }

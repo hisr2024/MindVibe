@@ -141,12 +141,14 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     }
   }, [])
 
-  // Auto-start if enabled on mount
+  // Auto-start when enabled, auto-stop when disabled
   useEffect(() => {
     if (enabled && isSupported && detectorRef.current && !isActive) {
       start()
+    } else if (!enabled && isActive) {
+      stop()
     }
-  }, [enabled, isSupported, isActive, start])
+  }, [enabled, isSupported, isActive, start, stop])
 
   return {
     isActive,

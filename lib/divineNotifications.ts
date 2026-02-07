@@ -107,7 +107,6 @@ function getRandomItem<T>(array: T[]): T {
  */
 export async function requestDivineNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
-    console.log('Notifications not supported');
     return false;
   }
 

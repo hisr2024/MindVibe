@@ -67,7 +67,7 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 /**
- * Initialize the cache with default wisdom
+ * Initialize the cache with default wisdom and warm the Service Worker cache
  */
 export async function initializeWisdomCache(): Promise<void> {
   const db = await openDB()
@@ -80,20 +80,43 @@ export async function initializeWisdomCache(): Promise<void> {
     req.onerror = () => resolve(0)
   })
 
-  if (count > 0) return // Already initialized
+  if (count === 0) {
+    // Populate with essential verses
+    const verseTx = db.transaction('verses', 'readwrite')
+    const store = verseTx.objectStore('verses')
+    for (const verse of ESSENTIAL_VERSES) {
+      store.put(verse)
+    }
 
-  // Populate with essential verses
-  const verseTx = db.transaction('verses', 'readwrite')
-  const store = verseTx.objectStore('verses')
-  for (const verse of ESSENTIAL_VERSES) {
-    store.put(verse)
+    // Populate offline responses
+    const responseTx = db.transaction('responses', 'readwrite')
+    const responseStore = responseTx.objectStore('responses')
+    for (const response of OFFLINE_RESPONSES) {
+      responseStore.put(response)
+    }
   }
 
-  // Populate offline responses
-  const responseTx = db.transaction('responses', 'readwrite')
-  const responseStore = responseTx.objectStore('responses')
-  for (const response of OFFLINE_RESPONSES) {
-    responseStore.put(response)
+  // Warm the Service Worker cache with wisdom API endpoints
+  warmServiceWorkerCache()
+}
+
+/**
+ * Signal the Service Worker to pre-cache wisdom endpoints.
+ * The SW caches /api/gita/verses for 1 year (knowledge doesn't change).
+ */
+function warmServiceWorkerCache(): void {
+  if (typeof navigator === 'undefined' || !navigator.serviceWorker?.controller) return
+
+  try {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'CACHE_URLS',
+      urls: [
+        '/api/gita/verses',
+        '/api/wisdom',
+      ],
+    })
+  } catch {
+    // Non-fatal — SW may not be ready yet
   }
 }
 

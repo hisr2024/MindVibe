@@ -12,6 +12,7 @@ import type {
 } from '@/types/emotional-reset.types'
 
 const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || ''
+const DEFAULT_TIMEOUT = 15000 // 15 seconds
 
 /**
  * Get CSRF token from cookie.
@@ -25,12 +26,27 @@ function getCsrfToken(): string | null {
 }
 
 /**
+ * Create a fetch call with timeout via AbortController.
+ */
+function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = DEFAULT_TIMEOUT
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+  return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+    clearTimeout(timeoutId)
+  )
+}
+
+/**
  * Start a new emotional reset session
  * @returns Promise with session data
  */
 export async function startEmotionalReset(): Promise<SessionResponse> {
   const csrfToken = getCsrfToken()
-  const response = await fetch(`${getApiUrl()}/api/emotional-reset/start`, {
+  const response = await fetchWithTimeout(`${getApiUrl()}/api/emotional-reset/start`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +76,7 @@ export async function processStep(
   input?: string,
 ): Promise<StepResponse> {
   const csrfToken = getCsrfToken()
-  const response = await fetch(`${getApiUrl()}/api/emotional-reset/step`, {
+  const response = await fetchWithTimeout(`${getApiUrl()}/api/emotional-reset/step`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -76,7 +92,7 @@ export async function processStep(
 
   if (!response.ok) {
     const data = await response.json()
-    
+
     // Check for crisis detection
     if (data.crisis_detected) {
       return {
@@ -85,7 +101,7 @@ export async function processStep(
         crisis_response: data.crisis_response,
       } as StepResponse
     }
-    
+
     throw new Error(data.detail || 'Failed to process step')
   }
 
@@ -100,7 +116,7 @@ export async function processStep(
 export async function getSession(
   sessionId: string,
 ): Promise<SessionData> {
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${getApiUrl()}/api/emotional-reset/session/${sessionId}`,
     {
       method: 'GET',
@@ -128,7 +144,7 @@ export async function completeSession(
   sessionId: string,
 ): Promise<CompleteResponse> {
   const csrfToken = getCsrfToken()
-  const response = await fetch(`${getApiUrl()}/api/emotional-reset/complete`, {
+  const response = await fetchWithTimeout(`${getApiUrl()}/api/emotional-reset/complete`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -153,13 +169,17 @@ export async function completeSession(
  * @returns Promise with health check response
  */
 export async function checkHealth(): Promise<HealthCheckResponse> {
-  const response = await fetch(`${getApiUrl()}/api/emotional-reset/health`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetchWithTimeout(
+    `${getApiUrl()}/api/emotional-reset/health`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
     },
-    credentials: 'include',
-  })
+    5000 // Shorter timeout for health checks
+  )
 
   if (!response.ok) {
     throw new Error('Health check failed')

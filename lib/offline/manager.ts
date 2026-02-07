@@ -260,11 +260,8 @@ class OfflineManager {
    */
   async cleanupCache(): Promise<void> {
     try {
-      const deletedCount = await indexedDBManager.cleanupExpired(STORES.CACHED_RESPONSES)
-      console.log(`Cleaned up ${deletedCount} expired cache entries`)
-      
-      const wisdomDeleted = await indexedDBManager.cleanupExpired(STORES.WISDOM_CACHE)
-      console.log(`Cleaned up ${wisdomDeleted} expired wisdom entries`)
+      await indexedDBManager.cleanupExpired(STORES.CACHED_RESPONSES)
+      await indexedDBManager.cleanupExpired(STORES.WISDOM_CACHE)
     } catch (error) {
       console.error('Failed to cleanup cache:', error)
     }

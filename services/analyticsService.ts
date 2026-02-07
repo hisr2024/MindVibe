@@ -86,10 +86,8 @@ export async function getAnalyticsOverview(
     console.warn('Failed to fetch analytics overview:', error)
   }
 
-  // Return honest empty state as fallback (no fake data)
-  const emptyData = getEmptyOverviewMetrics()
-  setCached(cacheKey, emptyData)
-  return emptyData
+  // Return empty state as fallback — don't cache so next request retries
+  return getEmptyOverviewMetrics()
 }
 
 /**
@@ -117,10 +115,8 @@ export async function getMoodTrends(
     console.warn('Failed to fetch mood trends:', error)
   }
 
-  // Return honest empty state as fallback (no fake data)
-  const emptyData = getEmptyMoodTrends(period)
-  setCached(cacheKey, emptyData)
-  return emptyData
+  // Return empty state as fallback — don't cache so next request retries
+  return getEmptyMoodTrends(period)
 }
 
 /**
@@ -146,10 +142,8 @@ export async function getJournalStatistics(): Promise<JournalStatistics> {
     console.warn('Failed to fetch journal statistics:', error)
   }
 
-  // Return honest empty state as fallback (no fake data)
-  const emptyData = getEmptyJournalStatistics()
-  setCached(cacheKey, emptyData)
-  return emptyData
+  // Return empty state as fallback — don't cache so next request retries
+  return getEmptyJournalStatistics()
 }
 
 /**
@@ -175,10 +169,8 @@ export async function getKIAANInsights(): Promise<KIAANInsightData> {
     console.warn('Failed to fetch KIAAN insights:', error)
   }
 
-  // Return honest empty state as fallback (no fake data)
-  const emptyData = getEmptyKIAANInsights()
-  setCached(cacheKey, emptyData)
-  return emptyData
+  // Return empty state as fallback — don't cache so next request retries
+  return getEmptyKIAANInsights()
 }
 
 /**
@@ -207,10 +199,8 @@ export async function getWeeklySummary(
     console.warn('Failed to fetch weekly summary:', error)
   }
 
-  // Return null when no data available (no fake data)
-  const emptyData = getEmptyWeeklySummary()
-  if (emptyData) setCached(cacheKey, emptyData)
-  return emptyData
+  // Return empty state — don't cache so next request retries
+  return getEmptyWeeklySummary()
 }
 
 /**
@@ -236,10 +226,8 @@ export async function getAchievements(): Promise<Achievement[]> {
     console.warn('Failed to fetch achievements:', error)
   }
 
-  // Return empty array - achievements are earned through genuine use
-  const emptyData = getEmptyAchievements()
-  setCached(cacheKey, emptyData)
-  return emptyData
+  // Return empty array — don't cache so next request retries
+  return getEmptyAchievements()
 }
 
 /**

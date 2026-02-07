@@ -113,12 +113,10 @@ class OfflineSyncService {
    */
   private setupNetworkListener(): void {
     window.addEventListener('online', () => {
-      console.log('[SyncService] Network online, starting sync')
       this.startSync()
     })
 
     window.addEventListener('offline', () => {
-      console.log('[SyncService] Network offline, pausing sync')
       this.isSyncing = false
     })
   }

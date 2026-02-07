@@ -129,8 +129,7 @@ function KiaanChatPageInner() {
     if (typeof window === 'undefined') return;
     
     navigator.clipboard.writeText(text).then(() => {
-      // Show a brief success message (could be enhanced with a toast notification)
-      console.log('Copied to clipboard');
+      // Copied successfully
     }).catch(err => {
       console.error('Failed to copy:', err);
     });
