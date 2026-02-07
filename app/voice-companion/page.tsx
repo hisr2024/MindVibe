@@ -32,6 +32,7 @@ import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer'
 import KiaanVoiceOrb from '@/components/voice/KiaanVoiceOrb'
 import VoiceWaveform from '@/components/voice/VoiceWaveform'
 import ConversationInsights from '@/components/voice/ConversationInsights'
+import VoiceErrorBoundary from '@/components/voice/VoiceErrorBoundary'
 import { saveSacredReflection } from '@/utils/sacredReflections'
 import divineVoiceService from '@/services/divineVoiceService'
 import voiceCompanionService from '@/services/voiceCompanionService'
@@ -52,6 +53,19 @@ import wisdomAutoUpdate from '@/utils/voice/wisdomAutoUpdate'
 import { getProactivePrompts, acknowledgePrompt, resetProactiveSession, type ProactivePrompt } from '@/utils/voice/proactiveKiaan'
 import { storeMessage, startHistorySession, endHistorySession } from '@/utils/voice/conversationHistory'
 import type { OrbEmotion } from '@/components/voice/KiaanVoiceOrb'
+
+// ─── New Feature Imports (Wave 2) ──────────────────────────────────────────
+import { preprocessForTTS } from '@/utils/speech/sanskritPronunciation'
+import { getSituationalResponse } from '@/utils/wisdom/situationalWisdom'
+import { getMeditationForEmotion, type GuidedMeditation } from '@/utils/wisdom/meditationScripts'
+import { getStoryForEmotion } from '@/utils/wisdom/mahabharataStories'
+import { startQuiz, answerQuestion, getCurrentQuestion, getQuizResultMessage, type QuizSession } from '@/utils/wisdom/gitaQuiz'
+import { getDebateResponse } from '@/utils/wisdom/debateMode'
+import { getReframingResponse } from '@/utils/wisdom/cognitiveReframing'
+import { summarizeConversation, shouldOfferSummary, type ConversationEntry } from '@/utils/voice/conversationSummarizer'
+import { hapticPulse, hapticVerse, hapticWisdom, hapticCelebration, hapticEmphasis } from '@/utils/voice/hapticFeedback'
+import { generateProgressReport, getSpokenProgressSummary } from '@/utils/voice/progressInsights'
+import { getAdaptiveRate, recordUserSpeakingPace, resetAdaptiveRate } from '@/utils/voice/audioDucking'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -424,6 +438,8 @@ export default function VoiceCompanionPage() {
   const [voiceGender, setVoiceGender] = useState<VoiceGender>('female')
   const [proactivePrompt, setProactivePrompt] = useState<ProactivePrompt | null>(null)
   const [sessionStartTime] = useState(() => new Date())
+  const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
+  const [activeMeditation, setActiveMeditation] = useState<GuidedMeditation | null>(null)
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -616,6 +632,7 @@ export default function VoiceCompanionPage() {
 
   const speakResponse = useCallback(async (text: string) => {
     lastResponseRef.current = text
+    hapticEmphasis() // Subtle haptic on each response
     if (!autoSpeak) {
       if (conversationModeRef.current) {
         resumeListeningIfConversation()
@@ -628,14 +645,18 @@ export default function VoiceCompanionPage() {
 
     if (isMountedRef.current) setState('speaking')
 
-    // Get emotion-adaptive voice parameters
+    // Preprocess Sanskrit terms for correct pronunciation
+    const processedText = preprocessForTTS(text)
+
+    // Get emotion-adaptive voice parameters with adaptive rate
     const voiceParams = getEmotionAdaptedParams(currentEmotion, voicePersona)
+    const adaptiveRate = getAdaptiveRate({ responseText: text, emotion: currentEmotion, baseRate: voiceParams.rate })
 
     // Tier 1: Divine Voice Service (Sarvam AI / Google Neural2 - highest quality)
     if (useDivineVoice) {
       try {
         const result = await divineVoiceService.synthesize({
-          text,
+          text: processedText,
           language: 'en',
           style: voiceParams.style as 'friendly' | 'divine' | 'calm' | 'wisdom' | 'chanting',
           volume: voiceParams.volume,
@@ -658,9 +679,9 @@ export default function VoiceCompanionPage() {
     }
 
     // Tier 2+3: Enhanced Voice Output (backend TTS → browser best neural voice)
-    // Apply emotion-adaptive rate/pitch to browser TTS for more natural sound
-    voiceOutputRef.current.updateRate(voiceParams.rate)
-    if (isMountedRef.current) await voiceOutputRef.current.speak(text)
+    // Apply emotion-adaptive rate/pitch with adaptive rate for more natural sound
+    voiceOutputRef.current.updateRate(adaptiveRate)
+    if (isMountedRef.current) await voiceOutputRef.current.speak(processedText)
   }, [autoSpeak, useDivineVoice, wakeWordEnabled, currentEmotion, voicePersona, resumeListeningIfConversation])
 
   // ─── Stop All ─────────────────────────────────────────────────────
@@ -692,7 +713,10 @@ export default function VoiceCompanionPage() {
     setError(null)
     setCurrentEmotion(undefined)
     setBreathingSteps(null)
+    setQuizSession(null)
+    setActiveMeditation(null)
     turnCountRef.current = 0
+    resetAdaptiveRate()
     voiceCompanionService.endSession()
   }, [stopAll])
 
@@ -862,6 +886,10 @@ export default function VoiceCompanionPage() {
         break
       }
     }
+
+    // ─── Extended Feature Commands ───────────────────────────────────
+    // These are detected by natural language below, not by voiceCommands.ts
+
   }, [speakResponse, stopAll, addSystemMessage, addKiaanMessage, startBreathingExercise, clearConversation, messages, currentEmotion])
 
   // ─── Handle User Input ────────────────────────────────────────────
@@ -897,6 +925,177 @@ export default function VoiceCompanionPage() {
       setState('processing')
       setError(null)
 
+      // ─── Extended Feature Detection (NLU) ─────────────────────────
+      const lower = text.toLowerCase()
+
+      // Quiz: "quiz", "test my knowledge", "gita quiz"
+      if (lower.includes('quiz') || lower.includes('test my knowledge') || lower.includes('test me')) {
+        if (quizSession) {
+          // Answer in progress quiz
+          const q = getCurrentQuestion(quizSession)
+          if (q) {
+            const answerMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3, '1': 0, '2': 1, '3': 2, '4': 3 }
+            const answerKey = lower.replace(/[^a-d1-4]/g, '')[0]
+            const answerIdx = answerMap[answerKey] ?? -1
+            if (answerIdx >= 0) {
+              const result = answerQuestion(quizSession, answerIdx)
+              if (result.correct) hapticCelebration()
+              const feedback = result.correct ? `Correct! ${result.explanation}` : `Not quite. ${result.explanation}`
+              if (result.isComplete) {
+                const summary = getQuizResultMessage(quizSession)
+                addKiaanMessage(`${feedback}\n\n${summary}`)
+                await speakResponse(`${feedback} ${summary}`)
+                setQuizSession(null)
+              } else {
+                const nextQ = getCurrentQuestion(quizSession)
+                const nextText = nextQ ? `${feedback}\n\nNext question: ${nextQ.question}\n${nextQ.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join('\n')}` : feedback
+                addKiaanMessage(nextText)
+                await speakResponse(`${feedback}. Next question: ${nextQ?.question}. ${nextQ?.options.map((o, i) => `${String.fromCharCode(65 + i)}, ${o}`).join('. ')}`)
+              }
+              processingRef.current = false
+              return
+            }
+          }
+        }
+        // Start new quiz
+        const difficulty = lower.includes('hard') ? 'hard' : lower.includes('easy') ? 'easy' : 'medium'
+        const session = startQuiz(difficulty, 5)
+        setQuizSession(session)
+        const firstQ = getCurrentQuestion(session)
+        if (firstQ) {
+          hapticPulse()
+          const quizText = `Let's test your wisdom, friend! Here's a ${difficulty} question:\n\n${firstQ.question}\n${firstQ.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join('\n')}\n\nSay A, B, C, or D!`
+          addKiaanMessage(quizText)
+          await speakResponse(`Let's test your wisdom! ${firstQ.question}. ${firstQ.options.map((o, i) => `${String.fromCharCode(65 + i)}, ${o}`).join('. ')}. Say A, B, C, or D!`)
+        }
+        processingRef.current = false
+        return
+      }
+
+      // Quiz answer in progress (when quiz is active)
+      if (quizSession) {
+        const q = getCurrentQuestion(quizSession)
+        if (q) {
+          const answerMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3, '1': 0, '2': 1, '3': 2, '4': 3 }
+          const answerKey = lower.replace(/[^a-d1-4]/g, '')[0]
+          const answerIdx = answerMap[answerKey] ?? -1
+          if (answerIdx >= 0) {
+            const result = answerQuestion(quizSession, answerIdx)
+            if (result.correct) hapticCelebration()
+            const feedback = result.correct ? `Correct! ${result.explanation}` : `Not quite, friend. ${result.explanation}`
+            if (result.isComplete) {
+              const summary = getQuizResultMessage(quizSession)
+              addKiaanMessage(`${feedback}\n\n${summary}`)
+              await speakResponse(`${feedback} ${summary}`)
+              setQuizSession(null)
+            } else {
+              const nextQ = getCurrentQuestion(quizSession)
+              const nextText = nextQ ? `${feedback}\n\nNext: ${nextQ.question}\n${nextQ.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join('\n')}` : feedback
+              addKiaanMessage(nextText)
+              await speakResponse(`${feedback}. Next: ${nextQ?.question}. ${nextQ?.options.map((o, i) => `${String.fromCharCode(65 + i)}, ${o}`).join('. ')}`)
+            }
+            processingRef.current = false
+            return
+          }
+        }
+      }
+
+      // Story: "tell me a story", "Mahabharata story"
+      if (lower.includes('story') || lower.includes('parable') || lower.includes('mahabharata')) {
+        const story = getStoryForEmotion(emotion || 'confusion')
+        hapticWisdom()
+        const storyText = `Let me share a story, dear friend.\n\n"${story.title}"\n\n${story.narrative}\n\nThe lesson: ${story.lesson}\n\n${story.reflection}`
+        addKiaanMessage(storyText)
+        await speakResponse(`Let me share a story. ${story.title}. ${story.narrative}. The lesson: ${story.lesson}. ${story.reflection}`)
+        processingRef.current = false
+        return
+      }
+
+      // Guided Meditation: "guided meditation", "guide me"
+      if ((lower.includes('guided') && lower.includes('meditation')) || lower.includes('guide me through meditation')) {
+        const meditation = getMeditationForEmotion(emotion || 'peace')
+        setActiveMeditation(meditation)
+        hapticWisdom()
+        const steps = meditation.steps.map(s => s.type === 'speak' ? s.instruction : s.type === 'breathe' ? '(Breathe deeply)' : '').filter(Boolean).join(' ')
+        const meditationText = `${meditation.name}\n\n${meditation.description}\n\n${steps}`
+        addKiaanMessage(meditationText)
+        await speakResponse(`Let's begin ${meditation.name}. ${meditation.description}. ${steps}`)
+        setActiveMeditation(null)
+        processingRef.current = false
+        return
+      }
+
+      // Debate: "but what about", "I disagree", "debate"
+      if (lower.includes('but what about') || lower.includes('i disagree') || lower.includes('debate') || lower.includes('different perspective')) {
+        const debateResult = getDebateResponse(text)
+        if (debateResult) {
+          hapticWisdom()
+          const debateText = `Great question, friend! Here are different perspectives:\n\n${debateResult.perspectives}\n\nMy synthesis: ${debateResult.synthesis}`
+          addKiaanMessage(debateText)
+          await speakResponse(`Great question! Let me share different perspectives. ${debateResult.perspectives}. My synthesis: ${debateResult.synthesis}`)
+          processingRef.current = false
+          return
+        }
+      }
+
+      // Progress report: "my progress", "how am I doing", "growth report"
+      if (lower.includes('my progress') || lower.includes('growth report') || lower.includes('monthly report')) {
+        const profile = contextMemory.getProfile()
+        const emotionSummary = await getEmotionalSummary()
+        if (profile) {
+          const report = generateProgressReport({
+            totalConversations: profile.totalConversations,
+            emotionalJourney: profile.emotionalJourney.map(e => ({ emotion: e.emotion, count: e.count })),
+            recurringTopics: profile.recurringTopics.map(t => ({ topic: t.topic, count: t.count })),
+            daysSinceStart: Math.floor((Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+            conversationStreak: 1,
+            versesExplored: messages.filter(m => m.verse).length,
+            meditationCount: messages.filter(m => m.type === 'breathing').length,
+            breathingCount: messages.filter(m => m.type === 'breathing').length,
+            journalCount: messages.filter(m => m.saved).length,
+            recentEmotionTrend: emotionSummary.trend === 'unknown' ? 'stable' : emotionSummary.trend as 'improving' | 'stable' | 'concerning',
+          })
+          const spokenSummary = getSpokenProgressSummary(report)
+          hapticCelebration()
+          addKiaanMessage(spokenSummary)
+          await speakResponse(spokenSummary)
+          processingRef.current = false
+          return
+        }
+      }
+
+      // Session Summary: "summarize", "session summary", "journal"
+      if (lower.includes('summarize') || lower.includes('session summary') || lower.includes('journal entry')) {
+        if (shouldOfferSummary(messages.length)) {
+          const entries: ConversationEntry[] = messages
+            .filter(m => m.role !== 'system')
+            .map(m => ({ role: m.role as 'user' | 'kiaan', text: m.content, emotion: m.emotion, timestamp: m.timestamp }))
+          const summary = summarizeConversation(entries)
+          hapticWisdom()
+          const summaryText = `${summary.title}\n\n${summary.emotionalJourney}\n\nJournal Entry:\n${summary.journalEntry}\n\n${summary.closingWisdom}`
+          addKiaanMessage(summaryText)
+          await speakResponse(`${summary.title}. ${summary.emotionalJourney}. ${summary.closingWisdom}`)
+          processingRef.current = false
+          return
+        } else {
+          const minText = 'We need a few more exchanges before I can create a meaningful summary. Keep talking to me, friend!'
+          addKiaanMessage(minText)
+          await speakResponse(minText)
+          processingRef.current = false
+          return
+        }
+      }
+
+      // ─── Situational Wisdom Check ──────────────────────────────────
+      // Check if user describes a specific life situation
+      const situationalResult = getSituationalResponse(text)
+
+      // ─── Cognitive Reframing Check ─────────────────────────────────
+      // Detect cognitive distortions in user's language
+      const reframingResult = getReframingResponse(text)
+
+      // ─── Main Response Generation ─────────────────────────────────
+
       // Try session-based message first, then stateless fallback, then offline cache
       let result = await voiceCompanionService.sendMessage(text)
       if (!result) {
@@ -911,6 +1110,14 @@ export default function VoiceCompanionPage() {
       if (result?.response) {
         // Dynamic Wisdom available - wrap backend AI response with friend warmth
         responseText = wrapWithConversationalWarmth(result.response, turnCountRef.current, emotion)
+      } else if (situationalResult) {
+        // Situational wisdom match - use targeted Gita verse for this life situation
+        hapticVerse()
+        responseText = situationalResult.response
+      } else if (reframingResult && turnCountRef.current >= 2) {
+        // Cognitive reframing - gently address distorted thinking (only after rapport built)
+        hapticWisdom()
+        responseText = reframingResult.response
       } else {
         // Static Wisdom - generate local response based on conversation phase
         // Phase 1 CONNECT: empathy + question (no advice)
@@ -924,6 +1131,9 @@ export default function VoiceCompanionPage() {
       // Adapt voice persona based on detected emotion
       const recommended = getRecommendedPersona(emotion, 'conversation')
       if (recommended !== voicePersona) setVoicePersona(recommended)
+
+      // Haptic feedback for verse sharing
+      if (result?.verse) hapticVerse()
 
       addKiaanMessage(responseText, { verse: result?.verse, emotion: result?.emotion || emotion })
 
@@ -977,6 +1187,7 @@ export default function VoiceCompanionPage() {
   }
 
   const handleOrbClick = () => {
+    hapticPulse()
     if (['speaking', 'processing', 'breathing'].includes(state)) {
       stopAll()
     } else if (voiceInput.isListening) {
@@ -1056,6 +1267,7 @@ export default function VoiceCompanionPage() {
   // ─── Render ───────────────────────────────────────────────────────
 
   return (
+    <VoiceErrorBoundary>
     <div className={`flex flex-col h-[100dvh] bg-gradient-to-b ${moodBg} transition-colors duration-1000 relative overflow-hidden`}>
 
       {/* Ambient background particles */}
@@ -1282,9 +1494,9 @@ export default function VoiceCompanionPage() {
                 { label: 'Breathe', emoji: '🌬', cmd: 'breathe' },
                 { label: 'Meditate', emoji: '🧘', cmd: 'meditate' },
                 { label: 'Verse', emoji: '📖', cmd: 'verse' },
-                { label: 'Affirm', emoji: '✨', cmd: 'affirmation' },
+                { label: 'Quiz', emoji: '🧠', cmd: 'quiz' },
               ].map(({ label, emoji, cmd }) => (
-                <button key={cmd} onClick={() => handleVoiceCommand(cmd)} className="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all active:scale-95">
+                <button key={cmd} onClick={() => cmd === 'quiz' ? handleUserInput('quiz') : handleVoiceCommand(cmd)} className="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all active:scale-95">
                   <span className="text-lg">{emoji}</span>
                   <span className="text-[10px] text-white/50 font-medium">{label}</span>
                 </button>
@@ -1387,15 +1599,16 @@ export default function VoiceCompanionPage() {
       <div className="relative z-10 border-t border-white/[0.06] px-4 py-3 bg-black/20 backdrop-blur-sm safe-bottom">
         {/* Quick action chips in active conversation */}
         {messages.length > 0 && (
-          <div className="flex gap-1.5 justify-center mb-2.5">
+          <div className="flex gap-1.5 justify-center mb-2.5 flex-wrap">
             {[
-              { label: 'Breathe', cmd: 'breathe' },
-              { label: 'Verse', cmd: 'verse' },
-              { label: 'Affirm', cmd: 'affirmation' },
-              { label: 'Repeat', cmd: 'repeat' },
-              { label: 'Clear', cmd: 'clear' },
-            ].map(({ label, cmd }) => (
-              <button key={cmd} onClick={() => handleVoiceCommand(cmd)} className="px-2.5 py-1 rounded-full text-[10px] bg-white/[0.04] border border-white/[0.06] text-white/40 hover:bg-white/[0.08] hover:text-white/60 transition-all active:scale-95">
+              { label: 'Breathe', cmd: 'breathe', isVoiceCmd: true },
+              { label: 'Verse', cmd: 'verse', isVoiceCmd: true },
+              { label: 'Story', cmd: 'Tell me a story', isVoiceCmd: false },
+              { label: 'Quiz', cmd: 'quiz', isVoiceCmd: false },
+              { label: 'Repeat', cmd: 'repeat', isVoiceCmd: true },
+              { label: 'Clear', cmd: 'clear', isVoiceCmd: true },
+            ].map(({ label, cmd, isVoiceCmd }) => (
+              <button key={cmd} onClick={() => isVoiceCmd ? handleVoiceCommand(cmd) : handleUserInput(cmd)} className="px-2.5 py-1 rounded-full text-[10px] bg-white/[0.04] border border-white/[0.06] text-white/40 hover:bg-white/[0.08] hover:text-white/60 transition-all active:scale-95">
                 {label}
               </button>
             ))}
@@ -1475,5 +1688,6 @@ export default function VoiceCompanionPage() {
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
       `}</style>
     </div>
+    </VoiceErrorBoundary>
   )
 }
