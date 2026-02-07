@@ -208,8 +208,8 @@ function getMorningMessage(trend?: string): string {
 
 function getEveningMessage(): string {
   const messages = [
-    "Good evening, dear one. As the day winds down, let's take a moment to honor all you did today. What are you grateful for? Even small things count enormously.",
-    "The evening is a sacred time for reflection. In the Gita, I spoke about the importance of examining one's actions with honesty and compassion. How was your day, friend?",
+    "Good evening, dear one. As the day winds down, let us take a moment to honor all you did today. What are you grateful for? Even small things count enormously.",
+    "The evening is a sacred time for reflection, a time to look back at the day with honesty and compassion. How was your day, friend?",
     "Night is approaching, and with it, a chance to let go of the day's weight. Would you like to do a short breathing exercise or share what is on your mind?",
     "Good evening, friend. Before the day ends, I want you to name three things you did well today. They do not have to be big. Even getting through a hard day counts. What comes to mind?",
     "Hey friend, the day is winding down. Whether today was amazing or just okay, you showed up. That matters. How are you feeling right now?",
@@ -247,8 +247,8 @@ function getMilestoneMessage(count: number): string {
 
 function getAfternoonMessage(): string {
   const messages = [
-    "Hey friend, it's that time of day when energy can dip. Just checking in — how are you doing? Sometimes a quick pause can reset everything. Would you like a 60-second breathing exercise or just a quick chat?",
-    "Good afternoon, dear one. The middle of the day can feel like pushing through fog sometimes. The Gita says balance in work and rest is the path to peace. Are you taking care of yourself today?",
+    "Hey friend, it is that time of day when energy can dip. Just checking in, how are you doing? Sometimes a quick pause can reset everything. Would you like a 60-second breathing exercise or just a quick chat?",
+    "Good afternoon, dear one. The middle of the day can feel like pushing through fog sometimes. The ancient wisdom teaches that balance in work and rest is the path to peace. Are you taking care of yourself today?",
     "Friend, afternoon check-in! Remember: true mastery is skill in action. That includes knowing when to pause. How is your energy right now?",
   ]
   return messages[Math.floor(Math.random() * messages.length)]
@@ -257,7 +257,7 @@ function getAfternoonMessage(): string {
 function getFollowUpMessage(dominantEmotion: string): string {
   if (dominantEmotion === 'anxiety' || dominantEmotion === 'overwhelm') {
     const messages = [
-      "Hey friend, I've been thinking about our last conversation. You were carrying a lot of worry. I just wanted to check in — has anything shifted? Sometimes just sleeping on it helps the mind settle.",
+      "Hey friend, I have been thinking about our last conversation. You were carrying a lot of worry. I just wanted to check in, has anything shifted? Sometimes just sleeping on it helps the mind settle.",
       "Dear one, last time we talked, you had a lot on your shoulders. There is a saying: the night of all beings is the time of awakening for the wise. Did some clarity come to you? How are you feeling?",
     ]
     return messages[Math.floor(Math.random() * messages.length)]

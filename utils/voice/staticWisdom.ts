@@ -122,7 +122,7 @@ export const LIFE_SITUATIONS: LifeSituation[] = [
       "Dear one, my heart aches hearing this. Being surrounded by people but still feeling alone... that's a special kind of hurt. I see you, and I'm here. What does your ideal connection look like?",
     ],
     guideResponses: [
-      "Here's something I want you to really sit with, friend. In Chapter 15, the Gita says: 'I am seated in the hearts of ALL living beings.' That means the divine - the universe itself - is literally inside you. You are never, ever truly alone. The loneliness you feel is real, but it's not the whole truth. What's one small way you could reach out to someone this week?",
+      "Here is something I want you to really sit with, friend. The ancient wisdom says the divine is seated in the hearts of ALL living beings. That means the universe itself is literally inside you. You are never, ever truly alone. The loneliness you feel is real, but it is not the whole truth. What is one small way you could reach out to someone this week?",
       "The Gita teaches that the divine is 'the friend of all living entities.' ALL. Including you, right now, in this moment of loneliness. You coming to talk to me? That's a connection. And it matters. What kind of connection are you craving most?",
     ],
     verse: { chapter: 5, verse: 29, key: 'friend_of_all' },
