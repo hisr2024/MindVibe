@@ -33,6 +33,9 @@ import KiaanVoiceOrb from '@/components/voice/KiaanVoiceOrb'
 import VoiceWaveform from '@/components/voice/VoiceWaveform'
 import ConversationInsights from '@/components/voice/ConversationInsights'
 import VoiceErrorBoundary from '@/components/voice/VoiceErrorBoundary'
+import BreathingRing from '@/components/voice/BreathingRing'
+import { ToastProvider, useToast } from '@/components/voice/Toast'
+import { getDailyWisdom, type DailyVerse } from '@/utils/voice/dailyWisdom'
 import { saveSacredReflection } from '@/utils/sacredReflections'
 import divineVoiceService from '@/services/divineVoiceService'
 import voiceCompanionService from '@/services/voiceCompanionService'
@@ -367,69 +370,21 @@ function getTimeGreeting(): string {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-// ─── Breathing Timer Component ──────────────────────────────────────────────
-
-function BreathingTimer({ steps, onComplete }: { steps: BreathingStep[]; onComplete: () => void }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(steps[0]?.duration || 4)
-  const [isActive, setIsActive] = useState(true)
-
-  useEffect(() => {
-    if (!isActive || currentStep >= steps.length) {
-      if (currentStep >= steps.length) onComplete()
-      return
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          const next = currentStep + 1
-          if (next >= steps.length) {
-            setIsActive(false)
-            clearInterval(timer)
-            onComplete()
-            return 0
-          }
-          setCurrentStep(next)
-          return steps[next].duration
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [currentStep, isActive, steps, onComplete])
-
-  if (currentStep >= steps.length) return null
-
-  const step = steps[currentStep]
-  const phaseColor = {
-    inhale: 'text-blue-400',
-    hold: 'text-purple-400',
-    exhale: 'text-amber-400',
-    rest: 'text-emerald-400',
-  }[step.phase] || 'text-white/60'
-
-  return (
-    <div className="flex flex-col items-center space-y-3">
-      <p className={`text-lg font-light ${phaseColor} capitalize`}>{step.phase}</p>
-      <p className="text-4xl font-extralight text-white tabular-nums">{timeLeft}</p>
-      <p className="text-xs text-white/50">{step.instruction}</p>
-      <div className="flex gap-1.5">
-        {steps.map((_, i) => (
-          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i < currentStep ? 'bg-emerald-400' : i === currentStep ? 'bg-white' : 'bg-white/20'}`} />
-        ))}
-      </div>
-      <button onClick={() => { setIsActive(false); onComplete() }} className="text-xs text-white/30 hover:text-white/50 transition-colors mt-2">
-        Skip
-      </button>
-    </div>
-  )
-}
+// BreathingTimer is now the BreathingRing component (imported above)
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function VoiceCompanionPage() {
+  return (
+    <ToastProvider>
+      <VoiceCompanionInner />
+    </ToastProvider>
+  )
+}
+
+function VoiceCompanionInner() {
+  const toast = useToast()
+
   // State
   const [state, setState] = useState<CompanionState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
@@ -454,6 +409,8 @@ export default function VoiceCompanionPage() {
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
   const [activeMeditation, setActiveMeditation] = useState<GuidedMeditation | null>(null)
   const [friendshipState, setFriendshipState] = useState<FriendshipState>(() => getFriendshipState(null))
+  const [dailyVerse] = useState<DailyVerse>(() => getDailyWisdom())
+  const [showScrollBtn, setShowScrollBtn] = useState(false)
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -832,6 +789,7 @@ export default function VoiceCompanionPage() {
           const success = await saveSacredReflection(lastKiaan.content, 'kiaan')
           if (success) {
             setMessages(prev => prev.map(m => m.id === lastKiaan.id ? { ...m, saved: true } : m))
+            toast.show('Saved to Sacred Reflections', 'save')
             addSystemMessage('Saved to Sacred Reflections. This wisdom is yours forever.')
           }
         } else {
@@ -899,6 +857,7 @@ export default function VoiceCompanionPage() {
         a.download = `kiaan-conversation-${new Date().toISOString().split('T')[0]}.txt`
         a.click()
         URL.revokeObjectURL(url)
+        toast.show('Conversation exported', 'check')
         addSystemMessage('Conversation exported! Check your downloads.')
         break
       }
@@ -990,33 +949,6 @@ export default function VoiceCompanionPage() {
 
       // Quiz: "quiz", "test my knowledge", "gita quiz"
       if (lower.includes('quiz') || lower.includes('test my knowledge') || lower.includes('test me')) {
-        if (quizSession) {
-          // Answer in progress quiz
-          const q = getCurrentQuestion(quizSession)
-          if (q) {
-            const answerMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3, '1': 0, '2': 1, '3': 2, '4': 3 }
-            const answerKey = lower.replace(/[^a-d1-4]/g, '')[0]
-            const answerIdx = answerMap[answerKey] ?? -1
-            if (answerIdx >= 0) {
-              const result = answerQuestion(quizSession, answerIdx)
-              if (result.correct) hapticCelebration()
-              const feedback = result.correct ? `Correct! ${result.explanation}` : `Not quite. ${result.explanation}`
-              if (result.isComplete) {
-                const summary = getQuizResultMessage(quizSession)
-                addKiaanMessage(`${feedback}\n\n${summary}`)
-                await speakResponse(`${feedback} ${summary}`)
-                setQuizSession(null)
-              } else {
-                const nextQ = getCurrentQuestion(quizSession)
-                const nextText = nextQ ? `${feedback}\n\nNext question: ${nextQ.question}\n${nextQ.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join('\n')}` : feedback
-                addKiaanMessage(nextText)
-                await speakResponse(`${feedback}. Next question: ${nextQ?.question}. ${nextQ?.options.map((o, i) => `${String.fromCharCode(65 + i)}, ${o}`).join('. ')}`)
-              }
-              processingRef.current = false
-              return
-            }
-          }
-        }
         // Start new quiz
         const difficulty = lower.includes('hard') ? 'hard' : lower.includes('easy') ? 'easy' : 'medium'
         const session = startQuiz(difficulty, 5)
@@ -1307,7 +1239,28 @@ export default function VoiceCompanionPage() {
 
   const saveMessage = async (msg: Message) => {
     const success = await saveSacredReflection(msg.content, msg.role === 'kiaan' ? 'kiaan' : 'user')
-    if (success) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, saved: true } : m))
+    if (success) {
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, saved: true } : m))
+      toast.show('Saved to Sacred Reflections', 'save')
+    }
+  }
+
+  const copyMessage = async (msg: Message) => {
+    const verseRef = msg.verse ? `\n— Bhagavad Gita ${msg.verse.chapter}.${msg.verse.verse}` : ''
+    await navigator.clipboard.writeText(msg.content + verseRef).catch(() => {})
+    toast.show('Copied to clipboard', 'copy')
+  }
+
+  const shareMessage = async (msg: Message) => {
+    const verseRef = msg.verse ? `\n— Bhagavad Gita ${msg.verse.chapter}.${msg.verse.verse}` : ''
+    const text = msg.content + verseRef + '\n\n— Shared from MindVibe KIAAN'
+    if (navigator.share) {
+      await navigator.share({ text }).catch(() => {})
+      toast.show('Shared wisdom', 'share')
+    } else {
+      await navigator.clipboard.writeText(text).catch(() => {})
+      toast.show('Copied for sharing', 'copy')
+    }
   }
 
   const saveConversation = async () => {
@@ -1315,6 +1268,7 @@ export default function VoiceCompanionPage() {
     for (const msg of kiaanMessages) {
       if (!msg.saved) await saveMessage(msg)
     }
+    toast.show('Conversation saved', 'save')
   }
 
   const getSuggestions = (): string[] => {
@@ -1500,20 +1454,22 @@ export default function VoiceCompanionPage() {
                 onClick={stopAll}
               />
               <div className="mt-4">
-                <BreathingTimer steps={breathingSteps} onComplete={onBreathingComplete} />
+                <BreathingRing steps={breathingSteps} onComplete={onBreathingComplete} />
               </div>
             </div>
           ) : (
             <>
-              {/* The Living Orb */}
-              <KiaanVoiceOrb
-                state={state}
-                emotion={toOrbEmotion(currentEmotion)}
-                volume={audioAnalyzer.volume}
-                size={messages.length > 0 ? 120 : 160}
-                onClick={handleOrbClick}
-                disabled={!voiceInput.isSupported && !['speaking', 'processing', 'breathing'].includes(state)}
-              />
+              {/* The Living Orb — smooth size transition */}
+              <div className="transition-all duration-700 ease-out" style={{ transform: messages.length > 0 ? 'scale(0.75)' : 'scale(1)' }}>
+                <KiaanVoiceOrb
+                  state={state}
+                  emotion={toOrbEmotion(currentEmotion)}
+                  volume={audioAnalyzer.volume}
+                  size={160}
+                  onClick={handleOrbClick}
+                  disabled={!voiceInput.isSupported && !['speaking', 'processing', 'breathing'].includes(state)}
+                />
+              </div>
 
               {/* Waveform visualization */}
               <div className="mt-3 opacity-80">
@@ -1559,30 +1515,76 @@ export default function VoiceCompanionPage() {
           )}
         </div>
 
-        {/* Empty State - Greeting + Suggestions */}
+        {/* Empty State - Greeting + Daily Wisdom + Quick Actions + Mood Selector */}
         {messages.length === 0 && !breathingSteps && (
-          <div className="flex flex-col items-center px-6 space-y-4 pb-4">
+          <div className="flex flex-col items-center px-6 space-y-3 pb-4 overflow-y-auto max-h-[40vh]">
             <p className="text-white/80 font-medium text-center text-sm max-w-xs leading-relaxed">
               {greeting || getTimeGreeting()}
             </p>
 
+            {/* Daily Wisdom Card */}
+            <div className="w-full max-w-xs rounded-2xl bg-gradient-to-br from-mv-aurora/10 via-black/20 to-mv-ocean/10 border border-white/[0.06] p-3.5" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.2s both' }}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-[10px] text-mv-aurora/50 font-semibold uppercase tracking-wider">Today&apos;s Wisdom</span>
+                <span className="text-[10px] text-white/20">BG {dailyVerse.chapter}.{dailyVerse.verse}</span>
+              </div>
+              <p className="text-xs text-white/50 italic mb-1.5">{dailyVerse.sanskrit}</p>
+              <p className="text-xs text-white/70 leading-relaxed mb-2">{dailyVerse.translation}</p>
+              <p className="text-[11px] text-white/50 leading-relaxed">{dailyVerse.kiaanReflection}</p>
+              <button
+                onClick={() => handleUserInput(dailyVerse.contemplation)}
+                className="mt-2 w-full text-left px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.04] text-[10px] text-mv-sunrise/60 hover:bg-white/[0.08] transition-all"
+              >
+                Reflect: &ldquo;{dailyVerse.contemplation}&rdquo;
+              </button>
+            </div>
+
+            {/* How are you feeling? Mood selector */}
+            <div className="w-full max-w-xs" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.35s both' }}>
+              <p className="text-[10px] text-white/30 text-center mb-1.5 font-medium uppercase tracking-wider">How are you feeling?</p>
+              <div className="flex justify-center gap-1.5">
+                {[
+                  { emoji: '😰', label: 'Anxious', prompt: 'I\'m feeling anxious and worried' },
+                  { emoji: '😢', label: 'Sad', prompt: 'I\'m feeling sad today' },
+                  { emoji: '😤', label: 'Angry', prompt: 'I\'m feeling angry and frustrated' },
+                  { emoji: '😵', label: 'Lost', prompt: 'I feel confused and lost' },
+                  { emoji: '😌', label: 'Peaceful', prompt: 'I\'m feeling peaceful today' },
+                  { emoji: '🥰', label: 'Grateful', prompt: 'I\'m feeling grateful and loving' },
+                ].map(({ emoji, label, prompt }) => (
+                  <button
+                    key={label}
+                    onClick={() => handleUserInput(prompt)}
+                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-transparent hover:border-white/[0.08] transition-all active:scale-95"
+                    title={label}
+                  >
+                    <span className="text-base">{emoji}</span>
+                    <span className="text-[8px] text-white/30">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-2 w-full max-w-xs">
+            <div className="grid grid-cols-4 gap-2 w-full max-w-xs" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.45s both' }}>
               {[
                 { label: 'Breathe', emoji: '🌬', cmd: 'breathe' },
                 { label: 'Meditate', emoji: '🧘', cmd: 'meditate' },
                 { label: 'Verse', emoji: '📖', cmd: 'verse' },
                 { label: 'Quiz', emoji: '🧠', cmd: 'quiz' },
+                { label: 'Story', emoji: '📚', cmd: 'Tell me a story' },
+                { label: 'Debate', emoji: '🤔', cmd: 'debate' },
+                { label: 'Journal', emoji: '✍️', cmd: 'journal entry' },
+                { label: 'Progress', emoji: '📊', cmd: 'my progress' },
               ].map(({ label, emoji, cmd }) => (
-                <button key={cmd} onClick={() => cmd === 'quiz' ? handleUserInput('quiz') : handleVoiceCommand(cmd)} className="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all active:scale-95">
-                  <span className="text-lg">{emoji}</span>
-                  <span className="text-[10px] text-white/50 font-medium">{label}</span>
+                <button key={cmd} onClick={() => ['breathe', 'meditate', 'verse'].includes(cmd) ? handleVoiceCommand(cmd) : handleUserInput(cmd)} className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all active:scale-95">
+                  <span className="text-base">{emoji}</span>
+                  <span className="text-[9px] text-white/50 font-medium">{label}</span>
                 </button>
               ))}
             </div>
 
             {/* Suggestion chips */}
-            <div className="flex flex-wrap gap-2 justify-center max-w-sm">
+            <div className="flex flex-wrap gap-2 justify-center max-w-sm" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.55s both' }}>
               {getSuggestions().map(prompt => (
                 <button key={prompt} onClick={() => handleUserInput(prompt)} className="px-3 py-1.5 rounded-full text-xs bg-white/[0.04] border border-white/[0.06] text-white/60 hover:bg-white/[0.08] hover:text-white/80 transition-all active:scale-95">
                   {prompt}
@@ -1592,9 +1594,33 @@ export default function VoiceCompanionPage() {
           </div>
         )}
 
+        {/* Session Stats Bar */}
+        {messages.length > 0 && (
+          <div className="flex items-center justify-center gap-3 px-4 py-1 text-[10px] text-white/25" style={{ animation: 'fadeSlideUp 0.3s ease-out' }}>
+            <span>{messages.filter(m => m.role === 'user').length} turns</span>
+            <span className="w-0.5 h-0.5 rounded-full bg-white/15" />
+            <span>{messages.filter(m => m.verse).length} verses</span>
+            <span className="w-0.5 h-0.5 rounded-full bg-white/15" />
+            <span>{Math.floor((Date.now() - sessionStartTime.getTime()) / 60000)} min</span>
+            {currentEmotion && EMOTION_LABELS[currentEmotion] && (
+              <>
+                <span className="w-0.5 h-0.5 rounded-full bg-white/15" />
+                <span className={EMOTION_LABELS[currentEmotion].color}>{EMOTION_LABELS[currentEmotion].label}</span>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Messages Area */}
         {messages.length > 0 && (
-          <div className="flex-1 w-full max-w-lg overflow-y-auto px-4 pb-2 space-y-2.5 scrollbar-thin scrollbar-thumb-white/10">
+          <div
+            className="relative flex-1 w-full max-w-lg overflow-y-auto px-4 pb-2 space-y-2.5 scrollbar-thin scrollbar-thumb-white/10"
+            onScroll={(e) => {
+              const el = e.currentTarget
+              const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80
+              setShowScrollBtn(!isNearBottom)
+            }}
+          >
             {messages.map(msg => (
               <div
                 key={msg.id}
@@ -1620,9 +1646,12 @@ export default function VoiceCompanionPage() {
                     <p className="text-sm leading-relaxed text-white/85 whitespace-pre-wrap">{msg.content}</p>
 
                     {msg.verse && (
-                      <div className="mt-2 pt-2 border-t border-white/[0.06]">
-                        <p className="text-[10px] text-mv-ocean/50 font-medium">BG {msg.verse.chapter}.{msg.verse.verse}</p>
-                        <p className="text-xs text-white/40 italic mt-0.5">{msg.verse.text}</p>
+                      <div className="mt-2 pt-2 border-t border-white/[0.06] bg-mv-aurora/[0.03] -mx-4 px-4 -mb-2.5 pb-2.5 rounded-b-2xl">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-mv-aurora/50 font-semibold uppercase tracking-wider">Gita</span>
+                          <span className="text-[10px] text-mv-ocean/50 font-medium">{msg.verse.chapter}.{msg.verse.verse}</span>
+                        </div>
+                        <p className="text-xs text-white/50 italic mt-0.5 leading-relaxed">{msg.verse.text}</p>
                       </div>
                     )}
 
@@ -1630,10 +1659,16 @@ export default function VoiceCompanionPage() {
                       <span className="text-[10px] text-white/25">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       {msg.role === 'kiaan' && (
                         <>
-                          <button onClick={() => speakResponse(msg.content)} className="text-[10px] text-white/25 hover:text-white/50 transition-colors" title="Replay">
+                          <button onClick={() => speakResponse(msg.content)} className="text-[10px] text-white/25 hover:text-white/50 transition-colors" title="Replay" aria-label="Replay">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                           </button>
-                          <button onClick={() => saveMessage(msg)} className={`text-[10px] transition-colors ${msg.saved ? 'text-mv-sunrise/60' : 'text-white/25 hover:text-white/50'}`} title={msg.saved ? 'Saved' : 'Save to reflections'}>
+                          <button onClick={() => copyMessage(msg)} className="text-[10px] text-white/25 hover:text-white/50 transition-colors" title="Copy" aria-label="Copy">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                          </button>
+                          <button onClick={() => shareMessage(msg)} className="text-[10px] text-white/25 hover:text-white/50 transition-colors" title="Share" aria-label="Share">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                          </button>
+                          <button onClick={() => saveMessage(msg)} className={`text-[10px] transition-colors ${msg.saved ? 'text-mv-sunrise/60' : 'text-white/25 hover:text-white/50'}`} title={msg.saved ? 'Saved' : 'Save to reflections'} aria-label={msg.saved ? 'Saved' : 'Save'}>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill={msg.saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                           </button>
                         </>
@@ -1661,6 +1696,17 @@ export default function VoiceCompanionPage() {
             )}
 
             <div ref={messagesEndRef} />
+
+            {/* Scroll to bottom button */}
+            {showScrollBtn && (
+              <button
+                onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="sticky bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/50 hover:text-white/80 hover:bg-black/80 transition-all shadow-lg z-10"
+                aria-label="Scroll to bottom"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -1683,10 +1729,13 @@ export default function VoiceCompanionPage() {
               { label: 'Verse', cmd: 'verse', isVoiceCmd: true },
               { label: 'Story', cmd: 'Tell me a story', isVoiceCmd: false },
               { label: 'Quiz', cmd: 'quiz', isVoiceCmd: false },
+              { label: 'Meditate', cmd: 'meditate', isVoiceCmd: true },
+              { label: 'Summary', cmd: 'summarize', isVoiceCmd: false },
               { label: 'Repeat', cmd: 'repeat', isVoiceCmd: true },
+              { label: 'Save All', cmd: '__save_all__', isVoiceCmd: false },
               { label: 'Clear', cmd: 'clear', isVoiceCmd: true },
             ].map(({ label, cmd, isVoiceCmd }) => (
-              <button key={cmd} onClick={() => isVoiceCmd ? handleVoiceCommand(cmd) : handleUserInput(cmd)} className="px-2.5 py-1 rounded-full text-[10px] bg-white/[0.04] border border-white/[0.06] text-white/40 hover:bg-white/[0.08] hover:text-white/60 transition-all active:scale-95">
+              <button key={cmd} onClick={() => cmd === '__save_all__' ? saveConversation() : isVoiceCmd ? handleVoiceCommand(cmd) : handleUserInput(cmd)} className="px-2.5 py-1 rounded-full text-[10px] bg-white/[0.04] border border-white/[0.06] text-white/40 hover:bg-white/[0.08] hover:text-white/60 transition-all active:scale-95">
                 {label}
               </button>
             ))}
