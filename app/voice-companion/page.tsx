@@ -480,6 +480,45 @@ function VoiceCompanionInner() {
     }
   }, [messages.length, breathingSteps])
 
+  // ─── Keyboard Shortcuts ─────────────────────────────────────────────
+  // Space = toggle mic (when text input is NOT focused)
+  // Escape = stop everything
+  // Ctrl/Cmd+Shift+C = toggle conversation mode
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Don't intercept when typing in the text input
+      const isInputFocused = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA'
+
+      // Escape always stops (even in input)
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        stopAll()
+        return
+      }
+
+      // Skip remaining shortcuts when input is focused
+      if (isInputFocused) return
+
+      // Space = toggle mic
+      if (e.code === 'Space' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        e.preventDefault()
+        handleOrbClick()
+        return
+      }
+
+      // Ctrl/Cmd+Shift+C = toggle conversation mode
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+        e.preventDefault()
+        toggleConversationMode()
+        return
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, conversationMode, wakeWordEnabled])
+
   // ─── Wake Word Detection ──────────────────────────────────────────
 
   // Wake word and voice input CANNOT run simultaneously (browser allows only 1 SpeechRecognition).
@@ -588,6 +627,21 @@ function VoiceCompanionInner() {
   const addKiaanMessage = useCallback((content: string, opts?: Partial<Message>) => {
     setMessages(prev => [...prev, { id: `kiaan-${Date.now()}`, role: 'kiaan', content, timestamp: new Date(), ...opts }])
   }, [])
+
+  // ─── Processing Safety Net ──────────────────────────────────────────
+  // If processing gets stuck for 15s (network timeout, etc.), auto-recover
+  useEffect(() => {
+    if (state !== 'processing') return
+    const timeout = setTimeout(() => {
+      if (!isMountedRef.current || stateRef.current !== 'processing') return
+      processingRef.current = false
+      const recovery = 'I seem to have gotten lost in thought, dear friend. Let me come back to you. What were you saying?'
+      addKiaanMessage(recovery)
+      setWakeWordPaused(false)
+      setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+    }, 15000)
+    return () => clearTimeout(timeout)
+  }, [state, wakeWordEnabled, addKiaanMessage])
 
   // ─── Speak Response ───────────────────────────────────────────────
 
@@ -1150,19 +1204,10 @@ function VoiceCompanionInner() {
       await speakResponse(responseText)
     } catch {
       if (isMountedRef.current) {
-        addSystemMessage('I missed that, friend. Could you say it once more?')
-        // If in conversation mode, stay listening so user can retry immediately
-        if (conversationModeRef.current) {
-          setTimeout(() => {
-            if (!isMountedRef.current) return
-            audioAnalyzerRef.current.start()
-            voiceInputRef.current.startListening()
-            setState('listening')
-          }, 500)
-        } else {
-          setWakeWordPaused(false)
-          setState(wakeWordEnabled ? 'wake-listening' : 'idle')
-        }
+        // Compassionate error recovery — use offline wisdom if available
+        const offlineMsg = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
+        addKiaanMessage(offlineMsg)
+        speakResponse(offlineMsg).catch(() => {})
       }
     } finally {
       processingRef.current = false
@@ -1711,11 +1756,29 @@ function VoiceCompanionInner() {
         )}
       </div>
 
-      {/* Error Banner */}
+      {/* Error Banner — compassionate, not technical */}
       {error && state === 'error' && (
-        <div className="relative z-10 mx-4 mb-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
-          {error}
-          <button onClick={() => { setError(null); setState(idleState()) }} className="ml-2 underline text-red-400 hover:text-red-300">Dismiss</button>
+        <div className="relative z-10 mx-4 mb-2 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-xs" role="alert">
+          <div className="flex items-start gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-400/70 flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <div>
+              <p className="text-red-300/80 leading-relaxed">
+                {error.includes('network') || error.includes('Network')
+                  ? 'Connection hiccup — I\'m still here, friend. Check your internet and let\'s try again.'
+                  : error.includes('permission') || error.includes('Permission') || error.includes('not-allowed')
+                  ? 'I need microphone access to hear you. Tap the lock icon in your browser and allow microphone.'
+                  : error.includes('not supported') || error.includes('not-supported')
+                  ? 'Voice works best in Chrome, Edge, or Safari. You can always type your messages below.'
+                  : `${error}. Don't worry — we can try again.`}
+              </p>
+              <button
+                onClick={() => { setError(null); setState(idleState()) }}
+                className="mt-1 text-red-400 hover:text-red-300 font-medium transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1785,6 +1848,13 @@ function VoiceCompanionInner() {
         {!voiceInput.isSupported && (
           <p className="text-center text-[10px] text-white/25 mt-1.5">Voice needs Chrome, Edge, or Safari. Text works everywhere.</p>
         )}
+
+        {/* Keyboard shortcut hints (desktop only) */}
+        <div className="hidden md:flex items-center justify-center gap-3 mt-1 text-[9px] text-white/15">
+          <span><kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/[0.03] text-[8px]">Space</kbd> mic</span>
+          <span><kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/[0.03] text-[8px]">Esc</kbd> stop</span>
+          <span><kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/[0.03] text-[8px]">Ctrl+Shift+C</kbd> flow</span>
+        </div>
       </div>
 
       {/* Conversation Insights Panel */}
