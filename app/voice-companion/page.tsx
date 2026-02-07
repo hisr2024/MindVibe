@@ -83,6 +83,18 @@ import {
 } from '@/utils/voice/divineFriendPersonality'
 import { assessCrisis, formatCrisisResources } from '@/utils/voice/crisisSupport'
 
+// ─── Gita Journey (Voice-guided chapter walkthrough) ─────────────────────────
+import GitaJourneyPanel from '@/components/voice/GitaJourneyPanel'
+import {
+  getJourney as getGitaJourney,
+  startJourney as startGitaJourney,
+  completeChapter as completeGitaChapter,
+  resetJourney as resetGitaJourney,
+  getChapterSession,
+  type GitaJourney,
+  type SegmentType,
+} from '@/utils/voice/gitaJourneyEngine'
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 type CompanionState =
@@ -412,6 +424,16 @@ function VoiceCompanionInner() {
   const [dailyVerse] = useState<DailyVerse>(() => getDailyWisdom())
   const [showScrollBtn, setShowScrollBtn] = useState(false)
 
+  // Journey state
+  const [showJourney, setShowJourney] = useState(false)
+  const [journey, setJourney] = useState<GitaJourney | null>(null)
+  const [activeJourneySession, setActiveJourneySession] = useState<{
+    chapter: number
+    segmentIndex: number
+    totalSegments: number
+    currentSegmentType: SegmentType
+  } | null>(null)
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const processingRef = useRef(false)
@@ -419,6 +441,9 @@ function VoiceCompanionInner() {
   const isMountedRef = useRef(true)
   const lastResponseRef = useRef<string>('')
   const stateRef = useRef<CompanionState>(state)
+  const journeyPlayingRef = useRef(false)
+  const journeyPausedRef = useRef(false)
+  const journeySkipRef = useRef(false)
 
   useEffect(() => { conversationModeRef.current = conversationMode }, [conversationMode])
   useEffect(() => { stateRef.current = state }, [state])
@@ -433,6 +458,7 @@ function VoiceCompanionInner() {
     wisdomAutoUpdate.checkAndApplyUpdate().catch(() => {})
     startHistorySession().catch(() => {})
     resetProactiveSession()
+    setJourney(getGitaJourney())
     return () => {
       isMountedRef.current = false
       divineVoiceService.destroyAll()
@@ -725,6 +751,164 @@ function VoiceCompanionInner() {
     setWakeWordPaused(false)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
   }, [wakeWordEnabled])
+
+  // ─── Gita Journey Narration ──────────────────────────────────────
+
+  const narrateText = useCallback((text: string): Promise<void> => {
+    return new Promise<void>(async (resolve) => {
+      if (!isMountedRef.current) { resolve(); return }
+      if (isMountedRef.current) setState('speaking')
+      const processed = preprocessForTTS(text)
+
+      // Try divine voice (highest quality)
+      if (useDivineVoice) {
+        try {
+          const result = await divineVoiceService.synthesize({
+            text: processed,
+            language: 'en',
+            style: 'wisdom',
+            onEnd: () => resolve(),
+          })
+          if (result.success) return
+        } catch { /* fall through to browser TTS */ }
+      }
+
+      // Fallback: browser Speech Synthesis
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(processed)
+        utterance.rate = speechRate
+        utterance.onend = () => resolve()
+        utterance.onerror = () => resolve()
+        window.speechSynthesis.speak(utterance)
+      } else {
+        resolve()
+      }
+    })
+  }, [useDivineVoice, speechRate])
+
+  const playJourneySession = useCallback(async (chapterNum: number) => {
+    const session = getChapterSession(chapterNum)
+    if (!session) return
+
+    journeyPlayingRef.current = true
+    journeyPausedRef.current = false
+    journeySkipRef.current = false
+    setActiveJourneySession({
+      chapter: chapterNum,
+      segmentIndex: 0,
+      totalSegments: session.segments.length,
+      currentSegmentType: session.segments[0].type,
+    })
+
+    for (let i = 0; i < session.segments.length; i++) {
+      if (!journeyPlayingRef.current || !isMountedRef.current) break
+
+      // Handle pause
+      while (journeyPausedRef.current && journeyPlayingRef.current) {
+        setState('idle')
+        await new Promise(r => setTimeout(r, 300))
+      }
+      if (!journeyPlayingRef.current) break
+
+      // Handle skip
+      if (journeySkipRef.current) {
+        journeySkipRef.current = false
+        continue
+      }
+
+      const segment = session.segments[i]
+      setActiveJourneySession(prev => prev ? {
+        ...prev,
+        segmentIndex: i,
+        currentSegmentType: segment.type,
+      } : null)
+
+      // Add message to chat
+      setMessages(prev => [...prev, {
+        id: `journey_${chapterNum}_${i}_${Date.now()}`,
+        role: 'kiaan' as const,
+        content: segment.text,
+        timestamp: new Date(),
+        verse: segment.verseRef ? {
+          chapter: segment.verseRef.chapter,
+          verse: segment.verseRef.verse,
+          text: '',
+        } : undefined,
+      }])
+
+      // Speak the segment
+      if (autoSpeak) {
+        await narrateText(segment.text)
+      }
+
+      // Pause between segments
+      if (segment.pauseAfterMs > 0 && journeyPlayingRef.current && !journeySkipRef.current) {
+        setState('idle')
+        await new Promise(r => setTimeout(r, segment.pauseAfterMs))
+      }
+    }
+
+    // Session complete
+    if (journeyPlayingRef.current) {
+      completeGitaChapter(chapterNum)
+      setJourney(getGitaJourney())
+      setMessages(prev => [...prev, {
+        id: `journey_done_${Date.now()}`,
+        role: 'system' as const,
+        content: chapterNum === 18
+          ? 'Journey complete. All 18 chapters explored. Namaste.'
+          : `Chapter ${chapterNum} complete. ${18 - chapterNum} chapters remaining.`,
+        timestamp: new Date(),
+      }])
+    }
+
+    journeyPlayingRef.current = false
+    setActiveJourneySession(null)
+    if (isMountedRef.current) setState('idle')
+  }, [autoSpeak, narrateText])
+
+  const pauseJourney = useCallback(() => {
+    journeyPausedRef.current = true
+    divineVoiceService.stop()
+    if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
+  }, [])
+
+  const resumeJourney = useCallback(() => {
+    journeyPausedRef.current = false
+  }, [])
+
+  const skipJourneySegment = useCallback(() => {
+    journeySkipRef.current = true
+    journeyPausedRef.current = false
+    divineVoiceService.stop()
+    if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
+  }, [])
+
+  const stopJourney = useCallback(() => {
+    journeyPlayingRef.current = false
+    journeyPausedRef.current = false
+    divineVoiceService.stop()
+    if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
+    setActiveJourneySession(null)
+    setState('idle')
+  }, [])
+
+  const handleStartJourney = useCallback(() => {
+    const newJourney = startGitaJourney()
+    setJourney(newJourney)
+  }, [])
+
+  const handleResetJourney = useCallback(() => {
+    resetGitaJourney()
+    setJourney(null)
+    setActiveJourneySession(null)
+    journeyPlayingRef.current = false
+  }, [])
+
+  const handleStartJourneySession = useCallback((chapter: number) => {
+    setShowJourney(false)
+    playJourneySession(chapter)
+  }, [playJourneySession])
 
   // ─── Breathing Exercise ───────────────────────────────────────────
 
@@ -1386,6 +1570,9 @@ function VoiceCompanionInner() {
           <button onClick={toggleConversationMode} className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${conversationMode ? 'bg-mv-sunrise/20 text-mv-sunrise border border-mv-sunrise/30' : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'}`} title="Continuous conversation">
             {conversationMode ? 'Flow ON' : 'Flow'}
           </button>
+          <button onClick={() => setShowJourney(true)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white/50" aria-label="Gita Journey" title="Gita Journey">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </button>
           {messages.length > 0 && (
             <button onClick={() => setShowInsights(true)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white/50" aria-label="Session insights" title="Session insights">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -1610,7 +1797,7 @@ function VoiceCompanionInner() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-2 w-full max-w-xs" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.45s both' }}>
+            <div className="grid grid-cols-3 gap-2 w-full max-w-xs" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.45s both' }}>
               {[
                 { label: 'Breathe', emoji: '🌬', cmd: 'breathe' },
                 { label: 'Meditate', emoji: '🧘', cmd: 'meditate' },
@@ -1620,8 +1807,9 @@ function VoiceCompanionInner() {
                 { label: 'Debate', emoji: '🤔', cmd: 'debate' },
                 { label: 'Journal', emoji: '✍️', cmd: 'journal entry' },
                 { label: 'Progress', emoji: '📊', cmd: 'my progress' },
+                { label: 'Journey', emoji: '🙏', cmd: 'journey' },
               ].map(({ label, emoji, cmd }) => (
-                <button key={cmd} onClick={() => ['breathe', 'meditate', 'verse'].includes(cmd) ? handleVoiceCommand(cmd) : handleUserInput(cmd)} className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all active:scale-95">
+                <button key={cmd} onClick={() => cmd === 'journey' ? setShowJourney(true) : ['breathe', 'meditate', 'verse'].includes(cmd) ? handleVoiceCommand(cmd) : handleUserInput(cmd)} className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all active:scale-95">
                   <span className="text-base">{emoji}</span>
                   <span className="text-[9px] text-white/50 font-medium">{label}</span>
                 </button>
@@ -1864,6 +2052,22 @@ function VoiceCompanionInner() {
         onClose={() => setShowInsights(false)}
         onSaveConversation={saveConversation}
         sessionStartTime={sessionStartTime}
+      />
+
+      {/* Gita Journey Panel */}
+      <GitaJourneyPanel
+        isOpen={showJourney}
+        onClose={() => setShowJourney(false)}
+        journey={journey}
+        onStartJourney={handleStartJourney}
+        onStartSession={handleStartJourneySession}
+        onResetJourney={handleResetJourney}
+        activeSession={activeJourneySession}
+        isPlaying={journeyPlayingRef.current && !journeyPausedRef.current}
+        onPause={pauseJourney}
+        onResume={resumeJourney}
+        onSkip={skipJourneySegment}
+        onStop={stopJourney}
       />
 
       {/* Accessibility: announce state changes to screen readers */}
