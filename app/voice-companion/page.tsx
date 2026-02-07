@@ -433,6 +433,7 @@ function VoiceCompanionInner() {
     totalSegments: number
     currentSegmentType: SegmentType
   } | null>(null)
+  const [journeyPaused, setJourneyPaused] = useState(false)
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -461,6 +462,7 @@ function VoiceCompanionInner() {
     setJourney(getGitaJourney())
     return () => {
       isMountedRef.current = false
+      journeyPlayingRef.current = false
       divineVoiceService.destroyAll()
       voiceCompanionService.endSession()
       endHistorySession().catch(() => {})
@@ -747,6 +749,11 @@ function VoiceCompanionInner() {
     audioAnalyzerRef.current.stop()
     setBreathingSteps(null)
     setConversationMode(false)
+    // Stop any running journey session
+    journeyPlayingRef.current = false
+    journeyPausedRef.current = false
+    setJourneyPaused(false)
+    setActiveJourneySession(null)
     // Resume wake word - returning to idle
     setWakeWordPaused(false)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
@@ -757,8 +764,14 @@ function VoiceCompanionInner() {
   const narrateText = useCallback((text: string): Promise<void> => {
     return new Promise<void>(async (resolve) => {
       if (!isMountedRef.current) { resolve(); return }
-      if (isMountedRef.current) setState('speaking')
+      setState('speaking')
       const processed = preprocessForTTS(text)
+      let resolved = false
+      const safeResolve = () => { if (!resolved) { resolved = true; resolve() } }
+
+      // Safety timeout: if TTS never fires onEnd/onError, unblock after 90s
+      const timeout = setTimeout(safeResolve, 90_000)
+      const done = () => { clearTimeout(timeout); safeResolve() }
 
       // Try divine voice (highest quality)
       if (useDivineVoice) {
@@ -767,7 +780,8 @@ function VoiceCompanionInner() {
             text: processed,
             language: 'en',
             style: 'wisdom',
-            onEnd: () => resolve(),
+            onEnd: done,
+            onError: done,
           })
           if (result.success) return
         } catch { /* fall through to browser TTS */ }
@@ -777,11 +791,11 @@ function VoiceCompanionInner() {
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         const utterance = new SpeechSynthesisUtterance(processed)
         utterance.rate = speechRate
-        utterance.onend = () => resolve()
-        utterance.onerror = () => resolve()
+        utterance.onend = done
+        utterance.onerror = done
         window.speechSynthesis.speak(utterance)
       } else {
-        resolve()
+        done()
       }
     })
   }, [useDivineVoice, speechRate])
@@ -793,6 +807,7 @@ function VoiceCompanionInner() {
     journeyPlayingRef.current = true
     journeyPausedRef.current = false
     journeySkipRef.current = false
+    setJourneyPaused(false)
     setActiveJourneySession({
       chapter: chapterNum,
       segmentIndex: 0,
@@ -869,17 +884,20 @@ function VoiceCompanionInner() {
 
   const pauseJourney = useCallback(() => {
     journeyPausedRef.current = true
+    setJourneyPaused(true)
     divineVoiceService.stop()
     if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
   }, [])
 
   const resumeJourney = useCallback(() => {
     journeyPausedRef.current = false
+    setJourneyPaused(false)
   }, [])
 
   const skipJourneySegment = useCallback(() => {
     journeySkipRef.current = true
     journeyPausedRef.current = false
+    setJourneyPaused(false)
     divineVoiceService.stop()
     if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
   }, [])
@@ -887,6 +905,7 @@ function VoiceCompanionInner() {
   const stopJourney = useCallback(() => {
     journeyPlayingRef.current = false
     journeyPausedRef.current = false
+    setJourneyPaused(false)
     divineVoiceService.stop()
     if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
     setActiveJourneySession(null)
@@ -903,6 +922,8 @@ function VoiceCompanionInner() {
     setJourney(null)
     setActiveJourneySession(null)
     journeyPlayingRef.current = false
+    journeyPausedRef.current = false
+    setJourneyPaused(false)
   }, [])
 
   const handleStartJourneySession = useCallback((chapter: number) => {
@@ -2063,7 +2084,7 @@ function VoiceCompanionInner() {
         onStartSession={handleStartJourneySession}
         onResetJourney={handleResetJourney}
         activeSession={activeJourneySession}
-        isPlaying={journeyPlayingRef.current && !journeyPausedRef.current}
+        isPlaying={!!activeJourneySession && !journeyPaused}
         onPause={pauseJourney}
         onResume={resumeJourney}
         onSkip={skipJourneySegment}
