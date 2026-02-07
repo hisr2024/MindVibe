@@ -45,6 +45,7 @@ import {
   contextMemory,
 } from '@/utils/voice/contextMemory'
 import { getEmotionAdaptedParams, getRecommendedPersona, type VoicePersona } from '@/utils/voice/emotionVoiceAdapter'
+import type { VoiceGender } from '@/utils/speech/synthesis'
 import { initializeWisdomCache } from '@/utils/voice/offlineWisdomCache'
 import { generateDivineResponse, wrapWithConversationalWarmth } from '@/utils/voice/divineDialogue'
 import wisdomAutoUpdate from '@/utils/voice/wisdomAutoUpdate'
@@ -420,6 +421,7 @@ export default function VoiceCompanionPage() {
   const [breathingSteps, setBreathingSteps] = useState<BreathingStep[] | null>(null)
   const [speechRate, setSpeechRate] = useState(0.95)
   const [voicePersona, setVoicePersona] = useState<VoicePersona>('friendly_kiaan')
+  const [voiceGender, setVoiceGender] = useState<VoiceGender>('female')
   const [proactivePrompt, setProactivePrompt] = useState<ProactivePrompt | null>(null)
   const [sessionStartTime] = useState(() => new Date())
 
@@ -511,7 +513,7 @@ export default function VoiceCompanionPage() {
         }, 120)
       }
     },
-    onError: (err) => console.warn('[Wake Word]', err),
+    onError: () => {},
   })
   const wakeWordRef = useRef(wakeWord)
   wakeWordRef.current = wakeWord
@@ -550,6 +552,7 @@ export default function VoiceCompanionPage() {
     language: 'en',
     rate: speechRate,
     voiceType: 'friendly',
+    voiceGender,
     useBackendTts: true,
     onStart: () => { if (isMountedRef.current) setState('speaking') },
     onEnd: () => {
@@ -645,11 +648,8 @@ export default function VoiceCompanionPage() {
               setState(wakeWordEnabled ? 'wake-listening' : 'idle')
             }
           },
-          onError: () => {
-            // Divine voice playback error - fall through to Tier 2
-            if (!isMountedRef.current) return
-            voiceOutputRef.current.speak(text)
-          },
+          // onError only fires for actual playback errors (audio element errors)
+          // Circuit breaker short-circuits are handled via result.success === false below
         })
         if (result.success) return
       } catch {
@@ -658,8 +658,10 @@ export default function VoiceCompanionPage() {
     }
 
     // Tier 2+3: Enhanced Voice Output (backend TTS → browser best neural voice)
+    // Apply emotion-adaptive rate/pitch to browser TTS for more natural sound
+    voiceOutputRef.current.updateRate(voiceParams.rate)
     if (isMountedRef.current) await voiceOutputRef.current.speak(text)
-  }, [autoSpeak, useDivineVoice, wakeWordEnabled, resumeListeningIfConversation])
+  }, [autoSpeak, useDivineVoice, wakeWordEnabled, currentEmotion, voicePersona, resumeListeningIfConversation])
 
   // ─── Stop All ─────────────────────────────────────────────────────
 
@@ -1127,6 +1129,17 @@ export default function VoiceCompanionPage() {
               {([['friendly_kiaan', 'Friend'], ['divine_guide', 'Divine'], ['meditation_voice', 'Calm']] as const).map(([id, label]) => (
                 <button key={id} onClick={() => setVoicePersona(id)}
                   className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all ${voicePersona === id ? 'bg-mv-aurora/20 text-mv-aurora border border-mv-aurora/30' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-white/70">Voice Gender</span>
+            <div className="flex gap-1">
+              {([['female', 'Female'], ['male', 'Male'], ['auto', 'Auto']] as const).map(([id, label]) => (
+                <button key={id} onClick={() => setVoiceGender(id)}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all ${voiceGender === id ? 'bg-mv-ocean/20 text-mv-ocean border border-mv-ocean/30' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}>
                   {label}
                 </button>
               ))}

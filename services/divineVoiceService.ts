@@ -94,10 +94,9 @@ class DivineVoiceService {
 
   private tripCircuitBreaker(): void {
     this.apiFailCount++
-    if (this.apiFailCount >= 1) {
+    if (this.apiFailCount >= 2) {
       this.apiDisabled = true
       this.apiDisabledUntil = Date.now() + this.CIRCUIT_COOLDOWN
-      console.warn('[DivineVoice] API unavailable - circuit breaker open, retry in 5 min')
     }
   }
 
@@ -204,7 +203,6 @@ class DivineVoiceService {
 
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error))
-      console.error('[DivineVoice] Synthesis error:', err)
       onError?.(err)
       return {
         success: false,
@@ -303,7 +301,6 @@ class DivineVoiceService {
 
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error))
-      console.error('[DivineVoice] Shloka error:', err)
       onError?.(err)
       return {
         success: false,
@@ -374,14 +371,12 @@ class DivineVoiceService {
    * Get available providers and their status.
    */
   async getProviders(): Promise<ProvidersResponse | null> {
+    if (!this.isApiAvailable()) return null
     try {
       const response = await apiFetch(`${this.baseUrl}/providers`)
-      if (!response.ok) {
-        throw new Error('Failed to get providers')
-      }
+      if (!response.ok) return null
       return response.json()
-    } catch (error) {
-      console.error('[DivineVoice] Failed to get providers:', error)
+    } catch {
       return null
     }
   }

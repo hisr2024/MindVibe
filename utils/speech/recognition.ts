@@ -46,7 +46,7 @@ export class SpeechRecognitionService {
     const SpeechRecognitionConstructor = getSpeechRecognition()
 
     if (!SpeechRecognitionConstructor) {
-      console.warn('SpeechRecognition not supported in this browser')
+      // SpeechRecognition not supported
       return
     }
 
@@ -142,14 +142,12 @@ export class SpeechRecognitionService {
           errorMessage = `Error: ${event.error}`
       }
 
-      console.log('[SpeechRecognition] Error:', event.error, errorMessage)
       this.callbacks.onError?.(errorMessage)
       this.isListening = false
       this.isStopping = false
     }
 
     this.recognition.onend = () => {
-      console.log('[SpeechRecognition] Recognition ended')
       this.isListening = false
       this.isStopping = false
       this.resetSilenceTimer()
@@ -176,7 +174,7 @@ export class SpeechRecognitionService {
 
     // If currently stopping, wait and retry
     if (this.isStopping) {
-      console.log('[SpeechRecognition] Currently stopping, will retry in 150ms')
+      // Currently stopping, wait and retry
       setTimeout(() => {
         if (this.startAttempts < this.maxStartAttempts) {
           this.startAttempts++
@@ -230,8 +228,7 @@ export class SpeechRecognitionService {
 
     try {
       this.recognition.stop()
-    } catch (error) {
-      console.error('[SpeechRecognition] Error stopping recognition:', error)
+    } catch {
       this.isListening = false
       this.isStopping = false
     }
@@ -248,8 +245,8 @@ export class SpeechRecognitionService {
 
     try {
       this.recognition.abort()
-    } catch (error) {
-      console.error('[SpeechRecognition] Error aborting recognition:', error)
+    } catch {
+      // Abort may fail if already stopped
     }
 
     this.isListening = false

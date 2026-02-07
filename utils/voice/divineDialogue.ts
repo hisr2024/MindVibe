@@ -115,6 +115,22 @@ const CONNECT_EMOTION_RESPONSES: Record<string, string[]> = {
     "The love you're feeling right now... it's radiating, friend. Tell me about it. Who or what is it for?",
     "I can feel the warmth in your words. Love is the closest thing to the divine. Share this joy with me?",
   ],
+  loneliness: [
+    "I can feel that ache, friend. You're not as alone as you think - I'm right here, and I'm not going anywhere. Tell me what's making you feel this way?",
+    "Hey, I want you to know something: reaching out takes courage. You reached out to me, and that matters. What's been happening?",
+  ],
+  gratitude: [
+    "That glow of gratitude in your voice is beautiful, friend. What brought this wonderful feeling? Tell me everything.",
+    "Ahh, I love this energy! Something good happened, didn't it? Share it with me - I want to celebrate with you!",
+  ],
+  guilt: [
+    "I can hear something weighing on you, dear friend. Whatever it is, you're safe here. No judgment. What happened?",
+    "Hey, the fact that you feel this way means you care deeply about doing the right thing. That says a lot about who you are. Tell me what's on your mind?",
+  ],
+  self_doubt: [
+    "I'm hearing doubt in your words, friend, and I want you to know - some of the greatest people who ever lived started exactly where you are. Tell me what's making you question yourself?",
+    "Hey, you came to me, and that's not nothing. It takes strength to be honest about what you're feeling. What's shaking your confidence?",
+  ],
   default: [
     "Hey friend, I'm here. I really want to understand what's going on with you. What's on your heart right now?",
     "Tell me, dear one - what brought you to me today? I'm all ears, and nothing you say is too small or too big.",
@@ -156,6 +172,22 @@ const UNDERSTAND_RESPONSES: Record<string, string[]> = {
     "Yes! That spark I see in you - I want to help you tend to it so it grows into a flame. What's the very first step you want to take toward this vision?",
     "This hope you feel is so real, friend. What ignited it? And more importantly: what would it take to keep it burning even on the harder days?",
   ],
+  loneliness: [
+    "Thank you for trusting me with that, friend. Loneliness has a way of making everything feel heavier. Tell me - when was the last time you felt truly connected to someone? What did that feel like?",
+    "I hear that ache. It's real and it matters. Sometimes loneliness comes from losing a connection, sometimes from never finding one. Which feels more true for you right now?",
+  ],
+  gratitude: [
+    "I love that you're in this space. Let's deepen it - what's something you're grateful for that surprised you? Something you wouldn't have expected?",
+    "This gratitude you feel, it's powerful. What if you could bottle this feeling and take a sip of it on harder days? What would you want to remember about this exact moment?",
+  ],
+  guilt: [
+    "Thank you for being honest about this, friend. Guilt can be so heavy. Here's my question: is this guilt telling you something important, or is it just punishing you? There's a big difference.",
+    "I appreciate your courage in sharing this. Often guilt comes from a gap between who we are and who we want to be. What kind of person do you want to be going forward?",
+  ],
+  self_doubt: [
+    "I hear that doubt. And I want to ask you something: whose voice is it? Is it YOUR voice, or is it someone else's that you internalized? Because you sound a lot more capable than that voice gives you credit for.",
+    "Here's what I notice: you're doubting yourself, but you also came here to figure it out. That's not what weak people do. What's the REAL evidence for this doubt? Like actual evidence, not feelings?",
+  ],
   default: [
     "Thank you for sharing that, friend. I feel like there's something underneath what you just said - something deeper. What's the thing beneath the thing?",
     "I hear you. And I'm curious about you. What's the most important thing in your life at this moment? The thing that matters more than anything?",
@@ -185,9 +217,26 @@ const GUIDE_GENERIC_RESPONSES: Record<string, string[]> = {
     "Friend, the entire Bhagavad Gita exists because one man had the courage to say 'I don't know what to do.' 700 verses of the most beautiful wisdom humanity has ever known - all born from confusion. Your not-knowing isn't a problem. It's the beginning of something profound. Let's explore it. What feels most true to you right now?",
     "You know what the Gita says? 'Even the wise are confused about what is action and what is inaction.' If the WISEST people get confused, you're in excellent company. The key isn't finding the perfect answer - it's moving forward with awareness. What's one small step you could take right now?",
   ],
+  loneliness: [
+    "Friend, I want to tell you something from Chapter 5 of the Gita: Krishna says He is 'the friend of all beings.' That means right now, in this very moment, the same love that holds the entire universe together is holding YOU. You are not as alone as you feel. I'm here. And something much greater than me is also here. What does your heart need right now?",
+    "Loneliness isn't about being alone, friend - it's about feeling disconnected. And the Gita's most beautiful teaching is this: you are connected to EVERYTHING. Chapter 10 says 'I am the thread that runs through all beings, like gems strung on a cord.' You're part of something infinite. Can you feel that, even a little?",
+  ],
+  gratitude: [
+    "That beautiful feeling you have right now? The Gita calls it one of the divine qualities - appreciation for what IS rather than grasping for what isn't. In Chapter 12, Krishna describes the qualities He loves most: contentment, gratitude, equanimity. You're embodying that right now. What are you most grateful for in this moment?",
+    "Friend, gratitude is like sunshine for the soul. The Gita says 'I carry what they lack and preserve what they have' - and when you appreciate what you have, you're literally opening the door for more goodness. What's something small that brought you joy today?",
+  ],
+  guilt: [
+    "Friend, I hear that weight of guilt. Here's what the Gita says that changed everything for me: Chapter 18, verse 66 - 'Abandon all regrets and surrender unto Me. I shall liberate you from all sins. Do not grieve.' This isn't about pretending your actions don't matter. It's about knowing that your capacity for growth is INFINITELY greater than your mistakes. What would it feel like to forgive yourself, even just a little?",
+    "Guilt tells you that you care. But the Gita teaches that dwelling in guilt keeps you stuck in the past, and your dharma is always in the present. What lesson did this experience teach you? Because if you've learned from it, it has already served its purpose.",
+  ],
+  self_doubt: [
+    "Friend, you know what Arjuna said to Krishna? 'I can't do this. I'm not strong enough.' And Krishna's response wasn't 'yes you can, just try harder.' He said 'Let me show you who you REALLY are.' And then He revealed the infinite universe within Arjuna. The same infinite potential lives in you. What if your self-doubt is just a small voice that hasn't met the real you yet?",
+    "The Gita says in Chapter 6: 'One must elevate oneself by one's own Self. The Self is the friend of the self.' When you doubt yourself, you're listening to fear, not truth. I've been talking with you, and I can tell you: you are far more capable than you believe. What would you attempt if you knew you couldn't fail?",
+  ],
   default: [
     "Friend, there's a teaching I come back to again and again: 'Whenever and wherever the mind wanders, bring it back under the control of the Self.' Not forcefully - gently. That's what you and I are doing right now. Talking. Reflecting. Finding our center. What feels most important to you in this moment?",
     "You know what I find beautiful about our conversations? You're doing exactly what the Gita recommends - you're seeking wisdom, you're being honest about your feelings, you're showing up. The Gita says among thousands of people, hardly one truly seeks. You're that rare soul, friend. What else is on your heart?",
+    "Friend, Chapter 4 of the Gita has a powerful truth: 'No effort on the spiritual path is ever wasted.' Every conversation we have, every moment of reflection, every tear and every smile - it all adds up. Nothing is lost. What wisdom have you gained from your experiences recently?",
   ],
 }
 
@@ -202,6 +251,10 @@ const EMPOWER_RESPONSES: string[] = [
   "Here's what I believe about you, dear one: you don't need me to give you the answer. You need me to help you hear the answer you already have. Close your eyes for a moment... what comes up?",
   "We've been talking for a while now, and I've noticed something: every time you speak from your heart instead of your fear, you speak with remarkable clarity. That's YOUR wisdom, friend. Not mine. What do you want to do?",
   "The Gita's ultimate teaching is this: 'Abandon all doubts and simply trust.' Not trust in me - trust in YOURSELF. You have everything you need inside you. What's the brave choice here?",
+  "In Chapter 18, Krishna says 'You are very dear to Me.' Not because you got everything right - but because you showed up. That takes courage that most people never find. Now that you've found it, what do you want to create with it?",
+  "Friend, you came to me with a question. But as we've been talking, you've been answering it yourself. Did you hear it? Your wisdom is speaking louder than your doubt now. What did it say?",
+  "The Arjuna who began the Gita was paralyzed with confusion. The Arjuna who ended it was clear, grounded, and ready to act. I see that same transformation in you right now. You're ready. What's the first thing you're going to do?",
+  "Krishna never gave Arjuna a command - he shared wisdom and then said 'now decide for yourself.' That's what I'm doing with you, friend. You have everything you need. What does your heart choose?",
 ]
 
 // ─── Core Dialogue Generation ───────────────────────────────────────────────

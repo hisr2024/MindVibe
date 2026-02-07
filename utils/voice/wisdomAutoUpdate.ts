@@ -245,7 +245,6 @@ class WisdomAutoUpdateService {
       // Check payload size
       const contentLength = response.headers.get('content-length')
       if (contentLength && parseInt(contentLength, 10) > MAX_PAYLOAD_SIZE) {
-        console.warn('[WisdomUpdate] Payload too large, rejecting')
         return null
       }
 

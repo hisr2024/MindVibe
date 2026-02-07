@@ -190,12 +190,7 @@ class ContextMemoryManager {
       }
 
       this.isInitialized = true
-      console.log('[KIAAN Memory] Context memory initialized', {
-        totalConversations: this.profile?.totalConversations,
-        recentMemories: this.conversations.length
-      })
-    } catch (error) {
-      console.error('[KIAAN Memory] Failed to initialize:', error)
+    } catch {
       // Create fresh profile on error
       this.profile = this.createNewProfile()
       this.conversations = []
@@ -307,11 +302,6 @@ class ContextMemoryManager {
 
     this.saveProfile()
 
-    console.log('[KIAAN Memory] Conversation recorded', {
-      emotion: detectedEmotion,
-      topics,
-      totalConversations: this.profile.totalConversations
-    })
   }
 
   /**
@@ -608,7 +598,6 @@ class ContextMemoryManager {
     localStorage.removeItem(STORAGE_KEYS.profile)
     localStorage.removeItem(STORAGE_KEYS.conversations)
     this.saveProfile()
-    console.log('[KIAAN Memory] All memory cleared')
   }
 }
 
