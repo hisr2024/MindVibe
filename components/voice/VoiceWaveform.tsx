@@ -145,6 +145,9 @@ export default function VoiceWaveform({
             0%, 100% { transform: scaleY(1); }
             50% { transform: scaleY(2.2); }
           }
+          @media (prefers-reduced-motion: reduce) {
+            rect { animation: none !important; }
+          }
         `}</style>
       </svg>
     </div>

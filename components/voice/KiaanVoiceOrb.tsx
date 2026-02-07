@@ -23,7 +23,7 @@
 
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 
 export type OrbState =
   | 'idle'
@@ -147,6 +147,16 @@ export default function KiaanVoiceOrb({
   onClick,
   disabled = false,
 }: KiaanVoiceOrbProps) {
+  // Respect prefers-reduced-motion for accessibility (WCAG 2.1)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
   const gradient = EMOTION_GRADIENTS[emotion] || EMOTION_GRADIENTS.neutral
   const config = STATE_CONFIG[state] || STATE_CONFIG.idle
 
@@ -286,33 +296,35 @@ export default function KiaanVoiceOrb({
         }
       >
         {/* Sacred geometry particles — 8 orbiting dots forming a mandala */}
-        <div
-          className="absolute inset-0"
-          style={{ animation: `orbParticleOrbit ${config.particleSpeed}s linear infinite` }}
-        >
-          {PARTICLE_ANGLES.map((angle, i) => {
-            const rad = (angle * Math.PI) / 180
-            const x = Math.cos(rad) * particleOrbitRadius
-            const y = Math.sin(rad) * particleOrbitRadius
-            const dotSize = i % 2 === 0 ? 3 : 2 // Alternating sizes for visual rhythm
-            return (
-              <div
-                key={i}
-                className="absolute rounded-full"
-                style={{
-                  width: dotSize,
-                  height: dotSize,
-                  left: '50%',
-                  top: '50%',
-                  transform: `translate(${x - dotSize / 2}px, ${y - dotSize / 2}px)`,
-                  backgroundColor: i % 2 === 0 ? gradient.from : gradient.to,
-                  animation: `orbParticlePulse ${3 + i * 0.4}s ease-in-out ${i * 0.3}s infinite`,
-                  transition: 'background-color 1s ease',
-                }}
-              />
-            )
-          })}
-        </div>
+        {!prefersReducedMotion && (
+          <div
+            className="absolute inset-0"
+            style={{ animation: `orbParticleOrbit ${config.particleSpeed}s linear infinite` }}
+          >
+            {PARTICLE_ANGLES.map((angle, i) => {
+              const rad = (angle * Math.PI) / 180
+              const x = Math.cos(rad) * particleOrbitRadius
+              const y = Math.sin(rad) * particleOrbitRadius
+              const dotSize = i % 2 === 0 ? 3 : 2 // Alternating sizes for visual rhythm
+              return (
+                <div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: dotSize,
+                    height: dotSize,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(${x - dotSize / 2}px, ${y - dotSize / 2}px)`,
+                    backgroundColor: i % 2 === 0 ? gradient.from : gradient.to,
+                    animation: `orbParticlePulse ${3 + i * 0.4}s ease-in-out ${i * 0.3}s infinite`,
+                    transition: 'background-color 1s ease',
+                  }}
+                />
+              )
+            })}
+          </div>
+        )}
 
         {/* Counter-rotating sacred ring (very subtle) */}
         <div
@@ -321,7 +333,7 @@ export default function KiaanVoiceOrb({
             width: size + 48,
             height: size + 48,
             borderColor: gradient.via,
-            animation: `orbSacredRing ${config.particleSpeed * 1.5}s linear infinite reverse`,
+            animation: prefersReducedMotion ? 'none' : `orbSacredRing ${config.particleSpeed * 1.5}s linear infinite reverse`,
             transition: 'border-color 1s ease',
           }}
         />
@@ -333,7 +345,7 @@ export default function KiaanVoiceOrb({
             width: size + 40,
             height: size + 40,
             border: `2px solid ${config.ringColor}`,
-            animation: config.ringAnimation,
+            animation: prefersReducedMotion ? 'none' : config.ringAnimation,
             transition: 'border-color 0.5s ease',
           }}
         />
@@ -345,7 +357,7 @@ export default function KiaanVoiceOrb({
             width: size + 24,
             height: size + 24,
             border: `1px solid rgba(255,255,255,0.04)`,
-            animation: state === 'breathing' ? 'orbBreathe 6s ease-in-out infinite reverse' : 'none',
+            animation: state === 'breathing' && !prefersReducedMotion ? 'orbBreathe 6s ease-in-out infinite reverse' : 'none',
           }}
         />
 
@@ -356,7 +368,7 @@ export default function KiaanVoiceOrb({
             width: size + 20,
             height: size + 20,
             background: `radial-gradient(circle, ${gradient.from}${Math.round(config.glowOpacity * 255).toString(16).padStart(2, '0')}, transparent 70%)`,
-            animation: 'orbGlowRotate 8s linear infinite',
+            animation: prefersReducedMotion ? 'none' : 'orbGlowRotate 8s linear infinite',
             transition: 'background 1s ease',
           }}
         />
@@ -376,7 +388,7 @@ export default function KiaanVoiceOrb({
             transition: state === 'listening'
               ? 'transform 0.08s ease-out, background 1.2s ease'
               : 'transform 0.3s ease-out, background 1.2s ease',
-            animation: config.pulseAnimation,
+            animation: prefersReducedMotion ? 'none' : config.pulseAnimation,
             boxShadow: `
               0 0 ${20 + volume * 40}px ${gradient.from}${Math.round((0.2 + volume * 0.3) * 255).toString(16).padStart(2, '0')},
               0 0 ${40 + volume * 60}px ${gradient.via}${Math.round((0.1 + volume * 0.15) * 255).toString(16).padStart(2, '0')},
@@ -415,7 +427,7 @@ export default function KiaanVoiceOrb({
         <div
           className="relative z-10 flex items-center justify-center"
           style={{
-            animation: state === 'idle' || state === 'wake-listening' ? 'orbFloat 3s ease-in-out infinite' : 'none',
+            animation: (state === 'idle' || state === 'wake-listening') && !prefersReducedMotion ? 'orbFloat 3s ease-in-out infinite' : 'none',
           }}
         >
           {orbIcon}

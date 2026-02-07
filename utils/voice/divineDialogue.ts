@@ -292,6 +292,18 @@ const GUIDE_GENERIC_RESPONSES: Record<string, string[]> = {
     "Friend, do you know what you're feeling? The Gita calls it 'sattva' — the quality of goodness, light, and harmony. Chapter 14 says when sattva predominates, 'the light of knowledge shines through all the gates of the body.' That's YOU right now — shining. This feeling is a sign you're aligned with your dharma. How can you build on this momentum?",
     "YES! This energy, friend — THIS is what the Gita means by 'working without attachment to results.' You're not excited about the outcome. You're excited about the DOING. That's karma yoga in its purest form. Ride this wave. What's the very next action you want to take?",
   ],
+  peace: [
+    "Friend, the Gita describes this state you're in as 'prasada' — divine grace. Chapter 2 says when the mind becomes serene, all sorrows are destroyed. You've touched something real. The Gita teaches that THIS calm knowing is actually your natural state — everything else is the disturbance. How can we help you stay here longer?",
+    "What you're feeling right now, friend, is what the Gita calls 'sthitaprajna' — steady wisdom. Chapter 2 describes it as the state where you're content in yourself, by yourself. Not needing anything external to feel complete. That's deeply rare and deeply beautiful. What practice or moment brought you to this space?",
+  ],
+  hope: [
+    "Friend, that hope you feel? The Gita says in Chapter 4: 'Whenever righteousness declines, I manifest Myself.' That spark of hope IS the divine manifesting in you right now. It's not wishful thinking — it's wisdom recognizing that something better is coming. The Gita promises it. What's the first thing you want to build with this energy?",
+    "You know what the Gita says about moments like this, friend? 'What seems like poison at first but becomes nectar in the end — that's the nature of true goodness.' Your hope isn't naive. It's your soul recognizing that the hard part is becoming the sweet part. You're tasting the nectar now. What does this future you're hoping for look like?",
+  ],
+  love: [
+    "Friend, in Chapter 12, Krishna describes the qualities of the highest devotion — and they all come down to one thing: love. Not romantic love, not conditional love, but the love that says 'I see the divine in you.' That's what you're feeling right now. The Gita teaches that this kind of love is the fastest path to peace. Who or what is this love flowing toward?",
+    "The Gita says in Chapter 9: 'A leaf, a flower, a fruit, or water — offered with love, I accept.' The simplest offering, when infused with genuine love, reaches the highest. What you're feeling right now isn't just an emotion, friend — it's the most powerful force in existence. How are you expressing this love?",
+  ],
   default: [
     "Friend, there's a teaching I come back to again and again: 'Whenever and wherever the mind wanders, bring it back under the control of the Self.' Not forcefully - gently. That's what you and I are doing right now. Talking. Reflecting. Finding our center. What feels most important to you in this moment?",
     "You know what I find beautiful about our conversations? You're doing exactly what the Gita recommends - you're seeking wisdom, you're being honest about your feelings, you're showing up. The Gita says among thousands of people, hardly one truly seeks. You're that rare soul, friend. What else is on your heart?",
@@ -301,20 +313,171 @@ const GUIDE_GENERIC_RESPONSES: Record<string, string[]> = {
 
 /**
  * EMPOWER Phase: Help them find their OWN answers.
- * "You already know. I can hear it in your voice."
+ * Emotion-aware empowerment — acknowledges what they've been through
+ * while redirecting power back to THEM.
  */
-const EMPOWER_RESPONSES: string[] = [
-  "You know what I notice, friend? You already have more clarity than you think. I can hear it in your words. What does YOUR gut tell you?",
-  "I've been listening to you, really listening - and here's what I see: you're wiser than you give yourself credit for. If you trusted yourself completely right now, what would you do?",
-  "Friend, the Gita says the divine is seated in your heart. That means your inner voice IS wisdom speaking. You've been looking outside for answers that already live inside you. What is your heart saying right now?",
-  "Here's what I believe about you, dear one: you don't need me to give you the answer. You need me to help you hear the answer you already have. Close your eyes for a moment... what comes up?",
-  "We've been talking for a while now, and I've noticed something: every time you speak from your heart instead of your fear, you speak with remarkable clarity. That's YOUR wisdom, friend. Not mine. What do you want to do?",
-  "The Gita's ultimate teaching is this: 'Abandon all doubts and simply trust.' Not trust in me - trust in YOURSELF. You have everything you need inside you. What's the brave choice here?",
-  "In Chapter 18, Krishna says 'You are very dear to Me.' Not because you got everything right - but because you showed up. That takes courage that most people never find. Now that you've found it, what do you want to create with it?",
-  "Friend, you came to me with a question. But as we've been talking, you've been answering it yourself. Did you hear it? Your wisdom is speaking louder than your doubt now. What did it say?",
-  "The Arjuna who began the Gita was paralyzed with confusion. The Arjuna who ended it was clear, grounded, and ready to act. I see that same transformation in you right now. You're ready. What's the first thing you're going to do?",
-  "Krishna never gave Arjuna a command - he shared wisdom and then said 'now decide for yourself.' That's what I'm doing with you, friend. You have everything you need. What does your heart choose?",
-]
+const EMPOWER_RESPONSES: Record<string, string[]> = {
+  anxiety: [
+    "Friend, I've been watching you through this conversation. You came in carrying so much worry, but listen to yourself now — you're thinking more clearly than you realize. That anxious voice? It's getting quieter. YOUR voice is getting louder. What is it saying?",
+    "You know what anxiety can't survive? Clarity of purpose. And I can hear yours emerging. The Gita says 'yoga is equanimity' — and you're finding yours right now. What feels right to you, not what feels safe, but what feels RIGHT?",
+  ],
+  sadness: [
+    "I hear something beautiful happening, friend. Your sadness hasn't disappeared — but it's transforming into something wiser. You're not just feeling the pain anymore; you're understanding it. That's the alchemy the Gita talks about. What has this sadness taught you about what truly matters?",
+    "Friend, you've sat with this pain courageously. Not everyone can do that. The Gita says the wise move through sorrow, not around it. And that's exactly what you've done. Now — what do you want to build from here?",
+  ],
+  anger: [
+    "I've watched your fire evolve during our conversation, friend. It started as burning, and now it's becoming light — the kind of light that illuminates what needs to change. The Gita teaches that righteous energy, channeled wisely, moves mountains. What mountain are you going to move?",
+    "Your anger told me something important: you care deeply about justice, about fairness, about what's right. That fire is a gift when you direct it. You know what needs to happen. Trust that knowing. What are you going to do with this fire?",
+  ],
+  peace: [
+    "This peace you've found, friend? The Gita says this IS your true nature. Not the anxiety, not the noise — THIS quiet knowing. You can always come back to this place. It lives in you now. What do you want to carry from this moment into the rest of your week?",
+    "You've touched something real today, friend. The Gita calls it 'prasada' — divine grace descending. This isn't a temporary mood. It's a memory your soul now holds. And you can return to it anytime. What will you do to protect this space?",
+  ],
+  hope: [
+    "That hope in your voice, friend? It's not naive — it's your soul recognizing a truth that your mind hasn't caught up with yet. The Gita says the wise see things as they truly are, not as fear paints them. You're seeing clearly now. What's the first step toward that vision?",
+    "You came in with questions, and now you have direction. That hope isn't wishful thinking, friend — it's your dharma calling. The Gita says when you're aligned with your true path, the whole universe conspires to support you. Go. Take that step.",
+  ],
+  default: [
+    "You know what I notice, friend? You already have more clarity than you think. I can hear it in your words. What does YOUR gut tell you?",
+    "I've been listening to you, really listening - and here's what I see: you're wiser than you give yourself credit for. If you trusted yourself completely right now, what would you do?",
+    "Friend, the Gita says the divine is seated in your heart. That means your inner voice IS wisdom speaking. You've been looking outside for answers that already live inside you. What is your heart saying right now?",
+    "Here's what I believe about you, dear one: you don't need me to give you the answer. You need me to help you hear the answer you already have. Close your eyes for a moment... what comes up?",
+    "We've been talking for a while now, and I've noticed something: every time you speak from your heart instead of your fear, you speak with remarkable clarity. That's YOUR wisdom, friend. Not mine. What do you want to do?",
+    "The Gita's ultimate teaching is this: 'Abandon all doubts and simply trust.' Not trust in me - trust in YOURSELF. You have everything you need inside you. What's the brave choice here?",
+    "In Chapter 18, Krishna says 'You are very dear to Me.' Not because you got everything right - but because you showed up. That takes courage that most people never find. Now that you've found it, what do you want to create with it?",
+    "Friend, you came to me with a question. But as we've been talking, you've been answering it yourself. Did you hear it? Your wisdom is speaking louder than your doubt now. What did it say?",
+    "The Arjuna who began the Gita was paralyzed with confusion. The Arjuna who ended it was clear, grounded, and ready to act. I see that same transformation in you right now. You're ready. What's the first thing you're going to do?",
+    "Krishna never gave Arjuna a command - he shared wisdom and then said 'now decide for yourself.' That's what I'm doing with you, friend. You have everything you need. What does your heart choose?",
+  ],
+}
+
+// ─── Anti-Repetition System ─────────────────────────────────────────────────
+
+/**
+ * Tracks recently used response indices per pool to avoid repetition.
+ * Key = pool identifier (e.g. "connect:anxiety"), value = set of recently used indices.
+ * Auto-resets when the set covers most of the pool to keep variety flowing.
+ */
+const recentResponseIndices = new Map<string, Set<number>>()
+
+/** Reset all dialogue state (call when starting a new session) */
+export function resetDialogueState(): void {
+  recentResponseIndices.clear()
+  lastPhase = null
+}
+
+function pickFresh<T>(arr: T[], poolKey: string): T {
+  if (arr.length <= 1) return arr[0]
+
+  const used = recentResponseIndices.get(poolKey) ?? new Set<number>()
+
+  // Reset if we've exhausted most options (leave 1 unused minimum)
+  if (used.size >= arr.length - 1) {
+    used.clear()
+  }
+
+  // Pick a random index that hasn't been used recently
+  let index: number
+  let attempts = 0
+  do {
+    index = Math.floor(Math.random() * arr.length)
+    attempts++
+  } while (used.has(index) && attempts < 10)
+
+  used.add(index)
+  recentResponseIndices.set(poolKey, used)
+  return arr[index]
+}
+
+// ─── Phase Transition Bridges ───────────────────────────────────────────────
+
+/**
+ * Smooth transition phrases when conversation moves to a new phase.
+ * Prepended to the response to signal the shift naturally.
+ */
+const PHASE_TRANSITION_BRIDGES: Record<string, string[]> = {
+  // Moving from CONNECT to UNDERSTAND
+  'connect→understand': [
+    "Thank you for trusting me with that. ",
+    "I appreciate you sharing that. ",
+    "I'm glad you told me. ",
+  ],
+  // Moving from UNDERSTAND to GUIDE
+  'understand→guide': [
+    "You know, as I listen to you, something comes to mind. ",
+    "I've been thinking about what you shared, and there's something I want to offer you. ",
+    "What you just said reminds me of something beautiful. ",
+  ],
+  // Moving from GUIDE to EMPOWER
+  'guide→empower': [
+    "We've been on quite a journey together in this conversation. ",
+    "I've shared a lot with you, but now I want to turn it back to you. ",
+    "You know what I'm noticing? ",
+  ],
+}
+
+let lastPhase: ConversationPhase | null = null
+
+function getTransitionBridge(currentPhase: ConversationPhase): string {
+  const transitionKey = lastPhase ? `${lastPhase}→${currentPhase}` : null
+  const prev = lastPhase
+  lastPhase = currentPhase
+
+  // Only bridge on actual phase changes, and only sometimes (70%) to feel natural
+  if (!transitionKey || prev === currentPhase || Math.random() > 0.7) return ''
+  const bridges = PHASE_TRANSITION_BRIDGES[transitionKey]
+  if (!bridges) return ''
+  return bridges[Math.floor(Math.random() * bridges.length)]
+}
+
+// ─── Emotion Shift Acknowledgment ───────────────────────────────────────────
+
+/**
+ * When a user's emotion changes between turns, KIAAN notices.
+ * A divine friend pays attention to emotional shifts.
+ */
+const EMOTION_SHIFT_PHRASES: Record<string, string[]> = {
+  // Shift toward positive
+  positive: [
+    "I notice something different in you right now — there's a lightness that wasn't there before. ",
+    "Something shifted, friend. I can feel it. ",
+    "Your energy changed just now, and I love it. ",
+  ],
+  // Shift toward pain
+  negative: [
+    "I sense something heavier just came up for you. ",
+    "Hey, I noticed a shift in you just now. ",
+    "Something deeper just surfaced, didn't it? ",
+  ],
+}
+
+const POSITIVE_EMOTIONS = new Set(['peace', 'hope', 'love', 'gratitude', 'excitement'])
+const NEGATIVE_EMOTIONS = new Set(['anxiety', 'sadness', 'anger', 'grief', 'shame', 'guilt', 'overwhelm'])
+
+function getEmotionShiftPrefix(emotion?: string, existingEmotions?: string[]): string {
+  if (!emotion || !existingEmotions || existingEmotions.length < 2) return ''
+
+  const prevEmotion = existingEmotions[existingEmotions.length - 2]
+  if (prevEmotion === emotion) return ''
+
+  // Detect direction of shift
+  const wasNegative = NEGATIVE_EMOTIONS.has(prevEmotion)
+  const isNowPositive = POSITIVE_EMOTIONS.has(emotion)
+  const wasPositive = POSITIVE_EMOTIONS.has(prevEmotion)
+  const isNowNegative = NEGATIVE_EMOTIONS.has(emotion)
+
+  // Only acknowledge meaningful shifts (30% chance to avoid feeling surveillance-like)
+  if (Math.random() > 0.3) return ''
+
+  if (wasNegative && isNowPositive) {
+    return EMOTION_SHIFT_PHRASES.positive[Math.floor(Math.random() * EMOTION_SHIFT_PHRASES.positive.length)]
+  }
+  if (wasPositive && isNowNegative) {
+    return EMOTION_SHIFT_PHRASES.negative[Math.floor(Math.random() * EMOTION_SHIFT_PHRASES.negative.length)]
+  }
+
+  return ''
+}
 
 // ─── Core Dialogue Generation ───────────────────────────────────────────────
 
@@ -323,10 +486,11 @@ const EMPOWER_RESPONSES: string[] = [
  *
  * This is the heart of KIAAN's conversational intelligence.
  * It selects the right response based on:
- * - Current conversation phase
- * - Detected emotion (if any)
+ * - Current conversation phase (with smooth transition bridges)
+ * - Detected emotion (with shift acknowledgment)
  * - Detected life situation (if any)
  * - Turn count
+ * - Anti-repetition (tracks recently used responses per pool)
  */
 export function generateDivineResponse(
   userMessage: string,
@@ -342,24 +506,34 @@ export function generateDivineResponse(
   const situations = detectSituations(userMessage)
   const primarySituation = situations[0] || null
 
+  // Build prefixes for natural flow
+  const transitionBridge = getTransitionBridge(phase)
+  const emotionShift = getEmotionShiftPrefix(emotion, existingEmotions)
+  const prefix = emotionShift || transitionBridge // Use one, not both (avoids wordiness)
+
   // Generate response based on phase
+  let response: DialogueResponse
   switch (phase) {
     case 'connect':
-      return generateConnectResponse(emotion, primarySituation)
-
+      response = generateConnectResponse(emotion, primarySituation)
+      break
     case 'understand':
-      return generateUnderstandResponse(emotion)
-
+      response = generateUnderstandResponse(emotion)
+      break
     case 'guide':
-      return generateGuideResponse(emotion, primarySituation)
-
+      response = generateGuideResponse(emotion, primarySituation)
+      break
     case 'empower':
-      return generateEmpowerResponse()
+      response = generateEmpowerResponse(emotion)
+      break
   }
-}
 
-function pickRandom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
+  // Prepend natural bridge/acknowledgment
+  if (prefix) {
+    response.text = prefix + response.text
+  }
+
+  return response
 }
 
 function generateConnectResponse(emotion?: string, situation?: LifeSituation | null): DialogueResponse {
@@ -374,18 +548,20 @@ function generateConnectResponse(emotion?: string, situation?: LifeSituation | n
   }
 
   // Fall back to emotion-based connect response
-  const pool = (emotion && CONNECT_EMOTION_RESPONSES[emotion]) || CONNECT_EMOTION_RESPONSES.default
+  const key = emotion && CONNECT_EMOTION_RESPONSES[emotion] ? emotion : 'default'
+  const pool = CONNECT_EMOTION_RESPONSES[key]
   return {
-    text: pickRandom(pool),
+    text: pickFresh(pool, `connect:${key}`),
     phase: 'connect',
     hasWisdom: false,
   }
 }
 
 function generateUnderstandResponse(emotion?: string): DialogueResponse {
-  const pool = (emotion && UNDERSTAND_RESPONSES[emotion]) || UNDERSTAND_RESPONSES.default
+  const key = emotion && UNDERSTAND_RESPONSES[emotion] ? emotion : 'default'
+  const pool = UNDERSTAND_RESPONSES[key]
   return {
-    text: pickRandom(pool),
+    text: pickFresh(pool, `understand:${key}`),
     phase: 'understand',
     hasWisdom: false,
   }
@@ -418,17 +594,20 @@ function generateGuideResponse(emotion?: string, situation?: LifeSituation | nul
   }
 
   // Fall back to generic guide responses
-  const pool = (emotion && GUIDE_GENERIC_RESPONSES[emotion]) || GUIDE_GENERIC_RESPONSES.default
+  const key = emotion && GUIDE_GENERIC_RESPONSES[emotion] ? emotion : 'default'
+  const pool = GUIDE_GENERIC_RESPONSES[key]
   return {
-    text: pickRandom(pool),
+    text: pickFresh(pool, `guide:${key}`),
     phase: 'guide',
     hasWisdom: true,
   }
 }
 
-function generateEmpowerResponse(): DialogueResponse {
+function generateEmpowerResponse(emotion?: string): DialogueResponse {
+  const key = emotion && EMPOWER_RESPONSES[emotion] ? emotion : 'default'
+  const pool = EMPOWER_RESPONSES[key]
   return {
-    text: pickRandom(EMPOWER_RESPONSES),
+    text: pickFresh(pool, `empower:${key}`),
     phase: 'empower',
     hasWisdom: true,
   }
@@ -460,7 +639,7 @@ export function wrapWithConversationalWarmth(
       " What part of this speaks to you most?",
       " Tell me more about what you're feeling?",
     ]
-    return pickRandom(empathyPrefixes) + backendResponse + pickRandom(followUpQuestions)
+    return pickFresh(empathyPrefixes, 'warmth:prefix') + backendResponse + pickFresh(followUpQuestions, 'warmth:followup')
   }
 
   // In understand phase, add a deepening question
@@ -470,7 +649,7 @@ export function wrapWithConversationalWarmth(
       " How does that land with you, friend?",
       " Does any part of that feel especially true for you?",
     ]
-    return backendResponse + pickRandom(deepeners)
+    return backendResponse + pickFresh(deepeners, 'warmth:deepen')
   }
 
   // In guide/empower phase, add an invitation to continue
@@ -482,7 +661,7 @@ export function wrapWithConversationalWarmth(
     ]
     // Only add follow-up sometimes in guide phase (not every response)
     if (Math.random() > 0.4) {
-      return backendResponse + pickRandom(invitations)
+      return backendResponse + pickFresh(invitations, 'warmth:invite')
     }
   }
 

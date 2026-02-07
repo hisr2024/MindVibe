@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { BreathingStep } from '@/services/voiceCompanionService'
 
 interface BreathingRingProps {
@@ -89,7 +89,13 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
     exhale: 0.85 + 0.15 * stepProgress, // Shrinks from 1.0 to 0.85
     rest: 0.85,
   }
-  const breathScale = scaleMap[phase]
+  // Respect prefers-reduced-motion: keep timer/labels, simplify animations
+  const prefersReducedMotion = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  }, [])
+
+  const breathScale = prefersReducedMotion ? 1.0 : scaleMap[phase]
 
   return (
     <div className="flex flex-col items-center">
@@ -97,7 +103,7 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
       <div className="relative" style={{ width: size, height: size }}>
         {/* Ambient glow */}
         <div
-          className={`absolute inset-4 rounded-full blur-2xl transition-all duration-1000 ${config.bgGlow}`}
+          className={`absolute inset-4 rounded-full blur-2xl ${prefersReducedMotion ? '' : 'transition-all duration-1000'} ${config.bgGlow}`}
           style={{
             backgroundColor: config.color,
             opacity: 0.08,
