@@ -18,7 +18,9 @@ export function ServiceWorkerRegistration() {
 
           // Check for updates periodically
           setInterval(() => {
-            registration.update()
+            registration.update().catch(() => {
+              // Network error during update check - will retry next interval
+            })
           }, 60000) // Check every minute
 
           // Listen for updates

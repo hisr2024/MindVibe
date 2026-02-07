@@ -25,6 +25,9 @@ export interface UseEnhancedVoiceOutputOptions {
   onError?: (error: string) => void
 }
 
+// Module-level circuit breaker: once backend TTS returns 401/403, skip it for all instances
+let backendTtsDisabled = false
+
 export interface UseEnhancedVoiceOutputReturn {
   isSpeaking: boolean
   isPaused: boolean
@@ -97,7 +100,7 @@ export function useEnhancedVoiceOutput(
 
   // Try backend TTS
   const tryBackendTts = useCallback(async (text: string): Promise<boolean> => {
-    if (!useBackendTts) return false
+    if (!useBackendTts || backendTtsDisabled) return false
 
     try {
       const response = await fetch('/api/voice/synthesize', {
@@ -113,6 +116,9 @@ export function useEnhancedVoiceOutput(
       })
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          backendTtsDisabled = true
+        }
         return false
       }
 

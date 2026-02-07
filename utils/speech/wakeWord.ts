@@ -593,33 +593,39 @@ export class WakeWordDetector {
       onResult: this.handleResult,
       onError: (error: string) => {
         const errorType = this.classifyError(error)
-        const friendlyMessage = this.getErrorMessage(error)
+        const lowerError = error.toLowerCase()
 
-        // Track no-speech errors for noise estimation
-        if (error.toLowerCase().includes('no-speech')) {
+        // no-speech is expected in continuous listening (user isn't always talking).
+        // The onEnd handler already restarts after 50ms, so just update noise stats.
+        if (lowerError.includes('no-speech')) {
           this.consecutiveSilenceErrors++
           if (this.consecutiveSilenceErrors > 10) {
             this.noiseLevel = 'quiet'
           }
+          return // Let onEnd handle restart - no notification needed
         }
 
-        // Only notify user for non-recoverable or first-time errors
-        if (errorType !== 'recoverable' || this.retryCount === 0) {
-          this.onError?.(friendlyMessage)
+        // aborted is expected during mode transitions (e.g., switching to voice input)
+        if (lowerError.includes('aborted')) {
+          return
         }
 
-        // Handle based on error type
+        // Permission and fatal errors: notify always, then stop
         if (errorType === 'permission' || errorType === 'fatal') {
+          this.onError?.(this.getErrorMessage(error))
           this.isActive = false
           this.retryCount = 0
           this.emitStateChange()
           return
         }
 
-        // Recoverable error - retry with exponential backoff
+        // Network and other recoverable errors: notify once, then retry silently
+        if (this.retryCount === 0) {
+          this.onError?.(this.getErrorMessage(error))
+        }
+
         if (this.retryCount < this.maxRetries) {
           this.retryCount++
-          // Faster retry for wake word detection (critical path)
           const backoffDelay = Math.min(500 * Math.pow(1.5, this.retryCount - 1), 8000)
 
           this.clearRestartTimeout()
