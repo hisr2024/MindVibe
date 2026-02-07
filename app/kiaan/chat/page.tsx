@@ -186,14 +186,14 @@ function KiaanChatPageInner() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Voice Companion - Conversation Mode */}
+            {/* KIAAN Companion - Conversation Mode */}
             <Link
               href="/voice-companion"
               className="flex items-center gap-2 rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 px-4 py-2 text-sm font-semibold text-teal-50 transition-all hover:border-teal-400/50 hover:from-teal-500/20 hover:to-cyan-500/20"
-              title="Voice Companion - Talk with KIAAN"
+              title="KIAAN Companion - Talk with KIAAN"
             >
               <span className="text-lg">🗣️</span>
-              <span className="hidden sm:inline">{t('kiaan.voice.companion', 'Voice Companion')}</span>
+              <span className="hidden sm:inline">{t('kiaan.voice.companion', 'KIAAN Companion')}</span>
             </Link>
             {/* Voice Mode Toggle */}
             <Link

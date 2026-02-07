@@ -40,8 +40,8 @@ export const CORE_TOOLS: ToolConfig[] = [
   {
     id: 'kiaan-voice',
     icon: '🎙️',
-    title: 'KIAAN Voice',
-    description: 'Voice-activated wisdom guide',
+    title: 'KIAAN Companion',
+    description: 'Your divine best friend and wisdom guide',
     gradient: 'from-orange-400/30 to-amber-400/30',
     href: '/voice-companion',
     badge: 'new',

@@ -30,6 +30,8 @@ import {
 } from './staticWisdom'
 import { getChapterWisdom, getVersesForEmotion } from './gitaTeachings'
 import { getConversationalSourceReference } from './wisdomSources'
+import { detectToolSuggestion, type ToolSuggestion, type EcosystemTool } from './ecosystemNavigator'
+import { detectDistortions, type CognitiveDistortion } from '@/utils/wisdom/cognitiveReframing'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +52,19 @@ export interface DialogueResponse {
   situation?: LifeSituation
   /** Whether this response includes Gita wisdom */
   hasWisdom: boolean
+}
+
+/**
+ * Enhanced response from the Companion Engine.
+ * Extends DialogueResponse with ecosystem tool suggestions and cognitive reframing.
+ */
+export interface CompanionResponse extends DialogueResponse {
+  /** Suggested ecosystem tool (if relevant to user's situation) */
+  toolSuggestion?: ToolSuggestion | null
+  /** Detected cognitive distortion (if any) */
+  distortion?: CognitiveDistortion | null
+  /** Whether the response includes a tool suggestion woven into the text */
+  hasToolSuggestion: boolean
 }
 
 // ─── Phase Management ───────────────────────────────────────────────────────
@@ -666,4 +681,146 @@ export function wrapWithConversationalWarmth(
   }
 
   return backendResponse
+}
+
+// ─── Companion Response Engine ──────────────────────────────────────────────
+//
+// The unified orchestrator that combines:
+// 1. Phase-based divine dialogue (connect → understand → guide → empower)
+// 2. Cognitive reframing (detect distortions, weave CBT+Gita reframes)
+// 3. Ecosystem navigation (suggest the right wellness tool at the right time)
+// 4. Deep Gita wisdom routing
+//
+// This is the "brain" of the KIAAN Companion — the function that makes KIAAN
+// feel like a wise, omniscient best friend who knows every tool in the ecosystem
+// and can gently guide users to exactly what they need.
+
+/**
+ * Tool suggestion bridges — how a friend naturally transitions to suggesting a tool.
+ * These are ADDED to the dialogue response, not replacing it.
+ */
+const TOOL_BRIDGE_PHRASES = [
+  '\n\nBy the way, friend, there is something I think could really help you right now.',
+  '\n\nYou know, as I listen to you, I am reminded of something we have that was made for exactly this.',
+  '\n\nFriend, I want to share something with you. We have a beautiful tool that was created for moments like this.',
+  '\n\nHere is what I want to suggest, with all the love in my heart.',
+  '\n\nI have been thinking about what you shared, and there is something special I want you to try.',
+]
+
+/**
+ * Reframing bridges — how a friend naturally introduces cognitive reframing.
+ */
+const REFRAMING_BRIDGE_PHRASES = [
+  'I noticed something in what you said, friend, and I want to gently point it out because I care about you. ',
+  'Can I share something I noticed? Sometimes our minds tell us stories that are not the full truth. ',
+  'Friend, I hear a pattern in your words, and because I am your friend, I want to shine a light on it. ',
+  'Let me be honest with you, dear one, because that is what real friends do. ',
+]
+
+/**
+ * Generate a full Companion response — the unified brain of KIAAN.
+ *
+ * This function orchestrates phase-based dialogue, cognitive reframing detection,
+ * and ecosystem tool suggestions into a single coherent divine friend response.
+ *
+ * Decision tree:
+ * 1. Determine conversation phase
+ * 2. In GUIDE/EMPOWER phases, check for cognitive distortions
+ * 3. In GUIDE/EMPOWER phases, check if an ecosystem tool is relevant
+ * 4. Generate the base phase-appropriate response
+ * 5. If distortion detected (GUIDE+), weave reframing into response
+ * 6. If tool is relevant (GUIDE+, 40% chance), append tool suggestion
+ * 7. Return unified CompanionResponse
+ */
+export function generateCompanionResponse(
+  userMessage: string,
+  turnCount: number,
+  emotion?: string,
+  existingEmotions?: string[],
+  recentTopics?: string[],
+): CompanionResponse {
+  const hasStrongEmotion = Boolean(emotion && ['anxiety', 'sadness', 'anger', 'grief', 'overwhelm'].includes(emotion))
+  const phase = getConversationPhase(turnCount, hasStrongEmotion)
+
+  // ─── Step 1: Detect cognitive distortions ─────────────────────────
+  let detectedDistortion: CognitiveDistortion | null = null
+  if (phase === 'guide' || phase === 'empower') {
+    const distortions = detectDistortions(userMessage)
+    if (distortions.length > 0) {
+      detectedDistortion = distortions[0]
+    }
+  }
+
+  // ─── Step 2: Detect ecosystem tool suggestion ─────────────────────
+  let toolSuggestion: ToolSuggestion | null = null
+  if (phase === 'guide' || phase === 'empower') {
+    toolSuggestion = detectToolSuggestion(userMessage, emotion, recentTopics)
+  }
+
+  // ─── Step 3: Generate base dialogue response ─────────────────────
+  const baseResponse = generateDivineResponse(userMessage, turnCount, emotion, existingEmotions)
+
+  // ─── Step 4: Enhance with reframing (in GUIDE phase) ─────────────
+  let enhancedText = baseResponse.text
+  if (detectedDistortion && phase === 'guide' && Math.random() > 0.3) {
+    // Weave reframing into the response naturally
+    const bridge = REFRAMING_BRIDGE_PHRASES[Math.floor(Math.random() * REFRAMING_BRIDGE_PHRASES.length)]
+    enhancedText = bridge + detectedDistortion.kiaanResponse
+  }
+
+  // ─── Step 5: Append tool suggestion (40% chance in GUIDE/EMPOWER) ─
+  // Don't overwhelm — only suggest tools sometimes, and never in early turns
+  let hasToolSuggestionInText = false
+  if (toolSuggestion && turnCount >= 3 && Math.random() > 0.6) {
+    const bridgePhrase = TOOL_BRIDGE_PHRASES[Math.floor(Math.random() * TOOL_BRIDGE_PHRASES.length)]
+    enhancedText += bridgePhrase + ' ' + toolSuggestion.message
+    hasToolSuggestionInText = true
+  }
+
+  return {
+    text: enhancedText,
+    phase,
+    situation: baseResponse.situation,
+    hasWisdom: baseResponse.hasWisdom || !!detectedDistortion,
+    toolSuggestion,
+    distortion: detectedDistortion,
+    hasToolSuggestion: hasToolSuggestionInText || !!toolSuggestion,
+  }
+}
+
+/**
+ * Wrap a backend (dynamic wisdom) response with companion intelligence.
+ * Like wrapWithConversationalWarmth but also detects tool opportunities.
+ */
+export function wrapWithCompanionIntelligence(
+  backendResponse: string,
+  turnCount: number,
+  userMessage: string,
+  emotion?: string,
+  recentTopics?: string[],
+): CompanionResponse {
+  const phase = getConversationPhase(turnCount)
+  const warmed = wrapWithConversationalWarmth(backendResponse, turnCount, emotion)
+
+  // Check for ecosystem tool suggestion on dynamic responses too
+  let toolSuggestion: ToolSuggestion | null = null
+  if ((phase === 'guide' || phase === 'empower') && turnCount >= 4) {
+    toolSuggestion = detectToolSuggestion(userMessage, emotion, recentTopics)
+  }
+
+  // Check for cognitive distortions
+  let distortion: CognitiveDistortion | null = null
+  if (phase === 'guide' || phase === 'empower') {
+    const distortions = detectDistortions(userMessage)
+    if (distortions.length > 0) distortion = distortions[0]
+  }
+
+  return {
+    text: warmed,
+    phase,
+    hasWisdom: true,
+    toolSuggestion,
+    distortion,
+    hasToolSuggestion: !!toolSuggestion,
+  }
 }
