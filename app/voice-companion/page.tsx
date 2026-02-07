@@ -1214,6 +1214,7 @@ function VoiceCompanionInner() {
       }
 
       case 'export_chat': {
+        if (typeof document === 'undefined') break
         const { exportAsText } = await import('@/utils/voice/conversationHistory')
         const exported = await exportAsText()
         const blob = new Blob([exported], { type: 'text/plain' })
@@ -1638,17 +1639,19 @@ function VoiceCompanionInner() {
 
   const copyMessage = async (msg: Message) => {
     const verseRef = msg.verse ? `\n— Bhagavad Gita ${msg.verse.chapter}.${msg.verse.verse}` : ''
-    await navigator.clipboard.writeText(msg.content + verseRef).catch(() => {})
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(msg.content + verseRef).catch(() => {})
+    }
     toast.show('Copied to clipboard', 'copy')
   }
 
   const shareMessage = async (msg: Message) => {
     const verseRef = msg.verse ? `\n— Bhagavad Gita ${msg.verse.chapter}.${msg.verse.verse}` : ''
     const text = msg.content + verseRef + '\n\n— Shared from MindVibe KIAAN'
-    if (navigator.share) {
+    if (typeof navigator !== 'undefined' && navigator.share) {
       await navigator.share({ text }).catch(() => {})
       toast.show('Shared wisdom', 'share')
-    } else {
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(text).catch(() => {})
       toast.show('Copied for sharing', 'copy')
     }
