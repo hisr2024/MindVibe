@@ -13,11 +13,15 @@
 
 import { getSpeechLanguage } from './languageMapping'
 
+export type VoiceGender = 'female' | 'male' | 'auto'
+
 export interface SynthesisConfig {
   language?: string
   rate?: number
   pitch?: number
   volume?: number
+  /** Preferred voice gender: female, male, or auto (best quality) */
+  gender?: VoiceGender
 }
 
 export interface SynthesisCallbacks {
@@ -54,7 +58,36 @@ const VOICE_QUALITY_PATTERNS: { pattern: RegExp; score: number }[] = [
   { pattern: /Female/i, score: 10 },
 ]
 
-function scoreVoice(voice: SpeechSynthesisVoice): number {
+// Known female voice name patterns (for gender detection)
+const FEMALE_VOICE_PATTERNS = [
+  /Jenny/i, /Aria/i, /Samantha/i, /Karen/i, /Moira/i, /Zira/i,
+  /Siri.*Female/i, /Google.*Female/i, /Female/i,
+  /Heera/i, /Neerja/i, /Sara/i, /Libby/i, /Emily/i,
+  /Hazel/i, /Susan/i, /Linda/i, /Catherine/i, /Fiona/i,
+]
+
+// Known male voice name patterns
+const MALE_VOICE_PATTERNS = [
+  /Guy/i, /Daniel/i, /David/i, /Mark/i, /James/i,
+  /Siri.*Male/i, /Google.*Male/i, /Male/i,
+  /Ravi/i, /Prabhat/i, /Ryan/i, /Christopher/i,
+  /Thomas/i, /George/i, /Fred/i,
+]
+
+/**
+ * Detect voice gender from voice name using known patterns
+ */
+function detectVoiceGender(voice: SpeechSynthesisVoice): VoiceGender {
+  for (const p of FEMALE_VOICE_PATTERNS) {
+    if (p.test(voice.name)) return 'female'
+  }
+  for (const p of MALE_VOICE_PATTERNS) {
+    if (p.test(voice.name)) return 'male'
+  }
+  return 'auto'
+}
+
+function scoreVoice(voice: SpeechSynthesisVoice, preferredGender?: VoiceGender): number {
   let score = 0
 
   // Pattern-based scoring
@@ -67,6 +100,16 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
   // Remote/cloud voices are generally higher quality than local
   if (!voice.localService) {
     score += 15
+  }
+
+  // Gender preference bonus: +30 for matching, -20 for non-matching
+  if (preferredGender && preferredGender !== 'auto') {
+    const voiceGender = detectVoiceGender(voice)
+    if (voiceGender === preferredGender) {
+      score += 30
+    } else if (voiceGender !== 'auto') {
+      score -= 20
+    }
   }
 
   return score
@@ -92,6 +135,7 @@ export class SpeechSynthesisService {
       rate: config.rate ?? 0.94,
       pitch: config.pitch ?? 1.03,
       volume: config.volume ?? 1.0,
+      gender: config.gender || 'auto',
     }
 
     // Auto-select best voice (voices may load async)
@@ -120,9 +164,9 @@ export class SpeechSynthesisService {
 
     if (matchingVoices.length === 0) return
 
-    // Score and sort - highest quality first
+    // Score and sort - highest quality first, respecting gender preference
     const scored = matchingVoices
-      .map(voice => ({ voice, score: scoreVoice(voice) }))
+      .map(voice => ({ voice, score: scoreVoice(voice, this.config.gender) }))
       .sort((a, b) => b.score - a.score)
 
     this.bestVoice = scored[0].voice
@@ -225,10 +269,45 @@ export class SpeechSynthesisService {
   }
 
   /**
-   * Update configuration
+   * Update configuration. Re-selects voice if gender changes.
    */
   updateConfig(config: Partial<SynthesisConfig>): void {
+    const genderChanged = config.gender !== undefined && config.gender !== this.config.gender
     this.config = { ...this.config, ...config }
+    if (genderChanged) {
+      this.selectBestVoice()
+    }
+  }
+
+  /**
+   * Set voice gender preference and re-select best voice
+   */
+  setGender(gender: VoiceGender): void {
+    this.config.gender = gender
+    this.selectBestVoice()
+  }
+
+  /**
+   * Get available voice genders for the current language
+   */
+  getAvailableVoiceGenders(): VoiceGender[] {
+    if (!this.synthesis) return ['auto']
+    const voices = this.synthesis.getVoices()
+    const langPrefix = getSpeechLanguage(this.config.language || 'en').split('-')[0]
+    const matching = voices.filter(v => v.lang.startsWith(langPrefix))
+    const genders = new Set<VoiceGender>(['auto'])
+    for (const v of matching) {
+      const g = detectVoiceGender(v)
+      if (g !== 'auto') genders.add(g)
+    }
+    return Array.from(genders)
+  }
+
+  /**
+   * Get the currently selected voice name
+   */
+  getSelectedVoiceName(): string | null {
+    return this.bestVoice?.name || null
   }
 
   /**

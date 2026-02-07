@@ -12,13 +12,15 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { SpeechSynthesisService } from '@/utils/speech/synthesis'
+import { SpeechSynthesisService, type VoiceGender } from '@/utils/speech/synthesis'
 import { isSpeechSynthesisSupported } from '@/utils/speech/languageMapping'
 
 export interface UseEnhancedVoiceOutputOptions {
   language?: string
   rate?: number
   voiceType?: 'friendly' | 'calm' | 'wisdom'
+  /** Preferred voice gender: female, male, or auto */
+  voiceGender?: VoiceGender
   useBackendTts?: boolean  // Try backend TTS first
   onStart?: () => void
   onEnd?: () => void
@@ -50,6 +52,7 @@ export interface UseEnhancedVoiceOutputReturn {
   resume: () => void
   cancel: () => void
   updateRate: (rate: number) => void
+  updateGender: (gender: VoiceGender) => void
 }
 
 export function useEnhancedVoiceOutput(
@@ -59,6 +62,7 @@ export function useEnhancedVoiceOutput(
     language = 'en',
     rate = 0.95,
     voiceType = 'friendly',
+    voiceGender = 'auto',
     useBackendTts = true,
     onStart,
     onEnd,
@@ -85,6 +89,7 @@ export function useEnhancedVoiceOutput(
       rate,
       pitch: 1.0,
       volume: 1.0,
+      gender: voiceGender,
     })
 
     return () => {
@@ -93,7 +98,7 @@ export function useEnhancedVoiceOutput(
         synthesisRef.current = null
       }
     }
-  }, [isSupported, language, rate])
+  }, [isSupported, language, rate, voiceGender])
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -309,6 +314,13 @@ export function useEnhancedVoiceOutput(
     }
   }, [])
 
+  // Update voice gender preference
+  const updateGender = useCallback((gender: VoiceGender) => {
+    if (synthesisRef.current) {
+      synthesisRef.current.setGender(gender)
+    }
+  }, [])
+
   return {
     isSpeaking,
     isPaused,
@@ -320,5 +332,6 @@ export function useEnhancedVoiceOutput(
     resume,
     cancel,
     updateRate,
+    updateGender,
   }
 }
