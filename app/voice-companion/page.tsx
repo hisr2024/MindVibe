@@ -407,6 +407,7 @@ export default function VoiceCompanionPage() {
   const [autoSpeak, setAutoSpeak] = useState(true)
   const [useDivineVoice, setUseDivineVoice] = useState(true)
   const [wakeWordEnabled, setWakeWordEnabled] = useState(true) // ON by default - divine companion always listening
+  const [wakeWordPaused, setWakeWordPaused] = useState(false) // Paused while voice input is active (browser allows only 1 SpeechRecognition)
   const [greeting, setGreeting] = useState<string | null>(null)
   const [emotionalTrend, setEmotionalTrend] = useState<string | null>(null)
   const [currentEmotion, setCurrentEmotion] = useState<string | undefined>(undefined)
@@ -467,20 +468,31 @@ export default function VoiceCompanionPage() {
 
   // ─── Wake Word Detection ──────────────────────────────────────────
 
-  useWakeWord({
-    enabled: wakeWordEnabled,
+  // Wake word and voice input CANNOT run simultaneously (browser allows only 1 SpeechRecognition).
+  // wakeWordPaused prevents auto-restart while voice input is active.
+  const wakeWord = useWakeWord({
+    enabled: wakeWordEnabled && !wakeWordPaused,
     sensitivity: 'high',
     onWakeWordDetected: () => {
       if (!isMountedRef.current) return
       if (stateRef.current === 'idle' || stateRef.current === 'wake-listening') {
         setError(null)
-        audioAnalyzer.start()
-        voiceInput.startListening()
-        setState('listening')
+        // Stop wake word to free the SpeechRecognition channel for voice input
+        wakeWordRef.current.stop()
+        setWakeWordPaused(true)
+        // Short delay to ensure browser releases the SpeechRecognition channel
+        setTimeout(() => {
+          if (!isMountedRef.current) return
+          audioAnalyzerRef.current.start()
+          voiceInputRef.current.startListening()
+          setState('listening')
+        }, 120)
       }
     },
     onError: (err) => console.warn('[Wake Word]', err),
   })
+  const wakeWordRef = useRef(wakeWord)
+  wakeWordRef.current = wakeWord
 
   // ─── Voice Input with Interrupt Detection ─────────────────────────
 
@@ -520,18 +532,25 @@ export default function VoiceCompanionPage() {
     onStart: () => { if (isMountedRef.current) setState('speaking') },
     onEnd: () => {
       if (!isMountedRef.current) return
-      setState(wakeWordEnabled ? 'wake-listening' : 'idle')
       if (conversationModeRef.current) {
+        // Keep wake word paused - resuming voice input
         setTimeout(() => {
           if (!isMountedRef.current) return
+          wakeWordRef.current.stop()
           audioAnalyzer.start()
           voiceInput.startListening()
           setState('listening')
         }, 500)
+      } else {
+        // Resume wake word - returning to idle
+        setWakeWordPaused(false)
+        setState(wakeWordEnabled ? 'wake-listening' : 'idle')
       }
     },
     onError: () => {
-      if (isMountedRef.current) setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+      if (!isMountedRef.current) return
+      setWakeWordPaused(false)
+      setState(wakeWordEnabled ? 'wake-listening' : 'idle')
     },
   })
 
@@ -559,6 +578,9 @@ export default function VoiceCompanionPage() {
 
   const resumeListeningIfConversation = useCallback(() => {
     if (!isMountedRef.current || !conversationModeRef.current) return
+    // Keep wake word paused while voice input takes over
+    wakeWordRef.current.stop()
+    setWakeWordPaused(true)
     setTimeout(() => {
       if (!isMountedRef.current) return
       audioAnalyzerRef.current.start()
@@ -570,8 +592,12 @@ export default function VoiceCompanionPage() {
   const speakResponse = useCallback(async (text: string) => {
     lastResponseRef.current = text
     if (!autoSpeak) {
-      if (isMountedRef.current) setState(wakeWordEnabled ? 'wake-listening' : 'idle')
-      resumeListeningIfConversation()
+      if (conversationModeRef.current) {
+        resumeListeningIfConversation()
+      } else {
+        setWakeWordPaused(false)
+        if (isMountedRef.current) setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+      }
       return
     }
 
@@ -586,8 +612,12 @@ export default function VoiceCompanionPage() {
           style: 'friendly',
           onEnd: () => {
             if (!isMountedRef.current) return
-            setState(wakeWordEnabled ? 'wake-listening' : 'idle')
-            resumeListeningIfConversation()
+            if (conversationModeRef.current) {
+              resumeListeningIfConversation()
+            } else {
+              setWakeWordPaused(false)
+              setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+            }
           },
           onError: () => {
             // Divine voice playback error - fall through to Tier 2
@@ -613,8 +643,10 @@ export default function VoiceCompanionPage() {
     divineVoiceService.stop()
     audioAnalyzerRef.current.stop()
     setBreathingSteps(null)
-    setState(wakeWordEnabled ? 'wake-listening' : 'idle')
     setConversationMode(false)
+    // Resume wake word - returning to idle
+    setWakeWordPaused(false)
+    setState(wakeWordEnabled ? 'wake-listening' : 'idle')
   }, [wakeWordEnabled])
 
   // ─── Breathing Exercise ───────────────────────────────────────────
@@ -772,6 +804,7 @@ export default function VoiceCompanionPage() {
       await speakResponse(responseText)
     } catch {
       if (isMountedRef.current) {
+        setWakeWordPaused(false)
         setState(wakeWordEnabled ? 'wake-listening' : 'idle')
         setError('I had trouble processing that. Can you try again?')
       }
@@ -784,6 +817,7 @@ export default function VoiceCompanionPage() {
     setBreathingSteps(null)
     const text = 'Beautiful, dear one. Feel that stillness? In Chapter 6 of the Gita, I said: "For one who has conquered the mind, the Supersoul is already reached." You just did that - you conquered your restless mind with your breath. Your body is calmer, your mind is clearer, and your spirit is shining brighter. I\'m so proud of you. Carry this peace with you. It\'s yours now.'
     addKiaanMessage(text)
+    setWakeWordPaused(false)
     setState(wakeWordEnabled ? 'wake-listening' : 'idle')
     speakResponse(text)
   }, [wakeWordEnabled, addKiaanMessage, speakResponse])
@@ -803,9 +837,13 @@ export default function VoiceCompanionPage() {
     } else if (voiceInput.isListening) {
       voiceInput.stopListening()
       audioAnalyzer.stop()
+      setWakeWordPaused(false)
       setState(idleState())
     } else {
       setError(null)
+      // Pause wake word to free SpeechRecognition for voice input
+      wakeWordRef.current.stop()
+      setWakeWordPaused(true)
       audioAnalyzer.start()
       voiceInput.startListening()
       setState('listening')
@@ -817,12 +855,16 @@ export default function VoiceCompanionPage() {
     setConversationMode(newMode)
     if (newMode && (state === 'idle' || state === 'wake-listening')) {
       await voiceCompanionService.startSession()
+      // Pause wake word to free SpeechRecognition for voice input
+      wakeWordRef.current.stop()
+      setWakeWordPaused(true)
       audioAnalyzer.start()
       voiceInput.startListening()
       setState('listening')
     } else if (!newMode && voiceInput.isListening) {
       voiceInput.stopListening()
       audioAnalyzer.stop()
+      setWakeWordPaused(false)
       setState(idleState())
     }
   }
