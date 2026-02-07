@@ -149,15 +149,15 @@ const PRONUNCIATION_MAP: Record<string, string> = {
 
 /**
  * Preprocess text for browser TTS to improve pronunciation and pacing.
- * - Replaces Sanskrit terms with phonetic equivalents
- * - Adds pauses (commas) between Sanskrit terms and English
- * - Adds emphasis markers (periods for pauses) before verse references
+ * 1. Sanitizes for speech (strips markdown, emojis, academic citations)
+ * 2. Replaces Sanskrit terms with phonetic equivalents
+ * 3. Adds pacing pauses for natural rhythm
  *
  * @param text - Raw text to preprocess
  * @returns Preprocessed text optimized for browser TTS
  */
 export function preprocessForTTS(text: string): string {
-  let processed = text
+  let processed = sanitizeForSpeech(text)
 
   // Replace Sanskrit terms with phonetic pronunciations (case-insensitive)
   for (const [term, phonetic] of Object.entries(PRONUNCIATION_MAP)) {
@@ -166,25 +166,11 @@ export function preprocessForTTS(text: string): string {
     processed = processed.replace(regex, phonetic)
   }
 
-  // Add breathing pauses before verse references (Chapter X, verse Y)
-  processed = processed.replace(
-    /\b(Chapter|chapter)\s+(\d+)/g,
-    '. $1 $2'
-  )
-  processed = processed.replace(
-    /\b(verse|Verse)\s+(\d+)/g,
-    ', $1 $2,'
-  )
-
   // Add pause after "In the Gita" or "The Gita says"
   processed = processed.replace(
     /(In the Gee-tah|The Gee-tah says|The Gee-tah teaches)/gi,
     '$1,'
   )
-
-  // Add emphasis pause before quoted text (verse translations)
-  processed = processed.replace(/['']/g, ',')
-  processed = processed.replace(/['']/g, ',')
 
   // Add pause between sentences for more natural pacing
   processed = processed.replace(/\.\s+/g, '. ... ')
@@ -194,6 +180,98 @@ export function preprocessForTTS(text: string): string {
   processed = processed.replace(/\s{2,}/g, ' ')
 
   return processed.trim()
+}
+
+/**
+ * Sanitize text for spoken output.
+ * Strips everything that sounds wrong when read aloud by TTS:
+ * - Markdown formatting (bold, italic, headers, links, code)
+ * - Emoji characters
+ * - Academic verse citations ("Chapter X, verse Y", "BG 2.47")
+ * - Parenthetical references
+ * - Special characters that TTS reads literally
+ * - ALL-CAPS words (converted to normal case for natural speech)
+ */
+export function sanitizeForSpeech(text: string): string {
+  let clean = text
+
+  // 1. Strip markdown bold/italic: **bold** → bold, *italic* → italic, __bold__ → bold, _italic_ → italic
+  clean = clean.replace(/\*{2,3}([^*]+)\*{2,3}/g, '$1')
+  clean = clean.replace(/\*([^*]+)\*/g, '$1')
+  clean = clean.replace(/_{2,3}([^_]+)_{2,3}/g, '$1')
+  clean = clean.replace(/_([^_]+)_/g, '$1')
+
+  // 2. Strip markdown headers: ### Header → Header
+  clean = clean.replace(/^#{1,6}\s+/gm, '')
+
+  // 3. Strip markdown links: [text](url) → text
+  clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+
+  // 4. Strip inline code: `code` → code
+  clean = clean.replace(/`([^`]+)`/g, '$1')
+
+  // 5. Strip markdown bullet points: - item → item, * item → item
+  clean = clean.replace(/^\s*[-*]\s+/gm, '')
+
+  // 6. Remove emojis (comprehensive Unicode emoji ranges)
+  clean = clean.replace(/[\u{1F600}-\u{1F64F}]/gu, '')  // emoticons
+  clean = clean.replace(/[\u{1F300}-\u{1F5FF}]/gu, '')  // misc symbols & pictographs
+  clean = clean.replace(/[\u{1F680}-\u{1F6FF}]/gu, '')  // transport & map
+  clean = clean.replace(/[\u{1F700}-\u{1F77F}]/gu, '')  // alchemical
+  clean = clean.replace(/[\u{1F780}-\u{1F7FF}]/gu, '')  // geometric shapes ext
+  clean = clean.replace(/[\u{1F800}-\u{1F8FF}]/gu, '')  // supplemental arrows
+  clean = clean.replace(/[\u{1F900}-\u{1F9FF}]/gu, '')  // supplemental symbols
+  clean = clean.replace(/[\u{1FA00}-\u{1FA6F}]/gu, '')  // chess symbols
+  clean = clean.replace(/[\u{1FA70}-\u{1FAFF}]/gu, '')  // symbols & pictographs ext-A
+  clean = clean.replace(/[\u{2600}-\u{26FF}]/gu, '')    // misc symbols
+  clean = clean.replace(/[\u{2700}-\u{27BF}]/gu, '')    // dingbats
+  clean = clean.replace(/[\u{FE00}-\u{FE0F}]/gu, '')    // variation selectors
+  clean = clean.replace(/[\u{200D}]/gu, '')              // zero-width joiner
+  clean = clean.replace(/[\u{20E3}]/gu, '')              // combining enclosing keycap
+  clean = clean.replace(/[\u{E0020}-\u{E007F}]/gu, '')   // tags
+
+  // 7. Convert academic citations to natural speech
+  // "Chapter X, verse Y" → natural form
+  clean = clean.replace(/Chapter\s+(\d+),?\s*verse\s+(\d+)/gi, 'the Gita')
+  // "Chapter X" → natural form (only when standalone reference)
+  clean = clean.replace(/In\s+Chapter\s+\d+\s*,?\s*/gi, 'In the Gita, ')
+  clean = clean.replace(/Chapter\s+\d+\s+(says|teaches|describes|explains|has|is|of|promises)/gi, 'The Gita $1')
+  clean = clean.replace(/Chapter\s+\d+:\s*/gi, '')
+  clean = clean.replace(/Chapter\s+\d+/gi, 'the Gita')
+  // "BG X.Y" or "BG X:Y" → the Gita
+  clean = clean.replace(/\bBG\s*\d+[.:]\d+/gi, 'the Gita')
+  // "verse X" standalone → remove
+  clean = clean.replace(/,?\s*verse\s+\d+\s*,?/gi, '')
+
+  // 8. Remove parenthetical references: (Chapter 2) → nothing
+  clean = clean.replace(/\(\s*Chapter\s+\d+[^)]*\)/gi, '')
+  clean = clean.replace(/\(\s*verse\s+\d+[^)]*\)/gi, '')
+  clean = clean.replace(/\(\s*BG\s+\d+[^)]*\)/gi, '')
+
+  // 9. Convert curly/smart quotes to simple pauses (TTS reads them oddly)
+  clean = clean.replace(/['']/g, ',')
+  clean = clean.replace(/[""]/g, ',')
+
+  // 10. Convert ALL-CAPS words (3+ chars) to title case for natural speech
+  clean = clean.replace(/\b([A-Z]{3,})\b/g, (match) => {
+    // Preserve known acronyms
+    if (['KIAAN', 'TTS', 'SSML', 'WCAG'].includes(match)) return match
+    return match.charAt(0) + match.slice(1).toLowerCase()
+  })
+
+  // 11. Strip hash/number signs that might be read: #1 → number 1
+  clean = clean.replace(/#(\d+)/g, 'number $1')
+
+  // 12. Clean up excessive punctuation
+  clean = clean.replace(/\.{2,}/g, '.')     // multiple dots → single
+  clean = clean.replace(/!{2,}/g, '!')       // multiple bangs → single
+  clean = clean.replace(/\?{2,}/g, '?')      // multiple questions → single
+
+  // 13. Clean up resulting whitespace
+  clean = clean.replace(/\s{2,}/g, ' ')
+  clean = clean.replace(/\s+([.,!?;:])/g, '$1')
+
+  return clean.trim()
 }
 
 /**
