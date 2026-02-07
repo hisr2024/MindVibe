@@ -379,15 +379,70 @@ def merge_chunks(primary: RetrievalResult, limit: int = 20) -> list[GitaChunk]:
     return merged
 
 
-def build_context_block(chunks: Iterable[GitaChunk]) -> str:
+def build_context_block(chunks: Iterable[GitaChunk], dynamic_wisdom: list[dict] | None = None) -> str:
+    """Build rich context block with static verses and dynamic learned wisdom.
+
+    Includes Sanskrit text, verse metadata, themes, principles, and any
+    dynamic wisdom from validated learned sources for stricter Gita adherence.
+    """
     lines = ["[GITA_CORE_WISDOM_CONTEXT]"]
+    lines.append("Source: Bhagavad Gita 701-verse repository (static) + validated learned wisdom (dynamic)")
+    lines.append("")
+
+    lines.append("--- STATIC GITA VERSES (from 701-verse repository) ---")
     for chunk in chunks:
-        lines.append(f"- Chapter: {chunk.chapter or 'Unknown'}")
-        lines.append(f"  Verse: {chunk.verse or 'Unknown'}")
+        ref = f"BG {chunk.chapter}:{chunk.verse}" if chunk.chapter and chunk.verse else "Unknown"
+        lines.append(f"- Reference: {ref}")
         lines.append(f"  Source: {chunk.source_file}")
-        lines.append(f"  Text: {chunk.text}")
-        lines.append(f"  Commentary: {chunk.commentary or 'None'}")
-        lines.append(f"  Tags: {', '.join(chunk.tags) if chunk.tags else 'None'}")
+
+        # Extract Sanskrit if present in text
+        text = chunk.text
+        if "Sanskrit:" in text:
+            sanskrit_part = text.split("Sanskrit:")[1].split("\n")[0].strip()
+            lines.append(f"  Sanskrit: {sanskrit_part[:200]}")
+        if "Transliteration:" in text:
+            translit_part = text.split("Transliteration:")[1].split("\n")[0].strip()
+            lines.append(f"  Transliteration: {translit_part[:200]}")
+        if "English:" in text:
+            english_part = text.split("English:")[1].split("\n")[0].strip().strip('"')
+            lines.append(f"  Translation: {english_part}")
+        elif text:
+            lines.append(f"  Text: {text[:300]}")
+
+        # Extract theme and principle from commentary
+        commentary = chunk.commentary or ""
+        if "Theme:" in commentary:
+            theme = commentary.split("Theme:")[1].split("Principle:")[0].strip()
+            lines.append(f"  Theme: {theme.replace('_', ' ').title()}")
+        if "Principle:" in commentary:
+            principle = commentary.split("Principle:")[-1].strip()
+            lines.append(f"  Gita Principle: {principle}")
+        if "Mental Health:" in commentary:
+            mh = commentary.split("Mental Health:")[1].split("\n")[0].strip()
+            lines.append(f"  Mental Health Application: {mh}")
+
+        if chunk.tags:
+            lines.append(f"  Tags: {', '.join(chunk.tags)}")
+        if chunk.keywords:
+            lines.append(f"  Keywords: {', '.join(chunk.keywords[:8])}")
+        lines.append("")
+
+    # Include dynamic learned wisdom if available
+    if dynamic_wisdom:
+        lines.append("")
+        lines.append("--- DYNAMIC LEARNED WISDOM (validated from verified sources) ---")
+        for dw in dynamic_wisdom:
+            lines.append(f"- Source: {dw.get('source_name', 'Unknown')}")
+            if dw.get('verse_refs'):
+                refs = [f"BG {r[0]}.{r[1]}" for r in dw['verse_refs'] if len(r) >= 2]
+                lines.append(f"  Related Verses: {', '.join(refs)}")
+            lines.append(f"  Wisdom: {dw.get('content', '')[:300]}")
+            if dw.get('themes'):
+                lines.append(f"  Themes: {', '.join(dw['themes'][:5])}")
+            if dw.get('shad_ripu_tags'):
+                lines.append(f"  Shad Ripu: {', '.join(dw['shad_ripu_tags'])}")
+            lines.append("")
+
     lines.append("[/GITA_CORE_WISDOM_CONTEXT]")
     return "\n".join(lines)
 
@@ -460,6 +515,11 @@ def citations_within_allowed(citations: list[str], allowed: set[str]) -> bool:
 
 
 def validate_response(text: str, allowed_citations: set[str]) -> tuple[bool, list[str]]:
+    """Validate response for strict Gita adherence.
+
+    Ensures every guidance section has proper verse citations and
+    uses Gita terminology rather than generic psychology.
+    """
     errors: list[str] = []
 
     for heading in HEADINGS_SUFFICIENT:
@@ -472,17 +532,39 @@ def validate_response(text: str, allowed_citations: set[str]) -> tuple[bool, lis
 
     sections = extract_sections(text, HEADINGS_SUFFICIENT)
     citations = collect_citations(text)
-    if len(citations) < 2:
-        errors.append("At least 2 verse citations required")
 
-    for section_name in ["Gita Teachings Used", "Dharma Options", "Detachment Anchor", "One Next Step"]:
+    # Stricter citation requirements: minimum 3 unique verse citations
+    if len(set(citations)) < 3:
+        errors.append("At least 3 unique verse citations required for strict Gita adherence")
+
+    # Every guidance section MUST have at least one citation
+    citation_required_sections = [
+        "Sacred Acknowledgement",
+        "Inner Conflict Mirror",
+        "Gita Teachings Used",
+        "Dharma Options",
+        "Detachment Anchor",
+        "One Next Step",
+    ]
+    for section_name in citation_required_sections:
         section_text = sections.get(section_name, "")
         if not collect_citations(section_text):
-            errors.append(f"Missing citation in {section_name}")
+            errors.append(f"Missing verse citation in {section_name} (strict Gita adherence)")
+
+    # Gita Teachings Used must have 3-5 verses
+    teachings_citations = collect_citations(sections.get("Gita Teachings Used", ""))
+    if len(set(teachings_citations)) < 3:
+        errors.append("Gita Teachings Used must cite at least 3 unique verses")
 
     dharma_options = count_dharma_options(sections.get("Dharma Options", ""))
     if dharma_options != 3:
         errors.append("Dharma Options must include exactly 3 options")
+
+    # Each Dharma Option must have its own citation
+    dharma_text = sections.get("Dharma Options", "")
+    dharma_citations = collect_citations(dharma_text)
+    if len(dharma_citations) < 3:
+        errors.append("Each Dharma Option must cite at least one verse")
 
     speech_section = sections.get("Sacred Speech", "")
     if speech_section:
@@ -491,6 +573,16 @@ def validate_response(text: str, allowed_citations: set[str]) -> tuple[bool, lis
 
     if allowed_citations and not citations_within_allowed(citations, allowed_citations):
         errors.append("Response cites verses not present in retrieved context")
+
+    # Check for Gita terminology usage (must use Sanskrit terms)
+    text_lower = text.lower()
+    gita_terms_present = any(term in text_lower for term in [
+        "dharma", "karma", "yoga", "krodha", "raga", "dvesha", "moha",
+        "kshama", "ahimsa", "satya", "vairagya", "sthitaprajna",
+        "svadharma", "sama-darshana", "atma", "sakshi", "buddhi",
+    ])
+    if not gita_terms_present:
+        errors.append("Response lacks Gita Sanskrit terminology (strict adherence requires Sanskrit terms)")
 
     return (len(errors) == 0, errors)
 
@@ -621,131 +713,151 @@ def extract_verse_wisdom(chunk: GitaChunk) -> dict[str, str]:
 
 
 def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str, user_message: str) -> str:
-    """Generate a Gita-based response deeply rooted in retrieved verse wisdom.
+    """Generate a strictly Gita-grounded response from retrieved verse wisdom.
 
-    This creates meaningful guidance using actual Gita teachings from the 700+ verse
-    repository, similar to KIAAN Chat's approach of grounding every response in
-    authentic scripture wisdom.
+    Every section traces to specific Gita verses, uses Sanskrit terminology
+    with translations, and follows the Shad Ripu diagnostic framework.
+    No generic psychology - only Gita wisdom from the 701-verse repository.
     """
     if not chunks:
         return build_insufficient_response()
 
     # Extract rich wisdom from top chunks
-    wisdom_items = [extract_verse_wisdom(chunk) for chunk in chunks[:8]]
+    wisdom_items = [extract_verse_wisdom(chunk) for chunk in chunks[:10]]
     teachings = [w for w in wisdom_items if w["english"]]
     verse_refs = [w["verse_ref"] for w in wisdom_items if w["verse_ref"]]
 
-    # Collect themes and tags for understanding the retrieved context
+    # Collect themes and tags for Gita psychology diagnosis
     all_tags = set()
     for w in wisdom_items:
         all_tags.update(tag.lower().replace("_", " ") for tag in w["tags"])
 
-    # Determine relationship-specific context
-    relationship_contexts = {
-        "romantic": "partner, beloved, spouse",
-        "family": "family member, parent, child, sibling",
-        "friendship": "friend, companion",
-        "workplace": "colleague, work relationship",
-        "self": "yourself, inner self",
-        "other": "this person",
+    # Determine active Shad Ripu from tags
+    shad_ripu_map = {
+        "krodha": ["anger", "krodha", "rage", "wrath"],
+        "kama": ["desire", "kama", "attachment", "lust", "craving"],
+        "lobha": ["greed", "lobha", "possessive", "hoarding"],
+        "moha": ["delusion", "moha", "confusion", "ignorance"],
+        "mada": ["pride", "mada", "ego", "arrogance"],
+        "matsarya": ["jealousy", "matsarya", "envy"],
     }
-    rel_context = relationship_contexts.get(relationship_type, "this person")
+    active_ripu = "moha"  # Default
+    for ripu, indicators in shad_ripu_map.items():
+        if any(ind in all_tags for ind in indicators):
+            active_ripu = ripu
+            break
 
-    # Build response sections deeply grounded in retrieved Gita wisdom
+    # Determine relationship-specific Gita context
+    relationship_contexts = {
+        "romantic": ("partner", "Nishkama Prema (desireless love)", "BG 12.13-14"),
+        "family": ("family member", "Kula-dharma (family righteousness)", "BG 1.40-43"),
+        "friendship": ("friend", "Maitri (unconditional friendship)", "BG 6.9"),
+        "workplace": ("colleague", "Karma Yoga (selfless action)", "BG 2.47"),
+        "self": ("yourself", "Atma-jnana (self-knowledge)", "BG 6.5-6"),
+        "other": ("this person", "Sama-darshana (equal vision)", "BG 6.32"),
+    }
+    rel_context, rel_principle, rel_verse = relationship_contexts.get(
+        relationship_type, ("this person", "Sama-darshana (equal vision)", "BG 6.32")
+    )
+
     sections = []
 
-    # Sacred Acknowledgement - grounded in retrieved themes
+    # Sacred Acknowledgement - grounded in Gita understanding of Dukha
     sections.append("# Sacred Acknowledgement")
     ack_teaching = teachings[0]["english"] if teachings else ""
-    if "compassion" in all_tags or "karuna" in all_tags or "daya" in all_tags:
-        sections.append(f"I witness the pain you carry with deep daya (compassion). The timeless wisdom reminds us: '{ack_teaching[:150]}...' Your willingness to seek understanding rather than simply reacting reveals your inner strength. This moment of reflection is itself an act of dharma.")
-    elif "anger" in all_tags or "krodha" in all_tags:
-        sections.append(f"I honor the intensity of what you're feeling. The ancient teachings speak directly to this: '{ack_teaching[:150]}...' Anger often masks deeper wounds - fear, hurt, unmet needs. Your awareness of this conflict is the first step toward clarity.")
+    ack_ref = verse_refs[0] if verse_refs else "2:14"
+    if active_ripu == "krodha":
+        sections.append(f"I honor what you carry. The Gita ({ack_ref}) teaches: '{ack_teaching[:150]}...' Krodha (anger) is one of the three gates to self-destruction (BG 16.21), yet its presence here reveals how deeply you care. The Gita does not condemn the emotion - it illuminates the path through it. Your Svadhyaya (self-inquiry) begins now.")
+    elif active_ripu == "kama":
+        sections.append(f"I witness the Dukha (suffering) born of Raga (attachment). The Gita ({ack_ref}) speaks directly: '{ack_teaching[:150]}...' When our Kama (desires) for how others should behave remain unfulfilled, pain follows inevitably (BG 2.62). Your awareness of this pattern is the beginning of Viveka (discrimination).")
+    elif active_ripu == "moha":
+        sections.append(f"I see the Moha (confusion) clouding your Buddhi (discrimination). The Gita ({ack_ref}) teaches: '{ack_teaching[:150]}...' As Arjuna stood paralyzed by confusion (BG 1.28-46), so too does this situation overwhelm your clarity. But Krishna's wisdom illuminated Arjuna's path, and it will illuminate yours.")
     else:
-        sections.append(f"I bow to the tender heart that brought you here. The eternal wisdom teaches: '{ack_teaching[:150]}...' Every awakened soul throughout time has faced moments exactly like this. You are not alone in this struggle.")
+        sections.append(f"I bow to the Atman (eternal self) within you that seeks clarity. The Gita ({ack_ref}) teaches: '{ack_teaching[:150]}...' The very act of seeking understanding rather than reacting from Ahamkara (ego) is dharmic. Every Sthitaprajna (person of steady wisdom) has faced such moments (BG 2.55-56).")
     sections.append("")
 
-    # Inner Conflict Mirror - using actual verse teachings
+    # Inner Conflict Mirror - Shad Ripu and Raga-Dvesha diagnosis
     sections.append("# Inner Conflict Mirror")
-    if len(teachings) > 1:
-        mirror_teaching = teachings[1]["english"]
-        sections.append(f"The Gita reveals a profound truth ({verse_refs[1] if len(verse_refs) > 1 else '2:62'}): '{mirror_teaching[:200]}' This speaks directly to your situation with {rel_context}. What wound is being touched here? What do you truly need beneath the surface - to be seen? Understood? Respected? Safe?")
-    else:
-        sections.append("Ancient wisdom teaches: all outer conflicts are mirrors of inner ones. The Gita's teaching of svadhyaya (self-study) invites us to look within first. What do you truly need beneath the surface of this conflict?")
+    mirror_ref = verse_refs[1] if len(verse_refs) > 1 else "2:62-63"
+    mirror_teaching = teachings[1]["english"][:200] if len(teachings) > 1 else "From dwelling on sense objects, attachment arises; from attachment, desire; from desire, anger"
+    sections.append(f"Through the lens of Svadhyaya (self-study), the Gita ({mirror_ref}) reveals: '{mirror_teaching}...'")
+    sections.append("")
+    sections.append(f"The active Shad Ripu (inner enemy) in this situation is **{active_ripu.title()}** ({_get_shad_ripu_meaning(active_ripu)}). The Raga-Dvesha (attachment-aversion) dynamic with {rel_context} is: you are attached (Raga) to how you want them to be, and averse (Dvesha) to how they actually are. This gap between expectation and reality is the root of Dukha (suffering) as the Gita teaches.")
     sections.append("")
 
-    # Gita Teachings Used - comprehensive verse integration
+    # Gita Teachings Used - comprehensive verse integration with Sanskrit principles
     sections.append("# Gita Teachings Used")
-    sections.append(f"These verses from the Bhagavad Gita ({', '.join(verse_refs[:4])}) illuminate your path:")
+    sections.append(f"These verses from the Bhagavad Gita illuminate the path through {active_ripu.title()}:")
     sections.append("")
-    for i, wisdom in enumerate(teachings[:4], 1):
+    for i, wisdom in enumerate(teachings[:5], 1):
         if wisdom["english"]:
+            principle_note = f" - {wisdom['principle']}" if wisdom["principle"] else ""
             theme_note = f" [{wisdom['theme']}]" if wisdom["theme"] else ""
-            sections.append(f"{i}. ({wisdom['verse_ref']}){theme_note}: \"{wisdom['english'][:180]}...\"")
+            sections.append(f"{i}. ({wisdom['verse_ref']}){principle_note}{theme_note}: \"{wisdom['english'][:200]}\"")
             sections.append("")
     sections.append("")
 
-    # Dharma Options - grounded in specific retrieved wisdom
+    # Dharma Options - each grounded in a specific Yoga path with verse citation
     sections.append("# Dharma Options")
-    sections.append("Drawing from these teachings, consider three dharmic paths:")
+    sections.append(f"Drawing from the Gita's wisdom on {active_ripu.title()}, three dharmic paths emerge:")
     sections.append("")
 
-    # Option 1 - based on first relevant teaching
     opt1_ref = verse_refs[0] if verse_refs else "2:47"
-    opt1_teaching = teachings[0]["english"][:100] if teachings else "Focus on action, release attachment to results"
-    sections.append(f"1. **Karma Yoga Path** ({opt1_ref}): '{opt1_teaching}...' Applied here: Focus on YOUR actions and intentions, not on controlling {rel_context}'s response. What right action can you take today, regardless of outcome?")
+    opt1_teaching = teachings[0]["english"][:100] if teachings else "You have the right to action alone, never to its fruits"
+    sections.append(f"1. **Nishkama Karma (Desireless Action) Path** ({opt1_ref}): '{opt1_teaching}...' Applied through {rel_principle}: Focus on YOUR Svadharma (right action) toward {rel_context}, releasing Phala-sakti (attachment to outcome). The Gita teaches your Adhikara (right) is to action alone, never to results.")
     sections.append("")
 
-    # Option 2 - based on second teaching or forgiveness theme
-    opt2_ref = verse_refs[1] if len(verse_refs) > 1 else "12:13"
-    if len(teachings) > 1:
-        opt2_teaching = teachings[1]["english"][:100]
-    else:
-        opt2_teaching = "One who is free from malice toward all beings, friendly and compassionate"
-    sections.append(f"2. **Kshama (Forgiveness) Path** ({opt2_ref}): '{opt2_teaching}...' Applied here: Forgiveness is not condoning harm - it is YOUR liberation. It means releasing the poison of resentment so YOU can be free.")
+    opt2_ref = verse_refs[1] if len(verse_refs) > 1 else "12:13-14"
+    opt2_teaching = teachings[1]["english"][:100] if len(teachings) > 1 else "One who is free from malice toward all beings, friendly and compassionate"
+    sections.append(f"2. **Kshama (Forgiveness/Forbearance) Path** ({opt2_ref}): '{opt2_teaching}...' Kshama is listed among Daivi Sampat (divine qualities) in BG 16.1-3. Applied here: Kshama liberates YOU from Dvesha (aversion). It is not condoning Adharma - it is choosing Abhaya (fearlessness) over Krodha's prison.")
     sections.append("")
 
-    # Option 3 - equal vision
     opt3_ref = verse_refs[2] if len(verse_refs) > 2 else "6:32"
-    if len(teachings) > 2:
-        opt3_teaching = teachings[2]["english"][:100]
-    else:
-        opt3_teaching = "One who sees equality everywhere, seeing their own self in all beings"
-    sections.append(f"3. **Sama-Darshana (Equal Vision) Path** ({opt3_ref}): '{opt3_teaching}...' Applied here: See the divine struggling in {rel_context} too. They act from their own wounds, fears, and conditioning - not to hurt you, but because they suffer too.")
+    opt3_teaching = teachings[2]["english"][:100] if len(teachings) > 2 else "One who sees equality everywhere, seeing their own self in all beings"
+    sections.append(f"3. **Sama-Darshana (Equal Vision) Path** ({opt3_ref}): '{opt3_teaching}...' The highest Yoga is seeing the same Atman in {rel_context} as in yourself (BG 6.29). They act from their own Gunas and Prakriti (conditioning) - not to hurt you, but because they too are bound by Karma and Samskaras (BG 3.27-28).")
     sections.append("")
 
-    # Sacred Speech - with verse grounding
+    # Sacred Speech - Vak-tapas with specific verse
     sections.append("# Sacred Speech")
     speech_ref = verse_refs[3] if len(verse_refs) > 3 else "17:15"
-    sections.append(f"The Gita teaches ({speech_ref}): 'Speech that causes no distress, that is truthful, pleasant, and beneficial.' When you're ready to speak:")
+    sections.append(f"The Gita's Vak-tapas (austerity of speech) teaching ({speech_ref}): 'Speech that is Satya (truthful), Priya (pleasant), Hitam (beneficial), and Anudvega-karam (non-agitating).' This is the fourfold test for every word spoken in relationship conflict.")
     sections.append("")
-    sections.append("Try this dharmic formula: 'When [specific situation happens], I feel [your emotion], because I need [underlying need]. What I'm hoping we can explore together is [request, not demand].'")
-    sections.append("")
-    sections.append("Before speaking, pause and ask: Am I speaking from my wound or my wisdom? Will these words bring us closer to peace?")
+    sections.append(f"When speaking with {rel_context}, practice Arjavam (straightforwardness, BG 13.7) combined with Ahimsa (non-harm, BG 16.2). Express truth without weaponizing it. Before speaking, ask through the Vak-tapas lens: Is it Satya? Is it Priya? Is it Hitam?")
     sections.append("")
 
-    # Detachment Anchor - with core teaching
+    # Detachment Anchor - Vairagya with specific verse
     sections.append("# Detachment Anchor")
     anchor_ref = verse_refs[0] if verse_refs else "2:47"
     anchor_teaching = teachings[0]["english"] if teachings else "You have the right to action alone, never to the fruits"
     sections.append(f"({anchor_ref}): '{anchor_teaching[:150]}...'")
     sections.append("")
-    sections.append(f"Your dharma is to act with integrity toward {rel_context}; the outcome is not yours to control. Release attachment to HOW this must resolve. Trust that right action, performed without attachment, creates right results in ways you cannot foresee.")
+    sections.append(f"Vairagya (dispassion) does not mean indifference - it means freedom from Phala-sakti (attachment to fruits). Your Svadharma is to act with Shraddha (faith) and integrity toward {rel_context}; the Phala (result) unfolds according to the larger order of Karma. Nishkama Karma (desireless action) is your liberation (BG 2.47).")
     sections.append("")
 
-    # One Next Step - specific action from teachings
+    # One Next Step - specific Gita practice with Sanskrit name
     sections.append("# One Next Step")
-    step_ref = verse_refs[1] if len(verse_refs) > 1 else "6:5"
-    sections.append(f"Today, practice witness consciousness ({step_ref}): When emotions arise about this situation, simply observe them without becoming them. Say internally: 'I see you, anger/hurt/fear. I am not you - I am the one who witnesses.'")
-    sections.append("")
-    sections.append("This is sakshi bhava - the observer stance that the Gita teaches as the gateway to equanimity.")
+    step_ref = verse_refs[1] if len(verse_refs) > 1 else "6:19"
+    sections.append(f"Today, practice **Sakshi Bhava** (witness consciousness, {step_ref}): When the Vrittis (mental fluctuations) about {rel_context} arise, practice Drashta (the seer). Observe: 'I witness Krodha/Bhaya/Shoka arising. I am not this emotion - I am the Sakshi (witness) who observes it.' This is the Gita's foundation for Samatvam (equanimity, BG 2.48).")
     sections.append("")
 
-    # One Gentle Question
+    # One Gentle Question - through Svadhyaya lens
     sections.append("# One Gentle Question")
-    sections.append(f"If you were at complete peace with yourself - needing nothing from {rel_context} to feel whole - how would you respond to this situation? What would your highest self do here?")
+    sections.append(f"If Atma-tripti (self-contentment, BG 2.55) were fully established in you - needing nothing from {rel_context} for your Purnatva (inner completeness) - how would your Svadharma (right action) in this situation change?")
 
     return "\n".join(sections)
+
+
+def _get_shad_ripu_meaning(ripu: str) -> str:
+    """Return the meaning of a Shad Ripu term."""
+    meanings = {
+        "kama": "desire/lust - the root craving that binds",
+        "krodha": "anger/wrath - destroyer of discrimination",
+        "lobha": "greed/possessiveness - the insatiable hunger",
+        "moha": "delusion/confusion - the fog over Buddhi",
+        "mada": "pride/arrogance - the blindness of ego",
+        "matsarya": "envy/jealousy - the poison of comparison",
+    }
+    return meanings.get(ripu, "inner enemy of the mind")
 
 
 def build_secular_insufficient_response() -> str:
@@ -765,16 +877,18 @@ def build_secular_insufficient_response() -> str:
 
 
 def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, user_message: str) -> str:
-    """Generate a modern, friendly response using wisdom internally but without spiritual language.
+    """Generate a modern, friendly response where ALL advice derives from Gita principles.
 
-    This creates practical relationship guidance that's informed by timeless wisdom
-    but presented in everyday, secular language that anyone can relate to.
+    Every suggestion is rooted in a specific Gita teaching, but presented in
+    everyday, accessible language. The Gita Wisdom section explicitly cites
+    the guiding verses.
     """
     if not chunks:
         return build_secular_insufficient_response()
 
-    # Extract wisdom themes to inform our advice (but never mention them)
-    wisdom_items = [extract_verse_wisdom(chunk) for chunk in chunks[:8]]
+    # Extract wisdom to derive ALL advice from Gita principles
+    wisdom_items = [extract_verse_wisdom(chunk) for chunk in chunks[:10]]
+    teachings = [w for w in wisdom_items if w["english"]]
     all_tags = set()
     for w in wisdom_items:
         all_tags.update(tag.lower().replace("_", " ") for tag in w["tags"])
@@ -790,147 +904,156 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
     }
     rel_name, pronoun, obj_pronoun = relationship_contexts.get(relationship_type, ("this person", "they", "them"))
 
-    # Detect emotional themes from tags to tailor advice
+    # Detect emotional themes for Gita-derived advice routing
     is_anger = any(t in all_tags for t in ["anger", "krodha", "resentment", "hatred"])
     is_hurt = any(t in all_tags for t in ["suffering", "pain", "grief", "sorrow"])
     is_fear = any(t in all_tags for t in ["fear", "anxiety", "worry"])
     is_forgiveness = any(t in all_tags for t in ["forgiveness", "compassion", "karuna"])
-    is_communication = any(t in all_tags for t in ["speech", "truth", "communication"])
 
     sections = []
 
-    # I Hear You - Validation
+    # I Hear You - Validation (derived from Gita's Karuna/Daya)
     sections.append("# I Hear You")
     if is_anger:
-        sections.append(f"What you're feeling makes total sense. When someone we care about does something that feels unfair or hurtful, anger is a natural response. It's actually your mind's way of saying \"this matters to me\" and \"something isn't right here.\" Don't judge yourself for feeling this way.")
+        sections.append(f"What you're feeling makes complete sense. When someone we care about does something that feels unfair, that fire inside is your mind's way of saying \"this matters deeply to me.\" The ancient wisdom teaches that strong emotions aren't the enemy - it's what we do with them that matters. Don't judge yourself for feeling this way.")
     elif is_hurt:
-        sections.append(f"I can hear how much this is affecting you. When we're hurt by someone close to us, it can feel like the rug has been pulled out from under us. Your feelings are completely valid - this kind of pain runs deep precisely because the relationship matters to you.")
+        sections.append(f"I can hear how much this is affecting you. When someone close to us causes pain, it can shake our whole sense of safety. Your feelings are completely valid - this kind of hurt runs deep precisely because this relationship matters to you.")
     elif is_fear:
-        sections.append(f"It sounds like there's a lot of uncertainty here, and that can be really unsettling. Fear in relationships often comes from caring deeply and not wanting to lose something important. What you're feeling is understandable.")
+        sections.append(f"It sounds like there's a lot of uncertainty here. That unsettled feeling often comes from caring deeply about something and feeling like it's not in your control. What you're feeling is a very human response to an uncertain situation.")
     else:
-        sections.append(f"I hear you. Relationship challenges can feel overwhelming, especially when you're right in the middle of them. The fact that you're taking time to reflect on this instead of just reacting shows a lot of self-awareness.")
+        sections.append(f"I hear you. What you're going through is genuinely difficult. The fact that you're taking time to reflect rather than just react says something important about you - it shows real self-awareness and courage.")
     sections.append("")
 
-    # What Might Be Happening - Insight
+    # What Might Be Happening - Insight (derived from Gita's Raga-Dvesha + Krodha chain)
     sections.append("# What Might Be Happening")
     sections.append("A few things that might be at play here:")
     sections.append("")
 
     if is_anger:
-        sections.append(f"- **Unmet needs**: Anger often signals that something important to us isn't being acknowledged. What do you really need here - respect? To be heard? Fairness?")
-        sections.append(f"- **Accumulated frustration**: Sometimes what feels like a big reaction is actually built up from smaller moments over time.")
-        sections.append(f"- **Feeling powerless**: Anger can be our mind's way of trying to regain a sense of control when we feel helpless.")
+        # Derived from BG 2.62-63 Krodha chain + BG 16.21 three gates
+        sections.append(f"- **The replay trap**: When we keep mentally replaying what upset us, frustration grows into full anger, and anger clouds our thinking. Notice if you're stuck in a mental loop.")
+        sections.append(f"- **Unmet needs beneath the anger**: Strong frustration almost always signals something important to us isn't being acknowledged. What do you really need here - respect? Fairness? To be heard?")
+        sections.append(f"- **The desire-frustration cycle**: We wanted something specific from {rel_name} - when that expectation wasn't met, frustration naturally followed. The key isn't to stop wanting - it's to hold expectations more loosely.")
     elif is_hurt:
-        sections.append(f"- **Expectations vs. reality**: We often have unspoken expectations of how people should treat us. When reality doesn't match, it hurts.")
-        sections.append(f"- **Past experiences**: Sometimes current situations trigger old wounds. The pain might feel bigger than the situation because it's connected to something deeper.")
-        sections.append(f"- **Need for validation**: Feeling hurt often connects to wanting to be seen, valued, or understood.")
+        # Derived from BG 2.14 Titiksha + BG 2.55-56 Sthitaprajna
+        sections.append(f"- **The gap between expectation and reality**: We carry deep (often unspoken) expectations about how people should treat us. When reality doesn't match, the gap itself is what hurts.")
+        sections.append(f"- **Seeking worth from outside**: Part of the pain may come from looking to {rel_name} for a sense of validation or worth that ultimately can only come from within.")
+        sections.append(f"- **Temporary vs. permanent**: This pain feels enormous right now, but like all experiences, it will shift. Hard times come and go - your core self remains steady underneath.")
     else:
-        sections.append(f"- **Different perspectives**: You and {rel_name} might be seeing the same situation very differently. Neither view is necessarily \"wrong.\"")
-        sections.append(f"- **Underlying needs**: Conflicts often aren't about what they seem to be on the surface. What's the deeper need here?")
-        sections.append(f"- **Communication patterns**: Sometimes how we communicate (or don't) creates misunderstandings that snowball.")
+        # Derived from BG 3.27-28 on beings acting from conditioning + BG 6.32 equal vision
+        sections.append(f"- **Different inner worlds**: You and {rel_name} are experiencing this situation through completely different lenses, shaped by different experiences and fears. Neither view is the whole picture.")
+        sections.append(f"- **Surface vs. depth**: What this conflict seems to be about on the surface is rarely the full story. Underneath, there's usually a deeper need - for safety, connection, respect, or understanding.")
+        sections.append(f"- **Everyone acts from their conditioning**: People behave based on their accumulated experiences, habits, and fears. Understanding this doesn't excuse harm, but it helps you see the full picture.")
     sections.append("")
 
-    # The Other Side - Perspective
+    # The Other Side - Perspective (derived from BG 6.32 Sama-darshana + BG 3.27-28)
     sections.append("# The Other Side")
-    sections.append(f"Without excusing any hurtful behavior, it might help to consider: {rel_name} is also a person navigating their own fears, insecurities, and past experiences. People often act from their own pain, not from a desire to hurt us.")
+    sections.append(f"Without excusing any hurtful behavior: {rel_name} is also navigating their own fears, wounds, and conditioning. One of the deepest insights from ancient wisdom is that people act from their own inner state, not from a conscious desire to cause harm.")
     sections.append("")
-    sections.append("Some questions to consider:")
-    sections.append(f"- What might {pronoun} be feeling or fearing in this situation?")
-    sections.append(f"- Is there any possibility {pronoun}'re unaware of how their actions are affecting you?")
-    sections.append(f"- What pressure or stress might {pronoun} be under that you might not fully see?")
+    sections.append("Consider:")
+    sections.append(f"- What might {pronoun} be struggling with internally that you can't see?")
+    sections.append(f"- Is there a possibility {pronoun}'re unaware of how their actions are landing?")
+    sections.append(f"- What would it look like to see their struggles with the same compassion you'd want for yourself?")
     sections.append("")
-    sections.append("This isn't about justifying bad behavior - it's about understanding that helps you respond more effectively.")
+    sections.append("Understanding isn't the same as excusing. It's about seeing the full picture so you can respond more wisely.")
     sections.append("")
 
-    # What You Could Try - Practical suggestions
+    # What You Could Try - each derived from a specific Gita principle
     sections.append("# What You Could Try")
-    sections.append("Here are a few approaches that might help:")
+    sections.append("Here are approaches rooted in timeless wisdom, translated into practical action:")
     sections.append("")
 
-    if is_communication or is_anger:
-        sections.append("1. **Take a breather first**: Before having a conversation, give yourself time to move from reactive to responsive. A calm conversation is 10x more productive than one driven by raw emotion.")
+    if is_anger:
+        # Derived from BG 2.47 Nishkama Karma + BG 6.19 Sakshi Bhava + BG 17.15 Vak-tapas
+        sections.append(f"1. **Observe before you act** (the witness practice): When anger rises, pause. Instead of becoming the anger, try watching it: \"I notice I'm feeling angry right now.\" This tiny shift from being angry to noticing anger creates space for wisdom.")
         sections.append("")
-        sections.append("2. **Focus on what you can control**: You can't control how someone else behaves, but you can control how you respond. Ask yourself: \"What would the version of me I'm proud of do here?\"")
+        sections.append(f"2. **Focus on your actions, not their response**: You can't control how {rel_name} behaves. But you can control how you show up. Ask: \"What would the most centered version of me do right now?\"")
         sections.append("")
-        sections.append("3. **Lead with curiosity, not accusations**: Instead of \"You always...\" try \"Help me understand...\" People get defensive when they feel attacked, which usually makes things worse.")
+        sections.append(f"3. **Speak truth with kindness**: When you do talk, apply the fourfold test: Is it true? Is it kind? Is it helpful? Is it the right time? If any answer is no, wait.")
     elif is_forgiveness:
-        sections.append("1. **Separate the person from the action**: The person who hurt you is flawed (like all of us), but they're also more than their worst moments. This doesn't excuse the behavior - it just helps you process it.")
+        # Derived from BG 16.2 Kshama + BG 12.13-14 Adveshta + BG 6.5-6 Atma-seva
+        sections.append(f"1. **Forgiveness as self-liberation**: Holding resentment is like carrying a heavy stone hoping someone else gets tired. Forgiveness isn't saying it was okay - it's putting down the weight for YOUR peace.")
         sections.append("")
-        sections.append("2. **Forgiveness is for you**: Holding onto resentment is like drinking poison and expecting someone else to suffer. Forgiveness doesn't mean what happened was okay - it means you're choosing to let go for your own peace.")
+        sections.append(f"2. **Be your own best friend**: Treat yourself with the same kindness you'd give to a close friend in your situation. You can be your greatest ally or your harshest critic - choose wisely.")
         sections.append("")
-        sections.append("3. **Set boundaries if needed**: You can forgive someone and still set healthy boundaries. Understanding why someone hurt you doesn't mean you have to accept ongoing harmful behavior.")
+        sections.append(f"3. **Protect your peace with clear limits**: You can release resentment AND maintain firm boundaries. Understanding someone's behavior doesn't require tolerating it.")
     else:
-        sections.append("1. **Name what you actually need**: Get specific about what you're hoping for. \"I need to feel respected\" is clearer than \"I want things to be better.\"")
+        # Derived from BG 2.47 Nishkama Karma + BG 17.15 Vak-tapas + BG 6.32 Sama-darshana
+        sections.append(f"1. **Name your actual need**: Get specific. \"I need to feel respected when we disagree\" is clearer and more actionable than \"I want things to be better.\"")
         sections.append("")
-        sections.append("2. **Pick the right moment**: Timing matters. Choose a moment when both of you can be present and calm, not in the heat of conflict or when either of you is stressed/tired.")
+        sections.append(f"2. **Choose the right moment**: Timing matters. A conversation when both people are calm and present is worth ten conversations in the heat of the moment.")
         sections.append("")
-        sections.append("3. **Listen to understand, not to respond**: When they talk, really listen. Try to understand their point of view before crafting your rebuttal. People feel it when you genuinely try to understand them.")
+        sections.append(f"3. **Listen to truly understand**: When {pronoun} speak, listen as if you're genuinely trying to learn something new about them. People can feel the difference between real listening and waiting for your turn to talk.")
     sections.append("")
 
-    # A Way to Say It - Communication script
+    # A Way to Say It - derived from BG 17.15 Vak-tapas
     sections.append("# A Way to Say It")
-    sections.append("When you're ready, here's a template that tends to work well:")
+    sections.append("When you're ready, here's a way to open the conversation:")
     sections.append("")
-    sections.append(f"*\"Hey, can we talk about something that's been on my mind? When [specific situation], I felt [your emotion - use 'I' statements]. I think it's because [your underlying need]. I'm not looking to argue - I just want us to understand each other better. What was going on for you in that moment?\"*")
+    sections.append(f"*\"I've been thinking about us, and I want to share something honestly but kindly. When [specific situation], I felt [your emotion]. I think it's because I really need [underlying need]. I'm not looking for a debate - I just want us to understand each other better. Can you help me understand what was going on for you?\"*")
     sections.append("")
-    sections.append("Some tips:")
-    sections.append("- Start soft. The first 3 minutes of a conversation often predict how it'll go.")
-    sections.append("- Use \"I feel\" instead of \"You made me feel\" - it's less accusatory.")
-    sections.append("- Ask genuine questions and actually listen to the answers.")
+    sections.append("The key principles: truthful but kind, helpful not harmful, and spoken at the right time. Start gently - the first few minutes set the tone for the entire conversation.")
     sections.append("")
 
-    # Gita Wisdom - One relevant verse in accessible language
+    # Gita Wisdom - ONE to TWO relevant verses in accessible language
     sections.append("# Gita Wisdom")
     sections.append("")
 
-    # Select the most relevant verse based on emotional themes
+    # Primary verse based on emotional theme
     if is_anger and teachings:
-        # Find verse about anger/self-control
         wisdom = teachings[0]
         verse_ref = wisdom["verse_ref"] or "2:62-63"
-        sections.append(f"**{verse_ref}** - The Gita teaches that when we dwell on things that upset us, attachment grows. From attachment comes desire, and from unfulfilled desire comes anger. Anger clouds our judgment and leads to confusion.")
+        sections.append(f"**{verse_ref}** - There's a powerful insight here: when we keep replaying what upset us, attachment to the situation grows. From that attachment comes stronger desire for things to be different. When that desire is frustrated, anger erupts - and anger clouds our ability to think clearly.")
         sections.append("")
-        sections.append(f"What this means for you: Your anger is valid, but notice how it might be keeping you stuck. The ancient wisdom suggests that the path to peace isn't about suppressing anger - it's about not feeding it with endless mental replays. You can acknowledge the hurt without letting it consume you.")
+        sections.append(f"What this means for you: Your anger is valid, but notice if you're caught in a replay loop. The path to peace isn't suppressing the anger - it's choosing not to feed it with endless mental reruns. You can honor the hurt without letting it run the show.")
     elif is_hurt and teachings:
-        # Find verse about equanimity in pain
         wisdom = teachings[0]
         verse_ref = wisdom["verse_ref"] or "2:14"
-        sections.append(f"**{verse_ref}** - The Gita reminds us that pleasure and pain come and go like summer and winter - they are temporary visitors, not permanent residents. The wise person learns to bear them without being overwhelmed.")
+        sections.append(f"**{verse_ref}** - An ancient truth that still holds: joy and pain come and go like seasons. They are real experiences, but they are visitors - not permanent residents. The wise person learns to hold both without being swept away.")
         sections.append("")
-        sections.append(f"What this means for you: This pain is real, and it hurts. But it won't last forever. You've survived difficult moments before, and you'll survive this one too. The teaching isn't about denying your feelings - it's about trusting that you're stronger than any single moment of suffering.")
+        sections.append(f"What this means for you: This pain is real and it matters. But it won't define you forever. You've weathered storms before. Underneath the hurt, there's a steady, unshakeable part of you that no one can touch.")
     elif is_forgiveness and teachings:
-        # Find verse about forgiveness/compassion
         wisdom = teachings[0]
         verse_ref = wisdom["verse_ref"] or "12:13-14"
-        sections.append(f"**{verse_ref}** - The Gita describes the ideal person as one who is free from malice toward all beings, who is friendly and compassionate. Such a person is dear to the divine - not because they're perfect, but because they've chosen love over resentment.")
+        sections.append(f"**{verse_ref}** - The ideal described here is someone free from ill-will toward all beings, genuinely friendly and compassionate. Not because they've never been hurt, but because they've chosen freedom over resentment.")
         sections.append("")
-        sections.append(f"What this means for you: Kshama (forgiveness) in the Gita isn't about saying what happened was okay. It's about freeing yourself from the prison of resentment. When you forgive, you're not letting {obj_pronoun} off the hook - you're letting yourself off the hook of carrying this weight.")
+        sections.append(f"What this means for you: Kshama (forgiveness) isn't about saying what happened was acceptable. It's about freeing yourself from the weight of carrying it. When you forgive, you're not excusing {obj_pronoun} - you're releasing yourself.")
     elif is_fear and teachings:
-        # Find verse about fearlessness
         wisdom = teachings[0]
         verse_ref = wisdom["verse_ref"] or "2:20"
-        sections.append(f"**{verse_ref}** - The Gita teaches that your true self - your innermost essence - cannot be harmed, broken, or diminished by any external circumstance. The soul is eternal and unchanging.")
+        sections.append(f"**{verse_ref}** - At the deepest level, your true essence cannot be harmed, diminished, or taken away by any circumstance. Who you really are is beyond any situation.")
         sections.append("")
-        sections.append(f"What this means for you: Whatever you're afraid of losing in this relationship, your core worth remains intact. You are not defined by this situation. The fear you feel is natural, but at your center, there's a place that remains steady and whole, regardless of how this unfolds.")
+        sections.append(f"What this means for you: Whatever you're afraid of losing, your fundamental worth remains intact. You are not this situation. The fear is natural, but at your core, there's something steady and whole that persists regardless of how this unfolds.")
     else:
-        # Default: karma yoga - focus on what you can control
         verse_ref = "2:47"
         if teachings and teachings[0]["verse_ref"]:
             verse_ref = teachings[0]["verse_ref"]
-        sections.append(f"**{verse_ref}** - Perhaps the Gita's most famous teaching: \"You have the right to perform your actions, but you are not entitled to the fruits of your actions.\" Focus on doing the right thing; release attachment to how others respond.")
+        sections.append(f"**{verse_ref}** - Perhaps the most powerful teaching for relationships: you have every right to do your best - but you don't get to control the outcome. Focus on how YOU show up; release attachment to how others respond.")
         sections.append("")
-        sections.append(f"What this means for you: You can't control how {rel_name} will react or whether this situation will resolve the way you hope. But you can control how YOU show up - with integrity, honesty, and compassion. Do your part well, and let go of trying to control the outcome. That's where peace lives.")
+        sections.append(f"What this means for you: You can't control how {rel_name} will react. But you can control whether you show up with integrity, honesty, and genuine care. Do your part well, then let go of trying to manage the result. Peace lives in that letting go.")
+
+    # Add second verse if available
+    if len(teachings) > 1:
+        wisdom2 = teachings[1]
+        verse_ref2 = wisdom2["verse_ref"]
+        if verse_ref2:
+            sections.append("")
+            sections.append(f"**{verse_ref2}** - \"{wisdom2['english'][:120]}...\" This teaching reminds us that the quality of our actions matters more than any specific outcome we're chasing.")
     sections.append("")
 
-    # One Small Step - Actionable next step
+    # One Small Step - derived from Gita practice (Sakshi Bhava, Dhyana, Vak-tapas)
     sections.append("# One Small Step")
     if is_anger:
-        sections.append("For today, try this: When you notice anger about this situation rising, pause and take 3 slow breaths. Then ask yourself: \"What do I actually need here?\" Sometimes just naming the need takes away some of anger's intensity.")
+        # Derived from Sakshi Bhava (witness consciousness) BG 6.19
+        sections.append(f"For today: When you feel the anger rising, try this - instead of diving into it, step back and observe it. Say to yourself: \"I notice anger is here.\" That small act of witnessing rather than becoming the emotion is one of the most powerful things you can practice. It creates just enough space for wisdom.")
     elif is_hurt:
-        sections.append("For today, try this: Write down what you're feeling without censoring yourself. Sometimes getting thoughts out of our head and onto paper helps us see them more clearly. You might discover what you really need from this situation.")
+        # Derived from Svadhyaya (self-study) BG 4.38
+        sections.append(f"For today: Write down what you're really feeling - not what you think you \"should\" feel, but what's actually there. Sometimes getting it out of your head and onto paper reveals what you truly need. This honest self-reflection is one of the oldest paths to clarity.")
     elif is_forgiveness:
-        sections.append(f"For today, try this: See if you can hold two truths at once - \"what {pronoun} did hurt me\" AND \"{pronoun}'re a flawed human doing their best.\" You don't have to choose. Both can be true.")
+        # Derived from Sama-darshana (equal vision) BG 6.32
+        sections.append(f"For today: See if you can hold both truths at once - \"what {pronoun} did hurt me\" AND \"{pronoun}'re a human being struggling with their own fears and limitations.\" You don't have to choose between these. Both are true simultaneously.")
     else:
-        sections.append(f"For today, try this: Before your next interaction with {rel_name}, take a moment to set an intention. Not an outcome you're hoping for, but a way of being. Something like: \"I'm going to stay curious\" or \"I'm going to listen more than I speak.\"")
+        # Derived from Nishkama Karma (intention-setting) BG 2.47
+        sections.append(f"For today: Before your next interaction with {rel_name}, set a clear intention - not about the outcome you want, but about how you want to show up. Something like: \"I'm going to listen with genuine curiosity\" or \"I'm going to speak honestly but kindly.\" Focus on the action, not the result.")
 
     return "\n".join(sections)
