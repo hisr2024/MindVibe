@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { EmotionalResetWizard } from '@/components/emotional-reset'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
 import { FadeIn } from '@/components/ui'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 
 export default function EmotionalResetClient() {
   const router = useRouter()
@@ -81,6 +82,11 @@ export default function EmotionalResetClient() {
               </span>
             </div>
           </div>
+        </FadeIn>
+
+        {/* Talk to KIAAN */}
+        <FadeIn delay={0.2}>
+          <CompanionCTA fromTool="emotional-reset" />
         </FadeIn>
 
         {/* Additional Resources */}

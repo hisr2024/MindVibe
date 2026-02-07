@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -370,6 +371,8 @@ export default function ViyogClient() {
             </div>
           </section>
         </div>
+
+        <CompanionCTA fromTool="viyog" />
       </div>
     </main>
   )

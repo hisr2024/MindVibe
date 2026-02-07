@@ -691,6 +691,73 @@ async def delete_companion_memory(
     return {"status": "deleted", "message": "Memory removed. I'll forget that, friend."}
 
 
+@router.post("/voice/synthesize")
+@limiter.limit("15/minute")
+async def synthesize_companion_voice(
+    request: Request,
+    body: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Synthesize speech for a companion message with emotion-adaptive voice.
+
+    Uses the premium voice pipeline: Google Neural2 → Edge TTS → browser fallback.
+    Voice automatically adapts to the user's detected mood.
+
+    Body params:
+    - text: str - Text to synthesize
+    - mood: str - Detected mood for prosody adaptation
+    - voice_id: str - Voice persona (priya, maya, ananya, arjun, devi)
+    - language: str - Language code
+    """
+    from backend.services.companion_voice_service import (
+        synthesize_companion_voice as synth,
+    )
+    from fastapi.responses import Response
+
+    text = body.get("text", "")
+    if not text or len(text) > 5000:
+        raise HTTPException(status_code=400, detail="Text is required (max 5000 chars)")
+
+    mood = body.get("mood", "neutral")
+    voice_id = body.get("voice_id", "priya")
+    language = body.get("language", "en")
+
+    result = await synth(
+        text=text,
+        mood=mood,
+        voice_id=voice_id,
+        language=language,
+    )
+
+    if result.get("audio") and result.get("content_type"):
+        return Response(
+            content=result["audio"],
+            media_type=result["content_type"],
+            headers={
+                "X-Voice-Provider": result.get("provider", "unknown"),
+                "X-Voice-Persona": result.get("voice_persona", "unknown"),
+                "X-Voice-Quality": str(result.get("quality_score", 0)),
+                "Cache-Control": "public, max-age=604800",
+            },
+        )
+
+    # No audio generated - return metadata for browser-side synthesis
+    return {
+        "fallback_to_browser": True,
+        "ssml": result.get("ssml", ""),
+        "browser_config": result.get("browser_config", {}),
+        "voice_persona": result.get("voice_persona", "priya"),
+    }
+
+
+@router.get("/voices")
+async def get_companion_voices():
+    """Get available companion voice personas."""
+    from backend.services.companion_voice_service import get_available_voices
+
+    return {"voices": get_available_voices()}
+
+
 @router.get("/health")
 async def companion_health():
     """Health check for the companion service."""
@@ -701,4 +768,5 @@ async def companion_health():
         "status": "healthy",
         "ai_enhanced": engine._openai_available,
         "service": "kiaan-companion",
+        "voice_providers": ["google_neural2", "edge_tts", "browser_fallback"],
     }

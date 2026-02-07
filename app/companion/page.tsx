@@ -16,12 +16,29 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import CompanionChatBubble from '@/components/companion/CompanionChatBubble'
 import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
 import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorder'
 import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
+import CompanionVoicePlayer from '@/components/companion/CompanionVoicePlayer'
 import { apiFetch } from '@/lib/api'
+
+// ─── Referral Context Greetings ──────────────────────────────────────
+
+const REFERRAL_GREETINGS: Record<string, string> = {
+  'emotional-reset': "Hey friend! I see you just came from the Emotional Reset. How are you feeling now? Sometimes it helps to talk through what came up during that process. I'm all ears.",
+  'ardha': "Hey! I noticed you were working with Ardha on reframing your thoughts. Want to talk about what you discovered? Sometimes saying it out loud makes it click even deeper.",
+  'viyog': "Friend! You've been working on letting go with Viyoga. That takes real courage. How are you feeling about it? I'm here if you want to process what came up.",
+  'relationship-compass': "Hey there. Relationship stuff is never easy, and I saw you were exploring the Relationship Compass. Want to talk about what's going on? No judgment, just your friend listening.",
+  'karma-reset': "I see you've been doing some deep work with Karma Reset. That takes a lot of strength. How are you holding up? Sometimes it helps to just talk about it.",
+  'karma-footprint': "Hey friend! I noticed you were reflecting on your daily actions. That kind of self-awareness is beautiful. Want to share what you're thinking about?",
+  'karmic-tree': "Your growth journey is inspiring, friend! I saw you checking your Karmic Tree. Want to talk about where you are and where you want to go?",
+  'sacred-reflections': "Hey! I see you've been journaling. Writing is powerful, and so is talking it through. Want to share what's on your heart today?",
+  'kiaan-vibe': "I see you were vibing with some meditation music. Feeling more centered? Want to chat about anything that came up during that peaceful time?",
+  'wisdom-rooms': "Hey friend! I noticed you were in the Wisdom Rooms. Community wisdom is amazing, but sometimes you need one-on-one time. I'm right here for you.",
+}
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -62,10 +79,14 @@ const MOOD_BACKGROUNDS: Record<string, string> = {
 // ─── Component ──────────────────────────────────────────────────────────
 
 export default function CompanionPage() {
+  const searchParams = useSearchParams()
+  const referralTool = searchParams.get('from')
+  const referralMood = searchParams.get('mood')
+
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [currentMood, setCurrentMood] = useState('neutral')
+  const [currentMood, setCurrentMood] = useState(referralMood || 'neutral')
   const [session, setSession] = useState<SessionState>({
     sessionId: null,
     phase: 'connect',
@@ -76,6 +97,9 @@ export default function CompanionPage() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [showSuggestions, setShowSuggestions] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [autoPlayVoice, setAutoPlayVoice] = useState(false)
+  const [selectedVoice, setSelectedVoice] = useState('priya')
+  const [isSpeaking, setIsSpeaking] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -88,7 +112,11 @@ export default function CompanionPage() {
       const response = await apiFetch('/api/companion/session/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language: 'en' }),
+        body: JSON.stringify({
+          language: 'en',
+          referral_tool: referralTool || undefined,
+          referral_mood: referralMood || undefined,
+        }),
       })
 
       if (response.ok) {
@@ -134,16 +162,21 @@ export default function CompanionPage() {
       isActive: true,
     })
 
-    const hour = new Date().getHours()
+    // Use referral-aware greeting if user came from another tool
     let greeting: string
-    if (hour >= 5 && hour < 12) {
-      greeting = "Good morning, friend! I'm KIAAN. Think of me as that friend who's always here - no judgment, no agenda. What's on your mind today?"
-    } else if (hour >= 12 && hour < 17) {
-      greeting = "Hey there! I'm KIAAN, your personal friend who never gets tired of listening. How's your day going?"
-    } else if (hour >= 17 && hour < 21) {
-      greeting = "Good evening! I'm KIAAN. The day's winding down - perfect time for a real conversation. How are you feeling?"
+    if (referralTool && REFERRAL_GREETINGS[referralTool]) {
+      greeting = REFERRAL_GREETINGS[referralTool]
     } else {
-      greeting = "Hey night owl! I'm KIAAN. Can't sleep, or just need someone to talk to? Either way, I'm right here."
+      const hour = new Date().getHours()
+      if (hour >= 5 && hour < 12) {
+        greeting = "Good morning, friend! I'm KIAAN. Think of me as that friend who's always here - no judgment, no agenda. What's on your mind today?"
+      } else if (hour >= 12 && hour < 17) {
+        greeting = "Hey there! I'm KIAAN, your personal friend who never gets tired of listening. How's your day going?"
+      } else if (hour >= 17 && hour < 21) {
+        greeting = "Good evening! I'm KIAAN. The day's winding down - perfect time for a real conversation. How are you feeling?"
+      } else {
+        greeting = "Hey night owl! I'm KIAAN. Can't sleep, or just need someone to talk to? Either way, I'm right here."
+      }
     }
 
     setMessages([
@@ -158,7 +191,7 @@ export default function CompanionPage() {
     ])
     setShowSuggestions(true)
     setIsInitializing(false)
-  }, [])
+  }, [referralTool])
 
   useEffect(() => {
     startSession()
@@ -346,24 +379,10 @@ export default function CompanionPage() {
     sendMessage(suggestion)
   }, [sendMessage])
 
-  // ─── TTS (speak KIAAN's messages) ─────────────────────────────────
+  // ─── Voice state handlers ─────────────────────────────────────────
 
-  const speakMessage = useCallback(async (text: string) => {
-    // Use browser TTS as immediate option
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.rate = 0.9
-      utterance.pitch = 1.0
-      // Prefer a warm, natural voice
-      const voices = window.speechSynthesis.getVoices()
-      const preferred = voices.find(v =>
-        v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Natural')
-      )
-      if (preferred) utterance.voice = preferred
-      window.speechSynthesis.speak(utterance)
-    }
-  }, [])
+  const handleVoiceStart = useCallback(() => setIsSpeaking(true), [])
+  const handleVoiceEnd = useCallback(() => setIsSpeaking(false), [])
 
   // ─── Background gradient based on mood ────────────────────────────
 
@@ -416,6 +435,27 @@ export default function CompanionPage() {
                'New Friend'}
             </span>
 
+            {/* Auto-play voice toggle */}
+            <button
+              onClick={() => setAutoPlayVoice(v => !v)}
+              className={`p-1.5 rounded-full transition-all ${
+                autoPlayVoice
+                  ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+              title={autoPlayVoice ? 'Voice auto-play ON' : 'Voice auto-play OFF'}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {autoPlayVoice ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                )}
+              </svg>
+            </button>
+
             {session.isActive && (
               <button
                 onClick={endSession}
@@ -433,17 +473,30 @@ export default function CompanionPage() {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto px-4 py-4">
           {messages.map((msg, i) => (
-            <CompanionChatBubble
-              key={msg.id}
-              id={msg.id}
-              role={msg.role}
-              content={msg.content}
-              mood={msg.mood}
-              phase={msg.phase}
-              timestamp={msg.timestamp}
-              isLatest={i === messages.length - 1}
-              onSpeak={msg.role === 'companion' ? speakMessage : undefined}
-            />
+            <div key={msg.id}>
+              <CompanionChatBubble
+                id={msg.id}
+                role={msg.role}
+                content={msg.content}
+                mood={msg.mood}
+                phase={msg.phase}
+                timestamp={msg.timestamp}
+                isLatest={i === messages.length - 1}
+              />
+              {msg.role === 'companion' && (
+                <div className="ml-10 mb-3 -mt-1">
+                  <CompanionVoicePlayer
+                    text={msg.content}
+                    mood={msg.mood || currentMood}
+                    voiceId={selectedVoice}
+                    compact
+                    autoPlay={autoPlayVoice && i === messages.length - 1}
+                    onStart={handleVoiceStart}
+                    onEnd={handleVoiceEnd}
+                  />
+                </div>
+              )}
+            </div>
           ))}
 
           {/* Typing indicator */}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -401,7 +402,9 @@ export default function ArdhaClient() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <CompanionCTA fromTool="ardha" className="mt-4" />
+
+            <div className="flex flex-wrap gap-2 mt-4">
               <Link
                 href="/ardha"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"

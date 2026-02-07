@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard, KarmicTreeClient } from '@/components/tools'
 import { FadeIn } from '@/components/ui'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 
 export default function KarmicTreePageClient() {
   return (
@@ -83,6 +84,9 @@ export default function KarmicTreePageClient() {
               </Link>
             </div>
           </div>
+        </FadeIn>
+        <FadeIn delay={0.2}>
+          <CompanionCTA fromTool="karmic-tree" />
         </FadeIn>
       </div>
     </main>

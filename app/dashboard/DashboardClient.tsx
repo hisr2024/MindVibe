@@ -2,6 +2,7 @@
 
 import { FadeIn } from '@/components/ui'
 import { ToolsDashboardSection } from '@/components/dashboard'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -209,6 +210,11 @@ export default function DashboardClient() {
                 <span className="mt-0.5 text-[10px] text-white/40">How are you?</span>
               </Link>
             </motion.div>
+          </motion.div>
+
+          {/* KIAAN Companion - Best Friend CTA */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <CompanionCTA message="Your best friend who truly listens. Talk through anything — voice or text." />
           </motion.div>
 
           {/* Tools Section */}
