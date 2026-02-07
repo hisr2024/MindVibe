@@ -561,11 +561,7 @@ export default function CompanionPage() {
                   onKeyDown={handleKeyDown}
                   placeholder="Talk to KIAAN..."
                   rows={1}
-                  className="w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-700
-                             bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm
-                             text-gray-900 dark:text-white placeholder-gray-400
-                             focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300
-                             transition-all duration-200"
+                  className="w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 transition-all duration-200"
                   disabled={isLoading}
                 />
               </div>
@@ -600,8 +596,7 @@ export default function CompanionPage() {
             <p className="text-sm text-gray-500 mb-3">This conversation has ended.</p>
             <button
               onClick={startSession}
-              className="px-6 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-full
-                         text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105"
+              className="px-6 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105"
             >
               Start New Conversation
             </button>
