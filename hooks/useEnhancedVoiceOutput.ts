@@ -184,7 +184,14 @@ export function useEnhancedVoiceOutput(
           setIsLoading(false)
         }
 
-        await audio.play()
+        try {
+          await audio.play()
+        } catch {
+          // Autoplay blocked or audio element error — fall through to browser TTS
+          setIsSpeaking(false)
+          setIsLoading(false)
+          return false
+        }
         return true
       }
 

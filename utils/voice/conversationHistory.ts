@@ -114,8 +114,8 @@ export async function endHistorySession(summary?: string): Promise<void> {
 
     const request = store.get(currentSessionId)
     request.onsuccess = () => {
-      const session = request.result as ConversationSession
-      if (session) {
+      const session = request.result as ConversationSession | undefined
+      if (session && session.id) {
         session.endTime = Date.now()
         if (summary) session.summary = summary
         store.put(session)
@@ -152,8 +152,8 @@ export async function storeMessage(message: Omit<StoredMessage, 'sessionId'>): P
       const sessionStore = tx.objectStore('sessions')
       const req = sessionStore.get(currentSessionId)
       req.onsuccess = () => {
-        const session = req.result as ConversationSession
-        if (session) {
+        const session = req.result as ConversationSession | undefined
+        if (session && session.id) {
           session.messageCount++
           if (message.emotion) session.dominantEmotion = message.emotion
           sessionStore.put(session)
@@ -177,8 +177,8 @@ export async function toggleBookmark(messageId: string): Promise<boolean> {
     return new Promise((resolve) => {
       const request = store.get(messageId)
       request.onsuccess = () => {
-        const msg = request.result as StoredMessage
-        if (msg) {
+        const msg = request.result as StoredMessage | undefined
+        if (msg && msg.id) {
           msg.bookmarked = !msg.bookmarked
           store.put(msg)
           resolve(msg.bookmarked)

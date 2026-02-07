@@ -133,6 +133,7 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey | null> {
 }
 
 async function encryptData(data: string): Promise<string> {
+  if (typeof crypto === 'undefined' || !crypto.subtle) return data
   const key = await getOrCreateEncryptionKey()
   if (!key) return data
   const iv = crypto.getRandomValues(new Uint8Array(12))
@@ -146,6 +147,7 @@ async function encryptData(data: string): Promise<string> {
 
 async function decryptData(data: string): Promise<string> {
   if (!data.startsWith('ENC:')) return data
+  if (typeof crypto === 'undefined' || !crypto.subtle) return data
   const key = await getOrCreateEncryptionKey()
   if (!key) return data
   try {
@@ -224,7 +226,7 @@ class ContextMemoryManager {
         preferredLanguage: 'en',
         voiceSpeed: 0.95,
         formalityLevel: 'balanced',
-        preferredWisdomStyle: 'balanced' as 'direct'
+        preferredWisdomStyle: 'direct'
       }
     }
   }
@@ -233,7 +235,7 @@ class ContextMemoryManager {
    * Generate a unique user ID
    */
   private generateUserId(): string {
-    return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `user_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
   }
 
   /**
