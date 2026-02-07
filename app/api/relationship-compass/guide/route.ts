@@ -28,7 +28,9 @@ const FALLBACK_RESPONSE = {
     Citations: '(none)'
   },
   citations: [],
-  contextSufficient: false
+  contextSufficient: false,
+  secularMode: false,
+  fallback: true
 }
 
 export async function POST(request: NextRequest) {
@@ -63,7 +65,8 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           message,
           sessionId,
-          relationshipType: relationshipTypeRaw
+          relationshipType: relationshipTypeRaw,
+          secularMode: false // Guide route: Gita-only mode
         }),
         signal: controller.signal
       })
