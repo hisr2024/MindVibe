@@ -119,7 +119,6 @@ class DivineVoiceService {
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
         // Track auth failures - disable API after first 401
         if (response.status === 401 || response.status === 403) {
           this.apiFailCount++
@@ -127,7 +126,12 @@ class DivineVoiceService {
             this.apiDisabled = true
             console.warn('[DivineVoice] API requires authentication - using browser voice. Login for neural TTS.')
           }
+          // Return failure directly (don't throw → avoids double error log in catch block)
+          const err = new Error('Divine voice API unavailable (auth required)')
+          onError?.(err)
+          return { success: false, error: err.message }
         }
+        const errorText = await response.text()
         throw new Error(`Synthesis failed: ${errorText}`)
       }
 
@@ -231,14 +235,17 @@ class DivineVoiceService {
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
         if (response.status === 401 || response.status === 403) {
           this.apiFailCount++
           if (this.apiFailCount >= 1) {
             this.apiDisabled = true
             console.warn('[DivineVoice] API requires authentication - using browser voice. Login for neural TTS.')
           }
+          const err = new Error('Divine voice API unavailable (auth required)')
+          onError?.(err)
+          return { success: false, error: err.message }
         }
+        const errorText = await response.text()
         throw new Error(`Shloka synthesis failed: ${errorText}`)
       }
 
