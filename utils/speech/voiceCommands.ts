@@ -31,6 +31,13 @@ export type VoiceCommandType =
   | 'journal'
   | 'verse'
   | 'affirmation'
+  // Smart interruption commands
+  | 'explain'
+  | 'remember'
+  | 'recall_verse'
+  | 'soul_reading'
+  | 'how_am_i'
+  | 'export_chat'
 
 export interface VoiceCommandResult {
   type: VoiceCommandType
@@ -241,6 +248,67 @@ const COMMAND_DEFINITIONS: CommandDefinition[] = [
     minConfidence: 0.7,
     contexts: ['conversation'],
   },
+  // ─── Smart Interruption Commands ─────────────────────────────────
+  {
+    type: 'explain',
+    phrases: [
+      'explain that', 'what do you mean', 'say that differently',
+      'explain simpler', 'I don\'t understand', 'break it down',
+      'say it again differently', 'rephrase that', 'tell me more',
+      'explain more', 'what does that mean', 'simplify',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'remember',
+    phrases: [
+      'remember this', 'save this', 'bookmark this', 'that\'s important',
+      'I want to remember this', 'note this', 'mark this',
+      'keep this', 'don\'t forget this',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'recall_verse',
+    phrases: [
+      'what verse was that', 'which verse', 'what was that verse',
+      'repeat the verse', 'the shloka again', 'what chapter was that',
+      'which gita verse', 'verse number',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'soul_reading',
+    phrases: [
+      'read my soul', 'soul reading', 'analyze my emotions',
+      'emotional reading', 'how do I feel', 'what do you sense',
+      'read me', 'spiritual analysis',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'how_am_i',
+    phrases: [
+      'how am I doing', 'how have I been', 'my progress',
+      'my emotional journey', 'my patterns', 'what have you noticed',
+      'tell me about myself', 'my emotional trends',
+    ],
+    minConfidence: 0.7,
+    contexts: ['conversation'],
+  },
+  {
+    type: 'export_chat',
+    phrases: [
+      'export chat', 'save conversation', 'download history',
+      'export our conversation', 'save our talk', 'download chat',
+    ],
+    minConfidence: 0.8,
+    contexts: ['conversation'],
+  },
 ]
 
 // Language name mapping for the "switch to X" command
@@ -416,6 +484,12 @@ const COMMAND_DESCRIPTIONS: Record<string, string> = {
   journal: 'Open the journal for writing',
   verse: 'Hear a Bhagavad Gita verse',
   affirmation: 'Receive a positive affirmation',
+  explain: 'Ask KIAAN to rephrase or explain simpler',
+  remember: 'Bookmark the last response',
+  recall_verse: 'Recall the last verse shared',
+  soul_reading: 'Get a spiritual/emotional reading',
+  how_am_i: 'See your emotional journey and patterns',
+  export_chat: 'Export conversation history',
 }
 
 // Command response texts

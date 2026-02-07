@@ -44,6 +44,10 @@ import {
   getEmotionalSummary,
   contextMemory,
 } from '@/utils/voice/contextMemory'
+import { getEmotionAdaptedParams, getRecommendedPersona, type VoicePersona } from '@/utils/voice/emotionVoiceAdapter'
+import { initializeWisdomCache, getOfflineResponse } from '@/utils/voice/offlineWisdomCache'
+import { getProactivePrompts, acknowledgePrompt, resetProactiveSession, type ProactivePrompt } from '@/utils/voice/proactiveKiaan'
+import { storeMessage, startHistorySession, endHistorySession } from '@/utils/voice/conversationHistory'
 import type { OrbEmotion } from '@/components/voice/KiaanVoiceOrb'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -413,6 +417,8 @@ export default function VoiceCompanionPage() {
   const [currentEmotion, setCurrentEmotion] = useState<string | undefined>(undefined)
   const [breathingSteps, setBreathingSteps] = useState<BreathingStep[] | null>(null)
   const [speechRate, setSpeechRate] = useState(0.95)
+  const [voicePersona, setVoicePersona] = useState<VoicePersona>('friendly_kiaan')
+  const [proactivePrompt, setProactivePrompt] = useState<ProactivePrompt | null>(null)
   const [sessionStartTime] = useState(() => new Date())
 
   // Refs
@@ -429,30 +435,37 @@ export default function VoiceCompanionPage() {
   // Audio analyzer for orb reactivity
   const audioAnalyzer = useAudioAnalyzer()
 
-  // Cleanup on unmount
+  // Initialize systems + cleanup on unmount
   useEffect(() => {
     voiceCompanionService.startLearningSession()
+    initializeWisdomCache().catch(() => {})
+    startHistorySession().catch(() => {})
+    resetProactiveSession()
     return () => {
       isMountedRef.current = false
-      divineVoiceService.stop()
+      divineVoiceService.destroyAll()
       voiceCompanionService.endSession()
+      endHistorySession().catch(() => {})
       audioAnalyzer.stop()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Load personalized greeting and emotional context
+  // Load personalized greeting, emotional context, and proactive prompts
   useEffect(() => {
     let cancelled = false
     async function loadContext() {
       try {
-        const [greetingText, emotionSummary] = await Promise.all([
+        const [greetingText, emotionSummary, prompts] = await Promise.all([
           getPersonalizedKiaanGreeting(),
           getEmotionalSummary(),
+          getProactivePrompts(),
         ])
         if (cancelled) return
         setGreeting(greetingText || getTimeGreeting())
         if (emotionSummary.trend !== 'unknown') setEmotionalTrend(emotionSummary.trend)
+        // Show highest-priority proactive prompt
+        if (prompts.length > 0) setProactivePrompt(prompts[0])
       } catch {
         if (!cancelled) setGreeting(getTimeGreeting())
       }
@@ -609,13 +622,17 @@ export default function VoiceCompanionPage() {
 
     if (isMountedRef.current) setState('speaking')
 
+    // Get emotion-adaptive voice parameters
+    const voiceParams = getEmotionAdaptedParams(currentEmotion, voicePersona)
+
     // Tier 1: Divine Voice Service (Sarvam AI / Google Neural2 - highest quality)
     if (useDivineVoice) {
       try {
         const result = await divineVoiceService.synthesize({
           text,
           language: 'en',
-          style: 'friendly',
+          style: voiceParams.style as 'friendly' | 'divine' | 'calm' | 'wisdom' | 'chanting',
+          volume: voiceParams.volume,
           onEnd: () => {
             if (!isMountedRef.current) return
             if (conversationModeRef.current) {
@@ -745,8 +762,102 @@ export default function VoiceCompanionPage() {
       case 'language':
         if (params?.languageName) addSystemMessage(`Language: ${params.languageName}. (Multi-language support coming soon.)`)
         break
+
+      // ─── Smart Interruption Commands ─────────────────────────────
+      case 'explain': {
+        if (lastResponseRef.current) {
+          setState('processing')
+          const result = await voiceCompanionService.voiceQuery(
+            `Please rephrase this simpler and shorter: "${lastResponseRef.current.slice(0, 300)}"`,
+            'explain'
+          )
+          const text = result?.response || 'Let me try to say that more simply: ' + lastResponseRef.current.split('.').slice(0, 2).join('.') + '.'
+          addKiaanMessage(text)
+          await speakResponse(text)
+        } else {
+          addSystemMessage('Nothing to explain yet. Ask me something first!')
+        }
+        break
+      }
+
+      case 'remember': {
+        const lastKiaan = messages.filter(m => m.role === 'kiaan').pop()
+        if (lastKiaan) {
+          const success = await saveSacredReflection(lastKiaan.content, 'kiaan')
+          if (success) {
+            setMessages(prev => prev.map(m => m.id === lastKiaan.id ? { ...m, saved: true } : m))
+            addSystemMessage('Saved to Sacred Reflections. This wisdom is yours forever.')
+          }
+        } else {
+          addSystemMessage('Nothing to save yet. Let\'s create some wisdom first!')
+        }
+        break
+      }
+
+      case 'recall_verse': {
+        const lastVerse = messages.filter(m => m.verse).pop()
+        if (lastVerse?.verse) {
+          const text = `That was Bhagavad Gita, Chapter ${lastVerse.verse.chapter}, Verse ${lastVerse.verse.verse}: "${lastVerse.verse.text}"`
+          addKiaanMessage(text, { verse: lastVerse.verse })
+          await speakResponse(text)
+        } else {
+          addSystemMessage('No verse shared yet in this conversation. Say "verse" to hear one!')
+        }
+        break
+      }
+
+      case 'soul_reading': {
+        setState('processing')
+        const reading = await voiceCompanionService.getSoulReading(
+          messages.filter(m => m.role === 'user').map(m => m.content).slice(-5).join('. ')
+        )
+        if (reading) {
+          const text = `Dear friend, here is what I sense: Your primary energy is ${reading.emotion.primary} with ${Math.round(reading.emotion.intensity * 100)}% intensity. ${reading.spiritual.consciousnessLevel ? `Spiritually, you are at the ${reading.spiritual.consciousnessLevel} level.` : ''} ${reading.recommendations[0] || ''}`
+          addKiaanMessage(text)
+          await speakResponse(text)
+        } else {
+          const text = 'Dear one, share a bit more with me so I can truly sense your spiritual state. Tell me what\'s in your heart.'
+          addKiaanMessage(text)
+          await speakResponse(text)
+        }
+        break
+      }
+
+      case 'how_am_i': {
+        setState('processing')
+        const summary = await getEmotionalSummary()
+        const profile = contextMemory.getProfile()
+        let text = 'Here\'s what I\'ve observed on your journey, dear friend: '
+        if (profile && profile.totalConversations > 0) {
+          text += `We've had ${profile.totalConversations} conversations together. `
+          if (summary.dominant) text += `Your most frequent emotional theme is ${summary.dominant}. `
+          if (summary.trend === 'improving') text += 'And here\'s the beautiful part - your emotional trend is improving! You\'re growing, and I can see it. '
+          else if (summary.trend === 'concerning') text += 'I\'ve noticed some heaviness lately. Remember, I\'m here for you through all of it. '
+          else text += 'Your emotional journey has been steady. '
+          if (profile.recurringTopics.length > 0) text += `Topics close to your heart: ${profile.recurringTopics.slice(0, 3).map(t => t.topic.replace('_', ' ')).join(', ')}. `
+        } else {
+          text += 'We\'re just beginning our journey together! The more we talk, the more I\'ll understand your patterns and growth.'
+        }
+        addKiaanMessage(text)
+        await speakResponse(text)
+        break
+      }
+
+      case 'export_chat': {
+        const { exportAsText } = await import('@/utils/voice/conversationHistory')
+        const exported = await exportAsText()
+        const blob = new Blob([exported], { type: 'text/plain' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `kiaan-conversation-${new Date().toISOString().split('T')[0]}.txt`
+        a.click()
+        URL.revokeObjectURL(url)
+        addSystemMessage('Conversation exported! Check your downloads.')
+        break
+      }
     }
-  }, [speakResponse, stopAll, addSystemMessage, addKiaanMessage, startBreathingExercise, clearConversation])
+  }, [speakResponse, stopAll, addSystemMessage, addKiaanMessage, startBreathingExercise, clearConversation, messages, currentEmotion])
 
   // ─── Handle User Input ────────────────────────────────────────────
 
@@ -781,19 +892,28 @@ export default function VoiceCompanionPage() {
       setState('processing')
       setError(null)
 
-      // Try session-based message first, then stateless fallback
+      // Try session-based message first, then stateless fallback, then offline cache
       let result = await voiceCompanionService.sendMessage(text)
       if (!result) {
         const context = await getKiaanContextForResponse()
         result = await voiceCompanionService.voiceQuery(text, context || 'voice')
       }
 
-      // Build the response: backend answer OR emotion-specific Gita wisdom
+      // Build the response: backend answer OR emotion-specific Gita wisdom OR offline cache
+      let fallback: string
       const emotionPool = emotion && EMOTION_RESPONSES[emotion]
-      const fallback = emotionPool
-        ? emotionPool[Math.floor(Math.random() * emotionPool.length)]
-        : FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
+      if (emotionPool) {
+        fallback = emotionPool[Math.floor(Math.random() * emotionPool.length)]
+      } else {
+        // Try offline wisdom cache (IndexedDB) before static fallback
+        const offlineWisdom = await getOfflineResponse(emotion).catch(() => null)
+        fallback = offlineWisdom?.response || FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
+      }
       let responseText = result?.response || fallback
+
+      // Adapt voice persona based on detected emotion
+      const recommended = getRecommendedPersona(emotion, 'conversation')
+      if (recommended !== voicePersona) setVoicePersona(recommended)
 
       // KIAAN is a friend: add follow-up questions to deepen the conversation
       // Every 1-2 turns, ask a probing question (not on first or every turn)
@@ -806,7 +926,10 @@ export default function VoiceCompanionPage() {
 
       addKiaanMessage(responseText, { verse: result?.verse, emotion: result?.emotion || emotion })
 
+      // Store in encrypted context memory + durable IndexedDB history
       try { await recordKiaanConversation(text, responseText) } catch { /* non-fatal */ }
+      storeMessage({ id: `user-${Date.now()-1}`, role: 'user', content: text, timestamp: Date.now()-1, emotion }).catch(() => {})
+      storeMessage({ id: `kiaan-${Date.now()}`, role: 'kiaan', content: responseText, timestamp: Date.now(), emotion: result?.emotion || emotion, verse: result?.verse }).catch(() => {})
 
       await speakResponse(responseText)
     } catch {
@@ -1000,6 +1123,17 @@ export default function VoiceCompanionPage() {
             </div>
           ))}
           <div className="flex items-center justify-between">
+            <span className="text-sm text-white/70">Voice Persona</span>
+            <div className="flex gap-1">
+              {([['friendly_kiaan', 'Friend'], ['divine_guide', 'Divine'], ['meditation_voice', 'Calm']] as const).map(([id, label]) => (
+                <button key={id} onClick={() => setVoicePersona(id)}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all ${voicePersona === id ? 'bg-mv-aurora/20 text-mv-aurora border border-mv-aurora/30' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
             <span className="text-sm text-white/70">Speech speed</span>
             <div className="flex items-center gap-2">
               <button onClick={() => setSpeechRate(prev => Math.max(prev - 0.05, 0.6))} className="w-6 h-6 rounded-full bg-white/10 text-white/60 text-xs flex items-center justify-center hover:bg-white/20">-</button>
@@ -1025,6 +1159,27 @@ export default function VoiceCompanionPage() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Proactive KIAAN Prompt */}
+      {proactivePrompt && messages.length === 0 && (
+        <div className="relative z-10 mx-4 mb-2 px-4 py-3 rounded-2xl bg-mv-aurora/10 border border-mv-aurora/20 backdrop-blur-sm" style={{ animation: 'fadeSlideUp 0.4s ease-out' }}>
+          <p className="text-sm text-white/80 leading-relaxed">{proactivePrompt.message}</p>
+          {proactivePrompt.suggestedActions && (
+            <div className="flex gap-2 mt-2">
+              {proactivePrompt.suggestedActions.map(action => (
+                <button key={action} onClick={() => { acknowledgePrompt(proactivePrompt.id); setProactivePrompt(null); handleUserInput(action) }}
+                  className="px-3 py-1 rounded-full text-xs bg-mv-aurora/15 border border-mv-aurora/25 text-mv-aurora hover:bg-mv-aurora/25 transition-all">
+                  {action}
+                </button>
+              ))}
+            </div>
+          )}
+          <button onClick={() => { acknowledgePrompt(proactivePrompt.id); setProactivePrompt(null) }}
+            className="absolute top-2 right-2 text-white/30 hover:text-white/50 transition-colors" aria-label="Dismiss">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
         </div>
       )}
 
