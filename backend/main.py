@@ -1062,6 +1062,24 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Content router: {e}")
 
+# Load Voice Companion (Best Friend) router
+startup_logger.info("\n[Companion] Attempting to import Voice Companion router...")
+try:
+    from backend.routes.voice_companion import router as voice_companion_router
+    app.include_router(voice_companion_router)
+    startup_logger.info("✅ [SUCCESS] Voice Companion router loaded")
+    startup_logger.info("   • POST   /api/companion/session/start - Start companion session")
+    startup_logger.info("   • POST   /api/companion/message - Send message to KIAAN friend")
+    startup_logger.info("   • POST   /api/companion/session/end - End companion session")
+    startup_logger.info("   • GET    /api/companion/history - Conversation history")
+    startup_logger.info("   • GET    /api/companion/profile - Companion profile")
+    startup_logger.info("   • PATCH  /api/companion/profile - Update preferences")
+    startup_logger.info("   • GET    /api/companion/memories - User memories")
+    startup_logger.info("   • DELETE /api/companion/memories/{id} - Delete memory")
+    startup_logger.info("   • GET    /api/companion/health - Health check")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Voice Companion router: {e}")
+
 startup_logger.info("="*80)
 startup_logger.info(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 startup_logger.info("="*80 + "\n")

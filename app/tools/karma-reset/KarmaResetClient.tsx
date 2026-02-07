@@ -19,6 +19,7 @@ import { KiaanMetadata } from '@/types/kiaan-ecosystem.types'
 import { springConfigs } from '@/lib/animations/spring-configs'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
 
@@ -472,6 +473,8 @@ export default function KarmaResetClient() {
             </div>
           </div>
         </div>
+
+        <CompanionCTA fromTool="karma-reset" />
       </div>
     </div>
   )

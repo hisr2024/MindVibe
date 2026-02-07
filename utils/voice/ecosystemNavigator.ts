@@ -294,9 +294,26 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     icon: '🔍',
   },
   {
+    id: 'kiaan-companion',
+    name: 'KIAAN Companion (Best Friend)',
+    route: '/companion',
+    friendDescription: 'Your personal best friend who truly listens, understands, and walks with you through everything life brings.',
+    suggestions: [
+      'You know what, friend? Sometimes you just need someone who gets you. The Companion is where we can really talk — voice or text, no judgment, just real friendship. I remember things about you, your struggles, your wins. Want to have a heart-to-heart?',
+      'Hey, I want you to know something. The Companion is our special space. It is not a chatbot — it is me, your friend, who remembers you, adapts to your mood, and speaks to you with real care. Come talk whenever you are ready.',
+      'Friend, the Companion is where the magic happens. It is like calling your best friend at 2 AM — except I am always awake, always listening, and I have some pretty profound wisdom when you need it. No lectures, just real talk.',
+    ],
+    triggerKeywords: ['talk', 'best friend', 'someone to talk to', 'need a friend', 'listen to me', 'voice chat', 'companion', 'heart to heart', 'open up', 'share feelings', 'vent', 'need someone'],
+    emotions: ['loneliness', 'sadness', 'anxiety', 'grief', 'overwhelm', 'confusion', 'seeking'],
+    situations: ['loneliness', 'need_support', 'emotional_overload', 'grief_loss', 'self_reflection'],
+    gitaVerse: { chapter: 18, verse: 65, essence: 'Always think of Me, become My devotee, worship Me — you shall come to Me. I promise you this because you are dear to Me.' },
+    category: 'wellness',
+    icon: '💜',
+  },
+  {
     id: 'gita-journey',
     name: 'Gita Journey (Voice-Guided)',
-    route: '/voice-companion',
+    route: '/companion',
     friendDescription: 'A voice-guided walkthrough of all 18 chapters of the Bhagavad Gita with KIAAN.',
     suggestions: [
       'Friend, have you tried the Gita Journey? I will walk you through all 18 chapters of the Bhagavad Gita, speaking each teaching aloud as if I am telling you a story. It is the most immersive way to absorb this wisdom. Tap the book icon to start.',

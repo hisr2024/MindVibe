@@ -164,6 +164,16 @@ from backend.models.chat import (
     ChatTranslation,
 )
 
+# Companion (KIAAN Best Friend) models
+from backend.models.companion import (
+    CompanionMood,
+    ConversationPhase,
+    CompanionSession,
+    CompanionMessage,
+    CompanionMemory,
+    CompanionProfile,
+)
+
 # Emotional & analysis models
 from backend.models.emotional import (
     EmotionalResetSession,
@@ -329,4 +339,11 @@ __all__ = [
     "KiaanChatSession",
     # Personal Journey
     "PersonalJourney",
+    # Companion (KIAAN Best Friend) models
+    "CompanionMood",
+    "ConversationPhase",
+    "CompanionSession",
+    "CompanionMessage",
+    "CompanionMemory",
+    "CompanionProfile",
 ]

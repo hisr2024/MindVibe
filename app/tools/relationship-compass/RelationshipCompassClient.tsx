@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
 import { apiFetch } from '@/lib/api'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -287,6 +288,8 @@ export default function RelationshipCompassClient() {
             </div>
           </section>
         </div>
+
+        <CompanionCTA fromTool="relationship-compass" />
       </div>
     </main>
   )

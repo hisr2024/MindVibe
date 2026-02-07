@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ToolHeader, ToolActionCard, KarmaPlant, type KarmaFootprintState } from '@/components/tools'
 import { apiFetch } from '@/lib/api'
 import { FadeIn } from '@/components/ui'
+import CompanionCTA from '@/components/companion/CompanionCTA'
 
 interface FootprintAnalysis {
   state: KarmaFootprintState
@@ -313,6 +314,10 @@ export default function KarmaFootprintClient() {
             </FadeIn>
           </section>
         </div>
+
+        <FadeIn delay={0.35}>
+          <CompanionCTA fromTool="karma-footprint" />
+        </FadeIn>
       </div>
     </main>
   )

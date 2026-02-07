@@ -35,6 +35,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
     { href: '/introduction', label: t('navigation.mainNav.introduction', 'Introduction'), divine: true },
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN') },
+    { href: '/companion', label: t('navigation.features.companion', 'Companion') },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
     { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true },
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
