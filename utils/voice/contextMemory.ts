@@ -424,7 +424,11 @@ class ContextMemoryManager {
   }
 
   /**
-   * Get context for KIAAN's response
+   * Get context for KIAAN's response.
+   *
+   * Enhanced multi-turn context: includes a sliding window of the last 10
+   * conversation turns so KIAAN can reference what was just discussed,
+   * plus long-term emotional and topic patterns.
    */
   async getContextForResponse(): Promise<string> {
     await this.initialize()
@@ -474,7 +478,20 @@ class ContextMemoryManager {
       contextParts.push(`[User has shared: ${recentInsights}]`)
     }
 
-    // Add last conversation summary if available
+    // ─── Multi-turn sliding window (last 10 exchanges) ──────────────
+    // Gives KIAAN short-term memory of what was just discussed
+    const recentTurns = this.conversations.slice(-10)
+    if (recentTurns.length > 0) {
+      const turnSummaries = recentTurns.map(c => {
+        const emotionTag = c.detectedEmotion ? ` [${c.detectedEmotion}]` : ''
+        const userSnippet = c.userMessage.length > 120 ? c.userMessage.slice(0, 120) + '...' : c.userMessage
+        const kiaanSnippet = c.kiaanResponse.length > 120 ? c.kiaanResponse.slice(0, 120) + '...' : c.kiaanResponse
+        return `User${emotionTag}: ${userSnippet}\nKIAAN: ${kiaanSnippet}`
+      })
+      contextParts.push(`[Recent conversation:\n${turnSummaries.join('\n---\n')}]`)
+    }
+
+    // Add last conversation summary if available (for cross-session context)
     const lastConversation = this.conversations[this.conversations.length - 1]
     if (lastConversation && hoursSinceLast < 24) {
       contextParts.push(`[Last topic: ${lastConversation.topics?.join(', ') || 'general'}]`)
