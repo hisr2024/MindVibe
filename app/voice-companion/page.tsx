@@ -461,10 +461,16 @@ export default function VoiceCompanionPage() {
     return () => { cancelled = true }
   }, [])
 
-  // Scroll to bottom
+  // Scroll to bottom only when new messages arrive
+  const lastMessageCountRef = useRef(0)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, breathingSteps])
+    if (messages.length > lastMessageCountRef.current || breathingSteps) {
+      lastMessageCountRef.current = messages.length
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      })
+    }
+  }, [messages.length, breathingSteps])
 
   // ─── Wake Word Detection ──────────────────────────────────────────
 
@@ -664,6 +670,7 @@ export default function VoiceCompanionPage() {
     setError(null)
     setCurrentEmotion(undefined)
     setBreathingSteps(null)
+    turnCountRef.current = 0
     voiceCompanionService.endSession()
   }, [stopAll])
 
@@ -804,9 +811,19 @@ export default function VoiceCompanionPage() {
       await speakResponse(responseText)
     } catch {
       if (isMountedRef.current) {
-        setWakeWordPaused(false)
-        setState(wakeWordEnabled ? 'wake-listening' : 'idle')
-        setError('I had trouble processing that. Can you try again?')
+        addSystemMessage('I had trouble processing that. Can you try again?')
+        // If in conversation mode, stay listening so user can retry immediately
+        if (conversationModeRef.current) {
+          setTimeout(() => {
+            if (!isMountedRef.current) return
+            audioAnalyzerRef.current.start()
+            voiceInputRef.current.startListening()
+            setState('listening')
+          }, 500)
+        } else {
+          setWakeWordPaused(false)
+          setState(wakeWordEnabled ? 'wake-listening' : 'idle')
+        }
       }
     } finally {
       processingRef.current = false
@@ -824,11 +841,15 @@ export default function VoiceCompanionPage() {
 
   // ─── UI Handlers ──────────────────────────────────────────────────
 
+  const textInputRef = useRef<HTMLInputElement>(null)
+
   const handleTextSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!textInput.trim()) return
     handleUserInput(textInput.trim())
     setTextInput('')
+    // Keep focus so user can type next message immediately
+    textInputRef.current?.focus()
   }
 
   const handleOrbClick = () => {
@@ -1064,12 +1085,14 @@ export default function VoiceCompanionPage() {
             {stateLabel[state]}
           </p>
 
-          {/* Interim transcript (while speaking) */}
-          {voiceInput.interimTranscript && (
-            <p className="mt-1 text-sm text-mv-sunrise/70 italic max-w-xs text-center truncate">
-              {voiceInput.interimTranscript}
-            </p>
-          )}
+          {/* Interim transcript (while listening) - fixed height to prevent layout shift */}
+          <div className="mt-1 h-5 overflow-hidden">
+            {voiceInput.interimTranscript && (
+              <p className="text-sm text-mv-sunrise/70 italic max-w-xs text-center truncate whitespace-nowrap">
+                {voiceInput.interimTranscript}
+              </p>
+            )}
+          </div>
 
           {/* Current emotion indicator */}
           {currentEmotion && EMOTION_LABELS[currentEmotion] && (
@@ -1215,12 +1238,14 @@ export default function VoiceCompanionPage() {
         {/* Text input + send */}
         <form onSubmit={handleTextSubmit} className="flex items-center gap-2">
           <input
+            ref={textInputRef}
             type="text"
             value={textInput}
             onChange={e => setTextInput(e.target.value)}
             placeholder="Type a message to KIAAN..."
-            className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-mv-sunrise/30 focus:ring-1 focus:ring-mv-sunrise/15 transition-all"
-            disabled={state === 'processing' || state === 'speaking' || state === 'breathing'}
+            className={`flex-1 bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-mv-sunrise/30 focus:ring-1 focus:ring-mv-sunrise/15 transition-all ${['processing', 'speaking', 'breathing'].includes(state) ? 'opacity-50' : ''}`}
+            disabled={state === 'breathing'}
+            aria-disabled={['processing', 'speaking'].includes(state)}
           />
           {textInput.trim() ? (
             <button type="submit" className="px-4 py-2.5 rounded-xl bg-mv-sunrise/15 text-mv-sunrise text-sm font-medium hover:bg-mv-sunrise/25 transition-colors active:scale-95" disabled={state === 'processing' || state === 'speaking' || state === 'breathing'}>
@@ -1263,6 +1288,15 @@ export default function VoiceCompanionPage() {
         onSaveConversation={saveConversation}
         sessionStartTime={sessionStartTime}
       />
+
+      {/* Accessibility: announce state changes to screen readers */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {state === 'listening' && 'KIAAN is listening. Please speak.'}
+        {state === 'speaking' && 'KIAAN is speaking. Say stop to interrupt.'}
+        {state === 'processing' && 'KIAAN is thinking about your message.'}
+        {state === 'breathing' && 'Breathing exercise in progress.'}
+        {state === 'error' && error}
+      </div>
 
       {/* Global animation styles */}
       <style>{`

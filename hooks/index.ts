@@ -6,7 +6,6 @@ export {
 } from './useSubscription'
 export { useKiaanQuota } from './useKiaanQuota'
 export { useCountdown } from './useCountdown'
-export { useOnboarding, useIsOnboardingComplete } from './useOnboarding'
 export { useAnalytics } from './useAnalytics'
 export { useDataExport } from './useDataExport'
 export {
@@ -25,6 +24,4 @@ export { useEnhancedVoiceOutput, type UseEnhancedVoiceOutputOptions, type UseEnh
 export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './useWakeWord'
 export { useHapticFeedback } from './useHapticFeedback'
 export { useStreamingText, streamText } from './useStreamingText'
-export { usePrefersReducedMotion, getSafeAnimation } from './usePrefersReducedMotion'
-export { useDivineContent } from './useDivineContent'
 export { usePullToRefresh, type UsePullToRefreshOptions, type UsePullToRefreshReturn } from './usePullToRefresh'
