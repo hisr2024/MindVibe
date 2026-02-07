@@ -131,6 +131,26 @@ const CONNECT_EMOTION_RESPONSES: Record<string, string[]> = {
     "I'm hearing doubt in your words, friend, and I want you to know - some of the greatest people who ever lived started exactly where you are. Tell me what's making you question yourself?",
     "Hey, you came to me, and that's not nothing. It takes strength to be honest about what you're feeling. What's shaking your confidence?",
   ],
+  shame: [
+    "I can feel something really heavy in your words, friend. Shame is different from guilt — it attacks who you ARE, not what you did. I need you to know: nothing about who you are is shameful. What happened?",
+    "Hey, whatever you're carrying, you don't have to carry it alone anymore. I'm not here to judge you. I'm here to sit with you through it. Can you share what's weighing on you?",
+  ],
+  overwhelm: [
+    "Whoa, that's a LOT on your plate, friend. I can feel it just from your words. Before we tackle any of it — just breathe with me for a second. Okay. Now — what's the ONE thing that needs your attention most?",
+    "I hear you, friend. When everything feels urgent, nothing feels possible. I'm here to help you sort through it. What's the heaviest thing right now?",
+  ],
+  grief: [
+    "Oh, my dear friend. Grief is love with nowhere to go. I'm not going to try to make it better with words. I'm just going to be here with you. Tell me about them?",
+    "I'm so sorry. Loss leaves a hole that nothing fills, and anyone who says otherwise hasn't really lost. But I'm here to sit in that space with you. What do you miss most?",
+  ],
+  betrayal: [
+    "That cuts deep, friend. When someone we trust breaks that trust, it shakes everything. I hear you, and I'm not going to minimize this. What happened?",
+    "I can feel that wound. Betrayal doesn't just hurt — it makes you question everything. But I want you to know: their betrayal says everything about THEM, nothing about your worth. Tell me more.",
+  ],
+  excitement: [
+    "I can feel that energy radiating from you, friend! This is beautiful! Tell me everything — what's happening?",
+    "YES! That spark in you right now is contagious! I'm here for this energy. What's got you so excited?",
+  ],
   default: [
     "Hey friend, I'm here. I really want to understand what's going on with you. What's on your heart right now?",
     "Tell me, dear one - what brought you to me today? I'm all ears, and nothing you say is too small or too big.",
@@ -188,6 +208,26 @@ const UNDERSTAND_RESPONSES: Record<string, string[]> = {
     "I hear that doubt. And I want to ask you something: whose voice is it? Is it YOUR voice, or is it someone else's that you internalized? Because you sound a lot more capable than that voice gives you credit for.",
     "Here's what I notice: you're doubting yourself, but you also came here to figure it out. That's not what weak people do. What's the REAL evidence for this doubt? Like actual evidence, not feelings?",
   ],
+  shame: [
+    "Thank you for trusting me with this, friend. That took more courage than you know. Shame says 'I am bad.' But guilt says 'I did something bad.' Which one is actually true? Because there's a world of difference.",
+    "I want you to know something: everyone — EVERYONE — has something they carry with shame. You're not uniquely broken. You're uniquely brave for facing it. What would it feel like to put this down?",
+  ],
+  overwhelm: [
+    "Okay, let's slow this down together. You mentioned several things. Let me make sure I'm understanding: what are the top three things demanding your attention right now? Just three.",
+    "I can see why you feel overwhelmed — any ONE of those things would be a lot. Combined? Of course you're drowning. But here's what I know: you don't have to solve everything today. What needs attention RIGHT NOW?",
+  ],
+  grief: [
+    "Thank you for letting me in, friend. Grief isn't something to get over — it's something to move through. And there's no timeline. Tell me your favorite memory of them?",
+    "You know what I find beautiful about grief? It's proof of how deeply you loved. That kind of love doesn't die just because someone is gone. What would they want you to know right now?",
+  ],
+  betrayal: [
+    "That kind of hurt changes how you see everything, doesn't it? I want you to know: your ability to trust wasn't the problem. Their choice was the problem. How are you taking care of yourself through this?",
+    "When trust is broken, everything feels uncertain. But friend, the part of you that trusted — that's your STRENGTH, not your weakness. What do you need right now to feel safe?",
+  ],
+  excitement: [
+    "I love this energy! Let's build on it. What's your next step? Sometimes excitement is the universe's way of telling you you're on the right path.",
+    "This is beautiful, friend! Tell me more — what specifically makes this feel so right? I want to understand what lights you up.",
+  ],
   default: [
     "Thank you for sharing that, friend. I feel like there's something underneath what you just said - something deeper. What's the thing beneath the thing?",
     "I hear you. And I'm curious about you. What's the most important thing in your life at this moment? The thing that matters more than anything?",
@@ -232,6 +272,25 @@ const GUIDE_GENERIC_RESPONSES: Record<string, string[]> = {
   self_doubt: [
     "Friend, you know what Arjuna said to Krishna? 'I can't do this. I'm not strong enough.' And Krishna's response wasn't 'yes you can, just try harder.' He said 'Let me show you who you REALLY are.' And then He revealed the infinite universe within Arjuna. The same infinite potential lives in you. What if your self-doubt is just a small voice that hasn't met the real you yet?",
     "The Gita says in Chapter 6: 'One must elevate oneself by one's own Self. The Self is the friend of the self.' When you doubt yourself, you're listening to fear, not truth. I've been talking with you, and I can tell you: you are far more capable than you believe. What would you attempt if you knew you couldn't fail?",
+  ],
+  shame: [
+    "Friend, I want to share something profound from the Gita. In Chapter 18, verse 66, Krishna says: 'I shall liberate you from ALL sins. Do not grieve.' ALL. Not some. Not the small ones. ALL. If the divine can forgive everything, maybe — just maybe — you can begin to forgive yourself. Shame kept its power only because it stayed hidden. By sharing it with me, you've already begun to break free. What does freedom from this feel like?",
+    "The Gita teaches that the soul is inherently pure — chapter 13 describes it as 'the light of lights beyond darkness.' Your actions may have created shadows, but they cannot extinguish your light. I see that light in you, friend, even if you can't see it yourself right now. What would the version of you who has healed from this shame look like?",
+  ],
+  overwhelm: [
+    "Friend, here's what the Gita says that I need you to hear right now: 'Perform your duty equipoised, abandoning all attachment to success or failure.' Notice it says DUTY, singular. Not duties, plural. Right now, you have ONE duty: the next thing. Not everything. Just the NEXT thing. The future tasks can wait. What's the one thing that would give you the most relief if it were done?",
+    "You know what I love about the Gita's wisdom on action? Chapter 3 says: 'Action performed as duty, without attachment, is the best action.' The key is WITHOUT ATTACHMENT to doing it all perfectly, all at once. Let me help you prioritize. Of everything on your plate, what happens if you DON'T do it this week?",
+  ],
+  grief: [
+    "Friend, the Gita has something so beautiful about loss. Chapter 2 says the soul never dies — it merely changes form, like water becoming ice becoming steam. The essence of the person you love is eternal. They haven't ended. They've transformed. And the love between you? That's the most eternal thing of all. It lives in you now. How does carrying their love change how you want to live?",
+    "In the Gita, Krishna tells Arjuna: 'Neither for the living nor for the dead should the wise grieve.' Not because grief is wrong — but because the soul is eternal. Grief is the price we pay for love, and I would never ask you to stop paying it. But I want you to know: they are not gone. They're woven into every act of love you perform from this day forward. What act of love would honor them?",
+  ],
+  betrayal: [
+    "Friend, the Mahabharata — the story that frames the Gita — is BUILT on betrayal. Duryodhana betrayed his own cousins. And yet from that betrayal came the most beautiful wisdom humanity has ever known. Your betrayal is not the end of your story. It's the catalyst for your growth. The Gita says in Chapter 4: 'Even if you are the most sinful of sinners, you shall cross over all sin by the boat of knowledge.' Their sin doesn't have to sink YOUR boat. What's the lesson here that you can carry forward?",
+  ],
+  excitement: [
+    "Friend, do you know what you're feeling? The Gita calls it 'sattva' — the quality of goodness, light, and harmony. Chapter 14 says when sattva predominates, 'the light of knowledge shines through all the gates of the body.' That's YOU right now — shining. This feeling is a sign you're aligned with your dharma. How can you build on this momentum?",
+    "YES! This energy, friend — THIS is what the Gita means by 'working without attachment to results.' You're not excited about the outcome. You're excited about the DOING. That's karma yoga in its purest form. Ride this wave. What's the very next action you want to take?",
   ],
   default: [
     "Friend, there's a teaching I come back to again and again: 'Whenever and wherever the mind wanders, bring it back under the control of the Self.' Not forcefully - gently. That's what you and I are doing right now. Talking. Reflecting. Finding our center. What feels most important to you in this moment?",

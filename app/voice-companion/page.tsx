@@ -67,6 +67,19 @@ import { hapticPulse, hapticVerse, hapticWisdom, hapticCelebration, hapticEmphas
 import { generateProgressReport, getSpokenProgressSummary } from '@/utils/voice/progressInsights'
 import { getAdaptiveRate, recordUserSpeakingPace, resetAdaptiveRate } from '@/utils/voice/audioDucking'
 
+// ─── Divine Friend Personality + Crisis Support (Wave 3) ───────────────────
+import {
+  getFriendshipState,
+  getAddressTerm,
+  shouldUseToughLove,
+  getToughLoveResponse,
+  isPositiveNews,
+  getCelebrationResponse,
+  enrichWithPersonality,
+  type FriendshipState,
+} from '@/utils/voice/divineFriendPersonality'
+import { assessCrisis, formatCrisisResources } from '@/utils/voice/crisisSupport'
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 type CompanionState =
@@ -440,6 +453,7 @@ export default function VoiceCompanionPage() {
   const [sessionStartTime] = useState(() => new Date())
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
   const [activeMeditation, setActiveMeditation] = useState<GuidedMeditation | null>(null)
+  const [friendshipState, setFriendshipState] = useState<FriendshipState>(() => getFriendshipState(null))
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -487,6 +501,9 @@ export default function VoiceCompanionPage() {
         if (emotionSummary.trend !== 'unknown') setEmotionalTrend(emotionSummary.trend)
         // Show highest-priority proactive prompt
         if (prompts.length > 0) setProactivePrompt(prompts[0])
+        // Load friendship state from profile
+        const profile = contextMemory.getProfile()
+        if (profile) setFriendshipState(getFriendshipState(profile))
       } catch {
         if (!cancelled) setGreeting(getTimeGreeting())
       }
@@ -925,6 +942,49 @@ export default function VoiceCompanionPage() {
       setState('processing')
       setError(null)
 
+      // ─── CRISIS DETECTION (Highest Priority) ─────────────────────
+      // A true best friend recognizes when you're in real danger
+      const crisisAssessment = assessCrisis(text)
+      if (crisisAssessment.level !== 'none') {
+        hapticPulse()
+        const crisisText = crisisAssessment.shouldEscalate
+          ? `${crisisAssessment.response}\n\n---\nCrisis Resources:\n${formatCrisisResources(crisisAssessment.resources)}`
+          : crisisAssessment.response
+        addKiaanMessage(crisisText)
+        await speakResponse(crisisAssessment.response)
+        try { await recordKiaanConversation(text, crisisAssessment.response) } catch { /* non-fatal */ }
+        processingRef.current = false
+        return
+      }
+
+      // ─── POSITIVE NEWS DETECTION ──────────────────────────────────
+      // A best friend celebrates your wins
+      if (isPositiveNews(text) && turnCountRef.current >= 2) {
+        hapticCelebration()
+        const celebration = getCelebrationResponse()
+        const enriched = enrichWithPersonality(celebration, friendshipState, contextMemory.getProfile(), { emotion, isPositive: true, turnCount: turnCountRef.current })
+        addKiaanMessage(enriched)
+        await speakResponse(enriched)
+        try { await recordKiaanConversation(text, enriched) } catch { /* non-fatal */ }
+        processingRef.current = false
+        return
+      }
+
+      // ─── TOUGH LOVE DETECTION ─────────────────────────────────────
+      // A real friend doesn't just validate — they challenge you to grow
+      if (shouldUseToughLove(friendshipState, text, emotion, turnCountRef.current)) {
+        const toughLove = getToughLoveResponse(text)
+        if (toughLove) {
+          hapticEmphasis()
+          const enriched = enrichWithPersonality(toughLove, friendshipState, contextMemory.getProfile(), { emotion, turnCount: turnCountRef.current })
+          addKiaanMessage(enriched)
+          await speakResponse(enriched)
+          try { await recordKiaanConversation(text, enriched) } catch { /* non-fatal */ }
+          processingRef.current = false
+          return
+        }
+      }
+
       // ─── Extended Feature Detection (NLU) ─────────────────────────
       const lower = text.toLowerCase()
 
@@ -1128,6 +1188,19 @@ export default function VoiceCompanionPage() {
         responseText = dialogue.text
       }
 
+      // ─── Personality Enrichment ──────────────────────────────────
+      // Makes KIAAN feel like a real friend, not a bot
+      const profile = contextMemory.getProfile()
+      responseText = enrichWithPersonality(responseText, friendshipState, profile, {
+        emotion,
+        turnCount: turnCountRef.current,
+      })
+
+      // Update friendship state periodically
+      if (turnCountRef.current % 5 === 0 && profile) {
+        setFriendshipState(getFriendshipState(profile))
+      }
+
       // Adapt voice persona based on detected emotion
       const recommended = getRecommendedPersona(emotion, 'conversation')
       if (recommended !== voicePersona) setVoicePersona(recommended)
@@ -1298,7 +1371,12 @@ export default function VoiceCompanionPage() {
                 </span>
               )}
             </h1>
-            <p className="text-[11px] text-white/40">Your Divine Friend & Wisdom Guide</p>
+            <p className="text-[11px] text-white/40">
+              {friendshipState.level >= 3 && friendshipState.userName
+                ? `${friendshipState.userName}'s Divine Friend`
+                : friendshipState.levelName}
+              {friendshipState.level >= 2 && <span className="ml-1.5 text-mv-sunrise/60">{'✦'.repeat(friendshipState.level)}</span>}
+            </p>
           </div>
         </div>
 
