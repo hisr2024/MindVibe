@@ -263,6 +263,28 @@ export default function CompanionPage() {
   const addLocalFallbackResponse = useCallback((userText: string) => {
     const lower = userText.toLowerCase()
 
+    // SAFETY FIRST: Crisis detection overrides everything
+    const crisisSignals = [
+      'kill myself', 'suicide', 'end my life', 'want to die', "don't want to live",
+      'self harm', 'self-harm', 'cutting myself', 'hurt myself', 'no reason to live',
+      'better off dead', "can't go on", 'end it all', 'take my life',
+    ]
+    if (crisisSignals.some(signal => lower.includes(signal))) {
+      setCurrentMood('sad')
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `companion-${Date.now()}`,
+          role: 'companion',
+          content: "I hear you, and I'm really glad you told me this. What you're feeling is real, and it matters. You matter.\n\nI want to be honest with you: I'm your friend, and I care deeply, but right now you deserve to talk to someone who can truly help.\n\nPlease reach out:\n\u2022 iCall: 9152987821 (India)\n\u2022 Vandrevala Foundation: 1860-2662-345 (24/7)\n\u2022 Crisis Text Line: Text HOME to 741741 (US)\n\u2022 International: findahelpline.com\n\nI'm not going anywhere. I'll be right here before, during, and after you reach out. You are not alone in this.",
+          mood: 'sad',
+          phase: 'connect',
+          timestamp: new Date(),
+        },
+      ])
+      return
+    }
+
     // Local mood detection for contextual responses
     const moodMap: Record<string, string[]> = {
       anxious: ['anxious', 'anxiety', 'worried', 'scared', 'panic', 'stress', 'nervous', 'afraid'],

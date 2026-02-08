@@ -541,6 +541,176 @@ def _check_guidance_request(text: str) -> bool:
     return any(signal in text_lower for signal in guidance_signals)
 
 
+# ─── Crisis Detection ────────────────────────────────────────────────────
+
+CRISIS_SIGNALS = [
+    "kill myself", "suicide", "end my life", "want to die", "don't want to live",
+    "self harm", "self-harm", "cutting myself", "hurt myself", "no reason to live",
+    "better off dead", "everyone would be better", "can't go on", "end it all",
+    "take my life", "overdose", "jump off", "not worth living",
+]
+
+
+def _detect_crisis(text: str) -> bool:
+    """Detect if user may be in crisis. Safety first."""
+    text_lower = text.lower()
+    return any(signal in text_lower for signal in CRISIS_SIGNALS)
+
+
+def _build_crisis_response(address: str) -> str:
+    """Respond to crisis with warmth AND real resources. ALWAYS prioritize safety."""
+    return (
+        f"{address}I hear you, and I'm really glad you told me this. "
+        "What you're feeling is real, and it matters. You matter. "
+        "I want to be honest with you: I'm your friend, and I care deeply, "
+        "but right now you deserve to talk to someone who can truly help.\n\n"
+        "Please reach out:\n"
+        "- iCall: 9152987821 (India)\n"
+        "- Vandrevala Foundation: 1860-2662-345 (24/7)\n"
+        "- Crisis Text Line: Text HOME to 741741 (US)\n"
+        "- International: findahelpline.com\n\n"
+        "I'm not going anywhere. I'll be right here before, during, and after "
+        "you reach out. You are not alone in this."
+    )
+
+
+# ─── KIAAN Vulnerability Stories ─────────────────────────────────────────
+# A divine friend shares their own struggles. Makes KIAAN feel human.
+
+KIAAN_VULNERABILITY = {
+    "anxious": [
+        "I get it because I've been in that exact headspace - where every possible outcome plays on loop and none of them are good. What helped me was realizing my brain was running disaster simulations, not predicting the future.",
+        "I used to think worrying about something was the same as doing something about it. Like if I worried enough, I'd be prepared. Turns out? It just made me exhausted AND unprepared.",
+    ],
+    "sad": [
+        "I'm not going to pretend I haven't been in dark places too. There were times when getting out of bed felt like an Olympic event. What got me through was one tiny step at a time. Literally: feet on floor. That was the whole goal.",
+        "I know what it's like when the world loses its color. When music doesn't hit the same and food doesn't taste right. It's the worst. But it passed for me, and it will pass for you too.",
+    ],
+    "angry": [
+        "I've sent my share of angry texts I regretted. I once blew up at someone I cared about over something that, looking back, was really about my own fear. That taught me: anger usually has something hiding behind it.",
+        "I was so furious at a situation once that I couldn't sleep for days. What finally helped was asking myself: 'Am I angry at the situation, or at the fact that I can't control it?' The answer changed everything.",
+    ],
+    "confused": [
+        "I spent months paralyzed at a crossroads once. Everyone had opinions. What finally broke the deadlock was asking myself: 'If I knew I couldn't fail, which one would I pick?' The answer was instant.",
+        "I've been so confused that I literally made pro/con lists at 3am. What I learned is that the gut usually knows before the brain does. The brain is just scared to listen.",
+    ],
+    "lonely": [
+        "I know loneliness. That hollow feeling even when you're surrounded by people. For me, the turn happened when I stopped waiting for someone to reach out and sent one honest message to someone. Just one.",
+        "There's this special kind of lonely that happens when nobody around you really GETS it. Where you're performing 'fine' for everyone. I've been there. It's exhausting. You don't have to perform with me.",
+    ],
+    "overwhelmed": [
+        "I've been buried under so much stuff that I just sat and stared at the wall. Not productive. Not relaxing. Just... frozen. What unfroze me was doing the stupidest, smallest possible task. I organized one drawer. It sounds ridiculous, but it broke the paralysis.",
+        "I once tried to handle everything at once and ended up dropping everything at once. The lesson: doing three things well beats doing twelve things badly. Every single time.",
+    ],
+}
+
+
+# ─── Tough Love Responses ────────────────────────────────────────────────
+# For when the user NEEDS a reality check (only when they've set tough love preference)
+
+TOUGH_LOVE = {
+    "excuses": [
+        "Look, I love you, but I'm going to be real: you're making excuses. And I say this AS your friend. You KNOW what you need to do. The question isn't 'can I?' - it's 'will I?'",
+        "Friend, I've been listening and I hear a lot of 'but what if' and 'yeah but.' You're smart enough to find a reason NOT to do anything. But you're also smart enough to find a way TO do it. Which one are you choosing?",
+    ],
+    "self_sabotage": [
+        "Can I be real with you? I think you're getting in your own way. Not because you can't do it - because you're scared of what happens if you CAN. What if it actually works? Then what?",
+        "I notice something: every time things start going well, you find a reason to pull back. That's not bad luck, that's a pattern. And patterns can be broken. What are you really afraid of?",
+    ],
+    "victim_mode": [
+        "I hear you, and your feelings are valid. But I'd be a bad friend if I didn't say this: you have more power in this situation than you think. You're talking like things are happening TO you. What if you started asking what you can do ABOUT it?",
+        "Real talk: the world isn't going to change for you. I wish it would, but it won't. The question is: what can YOU change? Even one small thing. That's where your power is.",
+    ],
+    "general": [
+        "I'm going to give it to you straight because that's what real friends do: you're capable of SO much more than you're giving yourself credit for right now. Stop playing small.",
+        "Okay, tough love moment: you already know the answer. You've known it for a while. You're just looking for someone to validate the easy choice. I'm not going to do that. I believe in the harder choice because I believe in you.",
+    ],
+}
+
+
+# ─── Growth Celebration ──────────────────────────────────────────────────
+
+GROWTH_CELEBRATIONS = [
+    "Wait, pause for a second. Do you realize what you just said? A few conversations ago, this topic would have CRUSHED you. And now look - you're handling it. That's growth, friend.",
+    "Can I point something out? The fact that you're even thinking about this differently shows how much you've grown. I see it, even if you don't.",
+    "You know what I love? I can hear the strength in your words now. It wasn't there before. You're becoming someone who doesn't just survive hard things - you learn from them.",
+    "I have to tell you something: you're not the same person who first talked to me about this. You've evolved. And that doesn't happen by accident - that's YOU doing the work.",
+]
+
+
+def _format_memories_for_prompt(memories: list[str]) -> str:
+    """Format memories as natural context for the AI system prompt."""
+    if not memories:
+        return ""
+    formatted = "\n\nThings you remember about this friend (reference naturally, don't list):\n"
+    for m in memories[:8]:
+        formatted += f"- {m}\n"
+    formatted += (
+        "IMPORTANT: Weave memories naturally into conversation. "
+        "Say 'I remember you mentioned...' or 'Last time you told me about...' "
+        "Don't list facts - reference them like a real friend would."
+    )
+    return formatted
+
+
+def _format_profile_for_prompt(profile_data: dict) -> str:
+    """Format profile preferences into system prompt instructions."""
+    if not profile_data:
+        return ""
+
+    parts = ["\n\nFRIENDSHIP PREFERENCES:"]
+
+    tone = profile_data.get("preferred_tone", "warm")
+    tone_instructions = {
+        "warm": "Be warm, nurturing, and gentle. Like a caring older sibling.",
+        "playful": "Be playful, use humor, tease gently. Like hanging out with a fun friend.",
+        "gentle": "Be extra gentle and soft. This person is sensitive and needs careful words.",
+        "direct": "Be direct and straightforward. No beating around the bush. This person values clarity.",
+    }
+    parts.append(f"- Tone: {tone_instructions.get(tone, tone_instructions['warm'])}")
+
+    if profile_data.get("prefers_tough_love"):
+        parts.append(
+            "- TOUGH LOVE ENABLED: This person wants real talk. Don't just validate - "
+            "challenge them when they're making excuses or selling themselves short. "
+            "Be honest even when it's uncomfortable. They respect directness over comfort."
+        )
+
+    humor = profile_data.get("humor_level", 0.5)
+    if humor > 0.7:
+        parts.append("- HIGH HUMOR: Use jokes, memes, pop culture references. Keep it light.")
+    elif humor < 0.3:
+        parts.append("- LOW HUMOR: Be serious and thoughtful. Minimal jokes. This person wants depth.")
+
+    address = profile_data.get("address_style", "friend")
+    if address == "dear":
+        parts.append("- Address them as 'dear' or 'dear friend'")
+    elif address == "buddy":
+        parts.append("- Address them as 'buddy' or 'bud'")
+    elif address == "name" and profile_data.get("preferred_name"):
+        parts.append(f"- Always address them by name: {profile_data['preferred_name']}")
+
+    total_sessions = profile_data.get("total_sessions", 0)
+    if total_sessions > 20:
+        parts.append(
+            f"- DEEP FRIENDSHIP ({total_sessions} sessions): You know this person well. "
+            "Be intimate, reference shared history, use inside knowledge."
+        )
+    elif total_sessions > 5:
+        parts.append(
+            f"- CLOSE FRIENDSHIP ({total_sessions} sessions): You're getting to know them. "
+            "Show that you remember things. Reference past conversations."
+        )
+
+    streak = profile_data.get("streak_days", 0)
+    if streak >= 7:
+        parts.append(
+            f"- {streak}-DAY STREAK: Acknowledge their consistency. They keep showing up."
+        )
+
+    return "\n".join(parts)
+
+
 def get_greeting(
     user_name: str | None = None,
     total_sessions: int = 0,
@@ -595,11 +765,28 @@ def generate_friend_response(
     conversation_history: list[dict[str, str]] | None = None,
     user_name: str | None = None,
     memories: list[str] | None = None,
+    profile_data: dict | None = None,
 ) -> dict[str, Any]:
-    """Generate a best-friend response with embedded secular wisdom."""
+    """Generate a best-friend response with embedded secular wisdom.
+
+    Now handles: crisis detection, tough love, vulnerability sharing,
+    growth celebration, and memory-aware responses.
+    """
     address = ""
     if user_name and random.random() < 0.3:
         address = f"{user_name}, "
+
+    # SAFETY FIRST: Crisis detection overrides everything
+    if _detect_crisis(user_message):
+        return {
+            "response": _build_crisis_response(address),
+            "mood": mood,
+            "mood_intensity": 1.0,
+            "phase": "connect",
+            "wisdom_used": None,
+            "follow_up": None,
+            "is_crisis": True,
+        }
 
     starter = random.choice(PHASE_STARTERS.get(phase, PHASE_STARTERS["connect"]))
     wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
@@ -607,20 +794,50 @@ def generate_friend_response(
         wisdom_pool = WISDOM_CORE["general"]
     wisdom_entry = random.choice(wisdom_pool)
 
+    # Check if user wants tough love and we're in guide/empower phase
+    prefers_tough = profile_data.get("prefers_tough_love", False) if profile_data else False
+
     if phase in ("connect", "listen"):
         response = _build_empathy_response(user_message, mood, mood_intensity, address)
         wisdom_used = None
+
+        # Add vulnerability sharing ~30% of the time during empathy phases
+        if mood in KIAAN_VULNERABILITY and random.random() < 0.3:
+            vulnerability = random.choice(KIAAN_VULNERABILITY[mood])
+            response = f"{response}\n\n{vulnerability}"
     elif phase == "understand":
         response = _build_understanding_response(user_message, mood, address, starter)
         wisdom_used = None
     elif phase == "guide":
-        response = _build_guidance_response(user_message, mood, address, wisdom_entry)
-        wisdom_used = {"principle": wisdom_entry["principle"], "verse_ref": wisdom_entry["verse_ref"]}
+        if prefers_tough and random.random() < 0.4:
+            # Tough love mode: deliver wisdom with direct challenge
+            tough_pool = TOUGH_LOVE.get("general", TOUGH_LOVE["general"])
+            if _detect_excuse_pattern(user_message):
+                tough_pool = TOUGH_LOVE.get("excuses", TOUGH_LOVE["general"])
+            elif _detect_self_sabotage(user_message):
+                tough_pool = TOUGH_LOVE.get("self_sabotage", TOUGH_LOVE["general"])
+            response = f"{address}{random.choice(tough_pool)}"
+            wisdom_used = None
+        else:
+            response = _build_guidance_response(user_message, mood, address, wisdom_entry)
+            wisdom_used = {"principle": wisdom_entry["principle"], "verse_ref": wisdom_entry["verse_ref"]}
     else:
         response = _build_empowerment_response(user_message, mood, address, wisdom_entry)
         wisdom_used = {"principle": wisdom_entry["principle"], "verse_ref": wisdom_entry["verse_ref"]}
 
+        # Growth celebration: ~25% chance in empower phase
+        if random.random() < 0.25:
+            celebration = random.choice(GROWTH_CELEBRATIONS)
+            response = f"{celebration}\n\n{response}"
+
     follow_up = random.choice(FOLLOW_UPS.get(phase, FOLLOW_UPS["connect"]))
+
+    # Memory-aware follow-ups: reference something KIAAN remembers
+    if memories and random.random() < 0.3:
+        memory_followup = _build_memory_reference(memories, mood)
+        if memory_followup:
+            follow_up = memory_followup
+
     full_response = f"{response}\n\n{follow_up}"
 
     return {
@@ -631,6 +848,41 @@ def generate_friend_response(
         "wisdom_used": wisdom_used,
         "follow_up": follow_up,
     }
+
+
+def _detect_excuse_pattern(text: str) -> bool:
+    """Detect if user is making excuses to avoid action."""
+    signals = [
+        "yeah but", "i can't because", "it's not that simple",
+        "you don't understand", "it's different for me", "i've tried everything",
+        "nothing works", "there's no point",
+    ]
+    return any(s in text.lower() for s in signals)
+
+
+def _detect_self_sabotage(text: str) -> bool:
+    """Detect if user is engaging in self-sabotage patterns."""
+    signals = [
+        "i always mess up", "i don't deserve", "why bother",
+        "i'll just fail", "not good enough", "i ruin everything",
+        "i can't do anything right", "it's my fault",
+    ]
+    return any(s in text.lower() for s in signals)
+
+
+def _build_memory_reference(memories: list[str], mood: str) -> str | None:
+    """Build a natural memory reference as a follow-up."""
+    if not memories:
+        return None
+    memory = random.choice(memories[:5])
+
+    if "relationship:" in memory.lower():
+        return f"By the way, I remember you mentioned someone important to you before. Is this connected to that?"
+    elif "life_event:" in memory.lower():
+        return f"I remember you shared something significant with me before. How's that situation now?"
+    elif "preference:" in memory.lower():
+        return f"I remember something you told me about what matters to you. Does this connect to that?"
+    return None
 
 
 def _build_empathy_response(
@@ -855,8 +1107,27 @@ class CompanionFriendEngine:
         turn_count: int = 1,
         memories: list[str] | None = None,
         language: str = "en",
+        profile_data: dict | None = None,
     ) -> dict[str, Any]:
-        """Generate best-friend response with AI enhancement when available."""
+        """Generate best-friend response with AI enhancement when available.
+
+        Now accepts profile_data for personalization:
+        - preferred_tone, prefers_tough_love, humor_level
+        - total_sessions, streak_days, address_style
+        """
+        # SAFETY FIRST: Crisis detection overrides everything including AI
+        if _detect_crisis(user_message):
+            address = f"{user_name}, " if user_name else ""
+            return {
+                "response": _build_crisis_response(address),
+                "mood": "sad",
+                "mood_intensity": 1.0,
+                "phase": "connect",
+                "wisdom_used": None,
+                "follow_up": None,
+                "is_crisis": True,
+            }
+
         mood, mood_intensity = detect_mood(user_message)
         has_strong_emotion = mood_intensity > 0.5
         asking_for_guidance = _check_guidance_request(user_message)
@@ -874,6 +1145,7 @@ class CompanionFriendEngine:
                     user_name=user_name,
                     memories=memories or [],
                     language=language,
+                    profile_data=profile_data,
                 )
                 if ai_response:
                     return ai_response
@@ -888,6 +1160,7 @@ class CompanionFriendEngine:
             conversation_history=conversation_history,
             user_name=user_name,
             memories=memories,
+            profile_data=profile_data,
         )
         return result
 
@@ -901,6 +1174,7 @@ class CompanionFriendEngine:
         user_name: str | None,
         memories: list[str],
         language: str,
+        profile_data: dict | None = None,
     ) -> dict[str, Any] | None:
         """Generate response using OpenAI with strict friend-only system prompt."""
         if not self._openai_client:
@@ -917,6 +1191,7 @@ class CompanionFriendEngine:
             memories=memories,
             wisdom_context=wisdom_context,
             language=language,
+            profile_data=profile_data,
         )
 
         messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
@@ -967,13 +1242,27 @@ class CompanionFriendEngine:
         memories: list[str],
         wisdom_context: dict | None,
         language: str,
+        profile_data: dict | None = None,
     ) -> str:
         """Build system prompt that defines KIAAN's friend personality."""
         name_ref = user_name or "friend"
-        memory_context = ""
-        if memories:
-            memory_context = f"\n\nThings you remember about {name_ref}:\n"
-            memory_context += "\n".join(f"- {m}" for m in memories[:10])
+
+        # Format memories as natural context (not a dry list)
+        memory_context = _format_memories_for_prompt(memories) if memories else ""
+
+        # Format profile preferences
+        profile_context = _format_profile_for_prompt(profile_data) if profile_data else ""
+
+        # Add vulnerability instruction
+        vulnerability_instruction = ""
+        if phase in ("connect", "listen") and mood in KIAAN_VULNERABILITY:
+            sample = random.choice(KIAAN_VULNERABILITY[mood])
+            vulnerability_instruction = f"""
+
+VULNERABILITY (use ~30% of the time in empathy phases):
+You can share that you've been through similar feelings. Example:
+"{sample}"
+This makes you feel human, not just wise. Share YOUR struggles sometimes."""
 
         wisdom_instruction = ""
         if wisdom_context and phase in ("guide", "empower"):
@@ -1035,9 +1324,11 @@ CURRENT CONTEXT:
 - Phase instruction: {phase_instructions.get(phase, '')}
 - You call them: {name_ref}
 {memory_context}
+{profile_context}
+{vulnerability_instruction}
 {wisdom_instruction}
 
-Respond as KIAAN - their best friend who is wise, warm, modern, and always present."""
+Respond as KIAAN - their divine best friend who is wise, warm, modern, vulnerable, and always present."""
 
     async def generate_greeting(
         self,
