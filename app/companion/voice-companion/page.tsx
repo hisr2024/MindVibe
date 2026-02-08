@@ -138,18 +138,19 @@ export default function VoiceCompanionPage() {
       setVerses(SAMPLE_VERSES[chapterNum])
     }
 
-    // Try loading from API
+    // Try loading from API - endpoint is /api/gita/chapters/{id}
+    // Backend returns ChapterResponse with verses as VerseSummary[]
     try {
-      const res = await apiFetch(`/api/gita/${chapterNum}`)
+      const res = await apiFetch(`/api/gita/chapters/${chapterNum}`)
       if (res.ok) {
         const data = await res.json()
         if (data?.verses?.length > 0) {
           setVerses(data.verses.map((v: any) => ({
-            chapter: chapterNum,
-            verse: v.verseNumber || v.verse_number,
+            chapter: v.chapter || chapterNum,
+            verse: v.verse,
             sanskrit: v.sanskrit || '',
             transliteration: v.transliteration || '',
-            translation: v.translation || '',
+            translation: v.preview || '',
             theme: v.theme || '',
           })))
         }

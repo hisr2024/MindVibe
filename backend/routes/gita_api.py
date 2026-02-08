@@ -4,7 +4,10 @@ Provides RESTful endpoints for Bhagavad Gita wisdom access including
 AI-powered guidance, verse lookup, semantic search, and theme browsing.
 """
 
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -82,6 +85,8 @@ class VerseSummary(BaseModel):
     verse_id: str
     theme: str
     preview: str
+    sanskrit: str | None = None
+    transliteration: str | None = None
 
 
 class ChapterResponse(BaseModel):
@@ -235,6 +240,8 @@ async def get_chapter(chapter_id: int, db: AsyncSession = Depends(get_db)) -> Ch
             verse_id=f"{v.chapter}.{v.verse}",
             theme=v.theme,
             preview=v.english[:100] + "..." if len(v.english) > 100 else v.english,
+            sanskrit=v.sanskrit,
+            transliteration=v.transliteration,
         )
         for v in verses
     ]
