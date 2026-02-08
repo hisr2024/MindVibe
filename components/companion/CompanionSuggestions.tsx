@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * CompanionSuggestions - Quick reply suggestions for the chat.
+ * CompanionSuggestions - Glass-pill suggestions for dark orb UI.
  *
  * Shows contextual conversation starters or follow-up suggestions
- * that feel natural - like topics a best friend might bring up.
+ * styled as glowing glass pills on the dark companion background.
  */
 
 interface SuggestionsProps {
@@ -80,12 +80,10 @@ export default function CompanionSuggestions({
   isFirstMessage = false,
   onSelect,
 }: SuggestionsProps) {
-  // Choose suggestions based on context
   let pool: string[]
   if (isFirstMessage) {
     pool = SUGGESTIONS.first_time
   } else if (mood && SUGGESTIONS[mood]) {
-    // Mix mood-specific with phase-specific
     const moodSuggestions = SUGGESTIONS[mood] || []
     const phaseSuggestions = SUGGESTIONS[phase || 'connect'] || []
     pool = [...moodSuggestions.slice(0, 2), ...phaseSuggestions.slice(0, 2)]
@@ -93,7 +91,6 @@ export default function CompanionSuggestions({
     pool = SUGGESTIONS[phase || 'connect'] || SUGGESTIONS.connect
   }
 
-  // Show max 4 suggestions
   const suggestions = pool.slice(0, 4)
 
   return (
@@ -102,7 +99,7 @@ export default function CompanionSuggestions({
         <button
           key={i}
           onClick={() => onSelect(suggestion)}
-          className="text-xs px-3 py-1.5 rounded-full border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 hover:border-violet-300 transition-all duration-200 whitespace-nowrap"
+          className="text-xs px-3.5 py-2 rounded-full border border-white/10 text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90 hover:border-white/20 backdrop-blur-sm transition-all duration-200 whitespace-nowrap"
         >
           {suggestion}
         </button>
