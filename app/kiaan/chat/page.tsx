@@ -188,7 +188,7 @@ function KiaanChatPageInner() {
           <div className="flex items-center gap-2">
             {/* KIAAN Companion - Conversation Mode */}
             <Link
-              href="/voice-companion"
+              href="/companion"
               className="flex items-center gap-2 rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 px-4 py-2 text-sm font-semibold text-teal-50 transition-all hover:border-teal-400/50 hover:from-teal-500/20 hover:to-cyan-500/20"
               title="KIAAN Companion - Talk with KIAAN"
             >
@@ -197,7 +197,7 @@ function KiaanChatPageInner() {
             </Link>
             {/* Voice Mode Toggle */}
             <Link
-              href="/voice-companion"
+              href="/companion"
               className="flex items-center gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:from-orange-500/20 hover:to-amber-500/20"
               title="Switch to Voice Mode"
             >

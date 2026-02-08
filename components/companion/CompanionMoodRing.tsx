@@ -3,9 +3,8 @@
 /**
  * CompanionMoodRing - Visual indicator of the conversation's emotional state.
  *
- * A subtle, breathing ring around KIAAN's presence that shifts color
- * based on the detected mood. Provides ambient emotional feedback
- * without being intrusive.
+ * A breathing ring around KIAAN's presence that shifts color
+ * based on the detected mood. Uses Tailwind animations only (no styled-jsx).
  */
 
 import { useEffect, useState } from 'react'
@@ -59,31 +58,22 @@ export default function CompanionMoodRing({
   const gradient = MOOD_GRADIENTS[mood] || MOOD_GRADIENTS.neutral
   const sizeClasses = SIZES[size]
 
-  // Breathing animation speed based on mood
-  const breathSpeed = mood === 'anxious' ? '2s' : mood === 'peaceful' ? '6s' : '4s'
-
   return (
     <div className="relative flex items-center justify-center">
-      {/* Outer glow ring */}
+      {/* Outer glow ring - uses Tailwind animate-pulse for breathing */}
       <div
-        className={`absolute ${sizeClasses.ring} rounded-full bg-gradient-to-r ${gradient} opacity-30 blur-md transition-all duration-1000`}
-        style={{
-          transform: pulse ? 'scale(1.15)' : 'scale(1)',
-          animation: `breathe ${breathSpeed} ease-in-out infinite`,
-        }}
+        className={`absolute ${sizeClasses.ring} rounded-full bg-gradient-to-r ${gradient} opacity-30 blur-md transition-all duration-1000 animate-pulse`}
+        style={{ transform: pulse ? 'scale(1.15)' : 'scale(1)' }}
       />
 
       {/* Main ring */}
       <div
-        className={`relative ${sizeClasses.ring} rounded-full bg-gradient-to-br ${gradient} p-[3px] transition-all duration-700 shadow-lg`}
-        style={{
-          opacity: 0.4 + intensity * 0.6,
-          animation: isListening ? `pulse-ring 1.5s ease-in-out infinite` : undefined,
-        }}
+        className={`relative ${sizeClasses.ring} rounded-full bg-gradient-to-br ${gradient} p-[3px] transition-all duration-700 shadow-lg ${isListening ? 'animate-ping-slow' : ''}`}
+        style={{ opacity: 0.4 + intensity * 0.6 }}
       >
         {/* Inner circle */}
         <div className={`${sizeClasses.inner} rounded-full bg-white dark:bg-gray-900 flex items-center justify-center`}>
-          <span className={sizeClasses.text}>
+          <span className={`${sizeClasses.text} font-semibold text-transparent bg-clip-text bg-gradient-to-br ${gradient}`}>
             {isListening ? (
               <span className="animate-pulse">K</span>
             ) : isSpeaking ? (
@@ -101,29 +91,12 @@ export default function CompanionMoodRing({
           {[0, 1, 2].map(i => (
             <div
               key={i}
-              className="w-1.5 h-1.5 rounded-full bg-violet-500"
-              style={{
-                animation: `bounce 0.8s ease-in-out ${i * 0.15}s infinite`,
-              }}
+              className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-bounce"
+              style={{ animationDelay: `${i * 150}ms` }}
             />
           ))}
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.08); }
-        }
-        @keyframes pulse-ring {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-          50% { box-shadow: 0 0 0 12px rgba(139, 92, 246, 0); }
-        }
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
-        }
-      `}</style>
     </div>
   )
 }

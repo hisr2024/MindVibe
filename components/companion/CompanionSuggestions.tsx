@@ -102,10 +102,7 @@ export default function CompanionSuggestions({
         <button
           key={i}
           onClick={() => onSelect(suggestion)}
-          className="text-xs px-3 py-1.5 rounded-full border border-violet-200 dark:border-violet-800
-                     text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20
-                     hover:bg-violet-100 dark:hover:bg-violet-900/40 hover:border-violet-300
-                     transition-all duration-200 whitespace-nowrap"
+          className="text-xs px-3 py-1.5 rounded-full border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 hover:border-violet-300 transition-all duration-200 whitespace-nowrap"
         >
           {suggestion}
         </button>

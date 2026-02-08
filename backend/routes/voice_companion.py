@@ -364,6 +364,17 @@ async def send_companion_message(
     if not session.initial_mood:
         session.initial_mood = mood
 
+    # Build profile data for personalization
+    profile_context = {
+        "preferred_tone": profile.preferred_tone,
+        "prefers_tough_love": profile.prefers_tough_love,
+        "humor_level": profile.humor_level,
+        "address_style": profile.address_style,
+        "preferred_name": profile.preferred_name,
+        "total_sessions": profile.total_sessions,
+        "streak_days": profile.streak_days,
+    }
+
     # Generate response
     engine = get_companion_engine()
     response_data = await engine.generate_response(
@@ -373,6 +384,7 @@ async def send_companion_message(
         turn_count=user_turn_count,
         memories=memories,
         language=body.language,
+        profile_data=profile_context,
     )
 
     # Save companion response
