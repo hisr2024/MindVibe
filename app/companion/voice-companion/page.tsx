@@ -127,6 +127,16 @@ export default function VoiceCompanionPage() {
   // Total verses
   const totalVerses = CHAPTERS.reduce((sum, ch) => sum + ch.verseCount, 0)
 
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause()
+        currentAudioRef.current = null
+      }
+    }
+  }, [])
+
   // ─── Load Verses for Chapter ──────────────────────────────────────
 
   const loadChapterVerses = useCallback(async (chapterNum: number) => {
@@ -518,7 +528,7 @@ export default function VoiceCompanionPage() {
                       className={`p-4 rounded-xl transition-all ${
                         isAskingKiaan
                           ? 'bg-purple-500/10 border border-purple-400/20'
-                          : 'bg-white/5 border border-white/5 hover:bg-white/8'
+                          : 'bg-white/5 border border-white/5 hover:bg-white/10'
                       }`}
                     >
                       <div className="flex items-start gap-3">

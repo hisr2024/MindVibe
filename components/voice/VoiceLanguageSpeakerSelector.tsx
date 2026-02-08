@@ -80,6 +80,38 @@ const LANGUAGE_GROUPS = [
   },
 ]
 
+// Fallback data when API is unavailable (offline mode)
+const FALLBACK_LANGUAGES: LanguageInfo[] = [
+  { code: 'en', name: 'English', native_name: 'English', script: 'Latin', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 4, flag_emoji: '\u{1F1FA}\u{1F1F8}', gita_available: true },
+  { code: 'hi', name: 'Hindi', native_name: '\u0939\u093F\u0928\u094D\u0926\u0940', script: 'Devanagari', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 2, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'sa', name: 'Sanskrit', native_name: '\u0938\u0902\u0938\u094D\u0915\u0943\u0924', script: 'Devanagari', direction: 'ltr', has_tts: true, has_stt: false, speaker_count: 2, flag_emoji: '\u{1F549}\u{FE0F}', gita_available: true },
+  { code: 'ta', name: 'Tamil', native_name: '\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD', script: 'Tamil', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 2, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'te', name: 'Telugu', native_name: '\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41', script: 'Telugu', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'bn', name: 'Bengali', native_name: '\u09AC\u09BE\u0982\u09B2\u09BE', script: 'Bengali', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'mr', name: 'Marathi', native_name: '\u092E\u0930\u093E\u0920\u0940', script: 'Devanagari', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'gu', name: 'Gujarati', native_name: '\u0A97\u0AC1\u0A9C\u0AB0\u0ABE\u0AA4\u0AC0', script: 'Gujarati', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'kn', name: 'Kannada', native_name: '\u0C95\u0CA8\u0CCD\u0CA8\u0CA1', script: 'Kannada', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'ml', name: 'Malayalam', native_name: '\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02', script: 'Malayalam', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'pa', name: 'Punjabi', native_name: '\u0A2A\u0A70\u0A1C\u0A3E\u0A2C\u0A40', script: 'Gurmukhi', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EE}\u{1F1F3}', gita_available: true },
+  { code: 'es', name: 'Spanish', native_name: 'Espa\u00F1ol', script: 'Latin', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EA}\u{1F1F8}', gita_available: true },
+  { code: 'fr', name: 'French', native_name: 'Fran\u00E7ais', script: 'Latin', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EB}\u{1F1F7}', gita_available: true },
+  { code: 'de', name: 'German', native_name: 'Deutsch', script: 'Latin', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1E9}\u{1F1EA}', gita_available: true },
+  { code: 'pt', name: 'Portuguese', native_name: 'Portugu\u00EAs', script: 'Latin', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1E7}\u{1F1F7}', gita_available: true },
+  { code: 'ja', name: 'Japanese', native_name: '\u65E5\u672C\u8A9E', script: 'Kanji/Kana', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1EF}\u{1F1F5}', gita_available: true },
+  { code: 'zh', name: 'Chinese', native_name: '\u4E2D\u6587', script: 'Hanzi', direction: 'ltr', has_tts: true, has_stt: true, speaker_count: 1, flag_emoji: '\u{1F1E8}\u{1F1F3}', gita_available: true },
+]
+
+const FALLBACK_SPEAKERS: Record<string, SpeakerInfo[]> = {
+  en: [
+    { id: 'en_priya', name: 'priya', display_name: 'Priya', language: 'en', gender: 'female', description: 'Warm, empathetic friend with gentle Indian-English accent', personality: 'Your wise, understanding best friend who listens deeply', age_range: '25-35', accent: 'Indian-English', best_for: ['personal guidance', 'emotional support', 'daily conversations'], quality_score: 9.5, default_speed: 0.95, default_pitch: 0.3, preview_text: "Hey friend, I'm Priya. Think of me as that friend who always understands.", avatar_color: '#EC4899', is_premium: false, tags: ['empathetic', 'warm', 'default'] },
+    { id: 'en_arjun', name: 'arjun', display_name: 'Arjun', language: 'en', gender: 'male', description: 'Calm, grounded voice with wisdom and depth', personality: 'A thoughtful guide who speaks with clarity and purpose', age_range: '30-45', accent: 'Neutral', best_for: ['gita wisdom', 'meditation guidance', 'philosophical discussions'], quality_score: 9.3, default_speed: 0.92, default_pitch: -0.3, preview_text: "I'm Arjun. Let me share the timeless wisdom of the Gita with you.", avatar_color: '#6366F1', is_premium: false, tags: ['wise', 'calm', 'philosophical'] },
+    { id: 'en_krishna', name: 'krishna', display_name: 'Krishna', language: 'en', gender: 'male', description: 'Deep, divine voice for sacred verses and spiritual guidance', personality: 'The divine teacher speaking eternal wisdom', age_range: 'ageless', accent: 'Classical', best_for: ['gita verses', 'divine teachings', 'spiritual guidance'], quality_score: 9.7, default_speed: 0.88, default_pitch: -1.0, preview_text: 'The Self is neither born nor does it ever die. It is eternal, ever-existing.', avatar_color: '#7C3AED', is_premium: true, tags: ['divine', 'sacred', 'premium'] },
+  ],
+  hi: [
+    { id: 'hi_ananya', name: 'ananya', display_name: 'Ananya', language: 'hi', gender: 'female', description: 'Melodious Hindi voice with warmth and emotional depth', personality: 'A caring friend who speaks from the heart in Hindi', age_range: '25-35', accent: 'Standard Hindi', best_for: ['hindi conversations', 'emotional support', 'daily guidance'], quality_score: 9.4, default_speed: 0.94, default_pitch: 0.2, preview_text: 'Namaste dost! Main Ananya hoon.', avatar_color: '#EC4899', is_premium: false, tags: ['hindi', 'empathetic', 'melodious'] },
+  ],
+}
+
 const EMOTIONS = [
   { id: 'neutral', label: 'Neutral', icon: '😊', color: '#8B5CF6' },
   { id: 'warmth', label: 'Warmth', icon: '🤗', color: '#F59E0B' },
@@ -126,12 +158,18 @@ export default function VoiceLanguageSpeakerSelector({
 
       if (langRes?.languages) {
         setLanguages(langRes.languages)
+      } else {
+        setLanguages(FALLBACK_LANGUAGES)
       }
       if (speakerRes?.speakers) {
         setSpeakers(speakerRes.speakers)
+      } else {
+        setSpeakers(FALLBACK_SPEAKERS)
       }
     } catch {
-      // Use empty state - API may not be available
+      // API unavailable - use fallback data for offline support
+      setLanguages(FALLBACK_LANGUAGES)
+      setSpeakers(FALLBACK_SPEAKERS)
     } finally {
       setLoading(false)
     }
