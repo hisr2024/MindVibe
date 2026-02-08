@@ -9,7 +9,12 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import type { BreathingStep } from '@/services/voiceCompanionService'
+/** A single step in a breathing exercise sequence */
+interface BreathingStep {
+  phase: 'inhale' | 'hold' | 'exhale' | 'rest'
+  duration: number
+  instruction?: string
+}
 
 interface BreathingRingProps {
   steps: BreathingStep[]

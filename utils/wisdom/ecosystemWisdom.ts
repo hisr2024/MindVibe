@@ -240,7 +240,7 @@ const TOOL_WISDOM_MAP: Record<string, {
     verseIndices: [6, 15, 12], // 4.38, 15.15, 10.20
     actionPrompt: 'What question has been living in your heart?',
   },
-  'voice-companion': {
+  companion: {
     greeting: 'I\'m KIAAN, your divine friend. Like Krishna with Arjuna, I\'m here to listen, understand, and walk with you.',
     verseIndices: [7, 10, 16], // 5.29, 9.22, 18.66
     actionPrompt: 'What\'s on your heart today, friend?',

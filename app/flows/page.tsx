@@ -11,7 +11,7 @@ const pages = [
 ]
 
 const voiceFeature = {
-  href: '/voice-companion',
+  href: '/companion',
   title: 'KIAAN Companion',
   detail: 'Your divine best friend with voice guidance, Gita wisdom, and access to every wellness tool.',
   badge: 'New'

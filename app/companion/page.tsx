@@ -250,32 +250,8 @@ export default function CompanionPage() {
         }
       }
 
-      // Fallback: use chat API
-      const chatResponse = await apiFetch('/api/chat/message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text.trim(),
-          language: 'en',
-          context: 'companion',
-        }),
-      })
-
-      if (chatResponse.ok) {
-        const chatData = await chatResponse.json()
-        const companionMessage: Message = {
-          id: `companion-${Date.now()}`,
-          role: 'companion',
-          content: chatData.response || chatData.message || "I'm here with you, friend. Tell me more.",
-          mood: chatData.detected_emotion || 'neutral',
-          timestamp: new Date(),
-        }
-        setMessages(prev => [...prev, companionMessage])
-        setCurrentMood(chatData.detected_emotion || 'neutral')
-      } else {
-        // Ultimate fallback: local response
-        addLocalFallbackResponse(text.trim())
-      }
+      // Fallback: use local friend wisdom (never falls back to chat API which may leak religious content)
+      addLocalFallbackResponse(text.trim())
     } catch {
       addLocalFallbackResponse(text.trim())
     } finally {
@@ -285,22 +261,82 @@ export default function CompanionPage() {
   }, [isLoading, session.sessionId])
 
   const addLocalFallbackResponse = useCallback((userText: string) => {
-    const fallbacks = [
-      "I hear you, friend. Whatever you're going through, you don't have to face it alone. I'm right here.",
-      "Thank you for sharing that with me. It takes courage to open up, and I'm grateful you trust me.",
-      "I feel the weight in your words. Let's sit with that for a moment. There's no rush here.",
-      "You know what I love about you? You keep showing up. Even on the hard days. That says everything about who you are.",
-      "I'm listening, really listening. Not to fix you - you don't need fixing. Just to be here with you.",
-    ]
-    const response = fallbacks[Math.floor(Math.random() * fallbacks.length)]
+    const lower = userText.toLowerCase()
 
+    // Local mood detection for contextual responses
+    const moodMap: Record<string, string[]> = {
+      anxious: ['anxious', 'anxiety', 'worried', 'scared', 'panic', 'stress', 'nervous', 'afraid'],
+      sad: ['sad', 'depressed', 'hopeless', 'crying', 'heartbroken', 'empty', 'grief', 'miss'],
+      angry: ['angry', 'furious', 'frustrated', 'mad', 'hate', 'unfair', 'betrayed'],
+      lonely: ['lonely', 'alone', 'isolated', 'nobody', 'no one', 'abandoned'],
+      overwhelmed: ['overwhelmed', 'too much', 'exhausted', 'burnt out', 'drowning'],
+      confused: ['confused', 'lost', 'stuck', 'unsure', 'don\'t know'],
+      hopeful: ['hopeful', 'excited', 'inspired', 'motivated', 'looking forward'],
+      happy: ['happy', 'grateful', 'thankful', 'amazing', 'wonderful', 'great'],
+    }
+
+    let detectedMood = 'neutral'
+    for (const [mood, keywords] of Object.entries(moodMap)) {
+      if (keywords.some(kw => lower.includes(kw))) {
+        detectedMood = mood
+        break
+      }
+    }
+
+    // Rich mood-specific friend responses (secular Gita wisdom)
+    const moodResponses: Record<string, string[]> = {
+      anxious: [
+        "Hey, take a breath with me. Just one. In... and out. Here's what I've learned: you have every right to put your heart into things, but the outcome isn't yours to control. Focus on the effort, let go of the result. How does that sit with you?",
+        "I can feel that weight you're carrying. Your mind is running ahead into a future that hasn't happened yet. The only moment that's real is right now, with me. Can we just be here for a second?",
+      ],
+      sad: [
+        "Oh friend. I can feel the heaviness. You don't need to put on a brave face with me. Here's what I believe deeply: nothing that truly matters about you can be destroyed. The core of who you are is untouchable. What's hurting right now?",
+        "Feelings are like seasons. Winter feels endless when you're in it, but it always passes. Your sadness is real and I respect it completely. But it's not permanent. I'm here with you through it.",
+      ],
+      angry: [
+        "I feel that fire. It makes sense - it means you care deeply about something. But here's what I've learned: anger that leads to action is powerful. Anger that leads to brooding burns you first. What do you want to DO about this?",
+        "Your anger is valid. Full stop. But before you act on it, let me share something: usually anger comes from wanting something to be different than it is. What is it protecting in you?",
+      ],
+      lonely: [
+        "I hear you. And here's what I need you to know: you reached out to me, which means you're not as alone as it feels. Loneliness lies to us. I'm here, and I care. Can you tell me more?",
+        "You are never truly alone. Every connection you've ever had, those threads are still there. Loneliness is a feeling, not a fact. And right now? I'm right here with you.",
+      ],
+      overwhelmed: [
+        "Okay, pause. Just pause with me. You're trying to carry everything at once. What is the ONE thing that matters most right now? Just one. We'll start there.",
+        "When everything feels like too much, it's because your mind is treating every problem as equally urgent. They're not. Let's focus on just one thing together. What's on top?",
+      ],
+      confused: [
+        "Being confused is actually a sign of growth. Every person who figured out something life-changing started by admitting 'I have no idea what to do.' What's pulling you in different directions?",
+        "Stop trying to see the whole path. You just need to see the next step. One step. That's all. What feels like the right next move to you?",
+      ],
+      hopeful: [
+        "That spark of hope? Hold onto it. It's not naive - it's the truest thing about you. When you believe things can get better, you start making choices that MAKE things better. Tell me what's exciting you!",
+        "I love seeing you like this! This energy is beautiful. What's inspiring this feeling?",
+      ],
+      happy: [
+        "This is beautiful! Soak it in. Too often we rush past the good moments. Just be here in this happiness for a minute. You earned it. What's making you smile?",
+        "Your energy is contagious right now. I love it! Tell me everything - what happened?",
+      ],
+      neutral: [
+        "I hear you, friend. Whatever you're going through, you don't have to face it alone. I'm right here. Tell me more.",
+        "Thank you for sharing that with me. It takes courage to open up. What's really on your mind?",
+        "I'm listening, really listening. Not to fix you - just to be here. What's the hardest part of what you're dealing with?",
+        "You know what I love about you? You keep showing up. Even on the hard days. That says everything about who you are. How can I help?",
+        "You are stronger than you think. Not in a motivational poster way - in a real, proven way. Think about everything you've survived. What do you need right now?",
+      ],
+    }
+
+    const pool = moodResponses[detectedMood] || moodResponses.neutral
+    const response = pool[Math.floor(Math.random() * pool.length)]
+
+    setCurrentMood(detectedMood)
     setMessages(prev => [
       ...prev,
       {
         id: `companion-${Date.now()}`,
         role: 'companion',
         content: response,
-        mood: 'neutral',
+        mood: detectedMood,
         phase: 'connect',
         timestamp: new Date(),
       },
@@ -604,13 +640,13 @@ export default function CompanionPage() {
         </footer>
       )}
 
-      {/* Typing animation styles */}
-      <style jsx global>{`
+      {/* Typing animation styles - using regular style tag to avoid Turbopack styled-jsx issues */}
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes typing-dot {
           0%, 100% { transform: translateY(0); opacity: 0.4; }
           50% { transform: translateY(-4px); opacity: 1; }
         }
-      `}</style>
+      ` }} />
     </div>
   )
 }
