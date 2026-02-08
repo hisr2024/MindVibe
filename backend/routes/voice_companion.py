@@ -10,6 +10,7 @@ All wisdom is delivered in modern, secular language - no religious references.
 import datetime
 import html
 import logging
+import os
 import re
 import time
 import uuid
@@ -776,9 +777,16 @@ async def companion_health():
     from backend.services.companion_friend_engine import get_companion_engine
 
     engine = get_companion_engine()
+    voice_providers = []
+    if os.getenv("ELEVENLABS_API_KEY", "").strip():
+        voice_providers.append("elevenlabs")
+    if os.getenv("OPENAI_API_KEY", "").strip():
+        voice_providers.append("openai_tts_hd")
+    voice_providers.extend(["google_neural2", "edge_tts", "browser_fallback"])
+
     return {
         "status": "healthy",
         "ai_enhanced": engine._openai_available,
         "service": "kiaan-companion",
-        "voice_providers": ["google_neural2", "edge_tts", "browser_fallback"],
+        "voice_providers": voice_providers,
     }
