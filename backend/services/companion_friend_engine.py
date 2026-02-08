@@ -610,7 +610,7 @@ FOLLOW_UPS = {
 EMOTION_KEYWORDS: dict[str, list[tuple[str, float]]] = {
     "anxious": [
         ("anxious", 3.0), ("anxiety", 3.0), ("worried", 2.0), ("nervous", 2.0),
-        ("scared", 3.0), ("panic", 3.0), ("stress", 2.0), ("overwhelm", 3.0),
+        ("scared", 3.0), ("panic", 3.0), ("stress", 2.0),
         ("restless", 2.0), ("tense", 1.5), ("dread", 3.0), ("freaking", 3.0),
         ("on edge", 2.5), ("can't breathe", 3.0), ("heart racing", 3.0),
         ("afraid", 2.5), ("fear", 2.5), ("terrified", 3.0), ("uneasy", 2.0),
@@ -743,8 +743,9 @@ def _check_verse_request(text: str) -> bool:
         "bhagavad gita", "from the gita", "gita says", "which shloka",
         "what shloka", "which sloka", "scripture reference",
         "which teaching is this", "where is this from",
-        "what's the source", "original source", "verse number",
-        "chapter and verse", "gita chapter",
+        "what's the source", "whats the source", "original source",
+        "verse number", "chapter and verse", "gita chapter",
+        "the source", "where did you learn", "where does this come from",
     ]
     text_lower = text.lower()
     return any(signal in text_lower for signal in verse_signals)
