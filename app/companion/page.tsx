@@ -283,46 +283,51 @@ export default function CompanionPage() {
       }
     }
 
-    // Rich mood-specific friend responses (secular Gita wisdom)
+    // Rich mood-specific friend responses with modern examples
     const moodResponses: Record<string, string[]> = {
       anxious: [
-        "Hey, take a breath with me. Just one. In... and out. Here's what I've learned: you have every right to put your heart into things, but the outcome isn't yours to control. Focus on the effort, let go of the result. How does that sit with you?",
-        "I can feel that weight you're carrying. Your mind is running ahead into a future that hasn't happened yet. The only moment that's real is right now, with me. Can we just be here for a second?",
+        "Hey, take a breath with me. Just one. In... and out. Think of it like applying for a dream job - you pour everything into the application, then let go. You did YOUR part. The result isn't something you can control from your couch at 2am. How does that sit with you?",
+        "I can feel that weight. Your mind right now is like a browser with 47 tabs open, half of them playing different music. Let's close all the tabs except this one. This conversation. This breath. The future tab? It's not even loaded yet.",
+        "Your anxiety is like a smoke detector going off because you're making toast. The alarm is REAL, but there's no actual fire. Right this second, we're safe. What's the 'toast' that's setting it off?",
       ],
       sad: [
-        "Oh friend. I can feel the heaviness. You don't need to put on a brave face with me. Here's what I believe deeply: nothing that truly matters about you can be destroyed. The core of who you are is untouchable. What's hurting right now?",
-        "Feelings are like seasons. Winter feels endless when you're in it, but it always passes. Your sadness is real and I respect it completely. But it's not permanent. I'm here with you through it.",
+        "Oh friend. Remember when you thought that breakup would end you? Or that failed exam was game over? Look at you now. This pain is real, and I respect it completely. But like every hard thing before it - it will pass too. What's hurting right now?",
+        "Grief is like writing a text to someone whose number doesn't work anymore. The love is still real. That never goes away, and you wouldn't want it to. Your capacity to love that deeply? That's your superpower. I'm here with you through this.",
+        "Think about the ocean. The surface has storms, massive waves. But 20 feet down? Completely still. There's a deeper part of you that knows this wave will pass. What would it feel like to remember that stillness underneath?",
       ],
       angry: [
-        "I feel that fire. It makes sense - it means you care deeply about something. But here's what I've learned: anger that leads to action is powerful. Anger that leads to brooding burns you first. What do you want to DO about this?",
-        "Your anger is valid. Full stop. But before you act on it, let me share something: usually anger comes from wanting something to be different than it is. What is it protecting in you?",
+        "I feel that fire. And it makes total sense. Your anger is like rocket fuel - in a rocket, it takes you to the moon. In a dumpster, it just burns everything. Let's aim it somewhere useful. What do you want to DO about this?",
+        "Ever sent an angry text at 11pm and woke up at 7am thinking 'why did I do that'? That's because anger literally hijacks the smart part of your brain. Before you act on this, give it one hour. Let the smart part get back in the driver's seat. What happened?",
+        "Your anger is valid. Full stop. It's like a notification on your phone - it's telling you something needs attention. But you don't have to open every notification immediately. What is this anger trying to tell you?",
       ],
       lonely: [
-        "I hear you. And here's what I need you to know: you reached out to me, which means you're not as alone as it feels. Loneliness lies to us. I'm here, and I care. Can you tell me more?",
-        "You are never truly alone. Every connection you've ever had, those threads are still there. Loneliness is a feeling, not a fact. And right now? I'm right here with you.",
+        "You just reached out to me. That tiny act tells me something huge: you're not as disconnected as loneliness wants you to believe. Loneliness is a liar. Think of connections like Wi-Fi signals - they're invisible but everywhere. Who could you text one real message to today?",
+        "Social media is the worst because everyone looks connected and thriving. But most of those people are scrolling alone on their couch too. We're all lonely sometimes. You reaching out right now? That takes real courage. Tell me more.",
       ],
       overwhelmed: [
-        "Okay, pause. Just pause with me. You're trying to carry everything at once. What is the ONE thing that matters most right now? Just one. We'll start there.",
-        "When everything feels like too much, it's because your mind is treating every problem as equally urgent. They're not. Let's focus on just one thing together. What's on top?",
+        "Imagine your mind is like a kitchen after Thanksgiving dinner. Dishes everywhere. You don't clean it all at once - you start with ONE counter. Clear it. Done. Then the next. What's your one counter right now? Forget everything else.",
+        "Here's permission you didn't know you needed: you don't have to be productive today. Sometimes 'showing up' means brushing your teeth and drinking water. That counts. You're not behind. What's the ONE thing you could let go of?",
+        "You know why airplane safety says put YOUR mask on first? Because you can't help anyone else if you're suffocating. You're pouring from an empty cup. What would taking care of yourself look like today?",
       ],
       confused: [
-        "Being confused is actually a sign of growth. Every person who figured out something life-changing started by admitting 'I have no idea what to do.' What's pulling you in different directions?",
-        "Stop trying to see the whole path. You just need to see the next step. One step. That's all. What feels like the right next move to you?",
+        "Every successful founder started exactly where you are: completely lost. Jeff Bezos was shipping books from a garage. The clarity comes FROM the doing, not before it. What's one small step you could take this week?",
+        "Google Maps doesn't show you the entire route in detail - it shows you the next turn. That's all you need. What's your next turn? Not the whole life plan - just the next turn.",
+        "Decision paralysis is like standing in front of Netflix for 20 minutes. But there's rarely a truly 'wrong' choice. Take path A? Growth. Path B? Different growth. The only wrong choice is no choice. What feels right in your gut?",
       ],
       hopeful: [
-        "That spark of hope? Hold onto it. It's not naive - it's the truest thing about you. When you believe things can get better, you start making choices that MAKE things better. Tell me what's exciting you!",
-        "I love seeing you like this! This energy is beautiful. What's inspiring this feeling?",
+        "That spark of hope? It's like a startup founder pitching an idea everyone thinks is crazy. You can see something others can't - a future version of your life that doesn't exist yet. And that vision changes every decision you make. Tell me what you're seeing!",
+        "I love this energy! Hope is like compound interest. Small daily deposits add up in ways you can't see yet. Hold onto this feeling. What's inspiring it?",
       ],
       happy: [
-        "This is beautiful! Soak it in. Too often we rush past the good moments. Just be here in this happiness for a minute. You earned it. What's making you smile?",
-        "Your energy is contagious right now. I love it! Tell me everything - what happened?",
+        "Quick - screenshot this moment in your mind! We're SO good at remembering bad days in HD but good days barely register. Be here in this happiness. Soak it in. This is what life's actually about. What's making you smile?",
+        "Your energy is contagious right now! Happiness is like a wifi signal - it comes and goes, and that's okay. Just enjoy the good connection while it lasts. Tell me everything!",
       ],
       neutral: [
-        "I hear you, friend. Whatever you're going through, you don't have to face it alone. I'm right here. Tell me more.",
-        "Thank you for sharing that with me. It takes courage to open up. What's really on your mind?",
-        "I'm listening, really listening. Not to fix you - just to be here. What's the hardest part of what you're dealing with?",
-        "You know what I love about you? You keep showing up. Even on the hard days. That says everything about who you are. How can I help?",
-        "You are stronger than you think. Not in a motivational poster way - in a real, proven way. Think about everything you've survived. What do you need right now?",
+        "I hear you, friend. Whatever you're going through, you don't have to face it alone. Think about your track record of handling hard things - it's literally 100%. What's on your mind?",
+        "Imagine you had a friend who talked to you the way you talk to yourself. You'd fire that friend immediately, right? Try talking to yourself like you'd talk to your best friend. What's really going on?",
+        "The real difference between people who build the life they want? It's showing up on Tuesday. And the boring days in between. Just keep showing up. How can I help today?",
+        "Everyone you meet is fighting a battle you can't see. Including you. So be kind to them, but mostly - be kind to yourself. You're doing better than you think. What do you need right now?",
+        "Nobody talks about this, but the goal isn't to never feel bad. It's to know you can HANDLE it. Like, you don't need a phone case that prevents all drops - you need a phone that survives them. You're that phone. What's happening?",
       ],
     }
 

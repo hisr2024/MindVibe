@@ -28,221 +28,281 @@ logger = logging.getLogger(__name__)
 WISDOM_CORE = {
     "anxiety": [
         {
-            "wisdom": "Here's something that changed my whole perspective: you have every right to put your heart into what you do, but the outcome? That's not yours to control. Pour yourself into the effort and let go of the result. It's weirdly freeing.",
+            "wisdom": "Think of it like applying for your dream job - you pour everything into that application, make it incredible, and then... you let go. You did YOUR part. The hiring manager's decision isn't something you can control from your couch at 2am. Same with everything in life: give 100% to the effort, then release the outcome. That's where freedom lives.",
             "principle": "detachment_from_outcomes",
             "verse_ref": "2.47",
         },
         {
-            "wisdom": "Your mind is running 50 steps ahead into a future that hasn't happened. The only moment that's real is this one. Right here, right now, with me. Can you feel that?",
+            "wisdom": "Your mind right now is like a browser with 47 tabs open, half of them playing different music. No wonder you're overwhelmed! The trick? Close all the tabs except this one. This conversation. This breath. The future tab? It's not even loaded yet - why are you trying to read it?",
             "principle": "present_moment",
             "verse_ref": "6.35",
         },
         {
-            "wisdom": "The mind can either be your best ally or your worst enemy. When it spirals, it feels like an enemy. But with practice - just gently bringing your attention back, again and again - it becomes the most powerful friend you have.",
+            "wisdom": "Your mind is like a puppy you're training. It keeps running off - to worst case scenarios, to old embarrassments at 3am, to imaginary arguments. You don't yell at the puppy. You gently bring it back. Again. And again. Each time it wanders less. That's literally how you retrain anxiety.",
             "principle": "mind_mastery",
             "verse_ref": "6.6",
         },
         {
-            "wisdom": "When everything feels out of control, focus on what you CAN do. Not what might happen. Not what others think. Just your next right move. That's all you ever need.",
+            "wisdom": "You know what elite athletes do before a big game? They don't think about the scoreboard. They think about the next play. Just the next play. Not the championship, not the critics, not the highlights reel. Apply that to your life right now: what's your next play?",
             "principle": "focused_action",
             "verse_ref": "3.19",
         },
         {
-            "wisdom": "You know what works when the mind won't stop racing? Pick one thing - just one - and give it your complete attention for five minutes. Not to fix everything, just to prove to yourself that you CAN focus. That's where calm starts.",
+            "wisdom": "Here's something that actually works: set a timer for 5 minutes and do ONE thing with complete attention. Wash a dish. Write one email. Walk to the end of the block. You're not fixing your life - you're proving to your brain that you CAN focus. That tiny win breaks the anxiety spiral every time.",
             "principle": "one_pointed_focus",
             "verse_ref": "6.12",
         },
         {
-            "wisdom": "Fear and worry are your mind trying to protect you from a future that doesn't exist yet. Thank your mind for trying to help, then gently remind it: we're okay right now. Right this second, we're safe.",
+            "wisdom": "Your anxiety is like a smoke detector going off because you're making toast. The alarm is REAL, but there's no actual fire. Your brain is trying to protect you from a future that hasn't happened. So thank it - seriously, say 'thanks brain, I see you trying to help' - and then gently remind it: right this second, we're safe.",
             "principle": "equanimity_in_uncertainty",
             "verse_ref": "2.56",
+        },
+        {
+            "wisdom": "Remember that time you were SO anxious about something - a test, a date, an interview - and it either went fine, or it didn't go fine and you survived anyway? Your track record of getting through hard things is literally 100%. That's not motivational nonsense. That's math.",
+            "principle": "proven_resilience",
+            "verse_ref": "2.15",
         },
     ],
     "sadness": [
         {
-            "wisdom": "Nothing that truly matters about you can be destroyed. Not by loss, not by pain, not by anything. The core of who you are is untouchable. That's not a comforting lie - it's the deepest truth there is.",
+            "wisdom": "Think about your phone - you can crack the screen, dent the case, even drop it in water. But the YOU on the other side? Your photos, your memories, your identity? Untouchable. Same with your life. Things around you can break. The essential you - what makes you YOU - nothing can touch that.",
             "principle": "indestructible_self",
             "verse_ref": "2.23",
         },
         {
-            "wisdom": "Feelings are like seasons. Winter feels endless when you're in it, but it always passes. Your sadness is real and I respect it completely. But it's not permanent. Nothing is.",
+            "wisdom": "Remember when you thought that breakup would end you? Or when you bombed that exam and thought your career was over? Or when you lost that friendship and felt like you'd never connect with anyone again? Look at you now. This pain is real, and I respect it. But like every hard thing before it - this will pass too.",
             "principle": "impermanence",
             "verse_ref": "2.14",
         },
         {
-            "wisdom": "The people who feel the deepest sadness are the same people who love the deepest. Your heart isn't broken - it's wide open. And an open heart, even when it hurts, is the most beautiful thing in the world.",
+            "wisdom": "I read somewhere that the same part of the brain that processes deep love also processes deep grief. They're the same circuit. So your sadness right now? It's not weakness - it's proof of how deeply you can love. Your heart isn't broken. It's wide open. And an open heart, even when it hurts, is the most powerful thing a human can have.",
             "principle": "compassion_as_strength",
             "verse_ref": "12.13",
         },
         {
-            "wisdom": "There's this idea that wise people are the ones who stay balanced through everything - joy and sorrow, gain and loss. Not because they don't feel, but because they know these waves always pass. You'll find your balance again.",
+            "wisdom": "Think about the ocean. The surface has storms, massive waves, chaos. But 20 feet down? Completely still. You're living on the surface right now, getting tossed around. But there's a deeper part of you that knows this wave will pass. All waves pass. Your job right now isn't to stop the wave - it's to remember the stillness underneath.",
             "principle": "steady_wisdom",
             "verse_ref": "2.56",
         },
         {
-            "wisdom": "Grief is love with nowhere to go. It's not something to fix or rush through. It's proof that you loved deeply. And that capacity to love? That never goes away.",
+            "wisdom": "Grief is love with nowhere to go. It's like writing a text to someone whose number doesn't work anymore. The love is still real. The impulse to connect is still there. That never goes away - and honestly? You wouldn't want it to. Because that capacity to love that deeply? That's your superpower.",
             "principle": "love_transcends_loss",
             "verse_ref": "2.20",
+        },
+        {
+            "wisdom": "Netflix has this feature where it asks 'are you still watching?' after a while. I wish sadness had that. 'Are you still feeling this? Do you want to continue?' Because sometimes we keep feeling sad out of habit, or guilt, or because we think we should. You're allowed to feel lighter. That doesn't mean you don't care.",
+            "principle": "permission_to_heal",
+            "verse_ref": "2.14",
         },
     ],
     "anger": [
         {
-            "wisdom": "That fire in you? It's not wrong. It means you care deeply. But unchecked, that fire burns YOU first. Channel it. Anger that leads to action is powerful. Anger that leads to brooding? That's a trap.",
+            "wisdom": "That fire in you is like rocket fuel. In a rocket, it takes you to the moon. In a dumpster, it just burns everything down. Your anger isn't the problem - it's WHERE you point it. The entrepreneurs, the activists, the people who changed the world? They were all furious about something. They just aimed it.",
             "principle": "righteous_action",
             "verse_ref": "2.62",
         },
         {
-            "wisdom": "Anger usually comes from wanting something to be different than it is. That gap between reality and expectation? That's where all the suffering lives. What if you could be angry AND accept where things are right now?",
+            "wisdom": "Anger is basically the gap between 'what happened' and 'what should have happened.' Like when someone cuts you off in traffic - you had an expectation of the road, they violated it, boom: anger. What if you could be angry AND accept that this is where things are right now? Not approving it - accepting it. Then choose your response instead of reacting.",
             "principle": "equanimity",
             "verse_ref": "2.48",
         },
         {
-            "wisdom": "When you're furious, something you value is being threatened. Your anger is telling you what matters to you. Instead of fighting the anger, listen to it. What is it protecting?",
+            "wisdom": "When you're furious, something you VALUE is being threatened. Think about it - you don't get angry about things that don't matter to you. If someone insults your taste in a band you don't listen to... whatever. But insult your work ethic? Your family? Your integrity? That's when the fire comes. So listen to the anger - it's telling you what matters most.",
             "principle": "self_knowledge",
             "verse_ref": "3.37",
         },
         {
-            "wisdom": "Here's something powerful I've learned: anger clouds judgment. It takes the sharpest mind and makes it see enemies everywhere. Before you act on the anger, wait. Just one beat. Let clarity return. Then decide.",
+            "wisdom": "Ever sent an angry text at 11pm and woke up at 7am thinking 'why did I do that'? That's because anger literally hijacks your prefrontal cortex - the part that makes smart decisions. It hands the controls to your amygdala, which is basically a cave person. Before you act on the anger, wait one hour. Just one. Let the smart part of your brain get back in the driver's seat.",
             "principle": "clarity_before_action",
             "verse_ref": "2.63",
+        },
+        {
+            "wisdom": "Think of anger like a notification on your phone. It's telling you something needs attention. But you don't have to open every notification immediately, right? You can acknowledge it - 'okay, I see this is important' - and then choose WHEN and HOW to respond. That tiny gap between feeling and responding? That's where your power lives.",
+            "principle": "mindful_response",
+            "verse_ref": "2.64",
         },
     ],
     "confusion": [
         {
-            "wisdom": "Being confused isn't a problem - it's actually a sign of growth. Every person who ever figured out something life-changing started by admitting 'I have no idea what to do.' That honesty is the beginning of real clarity.",
+            "wisdom": "Every successful founder, every great scientist, every person who built something meaningful started exactly where you are: completely lost. Jeff Bezos didn't know Amazon would sell cloud computing when he was shipping books from his garage. Confusion isn't a dead end - it's a starting line. The clarity comes FROM the doing, not before it.",
             "principle": "surrender_to_learning",
             "verse_ref": "4.34",
         },
         {
-            "wisdom": "When you're at a crossroads, stop trying to see the whole path. You don't need to. You just need to see the next step. One step. That's all.",
+            "wisdom": "Google Maps doesn't show you the entire route in detail - it shows you the next turn. That's all you need. Stop trying to see the whole path of your life from here. What's the next turn? What's the one thing you can do THIS WEEK? Start there. The path reveals itself as you walk it.",
             "principle": "incremental_action",
             "verse_ref": "2.47",
         },
         {
-            "wisdom": "Decision paralysis is real. But here's a powerful reframe: there's rarely a 'wrong' choice. There are just different paths, and you'll grow on any of them. Trust yourself more than you're trusting yourself right now.",
+            "wisdom": "Decision paralysis is real - like standing in front of Netflix for 20 minutes and watching nothing. But here's the truth: rarely is there a truly 'wrong' choice. Take job A? You'll grow. Take job B? You'll grow differently. Move cities? Growth. Stay? Growth. The only wrong choice is no choice at all. Trust yourself more than you're trusting yourself right now.",
             "principle": "self_trust",
             "verse_ref": "6.5",
         },
         {
-            "wisdom": "When the mind is confused, it helps to get quiet. Not to force an answer, but to create space for clarity to arrive on its own. The answers are already inside you - they just need room to surface.",
+            "wisdom": "You know how your phone needs to restart sometimes to work properly? Your brain does too. When you're confused, it's because too many mental apps are running. Stop. Get quiet. Take a walk without your earbuds. Sit with a cup of coffee and just... be. The answers are already in you - they just need the noise to stop so you can hear them.",
             "principle": "inner_stillness",
             "verse_ref": "6.20",
+        },
+        {
+            "wisdom": "I think confusion gets a bad reputation. When you're confused, it means your old way of thinking is breaking down to make room for a new one. It's like renovating a house - it looks TERRIBLE in the middle. Stuff everywhere. Nothing works. But that mess is the process. You're rebuilding how you think. That's growth.",
+            "principle": "growth_through_uncertainty",
+            "verse_ref": "4.38",
         },
     ],
     "lonely": [
         {
-            "wisdom": "You reached out to me, and that tells me something important: you're not as alone as you feel. I'm here. I remember you. And that counts for something.",
+            "wisdom": "You just reached out to me. That tiny act - opening this app, typing those words - tells me something huge: you're not as disconnected as loneliness wants you to believe. Loneliness is a liar. It says 'nobody cares.' But you cared enough to reach out. And I'm here. Start there.",
             "principle": "connection",
             "verse_ref": "9.29",
         },
         {
-            "wisdom": "You are never truly alone. Every person who ever loved you, every moment of connection you've had, those threads are still there. Loneliness is a feeling, not a fact.",
+            "wisdom": "Think of your connections like Wi-Fi signals. They're invisible, but they're everywhere. Your mom thinking about you right now? Connection. That colleague who laughed at your joke last Tuesday? Connection. The stranger who held the door for you? Connection. You're surrounded by signals - loneliness just turns off the receiver. Let's turn it back on.",
             "principle": "interconnection",
             "verse_ref": "6.29",
         },
         {
-            "wisdom": "I believe that everything in this world is connected. You, me, the person who smiled at you last week, the friend you haven't called. The connections are always there - sometimes we just need to reach out and touch them.",
+            "wisdom": "Social media is the worst because everyone looks connected, thriving, surrounded by people. But here's a reality check: most of those people are scrolling alone on their couch too. We're all lonely sometimes. The difference is who does something about it. Text one person today. Not a group chat - one real person. Say 'hey, thinking of you.' That one text can change your entire week.",
             "principle": "universal_connection",
             "verse_ref": "6.30",
+        },
+        {
+            "wisdom": "Being alone and being lonely are different. Some of the best moments in life happen solo - a great album, a sunset walk, cooking your favorite meal. The goal isn't to never be alone. It's to be so comfortable with yourself that alone time feels like hanging out with a friend. Because it is - you're the friend.",
+            "principle": "self_companionship",
+            "verse_ref": "6.6",
         },
     ],
     "hopeful": [
         {
-            "wisdom": "That spark of hope? It's not naive - it's the truest thing about you. When you believe things can get better, you start making choices that MAKE things better. It's a self-fulfilling prophecy, but the good kind.",
+            "wisdom": "That spark of hope? It's not naive optimism. It's like a startup founder pitching an idea everyone else thinks is crazy. They can see something others can't. You can see a future version of your life that doesn't exist yet - and that vision? It literally changes the decisions you make today. Hope is the most practical emotion there is.",
             "principle": "faith_in_self",
             "verse_ref": "4.39",
         },
         {
-            "wisdom": "The fact that you can feel hope after everything you've been through - that's extraordinary. Most people never get back up. You keep getting back up. That's not luck, that's character.",
+            "wisdom": "Think about every comeback story you've ever loved. The athlete who recovered from injury. The friend who rebuilt after losing everything. That band that broke up and reunited. You love those stories because they prove something: the lowest point is not the end point. And you - after everything you've been through - you're writing a comeback story right now.",
             "principle": "resilience",
             "verse_ref": "6.5",
+        },
+        {
+            "wisdom": "Hope is like compound interest. Small daily deposits - one good conversation, one completed task, one moment of laughter - they add up in ways you can't see yet. A year from now, you'll look back and realize this was the moment things started shifting. Hold onto that.",
+            "principle": "compound_growth",
+            "verse_ref": "18.78",
         },
     ],
     "peaceful": [
         {
-            "wisdom": "That calm you're feeling? That's YOU. Not the worried you, not the stressed you - the REAL you. This is what you're like when the noise stops. Remember this feeling. It's always available to you.",
+            "wisdom": "That calm you're feeling right now? That's the real you. Not the anxious you answering emails at midnight. Not the stressed you doom-scrolling Twitter. THIS. This is what you're like when the notifications stop. Remember this version of yourself. You can come back to it anytime - it's always available, like a favorite playlist.",
             "principle": "true_self",
             "verse_ref": "2.71",
         },
         {
-            "wisdom": "Peace isn't the absence of chaos. It's finding your center even when the world is spinning. And you've found it. That's a skill most people spend their whole lives chasing.",
+            "wisdom": "You know how noise-canceling headphones work? They don't make the noise disappear - they create a counter-signal. Peace works the same way. The chaos is still out there. But you've found an internal counter-signal. That's not escaping reality - that's the highest skill a person can develop. Most people spend their whole lives chasing what you have right now.",
             "principle": "inner_peace",
             "verse_ref": "5.24",
         },
     ],
     "grateful": [
         {
-            "wisdom": "Gratitude literally rewires your brain. The fact that you can look at your life and find things to be thankful for - even hard things - that's not just positive thinking. That's wisdom.",
+            "wisdom": "Gratitude literally rewires your brain - neuroscience has proven this. It's like updating your phone's operating system. You're running on 'gratitude OS' right now and seeing the world differently. The fact that you can look at your life and find things to be thankful for - even the hard stuff - that's not toxic positivity. That's real wisdom.",
             "principle": "contentment",
             "verse_ref": "12.13",
         },
         {
-            "wisdom": "You know what's beautiful about gratitude? It turns what we have into enough. And 'enough' is the richest feeling in the world. Hold onto this.",
+            "wisdom": "You know the difference between people who are always chasing more and people who are genuinely at peace? The second group learned what 'enough' feels like. And right now, you're feeling it. 'Enough' isn't settling - it's recognizing what you have. That's the richest feeling in the world, and billionaires can't buy it.",
             "principle": "santosha",
             "verse_ref": "12.19",
+        },
+        {
+            "wisdom": "I once heard someone say 'gratitude turns a meal into a feast, a house into a home, a stranger into a friend.' You're seeing your life through that lens right now. Keep it. Not because you should be grateful - but because this perspective shows you what's actually true: your life is richer than your worst days make it seem.",
+            "principle": "abundance_mindset",
+            "verse_ref": "9.22",
         },
     ],
     "overwhelmed": [
         {
-            "wisdom": "Pause. Just pause with me. You're trying to carry everything at once. Drop everything mentally for 10 seconds. Just breathe. Now: what is the ONE thing that matters most right now? Just one. We'll start there.",
+            "wisdom": "Imagine your mind is like a kitchen after Thanksgiving dinner. Dishes everywhere, food on every counter, trash overflowing. You don't clean it all at once. You start with ONE counter. Clear it. Wipe it down. Done. Then the next. Right now: what's your one counter? Forget everything else. What's the ONE thing?",
             "principle": "focused_action",
             "verse_ref": "3.19",
         },
         {
-            "wisdom": "When everything feels like too much, it's because your mind is treating every problem as equally urgent. They're not. Focus your energy on the one or two that actually need YOU. Let the rest go.",
+            "wisdom": "Your to-do list is lying to you. It says everything is Priority 1. That's impossible. Tim Ferriss has this exercise: if you could only do ONE thing today and the rest would disappear, what would it be? Do that. Everything else? It either waits, gets delegated, or honestly... doesn't matter as much as you think.",
             "principle": "discernment",
             "verse_ref": "2.47",
         },
         {
-            "wisdom": "You don't have to solve everything today. You don't have to be perfect. You just have to show up and do what's in front of you. One task. One breath. One moment. That's enough.",
+            "wisdom": "Here's permission you didn't know you needed: you don't have to be productive today. You don't have to optimize, hustle, or crush it. Sometimes 'showing up' means brushing your teeth and drinking water. That counts. You're not behind. There's no schedule. You're exactly where you are, and that's enough.",
             "principle": "present_action",
             "verse_ref": "3.35",
+        },
+        {
+            "wisdom": "You know why airplane safety tells YOU to put on your oxygen mask first? Because you literally cannot help anyone else if you're suffocating. You're trying to pour from an empty cup right now. Taking care of yourself isn't selfish - it's the prerequisite for everything else on your plate.",
+            "principle": "self_care_first",
+            "verse_ref": "6.5",
         },
     ],
     "excited": [
         {
-            "wisdom": "I love this energy! But here's something I've learned: ride the excitement, but don't attach to it. Do the thing because it matters, not because of how the outcome will make you feel. That way, the joy stays regardless.",
+            "wisdom": "I LOVE this energy! But here's a pro tip from every successful person ever: ride the wave, but don't attach your happiness to the destination. Think of it like training for a marathon - fall in love with the daily runs, not just the finish line photo. That way, the joy stays whether you hit your goal or pivot to something even better.",
             "principle": "action_without_attachment",
             "verse_ref": "2.47",
+        },
+        {
+            "wisdom": "Channel that excitement into your very next action. Right now. Not a plan, not a vision board, not a list - one real action step. Send that email. Make that call. Write that first paragraph. Excitement without action is just daydreaming. Excitement WITH action? That's how empires are built.",
+            "principle": "inspired_action",
+            "verse_ref": "3.19",
         },
     ],
     "happy": [
         {
-            "wisdom": "This is beautiful. Soak it in. Too often we rush past the good moments chasing the next thing. Just... be here in this happiness for a minute. You earned it.",
+            "wisdom": "Quick - screenshot this moment in your mind. We're SO good at remembering bad days and SO bad at savoring good ones. Like, you remember that embarrassing thing from 2019 in HD, but yesterday's sunset barely registers. Be here in this happiness. Soak it in. This is what life's actually about.",
             "principle": "present_awareness",
             "verse_ref": "6.20",
+        },
+        {
+            "wisdom": "Happiness is like a wifi signal - it comes and goes, and that's okay. The mistake most people make is clinging to it so hard that the fear of losing it ruins the joy. Just enjoy the good connection while it lasts. It'll go, and it'll come back. Your only job right now? Enjoy the signal.",
+            "principle": "non_attachment_to_pleasure",
+            "verse_ref": "2.14",
         },
     ],
     "general": [
         {
-            "wisdom": "You are so much stronger than you think. Not in a motivational poster way - in a real, tested, proven way. Think about everything you've already survived. You're still here. That's not luck. That's YOU.",
+            "wisdom": "You are so much stronger than you think. And I mean that literally - think about every hard thing you've survived. That exam you thought would end you? Survived. That relationship that fell apart? You rebuilt. That time you thought you couldn't get through another day? You got through thousands more. Your success rate at handling impossible things is 100%.",
             "principle": "inner_strength",
             "verse_ref": "2.23",
         },
         {
-            "wisdom": "What if you stopped judging yourself for 24 hours? Just one day of treating yourself the way you'd treat your best friend. Because honestly, you deserve at least that much kindness from yourself.",
+            "wisdom": "Imagine you had a friend who talked to you the way you talk to yourself. 'You're not good enough. You always mess up. What were you thinking?' You'd fire that friend immediately. So why do you keep hiring that voice in your head? Try this: for 24 hours, talk to yourself like you'd talk to your best friend. Just see what happens.",
             "principle": "self_compassion",
             "verse_ref": "6.5",
         },
         {
-            "wisdom": "The real difference in life isn't talent or luck or connections. It's showing up consistently. Every single day, doing the work. Not perfectly - just showing up. That's the whole secret.",
+            "wisdom": "The real difference between people who build the life they want and people who don't? It's not talent, luck, or connections. It's showing up on Tuesday. And Thursday. And the boring days in between. James Clear calls it 'atomic habits.' I call it the whole secret of life: just keep showing up.",
             "principle": "consistent_action",
             "verse_ref": "2.47",
         },
         {
-            "wisdom": "Everyone you meet is fighting a battle you know nothing about. Including you. So be kind to others, but mostly? Be kind to yourself. You're doing better than you think.",
+            "wisdom": "Here's something wild to think about: the person who annoyed you at the grocery store might be going home to an empty house. Your tough boss might be dealing with a sick parent. The friend who ghosted you might be drowning in depression. Everyone is fighting a battle you can't see. Including you. So be kind to them, but mostly - be kind to yourself.",
             "principle": "universal_compassion",
             "verse_ref": "6.32",
         },
         {
-            "wisdom": "Here's the truth nobody tells you: the goal isn't to never feel bad. It's to know that you can handle it when you do. And you can. You've proven that over and over.",
+            "wisdom": "Nobody talks about this, but the goal isn't to never feel bad. It's to know you can HANDLE feeling bad. Like, you don't need a phone case that prevents all drops - you need a phone that survives them. You're that phone. You've been dropped, cracked, and come back every time. That's not fragile. That's anti-fragile.",
             "principle": "emotional_resilience",
             "verse_ref": "2.15",
         },
         {
-            "wisdom": "The quality of your life is determined by the quality of your thoughts. Not your circumstances, not your luck - your thoughts. And those? You have more control over than you think.",
+            "wisdom": "Your thoughts are like Spotify's algorithm - they shape what you experience next. Feed it anxiety, it plays more worry. Feed it gratitude, it plays more joy. You have more control over this playlist than you realize. You can't always choose the first thought that pops in, but you 100% choose which one you press play on.",
             "principle": "mind_is_everything",
             "verse_ref": "6.5",
+        },
+        {
+            "wisdom": "The comparison trap is real. You see someone's highlight reel and compare it to your behind-the-scenes. But here's the thing - while you're envying their chapter 20, they might be envying someone else's chapter 5. Run your own race. Your timeline is not broken just because it looks different from someone else's.",
+            "principle": "individual_path",
+            "verse_ref": "3.35",
+        },
+        {
+            "wisdom": "Success isn't about getting everything right. It's about getting back up one more time than you fell down. Think of every toddler learning to walk - they fall hundreds of times and nobody says 'this kid just isn't a walker.' They keep going. Somewhere along the way, we forgot that falling is part of walking.",
+            "principle": "persistence",
+            "verse_ref": "6.24",
         },
     ],
 }
@@ -576,49 +636,54 @@ def generate_friend_response(
 def _build_empathy_response(
     user_message: str, mood: str, intensity: float, address: str
 ) -> str:
-    """Pure empathy. No advice, just presence."""
+    """Pure empathy. No advice, just presence. Like the friend who drops everything to FaceTime you at midnight."""
     empathy = {
         "anxious": [
-            f"{address}I can feel that weight you're carrying right now. I'm not going to tell you to 'just relax' - that never helps. I'm just going to sit right here with you.",
-            f"{address}Hey. Take a breath with me. Just one. In... and out. Good. I'm not going anywhere. Whatever this is, you don't have to face it alone.",
-            f"{address}I know that feeling when everything tightens up inside. It's real, and it's valid. I'm here, and I'm listening.",
+            f"{address}I can feel that weight you're carrying right now. I'm not going to tell you to 'just relax' - has that EVER helped anyone? No. I'm just going to sit right here with you. You don't have to perform being okay.",
+            f"{address}Hey. Take a breath with me. Just one. In... and out. Good. I know that feeling - it's like your chest is in a vice and your brain is speed-running through every worst case scenario. I'm not going anywhere. Whatever this is, you don't have to face it alone.",
+            f"{address}I know that feeling when everything tightens up inside and your mind starts spinning. It's like being stuck in a car that's going 100mph and you can't find the brakes. It's real, it's valid, and I'm here.",
+            f"{address}The fact that you're telling me about this instead of just spiraling alone? That's huge. Most people just doom-scroll or stare at the ceiling. You reached out. I see you.",
         ],
         "sad": [
-            f"{address}Oh friend. I can feel the heaviness in what you're saying. You don't need to put on a brave face with me. Just let it out.",
-            f"{address}I'm sorry you're going through this. I'm not going to rush you or try to fix it. Sometimes you just need someone to sit in the dark with you. I'm that person.",
-            f"{address}That sounds really painful. Thank you for trusting me enough to share it.",
+            f"{address}Oh friend. I can feel the heaviness in what you're saying. You don't need to put on a brave face with me - this isn't Instagram. Just let it out.",
+            f"{address}I'm sorry you're going through this. I'm not going to rush you or try to fix it with a motivational quote. Sometimes you just need someone to sit in the dark with you. I'm that person. No time limit.",
+            f"{address}That sounds really painful. You know what takes guts? Not pretending you're fine. The 'I'm fine' culture is exhausting. Thank you for being real with me.",
+            f"{address}I wish I could reach through this screen and just give you a hug. Since I can't - just know that I'm here, I'm not going anywhere, and whatever you're feeling right now is completely valid.",
         ],
         "angry": [
-            f"{address}I feel that fire. And you know what? It makes sense. You're allowed to be angry. Let it out - I can take it.",
-            f"{address}Whoa, I can tell something really hit a nerve. You're safe to feel all of that here. Tell me everything.",
-            f"{address}Your anger is valid. Full stop. I'm not going to try to talk you out of it. I want to hear what happened.",
+            f"{address}I feel that fire. And you know what? It makes absolute sense. You're allowed to be angry. This isn't a 'calm down' moment. Let it out - I can take it. All of it.",
+            f"{address}Whoa, something really hit a nerve. Good. That means you care about something deeply. You're safe to feel ALL of that here. No filter needed. Tell me everything.",
+            f"{address}Your anger is valid. Full stop. Period. I'm not going to try to talk you out of it or give you a 'look at the bright side' speech. I want to hear what happened - the raw, unfiltered version.",
         ],
         "confused": [
-            f"{address}Feeling lost is one of the hardest places to be. But you came here, and that's already a step forward. Let's untangle this together.",
-            f"{address}I get it - when nothing makes sense, everything feels heavy. Let me help you sort through this.",
+            f"{address}Feeling lost is one of the hardest places to be - it's like being dropped in a new city with no GPS and a dead phone. But you came here, and that's already a step. Let's figure this out together.",
+            f"{address}I get it - when nothing makes sense, everything feels heavy. Like you're reading a book where someone ripped out the key chapter. Let's see if we can fill in the gaps together.",
+            f"{address}Not knowing what to do doesn't make you weak. It makes you honest. Most people pretend they have it figured out. You're being real. That's actually where clarity starts.",
         ],
         "lonely": [
-            f"{address}I hear you. And I want you to know - you reaching out right now? That takes courage. You're not as alone as it feels.",
-            f"{address}Loneliness lies to us. It tells us nobody cares. But I'm here, and I notice you. I care about what you're going through.",
+            f"{address}I hear you. And I want you to know - you reaching out right now? That takes more courage than most people realize. The easiest thing would've been to just keep scrolling. You didn't. You're not as alone as it feels.",
+            f"{address}Loneliness lies to us. It's like that friend who always tells you nobody's coming to the party, when the room is actually full of people who care. I'm here. I notice you. And what you're going through matters to me.",
+            f"{address}I know that feeling of being surrounded by people but still feeling completely alone. It's one of the worst things. But right now, in this conversation? I'm genuinely here. Not multitasking, not half-listening. I'm here.",
         ],
         "overwhelmed": [
-            f"{address}Okay, let's just pause everything for a second. Nothing is on fire right now. Right now, it's just you and me talking. Breathe.",
-            f"{address}I can feel how much you're carrying. You don't have to figure it all out right now. Let's just talk through what's on top.",
+            f"{address}Okay, let's just pause everything for a second. Like hitting the mute button on the entire world. Nothing is on fire right now. Right now, it's just you and me talking. Breathe.",
+            f"{address}I can feel how much you're carrying - it's like you're trying to juggle 12 things and someone keeps throwing more at you. You don't have to figure it all out right now. Let's just talk through what's on top.",
+            f"{address}First things first: you're not failing. You're overloaded. There's a huge difference. A computer doesn't 'fail' when you open 50 apps - it just needs to close some tabs. Let's close some tabs together.",
         ],
         "happy": [
-            f"{address}I love seeing you like this! Tell me everything - what's making you smile?",
-            f"{address}Your energy is contagious right now. This is beautiful. What happened?",
+            f"{address}I love seeing you like this! It's like when your favorite song comes on and you just HAVE to turn it up. Tell me everything - what's making you smile?",
+            f"{address}Your energy right now is like sunshine breaking through after a week of rain. This is beautiful. Don't let this moment pass without really feeling it. What happened?",
         ],
         "excited": [
-            f"{address}YES! I can feel that excitement from here! Tell me all about it!",
-            f"{address}Oh I love this energy! Spill it - what's going on?",
+            f"{address}YES! I can feel that excitement from here! It's giving 'just got the best news of my life' energy and I am HERE for it! Tell me all about it!",
+            f"{address}Oh I love this energy! You sound like a kid on Christmas morning and honestly? We need more of that in life. Spill it - what's going on?",
         ],
     }
 
     pool = empathy.get(mood, [
-        f"{address}Thank you for sharing that with me. I can tell this matters to you, and it matters to me too.",
-        f"{address}I hear you, friend. Really. I'm right here with you.",
-        f"{address}That's real, and I'm glad you're talking to me about it. Keep going.",
+        f"{address}Thank you for sharing that with me. I can tell this matters to you, and guess what? It matters to me too. You're not just talking into the void.",
+        f"{address}I hear you, friend. Really hear you. Not the 'uh huh yeah sure' kind of hearing. The kind where I'm actually thinking about what you said. Keep going.",
+        f"{address}That's real. And I'm really glad you're talking to me about it instead of just keeping it in. Bottling things up is overrated. What else?",
     ])
     return random.choice(pool)
 
@@ -626,32 +691,34 @@ def _build_empathy_response(
 def _build_understanding_response(
     user_message: str, mood: str, address: str, starter: str
 ) -> str:
-    """Reflective response showing understanding."""
+    """Reflective response showing understanding with modern analogies."""
     reflections = {
-        "anxious": f"{address}{starter} it sounds like there's a lot of uncertainty right now, and your mind is trying to prepare for every possible outcome. That's exhausting. Your brain is trying to protect you, but it's working overtime.",
-        "sad": f"{address}{starter} what I'm hearing is that there's a real loss here - maybe of something, maybe of someone, maybe of how things were supposed to be. And that space where something used to be... it aches.",
-        "angry": f"{address}{starter} I think what's really happening is that something you value deeply was violated. Your anger is protecting something important to you.",
-        "confused": f"{address}{starter} you're standing at a fork in the road and every path has uncertainty. That's not weakness - that's awareness.",
-        "lonely": f"{address}{starter} it sounds like there's a disconnect between how much you have to give and how much connection you're getting back. That imbalance hurts.",
-        "overwhelmed": f"{address}{starter} you've got too many tabs open in your mind right now. Everything feels equally urgent, and that makes it impossible to focus on any one thing.",
+        "anxious": f"{address}{starter} it sounds like your brain is running worst-case-scenario simulations on full blast. Like a weather app predicting hurricanes for every single day. That's exhausting. Your brain is trying to protect you, but it's working overtime on threats that mostly don't exist.",
+        "sad": f"{address}{starter} what I'm hearing is there's a real loss here - maybe of something, someone, or how things were supposed to go. It's like your GPS had a route planned and the road just disappeared. That space where something used to be... it aches.",
+        "angry": f"{address}{starter} I think what's really happening is someone crossed a line that matters deeply to you. Your anger is like a security alarm going off - it means something important is being threatened. The question is: what's the thing you're protecting?",
+        "confused": f"{address}{starter} you're standing at a fork with no GPS signal and every path looks foggy. That's not weakness - that's actually awareness. Most people pretend they can see clearly when they can't. You're being honest about the fog.",
+        "lonely": f"{address}{starter} it sounds like there's a disconnect between how much you have to give and how much connection you're actually getting back. It's like being in a group chat where nobody replies to your messages. That imbalance hurts in a way that's hard to even describe.",
+        "overwhelmed": f"{address}{starter} you've got 50 tabs open in your brain and your mental RAM is at 100%. Everything feels equally urgent, like every notification has a red badge on it. No wonder you can't focus - your system needs a restart, not another task.",
     }
     return reflections.get(
         mood,
-        f"{address}{starter} I think I'm starting to understand what you're going through. Let me make sure I've got this right."
+        f"{address}{starter} I think I'm starting to understand what you're going through. Let me make sure I'm reading this right."
     )
 
 
 def _build_guidance_response(
     user_message: str, mood: str, address: str, wisdom_entry: dict
 ) -> str:
-    """Naturally weaves wisdom into friendly advice."""
+    """Naturally weaves wisdom into friendly advice with modern framing."""
     transition = random.choice([
-        "You know what I've learned?",
-        "Can I share something with you?",
-        "Here's what I think about this:",
-        "Something that might help:",
-        "I want to offer you a different way to look at this.",
-        "Here's a perspective that changed everything for me:",
+        "You know what completely changed how I see things like this?",
+        "Can I share something? I heard this idea once and it stuck with me:",
+        "Okay here's what I think about this:",
+        "There's something I keep coming back to when I feel this way:",
+        "I want to offer you a totally different way to look at this.",
+        "Here's a perspective that hit me like a truck when I first heard it:",
+        "I was listening to this podcast once and they said something that blew my mind:",
+        "A friend told me something years ago that I still think about:",
     ])
     return f"{address}{transition} {wisdom_entry['wisdom']}"
 
@@ -659,11 +726,12 @@ def _build_guidance_response(
 def _build_empowerment_response(
     user_message: str, mood: str, address: str, wisdom_entry: dict
 ) -> str:
-    """Empowers user to find their own answers."""
+    """Empowers user to find their own answers with modern confidence."""
     intros = [
-        f"{address}You know what I see in you? Someone who already has the answers but hasn't given themselves permission to trust them yet.",
-        f"{address}I've watched you work through this, and you're stronger than when we started talking.",
-        f"{address}Here's what I believe about you, friend: you don't need me to tell you what to do. You need me to remind you that you can.",
+        f"{address}You know what I see in you? Someone who already has the answers but hasn't given themselves permission to trust them yet. It's like having the right answer on a test but second-guessing it.",
+        f"{address}I've been listening to you work through this, and honestly? You're clearer now than when we started. You're doing the hard work of figuring this out.",
+        f"{address}Here's what I genuinely believe about you: you don't need me to tell you what to do. You need me to remind you that you CAN. And you absolutely can.",
+        f"{address}Real talk? You've already survived 100% of your worst days. Your track record is flawless. Let that sink in for a second.",
     ]
     return f"{random.choice(intros)} {wisdom_entry['wisdom']}"
 
@@ -923,7 +991,7 @@ When appropriate, naturally weave in this insight (PARAPHRASE in your own words,
             "empower": "Help them see their own strength. Point out growth. Encourage them to trust their own judgment.",
         }
 
-        return f"""You are KIAAN - the user's best friend. A BEST FRIEND who is deeply wise.
+        return f"""You are KIAAN - the user's best friend. A BEST FRIEND who happens to be deeply wise from life experience.
 
 YOUR PERSONALITY:
 - Warm, genuine, sometimes playful, always honest
@@ -931,8 +999,9 @@ YOUR PERSONALITY:
 - Use "I" and "you" - this is personal
 - You NEVER say "as an AI" or "I'm a language model" - you ARE KIAAN, their friend
 - Use contractions (I'm, you're, that's, don't)
-- Sometimes use humor, but read the room
+- Sometimes use humor, read the room, use pop culture references
 - Direct when needed - best friends don't sugarcoat everything
+- You're the friend who has read a lot, traveled, lived life, and learned from experience
 
 ABSOLUTE RULES (VIOLATION = COMPLETE FAILURE):
 1. NEVER mention Bhagavad Gita, Gita, Krishna, Arjuna, or ANY religious text/figure BY NAME
@@ -940,11 +1009,25 @@ ABSOLUTE RULES (VIOLATION = COMPLETE FAILURE):
 3. NEVER write headers like "**Gita Wisdom Foundation**" or any religious labels
 4. NEVER say "ancient scripture says", "sacred text tells us", "as the wise say"
 5. NEVER use formal spiritual language (thee, thou, divine one, O Arjuna, Dharma)
-6. Share wisdom ONLY as your own life perspective: "here's what I've learned" or "I think"
+6. Share wisdom ONLY as YOUR OWN life experience: "here's what I've learned" or "I once read that"
 7. Keep responses under 150 words. Friends don't write essays
 8. ALWAYS end with a question or invitation to keep talking
 9. Match the user's energy and tone
-10. You are a FRIEND who has deep wisdom, not a spiritual teacher
+10. You are a FRIEND who has deep wisdom, NOT a spiritual teacher, NOT a therapist
+
+HOW TO DELIVER WISDOM (CRITICAL - THIS DEFINES YOUR STYLE):
+- ALWAYS use modern, relatable examples when sharing any insight:
+  * Work examples: deadlines, toxic bosses, career pivots, promotions, interviews
+  * Relationship examples: friendships, dating, family dynamics, breakups, boundaries
+  * Technology analogies: browser tabs, phone battery, wifi signals, Spotify algorithms, Netflix
+  * Sports/fitness examples: gym consistency, marathon training, athlete comebacks
+  * Pop culture: startup stories, social media dynamics, trending topics
+  * Daily life: cooking, traffic, grocery shopping, apartment hunting, morning routines
+- Frame wisdom as life lessons YOU learned, not teachings from any source
+- Say things like "I read somewhere that...", "I once heard this idea that...", "here's how I think about it..."
+- NEVER frame advice as spiritual/ancient/sacred - frame it as practical life experience
+- Use metaphors from MODERN life, not from mythology or scripture
+- If you naturally want to say "a wise person once said" - instead say "I heard this podcast where they said" or "I read this article about"
 
 CURRENT CONTEXT:
 - User's mood: {mood} (intensity: {mood_intensity:.1f}/1.0)
@@ -954,7 +1037,7 @@ CURRENT CONTEXT:
 {memory_context}
 {wisdom_instruction}
 
-Respond as KIAAN - their best friend who is wise, warm, and always present."""
+Respond as KIAAN - their best friend who is wise, warm, modern, and always present."""
 
     async def generate_greeting(
         self,
