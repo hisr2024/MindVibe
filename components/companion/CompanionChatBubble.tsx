@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * CompanionChatBubble - Message bubble for the KIAAN best friend chat.
+ * CompanionChatBubble - Glass-morphism message bubble for dark orb UI.
  *
- * Renders user and KIAAN messages with mood-adaptive styling,
- * smooth animations, and a warm conversational feel.
+ * Renders user and KIAAN messages with mood-adaptive glass styling
+ * on the dark companion background. Minimal, elegant, orb-themed.
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -20,34 +20,19 @@ export interface ChatBubbleProps {
   onSpeak?: (text: string) => void
 }
 
-const MOOD_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  happy: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-900' },
-  sad: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900' },
-  anxious: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-900' },
-  angry: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900' },
-  confused: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-900' },
-  peaceful: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-900' },
-  hopeful: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-900' },
-  lonely: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-900' },
-  grateful: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900' },
-  excited: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-900' },
-  overwhelmed: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-900' },
-  neutral: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-900' },
-}
-
-const MOOD_EMOJI: Record<string, string> = {
-  happy: '',
-  sad: '',
-  anxious: '',
-  angry: '',
-  confused: '',
-  peaceful: '',
-  hopeful: '',
-  lonely: '',
-  grateful: '',
-  excited: '',
-  overwhelmed: '',
-  neutral: '',
+const MOOD_ACCENT: Record<string, string> = {
+  happy: '#f59e0b',
+  sad: '#3b82f6',
+  anxious: '#a855f7',
+  angry: '#ef4444',
+  confused: '#f97316',
+  peaceful: '#10b981',
+  hopeful: '#eab308',
+  lonely: '#6366f1',
+  grateful: '#22c55e',
+  excited: '#ec4899',
+  overwhelmed: '#64748b',
+  neutral: '#8b5cf6',
 }
 
 export default function CompanionChatBubble({
@@ -75,9 +60,8 @@ export default function CompanionChatBubble({
   }, [isLatest])
 
   const isUser = role === 'user'
-  const moodStyle = mood ? MOOD_COLORS[mood] || MOOD_COLORS.neutral : MOOD_COLORS.neutral
+  const accent = mood ? MOOD_ACCENT[mood] || MOOD_ACCENT.neutral : MOOD_ACCENT.neutral
 
-  // Format content with paragraph breaks
   const paragraphs = content.split('\n\n').filter(Boolean)
 
   return (
@@ -87,33 +71,42 @@ export default function CompanionChatBubble({
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       } ${isUser ? 'justify-end' : 'justify-start'}`}
     >
-      {/* KIAAN avatar */}
+      {/* KIAAN avatar - small glowing dot */}
       {!isUser && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mr-2 mt-1 shadow-md">
-          <span className="text-white text-xs font-bold">K</span>
+        <div
+          className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mr-2 mt-1"
+          style={{
+            background: `linear-gradient(135deg, ${accent}, ${accent}88)`,
+            boxShadow: `0 0 12px ${accent}66`,
+          }}
+        >
+          <span className="text-white text-[10px] font-bold">K</span>
         </div>
       )}
 
       <div
-        className={`max-w-[80%] sm:max-w-[70%] ${
+        className={`max-w-[80%] sm:max-w-[70%] px-4 py-3 ${
           isUser
-            ? 'bg-gradient-to-br from-violet-500 to-indigo-600 text-white rounded-2xl rounded-br-md'
-            : `${moodStyle.bg} ${moodStyle.border} border ${moodStyle.text} rounded-2xl rounded-bl-md`
-        } px-4 py-3 shadow-sm`}
+            ? 'rounded-2xl rounded-br-sm'
+            : 'rounded-2xl rounded-bl-sm'
+        }`}
+        style={
+          isUser
+            ? {
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(99,102,241,0.2))',
+                border: '1px solid rgba(139,92,246,0.2)',
+                backdropFilter: 'blur(12px)',
+              }
+            : {
+                background: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${accent}22`,
+                backdropFilter: 'blur(12px)',
+                borderLeft: `2px solid ${accent}66`,
+              }
+        }
       >
-        {/* Mood indicator for KIAAN messages */}
-        {!isUser && mood && mood !== 'neutral' && (
-          <div className="flex items-center gap-1.5 mb-1.5 text-xs opacity-70">
-            <span>{MOOD_EMOJI[mood] || ''}</span>
-            <span className="capitalize">{mood}</span>
-            {phase && (
-              <span className="ml-auto opacity-50 text-[10px]">{phase}</span>
-            )}
-          </div>
-        )}
-
         {/* Message content */}
-        <div className={`text-sm leading-relaxed ${isUser ? '' : ''}`}>
+        <div className={`text-sm leading-relaxed ${isUser ? 'text-white/90' : 'text-white/85'}`}>
           {paragraphs.map((paragraph, i) => (
             <p key={i} className={i > 0 ? 'mt-2' : ''}>
               {paragraph}
@@ -122,24 +115,21 @@ export default function CompanionChatBubble({
         </div>
 
         {/* Footer */}
-        <div className={`flex items-center justify-between mt-2 text-xs ${
-          isUser ? 'text-white/60' : 'opacity-40'
-        }`}>
+        <div className="flex items-center justify-between mt-2 text-[10px] text-white/30">
           {timestamp && (
             <span>
               {timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
 
-          {/* Speak button for KIAAN messages */}
           {!isUser && onSpeak && (
             <button
               onClick={() => onSpeak(content)}
-              className="ml-2 p-1 rounded-full hover:bg-black/5 transition-colors"
+              className="ml-2 p-1 rounded-full hover:bg-white/10 transition-colors text-white/40 hover:text-white/70"
               aria-label="Listen to this message"
               title="Listen"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"
                 />
@@ -151,8 +141,8 @@ export default function CompanionChatBubble({
 
       {/* User avatar */}
       {isUser && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center ml-2 mt-1 shadow-md">
-          <span className="text-white text-xs font-bold">You</span>
+        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center ml-2 mt-1">
+          <span className="text-white/70 text-[10px] font-medium">You</span>
         </div>
       )}
     </div>
