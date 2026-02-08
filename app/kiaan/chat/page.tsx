@@ -173,23 +173,23 @@ function KiaanChatPageInner() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 p-4 pb-28 md:p-8">
+    <main className="mx-auto max-w-5xl space-y-4 sm:space-y-6 p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
       {/* Header */}
-      <div className="relative z-10 space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-8">
-        <div className="flex items-center justify-between gap-4">
+      <div className="relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 sm:p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
               {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
-            <p className="mt-2 text-sm text-orange-100/80 md:text-base">
+            <p className="mt-1 sm:mt-2 text-sm text-orange-100/80 md:text-base">
               {t('kiaan.chat.subtitle', 'Your calm, privacy-first mental wellness companion')}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {/* KIAAN Companion - Conversation Mode */}
             <Link
               href="/companion"
-              className="flex items-center gap-2 rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 px-4 py-2 text-sm font-semibold text-teal-50 transition-all hover:border-teal-400/50 hover:from-teal-500/20 hover:to-cyan-500/20"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 px-3 sm:px-4 py-2 text-sm font-semibold text-teal-50 transition-all hover:border-teal-400/50 hover:from-teal-500/20 hover:to-cyan-500/20"
               title="KIAAN Companion - Talk with KIAAN"
             >
               <span className="text-lg">🗣️</span>
@@ -198,7 +198,7 @@ function KiaanChatPageInner() {
             {/* Voice Mode Toggle */}
             <Link
               href="/companion"
-              className="flex items-center gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:from-orange-500/20 hover:to-amber-500/20"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-3 sm:px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:from-orange-500/20 hover:to-amber-500/20"
               title="Switch to Voice Mode"
             >
               <span className="text-lg">🎙️</span>
@@ -208,9 +208,9 @@ function KiaanChatPageInner() {
             <LanguageSelector compact />
             <Link
               href="/"
-              className="rounded-xl border border-orange-500/30 bg-white/5 px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
+              className="rounded-xl border border-orange-500/30 bg-white/5 px-3 sm:px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
             >
-              ← {t('navigation.mainNav.home', 'Home')}
+              ← <span className="hidden sm:inline">{t('navigation.mainNav.home', 'Home')}</span><span className="sm:hidden">{t('navigation.mainNav.home', 'Home')}</span>
             </Link>
           </div>
         </div>
@@ -300,7 +300,7 @@ function KiaanChatPageInner() {
               🧘 {t('kiaan.clarityPause.title', 'Clarity Pause')}
             </button>
           </div>
-          <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+          <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
             {quickResponses.map((response) => (
               <button
                 key={response.id}
@@ -319,7 +319,7 @@ function KiaanChatPageInner() {
       )}
 
       {/* Helper Links */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
         <Link
           href="/sacred-reflections"
           className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)] transition-all hover:border-amber-300/40 hover:shadow-[0_20px_80px_rgba(251,191,36,0.24)]"
