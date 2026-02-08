@@ -73,9 +73,9 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-orange-50 mb-2">Settings</h1>
+    <main className="mx-auto max-w-3xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-2">Settings</h1>
         <p className="text-orange-100/70">Customize your MindVibe experience</p>
       </div>
 
@@ -226,7 +226,7 @@ export default function SettingsPage() {
       </SettingsSection>
 
       {/* Links */}
-      <div className="text-center text-sm text-orange-100/50 space-x-4">
+      <div className="text-center text-sm text-orange-100/50 flex flex-wrap justify-center gap-2 sm:gap-4">
         <Link href="/privacy" className="hover:text-orange-100">Privacy Policy</Link>
         <span>•</span>
         <Link href="/terms" className="hover:text-orange-100">Terms of Service</Link>

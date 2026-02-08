@@ -337,14 +337,14 @@ export default function SacredReflectionsPage() {
   })()
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-3 sm:p-4 md:p-8 pb-28 sm:pb-8">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <header className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
+        <header className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Private Sanctuary</p>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
                 Sacred Reflections
               </h1>
               <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
@@ -384,9 +384,9 @@ export default function SacredReflectionsPage() {
         </header>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-[1.4fr,1fr]">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.4fr,1fr]">
           {/* Left: Journal Entry Form */}
-          <section className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-5">
+          <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div>
               <h2 className="text-lg font-semibold text-orange-50">New Reflection</h2>
               <p className="text-xs text-orange-100/70 mt-1">KIAAN holds space for your thoughts with warmth and privacy.</p>
@@ -413,7 +413,7 @@ export default function SacredReflectionsPage() {
                   <button
                     key={option.label}
                     onClick={() => setMood(option.label)}
-                    className={`px-3 py-2 rounded-2xl border text-sm transition-all ${
+                    className={`px-3 py-2.5 sm:py-2 rounded-2xl border text-sm transition-all ${
                       mood === option.label
                         ? 'bg-gradient-to-r from-orange-500/70 via-[#ff9933]/70 to-orange-300/70 border-orange-300 text-black shadow-lg shadow-orange-500/25'
                         : 'bg-black/50 border-orange-800/60 text-orange-100 hover:border-orange-500/60'
@@ -469,7 +469,7 @@ export default function SacredReflectionsPage() {
           </section>
 
           {/* Right: Weekly Assessment */}
-          <section className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-5">
+          <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-orange-50">Weekly Assessment</h2>
               <span className="text-xs text-orange-100/60">Auto-updates</span>
@@ -512,7 +512,7 @@ export default function SacredReflectionsPage() {
         </div>
 
         {/* Recent Entries */}
-        <section className="rounded-3xl border border-orange-500/15 bg-[#0c0c10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+        <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0c0c10]/85 p-4 sm:p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-orange-50">Recent Reflections</h2>
             <span className="text-xs text-orange-100/60">Stored locally • Newest first</span>
@@ -525,7 +525,7 @@ export default function SacredReflectionsPage() {
           ) : (
             <ul className="space-y-4">
               {entries.slice(0, 10).map(entry => (
-                <li key={entry.id} className="rounded-2xl bg-black/50 border border-orange-800/40 p-4">
+                <li key={entry.id} className="rounded-2xl bg-black/50 border border-orange-800/40 p-3 sm:p-4">
                   <div className="flex items-center justify-between text-xs text-orange-100/70 mb-2">
                     <span>{new Date(entry.at).toLocaleString()}</span>
                     <span className="px-2 py-1 rounded-lg bg-orange-900/50 text-orange-100 border border-orange-700">

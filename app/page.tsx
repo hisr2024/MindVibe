@@ -79,10 +79,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,137,56,0.05),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.06),transparent_35%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl space-y-8 pb-36 md:pb-16">
+      <div className="relative mx-auto max-w-6xl space-y-5 sm:space-y-8 pb-36 md:pb-16">
         {/* Hero Header */}
         <motion.header 
-          className="relative overflow-hidden rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-10"
+          className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-orange-500/10 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 sm:p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-10"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springConfigs.smooth}
@@ -175,7 +175,7 @@ export default function Home() {
 
         {/* Minimalistic Introduction */}
         <motion.section 
-          className="space-y-6 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur"
+          className="space-y-4 sm:space-y-6 rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 sm:p-6 md:p-8 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
@@ -189,7 +189,7 @@ export default function Home() {
               Your journey to mental wellness, guided by ancient wisdom and modern understanding
             </p>
           </div>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
             <Link href="/kiaan/chat">
               <motion.div
                 className="interactive-link group rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-amber-500/10 px-6 py-3 text-sm font-semibold text-orange-50 "
@@ -270,7 +270,7 @@ export default function Home() {
 
         {/* Quick Access Cards */}
         <motion.section 
-          className="grid gap-3 md:grid-cols-3" 
+          className="grid gap-3 sm:grid-cols-2 md:grid-cols-3"
           aria-label="Core daily actions"
           initial="hidden"
           whileInView="visible"

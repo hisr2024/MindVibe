@@ -239,7 +239,7 @@ export default function ProfilePage() {
 
   if (authLoading || loading || !profile) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-12">
+      <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
         <div className="animate-pulse space-y-6">
           <div className="h-32 rounded-3xl bg-orange-500/10" />
           <div className="h-64 rounded-3xl bg-orange-500/10" />
@@ -251,7 +251,7 @@ export default function ProfilePage() {
   // Show login prompt if not authenticated
   if (!isAuthenticated) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-12">
+      <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
         <Card variant="elevated" className="mb-8">
           <CardContent>
             <div className="text-center py-8">
@@ -270,7 +270,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12">
+    <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       {error && (
         <div className="mb-6 rounded-2xl border border-orange-400/40 bg-orange-500/10 p-4 text-sm text-orange-50">
           {error}

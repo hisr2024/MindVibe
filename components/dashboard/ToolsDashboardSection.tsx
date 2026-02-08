@@ -14,11 +14,11 @@ export function ToolsDashboardSection() {
   const { t } = useLanguage()
 
   return (
-    <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-6 shadow-[0_25px_90px_rgba(255,147,71,0.16)]">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <section className="rounded-2xl sm:rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 shadow-[0_25px_90px_rgba(255,147,71,0.16)]">
+      <div className="mb-4 sm:mb-6 flex flex-wrap items-start justify-between gap-3 sm:gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-200">{t('dashboard.title', 'Dashboard')}</p>
-          <h2 className="text-2xl font-bold text-orange-50">{t('dashboard.allTools', 'All tools in one place')}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-orange-50">{t('dashboard.allTools', 'All tools in one place')}</h2>
           <p className="mt-1 text-sm text-orange-100/80">{t('dashboard.subtitle', 'MindVibe tools')}</p>
         </div>
         <Link
@@ -30,11 +30,11 @@ export function ToolsDashboardSection() {
         </Link>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
         {TOOLS_BY_CATEGORY.map(category => (
           <div
             key={category.id}
-            className="rounded-2xl border border-orange-400/10 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,115,39,0.12)] backdrop-blur"
+            className="rounded-2xl border border-orange-400/10 bg-white/5 p-3 sm:p-4 shadow-[0_14px_60px_rgba(255,115,39,0.12)] backdrop-blur"
           >
             <div className="flex items-center justify-between gap-2">
               <div>

@@ -282,13 +282,13 @@ export default function KarmicTreeClient() {
   const notifications = [...(progress.notifications || []), ...(error ? [{ message: error, tone: 'warning' as const }] : [])]
 
   return (
-    <main className="mx-auto max-w-6xl space-y-10 px-4 pb-16 pt-24">
+    <main className="mx-auto max-w-6xl space-y-6 sm:space-y-8 md:space-y-10 px-3 sm:px-4 pb-28 sm:pb-16 pt-4 sm:pt-8 md:pt-12">
       <FadeIn>
-        <div className="relative overflow-hidden rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 md:p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
           <div className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full bg-orange-500/20 blur-3xl" />
           <div className="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/10 blur-3xl" />
 
-          <div className="relative grid gap-8 lg:grid-cols-[1.4fr,1fr] lg:items-start">
+          <div className="relative grid gap-4 sm:gap-6 md:gap-8 lg:grid-cols-[1.4fr,1fr] lg:items-start">
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <MindVibeLockup theme="sunrise" className="h-10 w-auto drop-shadow-[0_10px_40px_rgba(255,147,89,0.28)]" />
@@ -297,7 +297,7 @@ export default function KarmicTreeClient() {
                 </span>
               </div>
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold leading-tight text-orange-50 md:text-4xl">Grow with mindful actions</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-orange-50 md:text-4xl">Grow with mindful actions</h1>
                 <p className="max-w-2xl text-orange-100/80">
                   Earn achievements for journaling, mood tracking, and guided chats. Unlock calming themes and badges as your tree expands.
                 </p>
@@ -351,7 +351,7 @@ export default function KarmicTreeClient() {
         </div>
       )}
 
-      <StaggerContainer className="grid gap-6 lg:grid-cols-3">
+      <StaggerContainer className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StaggerItem className="lg:col-span-2">
           <AnimatedCard className="space-y-4 p-6">
             <div className="flex items-center justify-between">

@@ -153,7 +153,7 @@ function EnemyRadarChart({ data, size = 200 }: RadarChartProps) {
             y={y}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="text-[10px] fill-white/70 font-medium"
+            className="text-[11px] fill-white/70 font-medium"
           >
             {info.sanskrit}
           </text>
@@ -187,7 +187,7 @@ function TemplateCard({ template, onStart, isStarting }: TemplateCardProps) {
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5"
+      className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 md:p-5"
       style={{
         borderColor: enemyInfo ? `${enemyInfo.color}30` : undefined,
       }}
@@ -223,7 +223,7 @@ function TemplateCard({ template, onStart, isStarting }: TemplateCardProps) {
       )}
 
       {/* Title */}
-      <h3 className="mb-2 text-lg font-semibold text-white line-clamp-2">
+      <h3 className="mb-2 text-base sm:text-lg font-semibold text-white line-clamp-2">
         {template.title}
       </h3>
 
@@ -306,7 +306,7 @@ function ActiveJourneyCard({ journey }: ActiveJourneyCardProps) {
           )}
 
           {/* Title */}
-          <h3 className="mb-2 pr-16 text-base font-semibold text-white line-clamp-1">
+          <h3 className="mb-2 pr-12 sm:pr-16 text-base font-semibold text-white line-clamp-1">
             {journey.title}
           </h3>
 
@@ -431,14 +431,14 @@ function StatsCards({ dashboard }: StatsCardsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="rounded-xl border border-white/10 bg-white/5 p-4 text-center"
+          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 text-center"
         >
-          <div className="text-2xl mb-1">{stat.icon}</div>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-xl sm:text-2xl mb-1">{stat.icon}</div>
+          <div className="text-xl sm:text-2xl font-bold text-white">
             {stat.value}
             {stat.suffix}
             {stat.max && <span className="text-white/40 text-lg">/{stat.max}</span>}
@@ -587,7 +587,7 @@ export default function JourneysPageClient() {
   // Render auth error state
   if (isAuthError) {
     return (
-      <main className="mx-auto max-w-5xl space-y-6 px-4 pb-20 pt-4 lg:px-6">
+      <main className="mx-auto max-w-5xl space-y-6 px-3 sm:px-4 pb-28 sm:pb-20 pt-2 sm:pt-4 lg:px-6">
         <FadeIn>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -618,7 +618,7 @@ export default function JourneysPageClient() {
           {/* Preview of enemies */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-white mb-4">The Six Inner Enemies (Shadripu)</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
               {ENEMY_ORDER.map((enemy) => {
                 const info = ENEMY_INFO[enemy]
                 return (
@@ -655,7 +655,7 @@ export default function JourneysPageClient() {
   // Render loading state
   if (loading) {
     return (
-      <main className="mx-auto max-w-5xl space-y-6 px-4 pb-20 pt-4 lg:px-6">
+      <main className="mx-auto max-w-5xl space-y-6 px-3 sm:px-4 pb-28 sm:pb-20 pt-2 sm:pt-4 lg:px-6">
         <FadeIn>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -748,12 +748,17 @@ export default function JourneysPageClient() {
 
         {/* Progress Radar */}
         {dashboard && dashboard.enemy_progress.length > 0 && (
-          <section className="rounded-xl border border-white/10 bg-white/5 p-6">
+          <section className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 md:p-6">
             <h2 className="text-lg font-semibold text-white mb-4 text-center">
               Enemy Mastery Progress
             </h2>
-            <EnemyRadarChart data={dashboard.enemy_progress} size={250} />
-            <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <div className="hidden sm:block">
+              <EnemyRadarChart data={dashboard.enemy_progress} size={250} />
+            </div>
+            <div className="block sm:hidden">
+              <EnemyRadarChart data={dashboard.enemy_progress} size={200} />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {ENEMY_ORDER.map((enemy) => {
                 const info = ENEMY_INFO[enemy]
                 const progress = dashboard.enemy_progress.find(p => p.enemy === enemy)

@@ -77,7 +77,7 @@ export default function DashboardClient() {
   }, [triggerHaptic])
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 pb-16 lg:px-6">
+    <main className="mx-auto max-w-7xl space-y-4 sm:space-y-6 px-3 sm:px-4 pb-28 sm:pb-16 lg:px-6">
       <FadeIn>
         <motion.div
           variants={containerVariants}
@@ -89,7 +89,7 @@ export default function DashboardClient() {
             <Link
               href="/introduction"
               onClick={handleFeatureTap}
-              className="block overflow-hidden rounded-[20px] border border-amber-500/20 bg-gradient-to-br from-amber-900/40 via-amber-900/30 to-orange-900/40 p-5 shadow-lg shadow-amber-900/10 transition-all duration-200 active:scale-[0.98] md:p-6"
+              className="block overflow-hidden rounded-[18px] sm:rounded-[20px] border border-amber-500/20 bg-gradient-to-br from-amber-900/40 via-amber-900/30 to-orange-900/40 p-4 sm:p-5 shadow-lg shadow-amber-900/10 transition-all duration-200 active:scale-[0.98] md:p-6"
             >
               <motion.div
                 className="flex items-center gap-4"
@@ -138,7 +138,7 @@ export default function DashboardClient() {
 
           {/* Quick Actions Grid */}
           <motion.div
-            className="grid grid-cols-2 gap-3 mb-8 md:grid-cols-4 md:gap-4"
+            className="grid grid-cols-2 gap-2 sm:gap-3 mb-6 sm:mb-8 sm:grid-cols-2 md:grid-cols-4 md:gap-4"
             variants={itemVariants}
           >
             {/* KIAAN */}

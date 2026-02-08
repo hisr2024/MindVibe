@@ -198,7 +198,7 @@ export default function IntroductionPage() {
 
         {/* Main Container - Responsive padding with CSS containment to prevent layout thrashing */}
         <main
-          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 sm:pb-20 md:pb-16"
+          className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-16"
           style={{ contain: 'layout style', touchAction: 'manipulation' }}
         >
           {/* ==================== HERO SECTION ==================== */}
@@ -367,7 +367,7 @@ export default function IntroductionPage() {
           {/* ==================== MAIN FEATURES GRID ==================== */}
 
           <section className="mb-6 sm:mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
 
               {/* Column 1: Sacred Space & Mood */}
               <div className="space-y-4 sm:space-y-5">
@@ -433,7 +433,7 @@ export default function IntroductionPage() {
                   transition={{ delay: 0.65 }}
                 >
                   <h3 className="text-white/90 font-medium text-sm sm:text-base mb-3 sm:mb-4">Quick Divine Access</h3>
-                  <div className="grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <Link
                       href="/journeys"
                       className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
