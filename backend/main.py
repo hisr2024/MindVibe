@@ -946,6 +946,22 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Voice router: {e}")
 
+# Load Multilingual Voice router (ElevenLabs-inspired Voice System)
+startup_logger.info("\n[Multilingual Voice] Attempting to import Multilingual Voice router...")
+try:
+    from backend.routes.multilingual_voice import router as multilingual_voice_router
+    app.include_router(multilingual_voice_router, prefix="/api")
+    startup_logger.info("✅ [SUCCESS] Multilingual Voice router loaded (30+ speakers, 18 languages)")
+    startup_logger.info("   • GET    /api/voice/multilingual/languages - Supported languages")
+    startup_logger.info("   • GET    /api/voice/multilingual/speakers - All speaker profiles")
+    startup_logger.info("   • GET    /api/voice/multilingual/speakers/{lang} - Speakers by language")
+    startup_logger.info("   • GET    /api/voice/multilingual/speaker/{id} - Speaker details")
+    startup_logger.info("   • GET    /api/voice/multilingual/speaker/{id}/preview - Preview speaker")
+    startup_logger.info("   • POST   /api/voice/multilingual/synthesize - Synthesize with speaker")
+    startup_logger.info("   • GET    /api/voice/multilingual/recommend - Recommend speaker")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Multilingual Voice router: {e}")
+
 # Load Voice Learning router (KIAAN Self-Improvement System)
 startup_logger.info("\n[Voice Learning] Attempting to import Voice Learning router...")
 try:
