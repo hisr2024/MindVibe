@@ -287,19 +287,76 @@ BREATH_INSERTIONS = [
 ]
 
 
+# ─── Language-to-Edge-TTS Voice Mapping ──────────────────────────────────
+# When the user selects a non-English language, override the Edge TTS voice
+# with the best available neural voice for that language.
+LANGUAGE_EDGE_VOICES: dict[str, dict[str, str]] = {
+    "hi": {"female": "hi-IN-SwaraNeural", "male": "hi-IN-MadhurNeural"},
+    "sa": {"female": "hi-IN-SwaraNeural", "male": "hi-IN-MadhurNeural"},  # Sanskrit uses Hindi voice (closest)
+    "ta": {"female": "ta-IN-PallaviNeural", "male": "ta-IN-ValluvarNeural"},
+    "te": {"female": "te-IN-ShrutiNeural", "male": "te-IN-MohanNeural"},
+    "bn": {"female": "bn-IN-TanishaaNeural", "male": "bn-IN-BashkarNeural"},
+    "mr": {"female": "mr-IN-AarohiNeural", "male": "mr-IN-ManoharNeural"},
+    "gu": {"female": "gu-IN-DhwaniNeural", "male": "gu-IN-NiranjanNeural"},
+    "kn": {"female": "kn-IN-SapnaNeural", "male": "kn-IN-GaganNeural"},
+    "ml": {"female": "ml-IN-SobhanaNeural", "male": "ml-IN-MidhunNeural"},
+    "pa": {"female": "pa-IN-OjasNeural", "male": "pa-IN-OjasNeural"},  # Edge TTS has limited Punjabi
+    "es": {"female": "es-ES-ElviraNeural", "male": "es-ES-AlvaroNeural"},
+    "fr": {"female": "fr-FR-DeniseNeural", "male": "fr-FR-HenriNeural"},
+    "de": {"female": "de-DE-KatjaNeural", "male": "de-DE-ConradNeural"},
+    "pt": {"female": "pt-BR-FranciscaNeural", "male": "pt-BR-AntonioNeural"},
+    "ja": {"female": "ja-JP-NanamiNeural", "male": "ja-JP-KeitaNeural"},
+    "zh": {"female": "zh-CN-XiaoxiaoNeural", "male": "zh-CN-YunxiNeural"},
+}
+
+# Language-to-Google-TTS voice mapping for non-English languages
+LANGUAGE_GOOGLE_VOICES: dict[str, dict[str, str]] = {
+    "hi": {"female": "hi-IN-Neural2-A", "male": "hi-IN-Neural2-B"},
+    "ta": {"female": "ta-IN-Neural2-A", "male": "ta-IN-Neural2-B"},
+    "te": {"female": "te-IN-Neural2-A", "male": "te-IN-Neural2-B"},
+    "bn": {"female": "bn-IN-Neural2-A", "male": "bn-IN-Neural2-B"},
+    "mr": {"female": "mr-IN-Neural2-A", "male": "mr-IN-Neural2-B"},
+    "gu": {"female": "gu-IN-Neural2-A", "male": "gu-IN-Neural2-B"},
+    "kn": {"female": "kn-IN-Neural2-A", "male": "kn-IN-Neural2-B"},
+    "ml": {"female": "ml-IN-Neural2-A", "male": "ml-IN-Neural2-B"},
+    "es": {"female": "es-ES-Neural2-A", "male": "es-ES-Neural2-B"},
+    "fr": {"female": "fr-FR-Neural2-A", "male": "fr-FR-Neural2-B"},
+    "de": {"female": "de-DE-Neural2-A", "male": "de-DE-Neural2-B"},
+    "pt": {"female": "pt-BR-Neural2-A", "male": "pt-BR-Neural2-B"},
+    "ja": {"female": "ja-JP-Neural2-B", "male": "ja-JP-Neural2-C"},
+    "zh": {"female": "cmn-CN-Neural2-A", "male": "cmn-CN-Neural2-B"},
+}
+
+
 def build_companion_ssml(
     text: str,
     mood: str = "neutral",
     voice_id: str = "priya",
     language: str = "en",
 ) -> dict[str, Any]:
-    """Build SSML for companion voice synthesis with emotion-adaptive prosody."""
+    """Build SSML for companion voice synthesis with emotion-adaptive prosody.
+
+    When language != 'en', overrides voice selection with language-appropriate
+    neural voices from Edge TTS and Google Cloud TTS.
+    """
     profile = EMOTION_VOICE_PROFILES.get(mood, EMOTION_VOICE_PROFILES["neutral"])
     voice = COMPANION_VOICES.get(voice_id, COMPANION_VOICES["priya"])
 
     speed = profile["rate_value"] * voice["default_speed"]
     pitch = float(profile["pitch"].replace("st", "")) + voice["default_pitch"]
     pause_mult = profile["pause_multiplier"]
+
+    # Override Edge TTS and Google voices when non-English language is selected
+    edge_voice = voice["edge_voice"]
+    google_voice = voice["google_voice"]
+    if language != "en" and language in LANGUAGE_EDGE_VOICES:
+        gender = voice.get("gender", "female")
+        lang_edges = LANGUAGE_EDGE_VOICES[language]
+        edge_voice = lang_edges.get(gender, lang_edges.get("female", edge_voice))
+        if language in LANGUAGE_GOOGLE_VOICES:
+            lang_google = LANGUAGE_GOOGLE_VOICES[language]
+            google_voice = lang_google.get(gender, lang_google.get("female", google_voice))
+        logger.info(f"Language override: {language} → Edge: {edge_voice}, Google: {google_voice}")
 
     ssml_text = _escape_ssml(text)
 
@@ -341,8 +398,8 @@ def build_companion_ssml(
 
     return {
         "ssml": ssml,
-        "voice_name": voice["google_voice"],
-        "edge_voice": voice["edge_voice"],
+        "voice_name": google_voice,
+        "edge_voice": edge_voice,
         "openai_voice": voice["openai_voice"],
         "openai_model": voice["openai_model"],
         "elevenlabs_voice_id": voice.get("elevenlabs_voice_id"),
