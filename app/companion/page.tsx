@@ -278,41 +278,48 @@ export default function CompanionPage() {
     setError(null)
 
     try {
-      if (!session.sessionId.startsWith('local_')) {
-        const response = await apiFetch('/api/companion/message', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session_id: session.sessionId,
-            message: text.trim(),
-            language: voiceConfig.language,
-            content_type: 'text',
-          }),
-        })
+      // Always route through Next.js API (handles local_ and real sessions)
+      const response = await apiFetch('/api/companion/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: session.sessionId,
+          message: text.trim(),
+          language: voiceConfig.language,
+          content_type: 'text',
+        }),
+      })
 
-        if (response.ok) {
-          const data = await response.json()
+      if (response.ok) {
+        const data = await response.json()
 
-          const companionMessage: Message = {
-            id: data.message_id || `companion-${Date.now()}`,
-            role: 'companion',
-            content: data.response,
-            mood: data.mood,
-            phase: data.phase,
-            timestamp: new Date(),
-          }
-
-          setMessages(prev => [...prev, companionMessage])
-          setCurrentMood(data.mood || 'neutral')
-          setSession(prev => ({ ...prev, phase: data.phase || prev.phase }))
-          setShowSuggestions(true)
-          setIsLoading(false)
-          return
+        const companionMessage: Message = {
+          id: data.message_id || `companion-${Date.now()}`,
+          role: 'companion',
+          content: data.response,
+          mood: data.mood,
+          phase: data.phase,
+          timestamp: new Date(),
         }
+
+        setMessages(prev => [...prev, companionMessage])
+        setCurrentMood(data.mood || 'neutral')
+        setSession(prev => ({ ...prev, phase: data.phase || prev.phase }))
+
+        // Update AI status based on response tier
+        if (data.ai_tier === 'backend' || data.ai_tier === 'nextjs_openai') {
+          setAiStatus('connected')
+        }
+
+        setShowSuggestions(true)
+        setIsLoading(false)
+        return
       }
 
+      // API route returned non-OK — use local fallback
       addLocalFallbackResponse(text.trim())
     } catch {
+      // Network failure — use local fallback
       addLocalFallbackResponse(text.trim())
     } finally {
       setIsLoading(false)
