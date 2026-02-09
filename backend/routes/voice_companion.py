@@ -26,10 +26,12 @@ from backend.middleware.rate_limiter import limiter
 from backend.models.companion import (
     CompanionMemory,
     CompanionMessage,
+    CompanionMood,
     CompanionProfile,
     CompanionSession,
 )
 from backend.models.user import User
+
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,8 @@ MAX_MESSAGE_LENGTH = 2000
 
 class StartSessionRequest(BaseModel):
     language: str = Field(default="en", max_length=8)
+    referral_tool: str | None = Field(default=None, max_length=64)
+    referral_mood: str | None = Field(default=None, max_length=32)
 
 
 class StartSessionResponse(BaseModel):
@@ -196,6 +200,33 @@ async def _save_memories(
             db.add(memory)
 
 
+async def _get_recent_session_summaries(
+    db: AsyncSession, user_id: str, limit: int = 3
+) -> list[dict]:
+    """Retrieve summaries from recent past sessions for cross-session context."""
+    result = await db.execute(
+        select(CompanionSession)
+        .where(
+            CompanionSession.user_id == user_id,
+            CompanionSession.is_active.is_(False),
+            CompanionSession.topics_discussed.isnot(None),
+        )
+        .order_by(desc(CompanionSession.ended_at))
+        .limit(limit)
+    )
+    sessions = result.scalars().all()
+    return [s.topics_discussed for s in sessions if s.topics_discussed]
+
+
+async def _update_mood_profile(
+    profile: CompanionProfile, mood: str
+) -> None:
+    """Update the user's common_moods profile field with new mood data."""
+    moods = profile.common_moods or {}
+    moods[mood] = moods.get(mood, 0) + 1
+    profile.common_moods = moods
+
+
 def _update_streak(profile: CompanionProfile) -> None:
     """Update the conversation streak for the user."""
     now = datetime.datetime.now(datetime.UTC)
@@ -341,9 +372,10 @@ async def send_companion_message(
         for msg in history_messages
     ]
 
-    # Get user memories
+    # Get user memories and cross-session context
     profile = await _get_or_create_profile(db, current_user.id)
     memories = await _get_user_memories(db, current_user.id)
+    session_summaries = await _get_recent_session_summaries(db, current_user.id)
 
     # Calculate turn count (user messages only)
     user_turn_count = sum(1 for m in history_messages if m.role == "user") + 1
@@ -376,7 +408,7 @@ async def send_companion_message(
         "streak_days": profile.streak_days,
     }
 
-    # Generate response
+    # Generate response (with cross-session context for deep memory)
     engine = get_companion_engine()
     response_data = await engine.generate_response(
         user_message=body.message,
@@ -386,6 +418,7 @@ async def send_companion_message(
         memories=memories,
         language=body.language,
         profile_data=profile_context,
+        session_summaries=session_summaries,
     )
 
     # Save companion response
@@ -415,10 +448,21 @@ async def send_companion_message(
     # Update profile
     profile.total_messages += 2
 
-    # Extract and save memories
-    memory_entries = extract_memories_from_message(body.message, mood)
+    # Phase 1: Deep Memory — AI-powered memory extraction + profile population
+    try:
+        memory_entries = await engine.extract_memories_with_ai(
+            user_message=body.message,
+            companion_response=response_data["response"],
+            mood=mood,
+        )
+    except Exception:
+        memory_entries = extract_memories_from_message(body.message, mood)
+
     if memory_entries:
         await _save_memories(db, current_user.id, session.id, memory_entries)
+
+    # Update mood profile (Phase 1: populate common_moods)
+    await _update_mood_profile(profile, mood)
 
     await db.commit()
 
@@ -476,6 +520,37 @@ async def end_companion_session(
     session.is_active = False
     session.ended_at = datetime.datetime.now(datetime.UTC)
     session.mood_improved = mood_improved
+
+    # Phase 1: Generate AI session summary and store for cross-session context
+    try:
+        from backend.services.companion_friend_engine import get_companion_engine
+        engine = get_companion_engine()
+
+        # Get conversation history for summarization
+        history_result = await db.execute(
+            select(CompanionMessage)
+            .where(
+                CompanionMessage.session_id == session.id,
+                CompanionMessage.deleted_at.is_(None),
+            )
+            .order_by(CompanionMessage.created_at)
+            .limit(30)
+        )
+        history_msgs = history_result.scalars().all()
+        conversation_history = [
+            {"role": msg.role, "content": msg.content}
+            for msg in history_msgs
+        ]
+
+        session_summary = await engine.summarize_session(
+            conversation_history=conversation_history,
+            initial_mood=session.initial_mood,
+            final_mood=session.final_mood,
+        )
+        session.topics_discussed = session_summary
+        engine.reset_verse_history()
+    except Exception as e:
+        logger.warning(f"Session summary generation failed: {e}")
 
     # Generate farewell
     farewells = [
@@ -784,9 +859,174 @@ async def companion_health():
         voice_providers.append("openai_tts_hd")
     voice_providers.extend(["google_neural2", "edge_tts", "browser_fallback"])
 
+    # Phase 2: Report verse corpus status
+    try:
+        from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
+        sakha = get_sakha_wisdom_engine()
+        verse_count = sakha.get_verse_count()
+    except Exception:
+        verse_count = 0
+
     return {
         "status": "healthy",
         "ai_enhanced": engine._openai_available,
         "service": "kiaan-companion",
         "voice_providers": voice_providers,
+        "wisdom_corpus": verse_count,
+    }
+
+
+# ─── Phase 4: Self-Awareness Mirror Endpoints ───────────────────────────
+
+
+@router.get("/insights/mood-trends")
+@limiter.limit("20/minute")
+async def get_mood_trends(
+    request: Request,
+    days: int = 30,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get mood trend data for the Self-Awareness Mirror.
+
+    Returns mood frequencies, emotional arc over time, and pattern insights.
+    """
+    from backend.services.companion_friend_engine import get_companion_engine
+
+    since = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=days)
+
+    # Get all mood data from messages within timeframe
+    result = await db.execute(
+        select(
+            CompanionMessage.detected_mood,
+            CompanionMessage.mood_intensity,
+            CompanionMessage.created_at,
+            CompanionMessage.session_id,
+        )
+        .where(
+            CompanionMessage.user_id == current_user.id,
+            CompanionMessage.role == "user",
+            CompanionMessage.detected_mood.isnot(None),
+            CompanionMessage.created_at >= since,
+            CompanionMessage.deleted_at.is_(None),
+        )
+        .order_by(CompanionMessage.created_at)
+    )
+    rows = result.all()
+
+    mood_history = [
+        {
+            "mood": row.detected_mood,
+            "intensity": row.mood_intensity or 0.5,
+            "timestamp": row.created_at.isoformat() if row.created_at else None,
+            "session_id": row.session_id,
+        }
+        for row in rows
+    ]
+
+    # Use engine for pattern analysis
+    engine = get_companion_engine()
+    patterns = await engine.analyze_emotional_patterns(mood_history)
+
+    # Add timeline data (mood per day for charting)
+    daily_moods: dict[str, list[str]] = {}
+    for entry in mood_history:
+        if entry.get("timestamp"):
+            day = entry["timestamp"][:10]
+            daily_moods.setdefault(day, []).append(entry["mood"])
+
+    timeline = []
+    for day, moods in sorted(daily_moods.items()):
+        # Most common mood that day
+        from collections import Counter
+        most_common = Counter(moods).most_common(1)[0][0] if moods else "neutral"
+        timeline.append({
+            "date": day,
+            "primary_mood": most_common,
+            "mood_count": len(moods),
+        })
+
+    return {
+        **patterns,
+        "timeline": timeline,
+        "period_days": days,
+    }
+
+
+@router.get("/insights/milestones")
+@limiter.limit("20/minute")
+async def get_friendship_milestones(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get friendship milestones and achievements.
+
+    Tracks the user's journey with KIAAN: sessions, streaks, growth.
+    """
+    profile = await _get_or_create_profile(db, current_user.id)
+
+    # Count sessions with mood improvement
+    improved_count = await db.scalar(
+        select(func.count(CompanionSession.id))
+        .where(
+            CompanionSession.user_id == current_user.id,
+            CompanionSession.mood_improved.is_(True),
+        )
+    ) or 0
+
+    # Count total unique days of conversation
+    days_result = await db.execute(
+        select(func.date_trunc("day", CompanionSession.started_at))
+        .where(CompanionSession.user_id == current_user.id)
+        .distinct()
+    )
+    total_days = len(days_result.all())
+
+    # Define milestones
+    milestones = []
+    milestone_defs = [
+        (1, "First Conversation", "Started your journey with KIAAN", "new_friend"),
+        (5, "Getting Closer", "5 conversations deep", "familiar"),
+        (10, "True Friend", "10 heartfelt conversations", "close"),
+        (25, "Soul Connection", "25 sessions of growth together", "deep"),
+        (50, "Divine Bond", "50 sessions — a Sakha bond", "divine"),
+        (100, "Eternal Companion", "100 sessions — friends for life", "eternal"),
+    ]
+
+    for threshold, title, description, level in milestone_defs:
+        achieved = profile.total_sessions >= threshold
+        milestones.append({
+            "threshold": threshold,
+            "title": title,
+            "description": description,
+            "level": level,
+            "achieved": achieved,
+            "achieved_at": None,  # Could track with dates in future
+        })
+
+    streak_milestones = [
+        (3, "3-Day Streak", "Showed up 3 days in a row"),
+        (7, "Week Warrior", "7 consecutive days of self-care"),
+        (14, "Fortnight of Growth", "14 days of consistent inner work"),
+        (30, "Monthly Master", "30-day streak — incredible discipline"),
+    ]
+    for threshold, title, description in streak_milestones:
+        milestones.append({
+            "threshold": threshold,
+            "title": title,
+            "description": description,
+            "level": "streak",
+            "achieved": profile.longest_streak >= threshold,
+        })
+
+    return {
+        "total_sessions": profile.total_sessions,
+        "total_messages": profile.total_messages,
+        "current_streak": profile.streak_days,
+        "longest_streak": profile.longest_streak,
+        "sessions_with_improvement": improved_count,
+        "total_days_active": total_days,
+        "friendship_level": _get_friendship_level(profile.total_sessions),
+        "milestones": milestones,
     }

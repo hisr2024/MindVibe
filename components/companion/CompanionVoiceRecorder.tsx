@@ -10,10 +10,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+// BCP-47 language tags for Web Speech API multilingual STT
+const LANGUAGE_BCP47: Record<string, string> = {
+  en: 'en-US', hi: 'hi-IN', sa: 'sa-IN', ta: 'ta-IN', te: 'te-IN',
+  bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
+  pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
+  ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', ar: 'ar-SA', ru: 'ru-RU',
+  it: 'it-IT',
+}
+
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void
   isDisabled?: boolean
   isProcessing?: boolean
+  language?: string
 }
 
 type RecordingState = 'idle' | 'recording' | 'transcribing'
@@ -22,11 +32,10 @@ export default function CompanionVoiceRecorder({
   onTranscription,
   isDisabled = false,
   isProcessing = false,
+  language = 'en',
 }: VoiceRecorderProps) {
   const [state, setState] = useState<RecordingState>('idle')
   const [duration, setDuration] = useState(0)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const recognitionRef = useRef<any>(null)
 
@@ -52,7 +61,7 @@ export default function CompanionVoiceRecorder({
         const recognition = new SpeechRecognition()
         recognition.continuous = false
         recognition.interimResults = false
-        recognition.lang = 'en-US'
+        recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
 
         recognition.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript
@@ -90,7 +99,7 @@ export default function CompanionVoiceRecorder({
         setState('idle')
       }
     }
-  }, [isDisabled, isProcessing, onTranscription, state])
+  }, [isDisabled, isProcessing, onTranscription, state, language])
 
   const stopRecording = useCallback(() => {
     if (recognitionRef.current) {
