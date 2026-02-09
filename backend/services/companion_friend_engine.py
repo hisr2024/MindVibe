@@ -18,6 +18,7 @@ MUST trace back to a Gita principle, delivered through modern examples.
 Conversation pattern: CONNECT -> LISTEN -> UNDERSTAND -> GUIDE -> EMPOWER
 """
 
+import json
 import logging
 import os
 import random
@@ -25,6 +26,17 @@ import re
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+# Lazy import to avoid circular dependency
+_sakha_engine = None
+
+def _get_sakha_engine():
+    """Lazy-load the Sakha Wisdom Engine."""
+    global _sakha_engine
+    if _sakha_engine is None:
+        from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
+        _sakha_engine = get_sakha_wisdom_engine()
+    return _sakha_engine
 
 
 # ─── Behavioral Science & Relationship Psychology Framework ───────────
@@ -1887,6 +1899,7 @@ class CompanionFriendEngine:
     def __init__(self):
         self._openai_client = None
         self._openai_available = False
+        self._verse_history: list[str] = []
         self._init_openai()
 
     def _init_openai(self):
@@ -1912,6 +1925,7 @@ class CompanionFriendEngine:
         memories: list[str] | None = None,
         language: str = "en",
         profile_data: dict | None = None,
+        session_summaries: list[dict] | None = None,
     ) -> dict[str, Any]:
         """Generate best-friend response with AI enhancement when available.
 
@@ -1950,6 +1964,7 @@ class CompanionFriendEngine:
                     memories=memories or [],
                     language=language,
                     profile_data=profile_data,
+                    session_summaries=session_summaries,
                 )
                 if ai_response:
                     return ai_response
@@ -1979,6 +1994,7 @@ class CompanionFriendEngine:
         memories: list[str],
         language: str,
         profile_data: dict | None = None,
+        session_summaries: list[dict] | None = None,
     ) -> dict[str, Any] | None:
         """Generate AI response: behavioral science comprehension + Gita-only guidance."""
         if not self._openai_client:
@@ -1987,8 +2003,32 @@ class CompanionFriendEngine:
         # Check if user is explicitly asking about Gita verses
         verse_request = _check_verse_request(user_message)
 
-        wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
-        wisdom_context = random.choice(wisdom_pool) if wisdom_pool else None
+        # Phase 2: Semantic Wisdom — use 700-verse corpus for contextual matching
+        wisdom_context = None
+        try:
+            sakha = _get_sakha_engine()
+            if sakha and sakha.get_verse_count() > 0:
+                wisdom_context = sakha.get_contextual_verse(
+                    mood=mood,
+                    user_message=user_message,
+                    phase=phase,
+                    verse_history=self._verse_history,
+                    mood_intensity=mood_intensity,
+                )
+                if wisdom_context:
+                    # Track verse to avoid repetition within session
+                    self._verse_history.append(wisdom_context["verse_ref"])
+                    logger.info(
+                        f"SakhaWisdom: Selected verse {wisdom_context['verse_ref']} "
+                        f"(score={wisdom_context.get('relevance_score', 0):.1f}) for mood={mood}"
+                    )
+        except Exception as e:
+            logger.warning(f"Sakha wisdom engine failed, falling back to WISDOM_CORE: {e}")
+
+        # Fallback to hardcoded WISDOM_CORE if semantic engine returned nothing
+        if not wisdom_context:
+            wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
+            wisdom_context = random.choice(wisdom_pool) if wisdom_pool else None
 
         system_prompt = self._build_system_prompt(
             mood=mood,
@@ -2000,6 +2040,7 @@ class CompanionFriendEngine:
             language=language,
             profile_data=profile_data,
             verse_request=verse_request,
+            session_summaries=session_summaries,
         )
 
         messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
@@ -2055,6 +2096,7 @@ class CompanionFriendEngine:
         language: str,
         profile_data: dict | None = None,
         verse_request: bool = False,
+        session_summaries: list[dict] | None = None,
     ) -> str:
         """Build system prompt grounded in behavioral science and friendship research."""
         name_ref = user_name or "friend"
@@ -2064,6 +2106,25 @@ class CompanionFriendEngine:
 
         # Format profile preferences
         profile_context = _format_profile_for_prompt(profile_data) if profile_data else ""
+
+        # Phase 1: Cross-session context from previous session summaries
+        session_context = ""
+        if session_summaries:
+            session_context = "\n\nPREVIOUS SESSION INSIGHTS (reference naturally, like remembering past conversations):\n"
+            for i, summary in enumerate(session_summaries[:3]):
+                topics = ", ".join(summary.get("topics", []))
+                arc = summary.get("emotional_arc", "")
+                unresolved = summary.get("unresolved", [])
+                theme = summary.get("session_theme", "")
+                if topics or arc:
+                    session_context += f"- Session {i+1}: {theme} — discussed {topics}. {arc}\n"
+                if unresolved:
+                    session_context += f"  Follow up on: {', '.join(unresolved)}\n"
+            session_context += (
+                "IMPORTANT: Reference these naturally: 'Last time we talked about...' "
+                "'I've been thinking about what you said about...' "
+                "'How's that situation with... going?'"
+            )
 
         # Add vulnerability instruction (Reciprocal Vulnerability - Friendship Science)
         vulnerability_instruction = ""
@@ -2323,6 +2384,7 @@ CURRENT CONTEXT:
 - You call them: {name_ref}
 {memory_context}
 {profile_context}
+{session_context}
 {vulnerability_instruction}
 {wisdom_instruction}
 {verse_instruction}
@@ -2347,6 +2409,223 @@ Modern language is your voice. Interpret deeply. Respond with love and wisdom.""
             last_conversation_at=last_conversation_at,
             hour_of_day=hour_of_day,
         )
+
+    # ─── Phase 1: Deep Memory — GPT-Powered Memory Extraction ─────────
+
+    async def extract_memories_with_ai(
+        self,
+        user_message: str,
+        companion_response: str,
+        mood: str,
+    ) -> list[dict[str, str]]:
+        """Use GPT to extract semantic memories from conversation.
+
+        Unlike the regex-based extract_memories_from_message(), this uses AI
+        to understand context, nuance, and implied information.
+        Falls back to regex extraction if AI is unavailable.
+        """
+        if not self._openai_available or not self._openai_client:
+            return extract_memories_from_message(user_message, mood)
+
+        try:
+            extraction_prompt = f"""Analyze this conversation exchange and extract important details to remember about the user.
+
+User said: "{user_message}"
+KIAAN responded about mood: {mood}
+
+Extract ONLY genuinely important, specific details. Return a JSON array of objects.
+Each object has: "type" (one of: life_event, relationship, preference, emotional_pattern, topic, coping_strength), "key" (short label), "value" (1-sentence summary of what to remember).
+
+Rules:
+- Only extract if there's REAL information (not just "user feels sad")
+- Relationships: names, dynamics, conflicts mentioned
+- Life events: jobs, moves, breakups, achievements, losses
+- Preferences: what they love, hate, value, believe
+- Emotional patterns: recurring themes across conversations
+- Coping strengths: what helps them feel better
+- Topics: subjects they care about deeply
+
+If nothing meaningful to extract, return [].
+Return ONLY valid JSON array, no other text."""
+
+            response = await self._openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "system", "content": extraction_prompt}],
+                max_tokens=300,
+                temperature=0.3,
+            )
+
+            result_text = (response.choices[0].message.content or "").strip()
+
+            # Parse JSON from response
+            if result_text.startswith("```"):
+                result_text = result_text.split("```")[1]
+                if result_text.startswith("json"):
+                    result_text = result_text[4:]
+
+            memories = json.loads(result_text)
+            if isinstance(memories, list):
+                valid_types = {"life_event", "relationship", "preference", "emotional_pattern", "topic", "coping_strength"}
+                return [
+                    m for m in memories
+                    if isinstance(m, dict) and m.get("type") in valid_types
+                    and m.get("key") and m.get("value")
+                ]
+            return []
+
+        except Exception as e:
+            logger.warning(f"AI memory extraction failed, using regex fallback: {e}")
+            return extract_memories_from_message(user_message, mood)
+
+    async def summarize_session(
+        self,
+        conversation_history: list[dict[str, str]],
+        initial_mood: str | None,
+        final_mood: str | None,
+        user_name: str | None = None,
+    ) -> dict[str, Any]:
+        """Generate a rich session summary using AI.
+
+        Creates a narrative summary that captures:
+        - Key topics discussed
+        - Emotional arc (how mood changed)
+        - Insights shared
+        - Unresolved issues to follow up on
+        - Coping strengths observed
+        """
+        if not self._openai_available or not self._openai_client or not conversation_history:
+            return self._basic_session_summary(conversation_history, initial_mood, final_mood)
+
+        try:
+            # Build conversation text
+            convo_text = ""
+            for msg in conversation_history[-20:]:
+                role = "User" if msg.get("role") == "user" else "KIAAN"
+                convo_text += f"{role}: {msg['content'][:200]}\n"
+
+            summary_prompt = f"""Analyze this conversation between a user and their AI best friend KIAAN.
+
+Conversation:
+{convo_text}
+
+Emotional arc: {initial_mood or 'unknown'} → {final_mood or 'unknown'}
+
+Generate a JSON summary with these fields:
+- "topics": array of 1-3 main topics discussed (short phrases)
+- "emotional_arc": one sentence describing how the user's emotional state changed
+- "key_insights": array of 1-2 wisdom insights that resonated
+- "unresolved": array of 0-2 topics to follow up on next session
+- "coping_observed": array of 0-2 coping strengths the user showed
+- "session_theme": one word capturing the session (e.g., "healing", "venting", "growing")
+
+Return ONLY valid JSON, no other text."""
+
+            response = await self._openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "system", "content": summary_prompt}],
+                max_tokens=300,
+                temperature=0.3,
+            )
+
+            result_text = (response.choices[0].message.content or "").strip()
+            if result_text.startswith("```"):
+                result_text = result_text.split("```")[1]
+                if result_text.startswith("json"):
+                    result_text = result_text[4:]
+
+            summary = json.loads(result_text)
+            if isinstance(summary, dict):
+                return summary
+
+        except Exception as e:
+            logger.warning(f"AI session summary failed: {e}")
+
+        return self._basic_session_summary(conversation_history, initial_mood, final_mood)
+
+    def _basic_session_summary(
+        self,
+        history: list[dict[str, str]],
+        initial_mood: str | None,
+        final_mood: str | None,
+    ) -> dict[str, Any]:
+        """Basic session summary without AI."""
+        user_messages = [m["content"] for m in (history or []) if m.get("role") == "user"]
+        return {
+            "topics": [],
+            "emotional_arc": f"{initial_mood or 'unknown'} → {final_mood or 'unknown'}",
+            "key_insights": [],
+            "unresolved": [],
+            "coping_observed": [],
+            "session_theme": "conversation",
+            "message_count": len(history or []),
+        }
+
+    async def analyze_emotional_patterns(
+        self,
+        mood_history: list[dict[str, Any]],
+        user_name: str | None = None,
+    ) -> dict[str, Any]:
+        """Analyze emotional patterns across sessions for self-awareness insights.
+
+        Input: list of {mood, timestamp, session_id} from past messages.
+        Output: pattern analysis for the Self-Awareness Mirror.
+        """
+        if not mood_history:
+            return {"patterns": [], "insights": [], "growth_areas": []}
+
+        # Calculate mood frequencies
+        mood_counts: dict[str, int] = {}
+        for entry in mood_history:
+            m = entry.get("mood", "neutral")
+            mood_counts[m] = mood_counts.get(m, 0) + 1
+
+        total = sum(mood_counts.values()) or 1
+        mood_percentages = {
+            m: round(c / total * 100, 1)
+            for m, c in sorted(mood_counts.items(), key=lambda x: -x[1])
+        }
+
+        # Identify top 3 moods
+        top_moods = list(mood_percentages.keys())[:3]
+
+        # Detect trends (improving vs worsening)
+        positive_moods = {"happy", "hopeful", "grateful", "peaceful", "excited"}
+        negative_moods = {"sad", "anxious", "angry", "lonely", "overwhelmed", "hurt", "fearful", "stressed"}
+
+        recent = mood_history[-10:] if len(mood_history) > 10 else mood_history
+        older = mood_history[:-10] if len(mood_history) > 10 else []
+
+        recent_positive = sum(1 for m in recent if m.get("mood") in positive_moods)
+        older_positive = sum(1 for m in older if m.get("mood") in positive_moods) if older else 0
+
+        trend = "improving" if recent_positive > len(recent) * 0.5 else "stable"
+        if older and recent_positive > older_positive:
+            trend = "improving"
+        elif older and recent_positive < older_positive:
+            trend = "needs_attention"
+
+        # Build insights
+        insights = []
+        if "anxious" in top_moods:
+            insights.append("Anxiety appears frequently. Breathing exercises and grounding techniques could help.")
+        if "grateful" in top_moods:
+            insights.append("You show strong gratitude — this is a powerful coping strength.")
+        if "lonely" in top_moods:
+            insights.append("Loneliness themes emerge often. Connection and community could be supportive.")
+
+        return {
+            "mood_distribution": mood_percentages,
+            "top_moods": top_moods,
+            "trend": trend,
+            "total_entries": len(mood_history),
+            "insights": insights,
+            "growth_areas": [m for m in top_moods if m in negative_moods],
+            "strengths": [m for m in top_moods if m in positive_moods],
+        }
+
+    def reset_verse_history(self) -> None:
+        """Reset verse history for a new session."""
+        self._verse_history = []
 
 
 _engine_instance: CompanionFriendEngine | None = None

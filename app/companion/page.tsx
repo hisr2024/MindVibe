@@ -23,6 +23,8 @@ import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
 import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorder'
 import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
 import CompanionVoicePlayer from '@/components/companion/CompanionVoicePlayer'
+import CompanionBreathingExercise from '@/components/companion/CompanionBreathingExercise'
+import MoodJourneyPanel from '@/components/companion/MoodJourneyPanel'
 import VoiceLanguageSpeakerSelector from '@/components/voice/VoiceLanguageSpeakerSelector'
 import { apiFetch } from '@/lib/api'
 
@@ -132,6 +134,9 @@ export default function CompanionPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
+  const [showMoodJourney, setShowMoodJourney] = useState(false)
+  const [showBreathing, setShowBreathing] = useState(false)
+  const [wisdomCorpusCount, setWisdomCorpusCount] = useState(0)
   const [aiStatus, setAiStatus] = useState<'unknown' | 'connected' | 'offline'>('unknown')
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
     language: 'en',
@@ -243,6 +248,7 @@ export default function CompanionPage() {
         if (res.ok) {
           const data = await res.json()
           setAiStatus(data.ai_enhanced ? 'connected' : 'offline')
+          if (data.wisdom_corpus) setWisdomCorpusCount(data.wisdom_corpus)
         } else {
           setAiStatus('offline')
         }
@@ -568,7 +574,9 @@ export default function CompanionPage() {
             <span className={`w-1.5 h-1.5 rounded-full ${
               aiStatus === 'connected' ? 'bg-emerald-400' : aiStatus === 'offline' ? 'bg-amber-400' : 'bg-white/40'
             }`} />
-            {aiStatus === 'connected' ? 'AI' : aiStatus === 'offline' ? 'Offline' : '...'}
+            {aiStatus === 'connected'
+              ? `AI${wisdomCorpusCount ? ` \u00B7 ${wisdomCorpusCount}` : ''}`
+              : aiStatus === 'offline' ? 'Offline' : '...'}
           </span>
 
           {/* Friendship badge */}
@@ -616,6 +624,38 @@ export default function CompanionPage() {
             </svg>
           </button>
 
+          {/* Breathing exercise trigger */}
+          <button
+            onClick={() => setShowBreathing(v => !v)}
+            className={`p-2 rounded-full transition-all ${
+              showBreathing
+                ? 'bg-sky-500/20 text-sky-400'
+                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+            }`}
+            title="Guided breathing"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+
+          {/* Self-Awareness Mirror / Mood Journey */}
+          <button
+            onClick={() => setShowMoodJourney(v => !v)}
+            className={`p-2 rounded-full transition-all ${
+              showMoodJourney
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+            }`}
+            title="Your mood journey & milestones"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </button>
+
           {session.isActive && (
             <button
               onClick={endSession}
@@ -639,8 +679,32 @@ export default function CompanionPage() {
         </div>
       )}
 
+      {/* ─── Self-Awareness Mirror Panel ─── */}
+      {showMoodJourney && (
+        <div className="relative z-20 max-w-xl mx-auto w-full px-4 pt-3">
+          <MoodJourneyPanel onClose={() => setShowMoodJourney(false)} />
+        </div>
+      )}
+
       {/* ─── Scrollable Content ─── */}
       <main className="flex-1 overflow-y-auto relative z-10">
+        {/* ─── In-Chat Breathing Exercise ─── */}
+        {showBreathing && (
+          <div className="max-w-sm mx-auto px-4 pt-4 pb-2">
+            <CompanionBreathingExercise
+              cycles={3}
+              mood={currentMood}
+              onComplete={() => {
+                setShowBreathing(false)
+                // Auto-send a follow-up after breathing
+                if (session.isActive) {
+                  sendMessage('I just did the breathing exercise')
+                }
+              }}
+            />
+          </div>
+        )}
+
         {/* ─── Orb Section ─── */}
         <div className="flex flex-col items-center pt-6 pb-4">
           <CompanionMoodRing
@@ -766,6 +830,7 @@ export default function CompanionPage() {
                   onTranscription={handleVoiceTranscription}
                   isDisabled={!session.isActive}
                   isProcessing={isLoading}
+                  language={voiceConfig.language}
                 />
               </div>
 
