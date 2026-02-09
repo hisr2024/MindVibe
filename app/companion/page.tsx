@@ -23,7 +23,34 @@ import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
 import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorder'
 import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
 import CompanionVoicePlayer from '@/components/companion/CompanionVoicePlayer'
+import VoiceLanguageSpeakerSelector from '@/components/voice/VoiceLanguageSpeakerSelector'
 import { apiFetch } from '@/lib/api'
+
+// ─── Voice Config Type ──────────────────────────────────────────────
+interface VoiceConfig {
+  language: string
+  speakerId: string
+  emotion: string
+  speed: number
+  pitch: number
+  autoPlay: boolean
+}
+
+// ─── Mood Emoji + Label Map ─────────────────────────────────────────
+const MOOD_DISPLAY: Record<string, { emoji: string; label: string; color: string }> = {
+  happy: { emoji: '\uD83D\uDE0A', label: 'Happy', color: 'text-amber-400' },
+  sad: { emoji: '\uD83D\uDE22', label: 'Sad', color: 'text-blue-400' },
+  anxious: { emoji: '\uD83D\uDE30', label: 'Anxious', color: 'text-purple-400' },
+  angry: { emoji: '\uD83D\uDE24', label: 'Angry', color: 'text-red-400' },
+  confused: { emoji: '\uD83E\uDD14', label: 'Confused', color: 'text-orange-400' },
+  peaceful: { emoji: '\uD83E\uDDD8', label: 'Peaceful', color: 'text-emerald-400' },
+  hopeful: { emoji: '\u2728', label: 'Hopeful', color: 'text-yellow-400' },
+  lonely: { emoji: '\uD83D\uDC99', label: 'Lonely', color: 'text-indigo-400' },
+  grateful: { emoji: '\uD83D\uDE4F', label: 'Grateful', color: 'text-green-400' },
+  neutral: { emoji: '\uD83D\uDE0C', label: 'Calm', color: 'text-violet-400' },
+  excited: { emoji: '\uD83C\uDF89', label: 'Excited', color: 'text-pink-400' },
+  overwhelmed: { emoji: '\uD83C\uDF0A', label: 'Overwhelmed', color: 'text-slate-400' },
+}
 
 // ─── Referral Context Greetings ──────────────────────────────────────
 
@@ -97,9 +124,17 @@ export default function CompanionPage() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [showSuggestions, setShowSuggestions] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [autoPlayVoice, setAutoPlayVoice] = useState(false)
-  const [selectedVoice, setSelectedVoice] = useState('priya')
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false)
+  const [aiStatus, setAiStatus] = useState<'unknown' | 'connected' | 'offline'>('unknown')
+  const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
+    language: 'en',
+    speakerId: 'en_priya',
+    emotion: 'neutral',
+    speed: 0.95,
+    pitch: 0.0,
+    autoPlay: false,
+  })
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -113,7 +148,7 @@ export default function CompanionPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          language: 'en',
+          language: voiceConfig.language,
           referral_tool: referralTool || undefined,
           referral_mood: referralMood || undefined,
         }),
@@ -194,6 +229,24 @@ export default function CompanionPage() {
     startSession()
   }, [startSession])
 
+  // ─── Check AI backend health on mount ─────────────────────────────
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await apiFetch('/api/companion/health')
+        if (res.ok) {
+          const data = await res.json()
+          setAiStatus(data.ai_enhanced ? 'connected' : 'offline')
+        } else {
+          setAiStatus('offline')
+        }
+      } catch {
+        setAiStatus('offline')
+      }
+    }
+    checkHealth()
+  }, [])
+
   // ─── Message Sending ────────────────────────────────────────────────
 
   const sendMessage = useCallback(async (text: string) => {
@@ -220,7 +273,7 @@ export default function CompanionPage() {
           body: JSON.stringify({
             session_id: session.sessionId,
             message: text.trim(),
-            language: 'en',
+            language: voiceConfig.language,
             content_type: 'text',
           }),
         })
@@ -253,7 +306,7 @@ export default function CompanionPage() {
       setIsLoading(false)
       setShowSuggestions(true)
     }
-  }, [isLoading, session.sessionId])
+  }, [isLoading, session.sessionId, voiceConfig.language])
 
   const addLocalFallbackResponse = useCallback((userText: string) => {
     const lower = userText.toLowerCase()
@@ -495,6 +548,23 @@ export default function CompanionPage() {
         </Link>
 
         <div className="flex items-center gap-2">
+          {/* AI status indicator */}
+          <span
+            className={`text-[10px] px-2 py-1 rounded-full border flex items-center gap-1 ${
+              aiStatus === 'connected'
+                ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
+                : aiStatus === 'offline'
+                ? 'border-amber-500/30 text-amber-400 bg-amber-500/10'
+                : 'border-white/10 text-white/40 bg-white/5'
+            }`}
+            title={aiStatus === 'connected' ? 'AI-powered responses active' : 'Using offline wisdom'}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              aiStatus === 'connected' ? 'bg-emerald-400' : aiStatus === 'offline' ? 'bg-amber-400' : 'bg-white/40'
+            }`} />
+            {aiStatus === 'connected' ? 'AI' : aiStatus === 'offline' ? 'Offline' : '...'}
+          </span>
+
           {/* Friendship badge */}
           <span className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-white/50 bg-white/5">
             {session.friendshipLevel === 'deep' ? 'Best Friend' :
@@ -503,18 +573,34 @@ export default function CompanionPage() {
              'New Friend'}
           </span>
 
+          {/* Voice & Language Settings */}
+          <button
+            onClick={() => setShowVoiceSettings(v => !v)}
+            className={`p-2 rounded-full transition-all ${
+              showVoiceSettings
+                ? 'bg-purple-500/20 text-purple-400'
+                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+            }`}
+            title="Voice, Language & Speaker Settings"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+          </button>
+
           {/* Auto-play voice toggle */}
           <button
-            onClick={() => setAutoPlayVoice(v => !v)}
+            onClick={() => setVoiceConfig(prev => ({ ...prev, autoPlay: !prev.autoPlay }))}
             className={`p-2 rounded-full transition-all ${
-              autoPlayVoice
+              voiceConfig.autoPlay
                 ? 'bg-violet-500/20 text-violet-400'
                 : 'text-white/30 hover:text-white/60 hover:bg-white/5'
             }`}
-            title={autoPlayVoice ? 'Voice auto-play ON' : 'Voice auto-play OFF'}
+            title={voiceConfig.autoPlay ? 'Voice auto-play ON' : 'Voice auto-play OFF'}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {autoPlayVoice ? (
+              {voiceConfig.autoPlay ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z" />
               ) : (
@@ -536,6 +622,17 @@ export default function CompanionPage() {
         </div>
       </header>
 
+      {/* ─── Voice & Language Settings Panel ─── */}
+      {showVoiceSettings && (
+        <div className="relative z-20 max-w-xl mx-auto w-full px-4 pt-3">
+          <VoiceLanguageSpeakerSelector
+            currentConfig={voiceConfig}
+            onConfigChange={setVoiceConfig}
+            onClose={() => setShowVoiceSettings(false)}
+          />
+        </div>
+      )}
+
       {/* ─── Scrollable Content ─── */}
       <main className="flex-1 overflow-y-auto relative z-10">
         {/* ─── Orb Section ─── */}
@@ -552,6 +649,21 @@ export default function CompanionPage() {
           <p className="text-xs text-white/40 mt-0.5">
             {isLoading ? 'Thinking...' : session.isActive ? 'Your best friend' : 'Session ended'}
           </p>
+
+          {/* ── Mood + Language Indicator ── */}
+          <div className="flex items-center gap-2 mt-2">
+            {currentMood && currentMood !== 'neutral' && MOOD_DISPLAY[currentMood] && (
+              <span className={`text-xs px-2.5 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-1.5 ${MOOD_DISPLAY[currentMood].color}`}>
+                <span>{MOOD_DISPLAY[currentMood].emoji}</span>
+                <span>{MOOD_DISPLAY[currentMood].label}</span>
+              </span>
+            )}
+            {voiceConfig.language !== 'en' && (
+              <span className="text-[10px] px-2 py-1 rounded-full bg-purple-500/10 border border-purple-400/20 text-purple-300">
+                {voiceConfig.language.toUpperCase()}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* ─── Messages ─── */}
@@ -568,16 +680,23 @@ export default function CompanionPage() {
                 isLatest={i === messages.length - 1}
               />
               {msg.role === 'companion' && (
-                <div className="ml-9 mb-3 -mt-1">
+                <div className="ml-9 mb-3 -mt-1 flex items-center gap-2">
                   <CompanionVoicePlayer
                     text={msg.content}
                     mood={msg.mood || currentMood}
-                    voiceId={selectedVoice}
+                    voiceId={voiceConfig.speakerId.split('_').pop() || 'priya'}
+                    language={voiceConfig.language}
                     compact
-                    autoPlay={autoPlayVoice && i === messages.length - 1}
+                    autoPlay={voiceConfig.autoPlay && i === messages.length - 1}
                     onStart={handleVoiceStart}
                     onEnd={handleVoiceEnd}
                   />
+                  {/* Mood badge on message */}
+                  {msg.mood && msg.mood !== 'neutral' && MOOD_DISPLAY[msg.mood] && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 ${MOOD_DISPLAY[msg.mood].color}`}>
+                      {MOOD_DISPLAY[msg.mood].emoji} {MOOD_DISPLAY[msg.mood].label}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
