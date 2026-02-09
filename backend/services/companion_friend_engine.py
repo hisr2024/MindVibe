@@ -1960,6 +1960,7 @@ class CompanionFriendEngine:
         language: str = "en",
         profile_data: dict | None = None,
         session_summaries: list[dict] | None = None,
+        db_wisdom_verse: dict | None = None,
     ) -> dict[str, Any]:
         """Generate best-friend response with AI enhancement when available.
 
@@ -1999,6 +2000,7 @@ class CompanionFriendEngine:
                     language=language,
                     profile_data=profile_data,
                     session_summaries=session_summaries,
+                    db_wisdom_verse=db_wisdom_verse,
                 )
                 if ai_response:
                     return ai_response
@@ -2029,40 +2031,60 @@ class CompanionFriendEngine:
         language: str,
         profile_data: dict | None = None,
         session_summaries: list[dict] | None = None,
+        db_wisdom_verse: dict | None = None,
     ) -> dict[str, Any] | None:
-        """Generate AI response: behavioral science comprehension + Gita-only guidance."""
+        """Generate AI response: behavioral science comprehension + Gita-only guidance.
+
+        Wisdom source priority:
+        1. Guidance Engine DB verse (db_wisdom_verse) — richest data (mental health tags, modern contexts)
+        2. SakhaWisdomEngine JSON corpus — 5-factor contextual scoring over 700 verses
+        3. WISDOM_CORE static dict — hardcoded Gita principles per mood
+        """
         if not self._openai_client:
             return None
 
         # Check if user is explicitly asking about Gita verses
         verse_request = _check_verse_request(user_message)
 
-        # Phase 2: Semantic Wisdom — use 700-verse corpus for contextual matching
+        # Wisdom Source 1: Guidance Engine DB verse (from WisdomKnowledgeBase)
         wisdom_context = None
-        try:
-            sakha = _get_sakha_engine()
-            if sakha and sakha.get_verse_count() > 0:
-                wisdom_context = sakha.get_contextual_verse(
-                    mood=mood,
-                    user_message=user_message,
-                    phase=phase,
-                    verse_history=self._verse_history,
-                    mood_intensity=mood_intensity,
-                )
-                if wisdom_context:
-                    # Track verse to avoid repetition within session
-                    self._verse_history.append(wisdom_context["verse_ref"])
-                    logger.info(
-                        f"SakhaWisdom: Selected verse {wisdom_context['verse_ref']} "
-                        f"(score={wisdom_context.get('relevance_score', 0):.1f}) for mood={mood}"
-                    )
-        except Exception as e:
-            logger.warning(f"Sakha wisdom engine failed, falling back to WISDOM_CORE: {e}")
+        if db_wisdom_verse and db_wisdom_verse.get("wisdom"):
+            wisdom_context = db_wisdom_verse
+            ref = db_wisdom_verse.get("verse_ref", "")
+            if ref and ref not in self._verse_history:
+                self._verse_history.append(ref)
+            logger.info(
+                f"Wisdom[DB]: Using Guidance Engine verse {ref} "
+                f"(domain={db_wisdom_verse.get('primary_domain', '?')})"
+            )
 
-        # Fallback to hardcoded WISDOM_CORE if semantic engine returned nothing
+        # Wisdom Source 2: SakhaWisdomEngine JSON corpus (contextual scoring)
+        if not wisdom_context:
+            try:
+                sakha = _get_sakha_engine()
+                if sakha and sakha.get_verse_count() > 0:
+                    wisdom_context = sakha.get_contextual_verse(
+                        mood=mood,
+                        user_message=user_message,
+                        phase=phase,
+                        verse_history=self._verse_history,
+                        mood_intensity=mood_intensity,
+                    )
+                    if wisdom_context:
+                        self._verse_history.append(wisdom_context["verse_ref"])
+                        logger.info(
+                            f"Wisdom[Sakha]: Selected verse {wisdom_context['verse_ref']} "
+                            f"(score={wisdom_context.get('relevance_score', 0):.1f}) for mood={mood}"
+                        )
+            except Exception as e:
+                logger.warning(f"Sakha wisdom engine failed: {e}")
+
+        # Wisdom Source 3: WISDOM_CORE static fallback
         if not wisdom_context:
             wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
             wisdom_context = random.choice(wisdom_pool) if wisdom_pool else None
+            if wisdom_context:
+                logger.info(f"Wisdom[Static]: Using WISDOM_CORE fallback for mood={mood}")
 
         system_prompt = self._build_system_prompt(
             mood=mood,

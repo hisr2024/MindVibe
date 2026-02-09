@@ -408,6 +408,44 @@ async def send_companion_message(
         "streak_days": profile.streak_days,
     }
 
+    # Query Guidance Engine's Gita DB for a contextual verse (richer than JSON corpus)
+    db_wisdom_verse = None
+    try:
+        from backend.services.wisdom_kb import WisdomKnowledgeBase
+        kb = WisdomKnowledgeBase()
+        # Build search query from user message + mood for semantic matching
+        search_query = f"{body.message} {mood}"
+        # Map mood to theme for better filtering
+        mood_theme_hints = {
+            "anxious": "equanimity", "sad": "resilience", "angry": "self_mastery",
+            "confused": "clarity", "lonely": "connection", "hopeful": "purpose",
+            "peaceful": "meditation", "overwhelmed": "detachment", "fearful": "courage",
+            "frustrated": "patience", "stressed": "inner_peace", "guilty": "forgiveness",
+            "hurt": "acceptance", "jealous": "contentment",
+        }
+        theme_hint = mood_theme_hints.get(mood)
+        verse_results = await kb.search_relevant_verses_full_db(
+            db=db, query=search_query, theme=theme_hint, limit=3,
+        )
+        if verse_results and verse_results[0].get("score", 0) > 0.1:
+            top = verse_results[0]
+            v = top["verse"]
+            db_wisdom_verse = {
+                "verse_ref": v.get("verse_id", ""),
+                "principle": v.get("context", v.get("theme", "wisdom")),
+                "wisdom": top.get("sanitized_text") or v.get("english", ""),
+                "theme": v.get("theme", ""),
+                "mental_health_applications": v.get("mental_health_applications", []),
+                "primary_domain": v.get("primary_domain", ""),
+                "source": "gita_db",
+            }
+            logger.info(
+                f"GuidanceDB: Selected verse {db_wisdom_verse['verse_ref']} "
+                f"(score={top['score']:.2f}) for mood={mood}"
+            )
+    except Exception as e:
+        logger.debug(f"Guidance DB verse lookup skipped: {e}")
+
     # Generate response (with cross-session context for deep memory)
     engine = get_companion_engine()
     response_data = await engine.generate_response(
@@ -419,6 +457,7 @@ async def send_companion_message(
         language=body.language,
         profile_data=profile_context,
         session_summaries=session_summaries,
+        db_wisdom_verse=db_wisdom_verse,
     )
 
     # Save companion response
