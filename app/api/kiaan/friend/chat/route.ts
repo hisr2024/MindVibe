@@ -5,11 +5,12 @@
  * Reuses the 3-tier response strategy from /api/companion/message:
  * 1. Proxy to Python backend
  * 2. Direct OpenAI (KIAAN personality + Gita wisdom)
- * 3. Static mood-aware fallback
+ * 3. Local Friend Engine (mood + topic + entity + phase-aware intelligence)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -162,26 +163,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Tier 3: Static fallback ──────────────────────────────────────
-    const fallbacks: Record<string, string[]> = {
-      anxious: ["Your brain's running like 47 Chrome tabs right now. Let's close a few. What's the LOUDEST worry?"],
-      sad: ["I'm not going to say 'it'll be fine.' But I am going to say: you reaching out right now? That's strength. What hurts most?"],
-      angry: ["I hear the fire. Anger is usually fear in armor. What's underneath it for you right now?"],
-      confused: ["Feeling stuck is your brain saying 'I need more data.' What are the two things pulling you in different directions?"],
-      lonely: ["You reached out. That takes guts. What would actually help — talking it through, or just someone being here?"],
-      happy: ["Love this energy! Tell me more — what's got you feeling this way?"],
-      overwhelmed: ["That's a LOT. Pick ONE thing from that pile. The smallest one. What is it?"],
-      neutral: ["Hey — what's actually on your mind? Not the polite version. The real one."],
-    }
-
-    const pool = fallbacks[mood] || fallbacks.neutral
+    // ── Tier 3: Local Friend Engine (intelligent local response) ─────
+    const turnCount = conversationHistory.length
+    const engineResult = generateLocalResponse(message, turnCount)
     return NextResponse.json({
-      response: pool[Math.floor(Math.random() * pool.length)],
-      mood,
+      response: engineResult.response,
+      mood: engineResult.mood,
       mode: forceMode || 'best_friend',
       suggested_chapter: null,
-      gita_insight: null,
-      ai_tier: 'static',
+      gita_insight: engineResult.wisdom_used ? { verse_ref: engineResult.wisdom_used.verse_ref, principle: engineResult.wisdom_used.principle } : null,
+      ai_tier: 'local_engine',
     })
   } catch (error) {
     console.error('[KIAAN Chat] Error:', error)
