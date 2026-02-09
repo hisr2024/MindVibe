@@ -1702,11 +1702,17 @@ class KIAANModelProvider:
 kiaan_model_provider = KIAANModelProvider()
 
 
+def get_kiaan_provider() -> KIAANModelProvider:
+    """Factory function to get the singleton KIAAN model provider instance."""
+    return kiaan_model_provider
+
+
 # Export
 __all__ = [
     # Main provider
     "KIAANModelProvider",
     "kiaan_model_provider",
+    "get_kiaan_provider",
 
     # Enums
     "ModelProvider",

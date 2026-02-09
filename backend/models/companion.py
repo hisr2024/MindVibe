@@ -43,6 +43,12 @@ class CompanionMood(str, enum.Enum):
     NEUTRAL = "neutral"
     EXCITED = "excited"
     OVERWHELMED = "overwhelmed"
+    HURT = "hurt"
+    JEALOUS = "jealous"
+    GUILTY = "guilty"
+    FEARFUL = "fearful"
+    FRUSTRATED = "frustrated"
+    STRESSED = "stressed"
 
 
 class ConversationPhase(str, enum.Enum):

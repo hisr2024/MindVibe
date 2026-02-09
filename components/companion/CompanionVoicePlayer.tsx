@@ -274,13 +274,13 @@ export default function CompanionVoicePlayer({
     setState('idle')
   }, [])
 
-  // Auto-play if requested
+  // Auto-play if requested (triggers on mount and when autoPlay/text change)
   useEffect(() => {
     if (autoPlay && state === 'idle' && text) {
       const timer = setTimeout(() => playAudio(), 300)
       return () => clearTimeout(timer)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoPlay, text]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (compact) {
     return (
