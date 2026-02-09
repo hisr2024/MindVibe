@@ -194,7 +194,7 @@ export default function CompanionPage() {
     } finally {
       setIsInitializing(false)
     }
-  }, [])
+  }, [voiceConfig.language, referralTool, referralMood])
 
   const createLocalSession = useCallback(() => {
     const localId = `local_${Date.now()}`
