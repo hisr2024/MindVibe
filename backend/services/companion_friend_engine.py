@@ -1370,10 +1370,26 @@ def generate_friend_response(
         }
 
     starter = random.choice(PHASE_STARTERS.get(phase, PHASE_STARTERS["connect"]))
-    wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
-    if not wisdom_pool:
-        wisdom_pool = WISDOM_CORE["general"]
-    wisdom_entry = random.choice(wisdom_pool)
+
+    # Dynamic wisdom first (SakhaWisdomEngine), then static fallback (WISDOM_CORE)
+    wisdom_entry = None
+    try:
+        sakha = _get_sakha_engine()
+        if sakha and sakha.get_verse_count() > 0:
+            wisdom_entry = sakha.get_contextual_verse(
+                mood=mood,
+                user_message=user_message,
+                phase=phase,
+                mood_intensity=mood_intensity,
+            )
+    except Exception:
+        pass
+
+    if not wisdom_entry:
+        wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
+        if not wisdom_pool:
+            wisdom_pool = WISDOM_CORE["general"]
+        wisdom_entry = random.choice(wisdom_pool)
 
     # Check if user wants tough love and we're in guide/empower phase
     prefers_tough = profile_data.get("prefers_tough_love", False) if profile_data else False
