@@ -1096,6 +1096,21 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Voice Companion router: {e}")
 
+# Load KIAAN Friend Mode router (Dual-mode: Best Friend + Gita Guide)
+startup_logger.info("\n[KIAAN Friend Mode] Attempting to import KIAAN Friend Mode router...")
+try:
+    from backend.routes.kiaan_friend_mode import router as kiaan_friend_router
+    app.include_router(kiaan_friend_router, prefix="/api")
+    startup_logger.info("✅ [SUCCESS] KIAAN Friend Mode router loaded (Best Friend + Gita Guide)")
+    startup_logger.info("   • POST   /api/kiaan/friend/chat - Dual-mode chat (auto-detects friend vs guide)")
+    startup_logger.info("   • GET    /api/kiaan/friend/daily-wisdom - Personalized daily wisdom")
+    startup_logger.info("   • POST   /api/kiaan/friend/mood-check - Quick mood check-in")
+    startup_logger.info("   • GET    /api/kiaan/friend/gita-guide/{chapter} - Modern secular interpretation")
+    startup_logger.info("   • GET    /api/kiaan/friend/gita-guide - All 18 chapter guides")
+    startup_logger.info("   • POST   /api/kiaan/friend/verse-insight - Deep verse insight with modern lens")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Friend Mode router: {e}")
+
 startup_logger.info("="*80)
 startup_logger.info(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 startup_logger.info("="*80 + "\n")

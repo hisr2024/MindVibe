@@ -221,7 +221,10 @@ export default function VoiceLanguageSpeakerSelector({
 
     try {
       const speaker = Object.values(speakers).flat().find(s => s.id === speakerId)
-      if (!speaker) return
+      if (!speaker) {
+        setIsPreviewPlaying(false)
+        return
+      }
 
       const response = await apiFetch('/api/voice/synthesize', {
         method: 'POST',
