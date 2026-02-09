@@ -316,6 +316,7 @@ export default function VoiceCompanionPage() {
 
   const startMoodCheckin = async () => {
     setShowMoodCheckin(true)
+    let question: string | null = null
     try {
       const res = await apiFetch('/api/kiaan/friend/mood-check', {
         method: 'POST',
@@ -324,12 +325,10 @@ export default function VoiceCompanionPage() {
       })
       if (res.ok) {
         const data = await res.json()
-        setMoodQuestion(data.question)
+        question = data.question
       }
     } catch { /* use default */ }
-    if (!moodQuestion) {
-      setMoodQuestion("Quick check - how are you REALLY doing? Not the polite answer, the real one.")
-    }
+    setMoodQuestion(question || "Quick check - how are you REALLY doing? Not the polite answer, the real one.")
   }
 
   // ═══════════════════════════════════════════════════════════════════
