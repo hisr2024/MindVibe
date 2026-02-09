@@ -412,7 +412,45 @@ export default function CompanionPage() {
     }
 
     const pool = moodResponses[detectedMood] || moodResponses.neutral
-    const response = pool[Math.floor(Math.random() * pool.length)]
+
+    // Pick the best response by matching topic keywords from user's message
+    const topicScores = pool.map(resp => {
+      const respLower = resp.toLowerCase()
+      const userWords = lower.split(/\s+/).filter(w => w.length > 3)
+      let score = 0
+      for (const word of userWords) {
+        if (respLower.includes(word)) score += 1
+      }
+      return score
+    })
+    const maxScore = Math.max(...topicScores)
+    let response: string
+    if (maxScore > 0) {
+      // Pick the response that best matches user's words
+      const bestIdx = topicScores.indexOf(maxScore)
+      response = pool[bestIdx]
+    } else {
+      response = pool[Math.floor(Math.random() * pool.length)]
+    }
+
+    // Personalize: prepend a reflection of what they said
+    const shortInput = userText.trim().length > 10
+    if (shortInput && detectedMood !== 'neutral') {
+      const reflections: Record<string, string> = {
+        anxious: `When you say "${userText.trim().slice(0, 40)}..." — I can feel that weight.`,
+        sad: `"${userText.trim().slice(0, 40)}..." — that hits deep, friend.`,
+        angry: `I hear the fire in "${userText.trim().slice(0, 40)}..." — and honestly, it makes sense.`,
+        lonely: `"${userText.trim().slice(0, 40)}..." — reaching out to say that takes guts.`,
+        overwhelmed: `"${userText.trim().slice(0, 40)}..." — yeah, that's a LOT.`,
+        confused: `"${userText.trim().slice(0, 40)}..." — I get why that feels tangled.`,
+        hopeful: `"${userText.trim().slice(0, 40)}..." — I love that energy!`,
+        happy: `"${userText.trim().slice(0, 40)}..." — your vibe is contagious right now!`,
+      }
+      const reflection = reflections[detectedMood]
+      if (reflection) {
+        response = `${reflection}\n\n${response}`
+      }
+    }
 
     setCurrentMood(detectedMood)
     setMessages(prev => [
