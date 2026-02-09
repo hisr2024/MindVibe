@@ -4,11 +4,12 @@
  * 3-tier response strategy:
  * 1. Proxy to Python backend (full pipeline: DB wisdom + SakhaWisdom + OpenAI)
  * 2. Direct OpenAI call from Next.js (KIAAN personality + static Gita wisdom)
- * 3. Static fallback (mood-aware templates with user word reflection)
+ * 3. Local Friend Engine (mood + topic + entity + phase-aware intelligence)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -59,24 +60,23 @@ const GITA_WISDOM: Record<string, { principle: string; wisdom: string; verse_ref
   ],
 }
 
-// ─── Mood Detection ──────────────────────────────────────────────────────
-const MOOD_KEYWORDS: Record<string, string[]> = {
-  anxious: ['anxious', 'anxiety', 'worried', 'scared', 'panic', 'stress', 'nervous', 'afraid', 'fear', 'overwhelm', 'tense'],
-  sad: ['sad', 'depressed', 'hopeless', 'crying', 'heartbroken', 'empty', 'grief', 'miss', 'lonely', 'lost', 'numb'],
-  angry: ['angry', 'furious', 'frustrated', 'mad', 'hate', 'unfair', 'betrayed', 'rage', 'irritated', 'pissed'],
-  confused: ['confused', 'lost', 'stuck', 'unsure', "don't know", 'uncertain', 'torn', 'dilemma'],
-  lonely: ['lonely', 'alone', 'isolated', 'nobody', 'no one', 'abandoned', 'disconnected'],
-  happy: ['happy', 'grateful', 'thankful', 'amazing', 'wonderful', 'great', 'excited', 'proud', 'joy'],
-  overwhelmed: ['overwhelmed', 'too much', 'exhausted', 'burnt out', 'drowning', "can't cope"],
-  hurt: ['hurt', 'pain', 'wounded', 'broken', 'damaged'],
-  fearful: ['terrified', 'petrified', 'dread', 'horror'],
-  guilty: ['guilty', 'shame', 'regret', 'sorry', 'fault', 'blame'],
-}
-
+// ─── Mood Detection (lightweight — used for Tier 2 OpenAI prompt) ────────
+// Full mood/topic/entity detection is in lib/kiaan-friend-engine.ts (Tier 3)
 function detectMood(message: string): { mood: string; intensity: number } {
+  const keywords: Record<string, string[]> = {
+    anxious: ['anxious', 'anxiety', 'worried', 'scared', 'panic', 'stress', 'nervous'],
+    sad: ['sad', 'depressed', 'hopeless', 'crying', 'heartbroken', 'empty', 'grief'],
+    angry: ['angry', 'furious', 'frustrated', 'mad', 'hate', 'betrayed', 'rage'],
+    confused: ['confused', 'lost', 'stuck', 'unsure', 'uncertain', 'torn'],
+    lonely: ['lonely', 'alone', 'isolated', 'abandoned'],
+    happy: ['happy', 'grateful', 'amazing', 'wonderful', 'excited', 'birthday', 'celebration'],
+    overwhelmed: ['overwhelmed', 'exhausted', 'burnt out', 'drowning'],
+    hurt: ['hurt', 'wounded', 'broken', 'betrayed'],
+    guilty: ['guilty', 'shame', 'regret', 'blame'],
+  }
   const lower = message.toLowerCase()
-  for (const [mood, keywords] of Object.entries(MOOD_KEYWORDS)) {
-    const matches = keywords.filter(kw => lower.includes(kw))
+  for (const [mood, kws] of Object.entries(keywords)) {
+    const matches = kws.filter(kw => lower.includes(kw))
     if (matches.length > 0) {
       return { mood, intensity: Math.min(0.3 + matches.length * 0.2, 1.0) }
     }
@@ -170,72 +170,6 @@ async function generateWithOpenAI(
   }
 }
 
-// ─── Static Fallback ─────────────────────────────────────────────────────
-const MOOD_FALLBACKS: Record<string, string[]> = {
-  anxious: [
-    "Your brain right now is like having 47 Chrome tabs open and you can't find which one is playing music. Let's close all tabs except this one — this conversation, this breath. What's the LOUDEST worry right now?",
-    "Here's something I've learned: you can't control the future from your couch at 2am. But you CAN control this moment. What's one thing that would make the next 10 minutes better?",
-  ],
-  sad: [
-    "I'm not going to tell you it'll be fine — you've heard that enough. But I will say this: the fact that you're hurting means you cared about something real. That's not weakness, that's depth. What hurts the most right now?",
-    "Some days are just heavy. You don't need to fix everything today. What if we just sat with this for a minute — no fixing, no solving? What's weighing on you?",
-  ],
-  angry: [
-    "I hear the fire. And honestly? Sometimes anger is the only sane response. But here's what I've noticed: anger is usually fear in armor. What's underneath it for you right now?",
-    "Your frustration makes sense. Something crossed a line. Before we do anything with that energy — what exactly happened? Give me the raw version.",
-  ],
-  confused: [
-    "Feeling stuck is your brain's way of saying 'I need more info before I decide.' That's not weakness — that's intelligence. What are the two things pulling you in different directions?",
-  ],
-  lonely: [
-    "The fact that you reached out right now? That's not small. It takes guts to say 'I'm lonely' in a world that's always performing connection. What would actually help — talking it through, or just someone being here?",
-  ],
-  neutral: [
-    "Hey — what's actually on your mind today? Not the polite version. The real one.",
-    "I'm here. No agenda, no judgment, just a friend with two ears. What's up?",
-  ],
-  happy: [
-    "OK I love this energy! Tell me more — what's got you feeling this way? I want the full story.",
-  ],
-  overwhelmed: [
-    "That's a LOT. Let's not try to solve everything at once — that's how overwhelm wins. Pick ONE thing from that pile. The smallest, easiest one. What is it?",
-  ],
-  hurt: [
-    "That kind of pain doesn't have a quick fix, and I'm not going to pretend it does. But I'm here, and I'm not going anywhere. What happened?",
-  ],
-  guilty: [
-    "Guilt can be heavy. But here's the thing — the fact that you feel it means you care about doing right. That's not a flaw, that's your compass working. What's eating at you?",
-  ],
-  fearful: [
-    "Fear is just your body's alarm system going off. Sometimes there's a real fire, sometimes it's toast. Let's figure out which one this is. What are you afraid will happen?",
-  ],
-}
-
-function getStaticFallback(message: string, mood: string): string {
-  const pool = MOOD_FALLBACKS[mood] || MOOD_FALLBACKS.neutral
-  const response = pool[Math.floor(Math.random() * pool.length)]
-
-  if (message.trim().length > 15) {
-    const snippet = message.trim().slice(0, 45)
-    const reflections: Record<string, string> = {
-      anxious: `"${snippet}..." — I can feel that weight.`,
-      sad: `"${snippet}..." — that hits deep, friend.`,
-      angry: `"${snippet}..." — and honestly, it makes sense.`,
-      lonely: `"${snippet}..." — reaching out takes guts.`,
-      overwhelmed: `"${snippet}..." — yeah, that's a LOT.`,
-      confused: `"${snippet}..." — I get why that feels tangled.`,
-      happy: `"${snippet}..." — love this energy!`,
-      hurt: `"${snippet}..." — I hear you.`,
-      guilty: `"${snippet}..." — that takes courage to say.`,
-      fearful: `"${snippet}..." — let's look at this together.`,
-    }
-    const reflection = reflections[mood]
-    if (reflection) return `${reflection}\n\n${response}`
-  }
-
-  return response
-}
-
 // ─── Main Handler ────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
@@ -299,16 +233,16 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // ── Tier 3: Static fallback (mood-aware, personalized) ───────────
-    const fallbackResponse = getStaticFallback(sanitizedMessage, mood)
+    // ── Tier 3: Local Friend Engine (intelligent local response) ─────
+    const engineResult = generateLocalResponse(sanitizedMessage)
     return NextResponse.json({
       message_id: `msg_${Date.now()}`,
-      response: fallbackResponse,
-      mood,
-      mood_intensity: intensity,
-      phase: 'connect',
-      wisdom_used: null,
-      ai_tier: 'static',
+      response: engineResult.response,
+      mood: engineResult.mood,
+      mood_intensity: engineResult.mood_intensity,
+      phase: engineResult.phase,
+      wisdom_used: engineResult.wisdom_used,
+      ai_tier: 'local_engine',
     })
   } catch (error) {
     console.error('[Companion Message] Unexpected error:', error)
