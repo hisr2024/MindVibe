@@ -10,7 +10,7 @@ Provides endpoints for the world-class voice system:
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
-from typing import Optional, List, Literal
+from typing import Optional, List
 import logging
 
 from backend.deps import get_current_user_flexible
