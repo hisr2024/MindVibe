@@ -36,8 +36,6 @@ export default function CompanionVoiceRecorder({
 }: VoiceRecorderProps) {
   const [state, setState] = useState<RecordingState>('idle')
   const [duration, setDuration] = useState(0)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const recognitionRef = useRef<any>(null)
 
@@ -101,7 +99,7 @@ export default function CompanionVoiceRecorder({
         setState('idle')
       }
     }
-  }, [isDisabled, isProcessing, onTranscription, state])
+  }, [isDisabled, isProcessing, onTranscription, state, language])
 
   const stopRecording = useCallback(() => {
     if (recognitionRef.current) {

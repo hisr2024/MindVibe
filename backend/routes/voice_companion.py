@@ -32,8 +32,6 @@ from backend.models.companion import (
 )
 from backend.models.user import User
 
-# Phase 1: Deep Memory — imports for session summaries
-from sqlalchemy import case, cast, String
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +44,8 @@ MAX_MESSAGE_LENGTH = 2000
 
 class StartSessionRequest(BaseModel):
     language: str = Field(default="en", max_length=8)
+    referral_tool: str | None = Field(default=None, max_length=64)
+    referral_mood: str | None = Field(default=None, max_length=32)
 
 
 class StartSessionResponse(BaseModel):
