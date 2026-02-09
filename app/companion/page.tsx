@@ -50,6 +50,12 @@ const MOOD_DISPLAY: Record<string, { emoji: string; label: string; color: string
   neutral: { emoji: '\uD83D\uDE0C', label: 'Calm', color: 'text-violet-400' },
   excited: { emoji: '\uD83C\uDF89', label: 'Excited', color: 'text-pink-400' },
   overwhelmed: { emoji: '\uD83C\uDF0A', label: 'Overwhelmed', color: 'text-slate-400' },
+  hurt: { emoji: '\uD83D\uDC94', label: 'Hurt', color: 'text-rose-400' },
+  jealous: { emoji: '\uD83D\uDE15', label: 'Jealous', color: 'text-lime-400' },
+  guilty: { emoji: '\uD83D\uDE14', label: 'Guilty', color: 'text-stone-400' },
+  fearful: { emoji: '\uD83D\uDE28', label: 'Fearful', color: 'text-cyan-400' },
+  frustrated: { emoji: '\uD83D\uDE23', label: 'Frustrated', color: 'text-orange-500' },
+  stressed: { emoji: '\uD83E\uDD2F', label: 'Stressed', color: 'text-red-300' },
 }
 
 // ─── Referral Context Greetings ──────────────────────────────────────
