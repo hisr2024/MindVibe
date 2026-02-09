@@ -155,6 +155,73 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "openai_speed": 0.95,
         "description": "Natural, conversational, warm default",
     },
+    # ─── New mood profiles (Phase 1 mood expansion) ──────────────
+    "hurt": {
+        "rate": "slow",
+        "rate_value": 0.86,
+        "pitch": "-1.0st",
+        "volume": "soft",
+        "pause_multiplier": 1.4,
+        "breathing": False,
+        "warmth": "very_high",
+        "openai_speed": 0.86,
+        "description": "Tender, gentle, protective — wrapping you in care",
+    },
+    "jealous": {
+        "rate": "medium",
+        "rate_value": 0.90,
+        "pitch": "-0.5st",
+        "volume": "medium",
+        "pause_multiplier": 1.1,
+        "breathing": False,
+        "warmth": "medium",
+        "openai_speed": 0.90,
+        "description": "Understanding, non-judgmental — sitting with the discomfort",
+    },
+    "guilty": {
+        "rate": "slow",
+        "rate_value": 0.88,
+        "pitch": "-0.5st",
+        "volume": "soft",
+        "pause_multiplier": 1.3,
+        "breathing": False,
+        "warmth": "high",
+        "openai_speed": 0.88,
+        "description": "Compassionate, forgiving — guilt is heavy, let me help carry it",
+    },
+    "fearful": {
+        "rate": "slow",
+        "rate_value": 0.84,
+        "pitch": "-1.5st",
+        "volume": "soft",
+        "pause_multiplier": 1.5,
+        "breathing": True,
+        "warmth": "very_high",
+        "openai_speed": 0.82,
+        "description": "Safe, grounding, steady — I am your anchor in the storm",
+    },
+    "frustrated": {
+        "rate": "medium",
+        "rate_value": 0.91,
+        "pitch": "-1.0st",
+        "volume": "medium",
+        "pause_multiplier": 1.2,
+        "breathing": False,
+        "warmth": "medium",
+        "openai_speed": 0.91,
+        "description": "Patient, validating, steady — I hear you, this is real",
+    },
+    "stressed": {
+        "rate": "x-slow",
+        "rate_value": 0.83,
+        "pitch": "-1.5st",
+        "volume": "soft",
+        "pause_multiplier": 1.5,
+        "breathing": True,
+        "warmth": "very_high",
+        "openai_speed": 0.80,
+        "description": "Ultra-calm, spacious, decompressing — let the pressure go",
+    },
 }
 
 
@@ -530,6 +597,18 @@ async def _try_elevenlabs_tts(text: str, ssml_data: dict) -> bytes | None:
         model_id = ssml_data.get("elevenlabs_model", "eleven_multilingual_v2")
         speed = ssml_data.get("openai_speed", 1.0)
 
+        # Divine voice quality: tune stability/similarity per emotion
+        mood_profile = ssml_data.get("mood_profile", {})
+        warmth = mood_profile.get("warmth", "medium")
+
+        # Stability: lower = more expressive/emotional, higher = more consistent
+        # For divine friend voice: slightly lower stability for natural emotion
+        stability = 0.45 if warmth in ("very_high", "high") else 0.55
+        # Similarity boost: higher = more faithful to voice character
+        similarity = 0.80
+        # Style: emotional expressiveness (0 = neutral, 1 = very expressive)
+        style_value = 0.65 if warmth == "very_high" else 0.50 if warmth == "high" else 0.35
+
         async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.post(
                 f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
@@ -542,9 +621,9 @@ async def _try_elevenlabs_tts(text: str, ssml_data: dict) -> bytes | None:
                     "text": text,
                     "model_id": model_id,
                     "voice_settings": {
-                        "stability": 0.5,
-                        "similarity_boost": 0.75,
-                        "style": min(speed * 0.5, 1.0),
+                        "stability": stability,
+                        "similarity_boost": similarity,
+                        "style": style_value,
                         "use_speaker_boost": True,
                     },
                 },
