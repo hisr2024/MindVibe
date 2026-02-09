@@ -2169,8 +2169,8 @@ class CompanionFriendEngine:
                 "mood_intensity": mood_intensity,
                 "phase": phase,
                 "wisdom_used": {
-                    "principle": wisdom_context["principle"],
-                    "verse_ref": wisdom_context["verse_ref"],
+                    "principle": wisdom_context.get("principle", "unknown"),
+                    "verse_ref": wisdom_context.get("verse_ref", ""),
                 } if wisdom_context else None,
                 "follow_up": None,
                 "ai_enhanced": True,

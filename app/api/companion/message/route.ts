@@ -273,7 +273,10 @@ export async function POST(request: NextRequest) {
 
         if (companionResponse.ok) {
           const data = await companionResponse.json()
-          return NextResponse.json({ ...data, ai_tier: 'backend' })
+          // Validate required fields from backend before forwarding
+          if (data && typeof data.response === 'string' && data.mood && data.phase) {
+            return NextResponse.json({ ...data, ai_tier: 'backend' })
+          }
         }
       } catch {
         // Backend unavailable — fall through
@@ -307,7 +310,8 @@ export async function POST(request: NextRequest) {
       wisdom_used: null,
       ai_tier: 'static',
     })
-  } catch {
+  } catch (error) {
+    console.error('[Companion Message] Unexpected error:', error)
     return NextResponse.json(
       { error: 'Failed to process message' },
       { status: 500 },

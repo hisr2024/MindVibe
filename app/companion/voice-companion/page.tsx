@@ -385,7 +385,7 @@ export default function VoiceCompanionPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: verse.sanskrit + '. ' + verse.translation,
-          language: voiceConfig.language === 'sa' ? 'sa' : voiceConfig.language,
+          language: voiceConfig.language,
           voice_type: 'wisdom', speed: voiceConfig.speed,
         }),
       })

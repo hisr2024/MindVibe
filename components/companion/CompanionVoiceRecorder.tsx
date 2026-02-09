@@ -64,9 +64,11 @@ export default function CompanionVoiceRecorder({
         recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
 
         recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript
-          if (transcript.trim()) {
-            onTranscription(transcript.trim())
+          if (event.results?.length > 0 && event.results[0]?.length > 0) {
+            const transcript = event.results[0][0].transcript
+            if (transcript?.trim()) {
+              onTranscription(transcript.trim())
+            }
           }
           setState('idle')
           setDuration(0)

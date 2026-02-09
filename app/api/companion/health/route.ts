@@ -19,7 +19,7 @@ export async function GET() {
     if (res.ok) {
       backendAvailable = true
       const data = await res.json()
-      wisdomCorpus = data.wisdom_corpus || 700
+      wisdomCorpus = data.wisdom_corpus ?? 700
     }
   } catch {
     // Backend unavailable
@@ -36,7 +36,7 @@ export async function GET() {
     ai_enhanced: aiEnhanced,
     backend_available: backendAvailable,
     openai_direct: openaiAvailable,
-    wisdom_corpus: wisdomCorpus || (openaiAvailable ? 700 : 0),
+    wisdom_corpus: wisdomCorpus ?? (openaiAvailable ? 700 : 0),
     tiers: {
       tier1_backend: backendAvailable,
       tier2_openai: openaiAvailable,

@@ -117,6 +117,13 @@ class EndSessionResponse(BaseModel):
     session_summary: dict
 
 
+class SynthesizeVoiceRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=5000)
+    mood: str = Field(default="neutral", max_length=32)
+    voice_id: str = Field(default="priya", max_length=32)
+    language: str = Field(default="en", max_length=8)
+
+
 # ─── Helpers ──────────────────────────────────────────────────────────────
 
 def _get_friendship_level(total_sessions: int) -> str:
@@ -470,9 +477,7 @@ async def send_companion_message(
         detected_mood=response_data["mood"],
         mood_intensity=response_data.get("mood_intensity"),
         wisdom_used=response_data.get("wisdom_used"),
-        _verse_ref=response_data["wisdom_used"]["verse_ref"]
-        if response_data.get("wisdom_used")
-        else None,
+        _verse_ref=(response_data.get("wisdom_used") or {}).get("verse_ref"),
         phase=response_data["phase"],
     )
     db.add(companion_msg)
@@ -494,7 +499,8 @@ async def send_companion_message(
             companion_response=response_data["response"],
             mood=mood,
         )
-    except Exception:
+    except Exception as e:
+        logger.warning(f"AI memory extraction failed, using pattern fallback: {e}")
         memory_entries = extract_memories_from_message(body.message, mood)
 
     if memory_entries:
@@ -518,9 +524,7 @@ async def send_companion_message(
         mood_intensity=response_data.get("mood_intensity", 0.5),
         phase=response_data["phase"],
         follow_up=response_data.get("follow_up"),
-        wisdom_principle=response_data["wisdom_used"]["principle"]
-        if response_data.get("wisdom_used")
-        else None,
+        wisdom_principle=(response_data.get("wisdom_used") or {}).get("principle"),
     )
 
 
@@ -587,9 +591,10 @@ async def end_companion_session(
             final_mood=session.final_mood,
         )
         session.topics_discussed = session_summary
-        engine.reset_verse_history()
     except Exception as e:
         logger.warning(f"Session summary generation failed: {e}")
+    finally:
+        engine.reset_verse_history()
 
     # Generate farewell
     farewells = [
@@ -822,32 +827,23 @@ async def delete_companion_memory(
 @limiter.limit("15/minute")
 async def synthesize_companion_voice(
     request: Request,
-    body: dict,
+    body: SynthesizeVoiceRequest,
     current_user: User = Depends(get_current_user),
 ):
     """Synthesize speech for a companion message with emotion-adaptive voice.
 
     Uses the premium voice pipeline: Google Neural2 → Edge TTS → browser fallback.
     Voice automatically adapts to the user's detected mood.
-
-    Body params:
-    - text: str - Text to synthesize
-    - mood: str - Detected mood for prosody adaptation
-    - voice_id: str - Voice persona (priya, maya, ananya, arjun, devi)
-    - language: str - Language code
     """
     from backend.services.companion_voice_service import (
         synthesize_companion_voice as synth,
     )
     from fastapi.responses import Response
 
-    text = body.get("text", "")
-    if not text or len(text) > 5000:
-        raise HTTPException(status_code=400, detail="Text is required (max 5000 chars)")
-
-    mood = body.get("mood", "neutral")
-    voice_id = body.get("voice_id", "priya")
-    language = body.get("language", "en")
+    text = body.text
+    mood = body.mood
+    voice_id = body.voice_id
+    language = body.language
 
     result = await synth(
         text=text,
