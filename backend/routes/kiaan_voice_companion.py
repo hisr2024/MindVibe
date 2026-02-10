@@ -416,13 +416,19 @@ def _call_openai_direct(
 
     Returns the response text, or None if OpenAI is unavailable.
     """
+    # Import sanitize_response at function scope (not inside try) to prevent
+    # import errors from silently killing the entire OpenAI call
+    from backend.services.companion_friend_engine import sanitize_response
+    from backend.services.openai_optimizer import openai_optimizer
+
+    if not openai_optimizer.ready or not openai_optimizer.client:
+        logger.warning(
+            "VoiceCompanion: openai_optimizer not ready "
+            f"(ready={openai_optimizer.ready}, client={'yes' if openai_optimizer.client else 'no'})"
+        )
+        return None
+
     try:
-        from backend.services.openai_optimizer import openai_optimizer
-
-        if not openai_optimizer.ready or not openai_optimizer.client:
-            logger.warning("VoiceCompanion: openai_optimizer not ready")
-            return None
-
         messages = [{"role": "system", "content": system_prompt}]
 
         # Add conversation history (last 10 messages for context)
@@ -431,6 +437,11 @@ def _call_openai_direct(
             messages.append({"role": role, "content": msg["content"]})
 
         messages.append({"role": "user", "content": user_message})
+
+        logger.info(
+            f"VoiceCompanion: Calling OpenAI "
+            f"(model={openai_optimizer.default_model}, msgs={len(messages)})"
+        )
 
         completion = openai_optimizer.client.chat.completions.create(
             model=openai_optimizer.default_model,
@@ -446,10 +457,10 @@ def _call_openai_direct(
             text = text.strip()
 
             if not text:
+                logger.warning("VoiceCompanion: OpenAI returned empty response")
                 return None
 
             # Sanitize religious references
-            from backend.services.companion_friend_engine import sanitize_response
             text = sanitize_response(text)
 
             # Quality check: if response is too generic, retry once
@@ -490,11 +501,12 @@ def _call_openai_direct(
             )
             return text
 
-    except Exception as e:
-        logger.warning(f"VoiceCompanion: Direct OpenAI call failed: {e}")
+        logger.warning("VoiceCompanion: OpenAI returned no choices")
         return None
 
-    return None
+    except Exception as e:
+        logger.error(f"VoiceCompanion: Direct OpenAI call failed: {type(e).__name__}: {e}")
+        return None
 
 
 # ─── Greetings ────────────────────────────────────────────────────────────

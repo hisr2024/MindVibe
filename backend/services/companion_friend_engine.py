@@ -1953,10 +1953,32 @@ class CompanionFriendEngine:
         self._init_openai()
 
     def _init_openai(self):
-        """Initialize OpenAI client for enhanced responses."""
+        """Initialize OpenAI client for enhanced responses.
+
+        Tries two sources for the API key:
+        1. Direct env var OPENAI_API_KEY
+        2. openai_optimizer singleton (already proven to work in Viyoga/Ardha)
+
+        Safe to call multiple times — skips if already initialized.
+        """
+        if self._openai_available and self._openai_client:
+            return  # Already initialized
+
         try:
             import openai
             api_key = os.getenv("OPENAI_API_KEY", "").strip()
+
+            # Fallback: get key from openai_optimizer if env var is empty
+            if not api_key:
+                try:
+                    from backend.services.openai_optimizer import openai_optimizer
+                    if openai_optimizer.ready and openai_optimizer.client:
+                        api_key = openai_optimizer.client.api_key or ""
+                        if api_key:
+                            logger.info("CompanionFriendEngine: Got API key from openai_optimizer")
+                except Exception:
+                    pass
+
             if api_key:
                 self._openai_client = openai.AsyncOpenAI(api_key=api_key)
                 self._openai_available = True
@@ -1984,6 +2006,10 @@ class CompanionFriendEngine:
         - preferred_tone, prefers_tough_love, humor_level
         - total_sessions, streak_days, address_style
         """
+        # Self-healing: retry OpenAI init if it wasn't available at startup
+        if not self._openai_available:
+            self._init_openai()
+
         # SAFETY FIRST: Crisis detection overrides everything including AI
         if _detect_crisis(user_message):
             address = f"{user_name}, " if user_name else ""
@@ -2178,7 +2204,41 @@ class CompanionFriendEngine:
             }
 
         except Exception as e:
-            logger.warning(f"OpenAI call failed: {e}")
+            logger.warning(f"OpenAI AsyncClient call failed: {e}")
+
+            # Fallback: try openai_optimizer sync client (proven in Viyoga/Ardha)
+            try:
+                from backend.services.openai_optimizer import openai_optimizer
+                if openai_optimizer.ready and openai_optimizer.client:
+                    logger.info("CompanionEngine: Falling back to openai_optimizer sync client")
+                    sync_response = openai_optimizer.client.chat.completions.create(
+                        model=openai_optimizer.default_model,
+                        messages=messages,
+                        max_tokens=250,
+                        temperature=0.72,
+                        presence_penalty=0.4,
+                        frequency_penalty=0.35,
+                    )
+                    ai_text = (sync_response.choices[0].message.content or "").strip()
+                    if ai_text:
+                        if not verse_request:
+                            ai_text = sanitize_response(ai_text)
+                        return {
+                            "response": ai_text,
+                            "mood": mood,
+                            "mood_intensity": mood_intensity,
+                            "phase": phase,
+                            "wisdom_used": {
+                                "principle": wisdom_context.get("principle", "unknown"),
+                                "verse_ref": wisdom_context.get("verse_ref", ""),
+                            } if wisdom_context else None,
+                            "follow_up": None,
+                            "ai_enhanced": True,
+                            "verse_revealed": verse_request,
+                        }
+            except Exception as sync_err:
+                logger.warning(f"CompanionEngine: openai_optimizer fallback also failed: {sync_err}")
+
             return None
 
     def _build_system_prompt(
