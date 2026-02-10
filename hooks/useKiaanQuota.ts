@@ -27,16 +27,16 @@ interface UseKiaanQuotaResult {
 }
 
 const tierQuotas: Record<string, number> = {
-  free: 10,
+  free: 20,
   basic: 50,
-  premium: 200,
+  premium: 300,
   enterprise: -1, // unlimited
 }
 
 export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
   const [quotaData, setQuotaData] = useState<QuotaData>({
     used: 0,
-    limit: tierQuotas[tier] ?? 10,
+    limit: tierQuotas[tier] ?? 20,
     resetDate: getNextResetDate().toISOString(),
     tier,
   })
@@ -53,7 +53,7 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
       if (resetDate <= new Date()) {
         const newData: QuotaData = {
           used: 0,
-          limit: tierQuotas[tier] ?? 10,
+          limit: tierQuotas[tier] ?? 20,
           resetDate: getNextResetDate().toISOString(),
           tier,
         }
@@ -70,7 +70,7 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
     } else {
       const newData: QuotaData = {
         used: 0,
-        limit: tierQuotas[tier] ?? 10,
+        limit: tierQuotas[tier] ?? 20,
         resetDate: getNextResetDate().toISOString(),
         tier,
       }
@@ -97,7 +97,7 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
   const resetQuota = useCallback(() => {
     const newData: QuotaData = {
       used: 0,
-      limit: tierQuotas[tier] ?? 10,
+      limit: tierQuotas[tier] ?? 20,
       resetDate: getNextResetDate().toISOString(),
       tier,
     }

@@ -27,6 +27,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
 from backend.deps import get_current_user_flexible
+from backend.middleware.feature_access import is_developer
+from backend.services.subscription_service import (
+    check_feature_access,
+    check_kiaan_quota,
+    get_or_create_free_subscription,
+    get_user_tier,
+    increment_kiaan_usage,
+)
 from backend.services.kiaan_agent_orchestrator import (
     KIAANAgentOrchestrator,
     AgentContext,
@@ -78,6 +86,59 @@ async def _check_rate_limit(limiter: RateLimiter, user_id: str) -> None:
             detail=f"Rate limit exceeded. Please wait before making more requests. "
                    f"Remaining: minute={limits['minute_remaining']}, hour={limits['hour_remaining']}"
         )
+
+
+async def _check_agent_subscription(db: AsyncSession, user_id: str) -> None:
+    """Check that user has Premium+ subscription for KIAAN Agent access.
+
+    Args:
+        db: Database session.
+        user_id: The authenticated user ID.
+
+    Raises:
+        HTTPException: If user doesn't have agent access or quota is exceeded.
+    """
+    try:
+        await get_or_create_free_subscription(db, user_id)
+
+        # Developer bypass
+        if await is_developer(db, user_id):
+            return
+
+        # KIAAN Agent is a Premium+ feature
+        has_access = await check_feature_access(db, user_id, "kiaan_agent")
+        if not has_access:
+            tier = await get_user_tier(db, user_id)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "feature_not_available",
+                    "feature": "kiaan_agent",
+                    "message": "KIAAN Agent is a Premium feature. "
+                               "Upgrade to Premium to unlock autonomous research and development. 💙",
+                    "tier": tier.value,
+                    "upgrade_url": "/pricing",
+                },
+            )
+
+        # Check KIAAN quota (agent queries count against monthly limit)
+        has_quota, usage_count, usage_limit = await check_kiaan_quota(db, user_id)
+        if not has_quota:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={
+                    "error": "quota_exceeded",
+                    "message": "You've reached your monthly KIAAN conversations limit. "
+                               "Upgrade your plan for more agent queries. 💙",
+                    "usage_count": usage_count,
+                    "usage_limit": usage_limit,
+                    "upgrade_url": "/pricing",
+                },
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for agent endpoint: {e}")
 
 
 # Request/Response Models
@@ -142,7 +203,11 @@ async def process_agent_query(
     Returns a streaming response with real-time updates.
 
     Requires authentication. Rate limited to 60 requests/minute.
+    Subscription enforcement: Premium+ feature, shares KIAAN quota.
     """
+    # Subscription check (Premium+ required)
+    await _check_agent_subscription(db, user_id)
+
     # Rate limit check
     await _check_rate_limit(_query_rate_limiter, user_id)
 
@@ -181,6 +246,12 @@ async def process_agent_query(
         role="user",
         content=request.query
     )
+
+    # Increment KIAAN usage for this query
+    try:
+        await increment_kiaan_usage(db, user_id)
+    except Exception as usage_err:
+        logger.warning(f"Failed to increment KIAAN usage for agent query: {usage_err}")
 
     if request.stream:
         async def generate():
@@ -256,7 +327,11 @@ async def research_topic(
     - Synthesizing research findings
 
     Requires authentication. Rate limited to 60 requests/minute.
+    Subscription enforcement: Premium+ feature, shares KIAAN quota.
     """
+    # Subscription check (Premium+ required)
+    await _check_agent_subscription(db, user_id)
+
     # Rate limit check
     await _check_rate_limit(_query_rate_limiter, user_id)
 
@@ -321,7 +396,11 @@ async def process_code_task(
     - Code review and suggestions
 
     Requires authentication. Rate limited to 60 requests/minute.
+    Subscription enforcement: Premium+ feature, shares KIAAN quota.
     """
+    # Subscription check (Premium+ required)
+    await _check_agent_subscription(db, user_id)
+
     # Rate limit check
     await _check_rate_limit(_query_rate_limiter, user_id)
 
@@ -379,7 +458,11 @@ async def analyze_target(
     - Security analysis
 
     Requires authentication. Rate limited to 60 requests/minute.
+    Subscription enforcement: Premium+ feature, shares KIAAN quota.
     """
+    # Subscription check (Premium+ required)
+    await _check_agent_subscription(db, user_id)
+
     # Rate limit check
     await _check_rate_limit(_query_rate_limiter, user_id)
 
@@ -433,7 +516,11 @@ async def execute_tool_directly(
     - Documentation lookups
 
     Requires authentication. Rate limited to 10 requests/minute (stricter).
+    Subscription enforcement: Premium+ feature.
     """
+    # Subscription check (Premium+ required)
+    await _check_agent_subscription(db, user_id)
+
     # Stricter rate limit for direct tool execution
     await _check_rate_limit(_tool_rate_limiter, user_id)
 

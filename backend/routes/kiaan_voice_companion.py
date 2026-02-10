@@ -33,6 +33,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_current_user, get_db
 from backend.middleware.rate_limiter import limiter
+from backend.middleware.feature_access import is_developer
+from backend.services.subscription_service import (
+    check_feature_access,
+    check_kiaan_quota,
+    get_or_create_free_subscription,
+    get_user_tier,
+    increment_kiaan_usage,
+)
 from backend.models.companion import (
     CompanionMemory,
     CompanionMessage,
@@ -87,12 +95,16 @@ def _build_divine_friend_system_prompt(
         humor = profile_data.get("humor_level", 0.5)
         sessions = profile_data.get("total_sessions", 0)
         streak = profile_data.get("streak_days", 0)
+        tone_desc = "They prefer honest, direct feedback — don't sugarcoat." if tough else "They prefer warmth and gentleness."
+        humor_desc = "high — use humor freely" if humor > 0.7 else "moderate — occasional lightness" if humor > 0.3 else "low — be sincere and steady"
+        session_desc = "You know them deeply — reference past conversations." if sessions > 10 else "Still getting to know them — ask genuine questions." if sessions < 3 else "Growing bond — show you remember things."
+        streak_desc = "Amazing dedication!" if streak > 7 else ""
         profile_block = f"""
 THEIR PREFERENCES:
-- Tone: {tone}. {'They prefer honest, direct feedback — don\'t sugarcoat.' if tough else 'They prefer warmth and gentleness.'}
-- Humor level: {'high — use humor freely' if humor > 0.7 else 'moderate — occasional lightness' if humor > 0.3 else 'low — be sincere and steady'}
-- Sessions together: {sessions}. {'You know them deeply — reference past conversations.' if sessions > 10 else 'Still getting to know them — ask genuine questions.' if sessions < 3 else 'Growing bond — show you remember things.'}
-- Streak: {streak} days in a row. {'Amazing dedication!' if streak > 7 else ''}"""
+- Tone: {tone}. {tone_desc}
+- Humor level: {humor_desc}
+- Sessions together: {sessions}. {session_desc}
+- Streak: {streak} days in a row. {streak_desc}"""
 
     # Cross-session context
     session_block = ""
@@ -624,7 +636,33 @@ async def start_voice_companion_session(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Start a new Voice Companion session with KIAAN as Divine Friend."""
+    """Start a new Voice Companion session with KIAAN as Divine Friend.
+
+    Subscription enforcement: Premium+ feature only.
+    """
+    # Voice Companion requires Premium+ subscription
+    try:
+        await get_or_create_free_subscription(db, current_user.id)
+        if not await is_developer(db, current_user.id):
+            has_access = await check_feature_access(db, current_user.id, "kiaan_voice_companion")
+            if not has_access:
+                tier = await get_user_tier(db, current_user.id)
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "feature_not_available",
+                        "feature": "kiaan_voice_companion",
+                        "message": "Voice Companion is a Premium feature. "
+                                   "Upgrade to Premium to unlock your Divine Friend. 💙",
+                        "tier": tier.value,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for voice-companion session start: {e}")
+
     profile = await _get_or_create_profile(db, current_user.id)
 
     # Close any existing active sessions
@@ -691,7 +729,46 @@ async def send_voice_companion_message(
     1. Direct OpenAI call via openai_optimizer (same client as Viyoga/Ardha)
     2. CompanionFriendEngine with AI (AsyncOpenAI)
     3. CompanionFriendEngine local templates (last resort)
+
+    Subscription enforcement: Premium+ feature, shares KIAAN quota.
     """
+    # Enforce KIAAN quota for voice companion messages (makes AI calls)
+    try:
+        if not await is_developer(db, current_user.id):
+            # Check feature access (Premium+ only)
+            has_access = await check_feature_access(db, current_user.id, "kiaan_voice_companion")
+            if not has_access:
+                tier = await get_user_tier(db, current_user.id)
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "feature_not_available",
+                        "feature": "kiaan_voice_companion",
+                        "message": "Voice Companion is a Premium feature. "
+                                   "Upgrade to Premium to continue. 💙",
+                        "tier": tier.value,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+            # Check KIAAN quota
+            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, current_user.id)
+            if not has_quota:
+                raise HTTPException(
+                    status_code=429,
+                    detail={
+                        "error": "quota_exceeded",
+                        "message": "You've reached your monthly KIAAN conversations limit. "
+                                   "Upgrade your plan to continue your voice journey. 💙",
+                        "usage_count": usage_count,
+                        "usage_limit": usage_limit,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for voice-companion message: {e}")
+
     from backend.services.companion_friend_engine import (
         detect_mood,
         extract_memories_from_message,
@@ -951,6 +1028,12 @@ async def send_voice_companion_message(
     moods = profile.common_moods or {}
     moods[mood] = moods.get(mood, 0) + 1
     profile.common_moods = moods
+
+    # Increment KIAAN usage after successful AI response
+    try:
+        await increment_kiaan_usage(db, current_user.id)
+    except Exception as usage_err:
+        logger.warning(f"Failed to increment KIAAN usage for voice-companion: {usage_err}")
 
     await db.commit()
 

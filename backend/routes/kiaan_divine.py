@@ -18,6 +18,19 @@ import base64
 import io
 
 from backend.deps import get_db, get_current_user
+from backend.middleware.feature_access import (
+    get_current_user_id,
+    require_subscription,
+    require_kiaan_quota,
+    is_developer,
+    require_feature,
+)
+from backend.services.subscription_service import (
+    check_kiaan_quota,
+    get_or_create_free_subscription,
+    increment_kiaan_usage,
+    get_user_tier,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -117,20 +130,59 @@ async def divine_chat(
     2. Generates a wise, compassionate response
     3. Selects relevant Gita verses
     4. Provides healing practices
+
+    Subscription enforcement:
+    - All tiers have access to divine chat (shares KIAAN quota)
+    - Usage counts against monthly KIAAN questions limit
+    - Developer bypass grants unlimited access
     """
+    # Subscription quota enforcement - divine chat counts against KIAAN questions
+    user_id: Optional[str] = None
+    try:
+        user_id = await get_current_user_id(http_request)
+        await get_or_create_free_subscription(db, user_id)
+
+        # Developer bypass
+        if not await is_developer(db, user_id):
+            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, user_id)
+            if not has_quota:
+                raise HTTPException(
+                    status_code=429,
+                    detail={
+                        "error": "quota_exceeded",
+                        "message": "You've reached your monthly KIAAN conversations limit. "
+                                   "Upgrade your plan to continue your divine journey. 💙",
+                        "usage_count": usage_count,
+                        "usage_limit": usage_limit,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Graceful degradation - allow anonymous or failed-auth users through
+        logger.warning(f"Subscription check failed for divine-chat, allowing request: {e}")
+
     try:
         from backend.services.divine_conversation_engine import conversation_engine
 
         # Use authenticated user_id if available, fall back to "anonymous"
-        user_id = await _get_optional_user(http_request, db) or "anonymous"
+        effective_user_id = user_id or "anonymous"
 
         # Process the message
         response = await conversation_engine.process_message(
             user_message=request.message,
-            user_id=user_id,
+            user_id=effective_user_id,
             session_id=request.session_id,
             voice_features=request.voice_features
         )
+
+        # Increment usage after successful response
+        if user_id:
+            try:
+                await increment_kiaan_usage(db, user_id)
+            except Exception as usage_err:
+                logger.warning(f"Failed to increment KIAAN usage for divine-chat: {usage_err}")
 
         return ChatResponse(
             text=response.text,
@@ -153,6 +205,9 @@ async def divine_chat(
             session_id=request.session_id or "fallback"
         )
 
+    except HTTPException:
+        raise
+
     except Exception as e:
         logger.error(f"Divine chat error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -163,12 +218,45 @@ async def divine_chat(
 # ============================================
 
 @router.post("/synthesize")
-async def synthesize_voice(request: SynthesizeRequest):
+async def synthesize_voice(
+    request: SynthesizeRequest,
+    http_request: Request = None,
+    db: AsyncSession = Depends(get_db),
+):
     """
     Synthesize divine voice using world-class TTS.
 
     Returns audio as streaming response with quality headers.
+
+    Subscription enforcement: Basic+ feature (voice synthesis).
     """
+    # Voice synthesis requires Basic+ subscription
+    try:
+        if http_request:
+            auth_user_id = await get_current_user_id(http_request)
+            await get_or_create_free_subscription(db, auth_user_id)
+
+            if not await is_developer(db, auth_user_id):
+                from backend.services.subscription_service import check_feature_access
+                has_access = await check_feature_access(db, auth_user_id, "kiaan_voice_synthesis")
+                if not has_access:
+                    tier = await get_user_tier(db, auth_user_id)
+                    raise HTTPException(
+                        status_code=403,
+                        detail={
+                            "error": "feature_not_available",
+                            "feature": "kiaan_voice_synthesis",
+                            "message": "Voice synthesis is available on Basic plan and above. "
+                                       "Upgrade to hear KIAAN's divine voice. 💙",
+                            "tier": tier.value,
+                            "upgrade_url": "/pricing",
+                        },
+                    )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for synthesize, allowing request: {e}")
+
     try:
         # Try advanced voice engine first
         try:
@@ -326,7 +414,35 @@ async def get_soul_reading(
 ):
     """
     Get a complete soul reading - deep emotional and spiritual analysis.
+
+    Subscription enforcement: Premium+ feature only.
     """
+    # Soul reading requires Premium+ subscription
+    try:
+        auth_user_id = await get_current_user_id(http_request)
+        await get_or_create_free_subscription(db, auth_user_id)
+
+        if not await is_developer(db, auth_user_id):
+            from backend.services.subscription_service import check_feature_access
+            has_access = await check_feature_access(db, auth_user_id, "kiaan_soul_reading")
+            if not has_access:
+                tier = await get_user_tier(db, auth_user_id)
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "feature_not_available",
+                        "feature": "kiaan_soul_reading",
+                        "message": "Soul Reading is a Premium feature. "
+                                   "Upgrade to Premium to unlock deep spiritual analysis. 💙",
+                        "tier": tier.value,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for soul-reading: {e}")
+
     try:
         from backend.services.kiaan_divine_intelligence import kiaan_intelligence
 

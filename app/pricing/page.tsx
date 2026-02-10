@@ -122,6 +122,18 @@ const comparisonFeatures = [
     ],
   },
   {
+    category: 'KIAAN Ecosystem',
+    items: [
+      { name: 'Divine Chat', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Friend Mode', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Voice Synthesis', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Voice Companion', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Soul Reading', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Quantum Dive', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'KIAAN Agent', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+    ],
+  },
+  {
     category: 'Features',
     items: [
       { name: 'Encrypted Journal', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
