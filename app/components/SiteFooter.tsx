@@ -11,6 +11,9 @@ export default function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
           <p className="text-sm uppercase tracking-[0.24em] text-orange-100/70">{t('common.app.name', 'MindVibe')}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-400/70">
+            {t('common.app.tagline', 'Your Spiritual Companion')}
+          </p>
           <p className="max-w-md text-sm text-orange-100/70">
             {t('navigation.footer.description', 'Designed for calm, privacy-first mental health support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.')}
           </p>

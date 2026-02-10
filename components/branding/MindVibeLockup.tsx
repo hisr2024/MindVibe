@@ -39,7 +39,7 @@ export function MindVibeLockup({
             className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70"
             style={{ backgroundImage: gradientCss.mvGradientOcean, WebkitBackgroundClip: 'text', color: 'transparent' }}
           >
-            KIAAN — MindVibe Companion
+            KIAAN — Your Spiritual Companion
           </p>
         )}
       </div>

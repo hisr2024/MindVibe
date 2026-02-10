@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { gradientCss } from './brandTokens'
+import { KrishnaSymbol } from './KrishnaSymbol'
 
 interface MindVibeWordmarkProps {
   size?: 'sm' | 'md' | 'lg'
@@ -11,9 +12,9 @@ interface MindVibeWordmarkProps {
 }
 
 const sizes = {
-  sm: { text: 'text-xl', tagline: 'text-[11px]' },
-  md: { text: 'text-3xl', tagline: 'text-xs' },
-  lg: { text: 'text-4xl', tagline: 'text-sm' },
+  sm: { text: 'text-xl', tagline: 'text-[11px]', krishnaSize: 12 },
+  md: { text: 'text-3xl', tagline: 'text-xs', krishnaSize: 14 },
+  lg: { text: 'text-4xl', tagline: 'text-sm', krishnaSize: 16 },
 }
 
 export function MindVibeWordmark({
@@ -24,7 +25,7 @@ export function MindVibeWordmark({
 }: MindVibeWordmarkProps) {
   const shouldReduceMotion = useReducedMotion()
   const isAnimated = animated && !shouldReduceMotion
-  const { text, tagline } = sizes[size]
+  const { text, tagline, krishnaSize } = sizes[size]
 
   return (
     <motion.div
@@ -44,7 +45,7 @@ export function MindVibeWordmark({
       </motion.span>
       {showTagline && (
         <motion.span
-          className={`${tagline} font-semibold text-orange-50/80 tracking-[0.08em]`}
+          className={`${tagline} font-semibold text-orange-50/80 tracking-[0.08em] flex items-center gap-1`}
           initial={isAnimated ? { opacity: 0.7 } : undefined}
           animate={isAnimated ? { opacity: [0.7, 1, 0.7] } : undefined}
           transition={
@@ -53,7 +54,9 @@ export function MindVibeWordmark({
               : undefined
           }
         >
-          MindVibe Companion
+          Your{' '}
+          <KrishnaSymbol size={krishnaSize} animated={animated} />
+          {' '}Spiritual Companion
         </motion.span>
       )}
     </motion.div>

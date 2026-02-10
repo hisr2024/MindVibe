@@ -53,7 +53,7 @@ export function KiaanLogo({
       initial={motionEnabled ? { opacity: 0, y: 6 } : undefined}
       animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      aria-label="KIAAN — MindVibe Companion logo"
+      aria-label="KIAAN — Your Spiritual Companion logo"
     >
       <EnergyAura size={mark} animated={motionEnabled} hovered={hovered} />
       <LogoMark
@@ -88,7 +88,7 @@ export function KiaanLogo({
                   : undefined
               }
             >
-              MindVibe Companion
+              Your Spiritual Companion
             </motion.span>
             <motion.span
               className={`${subtitle} font-semibold tracking-[0.16em] text-slate-200/80`}
@@ -192,7 +192,7 @@ function LogoMark({
         xmlns="http://www.w3.org/2000/svg"
         className="relative z-10"
         role="img"
-        aria-label="KIAAN MindVibe Companion mark"
+        aria-label="KIAAN Your Spiritual Companion mark"
       >
         <defs>
           <linearGradient id="flute-body" x1="0%" y1="0%" x2="100%" y2="100%">
