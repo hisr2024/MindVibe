@@ -11,7 +11,7 @@
  * - Journey actions (pause, resume, abandon)
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -447,6 +447,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
   const [step, setStep] = useState<StepResponse | null>(null)
   const [selectedDay, setSelectedDay] = useState<number>(1)
   const [isCompleting, setIsCompleting] = useState(false)
+  const isCompletingRef = useRef(false)
   const [showActions, setShowActions] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
@@ -511,12 +512,14 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
     loadStep(day)
   }
 
-  // Handle step completion
+  // Handle step completion (ref guard prevents double-submission from rapid clicks)
   const handleCompleteStep = async (reflection?: string) => {
-    if (!step || isCompleting) return
+    if (!step || step.is_completed || isCompletingRef.current) return
+
+    isCompletingRef.current = true
+    setIsCompleting(true)
 
     try {
-      setIsCompleting(true)
       const result = await journeyEngineService.completeStep(
         journeyId,
         step.day_index,
@@ -533,12 +536,19 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         await loadJourney()
       }
     } catch (err) {
+      if (err instanceof JourneyEngineError && err.isAuthError()) {
+        router.push('/onboarding')
+        return
+      }
       const message = err instanceof JourneyEngineError
         ? err.message
         : 'Failed to complete step. Please try again.'
       setError(message)
       triggerHaptic('error')
+      // Reload step to reflect current server state
+      await loadStep(step.day_index).catch(() => {})
     } finally {
+      isCompletingRef.current = false
       setIsCompleting(false)
     }
   }

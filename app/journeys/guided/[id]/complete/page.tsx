@@ -84,16 +84,22 @@ export default function JourneyCompletePage() {
         const journeyData = await journeyEngineService.getJourney(journeyId)
         setJourney(journeyData)
 
-        // Load recommendations
-        const templatesData = await journeyEngineService.listTemplates({ limit: 3 })
-        setRecommendations(templatesData.templates.filter(t => t.id !== journeyData.template_slug))
+        // Load recommendations (non-critical, failure shouldn't block celebration)
+        try {
+          const templatesData = await journeyEngineService.listTemplates({ limit: 3 })
+          if (templatesData?.templates) {
+            setRecommendations(templatesData.templates.filter(t => t.id !== journeyData.template_slug))
+          }
+        } catch {
+          // Recommendations are non-critical
+        }
 
         // Trigger celebration haptic
         triggerHaptic('success')
       } catch (err) {
-        console.error('[JourneyCompletePage] Error:', err)
         if (err instanceof JourneyEngineError && err.isAuthError()) {
           router.push('/onboarding')
+          return
         }
       } finally {
         setLoading(false)

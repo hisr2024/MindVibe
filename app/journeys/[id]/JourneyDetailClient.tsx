@@ -38,7 +38,10 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
       setJourney(data)
     } catch (err) {
       if (err instanceof JourneyServiceError) {
-        if (err.statusCode === 404) {
+        if (err.isAuthError()) {
+          router.push('/onboarding')
+          return
+        } else if (err.statusCode === 404) {
           setError('Journey not found. It may have been deleted.')
         } else if (err.statusCode === 403) {
           setError('You do not have permission to view this journey.')
