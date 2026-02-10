@@ -1852,16 +1852,41 @@ def is_offline_tts_available() -> bool:
 
 def get_available_tts_providers() -> Dict[str, bool]:
     """Get status of all TTS providers."""
+    sarvam_available = False
+    try:
+        from backend.services.sarvam_tts_service import is_sarvam_available
+        sarvam_available = is_sarvam_available()
+    except ImportError:
+        pass
+
     return {
+        "sarvam_ai_bulbul": sarvam_available,
         "google_cloud": GOOGLE_TTS_AVAILABLE,
         "edge_tts": EDGE_TTS_AVAILABLE,
         "pyttsx3": PYTTSX3_AVAILABLE,
-        "offline_capable": is_offline_tts_available()
+        "offline_capable": is_offline_tts_available(),
     }
 
 
 # Voice quality tiers for provider comparison
 PROVIDER_QUALITY_TIERS = {
+    "sarvam_ai_bulbul": {
+        "tier": "premium",
+        "quality_score": 95,
+        "naturalness": "native-indian",
+        "features": [
+            "Bulbul v1 model",
+            "Native Indian language pronunciation",
+            "11 Indian languages + Indian English",
+            "Emotion-adaptive pace/pitch/loudness",
+            "Sanskrit via Hindi voice",
+            "22050Hz sample rate",
+        ],
+        "latency_ms": 250,
+        "priority_languages": [
+            "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "od", "sa", "en-IN",
+        ],
+    },
     "google_cloud": {
         "tier": "premium",
         "quality_score": 95,
@@ -1882,7 +1907,7 @@ PROVIDER_QUALITY_TIERS = {
         "naturalness": "synthetic",
         "features": ["offline only", "system voices"],
         "latency_ms": 100,
-    }
+    },
 }
 
 
@@ -1893,8 +1918,14 @@ def get_tts_provider_quality_info() -> Dict[str, any]:
     Returns information about voice quality tiers, which helps the frontend
     inform users about any quality degradation during fallback scenarios.
     """
+    sarvam_available = False
+    try:
+        from backend.services.sarvam_tts_service import is_sarvam_available
+        sarvam_available = is_sarvam_available()
+    except ImportError:
+        pass
+
     active_provider = "unavailable"
-    quality_info = {}
 
     if GOOGLE_TTS_AVAILABLE:
         active_provider = "google_cloud"
@@ -1903,16 +1934,24 @@ def get_tts_provider_quality_info() -> Dict[str, any]:
     elif PYTTSX3_AVAILABLE:
         active_provider = "pyttsx3"
 
+    def _is_available(name: str) -> bool:
+        if name == "sarvam_ai_bulbul":
+            return sarvam_available
+        if name == "google_cloud":
+            return GOOGLE_TTS_AVAILABLE
+        if name == "edge_tts":
+            return EDGE_TTS_AVAILABLE
+        if name == "pyttsx3":
+            return PYTTSX3_AVAILABLE
+        return False
+
     return {
         "active_provider": active_provider,
+        "sarvam_ai_available": sarvam_available,
         "providers": {
             name: {
                 **info,
-                "available": (
-                    GOOGLE_TTS_AVAILABLE if name == "google_cloud"
-                    else EDGE_TTS_AVAILABLE if name == "edge_tts"
-                    else PYTTSX3_AVAILABLE
-                )
+                "available": _is_available(name),
             }
             for name, info in PROVIDER_QUALITY_TIERS.items()
         },
@@ -1983,5 +2022,6 @@ def get_tts_health_status() -> Dict[str, any]:
             "ssml_prosody": providers["google_cloud"] or providers["edge_tts"],
             "offline_support": providers["pyttsx3"] or providers["edge_tts"],
             "multi_language": True,
-        }
+            "sarvam_indian_voices": providers.get("sarvam_ai_bulbul", False),
+        },
     }

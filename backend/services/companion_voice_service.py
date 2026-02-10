@@ -4,23 +4,27 @@ World-class voice synthesis for KIAAN best friend companion.
 Uses the most natural-sounding voices available in 2025.
 
 Voice Provider Chain (highest quality → lowest):
-┌──────────────────────────────────────────────────────────┐
-│  1. ElevenLabs (10/10) - Most human-like voices ever     │
-│     → Requires ELEVENLABS_API_KEY                        │
-│  2. OpenAI TTS (9.5/10) - Nova, Shimmer, Alloy voices   │
-│     → Uses existing OPENAI_API_KEY                       │
-│  3. Google Cloud Neural2/Studio (9/10)                   │
-│     → Requires GOOGLE_APPLICATION_CREDENTIALS            │
-│  4. Edge TTS - Microsoft Neural (8.5/10)                 │
-│     → Free, no API key needed                            │
-│  5. Browser SpeechSynthesis (5/10) - ultimate fallback   │
-│                                                          │
-│  Emotion-Adaptive Prosody:                               │
-│  - Speed/pitch modulation per detected mood              │
-│  - Natural pauses, breathing simulation via SSML         │
-│  - Emphasis on emotional key words                       │
-│  - Voice persona auto-selection by mood                  │
-└──────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  1. ElevenLabs (10/10) - Most human-like voices ever         │
+│     → Requires ELEVENLABS_API_KEY                            │
+│  2. Sarvam AI Bulbul (9.5/10) - Best Indian language voices  │
+│     → Uses SARVAM_API_KEY, activated for Indian languages    │
+│     → Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, etc. │
+│  3. OpenAI TTS HD (9.5/10) - Nova, Shimmer, Alloy voices    │
+│     → Uses existing OPENAI_API_KEY                           │
+│  4. Google Cloud Neural2/Studio (9/10)                       │
+│     → Requires GOOGLE_APPLICATION_CREDENTIALS                │
+│  5. Edge TTS - Microsoft Neural (8.5/10)                     │
+│     → Free, no API key needed                                │
+│  6. Browser SpeechSynthesis (5/10) - ultimate fallback       │
+│                                                              │
+│  Emotion-Adaptive Prosody:                                   │
+│  - Speed/pitch modulation per detected mood                  │
+│  - Natural pauses, breathing simulation via SSML             │
+│  - Emphasis on emotional key words                           │
+│  - Voice persona auto-selection by mood                      │
+│  - Sarvam AI native Indian prosody for Indian languages      │
+└──────────────────────────────────────────────────────────────┘
 """
 
 import logging
@@ -239,6 +243,8 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         # ElevenLabs: warm Indian female voice
         "elevenlabs_voice_id": "EXAVITQu4vr4xnSDxMaL",  # Sarah
         "elevenlabs_model": "eleven_multilingual_v2",
+        # Sarvam AI: warm nurturing Hindi female
+        "sarvam_speaker": "meera",
         # Google Cloud
         "google_voice": "en-IN-Neural2-A",
         # Edge TTS
@@ -257,6 +263,8 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "21m00Tcm4TlvDq8ikWAM",  # Rachel
         "elevenlabs_model": "eleven_multilingual_v2",
+        # Sarvam AI: clear multilingual female
+        "sarvam_speaker": "pavithra",
         "google_voice": "en-US-Neural2-F",
         "edge_voice": "en-US-JennyNeural",
         "description": "Natural, everyday best friend voice - warm and real",
@@ -273,6 +281,8 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "ThT5KcBeYPX3keUQqHPh",  # Dorothy
         "elevenlabs_model": "eleven_multilingual_v2",
+        # Sarvam AI: soft ethereal meditation voice
+        "sarvam_speaker": "maitreyi",
         "google_voice": "en-US-Studio-O",
         "edge_voice": "en-US-AriaNeural",
         "description": "Deep, gentle whisper - perfect for calm and meditation moments",
@@ -289,6 +299,8 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "pNInz6obpgDQGcFmaJgB",  # Adam
         "elevenlabs_model": "eleven_multilingual_v2",
+        # Sarvam AI: deep resonant male with gravitas
+        "sarvam_speaker": "arvind",
         "google_voice": "en-IN-Neural2-B",
         "edge_voice": "en-IN-PrabhatNeural",
         "description": "Calm, wise male voice - like a trusted brother",
@@ -305,6 +317,8 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "jBpfuIE2acCO8z3wKNLl",  # Gigi
         "elevenlabs_model": "eleven_multilingual_v2",
+        # Sarvam AI: clear powerful female
+        "sarvam_speaker": "pavithra",
         "google_voice": "en-US-Neural2-C",
         "edge_voice": "en-US-SaraNeural",
         "description": "Bright, motivating energy when you need a spark",
@@ -471,11 +485,13 @@ def build_companion_ssml(
         "openai_model": voice["openai_model"],
         "elevenlabs_voice_id": voice.get("elevenlabs_voice_id"),
         "elevenlabs_model": voice.get("elevenlabs_model"),
+        "sarvam_speaker": voice.get("sarvam_speaker"),
         "speed": speed,
         "pitch": pitch,
         "openai_speed": profile.get("openai_speed", 1.0),
         "mood_profile": profile,
         "voice_persona": voice["name"],
+        "voice_id": voice_id,
         "language": language,
     }
 
@@ -500,10 +516,12 @@ async def synthesize_companion_voice(
 
     Provider chain (tries in order, falls through on failure):
     1. ElevenLabs - Most human-like voices (needs ELEVENLABS_API_KEY)
-    2. OpenAI TTS HD - Extremely natural (uses existing OPENAI_API_KEY)
-    3. Google Cloud Neural2 - High quality neural voices
-    4. Edge TTS (Microsoft Neural) - Free, decent quality
-    5. Browser fallback - Returns config for frontend SpeechSynthesis
+    2. Sarvam AI Bulbul - Best Indian language voices (SARVAM_API_KEY)
+       → Only activated for Indian languages (hi, ta, te, bn, kn, ml, etc.)
+    3. OpenAI TTS HD - Extremely natural (uses existing OPENAI_API_KEY)
+    4. Google Cloud Neural2 - High quality neural voices
+    5. Edge TTS (Microsoft Neural) - Free, decent quality
+    6. Browser fallback - Returns config for frontend SpeechSynthesis
     """
     ssml_data = build_companion_ssml(text, mood, voice_id, language)
     plain_text = _strip_ssml_tags(ssml_data["ssml"])
@@ -521,7 +539,21 @@ async def synthesize_companion_voice(
             "fallback_to_browser": False,
         }
 
-    # 2. Try OpenAI TTS HD (extremely natural, already have API key)
+    # 2. Try Sarvam AI Bulbul (best Indian language voices)
+    #    Activated for Indian languages where Sarvam produces superior quality.
+    audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
+    if audio:
+        return {
+            "audio": audio,
+            "content_type": "audio/wav",
+            "ssml": ssml_data["ssml"],
+            "provider": "sarvam_ai_bulbul",
+            "voice_persona": ssml_data["voice_persona"],
+            "quality_score": 9.5,
+            "fallback_to_browser": False,
+        }
+
+    # 3. Try OpenAI TTS HD (extremely natural, already have API key)
     audio = await _try_openai_tts(plain_text, ssml_data)
     if audio:
         return {
@@ -534,7 +566,7 @@ async def synthesize_companion_voice(
             "fallback_to_browser": False,
         }
 
-    # 3. Try Google Cloud TTS
+    # 4. Try Google Cloud TTS
     audio = await _try_google_tts(ssml_data)
     if audio:
         return {
@@ -547,7 +579,7 @@ async def synthesize_companion_voice(
             "fallback_to_browser": False,
         }
 
-    # 4. Try Edge TTS
+    # 5. Try Edge TTS
     audio = await _try_edge_tts(ssml_data)
     if audio:
         return {
@@ -560,7 +592,7 @@ async def synthesize_companion_voice(
             "fallback_to_browser": False,
         }
 
-    # 5. Return config for browser-side synthesis
+    # 6. Return config for browser-side synthesis
     return {
         "audio": None,
         "content_type": None,
@@ -642,6 +674,60 @@ async def _try_elevenlabs_tts(text: str, ssml_data: dict) -> bytes | None:
         logger.info("ElevenLabs TTS: httpx not available")
     except Exception as e:
         logger.warning(f"ElevenLabs TTS failed: {e}")
+    return None
+
+
+async def _try_sarvam_tts(
+    text: str, ssml_data: dict, mood: str, voice_id: str
+) -> bytes | None:
+    """Attempt synthesis via Sarvam AI Bulbul - best Indian language voices.
+
+    Sarvam AI produces the most natural Indian language voices available.
+    Only activated when the target language is an Indian language where
+    Sarvam's quality surpasses OpenAI and Google for native pronunciation.
+
+    Supports: Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, Marathi,
+    Gujarati, Punjabi, Odia, Sanskrit (via Hindi), and Indian English.
+    """
+    language = ssml_data.get("language", "en")
+
+    try:
+        from backend.services.sarvam_tts_service import (
+            is_sarvam_available,
+            is_sarvam_priority_language,
+            synthesize_sarvam_tts,
+        )
+
+        if not is_sarvam_available():
+            return None
+
+        if not is_sarvam_priority_language(language):
+            logger.debug(f"Sarvam TTS: Skipping for non-Indian language '{language}'")
+            return None
+
+        sarvam_speaker = ssml_data.get("sarvam_speaker")
+
+        audio = await synthesize_sarvam_tts(
+            text=text,
+            language=language,
+            voice_id=voice_id,
+            mood=mood,
+            speaker_override=sarvam_speaker,
+        )
+
+        if audio and len(audio) > 100:
+            logger.info(
+                f"Sarvam TTS success: speaker={sarvam_speaker}, "
+                f"lang={language}, persona={ssml_data['voice_persona']}, "
+                f"size={len(audio)} bytes"
+            )
+            return audio
+
+    except ImportError:
+        logger.debug("Sarvam TTS: sarvam_tts_service not available")
+    except Exception as e:
+        logger.warning(f"Sarvam TTS failed: {e}")
+
     return None
 
 
@@ -789,5 +875,20 @@ def get_voice_for_mood(mood: str) -> str:
         "overwhelmed": "ananya",
         "excited": "devi",
         "neutral": "maya",
+        "hurt": "priya",
+        "fearful": "priya",
+        "frustrated": "arjun",
+        "stressed": "ananya",
+        "guilty": "maya",
+        "jealous": "maya",
     }
     return mood_to_voice.get(mood, "maya")
+
+
+def get_sarvam_voice_status() -> dict[str, Any]:
+    """Get Sarvam AI TTS integration status for health checks."""
+    try:
+        from backend.services.sarvam_tts_service import get_sarvam_health_status
+        return get_sarvam_health_status()
+    except ImportError:
+        return {"provider": "sarvam_ai_bulbul", "available": False}
