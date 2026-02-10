@@ -311,6 +311,8 @@ export default function CompanionPage() {
         // Update AI status based on response tier
         if (data.ai_tier === 'backend' || data.ai_tier === 'nextjs_openai') {
           setAiStatus('connected')
+        } else if (data.ai_tier === 'local_engine') {
+          setAiStatus('offline')
         }
 
         setShowSuggestions(true)

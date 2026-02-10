@@ -47,16 +47,16 @@ interface WisdomEntry {
 
 const EMOTION_KEYWORDS: Record<string, WeightedKeyword[]> = {
   anxious: [['anxious', 3], ['anxiety', 3], ['worried', 2.5], ['scared', 2], ['panic', 3], ['stress', 2], ['nervous', 2.5], ['afraid', 2], ['fear', 2], ['tense', 2], ['restless', 2], ['uneasy', 2], ['dread', 3]],
-  sad: [['sad', 2.5], ['depressed', 3], ['hopeless', 3], ['crying', 3], ['heartbroken', 3], ['empty', 2.5], ['grief', 3], ['miss', 1.5], ['numb', 2.5], ['miserable', 3], ['devastated', 3], ['tears', 2.5]],
-  angry: [['angry', 3], ['furious', 3], ['frustrated', 2.5], ['mad', 2], ['hate', 2.5], ['unfair', 2], ['betrayed', 3], ['rage', 3], ['irritated', 2], ['pissed', 2.5], ['livid', 3]],
-  confused: [['confused', 3], ['lost', 2], ['stuck', 2], ['unsure', 2.5], ["don't know", 2], ['uncertain', 2.5], ['torn', 2.5], ['dilemma', 2.5], ['indecisive', 2.5]],
-  lonely: [['lonely', 3], ['alone', 2.5], ['isolated', 3], ['nobody', 2.5], ['no one', 2.5], ['abandoned', 3], ['disconnected', 2.5]],
-  overwhelmed: [['overwhelmed', 3], ['too much', 2.5], ['exhausted', 2.5], ['burnt out', 3], ['drowning', 3], ["can't cope", 3], ['overloaded', 2.5]],
-  hurt: [['hurt', 2.5], ['wounded', 3], ['broken', 2.5], ['damaged', 2.5], ['betrayed', 3], ['let down', 2.5], ['disappointed', 2]],
+  sad: [['sad', 2.5], ['depressed', 3], ['hopeless', 3], ['crying', 3], ['heartbroken', 3], ['empty', 2.5], ['grief', 3], ['miss', 1.5], ['numb', 2.5], ['miserable', 3], ['devastated', 3], ['tears', 2.5], ['losing hope', 2.5], ['lost hope', 2.5], ['giving up', 2.5], ['no point', 2.5]],
+  angry: [['angry', 3], ['furious', 3], ['frustrated', 2.5], ['mad', 2], ['hate', 2.5], ['unfair', 2], ['betrayed', 3], ['rage', 3], ['irritated', 2], ['pissed', 2.5], ['livid', 3], ['fight', 2.5], ['fights', 2.5], ['fighting', 2.5], ['argument', 2.5], ['arguments', 2.5], ['yelling', 2.5], ['screaming', 2.5]],
+  confused: [['confused', 3], ['lost', 2], ['stuck', 2], ['unsure', 2.5], ["don't know", 2], ['uncertain', 2.5], ['torn', 2.5], ['dilemma', 2.5], ['indecisive', 2.5], ['misunderstanding', 2.5], ['mixed signals', 2.5], ['dont understand', 2.5], ["don't understand", 2.5]],
+  lonely: [['lonely', 3], ['alone', 2.5], ['isolated', 3], ['nobody', 2.5], ['no one', 2.5], ['abandoned', 3], ['disconnected', 2.5], ['need someone', 2.5], ['need to talk', 2.5], ['someone to talk', 2.5], ['need a friend', 2.5], ['no friends', 2.5]],
+  overwhelmed: [['overwhelmed', 3], ['too much', 2.5], ['exhausted', 2.5], ['burnt out', 3], ['drowning', 3], ["can't cope", 3], ['overloaded', 2.5], ['no solution', 2.5], ["don't know what to do", 2.5], ['dont know what to do', 2.5]],
+  hurt: [['hurt', 2.5], ['wounded', 3], ['broken', 2.5], ['damaged', 2.5], ['betrayed', 3], ['let down', 2.5], ['disappointed', 2], ['fight', 2], ['fights', 2], ['lied to me', 2.5], ['cheated', 2.5]],
   guilty: [['guilty', 3], ['shame', 3], ['regret', 2.5], ['sorry', 1.5], ['fault', 2], ['blame myself', 3], ['ashamed', 3]],
   fearful: [['terrified', 3], ['petrified', 3], ['dread', 3], ['horror', 3], ['phobia', 3], ['panicking', 3]],
   stressed: [['stressed', 3], ['pressure', 2.5], ['deadline', 2], ['hectic', 2], ['swamped', 2.5], ['slammed', 2.5]],
-  frustrated: [['frustrated', 3], ['annoyed', 2], ['fed up', 3], ['sick of', 2.5], ['irritating', 2.5], ['aggravating', 2.5]],
+  frustrated: [['frustrated', 3], ['annoyed', 2], ['fed up', 3], ['sick of', 2.5], ['irritating', 2.5], ['aggravating', 2.5], ['no solution', 2.5], ['cant find', 2.5], ["can't find", 2.5], ['nothing works', 2.5], ['misunderstanding', 2], ['misunderstood', 2.5], ['not working', 2.5]],
   jealous: [['jealous', 3], ['envious', 3], ['resentful', 2.5], ['grudge', 2.5], ['why them', 2.5]],
   // Positive emotions (the critical gap that was missing)
   happy: [['happy', 2.5], ['joy', 2.5], ['wonderful', 2], ['amazing', 2], ['birthday', 2], ['celebration', 2.5], ['celebrate', 2.5], ['wedding', 2], ['promotion', 2], ['graduated', 2.5], ['won', 2], ['blessed', 2], ['delighted', 2.5], ['fantastic', 2.5]],
@@ -126,17 +126,22 @@ function extractEntities(message: string): string[] {
   const lower = message.toLowerCase()
   const entities: string[] = []
 
+  // Use word boundary regex to avoid false matches like "personal" matching "son"
   for (const word of PEOPLE_WORDS) {
-    if (lower.includes(word)) entities.push(word)
+    const regex = new RegExp('\\b' + word + '\\b', 'i')
+    if (regex.test(lower)) entities.push(word)
   }
   for (const word of EVENT_WORDS) {
-    if (lower.includes(word)) entities.push(word)
+    const regex = new RegExp('\\b' + word + '\\b', 'i')
+    if (regex.test(lower)) entities.push(word)
   }
   for (const word of TIME_WORDS) {
-    if (lower.includes(word)) entities.push(word)
+    // TIME_WORDS can be multi-word phrases like "next week" — regex handles them fine
+    const regex = new RegExp('\\b' + word + '\\b', 'i')
+    if (regex.test(lower)) entities.push(word)
   }
 
-  // Extract "my [person]" pattern for possessive context
+  // Extract "my [person]" pattern for possessive context (already uses word boundaries)
   const myPattern = /\bmy\s+(mom|mother|dad|father|brother|sister|wife|husband|partner|boss|friend|daughter|son|child|girlfriend|boyfriend|baby|grandma|grandpa)\b/gi
   for (const match of lower.matchAll(myPattern)) {
     const entity = `my ${match[1]}`
@@ -236,7 +241,7 @@ function buildEntityOpener(mood: string, topic: string, entities: string[], inte
       stressed: ["I can feel that weight.", "That pressure is real."],
       frustrated: ["I hear that frustration.", "Yeah, that's maddening."],
     }
-    return pickRandom(moodOpeners[mood] || ["I hear you.", "Tell me more."])
+    return pickRandom(moodOpeners[mood] || ["I hear you.", "Something's going on — I can feel it.", "I'm with you on this.", "Talk to me — I'm listening.", "I can tell this is weighing on you."])
   }
 
   // For positive moods
@@ -247,7 +252,7 @@ function buildEntityOpener(mood: string, topic: string, entities: string[], inte
     peaceful: ["I can feel that calm coming through.", "That's beautiful.", "There's a steadiness in your words."],
     grateful: ["Gratitude looks good on you.", "I love that you're noticing the good.", "That awareness is powerful."],
   }
-  return pickRandom(positiveOpeners[mood] || ["I'm listening.", "Tell me more."])
+  return pickRandom(positiveOpeners[mood] || ["I'm listening — what's on your mind?", "I'm here for it. What's going on?", "OK, I'm all ears.", "You've got my attention.", "Let's get into it — what's happening?", "I'm right here. Walk me through it."])
 }
 
 function buildCoreBody(mood: string, topic: string, intent: string, phase: string, entities: string[]): string {
@@ -315,7 +320,16 @@ function buildCoreBody(mood: string, topic: string, intent: string, phase: strin
         "Frustration is the gap between what IS and what you KNOW is possible. You see a better version. That's insight, not impatience.",
       ],
     }
-    return pickRandom(empathyTemplates[mood] || ["Whatever you're feeling right now, it's valid. And I'm right here."])
+    const neutralEmpathyResponses = [
+      "I hear you. Let me understand what's going on — walk me through it.",
+      "I'm picking up that something's on your mind. No rush — let's talk through it together.",
+      "That's real, and I'm glad you're sharing it. Help me understand what's happening.",
+      "OK, I'm with you. There's clearly something beneath the surface here. What's the full picture?",
+      "You've got my full attention. I want to get this right — tell me more about what's really going on.",
+      "Something's clearly weighing on you. I don't want to assume — fill me in on what's happening.",
+      "I can tell this matters to you. Whatever it is, I'm here for it — no judgment, just listening.",
+    ]
+    return pickRandom(empathyTemplates[mood] || neutralEmpathyResponses)
   }
 
   // Phase: listen — deepening questions, complex reflections
