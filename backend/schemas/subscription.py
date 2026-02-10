@@ -37,7 +37,7 @@ class SubscriptionPlanCreate(BaseModel):
     stripe_price_id_monthly: str | None = None
     stripe_price_id_yearly: str | None = None
     features: dict[str, Any] = Field(default_factory=dict)
-    kiaan_questions_monthly: int = Field(default=10, ge=-1)  # -1 = unlimited
+    kiaan_questions_monthly: int = Field(default=20, ge=-1)  # -1 = unlimited
     encrypted_journal: bool = False
     data_retention_days: int = Field(default=30, ge=1)
 

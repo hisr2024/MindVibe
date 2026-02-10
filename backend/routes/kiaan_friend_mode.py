@@ -18,9 +18,19 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_current_user_flexible
+from backend.deps import get_current_user_flexible, get_db
 from backend.middleware.rate_limiter import limiter
+from backend.middleware.feature_access import (
+    get_current_user_id,
+    is_developer,
+)
+from backend.services.subscription_service import (
+    check_kiaan_quota,
+    get_or_create_free_subscription,
+    increment_kiaan_usage,
+)
 from backend.services.kiaan_friendship_engine import (
     get_friendship_engine,
     InteractionMode,
@@ -84,6 +94,7 @@ async def friend_chat(
     request: Request,
     body: FriendChatRequest,
     current_user=Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Dual-mode chat endpoint. Auto-detects friend vs guide mode.
@@ -91,7 +102,34 @@ async def friend_chat(
     When the user is just chatting casually, KIAAN is a best friend.
     When the user needs guidance, KIAAN becomes a modern Gita interpreter.
     Transition between modes is natural and contextual.
+
+    Subscription enforcement: All tiers have access (shares KIAAN quota).
     """
+    # Subscription quota enforcement - friend chat counts against KIAAN questions
+    auth_user_id: Optional[str] = None
+    try:
+        auth_user_id = await get_current_user_id(request)
+        await get_or_create_free_subscription(db, auth_user_id)
+
+        if not await is_developer(db, auth_user_id):
+            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, auth_user_id)
+            if not has_quota:
+                raise HTTPException(
+                    status_code=429,
+                    detail={
+                        "error": "quota_exceeded",
+                        "message": "You've reached your monthly KIAAN conversations limit. "
+                                   "Upgrade your plan to keep chatting with your friend. 💙",
+                        "usage_count": usage_count,
+                        "usage_limit": usage_limit,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for friend-chat, allowing request: {e}")
+
     engine = get_friendship_engine()
 
     # Force mode if specified
@@ -177,6 +215,13 @@ async def friend_chat(
             )
         else:
             response_text = mood_response
+
+    # Increment KIAAN usage after successful AI response
+    if auth_user_id:
+        try:
+            await increment_kiaan_usage(db, auth_user_id)
+        except Exception as usage_err:
+            logger.warning(f"Failed to increment KIAAN usage for friend-chat: {usage_err}")
 
     # Generate a natural follow-up
     follow_up = _generate_follow_up(detection)
@@ -299,13 +344,42 @@ async def get_verse_insight(
     request: Request,
     body: VerseInsightRequest,
     current_user=Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Get a deep, modern insight for a specific verse.
 
     Connects the verse to contemporary psychology, behavioral science,
     and the user's specific life situation if provided.
+
+    Subscription enforcement: Shares KIAAN quota when LLM enrichment is used.
     """
+    # Check KIAAN quota if personalized context is requested (triggers LLM call)
+    verse_user_id: Optional[str] = None
+    if body.user_context:
+        try:
+            verse_user_id = await get_current_user_id(request)
+            await get_or_create_free_subscription(db, verse_user_id)
+
+            if not await is_developer(db, verse_user_id):
+                has_quota, usage_count, usage_limit = await check_kiaan_quota(db, verse_user_id)
+                if not has_quota:
+                    raise HTTPException(
+                        status_code=429,
+                        detail={
+                            "error": "quota_exceeded",
+                            "message": "You've reached your monthly KIAAN conversations limit. "
+                                       "Upgrade for more personalized verse insights. 💙",
+                            "usage_count": usage_count,
+                            "usage_limit": usage_limit,
+                            "upgrade_url": "/pricing",
+                        },
+                    )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.warning(f"Subscription check failed for verse-insight: {e}")
+
     engine = get_friendship_engine()
     insight = engine.get_verse_insight(body.chapter, body.verse, body.user_context)
 
@@ -326,6 +400,13 @@ async def get_verse_insight(
             ]
             result = await provider.chat(messages)
             enriched_insight = result if isinstance(result, str) else str(result)
+
+            # Increment usage after successful LLM call
+            if verse_user_id:
+                try:
+                    await increment_kiaan_usage(db, verse_user_id)
+                except Exception as usage_err:
+                    logger.warning(f"Failed to increment KIAAN usage for verse-insight: {usage_err}")
         except Exception as e:
             logger.debug("LLM enrichment unavailable: %s", e)
 

@@ -18,6 +18,12 @@ import re
 
 from backend.deps import get_db, get_current_user_flexible
 from backend.middleware.rate_limiter import limiter
+from backend.middleware.feature_access import is_developer
+from backend.services.subscription_service import (
+    check_feature_access,
+    get_or_create_free_subscription,
+    get_user_tier,
+)
 from backend.services.tts_service import (
     get_tts_service,
     get_tts_health_status,
@@ -99,13 +105,39 @@ class VoiceSettingsResponse(BaseModel):
 async def synthesize_speech(
     request: Request,
     payload: SynthesizeRequest,
-    user_id: str = Depends(get_current_user_flexible)
+    user_id: str = Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db),
 ) -> Response:
     """
     Synthesize text to speech
 
     Returns MP3 audio stream.
+
+    Subscription enforcement: Basic+ feature (voice synthesis).
     """
+    # Voice synthesis requires Basic+ subscription
+    try:
+        await get_or_create_free_subscription(db, user_id)
+        if not await is_developer(db, user_id):
+            has_access = await check_feature_access(db, user_id, "kiaan_voice_synthesis")
+            if not has_access:
+                tier = await get_user_tier(db, user_id)
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "feature_not_available",
+                        "feature": "kiaan_voice_synthesis",
+                        "message": "Voice synthesis is available on Basic plan and above. "
+                                   "Upgrade to hear wisdom spoken aloud. 💙",
+                        "tier": tier.value,
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for voice synthesis, allowing request: {e}")
+
     logger.info(f"TTS request from user {user_id}: {len(payload.text)} chars, lang={payload.language}")
 
     tts_service = get_tts_service()

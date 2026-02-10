@@ -19,6 +19,7 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
     canceled: { variant: 'warning' as const, label: 'Canceled' },
     past_due: { variant: 'danger' as const, label: 'Past Due' },
     trialing: { variant: 'info' as const, label: 'Trial' },
+    expired: { variant: 'danger' as const, label: 'Expired' },
   }[subscription.status]
 
   return (

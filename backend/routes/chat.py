@@ -496,13 +496,37 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
     """
     Streaming endpoint for instant KIAAN responses.
     Returns Server-Sent Events (SSE) for real-time response display.
+
+    Subscription enforcement: All tiers have access (shares KIAAN quota).
     """
-    # Try to identify the user (optional - chat works without auth)
-    stream_user_id = None
-    try:
-        stream_user_id = await get_current_user(request, db)
-    except Exception:
-        pass  # Anonymous streaming allowed
+    # Subscription quota enforcement for streaming
+    stream_user_id: str | None = None
+    stream_quota_info: dict[str, Any] | None = None
+
+    if SUBSCRIPTION_ENABLED:
+        try:
+            stream_user_id = await get_current_user_id(request)
+            await get_or_create_free_subscription(db, stream_user_id)
+
+            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, stream_user_id)
+            if not has_quota:
+                import json
+                async def quota_exceeded_stream() -> AsyncGenerator[str, None]:
+                    yield f"data: {json.dumps({'error': 'quota_exceeded', 'message': 'You have reached your monthly KIAAN conversations limit. Upgrade your plan to continue. 💙', 'usage_count': usage_count, 'usage_limit': usage_limit, 'upgrade_url': '/pricing'})}\n\n"
+                    yield "data: [DONE]\n\n"
+                return StreamingResponse(
+                    quota_exceeded_stream(),
+                    media_type="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+                )
+
+            stream_quota_info = {
+                "usage_count": usage_count + 1,
+                "usage_limit": usage_limit,
+                "is_unlimited": usage_limit == -1,
+            }
+        except Exception as quota_err:
+            logger.warning(f"Quota check failed for streaming, allowing request: {quota_err}")
 
     async def generate_stream() -> AsyncGenerator[str, None]:
         try:
@@ -551,6 +575,13 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                 # Escape newlines for SSE format
                 escaped_chunk = chunk.replace('\n', '\\n')
                 yield f"data: {escaped_chunk}\n\n"
+
+            # Increment KIAAN usage after successful streaming response
+            if SUBSCRIPTION_ENABLED and stream_user_id:
+                try:
+                    await increment_kiaan_usage(db, stream_user_id)
+                except Exception as usage_err:
+                    logger.warning(f"Failed to increment usage for streaming: {usage_err}")
 
             yield "data: [DONE]\n\n"
 

@@ -8,7 +8,9 @@ export class APIError extends Error {
   constructor(
     message: string,
     public status?: number,
-    public statusText?: string
+    public statusText?: string,
+    public errorCode?: string,
+    public upgradeUrl?: string
   ) {
     super(message)
     this.name = 'APIError'
@@ -92,20 +94,51 @@ export async function apiCall(
     if (!response.ok) {
       // Enhanced error detection
       let errorMessage = `API Error: ${response.status} ${response.statusText}`
-      
+      let errorCode: string | undefined
+      let upgradeUrl: string | undefined
+
+      // Try to parse response body for structured error details
+      try {
+        const errorBody = await response.json()
+        const detail = errorBody?.detail
+        if (typeof detail === 'object' && detail !== null) {
+          errorMessage = detail.message || errorMessage
+          errorCode = detail.error
+          upgradeUrl = detail.upgrade_url
+        } else if (typeof detail === 'string') {
+          errorMessage = detail
+        } else if (errorBody?.message) {
+          errorMessage = errorBody.message
+        }
+      } catch {
+        // JSON parsing failed, use status-based messages
+      }
+
       // Detect specific error scenarios
-      if (response.status === 405) {
+      if (response.status === 429 && !errorCode) {
+        errorMessage = errorMessage.includes('quota')
+          ? errorMessage
+          : "You've reached your usage limit. Please upgrade your plan or wait for your quota to reset."
+        errorCode = errorCode || 'quota_exceeded'
+      } else if (response.status === 403 && !errorCode) {
+        errorMessage = errorMessage.includes('feature')
+          ? errorMessage
+          : 'This feature is not available on your current plan. Upgrade to unlock it.'
+        errorCode = errorCode || 'feature_locked'
+      } else if (response.status === 405) {
         errorMessage = 'Method not allowed. The endpoint may not be properly configured.'
       } else if (response.status === 404) {
         errorMessage = 'Endpoint not found. Please check the API configuration.'
       } else if (response.status === 503) {
         errorMessage = 'Service temporarily unavailable. Please try again later.'
       }
-      
+
       throw new APIError(
         errorMessage,
         response.status,
-        response.statusText
+        response.statusText,
+        errorCode,
+        upgradeUrl
       )
     }
 
@@ -184,19 +217,29 @@ export async function apiCallWithRetry(
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof APIError) {
+    // Quota exceeded (429)
+    if (error.status === 429 || error.errorCode === 'quota_exceeded') {
+      return error.message
+    }
+
+    // Feature locked (403)
+    if (error.status === 403 || error.errorCode === 'feature_locked') {
+      return error.message
+    }
+
     // Check for specific error codes
     if (error.status === 405) {
       return 'This operation is not supported. Please try a different action.'
     }
-    
+
     if (error.status === 404) {
       return 'The requested service could not be found. Please try again later.'
     }
-    
+
     if (error.status === 503) {
       return 'The service is temporarily unavailable. Please try again in a few moments.'
     }
-    
+
     // Check for connection-related errors
     if (error.message.includes('connect') || error.message.includes('network')) {
       const messages = [
@@ -207,7 +250,7 @@ export function getErrorMessage(error: unknown): string {
       ]
       return messages.join('\n')
     }
-    
+
     // Check for timeout errors
     if (error.message.includes('timed out') || error.message.includes('timeout')) {
       return 'The request is taking longer than expected. The service may be busy. Please try again.'
@@ -222,6 +265,27 @@ export function getErrorMessage(error: unknown): string {
   }
 
   return 'An unexpected error occurred. Please try again.'
+}
+
+/**
+ * Check if an error is a quota exceeded error
+ */
+export function isQuotaExceeded(error: unknown): boolean {
+  return error instanceof APIError && (error.status === 429 || error.errorCode === 'quota_exceeded')
+}
+
+/**
+ * Check if an error is a feature locked error
+ */
+export function isFeatureLocked(error: unknown): boolean {
+  return error instanceof APIError && (error.status === 403 || error.errorCode === 'feature_locked')
+}
+
+/**
+ * Get the upgrade URL from an error, if available
+ */
+export function getUpgradeUrl(error: unknown): string | undefined {
+  return error instanceof APIError ? error.upgradeUrl : undefined
 }
 
 /**

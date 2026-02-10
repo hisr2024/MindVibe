@@ -28,6 +28,14 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "wisdom_journeys_limit": 1,  # 1 trial journey
         "wisdom_journeys_trial": True,  # This is a trial (limited to 3 days)
         "wisdom_journeys_trial_days": 3,  # Trial limited to first 3 days
+        # KIAAN Ecosystem - Gated per tier
+        "kiaan_divine_chat": True,  # Basic divine chat allowed
+        "kiaan_friend_mode": True,  # Friend mode allowed (shares quota)
+        "kiaan_voice_companion": False,  # Voice companion is Premium+
+        "kiaan_agent": False,  # Agent is Premium+
+        "kiaan_soul_reading": False,  # Soul reading is Premium+
+        "kiaan_voice_synthesis": False,  # Voice synthesis is Basic+
+        "kiaan_quantum_dive": False,  # Quantum dive is Premium+
     },
     SubscriptionTier.BASIC: {
         "kiaan_questions_monthly": 50,
@@ -44,6 +52,14 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         # Wisdom Journeys - Limited access for Basic
         "wisdom_journeys": True,
         "wisdom_journeys_limit": 1,  # Can have 1 active journey
+        # KIAAN Ecosystem
+        "kiaan_divine_chat": True,
+        "kiaan_friend_mode": True,
+        "kiaan_voice_companion": False,  # Voice companion is Premium+
+        "kiaan_agent": False,  # Agent is Premium+
+        "kiaan_soul_reading": False,  # Soul reading is Premium+
+        "kiaan_voice_synthesis": True,  # Voice synthesis unlocked
+        "kiaan_quantum_dive": False,  # Quantum dive is Premium+
     },
     SubscriptionTier.PREMIUM: {
         "kiaan_questions_monthly": 300,
@@ -60,6 +76,14 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         # Wisdom Journeys - Full access for Premium
         "wisdom_journeys": True,
         "wisdom_journeys_limit": 5,  # Can have up to 5 active journeys
+        # KIAAN Ecosystem - Full access
+        "kiaan_divine_chat": True,
+        "kiaan_friend_mode": True,
+        "kiaan_voice_companion": True,
+        "kiaan_agent": True,
+        "kiaan_soul_reading": True,
+        "kiaan_voice_synthesis": True,
+        "kiaan_quantum_dive": True,
     },
     SubscriptionTier.ENTERPRISE: {
         "kiaan_questions_monthly": -1,  # Unlimited
@@ -76,6 +100,14 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         # Wisdom Journeys - Unlimited for Enterprise
         "wisdom_journeys": True,
         "wisdom_journeys_limit": -1,  # Unlimited active journeys
+        # KIAAN Ecosystem - Full unlimited access
+        "kiaan_divine_chat": True,
+        "kiaan_friend_mode": True,
+        "kiaan_voice_companion": True,
+        "kiaan_agent": True,
+        "kiaan_soul_reading": True,
+        "kiaan_voice_synthesis": True,
+        "kiaan_quantum_dive": True,
     },
 }
 

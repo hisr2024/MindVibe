@@ -3,7 +3,7 @@
 This service handles:
 - Auto-assigning free tier to new users
 - Feature access checking
-- Quota enforcement (10 KIAAN questions for free tier)
+- Quota enforcement (20 KIAAN questions for free tier)
 - Usage tracking and statistics
 """
 

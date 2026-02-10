@@ -7,8 +7,8 @@ import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
-// Updated pricing tiers per requirements:
-// Pro: $5, Premium: $10, Executive: $15
+// Pricing tiers aligned with backend SubscriptionTier enum:
+// FREE, BASIC, PREMIUM, ENTERPRISE
 const createPricingTiers = (
   currency: Currency,
   formatPrice: (amount: number, options?: { showDecimals?: boolean }) => string,
@@ -36,28 +36,12 @@ const createPricingTiers = (
     description: 'Build a steady practice with guided support',
     monthlyPrice: getMonthlyPrice('basic'),
     yearlyPrice: getYearlyPrice('basic'),
-    kiaanQuota: 75,
+    kiaanQuota: 50,
     features: [
-      '75 KIAAN questions/month',
-      'All Free features',
-      'Guided breathing sessions',
-      'Mood journaling prompts',
-      'Priority email support',
-    ],
-    cta: 'Start 15-day free trial',
-    trialAvailable: true,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    description: 'Enhanced tools for deeper practice',
-    monthlyPrice: getMonthlyPrice('pro'),
-    yearlyPrice: getYearlyPrice('pro'),
-    kiaanQuota: 150,
-    features: [
-      '150 KIAAN questions/month',
+      '50 KIAAN questions/month',
       'All Free features',
       'Journal with encryption',
+      'Voice synthesis',
       'Ardha Reframing Assistant',
       'Viyoga Detachment Coach',
     ],
@@ -75,26 +59,29 @@ const createPricingTiers = (
     badge: 'Most Popular',
     features: [
       '300 KIAAN questions/month',
-      'All Pro features',
+      'All Basic features',
+      'Voice Companion',
+      'Soul Reading & Quantum Dive',
+      'KIAAN Agent',
       'Relationship Compass',
-      'Emotional Reset Guide',
-      'Priority support',
       'Advanced mood analytics',
+      'Priority support',
     ],
     cta: 'Start 15-day free trial',
     trialAvailable: true,
   },
   {
-    id: 'executive',
-    name: 'Executive',
+    id: 'enterprise',
+    name: 'Enterprise',
     description: 'Unlimited access for power users',
-    monthlyPrice: getMonthlyPrice('executive'),
-    yearlyPrice: getYearlyPrice('executive'),
+    monthlyPrice: getMonthlyPrice('enterprise'),
+    yearlyPrice: getYearlyPrice('enterprise'),
     kiaanQuota: 'unlimited',
     features: [
       'Unlimited KIAAN questions',
       'All Premium features',
       'API access',
+      'White-label & SSO',
       'Dedicated support',
       'SLA guarantee',
     ],
@@ -107,37 +94,49 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '20', basic: '75', pro: '150', premium: '300', executive: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', pro: 'Same for all', premium: 'Same for all', executive: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
+      { name: 'Monthly Questions', values: { free: '20', basic: '50', premium: '300', enterprise: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', premium: 'Same for all', enterprise: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, basic: true, premium: true, enterprise: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Viyoga Detachment', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Relationship Compass', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
-      { name: 'Emotional Reset Guide', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
+      { name: 'Ardha Reframing', values: { free: false, basic: true, premium: true, enterprise: true } },
+      { name: 'Viyoga Detachment', values: { free: false, basic: true, premium: true, enterprise: true } },
+      { name: 'Relationship Compass', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'Emotional Reset Guide', values: { free: false, basic: false, premium: true, enterprise: true } },
+    ],
+  },
+  {
+    category: 'KIAAN Ecosystem',
+    items: [
+      { name: 'Divine Chat', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Friend Mode', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Voice Synthesis', values: { free: false, basic: true, premium: true, enterprise: true } },
+      { name: 'Voice Companion', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'Soul Reading', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'Quantum Dive', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'KIAAN Agent', values: { free: false, basic: false, premium: true, enterprise: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Mood Tracking', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Daily Wisdom', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Advanced Analytics', values: { free: false, basic: false, pro: true, premium: true, executive: true } },
-      { name: 'API Access', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
+      { name: 'Encrypted Journal', values: { free: false, basic: true, premium: true, enterprise: true } },
+      { name: 'Mood Tracking', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Daily Wisdom', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Advanced Analytics', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'API Access', values: { free: false, basic: false, premium: false, enterprise: true } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Email Support', values: { free: false, basic: true, pro: true, premium: true, executive: true } },
-      { name: 'Priority Support', values: { free: false, basic: false, pro: false, premium: true, executive: true } },
-      { name: 'Dedicated Support', values: { free: false, basic: false, pro: false, premium: false, executive: true } },
+      { name: 'Community Access', values: { free: true, basic: true, premium: true, enterprise: true } },
+      { name: 'Email Support', values: { free: false, basic: true, premium: true, enterprise: true } },
+      { name: 'Priority Support', values: { free: false, basic: false, premium: true, enterprise: true } },
+      { name: 'Dedicated Support', values: { free: false, basic: false, premium: false, enterprise: true } },
     ],
   },
 ]
@@ -423,12 +422,33 @@ export default function PricingPage() {
     }
 
     setLoading(tierId)
-    
-    // Simulate checkout process
-    // In production, this would redirect to Stripe checkout
-    setTimeout(() => {
-      router.push(`/subscription/success?tier=${tierId}&yearly=${isYearly}`)
-    }, 1000)
+
+    try {
+      const response = await fetch('/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          plan_tier: tierId,
+          billing_period: isYearly ? 'yearly' : 'monthly',
+          success_url: `${window.location.origin}/subscription/success?tier=${tierId}&yearly=${isYearly}`,
+          cancel_url: `${window.location.origin}/pricing`,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.detail || error.message || 'Failed to start checkout')
+      }
+
+      const data = await response.json()
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url
+      }
+    } catch (err) {
+      console.error('Checkout error:', err)
+      setLoading(null)
+    }
   }
 
   // Format prices for display

@@ -16,8 +16,8 @@ const mockTier: PricingTier = {
   id: 'basic',
   name: 'Basic',
   description: 'Perfect for individuals starting their wellness journey',
-  monthlyPrice: 2.49,
-  yearlyPrice: 24.99,
+  monthlyPrice: 9.99,
+  yearlyPrice: 99.99,
   features: [
     '50 KIAAN questions/month',
     'Encrypted journal',
@@ -47,8 +47,8 @@ const mockPremiumTier: PricingTier = {
   id: 'premium',
   name: 'Premium',
   description: 'Full access to all features',
-  monthlyPrice: 15,
-  yearlyPrice: 149.99,
+  monthlyPrice: 19.99,
+  yearlyPrice: 199.99,
   features: [
     '300 KIAAN questions/month',
     'Advanced analytics',
@@ -60,18 +60,18 @@ const mockPremiumTier: PricingTier = {
   kiaanQuota: 300,
 }
 
-const mockExecutiveTier: PricingTier = {
-  id: 'executive',
-  name: 'Executive',
+const mockEnterpriseTier: PricingTier = {
+  id: 'enterprise',
+  name: 'Enterprise',
   description: 'Unlimited access for power users',
-  monthlyPrice: 20,
-  yearlyPrice: 199.99,
+  monthlyPrice: 499,
+  yearlyPrice: 4999,
   features: [
     'Unlimited KIAAN questions',
     'API access',
     'Dedicated support',
   ],
-  cta: 'Go Executive',
+  cta: 'Go Enterprise',
   kiaanQuota: 'unlimited',
 }
 
@@ -150,7 +150,7 @@ describe('PricingCard', () => {
     it('displays unlimited quota correctly', () => {
       render(
         <PricingCard
-          tier={mockExecutiveTier}
+          tier={mockEnterpriseTier}
           isYearly={false}
           onSelect={mockOnSelect}
         />
@@ -194,7 +194,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('$2.49')).toBeInTheDocument()
+      expect(screen.getByText('$9.99')).toBeInTheDocument()
       expect(screen.getByText('/month')).toBeInTheDocument()
     })
 
@@ -207,7 +207,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('$24.99')).toBeInTheDocument()
+      expect(screen.getByText('$99.99')).toBeInTheDocument()
       expect(screen.getByText('/year')).toBeInTheDocument()
     })
 
@@ -217,12 +217,12 @@ describe('PricingCard', () => {
           tier={mockTier}
           isYearly={true}
           onSelect={mockOnSelect}
-          formattedMonthlyEquivalent="$2.08"
+          formattedMonthlyEquivalent="$8.33"
         />
       )
 
-      // $24.99 / 12 = $2.08
-      expect(screen.getByText(/\$2\.08\/month when billed yearly/)).toBeInTheDocument()
+      // $99.99 / 12 = $8.33
+      expect(screen.getByText(/\$8\.33\/month when billed yearly/)).toBeInTheDocument()
     })
 
     it('displays $0 for free tier', () => {

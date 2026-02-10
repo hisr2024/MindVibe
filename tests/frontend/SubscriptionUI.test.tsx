@@ -67,10 +67,10 @@ const SubscriptionStatus = ({
 }
 
 describe('QuotaDisplay Component', () => {
-  describe('Free Tier Quota (10 questions)', () => {
+  describe('Free Tier Quota (20 questions)', () => {
     it('displays used count', () => {
       render(
-        <QuotaDisplay used={5} limit={10} feature="KIAAN Questions" />
+        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
       )
 
       expect(screen.getByTestId('quota-used')).toHaveTextContent('5 used')
@@ -78,26 +78,26 @@ describe('QuotaDisplay Component', () => {
 
     it('displays remaining count', () => {
       render(
-        <QuotaDisplay used={5} limit={10} feature="KIAAN Questions" />
+        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
       )
 
-      expect(screen.getByTestId('quota-remaining')).toHaveTextContent('5 remaining')
+      expect(screen.getByTestId('quota-remaining')).toHaveTextContent('15 remaining')
     })
 
     it('displays progress bar', () => {
       render(
-        <QuotaDisplay used={5} limit={10} feature="KIAAN Questions" />
+        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
       )
 
       const progressBar = screen.getByRole('progressbar')
       expect(progressBar).toBeInTheDocument()
       expect(progressBar).toHaveAttribute('aria-valuenow', '5')
-      expect(progressBar).toHaveAttribute('aria-valuemax', '10')
+      expect(progressBar).toHaveAttribute('aria-valuemax', '20')
     })
 
     it('shows 0 remaining when quota exhausted', () => {
       render(
-        <QuotaDisplay used={10} limit={10} feature="KIAAN Questions" />
+        <QuotaDisplay used={20} limit={20} feature="KIAAN Questions" />
       )
 
       expect(screen.getByTestId('quota-remaining')).toHaveTextContent('0 remaining')
@@ -105,7 +105,7 @@ describe('QuotaDisplay Component', () => {
 
     it('shows full usage at 100%', () => {
       render(
-        <QuotaDisplay used={10} limit={10} feature="KIAAN Questions" />
+        <QuotaDisplay used={20} limit={20} feature="KIAAN Questions" />
       )
 
       expect(screen.getByTestId('quota-progress')).toHaveTextContent('100%')
@@ -141,7 +141,7 @@ describe('QuotaDisplay Component', () => {
   describe('Accessibility', () => {
     it('has accessible status role', () => {
       render(
-        <QuotaDisplay used={5} limit={10} feature="KIAAN Questions" />
+        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
       )
 
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -216,9 +216,9 @@ describe('SubscriptionStatus Component', () => {
 })
 
 describe('Subscription UI Integration', () => {
-  it('displays correct quota for free tier (10 questions)', () => {
-    const freeUserQuota = { used: 3, limit: 10 }
-    
+  it('displays correct quota for free tier (20 questions)', () => {
+    const freeUserQuota = { used: 3, limit: 20 }
+
     render(
       <QuotaDisplay
         used={freeUserQuota.used}
@@ -228,12 +228,12 @@ describe('Subscription UI Integration', () => {
     )
 
     expect(screen.getByTestId('quota-used')).toHaveTextContent('3 used')
-    expect(screen.getByTestId('quota-remaining')).toHaveTextContent('7 remaining')
+    expect(screen.getByTestId('quota-remaining')).toHaveTextContent('17 remaining')
   })
 
-  it('displays correct quota for basic tier (100 questions)', () => {
-    const basicUserQuota = { used: 45, limit: 100 }
-    
+  it('displays correct quota for basic tier (50 questions)', () => {
+    const basicUserQuota = { used: 45, limit: 50 }
+
     render(
       <QuotaDisplay
         used={basicUserQuota.used}
@@ -243,6 +243,6 @@ describe('Subscription UI Integration', () => {
     )
 
     expect(screen.getByTestId('quota-used')).toHaveTextContent('45 used')
-    expect(screen.getByTestId('quota-remaining')).toHaveTextContent('55 remaining')
+    expect(screen.getByTestId('quota-remaining')).toHaveTextContent('5 remaining')
   })
 })
