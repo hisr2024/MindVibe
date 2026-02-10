@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { MindVibeIcon } from './MindVibeIcon'
 import { MindVibeWordmark } from './MindVibeWordmark'
+import { KrishnaSymbol } from './KrishnaSymbol'
 import { gradientCss } from './brandTokens'
 
 interface MindVibeLockupProps {
@@ -35,11 +36,25 @@ export function MindVibeLockup({
       <div className={isStacked ? 'items-center text-center' : ''}>
         <MindVibeWordmark size={isStacked ? 'lg' : 'md'} animated={animated} showTagline={showTagline} />
         {!showTagline && (
-          <p
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70"
-            style={{ backgroundImage: gradientCss.mvGradientOcean, WebkitBackgroundClip: 'text', color: 'transparent' }}
-          >
-            KIAAN — Your Spiritual Companion
+          <p className="flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em]">
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: gradientCss.mvGradientOcean, WebkitBackgroundClip: 'text' }}
+            >
+              KIAAN —
+            </span>
+            <span className="text-white/60">Your</span>
+            <KrishnaSymbol size={12} animated={animated} glow={false} />
+            <span
+              className="font-bold bg-clip-text text-transparent"
+              style={{
+                backgroundImage: gradientCss.spiritualSaffron,
+                filter: 'drop-shadow(0 0 5px rgba(251, 191, 36, 0.3))',
+              }}
+            >
+              Spiritual
+            </span>
+            <span className="text-white/60">Companion</span>
           </p>
         )}
       </div>

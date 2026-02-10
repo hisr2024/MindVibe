@@ -11,6 +11,8 @@ export const gradientCss = {
   mvGradientOcean: 'linear-gradient(130deg, #0fa9a2 0%, #2ac8d4 55%, #9ae8ff 100%)',
   mvGradientAurora: 'linear-gradient(140deg, #ff7fa8 0%, #c987ff 52%, #e8d3ff 100%)',
   kiaanResonance: 'linear-gradient(120deg, #1e3a8a 0%, #2563eb 42%, #6ad7ff 100%)',
+  spiritualGold: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 30%, #fcd34d 55%, #f59e0b 100%)',
+  spiritualSaffron: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 35%, #fbbf24 60%, #fcd34d 100%)',
 }
 
 export const auraRings = {
