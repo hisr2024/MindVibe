@@ -524,17 +524,6 @@ export default function RelationshipCompassPage() {
                   </div>
                 </details>
 
-                {result.citations.length > 0 && (
-                  <div className="rounded-xl border border-orange-500/20 bg-black/40 p-4 text-xs text-orange-100/70">
-                    <span className="font-semibold text-orange-100">Sources:</span>{' '}
-                    {result.citations.map((citation, index) => (
-                      <span key={`${citation.chunk_id}-${index}`}>
-                        {citation.source} ({citation.chapter}:{citation.verse})
-                        {index < result.citations.length - 1 ? '; ' : ''}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </section>

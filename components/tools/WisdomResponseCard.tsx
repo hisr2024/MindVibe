@@ -493,19 +493,6 @@ export default function WisdomResponseCard({
         </div>
       )}
 
-      {resolvedCitations.length > 0 && !secularMode && (
-        <div className="mt-5 rounded-xl border border-gray-700/50 bg-black/40 p-3 text-xs text-gray-400">
-          <span className="text-gray-300 font-semibold">Sources:</span>{' '}
-          {resolvedCitations.map((citation, index) => {
-            const reference = citation.reference_if_any ? ` (${citation.reference_if_any})` : ''
-            return (
-              <span key={`${citation.chunk_id}-${index}`}>
-                {citation.source_file}{reference}{index < resolvedCitations.length - 1 ? '; ' : ''}
-              </span>
-            )
-          })}
-        </div>
-      )}
 
       {/* Closing */}
       <div className="mt-6 pt-4 border-t border-gray-700/50 text-center">
