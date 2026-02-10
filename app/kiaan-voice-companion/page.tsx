@@ -69,6 +69,7 @@ interface Message {
   mood?: string | null
   phase?: string | null
   timestamp: Date
+  aiTier?: string
 }
 
 interface SessionState {
@@ -265,7 +266,9 @@ export default function KiaanVoiceCompanionPage() {
         const res = await apiFetch('/api/voice-companion/health')
         if (res.ok) {
           const data = await res.json()
-          setAiStatus(data.ai_enhanced ? 'connected' : 'offline')
+          const tier1 = data.ai_tiers?.tier1_openai_direct
+          const tier2 = data.ai_tiers?.tier2_engine_ai
+          setAiStatus((tier1 || tier2) ? 'connected' : 'offline')
           if (data.wisdom_corpus) setWisdomCorpusCount(data.wisdom_corpus)
         } else {
           setAiStatus('offline')
@@ -318,14 +321,17 @@ export default function KiaanVoiceCompanionPage() {
           mood: data.mood,
           phase: data.phase,
           timestamp: new Date(),
+          aiTier: data.ai_tier || 'unknown',
         }
 
         setMessages(prev => [...prev, companionMessage])
         setCurrentMood(data.mood || 'neutral')
         setSession(prev => ({ ...prev, phase: data.phase || prev.phase }))
 
-        if (data.ai_tier === 'backend' || data.ai_tier === 'nextjs_openai') {
+        if (data.ai_tier === 'openai_direct' || data.ai_tier === 'engine_ai') {
           setAiStatus('connected')
+        } else if (data.ai_tier === 'template' || data.ai_tier === 'fallback') {
+          setAiStatus('offline')
         }
 
         setShowSuggestions(true)
@@ -648,7 +654,7 @@ export default function KiaanVoiceCompanionPage() {
 
           <h2 className="mt-6 text-lg font-semibold text-white/90 tracking-wide">KIAAN</h2>
           <p className="text-xs text-amber-300/50 mt-0.5 tracking-wider">
-            {isLoading ? 'Reflecting...' : isSpeaking ? 'Speaking to you...' : session.isActive ? 'Your Divine Friend' : 'Session ended'}
+            {isLoading ? 'Reflecting with wisdom...' : isSpeaking ? 'Speaking to you...' : session.isActive ? 'Your Divine Friend' : 'Session ended'}
           </p>
 
           {/* ── Mood + Voice Indicator ── */}
@@ -700,6 +706,17 @@ export default function KiaanVoiceCompanionPage() {
                   {msg.mood && msg.mood !== 'neutral' && MOOD_DISPLAY[msg.mood] && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 ${MOOD_DISPLAY[msg.mood].color}`}>
                       {MOOD_DISPLAY[msg.mood].emoji} {MOOD_DISPLAY[msg.mood].label}
+                    </span>
+                  )}
+                  {msg.aiTier && (
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                      msg.aiTier === 'openai_direct' ? 'bg-emerald-500/10 text-emerald-400/60 border border-emerald-500/20' :
+                      msg.aiTier === 'engine_ai' ? 'bg-sky-500/10 text-sky-400/60 border border-sky-500/20' :
+                      'bg-white/5 text-white/30 border border-white/10'
+                    }`}>
+                      {msg.aiTier === 'openai_direct' ? 'AI' :
+                       msg.aiTier === 'engine_ai' ? 'AI' :
+                       msg.aiTier === 'template' ? 'Offline' : ''}
                     </span>
                   )}
                 </div>
@@ -782,7 +799,7 @@ export default function KiaanVoiceCompanionPage() {
                   value={inputText}
                   onChange={e => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Speak or type to your Divine Friend..."
+                  placeholder="Talk to KIAAN, your Divine Friend..."
                   rows={1}
                   className="w-full resize-none rounded-2xl border border-amber-500/10 bg-white/5 px-4 py-2.5 text-sm text-white/90 placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/30 transition-all duration-200"
                   style={{ backdropFilter: 'blur(12px)' }}

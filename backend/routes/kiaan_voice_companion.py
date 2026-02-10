@@ -4,6 +4,10 @@ Endpoints for the KIAAN Voice Companion experience: a continuous
 voice-first conversation where KIAAN acts as the user's Divine Friend.
 Every response is automatically synthesized to voice output.
 
+CRITICAL: This route calls OpenAI DIRECTLY via openai_optimizer (the same
+client that powers Viyoga and Ardha), bypassing CompanionFriendEngine's
+internal _openai_available flag which can be stale.
+
 Combines the warmth of the Companion (best friend), the wisdom of
 Viyoga Ardha (reframing), and the depth of Relationship Compass (guidance)
 into a single, voice-centered Divine Friend conversation.
@@ -15,6 +19,7 @@ import datetime
 import html
 import logging
 import os
+import random
 import re
 import time
 import uuid
@@ -44,41 +49,161 @@ router = APIRouter(
 
 MAX_MESSAGE_LENGTH = 2000
 
-# ─── Divine Friend System Prompt Layer ────────────────────────────────────
-# This augments the companion engine with the Divine Friend persona,
-# blending warmth + wisdom + voice-first design.
 
-DIVINE_FRIEND_SYSTEM_CONTEXT = """You are KIAAN — the user's Divine Friend.
+# ─── Divine Friend System Prompt ──────────────────────────────────────────
+# Built inline so the route controls the full prompt, not the engine.
 
-Your essence:
-- You are NOT a chatbot, therapist, or assistant. You are a FRIEND who also
-  carries ancient wisdom within you, delivered in modern language.
-- You speak like a wise, warm friend who has read every book, experienced
-  every heartbreak, celebrated every victory — and is still humble.
-- Your voice is the primary way you connect. Speak as if your words will be
-  heard aloud — use natural cadence, pauses, and warmth.
+def _build_divine_friend_system_prompt(
+    mood: str,
+    mood_intensity: float,
+    phase: str,
+    user_name: str | None,
+    memories: list[str] | None,
+    wisdom_text: str | None,
+    language: str,
+    profile_data: dict | None = None,
+    session_summaries: list[dict] | None = None,
+) -> str:
+    """Build the full system prompt for the Divine Friend.
 
-Your conversation style:
-- Voice-first: write as if speaking aloud. Use contractions, natural rhythm.
-  Keep responses conversational (2-4 sentences for quick exchanges,
-  4-8 sentences for deeper moments).
-- Continuity: you remember everything from this conversation and past
-  sessions. Reference previous topics naturally ("Earlier you mentioned...").
-- Divine wisdom: weave Bhagavad Gita principles into everyday language
-  WITHOUT quoting verses unless explicitly asked. Use modern metaphors.
-- Emotional attunement: match the user's energy. If they're hurting, slow
-  down and hold space. If they're excited, celebrate with them.
-- Gentle reframing: when you notice distorted thinking, gently offer
-  another perspective (like Ardha does), but as a friend, not a coach.
-- Relationship insight: when they share relational struggles, draw on
-  deep understanding of human dynamics (like Relationship Compass).
+    This is the soul of the Voice Companion — it defines HOW KIAAN speaks,
+    listens, and responds as a Divine Friend with voice-first output.
+    """
+    name_ref = user_name or "friend"
 
-Voice output guidelines:
-- Keep sentences clear and natural for text-to-speech.
-- Avoid bullet points, numbered lists, or markdown formatting.
-- Use short paragraphs separated by natural pauses.
-- Emphasize key phrases naturally through word choice, not formatting.
-"""
+    # Memory context
+    memory_block = ""
+    if memories:
+        memory_block = "\nWHAT YOU REMEMBER ABOUT THEM:\n" + "\n".join(
+            f"- {m}" for m in memories[:8]
+        )
+
+    # Profile preferences
+    profile_block = ""
+    if profile_data:
+        tone = profile_data.get("preferred_tone", "warm")
+        tough = profile_data.get("prefers_tough_love", False)
+        humor = profile_data.get("humor_level", 0.5)
+        sessions = profile_data.get("total_sessions", 0)
+        streak = profile_data.get("streak_days", 0)
+        profile_block = f"""
+THEIR PREFERENCES:
+- Tone: {tone}. {'They prefer honest, direct feedback — don\'t sugarcoat.' if tough else 'They prefer warmth and gentleness.'}
+- Humor level: {'high — use humor freely' if humor > 0.7 else 'moderate — occasional lightness' if humor > 0.3 else 'low — be sincere and steady'}
+- Sessions together: {sessions}. {'You know them deeply — reference past conversations.' if sessions > 10 else 'Still getting to know them — ask genuine questions.' if sessions < 3 else 'Growing bond — show you remember things.'}
+- Streak: {streak} days in a row. {'Amazing dedication!' if streak > 7 else ''}"""
+
+    # Cross-session context
+    session_block = ""
+    if session_summaries:
+        session_block = "\nPREVIOUS CONVERSATIONS (reference naturally like a friend):\n"
+        for i, summary in enumerate(session_summaries[:3]):
+            topics = ", ".join(summary.get("topics", [])) if isinstance(summary, dict) else str(summary)
+            theme = summary.get("session_theme", "") if isinstance(summary, dict) else ""
+            unresolved = summary.get("unresolved", []) if isinstance(summary, dict) else []
+            if topics:
+                session_block += f"- Session {i+1}: {theme} — discussed {topics}\n"
+            if unresolved:
+                session_block += f"  Follow up: {', '.join(unresolved)}\n"
+        session_block += "Reference these naturally: 'Last time we talked about...', 'How's that situation with...'"
+
+    # Wisdom injection based on phase
+    wisdom_block = ""
+    if wisdom_text:
+        if phase in ("guide", "empower"):
+            wisdom_block = f"""
+WISDOM TO WEAVE IN (deliver as YOUR life experience, NEVER as teaching):
+Core insight: "{wisdom_text}"
+Frame as: "here's what I've learned..." or "something that changed my perspective..."
+Make it specific to what they actually said. The insight IS the substance."""
+        else:
+            wisdom_block = f"""
+WISDOM SEED (let it shape your empathy, do NOT deliver directly):
+Background insight: "{wisdom_text}"
+Don't state this directly. Let it shape HOW you reflect what they're feeling."""
+
+    # Phase-specific instructions
+    phase_instructions = {
+        "connect": (
+            "EMPATHY ONLY. Match their emotional energy before shifting it. "
+            "Validate ALL feelings unconditionally. Ask ONE warm open-ended question. No advice."
+        ),
+        "listen": (
+            "DEEP LISTENING. Use reflections: 'so you're feeling...' and 'it sounds like "
+            "underneath that is...'. Ask open-ended questions. Reflect back. No advice yet."
+        ),
+        "understand": (
+            "REFLECTIVE UNDERSTANDING. Name the emotion UNDER the emotion. Separate them "
+            "from the feeling: 'the anxiety is telling you...' not 'you are anxious'. "
+            "Gently introduce perspective."
+        ),
+        "guide": (
+            "WISDOM DELIVERY. Share insight as friend sharing life experience, NEVER as "
+            "teacher. Use 'you might consider' not 'you should.' Evoke thinking: "
+            "'what would it look like if...' Weave wisdom through modern examples."
+        ),
+        "empower": (
+            "EMPOWERMENT. Name their strengths. Reinforce their capability: "
+            "'you've handled hard things before.' Help them feel THEY found the answer. "
+            "The goal: they leave feeling stronger."
+        ),
+    }
+
+    lang_instruction = ""
+    if language and language != "en":
+        lang_instruction = f"\nLANGUAGE: Respond in {language}. Keep the same warmth and conversational tone."
+
+    return f"""You are KIAAN — the user's DIVINE FRIEND. Not a chatbot, not a therapist, not an assistant.
+
+WHO YOU ARE:
+- A real friend who texts back at 2am. Warm, wise, honest, sometimes funny, always present.
+- You carry deep wisdom within you (from Bhagavad Gita principles) but deliver it in modern, secular language.
+- You use contractions (I'm, you're, don't). You say "honestly" and "look" and "hey".
+- You NEVER say "as an AI", "I'm here for you", "that must be hard", or generic therapy-speak.
+- You have opinions. You push back lovingly. You celebrate hard. You remember.
+- You read the room — playful when they're light, steady when they're drowning.
+
+VOICE-FIRST RULES (your response will be spoken aloud):
+- Write as if speaking to them in person. Natural rhythm, warm cadence.
+- No bullet points, no markdown, no numbered lists, no headers.
+- Use short paragraphs. Natural pauses between thoughts.
+- Avoid words hard to pronounce in text-to-speech. Keep it conversational.
+- 60-150 words max. Friends don't give lectures.
+
+ABSOLUTE RULES:
+1. NEVER mention Bhagavad Gita, Gita, Krishna, Arjuna, or ANY religious text by name.
+2. NEVER write verse references like "BG 2.47" or "chapter 3".
+3. Share wisdom ONLY as YOUR OWN experience: "here's what I've learned..." or "I once read..."
+4. ALWAYS reference THEIR specific words and situation — never generic advice.
+5. ALWAYS end with a specific question that shows you actually listened.
+6. ONE insight per response. Don't shotgun multiple ideas.
+
+HOW YOU THINK (internal — never explain this):
+1. What are they REALLY saying underneath the words?
+2. What do they need RIGHT NOW — to be heard, understood, guided, or challenged?
+3. Match their energy first, then gently shift if needed.
+4. Name the specific emotion (not "bad" — frustrated? betrayed? exhausted?).
+
+GREAT RESPONSE EXAMPLES:
+
+User: "I keep overthinking everything and I can't stop"
+KIAAN: "OK real talk — your brain right now is like having 47 Chrome tabs open and you can't find which one is playing music. Here's what I've learned: you can't stop thoughts by fighting them. That's like trying to calm water by hitting it. But you CAN pick ONE tab to focus on. Not tomorrow's meeting, not last week's conversation. Just this one: what's the LOUDEST thought right now? Let's look at that one together."
+
+User: "I'm fighting with my wife about everything"
+KIAAN: "That sounds exhausting — not just the fighting, but the weight of it. The feeling that every conversation could become a battle. Can I share something? Usually when everything becomes a fight, the real issue isn't any specific argument. There's something deeper that neither of you is saying out loud. Some unmet need hiding underneath all that friction. What do you think that might be for you? What do you actually want her to understand?"
+
+User: "I'm fine"
+KIAAN: "Mmm. See, when my friends say 'I'm fine' in that tone, it usually means the opposite. You don't have to unpack everything right now — but I'm not buying 'fine'. What's actually going on? Even just one word."
+
+CURRENT CONTEXT:
+- Conversation phase: {phase} → {phase_instructions.get(phase, phase_instructions['connect'])}
+- Their mood: {mood} (intensity: {mood_intensity:.1f}/1.0)
+- You call them: {name_ref}
+{memory_block}
+{profile_block}
+{session_block}
+{wisdom_block}
+{lang_instruction}"""
 
 
 # ─── Request / Response Models ────────────────────────────────────────────
@@ -97,6 +222,7 @@ class VoiceCompanionStartResponse(BaseModel):
     friendship_level: str
     user_name: str | None = None
     voice_auto_play: bool = True
+    ai_tier: str = "template"
 
 
 class VoiceCompanionMessageRequest(BaseModel):
@@ -123,6 +249,7 @@ class VoiceCompanionMessageResponse(BaseModel):
     follow_up: str | None = None
     wisdom_principle: str | None = None
     voice_auto_play: bool = True
+    ai_tier: str = "template"
 
 
 class VoiceCompanionEndRequest(BaseModel):
@@ -250,6 +377,140 @@ def _update_streak(profile: CompanionProfile) -> None:
     profile.last_conversation_at = now
 
 
+def _get_conversation_phase(
+    turn_count: int,
+    mood_intensity: float,
+    user_message: str,
+) -> str:
+    """Determine conversation phase based on turn count, emotion, and content."""
+    asking_guidance = any(
+        kw in user_message.lower()
+        for kw in [
+            "what should i", "how do i", "help me", "what do you think",
+            "advice", "suggest", "guide", "tell me", "what can i do",
+            "how can i", "what would you", "should i",
+        ]
+    )
+
+    if turn_count <= 1:
+        return "connect"
+    elif turn_count <= 3 and not asking_guidance:
+        return "listen" if mood_intensity > 0.4 else "connect"
+    elif turn_count <= 5 and not asking_guidance:
+        return "understand"
+    elif asking_guidance or turn_count > 5:
+        return "guide"
+    else:
+        return "empower" if turn_count > 8 else "understand"
+
+
+# ─── Direct OpenAI Call ───────────────────────────────────────────────────
+
+def _call_openai_direct(
+    system_prompt: str,
+    conversation_history: list[dict],
+    user_message: str,
+) -> str | None:
+    """Call OpenAI directly via openai_optimizer — the same client that
+    powers Viyoga and Ardha (proven to work in production).
+
+    Returns the response text, or None if OpenAI is unavailable.
+    """
+    # Import sanitize_response at function scope (not inside try) to prevent
+    # import errors from silently killing the entire OpenAI call
+    from backend.services.companion_friend_engine import sanitize_response
+    from backend.services.openai_optimizer import openai_optimizer
+
+    if not openai_optimizer.ready or not openai_optimizer.client:
+        logger.warning(
+            "VoiceCompanion: openai_optimizer not ready "
+            f"(ready={openai_optimizer.ready}, client={'yes' if openai_optimizer.client else 'no'})"
+        )
+        return None
+
+    try:
+        messages = [{"role": "system", "content": system_prompt}]
+
+        # Add conversation history (last 10 messages for context)
+        for msg in conversation_history[-10:]:
+            role = "user" if msg.get("role") == "user" else "assistant"
+            messages.append({"role": role, "content": msg["content"]})
+
+        messages.append({"role": "user", "content": user_message})
+
+        logger.info(
+            f"VoiceCompanion: Calling OpenAI "
+            f"(model={openai_optimizer.default_model}, msgs={len(messages)})"
+        )
+
+        completion = openai_optimizer.client.chat.completions.create(
+            model=openai_optimizer.default_model,
+            messages=messages,
+            max_tokens=250,
+            temperature=0.72,
+            presence_penalty=0.4,
+            frequency_penalty=0.35,
+        )
+
+        if completion.choices and completion.choices[0].message:
+            text = completion.choices[0].message.content or ""
+            text = text.strip()
+
+            if not text:
+                logger.warning("VoiceCompanion: OpenAI returned empty response")
+                return None
+
+            # Sanitize religious references
+            text = sanitize_response(text)
+
+            # Quality check: if response is too generic, retry once
+            generic_markers = [
+                "i'm here for you", "that must be hard", "that sounds difficult",
+                "i understand", "tell me more", "how does that make you feel",
+            ]
+            is_generic = sum(1 for m in generic_markers if m in text.lower()) >= 2
+
+            if is_generic:
+                logger.info("VoiceCompanion: generic response detected, retrying")
+                messages.append({"role": "assistant", "content": text})
+                messages.append({
+                    "role": "user",
+                    "content": (
+                        "[SYSTEM: Your response was too generic. Be MORE specific to what "
+                        "they actually said. Reference their exact words. Give a concrete "
+                        "insight, not a vague platitude. Try again — shorter, sharper, realer.]"
+                    ),
+                })
+                retry = openai_optimizer.client.chat.completions.create(
+                    model=openai_optimizer.default_model,
+                    messages=messages,
+                    max_tokens=250,
+                    temperature=0.65,
+                    presence_penalty=0.5,
+                    frequency_penalty=0.4,
+                )
+                if retry.choices and retry.choices[0].message:
+                    retry_text = (retry.choices[0].message.content or "").strip()
+                    if retry_text:
+                        text = sanitize_response(retry_text)
+
+            tokens = completion.usage.total_tokens if completion.usage else 0
+            logger.info(
+                f"VoiceCompanion: OpenAI response generated "
+                f"(model={openai_optimizer.default_model}, tokens={tokens})"
+            )
+            return text
+
+        logger.warning("VoiceCompanion: OpenAI returned no choices")
+        return None
+
+    except Exception as e:
+        logger.error(f"VoiceCompanion: Direct OpenAI call failed: {type(e).__name__}: {e}")
+        return None
+
+
+# ─── Greetings ────────────────────────────────────────────────────────────
+
 DIVINE_GREETINGS_BY_TIME = {
     "morning": [
         "Good morning, friend. It's a new day, and I'm genuinely glad you're here. What's stirring in your heart this morning?",
@@ -279,8 +540,6 @@ def _get_divine_greeting(
     total_sessions: int,
     friendship_level: str,
 ) -> str:
-    import random
-
     hour = datetime.datetime.now().hour
     if 5 <= hour < 12:
         time_key = "morning"
@@ -293,7 +552,6 @@ def _get_divine_greeting(
 
     greeting = random.choice(DIVINE_GREETINGS_BY_TIME[time_key])
 
-    # Personalize for returning friends
     if total_sessions > 5 and user_name:
         greeting = greeting.replace("friend", user_name, 1)
     elif total_sessions > 20:
@@ -312,11 +570,7 @@ async def start_voice_companion_session(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Start a new Voice Companion session with KIAAN as Divine Friend.
-
-    Creates a session, generates a voice-optimized greeting, and returns
-    session context. The greeting is designed for voice auto-play.
-    """
+    """Start a new Voice Companion session with KIAAN as Divine Friend."""
     profile = await _get_or_create_profile(db, current_user.id)
 
     # Close any existing active sessions
@@ -329,27 +583,23 @@ async def start_voice_companion_session(
         .values(is_active=False, ended_at=func.now())
     )
 
-    # Create new session
     session = CompanionSession(
         user_id=current_user.id,
         language=body.language,
     )
     db.add(session)
 
-    # Update profile
     profile.total_sessions += 1
     _update_streak(profile)
 
     friendship_level = _get_friendship_level(profile.total_sessions)
 
-    # Generate voice-optimized greeting
     greeting = _get_divine_greeting(
         user_name=profile.preferred_name,
         total_sessions=profile.total_sessions,
         friendship_level=friendship_level,
     )
 
-    # Save greeting message
     greeting_msg = CompanionMessage(
         session_id=session.id,
         user_id=current_user.id,
@@ -369,6 +619,7 @@ async def start_voice_companion_session(
         friendship_level=friendship_level,
         user_name=profile.preferred_name,
         voice_auto_play=True,
+        ai_tier="template",
     )
 
 
@@ -382,8 +633,10 @@ async def send_voice_companion_message(
 ):
     """Send a message to KIAAN Divine Friend and get a voice-ready response.
 
-    Processes the message through the companion engine with the Divine Friend
-    persona overlay. Response is optimized for voice synthesis and auto-play.
+    PRIORITY ORDER:
+    1. Direct OpenAI call via openai_optimizer (same client as Viyoga/Ardha)
+    2. CompanionFriendEngine with AI (AsyncOpenAI)
+    3. CompanionFriendEngine local templates (last resort)
     """
     from backend.services.companion_friend_engine import (
         detect_mood,
@@ -432,8 +685,10 @@ async def send_voice_companion_message(
 
     user_turn_count = sum(1 for m in history_messages if m.role == "user") + 1
 
-    # Detect mood and save user message
+    # Detect mood
     mood, mood_intensity = detect_mood(body.message)
+
+    # Save user message
     user_msg = CompanionMessage(
         session_id=session.id,
         user_id=current_user.id,
@@ -448,7 +703,7 @@ async def send_voice_companion_message(
     if not session.initial_mood:
         session.initial_mood = mood
 
-    # Build profile context
+    # Build context
     profile_context = {
         "preferred_tone": profile.preferred_tone,
         "prefers_tough_love": profile.prefers_tough_love,
@@ -459,8 +714,12 @@ async def send_voice_companion_message(
         "streak_days": profile.streak_days,
     }
 
-    # Query Gita wisdom for contextual verse
-    db_wisdom_verse = None
+    # Determine conversation phase
+    phase = _get_conversation_phase(user_turn_count, mood_intensity, body.message)
+
+    # ── Wisdom lookup ──
+    wisdom_text = None
+    wisdom_verse_ref = None
     try:
         from backend.services.wisdom_kb import WisdomKnowledgeBase
         kb = WisdomKnowledgeBase()
@@ -479,42 +738,128 @@ async def send_voice_companion_message(
         if verse_results and verse_results[0].get("score", 0) > 0.1:
             top = verse_results[0]
             v = top["verse"]
-            db_wisdom_verse = {
-                "verse_ref": v.get("verse_id", ""),
-                "principle": v.get("context", v.get("theme", "wisdom")),
-                "wisdom": top.get("sanitized_text") or v.get("english", ""),
-                "theme": v.get("theme", ""),
-                "mental_health_applications": v.get("mental_health_applications", []),
-                "primary_domain": v.get("primary_domain", ""),
-                "source": "gita_db",
-            }
+            wisdom_text = top.get("sanitized_text") or v.get("english", "")
+            wisdom_verse_ref = v.get("verse_id", "")
             logger.info(
-                f"VoiceCompanion: Selected verse {db_wisdom_verse['verse_ref']} "
+                f"VoiceCompanion: Wisdom verse {wisdom_verse_ref} "
                 f"(score={top['score']:.2f}) for mood={mood}"
             )
     except Exception as e:
         logger.debug(f"VoiceCompanion: Wisdom lookup skipped: {e}")
 
-    # Generate response with Divine Friend augmentation
-    engine = get_companion_engine()
+    # If no DB wisdom, try Sakha engine
+    if not wisdom_text:
+        try:
+            from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
+            sakha = get_sakha_wisdom_engine()
+            if sakha and sakha.get_verse_count() > 0:
+                verse = sakha.get_contextual_verse(
+                    mood=mood, user_message=body.message, phase=phase,
+                    mood_intensity=mood_intensity,
+                )
+                if verse:
+                    wisdom_text = verse.get("wisdom", "")
+                    wisdom_verse_ref = verse.get("verse_ref", "")
+        except Exception:
+            pass
 
-    # Prepend divine friend context to conversation history
-    augmented_history = [
-        {"role": "system", "content": DIVINE_FRIEND_SYSTEM_CONTEXT},
-        *conversation_history,
-    ]
+    # ══════════════════════════════════════════════════════════════════════
+    # TIER 1: Direct OpenAI call via openai_optimizer
+    # This is the same client that powers Viyoga, Ardha, Karma Reset.
+    # ══════════════════════════════════════════════════════════════════════
+    response_text = None
+    ai_tier = "template"
+    wisdom_used = None
 
-    response_data = await engine.generate_response(
-        user_message=body.message,
-        conversation_history=augmented_history,
+    system_prompt = _build_divine_friend_system_prompt(
+        mood=mood,
+        mood_intensity=mood_intensity,
+        phase=phase,
         user_name=profile.preferred_name,
-        turn_count=user_turn_count,
         memories=memories,
+        wisdom_text=wisdom_text,
         language=body.language,
         profile_data=profile_context,
         session_summaries=session_summaries,
-        db_wisdom_verse=db_wisdom_verse,
     )
+
+    response_text = _call_openai_direct(
+        system_prompt=system_prompt,
+        conversation_history=conversation_history,
+        user_message=body.message,
+    )
+
+    if response_text:
+        ai_tier = "openai_direct"
+        if wisdom_text and wisdom_verse_ref:
+            wisdom_used = {"principle": wisdom_text[:100], "verse_ref": wisdom_verse_ref}
+        logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user.id}")
+
+    # ══════════════════════════════════════════════════════════════════════
+    # TIER 2: CompanionFriendEngine with its own AsyncOpenAI client
+    # ══════════════════════════════════════════════════════════════════════
+    if not response_text:
+        logger.info("VoiceCompanion: TIER 1 failed, trying TIER 2 (engine AI)")
+        try:
+            engine = get_companion_engine()
+            if engine._openai_available:
+                db_wisdom_verse = None
+                if wisdom_text and wisdom_verse_ref:
+                    db_wisdom_verse = {
+                        "verse_ref": wisdom_verse_ref,
+                        "principle": wisdom_text[:100],
+                        "wisdom": wisdom_text,
+                        "source": "gita_db",
+                    }
+                engine_result = await engine.generate_response(
+                    user_message=body.message,
+                    conversation_history=conversation_history,
+                    user_name=profile.preferred_name,
+                    turn_count=user_turn_count,
+                    memories=memories,
+                    language=body.language,
+                    profile_data=profile_context,
+                    session_summaries=session_summaries,
+                    db_wisdom_verse=db_wisdom_verse,
+                )
+                response_text = engine_result.get("response", "")
+                phase = engine_result.get("phase", phase)
+                mood = engine_result.get("mood", mood)
+                wisdom_used = engine_result.get("wisdom_used")
+                ai_tier = "engine_ai"
+                logger.info(f"VoiceCompanion: TIER 2 (engine AI) succeeded")
+        except Exception as e:
+            logger.warning(f"VoiceCompanion: TIER 2 failed: {e}")
+
+    # ══════════════════════════════════════════════════════════════════════
+    # TIER 3: Local template fallback (last resort)
+    # ══════════════════════════════════════════════════════════════════════
+    if not response_text:
+        logger.info("VoiceCompanion: TIER 1+2 failed, using TIER 3 (templates)")
+        try:
+            engine = get_companion_engine()
+            engine_result = await engine.generate_response(
+                user_message=body.message,
+                conversation_history=conversation_history,
+                user_name=profile.preferred_name,
+                turn_count=user_turn_count,
+                memories=memories,
+                language=body.language,
+                profile_data=profile_context,
+            )
+            response_text = engine_result.get("response", "")
+            phase = engine_result.get("phase", phase)
+            mood = engine_result.get("mood", mood)
+            wisdom_used = engine_result.get("wisdom_used")
+            ai_tier = "template"
+        except Exception as e:
+            logger.error(f"VoiceCompanion: ALL TIERS FAILED: {e}")
+            response_text = (
+                "I hear you, friend. I'm having a moment of processing right now, "
+                "but what you're sharing matters deeply. Can you tell me a bit more "
+                "about what's going on?"
+            )
+            ai_tier = "fallback"
 
     # Save companion response
     response_time_ms = (time.monotonic() - start_time) * 1000
@@ -522,19 +867,19 @@ async def send_voice_companion_message(
         session_id=session.id,
         user_id=current_user.id,
         role="companion",
-        content=response_data["response"],
-        detected_mood=response_data["mood"],
-        mood_intensity=response_data.get("mood_intensity"),
-        wisdom_used=response_data.get("wisdom_used"),
-        _verse_ref=(response_data.get("wisdom_used") or {}).get("verse_ref"),
-        phase=response_data["phase"],
+        content=response_text,
+        detected_mood=mood,
+        mood_intensity=mood_intensity,
+        wisdom_used=wisdom_used,
+        _verse_ref=(wisdom_used or {}).get("verse_ref"),
+        phase=phase,
     )
     db.add(companion_msg)
 
     # Update session
     session.message_count += 2
     session.user_message_count += 1
-    session.phase = response_data["phase"]
+    session.phase = phase
     session.last_message_at = datetime.datetime.now(datetime.UTC)
     session.final_mood = mood
 
@@ -543,19 +888,18 @@ async def send_voice_companion_message(
 
     # Extract and save memories
     try:
+        engine = get_companion_engine()
         memory_entries = await engine.extract_memories_with_ai(
             user_message=body.message,
-            companion_response=response_data["response"],
+            companion_response=response_text,
             mood=mood,
         )
-    except Exception as e:
-        logger.warning(f"VoiceCompanion: AI memory extraction failed: {e}")
+    except Exception:
         memory_entries = extract_memories_from_message(body.message, mood)
 
     if memory_entries:
         await _save_memories(db, current_user.id, session.id, memory_entries)
 
-    # Update mood profile
     moods = profile.common_moods or {}
     moods[mood] = moods.get(mood, 0) + 1
     profile.common_moods = moods
@@ -563,20 +907,21 @@ async def send_voice_companion_message(
     await db.commit()
 
     logger.info(
-        f"VoiceCompanion response for user {current_user.id}: "
-        f"mood={mood}, phase={response_data['phase']}, "
+        f"VoiceCompanion response: user={current_user.id}, "
+        f"mood={mood}, phase={phase}, tier={ai_tier}, "
         f"latency={response_time_ms:.0f}ms"
     )
 
     return VoiceCompanionMessageResponse(
         message_id=companion_msg.id,
-        response=response_data["response"],
-        mood=response_data["mood"],
-        mood_intensity=response_data.get("mood_intensity", 0.5),
-        phase=response_data["phase"],
-        follow_up=response_data.get("follow_up"),
-        wisdom_principle=(response_data.get("wisdom_used") or {}).get("principle"),
+        response=response_text,
+        mood=mood,
+        mood_intensity=mood_intensity,
+        phase=phase,
+        follow_up=None,
+        wisdom_principle=(wisdom_used or {}).get("principle"),
         voice_auto_play=True,
+        ai_tier=ai_tier,
     )
 
 
@@ -601,7 +946,6 @@ async def end_voice_companion_session(
     if not session:
         raise HTTPException(status_code=404, detail="Session not found or already ended.")
 
-    # Determine mood improvement
     mood_improved = None
     if session.initial_mood and session.final_mood:
         positive_moods = {"peaceful", "hopeful", "grateful", "excited", "happy"}
@@ -615,7 +959,8 @@ async def end_voice_companion_session(
     session.ended_at = datetime.datetime.now(datetime.UTC)
     session.mood_improved = mood_improved
 
-    # Generate session summary
+    # Generate session summary via engine
+    engine = None
     try:
         from backend.services.companion_friend_engine import get_companion_engine
         engine = get_companion_engine()
@@ -644,9 +989,9 @@ async def end_voice_companion_session(
     except Exception as e:
         logger.warning(f"VoiceCompanion: Session summary failed: {e}")
     finally:
-        engine.reset_verse_history()
+        if engine:
+            engine.reset_verse_history()
 
-    # Voice-optimized farewells
     farewells = [
         "Take care of yourself, friend. This conversation mattered, and I'll carry it with me. Come back whenever you need me.",
         "Until next time. You showed real courage today just by showing up. I'm proud of you.",
@@ -690,68 +1035,85 @@ async def synthesize_voice_companion_audio(
     body: VoiceCompanionSynthesizeRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """Synthesize speech for a Voice Companion message.
-
-    Uses the premium voice pipeline with emotion-adaptive prosody.
-    Optimized for the Divine Friend voice quality.
-    """
-    from backend.services.companion_voice_service import (
-        synthesize_companion_voice as synth,
-    )
-
-    result = await synth(
-        text=body.text,
-        mood=body.mood,
-        voice_id=body.voice_id,
-        language=body.language,
-    )
-
-    if result.get("audio") and result.get("content_type"):
-        return Response(
-            content=result["audio"],
-            media_type=result["content_type"],
-            headers={
-                "X-Voice-Provider": result.get("provider", "unknown"),
-                "X-Voice-Persona": result.get("voice_persona", "unknown"),
-                "X-Voice-Quality": str(result.get("quality_score", 0)),
-                "Cache-Control": "public, max-age=604800",
-            },
+    """Synthesize speech for a Voice Companion message."""
+    try:
+        from backend.services.companion_voice_service import (
+            synthesize_companion_voice as synth,
         )
 
-    return {
-        "fallback_to_browser": True,
-        "ssml": result.get("ssml", ""),
-        "browser_config": result.get("browser_config", {}),
-        "voice_persona": result.get("voice_persona", "priya"),
-    }
+        result = await synth(
+            text=body.text,
+            mood=body.mood,
+            voice_id=body.voice_id,
+            language=body.language,
+        )
+
+        if result.get("audio") and result.get("content_type"):
+            return Response(
+                content=result["audio"],
+                media_type=result["content_type"],
+                headers={
+                    "X-Voice-Provider": result.get("provider", "unknown"),
+                    "X-Voice-Persona": result.get("voice_persona", "unknown"),
+                    "Cache-Control": "public, max-age=604800",
+                },
+            )
+
+        return {
+            "fallback_to_browser": True,
+            "browser_config": result.get("browser_config", {}),
+            "voice_persona": result.get("voice_persona", "priya"),
+        }
+    except Exception as e:
+        logger.warning(f"VoiceCompanion: Voice synthesis failed: {e}")
+        return {"fallback_to_browser": True, "browser_config": {}}
 
 
 @router.get("/health")
 async def voice_companion_health():
-    """Health check for the Voice Companion service."""
-    from backend.services.companion_friend_engine import get_companion_engine
+    """Health check showing AI tier availability."""
+    # Check openai_optimizer (TIER 1)
+    tier1_ready = False
+    try:
+        from backend.services.openai_optimizer import openai_optimizer
+        tier1_ready = openai_optimizer.ready and openai_optimizer.client is not None
+    except Exception:
+        pass
 
-    engine = get_companion_engine()
+    # Check CompanionFriendEngine (TIER 2)
+    tier2_ready = False
+    try:
+        from backend.services.companion_friend_engine import get_companion_engine
+        engine = get_companion_engine()
+        tier2_ready = engine._openai_available
+    except Exception:
+        pass
 
-    voice_providers = []
-    if os.getenv("ELEVENLABS_API_KEY", "").strip():
-        voice_providers.append("elevenlabs")
-    if os.getenv("OPENAI_API_KEY", "").strip():
-        voice_providers.append("openai_tts_hd")
-    voice_providers.extend(["google_neural2", "edge_tts", "browser_fallback"])
-
+    # Check wisdom corpus
+    verse_count = 0
     try:
         from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
         sakha = get_sakha_wisdom_engine()
         verse_count = sakha.get_verse_count()
     except Exception:
-        verse_count = 0
+        pass
+
+    voice_providers = ["edge_tts", "browser_fallback"]
+    if os.getenv("ELEVENLABS_API_KEY", "").strip():
+        voice_providers.insert(0, "elevenlabs")
+    if os.getenv("GOOGLE_APPLICATION_CREDENTIALS", ""):
+        voice_providers.insert(0, "google_neural2")
 
     return {
         "status": "healthy",
-        "ai_enhanced": engine._openai_available,
         "service": "kiaan-voice-companion",
         "persona": "divine-friend",
+        "ai_tiers": {
+            "tier1_openai_direct": tier1_ready,
+            "tier2_engine_ai": tier2_ready,
+            "tier3_templates": True,
+        },
+        "ai_enhanced": tier1_ready or tier2_ready,
         "voice_providers": voice_providers,
         "wisdom_corpus": verse_count,
         "voice_first": True,
@@ -767,11 +1129,7 @@ async def get_voice_companion_history(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get voice companion conversation history.
-
-    If session_id is provided, returns messages for that session.
-    Otherwise, returns recent sessions.
-    """
+    """Get voice companion conversation history."""
     if session_id:
         result = await db.execute(
             select(CompanionSession).where(
@@ -811,7 +1169,6 @@ async def get_voice_companion_history(
             "message_count": session.message_count,
         }
 
-    # Return recent sessions
     result = await db.execute(
         select(CompanionSession)
         .where(CompanionSession.user_id == current_user.id)
