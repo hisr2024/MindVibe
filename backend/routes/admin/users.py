@@ -256,7 +256,7 @@ async def get_user(
         subscription_status=subscription.status.value if subscription else None,
         subscription_started_at=subscription.current_period_start if subscription else None,
         kiaan_questions_used=usage.usage_count if usage else 0,
-        kiaan_questions_limit=usage.usage_limit if usage else 10,
+        kiaan_questions_limit=usage.usage_limit if usage else 20,
     )
 
 

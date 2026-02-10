@@ -60,9 +60,9 @@ const mockPremiumTier: PricingTier = {
   kiaanQuota: 300,
 }
 
-const mockExecutiveTier: PricingTier = {
-  id: 'executive',
-  name: 'Executive',
+const mockEnterpriseTier: PricingTier = {
+  id: 'enterprise',
+  name: 'Enterprise',
   description: 'Unlimited access for power users',
   monthlyPrice: 20,
   yearlyPrice: 199.99,
@@ -71,7 +71,7 @@ const mockExecutiveTier: PricingTier = {
     'API access',
     'Dedicated support',
   ],
-  cta: 'Go Executive',
+  cta: 'Go Enterprise',
   kiaanQuota: 'unlimited',
 }
 
@@ -150,7 +150,7 @@ describe('PricingCard', () => {
     it('displays unlimited quota correctly', () => {
       render(
         <PricingCard
-          tier={mockExecutiveTier}
+          tier={mockEnterpriseTier}
           isYearly={false}
           onSelect={mockOnSelect}
         />

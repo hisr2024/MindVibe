@@ -15,6 +15,7 @@ function SuccessContent() {
   const [validating, setValidating] = useState(true)
 
   const tierNames: Record<string, string> = {
+    free: 'Free',
     basic: 'Basic',
     premium: 'Premium',
     enterprise: 'Enterprise',

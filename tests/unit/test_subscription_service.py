@@ -186,7 +186,7 @@ class TestSubscriptionModels:
             period_start=period_start,
             period_end=period_end,
             usage_count=5,
-            usage_limit=10,
+            usage_limit=20,
         )
         test_db.add(usage)
         await test_db.commit()

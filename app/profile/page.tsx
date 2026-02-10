@@ -346,7 +346,7 @@ export default function ProfilePage() {
               </div>
               <p className="text-sm text-orange-100/70 mb-4">
                 {subscription?.tierId === 'free'
-                  ? 'You are on the free plan with 10 KIAAN questions per month.'
+                  ? 'You are on the free plan with 20 KIAAN questions per month.'
                   : `You are on the ${subscription?.tierName} plan.`}
               </p>
               <div className="flex gap-3">

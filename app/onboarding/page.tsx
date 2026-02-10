@@ -15,11 +15,11 @@ const pricingTiers: PricingTier[] = [
   {
     id: 'free',
     name: 'Free',
-    description: 'Get started with 10 KIAAN questions/month',
+    description: 'Get started with 20 KIAAN questions/month',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    kiaanQuota: 10,
-    features: ['10 questions/month', 'Journal & mood tracking', 'Daily wisdom'],
+    kiaanQuota: 20,
+    features: ['20 questions/month', 'Journal & mood tracking', 'Daily wisdom'],
     cta: 'Start Free',
   },
   {
@@ -38,10 +38,10 @@ const pricingTiers: PricingTier[] = [
     description: 'Full access to everything',
     monthlyPrice: 19,
     yearlyPrice: 189,
-    kiaanQuota: 200,
+    kiaanQuota: 300,
     highlighted: true,
     badge: 'Best Value',
-    features: ['200 questions/month', 'Advanced features', 'Priority support'],
+    features: ['300 questions/month', 'Advanced features', 'Priority support'],
     cta: 'Go Premium',
   },
 ]
