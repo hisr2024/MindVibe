@@ -1,10 +1,13 @@
 /**
- * Companion Message - Next.js API Route
+ * Voice Companion Message - Next.js API Route
  *
  * 3-tier response strategy:
  * 1. Proxy to Python backend (full pipeline: DB wisdom + SakhaWisdom + OpenAI)
  * 2. Direct OpenAI call from Next.js (KIAAN personality + static Gita wisdom)
  * 3. Local Friend Engine (mood + topic + entity + phase-aware intelligence)
+ *
+ * Voice companion uses a 15s backend timeout (vs 8s for text companion)
+ * to allow for additional voice processing latency.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -173,7 +176,7 @@ async function generateWithOpenAI(
       wisdom_used: { principle: wisdom.principle, verse_ref: wisdom.verse_ref },
     }
   } catch (error) {
-    console.error('[KIAAN] OpenAI direct call failed:', error)
+    console.error('[Voice KIAAN] OpenAI direct call failed:', error)
     return null
   }
 }
@@ -196,9 +199,10 @@ export async function POST(request: NextRequest) {
     const isLocalSession = typeof body.session_id === 'string' && body.session_id.startsWith('local_')
 
     // ── Tier 1: Proxy to Python backend (full pipeline) ──────────────
+    // Voice companion uses 15s timeout to allow for voice processing latency
     if (!isLocalSession) {
       try {
-        const companionResponse = await fetch(`${BACKEND_URL}/api/companion/message`, {
+        const companionResponse = await fetch(`${BACKEND_URL}/api/voice-companion/message`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -221,7 +225,7 @@ export async function POST(request: NextRequest) {
           }
         }
       } catch (backendErr) {
-        console.error('[Companion] Backend proxy failed:', backendErr instanceof Error ? backendErr.message : backendErr)
+        console.error('[Voice Companion] Backend proxy failed:', backendErr instanceof Error ? backendErr.message : backendErr)
       }
     }
 
@@ -253,7 +257,7 @@ export async function POST(request: NextRequest) {
       ai_tier: 'local_engine',
     })
   } catch (error) {
-    console.error('[Companion Message] Unexpected error:', error)
+    console.error('[Voice Companion Message] Unexpected error:', error)
     return NextResponse.json(
       { error: 'Failed to process message' },
       { status: 500 },

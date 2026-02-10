@@ -328,9 +328,9 @@ export default function KiaanVoiceCompanionPage() {
         setCurrentMood(data.mood || 'neutral')
         setSession(prev => ({ ...prev, phase: data.phase || prev.phase }))
 
-        if (data.ai_tier === 'openai_direct' || data.ai_tier === 'engine_ai') {
+        if (data.ai_tier === 'openai_direct' || data.ai_tier === 'engine_ai' || data.ai_tier === 'backend' || data.ai_tier === 'nextjs_openai') {
           setAiStatus('connected')
-        } else if (data.ai_tier === 'template' || data.ai_tier === 'fallback') {
+        } else if (data.ai_tier === 'template' || data.ai_tier === 'fallback' || data.ai_tier === 'local_engine') {
           setAiStatus('offline')
         }
 
