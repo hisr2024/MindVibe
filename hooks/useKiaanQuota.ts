@@ -44,13 +44,49 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem(KIAAN_USAGE_STORAGE_KEY)
-    if (stored) {
-      const data = JSON.parse(stored) as QuotaData
-      const resetDate = new Date(data.resetDate)
-      
-      // Check if quota should be reset
-      if (resetDate <= new Date()) {
+    try {
+      const stored = localStorage.getItem(KIAAN_USAGE_STORAGE_KEY)
+      if (stored) {
+        let data: QuotaData
+        try {
+          data = JSON.parse(stored) as QuotaData
+        } catch {
+          // Corrupted localStorage data — reset
+          localStorage.removeItem(KIAAN_USAGE_STORAGE_KEY)
+          const freshData: QuotaData = {
+            used: 0,
+            limit: tierQuotas[tier] ?? 20,
+            resetDate: getNextResetDate().toISOString(),
+            tier,
+          }
+          setQuotaData(freshData)
+          localStorage.setItem(KIAAN_USAGE_STORAGE_KEY, JSON.stringify(freshData))
+          setLoading(false)
+          return
+        }
+
+        const resetDate = new Date(data.resetDate)
+
+        // Check if quota should be reset
+        if (resetDate <= new Date()) {
+          const newData: QuotaData = {
+            used: 0,
+            limit: tierQuotas[tier] ?? 20,
+            resetDate: getNextResetDate().toISOString(),
+            tier,
+          }
+          setQuotaData(newData)
+          localStorage.setItem(KIAAN_USAGE_STORAGE_KEY, JSON.stringify(newData))
+        } else {
+          // Update limit if tier changed
+          setQuotaData({
+            ...data,
+            used: Number.isFinite(data.used) ? data.used : 0,
+            limit: tierQuotas[tier] ?? data.limit,
+            tier,
+          })
+        }
+      } else {
         const newData: QuotaData = {
           used: 0,
           limit: tierQuotas[tier] ?? 20,
@@ -59,23 +95,9 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
         }
         setQuotaData(newData)
         localStorage.setItem(KIAAN_USAGE_STORAGE_KEY, JSON.stringify(newData))
-      } else {
-        // Update limit if tier changed
-        setQuotaData({
-          ...data,
-          limit: tierQuotas[tier] ?? data.limit,
-          tier,
-        })
       }
-    } else {
-      const newData: QuotaData = {
-        used: 0,
-        limit: tierQuotas[tier] ?? 20,
-        resetDate: getNextResetDate().toISOString(),
-        tier,
-      }
-      setQuotaData(newData)
-      localStorage.setItem(KIAAN_USAGE_STORAGE_KEY, JSON.stringify(newData))
+    } catch (e) {
+      console.warn('Failed to load KIAAN quota from localStorage', e)
     }
     setLoading(false)
   }, [tier])
@@ -107,7 +129,9 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
 
   const isUnlimited = quotaData.limit === -1
   const remaining = isUnlimited ? Infinity : Math.max(0, quotaData.limit - quotaData.used)
-  const percentage = isUnlimited ? 0 : Math.min(100, (quotaData.used / quotaData.limit) * 100)
+  const percentage = isUnlimited || quotaData.limit <= 0
+    ? 0
+    : Math.min(100, (quotaData.used / quotaData.limit) * 100)
   const resetDate = new Date(quotaData.resetDate)
   const daysUntilReset = Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
 

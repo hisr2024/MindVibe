@@ -19,9 +19,8 @@ export const CURRENCIES: Record<Currency, CurrencyConfig> = {
 export const BASE_PRICES_USD: Record<string, number> = {
   free: 0,
   basic: 2.49,
-  pro: 5,
   premium: 10,
-  executive: 15,
+  enterprise: 15,
 }
 
 // Conversion + discount rules

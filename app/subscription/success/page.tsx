@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button, Card, CardContent } from '@/components/ui'
@@ -11,6 +11,8 @@ function SuccessContent() {
   const router = useRouter()
   const tier = searchParams.get('tier') || 'basic'
   const yearly = searchParams.get('yearly') === 'true'
+  const sessionId = searchParams.get('session_id')
+  const [validating, setValidating] = useState(true)
 
   const tierNames: Record<string, string> = {
     basic: 'Basic',
@@ -19,22 +21,48 @@ function SuccessContent() {
   }
 
   useEffect(() => {
-    // Update subscription in localStorage (simulating successful checkout)
-    // Generate a more unique ID to avoid collisions
-    const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
-      : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    const newSubscription: Subscription = {
-      id: `sub_${uniqueId}`,
-      tierId: tier,
-      tierName: tierNames[tier] || 'Basic',
-      status: 'active',
-      currentPeriodEnd: new Date(Date.now() + (yearly ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
-      cancelAtPeriodEnd: false,
-      isYearly: yearly,
+    async function validateSubscription() {
+      try {
+        // Fetch the real subscription from the server to validate the checkout
+        const response = await fetch('/api/subscriptions/current', {
+          credentials: 'include',
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          const subscription: Subscription = {
+            id: String(data.id ?? `sub_${tier}`),
+            tierId: data.plan?.tier ?? tier,
+            tierName: data.plan?.name ?? tierNames[tier] ?? 'Basic',
+            status: (data.status as Subscription['status']) ?? 'active',
+            currentPeriodEnd: data.current_period_end
+              ? new Date(data.current_period_end).toISOString()
+              : new Date(Date.now() + (yearly ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+            cancelAtPeriodEnd: Boolean(data.cancel_at_period_end),
+            isYearly: yearly,
+          }
+          updateSubscription(subscription)
+        }
+      } catch (err) {
+        console.warn('Could not validate subscription from server, using tier from URL', err)
+      } finally {
+        setValidating(false)
+      }
     }
-    updateSubscription(newSubscription)
-  }, [tier, yearly])
+
+    validateSubscription()
+  }, [tier, yearly, sessionId])
+
+  if (validating) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
+          <p className="text-orange-100">Confirming your subscription...</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">

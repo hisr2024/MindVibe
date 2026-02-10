@@ -7,7 +7,7 @@ export interface Subscription {
   id: string
   tierId: string
   tierName: string
-  status: 'active' | 'canceled' | 'past_due' | 'trialing'
+  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'expired'
   currentPeriodEnd: string
   cancelAtPeriodEnd: boolean
   isYearly: boolean

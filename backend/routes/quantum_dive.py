@@ -21,6 +21,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_current_user_optional, get_db
 from backend.models import UserDailyAnalysis, UserWeeklyReflection
 from backend.services.kiaan_core import KIAANCore
+from backend.middleware.feature_access import get_current_user_id, is_developer
+from backend.services.subscription_service import (
+    check_feature_access,
+    get_or_create_free_subscription,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -306,6 +311,25 @@ async def perform_quantum_dive(
             detail="Authentication required for quantum dive",
         )
 
+    # Premium+ subscription enforcement
+    try:
+        await get_or_create_free_subscription(db, user_id)
+        if not await is_developer(db, user_id):
+            has_access = await check_feature_access(db, user_id, "kiaan_quantum_dive")
+            if not has_access:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "error": "feature_locked",
+                        "message": "Quantum Dive is available on Premium and Enterprise plans. Upgrade to explore your consciousness layers.",
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for quantum-dive, allowing request: {e}")
+
     logger.info(f"Initiating quantum dive for user {user_id}")
 
     try:
@@ -382,6 +406,25 @@ async def deep_dive_layer(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
         )
+
+    # Premium+ subscription enforcement
+    try:
+        await get_or_create_free_subscription(db, user_id)
+        if not await is_developer(db, user_id):
+            has_access = await check_feature_access(db, user_id, "kiaan_quantum_dive")
+            if not has_access:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "error": "feature_locked",
+                        "message": "Quantum Dive is available on Premium and Enterprise plans.",
+                        "upgrade_url": "/pricing",
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Subscription check failed for layer deep-dive, allowing request: {e}")
 
     logger.info(f"Layer deep dive for user {user_id}: {layer}")
 

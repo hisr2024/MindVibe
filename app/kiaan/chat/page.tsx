@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
-import { apiCall, getErrorMessage } from '@/lib/api-client';
+import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeUrl } from '@/lib/api-client';
 import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LanguageSelector } from '@/components/chat/LanguageSelector';
@@ -94,12 +94,20 @@ function KiaanChatPageInner() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('KIAAN chat error:', error);
-      
-      // Add error message
+
+      let errorText = getErrorMessage(error)
+      const upgradeUrl = getUpgradeUrl(error)
+
+      if (isQuotaExceeded(error)) {
+        errorText = `${errorText}\n\nYour monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.`
+      } else if (isFeatureLocked(error)) {
+        errorText = `${errorText}\n\nThis feature requires a higher plan. [View plans](${upgradeUrl || '/pricing'}) to unlock it.`
+      }
+
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         sender: 'assistant',
-        text: getErrorMessage(error),
+        text: errorText,
         timestamp: new Date().toISOString(),
         status: 'error',
       };
