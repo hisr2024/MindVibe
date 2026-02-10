@@ -15,6 +15,7 @@ into a single, voice-centered Divine Friend conversation.
 All existing ecosystem routes/services remain untouched.
 """
 
+import asyncio
 import datetime
 import html
 import logging
@@ -231,6 +232,10 @@ class VoiceCompanionMessageRequest(BaseModel):
     language: str = Field(default="en", max_length=8)
     content_type: str = Field(default="text", pattern=r"^(text|voice)$")
     voice_id: str = Field(default="priya", max_length=32)
+    prefer_speed: bool = Field(
+        default=False,
+        description="When True, skip generic-response retry to reduce latency by ~1-2s",
+    )
 
     @field_validator("message")
     @classmethod
@@ -250,6 +255,7 @@ class VoiceCompanionMessageResponse(BaseModel):
     wisdom_principle: str | None = None
     voice_auto_play: bool = True
     ai_tier: str = "template"
+    response_time_ms: int | None = None
 
 
 class VoiceCompanionEndRequest(BaseModel):
@@ -404,105 +410,153 @@ def _get_conversation_phase(
         return "empower" if turn_count > 8 else "understand"
 
 
-# ─── Direct OpenAI Call ───────────────────────────────────────────────────
+# ─── Async OpenAI client (singleton, created on first use) ────────────────
+_async_openai_client = None
 
-def _call_openai_direct(
+
+def _get_async_openai_client():
+    """Get or create an AsyncOpenAI client for non-blocking voice calls."""
+    global _async_openai_client
+    if _async_openai_client is None:
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        if api_key:
+            try:
+                from openai import AsyncOpenAI
+                _async_openai_client = AsyncOpenAI(api_key=api_key, timeout=10.0)
+            except Exception as e:
+                logger.warning(f"VoiceCompanion: AsyncOpenAI init failed: {e}")
+    return _async_openai_client
+
+
+# ─── Direct OpenAI Call (async, non-blocking) ────────────────────────────
+
+async def _call_openai_direct(
     system_prompt: str,
     conversation_history: list[dict],
     user_message: str,
+    prefer_speed: bool = False,
 ) -> str | None:
-    """Call OpenAI directly via openai_optimizer — the same client that
-    powers Viyoga and Ardha (proven to work in production).
+    """Call OpenAI directly using an async client for non-blocking voice responses.
+
+    Uses AsyncOpenAI to avoid blocking the event loop, which is critical
+    for voice companion latency. Falls back to running the sync client
+    in a thread pool if AsyncOpenAI is unavailable.
+
+    Args:
+        prefer_speed: When True, skip the generic-response retry to save ~1-2s.
 
     Returns the response text, or None if OpenAI is unavailable.
     """
-    # Import sanitize_response at function scope (not inside try) to prevent
-    # import errors from silently killing the entire OpenAI call
     from backend.services.companion_friend_engine import sanitize_response
     from backend.services.openai_optimizer import openai_optimizer
 
-    if not openai_optimizer.ready or not openai_optimizer.client:
-        logger.warning(
-            "VoiceCompanion: openai_optimizer not ready "
-            f"(ready={openai_optimizer.ready}, client={'yes' if openai_optimizer.client else 'no'})"
-        )
+    if not openai_optimizer.ready:
+        logger.warning("VoiceCompanion: openai_optimizer not ready")
         return None
 
+    model = openai_optimizer.default_model
+
+    messages = [{"role": "system", "content": system_prompt}]
+
+    # Add conversation history (last 10 messages for context)
+    for msg in conversation_history[-10:]:
+        role = "user" if msg.get("role") == "user" else "assistant"
+        messages.append({"role": role, "content": msg["content"]})
+
+    messages.append({"role": "user", "content": user_message})
+
+    logger.info(f"VoiceCompanion: Calling OpenAI async (model={model}, msgs={len(messages)})")
+
     try:
-        messages = [{"role": "system", "content": system_prompt}]
+        async_client = _get_async_openai_client()
 
-        # Add conversation history (last 10 messages for context)
-        for msg in conversation_history[-10:]:
-            role = "user" if msg.get("role") == "user" else "assistant"
-            messages.append({"role": role, "content": msg["content"]})
+        if async_client:
+            # Fast path: fully async, does not block the event loop
+            completion = await async_client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=200,
+                temperature=0.72,
+                presence_penalty=0.4,
+                frequency_penalty=0.35,
+            )
+        elif openai_optimizer.client:
+            # Fallback: run sync client in thread pool to avoid blocking
+            completion = await asyncio.to_thread(
+                openai_optimizer.client.chat.completions.create,
+                model=model,
+                messages=messages,
+                max_tokens=200,
+                temperature=0.72,
+                presence_penalty=0.4,
+                frequency_penalty=0.35,
+            )
+        else:
+            logger.warning("VoiceCompanion: No OpenAI client available")
+            return None
 
-        messages.append({"role": "user", "content": user_message})
+        if not (completion.choices and completion.choices[0].message):
+            logger.warning("VoiceCompanion: OpenAI returned no choices")
+            return None
 
-        logger.info(
-            f"VoiceCompanion: Calling OpenAI "
-            f"(model={openai_optimizer.default_model}, msgs={len(messages)})"
+        text = (completion.choices[0].message.content or "").strip()
+        if not text:
+            logger.warning("VoiceCompanion: OpenAI returned empty response")
+            return None
+
+        text = sanitize_response(text)
+
+        # Quality check: if response is too generic, retry once (async)
+        # Skip retry when prefer_speed is True to save ~1-2s latency
+        generic_markers = [
+            "i'm here for you", "that must be hard", "that sounds difficult",
+            "i understand", "tell me more", "how does that make you feel",
+        ]
+        is_generic = (
+            not prefer_speed
+            and sum(1 for m in generic_markers if m in text.lower()) >= 2
         )
 
-        completion = openai_optimizer.client.chat.completions.create(
-            model=openai_optimizer.default_model,
-            messages=messages,
-            max_tokens=250,
-            temperature=0.72,
-            presence_penalty=0.4,
-            frequency_penalty=0.35,
-        )
-
-        if completion.choices and completion.choices[0].message:
-            text = completion.choices[0].message.content or ""
-            text = text.strip()
-
-            if not text:
-                logger.warning("VoiceCompanion: OpenAI returned empty response")
-                return None
-
-            # Sanitize religious references
-            text = sanitize_response(text)
-
-            # Quality check: if response is too generic, retry once
-            generic_markers = [
-                "i'm here for you", "that must be hard", "that sounds difficult",
-                "i understand", "tell me more", "how does that make you feel",
-            ]
-            is_generic = sum(1 for m in generic_markers if m in text.lower()) >= 2
-
-            if is_generic:
-                logger.info("VoiceCompanion: generic response detected, retrying")
-                messages.append({"role": "assistant", "content": text})
-                messages.append({
+        if is_generic:
+            logger.info("VoiceCompanion: generic response detected, retrying")
+            retry_messages = messages + [
+                {"role": "assistant", "content": text},
+                {
                     "role": "user",
                     "content": (
                         "[SYSTEM: Your response was too generic. Be MORE specific to what "
                         "they actually said. Reference their exact words. Give a concrete "
                         "insight, not a vague platitude. Try again — shorter, sharper, realer.]"
                     ),
-                })
-                retry = openai_optimizer.client.chat.completions.create(
-                    model=openai_optimizer.default_model,
-                    messages=messages,
-                    max_tokens=250,
+                },
+            ]
+            if async_client:
+                retry_completion = await async_client.chat.completions.create(
+                    model=model,
+                    messages=retry_messages,
+                    max_tokens=200,
                     temperature=0.65,
                     presence_penalty=0.5,
                     frequency_penalty=0.4,
                 )
-                if retry.choices and retry.choices[0].message:
-                    retry_text = (retry.choices[0].message.content or "").strip()
-                    if retry_text:
-                        text = sanitize_response(retry_text)
+            else:
+                retry_completion = await asyncio.to_thread(
+                    openai_optimizer.client.chat.completions.create,
+                    model=model,
+                    messages=retry_messages,
+                    max_tokens=200,
+                    temperature=0.65,
+                    presence_penalty=0.5,
+                    frequency_penalty=0.4,
+                )
+            if retry_completion.choices and retry_completion.choices[0].message:
+                retry_text = (retry_completion.choices[0].message.content or "").strip()
+                if retry_text:
+                    text = sanitize_response(retry_text)
 
-            tokens = completion.usage.total_tokens if completion.usage else 0
-            logger.info(
-                f"VoiceCompanion: OpenAI response generated "
-                f"(model={openai_optimizer.default_model}, tokens={tokens})"
-            )
-            return text
-
-        logger.warning("VoiceCompanion: OpenAI returned no choices")
-        return None
+        tokens = completion.usage.total_tokens if completion.usage else 0
+        logger.info(f"VoiceCompanion: OpenAI response generated (model={model}, tokens={tokens})")
+        return text
 
     except Exception as e:
         logger.error(f"VoiceCompanion: Direct OpenAI call failed: {type(e).__name__}: {e}")
@@ -662,26 +716,27 @@ async def send_voice_companion_message(
             detail="No active voice companion session found. Start a new session first.",
         )
 
-    # Get conversation history
-    history_result = await db.execute(
-        select(CompanionMessage)
-        .where(
-            CompanionMessage.session_id == session.id,
-            CompanionMessage.deleted_at.is_(None),
-        )
-        .order_by(CompanionMessage.created_at)
-        .limit(20)
+    # Get conversation history + user context in parallel
+    # Running these concurrently saves ~50-150ms vs sequential execution
+    history_result, profile, memories, session_summaries = await asyncio.gather(
+        db.execute(
+            select(CompanionMessage)
+            .where(
+                CompanionMessage.session_id == session.id,
+                CompanionMessage.deleted_at.is_(None),
+            )
+            .order_by(CompanionMessage.created_at)
+            .limit(20)
+        ),
+        _get_or_create_profile(db, current_user.id),
+        _get_user_memories(db, current_user.id),
+        _get_recent_session_summaries(db, current_user.id),
     )
     history_messages = history_result.scalars().all()
     conversation_history = [
         {"role": msg.role, "content": msg.content}
         for msg in history_messages
     ]
-
-    # Get user context
-    profile = await _get_or_create_profile(db, current_user.id)
-    memories = await _get_user_memories(db, current_user.id)
-    session_summaries = await _get_recent_session_summaries(db, current_user.id)
 
     user_turn_count = sum(1 for m in history_messages if m.role == "user") + 1
 
@@ -783,10 +838,11 @@ async def send_voice_companion_message(
         session_summaries=session_summaries,
     )
 
-    response_text = _call_openai_direct(
+    response_text = await _call_openai_direct(
         system_prompt=system_prompt,
         conversation_history=conversation_history,
         user_message=body.message,
+        prefer_speed=body.prefer_speed,
     )
 
     if response_text:
@@ -886,17 +942,9 @@ async def send_voice_companion_message(
     # Update profile
     profile.total_messages += 2
 
-    # Extract and save memories
-    try:
-        engine = get_companion_engine()
-        memory_entries = await engine.extract_memories_with_ai(
-            user_message=body.message,
-            companion_response=response_text,
-            mood=mood,
-        )
-    except Exception:
-        memory_entries = extract_memories_from_message(body.message, mood)
-
+    # Extract memories using fast local extraction (non-blocking)
+    # AI-based memory extraction is deferred to avoid adding latency
+    memory_entries = extract_memories_from_message(body.message, mood)
     if memory_entries:
         await _save_memories(db, current_user.id, session.id, memory_entries)
 
@@ -905,6 +953,23 @@ async def send_voice_companion_message(
     profile.common_moods = moods
 
     await db.commit()
+
+    # Schedule AI-powered memory extraction in background (does not block response)
+    async def _extract_memories_background():
+        try:
+            engine = get_companion_engine()
+            ai_memories = await engine.extract_memories_with_ai(
+                user_message=body.message,
+                companion_response=response_text,
+                mood=mood,
+            )
+            if ai_memories:
+                await _save_memories(db, current_user.id, session.id, ai_memories)
+                await db.commit()
+        except Exception as e:
+            logger.debug(f"VoiceCompanion: Background memory extraction skipped: {e}")
+
+    asyncio.create_task(_extract_memories_background())
 
     logger.info(
         f"VoiceCompanion response: user={current_user.id}, "
@@ -922,6 +987,7 @@ async def send_voice_companion_message(
         wisdom_principle=(wisdom_used or {}).get("principle"),
         voice_auto_play=True,
         ai_tier=ai_tier,
+        response_time_ms=int(response_time_ms),
     )
 
 
