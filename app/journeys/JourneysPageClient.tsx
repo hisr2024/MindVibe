@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FadeIn } from '@/components/ui'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import useAuth from '@/hooks/useAuth'
 import {
   journeyEngineService,
   JourneyEngineError,
@@ -457,6 +458,7 @@ function StatsCards({ dashboard }: StatsCardsProps) {
 export default function JourneysPageClient() {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
+  const { isAuthenticated, loading: authLoading } = useAuth()
 
   // State
   const [loading, setLoading] = useState(true)
@@ -483,23 +485,29 @@ export default function JourneysPageClient() {
         limit: showAllTemplates ? 50 : 6,
       })
 
-      // Attempt to load dashboard - auth is handled via httpOnly cookies.
-      // If user is not authenticated, the API returns 401 and we show auth prompt.
-      const dashboardPromise: Promise<DashboardResponse | null> =
-        journeyEngineService.getDashboard().catch((err) => {
-          console.warn('[JourneysPageClient] Dashboard load failed:', err)
+      // Only attempt dashboard if user is authenticated.
+      // This avoids a 401 network error for unauthenticated users.
+      let dashboardPromise: Promise<DashboardResponse | null>
+      if (isAuthenticated) {
+        dashboardPromise = journeyEngineService.getDashboard().catch((err) => {
           if (err instanceof JourneyEngineError && err.isAuthError()) {
             setIsAuthError(true)
           }
           return null
         })
+      } else {
+        dashboardPromise = Promise.resolve(null)
+        setIsAuthError(true)
+      }
 
       const [templatesData, dashboardData] = await Promise.all([
         templatesPromise,
         dashboardPromise,
       ])
 
-      setTemplates(templatesData.templates)
+      if (templatesData?.templates) {
+        setTemplates(templatesData.templates)
+      }
       if (dashboardData) {
         setDashboard(dashboardData)
       }
@@ -514,15 +522,17 @@ export default function JourneysPageClient() {
       } else {
         setError('Failed to load journeys. Please try again.')
       }
-      console.error('[JourneysPageClient] Error:', err)
     } finally {
       setLoading(false)
     }
-  }, [selectedEnemy, showAllTemplates])
+  }, [selectedEnemy, showAllTemplates, isAuthenticated])
 
+  // Wait for auth check to resolve before loading data
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    if (!authLoading) {
+      loadData()
+    }
+  }, [loadData, authLoading])
 
   // Handle starting a journey
   const handleStartJourney = async (templateId: string) => {
@@ -652,8 +662,8 @@ export default function JourneysPageClient() {
     )
   }
 
-  // Render loading state
-  if (loading) {
+  // Render loading state (includes auth check)
+  if (loading || authLoading) {
     return (
       <main className="mx-auto max-w-5xl space-y-6 px-3 sm:px-4 pb-28 sm:pb-20 pt-2 sm:pt-4 lg:px-6">
         <FadeIn>

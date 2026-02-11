@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FadeIn } from '@/components/ui'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import useAuth from '@/hooks/useAuth'
 import {
   journeyService,
   JourneyServiceError,
@@ -199,6 +200,7 @@ function JourneyCard({ journey, onDelete }: JourneyCardProps) {
 export default function JourneysListClient() {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
+  const { isAuthenticated, loading: authLoading } = useAuth()
 
   // State
   const [journeys, setJourneys] = useState<Journey[]>([])
@@ -213,6 +215,14 @@ export default function JourneysListClient() {
 
   // Load journeys
   const loadJourneys = useCallback(async () => {
+    // Skip API call if not authenticated to avoid 401 console errors
+    if (!isAuthenticated) {
+      setIsAuthError(true)
+      setError('Please sign in to view your journeys.')
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -230,7 +240,6 @@ export default function JourneysListClient() {
       setTotal(result.total)
     } catch (err) {
       if (err instanceof JourneyServiceError) {
-        // Handle authentication errors specifically
         if (err.isAuthError()) {
           setIsAuthError(true)
           setError('Please sign in to view your journeys.')
@@ -244,18 +253,17 @@ export default function JourneysListClient() {
       } else {
         setError('Failed to load journeys. Please try again.')
       }
-      // Don't log auth errors to console - they're expected for unauthenticated users
-      if (!(err instanceof JourneyServiceError && err.isAuthError())) {
-        console.warn('[JourneysListClient] Error loading journeys:', err)
-      }
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, searchQuery, sortBy, sortOrder])
+  }, [statusFilter, searchQuery, sortBy, sortOrder, isAuthenticated])
 
+  // Wait for auth check before loading data
   useEffect(() => {
-    loadJourneys()
-  }, [loadJourneys])
+    if (!authLoading) {
+      loadJourneys()
+    }
+  }, [loadJourneys, authLoading])
 
   // Handle delete
   const handleDelete = async (id: string) => {
