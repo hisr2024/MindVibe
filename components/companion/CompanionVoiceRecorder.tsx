@@ -8,7 +8,7 @@
  * tap-to-record and hold-to-record modes.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 // BCP-47 language tags for Web Speech API multilingual STT
 const LANGUAGE_BCP47: Record<string, string> = {
@@ -28,12 +28,16 @@ interface VoiceRecorderProps {
 
 type RecordingState = 'idle' | 'recording' | 'transcribing'
 
-export default function CompanionVoiceRecorder({
+export interface CompanionVoiceRecorderHandle {
+  triggerRecord: () => void
+}
+
+const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRecorderProps>(function CompanionVoiceRecorder({
   onTranscription,
   isDisabled = false,
   isProcessing = false,
   language = 'en',
-}: VoiceRecorderProps) {
+}, ref) {
   const [state, setState] = useState<RecordingState>('idle')
   const [duration, setDuration] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -125,6 +129,15 @@ export default function CompanionVoiceRecorder({
     }
   }, [state, startRecording, stopRecording])
 
+  // Expose triggerRecord for wake word integration
+  useImperativeHandle(ref, () => ({
+    triggerRecord: () => {
+      if (state === 'idle' && !isDisabled && !isProcessing) {
+        startRecording()
+      }
+    },
+  }), [state, isDisabled, isProcessing, startRecording])
+
   const formatDuration = (seconds: number) => {
     const m = Math.floor(seconds / 60)
     const s = seconds % 60
@@ -180,4 +193,6 @@ export default function CompanionVoiceRecorder({
       )}
     </div>
   )
-}
+})
+
+export default CompanionVoiceRecorder
