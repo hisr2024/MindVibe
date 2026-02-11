@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        cookie: request.headers.get('cookie') || '',
       },
       body: JSON.stringify({
         message: sanitizedMessage,

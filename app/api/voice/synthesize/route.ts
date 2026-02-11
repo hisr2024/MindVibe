@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          cookie: request.headers.get('cookie') || '',
         },
         body: JSON.stringify({
           text: sanitizedText,

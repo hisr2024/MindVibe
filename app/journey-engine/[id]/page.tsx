@@ -40,14 +40,18 @@ export default function JourneyDetailPage() {
     setError(null)
 
     try {
-      const [journeyData, stepData] = await Promise.all([
-        journeyEngineService.getJourney(journeyId),
-        journeyEngineService.getCurrentStep(journeyId),
-      ])
-
+      // Load journey first (required), then step (may 404 for completed journeys)
+      const journeyData = await journeyEngineService.getJourney(journeyId)
       setJourney(journeyData)
-      setCurrentStep(stepData)
-      setSelectedDay(stepData?.day_index || journeyData.current_day)
+
+      try {
+        const stepData = await journeyEngineService.getCurrentStep(journeyId)
+        setCurrentStep(stepData)
+        setSelectedDay(stepData?.day_index || journeyData.current_day)
+      } catch (stepErr) {
+        // Step may not exist for completed journeys — not fatal
+        setSelectedDay(journeyData.current_day)
+      }
     } catch (err) {
       if (err instanceof JourneyEngineError) {
         if (err.isAuthError()) {

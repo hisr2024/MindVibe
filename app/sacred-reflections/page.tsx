@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import { apiFetch } from '@/lib/api'
 import { useLanguage } from '@/hooks/useLanguage'
 
 type EncryptedPayload = {
@@ -193,10 +194,7 @@ export default function SacredReflectionsPage() {
   async function syncFromServer() {
     if (!passphrase) return
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/journal/entries`, {
-        credentials: 'include'
-      })
+      const response = await apiFetch('/api/journal/entries')
       if (!response.ok) return
       const data: ApiEntry[] = await response.json()
       const decrypted: JournalEntry[] = []
@@ -245,11 +243,9 @@ export default function SacredReflectionsPage() {
     // Push to backend for cross-device sync (encrypted only)
     try {
       const payload = await encryptText(JSON.stringify(entry), passphrase)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      await fetch(`${apiUrl}/journal/entries`, {
+      await apiFetch('/api/journal/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           entry_id: entry.id,
           content: payload,

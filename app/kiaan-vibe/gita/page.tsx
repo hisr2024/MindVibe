@@ -27,13 +27,17 @@ export default function GitaChaptersPage() {
   // Load available languages on mount
   useEffect(() => {
     const loadLanguages = async () => {
-      const langs = await getAvailableLanguages()
-      setAvailableLanguages(langs)
+      try {
+        const langs = await getAvailableLanguages()
+        setAvailableLanguages(langs)
 
-      // Auto-detect browser language
-      const browserLang = detectBrowserLanguage()
-      if (langs.includes(browserLang)) {
-        setSelectedLanguage(browserLang)
+        // Auto-detect browser language
+        const browserLang = detectBrowserLanguage()
+        if (langs.includes(browserLang)) {
+          setSelectedLanguage(browserLang)
+        }
+      } catch (err) {
+        console.error('[GitaChapters] Failed to load languages:', err)
       }
     }
     loadLanguages()

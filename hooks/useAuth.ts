@@ -242,8 +242,12 @@ export function useAuth(): UseAuthResult {
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       if (event.key === AUTH_USER_KEY) {
-        const newUser = event.newValue ? JSON.parse(event.newValue) : null
-        setUser(newUser)
+        try {
+          const newUser = event.newValue ? JSON.parse(event.newValue) : null
+          setUser(newUser)
+        } catch {
+          setUser(null)
+        }
       }
     }
 

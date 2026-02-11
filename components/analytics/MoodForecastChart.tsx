@@ -90,7 +90,8 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
   }))
 
   // Calculate average predicted score
-  const avgPredicted = forecastData.predictions.reduce((sum, p) => sum + p.predicted_score, 0) / forecastData.predictions.length
+  const scores = forecastData.predictions.map(p => p.predicted_score)
+  const avgPredicted = scores.length > 0 ? scores.reduce((sum, s) => sum + s, 0) / scores.length : 0
 
   // Determine trend
   const firstScore = forecastData.predictions[0]?.predicted_score || 0
@@ -134,13 +135,13 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
         <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3">
           <div className="text-xs text-orange-100/60 mb-1">Best Day</div>
           <div className="text-2xl font-bold text-green-400">
-            {Math.max(...forecastData.predictions.map(p => p.predicted_score)).toFixed(1)}
+            {(scores.length > 0 ? Math.max(...scores) : 0).toFixed(1)}
           </div>
         </div>
         <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3">
           <div className="text-xs text-orange-100/60 mb-1">Lowest Day</div>
           <div className="text-2xl font-bold text-red-400">
-            {Math.min(...forecastData.predictions.map(p => p.predicted_score)).toFixed(1)}
+            {(scores.length > 0 ? Math.min(...scores) : 0).toFixed(1)}
           </div>
         </div>
       </div>

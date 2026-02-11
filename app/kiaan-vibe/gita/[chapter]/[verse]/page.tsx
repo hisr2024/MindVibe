@@ -220,18 +220,23 @@ export default function VerseDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     const loadVerse = async () => {
-      setLoading(true)
+      try {
+        setLoading(true)
 
-      if (showAllTranslations) {
-        const langs = await getAvailableLanguages()
-        const multiVerse = await getVerseMultiLang(chapterNumber, verseNumber, langs)
-        setVerse(multiVerse)
-      } else {
-        const singleVerse = await getVerse(chapterNumber, verseNumber, languageCode)
-        setVerse(singleVerse)
+        if (showAllTranslations) {
+          const langs = await getAvailableLanguages()
+          const multiVerse = await getVerseMultiLang(chapterNumber, verseNumber, langs)
+          setVerse(multiVerse)
+        } else {
+          const singleVerse = await getVerse(chapterNumber, verseNumber, languageCode)
+          setVerse(singleVerse)
+        }
+      } catch (err) {
+        console.error('[GitaVerse] Failed to load verse:', err)
+        setVerse(null)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
     loadVerse()
   }, [chapterNumber, verseNumber, languageCode, showAllTranslations])

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardContent } from '@/components/ui'
 import { SettingsSection, SettingsItem, SettingsDivider } from '@/components/settings'
 import { apiFetch } from '@/lib/api'
+import useAuth from '@/hooks/useAuth'
 
 interface TwoFactorStatus {
   enabled: boolean
@@ -22,6 +23,7 @@ interface SetupData {
 type SetupStep = 'initial' | 'scanning' | 'verify' | 'backup' | 'complete'
 
 export default function SecuritySettingsPage() {
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [twoFactorStatus, setTwoFactorStatus] = useState<TwoFactorStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -59,8 +61,15 @@ export default function SecuritySettingsPage() {
   }, [])
 
   useEffect(() => {
-    fetchStatus()
-  }, [fetchStatus])
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        setError('Please log in to manage security settings')
+        setLoading(false)
+        return
+      }
+      fetchStatus()
+    }
+  }, [fetchStatus, authLoading, isAuthenticated])
 
   const startSetup = async () => {
     try {
