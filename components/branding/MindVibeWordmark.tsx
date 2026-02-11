@@ -12,9 +12,9 @@ interface MindVibeWordmarkProps {
 }
 
 const sizes = {
-  sm: { text: 'text-xl', tagline: 'text-[11px]', krishnaSize: 12 },
-  md: { text: 'text-3xl', tagline: 'text-xs', krishnaSize: 14 },
-  lg: { text: 'text-4xl', tagline: 'text-sm', krishnaSize: 16 },
+  sm: { text: 'text-xl', tagline: 'text-[11px]', spiritual: 'text-xs', krishnaSize: 14, gap: 'gap-0.5' },
+  md: { text: 'text-3xl', tagline: 'text-xs', spiritual: 'text-sm', krishnaSize: 18, gap: 'gap-1' },
+  lg: { text: 'text-4xl', tagline: 'text-sm', spiritual: 'text-base', krishnaSize: 22, gap: 'gap-1.5' },
 }
 
 export function MindVibeWordmark({
@@ -25,7 +25,7 @@ export function MindVibeWordmark({
 }: MindVibeWordmarkProps) {
   const shouldReduceMotion = useReducedMotion()
   const isAnimated = animated && !shouldReduceMotion
-  const { text, tagline, krishnaSize } = sizes[size]
+  const { text, tagline, spiritual, krishnaSize, gap } = sizes[size]
 
   return (
     <motion.div
@@ -45,18 +45,39 @@ export function MindVibeWordmark({
       </motion.span>
       {showTagline && (
         <motion.span
-          className={`${tagline} font-semibold text-orange-50/80 tracking-[0.08em] flex items-center gap-1`}
-          initial={isAnimated ? { opacity: 0.7 } : undefined}
-          animate={isAnimated ? { opacity: [0.7, 1, 0.7] } : undefined}
-          transition={
-            isAnimated
-              ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }
-              : undefined
-          }
+          className={`${tagline} font-medium text-orange-50/60 tracking-[0.08em] flex items-center ${gap}`}
+          initial={isAnimated ? { opacity: 0 } : undefined}
+          animate={isAnimated ? { opacity: 1 } : undefined}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           Your{' '}
-          <KrishnaSymbol size={krishnaSize} animated={animated} />
-          {' '}Spiritual Companion
+          <span className="relative inline-flex items-center">
+            <KrishnaSymbol size={krishnaSize} animated={animated} glow />
+            <motion.span
+              className={`${spiritual} font-bold tracking-[0.1em] bg-clip-text text-transparent`}
+              style={{
+                backgroundImage: gradientCss.spiritualSaffron,
+                filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.4))',
+              }}
+              animate={
+                isAnimated
+                  ? { filter: [
+                      'drop-shadow(0 0 6px rgba(251, 191, 36, 0.3))',
+                      'drop-shadow(0 0 12px rgba(251, 191, 36, 0.55))',
+                      'drop-shadow(0 0 6px rgba(251, 191, 36, 0.3))',
+                    ]}
+                  : undefined
+              }
+              transition={
+                isAnimated
+                  ? { duration: 3, repeat: Infinity, ease: 'easeInOut' }
+                  : undefined
+              }
+            >
+              Spiritual
+            </motion.span>
+          </span>
+          {' '}Companion
         </motion.span>
       )}
     </motion.div>

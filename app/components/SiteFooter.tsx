@@ -2,17 +2,26 @@
 
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
+import { KrishnaSymbol } from '@/components/branding/KrishnaSymbol'
 
 export default function SiteFooter() {
   const { t } = useLanguage()
-  
+
   return (
     <footer className="border-t border-orange-500/10 bg-slate-950/80 backdrop-blur-lg">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
           <p className="text-sm uppercase tracking-[0.24em] text-orange-100/70">{t('common.app.name', 'MindVibe')}</p>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-400/70">
-            {t('common.app.tagline', 'Your Spiritual Companion')}
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
+            <span className="text-orange-100/60">{t('common.app.taglinePrefix', 'Your')}</span>
+            <KrishnaSymbol size={12} animated={false} glow={false} />
+            <span
+              className="bg-clip-text text-transparent font-bold"
+              style={{ backgroundImage: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 35%, #fbbf24 60%, #fcd34d 100%)' }}
+            >
+              {t('common.app.taglineSpiritual', 'Spiritual')}
+            </span>
+            <span className="text-orange-100/60">{t('common.app.taglineSuffix', 'Companion')}</span>
           </p>
           <p className="max-w-md text-sm text-orange-100/70">
             {t('navigation.footer.description', 'Designed for calm, privacy-first mental health support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.')}

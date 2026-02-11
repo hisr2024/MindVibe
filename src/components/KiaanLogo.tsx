@@ -2,6 +2,7 @@
 
 import { easeInOut, motion, useReducedMotion } from 'framer-motion'
 import { useMemo, useState } from 'react'
+import { KrishnaSymbol } from '@/components/branding/KrishnaSymbol'
 
 export type KiaanLogoSize = 'sm' | 'md' | 'lg'
 
@@ -79,7 +80,7 @@ export function KiaanLogo({
         {subtitleVisible && (
           <>
             <motion.span
-              className={`${subtitle} font-semibold tracking-[0.12em] text-slate-100/90`}
+              className={`${subtitle} font-semibold tracking-[0.12em] text-slate-100/90 flex items-center gap-1`}
               initial={motionEnabled ? { opacity: 0.75 } : undefined}
               animate={motionEnabled ? { opacity: hovered ? 1 : [0.75, 0.92, 0.75] } : undefined}
               transition={
@@ -88,7 +89,20 @@ export function KiaanLogo({
                   : undefined
               }
             >
-              Your Spiritual Companion
+              Your{' '}
+              <span className="inline-flex items-center gap-0.5">
+                <KrishnaSymbol size={size === 'sm' ? 12 : size === 'md' ? 14 : 16} animated={animated} glow={false} />
+                <span
+                  className="font-bold bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 35%, #fbbf24 60%, #fcd34d 100%)',
+                    filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.35))',
+                  }}
+                >
+                  Spiritual
+                </span>
+              </span>
+              {' '}Companion
             </motion.span>
             <motion.span
               className={`${subtitle} font-semibold tracking-[0.16em] text-slate-200/80`}
