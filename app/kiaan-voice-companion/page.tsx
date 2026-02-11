@@ -25,17 +25,19 @@ import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorde
 import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
 import CompanionVoicePlayer from '@/components/companion/CompanionVoicePlayer'
 import CompanionBreathingExercise from '@/components/companion/CompanionBreathingExercise'
-import VoiceLanguageSpeakerSelector from '@/components/voice/VoiceLanguageSpeakerSelector'
+import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
+import type { VoiceCompanionConfig } from '@/components/voice/VoiceCompanionSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { useWakeWord } from '@/hooks/useWakeWord'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
 import type { CompanionVoiceRecorderHandle } from '@/components/companion/CompanionVoiceRecorder'
 
-// ─── Voice Config Type ──────────────────────────────────────────────
+// ─── Voice Config Type (extends VoiceCompanionConfig for page state) ──
 interface VoiceConfig {
   language: string
   speakerId: string
+  voiceId: string
   emotion: string
   speed: number
   pitch: number
@@ -167,11 +169,26 @@ export default function KiaanVoiceCompanionPage() {
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
     language: 'en',
     speakerId: 'en_priya',
+    voiceId: 'priya',
     emotion: 'neutral',
     speed: 0.95,
     pitch: 0.0,
     autoPlay: true, // Voice auto-play ON by default for Voice Companion
   })
+
+  // Bridge between VoiceCompanionConfig and page-level VoiceConfig
+  const handleVoiceCompanionConfigChange = useCallback((cfg: VoiceCompanionConfig) => {
+    setVoiceConfig(prev => ({
+      ...prev,
+      language: cfg.language,
+      voiceId: cfg.voiceId,
+      speakerId: `${cfg.language}_${cfg.voiceId}`,
+      emotion: cfg.emotion,
+      speed: cfg.speed,
+      pitch: cfg.pitch,
+      autoPlay: cfg.autoPlay,
+    }))
+  }, [])
 
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false)
   const [isRecordingFromWake, setIsRecordingFromWake] = useState(false)
@@ -230,7 +247,7 @@ export default function KiaanVoiceCompanionPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           language: voiceConfig.language,
-          voice_id: voiceConfig.speakerId.split('_').pop() || 'priya',
+          voice_id: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya',
         }),
       })
 
@@ -263,7 +280,7 @@ export default function KiaanVoiceCompanionPage() {
     } finally {
       setIsInitializing(false)
     }
-  }, [voiceConfig.language, voiceConfig.speakerId])
+  }, [voiceConfig.language, voiceConfig.speakerId, voiceConfig.voiceId])
 
   const createLocalSession = useCallback(() => {
     const localId = `local_${Date.now()}`
@@ -361,9 +378,10 @@ export default function KiaanVoiceCompanionPage() {
           message: text.trim(),
           language: voiceConfig.language,
           content_type: 'text',
-          voice_id: voiceConfig.speakerId.split('_').pop() || 'priya',
+          voice_id: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya',
           prefer_speed: true,
           response_mode: 'auto',
+          emotion_tone: voiceConfig.emotion,
         }),
       })
 
@@ -402,7 +420,7 @@ export default function KiaanVoiceCompanionPage() {
       setIsLoading(false)
       setShowSuggestions(true)
     }
-  }, [isLoading, session.sessionId, voiceConfig.language, voiceConfig.speakerId])
+  }, [isLoading, session.sessionId, voiceConfig.language, voiceConfig.speakerId, voiceConfig.voiceId, voiceConfig.emotion])
 
   const addLocalFallbackResponse = useCallback((userText: string) => {
     const result = friendEngineRef.current.processMessage(userText)
@@ -700,12 +718,19 @@ export default function KiaanVoiceCompanionPage() {
         </div>
       </header>
 
-      {/* ─── Voice & Language Settings Panel ─── */}
+      {/* ─── Voice & Language Settings Panel (ElevenLabs-Inspired) ─── */}
       {showVoiceSettings && (
         <div className="relative z-20 max-w-xl mx-auto w-full px-4 pt-3">
-          <VoiceLanguageSpeakerSelector
-            currentConfig={voiceConfig}
-            onConfigChange={setVoiceConfig}
+          <VoiceCompanionSelector
+            currentConfig={{
+              language: voiceConfig.language as any,
+              voiceId: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya',
+              emotion: voiceConfig.emotion,
+              speed: voiceConfig.speed,
+              pitch: voiceConfig.pitch,
+              autoPlay: voiceConfig.autoPlay,
+            }}
+            onConfigChange={handleVoiceCompanionConfigChange}
             onClose={() => setShowVoiceSettings(false)}
           />
         </div>
@@ -812,7 +837,7 @@ export default function KiaanVoiceCompanionPage() {
                   <CompanionVoicePlayer
                     text={msg.content}
                     mood={msg.mood || currentMood}
-                    voiceId={voiceConfig.speakerId.split('_').pop() || 'priya'}
+                    voiceId={voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya'}
                     language={voiceConfig.language}
                     compact
                     autoPlay={voiceConfig.autoPlay && i === messages.length - 1}
