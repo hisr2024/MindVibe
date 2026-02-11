@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardContent } from '@/components/ui'
 import { apiFetch } from '@/lib/api'
+import useAuth from '@/hooks/useAuth'
 
 interface Session {
   session_id: string
@@ -17,6 +18,7 @@ interface Session {
 }
 
 export default function SessionsPage() {
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -42,8 +44,15 @@ export default function SessionsPage() {
   }, [])
 
   useEffect(() => {
-    fetchSessions()
-  }, [fetchSessions])
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        setError('Please log in to view sessions')
+        setLoading(false)
+        return
+      }
+      fetchSessions()
+    }
+  }, [fetchSessions, authLoading, isAuthenticated])
 
   const revokeSession = async (sessionId: string) => {
     try {

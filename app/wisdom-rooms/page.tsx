@@ -67,6 +67,12 @@ export default function WisdomRoomsPage() {
   }, [])
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setRooms(defaultRooms)
+      setActiveRoomId(defaultRooms[0].slug)
+      return
+    }
+
     async function loadRooms() {
       try {
         const response = await apiFetch('/api/rooms')
@@ -84,7 +90,7 @@ export default function WisdomRoomsPage() {
     }
 
     loadRooms()
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!activeRoomId || !rooms.length || !isAuthenticated) return

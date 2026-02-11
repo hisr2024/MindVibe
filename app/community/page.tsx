@@ -91,6 +91,8 @@ export default function CommunityPage() {
         body: JSON.stringify({ circle_id: selectedCircle.id, content })
       })
 
+      if (!res.ok) return
+
       const data = await res.json()
 
       if (data.crisis_detected) {
@@ -107,28 +109,35 @@ export default function CommunityPage() {
   }
 
   const handleReact = async (postId: number, reactionType: string) => {
+    // Optimistic update
+    const previousPosts = posts
+    setPosts(prev => prev.map(post =>
+      post.id === postId
+        ? {
+            ...post,
+            reaction_counts: {
+              ...post.reaction_counts,
+              [reactionType]: (post.reaction_counts[reactionType] || 0) + 1
+            },
+            user_reaction: reactionType
+          }
+        : post
+    ))
+
     try {
-      await apiFetch(`/api/community/posts/${postId}/react`, {
+      const res = await apiFetch(`/api/community/posts/${postId}/react`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reaction: reactionType })
       })
 
-      // Update local state
-      setPosts(prev => prev.map(post =>
-        post.id === postId
-          ? {
-              ...post,
-              reaction_counts: {
-                ...post.reaction_counts,
-                [reactionType]: (post.reaction_counts[reactionType] || 0) + 1
-              },
-              user_reaction: reactionType
-            }
-          : post
-      ))
+      if (!res.ok) {
+        // Rollback optimistic update on failure
+        setPosts(previousPosts)
+      }
     } catch (err) {
-      console.error('Failed to react:', err)
+      // Rollback optimistic update on network error
+      setPosts(previousPosts)
     }
   }
 

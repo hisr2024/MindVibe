@@ -33,10 +33,16 @@ export default function ChapterVersesPage({ params }: PageProps) {
 
   useEffect(() => {
     const loadChapter = async () => {
-      setLoading(true)
-      const data = await getChapter(chapterNumber, languageCode)
-      setChapter(data)
-      setLoading(false)
+      try {
+        setLoading(true)
+        const data = await getChapter(chapterNumber, languageCode)
+        setChapter(data)
+      } catch (err) {
+        console.error('[GitaChapter] Failed to load chapter:', err)
+        setChapter(null)
+      } finally {
+        setLoading(false)
+      }
     }
     loadChapter()
   }, [chapterNumber, languageCode])

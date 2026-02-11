@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
+          cookie: request.headers.get('cookie') || '',
         },
         body: JSON.stringify({
           message: sanitizedMessage,
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          cookie: request.headers.get('cookie') || '',
         },
         body: JSON.stringify({
           message: sanitizedMessage,

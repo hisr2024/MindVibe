@@ -323,26 +323,36 @@ export default function JourneyEnginePage() {
     setError(null)
 
     try {
-      const [dashboardData, radar, templateList] = await Promise.all([
+      // Load independently so partial failures don't kill all data
+      const [dashboardResult, radarResult, templateResult] = await Promise.allSettled([
         journeyEngineService.getDashboard(),
         journeyEngineService.getEnemyRadar(),
         journeyEngineService.listTemplates({ limit: 20 }),
       ])
 
-      setDashboard(dashboardData)
-      setRadarData(radar)
-      setTemplates(templateList.templates)
-      setFilteredTemplates(templateList.templates)
-    } catch (err) {
-      if (err instanceof JourneyEngineError) {
-        if (err.isAuthError()) {
+      // Check for auth errors in any result
+      for (const result of [dashboardResult, radarResult, templateResult]) {
+        if (result.status === 'rejected' && result.reason instanceof JourneyEngineError && result.reason.isAuthError()) {
           setError('Please sign in to access your journey dashboard')
-        } else {
-          setError(err.message)
+          setIsLoading(false)
+          return
         }
-      } else {
+      }
+
+      if (dashboardResult.status === 'fulfilled') setDashboard(dashboardResult.value)
+      if (radarResult.status === 'fulfilled') setRadarData(radarResult.value)
+      if (templateResult.status === 'fulfilled') {
+        setTemplates(templateResult.value.templates)
+        setFilteredTemplates(templateResult.value.templates)
+      }
+
+      // Only show error if all three failed
+      const allFailed = [dashboardResult, radarResult, templateResult].every(r => r.status === 'rejected')
+      if (allFailed) {
         setError('Failed to load journey data')
       }
+    } catch (err) {
+      setError('Failed to load journey data')
     } finally {
       setIsLoading(false)
     }

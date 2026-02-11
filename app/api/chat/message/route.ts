@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // Backend-to-backend call doesn't need CSRF
+          cookie: request.headers.get('cookie') || '',
         },
         body: JSON.stringify({
           message: sanitizedMessage,
