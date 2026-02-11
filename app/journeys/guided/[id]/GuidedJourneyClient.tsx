@@ -512,9 +512,23 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
     loadStep(day)
   }
 
-  // Handle step completion (ref guard prevents double-submission from rapid clicks)
+  // Handle step completion with pre-flight validation and auto-recovery.
+  // Guards against stale state (multi-tab, cached responses, race conditions)
+  // by verifying frontend state matches backend expectations before sending.
   const handleCompleteStep = async (reflection?: string) => {
-    if (!step || step.is_completed || isCompletingRef.current) return
+    if (!step || !journey || step.is_completed || isCompletingRef.current) return
+
+    // Pre-flight: verify state matches what backend expects.
+    // If stale (step completed in another tab, journey advanced, etc.),
+    // silently refresh instead of sending a doomed request.
+    if (journey.status !== 'active') {
+      await loadJourney()
+      return
+    }
+    if (step.day_index !== journey.current_day) {
+      await loadJourney()
+      return
+    }
 
     isCompletingRef.current = true
     setIsCompleting(true)
@@ -529,10 +543,8 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
       triggerHaptic('success')
 
       if (result.journey_complete) {
-        // Show completion celebration
         router.push(`/journeys/guided/${journeyId}/complete`)
       } else {
-        // Reload to show updated state
         await loadJourney()
       }
     } catch (err) {
@@ -540,13 +552,19 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         router.push('/onboarding')
         return
       }
+
+      // On 400 (step not available / day mismatch / already completed),
+      // the frontend state is stale — auto-refresh to sync with backend.
+      if (err instanceof JourneyEngineError && err.statusCode === 400) {
+        await loadJourney()
+        return
+      }
+
       const message = err instanceof JourneyEngineError
         ? err.message
         : 'Failed to complete step. Please try again.'
       setError(message)
       triggerHaptic('error')
-      // Reload step to reflect current server state
-      await loadStep(step.day_index).catch(() => {})
     } finally {
       isCompletingRef.current = false
       setIsCompleting(false)
