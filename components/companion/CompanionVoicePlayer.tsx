@@ -23,6 +23,7 @@ export interface VoicePlayerProps {
   autoPlay?: boolean
   onStart?: () => void
   onEnd?: () => void
+  onStop?: () => void
   compact?: boolean
 }
 
@@ -59,6 +60,7 @@ export default function CompanionVoicePlayer({
   autoPlay = false,
   onStart,
   onEnd,
+  onStop,
   compact = false,
 }: VoicePlayerProps) {
   const [state, setState] = useState<PlaybackState>('idle')
@@ -272,7 +274,9 @@ export default function CompanionVoicePlayer({
       window.speechSynthesis.cancel()
     }
     setState('idle')
-  }, [])
+    onStop?.()
+    onEnd?.()
+  }, [onStop, onEnd])
 
   // Auto-play if requested (triggers on mount and when autoPlay/text change)
   useEffect(() => {
@@ -284,33 +288,47 @@ export default function CompanionVoicePlayer({
 
   if (compact) {
     return (
-      <button
-        onClick={playAudio}
-        disabled={state === 'loading'}
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all ${
-          state === 'playing'
-            ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
-            : 'bg-gray-100 text-gray-500 hover:bg-violet-50 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-400'
-        }`}
-        title={state === 'playing' ? 'Pause' : 'Listen'}
-      >
-        {state === 'loading' ? (
-          <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-        ) : state === 'playing' ? (
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-            <rect x="6" y="4" width="4" height="16" rx="1" />
-            <rect x="14" y="4" width="4" height="16" rx="1" />
-          </svg>
-        ) : (
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
+      <span className="inline-flex items-center gap-1">
+        <button
+          onClick={playAudio}
+          disabled={state === 'loading'}
+          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all ${
+            state === 'playing'
+              ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
+              : 'bg-gray-100 text-gray-500 hover:bg-violet-50 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-400'
+          }`}
+          title={state === 'playing' ? 'Pause' : 'Listen'}
+        >
+          {state === 'loading' ? (
+            <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : state === 'playing' ? (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
+            </svg>
+          ) : (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          )}
+          {state === 'playing' ? 'Pause' : 'Listen'}
+        </button>
+        {(state === 'playing' || state === 'paused') && (
+          <button
+            onClick={stop}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-all"
+            title="Stop"
+          >
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="6" width="12" height="12" rx="2" />
+            </svg>
+            Stop
+          </button>
         )}
-        {state === 'playing' ? 'Pause' : 'Listen'}
-      </button>
+      </span>
     )
   }
 

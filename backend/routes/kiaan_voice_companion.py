@@ -72,6 +72,7 @@ def _build_divine_friend_system_prompt(
     language: str,
     profile_data: dict | None = None,
     session_summaries: list[dict] | None = None,
+    length_hint: str = "moderate",
 ) -> str:
     """Build the full system prompt for the Divine Friend.
 
@@ -181,7 +182,7 @@ VOICE-FIRST RULES (your response will be spoken aloud):
 - No bullet points, no markdown, no numbered lists, no headers.
 - Use short paragraphs. Natural pauses between thoughts.
 - Avoid words hard to pronounce in text-to-speech. Keep it conversational.
-- 60-150 words max. Friends don't give lectures.
+- RESPONSE LENGTH: {"SHORT — 20-50 words. One warm sentence or two. Match their energy, don't over-explain. Quick greetings get quick warmth." if length_hint == "brief" else "FULL — 100-200 words. Go deep. Share wisdom, give perspective, weave in insight. This is a moment for real guidance and heartfelt connection." if length_hint == "detailed" else "MODERATE — 60-120 words. Balanced warmth with substance. One key insight. Friends don't give lectures."}
 
 ABSOLUTE RULES:
 1. NEVER mention Bhagavad Gita, Gita, Krishna, Arjuna, or ANY religious text by name.
@@ -248,6 +249,11 @@ class VoiceCompanionMessageRequest(BaseModel):
         default=False,
         description="When True, skip generic-response retry to reduce latency by ~1-2s",
     )
+    response_mode: str = Field(
+        default="auto",
+        pattern=r"^(auto|brief|detailed)$",
+        description="Response length: 'brief' for short answers, 'detailed' for longer guidance, 'auto' to detect from question",
+    )
 
     @field_validator("message")
     @classmethod
@@ -268,6 +274,7 @@ class VoiceCompanionMessageResponse(BaseModel):
     voice_auto_play: bool = True
     ai_tier: str = "template"
     response_time_ms: int | None = None
+    response_length: str = "moderate"
 
 
 class VoiceCompanionEndRequest(BaseModel):
@@ -395,6 +402,70 @@ def _update_streak(profile: CompanionProfile) -> None:
     profile.last_conversation_at = now
 
 
+def _detect_response_length(
+    user_message: str,
+    response_mode: str,
+    phase: str,
+) -> tuple[str, int]:
+    """Determine the ideal response length based on the user's question.
+
+    Returns a tuple of (length_hint, max_tokens) where length_hint is one of
+    'brief', 'moderate', or 'detailed', and max_tokens is the OpenAI limit.
+
+    Brief responses (30-60 words): greetings, yes/no questions, simple check-ins,
+    acknowledgments, single-word feelings.
+
+    Moderate responses (60-120 words): standard emotional conversations, asking
+    for perspective, sharing updates.
+
+    Detailed responses (120-200 words): deep questions about life, requests for
+    wisdom/guidance, complex emotional situations, "tell me more" type queries.
+    """
+    if response_mode == "brief":
+        return "brief", 100
+    if response_mode == "detailed":
+        return "detailed", 300
+
+    msg_lower = user_message.lower().strip()
+    word_count = len(msg_lower.split())
+
+    # Brief: very short messages, greetings, acknowledgments, yes/no
+    brief_patterns = [
+        "hi", "hello", "hey", "yes", "no", "ok", "okay", "thanks",
+        "thank you", "good", "fine", "i'm fine", "i'm good", "i'm ok",
+        "cool", "nice", "sure", "yep", "nope", "bye", "hmm", "hm",
+        "yeah", "nah", "right", "true", "agreed", "same", "lol",
+        "haha", "sup", "nm", "nothing much", "not much",
+    ]
+    if msg_lower in brief_patterns or word_count <= 3:
+        return "brief", 100
+
+    # Detailed: explicitly asking for depth, guidance, wisdom, long explanations
+    detailed_indicators = [
+        "explain", "tell me more", "go deeper", "elaborate", "why do",
+        "help me understand", "what does it mean", "what should i do",
+        "how do i deal with", "how can i overcome", "i need guidance",
+        "share some wisdom", "tell me about", "what's your take on",
+        "can you explain", "i want to understand", "walk me through",
+        "what are the steps", "how do i start", "guide me",
+        "what's the meaning", "help me figure out", "i'm really struggling",
+        "i don't know what to do", "everything feels", "i can't stop thinking",
+    ]
+    if any(indicator in msg_lower for indicator in detailed_indicators):
+        return "detailed", 300
+
+    # Detailed for long, complex messages (user pouring out feelings)
+    if word_count > 40:
+        return "detailed", 300
+
+    # Guide/empower phases tend toward longer responses with wisdom
+    if phase in ("guide", "empower") and word_count > 10:
+        return "detailed", 300
+
+    # Default: moderate
+    return "moderate", 200
+
+
 def _get_conversation_phase(
     turn_count: int,
     mood_intensity: float,
@@ -447,6 +518,7 @@ async def _call_openai_direct(
     conversation_history: list[dict],
     user_message: str,
     prefer_speed: bool = False,
+    max_tokens: int = 200,
 ) -> str | None:
     """Call OpenAI directly using an async client for non-blocking voice responses.
 
@@ -456,6 +528,7 @@ async def _call_openai_direct(
 
     Args:
         prefer_speed: When True, skip the generic-response retry to save ~1-2s.
+        max_tokens: Maximum response tokens, adjusted by response length hint.
 
     Returns the response text, or None if OpenAI is unavailable.
     """
@@ -487,7 +560,7 @@ async def _call_openai_direct(
             completion = await async_client.chat.completions.create(
                 model=model,
                 messages=messages,
-                max_tokens=200,
+                max_tokens=max_tokens,
                 temperature=0.72,
                 presence_penalty=0.4,
                 frequency_penalty=0.35,
@@ -498,7 +571,7 @@ async def _call_openai_direct(
                 openai_optimizer.client.chat.completions.create,
                 model=model,
                 messages=messages,
-                max_tokens=200,
+                max_tokens=max_tokens,
                 temperature=0.72,
                 presence_penalty=0.4,
                 frequency_penalty=0.35,
@@ -849,6 +922,12 @@ async def send_voice_companion_message(
     # Determine conversation phase
     phase = _get_conversation_phase(user_turn_count, mood_intensity, body.message)
 
+    # Determine adaptive response length based on user's question
+    length_hint, adaptive_max_tokens = _detect_response_length(
+        body.message, body.response_mode, phase,
+    )
+    logger.info(f"VoiceCompanion: response_mode={body.response_mode}, length_hint={length_hint}, max_tokens={adaptive_max_tokens}")
+
     # ── Wisdom lookup ──
     wisdom_text = None
     wisdom_verse_ref = None
@@ -913,13 +992,15 @@ async def send_voice_companion_message(
         language=body.language,
         profile_data=profile_context,
         session_summaries=session_summaries,
+        length_hint=length_hint,
     )
 
     response_text = await _call_openai_direct(
         system_prompt=system_prompt,
         conversation_history=conversation_history,
         user_message=body.message,
-        prefer_speed=body.prefer_speed,
+        prefer_speed=body.prefer_speed or length_hint == "brief",
+        max_tokens=adaptive_max_tokens,
     )
 
     if response_text:
@@ -1071,6 +1152,7 @@ async def send_voice_companion_message(
         voice_auto_play=True,
         ai_tier=ai_tier,
         response_time_ms=int(response_time_ms),
+        response_length=length_hint,
     )
 
 

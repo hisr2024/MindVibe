@@ -28,6 +28,9 @@ import CompanionBreathingExercise from '@/components/companion/CompanionBreathin
 import VoiceLanguageSpeakerSelector from '@/components/voice/VoiceLanguageSpeakerSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
+import { useWakeWord } from '@/hooks/useWakeWord'
+import { stopAllAudio } from '@/utils/audio/universalAudioStop'
+import type { CompanionVoiceRecorderHandle } from '@/components/companion/CompanionVoiceRecorder'
 
 // ─── Voice Config Type ──────────────────────────────────────────────
 interface VoiceConfig {
@@ -170,9 +173,52 @@ export default function KiaanVoiceCompanionPage() {
     autoPlay: true, // Voice auto-play ON by default for Voice Companion
   })
 
+  const [wakeWordEnabled, setWakeWordEnabled] = useState(false)
+  const [isRecordingFromWake, setIsRecordingFromWake] = useState(false)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const friendEngineRef = useRef(new KiaanFriendEngine())
+  const voiceRecorderRef = useRef<CompanionVoiceRecorderHandle>(null)
+
+  // ─── Wake Word Detection ──────────────────────────────────────────
+  // Uses the browser's SpeechRecognition API for continuous "Hey KIAAN" detection.
+  // When detected, pauses wake word listening and triggers voice recording.
+  const { isActive: wakeWordActive, isSupported: wakeWordSupported } = useWakeWord({
+    language: voiceConfig.language,
+    enabled: wakeWordEnabled && session.isActive && !isLoading && !isSpeaking && !isRecordingFromWake,
+    sensitivity: 'high',
+    onWakeWordDetected: useCallback(() => {
+      // Stop any playing audio first
+      stopAllAudio()
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+      setIsSpeaking(false)
+      setIsRecordingFromWake(true)
+      // Trigger voice recorder programmatically after a short delay
+      // to let the wake word recognition release the microphone
+      setTimeout(() => {
+        voiceRecorderRef.current?.triggerRecord()
+      }, 300)
+    }, []),
+    onError: useCallback((err: string) => {
+      // Only show errors that aren't recoverable/expected
+      if (err.includes('permission') || err.includes('not supported')) {
+        setError(err)
+      }
+    }, []),
+  })
+
+  // ─── Global Stop Handler ──────────────────────────────────────────
+  // Immediately stops all audio playback (premium TTS + browser SpeechSynthesis)
+  const handleStopAll = useCallback(() => {
+    stopAllAudio()
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+    }
+    setIsSpeaking(false)
+  }, [])
 
   // ─── Session Management ─────────────────────────────────────────────
 
@@ -285,6 +331,14 @@ export default function KiaanVoiceCompanionPage() {
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading || !session.sessionId) return
 
+    // Stop any current audio when user sends a new message
+    stopAllAudio()
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+    }
+    setIsSpeaking(false)
+    setIsRecordingFromWake(false)
+
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -308,6 +362,8 @@ export default function KiaanVoiceCompanionPage() {
           language: voiceConfig.language,
           content_type: 'text',
           voice_id: voiceConfig.speakerId.split('_').pop() || 'priya',
+          prefer_speed: true,
+          response_mode: 'auto',
         }),
       })
 
@@ -442,6 +498,9 @@ export default function KiaanVoiceCompanionPage() {
 
   const handleVoiceStart = useCallback(() => setIsSpeaking(true), [])
   const handleVoiceEnd = useCallback(() => setIsSpeaking(false), [])
+  const handleVoiceStop = useCallback(() => {
+    setIsSpeaking(false)
+  }, [])
 
   // ─── Mood glow color ──────────────────────────────────────────────
 
@@ -564,6 +623,34 @@ export default function KiaanVoiceCompanionPage() {
             </svg>
           </button>
 
+          {/* Wake word toggle ("Hey KIAAN") */}
+          {wakeWordSupported && (
+            <button
+              onClick={() => setWakeWordEnabled(v => !v)}
+              className={`p-2 rounded-full transition-all ${
+                wakeWordEnabled
+                  ? wakeWordActive
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-emerald-500/10 text-emerald-400/60'
+                  : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+              }`}
+              title={wakeWordEnabled ? '"Hey KIAAN" wake word ON - say "Hey KIAAN" to start talking' : '"Hey KIAAN" wake word OFF'}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M19 10v2a7 7 0 01-14 0v-2" />
+                {wakeWordEnabled && (
+                  <>
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                  </>
+                )}
+              </svg>
+            </button>
+          )}
+
           {/* Voice auto-play toggle */}
           <button
             onClick={() => setVoiceConfig(prev => ({ ...prev, autoPlay: !prev.autoPlay }))}
@@ -654,11 +741,30 @@ export default function KiaanVoiceCompanionPage() {
 
           <h2 className="mt-6 text-lg font-semibold text-white/90 tracking-wide">KIAAN</h2>
           <p className="text-xs text-amber-300/50 mt-0.5 tracking-wider">
-            {isLoading ? 'Reflecting with wisdom...' : isSpeaking ? 'Speaking to you...' : session.isActive ? 'Your Divine Friend' : 'Session ended'}
+            {isLoading ? 'Reflecting with wisdom...' : isSpeaking ? 'Speaking to you...' : wakeWordEnabled && wakeWordActive ? 'Listening for "Hey KIAAN"...' : session.isActive ? 'Your Divine Friend' : 'Session ended'}
           </p>
 
-          {/* ── Mood + Voice Indicator ── */}
-          <div className="flex items-center gap-2 mt-2">
+          {/* ── Floating Stop Button ── */}
+          {isSpeaking && (
+            <button
+              onClick={handleStopAll}
+              className="mt-4 px-6 py-2.5 rounded-full text-sm font-medium text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              style={{
+                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                boxShadow: '0 0 25px rgba(239,68,68,0.4), 0 0 50px rgba(239,68,68,0.15)',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              }}
+              aria-label="Stop KIAAN from speaking"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+              Stop Listening
+            </button>
+          )}
+
+          {/* ── Mood + Voice + Wake Indicator ── */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap justify-center">
             {currentMood && currentMood !== 'neutral' && MOOD_DISPLAY[currentMood] && (
               <span className={`text-xs px-2.5 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-1.5 ${MOOD_DISPLAY[currentMood].color}`}>
                 <span>{MOOD_DISPLAY[currentMood].emoji}</span>
@@ -668,6 +774,16 @@ export default function KiaanVoiceCompanionPage() {
             {voiceConfig.autoPlay && (
               <span className="text-[10px] px-2 py-1 rounded-full bg-amber-500/10 border border-amber-400/20 text-amber-300/70">
                 Voice ON
+              </span>
+            )}
+            {wakeWordEnabled && (
+              <span className={`text-[10px] px-2 py-1 rounded-full border flex items-center gap-1 ${
+                wakeWordActive
+                  ? 'bg-emerald-500/10 border-emerald-400/20 text-emerald-300/70'
+                  : 'bg-white/5 border-white/10 text-white/30'
+              }`}>
+                <span className={`w-1 h-1 rounded-full ${wakeWordActive ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
+                Hey KIAAN
               </span>
             )}
             {voiceConfig.language !== 'en' && (
@@ -702,6 +818,7 @@ export default function KiaanVoiceCompanionPage() {
                     autoPlay={voiceConfig.autoPlay && i === messages.length - 1}
                     onStart={handleVoiceStart}
                     onEnd={handleVoiceEnd}
+                    onStop={handleVoiceStop}
                   />
                   {msg.mood && msg.mood !== 'neutral' && MOOD_DISPLAY[msg.mood] && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 ${MOOD_DISPLAY[msg.mood].color}`}>
@@ -785,6 +902,7 @@ export default function KiaanVoiceCompanionPage() {
               {/* Voice recorder */}
               <div className="dark">
                 <CompanionVoiceRecorder
+                  ref={voiceRecorderRef}
                   onTranscription={handleVoiceTranscription}
                   isDisabled={!session.isActive}
                   isProcessing={isLoading}
