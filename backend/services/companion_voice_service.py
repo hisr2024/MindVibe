@@ -1,12 +1,13 @@
 """Companion Premium Voice Service - Best Natural Human Voices
 
 World-class voice synthesis for KIAAN best friend companion.
-Uses the most natural-sounding voices available in 2025.
+Uses the most natural-sounding voices available.
 
 Voice Provider Chain (highest quality → lowest):
 ┌──────────────────────────────────────────────────────────────┐
 │  1. ElevenLabs (10/10) - Most human-like voices ever         │
 │     → Requires ELEVENLABS_API_KEY                            │
+│     → Dedicated service: elevenlabs_tts_service.py           │
 │  2. Sarvam AI Bulbul (9.5/10) - Best Indian language voices  │
 │     → Uses SARVAM_API_KEY, activated for Indian languages    │
 │     → Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, etc. │
@@ -17,6 +18,12 @@ Voice Provider Chain (highest quality → lowest):
 │  5. Edge TTS - Microsoft Neural (8.5/10)                     │
 │     → Free, no API key needed                                │
 │  6. Browser SpeechSynthesis (5/10) - ultimate fallback       │
+│                                                              │
+│  Pronunciation Engine:                                       │
+│  - Sanskrit/spiritual term IPA phoneme dictionary            │
+│  - Language-specific pronunciation correction                │
+│  - Verse pause pattern insertion                             │
+│  - Provider-specific formatting (SSML, respelling, hints)    │
 │                                                              │
 │  Emotion-Adaptive Prosody:                                   │
 │  - Speed/pitch modulation per detected mood                  │
@@ -33,6 +40,29 @@ import re
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+# Import pronunciation engine for correct Sanskrit/spiritual term handling
+try:
+    from backend.services.pronunciation_engine import (
+        PronunciationEngine,
+        correct_pronunciation,
+    )
+    PRONUNCIATION_ENGINE_AVAILABLE = True
+except ImportError:
+    PRONUNCIATION_ENGINE_AVAILABLE = False
+    logger.debug("Pronunciation engine not available (optional)")
+
+# Import dedicated ElevenLabs service for premium voice synthesis
+try:
+    from backend.services.elevenlabs_tts_service import (
+        is_elevenlabs_available as _el_available,
+        synthesize_elevenlabs_tts,
+        get_elevenlabs_health_status,
+    )
+    ELEVENLABS_SERVICE_AVAILABLE = True
+except ImportError:
+    ELEVENLABS_SERVICE_AVAILABLE = False
+    logger.debug("ElevenLabs dedicated service not available (optional)")
 
 
 # ─── Emotion-to-Prosody Mapping ──────────────────────────────────────────
@@ -515,19 +545,65 @@ async def synthesize_companion_voice(
     """Synthesize speech using the best available natural voice provider.
 
     Provider chain (tries in order, falls through on failure):
-    1. ElevenLabs - Most human-like voices (needs ELEVENLABS_API_KEY)
-    2. Sarvam AI Bulbul - Best Indian language voices (SARVAM_API_KEY)
-       → Only activated for Indian languages (hi, ta, te, bn, kn, ml, etc.)
-    3. OpenAI TTS HD - Extremely natural (uses existing OPENAI_API_KEY)
+    1. ElevenLabs (dedicated service) - Most human-like voices
+    2. Sarvam AI Bulbul - Best Indian language voices
+    3. OpenAI TTS HD - Extremely natural
     4. Google Cloud Neural2 - High quality neural voices
     5. Edge TTS (Microsoft Neural) - Free, decent quality
     6. Browser fallback - Returns config for frontend SpeechSynthesis
+
+    Pronunciation Pipeline:
+    - Sanskrit/spiritual terms receive IPA phoneme correction
+    - Verse text gets natural pause markers
+    - Provider-specific formatting applied
     """
     ssml_data = build_companion_ssml(text, mood, voice_id, language)
     plain_text = _strip_ssml_tags(ssml_data["ssml"])
 
-    # 1. Try ElevenLabs (most natural, most human-like)
-    audio = await _try_elevenlabs_tts(plain_text, ssml_data)
+    # Apply pronunciation corrections for accurate spiritual term pronunciation
+    pronunciation_corrected_text = plain_text
+    if PRONUNCIATION_ENGINE_AVAILABLE:
+        try:
+            engine = PronunciationEngine(language=language)
+            pronunciation_corrected_text = engine.correct_text(
+                plain_text, provider="generic"
+            )
+        except Exception as e:
+            logger.warning(f"Pronunciation correction failed: {e}")
+            pronunciation_corrected_text = plain_text
+
+    # 1. Try ElevenLabs via dedicated service (most natural, most human-like)
+    if ELEVENLABS_SERVICE_AVAILABLE and _el_available():
+        try:
+            el_pronunciation_text = plain_text
+            if PRONUNCIATION_ENGINE_AVAILABLE:
+                el_engine = PronunciationEngine(language=language)
+                el_pronunciation_text = el_engine.correct_text(
+                    plain_text, provider="elevenlabs"
+                )
+
+            audio = await synthesize_elevenlabs_tts(
+                text=plain_text,
+                language=language,
+                voice_id=voice_id,
+                mood=mood,
+                pronunciation_text=el_pronunciation_text,
+            )
+            if audio:
+                return {
+                    "audio": audio,
+                    "content_type": "audio/mpeg",
+                    "ssml": ssml_data["ssml"],
+                    "provider": "elevenlabs",
+                    "voice_persona": ssml_data["voice_persona"],
+                    "quality_score": 10.0,
+                    "fallback_to_browser": False,
+                }
+        except Exception as e:
+            logger.warning(f"ElevenLabs dedicated service failed: {e}")
+
+    # 1b. Fallback: Try ElevenLabs via inline implementation
+    audio = await _try_elevenlabs_tts(pronunciation_corrected_text, ssml_data)
     if audio:
         return {
             "audio": audio,
@@ -892,3 +968,30 @@ def get_sarvam_voice_status() -> dict[str, Any]:
         return get_sarvam_health_status()
     except ImportError:
         return {"provider": "sarvam_ai_bulbul", "available": False}
+
+
+def get_elevenlabs_voice_status() -> dict[str, Any]:
+    """Get ElevenLabs TTS integration status for health checks."""
+    if ELEVENLABS_SERVICE_AVAILABLE:
+        try:
+            return get_elevenlabs_health_status()
+        except Exception:
+            pass
+    return {"provider": "elevenlabs", "available": False}
+
+
+def get_all_voice_providers_status() -> dict[str, Any]:
+    """Get combined health status for all voice providers."""
+    return {
+        "elevenlabs": get_elevenlabs_voice_status(),
+        "sarvam_ai": get_sarvam_voice_status(),
+        "pronunciation_engine": {
+            "available": PRONUNCIATION_ENGINE_AVAILABLE,
+            "features": [
+                "Sanskrit/spiritual term IPA phonemes",
+                "Language-specific pronunciation fixes",
+                "Verse pause pattern insertion",
+                "Provider-specific formatting",
+            ] if PRONUNCIATION_ENGINE_AVAILABLE else [],
+        },
+    }

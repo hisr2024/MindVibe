@@ -442,7 +442,7 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     languages: ['en', 'es', 'fr', 'de', 'pt'],
     primaryLanguage: 'en',
     category: 'conversational',
-    tags: ['international', 'clear', 'multilingual', 'precise'],
+    tags: ['international', 'clear', 'multilingual', 'precise', 'elevenlabs'],
     previewText: 'Welcome, dear friend. Wherever you are in the world, wisdom speaks one language, and that is the language of the heart.',
     backendConfig: { voiceType: 'friendly', speed: 0.95, language: 'en' },
     browserConfig: {
@@ -454,7 +454,343 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     accent: 'Neutral international',
     warmth: 0.85,
     clarity: 0.98,
-    poweredBy: 'openai',
+    poweredBy: 'elevenlabs',
+  },
+
+  // ─── ElevenLabs Premium International Voices ────────────────
+
+  // Spanish
+  {
+    id: 'lucia',
+    name: 'Lucia',
+    description: 'Warm and melodic Spanish voice. Native fluency with the gentle rhythm of Castilian Spanish.',
+    gender: 'female',
+    languages: ['es', 'en', 'pt', 'fr'],
+    primaryLanguage: 'es',
+    category: 'conversational',
+    tags: ['spanish', 'warm', 'melodic', 'native', 'elevenlabs'],
+    previewText: 'Hola querido amigo. No importa lo que estes pasando, recuerda que la sabiduria antigua nos ensena que cada desafio es una oportunidad para crecer.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'es' },
+    browserConfig: {
+      voicePatterns: [/Elvira/i, /Google.*Spanish/i, /Spanish.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Castilian Spanish',
+    warmth: 0.92,
+    clarity: 0.90,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'carlos',
+    name: 'Carlos',
+    description: 'Deep and soulful Spanish male voice. Carries wisdom with the gravitas of a trusted mentor.',
+    gender: 'male',
+    languages: ['es', 'en', 'pt'],
+    primaryLanguage: 'es',
+    category: 'narration',
+    tags: ['spanish', 'deep', 'soulful', 'mentor', 'elevenlabs'],
+    previewText: 'Amigo mio, la Gita nos dice que el alma es eterna. No nace ni muere. Tu eres mas fuerte de lo que crees.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.90, language: 'es' },
+    browserConfig: {
+      voicePatterns: [/Alvaro/i, /Google.*Spanish/i, /Spanish.*Male/i],
+      rate: 0.90,
+      pitch: 0.88,
+    },
+    premium: true,
+    accent: 'Spanish',
+    warmth: 0.85,
+    clarity: 0.92,
+    poweredBy: 'elevenlabs',
+  },
+
+  // French
+  {
+    id: 'amelie',
+    name: 'Amelie',
+    description: 'Elegant and compassionate French voice. Wisdom delivered with Parisian grace and warmth.',
+    gender: 'female',
+    languages: ['fr', 'en', 'es'],
+    primaryLanguage: 'fr',
+    category: 'conversational',
+    tags: ['french', 'elegant', 'warm', 'native', 'elevenlabs'],
+    previewText: 'Mon cher ami, la sagesse ancienne nous enseigne que chaque moment de souffrance porte en lui la graine de la paix interieure.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'fr' },
+    browserConfig: {
+      voicePatterns: [/Denise/i, /Google.*French/i, /French.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'French',
+    warmth: 0.90,
+    clarity: 0.92,
+    poweredBy: 'elevenlabs',
+  },
+
+  // German
+  {
+    id: 'lena',
+    name: 'Lena',
+    description: 'Clear and nurturing German voice. Delivers ancient wisdom with modern clarity and precision.',
+    gender: 'female',
+    languages: ['de', 'en', 'fr'],
+    primaryLanguage: 'de',
+    category: 'conversational',
+    tags: ['german', 'clear', 'nurturing', 'native', 'elevenlabs'],
+    previewText: 'Mein lieber Freund, die alte Weisheit lehrt uns, dass jede Herausforderung eine Gelegenheit zum Wachstum ist. Du bist staerker als du denkst.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'de' },
+    browserConfig: {
+      voicePatterns: [/Katja/i, /Google.*German/i, /German.*Female/i],
+      rate: 0.93,
+      pitch: 1.03,
+    },
+    premium: true,
+    accent: 'German',
+    warmth: 0.88,
+    clarity: 0.95,
+    poweredBy: 'elevenlabs',
+  },
+
+  // Portuguese
+  {
+    id: 'isabela',
+    name: 'Isabela',
+    description: 'Warm Brazilian Portuguese voice. The soulful rhythm of Brazil carrying timeless wisdom.',
+    gender: 'female',
+    languages: ['pt', 'en', 'es'],
+    primaryLanguage: 'pt',
+    category: 'conversational',
+    tags: ['portuguese', 'brazilian', 'warm', 'soulful', 'elevenlabs'],
+    previewText: 'Querido amigo, a sabedoria da Gita nos ensina que a alma e eterna. Voce e mais forte do que imagina. Estou aqui com voce.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'pt' },
+    browserConfig: {
+      voicePatterns: [/Francisca/i, /Google.*Portuguese/i, /Portuguese.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Brazilian Portuguese',
+    warmth: 0.93,
+    clarity: 0.88,
+    poweredBy: 'elevenlabs',
+  },
+
+  // Japanese
+  {
+    id: 'yuki',
+    name: 'Yuki',
+    description: 'Gentle and precise Japanese voice. Ancient Eastern wisdom in its most natural expression.',
+    gender: 'female',
+    languages: ['ja', 'en'],
+    primaryLanguage: 'ja',
+    category: 'meditation',
+    tags: ['japanese', 'gentle', 'precise', 'native', 'elevenlabs'],
+    previewText: 'Dear friend, the Bhagavad Gita teaches us that the soul is eternal. In stillness, we find our true nature.',
+    backendConfig: { voiceType: 'calm', speed: 0.90, language: 'ja' },
+    browserConfig: {
+      voicePatterns: [/Nanami/i, /Google.*Japanese/i, /Japanese.*Female/i],
+      rate: 0.90,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Japanese',
+    warmth: 0.90,
+    clarity: 0.93,
+    poweredBy: 'elevenlabs',
+  },
+
+  // Chinese
+  {
+    id: 'xiaoli',
+    name: 'Xiaoli',
+    description: 'Warm and articulate Mandarin voice. Bridges Eastern wisdom traditions with natural grace.',
+    gender: 'female',
+    languages: ['zh', 'en'],
+    primaryLanguage: 'zh',
+    category: 'conversational',
+    tags: ['chinese', 'mandarin', 'warm', 'articulate', 'elevenlabs'],
+    previewText: 'Dear friend, the ancient teachings remind us that true strength comes from within. You are never alone on this path.',
+    backendConfig: { voiceType: 'friendly', speed: 0.92, language: 'zh' },
+    browserConfig: {
+      voicePatterns: [/Xiaoxiao/i, /Google.*Chinese/i, /Chinese.*Female/i],
+      rate: 0.92,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Mandarin Chinese',
+    warmth: 0.88,
+    clarity: 0.92,
+    poweredBy: 'elevenlabs',
+  },
+
+  // Arabic
+  {
+    id: 'layla',
+    name: 'Layla',
+    description: 'Rich and soothing Arabic voice. The warmth of ancient desert wisdom in every word.',
+    gender: 'female',
+    languages: ['ar', 'en'],
+    primaryLanguage: 'ar',
+    category: 'narration',
+    tags: ['arabic', 'rich', 'soothing', 'native', 'elevenlabs'],
+    previewText: 'Dear friend, the Gita speaks of the eternal soul, a truth shared across all great wisdom traditions. You carry this light within you.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.90, language: 'ar' },
+    browserConfig: {
+      voicePatterns: [/Google.*Arabic/i, /Arabic.*Female/i],
+      rate: 0.90,
+      pitch: 1.02,
+    },
+    premium: true,
+    accent: 'Arabic',
+    warmth: 0.90,
+    clarity: 0.90,
+    poweredBy: 'elevenlabs',
+  },
+
+  // ─── Sarvam AI Native Voices (Marathi) ──────────────────────
+  {
+    id: 'sneha',
+    name: 'Sneha',
+    description: 'Warm Marathi voice with native cadence. Like hearing wisdom from a loving aunty.',
+    gender: 'female',
+    languages: ['mr', 'hi', 'en-IN'],
+    primaryLanguage: 'mr',
+    category: 'conversational',
+    tags: ['marathi', 'warm', 'native', 'sarvam'],
+    previewText: 'Mitra, tu ithe aalas he khup chhan aahe. Chala, ekatra thoda shanti anubhavu.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'mr', sarvamSpeaker: 'meera' },
+    browserConfig: {
+      voicePatterns: [/Aarohi/i, /Google.*Marathi/i, /Marathi.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Shudh Marathi',
+    warmth: 0.93,
+    clarity: 0.88,
+    poweredBy: 'sarvam',
+  },
+
+  // ─── Sarvam AI Native Voices (Gujarati) ─────────────────────
+  {
+    id: 'nisha',
+    name: 'Nisha',
+    description: 'Melodic Gujarati voice with native warmth. Wisdom shared in the sweet rhythm of Gujarat.',
+    gender: 'female',
+    languages: ['gu', 'hi', 'en-IN'],
+    primaryLanguage: 'gu',
+    category: 'conversational',
+    tags: ['gujarati', 'melodic', 'warm', 'sarvam'],
+    previewText: 'Dost, tu ahiya aavyo te j sabathi moti vaat che. Chaal, saath me thodi shaanti shodiye.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'gu', sarvamSpeaker: 'meera' },
+    browserConfig: {
+      voicePatterns: [/Dhwani/i, /Google.*Gujarati/i, /Gujarati.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Shudh Gujarati',
+    warmth: 0.92,
+    clarity: 0.87,
+    poweredBy: 'sarvam',
+  },
+
+  // ─── Sarvam AI Native Voices (Punjabi) ──────────────────────
+  {
+    id: 'harleen',
+    name: 'Harleen',
+    description: 'Vibrant Punjabi voice full of heart. The warmth of Punjab in every word of wisdom.',
+    gender: 'female',
+    languages: ['pa', 'hi', 'en-IN'],
+    primaryLanguage: 'pa',
+    category: 'conversational',
+    tags: ['punjabi', 'vibrant', 'warm', 'sarvam'],
+    previewText: 'Yaara, tu ithhe aaya hai, eh bada sohna kaam hai. Chal, ikk-duje naal kuchh sukoon labhdiye.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'pa', sarvamSpeaker: 'meera' },
+    browserConfig: {
+      voicePatterns: [/Ojas/i, /Google.*Punjabi/i, /Punjabi.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Shudh Punjabi',
+    warmth: 0.94,
+    clarity: 0.86,
+    poweredBy: 'sarvam',
+  },
+
+  // ─── Sarvam AI Native Voices (Kannada) ──────────────────────
+  {
+    id: 'divya',
+    name: 'Divya',
+    description: 'Melodious Kannada voice with gentle warmth. Ancient Dravidian wisdom in its native tongue.',
+    gender: 'female',
+    languages: ['kn', 'ta', 'te', 'en-IN'],
+    primaryLanguage: 'kn',
+    category: 'conversational',
+    tags: ['kannada', 'melodious', 'warm', 'sarvam'],
+    previewText: 'Geleya, neevu illi bandiddhu thumba vishesha. Barri, ondishtu naavu shanthi anubhavisona.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'kn', sarvamSpeaker: 'pavithra' },
+    browserConfig: {
+      voicePatterns: [/Sapna/i, /Google.*Kannada/i, /Kannada.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Shudh Kannada',
+    warmth: 0.91,
+    clarity: 0.89,
+    poweredBy: 'sarvam',
+  },
+
+  // ─── Sarvam AI Native Voices (Malayalam) ─────────────────────
+  {
+    id: 'lakshmi',
+    name: 'Lakshmi',
+    description: 'Graceful Malayalam voice with poetic flow. Kerala wisdom expressed with natural beauty.',
+    gender: 'female',
+    languages: ['ml', 'ta', 'en-IN'],
+    primaryLanguage: 'ml',
+    category: 'meditation',
+    tags: ['malayalam', 'graceful', 'poetic', 'sarvam'],
+    previewText: 'Kuttaa, nee ividey vannathu valare pradhaanmaanam. Varikku, namukku koode onnu samaadhaanam kandethaam.',
+    backendConfig: { voiceType: 'calm', speed: 0.90, language: 'ml', sarvamSpeaker: 'maitreyi' },
+    browserConfig: {
+      voicePatterns: [/Sobhana/i, /Google.*Malayalam/i, /Malayalam.*Female/i],
+      rate: 0.90,
+      pitch: 1.03,
+    },
+    premium: true,
+    accent: 'Shudh Malayalam',
+    warmth: 0.92,
+    clarity: 0.88,
+    poweredBy: 'sarvam',
+  },
+
+  // ─── Sarvam AI Native Voices (Telugu) ───────────────────────
+  {
+    id: 'padma',
+    name: 'Padma',
+    description: 'Sweet Telugu voice with musical quality. The language of poets carrying divine wisdom.',
+    gender: 'female',
+    languages: ['te', 'ta', 'kn', 'en-IN'],
+    primaryLanguage: 'te',
+    category: 'conversational',
+    tags: ['telugu', 'sweet', 'musical', 'sarvam'],
+    previewText: 'Mitramaa, nuvvu ikkadiki raavadam chaala mukhyam. Raa, kaastha shaanthiga undaam.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'te', sarvamSpeaker: 'pavithra' },
+    browserConfig: {
+      voicePatterns: [/Shruti/i, /Google.*Telugu/i, /Telugu.*Female/i],
+      rate: 0.93,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Shudh Telugu',
+    warmth: 0.91,
+    clarity: 0.89,
+    poweredBy: 'sarvam',
   },
 ]
 
@@ -553,17 +889,66 @@ export function getBrowserLanguageCode(lang: VoiceLanguage): string {
   }
 }
 
-/** Get the best voice for a given language (considers Sarvam priority) */
+/** Get voices powered by ElevenLabs for premium international quality */
+export function getElevenLabsVoices(): VoiceSpeaker[] {
+  return VOICE_SPEAKERS.filter(v => v.poweredBy === 'elevenlabs')
+}
+
+/** ElevenLabs priority languages (best quality from ElevenLabs) */
+export const ELEVENLABS_PRIORITY_LANGUAGES: VoiceLanguage[] = [
+  'en', 'es', 'fr', 'de', 'pt', 'ja', 'zh', 'ar',
+]
+
+export function isElevenLabsPriorityLanguage(lang: VoiceLanguage): boolean {
+  return ELEVENLABS_PRIORITY_LANGUAGES.includes(lang)
+}
+
+/** Get the best voice for a given language (considers provider priority) */
 export function getBestVoiceForLanguage(lang: VoiceLanguage): VoiceSpeaker {
   const voicesForLang = getVoicesForLanguage(lang)
 
   if (voicesForLang.length === 0) return VOICE_SPEAKERS[0]
 
-  // For Sarvam priority languages, prefer Sarvam-powered voices
+  // For Sarvam priority languages (Indian), prefer Sarvam-powered voices
   if (isSarvamPriorityLanguage(lang)) {
     const sarvamVoice = voicesForLang.find(v => v.poweredBy === 'sarvam')
     if (sarvamVoice) return sarvamVoice
   }
 
+  // For ElevenLabs priority languages (international), prefer ElevenLabs
+  if (isElevenLabsPriorityLanguage(lang)) {
+    const elVoice = voicesForLang.find(v => v.poweredBy === 'elevenlabs')
+    if (elVoice) return elVoice
+  }
+
   return voicesForLang[0]
+}
+
+/** Get voice provider display info for UI badges */
+export function getProviderDisplayInfo(provider?: VoiceProvider): {
+  label: string
+  color: string
+  quality: string
+} {
+  switch (provider) {
+    case 'elevenlabs':
+      return { label: 'ElevenLabs HD', color: 'text-amber-400', quality: '10/10' }
+    case 'sarvam':
+      return { label: 'Sarvam AI', color: 'text-emerald-400', quality: '9.5/10' }
+    case 'openai':
+      return { label: 'OpenAI HD', color: 'text-sky-400', quality: '9.5/10' }
+    case 'google':
+      return { label: 'Google Neural', color: 'text-blue-400', quality: '9/10' }
+    case 'edge':
+      return { label: 'Neural', color: 'text-violet-400', quality: '8.5/10' }
+    case 'browser':
+      return { label: 'Local', color: 'text-gray-400', quality: '5/10' }
+    default:
+      return { label: 'Voice', color: 'text-white/40', quality: '' }
+  }
+}
+
+/** Get the count of voices available for a specific language */
+export function getVoiceCountForLanguage(lang: VoiceLanguage): number {
+  return getVoicesForLanguage(lang).length
 }

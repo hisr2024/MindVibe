@@ -25,7 +25,7 @@ import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
 import CompanionVoicePlayer from '@/components/companion/CompanionVoicePlayer'
 import CompanionBreathingExercise from '@/components/companion/CompanionBreathingExercise'
 import MoodJourneyPanel from '@/components/companion/MoodJourneyPanel'
-import VoiceLanguageSpeakerSelector from '@/components/voice/VoiceLanguageSpeakerSelector'
+import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 
@@ -589,12 +589,27 @@ export default function CompanionPage() {
         </div>
       </header>
 
-      {/* ─── Voice & Language Settings Panel ─── */}
+      {/* ─── Voice & Language Settings Panel (ElevenLabs-Inspired) ─── */}
       {showVoiceSettings && (
         <div className="relative z-20 max-w-xl mx-auto w-full px-4 pt-3">
-          <VoiceLanguageSpeakerSelector
-            currentConfig={voiceConfig}
-            onConfigChange={setVoiceConfig}
+          <VoiceCompanionSelector
+            currentConfig={{
+              language: (voiceConfig.language || 'en') as any,
+              voiceId: voiceConfig.speakerId?.split('_').pop() || 'priya',
+              emotion: voiceConfig.emotion || 'neutral',
+              speed: voiceConfig.speed || 0.95,
+              pitch: voiceConfig.pitch || 0.0,
+              autoPlay: voiceConfig.autoPlay ?? true,
+            }}
+            onConfigChange={(cfg) => setVoiceConfig(prev => ({
+              ...prev,
+              language: cfg.language,
+              speakerId: `${cfg.language}_${cfg.voiceId}`,
+              emotion: cfg.emotion,
+              speed: cfg.speed,
+              pitch: cfg.pitch,
+              autoPlay: cfg.autoPlay,
+            }))}
             onClose={() => setShowVoiceSettings(false)}
           />
         </div>

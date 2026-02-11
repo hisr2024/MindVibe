@@ -29,7 +29,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/api'
-import VoiceLanguageSpeakerSelector from '@/components/voice/VoiceLanguageSpeakerSelector'
+import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -527,7 +527,26 @@ export default function VoiceCompanionPage() {
       {/* Voice Settings */}
       {showVoiceSettings && (
         <div className="max-w-6xl mx-auto px-4 pt-4">
-          <VoiceLanguageSpeakerSelector currentConfig={voiceConfig} onConfigChange={setVoiceConfig} onClose={() => setShowVoiceSettings(false)} />
+          <VoiceCompanionSelector
+            currentConfig={{
+              language: (voiceConfig.language || 'en') as any,
+              voiceId: voiceConfig.speakerId?.split('_').pop() || 'priya',
+              emotion: voiceConfig.emotion || 'neutral',
+              speed: voiceConfig.speed || 0.95,
+              pitch: voiceConfig.pitch || 0.0,
+              autoPlay: voiceConfig.autoPlay ?? true,
+            }}
+            onConfigChange={(cfg) => setVoiceConfig(prev => ({
+              ...prev,
+              language: cfg.language,
+              speakerId: `${cfg.language}_${cfg.voiceId}`,
+              emotion: cfg.emotion,
+              speed: cfg.speed,
+              pitch: cfg.pitch,
+              autoPlay: cfg.autoPlay,
+            }))}
+            onClose={() => setShowVoiceSettings(false)}
+          />
         </div>
       )}
 
