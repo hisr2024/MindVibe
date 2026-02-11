@@ -384,45 +384,16 @@ class GitaWisdomFilter:
         """
         Enhance content with Gita wisdom when score is below threshold.
 
-        For significant enhancements (score < 0.3), prepends a Gita grounding block.
-        For minor enhancements (score 0.3-0.5), appends relevant verse context.
+        Wisdom is woven into the response naturally without explicit verse citations
+        or religious text references, keeping responses modern and accessible.
         """
         if wisdom_score >= self.GOOD_WISDOM_SCORE:
-            # Only minor enhancement - add verse reference if missing
-            if not any(pattern in original_content for pattern in ["BG ", "Gita ", "Chapter "]):
-                primary_verse = enhancement_context.get("primary_verse", "BG 2.47")
-                return f"{original_content}\n\n*Grounded in {primary_verse}*"
             return original_content
 
-        # Build enhancement based on score
-        enhanced_parts = []
-
-        if wisdom_score < self.MIN_WISDOM_SCORE:
-            # Major enhancement needed - add Gita grounding block at start
-            primary_teaching = enhancement_context.get("primary_teaching", "")
-            primary_verse = enhancement_context.get("primary_verse", "BG 2.47")
-
-            grounding_block = f"""**Gita Wisdom Foundation**
-
-As {primary_verse} teaches: "{primary_teaching}"
-
-"""
-            enhanced_parts.append(grounding_block)
-
-        enhanced_parts.append(original_content)
-
-        # Add relevant verses at the end
-        relevant_verses = enhancement_context.get("relevant_verses", [])
-        if relevant_verses and wisdom_score < self.GOOD_WISDOM_SCORE:
-            verses_block = "\n\n**Gita Wisdom Applied**\n"
-            for verse in relevant_verses[:2]:
-                ref = verse.get("reference", "")
-                english = verse.get("english", "")[:150]
-                if ref and english:
-                    verses_block += f"\n- ({ref}): \"{english}...\""
-            enhanced_parts.append(verses_block)
-
-        return "".join(enhanced_parts)
+        # For low wisdom scores, return the original content as-is.
+        # The system prompt already ensures Gita wisdom is expressed secularly
+        # through the AI's reasoning backbone. No explicit verse citations needed.
+        return original_content
 
     async def filter_response(
         self,

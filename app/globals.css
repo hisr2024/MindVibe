@@ -482,6 +482,7 @@ html {
 .scroll-stable {
   scrollbar-gutter: stable both-edges;
   overscroll-behavior: contain;
+  overflow-anchor: auto;
 }
 
 /* =====================================================
@@ -493,6 +494,7 @@ html {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
   overscroll-behavior: contain;
+  overflow-anchor: auto;
   scrollbar-gutter: stable both-edges;
   padding-inline-end: max(env(safe-area-inset-right), 0px);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));

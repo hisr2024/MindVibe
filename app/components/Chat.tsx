@@ -124,7 +124,7 @@ export default function Chat() {
             tabIndex: 0,
             className: 'chat-scrollbar smooth-touch-scroll scroll-stable',
           }}
-          className="mv-energy-scrollbar h-80 rounded-2xl border border-orange-500/20 bg-slate-950/70 shadow-inner shadow-orange-500/10"
+          className="mv-energy-scrollbar h-[480px] max-h-[calc(100vh-320px)] min-h-[320px] rounded-2xl border border-orange-500/20 bg-slate-950/70 shadow-inner shadow-orange-500/10"
         >
           <div className="p-4 pr-3 sm:pr-4">
             {messages.length === 0 && (
