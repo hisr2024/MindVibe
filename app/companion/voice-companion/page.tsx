@@ -184,6 +184,7 @@ export default function VoiceCompanionPage() {
   const chatInputRef = useRef<HTMLInputElement>(null)
 
   const totalVerses = CHAPTERS.reduce((sum, ch) => sum + ch.verseCount, 0)
+  const selectedVoiceId = voiceConfig.speakerId?.split('_').pop() || 'priya'
 
   // ── Cleanup audio on unmount ──────────────────────────────────────
   useEffect(() => {
@@ -386,6 +387,7 @@ export default function VoiceCompanionPage() {
         body: JSON.stringify({
           text: verse.sanskrit + '. ' + verse.translation,
           language: voiceConfig.language,
+          voice_id: selectedVoiceId,
           voice_type: 'wisdom', speed: voiceConfig.speed,
         }),
       })
@@ -530,7 +532,7 @@ export default function VoiceCompanionPage() {
           <VoiceCompanionSelector
             currentConfig={{
               language: (voiceConfig.language || 'en') as any,
-              voiceId: voiceConfig.speakerId?.split('_').pop() || 'priya',
+              voiceId: selectedVoiceId,
               emotion: voiceConfig.emotion || 'neutral',
               speed: voiceConfig.speed || 0.95,
               pitch: voiceConfig.pitch || 0.0,

@@ -50,7 +50,7 @@ import kotlin.math.*
 
 data class WakeWordConfig(
     /** Wake word phrases to detect */
-    val phrases: List<String> = listOf("hey kiaan", "ok kiaan"),
+    val phrases: List<String> = listOf("hey kiaan", "hi kiaan", "namaste kiaan", "ok kiaan"),
 
     /** Detection confidence threshold (0.0 - 1.0) */
     val confidenceThreshold: Float = 0.85f,

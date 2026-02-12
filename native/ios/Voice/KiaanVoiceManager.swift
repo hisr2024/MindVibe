@@ -125,7 +125,7 @@ public struct KiaanVoiceConfig {
             language: Locale(identifier: "en-US"),
             useOnDeviceRecognition: true,
             enableWakeWord: true,
-            wakeWordPhrases: ["hey kiaan", "ok kiaan", "kiaan"],
+            wakeWordPhrases: ["hey kiaan", "hi kiaan", "namaste kiaan", "ok kiaan", "kiaan"],
             maxRetries: 3,
             retryBaseDelay: 0.5,
             silenceTimeout: 2.0,

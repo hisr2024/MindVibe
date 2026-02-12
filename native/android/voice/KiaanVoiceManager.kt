@@ -114,7 +114,7 @@ data class KiaanVoiceConfig(
     val language: Locale = Locale.US,
     val useOnDeviceRecognition: Boolean = true,
     val enableWakeWord: Boolean = true,
-    val wakeWordPhrases: List<String> = listOf("hey kiaan", "ok kiaan", "kiaan"),
+    val wakeWordPhrases: List<String> = listOf("hey kiaan", "hi kiaan", "namaste kiaan", "ok kiaan", "kiaan"),
     val maxRetries: Int = 3,
     val retryBaseDelayMs: Long = 500,
     val silenceTimeoutMs: Long = 2000,
