@@ -1,5 +1,5 @@
 /**
- * MindVibe Service Worker v15.0 - Silent Production Grade
+ * MindVibe Service Worker v16.0 - Silent Production Grade
  *
  * Zero console output. Robust offline support. Intelligent caching.
  *
@@ -10,7 +10,7 @@
  * - Images: cache-first (30 days)
  */
 
-const CACHE_VERSION = 'mindvibe-v15.0-silent';
+const CACHE_VERSION = 'mindvibe-v16.0-silent';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
@@ -22,10 +22,7 @@ const STATIC_ASSETS = [
   '/mindvibe-logo.svg',
 ];
 
-const OPTIONAL_ASSETS = [
-  '/offline',
-  '/introduction',
-];
+const OPTIONAL_ASSETS = ['/offline'];
 
 const CACHEABLE_API_ENDPOINTS = [
   '/api/chat/about',
@@ -111,6 +108,16 @@ self.addEventListener('fetch', (event) => {
 
   if (!url.protocol.startsWith('http')) return
   if (url.origin !== self.location.origin) return
+
+  // Never intercept Next.js runtime/build assets. Let the browser + CDN handle them directly.
+  if (
+    url.pathname.startsWith('/_next/static') ||
+    url.pathname.startsWith('/_next/image') ||
+    url.pathname.startsWith('/_next/data') ||
+    url.pathname.startsWith('/_next/webpack-hmr')
+  ) {
+    return
+  }
 
   const isMediaRequest =
     url.pathname.endsWith('.mp3') ||
@@ -256,7 +263,13 @@ async function handleStaticRequest(request) {
 
   try {
     const cachedResponse = await caches.match(request)
-    if (cachedResponse) return cachedResponse
+    if (cachedResponse) {
+      if (isUnexpectedAssetMimeType(request, cachedResponse)) {
+        await deleteFromManagedCaches(request)
+      } else {
+        return cachedResponse
+      }
+    }
 
     const networkResponse = await fetch(request)
 
@@ -272,6 +285,33 @@ async function handleStaticRequest(request) {
 
     return new Response('Offline', { status: 503, statusText: 'Service Unavailable' })
   }
+}
+
+
+async function deleteFromManagedCaches(request) {
+  const cacheNames = [CACHE_STATIC, CACHE_DYNAMIC, CACHE_API, CACHE_IMAGES]
+  await Promise.all(cacheNames.map(async (cacheName) => {
+    const cache = await caches.open(cacheName)
+    await cache.delete(request)
+  }))
+}
+
+function isUnexpectedAssetMimeType(request, response) {
+  const contentType = (response.headers.get('content-type') || '').toLowerCase()
+  const destination = request.destination
+  const pathname = new URL(request.url).pathname
+
+  const isScriptRequest = destination === 'script' || pathname.endsWith('.js')
+  if (isScriptRequest) {
+    return !contentType.includes('javascript') && !contentType.includes('ecmascript')
+  }
+
+  const isStyleRequest = destination === 'style' || pathname.endsWith('.css')
+  if (isStyleRequest) {
+    return !contentType.includes('text/css')
+  }
+
+  return false
 }
 
 self.addEventListener('sync', (event) => {
