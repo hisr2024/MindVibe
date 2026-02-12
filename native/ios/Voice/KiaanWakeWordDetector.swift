@@ -50,7 +50,7 @@ public struct WakeWordConfig {
 
     public static var `default`: WakeWordConfig {
         WakeWordConfig(
-            phrases: ["hey kiaan", "ok kiaan"],
+            phrases: ["hey kiaan", "hi kiaan", "namaste kiaan", "ok kiaan"],
             confidenceThreshold: 0.85,
             debounceInterval: 1.5,
             sampleRate: 16000.0,

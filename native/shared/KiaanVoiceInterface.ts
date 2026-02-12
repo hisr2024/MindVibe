@@ -76,7 +76,7 @@ export interface KiaanVoiceConfig {
   /** Enable wake word detection (default: true) */
   enableWakeWord?: boolean
 
-  /** Wake word phrases to listen for (default: ['hey kiaan', 'ok kiaan', 'kiaan']) */
+  /** Wake word phrases to listen for (default: ['hey kiaan', 'hi kiaan', 'namaste kiaan', 'ok kiaan', 'kiaan']) */
   wakeWordPhrases?: string[]
 
   /** Maximum retry attempts for self-healing (default: 3) */
@@ -102,7 +102,7 @@ export const DEFAULT_CONFIG: Required<KiaanVoiceConfig> = {
   language: 'en-US',
   useOnDeviceRecognition: true,
   enableWakeWord: true,
-  wakeWordPhrases: ['hey kiaan', 'ok kiaan', 'kiaan'],
+  wakeWordPhrases: ['hey kiaan', 'hi kiaan', 'namaste kiaan', 'ok kiaan', 'kiaan'],
   maxRetries: 3,
   retryBaseDelayMs: 500,
   silenceTimeoutMs: 2000,
