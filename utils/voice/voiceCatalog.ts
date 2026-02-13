@@ -17,6 +17,9 @@
 
 import type { VoiceGender } from '@/utils/speech/synthesis'
 
+const STORAGE_KEY = 'mindvibe_selected_voice'
+const LANGUAGE_KEY = 'mindvibe_selected_voice_language'
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type VoiceLanguage =
