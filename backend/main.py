@@ -585,6 +585,15 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
 
+# Load Wisdom Guide router
+startup_logger.info("\n[Wisdom Guide] Attempting to import Wisdom Guide router...")
+try:
+    from backend.routes.wisdom_guide import router as wisdom_guide_router
+    app.include_router(wisdom_guide_router)
+    startup_logger.info("✅ [SUCCESS] Wisdom Guide router loaded")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Wisdom Guide router: {e}")
+
 # Load Emotional Reset router
 startup_logger.info("\n[Emotional Reset] Attempting to import Emotional Reset router...")
 try:
@@ -602,6 +611,22 @@ try:
     startup_logger.info("✅ [SUCCESS] Karmic Tree Analytics router loaded")
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Karmic Tree Analytics router: {e}")
+
+# Load main Analytics router (overview, mood-trends, journal-stats, kiaan-insights, etc.)
+startup_logger.info("\n[Analytics] Attempting to import Analytics router...")
+try:
+    from backend.routes.analytics_dashboard import router as analytics_router
+    app.include_router(analytics_router, prefix="/api")
+    startup_logger.info("✅ [SUCCESS] Analytics router loaded")
+    startup_logger.info("   • GET    /api/analytics/overview - Overview metrics")
+    startup_logger.info("   • GET    /api/analytics/mood-trends - Mood trend data")
+    startup_logger.info("   • GET    /api/analytics/journal-stats - Journal statistics")
+    startup_logger.info("   • GET    /api/analytics/kiaan-insights - KIAAN insights")
+    startup_logger.info("   • GET    /api/analytics/weekly-summary - Weekly summary")
+    startup_logger.info("   • GET    /api/analytics/achievements - Achievements")
+    startup_logger.info("   • POST   /api/analytics/export - Export data")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Analytics router: {e}")
 
 # Load Admin routers
 startup_logger.info("\n[Admin] Attempting to import Admin routers...")
@@ -1035,17 +1060,7 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Community router: {e}")
 
-# Load Analytics router
-startup_logger.info("\n[Analytics] Attempting to import Analytics router...")
-try:
-    from backend.routes.analytics import router as analytics_router
-    app.include_router(analytics_router, prefix="/api")
-    startup_logger.info("✅ [SUCCESS] Analytics router loaded")
-    startup_logger.info("   • GET    /api/analytics/dashboard - Get dashboard data")
-    startup_logger.info("   • GET    /api/analytics/overview - Get overview metrics")
-    startup_logger.info("   • GET    /api/analytics/mood-trends - Get mood trends")
-except Exception as e:
-    startup_logger.info(f"❌ [ERROR] Failed to load Analytics router: {e}")
+# NOTE: Analytics dashboard router already loaded above (from analytics_dashboard.py)
 
 # Load Moods router
 startup_logger.info("\n[Moods] Attempting to import Moods router...")

@@ -11,6 +11,12 @@ import pytest
 from unittest.mock import Mock, patch
 from backend.services.translation_service import TranslationService, SUPPORTED_LANGUAGES
 
+# Skip all tests if googletrans is not installed (translation service runs in fallback mode)
+try:
+    import googletrans
+except ImportError:
+    pytestmark = pytest.mark.skip(reason="googletrans not installed - translation service runs in fallback mode")
+
 
 class TestAllLanguagesTranslation:
     """Test translation functionality for all 17 supported languages"""

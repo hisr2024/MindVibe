@@ -20,14 +20,14 @@ class TestGitaValidator:
 
     @pytest.fixture
     def valid_gita_response(self):
-        """A valid Gita-rooted response."""
+        """A valid Gita-rooted response (200+ words)."""
         return """The timeless wisdom teaches us that true peace comes from focusing on your actions, not the outcomes. You pour your energy into doing your best, then release attachment to how things turn out. This is the path of karma yoga - acting with full presence but without anxiety about results.
 
-In your situation with work stress, this means: First, identify what's actually in your control today - your effort, your attitude, your response. Second, give those things your best without obsessing over the promotion or recognition. Third, practice this daily mantra: 'I do my dharma and trust the process.'
+In your situation with work stress, this means approaching each day with the spirit of nishkama karma - selfless action without fixation on rewards. First, identify what is actually in your control today - your effort, your attitude, your response to challenges. Second, give those things your absolute best without obsessing over the promotion or recognition or any particular result. Third, practice this daily mantra: 'I do my dharma and trust the process.'
 
-When you shift from outcome-obsession to action-devotion, something profound happens. The anxiety dissolves because you're no longer fighting reality - you're flowing with it. Your buddhi (higher wisdom) recognizes that you're the eternal observer, not the temporary doer-result chain.
+When you shift from outcome-obsession to action-devotion, something truly profound happens. The anxiety dissolves because you are no longer fighting reality - you are flowing with it. Your buddhi (higher wisdom) recognizes that you are the eternal observer, the sakshi, not the temporary doer-result chain. This understanding is the essence of vairagya - detachment from the fruits of action.
 
-This is more than stress management - it's the gateway to unshakeable inner peace. Start today with one small practice of detachment. 💙"""
+The ancient sages understood that our suffering comes not from action itself but from our clinging to particular outcomes. By practicing this awareness daily, you cultivate the equanimity that the Gita calls samatva - evenness of mind in success and failure alike. This is more than stress management - it is the gateway to unshakeable inner peace and spiritual liberation. Start today with one small practice of conscious detachment. 💙"""
 
     @pytest.fixture
     def generic_response(self):
@@ -89,7 +89,10 @@ Remember to take breaks and prioritize your wellbeing. 💙"""
         assert not is_valid, "Generic response should fail validation"
         assert not details["no_forbidden_terms"]
         assert len(details["forbidden_terms_found"]) > 0
-        assert "studies" in " ".join(details["forbidden_terms_found"]).lower()
+        # Forbidden terms should include phrases like "research indicates", "experts recommend", etc.
+        all_forbidden = " ".join(details["forbidden_terms_found"]).lower()
+        assert any(term in all_forbidden for term in ["research", "experts", "therapy", "therapist", "psychology"]), \
+            f"Expected generic forbidden terms, found: {details['forbidden_terms_found']}"
         assert len(details["issues"]) > 0
 
     def test_short_response_fails_validation(self, validator, short_response):

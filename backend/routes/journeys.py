@@ -46,7 +46,7 @@ class CreateJourneyRequest(BaseModel):
         "draft", description="Initial status"
     )
     cover_image_url: str | None = Field(None, max_length=512, description="Cover image URL")
-    tags: list[str] | None = Field(None, max_items=10, description="Tags for categorization")
+    tags: list[str] | None = Field(None, max_length=10, description="Tags for categorization")
 
     @field_validator("title")
     @classmethod
@@ -73,7 +73,7 @@ class UpdateJourneyRequest(BaseModel):
         None, description="New status"
     )
     cover_image_url: str | None = Field(None, max_length=512, description="New cover image URL")
-    tags: list[str] | None = Field(None, max_items=10, description="New tags")
+    tags: list[str] | None = Field(None, max_length=10, description="New tags")
 
     @field_validator("title")
     @classmethod

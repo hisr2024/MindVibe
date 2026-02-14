@@ -70,6 +70,11 @@ class SendMessageRequest(BaseModel):
         return v
 
 
+class WisdomUsed(BaseModel):
+    principle: str | None = None
+    verse_ref: str | None = None
+
+
 class SendMessageResponse(BaseModel):
     message_id: str
     response: str
@@ -78,6 +83,7 @@ class SendMessageResponse(BaseModel):
     phase: str
     follow_up: str | None = None
     wisdom_principle: str | None = None
+    wisdom_used: WisdomUsed | None = None
 
 
 class ConversationHistoryResponse(BaseModel):
@@ -517,6 +523,14 @@ async def send_companion_message(
         f"latency={response_time_ms:.0f}ms"
     )
 
+    # Extract wisdom metadata for response
+    wisdom_data = response_data.get("wisdom_used") or {}
+    wisdom_principle = wisdom_data.get("principle") if wisdom_data else None
+    wisdom_used_obj = WisdomUsed(
+        principle=wisdom_data.get("principle"),
+        verse_ref=wisdom_data.get("verse_ref"),
+    ) if wisdom_data.get("principle") else None
+
     return SendMessageResponse(
         message_id=companion_msg.id,
         response=response_data["response"],
@@ -524,7 +538,8 @@ async def send_companion_message(
         mood_intensity=response_data.get("mood_intensity", 0.5),
         phase=response_data["phase"],
         follow_up=response_data.get("follow_up"),
-        wisdom_principle=(response_data.get("wisdom_used") or {}).get("principle"),
+        wisdom_principle=wisdom_principle,
+        wisdom_used=wisdom_used_obj,
     )
 
 

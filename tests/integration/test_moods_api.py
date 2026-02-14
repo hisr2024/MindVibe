@@ -34,7 +34,7 @@ class TestMoodsEndpoints:
 
         # Create a mood using JWT Bearer token
         response = await test_client.post(
-            "/moods",
+            "/api/moods",
             json={
                 "score": 2,
                 "tags": ["happy", "energetic"],
@@ -43,7 +43,7 @@ class TestMoodsEndpoints:
             headers=auth_headers_for(user.id),
         )
 
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         data = response.json()
         assert data["score"] == 2
         assert data["tags"] == ["happy", "energetic"]
@@ -67,10 +67,10 @@ class TestMoodsEndpoints:
         await test_db.refresh(user)
 
         response = await test_client.post(
-            "/moods", json={"score": -1}, headers=auth_headers_for(user.id)
+            "/api/moods", json={"score": -1}, headers=auth_headers_for(user.id)
         )
 
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         data = response.json()
         assert data["score"] == -1
         assert data["tags"] is None
@@ -93,7 +93,7 @@ class TestMoodsEndpoints:
 
         # Score too high
         response = await test_client.post(
-            "/moods", json={"score": 5}, headers=auth_headers_for(user.id)
+            "/api/moods", json={"score": 5}, headers=auth_headers_for(user.id)
         )
 
         assert response.status_code == 422  # Validation error
@@ -102,7 +102,7 @@ class TestMoodsEndpoints:
     async def test_create_mood_requires_auth(self, test_client: AsyncClient):
         """Test that creating a mood without authentication returns 401."""
         response = await test_client.post(
-            "/moods",
+            "/api/moods",
             json={"score": 1, "tags": ["calm"]},
         )
 
@@ -115,7 +115,7 @@ class TestMoodsEndpoints:
         Previously this used dev-anon auto-creation which has been removed
         for security (shared anonymous account across all unauthenticated requests).
         """
-        response = await test_client.post("/moods", json={"score": 0})
+        response = await test_client.post("/api/moods", json={"score": 0})
 
         # Should fail - authentication is now required
         assert response.status_code == 401

@@ -3,11 +3,21 @@ Integration tests for Mobile BFF API endpoints
 
 Tests the Mobile Backend for Frontend service which aggregates
 and proxies requests to the main KIAAN API.
+
+NOTE: The mobile_bff module has been consolidated into the main backend app.
+These tests are skipped until they are rewritten to target the main app's
+mobile endpoints.
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+# Skip all tests in this module if backend.mobile_bff is not available
+pytest.importorskip("backend.mobile_bff", reason="backend.mobile_bff module not available")
+
+# Skip entire module — backend.mobile_bff was removed and consolidated into main app
+pytestmark = pytest.mark.skip(reason="backend.mobile_bff module was removed; tests need rewrite for main app mobile endpoints")
 from httpx import ASGITransport, AsyncClient
 
 

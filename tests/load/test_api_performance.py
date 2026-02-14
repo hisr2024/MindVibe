@@ -7,7 +7,26 @@ Usage:
     locust -f tests/load/test_api_performance.py --host=http://localhost:8000 --headless --users 100 --spawn-rate 10 --run-time 5m
 """
 
-from locust import HttpUser, task, between
+try:
+    from locust import HttpUser, task, between
+except ImportError:
+    import sys
+    # When run under pytest, locust may not be installed.  Mark the
+    # entire module as skipped so collection does not fail.
+    import pytest
+    pytestmark = pytest.mark.skip(reason="locust not installed")
+
+    # Provide stub symbols so the rest of the module can be parsed
+    # without NameError during collection.
+    class HttpUser:  # type: ignore[no-redef]
+        pass
+    def task(f=None, *a, **kw):  # type: ignore[no-redef]
+        """Stub for @task and @task(weight) decorator."""
+        if callable(f):
+            return f
+        return lambda fn: fn
+    def between(*a, **kw):  # type: ignore[no-redef]
+        return 0
 import random
 
 # Sample test data

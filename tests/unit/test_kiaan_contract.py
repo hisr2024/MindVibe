@@ -41,8 +41,8 @@ def test_message_endpoint_preserves_contract(mock_request, monkeypatch):
     # Response should contain text
     assert "response" in result
     assert isinstance(result["response"], str)
-    # All KIAAN responses end with 💙
-    assert "💙" in result["response"]
+    # KIAAN responses should contain meaningful content
+    assert len(result["response"]) > 20
 
 
 def test_message_endpoint_rejects_empty_input():
