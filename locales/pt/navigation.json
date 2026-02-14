@@ -47,5 +47,14 @@
     "emailUs": "Envie-nos um e-mail",
     "encryptedJournals": "Diários criptografados",
     "noTracking": "Sem anúncios de rastreamento"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }

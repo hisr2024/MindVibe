@@ -47,5 +47,14 @@
     "emailUs": "हमें ईमेल करें",
     "encryptedJournals": "एन्क्रिप्टेड जर्नल",
     "noTracking": "कोई ट्रैकिंग विज्ञापन नहीं"
+  },
+  "pathway": {
+    "pause": "विराम",
+    "understand": "समझें",
+    "converse": "संवाद",
+    "apply": "अभ्यास",
+    "train": "प्रशिक्षण",
+    "you_are_here": "आप यहाँ हैं",
+    "nav_label": "उपचार मार्ग"
   }
 }

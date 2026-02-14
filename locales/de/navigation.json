@@ -47,5 +47,14 @@
     "emailUs": "Schreiben Sie uns",
     "encryptedJournals": "Verschlüsselte Tagebücher",
     "noTracking": "Keine Tracking-Anzeigen"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }

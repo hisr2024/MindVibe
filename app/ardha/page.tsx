@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
+import { PathwayMap } from '@/components/navigation/PathwayMap'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -128,6 +129,9 @@ export default function ArdhaPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
+        {/* Pathway Map */}
+        <PathwayMap />
+
         {/* Header */}
         <header className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

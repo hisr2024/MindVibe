@@ -47,5 +47,14 @@
     "emailUs": "ನಮಗೆ ಇಮೇಲ್ ಮಾಡಿ",
     "encryptedJournals": "ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಜರ್ನಲ್‌ಗಳು",
     "noTracking": "ಯಾವುದೇ ಟ್ರ್ಯಾಕಿಂಗ್ ಜಾಹೀರಾತುಗಳಿಲ್ಲ"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }
