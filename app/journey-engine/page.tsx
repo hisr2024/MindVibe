@@ -25,6 +25,8 @@ import {
 } from '@/types/journeyEngine.types'
 import { journeyEngineService, JourneyEngineError } from '@/services/journeyEngineService'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
+import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
 // =============================================================================
 // ENEMY RADAR COMPONENT
@@ -465,6 +467,9 @@ export default function JourneyEnginePage() {
                 Master them through guided journeys of wisdom and practice.
               </p>
             </div>
+
+            {/* Next Step Suggestion (activates in journey detail contexts) */}
+            <NextStepLink suggestion={getNextStepSuggestion({ tool: 'journey' })} />
 
             {/* Stats Row */}
             {dashboard && (

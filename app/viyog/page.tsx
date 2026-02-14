@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
+import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -170,6 +172,7 @@ Boundaries:
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
                   {result.response}
                 </div>
+                <NextStepLink suggestion={getNextStepSuggestion({ tool: 'viyoga' })} />
               </div>
             )}
           </section>
