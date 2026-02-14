@@ -33,6 +33,7 @@ import {
 } from '@/types/journeyEngine.types'
 import { JourneyDayHeader } from '@/components/journey/JourneyDayHeader'
 import { MicroPractice } from '@/components/journey/MicroPractice'
+import { Day14Completed } from '@/components/journey/Day14Completed'
 import { hydrateJourneyMeta } from '@/lib/journey/offlineCache'
 
 // =============================================================================
@@ -796,28 +797,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
             </button>
           </div>
         ) : journey.status === 'completed' ? (
-          <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-            <p className="text-sm text-white/40 uppercase tracking-widest mb-3">Day 14</p>
-            <h2 className="text-lg font-medium text-white mb-2">Practice continues</h2>
-            <p className="text-white/50 mb-6 leading-relaxed max-w-md mx-auto">
-              The 14 days are a beginning, not an end. Carry what you have practiced
-              into everyday moments — the work deepens from here.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="/journey-engine"
-                className="inline-block rounded-xl bg-white/10 px-6 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-colors"
-              >
-                Explore another path
-              </Link>
-              <Link
-                href="/journeys"
-                className="inline-block rounded-xl border border-white/10 px-6 py-2.5 text-sm font-medium text-white/60 hover:text-white/80 hover:border-white/20 transition-colors"
-              >
-                Review your journey
-              </Link>
-            </div>
-          </div>
+          <Day14Completed />
         ) : (
           <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-500 border-t-transparent mx-auto" />
