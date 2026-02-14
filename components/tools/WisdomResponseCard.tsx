@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { VoiceResponseButton } from '@/components/voice'
 
 /**
@@ -266,9 +267,10 @@ export default function WisdomResponseCard({
   sources = [],
   secularMode = false,
 }: WisdomResponseCardProps) {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+  const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [showFullText, setShowFullText] = useState(false)
   const [copyLabel, setCopyLabel] = useState('Copy')
+  const [initialized, setInitialized] = useState(false)
 
   const config = SECTION_CONFIG[tool]
   const resolvedCitations = citations.length
@@ -329,24 +331,23 @@ export default function WisdomResponseCard({
     .filter(s => s.content && s.content.trim().length > 0)
     .sort((a, b) => (a.order || 99) - (b.order || 99))
 
-  const toggleSection = (key: string) => {
-    setExpandedSections(prev => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
-      return next
-    })
-  }
+  // Default: expand first 2 sections (or all if ≤ 3)
+  useEffect(() => {
+    if (!initialized && parsedSections.length > 0) {
+      const defaultOpen = parsedSections.length <= 3
+        ? parsedSections.map(s => s.key)
+        : parsedSections.slice(0, 2).map(s => s.key)
+      setExpandedSections(defaultOpen)
+      setInitialized(true)
+    }
+  }, [parsedSections, initialized])
 
   const expandAll = () => {
-    setExpandedSections(new Set(parsedSections.map(s => s.key)))
+    setExpandedSections(parsedSections.map(s => s.key))
   }
 
   const collapseAll = () => {
-    setExpandedSections(new Set())
+    setExpandedSections([])
   }
 
   const handleCopy = async () => {
@@ -361,9 +362,9 @@ export default function WisdomResponseCard({
   }
 
   return (
-    <div className={`rounded-2xl bg-black/60 ${accentColorClass.border} border p-5 shadow-inner ${accentColorClass.glow}`}>
+    <div className={`rounded-2xl bg-black/60 ${accentColorClass.border} border p-5 md:p-6 shadow-inner ${accentColorClass.glow}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{config.icon}</span>
           <div>
@@ -408,7 +409,7 @@ export default function WisdomResponseCard({
 
       {/* Section Controls - only show when we have sections */}
       {parsedSections.length > 1 && !showFullText && (
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-5">
           <button
             onClick={expandAll}
             className="text-[10px] px-2 py-1 rounded border border-gray-600/50 text-gray-400 hover:text-white hover:border-gray-500 transition"
@@ -437,65 +438,61 @@ export default function WisdomResponseCard({
       {/* Content */}
       {showFullText || parsedSections.length === 0 ? (
         /* Full Text View - also shown when no sections parsed */
-        <div className={`whitespace-pre-wrap text-sm ${accentColorClass.text} leading-relaxed`}>
+        <div className={`whitespace-pre-wrap text-sm ${accentColorClass.text} leading-relaxed max-w-[65ch]`}>
           {secularMode ? fullResponse : highlightSanskrit(fullResponse)}
         </div>
       ) : (
-        /* Sectioned View */
-        <div className="space-y-3">
-          {parsedSections.map((section, index) => {
-            const isExpanded = expandedSections.has(section.key) || parsedSections.length <= 3
-            const isPreview = !isExpanded && section.content.length > 200
-
-            return (
-              <div
-                key={section.key}
-                className={`rounded-xl ${accentColorClass.bg} border ${accentColorClass.border} overflow-hidden transition-all duration-300`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Section Header */}
-                <button
-                  onClick={() => toggleSection(section.key)}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-white/5 transition text-left"
+        /* Sectioned View — Radix Accordion for a11y */
+        <AccordionPrimitive.Root
+          type="multiple"
+          value={expandedSections}
+          onValueChange={setExpandedSections}
+          className="space-y-4"
+        >
+          {parsedSections.map((section, index) => (
+            <AccordionPrimitive.Item
+              key={section.key}
+              value={section.key}
+              className={`rounded-xl ${accentColorClass.bg} border ${accentColorClass.border} overflow-hidden`}
+            >
+              <AccordionPrimitive.Header>
+                <AccordionPrimitive.Trigger
+                  className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
                 >
-                  <span className="text-lg">{section.icon}</span>
+                  <span className="text-lg" aria-hidden="true">{section.icon}</span>
                   <span className={`font-medium ${accentColorClass.accent} flex-1`}>
                     {section.title}
                   </span>
-                  <span className="text-gray-500 text-sm">
-                    {isExpanded ? '▼' : '▶'}
-                  </span>
-                </button>
-
-                {/* Section Content */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 ${
-                    isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className={`px-4 pb-4 text-sm ${accentColorClass.text} leading-relaxed`}>
-                    {secularMode ? section.content : highlightSanskrit(section.content)}
-                  </div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 text-gray-500 transition-transform motion-reduce:transition-none group-data-[state=open]:rotate-180"
+                    aria-hidden="true"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </AccordionPrimitive.Trigger>
+              </AccordionPrimitive.Header>
+              <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                {/* Subtle separator between trigger and content */}
+                <div className={`mx-4 border-t ${accentColorClass.border}`} />
+                <div className={`px-4 pt-3 pb-4 text-sm ${accentColorClass.text} leading-[1.75] max-w-[65ch]`}>
+                  {secularMode ? section.content : highlightSanskrit(section.content)}
                 </div>
-
-                {/* Preview (when collapsed) */}
-                {isPreview && (
-                  <div className={`px-4 pb-3 text-sm ${accentColorClass.text} opacity-60`}>
-                    {section.content.slice(0, 150)}...
-                    <span className={`ml-2 text-xs ${accentColorClass.accent}`}>
-                      (click to expand)
-                    </span>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+              </AccordionPrimitive.Content>
+            </AccordionPrimitive.Item>
+          ))}
+        </AccordionPrimitive.Root>
       )}
 
 
       {/* Closing */}
-      <div className="mt-6 pt-4 border-t border-gray-700/50 text-center">
+      <div className="mt-8 pt-4 border-t border-gray-700/50 text-center">
         <p className="text-xs text-gray-500 italic">
           💙 Here to help you navigate this with clarity and compassion
         </p>
