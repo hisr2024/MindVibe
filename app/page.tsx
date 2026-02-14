@@ -10,6 +10,7 @@ import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
 // Language selector is now in the global header (SiteNav)
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs, animationVariants } from '@/lib/animations/spring-configs';
+import { PathwayMap } from '@/components/navigation/PathwayMap';
 
 /**
  * Redesigned Home Page
@@ -160,6 +161,9 @@ export default function Home() {
             </motion.div>
           </div>
         </motion.header>
+
+        {/* Pathway Map */}
+        <PathwayMap />
 
         {/* Privacy Notice */}
         <motion.div 

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback } from 'react'
+import { PathwayMap } from '@/components/navigation/PathwayMap'
 
 // Animation variants for staggered entrance
 const containerVariants = {
@@ -84,6 +85,11 @@ export default function DashboardClient() {
           initial="hidden"
           animate="visible"
         >
+          {/* Pathway Map */}
+          <motion.div variants={itemVariants} className="mb-4">
+            <PathwayMap />
+          </motion.div>
+
           {/* Quick Access to Introduction - Divine Presence */}
           <motion.div className="mb-6" variants={itemVariants}>
             <Link

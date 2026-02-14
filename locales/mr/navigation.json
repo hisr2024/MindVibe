@@ -47,5 +47,14 @@
     "emailUs": "आम्हाला ईमेल करा",
     "encryptedJournals": "एन्क्रिप्टेड जर्नल्स",
     "noTracking": "कोणतेही ट्रॅकिंग जाहिराती नाहीत"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }

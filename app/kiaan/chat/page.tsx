@@ -7,6 +7,7 @@ import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeU
 import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LanguageSelector } from '@/components/chat/LanguageSelector';
+import { PathwayMap } from '@/components/navigation/PathwayMap';
 
 /**
  * Dedicated KIAAN Chat Page - Inner Component
@@ -182,6 +183,9 @@ function KiaanChatPageInner() {
 
   return (
     <main className="mx-auto max-w-5xl space-y-4 sm:space-y-6 p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
+      {/* Pathway Map */}
+      <PathwayMap />
+
       {/* Header */}
       <div className="relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 sm:p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">

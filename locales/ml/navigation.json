@@ -47,5 +47,14 @@
     "emailUs": "ഞങ്ങളെ ഇമെയിൽ ചെയ്യുക",
     "encryptedJournals": "എൻക്രിപ്റ്റ് ചെയ്ത ജേണലുകൾ",
     "noTracking": "ട്രാക്കിംഗ് പരസ്യങ്ങൾ ഇല്ല"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }

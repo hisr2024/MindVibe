@@ -47,5 +47,14 @@
     "emailUs": "अस्मभ्यम् ईमेल प्रेषयतु",
     "encryptedJournals": "कूटितानि पत्रिकाणि",
     "noTracking": "अनुगमन विज्ञापनानि नास्ति"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }

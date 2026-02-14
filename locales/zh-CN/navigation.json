@@ -47,5 +47,14 @@
     "emailUs": "发送电子邮件",
     "encryptedJournals": "加密日记",
     "noTracking": "无跟踪广告"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
   }
 }
