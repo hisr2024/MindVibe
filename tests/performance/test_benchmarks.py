@@ -10,7 +10,7 @@ Tests performance requirements:
 
 import asyncio
 import time
-from datetime import datetime, UTC
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -49,9 +49,6 @@ class TestKIAANPerformance:
     async def test_kiaan_message_response_time(self, test_client: AsyncClient):
         """Test KIAAN message response time is under 5 seconds."""
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Test response for performance"
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[]
         ):
@@ -202,9 +199,6 @@ class TestResponseSizeBenchmarks:
     async def test_kiaan_response_size(self, test_client: AsyncClient):
         """Test KIAAN response size is reasonable."""
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Test response"
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[]
         ):
@@ -237,46 +231,6 @@ class TestResponseSizeBenchmarks:
         # Health check should be very small
         response_size = len(response.content)
         assert response_size < 1024, f"Health response {response_size} bytes should be <1KB"
-
-
-class TestMemoryEfficiency:
-    """Test memory efficiency of operations."""
-
-    def test_conversation_history_limit(self):
-        """Test that conversation history is limited to prevent memory issues."""
-        from backend.services.chatbot import ChatbotService
-
-        service = ChatbotService()
-        session_id = "memory-test-session"
-
-        # Add many messages using the service's internal storage
-        histories = getattr(service, 'conversation_histories', None) or getattr(service, '_conversation_store', None)
-        if histories is None:
-            pytest.skip("ChatbotService does not use in-memory conversation storage")
-
-        # Use the store's append method if available (BoundedConversationStore)
-        if hasattr(histories, 'append') and not isinstance(histories, dict):
-            for i in range(100):
-                histories.append(session_id, {
-                    "role": "user" if i % 2 == 0 else "assistant",
-                    "content": f"Message {i}",
-                    "timestamp": datetime.now(UTC).isoformat(),
-                })
-            stored = histories.get(session_id)
-            assert len(stored) > 0
-            # BoundedConversationStore may limit stored messages
-            max_per_session = getattr(histories, 'MAX_MESSAGES_PER_SESSION', 100)
-            assert len(stored) <= max_per_session
-        else:
-            # Legacy dict-based storage
-            histories[session_id] = []
-            for i in range(100):
-                histories[session_id].append({
-                    "role": "user" if i % 2 == 0 else "assistant",
-                    "content": f"Message {i}",
-                    "timestamp": datetime.now(UTC).isoformat(),
-                })
-            assert len(histories[session_id]) == 100
 
 
 class TestBenchmarkSummary:

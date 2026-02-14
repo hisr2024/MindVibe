@@ -1,7 +1,7 @@
 """
 Integration tests for Chat API endpoints
 
-Tests the full chatbot API including message handling, session management,
+Tests the full chat API including message handling, session management,
 and conversation history.
 """
 
@@ -31,6 +31,13 @@ def sample_verse_data():
     }
 
 
+def _mock_kiaan():
+    """Create a mock KIAAN service for testing."""
+    async def _generate(message: str, db):
+        return "Test response"
+    return SimpleNamespace(generate_response_with_gita=_generate)
+
+
 @pytest.mark.asyncio
 class TestChatEndpoints:
     """Test suite for chat API endpoints."""
@@ -40,7 +47,7 @@ class TestChatEndpoints:
         from backend.routes import chat as chat_module
 
         async def _stable_response(message: str, db):
-            return "Contract steady 💙"
+            return "Contract steady"
 
         monkeypatch.setattr(
             chat_module,
@@ -84,13 +91,12 @@ class TestChatEndpoints:
         assert "message" in data
         assert len(data["session_id"]) > 0
 
-    async def test_send_message_new_session(self, test_client: AsyncClient, sample_verse_data):
+    async def test_send_message_new_session(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, sample_verse_data):
         """Test sending a message without a session ID (creates new session)."""
-        # Mock the database query and OpenAI
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="I understand your concern about anxiety...",
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[],
         ):
@@ -104,29 +110,27 @@ class TestChatEndpoints:
         assert data.get("status") == "success" or data.get("response")
         assert "response" in data
 
-    async def test_send_message_with_session_id(self, test_client: AsyncClient, sample_verse_data):
+    async def test_send_message_with_session_id(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, sample_verse_data):
         """Test sending a message with an existing session ID."""
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         session_id = "test-session-123"
 
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
         ):
-            with patch(
-                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                response = await test_client.post(
-                    "/api/chat/message",
-                    json={"message": "First message", "session_id": session_id},
-                )
+            response = await test_client.post(
+                "/api/chat/message",
+                json={"message": "First message", "session_id": session_id},
+            )
 
-                assert response.status_code == 200
-                data = response.json()
-                assert data.get("status") == "success" or data.get("response")
-                # session_id is set during persistence; may be absent if DB table missing
-                if "session_id" in data:
-                    assert data["session_id"] == session_id
+            assert response.status_code == 200
+            data = response.json()
+            assert data.get("status") == "success" or data.get("response")
+            if "session_id" in data:
+                assert data["session_id"] == session_id
 
     async def test_send_message_empty(self, test_client: AsyncClient):
         """Test sending an empty message (should fail)."""
@@ -147,12 +151,12 @@ class TestChatEndpoints:
         data = response.json()
         assert data.get("status") == "success" or data.get("response")
 
-    async def test_send_message_hindi(self, test_client: AsyncClient):
+    async def test_send_message_hindi(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test sending a message with Hindi language preference."""
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[],
         ):
@@ -165,12 +169,12 @@ class TestChatEndpoints:
         data = response.json()
         assert data["language"] == "hindi"
 
-    async def test_send_message_with_sanskrit(self, test_client: AsyncClient):
+    async def test_send_message_with_sanskrit(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test sending a message with Sanskrit included."""
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[],
         ):
@@ -181,18 +185,17 @@ class TestChatEndpoints:
 
         assert response.status_code == 200
 
-    async def test_get_conversation_history(self, test_client: AsyncClient):
+    async def test_get_conversation_history(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test retrieving conversation history endpoint exists and returns valid structure."""
+        from backend.routes import chat as chat_module
         from tests.conftest import auth_headers_for
+
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
 
         session_id = "test-session-history"
         headers = auth_headers_for("test-user-123")
 
-        # First, send a message to create history
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[],
         ):
@@ -202,7 +205,6 @@ class TestChatEndpoints:
                 headers=headers,
             )
 
-        # Then retrieve history (query param, not path param)
         response = await test_client.get(
             "/api/chat/history",
             params={"session_id": session_id},
@@ -212,7 +214,6 @@ class TestChatEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert "messages" in data
-        # May be "error" if user not found in DB (test context) or "success"
         assert data.get("status") in {"success", "error"}
 
     async def test_get_conversation_history_not_found(self, test_client: AsyncClient):
@@ -231,18 +232,17 @@ class TestChatEndpoints:
         assert "messages" in data
         assert len(data["messages"]) == 0
 
-    async def test_clear_conversation(self, test_client: AsyncClient):
+    async def test_clear_conversation(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test deleting a chat message (soft-delete)."""
+        from backend.routes import chat as chat_module
         from tests.conftest import auth_headers_for
+
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
 
         headers = auth_headers_for("test-user-123")
         session_id = "test-session-clear"
 
-        # Create a conversation
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[],
         ):
@@ -256,7 +256,6 @@ class TestChatEndpoints:
         message_id = msg_data.get("message_id")
 
         if message_id:
-            # Delete the specific message
             response = await test_client.delete(
                 f"/api/chat/history/{message_id}",
                 headers=headers,
@@ -280,18 +279,17 @@ class TestChatEndpoints:
         data = response.json()
         assert data.get("status") == "error"
 
-    async def test_list_active_sessions(self, test_client: AsyncClient):
+    async def test_list_active_sessions(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test listing active sessions."""
+        from backend.routes import chat as chat_module
         from tests.conftest import auth_headers_for
 
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         headers = auth_headers_for("test-user-123")
-        # Create a few sessions
         session_ids = ["session-1", "session-2"]
 
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ), patch(
             "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
             return_value=[],
         ):
@@ -302,7 +300,6 @@ class TestChatEndpoints:
                     headers=headers,
                 )
 
-        # List sessions
         response = await test_client.get("/api/chat/sessions", headers=headers)
 
         assert response.status_code == 200
@@ -321,8 +318,11 @@ class TestChatEndpoints:
         assert data["status"] in {"healthy", "error"}
         assert data["bot"] == "KIAAN"
 
-    async def test_multi_turn_conversation(self, test_client: AsyncClient):
+    async def test_multi_turn_conversation(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test a multi-turn conversation."""
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         session_id = "test-multi-turn"
         messages = [
             "I'm feeling stressed",
@@ -331,55 +331,48 @@ class TestChatEndpoints:
         ]
 
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
         ):
-            with patch(
-                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                for i, msg in enumerate(messages):
-                    response = await test_client.post(
-                        "/api/chat/message",
-                        json={"message": msg, "session_id": session_id},
-                    )
+            for i, msg in enumerate(messages):
+                response = await test_client.post(
+                    "/api/chat/message",
+                    json={"message": msg, "session_id": session_id},
+                )
 
-                    assert response.status_code == 200
-                    data = response.json()
-                    assert data.get("status") == "success" or data.get("response")
+                assert response.status_code == 200
+                data = response.json()
+                assert data.get("status") == "success" or data.get("response")
 
-    async def test_concurrent_sessions(self, test_client: AsyncClient):
+    async def test_concurrent_sessions(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch):
         """Test that multiple sessions can coexist."""
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
+
         session1 = "concurrent-session-1"
         session2 = "concurrent-session-2"
 
         with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
         ):
-            with patch(
-                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                # Send messages to both sessions
-                response1 = await test_client.post(
-                    "/api/chat/message",
-                    json={"message": "Session 1 message", "session_id": session1},
-                )
+            response1 = await test_client.post(
+                "/api/chat/message",
+                json={"message": "Session 1 message", "session_id": session1},
+            )
 
-                response2 = await test_client.post(
-                    "/api/chat/message",
-                    json={"message": "Session 2 message", "session_id": session2},
-                )
+            response2 = await test_client.post(
+                "/api/chat/message",
+                json={"message": "Session 2 message", "session_id": session2},
+            )
 
-                assert response1.status_code == 200
-                assert response2.status_code == 200
+            assert response1.status_code == 200
+            assert response2.status_code == 200
 
-                # Verify both sessions got distinct responses
-                data1 = response1.json()
-                data2 = response2.json()
-                assert data1.get("status") == "success" or data1.get("response")
-                assert data2.get("status") == "success" or data2.get("response")
+            data1 = response1.json()
+            data2 = response2.json()
+            assert data1.get("status") == "success" or data1.get("response")
+            assert data2.get("status") == "success" or data2.get("response")
 
 
 @pytest.mark.asyncio
@@ -425,37 +418,35 @@ class TestChatValidation:
     """Test input validation for chat endpoints."""
 
     @pytest.mark.parametrize("language", ["english", "hindi", "sanskrit"])
-    async def test_valid_languages(self, test_client: AsyncClient, language):
+    async def test_valid_languages(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, language):
         """Test that all valid languages are accepted."""
-        with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ):
-            with patch(
-                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                response = await test_client.post(
-                    "/api/chat/message",
-                    json={"message": "Test", "language": language},
-                )
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
 
-                assert response.status_code == 200
+        with patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            response = await test_client.post(
+                "/api/chat/message",
+                json={"message": "Test", "language": language},
+            )
+
+            assert response.status_code == 200
 
     @pytest.mark.parametrize("include_sanskrit", [True, False])
-    async def test_include_sanskrit_options(self, test_client: AsyncClient, include_sanskrit):
+    async def test_include_sanskrit_options(self, test_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, include_sanskrit):
         """Test both options for include_sanskrit parameter."""
-        with patch(
-            "backend.services.chatbot.ChatbotService._generate_chat_response",
-            return_value="Response",
-        ):
-            with patch(
-                "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
-                return_value=[],
-            ):
-                response = await test_client.post(
-                    "/api/chat/message",
-                    json={"message": "Test", "include_sanskrit": include_sanskrit},
-                )
+        from backend.routes import chat as chat_module
+        monkeypatch.setattr(chat_module, "kiaan", _mock_kiaan())
 
-                assert response.status_code == 200
+        with patch(
+            "backend.services.wisdom_kb.WisdomKnowledgeBase.search_relevant_verses",
+            return_value=[],
+        ):
+            response = await test_client.post(
+                "/api/chat/message",
+                json={"message": "Test", "include_sanskrit": include_sanskrit},
+            )
+
+            assert response.status_code == 200
