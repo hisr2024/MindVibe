@@ -7,6 +7,8 @@ import { KiaanLogo } from '@/components/branding'
 import { useSmartScroll } from '@/hooks/useSmartScroll'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useMicroPause } from '@/hooks/useMicroPause'
+import { BreathingDot } from '@/components/animations/BreathingDot'
 
 export interface Message {
   id: string
@@ -42,6 +44,13 @@ export function KiaanChat({
   
   // Get current language for voice features
   const { language } = useLanguage()
+
+  // Micro-pause before revealing AI response
+  const { showPause } = useMicroPause({
+    loading: isLoading,
+    hasResult: messages.length > 0,
+    tool: 'kiaan',
+  })
 
   // Use smart scroll hook for better UX
   const visibleMessages = messages.slice(clearedUntil)
@@ -203,6 +212,9 @@ export function KiaanChat({
                 <span className="sr-only">KIAAN is typing...</span>
               </div>
             )}
+
+            {/* Micro-pause breathing dot before revealing new response */}
+            <BreathingDot visible={showPause} />
 
             {/* Invisible element at the end for scrolling */}
             <div ref={messagesEndRef} />

@@ -250,10 +250,10 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     id: 'journey-engine',
     name: 'Journey Engine (Six Enemies)',
     route: '/journey-engine',
-    friendDescription: 'Guided multi-day journeys to conquer the six inner enemies described in the Gita.',
+    friendDescription: 'Guided multi-day journeys to reduce the grip of the six inner tendencies described in the Gita.',
     suggestions: [
-      'Friend, in the Gita, there are six inner enemies that steal our peace: desire, anger, greed, delusion, arrogance, and envy. The Journey Engine is a structured multi-day program where we tackle these one by one. Which enemy is troubling you most right now?',
-      'There is a powerful system I want to introduce you to. The ancient sages identified six enemies of the mind — and we have built guided journeys to help you conquer each one. It is not a quick fix. It is real work. But I will be with you every step.',
+      'Friend, in the Gita, there are six inner tendencies that unsettle our peace: desire, anger, greed, delusion, arrogance, and envy. The Journey Engine is a structured multi-day program where we loosen their influence one by one. Which tendency is weighing on you most right now?',
+      'There is a powerful system I want to introduce you to. The ancient sages identified six tendencies of the mind — and we have built guided journeys to help you strengthen steadiness against each one. It is not a quick fix. It is real work. But I will be with you every step.',
     ],
     triggerKeywords: ['journey', 'program', 'multi-day', 'structured', 'enemy', 'desire', 'greed', 'arrogance', 'envy', 'delusion', 'shadripu', 'six enemies', 'conquer'],
     emotions: ['determination', 'anger', 'confusion', 'seeking'],

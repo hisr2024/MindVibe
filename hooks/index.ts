@@ -25,3 +25,5 @@ export { useWakeWord, type UseWakeWordOptions, type UseWakeWordReturn } from './
 export { useHapticFeedback } from './useHapticFeedback'
 export { useStreamingText, streamText } from './useStreamingText'
 export { usePullToRefresh, type UsePullToRefreshOptions, type UsePullToRefreshReturn } from './usePullToRefresh'
+export { useReducedMotion } from './useReducedMotion'
+export { useMicroPause } from './useMicroPause'

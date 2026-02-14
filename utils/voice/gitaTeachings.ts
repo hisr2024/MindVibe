@@ -358,7 +358,7 @@ export const GITA_CHAPTERS: ChapterTeaching[] = [
     sanskritTitle: 'Akshara Brahma Yoga',
     coreTheme: 'What you think about at the end defines your journey',
     friendlySummary: 'Your habitual thoughts shape your destiny. What you dwell on, you become. This chapter teaches that by consistently directing your mind toward the highest, you naturally move toward the highest. Your mental habits today create your tomorrow.',
-    lifeMoments: ['building habits', 'overcoming negative thinking', 'fear of death', 'manifesting goals'],
+    lifeMoments: ['building habits', 'reducing the grip of negative thinking', 'fear of death', 'manifesting goals'],
     verses: [
       {
         chapter: 8, verse: 6,

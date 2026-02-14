@@ -124,7 +124,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
   const showSummaryToggle = sender === 'assistant' && condensedSummary && condensedSummary !== text
 
   return (
-    <div className="space-y-2 group">
+    <div className="space-y-3 group">
       <div className="flex items-center gap-2 text-xs text-orange-100/60">
         <span className="font-semibold text-orange-50">{sender === 'user' ? 'You' : 'KIAAN'}</span>
         <span suppressHydrationWarning>
@@ -162,7 +162,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       </div>
       
       <div
-        className={`whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+        className={`whitespace-pre-wrap rounded-2xl px-4 py-3.5 text-sm leading-[1.75] ${
           sender === 'user'
             ? 'bg-orange-500/10 text-orange-50'
             : status === 'error'
@@ -170,7 +170,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               : 'bg-white/5 text-orange-50 border border-orange-500/15'
         } ${isTranslated ? 'border-l-2 border-l-blue-400/50' : ''}`}
       >
-        {displayText || ''}
+        <div className={sender === 'assistant' ? 'max-w-[65ch]' : ''}>
+          {displayText || ''}
+        </div>
         
         {/* Translation indicator */}
         {isTranslated && translatedText && (

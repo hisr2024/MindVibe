@@ -8,6 +8,8 @@ import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 import CompanionCTA from '@/components/companion/CompanionCTA'
+import { useMicroPause } from '@/hooks/useMicroPause'
+import { BreathingDot } from '@/components/animations/BreathingDot'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -81,6 +83,13 @@ export default function ViyogClient() {
 
   // Voice integration
   const { language, t } = useLanguage()
+
+  // Micro-pause before revealing response
+  const { showPause } = useMicroPause({
+    loading,
+    hasResult: !!result,
+    tool: 'viyoga',
+  })
 
   useEffect(() => {
     if (error) setError(null)
@@ -244,8 +253,11 @@ export default function ViyogClient() {
               <WisdomLoadingState tool="viyoga" secularMode={true} />
             )}
 
+            {/* Micro-pause breathing dot */}
+            <BreathingDot visible={showPause} />
+
             {/* Response Card */}
-            {result && !loading && (
+            {result && !loading && !showPause && (
               <WisdomResponseCard
                 tool="viyoga"
                 sections={result.sections}
@@ -262,7 +274,7 @@ export default function ViyogClient() {
           {/* Right: Insight Card, Flow Steps and Info */}
           <section className="space-y-4">
             {/* Concern Analysis Insight Card - shows when analysis is available */}
-            {result && !loading && result.concernAnalysis && result.concernAnalysis.analysis_depth === 'ai_enhanced' && (
+            {result && !loading && !showPause && result.concernAnalysis && result.concernAnalysis.analysis_depth === 'ai_enhanced' && (
               <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-5 shadow-[0_15px_60px_rgba(255,180,50,0.08)]">
                 <h3 className="text-sm font-semibold text-amber-100 mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
