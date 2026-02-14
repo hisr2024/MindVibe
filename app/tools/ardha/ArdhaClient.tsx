@@ -8,6 +8,8 @@ import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
+import { useMicroPause } from '@/hooks/useMicroPause'
+import { BreathingDot } from '@/components/animations/BreathingDot'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -165,6 +167,13 @@ export default function ArdhaClient() {
 
   // Voice integration
   const { language, t } = useLanguage()
+
+  // Micro-pause before revealing response
+  const { showPause } = useMicroPause({
+    loading,
+    hasResult: !!result,
+    tool: 'ardha',
+  })
 
   useEffect(() => {
     if (error) setError(null)
@@ -355,8 +364,11 @@ export default function ArdhaClient() {
               <WisdomLoadingState tool="ardha" />
             )}
 
+            {/* Micro-pause breathing dot */}
+            <BreathingDot visible={showPause} />
+
             {/* Ultra-Deep Wisdom Response */}
-            {result && !loading && (
+            {result && !loading && !showPause && (
               <WisdomResponseCard
                 tool="ardha"
                 sections={result.sections}
