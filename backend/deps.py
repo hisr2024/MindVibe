@@ -99,18 +99,31 @@ _MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "10"))     # burst connections
 _POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))   # recycle after 1h
 _POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))     # wait for connection
 
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False,
-    future=True,
-    connect_args=_get_ssl_connect_args(DATABASE_URL),
-    # Connection pool settings
-    pool_size=_POOL_SIZE,
-    max_overflow=_MAX_OVERFLOW,
-    pool_pre_ping=True,         # verify connections are alive before use
-    pool_recycle=_POOL_RECYCLE,  # recycle stale connections (seconds)
-    pool_timeout=_POOL_TIMEOUT,  # seconds to wait for a free connection
-)
+_is_sqlite = DATABASE_URL.startswith("sqlite")
+
+if _is_sqlite:
+    # SQLite uses StaticPool; pool_size / max_overflow / pool_timeout are invalid.
+    from sqlalchemy.pool import StaticPool
+
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False,
+        future=True,
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False},
+    )
+else:
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False,
+        future=True,
+        connect_args=_get_ssl_connect_args(DATABASE_URL),
+        pool_size=_POOL_SIZE,
+        max_overflow=_MAX_OVERFLOW,
+        pool_pre_ping=True,
+        pool_recycle=_POOL_RECYCLE,
+        pool_timeout=_POOL_TIMEOUT,
+    )
 SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

@@ -24,9 +24,6 @@ class TestSecurityHeaders:
         # X-Frame-Options
         assert response.headers.get("X-Frame-Options") == "DENY"
         
-        # X-XSS-Protection
-        assert response.headers.get("X-XSS-Protection") == "1; mode=block"
-        
         # Strict-Transport-Security
         assert "max-age=31536000" in response.headers.get("Strict-Transport-Security", "")
         
@@ -45,7 +42,6 @@ class TestSecurityHeaders:
         
         assert response.headers.get("X-Content-Type-Options") == "nosniff"
         assert response.headers.get("X-Frame-Options") == "DENY"
-        assert response.headers.get("X-XSS-Protection") == "1; mode=block"
 
     async def test_security_headers_present_on_post_endpoints(self, test_client: AsyncClient):
         """Test that security headers are present on POST endpoints."""

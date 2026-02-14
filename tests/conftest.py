@@ -22,9 +22,18 @@ from starlette.requests import Request
 # Allow pytest-cov options even when the plugin is not installed.
 def pytest_addoption(parser):
     """Register optional coverage CLI flags to avoid errors without pytest-cov."""
-    parser.addoption("--cov", action="append", default=[])
-    parser.addoption("--cov-report", action="append", default=[])
-    parser.addoption("--cov-fail-under", action="store", default=None)
+    try:
+        parser.addoption("--cov", action="append", default=[])
+    except Exception:
+        pass  # Already registered by pytest-cov
+    try:
+        parser.addoption("--cov-report", action="append", default=[])
+    except Exception:
+        pass
+    try:
+        parser.addoption("--cov-fail-under", action="store", default=None)
+    except Exception:
+        pass
 
 
 def pytest_configure(config):

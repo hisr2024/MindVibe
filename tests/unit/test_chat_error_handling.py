@@ -9,7 +9,7 @@ which uses async methods and gpt-4o-mini model.
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, MagicMock, patch, AsyncMock
 
 
 class TestKIAANErrorHandling:
@@ -115,7 +115,11 @@ class TestEndpointMetadata:
         """Test that /message endpoint returns correct model in metadata."""
         from backend.routes.chat import send_message, ChatMessage
 
-        result = await send_message(request=mock_request, chat=ChatMessage(message="Hello"), db=None)
+        mock_db = AsyncMock()
+        mock_db.add = MagicMock()
+        mock_db.commit = AsyncMock()
+        mock_db.refresh = AsyncMock()
+        result = await send_message(request=mock_request, chat=ChatMessage(message="Hello"), db=mock_db)
 
         # Model can be GPT-4o-mini or offline-template (when API key not configured)
         assert result["model"] in ["GPT-4o-mini", "gpt-4o-mini", "offline-template"]

@@ -158,7 +158,7 @@ This isn't just stress management - it's the path to unshakeable inner peace thr
         # Check that validation returns expected structure
         assert "valid" in validation
         assert "errors" in validation
-        assert "gita_terms" in validation
+        assert "wellness_terms" in validation
         assert "markers_found" in validation
         assert "word_count" in validation
         # If valid, no errors
@@ -178,14 +178,19 @@ This isn't just stress management - it's the path to unshakeable inner peace thr
 
     @pytest.mark.asyncio
     async def test_response_validation_invalid_no_gita_terms(self, kiaan_core, sample_verses):
-        """Test validation catches responses without Gita terminology."""
-        invalid_response = """You should try meditation and therapy. Research shows it helps with stress management. Deep breathing exercises can calm your nervous system. Consider journaling your thoughts. Regular exercise also improves mental health. These are proven techniques for managing anxiety and finding peace. 💙""" * 3
+        """Test validation catches responses without any wellness terminology."""
+        # This text avoids all wellness_terms: dharma, karma, yoga, peace, calm,
+        # balance, equanimity, mindful, resilience, compassion, stillness, breathe,
+        # gentle, strength, grounded, wisdom, awareness, detachment, self-mastery,
+        # sattva, inner -- and also avoids quality markers.
+        invalid_response = ("Talk to a professional about your issues. "
+                            "There are many programs available. "
+                            "You can find resources online. ") * 12
 
         validation = kiaan_core._validate_kiaan_response(invalid_response, sample_verses)
 
         assert validation["valid"] is False
-        assert any("gita" in error.lower() or "terms" in error.lower()
-                  for error in validation["errors"])
+        assert any("terms" in error.lower() for error in validation["errors"])
 
     @pytest.mark.asyncio
     async def test_response_validation_invalid_no_marker(self, kiaan_core, sample_verses):
@@ -262,14 +267,14 @@ This isn't just stress management - it's the path to unshakeable inner peace thr
         text_with_terms = "Practice karma yoga with dharma and achieve moksha through buddhi and atman."
         validation = kiaan_core._validate_kiaan_response(text_with_terms * 20 + " 💙", [])
 
-        assert len(validation["gita_terms"]) >= 2
+        assert len(validation["wellness_terms"]) >= 2
 
     def test_gita_terms_case_insensitive(self, kiaan_core):
         """Test that Gita terms detection is case-insensitive."""
         text = "Practice KARMA yoga with DHARMA and achieve MOKSHA." * 20 + " 💙"
         validation = kiaan_core._validate_kiaan_response(text, [])
 
-        assert len(validation["gita_terms"]) >= 2
+        assert len(validation["wellness_terms"]) >= 2
 
     @pytest.mark.asyncio
     async def test_caching_mechanism(self, kiaan_core, mock_db, sample_verses):
