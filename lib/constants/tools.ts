@@ -17,6 +17,8 @@ export interface ToolConfig {
   badge?: ToolBadge
   disabled?: boolean
   adminOnly?: boolean
+  /** i18n key suffix for the one-line purpose descriptor (e.g. 'viyog' → dashboard.tool_desc.viyog) */
+  purposeDescKey?: string
 }
 
 export interface ToolCategory {
@@ -36,6 +38,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     description: 'AI mental health companion',
     gradient: 'from-blue-400/30 to-purple-400/30',
     href: '/kiaan/chat',
+    purposeDescKey: 'kiaan',
   },
   {
     id: 'kiaan-voice',
@@ -45,6 +48,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     gradient: 'from-violet-400/30 to-indigo-400/30',
     href: '/companion',
     badge: 'new',
+    purposeDescKey: 'kiaan',
   },
   {
     id: 'journal',
@@ -126,6 +130,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     gradient: 'from-cyan-400/30 to-blue-400/30',
     href: '/tools/viyog',
     badge: 'new',
+    purposeDescKey: 'viyog',
   },
   {
     id: 'ardha',
@@ -134,6 +139,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     description: 'Ancient wisdom reframing',
     gradient: 'from-amber-400/30 to-yellow-400/30',
     href: '/tools/ardha',
+    purposeDescKey: 'ardha',
   },
   {
     id: 'relationship-compass',
@@ -142,6 +148,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     description: 'Calm conflict guidance',
     gradient: 'from-rose-400/30 to-orange-400/30',
     href: '/tools/relationship-compass',
+    purposeDescKey: 'relationship-compass',
   },
 ]
 

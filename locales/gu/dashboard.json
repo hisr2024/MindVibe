@@ -28,5 +28,20 @@
     "chatSessions": "Chat Sessions",
     "moodCheckins": "Mood Check-ins",
     "streakDays": "Day Streak"
+  },
+  "tool_desc": {
+    "viyog": "Calm the immediate reaction",
+    "ardha": "Reframe the perception",
+    "kiaan": "Talk it through",
+    "relationship-compass": "Navigate relational clarity",
+    "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "તમે છો:",
+    "viyog": "વિરામ મોડ",
+    "ardha": "સ્પષ્ટતા મોડ",
+    "kiaan": "સાથી મોડ",
+    "relationship-compass": "સંબંધ મોડ",
+    "journey": "તાલીમ મોડ"
   }
 }

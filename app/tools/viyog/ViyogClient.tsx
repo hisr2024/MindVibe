@@ -80,7 +80,7 @@ export default function ViyogClient() {
   const [sessionId, setSessionId] = useLocalState<string>('viyog_session', '')
 
   // Voice integration
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
 
   useEffect(() => {
     if (error) setError(null)
@@ -173,6 +173,7 @@ export default function ViyogClient() {
           title="Viyoga - Outcome Anxiety Support"
           subtitle="Shift from worrying about results to focused action. Get practical help when you're stuck overthinking outcomes."
           backLink={{ label: 'Back to home', href: '/' }}
+          modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.viyog', 'Pause Mode')}`}
         />
 
         {/* Quick Actions */}

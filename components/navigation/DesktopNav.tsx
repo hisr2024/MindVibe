@@ -34,10 +34,10 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
   const mainNavLinks = useMemo(() => [
     { href: '/introduction', label: t('navigation.mainNav.introduction', 'Introduction'), divine: true },
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
-    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN') },
-    { href: '/companion', label: t('navigation.features.companion', 'Companion') },
+    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), purposeDescKey: 'kiaan' },
+    { href: '/companion', label: t('navigation.features.companion', 'Companion'), purposeDescKey: 'kiaan' },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
-    { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true },
+    { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true, purposeDescKey: 'journey' },
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
@@ -163,6 +163,11 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                   }`}
                 >
                   {link.label}
+                  {'purposeDescKey' in link && link.purposeDescKey && (
+                    <span className="block text-[10px] font-normal text-white/40 truncate">
+                      {t(`dashboard.tool_desc.${link.purposeDescKey}`, '')}
+                    </span>
+                  )}
                 </Link>
               )
             })}
@@ -178,7 +183,14 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 transition hover:bg-white/5"
                 >
                   <span className="text-base">{item.icon}</span>
-                  {t(`dashboard.tools.${item.id}.title`, item.title)}
+                  <span className="min-w-0">
+                    <span className="block">{t(`dashboard.tools.${item.id}.title`, item.title)}</span>
+                    {item.purposeDescKey && (
+                      <span className="block text-[10px] text-white/40 truncate">
+                        {t(`dashboard.tool_desc.${item.purposeDescKey}`, '')}
+                      </span>
+                    )}
+                  </span>
                 </Link>
               ))}
             </div>

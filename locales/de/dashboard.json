@@ -109,5 +109,20 @@
     "chatSessions": "Chat-Sitzungen",
     "moodCheckins": "Stimmungs-Check-ins",
     "streakDays": "Tage-Streak"
+  },
+  "tool_desc": {
+    "viyog": "Die unmittelbare Reaktion beruhigen",
+    "ardha": "Die Wahrnehmung neu rahmen",
+    "kiaan": "Darüber sprechen",
+    "relationship-compass": "Beziehungsklarheit finden",
+    "journey": "Langfristige innere Ruhe trainieren"
+  },
+  "mode_label": {
+    "prefix": "Du bist im:",
+    "viyog": "Pause-Modus",
+    "ardha": "Klarheits-Modus",
+    "kiaan": "Begleiter-Modus",
+    "relationship-compass": "Beziehungs-Modus",
+    "journey": "Trainings-Modus"
   }
 }
