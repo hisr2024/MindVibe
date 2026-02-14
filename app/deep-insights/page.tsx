@@ -1,9 +1,13 @@
+'use client'
+
 import Link from 'next/link'
+import { useLanguage } from '@/hooks/useLanguage'
 
 const insightTools = [
   {
     href: '/ardha',
     title: 'Ardha',
+    purposeDescKey: 'ardha',
     description: 'Reframe spiraling thoughts with calm, Ancient Wisdom-aligned perspective.',
     accent: 'from-amber-400/20 via-orange-400/15 to-rose-300/15',
     logo: <ArdhaLogo />,
@@ -11,6 +15,7 @@ const insightTools = [
   {
     href: '/viyog',
     title: 'Viyoga',
+    purposeDescKey: 'viyog',
     description: 'Release outcome anxiety and return to one grounded action.',
     accent: 'from-cyan-400/25 via-blue-400/15 to-indigo-400/10',
     logo: <ViyogaLogo />,
@@ -18,6 +23,7 @@ const insightTools = [
   {
     href: '/relationship-compass',
     title: 'Relationship Compass',
+    purposeDescKey: 'relationship-compass',
     description: 'Navigate tense conversations with clear, ego-light next steps.',
     accent: 'from-rose-400/20 via-orange-400/15 to-yellow-300/10',
     logo: <RelationshipCompassLogo />,
@@ -67,6 +73,8 @@ function RelationshipCompassLogo() {
 }
 
 export default function DeepInsightsPage() {
+  const { t } = useLanguage()
+
   return (
     <main className="mv-page relative min-h-screen p-4 md:p-8 pb-24">
       <div className="pointer-events-none absolute inset-0">
@@ -96,6 +104,9 @@ export default function DeepInsightsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <h2 className="text-xl font-semibold text-white">{tool.title}</h2>
+                    <p className="text-xs text-white/50 truncate">
+                      {t(`dashboard.tool_desc.${tool.purposeDescKey}`, '')}
+                    </p>
                     <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
                       <span className="h-1.5 w-1.5 rounded-full bg-orange-300 animate-pulse" aria-hidden />
                       Open

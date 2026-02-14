@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export interface ToolItem {
   id: string
@@ -10,6 +11,7 @@ export interface ToolItem {
   description: string
   href: string
   icon: React.ReactNode
+  purposeDescKey?: string
 }
 
 export interface ToolCategory {
@@ -36,6 +38,7 @@ export interface ToolsDropdownProps {
  * - MindVibe dark theme styling
  */
 export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps) {
+  const { t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -82,6 +85,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
       description: tool.description,
       href: tool.href,
       icon: <span className="text-base">{tool.icon}</span>,
+      purposeDescKey: tool.purposeDescKey,
     })),
   }))
 
@@ -149,6 +153,11 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
                         <div className="text-xs text-orange-100/60">
                           {item.description}
                         </div>
+                        {item.purposeDescKey && (
+                          <div className="text-[10px] text-orange-200/40 truncate">
+                            {t(`dashboard.tool_desc.${item.purposeDescKey}`, '')}
+                          </div>
+                        )}
                       </div>
                     </Link>
                   ))}

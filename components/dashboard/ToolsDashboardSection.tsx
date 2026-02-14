@@ -63,6 +63,11 @@ export function ToolsDashboardSection() {
                       <p className="text-[11px] text-orange-100/70">
                         {t(`dashboard.tools.${tool.id}.description`, tool.description)}
                       </p>
+                      {tool.purposeDescKey && (
+                        <p className="text-[10px] text-orange-200/50 truncate">
+                          {t(`dashboard.tool_desc.${tool.purposeDescKey}`, '')}
+                        </p>
+                      )}
                     </div>
                   </div>
                   {tool.badge && (

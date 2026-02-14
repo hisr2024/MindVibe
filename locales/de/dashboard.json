@@ -109,5 +109,12 @@
     "chatSessions": "Chat-Sitzungen",
     "moodCheckins": "Stimmungs-Check-ins",
     "streakDays": "Tage-Streak"
+  },
+  "tool_desc": {
+    "viyog": "Die unmittelbare Reaktion beruhigen",
+    "ardha": "Die Wahrnehmung neu rahmen",
+    "kiaan": "Darüber sprechen",
+    "relationship-compass": "Beziehungsklarheit finden",
+    "journey": "Langfristige innere Ruhe trainieren"
   }
 }

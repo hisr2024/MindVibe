@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { useLanguage } from '@/hooks/useLanguage'
 import { Portal } from '@/components/ui/Portal'
 import { lockBodyScroll, unlockBodyScroll } from '@/lib/mobile/bodyScrollLock'
 
@@ -93,6 +94,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
   const sheetRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const { triggerHaptic } = useHapticFeedback()
+  const { t } = useLanguage()
 
   // Close on escape key and manage body scroll lock
   useEffect(() => {
@@ -284,6 +286,11 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                               <p className="text-[10px] text-white/40 mt-0.5 truncate">
                                 {tool.description}
                               </p>
+                              {tool.purposeDescKey && (
+                                <p className="text-[9px] text-orange-200/40 mt-0.5 truncate">
+                                  {t(`dashboard.tool_desc.${tool.purposeDescKey}`, '')}
+                                </p>
+                              )}
                             </div>
                           </Link>
                         </motion.div>
