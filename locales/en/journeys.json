@@ -42,7 +42,9 @@
     "teaching": "Today's Teaching",
     "reflection": "Guided Reflection",
     "practice": "Practice",
-    "commitment": "Today's Micro Commitment"
+    "commitment": "Today's Micro Commitment",
+    "microPractice": "Today's micro-practice",
+    "markPracticed": "Mark practiced"
   },
   "checkIn": {
     "label": "Your Reflection (optional)",

@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'mindvibe_offline'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 // Store names
 export const STORES = {
@@ -16,6 +16,7 @@ export const STORES = {
   WISDOM_CACHE: 'wisdomCache',
   OPERATION_QUEUE: 'operationQueue',
   JOURNEY_META: 'journeyMeta',
+  PRACTICE_STATE: 'practiceState',
 } as const
 
 export interface ConversationEntry {
@@ -136,6 +137,10 @@ class IndexedDBManager {
         if (!db.objectStoreNames.contains(STORES.JOURNEY_META)) {
           const journeyMetaStore = db.createObjectStore(STORES.JOURNEY_META, { keyPath: 'id' })
           journeyMetaStore.createIndex('day', 'day', { unique: true })
+        }
+
+        if (!db.objectStoreNames.contains(STORES.PRACTICE_STATE)) {
+          db.createObjectStore(STORES.PRACTICE_STATE, { keyPath: 'id' })
         }
       }
     })

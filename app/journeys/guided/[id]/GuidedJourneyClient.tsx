@@ -32,6 +32,7 @@ import {
   getJourneyStatusColor,
 } from '@/types/journeyEngine.types'
 import { JourneyDayHeader } from '@/components/journey/JourneyDayHeader'
+import { MicroPractice } from '@/components/journey/MicroPractice'
 import { hydrateJourneyMeta } from '@/lib/journey/offlineCache'
 
 // =============================================================================
@@ -730,6 +731,13 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
           currentDay={selectedDay}
           totalDays={journey.total_days}
           completedDays={journey.days_completed}
+          className="mb-4"
+        />
+
+        {/* Micro-practice block with offline-persisted toggle */}
+        <MicroPractice
+          journeyId={journeyId}
+          day={selectedDay}
           className="mb-6"
         />
 

@@ -20,10 +20,11 @@ describe('JOURNEY_DAY_META', () => {
     expect(days).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
   })
 
-  it('every entry has a non-empty theme and focus', () => {
+  it('every entry has a non-empty theme, focus, and microPractice', () => {
     for (const meta of JOURNEY_DAY_META) {
       expect(meta.theme.length).toBeGreaterThan(0)
       expect(meta.focus.length).toBeGreaterThan(0)
+      expect(meta.microPractice.length).toBeGreaterThan(0)
     }
   })
 
