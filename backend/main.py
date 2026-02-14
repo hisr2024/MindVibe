@@ -1126,6 +1126,16 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Friend Mode router: {e}")
 
+# Load Emotional Pattern Extraction router
+startup_logger.info("\n[Emotional Patterns] Attempting to import Emotional Pattern Extraction router...")
+try:
+    from backend.routes.emotional_patterns import router as emotional_patterns_router
+    app.include_router(emotional_patterns_router)
+    startup_logger.info("✅ [SUCCESS] Emotional Pattern Extraction router loaded")
+    startup_logger.info("   • GET    /api/kiaan/emotional-patterns/extract - Extract emotional signals")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Emotional Pattern Extraction router: {e}")
+
 startup_logger.info("="*80)
 startup_logger.info(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 startup_logger.info("="*80 + "\n")
