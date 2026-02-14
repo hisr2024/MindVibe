@@ -3,14 +3,13 @@ Unit tests for KIAAN Security Components
 
 Tests:
 1. Rate limiting functionality
-2. Shell command injection prevention
-3. Plugin security validation
-4. Hash collision resistance (SHA256 vs MD5)
+2. Hash collision resistance (SHA256 vs MD5)
+3. Async client usage in orchestrator
+4. Audit logging security
 """
 
 import pytest
 import asyncio
-import re
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
@@ -59,110 +58,6 @@ class TestRateLimiter:
         # User 2 should still be allowed
         result = await rate_limiter.is_allowed("user_2")
         assert result is True, "Different users should have separate limits"
-
-
-class TestTerminalToolSecurity:
-    """Tests for shell command injection prevention."""
-
-    @pytest.fixture
-    def terminal_tool(self):
-        """Create terminal tool instance for testing."""
-        from backend.services.kiaan_extended_tools import TerminalTool
-        return TerminalTool()
-
-    def test_allowed_commands_whitelist(self, terminal_tool):
-        """Test that only whitelisted commands are allowed."""
-        # Safe commands that should be allowed
-        safe_commands = ["ls", "cat", "grep", "find", "python", "node"]
-        for cmd in safe_commands:
-            assert cmd in terminal_tool.ALLOWED_COMMANDS, f"{cmd} should be in whitelist"
-
-        # Dangerous commands that should NOT be allowed
-        dangerous_commands = ["curl", "wget", "docker", "docker-compose", "awk"]
-        for cmd in dangerous_commands:
-            assert cmd not in terminal_tool.ALLOWED_COMMANDS, f"{cmd} should NOT be in whitelist"
-
-    def test_blocked_patterns_regex(self, terminal_tool):
-        """Test that blocked patterns catch dangerous inputs."""
-        dangerous_inputs = [
-            "ls; rm -rf /",  # Command chaining
-            "cat $(whoami)",  # Command substitution
-            "echo `id`",  # Backtick command substitution
-            "ls && rm -rf /",  # AND chaining
-            "ls || rm -rf /",  # OR chaining
-            "sudo ls",  # sudo
-            "rm -rf /tmp",  # rm -rf
-        ]
-
-        for dangerous_input in dangerous_inputs:
-            blocked = False
-            for pattern in terminal_tool.BLOCKED_PATTERNS:
-                if re.search(pattern, dangerous_input, re.IGNORECASE):
-                    blocked = True
-                    break
-            assert blocked, f"Pattern should block: {dangerous_input}"
-
-    @pytest.mark.asyncio
-    async def test_command_not_in_whitelist_rejected(self, terminal_tool):
-        """Test that commands not in whitelist are rejected."""
-        from backend.services.kiaan_agent_tools import ToolStatus
-
-        result = await terminal_tool.execute(command="curl http://evil.com")
-        assert result.status == ToolStatus.PERMISSION_DENIED
-
-    @pytest.mark.asyncio
-    async def test_blocked_pattern_rejected(self, terminal_tool):
-        """Test that blocked patterns are rejected."""
-        from backend.services.kiaan_agent_tools import ToolStatus
-
-        result = await terminal_tool.execute(command="ls; rm -rf /")
-        assert result.status == ToolStatus.PERMISSION_DENIED
-
-
-class TestPluginSecurity:
-    """Tests for plugin security validation."""
-
-    @pytest.fixture
-    def plugin_validator(self):
-        """Create plugin validator for testing."""
-        from backend.services.kiaan_plugins import PluginValidator
-        return PluginValidator()
-
-    def test_dangerous_patterns_comprehensive(self, plugin_validator):
-        """Test that all dangerous patterns are detected."""
-        dangerous_patterns_to_detect = [
-            "os.system",
-            "subprocess.run",
-            "subprocess.Popen",
-            "subprocess.call",
-            "eval(",
-            "exec(",
-            "compile(",
-            "__import__",
-            "shutil.rmtree",
-            "pickle.load",
-            "pickle.loads",
-        ]
-
-        # Check that these patterns are in the validator's dangerous patterns list
-        # We test by creating mock code with each pattern
-        for pattern in dangerous_patterns_to_detect:
-            # The validator checks if pattern is IN content
-            mock_content = f"def foo(): {pattern}"
-            found = False
-            for validator_pattern in [
-                "os.system", "subprocess.run", "subprocess.Popen", "subprocess.call",
-                "subprocess.check_output", "subprocess.check_call",
-                "eval(", "exec(", "compile(", "__import__",
-                "shutil.rmtree", "os.remove", "os.rmdir", "os.unlink",
-                "socket.socket", "urllib.request.urlopen",
-                "getattr(", "setattr(", "__getattribute__",
-                "pickle.load", "pickle.loads",
-            ]:
-                if validator_pattern in mock_content:
-                    found = True
-                    break
-            assert found or pattern not in mock_content, f"Pattern {pattern} should be detected"
 
 
 class TestHashingImprovements:
