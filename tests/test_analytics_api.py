@@ -15,12 +15,12 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from fastapi.testclient import TestClient
-from backend.routes.analytics import router
+from backend.routes.analytics_dashboard import router
 from fastapi import FastAPI
 
-# Create test app
+# Create test app - mount router with /api prefix to match production paths
 app = FastAPI()
-app.include_router(router)
+app.include_router(router, prefix="/api")
 client = TestClient(app)
 
 

@@ -32,7 +32,7 @@ class TestJournalEndpoints:
         await test_db.refresh(user)
 
         response = await test_client.post(
-            "/journal/blob",
+            "/api/journal/blob",
             json={"blob_json": '{"encrypted": "journal data"}'},
             headers=auth_headers_for(user.id),
         )
@@ -62,21 +62,21 @@ class TestJournalEndpoints:
 
         # Upload first blob
         await test_client.post(
-            "/journal/blob",
+            "/api/journal/blob",
             json={"blob_json": '{"encrypted": "first entry"}'},
             headers=headers,
         )
 
         # Upload second blob
         await test_client.post(
-            "/journal/blob",
+            "/api/journal/blob",
             json={"blob_json": '{"encrypted": "second entry"}'},
             headers=headers,
         )
 
         # Get the latest - should return one of the blobs
         response = await test_client.get(
-            "/journal/blob/latest", headers=headers
+            "/api/journal/blob/latest", headers=headers
         )
 
         assert response.status_code == 200
@@ -105,7 +105,7 @@ class TestJournalEndpoints:
         await test_db.refresh(user)
 
         response = await test_client.get(
-            "/journal/blob/latest", headers=auth_headers_for(user.id)
+            "/api/journal/blob/latest", headers=auth_headers_for(user.id)
         )
 
         assert response.status_code == 200
@@ -120,7 +120,7 @@ class TestJournalEndpoints:
         removed for security.
         """
         response = await test_client.post(
-            "/journal/blob",
+            "/api/journal/blob",
             json={"blob_json": '{"encrypted": "new user data"}'},
         )
 
@@ -154,28 +154,28 @@ class TestJournalEndpoints:
 
         # User 1 uploads a blob
         await test_client.post(
-            "/journal/blob",
+            "/api/journal/blob",
             json={"blob_json": '{"encrypted": "user1 data"}'},
             headers=headers1,
         )
 
         # User 2 uploads a blob
         await test_client.post(
-            "/journal/blob",
+            "/api/journal/blob",
             json={"blob_json": '{"encrypted": "user2 data"}'},
             headers=headers2,
         )
 
         # User 1 gets their latest blob
         response1 = await test_client.get(
-            "/journal/blob/latest", headers=headers1
+            "/api/journal/blob/latest", headers=headers1
         )
         data1 = response1.json()
         assert data1["blob_json"] == '{"encrypted": "user1 data"}'
 
         # User 2 gets their latest blob
         response2 = await test_client.get(
-            "/journal/blob/latest", headers=headers2
+            "/api/journal/blob/latest", headers=headers2
         )
         data2 = response2.json()
         assert data2["blob_json"] == '{"encrypted": "user2 data"}'

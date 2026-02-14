@@ -557,6 +557,20 @@ def _rule_based_analysis(
     gita_concepts = list(set(gita_concepts))  # Remove duplicates
     recommended_teachings = list(set(recommended_teachings))[:5]  # Limit to 5
 
+    # Determine emotional intensity (must be computed BEFORE guna analysis)
+    intensity_indicators = {
+        "overwhelming": ["can't stop", "unbearable", "drowning", "falling apart", "crisis"],
+        "high": ["very", "extremely", "so much", "deeply", "really hurt"],
+        "low": ["slightly", "a bit", "somewhat", "minor"],
+    }
+
+    emotional_intensity = "moderate"
+    for intensity, keywords in intensity_indicators.items():
+        for kw in keywords:
+            if kw in conflict_lower:
+                emotional_intensity = intensity
+                break
+
     # Determine Guna analysis from intensity and emotion
     guna_mapping = {
         "overwhelming": "Rajas dominant with Tamas undertone",
@@ -606,20 +620,6 @@ def _rule_based_analysis(
     for keyword, fear in fear_mapping.items():
         if keyword in conflict_lower:
             underlying_fears.append(fear)
-
-    # Determine emotional intensity
-    intensity_indicators = {
-        "overwhelming": ["can't stop", "unbearable", "drowning", "falling apart", "crisis"],
-        "high": ["very", "extremely", "so much", "deeply", "really hurt"],
-        "low": ["slightly", "a bit", "somewhat", "minor"],
-    }
-
-    emotional_intensity = "moderate"
-    for intensity, keywords in intensity_indicators.items():
-        for kw in keywords:
-            if kw in conflict_lower:
-                emotional_intensity = intensity
-                break
 
     # Add relationship-type specific Gita concepts
     relationship_gita = {

@@ -358,10 +358,11 @@ async def semantic_search(
         raise HTTPException(status_code=422, detail="Page size cannot exceed 50")
     
     # Build search query - whitelist valid language fields to prevent attribute access attacks
-    valid_languages = {"en", "hi", "sa", "te", "ta", "bn", "mr", "gu", "kn", "ml", "pa", "translation_en", "translation_hi"}
+    # Valid language names must match GitaVerse model column names
+    valid_languages = {"english", "hindi", "sanskrit"}
     if language not in valid_languages:
         raise HTTPException(status_code=422, detail=f"Invalid language. Must be one of: {', '.join(sorted(valid_languages))}")
-    lang_field = getattr(GitaVerse, language)
+    lang_field = getattr(GitaVerse, language, None) or getattr(GitaVerse, "english")
     search_conditions = [lang_field.ilike(f"%{keyword}%")]
 
     if theme:

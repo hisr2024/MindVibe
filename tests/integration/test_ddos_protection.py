@@ -17,7 +17,29 @@ from unittest.mock import Mock, AsyncMock
 from starlette.requests import Request
 from starlette.responses import Response, JSONResponse
 
+import backend.middleware.ddos_protection as _ddos_mod
+
+# Capture the original dispatch method before conftest patches it to a
+# passthrough.  This module-level reference remains bound to the real
+# implementation regardless of class-level monkey-patching.
+_original_dispatch = _ddos_mod.DDoSProtectionMiddleware.dispatch
+
 from backend.middleware.ddos_protection import DDoSProtectionMiddleware
+
+
+@pytest.fixture(autouse=True)
+def _restore_ddos_dispatch():
+    """Temporarily restore the real DDoS dispatch for this test module.
+
+    The session-scoped ``_disable_security_middleware`` fixture in conftest
+    replaces ``DDoSProtectionMiddleware.dispatch`` with a passthrough so that
+    other tests are not affected by rate limits.  This file's tests specifically
+    exercise DDoS middleware behaviour, so we restore the original method.
+    """
+    saved = DDoSProtectionMiddleware.dispatch
+    DDoSProtectionMiddleware.dispatch = _original_dispatch
+    yield
+    DDoSProtectionMiddleware.dispatch = saved
 
 
 class MockRequest:
@@ -250,10 +272,13 @@ def test_cleanup_removes_old_data(middleware):
     old_time = time.time() - 200
     middleware.request_history["old_ip"].append(old_time)
     middleware.blocked_ips["old_ip"] = old_time
-    
+
+    # Force cleanup to run by setting last_cleanup to old time
+    middleware.last_cleanup = time.time() - 400
+
     # Run cleanup
     middleware._cleanup_old_data()
-    
+
     # Old data should be removed
     assert "old_ip" not in middleware.blocked_ips
     assert len(middleware.request_history.get("old_ip", [])) == 0

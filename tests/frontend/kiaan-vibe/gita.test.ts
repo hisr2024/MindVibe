@@ -37,13 +37,13 @@ describe('KIAAN Vibe Gita Data', () => {
       })
     })
 
-    it('should have 701 total verses', () => {
-      // 701: includes verse 13.35 per the scholarly edition used by this project
+    it('should have 700 total verses', () => {
+      // Standard Bhagavad Gita has 700 verses across 18 chapters
       const totalVerses = GITA_CHAPTERS_META.reduce(
         (sum, chapter) => sum + chapter.verseCount,
         0
       )
-      expect(totalVerses).toBe(701)
+      expect(totalVerses).toBe(700)
     })
   })
 

@@ -377,7 +377,7 @@ class TestWisdomQueryEndpoint:
         from unittest.mock import patch
 
         with patch(
-            "routes.wisdom_guide.generate_wisdom_response",
+            "backend.routes.wisdom_guide.generate_wisdom_response",
             return_value="This is guidance based on universal wisdom...",
         ):
             response = await test_client.post(

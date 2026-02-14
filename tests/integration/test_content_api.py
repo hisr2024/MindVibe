@@ -32,7 +32,7 @@ class TestContentEndpoints:
         test_db.add(content_pack)
         await test_db.commit()
 
-        response = await test_client.get("/content/en")
+        response = await test_client.get("/api/content/en")
 
         assert response.status_code == 200
         data = response.json()
@@ -53,7 +53,7 @@ class TestContentEndpoints:
         await test_db.commit()
 
         # Request a non-existent locale
-        response = await test_client.get("/content/es")
+        response = await test_client.get("/api/content/es")
 
         assert response.status_code == 200
         data = response.json()
@@ -63,7 +63,7 @@ class TestContentEndpoints:
     @pytest.mark.asyncio
     async def test_get_content_pack_not_found(self, test_client: AsyncClient):
         """Test retrieving content when no packs exist."""
-        response = await test_client.get("/content/fr")
+        response = await test_client.get("/api/content/fr")
 
         assert response.status_code == 200
         data = response.json()
@@ -85,7 +85,7 @@ class TestContentEndpoints:
         await test_db.commit()
 
         # Request Spanish content
-        response = await test_client.get("/content/es")
+        response = await test_client.get("/api/content/es")
 
         assert response.status_code == 200
         data = response.json()
@@ -115,7 +115,7 @@ class TestContentEndpoints:
         test_db.add(content_pack)
         await test_db.commit()
 
-        response = await test_client.get("/content/en")
+        response = await test_client.get("/api/content/en")
 
         assert response.status_code == 200
         data = response.json()

@@ -148,8 +148,10 @@ def test_language_names_defined():
     
     # Check each language has a name
     for lang in SUPPORTED_LANGUAGES:
-        # Look for the language code in localeNames
-        assert f"{lang}:" in content, f"Display name for {lang} not found"
+        # Look for the language code in localeNames (may be quoted for keys with special chars)
+        assert (f"{lang}:" in content or f"'{lang}':" in content or f'"{lang}":' in content), (
+            f"Display name for {lang} not found"
+        )
 
 
 def test_use_language_hook_includes_all_languages():
