@@ -255,6 +255,13 @@ SARVAM_EMOTION_PROFILES: dict[str, dict[str, Any]] = {
 # Maps KIAAN companion voice personas to the best Sarvam speaker for that persona.
 
 COMPANION_TO_SARVAM_SPEAKER: dict[str, str] = {
+    # Canonical companion IDs
+    "sarvam-aura": "meera",
+    "sarvam-rishi": "arvind",
+    "elevenlabs-nova": "pavithra",
+    "elevenlabs-orion": "arvind",
+
+    # Legacy persona IDs (backward compatibility)
     "priya": "meera",       # Warm nurturing → Meera (warm female)
     "maya": "pavithra",     # Empathetic friend → Pavithra (clear female)
     "ananya": "maitreyi",   # Meditative → Maitreyi (soft ethereal)
@@ -302,7 +309,7 @@ def get_sarvam_emotion_profile(mood: str) -> dict[str, Any]:
 async def synthesize_sarvam_tts(
     text: str,
     language: str = "hi",
-    voice_id: str = "priya",
+    voice_id: str = "sarvam-aura",
     mood: str = "neutral",
     speaker_override: Optional[str] = None,
 ) -> Optional[bytes]:
@@ -315,7 +322,7 @@ async def synthesize_sarvam_tts(
     Args:
         text: Text to synthesize (1-5000 characters)
         language: MindVibe language code (hi, ta, te, bn, en-IN, etc.)
-        voice_id: KIAAN companion voice persona (priya, arjun, etc.)
+        voice_id: KIAAN companion voice persona (e.g., sarvam-aura, elevenlabs-nova)
         mood: Detected user mood for prosody adaptation
         speaker_override: Optional direct Sarvam speaker ID override
 

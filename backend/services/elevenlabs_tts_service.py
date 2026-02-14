@@ -218,6 +218,13 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
 # Maps each KIAAN companion persona to the optimal ElevenLabs voice.
 
 PERSONA_TO_ELEVENLABS: dict[str, str] = {
+    # Canonical companion IDs
+    "sarvam-aura": "sarah",       # Warm nurturing
+    "sarvam-rishi": "adam",       # Grounded, sacred narration
+    "elevenlabs-nova": "rachel",  # Conversational clarity
+    "elevenlabs-orion": "adam",   # Mentor / narration
+
+    # Legacy persona IDs (backward compatibility)
     "priya": "sarah",       # Warm nurturing → Sarah (warm female)
     "maya": "rachel",       # Calm friend → Rachel (calm articulate)
     "ananya": "dorothy",    # Meditative → Dorothy (soft ethereal)
@@ -409,7 +416,7 @@ def get_elevenlabs_emotion_settings(mood: str) -> dict[str, float]:
 async def synthesize_elevenlabs_tts(
     text: str,
     language: str = "en",
-    voice_id: str = "priya",
+    voice_id: str = "sarvam-aura",
     mood: str = "neutral",
     use_turbo: bool = False,
     pronunciation_text: Optional[str] = None,
@@ -423,7 +430,7 @@ async def synthesize_elevenlabs_tts(
     Args:
         text: Text to synthesize (will be pronunciation-corrected if engine available)
         language: MindVibe language code
-        voice_id: KIAAN companion persona ID (priya, arjun, etc.)
+        voice_id: KIAAN companion persona ID (e.g., sarvam-aura, elevenlabs-nova)
         mood: Detected user mood for emotion-adaptive voice settings
         use_turbo: Use turbo model for faster response (slightly lower quality)
         pronunciation_text: Pre-processed text with pronunciation hints
