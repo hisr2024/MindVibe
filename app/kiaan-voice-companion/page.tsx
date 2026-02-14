@@ -168,8 +168,8 @@ export default function KiaanVoiceCompanionPage() {
   const [wisdomCorpusCount, setWisdomCorpusCount] = useState(0)
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
     language: 'en',
-    speakerId: 'en_priya',
-    voiceId: 'priya',
+    speakerId: 'en_sarvam-aura',
+    voiceId: 'sarvam-aura',
     emotion: 'neutral',
     speed: 0.95,
     pitch: 0.0,
@@ -247,7 +247,7 @@ export default function KiaanVoiceCompanionPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           language: voiceConfig.language,
-          voice_id: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya',
+          voice_id: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'sarvam-aura',
         }),
       })
 
@@ -378,7 +378,7 @@ export default function KiaanVoiceCompanionPage() {
           message: text.trim(),
           language: voiceConfig.language,
           content_type: 'text',
-          voice_id: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya',
+          voice_id: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'sarvam-aura',
           prefer_speed: true,
           response_mode: 'auto',
           emotion_tone: voiceConfig.emotion,
@@ -724,7 +724,7 @@ export default function KiaanVoiceCompanionPage() {
           <VoiceCompanionSelector
             currentConfig={{
               language: voiceConfig.language as any,
-              voiceId: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya',
+              voiceId: voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'sarvam-aura',
               emotion: voiceConfig.emotion,
               speed: voiceConfig.speed,
               pitch: voiceConfig.pitch,
@@ -837,7 +837,7 @@ export default function KiaanVoiceCompanionPage() {
                   <CompanionVoicePlayer
                     text={msg.content}
                     mood={msg.mood || currentMood}
-                    voiceId={voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'priya'}
+                    voiceId={voiceConfig.voiceId || voiceConfig.speakerId.split('_').pop() || 'sarvam-aura'}
                     language={voiceConfig.language}
                     compact
                     autoPlay={voiceConfig.autoPlay && i === messages.length - 1}

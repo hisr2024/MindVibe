@@ -120,7 +120,7 @@ class EndSessionResponse(BaseModel):
 class SynthesizeVoiceRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     mood: str = Field(default="neutral", max_length=32)
-    voice_id: str = Field(default="priya", max_length=32)
+    voice_id: str = Field(default="sarvam-aura", max_length=32)
     language: str = Field(default="en", max_length=8)
 
 
@@ -869,7 +869,7 @@ async def synthesize_companion_voice(
         "fallback_to_browser": True,
         "ssml": result.get("ssml", ""),
         "browser_config": result.get("browser_config", {}),
-        "voice_persona": result.get("voice_persona", "priya"),
+        "voice_persona": result.get("voice_persona", "sarvam-aura"),
     }
 
 
