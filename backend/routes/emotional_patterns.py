@@ -25,20 +25,23 @@ router = APIRouter(
 
 
 class EmotionalPatternResponse(BaseModel):
-    """Response model for emotional pattern extraction."""
+    """Response model for emotional pattern extraction.
 
-    user_id: str
-    extraction_window_days: int
-    data_points_analyzed: int
+    Schema:
+        recurring_themes: []
+        reactivity_triggers: []
+        attachment_patterns: []
+        growth_signals: []
+        emotional_intensity_estimate: "low" | "medium" | "high"
+        self_awareness_level_estimate: "emerging" | "moderate" | "strong"
+    """
+
     recurring_themes: list[dict[str, Any]]
-    attachment_signals: list[dict[str, Any]]
     reactivity_triggers: list[dict[str, Any]]
+    attachment_patterns: list[dict[str, Any]]
     growth_signals: list[dict[str, Any]]
-    awareness_indicators: list[str]
-    dominant_quadrant: str
-    guna_distribution: dict[str, float]
-    emotional_variability: str
-    extracted_at: str
+    emotional_intensity_estimate: str
+    self_awareness_level_estimate: str
 
 
 @router.get("/extract", response_model=EmotionalPatternResponse)
@@ -56,7 +59,7 @@ async def extract_emotional_patterns(
 
     Returns a privacy-preserving summary of emotional signals including
     recurring themes, attachment patterns, reactivity triggers, growth
-    signals, and signs of increasing awareness.
+    signals, and awareness level estimates.
 
     All data is abstracted — no user quotes, personal details, or
     identifying information is included in the response.

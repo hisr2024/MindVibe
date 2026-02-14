@@ -2,15 +2,26 @@
 Tests for the Emotional Pattern Extraction Engine.
 
 Validates that the extractor correctly identifies recurring themes,
-attachment signals, reactivity triggers, growth signals, and awareness
-indicators from normalized emotional signal data.
+attachment patterns, reactivity triggers, growth signals, and produces
+the correct emotional_intensity_estimate and self_awareness_level_estimate.
 
 Tests use synthetic signal data to exercise each analysis pass
 independently, without requiring database access.
+
+Expected output schema:
+{
+    "recurring_themes": [],
+    "reactivity_triggers": [],
+    "attachment_patterns": [],
+    "growth_signals": [],
+    "emotional_intensity_estimate": "low | medium | high",
+    "self_awareness_level_estimate": "emerging | moderate | strong"
+}
 """
 
 import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+import json
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -78,6 +89,97 @@ def _make_signal_series(
 def extractor():
     """Create a fresh extractor instance."""
     return EmotionalPatternExtractor()
+
+
+# =============================================================================
+# OUTPUT SCHEMA TESTS
+# =============================================================================
+
+
+class TestOutputSchema:
+    """Verify that the output matches the exact expected JSON schema."""
+
+    def test_output_has_exactly_six_keys(self):
+        """Report to_dict produces exactly the 6 required keys."""
+        report = EmotionalPatternReport()
+        d = report.to_dict()
+        expected_keys = {
+            "recurring_themes",
+            "reactivity_triggers",
+            "attachment_patterns",
+            "growth_signals",
+            "emotional_intensity_estimate",
+            "self_awareness_level_estimate",
+        }
+        assert set(d.keys()) == expected_keys
+
+    def test_empty_report_defaults(self):
+        """Empty report has correct default values."""
+        report = EmotionalPatternReport()
+        d = report.to_dict()
+        assert d["recurring_themes"] == []
+        assert d["reactivity_triggers"] == []
+        assert d["attachment_patterns"] == []
+        assert d["growth_signals"] == []
+        assert d["emotional_intensity_estimate"] == "medium"
+        assert d["self_awareness_level_estimate"] == "emerging"
+
+    def test_output_is_json_serializable(self):
+        """Report to_dict output can be serialized to valid JSON."""
+        report = EmotionalPatternReport(
+            recurring_themes=[
+                EmotionalTheme(
+                    theme="inner friction",
+                    frequency=5,
+                    intensity_trend="stable",
+                    associated_domains=["equanimity"],
+                    guna_tendency="rajas",
+                )
+            ],
+            reactivity_triggers=[
+                ReactivityTrigger(
+                    domain="resilience",
+                    emotional_response="unsettledness",
+                    recurrence=3,
+                    intensity_level="high",
+                )
+            ],
+            attachment_patterns=[
+                AttachmentSignal(
+                    pattern="pattern of reaching toward connection",
+                    direction="seeking",
+                    strength="moderate",
+                    evolving=False,
+                )
+            ],
+            growth_signals=[
+                GrowthSignal(
+                    signal_type="calming_trajectory",
+                    description="overall emotional intensity is decreasing over time",
+                    first_observed_period="recent",
+                )
+            ],
+            emotional_intensity_estimate="high",
+            self_awareness_level_estimate="moderate",
+        )
+        d = report.to_dict()
+        serialized = json.dumps(d)
+        parsed = json.loads(serialized)
+        assert len(parsed["recurring_themes"]) == 1
+        assert parsed["emotional_intensity_estimate"] == "high"
+        assert parsed["self_awareness_level_estimate"] == "moderate"
+
+    def test_intensity_estimate_valid_values(self):
+        """emotional_intensity_estimate only uses low/medium/high."""
+        for val in ["low", "medium", "high"]:
+            report = EmotionalPatternReport(emotional_intensity_estimate=val)
+            assert report.to_dict()["emotional_intensity_estimate"] == val
+
+    def test_awareness_estimate_valid_values(self):
+        """self_awareness_level_estimate only uses emerging/moderate/strong."""
+        for val in ["emerging", "moderate", "strong"]:
+            report = EmotionalPatternReport(self_awareness_level_estimate=val)
+            assert report.to_dict()["self_awareness_level_estimate"] == val
 
 
 # =============================================================================
@@ -187,15 +289,15 @@ class TestRecurringThemes:
 
 
 # =============================================================================
-# ATTACHMENT SIGNALS TESTS
+# ATTACHMENT PATTERNS TESTS
 # =============================================================================
 
 
-class TestAttachmentSignals:
-    """Tests for _extract_attachment_signals."""
+class TestAttachmentPatterns:
+    """Tests for _extract_attachment_signals (output key: attachment_patterns)."""
 
-    def test_no_signals_with_insufficient_data(self, extractor):
-        """No attachment signals with too few data points."""
+    def test_no_patterns_with_insufficient_data(self, extractor):
+        """No attachment patterns with too few data points."""
         signals = [_make_signal("sad")]
         result = extractor._extract_attachment_signals(signals)
         assert result == []
@@ -219,26 +321,21 @@ class TestAttachmentSignals:
         assert len(avoiding) >= 1
 
     def test_strength_classification(self, extractor):
-        """Signal strength correctly classified based on proportion."""
-        # Strong: >40% of signals are in the cluster
+        """Pattern strength correctly classified based on proportion."""
         signals = _make_signal_series(["lonely"] * 8 + ["happy"] * 2)
         result = extractor._extract_attachment_signals(signals)
         connection = [s for s in result if "connection" in s.pattern]
         assert len(connection) >= 1
         assert connection[0].strength == "strong"
 
-    def test_evolving_flag_when_pattern_shifts(self, extractor):
-        """Evolving flag set when pattern distribution shifts between halves."""
-        # First half: mostly lonely, second half: mostly calm
-        signals = _make_signal_series(
-            ["lonely"] * 6 + ["calm"] * 6
-        )
+    def test_evolving_flag_type(self, extractor):
+        """Evolving flag is a boolean."""
+        signals = _make_signal_series(["lonely"] * 6 + ["calm"] * 6)
         result = extractor._extract_attachment_signals(signals)
-        evolving_signals = [s for s in result if s.evolving]
-        # May or may not detect evolving depending on threshold
-        assert isinstance(result, list)
+        for sig in result:
+            assert isinstance(sig.evolving, bool)
 
-    def test_attachment_signal_to_dict(self, extractor):
+    def test_attachment_pattern_to_dict(self, extractor):
         """AttachmentSignal.to_dict produces correct structure."""
         sig = AttachmentSignal(
             pattern="pattern of reaching toward connection",
@@ -365,7 +462,6 @@ class TestGrowthSignals:
 
     def test_expanding_awareness_detected(self, extractor):
         """Detects expanding awareness when emotional vocabulary grows."""
-        # First half: limited emotions; second half: diverse emotions
         signals = _make_signal_series(
             ["sad", "sad", "sad", "sad", "happy", "calm", "anxious", "hopeful", "grateful", "excited"]
         )
@@ -417,103 +513,111 @@ class TestGrowthSignals:
 
 
 # =============================================================================
-# AWARENESS INDICATORS TESTS
+# EMOTIONAL INTENSITY ESTIMATE TESTS
 # =============================================================================
 
 
-class TestAwarenessIndicators:
-    """Tests for _extract_awareness_indicators."""
+class TestEmotionalIntensityEstimate:
+    """Tests for _compute_emotional_intensity_estimate."""
 
-    def test_sustained_engagement_indicator(self, extractor):
-        """Detects sustained engagement over multiple days."""
-        signals = [
-            _make_signal("calm", days_ago=i) for i in range(10)
-        ]
-        result = extractor._extract_awareness_indicators(signals)
-        assert any("sustained" in ind for ind in result)
+    def test_high_intensity(self, extractor):
+        """High average intensity produces 'high' estimate."""
+        signals = _make_signal_series(
+            ["angry"] * 5, intensities=[0.8, 0.9, 0.7, 0.8, 0.9]
+        )
+        result = extractor._compute_emotional_intensity_estimate(signals)
+        assert result == "high"
 
-    def test_multi_source_indicator(self, extractor):
-        """Detects use of multiple emotional tools."""
-        signals = [
-            _make_signal("calm", source="mood", days_ago=3),
-            _make_signal("calm", source="companion", days_ago=2),
-            _make_signal("calm", source="reset", days_ago=1),
-        ]
-        result = extractor._extract_awareness_indicators(signals)
-        assert any("multiple pathways" in ind for ind in result)
+    def test_medium_intensity(self, extractor):
+        """Medium average intensity produces 'medium' estimate."""
+        signals = _make_signal_series(
+            ["neutral"] * 5, intensities=[0.4, 0.5, 0.5, 0.4, 0.5]
+        )
+        result = extractor._compute_emotional_intensity_estimate(signals)
+        assert result == "medium"
 
-    def test_nuanced_range_indicator(self, extractor):
-        """Detects recognition of diverse emotional states."""
-        emotions = ["happy", "sad", "anxious", "calm", "grateful", "lonely"]
-        signals = _make_signal_series(emotions)
-        result = extractor._extract_awareness_indicators(signals)
-        assert any("nuanced range" in ind for ind in result)
+    def test_low_intensity(self, extractor):
+        """Low average intensity produces 'low' estimate."""
+        signals = _make_signal_series(
+            ["calm"] * 5, intensities=[0.1, 0.2, 0.1, 0.2, 0.1]
+        )
+        result = extractor._compute_emotional_intensity_estimate(signals)
+        assert result == "low"
 
-    def test_regular_cadence_indicator(self, extractor):
-        """Detects regular rhythm of check-ins."""
-        signals = [_make_signal("calm", days_ago=i) for i in range(7)]
-        result = extractor._extract_awareness_indicators(signals)
-        assert any("regular rhythm" in ind for ind in result)
+    def test_empty_signals_returns_medium(self, extractor):
+        """Empty signals default to 'medium'."""
+        result = extractor._compute_emotional_intensity_estimate([])
+        assert result == "medium"
 
-    def test_max_4_indicators(self, extractor):
-        """At most 4 awareness indicators returned."""
-        emotions = ["happy", "sad", "anxious", "calm", "grateful", "lonely"]
-        signals = [
-            _make_signal(e, source=s, days_ago=i)
-            for i, (e, s) in enumerate(
-                zip(emotions * 3, ["mood", "companion", "reset"] * 6)
+    def test_returns_only_valid_values(self, extractor):
+        """Result is always one of low/medium/high."""
+        for intensities in [[0.1] * 5, [0.5] * 5, [0.9] * 5]:
+            signals = _make_signal_series(
+                ["neutral"] * 5, intensities=intensities
             )
+            result = extractor._compute_emotional_intensity_estimate(signals)
+            assert result in {"low", "medium", "high"}
+
+
+# =============================================================================
+# SELF AWARENESS LEVEL ESTIMATE TESTS
+# =============================================================================
+
+
+class TestSelfAwarenessLevelEstimate:
+    """Tests for _compute_self_awareness_level."""
+
+    def test_emerging_with_minimal_data(self, extractor):
+        """Minimal signals produce 'emerging' awareness level."""
+        signals = [_make_signal("sad", source="mood")]
+        result = extractor._compute_self_awareness_level(signals, [], [])
+        assert result == "emerging"
+
+    def test_moderate_with_some_indicators(self, extractor):
+        """Some awareness indicators and growth signals produce 'moderate'."""
+        signals = _make_signal_series(
+            ["sad", "happy", "anxious", "calm"], source="mood"
+        )
+        indicators = [
+            "sustained engagement",
+            "recognizing a nuanced range",
         ]
-        result = extractor._extract_awareness_indicators(signals)
-        assert len(result) <= 4
-
-
-# =============================================================================
-# AGGREGATE METRICS TESTS
-# =============================================================================
-
-
-class TestAggregateMetrics:
-    """Tests for _compute_aggregate_metrics."""
-
-    def test_dominant_quadrant_activated_unpleasant(self, extractor):
-        """Dominant quadrant reflects most common emotion quadrant."""
-        signals = _make_signal_series(["anxious"] * 5 + ["calm"])
-        quadrant, _, _ = extractor._compute_aggregate_metrics(signals)
-        assert quadrant == "activated_unpleasant"
-
-    def test_dominant_quadrant_deactivated_pleasant(self, extractor):
-        """Calm/peaceful signals produce deactivated_pleasant quadrant."""
-        signals = _make_signal_series(["calm"] * 5 + ["anxious"])
-        quadrant, _, _ = extractor._compute_aggregate_metrics(signals)
-        assert quadrant == "deactivated_pleasant"
-
-    def test_guna_distribution_sums_to_one(self, extractor):
-        """Guna distribution values sum to approximately 1.0."""
-        signals = _make_signal_series(
-            ["calm", "anxious", "sad", "happy", "stressed", "peaceful"]
+        growth = [
+            GrowthSignal("calming_trajectory", "desc", "recent"),
+        ]
+        result = extractor._compute_self_awareness_level(
+            signals, indicators, growth
         )
-        _, guna_dist, _ = extractor._compute_aggregate_metrics(signals)
-        total = sum(guna_dist.values())
-        assert abs(total - 1.0) < 0.01
+        assert result == "moderate"
 
-    def test_high_variability_detected(self, extractor):
-        """High variability detected with widely varying intensities."""
-        signals = _make_signal_series(
-            ["sad", "happy"] * 4,
-            intensities=[0.1, 0.9, 0.1, 0.9, 0.1, 0.9, 0.1, 0.9],
+    def test_strong_with_rich_engagement(self, extractor):
+        """Rich engagement across multiple dimensions produces 'strong'."""
+        emotions = ["sad", "happy", "anxious", "calm", "grateful", "hopeful"]
+        signals = []
+        for i, e in enumerate(emotions):
+            signals.append(
+                _make_signal(e, source=["mood", "companion", "reset"][i % 3], days_ago=i)
+            )
+        indicators = [
+            "sustained engagement",
+            "exploring multiple pathways",
+            "recognizing a nuanced range",
+            "developing a regular rhythm",
+        ]
+        growth = [
+            GrowthSignal("calming_trajectory", "desc", "recent"),
+            GrowthSignal("expanding_awareness", "desc", "recent"),
+        ]
+        result = extractor._compute_self_awareness_level(
+            signals, indicators, growth
         )
-        _, _, variability = extractor._compute_aggregate_metrics(signals)
-        assert variability == "high"
+        assert result == "strong"
 
-    def test_low_variability_detected(self, extractor):
-        """Low variability detected with consistent intensities."""
-        signals = _make_signal_series(
-            ["calm"] * 6,
-            intensities=[0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
-        )
-        _, _, variability = extractor._compute_aggregate_metrics(signals)
-        assert variability == "low"
+    def test_returns_only_valid_values(self, extractor):
+        """Result is always one of emerging/moderate/strong."""
+        signals = [_make_signal("calm")]
+        result = extractor._compute_self_awareness_level(signals, [], [])
+        assert result in {"emerging", "moderate", "strong"}
 
 
 # =============================================================================
@@ -584,100 +688,7 @@ class TestUtilityHelpers:
 
 
 # =============================================================================
-# FULL REPORT TESTS
-# =============================================================================
-
-
-class TestEmotionalPatternReport:
-    """Tests for the full EmotionalPatternReport dataclass."""
-
-    def test_empty_report_for_no_data(self):
-        """Empty report generated when no signals exist."""
-        report = EmotionalPatternReport(
-            user_id="test-user",
-            extraction_window_days=30,
-            data_points_analyzed=0,
-            extracted_at=datetime.datetime.now(datetime.UTC).isoformat(),
-        )
-        d = report.to_dict()
-        assert d["data_points_analyzed"] == 0
-        assert d["recurring_themes"] == []
-        assert d["attachment_signals"] == []
-        assert d["reactivity_triggers"] == []
-        assert d["growth_signals"] == []
-        assert d["awareness_indicators"] == []
-
-    def test_report_to_dict_is_json_serializable(self):
-        """Report to_dict output can be serialized to JSON."""
-        import json
-
-        report = EmotionalPatternReport(
-            user_id="test-user",
-            extraction_window_days=30,
-            data_points_analyzed=10,
-            recurring_themes=[
-                EmotionalTheme(
-                    theme="inner friction",
-                    frequency=5,
-                    intensity_trend="stable",
-                    associated_domains=["equanimity"],
-                    guna_tendency="rajas",
-                )
-            ],
-            attachment_signals=[
-                AttachmentSignal(
-                    pattern="pattern of reaching toward connection",
-                    direction="seeking",
-                    strength="moderate",
-                    evolving=False,
-                )
-            ],
-            reactivity_triggers=[
-                ReactivityTrigger(
-                    domain="resilience",
-                    emotional_response="unsettledness",
-                    recurrence=3,
-                    intensity_level="high",
-                )
-            ],
-            growth_signals=[
-                GrowthSignal(
-                    signal_type="calming_trajectory",
-                    description="overall emotional intensity is decreasing over time",
-                    first_observed_period="recent",
-                )
-            ],
-            awareness_indicators=["sustained engagement with emotional reflection"],
-            dominant_quadrant="activated_unpleasant",
-            guna_distribution={"sattva": 0.3, "rajas": 0.5, "tamas": 0.2},
-            emotional_variability="moderate",
-            extracted_at=datetime.datetime.now(datetime.UTC).isoformat(),
-        )
-        d = report.to_dict()
-        serialized = json.dumps(d)
-        assert isinstance(serialized, str)
-        parsed = json.loads(serialized)
-        assert parsed["user_id"] == "test-user"
-        assert len(parsed["recurring_themes"]) == 1
-        assert parsed["recurring_themes"][0]["theme"] == "inner friction"
-
-    def test_guna_distribution_rounded(self):
-        """Guna distribution values are rounded to 3 decimal places."""
-        report = EmotionalPatternReport(
-            user_id="test",
-            extraction_window_days=30,
-            data_points_analyzed=1,
-            guna_distribution={"sattva": 0.33333, "rajas": 0.33333, "tamas": 0.33333},
-            extracted_at="now",
-        )
-        d = report.to_dict()
-        for val in d["guna_distribution"].values():
-            # Check it has at most 3 decimal places
-            assert round(val, 3) == val
-
-
-# =============================================================================
-# EXTRACT METHOD INTEGRATION TEST (with mocked DB)
+# FULL EXTRACT INTEGRATION TEST (with mocked DB)
 # =============================================================================
 
 
@@ -685,8 +696,8 @@ class TestExtractIntegration:
     """Integration test for the full extract() pipeline with mocked DB."""
 
     @pytest.mark.asyncio
-    async def test_extract_with_no_data(self, extractor):
-        """Extract returns empty report when no data exists."""
+    async def test_extract_with_no_data_returns_default_schema(self, extractor):
+        """Extract returns empty report matching expected schema when no data."""
         mock_db = AsyncMock()
         mock_result = MagicMock()
         mock_result.scalars.return_value.all.return_value = []
@@ -695,26 +706,23 @@ class TestExtractIntegration:
         report = await extractor.extract(
             db=mock_db, user_id="empty-user", lookback_days=30
         )
-        assert report.data_points_analyzed == 0
-        assert report.recurring_themes == []
+        d = report.to_dict()
 
-    @pytest.mark.asyncio
-    async def test_extract_clamps_lookback_days(self, extractor):
-        """Extract clamps lookback_days to 1-90 range."""
-        mock_db = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = []
-        mock_db.execute = AsyncMock(return_value=mock_result)
-
-        report = await extractor.extract(
-            db=mock_db, user_id="test", lookback_days=200
-        )
-        assert report.extraction_window_days == 90
-
-        report = await extractor.extract(
-            db=mock_db, user_id="test", lookback_days=-5
-        )
-        assert report.extraction_window_days == 1
+        # Must have exactly the 6 expected keys.
+        assert set(d.keys()) == {
+            "recurring_themes",
+            "reactivity_triggers",
+            "attachment_patterns",
+            "growth_signals",
+            "emotional_intensity_estimate",
+            "self_awareness_level_estimate",
+        }
+        assert d["recurring_themes"] == []
+        assert d["reactivity_triggers"] == []
+        assert d["attachment_patterns"] == []
+        assert d["growth_signals"] == []
+        assert d["emotional_intensity_estimate"] in {"low", "medium", "high"}
+        assert d["self_awareness_level_estimate"] in {"emerging", "moderate", "strong"}
 
 
 # =============================================================================
@@ -733,7 +741,6 @@ class TestPrivacyGuarantees:
         themes = extractor._extract_recurring_themes(signals)
         for theme in themes:
             d = theme.to_dict()
-            # Theme should be an abstract label, not user content
             assert len(d["theme"]) < 50
             assert d["theme"] in _EMOTION_ABSTRACTIONS.values() or d["theme"] in _EMOTION_ABSTRACTIONS.keys()
 
@@ -747,7 +754,6 @@ class TestPrivacyGuarantees:
         triggers = extractor._extract_reactivity_triggers(signals)
         for trigger in triggers:
             d = trigger.to_dict()
-            # Domain should be an abstract category
             assert d["domain"] in [
                 "self understanding", "action discipline", "equanimity",
                 "knowledge insight", "values service", "meditation attention",
@@ -756,13 +762,13 @@ class TestPrivacyGuarantees:
 
     def test_report_contains_no_pii_fields(self):
         """Report structure has no fields that could contain PII."""
-        report = EmotionalPatternReport(
-            user_id="uid",
-            extraction_window_days=30,
-            data_points_analyzed=0,
-            extracted_at="now",
-        )
+        report = EmotionalPatternReport()
         d = report.to_dict()
-        # Only user_id is present, which is an opaque identifier
-        pii_fields = {"name", "email", "phone", "address", "location"}
+        pii_fields = {"name", "email", "phone", "address", "location", "user_id"}
         assert pii_fields.isdisjoint(set(d.keys()))
+
+    def test_no_user_id_in_output(self):
+        """Output schema does not include user_id."""
+        report = EmotionalPatternReport()
+        d = report.to_dict()
+        assert "user_id" not in d

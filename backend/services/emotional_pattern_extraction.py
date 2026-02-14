@@ -30,11 +30,9 @@ Integration:
 from __future__ import annotations
 
 import datetime
-import hashlib
-import json
 import logging
 from collections import Counter, defaultdict
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import Any
 
 from sqlalchemy import and_, select
@@ -42,16 +40,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (
     CompanionMessage,
-    CompanionSession,
     EmotionalResetSession,
     Mood,
     UserEmotionalLog,
 )
-from backend.services.mood_analytics_engine import (
-    EmotionalQuadrant,
-    Guna,
-    mood_analytics,
-)
+from backend.services.mood_analytics_engine import mood_analytics
 from backend.services.domain_mapper import DomainMapper
 
 logger = logging.getLogger(__name__)
@@ -149,40 +142,31 @@ class EmotionalPatternReport:
 
     Privacy-preserving summary of emotional signals suitable for
     guiding KIAAN responses without exposing user content.
+
+    Output schema:
+        recurring_themes: []
+        reactivity_triggers: []
+        attachment_patterns: []
+        growth_signals: []
+        emotional_intensity_estimate: "low" | "medium" | "high"
+        self_awareness_level_estimate: "emerging" | "moderate" | "strong"
     """
 
-    user_id: str
-    extraction_window_days: int
-    data_points_analyzed: int
-
     recurring_themes: list[EmotionalTheme] = field(default_factory=list)
-    attachment_signals: list[AttachmentSignal] = field(default_factory=list)
     reactivity_triggers: list[ReactivityTrigger] = field(default_factory=list)
+    attachment_patterns: list[AttachmentSignal] = field(default_factory=list)
     growth_signals: list[GrowthSignal] = field(default_factory=list)
-    awareness_indicators: list[str] = field(default_factory=list)
-
-    dominant_quadrant: str = "balanced"
-    guna_distribution: dict[str, float] = field(default_factory=dict)
-    emotional_variability: str = "moderate"  # "low", "moderate", "high"
-
-    extracted_at: str = ""
+    emotional_intensity_estimate: str = "medium"  # "low", "medium", "high"
+    self_awareness_level_estimate: str = "emerging"  # "emerging", "moderate", "strong"
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "user_id": self.user_id,
-            "extraction_window_days": self.extraction_window_days,
-            "data_points_analyzed": self.data_points_analyzed,
             "recurring_themes": [t.to_dict() for t in self.recurring_themes],
-            "attachment_signals": [a.to_dict() for a in self.attachment_signals],
             "reactivity_triggers": [r.to_dict() for r in self.reactivity_triggers],
+            "attachment_patterns": [a.to_dict() for a in self.attachment_patterns],
             "growth_signals": [g.to_dict() for g in self.growth_signals],
-            "awareness_indicators": self.awareness_indicators,
-            "dominant_quadrant": self.dominant_quadrant,
-            "guna_distribution": {
-                k: round(v, 3) for k, v in self.guna_distribution.items()
-            },
-            "emotional_variability": self.emotional_variability,
-            "extracted_at": self.extracted_at,
+            "emotional_intensity_estimate": self.emotional_intensity_estimate,
+            "self_awareness_level_estimate": self.self_awareness_level_estimate,
         }
 
 
@@ -302,38 +286,29 @@ class EmotionalPatternExtractor:
         all_signals = mood_signals + companion_signals + reset_signals + log_signals
         all_signals.sort(key=lambda s: s["timestamp"])
 
-        total_points = len(all_signals)
-        if total_points == 0:
-            return EmotionalPatternReport(
-                user_id=user_id,
-                extraction_window_days=lookback_days,
-                data_points_analyzed=0,
-                extracted_at=datetime.datetime.now(datetime.UTC).isoformat(),
-            )
+        if not all_signals:
+            return EmotionalPatternReport()
 
         # Run analysis passes.
         themes = self._extract_recurring_themes(all_signals)
         attachment = self._extract_attachment_signals(all_signals)
         triggers = self._extract_reactivity_triggers(all_signals)
         growth = self._extract_growth_signals(all_signals)
-        awareness = self._extract_awareness_indicators(all_signals)
-        quadrant, guna_dist, variability = self._compute_aggregate_metrics(
+        awareness_indicators = self._extract_awareness_indicators(all_signals)
+        intensity_estimate = self._compute_emotional_intensity_estimate(
             all_signals
+        )
+        awareness_level = self._compute_self_awareness_level(
+            all_signals, awareness_indicators, growth
         )
 
         return EmotionalPatternReport(
-            user_id=user_id,
-            extraction_window_days=lookback_days,
-            data_points_analyzed=total_points,
             recurring_themes=themes,
-            attachment_signals=attachment,
             reactivity_triggers=triggers,
+            attachment_patterns=attachment,
             growth_signals=growth,
-            awareness_indicators=awareness,
-            dominant_quadrant=quadrant,
-            guna_distribution=guna_dist,
-            emotional_variability=variability,
-            extracted_at=datetime.datetime.now(datetime.UTC).isoformat(),
+            emotional_intensity_estimate=intensity_estimate,
+            self_awareness_level_estimate=awareness_level,
         )
 
     # =========================================================================
@@ -789,60 +764,71 @@ class EmotionalPatternExtractor:
         return indicators[:4]
 
     # =========================================================================
-    # AGGREGATE METRICS
+    # AGGREGATE ESTIMATES
     # =========================================================================
 
-    def _compute_aggregate_metrics(
+    def _compute_emotional_intensity_estimate(
         self, signals: list[dict[str, Any]]
-    ) -> tuple[str, dict[str, float], str]:
-        """Compute overall emotional quadrant, guna distribution, and variability.
+    ) -> str:
+        """Compute an overall emotional intensity estimate.
+
+        Classifies the user's average emotional intensity across all
+        recent signals as "low", "medium", or "high".
 
         Returns:
-            Tuple of (dominant_quadrant, guna_distribution, variability_label).
+            One of "low", "medium", "high".
         """
-        quadrant_counts: Counter[str] = Counter()
-        guna_counts: Counter[str] = Counter()
-        intensities: list[float] = []
+        if not signals:
+            return "medium"
 
-        for sig in signals:
-            raw_emotion = sig["emotion"]
-            intensity = sig["intensity"]
-            intensities.append(intensity)
+        avg_intensity = sum(s["intensity"] for s in signals) / len(signals)
 
-            quadrant = self._emotion_to_quadrant(raw_emotion)
-            quadrant_counts[quadrant] += 1
+        if avg_intensity >= 0.65:
+            return "high"
+        elif avg_intensity >= 0.35:
+            return "medium"
+        return "low"
 
-            guna = self._infer_guna(raw_emotion, intensity)
-            guna_counts[guna] += 1
+    def _compute_self_awareness_level(
+        self,
+        signals: list[dict[str, Any]],
+        awareness_indicators: list[str],
+        growth_signals: list[GrowthSignal],
+    ) -> str:
+        """Compute a self-awareness level estimate.
 
-        # Dominant quadrant.
-        dominant_quadrant = (
-            quadrant_counts.most_common(1)[0][0]
-            if quadrant_counts
-            else "balanced"
-        )
+        Considers the number of awareness indicators, growth signals,
+        diversity of sources and emotional vocabulary to estimate whether
+        self-awareness is "emerging", "moderate", or "strong".
 
-        # Guna distribution (normalized).
-        total_guna = sum(guna_counts.values())
-        guna_dist = {}
-        for g in ["sattva", "rajas", "tamas"]:
-            guna_dist[g] = guna_counts.get(g, 0) / total_guna if total_guna > 0 else 0.33
+        Returns:
+            One of "emerging", "moderate", "strong".
+        """
+        score = 0
 
-        # Emotional variability.
-        if len(intensities) >= 2:
-            mean_i = sum(intensities) / len(intensities)
-            variance = sum((x - mean_i) ** 2 for x in intensities) / len(intensities)
-            std_dev = variance ** 0.5
-            if std_dev > 0.25:
-                variability = "high"
-            elif std_dev > 0.12:
-                variability = "moderate"
-            else:
-                variability = "low"
-        else:
-            variability = "insufficient_data"
+        # Each awareness indicator contributes to the score.
+        score += len(awareness_indicators)
 
-        return dominant_quadrant, guna_dist, variability
+        # Each growth signal contributes.
+        score += len(growth_signals)
+
+        # Emotional vocabulary diversity.
+        unique_emotions = set(s["emotion"] for s in signals)
+        if len(unique_emotions) >= 6:
+            score += 2
+        elif len(unique_emotions) >= 4:
+            score += 1
+
+        # Source diversity (using multiple wellness tools).
+        unique_sources = set(s["source"] for s in signals)
+        if len(unique_sources) >= 3:
+            score += 1
+
+        if score >= 6:
+            return "strong"
+        elif score >= 3:
+            return "moderate"
+        return "emerging"
 
     # =========================================================================
     # UTILITY HELPERS
