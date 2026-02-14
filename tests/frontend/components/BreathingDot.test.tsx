@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { BreathingDot } from '@/components/animations/BreathingDot'
 
 // Mock framer-motion so we can test rendering without animation runtime
