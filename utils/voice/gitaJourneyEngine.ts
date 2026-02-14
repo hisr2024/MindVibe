@@ -104,7 +104,7 @@ const CHAPTER_SESSION_DATA: Record<number, ChapterSessionData> = {
     welcome: 'Good to have you back, friend. We have learned that you are eternal and that your effort is your power. But here is a natural question: if results do not matter, why act at all? Today, we answer that.',
     featuredVerseIndices: [0, 1],
     verseIntros: [
-      'Here is the secret to overcoming procrastination.',
+      'Here is the secret to loosening the grip of procrastination.',
       'And this one, friend, this one might change your life.',
     ],
     application: 'The next time you catch yourself scrolling instead of doing, waiting for motivation instead of starting, remember this: action itself is the medicine. You do not need to feel ready. You just need to begin.',

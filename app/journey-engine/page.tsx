@@ -430,7 +430,7 @@ export default function JourneyEnginePage() {
           <Link href="/dashboard" className="text-white/60 hover:text-white transition-colors">
             &larr; Dashboard
           </Link>
-          <h1 className="text-lg font-semibold text-white">Conquer Your Inner Enemies</h1>
+          <h1 className="text-lg font-semibold text-white">Strengthen Steadiness Within</h1>
           <Link href="/kiaan" className="text-white/60 hover:text-white transition-colors">
             KIAAN &rarr;
           </Link>
