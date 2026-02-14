@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { useLanguage } from '@/hooks/useLanguage'
 import { apiFetch } from '@/lib/api'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 import CompanionCTA from '@/components/companion/CompanionCTA'
@@ -61,6 +62,7 @@ const triggerPatterns = [
 ]
 
 export default function RelationshipCompassClient() {
+  const { t } = useLanguage()
   const [conflict, setConflict] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -161,6 +163,7 @@ export default function RelationshipCompassClient() {
           title="Relationship Compass"
           subtitle="Navigate relationship challenges with clarity, fairness, and compassion."
           backLink={{ label: 'Back to home', href: '/' }}
+          modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.relationship-compass', 'Relationship Mode')}`}
         />
 
         {/* Quick Actions */}

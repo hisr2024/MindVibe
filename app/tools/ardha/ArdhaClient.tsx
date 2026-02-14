@@ -164,7 +164,7 @@ export default function ArdhaClient() {
   const [analysisMode, setAnalysisMode] = useLocalState<DepthMode>('ardha_analysis_mode', 'quick')
 
   // Voice integration
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
 
   useEffect(() => {
     if (error) setError(null)
@@ -249,6 +249,7 @@ export default function ArdhaClient() {
           title="Ardha - Reframing Assistant"
           subtitle="Transform negative thoughts into balanced, empowering perspectives with ancient wisdom."
           backLink={{ label: 'Back to home', href: '/' }}
+          modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.ardha', 'Clarity Mode')}`}
         />
 
         {/* Quick Actions */}

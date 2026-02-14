@@ -35,5 +35,13 @@
     "kiaan": "Talk it through",
     "relationship-compass": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "നിങ്ങൾ ഇതിലാണ്:",
+    "viyog": "വിരാമ മോഡ്",
+    "ardha": "വ്യക്തത മോഡ്",
+    "kiaan": "സഹചാരി മോഡ്",
+    "relationship-compass": "ബന്ധ മോഡ്",
+    "journey": "പരിശീലന മോഡ്"
   }
 }

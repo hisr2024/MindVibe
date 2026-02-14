@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FadeIn } from '@/components/ui'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { useLanguage } from '@/hooks/useLanguage'
 import useAuth from '@/hooks/useAuth'
 import {
   journeyEngineService,
@@ -459,6 +460,7 @@ export default function JourneysPageClient() {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
   const { isAuthenticated, loading: authLoading } = useAuth()
+  const { t } = useLanguage()
 
   // State
   const [loading, setLoading] = useState(true)
@@ -689,6 +691,9 @@ export default function JourneysPageClient() {
           <div>
             <h1 className="text-2xl font-bold text-white md:text-3xl">My Journeys</h1>
             <p className="mt-1 text-white/60">Transform through Bhagavad Gita wisdom</p>
+            <p className="mt-1.5 text-[11px] tracking-wide text-orange-300/50" data-testid="mode-label">
+              {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.journey', 'Training Mode')}
+            </p>
           </div>
           <Link
             href="/journeys/new"

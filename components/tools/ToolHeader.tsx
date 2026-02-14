@@ -21,6 +21,8 @@ export interface ToolHeaderProps {
     label: string
     href: string
   }
+  /** Mode label text (e.g. "You are in: Pause Mode") */
+  modeLabel?: string
   /** Additional className for styling */
   className?: string
 }
@@ -41,6 +43,7 @@ export function ToolHeader({
   subtitle,
   cta,
   backLink,
+  modeLabel,
   className = '',
 }: ToolHeaderProps) {
   return (
@@ -64,6 +67,11 @@ export function ToolHeader({
           <p className="text-sm text-orange-100/80 max-w-xl ml-[52px]">
             {subtitle}
           </p>
+          {modeLabel && (
+            <p className="mt-1.5 text-[11px] tracking-wide text-orange-300/50 ml-[52px]" data-testid="mode-label">
+              {modeLabel}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 items-end">

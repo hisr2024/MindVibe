@@ -35,5 +35,13 @@
     "kiaan": "Talk it through",
     "relationship-compass": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "நீங்கள் இருக்கிறீர்கள்:",
+    "viyog": "இடைநிறுத்த முறை",
+    "ardha": "தெளிவு முறை",
+    "kiaan": "துணை முறை",
+    "relationship-compass": "உறவு முறை",
+    "journey": "பயிற்சி முறை"
   }
 }

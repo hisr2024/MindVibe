@@ -35,5 +35,13 @@
     "kiaan": "Talk it through",
     "relationship-compass": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "भवान् अस्ति:",
+    "viyog": "विराम प्रकारः",
+    "ardha": "स्पष्टता प्रकारः",
+    "kiaan": "सहचर प्रकारः",
+    "relationship-compass": "सम्बन्ध प्रकारः",
+    "journey": "प्रशिक्षण प्रकारः"
   }
 }

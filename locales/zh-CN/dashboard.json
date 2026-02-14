@@ -35,5 +35,13 @@
     "kiaan": "Talk it through",
     "relationship-compass": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "当前模式:",
+    "viyog": "暂停模式",
+    "ardha": "清晰模式",
+    "kiaan": "伙伴模式",
+    "relationship-compass": "关系模式",
+    "journey": "训练模式"
   }
 }

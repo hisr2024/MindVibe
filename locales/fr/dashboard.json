@@ -35,5 +35,13 @@
     "kiaan": "Talk it through",
     "relationship-compass": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "Vous êtes en:",
+    "viyog": "Mode Pause",
+    "ardha": "Mode Clarté",
+    "kiaan": "Mode Compagnon",
+    "relationship-compass": "Mode Relation",
+    "journey": "Mode Entraînement"
   }
 }
