@@ -31,12 +31,23 @@ export function GlobalWakeWordListener() {
   // Play a subtle activation sound on wake word detection
   const audioRef = useRef<AudioContext | null>(null)
 
+  // Clean up AudioContext on unmount to prevent resource leak
+  useEffect(() => {
+    return () => {
+      if (audioRef.current && audioRef.current.state !== 'closed') {
+        audioRef.current.close().catch(() => {})
+        audioRef.current = null
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (!isActivated) return
+    if (typeof window === 'undefined' || typeof AudioContext === 'undefined') return
 
     // Play a brief chime using Web Audio API
     try {
-      if (!audioRef.current) {
+      if (!audioRef.current || audioRef.current.state === 'closed') {
         audioRef.current = new AudioContext()
       }
       const ctx = audioRef.current

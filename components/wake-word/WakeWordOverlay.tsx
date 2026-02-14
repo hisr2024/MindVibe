@@ -35,7 +35,6 @@ export function WakeWordOverlay() {
     dismissActivation,
     pause: pauseWakeWord,
     resume: resumeWakeWord,
-    lastDetection,
   } = useGlobalWakeWord()
 
   const [phase, setPhase] = useState<OverlayPhase>('idle')
@@ -46,9 +45,11 @@ export function WakeWordOverlay() {
   const friendEngineRef = useRef(new KiaanFriendEngine())
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Stable ref for handleDismiss to avoid circular dependency with useVoiceOutput
+  const handleDismissRef = useRef<() => void>(() => {})
+
   // Voice Input - captures user speech after wake word
   const {
-    isListening,
     transcript,
     interimTranscript,
     startListening,
@@ -73,7 +74,6 @@ export function WakeWordOverlay() {
 
   // Voice Output - speaks KIAAN's response
   const {
-    isSpeaking,
     speak,
     cancel: cancelSpeech,
   } = useVoiceOutput({
@@ -82,10 +82,76 @@ export function WakeWordOverlay() {
     onEnd: useCallback(() => {
       // Auto-dismiss after response finishes speaking
       dismissTimerRef.current = setTimeout(() => {
-        handleDismiss()
+        handleDismissRef.current()
       }, 3000)
     }, []),
   })
+
+  // ─── Dismiss Handler ─────────────────────────────────────────────
+
+  const handleDismiss = useCallback(() => {
+    if (dismissTimerRef.current) {
+      clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = null
+    }
+    cancelSpeech()
+    stopListening()
+    stopAllAudio()
+    dismissActivation()
+    resumeWakeWord()
+  }, [cancelSpeech, stopListening, dismissActivation, resumeWakeWord])
+
+  // Keep ref in sync
+  handleDismissRef.current = handleDismiss
+
+  // ─── Process Query ───────────────────────────────────────────────
+
+  const processQuery = useCallback(async (query: string) => {
+    try {
+      // Try backend API first
+      const response = await apiFetch('/api/voice-companion/quick-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          language: 'en',
+          context: 'wake_word_activation',
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        const responseText = data.response || data.message
+        if (responseText) {
+          setKiaanResponse(responseText)
+          setPhase('responding')
+          speak(responseText)
+          return
+        }
+      }
+    } catch (err) {
+      // Backend unavailable - fall through to local engine
+      if (typeof console !== 'undefined') {
+        console.warn('Wake word quick-response API unavailable, using local fallback:', err)
+      }
+    }
+
+    // Fallback to local KIAAN Friend Engine
+    try {
+      const localResponse = friendEngineRef.current.processMessage(query)
+      setKiaanResponse(localResponse.response)
+      setPhase('responding')
+      speak(localResponse.response)
+    } catch (err) {
+      if (typeof console !== 'undefined') {
+        console.warn('Local KIAAN engine fallback failed:', err)
+      }
+      const fallbackMsg = "I heard you. Let me open our conversation space so we can talk properly."
+      setKiaanResponse(fallbackMsg)
+      setPhase('responding')
+      speak(fallbackMsg)
+    }
+  }, [speak])
 
   // ─── Activation Flow ─────────────────────────────────────────────
 
@@ -121,7 +187,7 @@ export function WakeWordOverlay() {
         clearTimeout(dismissTimerRef.current)
       }
     }
-  }, [isActivated])
+  }, [isActivated, pauseWakeWord, startListening, resetTranscript])
 
   // ─── Process user query when received ────────────────────────────
 
@@ -130,60 +196,7 @@ export function WakeWordOverlay() {
 
     setPhase('processing')
     processQuery(userQuery)
-  }, [userQuery])
-
-  const processQuery = async (query: string) => {
-    try {
-      // Try backend API first
-      const response = await apiFetch('/api/voice-companion/quick-response', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          language: 'en',
-          context: 'wake_word_activation',
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        const responseText = data.response || data.message
-        setKiaanResponse(responseText)
-        setPhase('responding')
-        speak(responseText)
-        return
-      }
-    } catch {
-      // Backend unavailable - fall through to local engine
-    }
-
-    // Fallback to local KIAAN Friend Engine
-    try {
-      const localResponse = friendEngineRef.current.processMessage(query)
-      setKiaanResponse(localResponse.response)
-      setPhase('responding')
-      speak(localResponse.response)
-    } catch {
-      const fallbackMsg = "I heard you. Let me open our conversation space so we can talk properly."
-      setKiaanResponse(fallbackMsg)
-      setPhase('responding')
-      speak(fallbackMsg)
-    }
-  }
-
-  // ─── Dismiss Handler ─────────────────────────────────────────────
-
-  const handleDismiss = useCallback(() => {
-    if (dismissTimerRef.current) {
-      clearTimeout(dismissTimerRef.current)
-      dismissTimerRef.current = null
-    }
-    cancelSpeech()
-    stopListening()
-    stopAllAudio()
-    dismissActivation()
-    resumeWakeWord()
-  }, [cancelSpeech, stopListening, dismissActivation, resumeWakeWord])
+  }, [userQuery, phase, processQuery])
 
   // ─── Navigate to full voice companion ────────────────────────────
 

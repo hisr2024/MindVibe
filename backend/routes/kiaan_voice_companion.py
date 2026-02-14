@@ -286,6 +286,27 @@ class VoiceCompanionEndResponse(BaseModel):
     session_summary: dict
 
 
+class VoiceCompanionQuickResponseRequest(BaseModel):
+    """Request model for session-less quick response from wake word activation."""
+    query: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    language: str = Field(default="en", max_length=8)
+    context: str = Field(default="wake_word_activation", max_length=32)
+
+    @field_validator("query")
+    @classmethod
+    def sanitize_query(cls, v: str) -> str:
+        v = html.escape(v.strip())
+        v = re.sub(r"<[^>]+>", "", v)
+        return v
+
+
+class VoiceCompanionQuickResponseResponse(BaseModel):
+    """Response model for quick wake word response."""
+    response: str
+    mood: str = "neutral"
+    ai_tier: str = "template"
+
+
 class VoiceCompanionSynthesizeRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     mood: str = Field(default="neutral", max_length=32)
@@ -1153,6 +1174,120 @@ async def send_voice_companion_message(
         ai_tier=ai_tier,
         response_time_ms=int(response_time_ms),
         response_length=length_hint,
+    )
+
+
+@router.post("/quick-response", response_model=VoiceCompanionQuickResponseResponse)
+@limiter.limit("20/minute")
+async def quick_voice_response(
+    request: Request,
+    body: VoiceCompanionQuickResponseRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Session-less quick response for wake word activation.
+
+    Provides a fast KIAAN response without requiring an active session.
+    Used when the user says "Hey KIAAN" from anywhere in the app.
+
+    Falls back to local template responses if AI services are unavailable.
+    """
+    from backend.services.companion_friend_engine import (
+        detect_mood,
+        get_companion_engine,
+    )
+
+    start_time = time.monotonic()
+
+    # Detect mood from the query
+    try:
+        mood_result = detect_mood(body.query)
+        mood = mood_result.get("mood", "neutral")
+        mood_intensity = mood_result.get("intensity", 0.5)
+    except Exception:
+        mood = "neutral"
+        mood_intensity = 0.5
+
+    # Get user profile for personalization
+    profile = await _get_or_create_profile(db, current_user.id)
+    user_name = profile.user_name
+    memories = await _get_user_memories(db, current_user.id)
+
+    ai_tier = "template"
+    response_text = ""
+
+    # Try AI-powered response via OpenAI
+    try:
+        from backend.services.openai_optimizer import get_openai_client
+
+        client = get_openai_client()
+        if client:
+            name_ref = user_name or "friend"
+            system_prompt = (
+                f"You are KIAAN, a divine friend and mental wellness companion. "
+                f"The user just activated you with a voice wake word. "
+                f"Respond warmly and briefly to their query. "
+                f"Address them as '{name_ref}'. "
+                f"Their current mood seems {mood}. "
+                f"Keep your response under 3 sentences — this is a quick voice interaction. "
+                f"Be compassionate, wise, and concise."
+            )
+
+            if memories:
+                system_prompt += f"\nYou remember about them: {'; '.join(memories[:5])}"
+
+            completion = await client.chat.completions.create(
+                model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": body.query},
+                ],
+                max_tokens=200,
+                temperature=0.8,
+            )
+
+            response_text = (completion.choices[0].message.content or "").strip()
+            ai_tier = "openai"
+    except Exception as e:
+        logger.warning(f"Quick response AI call failed: {e}")
+
+    # Fallback to local companion engine
+    if not response_text:
+        try:
+            engine = get_companion_engine()
+            engine_result = engine.respond(
+                user_message=body.query,
+                conversation_history=[],
+                detected_mood=mood,
+                mood_intensity=mood_intensity,
+                phase="connect",
+                user_name=user_name,
+            )
+            response_text = engine_result.get("response", "")
+            ai_tier = engine_result.get("ai_tier", "template")
+        except Exception as e:
+            logger.warning(f"Quick response engine fallback failed: {e}")
+
+    # Final fallback - hardcoded warm response
+    if not response_text:
+        name_ref = user_name or "friend"
+        response_text = (
+            f"I'm here, {name_ref}. "
+            "What would you like to talk about? "
+            "I'm ready to listen."
+        )
+        ai_tier = "template"
+
+    elapsed_ms = int((time.monotonic() - start_time) * 1000)
+    logger.info(
+        f"Quick voice response for user {current_user.id}: "
+        f"ai_tier={ai_tier}, mood={mood}, latency={elapsed_ms}ms"
+    )
+
+    return VoiceCompanionQuickResponseResponse(
+        response=response_text,
+        mood=mood,
+        ai_tier=ai_tier,
     )
 
 
