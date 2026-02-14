@@ -4,9 +4,13 @@
  * Tracks when a loading phase ends (loading transitions from true to false
  * while a result exists) and holds a `showPause` flag for the breathing-dot
  * duration. Automatically respects reduced-motion and the feature flag.
+ *
+ * Uses the React-documented "storing information from previous renders"
+ * pattern to detect prop transitions without refs or effects:
+ * https://react.dev/reference/react/useState#storing-information-from-previous-renders
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useReducedMotion } from './useReducedMotion'
 import { useMicroPauseStore, type MicroPauseTool } from '@/lib/micro-pause/store'
 
@@ -33,29 +37,28 @@ export function useMicroPause({
   tool,
 }: UseMicroPauseOptions): UseMicroPauseReturn {
   const [showPause, setShowPause] = useState(false)
-  const wasLoading = useRef(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [prevLoading, setPrevLoading] = useState(loading)
 
   const prefersReducedMotion = useReducedMotion()
   const isEnabled = useMicroPauseStore((s) => s.isEnabledForTool)(tool)
 
-  useEffect(() => {
-    // Detect loading → done transition
-    if (wasLoading.current && !loading && hasResult) {
-      if (isEnabled && !prefersReducedMotion) {
-        setShowPause(true)
-        timerRef.current = setTimeout(() => setShowPause(false), MICRO_PAUSE_MS)
-      }
+  // Detect loading→done transition via render-time state derivation.
+  // React allows calling setState during render when comparing with
+  // previously stored state. It re-renders synchronously before commit.
+  if (loading !== prevLoading) {
+    setPrevLoading(loading)
+    if (prevLoading && !loading && hasResult && isEnabled && !prefersReducedMotion) {
+      setShowPause(true)
     }
-    wasLoading.current = loading
-  }, [loading, hasResult, isEnabled, prefersReducedMotion])
+  }
 
-  // Cleanup timer on unmount
+  // Timer to end the pause after MICRO_PAUSE_MS
   useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [])
+    if (!showPause) return
+
+    const timer = setTimeout(() => setShowPause(false), MICRO_PAUSE_MS)
+    return () => clearTimeout(timer)
+  }, [showPause])
 
   return { showPause }
 }
