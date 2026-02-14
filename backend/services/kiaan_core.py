@@ -869,21 +869,46 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
             logger.warning(f"KIAAN Core: Only {len(verses) if verses else 0} verses found, getting fallback")
             verses = await self._get_fallback_verses(db)
 
-        # Step 2: Build wisdom context from verses
+        # Step 2: Build wisdom context from static Gita corpus (700+ verses)
         wisdom_context = self._build_verse_context(verses)
 
-        # Step 2b: Enhance with learned wisdom from knowledge base (v4.0 Learning Engine)
-        # This adds supplementary teachings from external sources (videos, audio, texts)
+        # Step 2b: Enrich with curated Indian Gita teachings (yoga paths, sthitaprajna qualities)
+        # This adds structured wisdom from the authentic Indian data sources service
+        try:
+            if self.gita_sources:
+                curated_wisdom = await self.gita_sources.get_wisdom_for_kiaan(message, context)
+                if curated_wisdom:
+                    teachings = curated_wisdom.get("teachings", [])
+                    practices = curated_wisdom.get("practices", [])
+                    if teachings or practices:
+                        enrichment_parts = ["\n\n--- Curated Gita Teachings (static wisdom) ---"]
+                        for t in teachings[:2]:
+                            name = t.get("name", "")
+                            teaching_text = t.get("teaching", "")
+                            if name and teaching_text:
+                                enrichment_parts.append(f"- {name}: {teaching_text[:200]}")
+                        for p in practices[:1]:
+                            practice_name = p.get("name", "")
+                            description = p.get("description", "")
+                            if practice_name and description:
+                                enrichment_parts.append(f"- Practice: {practice_name} — {description[:150]}")
+                        wisdom_context += "\n".join(enrichment_parts)
+                        logger.debug(f"Enriched with {len(teachings)} teachings, {len(practices)} practices from Indian sources")
+        except Exception as gita_sources_error:
+            logger.warning(f"Indian Gita sources enrichment failed (non-critical): {gita_sources_error}")
+
+        # Step 2c: Enhance with learned wisdom from knowledge base (v4.0 Learning Engine)
+        # This adds dynamic supplementary teachings from external sources (videos, audio, texts)
         try:
             if self.learning_engine:
                 learned_wisdom = self.learning_engine.get_relevant_wisdom(
                     message, limit=3, language=language
                 )
                 if learned_wisdom:
-                    learned_context = "\n\n--- Supplementary Gita Wisdom ---\n"
+                    learned_context = "\n\n--- Supplementary Wisdom (dynamic learning) ---\n"
                     for lw in learned_wisdom:
                         source_info = f" (Source: {lw.source_name})" if lw.source_name else ""
-                        learned_context += f"• {lw.content[:300]}...{source_info}\n"
+                        learned_context += f"- {lw.content[:300]}...{source_info}\n"
                     wisdom_context += learned_context
                     logger.debug(f"Enhanced with {len(learned_wisdom)} learned wisdom items")
         except Exception as le_error:
@@ -1188,54 +1213,65 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
             return []
 
     def _build_verse_context_fast(self, verses: list[dict[str, Any]]) -> str:
-        """Build concise wisdom context for fast responses (3 verses max).
+        """Build concise wisdom context for fast streaming responses (3 verses max).
 
-        Passes Gita wisdom as internal guidance - the AI uses these principles
-        as its reasoning backbone but expresses them secularly in output.
+        Draws from the static Gita corpus (700+ verses) via semantic search.
+        Passes verses as internal guidance — the companion weaves them as lived truth.
         """
         if not verses:
-            return "INTERNAL WISDOM (use as reasoning backbone, express secularly): Nishkama karma - act with full effort without attachment to outcomes. Samatva - maintain equanimity in success and failure. Sthitaprajna - cultivate steady wisdom through self-mastery."
+            return "INTERNAL WISDOM (from Gita corpus — weave naturally): Nishkama karma — pour yourself into right action without clinging to outcomes. Samatva — hold equanimity in success and failure. Sthitaprajna — steady wisdom that stays calm through change."
 
         principles = []
         for verse in verses[:3]:
             if verse.get('principle'):
-                principles.append(verse['principle'][:100])
+                principles.append(verse['principle'][:120])
             elif verse.get('english'):
-                principles.append(verse['english'][:80])
+                principles.append(verse['english'][:100])
 
-        return "INTERNAL WISDOM (use as reasoning backbone, express secularly): " + " | ".join(principles) if principles else "Apply nishkama karma (selfless action), samatva (equanimity), sthitaprajna (steady wisdom)."
+        return "INTERNAL WISDOM (from Gita corpus — weave naturally): " + " | ".join(principles) if principles else "Draw from nishkama karma (selfless action), samatva (equanimity), sthitaprajna (steady wisdom)."
 
     def _build_verse_context(self, verses: list[dict[str, Any]]) -> str:
-        """Build wisdom context from verses (optimized to 5 for faster responses).
+        """Build wisdom context from static Gita verse corpus (700+ verses).
 
-        These verses from the Gita Wisdom Core form the internal reasoning backbone.
-        The AI absorbs these teachings and expresses them as universal secular wisdom,
-        using terms like dharma, karma, yoga which are globally understood.
+        These verses are retrieved from the Wisdom Knowledge Base via OpenAI-powered
+        semantic search. They form the internal reasoning backbone for KIAAN's responses.
+        The companion absorbs these teachings and weaves them naturally as lived wisdom.
+
+        Static Wisdom Source: Bhagavad Gita 700+ verse corpus (database-backed)
+        Dynamic Wisdom Source: Learning engine supplements (appended separately)
         """
         if not verses:
-            return """GITA WISDOM (internal reasoning backbone - absorb and express secularly):
-Core teachings to guide your response:
-- Nishkama Karma: Act with full dedication without attachment to outcomes
-- Samatva: Maintain equanimity - treat success and failure with equal calm
-- Sthitaprajna: Cultivate steady wisdom - the mind undisturbed by changing circumstances
-- Buddhi Yoga: Use discerning intellect to navigate life's challenges
-EXPRESS these through secular terms: dharma (right action), karma (purposeful effort), yoga (union/balance), equanimity, detachment, self-mastery.
-"""
+            return """INTERNAL WISDOM (from Gita corpus — absorb and weave naturally):
+Core teachings to draw from:
+- Nishkama Karma: Pour yourself into right action without clinging to outcomes
+- Samatva: Hold equanimity — meet success and failure with the same steady presence
+- Sthitaprajna: Steady wisdom that remains undisturbed by changing circumstances
+- Buddhi Yoga: The discerning intellect that sees clearly through confusion
+Express these as lived truth using terms like dharma, karma, equanimity, detachment, self-mastery. Never cite sources."""
 
-        context_parts = ["GITA WISDOM (internal reasoning backbone - absorb and express secularly):", ""]
+        context_parts = ["INTERNAL WISDOM (from Gita corpus — absorb and weave naturally):", ""]
 
-        # Use up to 5 verses for balanced context (reduced from 15 for speed)
+        # Use up to 5 verses for balanced context
         for i, verse in enumerate(verses[:5], 1):
+            parts = []
             if verse.get('english'):
-                # Truncate to 150 chars for speed
                 english_text = verse['english']
-                if len(english_text) > 150:
-                    english_text = english_text[:147] + '...'
-                context_parts.append(f"{i}. {english_text}")
+                if len(english_text) > 200:
+                    english_text = english_text[:197] + '...'
+                parts.append(english_text)
+            if verse.get('principle'):
+                principle_text = verse['principle']
+                if len(principle_text) > 100:
+                    principle_text = principle_text[:97] + '...'
+                parts.append(f"Principle: {principle_text}")
+            if verse.get('theme'):
+                parts.append(f"Theme: {verse['theme'].replace('_', ' ').title()}")
+            if parts:
+                context_parts.append(f"{i}. " + " | ".join(parts))
 
         context_parts.extend([
             "",
-            "RULES: Absorb this wisdom deeply. Express it secularly using terms like dharma, karma, yoga, equanimity, detachment, self-mastery. NEVER cite Bhagavad Gita, Krishna, Arjuna, verse numbers, or chapter numbers. End with 💙"
+            "GUIDANCE: Let this wisdom inform your understanding. Weave relevant insights naturally into your response as lived truth. Never cite sources, verse numbers, or religious texts by name."
         ])
 
         return "\n".join(context_parts)

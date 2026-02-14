@@ -381,18 +381,16 @@ def build_gita_context_comprehensive(verse_results: list, limit: int = 5) -> str
     MAX_TEACHING_LENGTH = 300
 
     if not verse_results:
-        return """FALLBACK WISDOM (no specific verses found):
-Apply universal Gita principles:
-- Dharma (righteous duty) - Do what's right, not what's easy
-- Karma Yoga (action without attachment) - Focus on effort, not results
-- Equanimity (samatva) - Stay balanced in success and failure
-- Self-mastery (atma-vashya) - Control the mind, not external events
-- Inner peace (shanti) - Find calm within, regardless of outside chaos
-
-RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any scripture. Present wisdom as universal life principles."""
+        return """INTERNAL WISDOM (from Gita corpus — weave naturally, never cite):
+Draw from these universal principles:
+- Nishkama Karma: Pour yourself into right action without clinging to outcomes
+- Samatva: Hold equanimity — meet success and failure with the same steady presence
+- Sthitaprajna: Steady wisdom that remains undisturbed by changing circumstances
+- Buddhi Yoga: The discerning intellect that sees clearly through confusion
+- Shanti: The inner peace that exists beneath all external circumstances"""
 
     context_parts = [
-        "RELEVANT GITA WISDOM (use internally, NEVER cite in response):",
+        "INTERNAL WISDOM (from Gita corpus — absorb and weave naturally):",
         ""
     ]
 
@@ -416,41 +414,29 @@ RESPONSE GUIDELINE: Never cite "Bhagavad Gita", "verse", "chapter" or any script
             elif isinstance(verse, dict):
                 mh_apps = verse.get('mental_health_applications')
 
-            context_parts.append(f"WISDOM #{i} (relevance: {score:.2f}):")
+            verse_parts = []
 
             if english:
-                # Truncate teaching to reasonable length for context
-                context_parts.append(f"Teaching: {english[:MAX_TEACHING_LENGTH]}")
+                verse_parts.append(english[:MAX_TEACHING_LENGTH])
 
             if principle:
-                context_parts.append(f"Principle: {principle}")
+                verse_parts.append(f"Principle: {principle}")
 
             if theme:
-                # Format theme to be more readable
                 formatted_theme = theme.replace('_', ' ').title()
-                context_parts.append(f"Theme: {formatted_theme}")
+                verse_parts.append(f"Theme: {formatted_theme}")
 
             if mh_apps and isinstance(mh_apps, list):
-                apps_str = ", ".join(mh_apps[:3])  # First 3 applications
-                context_parts.append(f"Applications: {apps_str}")
+                apps_str = ", ".join(mh_apps[:3])
+                verse_parts.append(f"Applications: {apps_str}")
 
-            context_parts.append("")  # Blank line between verses
+            if verse_parts:
+                context_parts.append(f"{i}. " + " | ".join(verse_parts))
 
-    # Add synthesis guidelines
+    # Add guidance for weaving wisdom naturally
     context_parts.extend([
-        "---",
-        "SYNTHESIS GUIDELINES:",
-        "1. Identify the core principle across these verses",
-        "2. Find the practical application to user's situation",
-        "3. Present wisdom naturally without citing sources",
-        "4. Use Sanskrit terms (dharma, karma, atman) to add depth",
-        "5. Make ancient wisdom feel immediately relevant to modern life",
         "",
-        "FORBIDDEN IN RESPONSE:",
-        "❌ Never say 'Bhagavad Gita', 'Gita', 'verse', 'chapter', or cite numbers",
-        "❌ Never say 'Krishna', 'Arjuna', or reference the dialogue",
-        "❌ Never say 'according to scripture' or 'the text says'",
-        "✅ Instead, say 'ancient wisdom teaches', 'timeless principle', 'eternal truth'",
+        "GUIDANCE: Let this wisdom inform your understanding. Weave relevant insights naturally into your response as lived truth. Never cite sources, verse numbers, or religious texts by name.",
     ])
 
     return "\n".join(context_parts)
