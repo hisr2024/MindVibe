@@ -31,6 +31,8 @@ import {
   getJourneyStatusLabel,
   getJourneyStatusColor,
 } from '@/types/journeyEngine.types'
+import { JourneyDayHeader } from '@/components/journey/JourneyDayHeader'
+import { hydrateJourneyMeta } from '@/lib/journey/offlineCache'
 
 // =============================================================================
 // VERSE DISPLAY COMPONENT - Professional Sanskrit Verse Presentation
@@ -503,6 +505,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
   }, [journeyId, journey])
 
   useEffect(() => {
+    hydrateJourneyMeta()
     loadJourney()
   }, [loadJourney])
 
@@ -722,32 +725,13 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
           )}
         </AnimatePresence>
 
-        {/* Progress bar */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">
-              Day {journey.current_day} of {journey.total_days}
-            </span>
-            <span className="text-sm font-medium text-amber-400">
-              {Math.round(journey.progress_percentage)}% complete
-            </span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <motion.div
-              className="h-full rounded-full"
-              style={{ backgroundColor: enemyInfo?.color || '#F59E0B' }}
-              initial={{ width: 0 }}
-              animate={{ width: `${journey.progress_percentage}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            />
-          </div>
-          {journey.streak_days > 0 && (
-            <div className="mt-2 flex items-center gap-1 text-sm text-amber-400">
-              <span>🔥</span>
-              <span>{journey.streak_days} day streak</span>
-            </div>
-          )}
-        </div>
+        {/* Day header — Day X/14, progress bar, theme, focus */}
+        <JourneyDayHeader
+          currentDay={selectedDay}
+          totalDays={journey.total_days}
+          completedDays={journey.days_completed}
+          className="mb-6"
+        />
 
         {/* Day selector */}
         <div className="mb-6">
@@ -804,18 +788,27 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
             </button>
           </div>
         ) : journey.status === 'completed' ? (
-          <div className="rounded-xl border border-green-500/30 bg-green-900/10 p-8 text-center">
-            <div className="text-4xl mb-4">🎉</div>
-            <h2 className="text-lg font-medium text-white mb-2">Journey Complete!</h2>
-            <p className="text-white/60 mb-6">
-              Congratulations on completing this journey of transformation.
+          <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+            <p className="text-sm text-white/40 uppercase tracking-widest mb-3">Day 14</p>
+            <h2 className="text-lg font-medium text-white mb-2">Practice continues</h2>
+            <p className="text-white/50 mb-6 leading-relaxed max-w-md mx-auto">
+              The 14 days are a beginning, not an end. Carry what you have practiced
+              into everyday moments — the work deepens from here.
             </p>
-            <Link
-              href="/journeys"
-              className="inline-block rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 font-medium text-black hover:from-amber-400 hover:to-orange-400"
-            >
-              Start Another Journey
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/journey-engine"
+                className="inline-block rounded-xl bg-white/10 px-6 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-colors"
+              >
+                Explore another path
+              </Link>
+              <Link
+                href="/journeys"
+                className="inline-block rounded-xl border border-white/10 px-6 py-2.5 text-sm font-medium text-white/60 hover:text-white/80 hover:border-white/20 transition-colors"
+              >
+                Review your journey
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
