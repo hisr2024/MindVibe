@@ -29,7 +29,7 @@ import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
 import type { VoiceCompanionConfig } from '@/components/voice/VoiceCompanionSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
-import { useWakeWord } from '@/hooks/useWakeWord'
+import { useGlobalWakeWord } from '@/contexts/WakeWordContext'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
 import type { CompanionVoiceRecorderHandle } from '@/components/companion/CompanionVoiceRecorder'
 
@@ -190,7 +190,6 @@ export default function KiaanVoiceCompanionPage() {
     }))
   }, [])
 
-  const [wakeWordEnabled, setWakeWordEnabled] = useState(false)
   const [isRecordingFromWake, setIsRecordingFromWake] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -198,34 +197,50 @@ export default function KiaanVoiceCompanionPage() {
   const friendEngineRef = useRef(new KiaanFriendEngine())
   const voiceRecorderRef = useRef<CompanionVoiceRecorderHandle>(null)
 
-  // ─── Wake Word Detection ──────────────────────────────────────────
-  // Uses the browser's SpeechRecognition API for continuous "Hey KIAAN" detection.
-  // When detected, pauses wake word listening and triggers voice recording.
-  const { isActive: wakeWordActive, isSupported: wakeWordSupported } = useWakeWord({
-    language: voiceConfig.language,
-    enabled: wakeWordEnabled && session.isActive && !isLoading && !isSpeaking && !isRecordingFromWake,
-    sensitivity: 'high',
-    onWakeWordDetected: useCallback(() => {
-      // Stop any playing audio first
-      stopAllAudio()
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
-      setIsSpeaking(false)
-      setIsRecordingFromWake(true)
-      // Trigger voice recorder programmatically after a short delay
-      // to let the wake word recognition release the microphone
-      setTimeout(() => {
-        voiceRecorderRef.current?.triggerRecord()
-      }, 300)
-    }, []),
-    onError: useCallback((err: string) => {
-      // Only show errors that aren't recoverable/expected
-      if (err.includes('permission') || err.includes('not supported')) {
-        setError(err)
-      }
-    }, []),
-  })
+  // ─── Global Wake Word Integration ──────────────────────────────────
+  // Uses the app-wide wake word context. When on this page, wake word
+  // detections trigger voice recording directly instead of the overlay.
+  const {
+    enabled: wakeWordEnabled,
+    isListening: wakeWordActive,
+    isSupported: wakeWordSupported,
+    isActivated: wakeWordJustActivated,
+    setEnabled: setWakeWordEnabled,
+    pause: pauseGlobalWakeWord,
+    resume: resumeGlobalWakeWord,
+    dismissActivation,
+  } = useGlobalWakeWord()
+
+  // When wake word fires while on this page, intercept the overlay
+  // and instead trigger the in-page voice recorder directly.
+  useEffect(() => {
+    if (!wakeWordJustActivated || !session.isActive) return
+
+    // Dismiss the global overlay since we handle it locally on this page
+    dismissActivation()
+
+    // Stop any playing audio first
+    stopAllAudio()
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+    }
+    setIsSpeaking(false)
+    setIsRecordingFromWake(true)
+
+    // Trigger voice recorder after a short delay for mic release
+    setTimeout(() => {
+      voiceRecorderRef.current?.triggerRecord()
+    }, 300)
+  }, [wakeWordJustActivated, session.isActive, dismissActivation])
+
+  // Pause global wake word when speaking or loading on this page
+  useEffect(() => {
+    if (isSpeaking || isLoading || isRecordingFromWake) {
+      pauseGlobalWakeWord()
+    } else {
+      resumeGlobalWakeWord()
+    }
+  }, [isSpeaking, isLoading, isRecordingFromWake, pauseGlobalWakeWord, resumeGlobalWakeWord])
 
   // ─── Global Stop Handler ──────────────────────────────────────────
   // Immediately stops all audio playback (premium TTS + browser SpeechSynthesis)
@@ -644,7 +659,7 @@ export default function KiaanVoiceCompanionPage() {
           {/* Wake word toggle ("Hey KIAAN") */}
           {wakeWordSupported && (
             <button
-              onClick={() => setWakeWordEnabled(v => !v)}
+              onClick={() => setWakeWordEnabled(!wakeWordEnabled)}
               className={`p-2 rounded-full transition-all ${
                 wakeWordEnabled
                   ? wakeWordActive

@@ -7,6 +7,7 @@ import { MobileNav } from '@/components/navigation'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
+import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordListener'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 
@@ -84,6 +85,8 @@ export default function RootLayout({
             <MobileNav />
             {/* OM floating chat widget - unified for mobile and desktop */}
             <KiaanFooter />
+            {/* Global wake word listener - "Hey KIAAN" from anywhere */}
+            <GlobalWakeWordListener />
           </Providers>
         </ClientLayout>
       </body>

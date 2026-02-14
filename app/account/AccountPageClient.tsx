@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { apiFetch } from '@/lib/api'
+import { WakeWordSettings } from '@/components/wake-word/WakeWordSettings'
 
 type LegacyAccount = {
   name: string
@@ -428,6 +429,15 @@ export default function AccountPageClient() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* KIAAN Voice Settings */}
+      <section className="space-y-4">
+        <div className="space-y-1 px-1">
+          <h2 className="text-lg font-semibold text-orange-50">KIAAN Voice</h2>
+          <p className="text-xs text-orange-200/50">Wake up KIAAN with your voice from anywhere</p>
+        </div>
+        <WakeWordSettings />
       </section>
     </main>
   )

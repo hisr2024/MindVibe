@@ -102,28 +102,31 @@ const SENSITIVITY_THRESHOLDS: Record<WakeWordSensitivity, {
 
 // Default wake words with phonetic variants for maximum coverage
 export const DEFAULT_WAKE_WORDS = [
-  // Primary wake words
+  // Primary wake words (highest priority)
   'hey kiaan',
   'hey kian',
   'hi kiaan',
   'hi kian',
+  'hello kiaan',
+  'hello kian',
   'ok kiaan',
   'okay kiaan',
-  // MindVibe variations
-  'hey mindvibe',
-  'hi mindvibe',
-  'ok mindvibe',
-  'okay mindvibe',
   // Cultural/spiritual variations
   'namaste kiaan',
   'namaste kian',
   'om kiaan',
   'om kian',
+  // Wake up command
+  'wake up kiaan',
+  'wake up kian',
+  // MindVibe variations
+  'hey mindvibe',
+  'hi mindvibe',
+  'ok mindvibe',
+  'okay mindvibe',
   // Casual variations
   'yo kiaan',
   'yo kian',
-  'hello kiaan',
-  'hello kian',
   // Assistant-style
   'kiaan help',
   'kian help',
