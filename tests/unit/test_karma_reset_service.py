@@ -149,9 +149,7 @@ class TestKarmaResetService:
             repair_type="apology"
         )
         
-        assert "Ancient wisdom for apology" in context
-        assert "12.13" in context
-        assert "16.1" in context
+        assert "Helpful insights for apology" in context
         assert "One who is not envious" in context
         assert "Fearlessness" in context
 

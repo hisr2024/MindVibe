@@ -36,13 +36,21 @@
       "title": "Journey Complete!",
       "message": "Congratulations on completing {{title}}! You've taken a meaningful step toward inner peace.",
       "startAnother": "Start Another Journey"
+    },
+    "day14": {
+      "title": "Practice continues",
+      "body": "The 14 days are a beginning, not an end. Carry what you have practised into everyday moments — the work deepens from here.",
+      "linkTrigger": "Handle today's trigger",
+      "linkPractice": "Daily micro-practice"
     }
   },
   "sections": {
     "teaching": "Today's Teaching",
     "reflection": "Guided Reflection",
     "practice": "Practice",
-    "commitment": "Today's Micro Commitment"
+    "commitment": "Today's Micro Commitment",
+    "microPractice": "Today's micro-practice",
+    "markPracticed": "Mark practiced"
   },
   "checkIn": {
     "label": "Your Reflection (optional)",

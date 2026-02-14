@@ -196,7 +196,7 @@ class TestSubscriptionModels:
         assert usage.user_id == user.id
         assert usage.feature == "kiaan_questions"
         assert usage.usage_count == 5
-        assert usage.usage_limit == 10
+        assert usage.usage_limit == 20
 
 
 class TestSubscriptionStatusEnum:

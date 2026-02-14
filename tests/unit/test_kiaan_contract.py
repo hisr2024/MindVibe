@@ -1,6 +1,7 @@
 import asyncio
 import uuid
 from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -15,10 +16,20 @@ def test_start_session_preserves_kiaan_identity(mock_request):
     assert uuid.UUID(result["session_id"])  # validates UUID format
 
 
+def _make_mock_db():
+    """Create a mock async database session."""
+    mock_db = AsyncMock()
+    mock_db.add = MagicMock()
+    mock_db.commit = AsyncMock()
+    mock_db.refresh = AsyncMock()
+    return mock_db
+
+
 def test_message_endpoint_preserves_contract(mock_request, monkeypatch):
     from backend.routes.chat import ChatMessage, send_message
 
-    result = asyncio.run(send_message(request=mock_request, chat=ChatMessage(message="Hello"), db=None))
+    mock_db = _make_mock_db()
+    result = asyncio.run(send_message(request=mock_request, chat=ChatMessage(message="Hello"), db=mock_db))
 
     # Verify core contract elements are present
     assert result["bot"] == "KIAAN"

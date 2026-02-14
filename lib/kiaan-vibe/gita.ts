@@ -132,7 +132,7 @@ export const GITA_CHAPTERS_META = [
   { number: 10, name: 'Vibhuti Yoga', nameSanskrit: 'विभूतियोग', verseCount: 42 },
   { number: 11, name: 'Vishvarupa Darshana Yoga', nameSanskrit: 'विश्वरूपदर्शनयोग', verseCount: 55 },
   { number: 12, name: 'Bhakti Yoga', nameSanskrit: 'भक्तियोग', verseCount: 20 },
-  { number: 13, name: 'Kshetra Kshetrajna Vibhaga Yoga', nameSanskrit: 'क्षेत्रक्षेत्रज्ञविभागयोग', verseCount: 35 },
+  { number: 13, name: 'Kshetra Kshetrajna Vibhaga Yoga', nameSanskrit: 'क्षेत्रक्षेत्रज्ञविभागयोग', verseCount: 34 },
   { number: 14, name: 'Gunatraya Vibhaga Yoga', nameSanskrit: 'गुणत्रयविभागयोग', verseCount: 27 },
   { number: 15, name: 'Purushottama Yoga', nameSanskrit: 'पुरुषोत्तमयोग', verseCount: 20 },
   { number: 16, name: 'Daivasura Sampad Vibhaga Yoga', nameSanskrit: 'दैवासुरसम्पद्विभागयोग', verseCount: 24 },
