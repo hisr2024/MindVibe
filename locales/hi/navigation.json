@@ -56,5 +56,12 @@
     "train": "प्रशिक्षण",
     "you_are_here": "आप यहाँ हैं",
     "nav_label": "उपचार मार्ग"
+  },
+  "next_step": {
+    "explore_ardha": "Ardha में जानें \u2192",
+    "continue_kiaan": "KIAAN के साथ जारी रखें \u2192",
+    "stabilize_viyoga": "Viyoga से स्थिर करें \u2192",
+    "enter_journey": "यात्रा शुरू करें \u2192",
+    "helper": "आपकी बातचीत के आधार पर, यह आपके लिए सहायक हो सकता है"
   }
 }

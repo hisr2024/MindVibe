@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
+import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -255,6 +257,15 @@ export default function RelationshipCompassPage() {
       setLoading(false)
     }
   }, [conflict, relationshipType, sessionId, primaryEmotion, context, desiredOutcome])
+
+  const compassSuggestion = useMemo(() => {
+    if (!result) return null
+    return getNextStepSuggestion({
+      tool: 'compass',
+      userText: conflict,
+      aiText: result.response,
+    })
+  }, [result, conflict])
 
   const selectedRelType = RELATIONSHIP_TYPES.find(t => t.value === relationshipType)
 
@@ -528,6 +539,7 @@ export default function RelationshipCompassPage() {
                   </div>
                 </details>
 
+                <NextStepLink suggestion={compassSuggestion} />
               </div>
             )}
           </section>

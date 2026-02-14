@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, Suspense } from 'react';
+import { useState, useCallback, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeUrl } from '@/lib/api-client';
@@ -8,6 +8,9 @@ import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LanguageSelector } from '@/components/chat/LanguageSelector';
 import { PathwayMap } from '@/components/navigation/PathwayMap';
+import { getNextStepSuggestion, extractThemes } from '@/lib/suggestions/nextStep';
+import { NextStepLink } from '@/components/suggestions/NextStepLink';
+import { useNextStepStore } from '@/lib/suggestions/store';
 
 /**
  * Dedicated KIAAN Chat Page - Inner Component
@@ -160,6 +163,31 @@ function KiaanChatPageInner() {
     }
   }, [handleCopyResponse]);
 
+  // --- Next-step suggestion session signals ---
+  const incrementTheme = useNextStepStore((s) => s.incrementTheme);
+  const themeCounts = useNextStepStore((s) => s.themeCounts);
+
+  // Track themes when a new user message is added
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.sender === 'user') {
+      for (const theme of extractThemes(lastMsg.text)) {
+        incrementTheme(theme);
+      }
+    }
+  }, [messages.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const nextStepSuggestion = useMemo(() => {
+    const lastUser = [...messages].reverse().find((m) => m.sender === 'user');
+    const lastAssistant = [...messages].reverse().find((m) => m.sender === 'assistant' && !m.status);
+    return getNextStepSuggestion({
+      tool: 'kiaan',
+      userText: lastUser?.text,
+      aiText: lastAssistant?.text,
+      sessionSignals: { themeCounts },
+    });
+  }, [messages, themeCounts]);
+
   // Quick response prompts
   const quickResponses = [
     { id: 'anxiety', text: 'Help me calm anxiety', emoji: '😰', prompt: 'I\'m feeling anxious and need help finding calm. Can you guide me?' },
@@ -290,6 +318,11 @@ function KiaanChatPageInner() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Next Step Suggestion */}
+      {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
+        <NextStepLink suggestion={nextStepSuggestion} />
       )}
 
       {/* Chat Interface */}
