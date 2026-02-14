@@ -153,7 +153,7 @@ export default function VoiceCompanionPage() {
   const [isPlaying, setIsPlaying] = useState<string | null>(null)
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
-    language: 'en', speakerId: 'en_priya', emotion: 'neutral',
+    language: 'en', speakerId: 'en_sarvam-aura', emotion: 'neutral',
     speed: 0.95, pitch: 0.0, autoPlay: false,
   })
 
@@ -184,7 +184,7 @@ export default function VoiceCompanionPage() {
   const chatInputRef = useRef<HTMLInputElement>(null)
 
   const totalVerses = CHAPTERS.reduce((sum, ch) => sum + ch.verseCount, 0)
-  const selectedVoiceId = voiceConfig.speakerId?.split('_').pop() || 'priya'
+  const selectedVoiceId = voiceConfig.speakerId?.split('_').pop() || 'sarvam-aura'
 
   // ── Cleanup audio on unmount ──────────────────────────────────────
   useEffect(() => {
@@ -381,7 +381,7 @@ export default function VoiceCompanionPage() {
     }
     setIsPlaying(verseKey)
     try {
-      const res = await apiFetch('/api/voice/synthesize', {
+      const res = await apiFetch('/api/companion/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

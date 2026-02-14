@@ -224,7 +224,7 @@ CURRENT CONTEXT:
 
 class VoiceCompanionStartRequest(BaseModel):
     language: str = Field(default="en", max_length=8)
-    voice_id: str = Field(default="priya", max_length=32)
+    voice_id: str = Field(default="sarvam-aura", max_length=32)
     referral_tool: str | None = Field(default=None, max_length=64)
     referral_mood: str | None = Field(default=None, max_length=32)
 
@@ -244,7 +244,7 @@ class VoiceCompanionMessageRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
     language: str = Field(default="en", max_length=8)
     content_type: str = Field(default="text", pattern=r"^(text|voice)$")
-    voice_id: str = Field(default="priya", max_length=32)
+    voice_id: str = Field(default="sarvam-aura", max_length=32)
     prefer_speed: bool = Field(
         default=False,
         description="When True, skip generic-response retry to reduce latency by ~1-2s",
@@ -289,7 +289,7 @@ class VoiceCompanionEndResponse(BaseModel):
 class VoiceCompanionSynthesizeRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     mood: str = Field(default="neutral", max_length=32)
-    voice_id: str = Field(default="priya", max_length=32)
+    voice_id: str = Field(default="sarvam-aura", max_length=32)
     language: str = Field(default="en", max_length=8)
 
 
@@ -1293,7 +1293,7 @@ async def synthesize_voice_companion_audio(
         return {
             "fallback_to_browser": True,
             "browser_config": result.get("browser_config", {}),
-            "voice_persona": result.get("voice_persona", "priya"),
+            "voice_persona": result.get("voice_persona", "sarvam-aura"),
         }
     except Exception as e:
         logger.warning(f"VoiceCompanion: Voice synthesis failed: {e}")

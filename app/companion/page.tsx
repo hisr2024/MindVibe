@@ -141,7 +141,7 @@ export default function CompanionPage() {
   const [aiStatus, setAiStatus] = useState<'unknown' | 'connected' | 'offline'>('unknown')
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
     language: 'en',
-    speakerId: 'en_priya',
+    speakerId: 'en_sarvam-aura',
     emotion: 'neutral',
     speed: 0.95,
     pitch: 0.0,
@@ -595,7 +595,7 @@ export default function CompanionPage() {
           <VoiceCompanionSelector
             currentConfig={{
               language: (voiceConfig.language || 'en') as any,
-              voiceId: voiceConfig.speakerId?.split('_').pop() || 'priya',
+              voiceId: voiceConfig.speakerId?.split('_').pop() || 'sarvam-aura',
               emotion: voiceConfig.emotion || 'neutral',
               speed: voiceConfig.speed || 0.95,
               pitch: voiceConfig.pitch || 0.0,
@@ -690,7 +690,7 @@ export default function CompanionPage() {
                   <CompanionVoicePlayer
                     text={msg.content}
                     mood={msg.mood || currentMood}
-                    voiceId={voiceConfig.speakerId.split('_').pop() || 'priya'}
+                    voiceId={voiceConfig.speakerId.split('_').pop() || 'sarvam-aura'}
                     language={voiceConfig.language}
                     compact
                     autoPlay={voiceConfig.autoPlay && i === messages.length - 1}

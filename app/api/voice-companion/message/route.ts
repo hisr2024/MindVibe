@@ -213,6 +213,7 @@ export async function POST(request: NextRequest) {
             message: sanitizedMessage,
             language: body.language || 'en',
             content_type: body.content_type || 'text',
+            voice_id: body.voice_id || 'sarvam-aura',
           }),
           signal: AbortSignal.timeout(15000),
         })

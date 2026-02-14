@@ -24,21 +24,20 @@ export async function GET(request: NextRequest) {
     // Fallback voice catalog
     return NextResponse.json({
       voices: [
-        { id: 'priya', name: 'Priya', personality: 'Warm, empathetic best friend', gender: 'female' },
-        { id: 'maya', name: 'Maya', personality: 'Calm, thoughtful listener', gender: 'female' },
-        { id: 'ananya', name: 'Ananya', personality: 'Gentle, peaceful presence', gender: 'female' },
-        { id: 'arjun', name: 'Arjun', personality: 'Strong, reassuring guide', gender: 'male' },
-        { id: 'devi', name: 'Devi', personality: 'Joyful, uplifting spirit', gender: 'female' },
+        { id: 'sarvam-aura', name: 'Aura', personality: 'Warm Sarvam AI companion for Indian and multilingual support', gender: 'female' },
+        { id: 'sarvam-rishi', name: 'Rishi', personality: 'Grounded Sarvam AI guide for deep reflective sessions', gender: 'male' },
+        { id: 'elevenlabs-nova', name: 'Nova', personality: 'Ultra-natural ElevenLabs-inspired global companion voice', gender: 'female' },
+        { id: 'elevenlabs-orion', name: 'Orion', personality: 'Studio-grade ElevenLabs-inspired mentor voice', gender: 'male' },
       ],
-      default_voice: 'priya',
+      default_voice: 'sarvam-aura',
     })
   } catch {
     return NextResponse.json({
       voices: [
-        { id: 'priya', name: 'Priya', personality: 'Warm, empathetic best friend', gender: 'female' },
-        { id: 'maya', name: 'Maya', personality: 'Calm, thoughtful listener', gender: 'female' },
+        { id: 'sarvam-aura', name: 'Aura', personality: 'Warm Sarvam AI companion for Indian and multilingual support', gender: 'female' },
+        { id: 'elevenlabs-nova', name: 'Nova', personality: 'Ultra-natural ElevenLabs-inspired global companion voice', gender: 'female' },
       ],
-      default_voice: 'priya',
+      default_voice: 'sarvam-aura',
     })
   }
 }

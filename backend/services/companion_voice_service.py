@@ -263,98 +263,69 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
 # Each persona maps to the BEST voice across all providers.
 
 COMPANION_VOICES: dict[str, dict[str, Any]] = {
-    "priya": {
-        "name": "Priya",
+    "sarvam-aura": {
+        "name": "Aura",
         "gender": "female",
         "style": "nurturing",
-        # OpenAI: "shimmer" = warm, caring, natural female (best for nurturing)
         "openai_voice": "shimmer",
         "openai_model": "tts-1-hd",
-        # ElevenLabs: warm Indian female voice
         "elevenlabs_voice_id": "EXAVITQu4vr4xnSDxMaL",  # Sarah
         "elevenlabs_model": "eleven_multilingual_v2",
-        # Sarvam AI: warm nurturing Hindi female
         "sarvam_speaker": "meera",
-        # Google Cloud
         "google_voice": "en-IN-Neural2-A",
-        # Edge TTS
         "edge_voice": "en-IN-NeerjaNeural",
-        "description": "Warm, nurturing - like a wise older sister who always knows what to say",
+        "description": "Primary Sarvam AI companion voice tuned for emotionally warm Indian conversations.",
         "default_speed": 0.94,
         "default_pitch": 0.5,
         "warmth_boost": 0.1,
     },
-    "maya": {
-        "name": "Maya",
-        "gender": "female",
-        "style": "empathetic",
-        # OpenAI: "nova" = most natural conversational female (best all-rounder)
-        "openai_voice": "nova",
-        "openai_model": "tts-1-hd",
-        "elevenlabs_voice_id": "21m00Tcm4TlvDq8ikWAM",  # Rachel
-        "elevenlabs_model": "eleven_multilingual_v2",
-        # Sarvam AI: clear multilingual female
-        "sarvam_speaker": "pavithra",
-        "google_voice": "en-US-Neural2-F",
-        "edge_voice": "en-US-JennyNeural",
-        "description": "Natural, everyday best friend voice - warm and real",
-        "default_speed": 0.95,
-        "default_pitch": 0.3,
-        "warmth_boost": 0.05,
-    },
-    "ananya": {
-        "name": "Ananya",
-        "gender": "female",
-        "style": "meditative",
-        # OpenAI: "shimmer" at slow speed = deep, meditative quality
-        "openai_voice": "shimmer",
-        "openai_model": "tts-1-hd",
-        "elevenlabs_voice_id": "ThT5KcBeYPX3keUQqHPh",  # Dorothy
-        "elevenlabs_model": "eleven_multilingual_v2",
-        # Sarvam AI: soft ethereal meditation voice
-        "sarvam_speaker": "maitreyi",
-        "google_voice": "en-US-Studio-O",
-        "edge_voice": "en-US-AriaNeural",
-        "description": "Deep, gentle whisper - perfect for calm and meditation moments",
-        "default_speed": 0.85,
-        "default_pitch": -0.5,
-        "warmth_boost": 0.15,
-    },
-    "arjun": {
-        "name": "Arjun",
+    "sarvam-rishi": {
+        "name": "Rishi",
         "gender": "male",
-        "style": "wise",
-        # OpenAI: "onyx" = deep male voice, steady and grounded
+        "style": "sacred",
         "openai_voice": "onyx",
         "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "pNInz6obpgDQGcFmaJgB",  # Adam
         "elevenlabs_model": "eleven_multilingual_v2",
-        # Sarvam AI: deep resonant male with gravitas
+        "sarvam_speaker": "arvind",
+        "google_voice": "hi-IN-Neural2-B",
+        "edge_voice": "hi-IN-PrabhatNeural",
+        "description": "Grounded Sarvam AI narration voice for Sanskrit, Gita guidance, and deep reflective sessions.",
+        "default_speed": 0.88,
+        "default_pitch": -0.6,
+        "warmth_boost": 0.06,
+    },
+    "elevenlabs-nova": {
+        "name": "Nova",
+        "gender": "female",
+        "style": "conversational",
+        "openai_voice": "nova",
+        "openai_model": "tts-1-hd",
+        "elevenlabs_voice_id": "21m00Tcm4TlvDq8ikWAM",  # Rachel
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "pavithra",
+        "google_voice": "en-US-Neural2-F",
+        "edge_voice": "en-US-JennyNeural",
+        "description": "Ultra-natural ElevenLabs-inspired global companion voice for fluent daily support.",
+        "default_speed": 0.95,
+        "default_pitch": 0.3,
+        "warmth_boost": 0.05,
+    },
+    "elevenlabs-orion": {
+        "name": "Orion",
+        "gender": "male",
+        "style": "narration",
+        "openai_voice": "onyx",
+        "openai_model": "tts-1-hd",
+        "elevenlabs_voice_id": "pNInz6obpgDQGcFmaJgB",  # Adam
+        "elevenlabs_model": "eleven_multilingual_v2",
         "sarvam_speaker": "arvind",
         "google_voice": "en-IN-Neural2-B",
         "edge_voice": "en-IN-PrabhatNeural",
-        "description": "Calm, wise male voice - like a trusted brother",
+        "description": "Studio-grade ElevenLabs-inspired mentor voice for storytelling and high-clarity guidance.",
         "default_speed": 0.92,
         "default_pitch": -1.0,
         "warmth_boost": 0.08,
-    },
-    "devi": {
-        "name": "Devi",
-        "gender": "female",
-        "style": "energetic",
-        # OpenAI: "alloy" = bright, energetic, versatile
-        "openai_voice": "alloy",
-        "openai_model": "tts-1-hd",
-        "elevenlabs_voice_id": "jBpfuIE2acCO8z3wKNLl",  # Gigi
-        "elevenlabs_model": "eleven_multilingual_v2",
-        # Sarvam AI: clear powerful female
-        "sarvam_speaker": "pavithra",
-        "google_voice": "en-US-Neural2-C",
-        "edge_voice": "en-US-SaraNeural",
-        "description": "Bright, motivating energy when you need a spark",
-        "default_speed": 0.98,
-        "default_pitch": 1.0,
-        "warmth_boost": 0.0,
     },
 }
 
@@ -442,7 +413,7 @@ LANGUAGE_GOOGLE_VOICES: dict[str, dict[str, str]] = {
 def build_companion_ssml(
     text: str,
     mood: str = "neutral",
-    voice_id: str = "priya",
+    voice_id: str = "sarvam-aura",
     language: str = "en",
 ) -> dict[str, Any]:
     """Build SSML for companion voice synthesis with emotion-adaptive prosody.
@@ -451,7 +422,7 @@ def build_companion_ssml(
     neural voices from Edge TTS and Google Cloud TTS.
     """
     profile = EMOTION_VOICE_PROFILES.get(mood, EMOTION_VOICE_PROFILES["neutral"])
-    voice = COMPANION_VOICES.get(voice_id, COMPANION_VOICES["priya"])
+    voice = COMPANION_VOICES.get(voice_id, COMPANION_VOICES["sarvam-aura"])
 
     speed = profile["rate_value"] * voice["default_speed"]
     pitch = float(profile["pitch"].replace("st", "")) + voice["default_pitch"]
@@ -539,7 +510,7 @@ def _escape_ssml(text: str) -> str:
 async def synthesize_companion_voice(
     text: str,
     mood: str = "neutral",
-    voice_id: str = "priya",
+    voice_id: str = "sarvam-aura",
     language: str = "en",
 ) -> dict[str, Any]:
     """Synthesize speech using the best available natural voice provider.
@@ -940,25 +911,25 @@ def get_available_voices() -> list[dict[str, Any]]:
 def get_voice_for_mood(mood: str) -> str:
     """Select the best voice persona for a given mood."""
     mood_to_voice = {
-        "anxious": "priya",
-        "sad": "priya",
-        "angry": "arjun",
-        "confused": "maya",
-        "lonely": "priya",
-        "hopeful": "devi",
-        "peaceful": "ananya",
-        "grateful": "maya",
-        "overwhelmed": "ananya",
-        "excited": "devi",
-        "neutral": "maya",
-        "hurt": "priya",
-        "fearful": "priya",
-        "frustrated": "arjun",
-        "stressed": "ananya",
-        "guilty": "maya",
-        "jealous": "maya",
+        "anxious": "sarvam-aura",
+        "sad": "sarvam-aura",
+        "angry": "elevenlabs-orion",
+        "confused": "elevenlabs-nova",
+        "lonely": "sarvam-aura",
+        "hopeful": "elevenlabs-nova",
+        "peaceful": "sarvam-rishi",
+        "grateful": "elevenlabs-nova",
+        "overwhelmed": "sarvam-rishi",
+        "excited": "elevenlabs-nova",
+        "neutral": "elevenlabs-nova",
+        "hurt": "sarvam-aura",
+        "fearful": "sarvam-aura",
+        "frustrated": "elevenlabs-orion",
+        "stressed": "sarvam-rishi",
+        "guilty": "elevenlabs-nova",
+        "jealous": "elevenlabs-nova",
     }
-    return mood_to_voice.get(mood, "maya")
+    return mood_to_voice.get(mood, "elevenlabs-nova")
 
 
 def get_sarvam_voice_status() -> dict[str, Any]:

@@ -30,26 +30,25 @@ export interface VoicePlayerProps {
 type PlaybackState = 'idle' | 'loading' | 'playing' | 'paused'
 
 const VOICE_PERSONAS: Record<string, { name: string; color: string; icon: string }> = {
-  priya: { name: 'Priya', color: 'text-violet-600', icon: '🎙️' },
-  maya: { name: 'Maya', color: 'text-blue-600', icon: '🎙️' },
-  ananya: { name: 'Ananya', color: 'text-emerald-600', icon: '🎙️' },
-  arjun: { name: 'Arjun', color: 'text-amber-600', icon: '🎙️' },
-  devi: { name: 'Devi', color: 'text-pink-600', icon: '🎙️' },
+  'sarvam-aura': { name: 'Aura', color: 'text-violet-600', icon: '🎙️' },
+  'sarvam-rishi': { name: 'Rishi', color: 'text-amber-600', icon: '🎙️' },
+  'elevenlabs-nova': { name: 'Nova', color: 'text-blue-600', icon: '🎙️' },
+  'elevenlabs-orion': { name: 'Orion', color: 'text-emerald-600', icon: '🎙️' },
 }
 
 // Mood-to-default voice mapping (auto-select best voice per emotion)
 const MOOD_VOICE_MAP: Record<string, string> = {
-  anxious: 'priya',
-  sad: 'priya',
-  angry: 'arjun',
-  confused: 'maya',
-  lonely: 'priya',
-  hopeful: 'devi',
-  peaceful: 'ananya',
-  grateful: 'maya',
-  overwhelmed: 'ananya',
-  excited: 'devi',
-  neutral: 'maya',
+  anxious: 'sarvam-aura',
+  sad: 'sarvam-aura',
+  angry: 'elevenlabs-orion',
+  confused: 'elevenlabs-nova',
+  lonely: 'sarvam-aura',
+  hopeful: 'elevenlabs-nova',
+  peaceful: 'sarvam-rishi',
+  grateful: 'elevenlabs-nova',
+  overwhelmed: 'sarvam-rishi',
+  excited: 'elevenlabs-nova',
+  neutral: 'elevenlabs-nova',
 }
 
 export default function CompanionVoicePlayer({
@@ -73,8 +72,8 @@ export default function CompanionVoicePlayer({
   const audioContextRef = useRef<AudioContext | null>(null)
 
   // Auto-select voice based on mood if not specified
-  const effectiveVoiceId = voiceId || MOOD_VOICE_MAP[mood] || 'maya'
-  const persona = VOICE_PERSONAS[effectiveVoiceId] || VOICE_PERSONAS.maya
+  const effectiveVoiceId = voiceId || MOOD_VOICE_MAP[mood] || 'elevenlabs-nova'
+  const persona = VOICE_PERSONAS[effectiveVoiceId] || VOICE_PERSONAS['elevenlabs-nova']
 
   // Cleanup on unmount
   useEffect(() => {
@@ -243,7 +242,7 @@ export default function CompanionVoicePlayer({
 
     // Select best available voice
     const voices = window.speechSynthesis.getVoices()
-    const preferFemale = effectiveVoiceId !== 'arjun'
+    const preferFemale = effectiveVoiceId !== 'sarvam-rishi' && effectiveVoiceId !== 'elevenlabs-orion'
     const preferred = voices.find(v =>
       preferFemale
         ? /Jenny|Samantha|Google.*Female|Aria|Natural/i.test(v.name)
