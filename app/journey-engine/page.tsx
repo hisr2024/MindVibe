@@ -3,8 +3,8 @@
 /**
  * Journey Engine - Six Enemies (Shadripu) Dashboard
  *
- * A comprehensive journey system based on Bhagavad Gita wisdom to conquer
- * the six inner enemies: Kama, Krodha, Lobha, Moha, Mada, and Matsarya.
+ * A comprehensive journey system based on Bhagavad Gita wisdom to strengthen
+ * steadiness against the six inner tendencies: Kama, Krodha, Lobha, Moha, Mada, and Matsarya.
  */
 
 import { useState, useEffect, useCallback } from 'react'
