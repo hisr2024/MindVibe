@@ -17,7 +17,7 @@ interface MessageBubbleProps {
   onSaveToJournal?: (text: string) => void
   summary?: string
   aiPowered?: boolean  // Prop to indicate AI-powered response
-  verseReference?: string  // Optional reference tag
+  _verseReference?: string  // Optional reference tag (reserved for future use)
   viewMode?: 'detailed' | 'summary'
   messageId?: string  // Unique message ID for translation tracking
   autoTranslate?: boolean  // Whether to auto-translate this message
@@ -66,22 +66,25 @@ function buildSummary(text: string) {
   return summary
 }
 
-export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, aiPowered = true, verseReference, viewMode = 'detailed', messageId, autoTranslate = false }: MessageBubbleProps) {
+export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal, summary, aiPowered = true, _verseReference, viewMode = 'detailed', messageId, autoTranslate = false }: MessageBubbleProps) {
   const router = useRouter()
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
   const [showSummary, setShowSummary] = useState(false)
   const [showVerseHover, setShowVerseHover] = useState(false)
-  
+
   // Get current language for voice features
   const { language } = useLanguage()
-  
+
   // Use translation hook for assistant messages
   const {
     translatedText,
-    isTranslating,
+    isTranslating: _isTranslating,
     error: translationError,
     isTranslated,
-    toggleTranslation
+    toggleTranslation: _toggleTranslation
   } = useMessageTranslation({
     messageId: messageId || `msg-${timestamp}`,
     originalText: text,
@@ -93,13 +96,11 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
   const displayText = translatedText || text
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-      setPrefersReducedMotion(mediaQuery.matches)
-      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
-      mediaQuery.addEventListener('change', handler)
-      return () => mediaQuery.removeEventListener('change', handler)
-    }
+    if (typeof window === 'undefined') return
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
   }, [])
   
   // Respect viewMode prop - if summary mode, use summary; if detailed mode, use full text

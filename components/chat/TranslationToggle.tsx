@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
 import { DEFAULT_LANGUAGE } from '@/lib/constants/languages'
 

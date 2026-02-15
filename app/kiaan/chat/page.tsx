@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo, Suspense } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeUrl } from '@/lib/api-client';
@@ -17,41 +17,21 @@ import { useNextStepStore } from '@/lib/suggestions/store';
  * Full-featured chat interface with mood context support
  */
 function KiaanChatPageInner() {
-  const { t, isInitialized, language } = useLanguage();
+  const { t, language } = useLanguage();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('summary'); // Summary view is primary
+  const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('summary');
 
   // Session tracking for conversation continuity
   const [sessionId] = useState(() => crypto.randomUUID());
 
-  // Handle mood context from Quick Check-in
-  useEffect(() => {
-    const mood = searchParams?.get('mood');
-    const message = searchParams?.get('message');
-    
-    if (mood && message) {
-      // Add a welcome message with mood context
-      const welcomeMessage: Message = {
-        id: crypto.randomUUID(),
-        sender: 'assistant',
-        text: `You're registering ${mood} right now. That's useful data. Tell me what's happening — I'm here to help you understand it and work with it.`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages([welcomeMessage]);
-      
-      // Auto-send the mood message
-      setTimeout(() => {
-        handleSendMessage(decodeURIComponent(message));
-      }, 1000);
-    }
-  }, [searchParams]);
+  // Ref to always access the latest handleSendMessage without stale closures
+  const handleSendMessageRef = useRef<(text: string) => Promise<void>>();
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: crypto.randomUUID(),
       sender: 'user',
@@ -80,10 +60,6 @@ function KiaanChatPageInner() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response from KIAAN');
-      }
-
       const data = await response.json();
 
       // Add assistant message with AI-generated summary
@@ -92,7 +68,7 @@ function KiaanChatPageInner() {
         sender: 'assistant',
         text: data.response || "I'm here. Tell me what's going on and we'll work through it together.",
         timestamp: new Date().toISOString(),
-        summary: data.summary || undefined, // AI-generated summary from backend
+        summary: data.summary || undefined,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -121,6 +97,35 @@ function KiaanChatPageInner() {
       setIsLoading(false);
     }
   }, [language, sessionId, messages]);
+
+  // Keep ref in sync so useEffect always calls the latest version
+  useEffect(() => {
+    handleSendMessageRef.current = handleSendMessage;
+  }, [handleSendMessage]);
+
+  // Handle mood context from Quick Check-in
+  const moodHandledRef = useRef(false);
+  useEffect(() => {
+    if (moodHandledRef.current) return;
+    const mood = searchParams?.get('mood');
+    const message = searchParams?.get('message');
+
+    if (mood && message) {
+      moodHandledRef.current = true;
+      const welcomeMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: 'assistant',
+        text: `You're registering ${mood} right now. That's useful data. Tell me what's happening — I'm here to help you understand it and work with it.`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages([welcomeMessage]);
+
+      // Use ref to avoid stale closure
+      setTimeout(() => {
+        handleSendMessageRef.current?.(decodeURIComponent(message));
+      }, 1000);
+    }
+  }, [searchParams]);
 
   const handleSaveToJournal = useCallback(async (text: string) => {
     if (typeof window === 'undefined') return;
@@ -366,46 +371,106 @@ function KiaanChatPageInner() {
         </div>
       )}
 
-      {/* Helper Links */}
-      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <Link
-          href="/sacred-reflections"
-          className="rounded-2xl border border-amber-300/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(251,191,36,0.16)] transition-all hover:border-amber-300/40 hover:shadow-[0_20px_80px_rgba(251,191,36,0.24)]"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">📖</span>
-            <div>
-              <h3 className="font-semibold text-amber-50">Journal</h3>
-              <p className="text-sm text-amber-100/70">Journal your thoughts</p>
-            </div>
+      {/* Spiritual Toolkit */}
+      <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-5 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] backdrop-blur">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-400/20 border border-orange-500/25">
+            <span className="text-lg">🛕</span>
           </div>
-        </Link>
+          <div>
+            <h2 className="text-lg font-semibold text-orange-50">{t('kiaan.toolkit.title', 'Spiritual Toolkit')}</h2>
+            <p className="text-xs text-orange-100/60">{t('kiaan.toolkit.subtitle', 'Deepen your practice with these tools')}</p>
+          </div>
+        </div>
+        <div className="grid gap-2.5 sm:gap-3 grid-cols-2 lg:grid-cols-4">
+          <Link
+            href="/tools/ardha"
+            className="group rounded-2xl border border-violet-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-violet-400/40 hover:bg-violet-500/[0.06] hover:shadow-lg hover:shadow-violet-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">🧠</span>
+              <span className="text-sm font-semibold text-violet-50">Ardha</span>
+              <span className="text-[11px] leading-snug text-violet-200/60">Cognitive reframing with Gita clarity</span>
+            </div>
+          </Link>
 
-        <Link
-          href="/emotional-reset"
-          className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 shadow-[0_14px_60px_rgba(255,147,71,0.16)] transition-all hover:border-orange-500/40 hover:shadow-[0_20px_80px_rgba(255,147,71,0.24)]"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🔄</span>
-            <div>
-              <h3 className="font-semibold text-orange-50">Emotional Reset</h3>
-              <p className="text-sm text-orange-100/70">Quick calm exercises</p>
+          <Link
+            href="/tools/emotional-reset"
+            className="group rounded-2xl border border-rose-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-rose-400/40 hover:bg-rose-500/[0.06] hover:shadow-lg hover:shadow-rose-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">🔄</span>
+              <span className="text-sm font-semibold text-rose-50">Emotional Reset</span>
+              <span className="text-[11px] leading-snug text-rose-200/60">Quick calm &amp; grounding exercises</span>
             </div>
-          </div>
-        </Link>
+          </Link>
 
-        <Link
-          href="/dashboard"
-          className="rounded-2xl border border-teal-400/15 bg-white/5 p-4 shadow-[0_14px_60px_rgba(34,197,235,0.12)] transition-all hover:border-teal-400/30 hover:shadow-[0_20px_80px_rgba(34,197,235,0.18)]"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">📊</span>
-            <div>
-              <h3 className="font-semibold text-white">Dashboard</h3>
-              <p className="text-sm text-white/70">Track your progress</p>
+          <Link
+            href="/tools/viyog"
+            className="group rounded-2xl border border-cyan-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-cyan-400/40 hover:bg-cyan-500/[0.06] hover:shadow-lg hover:shadow-cyan-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">🪷</span>
+              <span className="text-sm font-semibold text-cyan-50">Viyog</span>
+              <span className="text-[11px] leading-snug text-cyan-200/60">Detachment &amp; letting go practice</span>
             </div>
-          </div>
-        </Link>
+          </Link>
+
+          <Link
+            href="/tools/karma-reset"
+            className="group rounded-2xl border border-amber-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-amber-400/40 hover:bg-amber-500/[0.06] hover:shadow-lg hover:shadow-amber-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">⚡</span>
+              <span className="text-sm font-semibold text-amber-50">Karma Reset</span>
+              <span className="text-[11px] leading-snug text-amber-200/60">Reset perspective on your actions</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/tools/relationship-compass"
+            className="group rounded-2xl border border-pink-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-pink-400/40 hover:bg-pink-500/[0.06] hover:shadow-lg hover:shadow-pink-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">💗</span>
+              <span className="text-sm font-semibold text-pink-50">Relationship Compass</span>
+              <span className="text-[11px] leading-snug text-pink-200/60">Clarity in connections</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/tools/karma-footprint"
+            className="group rounded-2xl border border-emerald-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-emerald-400/40 hover:bg-emerald-500/[0.06] hover:shadow-lg hover:shadow-emerald-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">👣</span>
+              <span className="text-sm font-semibold text-emerald-50">Karma Footprint</span>
+              <span className="text-[11px] leading-snug text-emerald-200/60">Track your karmic patterns</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/sacred-reflections"
+            className="group rounded-2xl border border-amber-300/20 bg-white/[0.03] p-3.5 transition-all hover:border-amber-300/40 hover:bg-amber-400/[0.06] hover:shadow-lg hover:shadow-amber-300/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">📖</span>
+              <span className="text-sm font-semibold text-amber-50">Journal</span>
+              <span className="text-[11px] leading-snug text-amber-200/60">Sacred reflections &amp; insights</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className="group rounded-2xl border border-teal-500/20 bg-white/[0.03] p-3.5 transition-all hover:border-teal-400/40 hover:bg-teal-500/[0.06] hover:shadow-lg hover:shadow-teal-500/10"
+          >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xl">📊</span>
+              <span className="text-sm font-semibold text-teal-50">Dashboard</span>
+              <span className="text-[11px] leading-snug text-teal-200/60">Track your growth journey</span>
+            </div>
+          </Link>
+        </div>
       </div>
 
       {/* Disclaimer */}
