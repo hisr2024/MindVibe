@@ -83,7 +83,11 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
       },
       onError: (err: string) => {
         setError(err)
-        setIsActive(false)
+        // Only mark inactive for fatal errors (permission denied, not supported).
+        // Recoverable errors are handled internally by the detector with auto-retry.
+        if (err.includes('permission') || err.includes('not supported') || err.includes('not found')) {
+          setIsActive(false)
+        }
         onErrorRef.current?.(err)
       },
       onListeningStateChange: (state: WakeWordListeningState) => {
@@ -145,10 +149,14 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
 
   // Auto-start when enabled, auto-stop when disabled
   useEffect(() => {
-    if (enabled && isSupported && detectorRef.current && !isActive) {
-      start()
+    const detector = detectorRef.current
+    if (enabled && isSupported && detector && !isActive) {
+      // Schedule outside synchronous effect to avoid cascading renders
+      const id = requestAnimationFrame(() => { start() })
+      return () => cancelAnimationFrame(id)
     } else if (!enabled && isActive) {
-      stop()
+      const id = requestAnimationFrame(() => { stop() })
+      return () => cancelAnimationFrame(id)
     }
   }, [enabled, isSupported, isActive, start, stop])
 

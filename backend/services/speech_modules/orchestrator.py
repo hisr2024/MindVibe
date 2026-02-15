@@ -99,14 +99,15 @@ class SpeechModuleOrchestrator:
             SpeechProvider.STYLE_TTS2,
         ],
         VoiceQuality.PREMIUM: [
+            SpeechProvider.ELEVENLABS,
+            SpeechProvider.SARVAM,
+            SpeechProvider.BHASHINI,
             SpeechProvider.SILERO,
             SpeechProvider.COQUI_TTS,
-            SpeechProvider.GOOGLE_CLOUD,
-            SpeechProvider.EDGE_TTS,
         ],
         VoiceQuality.STANDARD: [
             SpeechProvider.PIPER,
-            SpeechProvider.EDGE_TTS,
+            SpeechProvider.SARVAM,
             SpeechProvider.MARY_TTS,
         ],
         VoiceQuality.FAST: [
@@ -118,7 +119,6 @@ class SpeechModuleOrchestrator:
             SpeechProvider.PIPER,
             SpeechProvider.SILERO,
             SpeechProvider.ESPEAK,
-            SpeechProvider.PYTTSX3,
         ],
     }
 

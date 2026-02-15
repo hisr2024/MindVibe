@@ -164,7 +164,8 @@ export class SpeechRecognitionService {
 
   /**
    * Start listening for voice input
-   * Handles edge cases like starting while stopping, or rapid start/stop
+   * Handles edge cases like starting while stopping, or rapid start/stop.
+   * Robust against "already started" errors for always-on wake word listening.
    */
   start(callbacks: RecognitionCallbacks = {}): void {
     if (!this.recognition) {
@@ -174,14 +175,16 @@ export class SpeechRecognitionService {
 
     // If currently stopping, wait and retry
     if (this.isStopping) {
-      // Currently stopping, wait and retry
       setTimeout(() => {
         if (this.startAttempts < this.maxStartAttempts) {
           this.startAttempts++
           this.start(callbacks)
         } else {
           this.startAttempts = 0
-          callbacks.onError?.('Failed to start recognition - microphone may be in use')
+          // Force-reset state and try one more time
+          this.isListening = false
+          this.isStopping = false
+          this.start(callbacks)
         }
       }, 150)
       return
@@ -201,12 +204,18 @@ export class SpeechRecognitionService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
 
-      // Handle "already started" error by stopping and retrying
-      if (errorMsg.includes('already started') && this.startAttempts < this.maxStartAttempts) {
-        this.startAttempts++
-        this.abort()
-        setTimeout(() => this.start(callbacks), 150)
-        return
+      // Handle "already started" error by aborting and retrying
+      if (errorMsg.includes('already started')) {
+        if (this.startAttempts < this.maxStartAttempts) {
+          this.startAttempts++
+          this.abort()
+          setTimeout(() => this.start(callbacks), 200 + this.startAttempts * 50)
+          return
+        }
+        // Last resort: force state reset
+        this.isListening = false
+        this.isStopping = false
+        this.startAttempts = 0
       }
 
       this.callbacks.onError?.(errorMsg)
@@ -250,9 +259,10 @@ export class SpeechRecognitionService {
     }
 
     this.isListening = false
+    // Clear stopping flag quickly to allow rapid restart for wake word
     setTimeout(() => {
       this.isStopping = false
-    }, 300)
+    }, 150)
   }
 
   /**

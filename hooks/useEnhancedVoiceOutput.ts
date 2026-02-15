@@ -21,6 +21,8 @@ export interface UseEnhancedVoiceOutputOptions {
   voiceType?: 'friendly' | 'calm' | 'wisdom'
   /** Preferred voice gender: female, male, or auto */
   voiceGender?: VoiceGender
+  /** Specific voice ID for provider routing (e.g. 'sarvam-aura', 'bhashini-devi') */
+  voiceId?: string
   useBackendTts?: boolean  // Try backend TTS first
   onStart?: () => void
   onEnd?: () => void
@@ -63,6 +65,7 @@ export function useEnhancedVoiceOutput(
     rate = 0.95,
     voiceType = 'friendly',
     voiceGender = 'auto',
+    voiceId,
     useBackendTts = true,
     onStart,
     onEnd,
@@ -131,6 +134,7 @@ export function useEnhancedVoiceOutput(
           text,
           language,
           voice_type: voiceType,
+          voice_id: voiceId,
           speed: rateRef.current,
         }),
       })
@@ -206,7 +210,7 @@ export function useEnhancedVoiceOutput(
       clearTimeout(timeout)
       return false // Timeout or network error - fall back to browser TTS
     }
-  }, [language, voiceType, useBackendTts, onStart, onEnd])
+  }, [language, voiceType, voiceId, useBackendTts, onStart, onEnd])
 
   // Use browser synthesis as fallback
   const playBrowserSynthesis = useCallback((text: string) => {

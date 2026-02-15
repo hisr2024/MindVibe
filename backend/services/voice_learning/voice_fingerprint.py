@@ -25,10 +25,9 @@ logger = logging.getLogger(__name__)
 
 class VoiceProvider(str, Enum):
     """Available TTS providers."""
-    GOOGLE_STUDIO = "google_studio"
-    GOOGLE_NEURAL2 = "google_neural2"
-    EDGE_TTS = "edge_tts"
-    PYTTSX3 = "pyttsx3"
+    SARVAM = "sarvam"
+    BHASHINI = "bhashini"
+    ELEVENLABS = "elevenlabs"
 
 
 @dataclass
@@ -103,8 +102,8 @@ class VoiceFingerprint:
         return cls(
             user_id=data["user_id"],
             fingerprint_id=data.get("fingerprint_id", ""),
-            provider=VoiceProvider(data.get("provider", "google_neural2")),
-            voice_name=data.get("voice_name", "en-US-Neural2-F"),
+            provider=VoiceProvider(data.get("provider", "sarvam")),
+            voice_name=data.get("voice_name", "anushka"),
             language=data.get("language", "en"),
             voice_type=data.get("voice_type", "friendly"),
             speaking_rate=data.get("speaking_rate", 0.95),
@@ -196,38 +195,38 @@ class VoiceFingerprintService:
     DEFAULT_VOICES = {
         "en": {
             "female": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "en-US-Neural2-F",
-                "fallbacks": ["en-US-AvaNeural", "en-US-AriaNeural"]
+                "provider": VoiceProvider.ELEVENLABS,
+                "voice_name": "EXAVITQu4vr4xnSDxMaL",
+                "fallbacks": ["anushka", "bhashini-devi"]
             },
             "male": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "en-US-Neural2-D",
-                "fallbacks": ["en-US-AndrewNeural", "en-US-GuyNeural"]
+                "provider": VoiceProvider.ELEVENLABS,
+                "voice_name": "onwK4e9ZLuTAKqWW03F9",
+                "fallbacks": ["abhilash", "bhashini-arya"]
             }
         },
         "hi": {
             "female": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "hi-IN-Neural2-A",
-                "fallbacks": ["hi-IN-SwaraNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "anushka",
+                "fallbacks": ["bhashini-devi"]
             },
             "male": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "hi-IN-Neural2-B",
-                "fallbacks": ["hi-IN-MadhurNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "abhilash",
+                "fallbacks": ["bhashini-arya"]
             }
         },
         "ta": {
             "female": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "ta-IN-Neural2-A",
-                "fallbacks": ["ta-IN-PallaviNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "anushka",
+                "fallbacks": ["bhashini-devi"]
             },
             "male": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "ta-IN-Neural2-B",
-                "fallbacks": ["ta-IN-ValluvarNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "abhilash",
+                "fallbacks": ["bhashini-arya"]
             }
         },
     }

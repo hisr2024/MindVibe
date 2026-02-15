@@ -264,7 +264,7 @@ export class WakeWordDetector {
   private onError?: (error: string) => void
   private onListeningStateChange?: (state: WakeWordListeningState) => void
   private retryCount = 0
-  private readonly maxRetries = 8
+  private readonly maxRetries = 15
   private restartTimeout: ReturnType<typeof setTimeout> | null = null
   private lastDetectionTime = 0
   private detectionCount = 0
@@ -280,6 +280,15 @@ export class WakeWordDetector {
   // Noise estimation
   private noiseLevel: 'quiet' | 'moderate' | 'noisy' = 'quiet'
   private consecutiveSilenceErrors = 0
+
+  // Always-on health monitoring
+  private healthCheckInterval: ReturnType<typeof setInterval> | null = null
+  private lastRecognitionActivityTime = 0
+  private readonly HEALTH_CHECK_MS = 10_000
+  private readonly STALE_THRESHOLD_MS = 30_000
+
+  // Visibility-based management
+  private visibilityHandler: (() => void) | null = null
 
   constructor(config: WakeWordConfig = {}) {
     this.wakeWords = config.wakeWords || DEFAULT_WAKE_WORDS
@@ -297,6 +306,82 @@ export class WakeWordDetector {
       interimResults: true,
       maxAlternatives: 3,
     })
+
+    // Set up page visibility handler for tab switching
+    if (typeof document !== 'undefined') {
+      this.visibilityHandler = () => this.handleVisibilityChange()
+      document.addEventListener('visibilitychange', this.visibilityHandler)
+    }
+  }
+
+  /**
+   * Handle page visibility changes.
+   * When the tab becomes visible again, ensure recognition restarts
+   * (browsers often kill background SpeechRecognition).
+   */
+  private handleVisibilityChange(): void {
+    if (typeof document === 'undefined') return
+
+    if (document.visibilityState === 'visible' && this.isActive) {
+      // Tab became visible - force restart recognition
+      this.clearRestartTimeout()
+      this.restartTimeout = setTimeout(() => {
+        if (this.isActive) {
+          this.forceRestart()
+        }
+      }, 300)
+    }
+  }
+
+  /**
+   * Force restart recognition regardless of current state.
+   * Used for health recovery and visibility change handling.
+   */
+  private forceRestart(): void {
+    if (!this.recognition) return
+
+    this.clearRestartTimeout()
+    this.recognition.abort()
+
+    this.restartTimeout = setTimeout(() => {
+      if (this.isActive && this.recognition) {
+        this.retryCount = 0
+        this.recognition.start(this.getCallbacks())
+        this.lastRecognitionActivityTime = Date.now()
+        this.emitStateChange()
+      }
+    }, 250)
+  }
+
+  /**
+   * Start health check interval to detect stalled recognition.
+   * Browser SpeechRecognition can silently stop without firing events.
+   */
+  private startHealthMonitor(): void {
+    this.stopHealthMonitor()
+    this.lastRecognitionActivityTime = Date.now()
+
+    this.healthCheckInterval = setInterval(() => {
+      if (!this.isActive) return
+
+      const now = Date.now()
+      const timeSinceActivity = now - this.lastRecognitionActivityTime
+
+      // If no activity for STALE_THRESHOLD_MS, the recognition likely died silently
+      if (timeSinceActivity > this.STALE_THRESHOLD_MS) {
+        this.forceRestart()
+      }
+    }, this.HEALTH_CHECK_MS)
+  }
+
+  /**
+   * Stop the health check interval.
+   */
+  private stopHealthMonitor(): void {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval)
+      this.healthCheckInterval = null
+    }
   }
 
   /**
@@ -448,8 +533,12 @@ export class WakeWordDetector {
     const settings = SENSITIVITY_THRESHOLDS[this.sensitivity]
     const now = Date.now()
 
-    // Reset silence error counter on successful recognition
+    // Track activity for health monitoring
+    this.lastRecognitionActivityTime = now
+
+    // Reset silence error counter and retry count on successful recognition
     this.consecutiveSilenceErrors = 0
+    this.retryCount = 0
 
     // Cooldown check
     if (now - this.lastDetectionTime < settings.cooldownMs) {
@@ -598,8 +687,11 @@ export class WakeWordDetector {
         const errorType = this.classifyError(error)
         const lowerError = error.toLowerCase()
 
+        // Track activity even on errors (recognition is still alive)
+        this.lastRecognitionActivityTime = Date.now()
+
         // no-speech is expected in continuous listening (user isn't always talking).
-        // The onEnd handler already restarts after 50ms, so just update noise stats.
+        // The onEnd handler already restarts, so just update noise stats.
         if (lowerError.includes('no-speech')) {
           this.consecutiveSilenceErrors++
           if (this.consecutiveSilenceErrors > 10) {
@@ -618,42 +710,59 @@ export class WakeWordDetector {
           this.onError?.(this.getErrorMessage(error))
           this.isActive = false
           this.retryCount = 0
+          this.stopHealthMonitor()
           this.emitStateChange()
           return
         }
 
-        // Network and other recoverable errors: notify once, then retry silently
+        // Network and other recoverable errors: retry with exponential backoff + jitter
         if (this.retryCount === 0) {
           this.onError?.(this.getErrorMessage(error))
         }
 
         if (this.retryCount < this.maxRetries) {
           this.retryCount++
-          const backoffDelay = Math.min(500 * Math.pow(1.5, this.retryCount - 1), 8000)
+          // Exponential backoff with jitter to avoid thundering herd
+          const baseDelay = Math.min(500 * Math.pow(1.5, this.retryCount - 1), 8000)
+          const jitter = Math.random() * baseDelay * 0.3
+          const backoffDelay = baseDelay + jitter
 
           this.clearRestartTimeout()
           this.restartTimeout = setTimeout(() => {
             if (this.isActive) {
-              this.restart()
+              this.forceRestart()
             }
           }, backoffDelay)
         } else {
-          this.isActive = false
+          // After exhausting retries, wait longer then try again (never give up)
           this.retryCount = 0
-          this.onError?.('Wake word detection stopped after multiple failures. Tap to restart.')
-          this.emitStateChange()
+          this.clearRestartTimeout()
+          this.restartTimeout = setTimeout(() => {
+            if (this.isActive) {
+              this.forceRestart()
+            }
+          }, 15_000) // Wait 15s then start fresh retry cycle
         }
       },
       onEnd: () => {
-        // Auto-restart if still active (continuous listening)
-        if (this.isActive) {
-          this.retryCount = 0
+        // Track activity
+        this.lastRecognitionActivityTime = Date.now()
 
+        // Auto-restart if still active (continuous listening like Siri/Alexa)
+        if (this.isActive) {
           this.clearRestartTimeout()
           // Faster restart for always-on wake word listening
           this.restartTimeout = setTimeout(() => {
             if (this.isActive && this.recognition) {
-              this.recognition.start(this.getCallbacks())
+              try {
+                this.recognition.start(this.getCallbacks())
+              } catch {
+                // If start fails, schedule a force restart
+                this.clearRestartTimeout()
+                this.restartTimeout = setTimeout(() => {
+                  if (this.isActive) this.forceRestart()
+                }, 500)
+              }
             }
           }, 50) // 50ms restart for near-instant re-engagement
         }
@@ -689,7 +798,9 @@ export class WakeWordDetector {
     this.detectionCount = 0
     this.consecutiveMatchCount = 0
     this.lastMatchedWord = ''
+    this.lastRecognitionActivityTime = Date.now()
     this.recognition.start(this.getCallbacks())
+    this.startHealthMonitor()
     this.emitStateChange()
   }
 
@@ -702,6 +813,7 @@ export class WakeWordDetector {
     this.isActive = false
     this.retryCount = 0
     this.clearRestartTimeout()
+    this.stopHealthMonitor()
     this.recognition.stop()
     this.emitStateChange()
   }
@@ -777,6 +889,14 @@ export class WakeWordDetector {
   destroy(): void {
     this.stop()
     this.clearRestartTimeout()
+    this.stopHealthMonitor()
+
+    // Remove visibility listener
+    if (this.visibilityHandler && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.visibilityHandler)
+      this.visibilityHandler = null
+    }
+
     if (this.recognition) {
       this.recognition.destroy()
       this.recognition = null

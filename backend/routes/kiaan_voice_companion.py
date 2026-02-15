@@ -1461,11 +1461,13 @@ async def voice_companion_health():
     except Exception:
         pass
 
-    voice_providers = ["edge_tts", "browser_fallback"]
+    voice_providers = ["browser_fallback"]
+    if os.getenv("BHASHINI_API_KEY", "").strip():
+        voice_providers.insert(0, "bhashini_ai")
+    if os.getenv("SARVAM_API_KEY", "").strip():
+        voice_providers.insert(0, "sarvam_ai_bulbul")
     if os.getenv("ELEVENLABS_API_KEY", "").strip():
         voice_providers.insert(0, "elevenlabs")
-    if os.getenv("GOOGLE_APPLICATION_CREDENTIALS", ""):
-        voice_providers.insert(0, "google_neural2")
 
     return {
         "status": "healthy",

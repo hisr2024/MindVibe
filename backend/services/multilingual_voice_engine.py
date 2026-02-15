@@ -11,13 +11,10 @@ Provides a comprehensive voice synthesis engine with:
 - Streaming audio support for low-latency playback
 
 Provider Priority Chain:
-1. ElevenLabs (premium, multilingual, cloning) - when API key present
-2. Sarvam AI (Sanskrit/Hindi specialist)
-3. Google Cloud Neural2/Studio (broad language coverage)
-4. Edge-TTS (Microsoft Neural, free fallback)
-5. pyttsx3 (offline-first, no internet)
-
-Inspired by ElevenLabs' approach to natural, expressive voice synthesis.
+1. ElevenLabs (premium, multilingual, studio-grade) - when API key present
+2. Sarvam AI Bulbul (Sanskrit/Hindi specialist, 11 Indian languages)
+3. Bhashini AI (Government of India, 22 scheduled Indian languages)
+4. Browser TTS (always available fallback)
 """
 
 import logging
@@ -82,9 +79,8 @@ class SpeakerProfile:
     quality_score: float
     # Provider-specific voice IDs
     elevenlabs_voice_id: Optional[str] = None
-    google_voice_id: Optional[str] = None
-    edge_tts_voice_id: Optional[str] = None
     sarvam_voice_id: Optional[str] = None
+    bhashini_voice_id: Optional[str] = None
     # Prosody defaults
     default_speed: float = 0.95
     default_pitch: float = 0.0
@@ -111,8 +107,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Indian-English",
             best_for=["personal guidance", "emotional support", "daily conversations"],
             quality_score=9.5,
-            google_voice_id="en-US-Neural2-F",
-            edge_tts_voice_id="en-US-AvaNeural",
             default_speed=0.95, default_pitch=0.3,
             preview_text="Hey friend, I'm Priya. Think of me as that friend who always understands.",
             avatar_color="#EC4899", tags=["empathetic", "warm", "default"],
@@ -125,8 +119,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="30-45", accent="Neutral",
             best_for=["gita wisdom", "meditation guidance", "philosophical discussions"],
             quality_score=9.3,
-            google_voice_id="en-US-Neural2-D",
-            edge_tts_voice_id="en-US-AndrewNeural",
             default_speed=0.92, default_pitch=-0.3,
             preview_text="I'm Arjun. Let me share the timeless wisdom of the Gita with you.",
             avatar_color="#6366F1", tags=["wise", "calm", "philosophical"],
@@ -139,8 +131,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="22-30", accent="American",
             best_for=["motivation", "celebrations", "daily affirmations"],
             quality_score=9.0,
-            google_voice_id="en-US-Studio-O",
-            edge_tts_voice_id="en-US-EmmaNeural",
             default_speed=0.97, default_pitch=0.5,
             preview_text="Hey! I'm Maya. Let's celebrate every step of your journey together!",
             avatar_color="#F59E0B", tags=["energetic", "motivating", "cheerful"],
@@ -153,8 +143,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="ageless", accent="Classical",
             best_for=["gita verses", "divine teachings", "spiritual guidance"],
             quality_score=9.7,
-            google_voice_id="en-US-Neural2-A",
-            edge_tts_voice_id="en-US-GuyNeural",
             default_speed=0.88, default_pitch=-1.0,
             preview_text="The Self is neither born nor does it ever die. It is eternal, ever-existing.",
             avatar_color="#7C3AED", is_premium=True,
@@ -170,8 +158,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Hindi",
             best_for=["hindi conversations", "emotional support", "daily guidance"],
             quality_score=9.4,
-            google_voice_id="hi-IN-Neural2-A",
-            edge_tts_voice_id="hi-IN-SwaraNeural",
             sarvam_voice_id="ananya",
             default_speed=0.94, default_pitch=0.2,
             preview_text="नमस्ते दोस्त! मैं अनन्या हूँ। आप जो भी महसूस कर रहे हैं, मैं समझती हूँ।",
@@ -185,8 +171,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="35-50", accent="Standard Hindi",
             best_for=["gita recitation", "wisdom teachings", "meditation"],
             quality_score=9.2,
-            google_voice_id="hi-IN-Neural2-B",
-            edge_tts_voice_id="hi-IN-MadhurNeural",
             sarvam_voice_id="vikram",
             default_speed=0.90, default_pitch=-0.5,
             preview_text="गीता का ज्ञान अनंत है। आइए इसे मिलकर समझें।",
@@ -202,8 +186,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="ageless", accent="Classical Sanskrit",
             best_for=["shloka chanting", "sanskrit recitation", "vedic mantras"],
             quality_score=9.6,
-            google_voice_id="hi-IN-Neural2-B",
-            edge_tts_voice_id="hi-IN-MadhurNeural",
             sarvam_voice_id="acharya",
             default_speed=0.85, default_pitch=-0.8,
             preview_text="कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।",
@@ -218,8 +200,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="ageless", accent="Classical Sanskrit",
             best_for=["stotras", "mantras", "peaceful chanting"],
             quality_score=9.4,
-            google_voice_id="hi-IN-Neural2-A",
-            edge_tts_voice_id="hi-IN-SwaraNeural",
             sarvam_voice_id="devi",
             default_speed=0.82, default_pitch=-0.3,
             preview_text="ॐ शान्तिः शान्तिः शान्तिः।",
@@ -236,8 +216,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Tamil",
             best_for=["tamil conversations", "emotional support", "wisdom"],
             quality_score=9.0,
-            google_voice_id="ta-IN-Neural2-A",
-            edge_tts_voice_id="ta-IN-PallaviNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="வணக்கம் நண்பா! நான் மீரா. உங்கள் மனதில் உள்ளதை பகிர்ந்து கொள்ளுங்கள்.",
             avatar_color="#EC4899", tags=["tamil", "warm"],
@@ -250,8 +228,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="30-45", accent="Standard Tamil",
             best_for=["gita in tamil", "philosophical talks", "meditation"],
             quality_score=8.8,
-            google_voice_id="ta-IN-Neural2-B",
-            edge_tts_voice_id="ta-IN-ValluvarNeural",
             default_speed=0.92, default_pitch=-0.3,
             preview_text="கீதையின் ஞானம் என்றும் புதியது. இணைந்து கற்போம்.",
             avatar_color="#6366F1", tags=["tamil", "philosophical"],
@@ -266,8 +242,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Telugu",
             best_for=["telugu conversations", "comfort", "guidance"],
             quality_score=8.9,
-            google_voice_id="te-IN-Neural2-A",
-            edge_tts_voice_id="te-IN-ShrutiNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="నమస్కారం స్నేహితుడా! నేను లక్ష్మిని. మీ మనసులో ఉన్నది చెప్పండి.",
             avatar_color="#EC4899", tags=["telugu", "gentle"],
@@ -282,8 +256,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Bengali",
             best_for=["bengali conversations", "poetry", "emotional support"],
             quality_score=8.8,
-            google_voice_id="bn-IN-Neural2-A",
-            edge_tts_voice_id="bn-IN-TanishaaNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="নমস্কার বন্ধু! আমি রিয়া। তোমার মনের কথা বলো, আমি শুনছি।",
             avatar_color="#EC4899", tags=["bengali", "poetic"],
@@ -298,8 +270,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Marathi",
             best_for=["marathi conversations", "guidance", "comfort"],
             quality_score=8.7,
-            google_voice_id="mr-IN-Neural2-A",
-            edge_tts_voice_id="mr-IN-AarohiNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="नमस्कार मित्रा! मी स्नेहा. तुमच्या मनातलं सांगा, मी ऐकतेय.",
             avatar_color="#EC4899", tags=["marathi", "warm"],
@@ -314,8 +284,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Gujarati",
             best_for=["gujarati conversations", "daily guidance", "wisdom"],
             quality_score=8.6,
-            google_voice_id="gu-IN-Neural2-A",
-            edge_tts_voice_id="gu-IN-DhwaniNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="નમસ્તે મિત્ર! હું કાવ્ય છું. તમારા મનની વાત કહો, હું સાંભળું છું.",
             avatar_color="#EC4899", tags=["gujarati", "melodious"],
@@ -330,8 +298,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Kannada",
             best_for=["kannada conversations", "comfort", "spiritual guidance"],
             quality_score=8.6,
-            google_voice_id="kn-IN-Neural2-A",
-            edge_tts_voice_id="kn-IN-SapnaNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="ನಮಸ್ಕಾರ ಸ್ನೇಹಿತ! ನಾನು ದಿವ್ಯ. ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ ಹೇಳಿ.",
             avatar_color="#EC4899", tags=["kannada", "soothing"],
@@ -346,8 +312,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Malayalam",
             best_for=["malayalam conversations", "wisdom", "emotional support"],
             quality_score=8.6,
-            google_voice_id="ml-IN-Neural2-A",
-            edge_tts_voice_id="ml-IN-SobhanaNeural",
             default_speed=0.94, default_pitch=0.2,
             preview_text="നമസ്കാരം സുഹൃത്തേ! ഞാൻ അതിര. നിങ്ങളുടെ മനസ്സിലുള്ളത് പറയൂ.",
             avatar_color="#EC4899", tags=["malayalam", "poetic"],
@@ -362,8 +326,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Punjabi",
             best_for=["punjabi conversations", "encouragement", "comfort"],
             quality_score=8.5,
-            google_voice_id="pa-IN-Neural2-A",
-            edge_tts_voice_id="pa-IN-Neural2-A",
             default_speed=0.94, default_pitch=0.2,
             preview_text="ਸਤ ਸ੍ਰੀ ਅਕਾਲ ਦੋਸਤ! ਮੈਂ ਸਿਮਰਨ ਹਾਂ। ਦੱਸੋ ਕੀ ਹਾਲ ਹੈ।",
             avatar_color="#EC4899", tags=["punjabi", "warm"],
@@ -378,8 +340,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Neutral Spanish",
             best_for=["spanish conversations", "emotional support", "guidance"],
             quality_score=9.0,
-            google_voice_id="es-US-Neural2-A",
-            edge_tts_voice_id="es-MX-DaliaNeural",
             default_speed=0.95, default_pitch=0.2,
             preview_text="Hola amigo! Soy Isabella. Estoy aquí para escucharte y acompañarte.",
             avatar_color="#EC4899", tags=["spanish", "empathetic"],
@@ -394,8 +354,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Parisian French",
             best_for=["french conversations", "philosophical discussions", "guidance"],
             quality_score=8.9,
-            google_voice_id="fr-FR-Neural2-A",
-            edge_tts_voice_id="fr-FR-DeniseNeural",
             default_speed=0.95, default_pitch=0.2,
             preview_text="Bonjour mon ami! Je suis Amélie. Je suis là pour toi.",
             avatar_color="#EC4899", tags=["french", "elegant"],
@@ -410,8 +368,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard German",
             best_for=["german conversations", "structured guidance", "wisdom"],
             quality_score=8.8,
-            google_voice_id="de-DE-Neural2-A",
-            edge_tts_voice_id="de-DE-KatjaNeural",
             default_speed=0.95, default_pitch=0.2,
             preview_text="Hallo Freund! Ich bin Hannah. Erzähl mir, was dich beschäftigt.",
             avatar_color="#EC4899", tags=["german", "clear"],
@@ -426,8 +382,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Brazilian Portuguese",
             best_for=["portuguese conversations", "emotional support", "encouragement"],
             quality_score=8.8,
-            google_voice_id="pt-BR-Neural2-A",
-            edge_tts_voice_id="pt-BR-FranciscaNeural",
             default_speed=0.95, default_pitch=0.2,
             preview_text="Olá amigo! Sou a Camila. Estou aqui pra te ouvir e te apoiar.",
             avatar_color="#EC4899", tags=["portuguese", "melodious"],
@@ -442,8 +396,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Japanese",
             best_for=["japanese conversations", "meditation", "mindfulness"],
             quality_score=8.9,
-            google_voice_id="ja-JP-Neural2-B",
-            edge_tts_voice_id="ja-JP-NanamiNeural",
             default_speed=0.93, default_pitch=0.0,
             preview_text="こんにちは、お友達！さくらです。あなたの心の声を聞かせてください。",
             avatar_color="#EC4899", tags=["japanese", "mindful"],
@@ -458,8 +410,6 @@ SPEAKER_CATALOG: Dict[str, List[SpeakerProfile]] = {
             age_range="25-35", accent="Standard Mandarin",
             best_for=["chinese conversations", "wisdom", "philosophical discussions"],
             quality_score=8.8,
-            google_voice_id="cmn-CN-Neural2-A",
-            edge_tts_voice_id="zh-CN-XiaoxiaoNeural",
             default_speed=0.93, default_pitch=0.0,
             preview_text="你好朋友！我是莲。告诉我你心里在想什么。",
             avatar_color="#EC4899", tags=["chinese", "serene"],
@@ -724,14 +674,11 @@ class MultilingualVoiceEngine:
         if speaker.sarvam_voice_id and speaker.language in ("hi", "sa"):
             return ("sarvam", speaker.sarvam_voice_id)
 
-        if speaker.google_voice_id:
-            return ("google", speaker.google_voice_id)
-
-        if speaker.edge_tts_voice_id:
-            return ("edge_tts", speaker.edge_tts_voice_id)
+        if speaker.bhashini_voice_id:
+            return ("bhashini", speaker.bhashini_voice_id)
 
         # Ultimate fallback
-        return ("edge_tts", "en-US-AvaNeural")
+        return ("sarvam", "anushka")
 
     # ── Synthesis Request Builder ───────────────────────────────────────
 

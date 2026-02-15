@@ -33,20 +33,19 @@ class SpeechProvider(Enum):
     VITS = "vits"                       # Variational inference TTS
 
     # Cloud/API Providers
-    GOOGLE_CLOUD = "google_cloud"       # Google Cloud TTS
-    EDGE_TTS = "edge_tts"              # Microsoft Edge TTS
+    ELEVENLABS = "elevenlabs"          # ElevenLabs studio-grade TTS
     AMAZON_POLLY = "amazon_polly"       # AWS Polly
 
     # Classic Open Source
     ESPEAK = "espeak"                   # eSpeak NG
     FESTIVAL = "festival"               # Festival TTS
     MARY_TTS = "mary_tts"              # MaryTTS
-    PYTTSX3 = "pyttsx3"                # Local system TTS
 
     # Indian Language Specialists
+    SARVAM = "sarvam"                  # Sarvam AI Bulbul
+    BHASHINI = "bhashini"              # Government of India Bhashini AI
     VAKYANSH = "vakyansh"              # Indian TTS
     AI4BHARAT = "ai4bharat"            # Indic language models
-    SARVAM = "sarvam"                  # Sarvam AI
 
     # Asian Language Specialists
     PADDLE_SPEECH = "paddle_speech"    # Baidu PaddleSpeech
@@ -395,13 +394,13 @@ DIVINE_FEMALE_VOICES = {
         preferred_providers=[
             SpeechProvider.COQUI_XTTS,
             SpeechProvider.STYLE_TTS2,
-            SpeechProvider.EDGE_TTS,
+            SpeechProvider.ELEVENLABS,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-AnaNeural",      # Warm, natural female
+            "elevenlabs": "EXAVITQu4vr4xnSDxMaL",      # Warm, natural female
             "coqui_xtts": "female_serene",
             "silero": "en_0",                    # Calm female
-            "google_cloud": "en-US-Neural2-C",  # Natural female
+            "bhashini": "bhashini-devi",  # Natural female
         },
         default_prosody=EmotionalProsody(
             emotion=EmotionCategory.SERENE,
@@ -431,13 +430,13 @@ DIVINE_FEMALE_VOICES = {
         preferred_providers=[
             SpeechProvider.STYLE_TTS2,
             SpeechProvider.COQUI_XTTS,
-            SpeechProvider.EDGE_TTS,
+            SpeechProvider.ELEVENLABS,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-JennyNeural",    # Clear, articulate
+            "elevenlabs": "jBpfAIEiAUkR2KqPSoCY",    # Clear, articulate
             "coqui_xtts": "female_wise",
             "silero": "en_1",
-            "google_cloud": "en-US-Neural2-F",
+            "bhashini": "bhashini-devi",
         },
         default_prosody=EmotionalProsody(
             emotion=EmotionCategory.WISE,
@@ -468,7 +467,7 @@ DIVINE_FEMALE_VOICES = {
             SpeechProvider.STYLE_TTS2,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-AriaNeural",     # Expressive, warm
+            "elevenlabs": "EXAVITQu4vr4xnSDxMaL",     # Expressive, warm
             "coqui_xtts": "female_compassionate",
             "silero": "en_2",
         },
@@ -498,7 +497,7 @@ DIVINE_FEMALE_VOICES = {
             SpeechProvider.SILERO,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-AnaNeural",
+            "elevenlabs": "EXAVITQu4vr4xnSDxMaL",
             "coqui_xtts": "female_meditation",
             "silero": "en_0",
         },
@@ -531,13 +530,13 @@ DIVINE_MALE_VOICES = {
         preferred_providers=[
             SpeechProvider.COQUI_XTTS,
             SpeechProvider.STYLE_TTS2,
-            SpeechProvider.EDGE_TTS,
+            SpeechProvider.ELEVENLABS,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-GuyNeural",       # Warm male
+            "elevenlabs": "onwK4e9ZLuTAKqWW03F9",       # Warm male
             "coqui_xtts": "male_serene",
             "silero": "en_3",                    # Calm male
-            "google_cloud": "en-US-Neural2-D",  # Natural male
+            "sarvam": "abhilash",  # Natural male
         },
         default_prosody=EmotionalProsody(
             emotion=EmotionCategory.SERENE,
@@ -566,13 +565,13 @@ DIVINE_MALE_VOICES = {
         preferred_providers=[
             SpeechProvider.STYLE_TTS2,
             SpeechProvider.COQUI_XTTS,
-            SpeechProvider.EDGE_TTS,
+            SpeechProvider.ELEVENLABS,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-DavisNeural",    # Authoritative
+            "elevenlabs": "onwK4e9ZLuTAKqWW03F9",    # Authoritative
             "coqui_xtts": "male_wise",
             "silero": "en_4",
-            "google_cloud": "en-US-Neural2-J",
+            "sarvam": "abhilash",
         },
         default_prosody=EmotionalProsody(
             emotion=EmotionCategory.WISE,
@@ -604,7 +603,7 @@ DIVINE_MALE_VOICES = {
             SpeechProvider.STYLE_TTS2,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-JasonNeural",    # Warm, gentle
+            "elevenlabs": "onwK4e9ZLuTAKqWW03F9",    # Warm, gentle
             "coqui_xtts": "male_compassionate",
             "silero": "en_5",
         },
@@ -635,7 +634,7 @@ DIVINE_MALE_VOICES = {
             SpeechProvider.SILERO,
         ],
         provider_voice_ids={
-            "edge_tts": "en-US-TonyNeural",     # Mature, deep
+            "elevenlabs": "onwK4e9ZLuTAKqWW03F9",     # Mature, deep
             "coqui_xtts": "male_meditation",
             "silero": "en_6",
         },

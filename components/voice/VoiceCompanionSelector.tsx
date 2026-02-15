@@ -60,7 +60,7 @@ interface Props {
 const LANGUAGE_GROUPS = [
   {
     label: 'Indian Languages',
-    description: 'Powered by Sarvam AI with native pronunciation',
+    description: 'Powered by Sarvam AI + Bhashini AI with native pronunciation',
     provider: 'sarvam' as VoiceProvider,
     languages: ['hi', 'sa', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'en-IN'] as VoiceLanguage[],
   },
@@ -263,7 +263,9 @@ export default function VoiceCompanionSelector({
                 ? 'border-amber-500/20 bg-amber-500/10 text-amber-400'
                 : selectedVoice.poweredBy === 'sarvam'
                 ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-                : 'border-sky-500/20 bg-sky-500/10 text-sky-400'
+                : selectedVoice.poweredBy === 'bhashini'
+                ? 'border-sky-500/20 bg-sky-500/10 text-sky-400'
+                : 'border-white/10 bg-white/5 text-white/40'
             }`}>
               {getProviderDisplayInfo(selectedVoice.poweredBy).label}
             </span>
@@ -324,7 +326,7 @@ export default function VoiceCompanionSelector({
                       ? 'border-emerald-500/20 text-emerald-400/60 bg-emerald-500/5'
                       : 'border-amber-500/20 text-amber-400/60 bg-amber-500/5'
                   }`}>
-                    {group.provider === 'sarvam' ? 'Sarvam AI' : 'ElevenLabs'}
+                    {group.provider === 'sarvam' ? 'Sarvam + Bhashini' : 'ElevenLabs'}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
@@ -483,6 +485,8 @@ export default function VoiceCompanionSelector({
                               ? 'border-amber-500/15 text-amber-400/50 bg-amber-500/5'
                               : voice.poweredBy === 'sarvam'
                               ? 'border-emerald-500/15 text-emerald-400/50 bg-emerald-500/5'
+                              : voice.poweredBy === 'bhashini'
+                              ? 'border-sky-500/15 text-sky-400/50 bg-sky-500/5'
                               : 'border-white/[0.06] text-white/25 bg-white/[0.02]'
                           }`}>
                             {providerInfo.label}
@@ -636,9 +640,7 @@ export default function VoiceCompanionSelector({
                 {[
                   { name: 'ElevenLabs', quality: '10/10', desc: 'Most natural human-like voices', color: 'text-amber-400' },
                   { name: 'Sarvam AI', quality: '9.5/10', desc: 'Best Indian language pronunciation', color: 'text-emerald-400' },
-                  { name: 'OpenAI TTS', quality: '9.5/10', desc: 'Nova, Shimmer, Alloy voices', color: 'text-sky-400' },
-                  { name: 'Google Neural', quality: '9/10', desc: 'Neural2 & Studio voices', color: 'text-blue-400' },
-                  { name: 'Edge Neural', quality: '8.5/10', desc: 'Microsoft Neural (free)', color: 'text-violet-400' },
+                  { name: 'Bhashini AI', quality: '9/10', desc: 'Government of India, 22 Indian languages', color: 'text-sky-400' },
                 ].map(p => (
                   <div key={p.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -651,6 +653,7 @@ export default function VoiceCompanionSelector({
               </div>
               <p className="text-[8px] text-white/15 mt-2">
                 KIAAN automatically selects the best available provider for your language.
+                Indian languages: Sarvam AI &rarr; Bhashini AI &rarr; ElevenLabs.
               </p>
             </div>
           </div>
@@ -666,7 +669,9 @@ export default function VoiceCompanionSelector({
                 ? 'bg-amber-500/20 text-amber-400'
                 : selectedVoice.poweredBy === 'sarvam'
                 ? 'bg-emerald-500/20 text-emerald-400'
-                : 'bg-sky-500/20 text-sky-400'
+                : selectedVoice.poweredBy === 'bhashini'
+                ? 'bg-sky-500/20 text-sky-400'
+                : 'bg-white/10 text-white/40'
             }`}>
               {selectedVoice.name[0]}
             </div>

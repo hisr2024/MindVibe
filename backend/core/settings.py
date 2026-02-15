@@ -136,16 +136,14 @@ class Settings(BaseSettings):
     LM_STUDIO_ENABLED: bool = os.getenv("LM_STUDIO_ENABLED", "false").lower() == "true"
     HUGGINGFACE_HUB_ENABLED: bool = os.getenv("HUGGINGFACE_HUB_ENABLED", "true").lower() == "true"
 
-    # --- Local TTS (Text-to-Speech) Settings ---
+    # --- TTS (Text-to-Speech) Settings ---
+    # Provider chain: Sarvam AI → Bhashini AI → ElevenLabs (browser fallback always available)
     LOCAL_TTS_ENABLED: bool = os.getenv("LOCAL_TTS_ENABLED", "true").lower() == "true"
-    TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "auto")  # auto, google, edge, pyttsx3, coqui
-    TTS_FALLBACK_CHAIN: str = os.getenv("TTS_FALLBACK_CHAIN", "google,edge,pyttsx3")
+    TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "auto")  # auto, sarvam, bhashini, elevenlabs
+    TTS_FALLBACK_CHAIN: str = os.getenv("TTS_FALLBACK_CHAIN", "sarvam,bhashini,elevenlabs")
     LOCAL_TTS_QUALITY: str = os.getenv("LOCAL_TTS_QUALITY", "medium")  # low, medium, high
     TTS_CACHE_DIR: str = os.getenv("TTS_CACHE_DIR", str(DEFAULT_AUDIO_CACHE_PATH))
     TTS_CACHE_MAX_SIZE_MB: int = int(os.getenv("TTS_CACHE_MAX_SIZE_MB", "500"))
-    PYTTSX3_VOICE_ID: Optional[str] = os.getenv("PYTTSX3_VOICE_ID")
-    EDGE_TTS_VOICE: str = os.getenv("EDGE_TTS_VOICE", "en-US-AriaNeural")
-    COQUI_MODEL: str = os.getenv("COQUI_MODEL", "tts_models/en/ljspeech/tacotron2-DDC")
 
     # --- Local STT (Speech-to-Text/Whisper) Settings ---
     LOCAL_STT_ENABLED: bool = os.getenv("LOCAL_STT_ENABLED", "true").lower() == "true"

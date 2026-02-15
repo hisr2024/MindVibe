@@ -28,6 +28,7 @@ from backend.services.tts_service import (
     get_tts_service,
     get_tts_health_status,
     get_tts_provider_quality_info,
+    get_available_tts_providers,
     VoiceType
 )
 
@@ -1816,36 +1817,40 @@ async def get_divine_voice_providers() -> dict:
     Get information about available divine voice providers.
 
     Returns status and quality ranking of each provider.
+    Providers: Sarvam AI, Bhashini AI, ElevenLabs.
     """
-    try:
-        from backend.services.divine_voice_orchestrator import (
-            divine_voice,
-            SARVAM_VOICES,
-            GOOGLE_VOICES
-        )
+    providers = get_available_tts_providers()
 
-        return {
-            "providers": {
-                "sarvam_ai": {
-                    "available": divine_voice._sarvam_available,
-                    "quality_score": 9.5,
-                    "best_for": ["Sanskrit", "Hindi", "Indian languages"],
-                    "voices": list(SARVAM_VOICES.keys()) if divine_voice._sarvam_available else [],
-                },
-                "google_neural": {
-                    "available": divine_voice._google_available,
-                    "quality_score": 9.0,
-                    "best_for": ["English", "Multiple languages"],
-                    "voices": list(GOOGLE_VOICES.keys()) if divine_voice._google_available else [],
-                },
+    return {
+        "providers": {
+            "sarvam_ai": {
+                "available": providers.get("sarvam_ai_bulbul", False),
+                "quality_score": 9.5,
+                "best_for": ["Sanskrit", "Hindi", "Indian languages"],
+                "voices": ["sarvam-aura", "sarvam-rishi"] if providers.get("sarvam_ai_bulbul") else [],
             },
-            "recommendation": {
-                "sanskrit": "sarvam_ai" if divine_voice._sarvam_available else "google_neural",
-                "hindi": "sarvam_ai" if divine_voice._sarvam_available else "google_neural",
-                "english": "google_neural" if divine_voice._google_available else "browser_tts",
-            }
-        }
-
-    except Exception as e:
-        logger.error(f"Provider info error: {e}")
-        return {"error": str(e)}
+            "bhashini_ai": {
+                "available": providers.get("bhashini_ai", False),
+                "quality_score": 9.0,
+                "best_for": ["Hindi", "Tamil", "Telugu", "Bengali", "22 Indian languages"],
+                "voices": ["bhashini-devi", "bhashini-arya"] if providers.get("bhashini_ai") else [],
+            },
+            "elevenlabs": {
+                "available": providers.get("elevenlabs", False),
+                "quality_score": 10.0,
+                "best_for": ["English", "International languages"],
+                "voices": ["elevenlabs-nova", "elevenlabs-orion"] if providers.get("elevenlabs") else [],
+            },
+        },
+        "recommendation": {
+            "sanskrit": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "bhashini_ai",
+            "hindi": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "bhashini_ai",
+            "english": "elevenlabs" if providers.get("elevenlabs") else "sarvam_ai",
+            "tamil": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "bhashini_ai",
+            "international": "elevenlabs" if providers.get("elevenlabs") else "sarvam_ai",
+        },
+        "fallback_chain": {
+            "indian_languages": "Sarvam AI -> Bhashini AI -> ElevenLabs",
+            "international_languages": "ElevenLabs -> Sarvam AI",
+        },
+    }

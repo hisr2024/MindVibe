@@ -58,11 +58,9 @@ class EmotionCategoryEnum(str, Enum):
 
 class VoiceProviderEnum(str, Enum):
     """Voice provider types."""
-    GOOGLE_STUDIO = "google_studio"
-    GOOGLE_NEURAL2 = "google_neural2"
-    EDGE_TTS = "edge_tts"
-    PYTTSX3 = "pyttsx3"
     SARVAM = "sarvam"
+    BHASHINI = "bhashini"
+    ELEVENLABS = "elevenlabs"
 
 
 class ExperimentStatusEnum(str, Enum):
@@ -235,7 +233,7 @@ class VoiceFingerprint(Base):
 
     # Voice configuration
     provider: Mapped[str] = mapped_column(
-        SQLEnum(VoiceProviderEnum), default=VoiceProviderEnum.GOOGLE_NEURAL2
+        SQLEnum(VoiceProviderEnum), default=VoiceProviderEnum.SARVAM
     )
     voice_name: Mapped[str] = mapped_column(String(100), nullable=False)
     language: Mapped[str] = mapped_column(String(10), default="en")
