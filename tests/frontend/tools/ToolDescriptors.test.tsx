@@ -3,7 +3,7 @@
  * on the ToolsDashboardSection component, including RTL layout.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
@@ -96,17 +96,15 @@ describe('ToolsDashboardSection - purpose descriptors', () => {
   it('renders purpose descriptors under each applicable tool title', () => {
     render(<ToolsDashboardSection />)
 
-    expect(screen.getByText('Calm the immediate reaction')).toBeInTheDocument()
-    expect(screen.getByText('Reframe the perception')).toBeInTheDocument()
-    // "Talk it through" appears twice (KIAAN Chat + KIAAN Companion share the same descriptor)
+    // "Talk it through" appears for KIAAN Chat + KIAAN Companion (both share purposeDescKey 'kiaan')
     expect(screen.getAllByText('Talk it through').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getByText('Navigate relational clarity')).toBeInTheDocument()
   })
 
   it('renders descriptors with muted, small typography', () => {
     render(<ToolsDashboardSection />)
 
-    const descriptor = screen.getByText('Calm the immediate reaction')
+    const descriptors = screen.getAllByText('Talk it through')
+    const descriptor = descriptors[0]
     expect(descriptor.tagName).toBe('P')
     expect(descriptor.className).toContain('text-')
     expect(descriptor.className).toContain('truncate')
@@ -115,15 +113,16 @@ describe('ToolsDashboardSection - purpose descriptors', () => {
   it('renders descriptors below tool title, not above it', () => {
     render(<ToolsDashboardSection />)
 
-    const title = screen.getByText('Viyoga')
-    const descriptor = screen.getByText('Calm the immediate reaction')
+    const title = screen.getByText('KIAAN Chat')
+    const descriptors = screen.getAllByText('Talk it through')
+    const descriptor = descriptors[0]
 
     // Both should share a common parent container
     const titleParent = title.parentElement
     const descriptorParent = descriptor.parentElement
     expect(titleParent).toBe(descriptorParent)
 
-    // Descriptor should come after the description text in DOM order
+    // Descriptor should come after the title text in DOM order
     const children = Array.from(titleParent!.children)
     const titleIndex = children.indexOf(title)
     const descriptorIndex = children.indexOf(descriptor)
@@ -142,13 +141,10 @@ describe('ToolsDashboardSection - purpose descriptors', () => {
     expect(rtlWrapper.getAttribute('dir')).toBe('rtl')
 
     // Descriptors should still render
-    expect(screen.getByText('Calm the immediate reaction')).toBeInTheDocument()
-    expect(screen.getByText('Reframe the perception')).toBeInTheDocument()
     expect(screen.getAllByText('Talk it through').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getByText('Navigate relational clarity')).toBeInTheDocument()
 
     // Each descriptor should use truncate which works with RTL via text-overflow
-    const descriptor = screen.getByText('Calm the immediate reaction')
-    expect(descriptor.className).toContain('truncate')
+    const descriptors = screen.getAllByText('Talk it through')
+    expect(descriptors[0].className).toContain('truncate')
   })
 })

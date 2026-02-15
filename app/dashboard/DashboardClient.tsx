@@ -57,7 +57,7 @@ const quickActionVariants = {
   },
 }
 
-// Feature highlight card data
+// Feature highlight card data for Spiritual Toolkit
 const FEATURE_HIGHLIGHTS = [
   {
     id: 'kiaan-chat',
@@ -124,6 +124,67 @@ const FEATURE_HIGHLIGHTS = [
     borderColor: 'border-orange-500/20 hover:border-orange-400/40',
     iconBg: 'from-orange-400/30 to-amber-400/30',
     badge: null,
+  },
+  {
+    id: 'ardha',
+    icon: '\u{1F504}',
+    title: 'Ardha',
+    description: 'Gita-aligned cognitive reframing',
+    href: '/ardha',
+    gradient: 'from-amber-500/25 to-yellow-500/25',
+    borderColor: 'border-amber-500/20 hover:border-amber-400/40',
+    iconBg: 'from-amber-400/30 to-yellow-400/30',
+    badge: null,
+  },
+  {
+    id: 'community-circles',
+    icon: '\u{1F91D}',
+    title: 'Community Circles',
+    description: 'Spiritual peer community',
+    href: '/community',
+    gradient: 'from-pink-500/25 to-rose-500/25',
+    borderColor: 'border-pink-500/20 hover:border-pink-400/40',
+    iconBg: 'from-pink-400/30 to-rose-400/30',
+    badge: 'new',
+  },
+  {
+    id: 'kiaan-vibe',
+    icon: '\u{1F549}\uFE0F',
+    title: 'KIAAN Vibe',
+    description: 'Gita verses, meditation & uploads',
+    href: '/kiaan-vibe',
+    gradient: 'from-violet-500/25 to-orange-500/25',
+    borderColor: 'border-violet-500/20 hover:border-orange-400/40',
+    iconBg: 'from-violet-400/30 to-orange-400/30',
+    badge: 'new',
+  },
+] as const
+
+// Quick access links for the dashboard
+const QUICK_ACCESS = [
+  {
+    id: 'profile',
+    icon: '\u{2699}\uFE0F',
+    title: 'Profile & Settings',
+    href: '/profile',
+  },
+  {
+    id: 'subscription',
+    icon: '\u{1F4B3}',
+    title: 'Subscription',
+    href: '/subscription/success',
+  },
+  {
+    id: 'about',
+    icon: '\u{2139}\uFE0F',
+    title: 'About MindVibe',
+    href: '/about',
+  },
+  {
+    id: 'sacred-reflections',
+    icon: '\u{1F64F}',
+    title: 'Sacred Reflections',
+    href: '/sacred-reflections#spiritual',
   },
 ] as const
 
@@ -298,18 +359,18 @@ export default function DashboardClient() {
                 Your Spiritual Toolkit
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               {FEATURE_HIGHLIGHTS.map((feature, idx) => (
                 <motion.div
                   key={feature.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + idx * 0.05, type: 'spring', stiffness: 350, damping: 25 }}
+                  transition={{ delay: 0.1 + idx * 0.04, type: 'spring', stiffness: 350, damping: 25 }}
                 >
                   <Link
                     href={feature.href}
                     onClick={handleCardTap}
-                    className={`group relative flex flex-col items-center justify-center rounded-[20px] border bg-gradient-to-br ${feature.gradient} ${feature.borderColor} p-4 sm:p-5 shadow-mobile-glow transition-all duration-300 active:scale-[0.96] min-h-[130px]`}
+                    className={`group relative flex flex-col items-center justify-center rounded-[20px] border bg-gradient-to-br ${feature.gradient} ${feature.borderColor} p-3 sm:p-5 shadow-mobile-glow transition-all duration-300 active:scale-[0.96] min-h-[120px] sm:min-h-[130px]`}
                   >
                     {feature.badge && (
                       <span className="absolute -top-1.5 -right-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-lg">
@@ -317,15 +378,15 @@ export default function DashboardClient() {
                       </span>
                     )}
                     <motion.div
-                      className={`mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.iconBg} shadow-lg sm:h-14 sm:w-14`}
+                      className={`mb-2 sm:mb-3 flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.iconBg} shadow-lg`}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <span className="text-2xl sm:text-3xl">{feature.icon}</span>
+                      <span className="text-xl sm:text-3xl">{feature.icon}</span>
                     </motion.div>
-                    <span className="text-sm font-semibold text-white/90 group-hover:text-white text-center">
+                    <span className="text-[11px] sm:text-sm font-semibold text-white/90 group-hover:text-white text-center leading-tight">
                       {feature.title}
                     </span>
-                    <span className="mt-1 text-[10px] text-white/45 text-center line-clamp-2">
+                    <span className="mt-0.5 sm:mt-1 text-[9px] sm:text-[10px] text-white/45 text-center line-clamp-2">
                       {feature.description}
                     </span>
                   </Link>
@@ -381,6 +442,29 @@ export default function DashboardClient() {
                   <span className="mt-0.5 text-[10px] text-white/40">Your Growth</span>
                 </Link>
               </motion.div>
+            </div>
+          </motion.div>
+
+          {/* ─── Quick Access ─── */}
+          <motion.div variants={itemVariants}>
+            <div className="mb-3 flex items-center gap-3">
+              <span className="text-lg">{'\u{26A1}'}</span>
+              <h2 className="text-base font-semibold text-white/80">
+                Quick Access
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+              {QUICK_ACCESS.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={handleCardTap}
+                  className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] px-3 py-3 shadow-mobile-glow transition-all duration-300 active:scale-[0.96] hover:from-white/[0.07]"
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-xs font-medium text-white/70 truncate">{item.title}</span>
+                </Link>
+              ))}
             </div>
           </motion.div>
 

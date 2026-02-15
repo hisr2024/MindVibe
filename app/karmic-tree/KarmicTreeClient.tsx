@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { MindVibeLockup } from '@/components/branding'
 import { AnimatedCard, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui'
 import { apiFetch } from '@/lib/api'
+import { AnalyticsDashboard } from '@/components/analytics'
 
 interface ActivityCounts {
   moods: number
@@ -53,77 +54,25 @@ interface ProgressResponse {
   notifications: TreeNotification[]
 }
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
+/**
+ * Honest empty state when API is unavailable.
+ * No fake data — only real user data from the API should populate these fields.
+ */
 const fallbackProgress: ProgressResponse = {
-  level: 1,
-  xp: 24,
-  next_level_xp: 240,
-  progress_percent: 10,
+  level: 0,
+  xp: 0,
+  next_level_xp: 100,
+  progress_percent: 0,
   tree_stage: 'seedling',
-  activity: { moods: 3, journals: 2, chats: 4, streak: 1 },
+  activity: { moods: 0, journals: 0, chats: 0, streak: 0 },
   notifications: [
     {
-      message: 'Previewing Karmic Tree in offline mode. Connect to sync live progress.',
-      tone: 'info'
+      message: 'Unable to load live data. Connect to the internet to see your real progress.',
+      tone: 'warning'
     }
   ],
-  achievements: [
-    {
-      key: 'first_journal',
-      name: 'Reflection Seed',
-      description: 'Write your first private journal entry to plant your tree.',
-      rarity: 'common',
-      badge_icon: '📝',
-      target_value: 1,
-      progress: 1,
-      unlocked: true,
-      unlocked_at: new Date().toISOString(),
-      reward_hint: 'Unlocks the Dawnlight badge'
-    },
-    {
-      key: 'journal_10',
-      name: 'Roots of Reflection',
-      description: 'Complete 10 journal entries to deepen your roots.',
-      rarity: 'rare',
-      badge_icon: '🌱',
-      target_value: 10,
-      progress: 2,
-      unlocked: false,
-      reward_hint: 'Unlocks the Amber Grove theme'
-    },
-    {
-      key: 'chat_explorer',
-      name: 'KIAAN Explorer',
-      description: 'Complete 10 guided chats with KIAAN.',
-      rarity: 'common',
-      badge_icon: '💬',
-      target_value: 10,
-      progress: 4,
-      unlocked: false,
-      reward_hint: 'Unlocks a prompt booster'
-    }
-  ],
-  unlockables: [
-    {
-      key: 'dawnlight_badge',
-      name: 'Dawnlight Badge',
-      description: 'A soft sunrise badge for your first reflection.',
-      kind: 'badge',
-      rarity: 'common',
-      unlocked: true,
-      unlocked_at: new Date().toISOString(),
-      reward_data: { color: '#f97316' }
-    },
-    {
-      key: 'amber_grove_theme',
-      name: 'Amber Grove Theme',
-      description: 'A warm theme inspired by mindful journaling.',
-      kind: 'theme',
-      rarity: 'rare',
-      unlocked: false
-    }
-  ]
+  achievements: [],
+  unlockables: []
 }
 
 const rarityAccent: Record<string, string> = {
@@ -245,8 +194,22 @@ function TreeVisualizer({ stage, percent }: { stage: string; percent: number }) 
 export default function KarmicTreeClient() {
   const [data, setData] = useState<ProgressResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | undefined>()
 
   useEffect(() => {
+    // Resolve user ID for analytics
+    const profile = localStorage.getItem('mindvibe_profile')
+    if (profile) {
+      try {
+        const parsed = JSON.parse(profile)
+        setUserId(parsed.email || 'local-user')
+      } catch {
+        setUserId('local-user')
+      }
+    } else {
+      setUserId('local-user')
+    }
+
     const controller = new AbortController()
     const load = async () => {
       try {
@@ -260,7 +223,7 @@ export default function KarmicTreeClient() {
         setData(payload)
       } catch (err) {
         console.error('Karmic Tree fetch failed', err)
-        setError('Live data unavailable. Showing demo progress so you can preview the tree.')
+        setError('Live data unavailable. Your real progress will appear when connected.')
         setData(fallbackProgress)
       }
     }
@@ -385,6 +348,22 @@ export default function KarmicTreeClient() {
           </AnimatedCard>
         </StaggerItem>
       </StaggerContainer>
+
+      {/* ─── Analytics Section ─── */}
+      <FadeIn>
+        <div className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 md:p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">{'\u{1F4CA}'}</span>
+              <h2 className="text-xl sm:text-2xl font-bold text-orange-50">Your Analytics</h2>
+            </div>
+            <p className="text-sm text-orange-100/60">
+              Real insights from your wellness journey — all data comes from your actual activity.
+            </p>
+          </div>
+          <AnalyticsDashboard userId={userId} />
+        </div>
+      </FadeIn>
     </main>
   )
 }

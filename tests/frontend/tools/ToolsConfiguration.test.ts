@@ -6,10 +6,7 @@
 
 import { describe, it, expect } from 'vitest'
 import {
-  CORE_TOOLS,
-  GUIDANCE_TOOLS,
   KARMA_TOOLS,
-  QUICK_ACCESS_TOOLS,
   ALL_TOOLS,
   TOOLS_BY_CATEGORY,
   type ToolConfig,
@@ -81,13 +78,23 @@ describe('Tool Configuration', () => {
   })
 
   describe('TOOLS_BY_CATEGORY', () => {
-    it('should include Karma & Growth category with Karma Reset', () => {
+    it('should include Core Tools category', () => {
+      const coreCategory = TOOLS_BY_CATEGORY.find(cat => cat.id === 'core')
+      expect(coreCategory).toBeDefined()
+      expect(coreCategory?.name).toBe('Core Tools')
+    })
+
+    it('should include Quick Access category', () => {
+      const quickAccessCategory = TOOLS_BY_CATEGORY.find(cat => cat.id === 'quick-access')
+      expect(quickAccessCategory).toBeDefined()
+      expect(quickAccessCategory?.name).toBe('Quick Access')
+    })
+
+    it('should not include Karma & Growth or Guidance Engines categories on dashboard', () => {
       const karmaCategory = TOOLS_BY_CATEGORY.find(cat => cat.id === 'karma')
-      expect(karmaCategory).toBeDefined()
-      expect(karmaCategory?.name).toBe('Karma & Growth')
-      
-      const karmaReset = karmaCategory?.tools.find(tool => tool.id === 'karma-reset')
-      expect(karmaReset).toBeDefined()
+      const guidanceCategory = TOOLS_BY_CATEGORY.find(cat => cat.id === 'guidance')
+      expect(karmaCategory).toBeUndefined()
+      expect(guidanceCategory).toBeUndefined()
     })
   })
 })
