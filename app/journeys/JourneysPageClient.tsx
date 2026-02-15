@@ -1,13 +1,11 @@
 'use client'
 
 /**
- * Unified Journeys Page - Combines Journey Engine templates with personal journeys.
+ * Unified Journeys Page - The Six Enemies (Shadripu) Dashboard
  *
- * Features:
- * - Browse guided journey templates (Six Enemies / Shadripu)
- * - View active guided journeys with progress
- * - Track progress with radar chart
- * - Create custom journeys
+ * A divine, immersive experience merging the journey engine dashboard
+ * with journey management. Features gradient backgrounds, radar chart,
+ * enemy mastery cards, animated template grid, and today's practice.
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -36,10 +34,28 @@ import {
   getDifficultyColor,
   getJourneyStatusLabel,
   getJourneyStatusColor,
+  getMasteryDescription,
 } from '@/types/journeyEngine.types'
 
 // =============================================================================
-// RADAR CHART COMPONENT
+// HELPER: ICON NAME to EMOJI
+// =============================================================================
+
+const ICON_EMOJI: Record<string, string> = {
+  flame: '\uD83D\uDD25',
+  zap: '\u26A1',
+  coins: '\uD83D\uDCB0',
+  cloud: '\u2601\uFE0F',
+  crown: '\uD83D\uDC51',
+  eye: '\uD83D\uDC41\uFE0F',
+}
+
+function enemyEmoji(iconName: string): string {
+  return ICON_EMOJI[iconName] || '\u2728'
+}
+
+// =============================================================================
+// ENEMY RADAR CHART
 // =============================================================================
 
 interface RadarChartProps {
@@ -47,222 +63,186 @@ interface RadarChartProps {
   size?: number
 }
 
-function EnemyRadarChart({ data, size = 200 }: RadarChartProps) {
-  const centerX = size / 2
-  const centerY = size / 2
-  const maxRadius = size * 0.4
+function EnemyRadarChart({ data, size = 240 }: RadarChartProps) {
+  const center = size / 2
+  const maxRadius = size * 0.38
   const levels = 5
 
-  // Calculate points for each enemy
   const getPoint = (index: number, value: number) => {
     const angle = (Math.PI * 2 * index) / 6 - Math.PI / 2
-    const radius = (value / 100) * maxRadius
-    return {
-      x: centerX + radius * Math.cos(angle),
-      y: centerY + radius * Math.sin(angle),
-    }
+    const r = (value / 100) * maxRadius
+    return { x: center + r * Math.cos(angle), y: center + r * Math.sin(angle) }
   }
 
-  // Get mastery level for each enemy (0-100)
-  const getMasteryForEnemy = (enemy: string): number => {
-    const progress = data.find(p => p.enemy === enemy)
-    return progress?.mastery_level || 0
+  const getMastery = (enemy: string): number => {
+    return data.find(p => p.enemy === enemy)?.mastery_level || 0
   }
 
-  // Build polygon path
-  const points = ENEMY_ORDER.map((enemy, i) => {
-    const mastery = getMasteryForEnemy(enemy)
-    return getPoint(i, mastery)
-  })
+  const points = ENEMY_ORDER.map((enemy, i) => getPoint(i, getMastery(enemy)))
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
 
   return (
-    <svg width={size} height={size} className="mx-auto">
-      {/* Background grid */}
-      {[...Array(levels)].map((_, level) => {
-        const radius = ((level + 1) / levels) * maxRadius
-        const gridPoints = ENEMY_ORDER.map((_, i) => {
-          const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2
-          return `${centerX + radius * Math.cos(angle)},${centerY + radius * Math.sin(angle)}`
-        }).join(' ')
-        return (
-          <polygon
-            key={level}
-            points={gridPoints}
-            fill="none"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="1"
-          />
-        )
-      })}
+    <div className="relative">
+      <svg width={size} height={size} className="mx-auto">
+        <defs>
+          <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="rgba(139, 92, 246, 0.35)" />
+            <stop offset="100%" stopColor="rgba(236, 72, 153, 0.25)" />
+          </linearGradient>
+          <filter id="radarGlow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-      {/* Axis lines */}
-      {ENEMY_ORDER.map((enemy, i) => {
-        const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2
-        const endX = centerX + maxRadius * Math.cos(angle)
-        const endY = centerY + maxRadius * Math.sin(angle)
-        return (
-          <line
-            key={enemy}
-            x1={centerX}
-            y1={centerY}
-            x2={endX}
-            y2={endY}
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="1"
-          />
-        )
-      })}
+        {/* Grid rings */}
+        {[...Array(levels)].map((_, level) => {
+          const r = ((level + 1) / levels) * maxRadius
+          const gp = ENEMY_ORDER.map((_, i) => {
+            const a = (Math.PI * 2 * i) / 6 - Math.PI / 2
+            return `${center + r * Math.cos(a)},${center + r * Math.sin(a)}`
+          }).join(' ')
+          return (
+            <polygon
+              key={level}
+              points={gp}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth="1"
+            />
+          )
+        })}
 
-      {/* Data polygon */}
-      <motion.path
-        d={pathD}
-        fill="rgba(245, 158, 11, 0.3)"
-        stroke="#F59E0B"
-        strokeWidth="2"
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      />
+        {/* Axis lines */}
+        {ENEMY_ORDER.map((_, i) => {
+          const a = (Math.PI * 2 * i) / 6 - Math.PI / 2
+          return (
+            <line
+              key={i}
+              x1={center}
+              y1={center}
+              x2={center + maxRadius * Math.cos(a)}
+              y2={center + maxRadius * Math.sin(a)}
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth="1"
+            />
+          )
+        })}
 
-      {/* Data points */}
-      {points.map((point, i) => (
-        <motion.circle
-          key={ENEMY_ORDER[i]}
-          cx={point.x}
-          cy={point.y}
-          r="4"
-          fill={ENEMY_INFO[ENEMY_ORDER[i]].color}
-          stroke="white"
+        {/* Data polygon */}
+        <motion.path
+          d={pathD}
+          fill="url(#radarFill)"
+          stroke="rgba(168, 85, 247, 0.8)"
           strokeWidth="2"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.3 + i * 0.1 }}
+          filter="url(#radarGlow)"
+          initial={{ opacity: 0, scale: 0.3 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
         />
-      ))}
 
-      {/* Labels */}
-      {ENEMY_ORDER.map((enemy, i) => {
-        const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2
-        const labelRadius = maxRadius + 25
-        const x = centerX + labelRadius * Math.cos(angle)
-        const y = centerY + labelRadius * Math.sin(angle)
-        const info = ENEMY_INFO[enemy]
-        return (
-          <text
-            key={enemy}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="text-[11px] fill-white/70 font-medium"
-          >
-            {info.sanskrit}
-          </text>
-        )
-      })}
-    </svg>
+        {/* Data points */}
+        {points.map((p, i) => (
+          <motion.circle
+            key={ENEMY_ORDER[i]}
+            cx={p.x}
+            cy={p.y}
+            r="5"
+            fill={ENEMY_INFO[ENEMY_ORDER[i]].color}
+            stroke="white"
+            strokeWidth="2"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.4 + i * 0.08 }}
+          />
+        ))}
+
+        {/* Labels */}
+        {ENEMY_ORDER.map((enemy, i) => {
+          const a = (Math.PI * 2 * i) / 6 - Math.PI / 2
+          const lr = maxRadius + 28
+          const x = center + lr * Math.cos(a)
+          const y = center + lr * Math.sin(a)
+          const info = ENEMY_INFO[enemy]
+          return (
+            <text
+              key={enemy}
+              x={x}
+              y={y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="text-[10px] fill-white/60 font-medium"
+            >
+              {info.sanskrit}
+            </text>
+          )
+        })}
+      </svg>
+    </div>
   )
 }
 
 // =============================================================================
-// TEMPLATE CARD COMPONENT
+// ENEMY MASTERY CARD (sidebar)
 // =============================================================================
 
-interface TemplateCardProps {
-  template: JourneyTemplate
-  onStart: (templateId: string) => void
-  isStarting: boolean
-}
-
-function TemplateCard({ template, onStart, isStarting }: TemplateCardProps) {
-  const { triggerHaptic } = useHapticFeedback()
-  const primaryEnemy = template.primary_enemy_tags[0] as EnemyType | undefined
-  const enemyInfo = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
-
-  const handleStart = () => {
-    triggerHaptic('medium')
-    onStart(template.id)
-  }
+function EnemyMasteryCard({
+  enemy,
+  mastery,
+  isSelected,
+  onSelect,
+}: {
+  enemy: EnemyType
+  mastery: number
+  isSelected: boolean
+  onSelect: () => void
+}) {
+  const info = ENEMY_INFO[enemy]
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 md:p-5"
-      style={{
-        borderColor: enemyInfo ? `${enemyInfo.color}30` : undefined,
-      }}
+    <motion.button
+      onClick={onSelect}
+      whileTap={{ scale: 0.97 }}
+      className={`
+        relative w-full p-3 rounded-xl border text-left transition-all duration-300
+        ${isSelected
+          ? 'border-white/25 bg-white/10 shadow-lg shadow-purple-500/10'
+          : 'border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/15'
+        }
+      `}
     >
-      {/* Enemy indicator */}
-      {enemyInfo && (
-        <div
-          className="absolute right-0 top-0 h-20 w-20 opacity-10"
-          style={{
-            background: `radial-gradient(circle at top right, ${enemyInfo.color}, transparent)`,
-          }}
-        />
-      )}
-
-      {/* Free badge */}
-      {template.is_free && (
-        <span className="absolute right-3 top-3 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-400 border border-green-500/30">
-          Free
-        </span>
-      )}
-
-      {/* Enemy tag */}
-      {enemyInfo && (
-        <div className="mb-3 flex items-center gap-2">
-          <span
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: enemyInfo.color }}
-          />
-          <span className="text-xs font-medium" style={{ color: enemyInfo.color }}>
-            {enemyInfo.sanskrit} ({enemyInfo.name})
+      <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${info.gradient} opacity-[0.06]`} />
+      <div className="relative">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-lg">{enemyEmoji(info.icon)}</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
+            {getMasteryDescription(mastery)}
           </span>
         </div>
-      )}
-
-      {/* Title */}
-      <h3 className="mb-2 text-base sm:text-lg font-semibold text-white line-clamp-2">
-        {template.title}
-      </h3>
-
-      {/* Description */}
-      <p className="mb-4 text-sm text-white/60 line-clamp-2">
-        {template.description || 'Begin your journey of transformation'}
-      </p>
-
-      {/* Metadata */}
-      <div className="mb-4 flex items-center gap-4 text-xs text-white/50">
-        <span>{template.duration_days} days</span>
-        <span className={getDifficultyColor(template.difficulty)}>
-          {getDifficultyLabel(template.difficulty)}
-        </span>
+        <div className="text-[11px] font-medium text-white/50">{info.sanskrit}</div>
+        <div className="text-sm font-semibold text-white">{info.name}</div>
+        <div className="mt-2 h-1 bg-white/10 rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full bg-gradient-to-r ${info.gradient}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${mastery}%` }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          />
+        </div>
+        <div className="mt-1 text-[10px] text-white/40">{mastery}% mastery</div>
       </div>
-
-      {/* Start button */}
-      <button
-        onClick={handleStart}
-        disabled={isStarting}
-        className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 py-2.5 text-sm font-medium text-black transition-all hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
-      >
-        {isStarting ? 'Starting...' : 'Start Journey'}
-      </button>
-    </motion.div>
+    </motion.button>
   )
 }
 
 // =============================================================================
-// ACTIVE JOURNEY CARD COMPONENT
+// ACTIVE JOURNEY CARD
 // =============================================================================
 
-interface ActiveJourneyCardProps {
-  journey: JourneyResponse
-}
-
-function ActiveJourneyCard({ journey }: ActiveJourneyCardProps) {
+function ActiveJourneyCard({ journey }: { journey: JourneyResponse }) {
   const { triggerHaptic } = useHapticFeedback()
   const primaryEnemy = journey.primary_enemies[0] as EnemyType | undefined
   const enemyInfo = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
@@ -270,71 +250,58 @@ function ActiveJourneyCard({ journey }: ActiveJourneyCardProps) {
   return (
     <Link href={`/journeys/guided/${journey.journey_id}`}>
       <motion.div
-        whileHover={{ scale: 1.02, y: -2 }}
+        whileHover={{ scale: 1.02, y: -3 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => triggerHaptic('light')}
-        className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4"
-        style={{
-          borderColor: enemyInfo ? `${enemyInfo.color}30` : undefined,
-        }}
+        className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm"
+        style={{ borderColor: enemyInfo ? `${enemyInfo.color}25` : undefined }}
       >
-        {/* Progress bar background */}
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            background: enemyInfo
-              ? `linear-gradient(to right, ${enemyInfo.color} ${journey.progress_percentage}%, transparent ${journey.progress_percentage}%)`
-              : undefined,
-          }}
-        />
+        {/* Subtle gradient fill based on progress */}
+        {enemyInfo && (
+          <div
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              background: `linear-gradient(to right, ${enemyInfo.color} ${journey.progress_percentage}%, transparent ${journey.progress_percentage}%)`,
+            }}
+          />
+        )}
 
         <div className="relative">
-          {/* Status badge */}
-          <span className={`absolute right-0 top-0 rounded-full border px-2 py-0.5 text-xs ${getJourneyStatusColor(journey.status)}`}>
+          <span className={`absolute right-0 top-0 rounded-full border px-2 py-0.5 text-[10px] ${getJourneyStatusColor(journey.status)}`}>
             {getJourneyStatusLabel(journey.status)}
           </span>
 
-          {/* Enemy indicator */}
           {enemyInfo && (
-            <div className="mb-2 flex items-center gap-2">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: enemyInfo.color }}
-              />
-              <span className="text-xs" style={{ color: enemyInfo.color }}>
+            <div className="mb-1.5 flex items-center gap-2">
+              <span className="text-sm">{enemyEmoji(enemyInfo.icon)}</span>
+              <span className="text-xs font-medium" style={{ color: enemyInfo.color }}>
                 {enemyInfo.sanskrit}
               </span>
             </div>
           )}
 
-          {/* Title */}
-          <h3 className="mb-2 pr-12 sm:pr-16 text-base font-semibold text-white line-clamp-1">
+          <h3 className="mb-2 pr-16 text-sm font-semibold text-white line-clamp-1">
             {journey.title}
           </h3>
 
-          {/* Progress info */}
           <div className="flex items-center justify-between text-xs text-white/50">
             <span>Day {journey.current_day} of {journey.total_days}</span>
-            <span className="font-medium text-amber-400">
-              {Math.round(journey.progress_percentage)}%
-            </span>
+            <span className="font-bold text-purple-300">{Math.round(journey.progress_percentage)}%</span>
           </div>
 
-          {/* Progress bar */}
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
             <motion.div
-              className="h-full rounded-full"
-              style={{ backgroundColor: enemyInfo?.color || '#F59E0B' }}
+              className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+              style={{ backgroundColor: enemyInfo?.color }}
               initial={{ width: 0 }}
               animate={{ width: `${journey.progress_percentage}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
             />
           </div>
 
-          {/* Streak */}
           {journey.streak_days > 0 && (
-            <div className="mt-2 flex items-center gap-1 text-xs text-amber-400">
-              <span>🔥</span>
+            <div className="mt-2 flex items-center gap-1 text-[11px] text-amber-400/80">
+              <span>{'\uD83D\uDD25'}</span>
               <span>{journey.streak_days} day streak</span>
             </div>
           )}
@@ -345,50 +312,134 @@ function ActiveJourneyCard({ journey }: ActiveJourneyCardProps) {
 }
 
 // =============================================================================
-// ENEMY FILTER COMPONENT
+// TEMPLATE CARD
 // =============================================================================
 
-interface EnemyFilterProps {
-  selected: EnemyType | null
-  onSelect: (enemy: EnemyType | null) => void
+function TemplateCard({
+  template,
+  onStart,
+  isStarting,
+  disabled,
+}: {
+  template: JourneyTemplate
+  onStart: (id: string) => void
+  isStarting: boolean
+  disabled: boolean
+}) {
+  const { triggerHaptic } = useHapticFeedback()
+  const primaryEnemy = template.primary_enemy_tags[0] as EnemyType | undefined
+  const enemyInfo = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -3 }}
+      whileTap={{ scale: 0.98 }}
+      className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm"
+      style={{ borderColor: enemyInfo ? `${enemyInfo.color}20` : undefined }}
+    >
+      {/* Top-right glow */}
+      {enemyInfo && (
+        <div
+          className="absolute -right-4 -top-4 h-24 w-24 opacity-[0.12] blur-xl"
+          style={{ background: `radial-gradient(circle, ${enemyInfo.color}, transparent)` }}
+        />
+      )}
+
+      <div className="relative">
+        {/* Header row: icon + free badge */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            {enemyInfo && (
+              <div
+                className={`w-9 h-9 rounded-lg bg-gradient-to-br ${enemyInfo.gradient} flex items-center justify-center text-base shadow-lg`}
+                style={{ boxShadow: `0 4px 12px ${enemyInfo.color}30` }}
+              >
+                {enemyEmoji(enemyInfo.icon)}
+              </div>
+            )}
+            <div>
+              <div className="text-[11px] font-medium" style={{ color: enemyInfo?.color || '#a78bfa' }}>
+                {enemyInfo?.sanskrit || 'Journey'}
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] text-white/40">{template.duration_days} days</span>
+                <span className={`text-[10px] ${getDifficultyColor(template.difficulty)}`}>
+                  {getDifficultyLabel(template.difficulty)}
+                </span>
+              </div>
+            </div>
+          </div>
+          {template.is_free && (
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
+              Free
+            </span>
+          )}
+        </div>
+
+        {/* Title + description */}
+        <h3 className="mb-1.5 text-sm font-semibold text-white line-clamp-2">
+          {template.title}
+        </h3>
+        <p className="mb-4 text-xs text-white/50 line-clamp-2">
+          {template.description || 'Begin your journey of inner transformation'}
+        </p>
+
+        {/* Start button */}
+        <button
+          onClick={() => {
+            triggerHaptic('medium')
+            onStart(template.id)
+          }}
+          disabled={isStarting || disabled}
+          className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 py-2 text-xs font-semibold text-white transition-all hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20"
+        >
+          {isStarting ? 'Starting...' : 'Start Journey'}
+        </button>
+      </div>
+    </motion.div>
+  )
 }
 
-function EnemyFilter({ selected, onSelect }: EnemyFilterProps) {
+// =============================================================================
+// ENEMY FILTER PILLS
+// =============================================================================
+
+function EnemyFilter({
+  selected,
+  onSelect,
+}: {
+  selected: EnemyType | null
+  onSelect: (e: EnemyType | null) => void
+}) {
   const { triggerHaptic } = useHapticFeedback()
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       <button
-        onClick={() => {
-          triggerHaptic('light')
-          onSelect(null)
-        }}
+        onClick={() => { triggerHaptic('light'); onSelect(null) }}
         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
           selected === null
-            ? 'bg-amber-500 text-black'
-            : 'bg-white/10 text-white/70 hover:bg-white/20'
+            ? 'bg-purple-500/80 text-white shadow-lg shadow-purple-500/30'
+            : 'bg-white/[0.06] text-white/60 hover:bg-white/10'
         }`}
       >
         All
       </button>
       {ENEMY_ORDER.map((enemy) => {
         const info = ENEMY_INFO[enemy]
-        const isSelected = selected === enemy
+        const isActive = selected === enemy
         return (
           <button
             key={enemy}
-            onClick={() => {
-              triggerHaptic('light')
-              onSelect(isSelected ? null : enemy)
-            }}
+            onClick={() => { triggerHaptic('light'); onSelect(isActive ? null : enemy) }}
             className="rounded-full px-3 py-1.5 text-xs font-medium transition-all"
             style={{
-              backgroundColor: isSelected ? info.color : 'rgba(255,255,255,0.1)',
-              color: isSelected ? 'black' : info.color,
-              borderColor: isSelected ? info.color : 'transparent',
+              backgroundColor: isActive ? info.color : 'rgba(255,255,255,0.05)',
+              color: isActive ? '#000' : info.color,
+              boxShadow: isActive ? `0 2px 10px ${info.color}40` : 'none',
             }}
           >
-            {info.sanskrit}
+            {enemyEmoji(info.icon)} {info.sanskrit}
           </button>
         )
       })}
@@ -397,58 +448,41 @@ function EnemyFilter({ selected, onSelect }: EnemyFilterProps) {
 }
 
 // =============================================================================
-// STATS CARDS COMPONENT
+// STAT CARD
 // =============================================================================
 
-interface StatsCardsProps {
-  dashboard: DashboardResponse | null
-}
-
-function StatsCards({ dashboard }: StatsCardsProps) {
-  if (!dashboard) return null
-
-  const stats = [
-    {
-      label: 'Active Journeys',
-      value: dashboard.active_journeys.length,
-      max: 5,
-      icon: '🎯',
-    },
-    {
-      label: 'Completed',
-      value: dashboard.completed_journeys,
-      icon: '✅',
-    },
-    {
-      label: 'Days Practiced',
-      value: dashboard.total_days_practiced,
-      icon: '📅',
-    },
-    {
-      label: 'Current Streak',
-      value: dashboard.current_streak,
-      suffix: ' days',
-      icon: '🔥',
-    },
-  ]
-
+function StatCard({
+  label,
+  value,
+  suffix,
+  max,
+  gradient,
+  delay = 0,
+}: {
+  label: string
+  value: number
+  suffix?: string
+  max?: number
+  gradient: string
+  delay?: number
+}) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-      {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 text-center"
-        >
-          <div className="text-xl sm:text-2xl mb-1">{stat.icon}</div>
-          <div className="text-xl sm:text-2xl font-bold text-white">
-            {stat.value}
-            {stat.suffix}
-            {stat.max && <span className="text-white/40 text-lg">/{stat.max}</span>}
-          </div>
-          <div className="text-xs text-white/50">{stat.label}</div>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+      className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-4 text-center backdrop-blur-sm"
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-[0.06]`} />
+      <div className="relative">
+        <div className="text-2xl sm:text-3xl font-bold text-white">
+          {value}
+          {suffix && <span className="text-lg text-white/60">{suffix}</span>}
+          {max !== undefined && <span className="text-lg text-white/30">/{max}</span>}
         </div>
-      ))}
-    </div>
+        <div className="text-[11px] text-white/45 mt-1">{label}</div>
+      </div>
+    </motion.div>
   )
 }
 
@@ -481,14 +515,11 @@ export default function JourneysPageClient() {
       setError(null)
       setIsAuthError(false)
 
-      // Always load templates (no auth required)
       const templatesPromise = journeyEngineService.listTemplates({
         enemy: selectedEnemy || undefined,
         limit: showAllTemplates ? 50 : 6,
       })
 
-      // Only attempt dashboard if user is authenticated.
-      // This avoids a 401 network error for unauthenticated users.
       let dashboardPromise: Promise<DashboardResponse | null>
       if (isAuthenticated) {
         dashboardPromise = journeyEngineService.getDashboard().catch((err) => {
@@ -529,35 +560,28 @@ export default function JourneysPageClient() {
     }
   }, [selectedEnemy, showAllTemplates, isAuthenticated])
 
-  // Wait for auth check to resolve before loading data
   useEffect(() => {
     if (!authLoading) {
       loadData()
     }
   }, [loadData, authLoading])
 
-  // Handle starting a journey
+  // Start journey handler
   const handleStartJourney = async (templateId: string) => {
     if (startingJourney) return
-
-    // Check if user has max active journeys
     if (dashboard && dashboard.active_journeys.length >= 5) {
-      setError('You can only have 5 active journeys at a time. Complete or abandon a journey to start a new one.')
+      setError('You can only have 5 active journeys at a time. Complete or abandon one first.')
       triggerHaptic('error')
       return
     }
-
     try {
       setStartingJourney(templateId)
       const journey = await journeyEngineService.startJourney({ template_id: templateId })
       triggerHaptic('success')
       router.push(`/journeys/guided/${journey.journey_id}`)
     } catch (err) {
-      const message = err instanceof JourneyEngineError
-        ? err.message
-        : 'Failed to start journey. Please try again.'
+      const message = err instanceof JourneyEngineError ? err.message : 'Failed to start journey.'
       setError(message)
-      // Detect stuck state: error says "active journeys" but dashboard shows none
       if (message.toLowerCase().includes('active journeys') && (!dashboard || dashboard.active_journeys.length === 0)) {
         setIsStuckError(true)
       }
@@ -567,306 +591,440 @@ export default function JourneysPageClient() {
     }
   }
 
-  // Handle fixing stuck journeys
+  // Fix stuck journeys
   const handleFixStuckJourneys = async () => {
     try {
       setIsFixing(true)
       setError(null)
-
       const result = await journeyEngineService.fixStuckJourneys()
-
       triggerHaptic('success')
       setIsStuckError(false)
-      setError(null)
-
-      // Reload data after fix
       await loadData()
-
-      // Show success message briefly
       setError(`Fixed! Cleared ${result.orphaned_cleaned || 0} orphaned journeys. You can now start a new journey.`)
       setTimeout(() => setError(null), 5000)
     } catch (err) {
-      const message = err instanceof JourneyEngineError
-        ? err.message
-        : 'Failed to fix stuck journeys. Please try again.'
-      setError(message)
+      setError(err instanceof JourneyEngineError ? err.message : 'Failed to fix stuck journeys.')
       triggerHaptic('error')
     } finally {
       setIsFixing(false)
     }
   }
 
-  // Render auth error state
-  if (isAuthError) {
+  const activeJourneyCount = dashboard?.active_journeys.filter(j => j.status === 'active').length || 0
+  const canStartNewJourney = activeJourneyCount < 5
+
+  // =========================================================================
+  // AUTH ERROR STATE - Sign-in prompt with enemy preview
+  // =========================================================================
+  if (isAuthError && !dashboard) {
     return (
-      <main className="mx-auto max-w-5xl space-y-6 px-3 sm:px-4 pb-28 sm:pb-20 pt-2 sm:pt-4 lg:px-6">
-        <FadeIn>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white md:text-3xl">My Journeys</h1>
-              <p className="mt-1 text-white/60">Transform through Bhagavad Gita wisdom</p>
-            </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-amber-500/30 bg-amber-900/20 p-8 text-center"
-          >
-            <div className="text-5xl mb-4">🙏</div>
-            <h3 className="text-lg font-medium text-white mb-2">Sign In to Begin Your Journey</h3>
-            <p className="text-white/60 mb-6 max-w-md mx-auto">
-              Discover guided journeys based on the Six Inner Enemies (Shadripu) from the Bhagavad Gita.
-              Track your progress, build streaks, and transform your inner world.
-            </p>
-            <Link
-              href="/onboarding"
-              className="inline-block rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 font-medium text-black hover:from-amber-400 hover:to-orange-400"
-            >
-              Sign In
-            </Link>
-          </motion.div>
-
-          {/* Preview of enemies */}
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-white mb-4">The Six Inner Enemies (Shadripu)</h2>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
-              {ENEMY_ORDER.map((enemy) => {
-                const info = ENEMY_INFO[enemy]
-                return (
-                  <div
-                    key={enemy}
-                    className="rounded-xl border border-white/10 bg-white/5 p-4 text-center"
-                    style={{ borderColor: `${info.color}30` }}
-                  >
-                    <div
-                      className="mx-auto mb-2 h-10 w-10 rounded-full flex items-center justify-center text-lg"
-                      style={{ backgroundColor: `${info.color}20`, color: info.color }}
-                    >
-                      {info.icon === 'flame' && '🔥'}
-                      {info.icon === 'zap' && '⚡'}
-                      {info.icon === 'coins' && '💰'}
-                      {info.icon === 'cloud' && '☁️'}
-                      {info.icon === 'crown' && '👑'}
-                      {info.icon === 'eye' && '👁️'}
-                    </div>
-                    <div className="text-sm font-semibold" style={{ color: info.color }}>
-                      {info.sanskrit}
-                    </div>
-                    <div className="text-xs text-white/50">{info.name}</div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </FadeIn>
-      </main>
-    )
-  }
-
-  // Render loading state (includes auth check)
-  if (loading || authLoading) {
-    return (
-      <main className="mx-auto max-w-5xl space-y-6 px-3 sm:px-4 pb-28 sm:pb-20 pt-2 sm:pt-4 lg:px-6">
-        <FadeIn>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white md:text-3xl">My Journeys</h1>
-              <p className="mt-1 text-white/60">Transform through Bhagavad Gita wisdom</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center py-20">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
-          </div>
-        </FadeIn>
-      </main>
-    )
-  }
-
-  return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 pb-20 pt-4 lg:px-6">
-      <FadeIn>
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white md:text-3xl">My Journeys</h1>
-            <p className="mt-1 text-white/60">Transform through Bhagavad Gita wisdom</p>
-            <p className="mt-1.5 text-[11px] tracking-wide text-orange-300/50" data-testid="mode-label">
-              {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.journey', 'Training Mode')}
-            </p>
-          </div>
-          <Link
-            href="/journeys/new"
-            className="rounded-xl bg-white/10 px-4 py-2.5 font-medium text-white/70 transition-all hover:bg-white/20"
-          >
-            + Custom Journey
-          </Link>
+      <div className="min-h-screen relative">
+        {/* Background */}
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-600/8 rounded-full blur-[100px]" />
         </div>
 
-        {/* Error message */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`rounded-xl border p-4 text-center ${
-                error.includes('Fixed!') || error.includes('Cleared')
-                  ? 'border-green-500/30 bg-green-900/20 text-green-400'
-                  : 'border-red-500/30 bg-red-900/20 text-red-400'
-              }`}
-            >
-              <p>{error}</p>
-              <div className="mt-2 flex items-center justify-center gap-3">
-                {isStuckError && (
-                  <button
-                    onClick={handleFixStuckJourneys}
-                    disabled={isFixing}
-                    className="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-medium text-black hover:bg-amber-400 disabled:opacity-50"
-                  >
-                    {isFixing ? 'Fixing...' : 'Fix Stuck Journeys'}
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    setError(null)
-                    setIsStuckError(false)
-                  }}
-                  className="text-sm underline hover:opacity-80"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Stats */}
-        <StatsCards dashboard={dashboard} />
-
-        {/* Active Journeys Section */}
-        {dashboard && dashboard.active_journeys.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Active Journeys</h2>
-              <span className="text-xs text-white/50">
-                {dashboard.active_journeys.length}/5 slots used
-              </span>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {dashboard.active_journeys.map((journey) => (
-                <ActiveJourneyCard key={journey.journey_id} journey={journey} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Progress Radar */}
-        {dashboard && dashboard.enemy_progress.length > 0 && (
-          <section className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 md:p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 text-center">
-              Enemy Mastery Progress
-            </h2>
-            <div className="hidden sm:block">
-              <EnemyRadarChart data={dashboard.enemy_progress} size={250} />
-            </div>
-            <div className="block sm:hidden">
-              <EnemyRadarChart data={dashboard.enemy_progress} size={200} />
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-              {ENEMY_ORDER.map((enemy) => {
-                const info = ENEMY_INFO[enemy]
-                const progress = dashboard.enemy_progress.find(p => p.enemy === enemy)
-                const mastery = progress?.mastery_level || 0
-                return (
-                  <div key={enemy} className="text-center">
-                    <div className="text-xs font-medium" style={{ color: info.color }}>
-                      {info.sanskrit}
-                    </div>
-                    <div className="text-lg font-bold text-white">{mastery}%</div>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-        )}
-
-        {/* Journey Templates Section */}
-        <section>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">Start a Guided Journey</h2>
-          </div>
-
-          {/* Enemy filter */}
-          <div className="mb-4">
-            <EnemyFilter selected={selectedEnemy} onSelect={setSelectedEnemy} />
-          </div>
-
-          {/* Templates grid */}
-          {templates.length > 0 ? (
-            <>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {templates.map((template) => (
-                  <TemplateCard
-                    key={template.id}
-                    template={template}
-                    onStart={handleStartJourney}
-                    isStarting={startingJourney === template.id}
-                  />
-                ))}
-              </div>
-              {!showAllTemplates && templates.length === 6 && (
-                <button
-                  onClick={() => setShowAllTemplates(true)}
-                  className="mt-4 w-full rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-white/70 hover:bg-white/10"
-                >
-                  View All Templates
-                </button>
-              )}
-            </>
-          ) : (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-              <div className="text-4xl mb-3">📚</div>
-              <h3 className="text-lg font-medium text-white mb-2">No Templates Available</h3>
-              <p className="text-white/60">
-                {selectedEnemy
-                  ? `No journeys found for ${ENEMY_INFO[selectedEnemy].name}. Try selecting a different enemy.`
-                  : 'Journey templates are being prepared. Please check back soon.'}
+        <main className="relative z-10 mx-auto max-w-5xl space-y-8 px-4 pb-28 pt-6">
+          <FadeIn>
+            {/* Header */}
+            <div className="text-center mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white">
+                The Six Enemies{' '}
+                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  (Shadripu)
+                </span>
+              </h1>
+              <p className="mt-3 text-white/50 max-w-xl mx-auto text-sm">
+                According to the Bhagavad Gita, these six inner enemies prevent us from attaining peace.
+                Master them through guided journeys of wisdom and practice.
               </p>
             </div>
-          )}
-        </section>
 
-        {/* Today's Steps (if any) */}
-        {dashboard && dashboard.today_steps.length > 0 && (
-          <section className="rounded-xl border border-amber-500/30 bg-amber-900/10 p-6">
-            <h2 className="text-lg font-semibold text-amber-400 mb-4">
-              Today&apos;s Practice ({dashboard.today_steps.length} steps)
-            </h2>
-            <div className="space-y-3">
-              {dashboard.today_steps.map((step) => (
-                <Link
-                  key={step.step_id}
-                  href={`/journeys/guided/${step.journey_id}`}
-                  className="block rounded-lg border border-amber-500/20 bg-amber-900/20 p-4 hover:bg-amber-900/30 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
+            {/* Sign-in card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="rounded-2xl border border-purple-500/20 bg-white/[0.03] backdrop-blur-sm p-8 text-center"
+            >
+              <div className="text-5xl mb-4">{'\uD83D\uDE4F'}</div>
+              <h3 className="text-lg font-semibold text-white mb-2">Sign In to Begin Your Journey</h3>
+              <p className="text-white/50 mb-6 max-w-md mx-auto text-sm">
+                Discover guided journeys to strengthen your inner steadiness.
+                Track progress, build streaks, and transform from within.
+              </p>
+              <Link
+                href="/onboarding"
+                className="inline-block rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-3 font-medium text-white shadow-lg shadow-purple-500/25 hover:from-purple-500 hover:to-indigo-500 transition-all"
+              >
+                Sign In
+              </Link>
+            </motion.div>
+
+            {/* Enemy preview grid */}
+            <div className="mt-8">
+              <h2 className="text-base font-semibold text-white/70 mb-4 text-center">The Six Inner Enemies</h2>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                {ENEMY_ORDER.map((enemy, i) => {
+                  const info = ENEMY_INFO[enemy]
+                  return (
+                    <motion.div
+                      key={enemy}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + i * 0.06 }}
+                      className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4 text-center"
+                    >
+                      <div
+                        className="mx-auto mb-2 h-10 w-10 rounded-full flex items-center justify-center text-lg"
+                        style={{ backgroundColor: `${info.color}15`, boxShadow: `0 0 20px ${info.color}15` }}
+                      >
+                        {enemyEmoji(info.icon)}
+                      </div>
+                      <div className="text-sm font-semibold" style={{ color: info.color }}>{info.sanskrit}</div>
+                      <div className="text-[11px] text-white/40">{info.name}</div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Show templates even when not authed */}
+            {templates.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-base font-semibold text-white/70 mb-4">Available Journeys</h2>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {templates.slice(0, 6).map((template) => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      onStart={() => router.push('/onboarding')}
+                      isStarting={false}
+                      disabled={false}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </FadeIn>
+        </main>
+      </div>
+    )
+  }
+
+  // =========================================================================
+  // LOADING STATE
+  // =========================================================================
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
+        <main className="relative z-10 mx-auto max-w-7xl px-4 pt-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white">Strengthen Steadiness Within</h1>
+            <p className="mt-2 text-white/40 text-sm">Loading your journey...</p>
+          </div>
+          <div className="flex items-center justify-center py-20">
+            <div className="relative">
+              <div className="h-14 w-14 animate-spin rounded-full border-2 border-purple-500/30 border-t-purple-500" />
+              <div className="absolute inset-0 h-14 w-14 animate-ping rounded-full border border-purple-500/20" />
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // =========================================================================
+  // MAIN DASHBOARD VIEW
+  // =========================================================================
+  return (
+    <div className="min-h-screen relative">
+      {/* Deep gradient background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
+
+      {/* Ambient floating orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] bg-purple-600/[0.07] rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] bg-indigo-600/[0.06] rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s' }} />
+        <div className="absolute top-[60%] left-[50%] w-[300px] h-[300px] bg-pink-600/[0.04] rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '10s' }} />
+      </div>
+
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-28 pt-4 sm:pt-6">
+        <FadeIn>
+          {/* ============================================================= */}
+          {/* HERO HEADER                                                    */}
+          {/* ============================================================= */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 gap-4">
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white"
+              >
+                The Six Enemies{' '}
+                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+                  (Shadripu)
+                </span>
+              </motion.h1>
+              <p className="mt-1.5 text-white/40 text-sm max-w-lg">
+                Master the inner enemies through guided journeys of Gita wisdom and daily practice.
+              </p>
+              <p className="mt-1 text-[11px] tracking-wide text-purple-400/40" data-testid="mode-label">
+                {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.journey', 'Training Mode')}
+              </p>
+            </div>
+            <Link
+              href="/journeys/new"
+              className="shrink-0 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/80"
+            >
+              + Custom Journey
+            </Link>
+          </div>
+
+          {/* ============================================================= */}
+          {/* ERROR BANNER                                                   */}
+          {/* ============================================================= */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={`mb-6 rounded-xl border p-4 text-center backdrop-blur-sm ${
+                  error.includes('Fixed!') || error.includes('Cleared')
+                    ? 'border-emerald-500/30 bg-emerald-900/20 text-emerald-300'
+                    : 'border-red-500/20 bg-red-900/15 text-red-300'
+                }`}
+              >
+                <p className="text-sm">{error}</p>
+                <div className="mt-2 flex items-center justify-center gap-3">
+                  {isStuckError && (
+                    <button
+                      onClick={handleFixStuckJourneys}
+                      disabled={isFixing}
+                      className="rounded-lg bg-purple-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+                    >
+                      {isFixing ? 'Fixing...' : 'Fix Stuck Journeys'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setError(null); setIsStuckError(false) }}
+                    className="text-xs underline hover:opacity-80"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ============================================================= */}
+          {/* STATS ROW                                                      */}
+          {/* ============================================================= */}
+          {dashboard && (
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4 mb-8">
+              <StatCard
+                label="Active Journeys"
+                value={dashboard.active_journeys.length}
+                max={5}
+                gradient="from-purple-500 to-indigo-500"
+                delay={0}
+              />
+              <StatCard
+                label="Completed"
+                value={dashboard.completed_journeys}
+                gradient="from-emerald-500 to-green-500"
+                delay={0.05}
+              />
+              <StatCard
+                label="Day Streak"
+                value={dashboard.current_streak}
+                gradient="from-amber-500 to-orange-500"
+                delay={0.1}
+              />
+              <StatCard
+                label="Days Practiced"
+                value={dashboard.total_days_practiced}
+                gradient="from-pink-500 to-rose-500"
+                delay={0.15}
+              />
+            </div>
+          )}
+
+          {/* ============================================================= */}
+          {/* TODAY'S PRACTICE (prominent when available)                     */}
+          {/* ============================================================= */}
+          {dashboard && dashboard.today_steps.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/[0.08] to-indigo-500/[0.05] p-5 backdrop-blur-sm"
+            >
+              <h2 className="text-base font-semibold text-purple-300 mb-3">
+                Today&apos;s Practice ({dashboard.today_steps.length} {dashboard.today_steps.length === 1 ? 'step' : 'steps'})
+              </h2>
+              <div className="space-y-2">
+                {dashboard.today_steps.map((step) => (
+                  <Link
+                    key={step.step_id}
+                    href={`/journeys/guided/${step.journey_id}`}
+                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all"
+                  >
                     <div>
                       <div className="text-sm font-medium text-white">{step.step_title}</div>
-                      <div className="text-xs text-white/50">Day {step.day_index}</div>
+                      <div className="text-xs text-white/40">Day {step.day_index}</div>
                     </div>
                     {step.is_completed ? (
-                      <span className="text-green-400">✓ Complete</span>
+                      <span className="text-xs text-emerald-400 font-medium">{'\u2713'} Complete</span>
                     ) : (
-                      <span className="text-amber-400">→ Continue</span>
+                      <span className="px-3 py-1 text-xs font-medium bg-purple-600/80 text-white rounded-lg">
+                        Practice Now
+                      </span>
                     )}
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
+          {/* ============================================================= */}
+          {/* MAIN 3-COLUMN LAYOUT                                           */}
+          {/* ============================================================= */}
+          <div className="grid lg:grid-cols-12 gap-6">
+            {/* ========== LEFT SIDEBAR: Radar + Enemy Cards ========== */}
+            <div className="lg:col-span-4 xl:col-span-3 space-y-5">
+              {/* Radar Chart */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+                className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 backdrop-blur-sm"
+              >
+                <h3 className="text-sm font-semibold text-white/70 mb-3 text-center">
+                  Enemy Mastery Radar
+                </h3>
+                <div className="hidden sm:block lg:hidden">
+                  <EnemyRadarChart data={dashboard?.enemy_progress || []} size={280} />
+                </div>
+                <div className="block sm:hidden lg:block">
+                  <EnemyRadarChart data={dashboard?.enemy_progress || []} size={220} />
+                </div>
+              </motion.div>
+
+              {/* Enemy Mastery Cards */}
+              <div className="grid grid-cols-2 gap-2">
+                {ENEMY_ORDER.map((enemy) => {
+                  const progress = dashboard?.enemy_progress.find(p => p.enemy === enemy)
+                  return (
+                    <EnemyMasteryCard
+                      key={enemy}
+                      enemy={enemy}
+                      mastery={progress?.mastery_level || 0}
+                      isSelected={selectedEnemy === enemy}
+                      onSelect={() => {
+                        triggerHaptic('light')
+                        setSelectedEnemy(selectedEnemy === enemy ? null : enemy)
+                      }}
+                    />
+                  )
+                })}
+              </div>
             </div>
-          </section>
-        )}
-      </FadeIn>
-    </main>
+
+            {/* ========== RIGHT: Active Journeys + Templates ========== */}
+            <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+              {/* Active Journeys */}
+              {dashboard && dashboard.active_journeys.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-base font-semibold text-white">Your Active Journeys</h2>
+                    <span className="text-xs text-white/35">{activeJourneyCount}/5 slots</span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {dashboard.active_journeys.map((journey) => (
+                      <ActiveJourneyCard key={journey.journey_id} journey={journey} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Max journeys warning */}
+              {!canStartNewJourney && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <p className="text-amber-300/80 text-xs">
+                    You have 5 active journeys. Complete or pause one to start another.
+                  </p>
+                </div>
+              )}
+
+              {/* Available Templates */}
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-semibold text-white">
+                    {selectedEnemy
+                      ? `${ENEMY_INFO[selectedEnemy].name} Journeys`
+                      : 'Available Journeys'}
+                  </h2>
+                  {selectedEnemy && (
+                    <button
+                      onClick={() => setSelectedEnemy(null)}
+                      className="text-xs text-purple-400 hover:text-purple-300"
+                    >
+                      Show All
+                    </button>
+                  )}
+                </div>
+
+                {/* Enemy filter pills */}
+                <div className="mb-4">
+                  <EnemyFilter selected={selectedEnemy} onSelect={setSelectedEnemy} />
+                </div>
+
+                {/* Templates grid */}
+                {templates.length > 0 ? (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {templates.map((template) => (
+                        <TemplateCard
+                          key={template.id}
+                          template={template}
+                          onStart={handleStartJourney}
+                          isStarting={startingJourney === template.id}
+                          disabled={!canStartNewJourney}
+                        />
+                      ))}
+                    </div>
+
+                    {!showAllTemplates && templates.length >= 6 && (
+                      <motion.button
+                        onClick={() => setShowAllTemplates(true)}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        className="mt-4 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 text-sm font-medium text-purple-400/80 hover:bg-white/[0.06] hover:text-purple-300 transition-all"
+                      >
+                        View All Templates
+                      </motion.button>
+                    )}
+                  </>
+                ) : (
+                  <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-8 text-center">
+                    <div className="text-3xl mb-3">{'\uD83D\uDCDA'}</div>
+                    <h3 className="text-base font-medium text-white mb-1">No Templates Available</h3>
+                    <p className="text-sm text-white/40">
+                      {selectedEnemy
+                        ? `No journeys found for ${ENEMY_INFO[selectedEnemy].name}. Try a different enemy.`
+                        : 'Journey templates are being prepared. Please check back soon.'}
+                    </p>
+                  </div>
+                )}
+              </section>
+            </div>
+          </div>
+        </FadeIn>
+      </main>
+    </div>
   )
 }

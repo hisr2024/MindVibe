@@ -54,7 +54,7 @@ export class JourneyEngineError extends Error {
   }
 
   isAuthError(): boolean {
-    return this.statusCode === 401;
+    return this.statusCode === 401 || this.statusCode === 403;
   }
 
   isNotFoundError(): boolean {
