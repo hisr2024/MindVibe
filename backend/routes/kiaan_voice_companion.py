@@ -1200,27 +1200,24 @@ async def quick_voice_response(
     start_time = time.monotonic()
 
     # Detect mood from the query
+    # detect_mood returns tuple[str, float], not a dict
     try:
-        mood_result = detect_mood(body.query)
-        mood = mood_result.get("mood", "neutral")
-        mood_intensity = mood_result.get("intensity", 0.5)
+        mood, mood_intensity = detect_mood(body.query)
     except Exception:
         mood = "neutral"
         mood_intensity = 0.5
 
     # Get user profile for personalization
     profile = await _get_or_create_profile(db, current_user.id)
-    user_name = profile.user_name
+    user_name = profile.preferred_name
     memories = await _get_user_memories(db, current_user.id)
 
     ai_tier = "template"
     response_text = ""
 
-    # Try AI-powered response via OpenAI
+    # Try AI-powered response via AsyncOpenAI (same pattern as _call_openai_direct)
     try:
-        from backend.services.openai_optimizer import get_openai_client
-
-        client = get_openai_client()
+        client = _get_async_openai_client()
         if client:
             name_ref = user_name or "friend"
             system_prompt = (
@@ -1255,13 +1252,13 @@ async def quick_voice_response(
     if not response_text:
         try:
             engine = get_companion_engine()
-            engine_result = engine.respond(
+            engine_result = await engine.generate_response(
                 user_message=body.query,
                 conversation_history=[],
-                detected_mood=mood,
-                mood_intensity=mood_intensity,
-                phase="connect",
                 user_name=user_name,
+                turn_count=1,
+                memories=memories,
+                language=body.language,
             )
             response_text = engine_result.get("response", "")
             ai_tier = engine_result.get("ai_tier", "template")

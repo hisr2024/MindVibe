@@ -198,16 +198,22 @@ export async function POST(request: NextRequest) {
     // ── Tier 1: Proxy to Python backend (full pipeline) ──────────────
     if (!isLocalSession) {
       try {
+        const proxyHeaders: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        const proxyCookie = request.headers.get('cookie')
+        if (proxyCookie) proxyHeaders.cookie = proxyCookie
+        const proxyAuth = request.headers.get('authorization')
+        if (proxyAuth) proxyHeaders.authorization = proxyAuth
+
         const companionResponse = await fetch(`${BACKEND_URL}/api/companion/message`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            cookie: request.headers.get('cookie') || '',
-          },
+          headers: proxyHeaders,
           body: JSON.stringify({
             session_id: body.session_id,
             message: sanitizedMessage,
             language: body.language || 'en',
+            voice_id: body.voice_id || 'sarvam-aura',
             content_type: body.content_type || 'text',
           }),
           signal: AbortSignal.timeout(15000),

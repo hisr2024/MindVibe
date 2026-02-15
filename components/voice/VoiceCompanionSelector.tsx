@@ -21,13 +21,12 @@
  * Design: Dark glass-morphism, smooth transitions, premium feel
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   VOICE_SPEAKERS,
   VOICE_LANGUAGES,
   type VoiceSpeaker,
   type VoiceLanguage,
-  type VoiceCategory,
   type VoiceProvider,
   getVoicesForLanguage,
   getBestVoiceForLanguage,
@@ -81,14 +80,6 @@ const EMOTION_TONES = [
   { id: 'compassion', label: 'Compassion', description: 'Deep empathy and care', gradient: 'from-pink-500 to-rose-500' },
   { id: 'encouragement', label: 'Uplift', description: 'Energizing and positive', gradient: 'from-yellow-500 to-amber-500' },
 ]
-
-const CATEGORY_ICONS: Record<VoiceCategory, string> = {
-  conversational: 'chat',
-  meditation: 'lotus',
-  narration: 'book',
-  sacred: 'om',
-  energetic: 'bolt',
-}
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -207,11 +198,24 @@ export default function VoiceCompanionSelector({
         }
       }
 
-      // Fallback to browser TTS preview
+      // Fallback to browser TTS preview with language-matched voice
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(voice.previewText)
         utterance.rate = voice.browserConfig.rate
         utterance.pitch = voice.browserConfig.pitch
+        // Set language so browser picks the right accent/voice
+        const langMap: Record<string, string> = {
+          en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+          bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
+          pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
+          ja: 'ja-JP', zh: 'zh-CN',
+        }
+        utterance.lang = langMap[voice.primaryLanguage] || voice.primaryLanguage
+        // Try to match a voice from the browser voices for this language
+        const voices = window.speechSynthesis.getVoices()
+        const langPrefix = (langMap[voice.primaryLanguage] || voice.primaryLanguage).split('-')[0]
+        const matchedVoice = voices.find(v => v.lang.startsWith(langPrefix))
+        if (matchedVoice) utterance.voice = matchedVoice
         utterance.onend = () => {
           setIsPreviewPlaying(false)
           setPreviewingVoiceId(null)
