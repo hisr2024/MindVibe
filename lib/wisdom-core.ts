@@ -164,7 +164,6 @@ function loadVerses(): GitaVerse[] {
   if (_versesCache) return _versesCache
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const raw = require('@/data/gita/gita_verses_complete.json') as GitaVerse[]
     _versesCache = raw
     return raw

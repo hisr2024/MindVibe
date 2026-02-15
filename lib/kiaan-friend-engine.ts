@@ -256,7 +256,7 @@ function buildEntityOpener(mood: string, topic: string, entities: string[], inte
   return pickRandom(positiveOpeners[mood] || ["I'm listening. What's on your mind?", "I'm here. What's going on?", "Tell me what's happening.", "Walk me through it."])
 }
 
-function buildCoreBody(mood: string, topic: string, intent: string, phase: string, entities: string[]): string {
+function buildCoreBody(mood: string, topic: string, intent: string, phase: string, _entities: string[]): string {
   // Phase: connect — validate the emotion, name the mechanism
   if (phase === 'connect') {
     if (intent === 'celebrating' || ['happy', 'excited', 'hopeful', 'grateful'].includes(mood)) {
