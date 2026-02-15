@@ -233,7 +233,7 @@ class VoiceFingerprint(Base):
 
     # Voice configuration
     provider: Mapped[str] = mapped_column(
-        SQLEnum(VoiceProviderEnum), default=VoiceProviderEnum.GOOGLE_NEURAL2
+        SQLEnum(VoiceProviderEnum), default=VoiceProviderEnum.SARVAM
     )
     voice_name: Mapped[str] = mapped_column(String(100), nullable=False)
     language: Mapped[str] = mapped_column(String(10), default="en")

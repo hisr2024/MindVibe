@@ -195,38 +195,38 @@ class VoiceFingerprintService:
     DEFAULT_VOICES = {
         "en": {
             "female": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "en-US-Neural2-F",
-                "fallbacks": ["en-US-AvaNeural", "en-US-AriaNeural"]
+                "provider": VoiceProvider.ELEVENLABS,
+                "voice_name": "EXAVITQu4vr4xnSDxMaL",
+                "fallbacks": ["anushka", "bhashini-devi"]
             },
             "male": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "en-US-Neural2-D",
-                "fallbacks": ["en-US-AndrewNeural", "en-US-GuyNeural"]
+                "provider": VoiceProvider.ELEVENLABS,
+                "voice_name": "onwK4e9ZLuTAKqWW03F9",
+                "fallbacks": ["abhilash", "bhashini-arya"]
             }
         },
         "hi": {
             "female": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "hi-IN-Neural2-A",
-                "fallbacks": ["hi-IN-SwaraNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "anushka",
+                "fallbacks": ["bhashini-devi"]
             },
             "male": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "hi-IN-Neural2-B",
-                "fallbacks": ["hi-IN-MadhurNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "abhilash",
+                "fallbacks": ["bhashini-arya"]
             }
         },
         "ta": {
             "female": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "ta-IN-Neural2-A",
-                "fallbacks": ["ta-IN-PallaviNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "anushka",
+                "fallbacks": ["bhashini-devi"]
             },
             "male": {
-                "provider": VoiceProvider.GOOGLE_NEURAL2,
-                "voice_name": "ta-IN-Neural2-B",
-                "fallbacks": ["ta-IN-ValluvarNeural"]
+                "provider": VoiceProvider.SARVAM,
+                "voice_name": "abhilash",
+                "fallbacks": ["bhashini-arya"]
             }
         },
     }

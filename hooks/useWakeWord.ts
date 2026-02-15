@@ -149,10 +149,14 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
 
   // Auto-start when enabled, auto-stop when disabled
   useEffect(() => {
-    if (enabled && isSupported && detectorRef.current && !isActive) {
-      start()
+    const detector = detectorRef.current
+    if (enabled && isSupported && detector && !isActive) {
+      // Schedule outside synchronous effect to avoid cascading renders
+      const id = requestAnimationFrame(() => { start() })
+      return () => cancelAnimationFrame(id)
     } else if (!enabled && isActive) {
-      stop()
+      const id = requestAnimationFrame(() => { stop() })
+      return () => cancelAnimationFrame(id)
     }
   }, [enabled, isSupported, isActive, start, stop])
 
