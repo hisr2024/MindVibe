@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
@@ -264,7 +265,7 @@ export default function ArdhaClient() {
                 value={thought}
                 onChange={e => setThought(e.target.value)}
                 placeholder="Speak or type your thought. Example: I keep messing up at work, maybe I'm just not cut out for this."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="thought-hint"
               />
               <p id="thought-hint" className="sr-only">Describe the negative thought you want to reframe</p>
@@ -349,14 +350,7 @@ export default function ArdhaClient() {
 
             <CompanionCTA fromTool="ardha" className="mt-4" />
 
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Link
-                href="/ardha"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-              >
-                Original Ardha Page
-              </Link>
-            </div>
+            <SpiritualToolsNav currentTool="ardha" className="mt-4" />
           </section>
         </div>
       </div>

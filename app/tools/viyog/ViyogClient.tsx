@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { useMicroPause } from '@/hooks/useMicroPause'
 import { BreathingDot } from '@/components/animations/BreathingDot'
@@ -225,7 +226,7 @@ export default function ViyogClient() {
                 value={concern}
                 onChange={e => setConcern(e.target.value)}
                 placeholder="Tell me what's on your mind. Example: I'm worried my presentation won't go well and everyone will think I'm not good at my job."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="concern-hint"
               />
               <p id="concern-hint" className="sr-only">Describe what you&apos;re worried about</p>
@@ -374,14 +375,7 @@ export default function ViyogClient() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/viyog"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-              >
-                Original Viyoga Page
-              </Link>
-            </div>
+            <SpiritualToolsNav currentTool="viyoga" />
           </section>
         </div>
 

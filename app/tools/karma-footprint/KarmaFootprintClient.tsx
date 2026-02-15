@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ToolHeader, ToolActionCard, KarmaPlant, type KarmaFootprintState } from '@/components/tools'
 import { apiFetch } from '@/lib/api'
 import { FadeIn } from '@/components/ui'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 
 interface FootprintAnalysis {
@@ -144,7 +145,7 @@ export default function KarmaFootprintClient() {
                     value={dayDescription}
                     onChange={e => setDayDescription(e.target.value)}
                     placeholder="Describe your interactions, choices, and moments from today. Include both positive moments and areas where you might have acted differently..."
-                    className="w-full min-h-[200px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none resize-none"
+                    className="w-full min-h-[200px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none resize-none"
                     aria-describedby="day-hint"
                   />
                   <p id="day-hint" className="sr-only">Describe your day for karma analysis</p>
@@ -297,20 +298,7 @@ export default function KarmaFootprintClient() {
             </FadeIn>
 
             <FadeIn delay={0.3}>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href="/tools/karmic-tree"
-                  className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-                >
-                  Karmic Tree
-                </Link>
-                <Link
-                  href="/tools/emotional-reset"
-                  className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-                >
-                  Emotional Reset
-                </Link>
-              </div>
+              <SpiritualToolsNav currentTool="karma-footprint" />
             </FadeIn>
           </section>
         </div>

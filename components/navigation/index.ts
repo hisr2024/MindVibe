@@ -14,3 +14,8 @@ export {
 } from './ToolsDropdown'
 export { ToolsSheet, type ToolsSheetProps } from './ToolsSheet'
 export { GlobalLanguageSelector } from './GlobalLanguageSelector'
+export {
+  SpiritualToolsNav,
+  type SpiritualToolsNavProps,
+  type SpiritualToolId,
+} from './SpiritualToolsNav'

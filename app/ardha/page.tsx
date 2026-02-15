@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
 import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
@@ -169,7 +170,7 @@ export default function ArdhaPage() {
                 value={thought}
                 onChange={e => setThought(e.target.value)}
                 placeholder="Example: I keep messing up at work, maybe I'm just not cut out for this."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
               />
 
               <div className="flex flex-wrap gap-3 mt-4">
@@ -233,6 +234,9 @@ export default function ArdhaPage() {
                 <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist. No medical, legal, or crisis advice. It transforms distorted thoughts into balanced clarity through cognitive reframing.
               </p>
             </div>
+
+            {/* Cross-feature navigation */}
+            <SpiritualToolsNav currentTool="ardha" />
           </section>
         </div>
       </div>

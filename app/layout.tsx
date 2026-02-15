@@ -22,8 +22,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata = {
-  title: 'MindVibe - Mental Health App',
-  description: 'Calm, privacy-first mental health companion with journaling, guided chats, and dashboards.',
+  title: 'MindVibe - Your Spiritual Companion',
+  description: 'A divine friend rooted in the Bhagavad Gita — 700+ verses, spiritual tools, guided wisdom journeys, and KIAAN, your AI companion for inner peace.',
   metadataBase: new URL('https://mindvibe.app'),
   manifest: '/manifest.json',
   appleWebApp: {

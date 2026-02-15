@@ -5,16 +5,29 @@
  * current tool, user text, AI text, and session signals.
  *
  * Rules:
- *   VIYOGA  → suggest ARDHA
- *   ARDHA   → suggest KIAAN
- *   COMPASS + high-reactivity keywords → suggest VIYOGA
- *   KIAAN   + practice/training request OR repeated theme ≥2 → suggest JOURNEY
- *   JOURNEY + "trigger happened today" → suggest VIYOGA
+ *   VIYOGA           → suggest ARDHA
+ *   ARDHA            → suggest KIAAN
+ *   COMPASS + high-reactivity  → suggest VIYOGA
+ *   COMPASS (default)          → suggest EMOTIONAL_RESET
+ *   KIAAN + practice/training  → suggest JOURNEY
+ *   KIAAN + repeated theme ≥2  → suggest JOURNEY
+ *   JOURNEY + trigger today    → suggest VIYOGA
+ *   EMOTIONAL_RESET            → suggest VIYOGA
+ *   KARMA_RESET                → suggest RELATIONSHIP_COMPASS
+ *   KARMA_FOOTPRINT            → suggest EMOTIONAL_RESET
  *
  * No network dependency — works fully offline.
  */
 
-export type ToolId = 'viyoga' | 'ardha' | 'kiaan' | 'compass' | 'journey'
+export type ToolId =
+  | 'viyoga'
+  | 'ardha'
+  | 'kiaan'
+  | 'compass'
+  | 'journey'
+  | 'emotional-reset'
+  | 'karma-reset'
+  | 'karma-footprint'
 
 export interface SessionSignals {
   /** Map of theme keywords to occurrence counts in this session */
@@ -103,7 +116,7 @@ export function getNextStepSuggestion(input: SuggestionInput): Suggestion | null
     }
   }
 
-  // Rule 3: COMPASS + high-reactivity keywords → suggest VIYOGA
+  // Rule 3: COMPASS + high-reactivity keywords → suggest VIYOGA, otherwise → EMOTIONAL RESET
   if (tool === 'compass') {
     const combined = `${userText} ${aiText}`
     if (HIGH_REACTIVITY_PATTERN.test(combined)) {
@@ -114,7 +127,12 @@ export function getNextStepSuggestion(input: SuggestionInput): Suggestion | null
         labelFallback: 'Stabilize with Viyoga \u2192',
       }
     }
-    return null
+    return {
+      targetTool: 'emotional-reset',
+      href: '/emotional-reset',
+      labelKey: 'navigation.next_step.emotional_reset',
+      labelFallback: 'Process with Emotional Reset \u2192',
+    }
   }
 
   // Rule 4: KIAAN + practice/training OR repeated theme ≥ 2
@@ -156,6 +174,36 @@ export function getNextStepSuggestion(input: SuggestionInput): Suggestion | null
       }
     }
     return null
+  }
+
+  // Rule 6: EMOTIONAL RESET → suggest VIYOGA (deepen detachment after processing)
+  if (tool === 'emotional-reset') {
+    return {
+      targetTool: 'viyoga',
+      href: '/viyog',
+      labelKey: 'navigation.next_step.deepen_viyoga',
+      labelFallback: 'Deepen with Viyoga \u2192',
+    }
+  }
+
+  // Rule 7: KARMA RESET → suggest RELATIONSHIP COMPASS (apply wisdom to relationship)
+  if (tool === 'karma-reset') {
+    return {
+      targetTool: 'compass',
+      href: '/relationship-compass',
+      labelKey: 'navigation.next_step.apply_compass',
+      labelFallback: 'Apply with Relationship Compass \u2192',
+    }
+  }
+
+  // Rule 8: KARMA FOOTPRINT → suggest EMOTIONAL RESET (process what surfaced)
+  if (tool === 'karma-footprint') {
+    return {
+      targetTool: 'emotional-reset',
+      href: '/emotional-reset',
+      labelKey: 'navigation.next_step.process_emotional_reset',
+      labelFallback: 'Process with Emotional Reset \u2192',
+    }
   }
 
   return null
