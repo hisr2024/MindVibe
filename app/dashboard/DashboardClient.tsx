@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback } from 'react'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 
 // Animation variants for staggered entrance
 const containerVariants = {
@@ -289,6 +290,11 @@ export default function DashboardClient() {
                 </Link>
               </motion.div>
             </div>
+          </motion.div>
+
+          {/* ─── Spiritual Toolkit ─── */}
+          <motion.div variants={itemVariants}>
+            <SpiritualToolsNav />
           </motion.div>
 
           {/* ─── Quick Access ─── */}
