@@ -32,9 +32,17 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, AsyncGenerator, Optional, Callable
 
-import aiohttp
+try:
+    import aiohttp
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    aiohttp = None  # type: ignore[assignment]
+    AIOHTTP_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
+if not AIOHTTP_AVAILABLE:
+    logger.warning("aiohttp not installed. Offline model provider features will be limited. Install with: pip install aiohttp")
 
 # Optional imports for local model support
 try:
