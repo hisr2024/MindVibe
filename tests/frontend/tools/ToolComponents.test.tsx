@@ -36,11 +36,11 @@ describe('ToolHeader', () => {
     render(
       <ToolHeader
         icon="🔄"
-        title="Ardha - Reframing Assistant"
-        subtitle="Transform negative thoughts into balanced perspectives"
+        title="Ardha - Cognitive Reframing"
+        subtitle="Transform distorted thoughts into balanced clarity"
       />
     )
-    expect(screen.getByText('Transform negative thoughts into balanced perspectives')).toBeInTheDocument()
+    expect(screen.getByText('Transform distorted thoughts into balanced clarity')).toBeInTheDocument()
   })
 
   it('renders CTA link when provided', () => {

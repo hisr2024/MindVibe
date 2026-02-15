@@ -99,13 +99,13 @@ const SECTION_CONFIG = {
     icon: '🔄',
     name: 'Ardha',
     sectionMeta: {
-      sacred_witnessing: { title: 'Sacred Witnessing', icon: '👁️', order: 1 },
-      anatomy_of_the_thought: { title: 'Anatomy of the Thought', icon: '🧠', order: 2 },
-      gita_core_reframe: { title: 'Gita Core Reframe', icon: '📜', order: 3 },
-      stabilizing_awareness: { title: 'Stabilizing Awareness', icon: '🧘', order: 4 },
-      one_grounded_reframe: { title: 'One Grounded Reframe', icon: '🔄', order: 5 },
-      one_small_action: { title: 'One Small Action', icon: '🚶', order: 6 },
-      one_question: { title: 'One Question', icon: '❓', order: 7 },
+      distortion_detection: { title: 'Distortion Detection', icon: '🔍', order: 1 },
+      emotional_precision: { title: 'Emotional Precision', icon: '🎯', order: 2 },
+      mechanism_insight: { title: 'Mechanism Insight', icon: '🧠', order: 3 },
+      gitaaligned_truth: { title: 'Gita-Aligned Truth', icon: '📜', order: 4 },
+      calibration_layer: { title: 'Calibration Layer', icon: '⚖️', order: 5 },
+      disciplined_action: { title: 'Disciplined Action', icon: '🎯', order: 6 },
+      reflective_question: { title: 'Reflective Question', icon: '❓', order: 7 },
     },
     accentColor: 'purple',
   },
@@ -263,23 +263,14 @@ export default function WisdomResponseCard({
   timestamp,
   language = 'en-IN',
   analysisMode = 'quick',
-  citations = [],
-  sources = [],
+  citations: _citations = [],
+  sources: _sources = [],
   secularMode = false,
 }: WisdomResponseCardProps) {
-  const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [showFullText, setShowFullText] = useState(false)
   const [copyLabel, setCopyLabel] = useState('Copy')
-  const [initialized, setInitialized] = useState(false)
 
   const config = SECTION_CONFIG[tool]
-  const resolvedCitations = citations.length
-    ? citations
-    : sources.map((source, index) => ({
-      source_file: source.file,
-      reference_if_any: source.reference,
-      chunk_id: `${source.file}-${index}`,
-    }))
   const accentColorMap = {
     orange: {
       border: 'border-orange-500/20',
@@ -331,16 +322,21 @@ export default function WisdomResponseCard({
     .filter(s => s.content && s.content.trim().length > 0)
     .sort((a, b) => (a.order || 99) - (b.order || 99))
 
-  // Default: expand first 2 sections (or all if ≤ 3)
-  useEffect(() => {
-    if (!initialized && parsedSections.length > 0) {
-      const defaultOpen = parsedSections.length <= 3
-        ? parsedSections.map(s => s.key)
-        : parsedSections.slice(0, 2).map(s => s.key)
-      setExpandedSections(defaultOpen)
-      setInitialized(true)
-    }
-  }, [parsedSections, initialized])
+  // Expand first 2 sections by default (or all if 3 or fewer)
+  const [expandedSections, setExpandedSections] = useState<string[]>(() => {
+    const sectionMeta = config.sectionMeta as Record<string, SectionMeta>
+    const ordered = Object.entries(sections)
+      .map(([key, content]) => ({
+        key,
+        content: content || '',
+        order: sectionMeta[key]?.order ?? 99,
+      }))
+      .filter(s => s.content.trim().length > 0)
+      .sort((a, b) => a.order - b.order)
+    return ordered.length <= 3
+      ? ordered.map(s => s.key)
+      : ordered.slice(0, 2).map(s => s.key)
+  })
 
   const expandAll = () => {
     setExpandedSections(parsedSections.map(s => s.key))
@@ -369,7 +365,7 @@ export default function WisdomResponseCard({
           <span className="text-2xl">{config.icon}</span>
           <div>
             <h3 className={`font-semibold ${accentColorClass.accent}`}>
-              {config.name}&apos;s Transmission
+              {config.name}&apos;s {tool === 'ardha' ? 'Reframe' : 'Transmission'}
             </h3>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {/* Analysis Mode Badge (for Ardha) */}
@@ -449,7 +445,7 @@ export default function WisdomResponseCard({
           onValueChange={setExpandedSections}
           className="space-y-4"
         >
-          {parsedSections.map((section, index) => (
+          {parsedSections.map((section) => (
             <AccordionPrimitive.Item
               key={section.key}
               value={section.key}
@@ -511,10 +507,10 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
       'Preparing thoughtful guidance...',
     ],
     ardha: [
-      'Stilling the mind...',
-      'Accessing Sthitaprajna wisdom...',
-      'Observing thought patterns...',
-      'Preparing sacred transmission...',
+      'Detecting distortion patterns...',
+      'Calibrating story vs fact...',
+      'Aligning Gita principles...',
+      'Preparing reframe...',
     ],
     relationship_compass: [
       'Understanding your situation...',

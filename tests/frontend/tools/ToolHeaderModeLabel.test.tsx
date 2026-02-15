@@ -28,8 +28,8 @@ describe('ToolHeader - mode label', () => {
     render(
       <ToolHeader
         icon="🔄"
-        title="Ardha - Reframing Assistant"
-        subtitle="Transform negative thoughts."
+        title="Ardha - Cognitive Reframing"
+        subtitle="Transform distorted thoughts."
         modeLabel="You are in: Clarity Mode"
       />
     )

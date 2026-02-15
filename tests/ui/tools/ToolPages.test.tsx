@@ -159,7 +159,7 @@ describe('Existing Tool Pages Headers', () => {
     const { default: ArdhaPage } = await import('@/app/ardha/page')
     render(<ArdhaPage />)
     
-    expect(screen.getByText(/Ardha – The Reframing Assistant/i)).toBeInTheDocument()
+    expect(screen.getByText(/Ardha – Cognitive Reframing/i)).toBeInTheDocument()
   })
 
   it('relationship-compass page has correct heading', async () => {

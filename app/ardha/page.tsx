@@ -66,10 +66,10 @@ type ArdhaResult = {
 }
 
 const pillars = [
-  'Validate the feeling without dilution.',
-  'Spot the distortion before offering the shift.',
-  'Use ancient-wisdom-aligned calm insight, not sermons.',
-  "Close with one doable action inside the user's control.",
+  'Detect the cognitive distortion with CBT precision.',
+  'Name the emotion and explain the psychological mechanism.',
+  'Deliver a grounded Gita-aligned truth, not abstraction.',
+  'Provide one concrete disciplined action (abhyasa).',
 ]
 
 export default function ArdhaPage() {
@@ -138,12 +138,12 @@ export default function ArdhaPage() {
         <header className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Reframes Distorted Thoughts</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Cognitive Reframing</p>
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
-                Ardha – The Reframing Assistant
+                Ardha – Cognitive Reframing
               </h1>
               <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
-                Transform negative thoughts into balanced, empowering perspectives with ancient wisdom.
+                Transform distorted, reactive thoughts into balanced, steady clarity with Gita-aligned CBT precision.
               </p>
             </div>
             <div className="flex flex-col gap-2">
@@ -189,7 +189,7 @@ export default function ArdhaPage() {
             {result && (
               <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
                 <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <span className="font-semibold text-orange-50">Ardha's response</span>
+                  <span className="font-semibold text-orange-50">Ardha&apos;s response</span>
                   <span>{new Date(result.requestedAt).toLocaleString()}</span>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
@@ -203,7 +203,7 @@ export default function ArdhaPage() {
           {/* Right: Pillars and Info */}
           <section className="space-y-4">
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-4">Ardha's Pillars</h3>
+              <h3 className="text-sm font-semibold text-orange-50 mb-4">Ardha&apos;s Pillars</h3>
               <ul className="space-y-3 text-sm text-orange-100/85">
                 {pillars.map((pillar, idx) => (
                   <li key={idx} className="flex items-start gap-2">
@@ -217,20 +217,20 @@ export default function ArdhaPage() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-3">About Ardha</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Ardha spots the distortion, validates the feeling, and reshapes it with grounded insight. Balanced reframes that leave Kiaan untouched.
+                Ardha detects cognitive distortions, names the emotion precisely, explains the psychological mechanism, and delivers a Gita-aligned truth with calibrated action. Clear, direct, grounded.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
                 <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
                 <p className="text-xs text-orange-100/70">
-                  Sacred Witnessing → Anatomy → Gita Reframe → Awareness → One reframe → One action → One question
+                  Distortion Detection → Emotional Precision → Mechanism Insight → Gita-Aligned Truth → Calibration → Disciplined Action → Reflective Question
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist and does not give medical, legal, or crisis advice. It only transforms thoughts into healthier perspectives.
+                <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist. No medical, legal, or crisis advice. It transforms distorted thoughts into balanced clarity through cognitive reframing.
               </p>
             </div>
           </section>

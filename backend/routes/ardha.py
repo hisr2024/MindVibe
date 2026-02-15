@@ -1,9 +1,8 @@
-"""Ardha Reframing Assistant - OpenAI-powered Gita reframing.
+"""Ardha Cognitive Reframing Assistant - Gita-aligned CBT reframing.
 
-ENHANCED VERSION v2.0 - Integrated with KIAAN AI Gita Core Wisdom Filter
-
-Ardha is a witnessed reframing tool rooted in Bhagavad Gita core wisdom.
-This router provides Gita-inspired reframing with OpenAI integration.
+Ardha is a cognitive reframing tool that integrates Bhagavad Gita principles
+with CBT precision. This router provides Gita-inspired cognitive reframing
+with OpenAI integration.
 
 Key Features:
 - Direct OpenAI integration for reliable response generation
@@ -11,11 +10,7 @@ Key Features:
 - JSON-based verse search using full 700+ Gita verses (secondary)
 - Core wisdom fallback for edge cases
 - Session memory for contextual conversations
-- **GITA WISDOM FILTER** - All responses pass through Gita Core Wisdom
-
-ALL RESPONSES PASS THROUGH GITA CORE WISDOM:
-Every response is filtered through the GitaWisdomFilter to ensure
-guidance is grounded in Bhagavad Gita teachings on witnessed reframing.
+- Gita Wisdom Filter on all responses
 """
 
 from __future__ import annotations
@@ -73,13 +68,13 @@ MAX_SESSION_TURNS = 10
 LOW_CONFIDENCE_THRESHOLD = 0.35  # Lowered to allow more verse matches
 
 SECTION_HEADINGS = [
-    "Sacred Witnessing",
-    "Anatomy of the Thought",
-    "Gita Core Reframe",
-    "Stabilizing Awareness",
-    "One Grounded Reframe",
-    "One Small Action",
-    "One Question",
+    "Distortion Detection",
+    "Emotional Precision",
+    "Mechanism Insight",
+    "Gita-Aligned Truth",
+    "Calibration Layer",
+    "Disciplined Action",
+    "Reflective Question",
 ]
 
 # Core Gita wisdom for fallback when RAG is unavailable
@@ -216,27 +211,6 @@ async def reframe_thought(
     )
 
     return {"response": response_text, "sources": sources}
-
-
-def _missing_context_response() -> str:
-    return "\n".join(
-        [
-            "Sacred Witnessing",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "Anatomy of the Thought",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "Gita Core Reframe",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "Stabilizing Awareness",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "One Grounded Reframe",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "One Small Action",
-            "Take one slow breath and wait for the Gita context to load.",
-            "One Question",
-            "Would you like me to retrieve more Gita wisdom for this?",
-        ]
-    )
 
 
 def _build_gita_context(verses: list[dict[str, Any]]) -> tuple[str, list[dict[str, str]]]:

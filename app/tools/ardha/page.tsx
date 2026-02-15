@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import ArdhaClient from './ArdhaClient'
 
 export const metadata: Metadata = {
-  title: 'Ardha - Reframing Assistant | MindVibe',
-  description: 'Transform negative thoughts into balanced, empowering perspectives with ancient wisdom.',
+  title: 'Ardha - Cognitive Reframing | MindVibe',
+  description: 'Transform distorted, reactive thoughts into balanced, steady clarity with Gita-aligned CBT precision.',
 }
 
 export default function ArdhaPage() {

@@ -42,7 +42,7 @@ const createPricingTiers = (
       'All Free features',
       'Journal with encryption',
       'Voice synthesis',
-      'Ardha Reframing Assistant',
+      'Ardha Cognitive Reframing',
       'Viyoga Detachment Coach',
     ],
     cta: 'Start 15-day free trial',
