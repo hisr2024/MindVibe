@@ -53,6 +53,8 @@ export function WakeWordOverlay() {
 
   // Stable ref for handleDismiss to avoid circular dependency with useVoiceOutput
   const handleDismissRef = useRef<() => void>(() => {})
+  // Stable ref for processQuery to break circular dep with useVoiceInput
+  const processQueryRef = useRef<(query: string) => void>(() => {})
 
   // Voice Input - captures user speech after wake word
   const {
@@ -65,7 +67,10 @@ export function WakeWordOverlay() {
     language: 'en',
     onTranscript: useCallback((text: string, isFinal: boolean) => {
       if (isFinal && text.trim()) {
-        setUserQuery(text.trim())
+        const query = text.trim()
+        setUserQuery(query)
+        setPhase('processing')
+        processQueryRef.current(query)
       }
     }, []),
     onError: useCallback((err: string) => {
@@ -154,12 +159,18 @@ export function WakeWordOverlay() {
     }
     cancelSpeech()
     stopListening()
+    resetTranscript()
     stopAllAudio()
+    // Reset overlay state before dismissing
+    setPhase('idle')
+    setUserQuery('')
+    setKiaanResponse('')
+    setError(null)
     dismissActivation()
     resumeWakeWord()
-  }, [cancelSpeech, stopListening, dismissActivation, resumeWakeWord])
+  }, [cancelSpeech, stopListening, resetTranscript, dismissActivation, resumeWakeWord])
 
-  // Keep ref in sync via effect to avoid ref-during-render lint error
+  // Keep refs in sync via effect to avoid ref-during-render lint error
   useEffect(() => {
     handleDismissRef.current = handleDismiss
   }, [handleDismiss])
@@ -213,18 +224,15 @@ export function WakeWordOverlay() {
     }
   }, [speak, savedLanguage])
 
+  // Keep processQueryRef in sync
+  useEffect(() => {
+    processQueryRef.current = processQuery
+  }, [processQuery])
+
   // ─── Activation Flow ─────────────────────────────────────────────
 
   useEffect(() => {
-    if (!isActivated) {
-      // Reset state when not activated
-      setPhase('idle')
-      setUserQuery('')
-      setKiaanResponse('')
-      setError(null)
-      resetTranscript()
-      return
-    }
+    if (!isActivated) return
 
     // Pause wake word detection during conversation
     pauseWakeWord()
@@ -236,8 +244,8 @@ export function WakeWordOverlay() {
     }
 
     // Start listening after a brief delay to let wake word recognition release mic
-    setPhase('listening')
     const timer = setTimeout(() => {
+      setPhase('listening')
       startListening()
     }, 400)
 
@@ -247,16 +255,7 @@ export function WakeWordOverlay() {
         clearTimeout(dismissTimerRef.current)
       }
     }
-  }, [isActivated, pauseWakeWord, startListening, resetTranscript])
-
-  // ─── Process user query when received ────────────────────────────
-
-  useEffect(() => {
-    if (!userQuery || phase !== 'listening') return
-
-    setPhase('processing')
-    processQuery(userQuery)
-  }, [userQuery, phase, processQuery])
+  }, [isActivated, pauseWakeWord, startListening])
 
   // ─── Navigate to full voice companion ────────────────────────────
 

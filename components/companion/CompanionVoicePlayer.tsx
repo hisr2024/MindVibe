@@ -12,7 +12,7 @@
  * - Adapts voice based on detected mood
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { apiFetch } from '@/lib/api'
 
 export interface VoicePlayerProps {
@@ -138,15 +138,14 @@ export default function CompanionVoicePlayer({
   useEffect(() => {
     if (state === 'playing') {
       animateWaveform()
-    } else {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current)
-      }
-      if (state === 'idle') {
-        setWaveformBars(Array(20).fill(0.1))
-      }
+    } else if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current)
     }
   }, [state, animateWaveform])
+
+  // Derive display bars: show flat bars when idle, animated bars when playing
+  const IDLE_BARS = useMemo(() => Array(20).fill(0.1) as number[], [])
+  const displayBars = state === 'idle' ? IDLE_BARS : waveformBars
 
   // Browser TTS fallback — declared BEFORE playAudio so it can be referenced
   const fallbackToBrowserTTS = useCallback((config?: { rate?: number; pitch?: number }) => {
@@ -406,7 +405,7 @@ export default function CompanionVoicePlayer({
 
       {/* Waveform visualization */}
       <div className="flex-1 flex items-center gap-[2px] h-8">
-        {waveformBars.map((height, i) => (
+        {displayBars.map((height, i) => (
           <div
             key={i}
             className={`flex-1 rounded-full transition-all duration-75 ${

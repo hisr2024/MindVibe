@@ -85,9 +85,28 @@ interface WakeWordProviderProps {
 }
 
 export function WakeWordProvider({ children }: WakeWordProviderProps) {
-  // Core state
-  const [enabled, setEnabledState] = useState(false)
-  const [sensitivity, setSensitivityState] = useState<WakeWordSensitivity>('high')
+  // Core state — lazy initializers read persisted settings from localStorage
+  const [enabled, setEnabledState] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_ENABLED)
+      return stored === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [sensitivity, setSensitivityState] = useState<WakeWordSensitivity>(() => {
+    if (typeof window === 'undefined') return 'high'
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_SENSITIVITY)
+      if (stored && ['ultra', 'high', 'medium', 'low'].includes(stored)) {
+        return stored as WakeWordSensitivity
+      }
+    } catch {
+      // localStorage may be unavailable
+    }
+    return 'high'
+  })
   const [isListening, setIsListening] = useState(false)
   const [isActivated, setIsActivated] = useState(false)
   const [lastDetection, setLastDetection] = useState<WakeWordDetectionEvent | null>(null)
@@ -107,25 +126,6 @@ export function WakeWordProvider({ children }: WakeWordProviderProps) {
   useEffect(() => {
     isPausedRef.current = isPaused
   }, [isPaused])
-
-  // ─── Load persisted settings from localStorage ───────────────────
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    try {
-      const storedEnabled = localStorage.getItem(STORAGE_KEY_ENABLED)
-      if (storedEnabled !== null) {
-        setEnabledState(storedEnabled === 'true')
-      }
-
-      const storedSensitivity = localStorage.getItem(STORAGE_KEY_SENSITIVITY)
-      if (storedSensitivity && ['ultra', 'high', 'medium', 'low'].includes(storedSensitivity)) {
-        setSensitivityState(storedSensitivity as WakeWordSensitivity)
-      }
-    } catch {
-      // localStorage may be unavailable in some contexts
-    }
-  }, [])
 
   // ─── Initialize / Destroy Detector ───────────────────────────────
   useEffect(() => {
@@ -167,7 +167,6 @@ export function WakeWordProvider({ children }: WakeWordProviderProps) {
     const shouldListen = enabled && !isPaused
 
     if (shouldListen && !detectorRef.current.getIsActive()) {
-      setError(null)
       detectorRef.current.start()
     } else if (!shouldListen && detectorRef.current.getIsActive()) {
       detectorRef.current.stop()
@@ -204,6 +203,7 @@ export function WakeWordProvider({ children }: WakeWordProviderProps) {
 
   const resume = useCallback(() => {
     setIsPaused(false)
+    setError(null)
   }, [])
 
   const dismissActivation = useCallback(() => {
