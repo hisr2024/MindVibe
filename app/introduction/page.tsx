@@ -235,7 +235,7 @@ export default function IntroductionPage() {
                 style={{ transform: 'translateZ(0)' }}
               >
                 <span>🌅</span>
-                <span>Receive Krishna's Darshan</span>
+                <span>Receive Krishna&apos;s Darshan</span>
               </motion.button>
             )}
           </motion.section>
@@ -317,7 +317,7 @@ export default function IntroductionPage() {
                 </div>
                 <div className="w-full">
                   <h3 className="text-amber-100 font-semibold text-sm sm:text-base md:text-lg">Divine Protection Shield</h3>
-                  <p className="text-amber-200/60 text-xs sm:text-sm mt-1">Activate Krishna's protection</p>
+                  <p className="text-amber-200/60 text-xs sm:text-sm mt-1">Activate Krishna&apos;s protection</p>
                 </div>
               </motion.button>
 
@@ -477,7 +477,7 @@ export default function IntroductionPage() {
             transition={{ delay: 0.8 }}
           >
             <p className="text-white/40 text-xs sm:text-sm italic max-w-md mx-auto px-4">
-              "I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end."
+              &quot;I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end.&quot;
             </p>
             <p className="text-amber-400/50 text-xs mt-2">— Bhagavad Gita 10.20</p>
           </motion.section>

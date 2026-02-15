@@ -7,6 +7,7 @@
  * with theme colors and playing state
  */
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Play, Pause, BookOpen, Clock } from 'lucide-react'
 import type { GitaChapter } from '@/lib/kiaan-vibe/types'
@@ -18,6 +19,31 @@ export interface GitaChapterCardProps {
   onSelect: () => void
   variant?: 'default' | 'compact' | 'featured'
   className?: string
+}
+
+function FeaturedParticles() {
+  const positions = useMemo(
+    // eslint-disable-next-line react-hooks/purity
+    () => Array.from({ length: 8 }, () => Math.random() * 100 + '%'),
+    []
+  )
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {positions.map((x, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-white/30"
+          initial={{ x, y: '100%' }}
+          animate={{ y: '-10%', opacity: [0, 1, 0] }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            delay: i * 0.5
+          }}
+        />
+      ))}
+    </div>
+  )
 }
 
 export function GitaChapterCard({
@@ -111,21 +137,7 @@ export function GitaChapterCard({
 
         {/* Animated particles when playing */}
         {isActive && isPlaying && (
-          <div className="absolute inset-0 overflow-hidden">
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 rounded-full bg-white/30"
-                initial={{ x: Math.random() * 100 + '%', y: '100%' }}
-                animate={{ y: '-10%', opacity: [0, 1, 0] }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  delay: i * 0.5
-                }}
-              />
-            ))}
-          </div>
+          <FeaturedParticles />
         )}
 
         {/* Content */}

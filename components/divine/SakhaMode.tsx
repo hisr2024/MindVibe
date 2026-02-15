@@ -279,7 +279,7 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
           >
-            <p className="text-amber-200/80 text-sm italic">"{greeting}"</p>
+            <p className="text-amber-200/80 text-sm italic">&quot;{greeting}&quot;</p>
           </motion.div>
         )}
       </AnimatePresence>

@@ -59,7 +59,7 @@ const QUESTIONS: QuizQuestion[] = [
  * Start a new quiz session with specified difficulty.
  */
 export function startQuiz(difficulty?: 'easy' | 'medium' | 'hard', count: number = 5): QuizSession {
-  let pool = difficulty
+  const pool = difficulty
     ? QUESTIONS.filter(q => q.difficulty === difficulty)
     : [...QUESTIONS]
 

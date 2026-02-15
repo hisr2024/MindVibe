@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Input } from '@/components/ui'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
@@ -49,10 +49,15 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('csv')
   const [selectedDataTypes, setSelectedDataTypes] = useState<ExportDataType[]>(['all'])
-  const [dateRange, setDateRange] = useState<DateRange>({
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    end: new Date().toISOString().split('T')[0],
-  })
+  const defaultDateRange = useMemo<DateRange>(() => {
+    // eslint-disable-next-line react-hooks/purity
+    const now = Date.now()
+    return {
+      start: new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      end: new Date(now).toISOString().split('T')[0],
+    }
+  }, [])
+  const [dateRange, setDateRange] = useState<DateRange>(defaultDateRange)
 
   const { isExporting, progress, error, exportData, resetState } = useDataExport()
 

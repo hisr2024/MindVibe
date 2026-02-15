@@ -274,7 +274,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
       <div className="mt-4 p-3 rounded-2xl border border-yellow-400/20 bg-yellow-950/10">
         <p className="text-xs text-yellow-100/70 leading-relaxed">
           ⚠️ <strong>Important:</strong> This assessment is for informational purposes only and is not a medical
-          diagnosis. If you're experiencing a mental health crisis, please contact a professional or call your local
+          diagnosis. If you&apos;re experiencing a mental health crisis, please contact a professional or call your local
           crisis hotline.
         </p>
       </div>

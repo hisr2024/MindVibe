@@ -235,7 +235,7 @@ export function DivineCompanion({
                   {comfortMessage.icon}
                 </motion.span>
                 <p className="text-amber-100/90 italic text-lg">
-                  "{comfortMessage.message}"
+                  &quot;{comfortMessage.message}&quot;
                 </p>
               </motion.div>
 
@@ -249,7 +249,7 @@ export function DivineCompanion({
                     exit={{ height: 0, opacity: 0 }}
                   >
                     <p className="text-amber-200/70 text-sm italic mb-2">
-                      "{currentVerse.verse}"
+                      &quot;{currentVerse.verse}&quot;
                     </p>
                     <p className="text-amber-400/60 text-xs text-right">
                       - {currentVerse.reference}

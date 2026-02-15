@@ -50,7 +50,7 @@ export default function SubscriptionDashboardPage() {
         <Card>
           <CardContent className="text-center py-12">
             <h1 className="text-xl font-semibold text-orange-50 mb-4">No Active Subscription</h1>
-            <p className="text-sm text-orange-100/70 mb-6">Get started with a plan to unlock KIAAN's full potential.</p>
+            <p className="text-sm text-orange-100/70 mb-6">Get started with a plan to unlock KIAAN&apos;s full potential.</p>
             <Button onClick={handleUpgrade}>View Plans</Button>
           </CardContent>
         </Card>

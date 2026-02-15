@@ -98,7 +98,7 @@ export function WelcomeScreen({ className = '' }: WelcomeScreenProps) {
         variants={itemVariants}
         className="mt-8 text-xs text-orange-100/50 italic"
       >
-        "The mind is everything. What you think, you become."
+        &quot;The mind is everything. What you think, you become.&quot;
       </motion.p>
     </motion.div>
   )

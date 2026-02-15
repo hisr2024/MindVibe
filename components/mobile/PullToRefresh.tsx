@@ -45,7 +45,7 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
       progress,
       isRefreshing,
       isPulling,
-      containerRef,
+      setContainerRef,
       containerProps,
     } = usePullToRefresh({
       onRefresh,
@@ -100,9 +100,9 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
           if (typeof ref === 'function') {
             ref(node)
           } else if (ref) {
-            ref.current = node
+            (ref as React.MutableRefObject<HTMLDivElement | null>).current = node
           }
-          (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+          setContainerRef(node)
         }}
         className={`relative overflow-y-auto h-full ${className}`}
         {...containerProps}

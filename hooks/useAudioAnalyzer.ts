@@ -44,6 +44,9 @@ export function useAudioAnalyzer(): AudioAnalyzerData {
     }
   }, [])
 
+  // Use a ref for recursive requestAnimationFrame to avoid self-reference before declaration
+  const analyzeFnRef = useRef<(() => void) | null>(null)
+
   const analyze = useCallback(() => {
     if (!analyzerRef.current || !isMountedRef.current) return
 
@@ -67,8 +70,11 @@ export function useAudioAnalyzer(): AudioAnalyzerData {
       setFrequencyData(new Uint8Array(dataArray))
     }
 
-    rafRef.current = requestAnimationFrame(analyze)
+    rafRef.current = requestAnimationFrame(() => analyzeFnRef.current?.())
   }, [])
+
+  // Keep the ref in sync with the latest analyze callback
+  analyzeFnRef.current = analyze
 
   const start = useCallback(async () => {
     // Clean up any existing resources to prevent leaks on repeated start() calls

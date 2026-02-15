@@ -276,7 +276,7 @@ export function AdvancedInsightsPanel({
                 <div className="text-center">
                   <div className="inline-block bg-indigo-100 px-4 py-2 rounded-full">
                     <span className="text-sm text-indigo-800 italic">
-                      "{yogaGuidance.mantra}"
+                      &quot;{yogaGuidance.mantra}&quot;
                     </span>
                   </div>
                 </div>
@@ -289,10 +289,10 @@ export function AdvancedInsightsPanel({
         {dailyIntention && (
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 text-center">
             <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-              Today's Intention
+              Today&apos;s Intention
             </div>
             <p className="text-lg text-gray-800 italic">
-              "{dailyIntention}"
+              &quot;{dailyIntention}&quot;
             </p>
           </div>
         )}

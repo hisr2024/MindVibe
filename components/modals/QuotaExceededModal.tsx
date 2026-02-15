@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Modal, Button } from '@/components/ui'
 import Link from 'next/link'
 
@@ -18,7 +19,11 @@ export function QuotaExceededModal({
   resetDate,
   onUpgrade,
 }: QuotaExceededModalProps) {
-  const daysUntilReset = Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const daysUntilReset = useMemo(
+    // eslint-disable-next-line react-hooks/purity
+    () => Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+    [resetDate]
+  )
 
   return (
     <Modal
@@ -35,7 +40,7 @@ export function QuotaExceededModal({
         </div>
 
         <p className="text-sm text-orange-100/80 mb-4">
-          You've used all {quota} of your monthly KIAAN questions. Your quota will reset in{' '}
+          You&apos;ve used all {quota} of your monthly KIAAN questions. Your quota will reset in{' '}
           <span className="font-semibold text-orange-50">{daysUntilReset} days</span>.
         </p>
 
@@ -78,7 +83,7 @@ export function QuotaExceededModal({
             </Link>
           )}
           <Button onClick={onClose} variant="ghost" size="md">
-            I'll wait for the reset
+            I&apos;ll wait for the reset
           </Button>
         </div>
       </div>

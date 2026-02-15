@@ -363,7 +363,7 @@ export default function KarmaResetClient() {
                           <p className="text-sm text-red-200/80">{error}</p>
                           {retryCount >= MAX_RETRIES && (
                             <p className="text-sm text-red-200/70 mt-2">
-                              💙 Don't worry - we've prepared fallback guidance for you below.
+                              💙 Don&apos;t worry - we&apos;ve prepared fallback guidance for you below.
                             </p>
                           )}
                         </div>

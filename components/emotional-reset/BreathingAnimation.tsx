@@ -93,6 +93,9 @@ export function BreathingAnimation({
   }
 
   // Animation loop - using refs to avoid unnecessary callback recreations
+  // Use a ref to allow recursive requestAnimationFrame without variable-before-declaration
+  const animateFnRef = useRef<((timestamp: number) => void) | null>(null)
+
   const animate = useCallback((timestamp: number) => {
     if (!isActiveRef.current || isPausedRef.current) return
 
@@ -135,13 +138,17 @@ export function BreathingAnimation({
       }
     }
 
-    animationRef.current = requestAnimationFrame(animate)
+    // Use ref for recursive call to avoid self-reference before declaration
+    animationRef.current = requestAnimationFrame((ts) => animateFnRef.current?.(ts))
   }, [getPhaseDuration, durationSeconds, narration.length, onComplete])
+
+  // Keep the ref in sync with the latest animate callback
+  animateFnRef.current = animate
 
   // Start/stop animation
   useEffect(() => {
     if (isActive && !isPaused) {
-      animationRef.current = requestAnimationFrame(animate)
+      animationRef.current = requestAnimationFrame((ts) => animateFnRef.current?.(ts))
     }
 
     return () => {
@@ -149,7 +156,7 @@ export function BreathingAnimation({
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [isActive, isPaused, animate])
+  }, [isActive, isPaused])
 
   const handleStart = () => {
     setIsActive(true)

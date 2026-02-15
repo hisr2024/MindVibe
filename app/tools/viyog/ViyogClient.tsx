@@ -228,7 +228,7 @@ export default function ViyogClient() {
                 className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="concern-hint"
               />
-              <p id="concern-hint" className="sr-only">Describe what you're worried about</p>
+              <p id="concern-hint" className="sr-only">Describe what you&apos;re worried about</p>
 
               <div className="flex flex-wrap gap-3 mt-4">
                 <button
@@ -357,7 +357,7 @@ export default function ViyogClient() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyoga</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Viyoga is like a wise friend who actually listens. It deeply analyzes YOUR specific situation - understanding what you're attached to, why it matters to you, and what's really driving the anxiety. Then it helps you find freedom through focused action, guided by timeless Bhagavad Gita wisdom on detachment.
+                Viyoga is like a wise friend who actually listens. It deeply analyzes YOUR specific situation - understanding what you&apos;re attached to, why it matters to you, and what&apos;s really driving the anxiety. Then it helps you find freedom through focused action, guided by timeless Bhagavad Gita wisdom on detachment.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
@@ -370,7 +370,7 @@ export default function ViyogClient() {
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Note:</strong> Viyoga is here for everyday worries about outcomes - it's not a substitute for therapy, crisis support, or professional help. It simply helps redirect anxious energy toward calm action.
+                <strong className="text-orange-50">Note:</strong> Viyoga is here for everyday worries about outcomes - it&apos;s not a substitute for therapy, crisis support, or professional help. It simply helps redirect anxious energy toward calm action.
               </p>
             </div>
 

@@ -112,12 +112,27 @@ export function DivineProtectionShield({
   const [currentMessage, setCurrentMessage] = useState(PROTECTION_MESSAGES[0]);
   const [currentVerse, setCurrentVerse] = useState(PROTECTION_VERSES[0]);
 
+  const activateShield = useCallback(() => {
+    setIsActive(true);
+    setPhase('activating');
+    setGroundingStep(0);
+
+    // Random message and verse
+    setCurrentMessage(PROTECTION_MESSAGES[Math.floor(Math.random() * PROTECTION_MESSAGES.length)]);
+    setCurrentVerse(PROTECTION_VERSES[Math.floor(Math.random() * PROTECTION_VERSES.length)]);
+
+    actions.activateDivinePresence();
+
+    // Progress to protection phase
+    setTimeout(() => setPhase('protection'), 3000);
+  }, [actions]);
+
   // Sync with isOpen prop
   useEffect(() => {
     if (isOpen && !isActive) {
       activateShield();
     }
-  }, [isOpen]);
+  }, [isOpen, isActive, activateShield]);
 
   // Handle grounding phase
   useEffect(() => {
@@ -133,21 +148,6 @@ export function DivineProtectionShield({
       return () => clearTimeout(timer);
     }
   }, [phase, groundingStep]);
-
-  const activateShield = useCallback(() => {
-    setIsActive(true);
-    setPhase('activating');
-    setGroundingStep(0);
-
-    // Random message and verse
-    setCurrentMessage(PROTECTION_MESSAGES[Math.floor(Math.random() * PROTECTION_MESSAGES.length)]);
-    setCurrentVerse(PROTECTION_VERSES[Math.floor(Math.random() * PROTECTION_VERSES.length)]);
-
-    actions.activateDivinePresence();
-
-    // Progress to protection phase
-    setTimeout(() => setPhase('protection'), 3000);
-  }, [actions]);
 
   const startGrounding = useCallback(() => {
     setPhase('grounding');
@@ -340,7 +340,7 @@ export function DivineProtectionShield({
                   {/* Verse */}
                   <div className="bg-amber-950/50 border border-amber-500/20 rounded-xl p-4 mb-6">
                     <p className="text-amber-200/70 text-sm italic mb-2">
-                      "{currentVerse.verse}"
+                      &quot;{currentVerse.verse}&quot;
                     </p>
                     <p className="text-amber-400/60 text-xs text-right">
                       - {currentVerse.reference}
@@ -393,7 +393,7 @@ export function DivineProtectionShield({
                       {GROUNDING_STEPS[groundingStep].action}
                     </p>
                     <p className="text-amber-200/70 italic">
-                      "{GROUNDING_STEPS[groundingStep].krishnaMessage}"
+                      &quot;{GROUNDING_STEPS[groundingStep].krishnaMessage}&quot;
                     </p>
                   </div>
 
@@ -438,7 +438,7 @@ export function DivineProtectionShield({
                     You are protected
                   </p>
                   <p className="text-amber-200/70 mb-6">
-                    Krishna's divine shield surrounds you. Go forward in peace.
+                    Krishna&apos;s divine shield surrounds you. Go forward in peace.
                   </p>
 
                   <motion.button

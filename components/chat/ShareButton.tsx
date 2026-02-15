@@ -154,7 +154,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
                   </div>
 
                   <p className="text-sm text-orange-100/80 leading-relaxed">
-                    You are about to share mental health information. Please ensure you're
+                    You are about to share mental health information. Please ensure you&apos;re
                     comfortable sharing this content publicly.
                   </p>
 

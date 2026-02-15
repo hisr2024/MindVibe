@@ -143,9 +143,9 @@ export function DivineGreeting({
           transition={{ delay: 0.6 }}
         >
           <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
-            Today's Affirmation
+            Today&apos;s Affirmation
           </p>
-          <p className="text-white/80 italic">"{affirmation}"</p>
+          <p className="text-white/80 italic">&quot;{affirmation}&quot;</p>
         </motion.div>
       )}
 
