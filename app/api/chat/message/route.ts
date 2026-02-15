@@ -93,10 +93,27 @@ export async function POST(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json()
+
+        // Check if backend returned an error status (e.g., quota exceeded)
+        if (data.status === 'error' && data.error_code === 'quota_exceeded') {
+          return NextResponse.json(
+            {
+              success: false,
+              error: data.response || 'Quota exceeded',
+              detail: {
+                error: 'quota_exceeded',
+                message: data.response,
+                upgrade_url: data.upgrade_url || '/pricing',
+              },
+            },
+            { status: 429 }
+          )
+        }
+
         return NextResponse.json({
           success: true,
           response: data.response || data.message,
-          summary: data.summary || null,  // AI-generated summary for Quick View
+          summary: data.summary || null,
           verse: data.verse,
           verses_used: data.verses_used,
           emotion: data.detected_emotion || data.emotion,

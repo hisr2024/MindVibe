@@ -14,7 +14,7 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
   const { language, config } = useLanguage()
   const [isTranslating, setIsTranslating] = useState(false)
   const [isTranslated, setIsTranslated] = useState(false)
-  const [translatedText, setTranslatedText] = useState<string | null>(null)
+  const [_translatedText, setTranslatedText] = useState<string | null>(null)
   const [error, setError] = useState(false)
 
   // Memoize translation service to avoid recreating on every render
@@ -60,7 +60,7 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
     } finally {
       setIsTranslating(false)
     }
-  }, [language, text, isTranslated, onTranslate])
+  }, [language, text, isTranslated, onTranslate, translationService])
 
   return (
     <button

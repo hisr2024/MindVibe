@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import SimpleBar from 'simplebar-react'
 import { MessageBubble } from './MessageBubble'
 import { KiaanLogo } from '@/components/branding'
@@ -37,11 +37,14 @@ export function KiaanChat({
   viewMode = 'detailed',
 }: KiaanChatProps) {
   const [inputText, setInputText] = useState('')
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
   const [confirmingClear, setConfirmingClear] = useState(false)
   const [clearedUntil, setClearedUntil] = useState(0)
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  
+
   // Get current language for voice features
   const { language } = useLanguage()
 
@@ -56,15 +59,13 @@ export function KiaanChat({
   const visibleMessages = messages.slice(clearedUntil)
   const { scrollRef, messagesEndRef, hasNewMessage, scrollToBottom } = useSmartScroll(visibleMessages.length)
 
-  // Check for reduced motion preference
+  // Listen for reduced motion preference changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-      setPrefersReducedMotion(mediaQuery.matches)
-      const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
-      mediaQuery.addEventListener('change', handler)
-      return () => mediaQuery.removeEventListener('change', handler)
-    }
+    if (typeof window === 'undefined') return
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
