@@ -61,6 +61,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Sacred serif font for Gita verses, wisdom content, and blessings */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
         {/* Set language from localStorage before hydration to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
