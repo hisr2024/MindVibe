@@ -1,7 +1,6 @@
 'use client'
 
 import { FadeIn } from '@/components/ui'
-import { ToolsDashboardSection } from '@/components/dashboard'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -56,109 +55,6 @@ const quickActionVariants = {
     },
   },
 }
-
-// Feature highlight card data for Spiritual Toolkit
-const FEATURE_HIGHLIGHTS = [
-  {
-    id: 'kiaan-chat',
-    icon: '\u{1F4AC}',
-    title: 'KIAAN Chat',
-    description: 'Your spiritual companion',
-    href: '/kiaan/chat',
-    gradient: 'from-blue-500/25 to-purple-500/25',
-    borderColor: 'border-blue-500/20 hover:border-blue-400/40',
-    iconBg: 'from-blue-400/30 to-purple-400/30',
-    badge: null,
-  },
-  {
-    id: 'journeys',
-    icon: '\u{1F549}\uFE0F',
-    title: 'Wisdom Journeys',
-    description: 'Transform within, guided by Gita',
-    href: '/journeys',
-    gradient: 'from-violet-500/25 to-indigo-500/25',
-    borderColor: 'border-violet-500/20 hover:border-violet-400/40',
-    iconBg: 'from-violet-400/30 to-indigo-400/30',
-    badge: null,
-  },
-  {
-    id: 'viyoga',
-    icon: '\u{1F3AF}',
-    title: 'Viyoga',
-    description: 'Release attachment to outcomes',
-    href: '/tools/viyog',
-    gradient: 'from-cyan-500/25 to-blue-500/25',
-    borderColor: 'border-cyan-500/20 hover:border-cyan-400/40',
-    iconBg: 'from-cyan-400/30 to-blue-400/30',
-    badge: 'new',
-  },
-  {
-    id: 'relationship-compass',
-    icon: '\u{1F9ED}',
-    title: 'Relationship Compass',
-    description: 'Gita-grounded relationship guidance',
-    href: '/tools/relationship-compass',
-    gradient: 'from-rose-500/25 to-orange-500/25',
-    borderColor: 'border-rose-500/20 hover:border-rose-400/40',
-    iconBg: 'from-rose-400/30 to-orange-400/30',
-    badge: null,
-  },
-  {
-    id: 'karma-reset',
-    icon: '\u{1F49A}',
-    title: 'Karma Reset',
-    description: 'Heal relational harm with compassion',
-    href: '/tools/karma-reset',
-    gradient: 'from-emerald-500/25 to-teal-500/25',
-    borderColor: 'border-emerald-500/20 hover:border-emerald-400/40',
-    iconBg: 'from-emerald-400/30 to-teal-400/30',
-    badge: 'new',
-  },
-  {
-    id: 'emotional-reset',
-    icon: '\u{1F4AB}',
-    title: 'Emotional Reset',
-    description: '7-step guided inner peace flow',
-    href: '/tools/emotional-reset',
-    gradient: 'from-orange-500/25 to-amber-500/25',
-    borderColor: 'border-orange-500/20 hover:border-orange-400/40',
-    iconBg: 'from-orange-400/30 to-amber-400/30',
-    badge: null,
-  },
-  {
-    id: 'ardha',
-    icon: '\u{1F504}',
-    title: 'Ardha',
-    description: 'Gita-aligned cognitive reframing',
-    href: '/ardha',
-    gradient: 'from-amber-500/25 to-yellow-500/25',
-    borderColor: 'border-amber-500/20 hover:border-amber-400/40',
-    iconBg: 'from-amber-400/30 to-yellow-400/30',
-    badge: null,
-  },
-  {
-    id: 'community-circles',
-    icon: '\u{1F91D}',
-    title: 'Community Circles',
-    description: 'Spiritual peer community',
-    href: '/community',
-    gradient: 'from-pink-500/25 to-rose-500/25',
-    borderColor: 'border-pink-500/20 hover:border-pink-400/40',
-    iconBg: 'from-pink-400/30 to-rose-400/30',
-    badge: 'new',
-  },
-  {
-    id: 'kiaan-vibe',
-    icon: '\u{1F549}\uFE0F',
-    title: 'KIAAN Vibe',
-    description: 'Gita verses, meditation & uploads',
-    href: '/kiaan-vibe',
-    gradient: 'from-violet-500/25 to-orange-500/25',
-    borderColor: 'border-violet-500/20 hover:border-orange-400/40',
-    iconBg: 'from-violet-400/30 to-orange-400/30',
-    badge: 'new',
-  },
-] as const
 
 // Quick access links for the dashboard
 const QUICK_ACCESS = [
@@ -345,56 +241,6 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── Feature Highlights (ALWAYS VISIBLE) ─── */}
-          <motion.div variants={itemVariants}>
-            <div className="mb-4 flex items-center gap-3">
-              <motion.span
-                className="text-2xl"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {'\u{2728}'}
-              </motion.span>
-              <h2 className="text-lg font-semibold text-white/90 md:text-xl">
-                Your Spiritual Toolkit
-              </h2>
-            </div>
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-              {FEATURE_HIGHLIGHTS.map((feature, idx) => (
-                <motion.div
-                  key={feature.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + idx * 0.04, type: 'spring', stiffness: 350, damping: 25 }}
-                >
-                  <Link
-                    href={feature.href}
-                    onClick={handleCardTap}
-                    className={`group relative flex flex-col items-center justify-center rounded-[20px] border bg-gradient-to-br ${feature.gradient} ${feature.borderColor} p-3 sm:p-5 shadow-mobile-glow transition-all duration-300 active:scale-[0.96] min-h-[120px] sm:min-h-[130px]`}
-                  >
-                    {feature.badge && (
-                      <span className="absolute -top-1.5 -right-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-lg">
-                        {feature.badge}
-                      </span>
-                    )}
-                    <motion.div
-                      className={`mb-2 sm:mb-3 flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.iconBg} shadow-lg`}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <span className="text-xl sm:text-3xl">{feature.icon}</span>
-                    </motion.div>
-                    <span className="text-[11px] sm:text-sm font-semibold text-white/90 group-hover:text-white text-center leading-tight">
-                      {feature.title}
-                    </span>
-                    <span className="mt-0.5 sm:mt-1 text-[9px] sm:text-[10px] text-white/45 text-center line-clamp-2">
-                      {feature.description}
-                    </span>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
           {/* ─── Quick Actions ─── */}
           <motion.div variants={itemVariants}>
             <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
@@ -528,23 +374,6 @@ export default function DashboardClient() {
           {/* ─── KIAAN Companion CTA ─── */}
           <motion.div variants={itemVariants}>
             <CompanionCTA message="Your best friend who truly listens. Talk through anything — voice or text." />
-          </motion.div>
-
-          {/* ─── All Tools & Features ─── */}
-          <motion.div variants={itemVariants}>
-            <div className="mb-5 flex items-center gap-3">
-              <motion.span
-                className="text-2xl"
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                {'\u{1F6E0}\uFE0F'}
-              </motion.span>
-              <h2 className="text-lg font-semibold text-white/90 md:text-xl">
-                All Tools & Features
-              </h2>
-            </div>
-            <ToolsDashboardSection />
           </motion.div>
         </motion.div>
       </FadeIn>
