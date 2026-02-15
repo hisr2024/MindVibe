@@ -174,9 +174,14 @@ class UserAssessment(Base):
         String(50), default="weekly", index=True
     )
     questions_responses: Mapped[dict] = mapped_column(JSON)
-    calculated_scores: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    recommended_focus_areas: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    personalized_verses: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    # Map Python names to actual DB column names from migration
+    calculated_scores: Mapped[dict | None] = mapped_column("scores", JSON, nullable=True)
+    recommended_focus_areas: Mapped[list | None] = mapped_column(
+        "recommended_actions", JSON, nullable=True
+    )
+    personalized_verses: Mapped[list | None] = mapped_column(
+        "gita_verse_recommendations", JSON, nullable=True
+    )
     overall_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -193,17 +198,23 @@ class UserVerseBookmark(Base):
     __tablename__ = "user_verses_bookmarked"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
-    )
-    verse_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("gita_verses.id", ondelete="CASCADE"), index=True
-    )
-    bookmark_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    user_id: Mapped[str] = mapped_column(String(255), index=True)
+    # DB column is VARCHAR(100), not Integer FK
+    verse_id: Mapped[str] = mapped_column(String(100), index=True)
     personal_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    tags: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    emotional_context: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    bookmarked_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=True
+    )
+    last_viewed_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    times_revisited: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
     )
 
     __table_args__ = (

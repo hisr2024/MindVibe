@@ -574,7 +574,7 @@ class ContentAcquisitionWorker:
                 quality_score=validation["confidence"],
                 validation_status="validated",
                 learned_at=datetime.now(),
-                extra_metadata={"original_item": item, "daemon_acquired": True}
+                metadata={"original_item": item, "daemon_acquired": True}
             )
 
             # Store
@@ -652,7 +652,7 @@ class ContentAcquisitionWorker:
                 quality_score=quality_score,
                 validation_status="validated",
                 learned_at=datetime.now(),
-                extra_metadata={"original_item": item, "daemon_acquired": True}
+                metadata={"original_item": item, "daemon_acquired": True}
             )
 
             # Store to JSON (legacy)
@@ -710,7 +710,7 @@ class ContentAcquisitionWorker:
                         quality_score=quality_score,
                         primary_domain=primary_domain,
                         mental_health_applications=mental_health_apps if mental_health_apps else None,
-                        extra_metadata={"daemon_acquired": True, "original_source": item.get('source', 'unknown')},
+                        metadata={"daemon_acquired": True, "original_source": item.get('source', 'unknown')},
                     )
                     db_stored = result is not None
                     break
