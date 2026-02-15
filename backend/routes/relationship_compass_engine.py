@@ -26,20 +26,14 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, ConfigDict
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.deps import get_db
 from backend.services.relationship_compass_engine import (
     EngineAnalysis,
     RelationshipMode,
     ai_analysis,
     build_fallback_response,
-    detect_mode,
-    detect_safety_concern,
     extract_response_sections,
-    rule_based_analysis,
 )
 from backend.services.relationship_compass_engine_prompt import (
     RELATIONSHIP_ENGINE_SYSTEM_PROMPT,
@@ -105,7 +99,6 @@ class AnalyzeRequest(BaseModel):
 @router.post("/clarity")
 async def get_clarity(
     payload: ClarityRequest,
-    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Generate relationship clarity guidance.
 
@@ -232,7 +225,6 @@ async def get_clarity(
 @router.post("/analyze")
 async def analyze_situation(
     payload: AnalyzeRequest,
-    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Analyze mode and mechanism without generating full guidance.
 
