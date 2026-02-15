@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
       .slice(0, 2000)
 
     try {
-      // Try enhanced voice query endpoint first
-      const response = await fetch(`${BACKEND_URL}/api/voice/query/enhanced`, {
+      // Try voice query endpoint
+      const response = await fetch(`${BACKEND_URL}/api/voice/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

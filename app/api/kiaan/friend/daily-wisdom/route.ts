@@ -90,7 +90,7 @@ const WISDOM_LIBRARY: DailyWisdomEntry[] = [
 export async function GET() {
   // Try backend first
   try {
-    const res = await fetch(`${BACKEND_URL}/api/guidance/daily-wisdom`, {
+    const res = await fetch(`${BACKEND_URL}/api/kiaan/friend/daily-wisdom`, {
       signal: AbortSignal.timeout(3000),
     })
     if (res.ok) {
