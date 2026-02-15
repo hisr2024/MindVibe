@@ -89,9 +89,14 @@ const cases: TestCase[] = [
     },
   },
   {
-    name: 'compass without reactivity keywords returns null',
+    name: 'compass without reactivity keywords suggests emotional-reset',
     input: { tool: 'compass', userText: 'I feel disconnected from my partner' },
-    expected: null,
+    expected: {
+      targetTool: 'emotional-reset',
+      href: '/emotional-reset',
+      labelKey: 'navigation.next_step.emotional_reset',
+      labelFallback: 'Process with Emotional Reset \u2192',
+    },
   },
 
   // --- Rule 4: KIAAN + practice keywords → JOURNEY ---

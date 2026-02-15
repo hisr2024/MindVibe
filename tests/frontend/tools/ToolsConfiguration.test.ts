@@ -28,7 +28,7 @@ describe('Tool Configuration', () => {
         id: 'karma-reset',
         icon: '💚',
         title: 'Karma Reset',
-        description: 'Heal relational harm',
+        description: 'Heal relational harm with compassion',
         gradient: 'from-emerald-400/30 to-teal-400/30',
         href: '/tools/karma-reset',
         badge: 'new',

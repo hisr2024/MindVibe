@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { CopyButton } from './CopyButton'
 import { ShareButton } from './ShareButton'
 import { VoiceOutputButton } from '@/components/voice'
@@ -124,7 +125,12 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
   const showSummaryToggle = sender === 'assistant' && condensedSummary && condensedSummary !== text
 
   return (
-    <div className="space-y-3 group">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+      className="space-y-3 group"
+    >
       <div className="flex items-center gap-2 text-xs text-orange-100/60">
         <span className="font-semibold text-orange-50">{sender === 'user' ? 'You' : 'KIAAN'}</span>
         <span suppressHydrationWarning>
@@ -162,7 +168,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       </div>
       
       <div
-        className={`whitespace-pre-wrap rounded-2xl px-4 py-3.5 text-sm leading-[1.75] ${
+        className={`whitespace-pre-wrap rounded-2xl px-4 py-3.5 text-sm leading-[1.85] ${
           sender === 'user'
             ? 'bg-orange-500/10 text-orange-50'
             : status === 'error'
@@ -170,7 +176,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
               : 'bg-white/5 text-orange-50 border border-orange-500/15'
         } ${isTranslated ? 'border-l-2 border-l-blue-400/50' : ''}`}
       >
-        <div className={sender === 'assistant' ? 'max-w-[65ch]' : ''}>
+        <div className={sender === 'assistant' ? 'max-w-[65ch] font-sacred' : ''}>
           {displayText || ''}
         </div>
         
@@ -279,7 +285,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

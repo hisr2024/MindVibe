@@ -26,6 +26,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
         heading: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        sacred: ['var(--font-sacred)', 'Crimson Text', 'Georgia', 'serif'],
       },
       backgroundImage: {
         mvGradientSunrise: 'linear-gradient(135deg, #ff7a3c 0%, #ff9f52 50%, #ffd36f 100%)',

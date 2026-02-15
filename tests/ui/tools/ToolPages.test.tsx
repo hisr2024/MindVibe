@@ -84,14 +84,14 @@ describe('Karma Footprint Page', () => {
     })
   })
 
-  it('renders related tools links', async () => {
+  it('renders related tools links via SpiritualToolsNav', async () => {
     const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
     render(<KarmaFootprintPage />)
 
     await waitFor(() => {
+      // SpiritualToolsNav renders cross-feature navigation links
       expect(screen.getByText('Emotional Reset')).toBeInTheDocument()
-      expect(screen.getByText('Full Karmic Tree View')).toBeInTheDocument()
-      expect(screen.getByText('Sacred Reflections Journal')).toBeInTheDocument()
+      expect(screen.getByText('Karma Reset')).toBeInTheDocument()
     })
   })
 
@@ -152,7 +152,7 @@ describe('Existing Tool Pages Headers', () => {
     const { default: ViyogPage } = await import('@/app/viyog/page')
     render(<ViyogPage />)
 
-    expect(screen.getByText(/Viyoga – The Detachment Coach/i)).toBeInTheDocument()
+    expect(screen.getByText('Viyoga')).toBeInTheDocument()
   })
 
   it('ardha page has correct heading', async () => {

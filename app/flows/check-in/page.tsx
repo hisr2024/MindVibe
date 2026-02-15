@@ -1,29 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { getBlessing, moodToContext } from '@/lib/blessings'
+import { useEmotionTheme } from '@/hooks/useEmotionTheme'
 
 const states = ['Excellent', 'Good', 'Neutral', 'Low', 'Very Low']
 const prompts = ['What triggered this?', 'Where do you feel it?', 'What helps right now?']
 
-// KIAAN micro-responses based on mood selection - empathetic, human-centered responses
-const moodResponses: Record<string, string> = {
-  'Excellent': "That's wonderful! I'm so glad you're feeling this way. 💙",
-  'Good': "It's beautiful to feel good. I'm here to support your journey. 💙",
-  'Neutral': "I'm here with you. Sometimes neutral is exactly where we need to be. 💙",
-  'Low': "I see you, and I'm here. You're not alone in this. 💙",
-  'Very Low': "I'm here with you through this difficult moment. You matter. 💙",
+/** Maps mood picker labels to numeric scores for the emotion classifier */
+const MOOD_SCORES: Record<string, number> = {
+  'Excellent': 9,
+  'Good': 7,
+  'Neutral': 5,
+  'Low': 3,
+  'Very Low': 1,
 }
 
 export default function StateCheckIn() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const [showResponse, setShowResponse] = useState(false)
+  const { updateFromMood } = useEmotionTheme()
 
-  const handleMoodSelect = (state: string) => {
+  const handleMoodSelect = useCallback((state: string) => {
     setSelectedMood(state)
     setShowResponse(true)
+
+    // Update the global emotion theme based on mood selection
+    updateFromMood({ score: MOOD_SCORES[state] ?? 5 })
+
     // Hide response after 4 seconds
     setTimeout(() => setShowResponse(false), 4000)
-  }
+  }, [updateFromMood])
 
   return (
     <section className="space-y-6 rounded-3xl border border-orange-500/15 bg-black/50 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
@@ -52,15 +59,15 @@ export default function StateCheckIn() {
             ))}
           </div>
           
-          {/* KIAAN Micro-Response - Empathetic state check-in response */}
+          {/* KIAAN Micro-Blessing — sacred Gita-aligned response */}
           {showResponse && selectedMood && (
             <div className="mt-3 rounded-2xl border border-indigo-400/30 bg-gradient-to-r from-indigo-950/50 via-indigo-900/40 to-indigo-950/50 p-4 animate-in fade-in duration-300 transition-all">
               <div className="flex items-start gap-3">
                 <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-xs font-bold text-slate-900">
                   K
                 </div>
-                <p className="text-sm text-orange-50 leading-relaxed">
-                  {moodResponses[selectedMood]}
+                <p className="font-sacred text-sm text-orange-50 leading-relaxed italic">
+                  {getBlessing(moodToContext(selectedMood))}
                 </p>
               </div>
             </div>
