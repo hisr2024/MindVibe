@@ -42,13 +42,13 @@ function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
 }
 
 const ARDHA_SECTION_HEADINGS = [
-  'Sacred Witnessing',
-  'Anatomy of the Thought',
-  'Gita Core Reframe',
-  'Stabilizing Awareness',
-  'One Grounded Reframe',
-  'One Small Action',
-  'One Question',
+  'Distortion Detection',
+  'Emotional Precision',
+  'Mechanism Insight',
+  'Gita-Aligned Truth',
+  'Calibration Layer',
+  'Disciplined Action',
+  'Reflective Question',
 ]
 
 function parseArdhaSections(response: string): Record<string, string> {
@@ -152,10 +152,10 @@ const ANALYSIS_MODES: {
 ]
 
 const pillars = [
-  'Sacred witnessing - honor the courage to examine thoughts.',
-  'Chitta-Vritti teaching - understand the anatomy of thought.',
-  'Sthitaprajna wisdom - become one of steady mind.',
-  'Sakshi Bhava practice - cultivate witness consciousness.',
+  'Distortion detection - identify cognitive distortions with CBT precision.',
+  'Gita-aligned truth - grounded principles translated into modern clarity.',
+  'Calibration - distinguish story from fact, identity from behavior.',
+  'Disciplined action - one concrete corrective step rooted in abhyasa.',
 ]
 
 export default function ArdhaClient() {
@@ -255,8 +255,8 @@ export default function ArdhaClient() {
         {/* Header */}
         <ToolHeader
           icon="🔄"
-          title="Ardha - Reframing Assistant"
-          subtitle="Transform negative thoughts into balanced, empowering perspectives with ancient wisdom."
+          title="Ardha - Cognitive Reframing"
+          subtitle="Transform distorted, reactive thoughts into balanced, steady clarity with Gita-aligned CBT precision."
           backLink={{ label: 'Back to home', href: '/' }}
           modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.ardha', 'Clarity Mode')}`}
         />
@@ -266,7 +266,7 @@ export default function ArdhaClient() {
           <ToolActionCard
             icon="💭"
             title="Reframe a Thought"
-            description="Share a negative or distressing thought for a calmer perspective."
+            description="Share a distorted or reactive thought for grounded, precise clarity."
             ctaLabel="Start Reframing"
             onClick={() => document.getElementById('thought-input')?.focus()}
             gradient="from-purple-500/10 to-indigo-500/10"
@@ -274,7 +274,7 @@ export default function ArdhaClient() {
           <ToolActionCard
             icon="📚"
             title="Learn the Principles"
-            description="Understand how ancient wisdom applies to cognitive reframing."
+            description="Understand how Gita principles and CBT techniques work together."
             ctaLabel="Explore Wisdom"
             href="/wisdom-rooms"
             gradient="from-amber-500/10 to-orange-500/10"
@@ -398,20 +398,20 @@ export default function ArdhaClient() {
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <h3 className="text-sm font-semibold text-orange-50 mb-3">About Ardha</h3>
               <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
-                Ardha spots the distortion, validates the feeling, and reshapes it with grounded insight. Balanced reframes that leave Kiaan untouched.
+                Ardha detects cognitive distortions, names the emotion precisely, explains the psychological mechanism, and delivers a Gita-aligned truth with calibrated action. Clear, direct, grounded.
               </p>
 
               <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
                 <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
                 <p className="text-xs text-orange-100/70">
-                  Sacred Witnessing → Anatomy → Gita Reframe → Awareness → One reframe → One action → One question
+                  Distortion Detection → Emotional Precision → Mechanism Insight → Gita-Aligned Truth → Calibration → Disciplined Action → Reflective Question
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist and does not give medical, legal, or crisis advice. It only transforms thoughts into healthier perspectives.
+                <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist. No medical, legal, or crisis advice. It transforms distorted thoughts into balanced clarity through cognitive reframing.
               </p>
             </div>
 

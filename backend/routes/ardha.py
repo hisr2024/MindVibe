@@ -73,13 +73,13 @@ MAX_SESSION_TURNS = 10
 LOW_CONFIDENCE_THRESHOLD = 0.35  # Lowered to allow more verse matches
 
 SECTION_HEADINGS = [
-    "Sacred Witnessing",
-    "Anatomy of the Thought",
-    "Gita Core Reframe",
-    "Stabilizing Awareness",
-    "One Grounded Reframe",
-    "One Small Action",
-    "One Question",
+    "Distortion Detection",
+    "Emotional Precision",
+    "Mechanism Insight",
+    "Gita-Aligned Truth",
+    "Calibration Layer",
+    "Disciplined Action",
+    "Reflective Question",
 ]
 
 # Core Gita wisdom for fallback when RAG is unavailable
@@ -221,19 +221,19 @@ async def reframe_thought(
 def _missing_context_response() -> str:
     return "\n".join(
         [
-            "Sacred Witnessing",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "Anatomy of the Thought",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "Gita Core Reframe",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "Stabilizing Awareness",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "One Grounded Reframe",
-            "I don’t yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
-            "One Small Action",
+            "Distortion Detection",
+            "I don't yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
+            "Emotional Precision",
+            "I don't yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
+            "Mechanism Insight",
+            "I don't yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
+            "Gita-Aligned Truth",
+            "I don't yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
+            "Calibration Layer",
+            "I don't yet have the relevant Gita wisdom in my repository context. Let me retrieve it.",
+            "Disciplined Action",
             "Take one slow breath and wait for the Gita context to load.",
-            "One Question",
+            "Reflective Question",
             "Would you like me to retrieve more Gita wisdom for this?",
         ]
     )

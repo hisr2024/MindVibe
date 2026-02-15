@@ -99,6 +99,14 @@ const SECTION_CONFIG = {
     icon: '🔄',
     name: 'Ardha',
     sectionMeta: {
+      distortion_detection: { title: 'Distortion Detection', icon: '🔍', order: 1 },
+      emotional_precision: { title: 'Emotional Precision', icon: '🎯', order: 2 },
+      mechanism_insight: { title: 'Mechanism Insight', icon: '🧠', order: 3 },
+      gitaaligned_truth: { title: 'Gita-Aligned Truth', icon: '📜', order: 4 },
+      calibration_layer: { title: 'Calibration Layer', icon: '⚖️', order: 5 },
+      disciplined_action: { title: 'Disciplined Action', icon: '🎯', order: 6 },
+      reflective_question: { title: 'Reflective Question', icon: '❓', order: 7 },
+      // Legacy sections for backwards compatibility
       sacred_witnessing: { title: 'Sacred Witnessing', icon: '👁️', order: 1 },
       anatomy_of_the_thought: { title: 'Anatomy of the Thought', icon: '🧠', order: 2 },
       gita_core_reframe: { title: 'Gita Core Reframe', icon: '📜', order: 3 },
@@ -369,7 +377,7 @@ export default function WisdomResponseCard({
           <span className="text-2xl">{config.icon}</span>
           <div>
             <h3 className={`font-semibold ${accentColorClass.accent}`}>
-              {config.name}&apos;s Transmission
+              {config.name}&apos;s {tool === 'ardha' ? 'Reframe' : 'Transmission'}
             </h3>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {/* Analysis Mode Badge (for Ardha) */}
@@ -511,10 +519,10 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
       'Preparing thoughtful guidance...',
     ],
     ardha: [
-      'Stilling the mind...',
-      'Accessing Sthitaprajna wisdom...',
-      'Observing thought patterns...',
-      'Preparing sacred transmission...',
+      'Detecting distortion patterns...',
+      'Calibrating story vs fact...',
+      'Aligning Gita principles...',
+      'Preparing reframe...',
     ],
     relationship_compass: [
       'Understanding your situation...',
