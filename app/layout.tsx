@@ -1,6 +1,5 @@
 import './globals.css'
 import type { Viewport } from 'next'
-import { Crimson_Text } from 'next/font/google'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
@@ -11,14 +10,6 @@ import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordListener'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
-
-const crimsonText = Crimson_Text({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-crimson',
-  display: 'swap',
-})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -68,8 +59,22 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={crimsonText.variable}>
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Load Crimson Text at runtime — no build-time network dependency */}
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
+        />
         {/* Set language from localStorage before hydration to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
