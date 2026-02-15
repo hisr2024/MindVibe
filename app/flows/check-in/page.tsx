@@ -14,7 +14,7 @@
  * as the user progresses, creating a feeling of entering a divine realm.
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getBlessing, moodToContext } from '@/lib/blessings'
 import { useEmotionTheme } from '@/hooks/useEmotionTheme'
@@ -128,12 +128,22 @@ export default function SacredCheckIn() {
   const [reflection, setReflection] = useState('')
   const { updateFromMood } = useEmotionTheme()
   const { triggerHaptic } = useHapticFeedback()
+  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clean up any pending phase timers on unmount
+  useEffect(() => {
+    return () => {
+      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
+    }
+  }, [])
 
   // Gateway auto-advances after a brief sacred pause
   useEffect(() => {
     if (phase === 'gateway') {
-      const timer = setTimeout(() => setPhase('heart'), 3800)
-      return () => clearTimeout(timer)
+      phaseTimerRef.current = setTimeout(() => setPhase('heart'), 3800)
+      return () => {
+        if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
+      }
     }
   }, [phase])
 
@@ -143,7 +153,8 @@ export default function SacredCheckIn() {
       triggerHaptic('medium')
       updateFromMood({ score: emotion.score })
       // Brief pause to let the selection animate, then advance
-      setTimeout(() => setPhase('body'), 900)
+      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
+      phaseTimerRef.current = setTimeout(() => setPhase('body'), 900)
     },
     [triggerHaptic, updateFromMood],
   )
@@ -166,7 +177,7 @@ export default function SacredCheckIn() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-violet-950/20 to-slate-950 px-4 pb-28 sm:pb-16">
       {/* ─── Ambient sacred particles (always visible) ─── */}
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         {SACRED_PARTICLES.map((p) => (
           <motion.div
             key={p.id}
@@ -184,7 +195,7 @@ export default function SacredCheckIn() {
       </div>
 
       {/* ─── Sacred geometry background ring (always visible) ─── */}
-      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center" aria-hidden>
+      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center" aria-hidden="true">
         <motion.div
           className="h-[500px] w-[500px] rounded-full border border-violet-500/[0.06]"
           animate={{ rotate: 360, scale: [1, 1.04, 1] }}
@@ -302,7 +313,8 @@ export default function SacredCheckIn() {
           {phase === 'heart' && (
             <motion.div key="heart" {...phaseTransition} className="space-y-8 pt-4">
               {/* Phase indicator */}
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2" role="progressbar" aria-valuenow={1} aria-valuemin={1} aria-valuemax={4} aria-label="Step 1 of 4: Heart">
+                <span className="sr-only">Step 1 of 4</span>
                 {(['heart', 'body', 'reflect', 'blessing'] as Phase[]).map((p, i) => (
                   <motion.div
                     key={p}
@@ -312,6 +324,7 @@ export default function SacredCheckIn() {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.1 }}
+                    aria-hidden="true"
                   />
                 ))}
               </div>
@@ -364,20 +377,20 @@ export default function SacredCheckIn() {
                       whileTap={{ scale: 0.95 }}
                     >
                       {/* Emotion icon orb */}
-                      <motion.div
+                      <motion.span
                         className={`flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br ${emotion.gradient} shadow-lg`}
                         animate={isSelected ? { scale: [1, 1.15, 1] } : {}}
                         transition={{ duration: 1.5, repeat: isSelected ? Infinity : 0 }}
                       >
                         <span className="text-2xl">{emotion.icon}</span>
-                      </motion.div>
+                      </motion.span>
 
                       <span className="text-sm font-semibold text-white/85">{emotion.label}</span>
                       <span className="text-[11px] text-white/40 leading-tight">{emotion.description}</span>
 
                       {/* Selection glow ring */}
                       {isSelected && (
-                        <motion.div
+                        <motion.span
                           className="absolute inset-0 rounded-[20px] pointer-events-none"
                           initial={{ opacity: 0 }}
                           animate={{
@@ -402,7 +415,8 @@ export default function SacredCheckIn() {
           {phase === 'body' && (
             <motion.div key="body" {...phaseTransition} className="space-y-6 pt-4">
               {/* Phase indicator */}
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2" role="progressbar" aria-valuenow={2} aria-valuemin={1} aria-valuemax={4} aria-label="Step 2 of 4: Body">
+                <span className="sr-only">Step 2 of 4</span>
                 {(['heart', 'body', 'reflect', 'blessing'] as Phase[]).map((p) => (
                   <div
                     key={p}
@@ -411,6 +425,7 @@ export default function SacredCheckIn() {
                         : p === phase ? 'w-8 bg-violet-400'
                         : 'w-1.5 bg-violet-800/50'
                     }`}
+                    aria-hidden="true"
                   />
                 ))}
               </div>
@@ -461,7 +476,7 @@ export default function SacredCheckIn() {
                         whileTap={{ scale: 0.97 }}
                       >
                         {/* Chakra dot */}
-                        <motion.div
+                        <motion.span
                           className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
                           style={{ backgroundColor: isActive ? chakra.color : `${chakra.color}33` }}
                           animate={isActive ? {
@@ -474,31 +489,31 @@ export default function SacredCheckIn() {
                           } : {}}
                           transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
                         >
-                          <div
-                            className="h-2.5 w-2.5 rounded-full"
+                          <span
+                            className="inline-block h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: isActive ? '#fff' : chakra.color }}
                           />
-                        </motion.div>
+                        </motion.span>
 
-                        <div className="flex-1 text-left min-w-0">
-                          <span className={`text-sm font-medium transition-colors ${isActive ? 'text-white/90' : 'text-white/60'}`}>
+                        <span className="flex-1 text-left min-w-0">
+                          <span className={`block text-sm font-medium transition-colors ${isActive ? 'text-white/90' : 'text-white/60'}`}>
                             {chakra.label}
                           </span>
-                          <p className={`text-[11px] leading-tight transition-colors ${isActive ? 'text-white/50' : 'text-white/30'}`}>
+                          <span className={`block text-[11px] leading-tight transition-colors ${isActive ? 'text-white/50' : 'text-white/30'}`}>
                             {chakra.hint}
-                          </p>
-                        </div>
+                          </span>
+                        </span>
 
                         {isActive && (
-                          <motion.div
+                          <motion.span
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             className="flex-shrink-0 h-5 w-5 rounded-full bg-white/10 flex items-center justify-center"
                           >
-                            <svg className="h-3 w-3 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-3 w-3 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
-                          </motion.div>
+                          </motion.span>
                         )}
                       </motion.button>
                     )
@@ -516,7 +531,7 @@ export default function SacredCheckIn() {
                 whileTap={{ scale: 0.96 }}
               >
                 Continue your journey
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
               </motion.button>
@@ -527,7 +542,8 @@ export default function SacredCheckIn() {
           {phase === 'reflect' && (
             <motion.div key="reflect" {...phaseTransition} className="space-y-6 pt-4">
               {/* Phase indicator */}
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2" role="progressbar" aria-valuenow={3} aria-valuemin={1} aria-valuemax={4} aria-label="Step 3 of 4: Reflect">
+                <span className="sr-only">Step 3 of 4</span>
                 {(['heart', 'body', 'reflect', 'blessing'] as Phase[]).map((p) => (
                   <div
                     key={p}
@@ -536,6 +552,7 @@ export default function SacredCheckIn() {
                         : p === phase ? 'w-8 bg-violet-400'
                         : 'w-1.5 bg-violet-800/50'
                     }`}
+                    aria-hidden="true"
                   />
                 ))}
               </div>
@@ -601,9 +618,9 @@ export default function SacredCheckIn() {
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
                   placeholder="What weighs on your heart today? What would you share with a trusted divine friend?..."
+                  aria-label="Your sacred reflection"
                   className="relative w-full rounded-[18px] bg-transparent px-5 py-5 text-sm text-violet-100/80 placeholder:text-violet-400/30 outline-none resize-none font-sacred leading-relaxed"
                   rows={6}
-                  autoFocus
                 />
               </motion.div>
 
@@ -661,13 +678,15 @@ export default function SacredCheckIn() {
           {phase === 'blessing' && (
             <motion.div key="blessing" {...phaseTransition} className="space-y-8 pt-6 sm:pt-10">
               {/* Phase indicator — all complete */}
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2" role="progressbar" aria-valuenow={4} aria-valuemin={1} aria-valuemax={4} aria-label="Step 4 of 4: Blessing">
+                <span className="sr-only">Step 4 of 4</span>
                 {(['heart', 'body', 'reflect', 'blessing'] as Phase[]).map((p) => (
                   <div
                     key={p}
                     className={`h-1.5 rounded-full ${
                       p === phase ? 'w-8 bg-amber-400' : 'w-1.5 bg-violet-400/60'
                     }`}
+                    aria-hidden="true"
                   />
                 ))}
               </div>
@@ -735,9 +754,9 @@ export default function SacredCheckIn() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 1.4, duration: 0.6 }}
                     >
-                      {selectedEmotion?.score && selectedEmotion.score >= 7
+                      {selectedEmotion != null && selectedEmotion.score >= 7
                         ? 'Your light is beautiful. Carry it forward and let it touch others today.'
-                        : selectedEmotion?.score && selectedEmotion.score <= 3
+                        : selectedEmotion != null && selectedEmotion.score <= 3
                           ? 'I see your pain, dear soul. You are held. This darkness is not your destination — it is the passage to deeper wisdom.'
                           : 'You are exactly where you need to be. Trust the unfolding.'}
                     </motion.p>
@@ -795,7 +814,7 @@ export default function SacredCheckIn() {
                       Share more with your divine friend
                     </p>
                   </div>
-                  <svg className="h-4 w-4 text-violet-400/40 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 text-violet-400/40 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -815,7 +834,7 @@ export default function SacredCheckIn() {
                       Deepen your reflection in your journal
                     </p>
                   </div>
-                  <svg className="h-4 w-4 text-white/20 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 text-white/20 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -824,7 +843,7 @@ export default function SacredCheckIn() {
                   href="/dashboard"
                   className="flex items-center justify-center gap-2 rounded-full bg-white/[0.03] py-3 text-xs text-violet-400/50 hover:text-violet-300/70 hover:bg-white/[0.05] transition-all mt-4"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
                   </svg>
                   Return to Sacred Sanctuary
