@@ -240,15 +240,40 @@ export default function CompanionVoicePlayer({
     utterance.rate = config?.rate || 0.93
     utterance.pitch = config?.pitch ? 1.0 + config.pitch * 0.1 : 1.0
 
-    // Select best available voice
+    // Map language code to BCP-47 for browser SpeechSynthesis
+    const langToBcp47: Record<string, string> = {
+      en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+      bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
+      pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
+      ja: 'ja-JP', zh: 'zh-CN', ar: 'ar-SA',
+    }
+    const bcp47Lang = langToBcp47[language] || language
+    utterance.lang = bcp47Lang
+
+    // Select best available voice matching the language and gender preference
     const voices = window.speechSynthesis.getVoices()
     const preferFemale = effectiveVoiceId !== 'sarvam-rishi' && effectiveVoiceId !== 'elevenlabs-orion'
-    const preferred = voices.find(v =>
-      preferFemale
-        ? /Jenny|Samantha|Google.*Female|Aria|Natural/i.test(v.name)
-        : /Guy|Daniel|David|Google.*Male/i.test(v.name)
-    ) || voices.find(v => /Google|Natural|Neural/i.test(v.name))
-    if (preferred) utterance.voice = preferred
+
+    // First, try to find a voice that matches the selected language
+    const langVoices = voices.filter(v => v.lang.startsWith(bcp47Lang.split('-')[0]))
+
+    let selected: SpeechSynthesisVoice | undefined
+    if (langVoices.length > 0) {
+      // Prefer gender-matching voice within the target language
+      selected = langVoices.find(v =>
+        preferFemale
+          ? /female|woman|jenny|samantha|swara|pallavi|neerja|sobhana|denise|xiaoxiao|nanami/i.test(v.name)
+          : /male|man|guy|daniel|david|madhur|prabhat|valluvar|conrad|keita|yunxi/i.test(v.name)
+      ) || langVoices[0]
+    } else {
+      // No language-specific voice available; fall back to English voice selection
+      selected = voices.find(v =>
+        preferFemale
+          ? /Jenny|Samantha|Google.*Female|Aria|Natural/i.test(v.name)
+          : /Guy|Daniel|David|Google.*Male/i.test(v.name)
+      ) || voices.find(v => /Google|Natural|Neural/i.test(v.name))
+    }
+    if (selected) utterance.voice = selected
 
     utterance.onstart = () => {
       setState('playing')
@@ -262,7 +287,7 @@ export default function CompanionVoicePlayer({
     utterance.onerror = () => setState('idle')
 
     window.speechSynthesis.speak(utterance)
-  }, [text, effectiveVoiceId, onStart, onEnd])
+  }, [text, effectiveVoiceId, language, onStart, onEnd])
 
   const stop = useCallback(() => {
     if (audioRef.current) {

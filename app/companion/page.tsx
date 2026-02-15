@@ -288,6 +288,7 @@ export default function CompanionPage() {
           session_id: session.sessionId,
           message: text.trim(),
           language: voiceConfig.language,
+          voice_id: voiceConfig.speakerId?.split('_').pop() || 'sarvam-aura',
           content_type: 'text',
         }),
       })

@@ -11,13 +11,19 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    const cookie = request.headers.get('cookie')
+    if (cookie) headers.cookie = cookie
+    const authorization = request.headers.get('authorization')
+    if (authorization) headers.authorization = authorization
+
     const backendResponse = await fetch(`${BACKEND_URL}/api/companion/session/start`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers,
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
     })
 
     if (backendResponse.ok) {

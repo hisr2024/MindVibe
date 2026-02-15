@@ -202,12 +202,17 @@ export async function POST(request: NextRequest) {
     // Voice companion uses 15s timeout to allow for voice processing latency
     if (!isLocalSession) {
       try {
+        const proxyHeaders: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        const proxyCookie = request.headers.get('cookie')
+        if (proxyCookie) proxyHeaders.cookie = proxyCookie
+        const proxyAuth = request.headers.get('authorization')
+        if (proxyAuth) proxyHeaders.authorization = proxyAuth
+
         const companionResponse = await fetch(`${BACKEND_URL}/api/voice-companion/message`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            cookie: request.headers.get('cookie') || '',
-          },
+          headers: proxyHeaders,
           body: JSON.stringify({
             session_id: body.session_id,
             message: sanitizedMessage,

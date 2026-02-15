@@ -207,11 +207,24 @@ export default function VoiceCompanionSelector({
         }
       }
 
-      // Fallback to browser TTS preview
+      // Fallback to browser TTS preview with language-matched voice
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(voice.previewText)
         utterance.rate = voice.browserConfig.rate
         utterance.pitch = voice.browserConfig.pitch
+        // Set language so browser picks the right accent/voice
+        const langMap: Record<string, string> = {
+          en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+          bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
+          pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
+          ja: 'ja-JP', zh: 'zh-CN',
+        }
+        utterance.lang = langMap[voice.primaryLanguage] || voice.primaryLanguage
+        // Try to match a voice from the browser voices for this language
+        const voices = window.speechSynthesis.getVoices()
+        const langPrefix = (langMap[voice.primaryLanguage] || voice.primaryLanguage).split('-')[0]
+        const matchedVoice = voices.find(v => v.lang.startsWith(langPrefix))
+        if (matchedVoice) utterance.voice = matchedVoice
         utterance.onend = () => {
           setIsPreviewPlaying(false)
           setPreviewingVoiceId(null)
