@@ -216,7 +216,7 @@ export function WeeklySummary({
       {summary.highlightQuote && (
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-center">
           <p className="text-sm text-amber-100/90 italic">
-            "{summary.highlightQuote}"
+            &quot;{summary.highlightQuote}&quot;
           </p>
         </div>
       )}

@@ -256,7 +256,7 @@ export function KrishnaWhispers({
               {/* Content */}
               <div className="px-4 py-3">
                 <p className="text-amber-100/90 text-sm italic leading-relaxed">
-                  "{currentWhisper.message}"
+                  &quot;{currentWhisper.message}&quot;
                 </p>
               </div>
 
@@ -286,7 +286,7 @@ export function KrishnaWhispers({
               {/* Footer */}
               <div className="px-4 py-2 bg-amber-950/30 border-t border-amber-500/10">
                 <p className="text-amber-200/40 text-[10px] text-center">
-                  Krishna's Whispers
+                  Krishna&apos;s Whispers
                 </p>
               </div>
             </div>

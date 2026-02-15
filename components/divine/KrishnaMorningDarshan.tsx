@@ -294,7 +294,7 @@ export function KrishnaMorningDarshan({
                     Krishna speaks to you...
                   </p>
                   <p className="text-amber-100/90 text-base sm:text-lg leading-relaxed italic">
-                    "{moodData.message}"
+                    &quot;{moodData.message}&quot;
                   </p>
                 </div>
               </div>
@@ -316,7 +316,7 @@ export function KrishnaMorningDarshan({
                   Divine Wisdom for You Today
                 </p>
                 <p className="text-amber-100/80 italic mb-4 leading-relaxed text-sm sm:text-base">
-                  "{moodData.verse}"
+                  &quot;{moodData.verse}&quot;
                 </p>
                 <p className="text-amber-400/70 text-xs sm:text-sm text-right">
                   - {moodData.reference}
@@ -347,7 +347,7 @@ export function KrishnaMorningDarshan({
                 Go in peace, beloved one.
               </p>
               <p className="text-amber-200/60 text-xs sm:text-sm italic max-w-sm mx-auto px-4">
-                "I am always with you. In every thought, every breath, every heartbeat - there I am. You are never alone."
+                &quot;I am always with you. In every thought, every breath, every heartbeat - there I am. You are never alone.&quot;
               </p>
 
               {onComplete && (

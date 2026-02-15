@@ -96,13 +96,13 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
           </div>
           <div>
             <h3 className="text-xl font-bold text-red-50">Immediate Support Available</h3>
-            <p className="text-sm text-red-100/80">You don't have to face this alone</p>
+            <p className="text-sm text-red-100/80">You don&apos;t have to face this alone</p>
           </div>
         </div>
 
         <div className="p-4 rounded-2xl border border-red-400/20 bg-red-950/30">
           <p className="text-sm text-red-100/90 leading-relaxed">
-            If you're experiencing thoughts of suicide or self-harm, please reach out for immediate help.
+            If you&apos;re experiencing thoughts of suicide or self-harm, please reach out for immediate help.
             These resources are available right now, and trained counselors are ready to support you.
           </p>
         </div>
@@ -174,8 +174,8 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
       {/* Gita Wisdom */}
       <div className="mt-4 rounded-2xl border border-orange-400/20 bg-orange-950/20 p-4">
         <p className="text-sm text-orange-100/90 italic leading-relaxed mb-2">
-          "For one who has conquered the mind, the mind is the best of friends;
-          but for one who has failed to do so, their mind will remain the greatest enemy."
+          &quot;For one who has conquered the mind, the mind is the best of friends;
+          but for one who has failed to do so, their mind will remain the greatest enemy.&quot;
         </p>
         <p className="text-xs text-orange-100/60">— Bhagavad Gita 6.6</p>
       </div>

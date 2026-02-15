@@ -5,23 +5,25 @@
 
 'use client'
 
+import { useMemo } from 'react'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { motion } from 'framer-motion'
 
 export function SyncStatusWidget() {
   const { isOnline, queueCount, syncInProgress, lastSyncTime, syncNow } = useOfflineMode()
 
-  const formatLastSync = (timestamp: number | null) => {
-    if (!timestamp) return 'Never synced'
+  const formattedLastSync = useMemo(() => {
+    if (!lastSyncTime) return 'Never synced'
+    // eslint-disable-next-line react-hooks/purity
     const now = Date.now()
-    const diff = now - timestamp
+    const diff = now - lastSyncTime
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(minutes / 60)
 
     if (hours > 0) return `Synced ${hours}h ago`
     if (minutes > 0) return `Synced ${minutes}m ago`
     return 'Just synced'
-  }
+  }, [lastSyncTime])
 
   const handleSyncNow = async () => {
     if (isOnline && !syncInProgress) {
@@ -65,7 +67,7 @@ export function SyncStatusWidget() {
       {/* Status Text */}
       <div className="flex-1">
         <p className="text-xs font-medium text-slate-300">
-          {syncInProgress ? 'Syncing...' : formatLastSync(lastSyncTime)}
+          {syncInProgress ? 'Syncing...' : formattedLastSync}
         </p>
         {queueCount > 0 && (
           <p className="text-xs text-slate-500">

@@ -10,7 +10,7 @@
  * - Share options
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -27,31 +27,44 @@ import type {
 } from '@/types/journeyEngine.types'
 import { ENEMY_INFO } from '@/types/journeyEngine.types'
 
-// Confetti particles
+// Confetti particles - pre-compute random values to avoid hydration mismatches
 function Confetti() {
   const colors = ['#F59E0B', '#EF4444', '#22C55E', '#8B5CF6', '#EC4899', '#06B6D4']
 
+  // Stable random values computed once per mount
+  const particles = useMemo(() =>
+    [...Array(50)].map((_, i) => ({
+      left: Math.random() * 100,
+      direction: Math.random() > 0.5 ? 1 : -1,
+      xOffset: (Math.random() - 0.5) * 200,
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 2,
+      color: colors[i % colors.length],
+    })),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [])
+
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {[...Array(50)].map((_, i) => (
+      {particles.map((p, i) => (
         <motion.div
           key={i}
           className="absolute w-3 h-3 rounded-full"
           style={{
-            backgroundColor: colors[i % colors.length],
-            left: `${Math.random() * 100}%`,
+            backgroundColor: p.color,
+            left: `${p.left}%`,
             top: -20,
           }}
           initial={{ y: -20, opacity: 1, rotate: 0 }}
           animate={{
-            y: window?.innerHeight + 20 || 800,
+            y: typeof window !== 'undefined' ? window.innerHeight + 20 : 800,
             opacity: [1, 1, 0],
-            rotate: 360 * (Math.random() > 0.5 ? 1 : -1),
-            x: (Math.random() - 0.5) * 200,
+            rotate: 360 * p.direction,
+            x: p.xOffset,
           }}
           transition={{
-            duration: 3 + Math.random() * 2,
-            delay: Math.random() * 2,
+            duration: p.duration,
+            delay: p.delay,
             ease: 'easeOut',
           }}
         />

@@ -170,7 +170,7 @@ export function PostComposer({
               <ul className="space-y-1 text-xs text-blue-100/80">
                 <li>• Be compassionate and non-judgmental</li>
                 <li>• Share experiences, not medical advice</li>
-                <li>• Respect everyone's privacy and anonymity</li>
+                <li>• Respect everyone&apos;s privacy and anonymity</li>
                 <li>• No personal information (email, phone, social media)</li>
               </ul>
             </div>

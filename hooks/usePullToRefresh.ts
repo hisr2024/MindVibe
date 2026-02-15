@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, type MutableRefObject } from 'react'
 import { useHapticFeedback } from './useHapticFeedback'
 
 export interface UsePullToRefreshOptions {
@@ -27,6 +27,8 @@ export interface UsePullToRefreshReturn {
   isPulling: boolean
   /** Ref to attach to the scrollable container */
   containerRef: React.RefObject<HTMLDivElement>
+  /** Callback ref to set the container element */
+  setContainerRef: (node: HTMLDivElement | null) => void
   /** Props to spread on the container element */
   containerProps: {
     onTouchStart: (e: React.TouchEvent) => void
@@ -56,8 +58,13 @@ export function usePullToRefresh({
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isPulling, setIsPulling] = useState(false)
 
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null) as MutableRefObject<HTMLDivElement | null>
   const startYRef = useRef<number | null>(null)
+
+  // Callback ref setter to allow external consumers to set the container node
+  const setContainerRef = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node
+  }, [])
   const currentYRef = useRef<number>(0)
   const triggeredRef = useRef(false)
 
@@ -162,6 +169,7 @@ export function usePullToRefresh({
     isRefreshing,
     isPulling,
     containerRef,
+    setContainerRef,
     containerProps: {
       onTouchStart: handleTouchStart,
       onTouchMove: handleTouchMove,

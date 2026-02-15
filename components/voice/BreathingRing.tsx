@@ -76,8 +76,6 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
     return () => clearInterval(timer)
   }, [stepIndex, isActive, totalSteps, steps, handleComplete])
 
-  if (stepIndex >= totalSteps && !isActive) return null
-
   // SVG ring calculations
   const size = 200
   const strokeWidth = 4
@@ -101,6 +99,8 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
   }, [])
 
   const breathScale = prefersReducedMotion ? 1.0 : scaleMap[phase]
+
+  if (stepIndex >= totalSteps && !isActive) return null
 
   return (
     <div className="flex flex-col items-center">

@@ -207,7 +207,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
           {globalMessages.length === 0 && (
             <div className="text-center text-slate-400 py-12">
               <h3 className="text-lg font-semibold text-slate-200 mb-2">Welcome to KIAAN</h3>
-              <p className="text-sm">Share what's on your mind. I'm here to listen, support, and offer thoughtful guidance.</p>
+              <p className="text-sm">Share what&apos;s on your mind. I&apos;m here to listen, support, and offer thoughtful guidance.</p>
             </div>
           )}
           

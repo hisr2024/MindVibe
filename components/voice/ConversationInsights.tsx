@@ -90,6 +90,7 @@ export default function ConversationInsights({
     const userMessages = messages.filter(m => m.role === 'user')
     const kiaanMessages = messages.filter(m => m.role === 'kiaan')
     const duration = sessionStartTime
+      // eslint-disable-next-line react-hooks/purity
       ? Math.round((Date.now() - sessionStartTime.getTime()) / 60000)
       : 0
 

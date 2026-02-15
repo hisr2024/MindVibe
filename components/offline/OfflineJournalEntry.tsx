@@ -62,32 +62,6 @@ export function OfflineJournalEntry({
     resetOnSuccess: false
   })
 
-  // Auto-save draft to localStorage
-  useEffect(() => {
-    if (!autoSaveDrafts || !content) return
-
-    // Clear existing timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current)
-    }
-
-    // Set new timer for auto-save (2 seconds after last keystroke)
-    autoSaveTimerRef.current = setTimeout(() => {
-      saveDraftLocally()
-    }, 2000)
-
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current)
-      }
-    }
-  }, [content, title, tags, autoSaveDrafts])
-
-  // Load draft from localStorage on mount
-  useEffect(() => {
-    loadDraftFromLocal()
-  }, [])
-
   const saveDraftLocally = () => {
     setAutoSaveStatus('saving')
 
@@ -123,6 +97,32 @@ export function OfflineJournalEntry({
       console.error('Failed to load draft:', err)
     }
   }
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (!autoSaveDrafts || !content) return
+
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current)
+    }
+
+    // Set new timer for auto-save (2 seconds after last keystroke)
+    autoSaveTimerRef.current = setTimeout(() => {
+      saveDraftLocally()
+    }, 2000)
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [content, title, tags, autoSaveDrafts])
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    loadDraftFromLocal()
+  }, [])
 
   const clearDraftFromLocal = () => {
     try {

@@ -412,7 +412,7 @@ function KiaanChatPageInner() {
       <div className="rounded-3xl border border-orange-500/15 bg-[#0b0b0f] p-5 shadow-[0_20px_80px_rgba(255,115,39,0.12)] md:p-6">
         <h2 className="text-lg font-semibold text-orange-100">Disclaimer</h2>
         <p className="mt-3 text-sm leading-relaxed text-orange-100/80">
-          KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.
+          KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country&apos;s emergency medical services or a licensed professional right away.
         </p>
       </div>
     </main>

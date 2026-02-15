@@ -164,7 +164,7 @@ export default function VerseDetailPage({ params }: PageProps) {
 
           audio.onerror = () => {
             console.warn('[GitaVerse] Audio playback failed, trying browser TTS')
-            useBrowserTTS(text, section, lang)
+            playBrowserTTS(text, section, lang)
           }
 
           await audio.play()
@@ -173,18 +173,18 @@ export default function VerseDetailPage({ params }: PageProps) {
       }
 
       // Fallback to browser TTS if API returns fallback indicator or fails
-      useBrowserTTS(text, section, lang)
+      playBrowserTTS(text, section, lang)
 
     } catch (error) {
       console.warn('[GitaVerse] API TTS failed, using browser fallback:', error)
-      useBrowserTTS(text, section, lang)
+      playBrowserTTS(text, section, lang)
     }
   }, [isPlaying, playingSection])
 
   /**
    * Browser TTS fallback when API is unavailable
    */
-  const useBrowserTTS = useCallback((text: string, section: 'sanskrit' | 'translation', lang: string) => {
+  const playBrowserTTS = useCallback((text: string, section: 'sanskrit' | 'translation', lang: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       console.warn('[GitaVerse] Speech synthesis not supported')
       setIsLoadingAudio(false)

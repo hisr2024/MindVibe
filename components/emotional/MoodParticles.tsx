@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ParticleSystem } from '../animations/ParticleSystem';
 
 interface MoodParticlesProps {
@@ -18,9 +18,11 @@ export function MoodParticles({ color, trigger, origin }: MoodParticlesProps) {
   const [particleTrigger, setParticleTrigger] = useState(0);
 
   // Reset trigger to allow multiple bursts
-  if (trigger && particleTrigger !== Date.now()) {
-    setParticleTrigger(Date.now());
-  }
+  useEffect(() => {
+    if (trigger) {
+      setParticleTrigger(Date.now());
+    }
+  }, [trigger]);
 
   return (
     <ParticleSystem

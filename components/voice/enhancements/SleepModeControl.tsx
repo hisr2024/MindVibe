@@ -10,7 +10,7 @@
  * - Volume fade controls
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Moon,
@@ -94,6 +94,42 @@ const SLEEP_CONTENT: Record<SleepContentType, {
 
 const TIMER_OPTIONS = [15, 30, 45, 60, 90]
 
+// ============ Sleep Stars ============
+
+function SleepStars() {
+  /* eslint-disable react-hooks/purity */
+  const stars = useMemo(
+    () => Array.from({ length: 5 }, () => ({
+      top: `${20 + Math.random() * 60}%`,
+      left: `${20 + Math.random() * 60}%`,
+      duration: 2 + Math.random() * 2,
+    })),
+    []
+  )
+  /* eslint-enable react-hooks/purity */
+
+  return (
+    <>
+      {stars.map((star, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-indigo-300"
+          style={{ top: star.top, left: star.left }}
+          animate={{
+            opacity: [0, 1, 0],
+            scale: [0.5, 1, 0.5]
+          }}
+          transition={{
+            duration: star.duration,
+            repeat: Infinity,
+            delay: i * 0.5
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
 // ============ Sleep Progress Indicator ============
 
 function SleepProgressIndicator({
@@ -154,29 +190,7 @@ function SleepProgressIndicator({
       </div>
 
       {/* Animated stars */}
-      {isPlaying && (
-        <>
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 rounded-full bg-indigo-300"
-              style={{
-                top: `${20 + Math.random() * 60}%`,
-                left: `${20 + Math.random() * 60}%`
-              }}
-              animate={{
-                opacity: [0, 1, 0],
-                scale: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 2 + Math.random() * 2,
-                repeat: Infinity,
-                delay: i * 0.5
-              }}
-            />
-          ))}
-        </>
-      )}
+      {isPlaying && <SleepStars />}
     </div>
   )
 }
