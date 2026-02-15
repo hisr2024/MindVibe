@@ -2,10 +2,10 @@
 
 import { FadeIn } from '@/components/ui'
 import CompanionCTA from '@/components/companion/CompanionCTA'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
 
 // Animation variants for staggered entrance
@@ -144,6 +144,23 @@ const SPIRITUAL_TOOLKIT = [
   },
 ] as const
 
+// Sacred questions that cycle gently in the Chakra Heartbeat hero
+const SACRED_QUESTIONS = [
+  'How does your heart feel right now?',
+  'What is your soul carrying today?',
+  'Where does your breath feel stuck?',
+  'What would Krishna say to you right now?',
+] as const
+
+// Floating prayer-star particles configuration
+const PRAYER_STARS = Array.from({ length: 12 }, (_, i) => ({
+  id: i,
+  left: `${8 + (i * 7.5) % 85}%`,
+  delay: i * 0.7,
+  duration: 4 + (i % 3) * 1.5,
+  size: i % 3 === 0 ? 3 : 2,
+}))
+
 /**
  * Returns a time-of-day greeting for the sacred sanctuary dashboard.
  *
@@ -179,6 +196,15 @@ function getGreeting(): string {
 export default function DashboardClient() {
   const { triggerHaptic } = useHapticFeedback()
 
+  // Cycle through sacred questions every 5 seconds
+  const [questionIndex, setQuestionIndex] = useState(0)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setQuestionIndex((prev) => (prev + 1) % SACRED_QUESTIONS.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [])
+
   const handleCardTap = useCallback(() => {
     triggerHaptic('light')
   }, [triggerHaptic])
@@ -211,41 +237,163 @@ export default function DashboardClient() {
             </motion.p>
           </motion.div>
 
-          {/* ─── Soul Check-In (PRIMARY) ─── */}
+          {/* ─── Living Chakra Heartbeat (PRIMARY) ─── */}
           <motion.div variants={itemVariants}>
             <Link
               href="/flows/check-in"
               onClick={handleFeatureTap}
-              className="block"
+              className="block group"
             >
               <motion.div
-                className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-violet-900/50 via-indigo-900/40 to-purple-900/50 p-6 sm:p-8 shadow-mobile-glow animate-glow-pulse text-center"
+                className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-violet-950/60 via-indigo-950/50 to-purple-950/60 p-8 sm:p-10 shadow-mobile-glow text-center"
                 variants={quickActionVariants}
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
               >
-                {/* Breathing glow ring */}
-                <motion.div
-                  className="mx-auto mb-5 flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-500/20"
-                  animate={{
-                    scale: [1, 1.06, 1],
-                    boxShadow: [
-                      '0 0 30px rgba(139, 92, 246, 0.15)',
-                      '0 0 50px rgba(139, 92, 246, 0.3)',
-                      '0 0 30px rgba(139, 92, 246, 0.15)',
-                    ],
-                  }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <span className="text-4xl sm:text-5xl">{'\u{1F49C}'}</span>
-                </motion.div>
+                {/* Floating prayer-star particles */}
+                {PRAYER_STARS.map((star) => (
+                  <motion.div
+                    key={star.id}
+                    className="absolute rounded-full bg-violet-300/60"
+                    style={{
+                      width: star.size,
+                      height: star.size,
+                      left: star.left,
+                      bottom: 0,
+                    }}
+                    animate={{
+                      y: [0, -280],
+                      opacity: [0, 0.8, 0.6, 0],
+                      scale: [0.5, 1, 0.8, 0.3],
+                    }}
+                    transition={{
+                      duration: star.duration,
+                      repeat: Infinity,
+                      delay: star.delay,
+                      ease: 'easeOut',
+                    }}
+                  />
+                ))}
 
-                <h2 className="font-sacred text-xl sm:text-2xl text-white/90 mb-2">
-                  How does your heart feel right now?
-                </h2>
-                <p className="text-sm text-white/50">
-                  Pause. Breathe. Check in with yourself.
+                {/* Chakra Mandala — layered rotating rings */}
+                <div className="relative mx-auto mb-6 h-28 w-28 sm:h-36 sm:w-36">
+                  {/* Outer glow halo */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    animate={{
+                      boxShadow: [
+                        '0 0 40px 8px rgba(139, 92, 246, 0.15), 0 0 80px 16px rgba(99, 102, 241, 0.08)',
+                        '0 0 60px 12px rgba(139, 92, 246, 0.3), 0 0 100px 24px rgba(99, 102, 241, 0.15)',
+                        '0 0 40px 8px rgba(139, 92, 246, 0.15), 0 0 80px 16px rgba(99, 102, 241, 0.08)',
+                      ],
+                    }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+
+                  {/* Outer ring — slow clockwise rotation with 8 petals */}
+                  <motion.svg
+                    viewBox="0 0 120 120"
+                    className="absolute inset-0 h-full w-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+                  >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <ellipse
+                        key={i}
+                        cx="60"
+                        cy="60"
+                        rx="8"
+                        ry="28"
+                        fill="none"
+                        stroke="rgba(167, 139, 250, 0.25)"
+                        strokeWidth="1"
+                        transform={`rotate(${i * 45} 60 60)`}
+                      />
+                    ))}
+                  </motion.svg>
+
+                  {/* Middle ring — counter-rotating 6 petals */}
+                  <motion.svg
+                    viewBox="0 0 120 120"
+                    className="absolute inset-0 h-full w-full"
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
+                  >
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <ellipse
+                        key={i}
+                        cx="60"
+                        cy="60"
+                        rx="6"
+                        ry="20"
+                        fill="none"
+                        stroke="rgba(196, 181, 253, 0.2)"
+                        strokeWidth="1"
+                        transform={`rotate(${i * 60} 60 60)`}
+                      />
+                    ))}
+                  </motion.svg>
+
+                  {/* Inner lotus — pulsing, blooms on hover */}
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <motion.svg
+                      viewBox="0 0 80 80"
+                      className="h-16 w-16 sm:h-20 sm:w-20 transition-transform duration-700 group-hover:scale-125"
+                    >
+                      {/* Lotus petals — bloom on hover via CSS */}
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                          key={i}
+                          cx="40"
+                          cy="40"
+                          rx="5"
+                          ry="16"
+                          className="fill-violet-400/20 stroke-violet-300/40 transition-all duration-700 group-hover:fill-violet-400/30 group-hover:stroke-violet-200/60"
+                          strokeWidth="0.8"
+                          transform={`rotate(${i * 45} 40 40)`}
+                          style={{
+                            transformOrigin: '40px 40px',
+                          }}
+                        />
+                      ))}
+                      {/* Center Om symbol */}
+                      <text
+                        x="40"
+                        y="44"
+                        textAnchor="middle"
+                        className="fill-violet-200/90 transition-colors duration-700 group-hover:fill-white/95"
+                        fontSize="18"
+                        fontFamily="serif"
+                      >
+                        {'\u0950'}
+                      </text>
+                    </motion.svg>
+                  </motion.div>
+                </div>
+
+                {/* Cycling sacred questions with crossfade */}
+                <div className="relative h-8 sm:h-9 overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.h2
+                      key={questionIndex}
+                      className="absolute inset-x-0 font-sacred text-xl sm:text-2xl text-white/90"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.6, ease: 'easeInOut' }}
+                    >
+                      {SACRED_QUESTIONS[questionIndex]}
+                    </motion.h2>
+                  </AnimatePresence>
+                </div>
+
+                <p className="mt-3 text-sm text-violet-200/50">
+                  Tap to begin your soul check-in
                 </p>
               </motion.div>
             </Link>
@@ -303,7 +451,7 @@ export default function DashboardClient() {
 
           {/* ─── Quick Actions ─── */}
           <motion.div variants={itemVariants}>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
               {/* Journal */}
               <motion.div variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
                 <Link
@@ -316,21 +464,6 @@ export default function DashboardClient() {
                   </div>
                   <span className="text-sm font-medium text-white/80">Journal</span>
                   <span className="mt-0.5 text-[10px] text-white/40">Reflections</span>
-                </Link>
-              </motion.div>
-
-              {/* Mood Check-in */}
-              <motion.div variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
-                <Link
-                  href="/flows/check-in"
-                  onClick={handleCardTap}
-                  className="flex flex-col items-center justify-center rounded-[24px] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-glow transition-all duration-300 active:opacity-90 md:p-5"
-                >
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] shadow-inner md:h-14 md:w-14">
-                    <span className="text-2xl md:text-3xl">{'\u{1F499}'}</span>
-                  </div>
-                  <span className="text-sm font-medium text-white/80">Mood</span>
-                  <span className="mt-0.5 text-[10px] text-white/40">How are you?</span>
                 </Link>
               </motion.div>
 
