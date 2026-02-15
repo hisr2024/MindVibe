@@ -145,7 +145,7 @@ export default function KarmaFootprintClient() {
                     value={dayDescription}
                     onChange={e => setDayDescription(e.target.value)}
                     placeholder="Describe your interactions, choices, and moments from today. Include both positive moments and areas where you might have acted differently..."
-                    className="w-full min-h-[200px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none resize-none"
+                    className="w-full min-h-[200px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none resize-none"
                     aria-describedby="day-hint"
                   />
                   <p id="day-hint" className="sr-only">Describe your day for karma analysis</p>

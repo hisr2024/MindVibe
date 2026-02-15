@@ -184,7 +184,7 @@ Respond using the four-part format with brief, grounded insights.`
                 value={action}
                 onChange={(e) => setAction(e.target.value)}
                 placeholder="Example: I helped my colleague with their project today..."
-                className="w-full min-h-[100px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[100px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="action-hint"
               />
               <p id="action-hint" className="sr-only">
@@ -238,7 +238,7 @@ Respond using the four-part format with brief, grounded insights.`
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
                   placeholder="What was going through your mind?"
-                  className="w-full rounded-xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-3 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                  className="w-full rounded-xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-3 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 />
               </div>
 
@@ -299,7 +299,7 @@ Respond using the four-part format with brief, grounded insights.`
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-orange-50 truncate">{item.action}</p>
-                        <p className="text-xs text-orange-100/50">
+                        <p className="text-xs text-orange-100/70">
                           {new Date(item.timestamp).toLocaleTimeString()}
                         </p>
                       </div>

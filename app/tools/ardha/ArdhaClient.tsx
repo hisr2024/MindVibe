@@ -302,7 +302,7 @@ export default function ArdhaClient() {
                 value={thought}
                 onChange={e => setThought(e.target.value)}
                 placeholder="Speak or type your thought. Example: I keep messing up at work, maybe I'm just not cut out for this."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="thought-hint"
               />
               <p id="thought-hint" className="sr-only">Describe the negative thought you want to reframe</p>
@@ -331,7 +331,7 @@ export default function ArdhaClient() {
                         <span className="text-lg" role="img" aria-hidden="true">{mode.icon}</span>
                         <span className="text-sm font-medium text-orange-50">{mode.name}</span>
                       </div>
-                      <p className="text-xs text-orange-100/60 leading-relaxed">{mode.description}</p>
+                      <p className="text-xs text-orange-100/70 leading-relaxed">{mode.description}</p>
                       <span className="absolute top-2 right-2 text-[10px] text-orange-100/40">{mode.depth}</span>
                     </button>
                   ))}

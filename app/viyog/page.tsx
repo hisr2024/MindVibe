@@ -247,7 +247,7 @@ export default function ViyogaPage() {
                   <div key={idx}>
                     {msg.role === 'user' ? (
                       <div className="rounded-2xl border border-orange-500/10 bg-[#111115]/80 p-4">
-                        <p className="text-xs text-orange-100/50 mb-2">You</p>
+                        <p className="text-xs text-orange-100/70 mb-2">You</p>
                         <p className="text-sm text-orange-50 leading-relaxed whitespace-pre-wrap">
                           {msg.content}
                         </p>
@@ -279,7 +279,7 @@ export default function ViyogaPage() {
                 ))}
                 {loading && (
                   <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-5">
-                    <p className="text-xs text-orange-100/50 mb-2">Viyoga</p>
+                    <p className="text-xs text-orange-100/70 mb-2">Viyoga</p>
                     <div className="flex items-center gap-2 text-sm text-orange-100/60">
                       <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-400/60 animate-pulse" />
                       <span>Observing your concern...</span>

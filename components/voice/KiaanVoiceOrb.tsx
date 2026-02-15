@@ -23,7 +23,8 @@
 
 'use client'
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
+import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 export type OrbState =
   | 'idle'
@@ -147,6 +148,25 @@ export default function KiaanVoiceOrb({
   onClick,
   disabled = false,
 }: KiaanVoiceOrbProps) {
+  const { triggerHaptic } = useHapticFeedback()
+  const prevStateRef = useRef<OrbState>(state)
+
+  // Haptic feedback on state transitions
+  useEffect(() => {
+    if (prevStateRef.current === state) return
+    prevStateRef.current = state
+
+    const hapticMap: Partial<Record<OrbState, Parameters<typeof triggerHaptic>[0]>> = {
+      listening: 'medium',
+      processing: 'light',
+      speaking: 'light',
+      error: 'error',
+      breathing: 'selection',
+    }
+    const hapticType = hapticMap[state]
+    if (hapticType) triggerHaptic(hapticType)
+  }, [state, triggerHaptic])
+
   // Respect prefers-reduced-motion for accessibility (WCAG 2.1)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   useEffect(() => {

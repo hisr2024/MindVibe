@@ -359,7 +359,7 @@ export default function RelationshipCompassPage() {
                 className="w-full min-h-[180px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/40 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none resize-none"
               />
               <div className="flex justify-between items-center mt-2">
-                <span className="text-xs text-orange-100/50">{conflict.length}/3000 characters</span>
+                <span className="text-xs text-orange-100/70">{conflict.length}/3000 characters</span>
                 <button
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className="text-xs text-orange-200/70 hover:text-orange-200 transition"
@@ -397,7 +397,7 @@ export default function RelationshipCompassPage() {
                 {/* Context */}
                 <div>
                   <label className="text-sm font-semibold text-orange-100 block mb-2">
-                    Additional context <span className="font-normal text-orange-100/50">(optional)</span>
+                    Additional context <span className="font-normal text-orange-100/70">(optional)</span>
                   </label>
                   <textarea
                     value={context}
@@ -410,7 +410,7 @@ export default function RelationshipCompassPage() {
                 {/* Desired Outcome */}
                 <div>
                   <label className="text-sm font-semibold text-orange-100 block mb-2">
-                    What are you hoping for? <span className="font-normal text-orange-100/50">(optional)</span>
+                    What are you hoping for? <span className="font-normal text-orange-100/70">(optional)</span>
                   </label>
                   <textarea
                     value={desiredOutcome}
@@ -468,7 +468,7 @@ export default function RelationshipCompassPage() {
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs text-orange-100/50">
+                    <span className="text-xs text-orange-100/70">
                       {new Date(result.requestedAt).toLocaleString()}
                     </span>
                   </div>

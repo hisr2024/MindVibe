@@ -226,7 +226,7 @@ export default function ViyogClient() {
                 value={concern}
                 onChange={e => setConcern(e.target.value)}
                 placeholder="Tell me what's on your mind. Example: I'm worried my presentation won't go well and everyone will think I'm not good at my job."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/50 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
                 aria-describedby="concern-hint"
               />
               <p id="concern-hint" className="sr-only">Describe what you're worried about</p>

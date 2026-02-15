@@ -101,7 +101,7 @@ export function SpiritualToolsNav({
       <h3 className="text-sm font-semibold text-orange-50 mb-1">
         {t('navigation.spiritual_tools.title', 'Spiritual Toolkit')}
       </h3>
-      <p className="text-[10px] text-orange-100/50 mb-4">
+      <p className="text-[10px] text-orange-100/70 mb-4">
         {t(
           'navigation.spiritual_tools.subtitle',
           'Navigate your path — each tool connects to the next'
@@ -122,7 +122,7 @@ export function SpiritualToolsNav({
               <span className="text-sm font-medium text-orange-50 group-hover:text-orange-200 transition-colors">
                 {tool.label}
               </span>
-              <p className="text-[10px] text-orange-100/50 leading-tight mt-0.5 truncate">
+              <p className="text-[10px] text-orange-100/70 leading-tight mt-0.5 truncate">
                 {tool.description}
               </p>
             </div>
