@@ -6,10 +6,7 @@
 
 import { describe, it, expect } from 'vitest'
 import {
-  CORE_TOOLS,
-  GUIDANCE_TOOLS,
   KARMA_TOOLS,
-  QUICK_ACCESS_TOOLS,
   ALL_TOOLS,
   TOOLS_BY_CATEGORY,
   type ToolConfig,

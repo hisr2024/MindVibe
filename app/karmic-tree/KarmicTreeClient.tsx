@@ -54,8 +54,6 @@ interface ProgressResponse {
   notifications: TreeNotification[]
 }
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
 /**
  * Honest empty state when API is unavailable.
  * No fake data — only real user data from the API should populate these fields.
