@@ -14,11 +14,6 @@ export function OfflineStatusBanner() {
   const { isOnline, queueCount, lastSyncTime } = useOfflineMode()
   const { stats } = useCacheManager()
 
-  // Don't show banner if online and no queued operations
-  if (isOnline && queueCount === 0) {
-    return null
-  }
-
   const formattedLastSync = useMemo(() => {
     if (!lastSyncTime) return 'Never'
     // eslint-disable-next-line react-hooks/purity
@@ -33,6 +28,11 @@ export function OfflineStatusBanner() {
     if (minutes > 0) return `${minutes}m ago`
     return 'Just now'
   }, [lastSyncTime])
+
+  // Don't show banner if online and no queued operations
+  if (isOnline && queueCount === 0) {
+    return null
+  }
 
   return (
     <AnimatePresence>

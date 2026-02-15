@@ -185,7 +185,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // Keep the ref in sync with the latest loadTranslations callback
-  loadTranslationsRef.current = loadTranslations
+  useEffect(() => {
+    loadTranslationsRef.current = loadTranslations
+  }, [loadTranslations])
 
   // Initialize on mount - sync document attributes and load translations
   useEffect(() => {

@@ -74,7 +74,9 @@ export function useAudioAnalyzer(): AudioAnalyzerData {
   }, [])
 
   // Keep the ref in sync with the latest analyze callback
-  analyzeFnRef.current = analyze
+  useEffect(() => {
+    analyzeFnRef.current = analyze
+  }, [analyze])
 
   const start = useCallback(async () => {
     // Clean up any existing resources to prevent leaks on repeated start() calls

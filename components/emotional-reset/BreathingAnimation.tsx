@@ -143,7 +143,9 @@ export function BreathingAnimation({
   }, [getPhaseDuration, durationSeconds, narration.length, onComplete])
 
   // Keep the ref in sync with the latest animate callback
-  animateFnRef.current = animate
+  useEffect(() => {
+    animateFnRef.current = animate
+  }, [animate])
 
   // Start/stop animation
   useEffect(() => {
