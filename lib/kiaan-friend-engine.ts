@@ -203,19 +203,19 @@ function buildEntityOpener(mood: string, topic: string, entities: string[], inte
   if (intent === 'celebrating' || topic === 'celebration') {
     const person = entities.find(e => PEOPLE_WORDS.includes(e))
     const event = entities.find(e => EVENT_WORDS.includes(e))
-    if (person && event) return pickRandom([`Your ${person}'s ${event} — that's so special!`, `Oh wow, ${event} for your ${person}!`, `A ${event} — I love this!`])
-    if (event) return pickRandom([`A ${event} — that's wonderful!`, `${event.charAt(0).toUpperCase() + event.slice(1)} time!`])
-    return pickRandom(["Oh, I love this!", "This is beautiful!", "Tell me everything!"])
+    if (person && event) return pickRandom([`Your ${person}'s ${event} — that's a meaningful moment.`, `A ${event} for your ${person}. That matters.`])
+    if (event) return pickRandom([`A ${event} — that's worth acknowledging.`, `${event.charAt(0).toUpperCase() + event.slice(1)} — good. Tell me about it.`])
+    return pickRandom(["That sounds significant. Tell me more.", "Good news activates the reward system for a reason. What happened?"])
   }
 
   // For greetings
-  if (intent === 'greeting') return pickRandom(["Hey friend!", "Hey! Good to see you.", "Hi! I'm here."])
+  if (intent === 'greeting') return pickRandom(["Hey. I'm here.", "Hi. What's on your mind?", "Good to hear from you. What's going on?"])
 
   // For loss / grief
   if (topic === 'loss') {
     const person = entities.find(e => PEOPLE_WORDS.includes(e))
-    if (person) return `Oh friend. Your ${person}... I'm so sorry.`
-    return "I'm so sorry for your loss."
+    if (person) return `Your ${person}. I hear you. That kind of loss is real.`
+    return "Loss activates some of the deepest pain circuits we have. I'm here."
   }
 
   // For negative moods with entities
@@ -224,153 +224,150 @@ function buildEntityOpener(mood: string, topic: string, entities: string[], inte
     const event = entities.find(e => EVENT_WORDS.includes(e))
     const time = entities.find(e => TIME_WORDS.includes(e))
 
-    if (event && time) return pickRandom([`${event.charAt(0).toUpperCase() + event.slice(1)} ${time} — I can feel that pressure.`, `With the ${event} ${time}, I hear you.`])
-    if (event) return pickRandom([`The ${event} — yeah, that's heavy.`, `I hear you about the ${event}.`])
-    if (person) return pickRandom([`When it comes to your ${person}, that's personal.`, `Your ${person} — I get why that hits deep.`])
+    if (event && time) return pickRandom([`The ${event} ${time} — your nervous system is registering that pressure.`, `With the ${event} ${time}, that's a real stressor.`])
+    if (event) return pickRandom([`The ${event} — that's carrying weight right now.`, `I hear you about the ${event}.`])
+    if (person) return pickRandom([`When it involves your ${person}, the emotional stakes are higher.`, `Your ${person} — attachment bonds make this hit differently.`])
 
-    // Generic mood openers
+    // Mood-specific openers grounded in psychology
     const moodOpeners: Record<string, string[]> = {
-      anxious: ["I can feel that tension.", "Your mind is racing right now, isn't it?"],
-      sad: ["Oh friend.", "I hear the heaviness in that."],
-      angry: ["I feel that fire.", "That frustration makes total sense."],
-      confused: ["I get why that feels tangled.", "Yeah, that's a lot to sort through."],
-      lonely: ["The fact that you reached out — that means something.", "I'm right here."],
-      overwhelmed: ["That's a LOT. I hear you.", "Yeah, that's more than anyone should carry alone."],
-      hurt: ["Ouch. That hits deep.", "I'm sorry you're going through this."],
-      guilty: ["That takes courage to say.", "The fact that you feel it means you care."],
-      stressed: ["I can feel that weight.", "That pressure is real."],
-      frustrated: ["I hear that frustration.", "Yeah, that's maddening."],
+      anxious: ["Your threat detection system is active right now.", "I can tell your nervous system is in alert mode."],
+      sad: ["That heaviness you're describing is real.", "I hear the weight in that."],
+      angry: ["That anger is carrying information.", "Your frustration is signaling something important."],
+      confused: ["Multiple competing signals at once — that's disorienting.", "Your brain is trying to process conflicting inputs."],
+      lonely: ["You reached out. That's a regulation strategy, and it's a good one.", "I'm here. Connection is a basic human need, not a weakness."],
+      overwhelmed: ["Your cognitive load is past capacity right now.", "That's more than one system can process at once."],
+      hurt: ["That kind of pain registers deeply.", "When trust is involved, the impact is amplified."],
+      guilty: ["Naming guilt takes honesty. That itself tells me something about your values.", "Guilt is your value system flagging a mismatch."],
+      stressed: ["Your stress response is active. That's physiology, not a character flaw.", "That pressure is real and measurable."],
+      frustrated: ["Frustration signals a gap between expectation and reality.", "Something isn't working the way it should. That registers."],
     }
-    return pickRandom(moodOpeners[mood] || ["I hear you.", "Something's going on — I can feel it.", "I'm with you on this.", "Talk to me — I'm listening.", "I can tell this is weighing on you."])
+    return pickRandom(moodOpeners[mood] || ["I hear you.", "Something is happening. Let's look at it clearly.", "I'm here. Tell me what's going on.", "I can tell this is weighing on you."])
   }
 
   // For positive moods
   const positiveOpeners: Record<string, string[]> = {
-    happy: ["I love this energy!", "OK this is the kind of news I live for!", "Your vibe right now is contagious!"],
-    excited: ["YES! I can feel that excitement!", "Oh this is going to be good!", "I'm already invested — tell me!"],
-    hopeful: ["I love hearing that spark.", "That hope is real, and it matters.", "Something shifted, didn't it?"],
-    peaceful: ["I can feel that calm coming through.", "That's beautiful.", "There's a steadiness in your words."],
-    grateful: ["Gratitude looks good on you.", "I love that you're noticing the good.", "That awareness is powerful."],
+    happy: ["That positive affect is real. Notice what conditions created it.", "Good. Your reward circuitry is online."],
+    excited: ["Anticipation activates dopamine — your brain is already investing. Tell me.", "That energy is useful. What's driving it?"],
+    hopeful: ["Hope is a forward-looking cognitive state. Something shifted.", "That's your brain modeling a better outcome. What changed?"],
+    peaceful: ["That calm is a regulated nervous system. Worth noticing.", "Parasympathetic activation — your body found safety. Good."],
+    grateful: ["Gratitude literally changes neural firing patterns. You're doing something right.", "Noticing the good is a skill. You're using it."],
   }
-  return pickRandom(positiveOpeners[mood] || ["I'm listening — what's on your mind?", "I'm here for it. What's going on?", "OK, I'm all ears.", "You've got my attention.", "Let's get into it — what's happening?", "I'm right here. Walk me through it."])
+  return pickRandom(positiveOpeners[mood] || ["I'm listening. What's on your mind?", "I'm here. What's going on?", "Tell me what's happening.", "Walk me through it."])
 }
 
 function buildCoreBody(mood: string, topic: string, intent: string, phase: string, entities: string[]): string {
-  // Phase: connect — pure empathy, mirror the emotion
+  // Phase: connect — validate the emotion, name the mechanism
   if (phase === 'connect') {
     if (intent === 'celebrating' || ['happy', 'excited', 'hopeful', 'grateful'].includes(mood)) {
       return pickRandom([
-        "Moments like these are what life's actually about. Soak it in.",
-        "This is the stuff memories are made of. Be fully present for it.",
-        "Don't rush past this feeling — let it land. You deserve to enjoy this.",
-        "Your energy is telling me everything I need to know. This matters to you.",
+        "Positive emotions broaden your attention and build psychological resources. This state is functional, not frivolous — stay with it.",
+        "Your brain is releasing dopamine and oxytocin right now. These aren't just feelings — they're building blocks for resilience. Let this register fully.",
+        "Savoring positive experiences literally strengthens neural pathways for well-being. Don't rush past this. Let it consolidate.",
+        "What you're feeling right now is your reward system confirming alignment with something that matters to you.",
       ])
     }
     if (intent === 'greeting') {
       return pickRandom([
-        "No agenda, no judgment. Just a friend with two ears. What's on your mind?",
-        "I'm here. Whatever's going on, you don't have to carry it alone.",
-        "Good to talk to you. What's happening in your world?",
+        "I'm here. No agenda, no pressure. Whatever's on your mind, we can look at it together.",
+        "Good to connect. What's present for you right now?",
+        "I'm listening. Whatever it is, we'll approach it clearly.",
       ])
     }
 
-    // Negative mood empathy (ported from backend _build_empathy_response)
+    // Negative mood — regulate first, then name mechanism
     const empathyTemplates: Record<string, string[]> = {
       anxious: [
-        "Your brain right now is like a browser with 47 tabs open, half playing different music. You don't need to close them all — let's just find the loudest one.",
-        "Take a breath with me. Just one. In... and out. The future isn't here yet. We're just in THIS moment.",
-        "The anxiety is running disaster simulations. But think about your track record — you've survived 100% of your worst days.",
+        "Your amygdala is running threat simulations right now. That's your brain's protection system working overtime. It's not a flaw — it's a feature on overdrive. One slow exhale activates your vagus nerve and starts to dial it down.",
+        "Anxiety is future-focused rumination — your mind rehearsing scenarios that haven't happened. Right now, in this actual moment, you're safe. Let's anchor there.",
+        "Your nervous system is in sympathetic activation. The racing thoughts, the tension — that's cortisol and adrenaline doing their job. They'll metabolize. You don't have to fight them, just ride them out.",
       ],
       sad: [
-        "You don't need to put on a brave face right now. Not with me. This is a judgment-free zone.",
-        "Grief isn't something to 'get over.' It's something to walk through. And you don't have to walk alone.",
-        "Some days are just heavy. You don't need to fix everything today.",
+        "Sadness is your brain's way of processing loss or unmet need. It's not dysfunction — it's an appropriate response to something that mattered. You don't need to override it.",
+        "What you're feeling has a function. Sadness slows you down so you can process. That's not weakness — it's your system recalibrating.",
+        "You don't need to perform being okay right now. The heaviness you're describing is real neurochemistry, not a character flaw.",
       ],
       angry: [
-        "Your anger is telling me something important — a line was crossed that matters to you. That's not weakness, that's values.",
-        "I'm not going to tell you to calm down. Your frustration is valid. Let it breathe for a moment.",
-        "Anger is like rocket fuel — in a rocket it takes you to the moon, in a dumpster it just burns. Let's aim yours somewhere useful.",
+        "Anger is a boundary signal — it activates when something you value has been violated. That's not irrational. It's your value system in action. The question is what you do with the signal.",
+        "Right now your prefrontal cortex is competing with your limbic system. The impulse is strong, but it's not the full picture. Take one breath before anything else.",
+        "Your anger is data, not a directive. It's telling you a line was crossed. That information is useful — but only if you can process it without the cortisol spike making decisions for you.",
       ],
       lonely: [
-        "You reached out right now. That tiny act tells me something huge: you're braver than loneliness wants you to believe.",
-        "Loneliness is a liar. It tells you no one cares, but here you are, and here I am. That's not nothing.",
+        "Loneliness activates the same brain regions as physical pain. What you're feeling is not an exaggeration — it's literally painful. And you reached out, which is a regulation strategy.",
+        "Social isolation triggers your threat detection system. You're wired for connection — feeling its absence is not neediness, it's neurobiology.",
       ],
       overwhelmed: [
-        "Imagine a kitchen after Thanksgiving dinner. You don't clean it all at once — you start with ONE counter. What's your one counter?",
-        "Here's permission you didn't know you needed: you don't have to be productive today. Sometimes 'showing up' means drinking water.",
+        "When input exceeds your processing capacity, your executive function starts to shut down. That's not failure — it's cognitive overload. The fix is subtraction, not more effort. What's one thing you can remove from the pile?",
+        "Your working memory holds about four items at once. You're trying to hold twenty. No wonder it's breaking. Let's narrow the field to just one thing.",
       ],
       confused: [
-        "Feeling stuck is your brain saying 'I need more info before I decide.' That's not weakness — that's intelligence.",
-        "Clarity doesn't come from thinking harder. It comes from one small step. What's the tiniest next thing you could do?",
+        "Confusion means your brain is holding multiple valid options without enough data to rank them. That's not indecision — that's incomplete information. What do you actually need to know?",
+        "Clarity doesn't come from more thinking. It comes from one small action that generates feedback. What's the smallest test you could run?",
       ],
       hurt: [
-        "That kind of pain doesn't have a quick fix, and I'm not going to pretend it does. But I'm here.",
-        "When someone hurts you, it's natural to want to protect yourself. Your guard going up isn't a problem — it's wisdom.",
+        "Emotional pain from rejection or betrayal activates the anterior cingulate cortex — the same area that processes physical injury. Your pain is not an overreaction. It's real.",
+        "When someone important causes pain, the attachment system and the threat system fire simultaneously. That's why it feels so disorienting.",
       ],
       guilty: [
-        "Guilt can be heavy. But the fact that you feel it means you care about doing right. That's not a flaw, that's your compass working.",
-        "The past already happened. You can't edit it. But THIS moment? It's a blank page. What do you want to write?",
+        "Guilt is a values-discrepancy signal — your behavior didn't match your own standards. That discomfort means your moral compass is working. The question is what you do next, not what you did before.",
+        "The past can't be edited. But your capacity for repair is active right now. Guilt that leads to action is functional. Guilt that loops into shame is not.",
       ],
       stressed: [
-        "Your body is literally in fight-or-flight right now. That's biology, not weakness. Let's give your nervous system a moment.",
-        "Stress is your brain treating a Tuesday like a tiger attack. The alarm is real, but the tiger isn't. What's the actual threat?",
+        "Your HPA axis is activated — cortisol is up, attention is narrowing, and your body is preparing for threat. That's your stress response working correctly. But the response itself becomes the problem when it doesn't deactivate.",
+        "Stress is your brain treating the current demand as exceeding your resources. Sometimes that assessment is accurate, sometimes it's overestimating the demand. Which is it here?",
       ],
       frustrated: [
-        "Something isn't working the way it should, and you care enough to be frustrated about it. That tells me a lot about you.",
-        "Frustration is the gap between what IS and what you KNOW is possible. You see a better version. That's insight, not impatience.",
+        "Frustration is the gap between expected outcome and actual outcome. Your brain predicted something should work, and it didn't. That prediction error is what's generating the emotional charge.",
+        "When effort doesn't produce results, your dopamine system flags it. The frustration is your brain saying 'this approach isn't working — try a different one.'",
       ],
     }
     const neutralEmpathyResponses = [
-      "I hear you. Let me understand what's going on — walk me through it.",
-      "I'm picking up that something's on your mind. No rush — let's talk through it together.",
-      "That's real, and I'm glad you're sharing it. Help me understand what's happening.",
-      "OK, I'm with you. There's clearly something beneath the surface here. What's the full picture?",
-      "You've got my full attention. I want to get this right — tell me more about what's really going on.",
-      "Something's clearly weighing on you. I don't want to assume — fill me in on what's happening.",
-      "I can tell this matters to you. Whatever it is, I'm here for it — no judgment, just listening.",
+      "I hear you. Help me understand what's actually happening — the specifics matter.",
+      "Something is registering for you right now. Let's look at it clearly rather than in the abstract.",
+      "I want to understand the actual situation, not just the feeling. Walk me through what happened.",
+      "There's something here worth examining. What's the core of it?",
     ]
     return pickRandom(empathyTemplates[mood] || neutralEmpathyResponses)
   }
 
-  // Phase: listen — deepening questions, complex reflections
+  // Phase: listen — identify patterns, name mechanisms
   if (phase === 'listen') {
     const listenTemplates: Record<string, string[]> = {
-      anxious: ["It sounds like your brain is running worst-case scenarios on full blast. The irony? The need for certainty IS the anxiety.", "There's a pattern I'm noticing — the worry isn't about one thing, it's about losing control. Sound right?"],
-      sad: ["There's a depth to what you're carrying. It's not just sadness — it's the weight of something that mattered deeply.", "How long have you been holding this? Sometimes just naming the timeline helps it feel less infinite."],
-      angry: ["I think what's really happening is someone crossed a line that matters deeply to you. Your anger isn't the problem — it's the messenger.", "Underneath the frustration, I'm hearing something else. Fear? Hurt? What's at the bottom of this?"],
-      lonely: ["Loneliness isn't about being alone — it's about not feeling seen. When's the last time someone really saw you?", "Social media makes everyone look connected. But real connection? That's rare and valuable. Like what we're doing right now."],
-      overwhelmed: ["When everything feels urgent, nothing actually is. Your brain is in emergency mode. Let's downshift together.", "Let me ask you something: if you could only fix ONE thing from this pile, which one would give you the most relief?"],
-      confused: ["What are the two things pulling you in different directions? Sometimes naming both sides of the tug-of-war helps.", "You're not confused because you're weak. You're confused because you can see multiple truths at once. That's actually depth."],
+      anxious: ["There's a pattern here: your worry isn't about one specific thing — it's about uncertainty itself. The intolerance of not-knowing is the engine. The specific fears are just the content it grabs.", "Notice what your brain is doing: it's trying to solve a problem that hasn't happened yet. That's called anticipatory anxiety. The strategy that would actually help is the opposite — staying in the present moment."],
+      sad: ["What you're describing has a timeline. How long has this been present? Sometimes naming when it started reveals the actual trigger underneath.", "The heaviness has a pattern to it. Is it constant, or does it come in waves? Waves suggest processing. Constant suggests something that needs attention."],
+      angry: ["Underneath anger, there's almost always something more vulnerable — fear, hurt, or helplessness. The anger is the protective layer. What's it guarding?", "Your anger spikes when you feel dismissed or unseen. That's an attachment response, not an anger problem. The need for recognition is driving the emotion."],
+      lonely: ["Loneliness and being alone are different circuits. You can feel lonely in a room full of people. What you're missing isn't presence — it's feeling understood.", "The pull toward isolation often comes from a belief that connection will lead to rejection. That's a conditioned pattern, not a prediction of the future."],
+      overwhelmed: ["Your brain is treating all tasks as equally urgent. They're not. Prioritization breaks the overwhelm. If you could only do one thing, what would give you the most relief?", "Overwhelm is often a decision problem disguised as a volume problem. You don't have too much to do — you have too many unmade decisions."],
+      confused: ["Name the competing values pulling you in different directions. Confusion usually isn't about facts — it's about values conflict.", "You can hold multiple truths at once without resolving them immediately. The pressure to decide right now might be the actual source of distress, not the decision itself."],
     }
-    return pickRandom(listenTemplates[mood] || ["Tell me more about what's underneath this. I'm listening to understand, not to fix."])
+    return pickRandom(listenTemplates[mood] || ["Let's go deeper. What pattern do you notice when you step back from this?"])
   }
 
-  // Phase: understand — pattern naming, deeper insight
+  // Phase: understand — name the deeper pattern, connect dots
   if (phase === 'understand') {
     const understandTemplates: Record<string, string[]> = {
-      anxious: ["Here's what I'm seeing: your mind is trying to protect you by preparing for every possible outcome. But that protection has become its own problem. The guard is exhausting the person it's guarding.", "You know what I notice? When you're anxious, you're actually living in two timelines — the one where things go wrong AND the one where you're already dealing with the fallout. Neither is real. THIS moment is real."],
-      sad: ["What I hear is someone who loved something deeply enough to grieve it. That capacity to care? It's the same capacity that will carry you forward.", "There's a version of you that believes this heaviness is permanent. But you've weathered storms before. The sun didn't stop existing just because clouds showed up."],
-      angry: ["Your anger has been doing a job — protecting something vulnerable underneath. What would happen if you put the armor down, just for a moment?", "I've noticed the anger spikes when you feel unheard or unseen. That's not anger issues — that's a human need for respect."],
+      anxious: ["Here's the mechanism: your threat detection system learned at some point that hypervigilance kept you safe. Now it runs automatically, even when the threat is gone. The alarm isn't matching the actual danger level — it's matching the old one.", "You're running a cognitive distortion called catastrophizing — jumping to the worst-case scenario and treating it as probable. Your evidence doesn't support the conclusion. What would a realistic assessment look like?"],
+      sad: ["What I'm hearing is grief for something that mattered. Grief is the price of attachment, and the depth of your pain reflects the depth of what you valued. That's not pathology — that's being human.", "There's a pattern here: you're treating a temporary emotional state as a permanent identity. 'I am sad' versus 'I am experiencing sadness.' The first fuses you with it. The second gives you distance."],
+      angry: ["Your anger has been serving a protective function — it keeps vulnerability at a distance. But the protection costs you connection. When the armor is always on, no one can reach you.", "The pattern is: perceived disrespect → threat response → anger → withdrawal or escalation. The intervention point is between perception and response. That gap is where your choice lives."],
     }
-    return pickRandom(understandTemplates[mood] || ["I'm starting to see a pattern here. Your reaction makes complete sense when I look at the bigger picture of what you've shared."])
+    return pickRandom(understandTemplates[mood] || ["I can see the pattern now. Your response makes complete sense given your conditioning. But the pattern that protected you then may be limiting you now."])
   }
 
-  // Phase: guide — deliver wisdom through modern framing
+  // Phase: guide — deliver insight through psychological framing
   if (phase === 'guide') {
     return pickRandom([
-      "Here's something that changed how I see things like this:",
-      "Can I share a perspective? It hit me hard when I first heard it:",
-      "You know what I've learned about situations like yours?",
-      "Someone once told me something that rewired how I think about this:",
+      "Here's what the research shows about situations like this:",
+      "There's a concept from behavioral science that applies directly here:",
+      "Let me name the mechanism at play, because understanding it changes the dynamic:",
+      "The psychology here is clear, and once you see it, you can work with it:",
     ])
   }
 
-  // Phase: empower — affirm strength, encourage action
+  // Phase: empower — reinforce agency and capacity
   return pickRandom([
-    "You know what I see in you? Someone who already has the answers but hasn't given themselves permission to trust them yet.",
-    "Real talk? You've survived 100% of your worst days. Your track record is literally flawless.",
-    "The fact that you keep showing up, keep talking, keep trying — that's not luck. That's character.",
-    "I've been watching you process this, and you're handling it with more wisdom than you realize.",
+    "You already have the data you need. The next step isn't more information — it's trusting your own assessment and acting on it.",
+    "Your track record of handling difficulty is 100%. Not because it was easy, but because you adapted. That capacity hasn't gone anywhere.",
+    "The fact that you can observe your own patterns means you're no longer fully inside them. That metacognitive awareness is the foundation of change.",
+    "You're not waiting for readiness. Readiness is a myth. Action comes first, confidence follows.",
   ])
 }
 
@@ -378,64 +375,63 @@ function buildFollowUp(mood: string, topic: string, phase: string, intent: strin
   // Topic-specific follow-ups (highest priority)
   if (topic !== 'general') {
     const topicFollowUps: Record<string, string[]> = {
-      celebration: ["Tell me everything — what are you planning?", "How are you celebrating?", "Who else is involved in the celebration?"],
-      family: ["How are things between you two?", "What's the dynamic been like lately?", "How does that make you feel about your relationship with them?"],
-      work: ["How long has this been going on at work?", "What would make the biggest difference in this situation?", "If you could change ONE thing about it, what would it be?"],
-      academic: ["How are you feeling about your preparation?", "What's the subject that's got you most concerned?", "When exactly is it?"],
-      loss: ["What's one thing about them you want to tell me?", "How are you taking care of yourself through this?", "What are the days like right now?"],
-      relationship: ["What's the thing that's weighing on you most about this?", "How long have you been feeling this way?", "What would 'better' look like for you?"],
-      health: ["How are you managing day to day?", "Who's supporting you through this?", "What would help you feel even a little better right now?"],
-      growth: ["What made you decide to make this change?", "What does success look like for you?", "What's the first step?"],
-      spiritual: ["What brought you to this question?", "What does your gut tell you?", "Is there a specific area of your life where this applies?"],
+      celebration: ["What does this mean for you specifically?", "What conditions made this possible?", "How are you marking this?"],
+      family: ["What's the current dynamic?", "What changed recently?", "What do you need from this relationship right now?"],
+      work: ["How long has this pattern been active?", "What's within your direct control here?", "What would shift this situation most?"],
+      academic: ["What's the specific concern — preparation, capability, or outcome?", "What's your actual evidence about readiness?", "What's the timeline?"],
+      loss: ["What do you need right now — space to feel it, or help processing it?", "How are you managing basic self-care through this?", "What does a day look like currently?"],
+      relationship: ["What's the core need that isn't being met?", "How long has this pattern been running?", "What would 'workable' look like, concretely?"],
+      health: ["How are you managing day to day, practically?", "Who's in your support system?", "What's one thing that would make today slightly more manageable?"],
+      growth: ["What triggered this decision to change?", "What does a concrete first step look like?", "What's your actual metric for progress?"],
+      spiritual: ["What's the practical question underneath the abstract one?", "Where in your daily life does this show up?", "What would an answer actually change for you?"],
     }
     const pool = topicFollowUps[topic]
     if (pool) {
-      // Try entity-specific variants
       const person = entities.find(e => PEOPLE_WORDS.includes(e))
-      if (person && topic === 'celebration') return pickRandom([`How old is your ${person} turning?`, `What's the plan for your ${person}?`, `Tell me about your ${person}!`])
-      if (person && topic === 'family') return `What's going on with your ${person}?`
+      if (person && topic === 'celebration') return pickRandom([`What does this mean for your ${person}?`, `What's the plan for your ${person}?`])
+      if (person && topic === 'family') return `What's happening with your ${person} specifically?`
       return pickRandom(pool)
     }
   }
 
-  // Phase-specific follow-ups (ported from backend _build_psychology_follow_up)
+  // Phase-specific follow-ups — grounded, not poetic
   const phaseFollowUps: Record<string, string[]> = {
-    connect: ["What's weighing on you the most right now?", "How does that sit with you when you say it out loud?", "What's the feeling underneath all of this?"],
-    listen: ["How long have you been carrying this?", "Has there been a moment recently where this felt even a little lighter?", "What would it feel like to put this burden down, just for a moment?"],
-    understand: ["When you step back and look at the pattern, what do you see?", "What do you think your future self would say about this moment?", "If you could change one thing about this situation, what would it be?"],
-    guide: ["What do you think about that perspective?", "Does that resonate with where you are right now?", "How could you apply that starting today?"],
-    empower: ["What's the smallest win you could have this week?", "What would you tell a friend going through the same thing?", "What's one thing you're proud of right now?"],
+    connect: ["What's the most pressing thing right now?", "When you say it out loud, what shifts?", "What's the feeling underneath?"],
+    listen: ["How long has this been running?", "When was the last time this felt different?", "What triggers it most reliably?"],
+    understand: ["When you look at the pattern, what do you notice?", "What would you change if you could change one thing?", "What does this pattern cost you?"],
+    guide: ["Does that mechanism match what you're experiencing?", "How could you apply that this week, concretely?"],
+    empower: ["What's one small action you could take before tomorrow?", "What would you tell someone else in this same situation?"],
   }
-  return pickRandom(phaseFollowUps[phase] || ["What else is on your mind?"])
+  return pickRandom(phaseFollowUps[phase] || ["What else is relevant here?"])
 }
 
 // ─── 7. Gita Wisdom (curated, phase-gated) ──────────────────────────────
 
 const WISDOM_CORE: WisdomEntry[] = [
-  { wisdom: "Think of it like applying for your dream job — you pour everything in, then let go. You did YOUR part. The result isn't yours to control. That's where freedom actually lives.", principle: 'detachment_from_outcomes', verse_ref: '2.47', moods: ['anxious', 'stressed', 'overwhelmed'], topics: ['work', 'academic', 'general'] },
-  { wisdom: "Emotions are like weather — storms pass, sun returns. The mistake is building your identity around today's emotional forecast. You are the sky, not the clouds.", principle: 'impermanence', verse_ref: '2.14', moods: ['sad', 'hurt', 'lonely'], topics: ['general', 'loss', 'relationship'] },
-  { wisdom: "When anger shows up, it hijacks the smart part of your brain. Literally — the prefrontal cortex goes offline. One conscious breath? That's you taking back the wheel.", principle: 'emotional_regulation', verse_ref: '2.63', moods: ['angry', 'frustrated'], topics: ['relationship', 'work', 'family'] },
-  { wisdom: "Your mind is like a puppy — it pulls in every direction. You don't punish a puppy, you train it with patience. Each time you notice your mind wandering? That's one rep. That's progress.", principle: 'mind_mastery', verse_ref: '6.6', moods: ['anxious', 'confused', 'overwhelmed'], topics: ['general', 'health', 'academic'] },
-  { wisdom: "You are your own best friend AND your own worst enemy. Same person, same mind. The difference is which voice you choose to listen to right now.", principle: 'self_as_friend', verse_ref: '6.5', moods: ['sad', 'guilty', 'lonely', 'hurt'], topics: ['general', 'growth'] },
-  { wisdom: "Overthinking is procrastination wearing a thinking cap. Action creates clarity — you don't wait to feel ready, you start and readiness follows.", principle: 'action_over_overthinking', verse_ref: '3.19', moods: ['confused', 'anxious', 'stressed'], topics: ['work', 'academic', 'growth'] },
-  { wisdom: "Balance isn't about doing everything equally. It's about knowing when to push and when to rest. Even nature has seasons — growth AND stillness.", principle: 'balance', verse_ref: '6.17', moods: ['overwhelmed', 'stressed', 'peaceful'], topics: ['health', 'work', 'general'] },
-  { wisdom: "When everything feels heavy, sometimes the bravest thing isn't fighting harder — it's letting go. Not giving up. Giving over. There's a difference.", principle: 'surrender', verse_ref: '18.66', moods: ['overwhelmed', 'anxious', 'hurt', 'sad'], topics: ['general', 'loss', 'health'] },
-  { wisdom: "Stop comparing your chapter 3 to someone else's chapter 20. Your imperfect path, walked authentically, beats someone else's path walked perfectly.", principle: 'your_unique_path', verse_ref: '18.47', moods: ['jealous', 'confused', 'frustrated'], topics: ['work', 'growth', 'relationship'] },
-  { wisdom: "Knowledge isn't just information — it's self-awareness. When you understand your patterns and triggers, you stop being their puppet.", principle: 'self_knowledge', verse_ref: '4.38', moods: ['confused', 'angry', 'frustrated'], topics: ['general', 'growth', 'relationship'] },
-  { wisdom: "You can be IN the storm without being OF the storm. The chaos around you doesn't have to become the chaos within you.", principle: 'inner_peace_amid_chaos', verse_ref: '5.24', moods: ['stressed', 'overwhelmed', 'anxious'], topics: ['work', 'family', 'general'] },
-  { wisdom: "The real difference between people who build the life they want? It's not talent — it's showing up on Tuesday. Consistency beats intensity every single time.", principle: 'consistent_action', verse_ref: '2.40', moods: ['hopeful', 'confused', 'frustrated'], topics: ['growth', 'work', 'academic'] },
-  { wisdom: "Desire isn't the problem. It's clinging to desire — white-knuckling outcomes — that creates suffering. Hold your goals like a bird: firm enough it doesn't fly away, gentle enough you don't crush it.", principle: 'desire_management', verse_ref: '3.37', moods: ['anxious', 'stressed', 'frustrated'], topics: ['work', 'relationship', 'general'] },
-  { wisdom: "You don't need to earn your worth through achievement. A leaf, a flower, water — the smallest offering, given sincerely, is enough. YOU are enough.", principle: 'inherent_worth', verse_ref: '9.26', moods: ['guilty', 'sad', 'lonely', 'hurt'], topics: ['general', 'growth', 'relationship'] },
-  { wisdom: "Even the most broken person, choosing to grow, is regarded as righteous. Your past doesn't define you. Your next choice does.", principle: 'redemption', verse_ref: '9.30', moods: ['guilty', 'hurt', 'sad'], topics: ['general', 'growth'] },
-  { wisdom: "Peace doesn't come from controlling everything. It comes from letting desires flow through you like rivers into the ocean — always receiving, never disturbed.", principle: 'inner_peace', verse_ref: '2.70', moods: ['anxious', 'overwhelmed', 'stressed'], topics: ['general', 'health'] },
-  { wisdom: "One who is undisturbed by misery and unattached to happiness — that's not numbness, that's mastery. You can feel everything without being controlled by anything.", principle: 'equanimity', verse_ref: '2.56', moods: ['sad', 'anxious', 'overwhelmed', 'peaceful'], topics: ['general', 'health', 'growth'] },
-  { wisdom: "The things that happen TO you are temporary. Who you BECOME through them is permanent. You're not just surviving this — you're being shaped by it.", principle: 'growth_through_adversity', verse_ref: '2.23', moods: ['sad', 'hurt', 'fearful', 'stressed'], topics: ['general', 'loss', 'health'] },
-  { wisdom: "Gratitude isn't ignoring what's hard. It's seeing what's good ALONGSIDE what's hard. Both can exist at once. That's not toxic positivity — that's the full picture.", principle: 'gratitude_amid_difficulty', verse_ref: '14.24', moods: ['grateful', 'happy', 'peaceful', 'hopeful'], topics: ['general', 'celebration', 'growth'] },
-  { wisdom: "Your right is to the work itself, never to what comes from it. Freedom isn't getting everything you want — it's being at peace with whatever comes.", principle: 'karma_yoga', verse_ref: '2.48', moods: ['anxious', 'stressed', 'frustrated'], topics: ['work', 'academic', 'general'] },
-  { wisdom: "When the forest of delusion clears, you become indifferent to what was heard and what is yet to come. That's clarity — not knowing everything, but needing to.", principle: 'clarity', verse_ref: '2.52', moods: ['confused', 'anxious'], topics: ['general', 'spiritual', 'growth'] },
-  { wisdom: "Celebration itself is sacred. Joy isn't frivolous — it's fuel. The moments where you feel alive are telling you something about who you really are.", principle: 'joy_as_purpose', verse_ref: '10.20', moods: ['happy', 'excited', 'grateful', 'peaceful'], topics: ['celebration', 'family', 'general'] },
-  { wisdom: "The connections that matter most aren't the ones you perform — they're the ones you feel. Being present with someone? That's the real offering.", principle: 'presence_as_love', verse_ref: '12.14', moods: ['happy', 'grateful', 'lonely', 'hopeful'], topics: ['family', 'relationship', 'celebration'] },
-  { wisdom: "In this endeavor there is no loss. Even a little progress protects you from the greatest fear. Every step counts. Even the ones that feel small.", principle: 'no_effort_is_wasted', verse_ref: '2.40', moods: ['hopeful', 'confused', 'frustrated', 'overwhelmed'], topics: ['growth', 'academic', 'work'] },
+  { wisdom: "Cognitive defusion: you can invest fully in your effort while detaching from the outcome. Research shows that outcome-independence reduces performance anxiety and actually improves results. Control your input. Release the output.", principle: 'detachment_from_outcomes', verse_ref: '2.47', moods: ['anxious', 'stressed', 'overwhelmed'], topics: ['work', 'academic', 'general'] },
+  { wisdom: "Neuroplasticity research confirms: emotional states are temporary neural events, not permanent conditions. Your brain is literally different tomorrow than it is today. The current feeling is real, but it is not forever.", principle: 'impermanence', verse_ref: '2.14', moods: ['sad', 'hurt', 'lonely'], topics: ['general', 'loss', 'relationship'] },
+  { wisdom: "Anger triggers an amygdala hijack — your prefrontal cortex goes offline, and impulse control drops within milliseconds. One conscious breath reactivates executive function. That pause is not suppression — it is reclaiming your decision-making capacity.", principle: 'emotional_regulation', verse_ref: '2.63', moods: ['angry', 'frustrated'], topics: ['relationship', 'work', 'family'] },
+  { wisdom: "Attention training works like physical exercise — each time you notice your mind has wandered and bring it back, that is one repetition strengthening your executive function. The noticing IS the progress, not a sign of failure.", principle: 'mind_mastery', verse_ref: '6.6', moods: ['anxious', 'confused', 'overwhelmed'], topics: ['general', 'health', 'academic'] },
+  { wisdom: "Your internal dialogue pattern determines more than external circumstances. Self-compassion research shows that treating yourself as you would treat someone you care about improves outcomes across every measurable domain — resilience, performance, recovery.", principle: 'self_as_friend', verse_ref: '6.5', moods: ['sad', 'guilty', 'lonely', 'hurt'], topics: ['general', 'growth'] },
+  { wisdom: "Analysis paralysis is a documented cognitive trap. Action generates feedback that thinking cannot. You don't wait for clarity to act — you act to generate clarity. Start with the smallest possible move.", principle: 'action_over_overthinking', verse_ref: '3.19', moods: ['confused', 'anxious', 'stressed'], topics: ['work', 'academic', 'growth'] },
+  { wisdom: "Ultradian rhythms show that your brain cycles between high-focus and recovery states roughly every 90 minutes. Working against this rhythm depletes cognitive resources. Strategic rest is not laziness — it is maintenance.", principle: 'balance', verse_ref: '6.17', moods: ['overwhelmed', 'stressed', 'peaceful'], topics: ['health', 'work', 'general'] },
+  { wisdom: "When control efforts become the problem, the intervention is acceptance — not resignation, but choosing where to direct limited energy. Acceptance and Commitment Therapy calls this 'willingness.' You stop fighting what is and redirect toward what you can influence.", principle: 'surrender', verse_ref: '18.66', moods: ['overwhelmed', 'anxious', 'hurt', 'sad'], topics: ['general', 'loss', 'health'] },
+  { wisdom: "Social comparison activates the brain's status-threat circuitry. You're comparing your internal experience to someone else's external performance — those are different datasets. Your values-aligned action is the only relevant metric.", principle: 'your_unique_path', verse_ref: '18.47', moods: ['jealous', 'confused', 'frustrated'], topics: ['work', 'growth', 'relationship'] },
+  { wisdom: "Metacognition — the ability to observe your own thinking — is the strongest predictor of behavioral change. When you see the pattern, you are no longer fully inside it. That awareness gives you choice where before there was only automatic reaction.", principle: 'self_knowledge', verse_ref: '4.38', moods: ['confused', 'angry', 'frustrated'], topics: ['general', 'growth', 'relationship'] },
+  { wisdom: "Your nervous system can learn to maintain regulation even in chaotic environments. This is called 'window of tolerance' — and it expands with practice. External chaos does not have to become internal chaos.", principle: 'inner_peace_amid_chaos', verse_ref: '5.24', moods: ['stressed', 'overwhelmed', 'anxious'], topics: ['work', 'family', 'general'] },
+  { wisdom: "Behavioral research is unambiguous: consistency beats intensity. Small, regular actions compound over time through habit formation. Showing up on ordinary days builds the neural pathways that make excellence automatic.", principle: 'consistent_action', verse_ref: '2.40', moods: ['hopeful', 'confused', 'frustrated'], topics: ['growth', 'work', 'academic'] },
+  { wisdom: "Attachment to outcomes triggers the same neural circuits as addiction — dopamine-driven craving and withdrawal. Hold your goals with commitment but without rigidity. Psychological flexibility predicts better outcomes than rigid goal pursuit.", principle: 'desire_management', verse_ref: '3.37', moods: ['anxious', 'stressed', 'frustrated'], topics: ['work', 'relationship', 'general'] },
+  { wisdom: "Your worth is not performance-contingent. Self-worth research shows that unconditional self-regard outperforms contingent self-esteem on every wellness metric. You are not your output.", principle: 'inherent_worth', verse_ref: '9.26', moods: ['guilty', 'sad', 'lonely', 'hurt'], topics: ['general', 'growth', 'relationship'] },
+  { wisdom: "Post-traumatic growth is well-documented: people who have experienced difficulty and chosen to engage with it develop greater resilience, empathy, and meaning. Your history is not a sentence — it is data that you can use.", principle: 'redemption', verse_ref: '9.30', moods: ['guilty', 'hurt', 'sad'], topics: ['general', 'growth'] },
+  { wisdom: "Emotional regulation is not about elimination — it is about capacity. The goal is to experience the full range without being controlled by any point on it. This is what psychologists call distress tolerance.", principle: 'inner_peace', verse_ref: '2.70', moods: ['anxious', 'overwhelmed', 'stressed'], topics: ['general', 'health'] },
+  { wisdom: "Equanimity is not numbness — it is the ability to feel everything without being destabilized. Emotional agility research shows that people who can observe their emotions without fusing with them make better decisions and recover faster.", principle: 'equanimity', verse_ref: '2.56', moods: ['sad', 'anxious', 'overwhelmed', 'peaceful'], topics: ['general', 'health', 'growth'] },
+  { wisdom: "Adversity-activated development is real. Difficult experiences, when processed, build denser neural connections for coping. You are not just enduring this — your brain is literally building new capacity from it.", principle: 'growth_through_adversity', verse_ref: '2.23', moods: ['sad', 'hurt', 'fearful', 'stressed'], topics: ['general', 'loss', 'health'] },
+  { wisdom: "Gratitude practice rewires the reticular activating system — the brain's attention filter. It doesn't ignore difficulty; it widens the lens to include what's also working. Both realities exist simultaneously.", principle: 'gratitude_amid_difficulty', verse_ref: '14.24', moods: ['grateful', 'happy', 'peaceful', 'hopeful'], topics: ['general', 'celebration', 'growth'] },
+  { wisdom: "Process focus outperforms outcome focus. When you direct attention to the quality of your effort rather than the result, performance anxiety drops and flow state becomes accessible. Your right is to the work, not the outcome.", principle: 'karma_yoga', verse_ref: '2.48', moods: ['anxious', 'stressed', 'frustrated'], topics: ['work', 'academic', 'general'] },
+  { wisdom: "Cognitive clarity emerges when you stop forcing resolution. Your brain's default mode network does its best problem-solving during unfocused states. Sometimes the clearest thinking happens when you stop trying to think.", principle: 'clarity', verse_ref: '2.52', moods: ['confused', 'anxious'], topics: ['general', 'spiritual', 'growth'] },
+  { wisdom: "Positive affect serves a functional purpose — Barbara Fredrickson's broaden-and-build theory shows that positive emotions expand cognitive resources, creativity, and social connection. Pleasure is not indulgence; it is fuel for capability.", principle: 'joy_as_purpose', verse_ref: '10.20', moods: ['happy', 'excited', 'grateful', 'peaceful'], topics: ['celebration', 'family', 'general'] },
+  { wisdom: "Presence — sustained, non-judgmental attention — activates the social bonding circuits more effectively than any gesture. Quality of attention predicts relationship satisfaction more than quantity of time.", principle: 'presence_as_love', verse_ref: '12.14', moods: ['happy', 'grateful', 'lonely', 'hopeful'], topics: ['family', 'relationship', 'celebration'] },
+  { wisdom: "Every small action builds neural pathways. There is no wasted effort in behavioral change — even failed attempts strengthen the circuits for the next try. Progress is non-linear but cumulative.", principle: 'no_effort_is_wasted', verse_ref: '2.40', moods: ['hopeful', 'confused', 'frustrated', 'overwhelmed'], topics: ['growth', 'academic', 'work'] },
 ]
 
 function selectWisdom(mood: string, topic: string, phase: string, lastPrinciple: string | null): WisdomEntry | null {
@@ -471,7 +467,7 @@ function detectCrisis(message: string): boolean {
 }
 
 function buildCrisisResponse(): string {
-  return "I hear you, and I'm really glad you told me this. What you're feeling is real, and it matters. You matter.\n\nI want to be honest: I care deeply, but right now you deserve to talk to someone who can truly help.\n\nPlease reach out:\n\u2022 iCall: 9152987821 (India)\n\u2022 Vandrevala Foundation: 1860-2662-345 (24/7)\n\u2022 Crisis Text Line: Text HOME to 741741 (US)\n\u2022 International: findahelpline.com\n\nI'm not going anywhere. I'll be right here before, during, and after you reach out."
+  return "I hear you. What you're describing is serious, and I want to be direct: you deserve support from someone trained for this. That is not a weakness — it is the right action.\n\nPlease reach out now:\n\u2022 iCall: 9152987821 (India)\n\u2022 Vandrevala Foundation: 1860-2662-345 (24/7)\n\u2022 Crisis Text Line: Text HOME to 741741 (US)\n\u2022 International: findahelpline.com\n\nThese are trained professionals who can help with exactly what you're going through. I'm here too, but they have tools I don't."
 }
 
 // ─── 9. Response Assembly ────────────────────────────────────────────────

@@ -8,26 +8,26 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-// Fallback responses rooted in Gita wisdom, expressed secularly
+// Fallback responses grounded in psychology and behavioral science
 const FALLBACK_RESPONSES = [
   {
-    response: "Equanimity comes from within. Take a deep breath, and know that you are exactly where you need to be right now. Your dharma in this moment is simply to be present. I am KIAAN, and I'm here with you. 💙",
+    response: "Take a slow breath. What you're feeling right now is a temporary neurological state, not a permanent condition. Your nervous system is doing its job. I'm here — tell me what's on your mind.",
     verse: null,
   },
   {
-    response: "The path of karma yoga reminds us: focus on your effort with full dedication, and gently release attachment to outcomes. Your dharma is your action -- the results will follow in their own time. KIAAN is here to guide you. 💙",
+    response: "Focus on what's within your control right now — your attention, your next small action. Outcomes are uncertain by nature, but your effort is fully yours. What's weighing on you?",
     verse: null,
   },
   {
-    response: "In moments of challenge, remember that your inner equanimity is your greatest strength. Like the person of steady wisdom, you have the resilience to remain calm amid life's storms. I am KIAAN, your companion on this dharmic journey. 💙",
+    response: "Difficult moments activate your stress response, but they don't define your capacity. You've navigated hard things before. Your baseline resilience is stronger than the current discomfort. What's happening?",
     verse: null,
   },
   {
-    response: "Whatever difficulties you face are temporary. Beneath the surface, there is a steady, grounded part of you -- your inner self -- that remains at peace. This is the yoga of self-knowledge. I'm here with you. 💙",
+    response: "Whatever you're experiencing right now is real and valid. Emotions are signals, not sentences. They carry information about what matters to you. I'm listening — share what's going on.",
     verse: null,
   },
   {
-    response: "Whenever you feel lost, remember that you are never truly alone. Your dharma lights the path ahead. Reach out, breathe, and take things one step at a time -- this is karma yoga in action. KIAAN is here to support you. 💙",
+    response: "When things feel overwhelming, your brain is processing more than it can hold at once. That's not weakness — it's overload. Start with one thing. What feels most pressing right now?",
     verse: null,
   },
 ]

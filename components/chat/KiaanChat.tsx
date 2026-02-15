@@ -178,9 +178,9 @@ export function KiaanChat({
                 <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mb-4">
                   <span className="text-3xl">💬</span>
                 </div>
-                <h3 className="text-lg font-semibold text-orange-50 mb-2">Welcome to KIAAN</h3>
+                <h3 className="text-lg font-semibold text-orange-50 mb-2">KIAAN</h3>
                 <p className="text-sm text-orange-100/70 max-w-sm">
-                  Share what&apos;s on your mind. I&apos;m here to listen, support, and offer thoughtful guidance.
+                  Tell me what&apos;s happening. I&apos;ll help you understand the pattern, regulate the response, and find a concrete next step.
                 </p>
               </div>
             ) : (
