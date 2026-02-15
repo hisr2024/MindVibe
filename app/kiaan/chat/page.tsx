@@ -36,7 +36,7 @@ function KiaanChatPageInner() {
       const welcomeMessage: Message = {
         id: crypto.randomUUID(),
         sender: 'assistant',
-        text: `I see you're feeling ${mood}. I'm here to support you. Let's explore this together. 💙`,
+        text: `You're registering ${mood} right now. That's useful data. Tell me what's happening — I'm here to help you understand it and work with it.`,
         timestamp: new Date().toISOString(),
       };
       setMessages([welcomeMessage]);
@@ -90,7 +90,7 @@ function KiaanChatPageInner() {
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         sender: 'assistant',
-        text: data.response || "I'm here for you. Let's try again. 💙",
+        text: data.response || "I'm here. Tell me what's going on and we'll work through it together.",
         timestamp: new Date().toISOString(),
         summary: data.summary || undefined, // AI-generated summary from backend
       };
@@ -188,20 +188,20 @@ function KiaanChatPageInner() {
     });
   }, [messages, themeCounts]);
 
-  // Quick response prompts
+  // Quick response prompts — grounded, practical language
   const quickResponses = [
-    { id: 'anxiety', text: 'Help me calm anxiety', emoji: '😰', prompt: 'I\'m feeling anxious and need help finding calm. Can you guide me?' },
-    { id: 'heavy', text: 'My heart feels heavy', emoji: '💔', prompt: 'My heart feels heavy today. I need some support and understanding.' },
-    { id: 'anger', text: 'Cooling anger', emoji: '😤', prompt: 'I\'m feeling angry and need help cooling down. Can you help me find peace?' },
-    { id: 'clarity', text: 'Clarity check', emoji: '🧭', prompt: 'I need clarity on a situation. Can you help me see things more clearly?' },
-    { id: 'balance', text: 'Work balance', emoji: '⚖️', prompt: 'I\'m struggling with work-life balance. How can I find more equilibrium?' },
-    { id: 'relationships', text: 'Tender relationships', emoji: '💗', prompt: 'I need guidance on handling a tender relationship situation with care.' },
-    { id: 'purpose', text: 'Purpose pulse', emoji: '🌟', prompt: 'Help me reconnect with my sense of purpose. I feel a bit lost.' },
-    { id: 'peace', text: 'Quiet peace', emoji: '🕊️', prompt: 'I need to find quiet peace within myself. Can you guide me to stillness?' },
+    { id: 'anxiety', text: 'Anxiety is high', emoji: '😰', prompt: 'My anxiety is elevated right now. Help me understand what\'s happening in my nervous system and what I can do about it.' },
+    { id: 'heavy', text: 'Feeling heavy', emoji: '💔', prompt: 'I\'m carrying a heaviness today. Help me identify what\'s driving it and how to process it.' },
+    { id: 'anger', text: 'Managing anger', emoji: '😤', prompt: 'I\'m angry right now. Help me regulate before I react and understand what\'s underneath it.' },
+    { id: 'clarity', text: 'Need clarity', emoji: '🧭', prompt: 'I\'m stuck on a decision and can\'t think clearly. Help me sort through the competing factors.' },
+    { id: 'balance', text: 'Overwhelmed', emoji: '⚖️', prompt: 'I\'m overwhelmed with competing demands. Help me prioritize and reduce cognitive load.' },
+    { id: 'relationships', text: 'Relationship stress', emoji: '💗', prompt: 'A relationship is causing me stress. Help me understand the attachment pattern and what I can do.' },
+    { id: 'purpose', text: 'Feeling stuck', emoji: '🌟', prompt: 'I feel disconnected from what matters to me. Help me reconnect with my values and find a concrete next step.' },
+    { id: 'peace', text: 'Need to regulate', emoji: '🕊️', prompt: 'My nervous system is activated and I need to downregulate. Walk me through a grounding exercise.' },
   ];
 
   const handleClarityPause = () => {
-    const clarityMessage = "I need a moment to pause and reflect. Can you guide me through a brief clarity exercise?";
+    const clarityMessage = "I need to slow down and regulate. Walk me through a brief grounding exercise to bring my nervous system back to baseline.";
     handleSendMessage(clarityMessage);
   };
 

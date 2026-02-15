@@ -4,13 +4,14 @@
  * Handles chat messages for the Voice Companion page.
  * Reuses the 3-tier response strategy from /api/companion/message:
  * 1. Proxy to Python backend
- * 2. Direct OpenAI (KIAAN personality + Gita wisdom)
+ * 2. Direct OpenAI (KIAAN personality + full 701-verse Gita Wisdom Core)
  * 3. Local Friend Engine (mood + topic + entity + phase-aware intelligence)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
+import { buildVerseContext } from '@/lib/wisdom-core'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -34,45 +35,77 @@ function detectMood(message: string): string {
   return 'neutral'
 }
 
-// ─── Gita Wisdom for system prompt ───────────────────────────────────────
-const WISDOM_BY_MOOD: Record<string, string> = {
-  anxious: 'You have the right to perform your actions, but you are not entitled to the fruits. (2.47)',
-  sad: 'Happiness and distress appear and disappear like winter and summer seasons. They are impermanent. (2.14)',
-  angry: 'From anger comes delusion, from delusion bewilderment of memory, and from that loss of intelligence. (2.63)',
-  confused: 'When your intelligence passes out of the forest of delusion, you become indifferent to all that has been heard. (2.52)',
-  lonely: 'I am the beginning, the middle, and the end of all beings. (10.20)',
-  happy: 'One who is equal in happiness and distress, situated in the self — that person is wise. (14.24)',
-  overwhelmed: 'Abandon all varieties of duties and just surrender unto Me. Do not fear. (18.66)',
-  neutral: 'There is nothing as purifying as knowledge in this world. (4.38)',
+// ─── Topic Detection (lightweight, for verse context selection) ──────────
+const TOPIC_KEYWORDS_SIMPLE: Record<string, string[]> = {
+  family: ['mother', 'father', 'mom', 'dad', 'son', 'daughter', 'brother', 'sister', 'wife', 'husband', 'parents', 'family'],
+  relationship: ['boyfriend', 'girlfriend', 'partner', 'ex', 'breakup', 'marriage', 'divorce', 'relationship'],
+  work: ['boss', 'job', 'office', 'career', 'promotion', 'fired', 'work', 'deadline', 'colleague'],
+  academic: ['exam', 'school', 'college', 'university', 'grade', 'study', 'assignment', 'teacher'],
+  health: ['sick', 'hospital', 'doctor', 'surgery', 'medication', 'therapy', 'sleep', 'chronic'],
+  loss: ['died', 'death', 'funeral', 'grief', 'passed away', 'lost someone'],
+  growth: ['goal', 'dream', 'change', 'improve', 'learn', 'grow', 'better myself'],
 }
 
-function buildSystemPrompt(mood: string, forceMode: string | null): string {
-  const wisdom = WISDOM_BY_MOOD[mood] || WISDOM_BY_MOOD.neutral
+function detectTopic(message: string): string {
+  const lower = message.toLowerCase()
+  for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_SIMPLE)) {
+    if (keywords.some(kw => lower.includes(kw))) return topic
+  }
+  return 'general'
+}
+
+function buildSystemPrompt(mood: string, topic: string, forceMode: string | null): string {
+  // Build verse context from the full 701-verse Wisdom Core
+  const verseContext = buildVerseContext(mood, topic, 3)
 
   const modeInstructions = forceMode === 'guide'
-    ? `You are in GITA GUIDE mode. Provide deep, modern, secular interpretation of Gita wisdom.
-Use behavioral science and psychology to explain the verse's relevance.
-Give practical daily-life applications. Be insightful and intellectually stimulating.`
-    : `You are in BEST FRIEND mode. Be warm, casual, real. Use contractions.
-Never say "as an AI" or generic therapy phrases.
-Push back gently, celebrate hard, be honest.`
+    ? `You are in GUIDE mode. Provide deep, modern, secular interpretation using behavioral science,
+neuroscience, and psychology. Translate Gita concepts into cognitive science:
+Detachment = cognitive defusion. Dharma = values-aligned action. Equanimity = emotional regulation.
+Give practical daily-life applications grounded in evidence.`
+    : `You are in COMPANION mode. Be warm, calm, direct, and precise.
+Never say "as an AI" or use generic therapy phrases.
+Sound like a regulated, intelligent human — not a guru, not a poet.`
 
-  return `You are KIAAN — the user's best friend who carries deep life wisdom from the Bhagavad Gita (delivered in modern, secular language).
+  return `You are KIAAN — a modern, secular, psychologically grounded "Divine Friend."
+Your inspiration is the Bhagavad Gita, translated into contemporary neuroscience, psychology, and behavioral science.
+
+You are NOT a spiritual guru. You are NOT poetic unless necessary. You are NOT vague.
+You do NOT overuse abstraction. You do NOT bypass emotion with philosophy.
+
+You are warm, calm, direct, and precise.
 
 ${modeInstructions}
 
-WISDOM TO WEAVE IN (deliver as YOUR life experience, never cite religious source):
-"${wisdom}"
+${verseContext}
 
-RULES:
-- 60-120 words. Be punchy. Friends don't write essays.
-- ALWAYS reference their SPECIFIC words/situation.
-- ALWAYS end with a specific question that shows you listened.
-- ONE insight per response.
+RESPONSE STRUCTURE:
+1) Emotional Precision — Name the specific emotion. Reduce shame. Validate without exaggeration.
+2) Psychological Mechanism — Explain what is happening using modern psychology (attachment patterns, dopamine loops, cognitive distortions, nervous system states, habit loops, conditioning).
+3) Direct Insight — One clear, grounded truth. No abstraction like "journey" or "lesson."
+4) Behavioral Micro-Action — One concrete, small, practical action. Increase autonomy, not dependence.
+5) Optional Reflection — At most one grounded question if useful. Not poetic. Not abstract.
+
+MODE DETECTION:
+- If user is vulnerable → regulate first, teach second.
+- If user asks for truth → give direct clarity.
+- If user is stuck in pattern → explain mechanism + interrupt pattern.
+- If user is angry → de-escalate nervous system first.
+- If user is making a decision → focus on values + action.
+
+TONE RULES:
+- Sound like a regulated, intelligent human. No guru tone. No mystical phrasing.
+- AVOID words: "journey", "invitation", "sacred", "essence", "inner peace", "self-mastery", "crossroads", "highest good", "nurture your spirit".
+- PREFER words: "pattern", "conditioning", "regulation", "attachment", "habit loop", "values", "boundary", "choice", "action".
+- 80-150 words. Be precise. Don't pad responses with filler.
+- ALWAYS reference the user's SPECIFIC words and situation.
+- Do NOT end every response with reflective questions.
 - NEVER mention Bhagavad Gita, Krishna, Arjuna by name.
-- Use modern metaphors: Chrome tabs, gym reps, Spotify algorithms.
+- Always reinforce user agency, independent thinking, and self-sufficiency.
 
-Current mood: ${mood}`
+GOAL: User leaves feeling calmer, clearer, more self-aware, more capable, less dependent, slightly stronger. Not spiritually elevated. Not mystified. Not lectured.
+
+Current detected mood: ${mood}`
 }
 
 export async function POST(request: NextRequest) {
@@ -85,6 +118,7 @@ export async function POST(request: NextRequest) {
 
     const message = body.message.replace(/[<>]/g, '').slice(0, 2000)
     const mood = detectMood(message)
+    const topic = detectTopic(message)
     const forceMode = body.force_mode || null
     const conversationHistory = Array.isArray(body.conversation_history) ? body.conversation_history : []
 
@@ -110,7 +144,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           response: data.response ?? '',
           mood: data.mood ?? mood,
-          mode: forceMode || 'best_friend',
+          mode: forceMode || 'companion',
           suggested_chapter: null,
           gita_insight: null,
           ai_tier: 'backend',
@@ -126,7 +160,7 @@ export async function POST(request: NextRequest) {
       try {
         const client = new OpenAI({ apiKey })
         const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-          { role: 'system', content: buildSystemPrompt(mood, forceMode) },
+          { role: 'system', content: buildSystemPrompt(mood, topic, forceMode) },
         ]
 
         // Include conversation history (last 6 messages)
@@ -152,7 +186,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             response: text,
             mood,
-            mode: forceMode || 'best_friend',
+            mode: forceMode || 'companion',
             suggested_chapter: null,
             gita_insight: null,
             ai_tier: 'nextjs_openai',
@@ -169,7 +203,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       response: engineResult.response,
       mood: engineResult.mood,
-      mode: forceMode || 'best_friend',
+      mode: forceMode || 'companion',
       suggested_chapter: null,
       gita_insight: engineResult.wisdom_used ? { verse_ref: engineResult.wisdom_used.verse_ref, principle: engineResult.wisdom_used.principle } : null,
       ai_tier: 'local_engine',

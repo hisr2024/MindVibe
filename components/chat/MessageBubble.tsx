@@ -32,9 +32,9 @@ function buildSummary(text: string) {
 
   const sentences = normalized.split(/(?<=[.!?])\s+/).filter(s => s.length > 20)
 
-  // Look for sentences with wisdom or action markers for better summaries
-  const wisdomMarkers = ['dharma', 'karma', 'peace', 'wisdom', 'breath', 'trust', 'heart', 'soul', 'stillness']
-  const actionMarkers = ['step', 'practice', 'try', 'begin', 'start', 'remember', 'focus', 'take']
+  // Look for sentences with psychology or action markers for better summaries
+  const wisdomMarkers = ['pattern', 'regulation', 'nervous system', 'attachment', 'mechanism', 'cognitive', 'habit', 'values', 'conditioning', 'awareness']
+  const actionMarkers = ['step', 'practice', 'try', 'begin', 'start', 'notice', 'focus', 'take', 'action', 'choose']
 
   const wisdomSentence = sentences.find(s => wisdomMarkers.some(m => s.toLowerCase().includes(m)))
   const actionSentence = sentences.find(s => actionMarkers.some(m => s.toLowerCase().includes(m)))
@@ -57,9 +57,9 @@ function buildSummary(text: string) {
     summary = summary.slice(0, 340) + '...'
   }
 
-  // Ensure it ends with blue heart
-  if (!summary.endsWith('💙') && !summary.endsWith('...')) {
-    summary = summary.replace(/[.!?]?$/, '') + ' 💙'
+  // Ensure clean ending
+  if (summary && !summary.endsWith('.') && !summary.endsWith('...')) {
+    summary = summary.replace(/[!?]?$/, '.')
   }
 
   return summary
