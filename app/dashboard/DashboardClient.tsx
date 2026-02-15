@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback } from 'react'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
-import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 
 // Animation variants for staggered entrance
 const containerVariants = {
@@ -82,6 +81,66 @@ const QUICK_ACCESS = [
     icon: '\u{1F64F}',
     title: 'Sacred Reflections',
     href: '/sacred-reflections#spiritual',
+  },
+] as const
+
+// Spiritual Toolkit tools — card grid on the dashboard
+const SPIRITUAL_TOOLKIT = [
+  {
+    id: 'viyoga',
+    icon: '\u{1F3AF}',
+    title: 'Viyoga',
+    subtitle: 'Release attachments',
+    href: '/viyog',
+  },
+  {
+    id: 'ardha',
+    icon: '\u{1F504}',
+    title: 'Ardha',
+    subtitle: 'Reframe thoughts',
+    href: '/ardha',
+  },
+  {
+    id: 'kiaan-chat',
+    icon: '\u{1F4AC}',
+    title: 'KIAAN Chat',
+    subtitle: 'Your companion',
+    href: '/kiaan/chat',
+  },
+  {
+    id: 'relationship-compass',
+    icon: '\u{1F9ED}',
+    title: 'Compass',
+    subtitle: 'Relationships',
+    href: '/relationship-compass',
+  },
+  {
+    id: 'emotional-reset',
+    icon: '\u{1F4AB}',
+    title: 'Emotional Reset',
+    subtitle: 'Guided healing',
+    href: '/emotional-reset',
+  },
+  {
+    id: 'karma-reset',
+    icon: '\u{1F49A}',
+    title: 'Karma Reset',
+    subtitle: 'Heal with grace',
+    href: '/tools/karma-reset',
+  },
+  {
+    id: 'kiaan-vibe',
+    icon: '\u{1F3B5}',
+    title: 'Vibe Player',
+    subtitle: 'Sacred sounds',
+    href: '/kiaan-vibe',
+  },
+  {
+    id: 'wisdom-rooms',
+    icon: '\u{1F30D}',
+    title: 'Wisdom Rooms',
+    subtitle: 'Community chats',
+    href: '/wisdom-rooms',
   },
 ] as const
 
@@ -294,7 +353,29 @@ export default function DashboardClient() {
 
           {/* ─── Spiritual Toolkit ─── */}
           <motion.div variants={itemVariants}>
-            <SpiritualToolsNav />
+            <div className="mb-3 flex items-center gap-3">
+              <span className="text-lg">{'\u{1F549}\uFE0F'}</span>
+              <h2 className="text-base font-semibold text-white/80">
+                Your Spiritual Toolkit
+              </h2>
+            </div>
+            <div className="grid grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+              {SPIRITUAL_TOOLKIT.map((tool) => (
+                <motion.div key={tool.id} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
+                  <Link
+                    href={tool.href}
+                    onClick={handleCardTap}
+                    className="flex flex-col items-center justify-center rounded-[24px] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-3 sm:p-4 shadow-mobile-glow transition-all duration-300 active:opacity-90 md:p-5"
+                  >
+                    <div className="mb-2 sm:mb-3 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/[0.06] shadow-inner md:h-14 md:w-14">
+                      <span className="text-xl sm:text-2xl md:text-3xl">{tool.icon}</span>
+                    </div>
+                    <span className="text-xs sm:text-sm font-medium text-white/80 text-center leading-tight">{tool.title}</span>
+                    <span className="mt-0.5 text-[9px] sm:text-[10px] text-white/40 text-center leading-tight">{tool.subtitle}</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
 
           {/* ─── Quick Access ─── */}
