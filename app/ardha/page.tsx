@@ -189,7 +189,7 @@ export default function ArdhaPage() {
             {result && (
               <div className="rounded-2xl bg-black/60 border border-orange-500/20 p-5 shadow-inner shadow-orange-500/10">
                 <div className="flex items-center justify-between text-xs text-orange-100/70 mb-3">
-                  <span className="font-semibold text-orange-50">Ardha's response</span>
+                  <span className="font-semibold text-orange-50">Ardha&apos;s response</span>
                   <span>{new Date(result.requestedAt).toLocaleString()}</span>
                 </div>
                 <div className="whitespace-pre-wrap text-sm text-orange-50 leading-relaxed">
@@ -203,7 +203,7 @@ export default function ArdhaPage() {
           {/* Right: Pillars and Info */}
           <section className="space-y-4">
             <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-4">Ardha's Pillars</h3>
+              <h3 className="text-sm font-semibold text-orange-50 mb-4">Ardha&apos;s Pillars</h3>
               <ul className="space-y-3 text-sm text-orange-100/85">
                 {pillars.map((pillar, idx) => (
                   <li key={idx} className="flex items-start gap-2">
