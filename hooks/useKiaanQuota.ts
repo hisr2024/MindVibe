@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 
 const KIAAN_QUOTA_STORAGE_KEY = 'mindvibe_kiaan_quota'
 const KIAAN_USAGE_STORAGE_KEY = 'mindvibe_kiaan_usage'
@@ -133,7 +133,11 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
     ? 0
     : Math.min(100, (quotaData.used / quotaData.limit) * 100)
   const resetDate = new Date(quotaData.resetDate)
-  const daysUntilReset = Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const daysUntilReset = useMemo(
+    // eslint-disable-next-line react-hooks/purity
+    () => Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+    [resetDate]
+  )
 
   return {
     used: quotaData.used,

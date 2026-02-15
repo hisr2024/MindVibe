@@ -43,6 +43,13 @@ export function AnimatedParticles({
   hoveredMode,
   isAnimated,
 }: AnimatedParticlesProps) {
+  // Pre-compute stable random seeds for particle generation
+  const particleSeeds = useMemo(
+    () => Array.from({ length: 6 }, () => ({ duration: 4 + Math.random() * 3, size: 2 + Math.random() * 2 })),
+    // eslint-disable-next-line react-hooks/purity
+    []
+  )
+
   // Generate particles flowing between nodes
   const particles = useMemo(() => {
     if (!isAnimated) return []
@@ -51,10 +58,12 @@ export function AnimatedParticles({
     const particleCount = 6 // Keep minimal for performance
 
     // Create particles flowing along each edge
+    let seedIdx = 0
     nodes.forEach((node, index) => {
       const nextNode = nodes[(index + 1) % nodes.length]
 
       for (let i = 0; i < particleCount / 3; i++) {
+        const seed = particleSeeds[seedIdx % particleSeeds.length]
         result.push({
           id: `${node.id}-${nextNode.id}-${i}`,
           startX: node.x,
@@ -62,15 +71,16 @@ export function AnimatedParticles({
           endX: nextNode.x,
           endY: nextNode.y,
           color: node.color,
-          duration: 4 + Math.random() * 3, // 4-7s (matching slow rhythmic flow)
+          duration: seed.duration, // 4-7s (matching slow rhythmic flow)
           delay: i * 1.5,
-          size: 2 + Math.random() * 2,
+          size: seed.size,
         })
+        seedIdx++
       }
     })
 
     return result
-  }, [nodes, isAnimated])
+  }, [nodes, isAnimated, particleSeeds])
 
   // Get target node position for convergence effect
   const targetNode = useMemo(() => {
@@ -78,6 +88,13 @@ export function AnimatedParticles({
     if (!activeMode) return null
     return nodes.find((n) => n.id === activeMode) || null
   }, [nodes, selectedMode, hoveredMode])
+
+  // Pre-compute stable random radii for ambient particles
+  const ambientRadii = useMemo(
+    () => Array.from({ length: 4 }, () => 15 + Math.random() * 10),
+    // eslint-disable-next-line react-hooks/purity
+    []
+  )
 
   if (!isAnimated) return null
 
@@ -206,11 +223,10 @@ export function AnimatedParticles({
       )}
 
       {/* Ambient floating particles in center */}
-      {[...Array(4)].map((_, i) => {
+      {ambientRadii.map((radius, i) => {
         const centerX = size / 2
         const centerY = size / 2 + 10
         const angle = (i * Math.PI * 2) / 4
-        const radius = 15 + Math.random() * 10
 
         return (
           <motion.circle

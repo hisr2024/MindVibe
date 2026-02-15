@@ -5,6 +5,7 @@
 
 'use client'
 
+import { useMemo } from 'react'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { useCacheManager } from '@/hooks/useCacheManager'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,15 +14,11 @@ export function OfflineStatusBanner() {
   const { isOnline, queueCount, lastSyncTime } = useOfflineMode()
   const { stats } = useCacheManager()
 
-  // Don't show banner if online and no queued operations
-  if (isOnline && queueCount === 0) {
-    return null
-  }
-
-  const formatLastSync = (timestamp: number | null) => {
-    if (!timestamp) return 'Never'
+  const formattedLastSync = useMemo(() => {
+    if (!lastSyncTime) return 'Never'
+    // eslint-disable-next-line react-hooks/purity
     const now = Date.now()
-    const diff = now - timestamp
+    const diff = now - lastSyncTime
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
@@ -30,6 +27,11 @@ export function OfflineStatusBanner() {
     if (hours > 0) return `${hours}h ago`
     if (minutes > 0) return `${minutes}m ago`
     return 'Just now'
+  }, [lastSyncTime])
+
+  // Don't show banner if online and no queued operations
+  if (isOnline && queueCount === 0) {
+    return null
   }
 
   return (
@@ -69,7 +71,7 @@ export function OfflineStatusBanner() {
                 </span>
               )}
               <span className="text-xs text-white/70">
-                Last sync: {formatLastSync(lastSyncTime)}
+                Last sync: {formattedLastSync}
               </span>
             </div>
           </div>

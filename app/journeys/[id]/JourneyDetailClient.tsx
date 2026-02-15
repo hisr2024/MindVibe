@@ -119,7 +119,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
               {error || 'Journey not found'}
             </h2>
             <p className="text-white/60 mb-6">
-              We couldn't load this journey.
+              We couldn&apos;t load this journey.
             </p>
             <div className="flex justify-center gap-3">
               <button

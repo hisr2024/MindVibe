@@ -21,6 +21,7 @@ interface Particle {
   vx: number
   vy: number
   opacity: number
+  animationDuration: number
 }
 
 interface EmotionBackgroundProps {
@@ -91,7 +92,8 @@ function generateParticles(
       size,
       vx,
       vy,
-      opacity: Math.random() * 0.4 + 0.2
+      opacity: Math.random() * 0.4 + 0.2,
+      animationDuration: 20 + Math.random() * 10
     })
   }
 
@@ -189,7 +191,7 @@ export function EmotionBackground({
             opacity={particle.opacity}
             style={{
               animationDelay: `${particle.id * 0.1}s`,
-              animationDuration: `${20 + Math.random() * 10}s`
+              animationDuration: `${particle.animationDuration}s`
             }}
           />
         ))}

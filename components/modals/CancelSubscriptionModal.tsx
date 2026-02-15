@@ -64,7 +64,7 @@ export function CancelSubscriptionModal({
       {step === 'reason' && (
         <div>
           <p className="text-sm text-orange-100/70 mb-4">
-            We're sorry to see you go! Before you cancel, please let us know why:
+            We&apos;re sorry to see you go! Before you cancel, please let us know why:
           </p>
 
           <div className="space-y-2 mb-4">
@@ -115,7 +115,7 @@ export function CancelSubscriptionModal({
             <p className="text-sm text-amber-100/80">
               Your {planName} subscription will remain active until{' '}
               <span className="font-semibold">{endDate.toLocaleDateString()}</span>.
-              After that, you'll be moved to the Free plan.
+              After that, you&apos;ll be moved to the Free plan.
             </p>
           </div>
 
@@ -173,7 +173,7 @@ export function CancelSubscriptionModal({
           </div>
 
           <p className="text-sm text-orange-100/70 mb-4">
-            Your subscription has been canceled. You'll continue to have access to {planName} features
+            Your subscription has been canceled. You&apos;ll continue to have access to {planName} features
             until {endDate.toLocaleDateString()}.
           </p>
 

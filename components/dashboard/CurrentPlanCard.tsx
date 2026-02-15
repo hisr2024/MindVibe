@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Card, CardContent, Badge, Button } from '@/components/ui'
 import { type Subscription } from '@/hooks/useSubscription'
 
@@ -12,7 +13,11 @@ interface CurrentPlanCardProps {
 
 export function CurrentPlanCard({ subscription, onManage, onUpgrade, className = '' }: CurrentPlanCardProps) {
   const periodEnd = new Date(subscription.currentPeriodEnd)
-  const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const daysRemaining = useMemo(
+    // eslint-disable-next-line react-hooks/purity
+    () => Math.max(0, Math.ceil((periodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+    [periodEnd]
+  )
 
   const statusBadge = {
     active: { variant: 'success' as const, label: 'Active' },

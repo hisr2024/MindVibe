@@ -123,6 +123,7 @@ export default function OnboardingStepPage() {
 
   // Client-side initialization
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety
     setIsClient(true)
     setState(getInitialState())
   }, [])

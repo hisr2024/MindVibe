@@ -652,7 +652,7 @@ export default function QuantumDivePage() {
                       <div className="text-xs text-indigo-300 mb-2">
                         Chapter {verse.chapter}, Verse {verse.verse}
                       </div>
-                      <p className="text-white/90 italic mb-3">"{verse.translation}"</p>
+                      <p className="text-white/90 italic mb-3">&quot;{verse.translation}&quot;</p>
                       <p className="text-white/60 text-sm">{verse.application_guide}</p>
                     </div>
                   ))}

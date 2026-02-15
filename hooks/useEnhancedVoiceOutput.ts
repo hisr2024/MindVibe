@@ -209,7 +209,7 @@ export function useEnhancedVoiceOutput(
   }, [language, voiceType, useBackendTts, onStart, onEnd])
 
   // Use browser synthesis as fallback
-  const useBrowserSynthesis = useCallback((text: string) => {
+  const playBrowserSynthesis = useCallback((text: string) => {
     if (!synthesisRef.current || !isSupported) {
       const errorMsg = 'Speech synthesis not supported'
       setError(errorMsg)
@@ -267,9 +267,9 @@ export function useEnhancedVoiceOutput(
 
     if (!backendSuccess) {
       // Fall back to browser synthesis
-      useBrowserSynthesis(text)
+      playBrowserSynthesis(text)
     }
-  }, [tryBackendTts, useBrowserSynthesis])
+  }, [tryBackendTts, playBrowserSynthesis])
 
   // Pause
   const pause = useCallback(() => {

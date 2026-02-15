@@ -421,7 +421,7 @@ export function DivineMoodCheckIn({
                 transition={{ delay: 1 }}
               >
                 <p className="text-sm text-white/50 mb-1">✨ Affirmation</p>
-                <p className="text-white/80 italic">"{response.affirmation}"</p>
+                <p className="text-white/80 italic">&quot;{response.affirmation}&quot;</p>
               </motion.div>
             )}
 

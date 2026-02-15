@@ -403,7 +403,7 @@ export default function SacredReflectionsPage() {
 
             {/* Mood Selection */}
             <div>
-              <label className="text-sm font-semibold text-orange-100">Select today's tone</label>
+              <label className="text-sm font-semibold text-orange-100">Select today&apos;s tone</label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {moods.map(option => (
                   <button
@@ -489,7 +489,7 @@ export default function SacredReflectionsPage() {
             </div>
 
             <div className="rounded-2xl bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-400/20 p-4">
-              <h3 className="text-sm font-semibold text-orange-50 mb-2">KIAAN's gentle guidance</h3>
+              <h3 className="text-sm font-semibold text-orange-50 mb-2">KIAAN&apos;s gentle guidance</h3>
               <p className="text-sm text-orange-100/80 leading-relaxed">{assessment.headline}</p>
               <ul className="mt-3 space-y-2 text-xs text-orange-100/70">
                 {assessment.guidance.map((tip, i) => (

@@ -26,6 +26,7 @@ export function Portal({ children, containerId = 'overlay-root' }: PortalProps) 
   const [container, setContainer] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety
     setMounted(true)
 
     // Try to find the specified container, fall back to body
@@ -62,6 +63,7 @@ export function usePortalReady(): boolean {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety
     setReady(true)
   }, [])
 

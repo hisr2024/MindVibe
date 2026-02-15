@@ -106,7 +106,7 @@ export default function AdminExportPage() {
           <div>
             <h3 className="font-semibold text-orange-400">Privacy Notice</h3>
             <ul className="mt-2 space-y-1 text-sm text-orange-300/80">
-              <li>• Exported data is subject to your organization's data handling policies</li>
+              <li>• Exported data is subject to your organization&apos;s data handling policies</li>
               <li>• Sensitive data like passwords are never included in exports</li>
               <li>• KIAAN conversation content is encrypted and NOT exportable</li>
               <li>• All export actions are logged in the audit trail</li>
@@ -120,8 +120,8 @@ export default function AdminExportPage() {
         <h3 className="mb-4 font-semibold text-slate-100">Recent Exports</h3>
         <div className="space-y-3">
           {[
-            { type: 'users', format: 'csv', admin: 'admin@mindvibe.app', date: new Date(Date.now() - 86400000) },
-            { type: 'analytics', format: 'json', admin: 'admin@mindvibe.app', date: new Date(Date.now() - 172800000) },
+            { type: 'users', format: 'csv', admin: 'admin@mindvibe.app', date: new Date('2026-02-14') },
+            { type: 'analytics', format: 'json', admin: 'admin@mindvibe.app', date: new Date('2026-02-13') },
           ].map((item, idx) => (
             <div
               key={idx}

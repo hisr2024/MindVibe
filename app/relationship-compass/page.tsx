@@ -375,7 +375,7 @@ export default function RelationshipCompassPage() {
                 {/* Emotion Selection */}
                 <div>
                   <label className="text-sm font-semibold text-orange-100 block mb-3">
-                    Primary emotion you're feeling
+                    Primary emotion you&apos;re feeling
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {EMOTIONS.map((emotion) => (
@@ -614,7 +614,7 @@ export default function RelationshipCompassPage() {
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80 leading-relaxed">
                 <strong className="text-orange-50">Sacred Boundaries:</strong> This compass offers wisdom, not therapy.
-                It never takes sides or tells you to leave or stay. If you're experiencing harm or abuse,
+                It never takes sides or tells you to leave or stay. If you&apos;re experiencing harm or abuse,
                 please reach out to a trusted person or professional support.
               </p>
             </div>

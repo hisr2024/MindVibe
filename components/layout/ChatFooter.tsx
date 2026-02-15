@@ -354,7 +354,7 @@ export function ChatFooter() {
                     </div>
                     <h4 className="text-sm font-semibold text-orange-50 mb-2">Welcome to KIAAN</h4>
                     <p className="text-xs text-orange-100/70 max-w-[260px] mx-auto">
-                      Share what's on your mind. I'm here to listen, support, and offer thoughtful guidance.
+                      Share what&apos;s on your mind. I&apos;m here to listen, support, and offer thoughtful guidance.
                     </p>
                   </div>
                 )}

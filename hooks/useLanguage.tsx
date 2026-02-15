@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, useRef, createContext, useContext, type ReactNode } from 'react'
 
 // Align with all 17 languages from i18n.ts
 export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
@@ -141,6 +141,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [translations, setTranslations] = useState<TranslationObject>({})
   const [isInitialized, setIsInitialized] = useState(false)
 
+  // Use a ref for recursive calls to avoid self-reference before declaration
+  const loadTranslationsRef = useRef<((lang: Language) => Promise<void>) | null>(null)
+
   // Load translations for a language
   const loadTranslations = useCallback(async (lang: Language) => {
     // Check cache first
@@ -176,10 +179,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       console.error(`[useLanguage] Error loading translations for ${lang}:`, error)
       // Fallback to English
       if (lang !== 'en') {
-        await loadTranslations('en')
+        await loadTranslationsRef.current?.('en')
       }
     }
   }, [])
+
+  // Keep the ref in sync with the latest loadTranslations callback
+  useEffect(() => {
+    loadTranslationsRef.current = loadTranslations
+  }, [loadTranslations])
 
   // Initialize on mount - sync document attributes and load translations
   useEffect(() => {

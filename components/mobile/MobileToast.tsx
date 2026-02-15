@@ -36,8 +36,8 @@ export interface Toast extends ToastConfig {
 }
 
 // Toast context for global usage
-let toastListeners: Set<(toast: Toast) => void> = new Set()
-let dismissListeners: Set<(id: string) => void> = new Set()
+const toastListeners: Set<(toast: Toast) => void> = new Set()
+const dismissListeners: Set<(id: string) => void> = new Set()
 
 export function showToast(config: ToastConfig) {
   const toast: Toast = {

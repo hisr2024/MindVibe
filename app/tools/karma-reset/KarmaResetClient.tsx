@@ -21,6 +21,7 @@ import { springConfigs } from '@/lib/animations/spring-configs'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import CompanionCTA from '@/components/companion/CompanionCTA'
+import { KarmaResetTestimonials } from '@/components/testimonials'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
 
@@ -364,7 +365,7 @@ export default function KarmaResetClient() {
                           <p className="text-sm text-red-200/80">{error}</p>
                           {retryCount >= MAX_RETRIES && (
                             <p className="text-sm text-red-200/70 mt-2">
-                              💙 Don't worry - we've prepared fallback guidance for you below.
+                              💙 Don&apos;t worry - we&apos;ve prepared fallback guidance for you below.
                             </p>
                           )}
                         </div>
@@ -475,6 +476,9 @@ export default function KarmaResetClient() {
             </div>
           </div>
         </div>
+
+        {/* Testimonials */}
+        <KarmaResetTestimonials />
 
         <CompanionCTA fromTool="karma-reset" />
       </div>
