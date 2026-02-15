@@ -249,7 +249,7 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
   {
     id: 'journey-engine',
     name: 'Journey Engine (Six Enemies)',
-    route: '/journey-engine',
+    route: '/journeys',
     friendDescription: 'Guided multi-day journeys to reduce the grip of the six inner tendencies described in the Gita.',
     suggestions: [
       'Friend, in the Gita, there are six inner tendencies that unsettle our peace: desire, anger, greed, delusion, arrogance, and envy. The Journey Engine is a structured multi-day program where we loosen their influence one by one. Which tendency is weighing on you most right now?',

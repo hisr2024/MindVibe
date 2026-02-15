@@ -105,7 +105,7 @@ const cases: TestCase[] = [
     input: { tool: 'kiaan', userText: 'I want to start a practice' },
     expected: {
       targetTool: 'journey',
-      href: '/journey-engine',
+      href: '/journeys',
       labelKey: 'navigation.next_step.enter_journey',
       labelFallback: 'Enter a Journey \u2192',
     },
@@ -119,7 +119,7 @@ const cases: TestCase[] = [
     },
     expected: {
       targetTool: 'journey',
-      href: '/journey-engine',
+      href: '/journeys',
       labelKey: 'navigation.next_step.enter_journey',
       labelFallback: 'Enter a Journey \u2192',
     },

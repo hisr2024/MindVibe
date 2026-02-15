@@ -103,7 +103,7 @@ export default function JourneyDetailPage() {
 
       if (result.journey_complete) {
         setTimeout(() => {
-          router.push('/journey-engine')
+          router.push('/journeys')
         }, 3000)
       } else if (result.next_day !== null) {
         setTimeout(async () => {
@@ -156,7 +156,7 @@ export default function JourneyDetailPage() {
           <h2 className="text-2xl font-bold text-white mb-2">Journey Not Found</h2>
           <p className="text-white/60 mb-6">{error || 'This journey may have been completed or removed.'}</p>
           <Link
-            href="/journey-engine"
+            href="/journeys"
             className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all"
           >
             Back to Journeys
@@ -177,7 +177,7 @@ export default function JourneyDetailPage() {
       {/* Header */}
       <header className="relative z-10 px-4 py-4 border-b border-white/10">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/journey-engine" className="text-white/60 hover:text-white transition-colors">
+          <Link href="/journeys" className="text-white/60 hover:text-white transition-colors">
             &larr; All Journeys
           </Link>
           <div className="text-center">
@@ -422,7 +422,7 @@ export default function JourneyDetailPage() {
               You&apos;ve completed all steps in this journey. Congratulations on your progress!
             </p>
             <Link
-              href="/journey-engine"
+              href="/journeys"
               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all"
             >
               Start Another Journey
