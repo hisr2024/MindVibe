@@ -1,8 +1,8 @@
 {
   "ardha": {
-    "title": "Ardha: Reframing-Assistent",
-    "subtitle": "An alter Weisheit ausgerichtetes Reframing",
-    "description": "Ausgewogene Neuformulierungen, die KIAAN unberührt lassen.",
+    "title": "Ardha: Cognitive Reframing",
+    "subtitle": "Gita-aligned cognitive reframing",
+    "description": "Detect distortions, calibrate story vs fact, deliver grounded clarity.",
     "placeholder": "Beispiel: Ich mache bei der Arbeit immer wieder Fehler, vielleicht bin ich einfach nicht dafür geeignet.",
     "button": "Neu formulieren",
     "buttonLoading": "Reflektiere...",

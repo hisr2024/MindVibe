@@ -124,7 +124,7 @@ Contains:
 
 ### features.json
 Contains:
-- Ardha (Reframing Assistant) text
+- Ardha (Cognitive Reframing) text
 - Viyoga (Detachment Coach) text
 - Relationship Compass text
 - Sacred Reflections (Journal) text

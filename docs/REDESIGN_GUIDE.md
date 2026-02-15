@@ -411,7 +411,7 @@ All specialized tools are accessible via dedicated routes:
 | Tool | Primary Route | Tools Route | Description |
 |------|---------------|-------------|-------------|
 | Viyog | `/viyog` | `/tools/viyog` | Detachment Coach - Outcome anxiety reducer |
-| Ardha | `/ardha` | `/tools/ardha` | Reframing Assistant - Gita-aligned cognitive reframing |
+| Ardha | `/ardha` | `/tools/ardha` | Cognitive Reframing - Gita-aligned CBT precision |
 | Relationship Compass | `/relationship-compass` | `/tools/relationship-compass` | Calm conflict guidance |
 | Emotional Reset | `/emotional-reset` | `/tools/emotional-reset` | 7-step guided emotional processing |
 | Karma Reset | `/karma-reset` | `/tools/karma-reset` | 4-part emotional repair ritual |
@@ -638,7 +638,7 @@ Phase 3 adds dedicated tool pages under `app/tools/` with reusable components, c
 | Page | Route | Description |
 |------|-------|-------------|
 | Viyog | `/tools/viyog` | Detachment Coach - outcome anxiety reducer |
-| Ardha | `/tools/ardha` | Reframing Assistant - Gita-aligned perspective shifts |
+| Ardha | `/tools/ardha` | Cognitive Reframing - Gita-aligned CBT precision |
 | Relationship Compass | `/tools/relationship-compass` | Calm conflict guidance |
 | Emotional Reset | `/tools/emotional-reset` | 7-step guided processing flow |
 | Karma Reset | `/tools/karma-reset` | 4-part reset ritual |

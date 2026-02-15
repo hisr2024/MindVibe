@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully transformed Ardha (Reframing Assistant) and Viyoga (Detachment Coach) to use the complete 700-verse Bhagavad Gita database, following the same wisdom integration pattern as KIAAN and Relationship Compass.
+Successfully transformed Ardha (Cognitive Reframing) and Viyoga (Detachment Coach) to use the complete 700-verse Bhagavad Gita database, following the same wisdom integration pattern as KIAAN and Relationship Compass.
 
 ## Changes Implemented
 
