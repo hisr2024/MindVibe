@@ -51,6 +51,14 @@ const MOOD_VOICE_MAP: Record<string, string> = {
   neutral: 'elevenlabs-nova',
 }
 
+// Map language code to BCP-47 for browser SpeechSynthesis
+const LANG_TO_BCP47: Record<string, string> = {
+  en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+  bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
+  pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
+  ja: 'ja-JP', zh: 'zh-CN', ar: 'ar-SA',
+}
+
 export default function CompanionVoicePlayer({
   text,
   mood = 'neutral',
@@ -70,6 +78,12 @@ export default function CompanionVoicePlayer({
   const animFrameRef = useRef<number | null>(null)
   const analyzerRef = useRef<AnalyserNode | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const stateRef = useRef<PlaybackState>(state)
+
+  // Keep stateRef in sync via effect to avoid ref-during-render lint error
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
 
   // Auto-select voice based on mood if not specified
   const effectiveVoiceId = voiceId || MOOD_VOICE_MAP[mood] || 'elevenlabs-nova'
@@ -94,30 +108,32 @@ export default function CompanionVoicePlayer({
     }
   }, [])
 
-  // Waveform animation
+  // Waveform animation using ref to avoid self-reference in useCallback
   const animateWaveform = useCallback(() => {
-    if (analyzerRef.current && state === 'playing') {
-      const data = new Uint8Array(analyzerRef.current.frequencyBinCount)
-      analyzerRef.current.getByteFrequencyData(data)
+    const tick = () => {
+      if (analyzerRef.current && stateRef.current === 'playing') {
+        const data = new Uint8Array(analyzerRef.current.frequencyBinCount)
+        analyzerRef.current.getByteFrequencyData(data)
 
-      // Sample 20 bars from the frequency data
-      const barCount = 20
-      const step = Math.floor(data.length / barCount)
-      const bars: number[] = []
-      for (let i = 0; i < barCount; i++) {
-        const value = data[i * step] / 255
-        bars.push(Math.max(0.08, value))
+        const barCount = 20
+        const step = Math.floor(data.length / barCount)
+        const bars: number[] = []
+        for (let i = 0; i < barCount; i++) {
+          const value = data[i * step] / 255
+          bars.push(Math.max(0.08, value))
+        }
+        setWaveformBars(bars)
+        animFrameRef.current = requestAnimationFrame(tick)
+      } else if (stateRef.current === 'playing') {
+        // Simulated waveform when AudioContext isn't available
+        setWaveformBars(prev =>
+          prev.map(() => 0.15 + Math.random() * 0.7)
+        )
+        animFrameRef.current = requestAnimationFrame(tick)
       }
-      setWaveformBars(bars)
-      animFrameRef.current = requestAnimationFrame(animateWaveform)
-    } else if (state === 'playing') {
-      // Simulated waveform when AudioContext isn't available
-      setWaveformBars(prev =>
-        prev.map(() => 0.15 + Math.random() * 0.7)
-      )
-      animFrameRef.current = requestAnimationFrame(animateWaveform)
     }
-  }, [state])
+    tick()
+  }, [])
 
   useEffect(() => {
     if (state === 'playing') {
@@ -132,6 +148,61 @@ export default function CompanionVoicePlayer({
     }
   }, [state, animateWaveform])
 
+  // Browser TTS fallback — declared BEFORE playAudio so it can be referenced
+  const fallbackToBrowserTTS = useCallback((config?: { rate?: number; pitch?: number }) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      setState('idle')
+      return
+    }
+
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = config?.rate || 0.93
+    utterance.pitch = config?.pitch ? 1.0 + config.pitch * 0.1 : 1.0
+
+    const bcp47Lang = LANG_TO_BCP47[language] || language
+    utterance.lang = bcp47Lang
+
+    // Select best available voice matching the language and gender preference
+    const voices = window.speechSynthesis.getVoices()
+    const preferFemale = effectiveVoiceId !== 'sarvam-rishi' && effectiveVoiceId !== 'elevenlabs-orion'
+
+    // First, try to find a voice that matches the selected language
+    const langVoices = voices.filter(v => v.lang.startsWith(bcp47Lang.split('-')[0]))
+
+    let selected: SpeechSynthesisVoice | undefined
+    if (langVoices.length > 0) {
+      // Prefer gender-matching voice within the target language
+      selected = langVoices.find(v =>
+        preferFemale
+          ? /female|woman|jenny|samantha|swara|pallavi|neerja|sobhana|denise|xiaoxiao|nanami/i.test(v.name)
+          : /male|man|guy|daniel|david|madhur|prabhat|valluvar|conrad|keita|yunxi/i.test(v.name)
+      ) || langVoices[0]
+    } else {
+      // No language-specific voice available; fall back to English voice selection
+      selected = voices.find(v =>
+        preferFemale
+          ? /Jenny|Samantha|Google.*Female|Aria|Natural/i.test(v.name)
+          : /Guy|Daniel|David|Google.*Male/i.test(v.name)
+      ) || voices.find(v => /Google|Natural|Neural/i.test(v.name))
+    }
+    if (selected) utterance.voice = selected
+
+    utterance.onstart = () => {
+      setState('playing')
+      setProvider('browser')
+      onStart?.()
+    }
+    utterance.onend = () => {
+      setState('idle')
+      onEnd?.()
+    }
+    utterance.onerror = () => setState('idle')
+
+    window.speechSynthesis.speak(utterance)
+  }, [text, effectiveVoiceId, language, onStart, onEnd])
+
+  // Main play function — uses fallbackToBrowserTTS which is declared above
   const playAudio = useCallback(async () => {
     if (state === 'playing') {
       // Pause
@@ -227,67 +298,7 @@ export default function CompanionVoicePlayer({
 
     // Fallback to browser TTS
     fallbackToBrowserTTS()
-  }, [text, mood, effectiveVoiceId, language, state, onStart, onEnd])
-
-  const fallbackToBrowserTTS = useCallback((config?: { rate?: number; pitch?: number }) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      setState('idle')
-      return
-    }
-
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = config?.rate || 0.93
-    utterance.pitch = config?.pitch ? 1.0 + config.pitch * 0.1 : 1.0
-
-    // Map language code to BCP-47 for browser SpeechSynthesis
-    const langToBcp47: Record<string, string> = {
-      en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
-      bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
-      pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
-      ja: 'ja-JP', zh: 'zh-CN', ar: 'ar-SA',
-    }
-    const bcp47Lang = langToBcp47[language] || language
-    utterance.lang = bcp47Lang
-
-    // Select best available voice matching the language and gender preference
-    const voices = window.speechSynthesis.getVoices()
-    const preferFemale = effectiveVoiceId !== 'sarvam-rishi' && effectiveVoiceId !== 'elevenlabs-orion'
-
-    // First, try to find a voice that matches the selected language
-    const langVoices = voices.filter(v => v.lang.startsWith(bcp47Lang.split('-')[0]))
-
-    let selected: SpeechSynthesisVoice | undefined
-    if (langVoices.length > 0) {
-      // Prefer gender-matching voice within the target language
-      selected = langVoices.find(v =>
-        preferFemale
-          ? /female|woman|jenny|samantha|swara|pallavi|neerja|sobhana|denise|xiaoxiao|nanami/i.test(v.name)
-          : /male|man|guy|daniel|david|madhur|prabhat|valluvar|conrad|keita|yunxi/i.test(v.name)
-      ) || langVoices[0]
-    } else {
-      // No language-specific voice available; fall back to English voice selection
-      selected = voices.find(v =>
-        preferFemale
-          ? /Jenny|Samantha|Google.*Female|Aria|Natural/i.test(v.name)
-          : /Guy|Daniel|David|Google.*Male/i.test(v.name)
-      ) || voices.find(v => /Google|Natural|Neural/i.test(v.name))
-    }
-    if (selected) utterance.voice = selected
-
-    utterance.onstart = () => {
-      setState('playing')
-      setProvider('browser')
-      onStart?.()
-    }
-    utterance.onend = () => {
-      setState('idle')
-      onEnd?.()
-    }
-    utterance.onerror = () => setState('idle')
-
-    window.speechSynthesis.speak(utterance)
-  }, [text, effectiveVoiceId, language, onStart, onEnd])
+  }, [text, mood, effectiveVoiceId, language, state, onStart, onEnd, fallbackToBrowserTTS])
 
   const stop = useCallback(() => {
     if (audioRef.current) {

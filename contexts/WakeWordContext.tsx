@@ -103,8 +103,10 @@ export function WakeWordProvider({ children }: WakeWordProviderProps) {
   const detectorRef = useRef<WakeWordDetector | null>(null)
   const isPausedRef = useRef(false)
 
-  // Keep ref in sync
-  isPausedRef.current = isPaused
+  // Keep ref in sync via effect to avoid ref-during-render lint error
+  useEffect(() => {
+    isPausedRef.current = isPaused
+  }, [isPaused])
 
   // ─── Load persisted settings from localStorage ───────────────────
   useEffect(() => {

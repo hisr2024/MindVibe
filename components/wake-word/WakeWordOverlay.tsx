@@ -159,8 +159,10 @@ export function WakeWordOverlay() {
     resumeWakeWord()
   }, [cancelSpeech, stopListening, dismissActivation, resumeWakeWord])
 
-  // Keep ref in sync
-  handleDismissRef.current = handleDismiss
+  // Keep ref in sync via effect to avoid ref-during-render lint error
+  useEffect(() => {
+    handleDismissRef.current = handleDismiss
+  }, [handleDismiss])
 
   // ─── Process Query ───────────────────────────────────────────────
 
