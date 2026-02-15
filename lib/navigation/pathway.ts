@@ -51,7 +51,7 @@ export const PATHWAY_STEPS: readonly PathwayStep[] = [
     id: 'train',
     labelKey: 'navigation.pathway.train',
     labelFallback: 'Train',
-    href: '/journey-engine',
+    href: '/journeys',
   },
 ] as const
 

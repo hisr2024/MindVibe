@@ -55,10 +55,5 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://mindvibe-api.onrender.com/api/:path*"
-    }
-  ]
+  "rewrites": []
 }
