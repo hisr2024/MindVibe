@@ -1,7 +1,6 @@
 'use client'
 
 import { FadeIn } from '@/components/ui'
-import CompanionCTA from '@/components/companion/CompanionCTA'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -101,6 +100,13 @@ const SPIRITUAL_TOOLKIT = [
     href: '/ardha',
   },
   {
+    id: 'kiaan-companion',
+    icon: '\u{1F9E1}',
+    title: 'KIAAN Companion',
+    subtitle: 'Divine friend',
+    href: '/companion',
+  },
+  {
     id: 'kiaan-chat',
     icon: '\u{1F4AC}',
     title: 'KIAAN Chat',
@@ -127,6 +133,20 @@ const SPIRITUAL_TOOLKIT = [
     title: 'Karma Reset',
     subtitle: 'Heal with grace',
     href: '/tools/karma-reset',
+  },
+  {
+    id: 'sacred-reflections',
+    icon: '\u{1F4DD}',
+    title: 'Sacred Reflections',
+    subtitle: 'Private journal',
+    href: '/flows/journal',
+  },
+  {
+    id: 'karmic-tree',
+    icon: '\u{1F331}',
+    title: 'Karmic Tree',
+    subtitle: 'Your growth',
+    href: '/karmic-tree',
   },
   {
     id: 'kiaan-vibe',
@@ -449,41 +469,6 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── Quick Actions ─── */}
-          <motion.div variants={itemVariants}>
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
-              {/* Journal */}
-              <motion.div variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
-                <Link
-                  href="/flows/journal"
-                  onClick={handleCardTap}
-                  className="flex flex-col items-center justify-center rounded-[24px] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-glow transition-all duration-300 active:opacity-90 md:p-5"
-                >
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] shadow-inner md:h-14 md:w-14">
-                    <span className="text-2xl md:text-3xl">{'\u{1F4DD}'}</span>
-                  </div>
-                  <span className="text-sm font-medium text-white/80">Journal</span>
-                  <span className="mt-0.5 text-[10px] text-white/40">Reflections</span>
-                </Link>
-              </motion.div>
-
-              {/* Karmic Tree */}
-              <motion.div variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
-                <Link
-                  href="/karmic-tree"
-                  onClick={handleCardTap}
-                  className="flex flex-col items-center justify-center rounded-[24px] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-glow transition-all duration-300 active:opacity-90 md:p-5"
-                >
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] shadow-inner md:h-14 md:w-14">
-                    <span className="text-2xl md:text-3xl">{'\u{1F331}'}</span>
-                  </div>
-                  <span className="text-sm font-medium text-white/80">Karmic Tree</span>
-                  <span className="mt-0.5 text-[10px] text-white/40">Your Growth</span>
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-
           {/* ─── Spiritual Toolkit ─── */}
           <motion.div variants={itemVariants}>
             <div className="mb-3 flex items-center gap-3">
@@ -591,10 +576,6 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── KIAAN Companion CTA ─── */}
-          <motion.div variants={itemVariants}>
-            <CompanionCTA message="Your best friend who truly listens. Talk through anything — voice or text." />
-          </motion.div>
         </motion.div>
       </FadeIn>
     </main>
