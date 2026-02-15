@@ -382,7 +382,7 @@ export default function SacredReflectionsPage() {
         {/* Main Content Grid */}
         <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.4fr,1fr]">
           {/* Left: Journal Entry Form */}
-          <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
+          <form onSubmit={e => e.preventDefault()} className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div>
               <h2 className="text-lg font-semibold text-orange-50">New Reflection</h2>
               <p className="text-xs text-orange-100/70 mt-1">KIAAN holds space for your thoughts with warmth and privacy.</p>
@@ -456,13 +456,14 @@ export default function SacredReflectionsPage() {
             </div>
 
             <button
+              type="button"
               onClick={addEntry}
               disabled={!body.trim()}
               className="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.02]"
             >
               Save Reflection
             </button>
-          </section>
+          </form>
 
           {/* Right: Weekly Assessment */}
           <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
