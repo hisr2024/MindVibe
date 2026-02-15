@@ -77,30 +77,12 @@ export const CORE_TOOLS: ToolConfig[] = [
     gradient: 'from-teal-400/30 to-cyan-400/30',
     href: '/dashboard/analytics',
   },
-  {
-    id: 'kiaan-vibe',
-    icon: '🕉️',
-    title: 'KIAAN Vibe',
-    description: 'Gita verses • Meditation • Uploads',
-    gradient: 'from-violet-400/30 to-orange-400/30',
-    href: '/kiaan-vibe',
-    badge: 'new',
-  },
 ]
 
 /**
  * Community & Insights Tools - Social features and advanced analytics
  */
 export const COMMUNITY_TOOLS: ToolConfig[] = [
-  {
-    id: 'community-circles',
-    icon: '🤝',
-    title: 'Community Circles',
-    description: 'Spiritual peer community',
-    gradient: 'from-pink-400/30 to-rose-400/30',
-    href: '/community',
-    badge: 'new',
-  },
   {
     id: 'ai-insights',
     icon: '🧠',
@@ -254,16 +236,6 @@ export const TOOLS_BY_CATEGORY: ToolCategory[] = [
     id: 'community',
     name: 'Community & Insights',
     tools: COMMUNITY_TOOLS,
-  },
-  {
-    id: 'guidance',
-    name: 'Guidance Engines',
-    tools: GUIDANCE_TOOLS,
-  },
-  {
-    id: 'karma',
-    name: 'Karma & Growth',
-    tools: KARMA_TOOLS,
   },
   {
     id: 'quick-access',
