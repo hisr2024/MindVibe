@@ -811,6 +811,15 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Relationship Compass router: {e}")
 
+# Load Relationship Compass Engine router
+startup_logger.info("\n[Relationship Compass Engine] Attempting to import Relationship Compass Engine router...")
+try:
+    from backend.routes.relationship_compass_engine import router as relationship_compass_engine_router
+    app.include_router(relationship_compass_engine_router)
+    startup_logger.info("✅ [SUCCESS] Relationship Compass Engine router loaded")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Relationship Compass Engine router: {e}")
+
 # Load Daily Analysis router
 startup_logger.info("\n[Daily Analysis] Attempting to import Daily Analysis router...")
 try:

@@ -90,6 +90,19 @@ export const KIAAN_TOOLS: KiaanTool[] = [
     enabled: true
   },
   {
+    id: 'compass-engine',
+    name: 'Compass Engine',
+    description: 'Modern relationship clarity with mode detection and mechanism analysis',
+    category: 'relational',
+    endpoint: '/api/relationship-compass-engine/clarity',
+    route: '/relationship-compass-engine',
+    icon: '🎯',
+    usesGitaVerses: false,
+    usesValidation: false,
+    color: '#6366F1',
+    enabled: true
+  },
+  {
     id: 'karmic-tree',
     name: 'Karmic Tree',
     description: 'Visualize your growth journey',
