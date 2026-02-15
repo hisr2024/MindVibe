@@ -25,36 +25,50 @@ const BACKEND_TIMEOUT = 60000 // 60 seconds for AI analysis + response generatio
 const OPENAI_TIMEOUT_MS = 30000
 const OPENAI_MODEL = process.env.VIYOGA_CHAT_MODEL || 'gpt-4o-mini'
 
-// Secular fallback response - generic but compassionate
+// Secular fallback response - grounded and direct
 const FALLBACK_RESPONSE = {
   assistant: `**I Get It**
-I can hear the worry in what you're sharing. It makes total sense that you're feeling anxious about this - when something matters to us, of course we want it to work out. That's completely human.
+You are anxious about an outcome you cannot fully control. That anxiety is real, and it makes sense - this matters to you. But the anxiety itself is not helping you.
 
 **What's Really Going On**
-Here's what I'm noticing: you're spending energy trying to control an outcome that isn't fully in your hands. The result depends on many factors - some you can influence, others you simply can't. And that uncertainty feels uncomfortable.
+You are spending energy trying to control something that is not entirely in your hands. The result depends on factors beyond your influence. What you are doing right now is rehearsing uncertainty, not solving it.
 
 **A Different Way to See This**
-What if you shifted focus from "will this work out?" to "what's the best I can do right now?" You can't guarantee outcomes, but you CAN show up with intention and effort. That's actually where your power lives - not in the result, but in the doing.
+The outcome is not yours to guarantee. Your effort was. Shift the question from "will this work out?" to "have I done what I can?" If yes, the rest is not your responsibility. If no, do it now.
 
 **Try This Right Now**
-Take 3 slow breaths. Then ask yourself: "What's ONE small thing I can do in the next 10 minutes that's completely within my control?" Don't think about whether it will "work" - just identify one action you can take.
+Pause. Ask yourself: "What is ONE small thing within my control that I can do in the next 10 minutes?" Do not evaluate whether it will change the outcome. Just identify one action and take it.
 
 **One Thing You Can Do**
-Pick that one small action and do it today. Not because it guarantees success, but because it's what you can offer right now. Focus on doing it well, not on what happens after.
+Pick that one action and do it today. Not because it guarantees anything, but because it is what you can contribute right now. Measure yourself by the quality of your effort, not by the result.
 
 **Something to Consider**
-What would change if you measured success by the quality of your effort, rather than the outcome?`,
+If you knew the outcome was already decided and could not be changed, what would you do with the energy you are spending on worry right now?`,
   sections: {
-    i_get_it: 'I can hear the worry in what you\'re sharing. It makes total sense that you\'re feeling anxious about this.',
-    whats_really_going_on: 'You\'re spending energy trying to control an outcome that isn\'t fully in your hands.',
-    a_different_way_to_see_this: 'What if you shifted focus from "will this work out?" to "what\'s the best I can do right now?"',
-    try_this_right_now: 'Take 3 slow breaths. Then ask: "What\'s ONE small thing I can do that\'s within my control?"',
-    one_thing_you_can_do: 'Pick one small action and do it today. Focus on doing it well, not on what happens after.',
-    something_to_consider: 'What would change if you measured success by the quality of your effort?',
+    i_get_it: 'You are anxious about an outcome you cannot fully control. That anxiety is real.',
+    whats_really_going_on: 'You are spending energy trying to control something not entirely in your hands.',
+    a_different_way_to_see_this: 'The outcome is not yours to guarantee. Your effort was.',
+    try_this_right_now: 'What is ONE small thing within my control that I can do in the next 10 minutes?',
+    one_thing_you_can_do: 'Pick one action and do it today. Measure by quality of effort, not result.',
+    something_to_consider: 'If the outcome was already decided, what would you do with your worry energy?',
   },
   citations: [],
   secularMode: true,
   fallback: true,
+  attachment_analysis: {
+    type: 'outcome_anxiety',
+    description: 'Outcome anxiety',
+    primary_emotion: 'anxiety',
+    confidence: 0,
+    ai_powered: false,
+  },
+  concern_analysis: {
+    specific_worry: '',
+    primary_emotion: 'anxiety',
+    attachment_type: 'outcome_anxiety',
+    confidence: 0,
+    analysis_depth: 'fallback',
+  },
 }
 
 export async function POST(request: NextRequest) {

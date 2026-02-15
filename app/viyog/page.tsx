@@ -145,7 +145,8 @@ export default function ViyogaPage() {
       timestamp: new Date().toISOString(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    const withUserMessage = [...messages, userMessage]
+    setMessages(withUserMessage)
     setInput('')
     setLoading(true)
     setError(null)
@@ -164,18 +165,6 @@ export default function ViyogaPage() {
 
       const data = await response.json()
 
-      if (!response.ok) {
-        const errorMsg = data.error || 'An unexpected error occurred.'
-        if (response.status === 429) {
-          setError('Too many requests. Wait a moment before trying again.')
-        } else if (response.status === 503) {
-          setError('Viyoga is currently unavailable. Please try again later.')
-        } else {
-          setError(errorMsg)
-        }
-        return
-      }
-
       if (data.assistant) {
         const assistantMessage: Message = {
           role: 'assistant',
@@ -185,7 +174,7 @@ export default function ViyogaPage() {
           attachmentType: data.attachment_analysis?.type || data.concern_analysis?.attachment_type,
           primaryEmotion: data.concern_analysis?.primary_emotion,
         }
-        setMessages((prev) => [...prev, assistantMessage])
+        setMessages([...withUserMessage, assistantMessage])
       } else {
         setError('Viyoga could not generate a response. Try again.')
       }
@@ -194,7 +183,7 @@ export default function ViyogaPage() {
     } finally {
       setLoading(false)
     }
-  }, [input, loading, setMessages])
+  }, [input, loading, messages, setMessages])
 
   function clearConversation() {
     setMessages([])
@@ -210,7 +199,8 @@ export default function ViyogaPage() {
     }
   }
 
-  const lastAssistantMessage = messages.filter((m) => m.role === 'assistant').at(-1)
+  const assistantMessages = messages.filter((m) => m.role === 'assistant')
+  const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0e] to-[#0d0907] text-white p-4 md:p-8">
