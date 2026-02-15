@@ -20,6 +20,7 @@ import { springConfigs } from '@/lib/animations/spring-configs'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import CompanionCTA from '@/components/companion/CompanionCTA'
+import { KarmaResetTestimonials } from '@/components/testimonials'
 
 type ResetStep = 'input' | 'breathing' | 'plan' | 'complete'
 
@@ -473,6 +474,9 @@ export default function KarmaResetClient() {
             </div>
           </div>
         </div>
+
+        {/* Testimonials */}
+        <KarmaResetTestimonials />
 
         <CompanionCTA fromTool="karma-reset" />
       </div>
