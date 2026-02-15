@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         cookie: request.headers.get('cookie') || '',
+        ...(request.headers.get('X-CSRF-Token') ? { 'X-CSRF-Token': request.headers.get('X-CSRF-Token')! } : {}),
       },
     })
 

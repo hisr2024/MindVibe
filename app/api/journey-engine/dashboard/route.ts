@@ -10,12 +10,12 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const FALLBACK_DASHBOARD = {
   active_journeys: [],
-  completed_journeys: [],
-  total_journeys: 0,
+  completed_journeys: 0,
+  total_days_practiced: 0,
   current_streak: 0,
-  longest_streak: 0,
-  mastery_scores: {},
-  recommended_enemy: null,
+  enemy_progress: [],
+  recommended_templates: [],
+  today_steps: [],
   _fallback: true,
 }
 

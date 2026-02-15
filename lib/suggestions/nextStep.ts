@@ -141,7 +141,7 @@ export function getNextStepSuggestion(input: SuggestionInput): Suggestion | null
     if (PRACTICE_PATTERN.test(combined)) {
       return {
         targetTool: 'journey',
-        href: '/journey-engine',
+        href: '/journeys',
         labelKey: 'navigation.next_step.enter_journey',
         labelFallback: 'Enter a Journey \u2192',
       }
@@ -153,7 +153,7 @@ export function getNextStepSuggestion(input: SuggestionInput): Suggestion | null
       if (hasRepeatedTheme) {
         return {
           targetTool: 'journey',
-          href: '/journey-engine',
+          href: '/journeys',
           labelKey: 'navigation.next_step.enter_journey',
           labelFallback: 'Enter a Journey \u2192',
         }
