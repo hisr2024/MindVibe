@@ -4,13 +4,14 @@
  * Handles chat messages for the Voice Companion page.
  * Reuses the 3-tier response strategy from /api/companion/message:
  * 1. Proxy to Python backend
- * 2. Direct OpenAI (KIAAN personality + Gita wisdom)
+ * 2. Direct OpenAI (KIAAN personality + full 701-verse Gita Wisdom Core)
  * 3. Local Friend Engine (mood + topic + entity + phase-aware intelligence)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
+import { buildVerseContext } from '@/lib/wisdom-core'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -34,20 +35,28 @@ function detectMood(message: string): string {
   return 'neutral'
 }
 
-// ─── Gita Wisdom for system prompt ───────────────────────────────────────
-const WISDOM_BY_MOOD: Record<string, string> = {
-  anxious: 'Focus on what you can control — your effort and attention — and practice cognitive defusion from outcomes you cannot predict. Action reduces anxiety; rumination amplifies it. (2.47)',
-  sad: 'Emotional states are transient neurological events, not permanent identities. Sadness has a function — it signals what matters to you. Honor it without fusing with it. (2.14)',
-  angry: 'Anger triggers an amygdala hijack: prefrontal cortex goes offline, impulse control drops, and memory distorts. One conscious pause interrupts the cascade. (2.63)',
-  confused: 'Confusion is not a failure of intelligence — it is your brain processing competing values. Clarity emerges from action, not from more thinking. (2.52)',
-  lonely: 'Loneliness is a social pain signal, as real as physical pain. It does not mean you are alone — it means your need for connection is active and valid. (10.20)',
-  happy: 'Emotional regulation includes sustaining positive states, not just managing negative ones. Notice what conditions created this state so you can return to them deliberately. (14.24)',
-  overwhelmed: 'When cognitive load exceeds capacity, the nervous system shifts into freeze. The intervention is not to try harder — it is to narrow focus to one actionable step. (18.66)',
-  neutral: 'Self-awareness is the most reliable predictor of behavioral change. Understanding your patterns gives you choice where before there was only reaction. (4.38)',
+// ─── Topic Detection (lightweight, for verse context selection) ──────────
+const TOPIC_KEYWORDS_SIMPLE: Record<string, string[]> = {
+  family: ['mother', 'father', 'mom', 'dad', 'son', 'daughter', 'brother', 'sister', 'wife', 'husband', 'parents', 'family'],
+  relationship: ['boyfriend', 'girlfriend', 'partner', 'ex', 'breakup', 'marriage', 'divorce', 'relationship'],
+  work: ['boss', 'job', 'office', 'career', 'promotion', 'fired', 'work', 'deadline', 'colleague'],
+  academic: ['exam', 'school', 'college', 'university', 'grade', 'study', 'assignment', 'teacher'],
+  health: ['sick', 'hospital', 'doctor', 'surgery', 'medication', 'therapy', 'sleep', 'chronic'],
+  loss: ['died', 'death', 'funeral', 'grief', 'passed away', 'lost someone'],
+  growth: ['goal', 'dream', 'change', 'improve', 'learn', 'grow', 'better myself'],
 }
 
-function buildSystemPrompt(mood: string, forceMode: string | null): string {
-  const wisdom = WISDOM_BY_MOOD[mood] || WISDOM_BY_MOOD.neutral
+function detectTopic(message: string): string {
+  const lower = message.toLowerCase()
+  for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_SIMPLE)) {
+    if (keywords.some(kw => lower.includes(kw))) return topic
+  }
+  return 'general'
+}
+
+function buildSystemPrompt(mood: string, topic: string, forceMode: string | null): string {
+  // Build verse context from the full 701-verse Wisdom Core
+  const verseContext = buildVerseContext(mood, topic, 3)
 
   const modeInstructions = forceMode === 'guide'
     ? `You are in GUIDE mode. Provide deep, modern, secular interpretation using behavioral science,
@@ -68,8 +77,7 @@ You are warm, calm, direct, and precise.
 
 ${modeInstructions}
 
-WISDOM PRINCIPLE TO DRAW FROM (translate into psychology, never cite as religious text):
-"${wisdom}"
+${verseContext}
 
 RESPONSE STRUCTURE:
 1) Emotional Precision — Name the specific emotion. Reduce shame. Validate without exaggeration.
@@ -110,6 +118,7 @@ export async function POST(request: NextRequest) {
 
     const message = body.message.replace(/[<>]/g, '').slice(0, 2000)
     const mood = detectMood(message)
+    const topic = detectTopic(message)
     const forceMode = body.force_mode || null
     const conversationHistory = Array.isArray(body.conversation_history) ? body.conversation_history : []
 
@@ -135,7 +144,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           response: data.response ?? '',
           mood: data.mood ?? mood,
-          mode: forceMode || 'best_friend',
+          mode: forceMode || 'companion',
           suggested_chapter: null,
           gita_insight: null,
           ai_tier: 'backend',
@@ -151,7 +160,7 @@ export async function POST(request: NextRequest) {
       try {
         const client = new OpenAI({ apiKey })
         const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-          { role: 'system', content: buildSystemPrompt(mood, forceMode) },
+          { role: 'system', content: buildSystemPrompt(mood, topic, forceMode) },
         ]
 
         // Include conversation history (last 6 messages)
@@ -177,7 +186,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             response: text,
             mood,
-            mode: forceMode || 'best_friend',
+            mode: forceMode || 'companion',
             suggested_chapter: null,
             gita_insight: null,
             ai_tier: 'nextjs_openai',
@@ -194,7 +203,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       response: engineResult.response,
       mood: engineResult.mood,
-      mode: forceMode || 'best_friend',
+      mode: forceMode || 'companion',
       suggested_chapter: null,
       gita_insight: engineResult.wisdom_used ? { verse_ref: engineResult.wisdom_used.verse_ref, principle: engineResult.wisdom_used.principle } : null,
       ai_tier: 'local_engine',

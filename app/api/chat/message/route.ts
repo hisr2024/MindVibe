@@ -5,32 +5,48 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { selectWisdom } from '@/lib/wisdom-core'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-// Fallback responses grounded in psychology and behavioral science
-const FALLBACK_RESPONSES = [
-  {
-    response: "Take a slow breath. What you're feeling right now is a temporary neurological state, not a permanent condition. Your nervous system is doing its job. I'm here — tell me what's on your mind.",
-    verse: null,
-  },
-  {
-    response: "Focus on what's within your control right now — your attention, your next small action. Outcomes are uncertain by nature, but your effort is fully yours. What's weighing on you?",
-    verse: null,
-  },
-  {
-    response: "Difficult moments activate your stress response, but they don't define your capacity. You've navigated hard things before. Your baseline resilience is stronger than the current discomfort. What's happening?",
-    verse: null,
-  },
-  {
-    response: "Whatever you're experiencing right now is real and valid. Emotions are signals, not sentences. They carry information about what matters to you. I'm listening — share what's going on.",
-    verse: null,
-  },
-  {
-    response: "When things feel overwhelming, your brain is processing more than it can hold at once. That's not weakness — it's overload. Start with one thing. What feels most pressing right now?",
-    verse: null,
-  },
+// Static fallback responses (used when Wisdom Core also unavailable)
+const STATIC_FALLBACKS = [
+  "Take a slow breath. What you're feeling right now is a temporary neurological state, not a permanent condition. Your nervous system is doing its job. I'm here — tell me what's on your mind.",
+  "Focus on what's within your control right now — your attention, your next small action. Outcomes are uncertain by nature, but your effort is fully yours. What's weighing on you?",
+  "Difficult moments activate your stress response, but they don't define your capacity. You've navigated hard things before. Your baseline resilience is stronger than the current discomfort. What's happening?",
+  "Whatever you're experiencing right now is real and valid. Emotions are signals, not sentences. They carry information about what matters to you. I'm listening — share what's going on.",
+  "When things feel overwhelming, your brain is processing more than it can hold at once. That's not weakness — it's overload. Start with one thing. What feels most pressing right now?",
 ]
+
+/**
+ * Build a dynamic fallback response using the full 701-verse Wisdom Core.
+ * Falls back to static responses if the corpus is unavailable.
+ */
+function buildDynamicFallback(message: string): { response: string; verse: { ref: string; english: string } | null } {
+  // Simple mood detection for fallback context
+  const lower = message.toLowerCase()
+  let mood = 'neutral'
+  if (['anxious', 'anxiety', 'worried', 'scared', 'panic', 'stress'].some(k => lower.includes(k))) mood = 'anxious'
+  else if (['sad', 'depressed', 'hopeless', 'crying', 'grief', 'lonely'].some(k => lower.includes(k))) mood = 'sad'
+  else if (['angry', 'furious', 'frustrated', 'mad', 'hate'].some(k => lower.includes(k))) mood = 'angry'
+  else if (['confused', 'stuck', 'unsure', 'uncertain'].some(k => lower.includes(k))) mood = 'confused'
+  else if (['overwhelmed', 'exhausted', 'burnt out', 'too much'].some(k => lower.includes(k))) mood = 'overwhelmed'
+
+  // Try to get wisdom from the full 701-verse corpus
+  const wisdom = selectWisdom(mood, 'general')
+  if (wisdom) {
+    return {
+      response: `${wisdom.psychological_insight} What's happening for you right now?`,
+      verse: { ref: `BG ${wisdom.verse_ref}`, english: wisdom.english },
+    }
+  }
+
+  // Static fallback
+  return {
+    response: STATIC_FALLBACKS[Math.floor(Math.random() * STATIC_FALLBACKS.length)],
+    verse: null,
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,8 +144,8 @@ export async function POST(request: NextRequest) {
       console.warn('[Chat API] Backend connection failed:', backendError)
     }
 
-    // Use fallback response when backend is unavailable
-    const fallback = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
+    // Use dynamic fallback from 701-verse Wisdom Core when backend is unavailable
+    const fallback = buildDynamicFallback(sanitizedMessage)
 
     return NextResponse.json({
       success: true,
@@ -142,7 +158,7 @@ export async function POST(request: NextRequest) {
     console.error('[Chat API] Error:', error)
 
     // Always return a helpful response
-    const fallback = FALLBACK_RESPONSES[0]
+    const fallback = buildDynamicFallback('')
     return NextResponse.json({
       success: true,
       response: fallback.response,

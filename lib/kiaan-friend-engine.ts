@@ -7,9 +7,11 @@
  * 3. Entity extraction (daughter, exam, boss, etc.)
  * 4. Intent classification (sharing, venting, celebrating, asking advice)
  * 5. Phase-progressive responses (connect → listen → understand → guide → empower)
- * 6. Gita wisdom weaving (phase-gated, topic-matched)
- * 7. Psychology-backed templates (MI, EFT, Polyvagal, Narrative)
+ * 6. Full 701-verse Gita Wisdom Core (phase-gated, mood+topic scored)
+ * 7. Psychology-backed templates (CBT, ACT, Polyvagal, behavioral science)
  */
+
+import { getGroundedWisdom } from '@/lib/wisdom-core'
 
 // ─── Types ───────────────────────────────────────────────────────────────
 
@@ -32,7 +34,6 @@ interface ConversationState {
   topicHistory: string[]
   entitiesHistory: string[]
   currentPhase: string
-  lastWisdomPrinciple: string | null
 }
 
 interface WisdomEntry {
@@ -405,56 +406,27 @@ function buildFollowUp(mood: string, topic: string, phase: string, intent: strin
   return pickRandom(phaseFollowUps[phase] || ["What else is relevant here?"])
 }
 
-// ─── 7. Gita Wisdom (curated, phase-gated) ──────────────────────────────
+// ─── 7. Gita Wisdom — Full 701-Verse Corpus (phase-gated) ───────────────
+// Uses the Wisdom Core engine (lib/wisdom-core.ts) to select from the
+// complete authenticated Bhagavad Gita corpus with psychology framing.
 
-const WISDOM_CORE: WisdomEntry[] = [
-  { wisdom: "Cognitive defusion: you can invest fully in your effort while detaching from the outcome. Research shows that outcome-independence reduces performance anxiety and actually improves results. Control your input. Release the output.", principle: 'detachment_from_outcomes', verse_ref: '2.47', moods: ['anxious', 'stressed', 'overwhelmed'], topics: ['work', 'academic', 'general'] },
-  { wisdom: "Neuroplasticity research confirms: emotional states are temporary neural events, not permanent conditions. Your brain is literally different tomorrow than it is today. The current feeling is real, but it is not forever.", principle: 'impermanence', verse_ref: '2.14', moods: ['sad', 'hurt', 'lonely'], topics: ['general', 'loss', 'relationship'] },
-  { wisdom: "Anger triggers an amygdala hijack — your prefrontal cortex goes offline, and impulse control drops within milliseconds. One conscious breath reactivates executive function. That pause is not suppression — it is reclaiming your decision-making capacity.", principle: 'emotional_regulation', verse_ref: '2.63', moods: ['angry', 'frustrated'], topics: ['relationship', 'work', 'family'] },
-  { wisdom: "Attention training works like physical exercise — each time you notice your mind has wandered and bring it back, that is one repetition strengthening your executive function. The noticing IS the progress, not a sign of failure.", principle: 'mind_mastery', verse_ref: '6.6', moods: ['anxious', 'confused', 'overwhelmed'], topics: ['general', 'health', 'academic'] },
-  { wisdom: "Your internal dialogue pattern determines more than external circumstances. Self-compassion research shows that treating yourself as you would treat someone you care about improves outcomes across every measurable domain — resilience, performance, recovery.", principle: 'self_as_friend', verse_ref: '6.5', moods: ['sad', 'guilty', 'lonely', 'hurt'], topics: ['general', 'growth'] },
-  { wisdom: "Analysis paralysis is a documented cognitive trap. Action generates feedback that thinking cannot. You don't wait for clarity to act — you act to generate clarity. Start with the smallest possible move.", principle: 'action_over_overthinking', verse_ref: '3.19', moods: ['confused', 'anxious', 'stressed'], topics: ['work', 'academic', 'growth'] },
-  { wisdom: "Ultradian rhythms show that your brain cycles between high-focus and recovery states roughly every 90 minutes. Working against this rhythm depletes cognitive resources. Strategic rest is not laziness — it is maintenance.", principle: 'balance', verse_ref: '6.17', moods: ['overwhelmed', 'stressed', 'peaceful'], topics: ['health', 'work', 'general'] },
-  { wisdom: "When control efforts become the problem, the intervention is acceptance — not resignation, but choosing where to direct limited energy. Acceptance and Commitment Therapy calls this 'willingness.' You stop fighting what is and redirect toward what you can influence.", principle: 'surrender', verse_ref: '18.66', moods: ['overwhelmed', 'anxious', 'hurt', 'sad'], topics: ['general', 'loss', 'health'] },
-  { wisdom: "Social comparison activates the brain's status-threat circuitry. You're comparing your internal experience to someone else's external performance — those are different datasets. Your values-aligned action is the only relevant metric.", principle: 'your_unique_path', verse_ref: '18.47', moods: ['jealous', 'confused', 'frustrated'], topics: ['work', 'growth', 'relationship'] },
-  { wisdom: "Metacognition — the ability to observe your own thinking — is the strongest predictor of behavioral change. When you see the pattern, you are no longer fully inside it. That awareness gives you choice where before there was only automatic reaction.", principle: 'self_knowledge', verse_ref: '4.38', moods: ['confused', 'angry', 'frustrated'], topics: ['general', 'growth', 'relationship'] },
-  { wisdom: "Your nervous system can learn to maintain regulation even in chaotic environments. This is called 'window of tolerance' — and it expands with practice. External chaos does not have to become internal chaos.", principle: 'inner_peace_amid_chaos', verse_ref: '5.24', moods: ['stressed', 'overwhelmed', 'anxious'], topics: ['work', 'family', 'general'] },
-  { wisdom: "Behavioral research is unambiguous: consistency beats intensity. Small, regular actions compound over time through habit formation. Showing up on ordinary days builds the neural pathways that make excellence automatic.", principle: 'consistent_action', verse_ref: '2.40', moods: ['hopeful', 'confused', 'frustrated'], topics: ['growth', 'work', 'academic'] },
-  { wisdom: "Attachment to outcomes triggers the same neural circuits as addiction — dopamine-driven craving and withdrawal. Hold your goals with commitment but without rigidity. Psychological flexibility predicts better outcomes than rigid goal pursuit.", principle: 'desire_management', verse_ref: '3.37', moods: ['anxious', 'stressed', 'frustrated'], topics: ['work', 'relationship', 'general'] },
-  { wisdom: "Your worth is not performance-contingent. Self-worth research shows that unconditional self-regard outperforms contingent self-esteem on every wellness metric. You are not your output.", principle: 'inherent_worth', verse_ref: '9.26', moods: ['guilty', 'sad', 'lonely', 'hurt'], topics: ['general', 'growth', 'relationship'] },
-  { wisdom: "Post-traumatic growth is well-documented: people who have experienced difficulty and chosen to engage with it develop greater resilience, empathy, and meaning. Your history is not a sentence — it is data that you can use.", principle: 'redemption', verse_ref: '9.30', moods: ['guilty', 'hurt', 'sad'], topics: ['general', 'growth'] },
-  { wisdom: "Emotional regulation is not about elimination — it is about capacity. The goal is to experience the full range without being controlled by any point on it. This is what psychologists call distress tolerance.", principle: 'inner_peace', verse_ref: '2.70', moods: ['anxious', 'overwhelmed', 'stressed'], topics: ['general', 'health'] },
-  { wisdom: "Equanimity is not numbness — it is the ability to feel everything without being destabilized. Emotional agility research shows that people who can observe their emotions without fusing with them make better decisions and recover faster.", principle: 'equanimity', verse_ref: '2.56', moods: ['sad', 'anxious', 'overwhelmed', 'peaceful'], topics: ['general', 'health', 'growth'] },
-  { wisdom: "Adversity-activated development is real. Difficult experiences, when processed, build denser neural connections for coping. You are not just enduring this — your brain is literally building new capacity from it.", principle: 'growth_through_adversity', verse_ref: '2.23', moods: ['sad', 'hurt', 'fearful', 'stressed'], topics: ['general', 'loss', 'health'] },
-  { wisdom: "Gratitude practice rewires the reticular activating system — the brain's attention filter. It doesn't ignore difficulty; it widens the lens to include what's also working. Both realities exist simultaneously.", principle: 'gratitude_amid_difficulty', verse_ref: '14.24', moods: ['grateful', 'happy', 'peaceful', 'hopeful'], topics: ['general', 'celebration', 'growth'] },
-  { wisdom: "Process focus outperforms outcome focus. When you direct attention to the quality of your effort rather than the result, performance anxiety drops and flow state becomes accessible. Your right is to the work, not the outcome.", principle: 'karma_yoga', verse_ref: '2.48', moods: ['anxious', 'stressed', 'frustrated'], topics: ['work', 'academic', 'general'] },
-  { wisdom: "Cognitive clarity emerges when you stop forcing resolution. Your brain's default mode network does its best problem-solving during unfocused states. Sometimes the clearest thinking happens when you stop trying to think.", principle: 'clarity', verse_ref: '2.52', moods: ['confused', 'anxious'], topics: ['general', 'spiritual', 'growth'] },
-  { wisdom: "Positive affect serves a functional purpose — Barbara Fredrickson's broaden-and-build theory shows that positive emotions expand cognitive resources, creativity, and social connection. Pleasure is not indulgence; it is fuel for capability.", principle: 'joy_as_purpose', verse_ref: '10.20', moods: ['happy', 'excited', 'grateful', 'peaceful'], topics: ['celebration', 'family', 'general'] },
-  { wisdom: "Presence — sustained, non-judgmental attention — activates the social bonding circuits more effectively than any gesture. Quality of attention predicts relationship satisfaction more than quantity of time.", principle: 'presence_as_love', verse_ref: '12.14', moods: ['happy', 'grateful', 'lonely', 'hopeful'], topics: ['family', 'relationship', 'celebration'] },
-  { wisdom: "Every small action builds neural pathways. There is no wasted effort in behavioral change — even failed attempts strengthen the circuits for the next try. Progress is non-linear but cumulative.", principle: 'no_effort_is_wasted', verse_ref: '2.40', moods: ['hopeful', 'confused', 'frustrated', 'overwhelmed'], topics: ['growth', 'academic', 'work'] },
-]
-
-function selectWisdom(mood: string, topic: string, phase: string, lastPrinciple: string | null): WisdomEntry | null {
+function selectWisdom(mood: string, topic: string, phase: string, recentVerseRefs: string[]): WisdomEntry | null {
   if (phase !== 'guide' && phase !== 'empower') return null
 
-  const scored = WISDOM_CORE.map(entry => {
-    let score = 0
-    // Mood match (+3)
-    if (entry.moods.includes(mood)) score += 3
-    // Topic match (+2)
-    if (entry.topics.includes(topic)) score += 2
-    // Novelty (+3)
-    if (entry.principle !== lastPrinciple) score += 3
-    // Phase alignment
-    if (phase === 'empower' && ['self_as_friend', 'inherent_worth', 'redemption', 'growth_through_adversity', 'consistent_action'].includes(entry.principle)) score += 2
-    if (phase === 'guide' && ['detachment_from_outcomes', 'karma_yoga', 'mind_mastery', 'action_over_overthinking', 'balance'].includes(entry.principle)) score += 2
-    return { entry, score }
-  }).filter(s => s.score > 2).sort((a, b) => b.score - a.score)
+  // Query the full 701-verse Wisdom Core
+  const result = getGroundedWisdom(mood, topic, recentVerseRefs)
 
-  if (scored.length === 0) return null
-  // Pick from top 3 for variety
-  const top = scored.slice(0, Math.min(3, scored.length))
-  return pickRandom(top).entry
+  if (result) {
+    return {
+      wisdom: result.wisdom,
+      principle: result.principle,
+      verse_ref: result.verse_ref,
+      moods: [],   // Not used for scoring — Wisdom Core handles scoring internally
+      topics: [],  // Not used for scoring — Wisdom Core handles scoring internally
+    }
+  }
+
+  return null
 }
 
 // ─── 8. Crisis Detection ─────────────────────────────────────────────────
@@ -496,7 +468,7 @@ export function generateLocalResponse(
   message: string,
   turnCount: number = 0,
   conversationMoods: string[] = [],
-  lastWisdomPrinciple: string | null = null,
+  recentVerseRefs: string[] = [],
 ): FriendEngineResult {
   // Crisis check
   if (detectCrisis(message)) {
@@ -523,11 +495,11 @@ export function generateLocalResponse(
     topicHistory: [],
     entitiesHistory: entities,
     currentPhase: 'connect',
-    lastWisdomPrinciple: lastWisdomPrinciple,
   }
   const phase = getPhase(state)
 
-  const wisdom = selectWisdom(mood, topic, phase, lastWisdomPrinciple)
+  // Select wisdom from the full 701-verse corpus via Wisdom Core
+  const wisdom = selectWisdom(mood, topic, phase, recentVerseRefs)
   const opener = buildEntityOpener(mood, topic, entities, intent)
   const body = buildCoreBody(mood, topic, intent, phase, entities)
   const followUp = buildFollowUp(mood, topic, phase, intent, entities)
@@ -549,30 +521,36 @@ export function generateLocalResponse(
 export class KiaanFriendEngine {
   private turnCount = 0
   private moodHistory: string[] = []
-  private lastWisdomPrinciple: string | null = null
+  private recentVerseRefs: string[] = []
 
   processMessage(message: string): FriendEngineResult {
     const result = generateLocalResponse(
       message,
       this.turnCount,
       this.moodHistory,
-      this.lastWisdomPrinciple,
+      this.recentVerseRefs,
     )
 
     this.turnCount++
     this.moodHistory.push(result.mood)
-    if (result.wisdom_used) this.lastWisdomPrinciple = result.wisdom_used.principle
+    if (result.wisdom_used) {
+      this.recentVerseRefs.push(result.wisdom_used.verse_ref)
+      // Keep only last 10 verse refs for novelty tracking
+      if (this.recentVerseRefs.length > 10) {
+        this.recentVerseRefs = this.recentVerseRefs.slice(-10)
+      }
+    }
 
     return result
   }
 
   getState() {
-    return { turnCount: this.turnCount, moodHistory: this.moodHistory, lastWisdomPrinciple: this.lastWisdomPrinciple }
+    return { turnCount: this.turnCount, moodHistory: this.moodHistory, recentVerseRefs: this.recentVerseRefs }
   }
 
   resetState() {
     this.turnCount = 0
     this.moodHistory = []
-    this.lastWisdomPrinciple = null
+    this.recentVerseRefs = []
   }
 }
