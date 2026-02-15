@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { useMicroPause } from '@/hooks/useMicroPause'
 import { BreathingDot } from '@/components/animations/BreathingDot'
@@ -374,14 +375,7 @@ export default function ViyogClient() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/viyog"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-              >
-                Original Viyoga Page
-              </Link>
-            </div>
+            <SpiritualToolsNav currentTool="viyoga" />
           </section>
         </div>
 

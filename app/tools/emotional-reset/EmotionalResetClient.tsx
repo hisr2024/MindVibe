@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { EmotionalResetWizard } from '@/components/emotional-reset'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
 import { FadeIn } from '@/components/ui'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 
 export default function EmotionalResetClient() {
@@ -89,25 +90,9 @@ export default function EmotionalResetClient() {
           <CompanionCTA fromTool="emotional-reset" />
         </FadeIn>
 
-        {/* Additional Resources */}
+        {/* Spiritual Tools Navigation */}
         <FadeIn delay={0.25}>
-          <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5">
-            <h3 className="text-sm font-semibold text-orange-50 mb-3">Related Tools</h3>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/tools/viyog"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
-              >
-                Viyoga - Outcome Anxiety Support
-              </Link>
-              <Link
-                href="/emotional-reset"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
-              >
-                Original Page
-              </Link>
-            </div>
-          </div>
+          <SpiritualToolsNav currentTool="emotional-reset" />
         </FadeIn>
       </div>
     </main>

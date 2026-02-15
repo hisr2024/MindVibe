@@ -1,8 +1,11 @@
 /**
  * MindVibe Tool Configuration
  *
- * Configuration data for all tools in the MindVibe ecosystem.
+ * Configuration data for all tools in the MindVibe spiritual wellness ecosystem.
  * Organized by category: Core, Community & Insights, Guidance, Karma, and Quick Access.
+ *
+ * MindVibe is a Spiritual Companion — the Divine Friend — based on the
+ * Bhagavad Gita with 700+ verses, its principles and practical knowledge.
  */
 
 export type ToolBadge = 'new' | 'premium' | 'beta'
@@ -28,14 +31,14 @@ export interface ToolCategory {
 }
 
 /**
- * Core Tools - Essential features for everyday use
+ * Core Tools - Essential features for everyday spiritual practice
  */
 export const CORE_TOOLS: ToolConfig[] = [
   {
     id: 'kiaan',
     icon: '💬',
     title: 'KIAAN Chat',
-    description: 'AI mental health companion',
+    description: 'Your spiritual companion',
     gradient: 'from-blue-400/30 to-purple-400/30',
     href: '/kiaan/chat',
     purposeDescKey: 'kiaan',
@@ -44,7 +47,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     id: 'kiaan-voice',
     icon: '🎙️',
     title: 'KIAAN Companion',
-    description: 'Your best friend who truly listens',
+    description: 'Your divine friend who truly listens',
     gradient: 'from-violet-400/30 to-indigo-400/30',
     href: '/companion',
     badge: 'new',
@@ -54,7 +57,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     id: 'journal',
     icon: '📝',
     title: 'Private Journal',
-    description: 'Encrypted journaling',
+    description: 'Encrypted spiritual journaling',
     gradient: 'from-amber-400/30 to-orange-400/30',
     href: '/sacred-reflections', // Same page as Sacred Reflections - encrypted journaling feature
   },
@@ -62,7 +65,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     id: 'wisdom',
     icon: '🌍',
     title: 'Wisdom Rooms',
-    description: 'Ancient wisdom',
+    description: 'Bhagavad Gita wisdom',
     gradient: 'from-violet-400/30 to-indigo-400/30',
     href: '/wisdom-rooms',
   },
@@ -70,7 +73,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     id: 'insights',
     icon: '📊',
     title: 'Mood Insights',
-    description: 'Emotional patterns',
+    description: 'Inner state patterns',
     gradient: 'from-teal-400/30 to-cyan-400/30',
     href: '/dashboard/analytics',
   },
@@ -93,7 +96,7 @@ export const COMMUNITY_TOOLS: ToolConfig[] = [
     id: 'community-circles',
     icon: '🤝',
     title: 'Community Circles',
-    description: 'Anonymous peer support',
+    description: 'Spiritual peer community',
     gradient: 'from-pink-400/30 to-rose-400/30',
     href: '/community',
     badge: 'new',
@@ -102,7 +105,7 @@ export const COMMUNITY_TOOLS: ToolConfig[] = [
     id: 'ai-insights',
     icon: '🧠',
     title: 'AI Insights',
-    description: 'Predictive wellness AI',
+    description: 'Spiritual wellness analytics',
     gradient: 'from-purple-400/30 to-pink-400/30',
     href: '/analytics',
     badge: 'new',
@@ -119,14 +122,14 @@ export const COMMUNITY_TOOLS: ToolConfig[] = [
 ]
 
 /**
- * Guidance Engines - Specialized assistants for different situations
+ * Guidance Engines - Gita-powered spiritual tools for different situations
  */
 export const GUIDANCE_TOOLS: ToolConfig[] = [
   {
     id: 'viyog',
     icon: '🎯',
     title: 'Viyoga',
-    description: 'Outcome anxiety reducer',
+    description: 'Release attachment to outcomes',
     gradient: 'from-cyan-400/30 to-blue-400/30',
     href: '/tools/viyog',
     badge: 'new',
@@ -136,7 +139,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     id: 'ardha',
     icon: '🔄',
     title: 'Ardha',
-    description: 'Ancient wisdom reframing',
+    description: 'Gita-aligned cognitive reframing',
     gradient: 'from-amber-400/30 to-yellow-400/30',
     href: '/tools/ardha',
     purposeDescKey: 'ardha',
@@ -145,7 +148,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     id: 'relationship-compass',
     icon: '🧭',
     title: 'Relationship Compass',
-    description: 'Calm conflict guidance',
+    description: 'Gita-grounded relationship guidance',
     gradient: 'from-rose-400/30 to-orange-400/30',
     href: '/tools/relationship-compass',
     purposeDescKey: 'relationship-compass',
@@ -153,14 +156,14 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
 ]
 
 /**
- * Karma & Growth Tools - Progress tracking and emotional processing
+ * Karma & Growth Tools - Progress tracking and spiritual processing
  */
 export const KARMA_TOOLS: ToolConfig[] = [
   {
     id: 'karmic-tree',
     icon: '🌱',
     title: 'Karmic Tree',
-    description: 'Visual progress tracking',
+    description: 'Visual spiritual progress',
     gradient: 'from-green-400/30 to-emerald-400/30',
     href: '/tools/karmic-tree',
   },
@@ -176,7 +179,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     id: 'karma-reset',
     icon: '💚',
     title: 'Karma Reset',
-    description: 'Heal relational harm',
+    description: 'Heal relational harm with compassion',
     gradient: 'from-emerald-400/30 to-teal-400/30',
     href: '/tools/karma-reset',
     badge: 'new',
@@ -185,7 +188,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     id: 'emotional-reset',
     icon: '💫',
     title: 'Emotional Reset',
-    description: '7-step guided processing',
+    description: '7-step guided inner peace flow',
     gradient: 'from-orange-400/30 to-amber-300/30',
     href: '/tools/emotional-reset',
   },

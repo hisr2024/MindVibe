@@ -10,6 +10,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
 import { BreathingOrb } from '@/components/animations/BreathingOrb'
 import { ConfettiEffect } from '@/components/animations/ConfettiEffect'
@@ -466,9 +467,10 @@ export default function KarmaResetClient() {
             )}
           </div>
 
-          {/* Sidebar - KIAAN Ecosystem Navigation */}
+          {/* Sidebar - Navigation */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8">
+            <div className="sticky top-8 space-y-4">
+              <SpiritualToolsNav currentTool="karma-reset" />
               <EcosystemNav currentTool="karma-reset" relatedOnly={false} />
             </div>
           </div>

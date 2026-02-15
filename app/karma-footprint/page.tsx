@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { ToolHeader, ToolActionCard, KarmicTreeClient } from '@/components/tools'
+import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 
 // Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
@@ -155,6 +157,9 @@ Respond using the four-part format with brief, grounded insights.`
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
+        {/* Pathway Map */}
+        <PathwayMap />
+
         {/* Header */}
         <ToolHeader
           icon="👣"
@@ -332,30 +337,8 @@ Respond using the four-part format with brief, grounded insights.`
               </div>
             </ToolActionCard>
 
-            {/* Links */}
-            <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
-              <h4 className="text-xs font-semibold text-orange-50 mb-3">Related Tools</h4>
-              <div className="space-y-2">
-                <Link
-                  href="/emotional-reset"
-                  className="flex items-center gap-2 text-sm text-orange-100/80 hover:text-orange-50 transition"
-                >
-                  <span>💫</span> Emotional Reset
-                </Link>
-                <Link
-                  href="/karmic-tree"
-                  className="flex items-center gap-2 text-sm text-orange-100/80 hover:text-orange-50 transition"
-                >
-                  <span>🌳</span> Full Karmic Tree View
-                </Link>
-                <Link
-                  href="/sacred-reflections"
-                  className="flex items-center gap-2 text-sm text-orange-100/80 hover:text-orange-50 transition"
-                >
-                  <span>📝</span> Sacred Reflections Journal
-                </Link>
-              </div>
-            </div>
+            {/* Cross-feature navigation */}
+            <SpiritualToolsNav currentTool="karma-footprint" />
           </section>
         </div>
       </div>

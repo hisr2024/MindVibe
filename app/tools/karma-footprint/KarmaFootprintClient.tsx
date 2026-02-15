@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ToolHeader, ToolActionCard, KarmaPlant, type KarmaFootprintState } from '@/components/tools'
 import { apiFetch } from '@/lib/api'
 import { FadeIn } from '@/components/ui'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 
 interface FootprintAnalysis {
@@ -297,20 +298,7 @@ export default function KarmaFootprintClient() {
             </FadeIn>
 
             <FadeIn delay={0.3}>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href="/tools/karmic-tree"
-                  className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-                >
-                  Karmic Tree
-                </Link>
-                <Link
-                  href="/tools/emotional-reset"
-                  className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-                >
-                  Emotional Reset
-                </Link>
-              </div>
+              <SpiritualToolsNav currentTool="karma-footprint" />
             </FadeIn>
           </section>
         </div>

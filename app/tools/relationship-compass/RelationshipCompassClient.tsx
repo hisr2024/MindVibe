@@ -6,6 +6,7 @@ import { ToolHeader, ToolActionCard } from '@/components/tools'
 import { useLanguage } from '@/hooks/useLanguage'
 import { apiFetch } from '@/lib/api'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 
 // Sanitize user input to prevent prompt injection
@@ -281,14 +282,7 @@ export default function RelationshipCompassClient() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/relationship-compass"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-              >
-                Original Page
-              </Link>
-            </div>
+            <SpiritualToolsNav currentTool="relationship-compass" />
           </section>
         </div>
 

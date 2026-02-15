@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
 import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
@@ -618,27 +619,8 @@ export default function RelationshipCompassPage() {
               </p>
             </div>
 
-            {/* Links */}
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/kiaan/chat"
-                className="px-4 py-2 rounded-xl bg-white/5 border border-orange-500/30 text-orange-50 text-xs font-semibold hover:border-orange-300/50 transition"
-              >
-                Deepen with KIAAN
-              </Link>
-              <Link
-                href="/viyog"
-                className="px-4 py-2 rounded-xl bg-white/5 border border-orange-500/30 text-orange-50 text-xs font-semibold hover:border-orange-300/50 transition"
-              >
-                Detachment Coach
-              </Link>
-              <Link
-                href="/ardha"
-                className="px-4 py-2 rounded-xl bg-white/5 border border-orange-500/30 text-orange-50 text-xs font-semibold hover:border-orange-300/50 transition"
-              >
-                Reframe Thoughts
-              </Link>
-            </div>
+            {/* Cross-feature navigation */}
+            <SpiritualToolsNav currentTool="relationship-compass" />
           </section>
         </div>
       </div>

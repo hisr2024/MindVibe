@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
 import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
@@ -417,6 +418,9 @@ export default function ViyogaPage() {
                 Act fully. Release results. Remain balanced.
               </p>
             </div>
+
+            {/* Cross-feature navigation */}
+            <SpiritualToolsNav currentTool="viyoga" />
           </section>
         </div>
       </div>

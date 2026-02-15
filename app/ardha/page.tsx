@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { apiCall, getErrorMessage } from '@/lib/api-client'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { getNextStepSuggestion } from '@/lib/suggestions/nextStep'
 import { NextStepLink } from '@/components/suggestions/NextStepLink'
 
@@ -233,6 +234,9 @@ export default function ArdhaPage() {
                 <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist. No medical, legal, or crisis advice. It transforms distorted thoughts into balanced clarity through cognitive reframing.
               </p>
             </div>
+
+            {/* Cross-feature navigation */}
+            <SpiritualToolsNav currentTool="ardha" />
           </section>
         </div>
       </div>

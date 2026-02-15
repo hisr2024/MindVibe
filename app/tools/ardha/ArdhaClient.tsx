@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
@@ -417,14 +418,7 @@ export default function ArdhaClient() {
 
             <CompanionCTA fromTool="ardha" className="mt-4" />
 
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Link
-                href="/ardha"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-2 py-1 border border-orange-500/20"
-              >
-                Original Ardha Page
-              </Link>
-            </div>
+            <SpiritualToolsNav currentTool="ardha" className="mt-4" />
           </section>
         </div>
       </div>
