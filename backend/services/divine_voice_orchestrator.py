@@ -1,39 +1,38 @@
-"""
-Divine Voice Orchestrator - World-Class Open Source TTS System
+"""Divine Voice Orchestrator - Premium TTS System for KIAAN
 
-This module orchestrates multiple open-source TTS providers to deliver
-the best possible voice quality for KIAAN, with special handling for
-Sanskrit pronunciation.
+Orchestrates Sarvam AI, Bhashini AI, and ElevenLabs TTS providers
+to deliver world-class voice quality for KIAAN, with special handling
+for Sanskrit pronunciation and Indian languages.
 
-PROVIDERS (All Open Source / Free Tier):
-1. Google Cloud TTS - Free tier (4M chars/month), high quality Neural voices
-2. Sarvam AI - Free tier, India's best for Sanskrit/Hindi
-3. Browser Web Speech API - Always available fallback
-4. Chatterbox (via API) - MIT license, ElevenLabs quality
-5. Piper TTS - Local open source option
+PROVIDERS:
+1. Sarvam AI Bulbul - India's best for Sanskrit/Hindi (11 Indian languages)
+2. Bhashini AI - Government of India platform (22 scheduled languages)
+3. ElevenLabs - Studio-grade international voices
+4. Browser Web Speech API - Always available fallback
+
+Provider Priority:
+  Indian Languages: Sarvam AI → Bhashini AI → ElevenLabs
+  International:    ElevenLabs → Sarvam AI
 
 Quality Ranking (1-10):
 - Sarvam AI (Sanskrit/Hindi): 9.5
-- Google Neural2/Studio: 9.0
-- Chatterbox: 9.0
-- Google Standard: 7.0
+- Bhashini AI (Indian languages): 9.0
+- ElevenLabs (International): 9.3
 - Browser TTS: 5.0
 
 The orchestrator automatically selects the best provider based on:
-1. Language (Sanskrit/Hindi -> Sarvam AI)
+1. Language (Sanskrit/Hindi → Sarvam AI, Indian → Bhashini AI)
 2. Availability (API key present)
 3. Quality ranking
 4. Fallback chain
 """
 
 import os
-import asyncio
 import logging
 from typing import Optional, Dict, List, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 import base64
-import json
 import hashlib
 from datetime import datetime, timedelta
 
@@ -42,13 +41,10 @@ logger = logging.getLogger(__name__)
 
 class VoiceProvider(Enum):
     """Available TTS providers"""
-    SARVAM_AI = "sarvam_ai"           # India's best for Sanskrit
-    GOOGLE_NEURAL = "google_neural"    # High quality neural voices
-    GOOGLE_STUDIO = "google_studio"    # Premium studio voices
-    GOOGLE_STANDARD = "google_standard"  # Standard voices
-    BROWSER_TTS = "browser_tts"        # Browser fallback
-    CHATTERBOX = "chatterbox"          # Open source, ElevenLabs quality
-    PIPER = "piper"                    # Local open source
+    SARVAM_AI = "sarvam_ai"           # India's best for Sanskrit/Hindi
+    BHASHINI_AI = "bhashini_ai"       # Government of India 22 languages
+    ELEVENLABS = "elevenlabs"         # Studio-grade international voices
+    BROWSER_TTS = "browser_tts"       # Browser fallback
 
 
 class VoiceGender(Enum):
@@ -98,11 +94,11 @@ class SynthesisResult:
 # PROVIDER CONFIGURATIONS
 # ============================================
 
-# Sarvam AI Voices (Best for Sanskrit/Hindi)
+# Sarvam AI Voices (Best for Sanskrit/Hindi/Indian languages)
 SARVAM_VOICES = {
     "divine_female": VoiceConfig(
         provider=VoiceProvider.SARVAM_AI,
-        voice_id="anushka",  # Gentle, divine quality
+        voice_id="anushka",
         language="hi-IN",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.DIVINE,
@@ -113,7 +109,7 @@ SARVAM_VOICES = {
     ),
     "wisdom_male": VoiceConfig(
         provider=VoiceProvider.SARVAM_AI,
-        voice_id="abhilash",  # Authoritative, wise
+        voice_id="abhilash",
         language="hi-IN",
         gender=VoiceGender.MALE,
         style=VoiceStyle.WISDOM,
@@ -124,7 +120,7 @@ SARVAM_VOICES = {
     ),
     "calm_female": VoiceConfig(
         provider=VoiceProvider.SARVAM_AI,
-        voice_id="vidya",  # Soothing, meditative
+        voice_id="vidya",
         language="hi-IN",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.CALM,
@@ -135,70 +131,83 @@ SARVAM_VOICES = {
     ),
 }
 
-# Google Cloud TTS Voices
-GOOGLE_VOICES = {
+# ElevenLabs Voices (Studio-grade for English/International)
+ELEVENLABS_VOICES = {
     "divine_female_en": VoiceConfig(
-        provider=VoiceProvider.GOOGLE_NEURAL,
-        voice_id="en-US-Neural2-F",
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="EXAVITQu4vr4xnSDxMaL",  # Bella
         language="en-US",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.DIVINE,
-        quality_score=9.0,
+        quality_score=9.3,
         speed=0.92,
         pitch=-1.0,
-        description="Natural, warm female voice"
+        description="Natural, warm female voice for divine speech"
     ),
     "wisdom_male_en": VoiceConfig(
-        provider=VoiceProvider.GOOGLE_NEURAL,
-        voice_id="en-US-Neural2-D",
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="onwK4e9ZLuTAKqWW03F9",  # Daniel
         language="en-US",
         gender=VoiceGender.MALE,
         style=VoiceStyle.WISDOM,
-        quality_score=9.0,
+        quality_score=9.3,
         speed=0.9,
         pitch=-1.5,
         description="Authoritative, wise male voice"
     ),
     "calm_female_en": VoiceConfig(
-        provider=VoiceProvider.GOOGLE_STUDIO,
-        voice_id="en-US-Studio-O",
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="jBpfAIEiAUkR2KqPSoCY",  # Emily
         language="en-US",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.CALM,
-        quality_score=9.2,
+        quality_score=9.3,
         speed=0.88,
         pitch=-1.0,
-        description="Studio quality calm voice"
+        description="Calm, soothing voice for meditation"
     ),
     "friendly_female_en": VoiceConfig(
-        provider=VoiceProvider.GOOGLE_NEURAL,
-        voice_id="en-US-Neural2-F",
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="EXAVITQu4vr4xnSDxMaL",  # Bella
         language="en-US",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.FRIENDLY,
-        quality_score=9.0,
+        quality_score=9.3,
         speed=0.95,
         pitch=0.5,
         description="Conversational, friendly voice"
     ),
-    # Hindi voices
+}
+
+# Bhashini AI Voices (Government of India - 22 Indian languages)
+BHASHINI_VOICES = {
     "divine_female_hi": VoiceConfig(
-        provider=VoiceProvider.GOOGLE_NEURAL,
-        voice_id="hi-IN-Neural2-D",
+        provider=VoiceProvider.BHASHINI_AI,
+        voice_id="bhashini-devi",
         language="hi-IN",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.DIVINE,
-        quality_score=8.5,
+        quality_score=9.0,
         speed=0.9,
         pitch=-1.0,
-        description="Hindi female neural voice"
+        description="Hindi female voice from Bhashini AI"
+    ),
+    "wisdom_male_hi": VoiceConfig(
+        provider=VoiceProvider.BHASHINI_AI,
+        voice_id="bhashini-arya",
+        language="hi-IN",
+        gender=VoiceGender.MALE,
+        style=VoiceStyle.WISDOM,
+        quality_score=9.0,
+        speed=0.85,
+        pitch=-2.0,
+        description="Hindi male voice for wisdom teachings"
     ),
 }
 
 
 class DivineVoiceOrchestrator:
-    """
-    Orchestrates multiple TTS providers for world-class voice quality.
+    """Orchestrates Sarvam AI, Bhashini AI, and ElevenLabs TTS providers.
 
     Features:
     - Automatic provider selection based on language and style
@@ -214,15 +223,22 @@ class DivineVoiceOrchestrator:
         self._max_cache_size = 100
 
         # Check which providers are available
-        self._sarvam_available = bool(os.getenv("SARVAM_API_KEY"))
-        self._google_available = bool(os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or
-                                      os.getenv("GOOGLE_CLOUD_PROJECT"))
+        self._sarvam_available = bool(os.getenv("SARVAM_API_KEY", "").strip())
+        self._bhashini_available = bool(
+            os.getenv("BHASHINI_API_KEY", "").strip()
+            and os.getenv("BHASHINI_USER_ID", "").strip()
+        )
+        self._elevenlabs_available = bool(os.getenv("ELEVENLABS_API_KEY", "").strip())
 
         # Active synthesis tracking for stop functionality
         self._active_synthesis: Dict[str, bool] = {}
 
-        logger.info(f"Divine Voice Orchestrator initialized. "
-                   f"Sarvam: {self._sarvam_available}, Google: {self._google_available}")
+        logger.info(
+            f"Divine Voice Orchestrator initialized. "
+            f"Sarvam: {self._sarvam_available}, "
+            f"Bhashini: {self._bhashini_available}, "
+            f"ElevenLabs: {self._elevenlabs_available}"
+        )
 
     def _get_cache_key(self, text: str, voice_config: VoiceConfig) -> str:
         """Generate cache key for audio"""
@@ -242,9 +258,8 @@ class DivineVoiceOrchestrator:
     def _add_to_cache(self, cache_key: str, audio_data: bytes):
         """Add audio to cache with LRU eviction"""
         if len(self._cache) >= self._max_cache_size:
-            # Remove oldest entry
             oldest_key = min(self._cache.keys(),
-                           key=lambda k: self._cache[k][1])
+                             key=lambda k: self._cache[k][1])
             del self._cache[oldest_key]
 
         self._cache[cache_key] = (audio_data, datetime.now())
@@ -256,41 +271,61 @@ class DivineVoiceOrchestrator:
         gender: VoiceGender = VoiceGender.FEMALE,
         is_sanskrit: bool = False
     ) -> VoiceConfig:
-        """
-        Select the best voice for the given context.
+        """Select the best voice for the given context.
 
         Priority:
-        1. Sanskrit/Hindi -> Sarvam AI (if available)
-        2. Language match
-        3. Style match
-        4. Quality score
+        1. Sanskrit/Hindi → Sarvam AI (if available)
+        2. Indian languages → Bhashini AI (if available)
+        3. English/International → ElevenLabs (if available)
+        4. Fallback through the chain
         """
         # For Sanskrit or Hindi, prefer Sarvam AI
         if is_sanskrit or language in ["sa", "hi", "hi-IN", "sa-IN"]:
             if self._sarvam_available:
-                # Find best Sarvam voice for style
                 for voice_key, voice in SARVAM_VOICES.items():
                     if voice.style == style or style == VoiceStyle.CHANTING:
                         return voice
-                # Default to divine female for Sanskrit
                 return SARVAM_VOICES["divine_female"]
 
-        # For English, use Google voices
-        candidates = []
-        for voice_key, voice in GOOGLE_VOICES.items():
-            if voice.language.startswith(language.split("-")[0]):
+            # Fallback to Bhashini for Hindi
+            if self._bhashini_available:
+                for voice_key, voice in BHASHINI_VOICES.items():
+                    if voice.style == style:
+                        return voice
+                return BHASHINI_VOICES["divine_female_hi"]
+
+        # For other Indian languages, prefer Bhashini AI
+        indian_languages = {
+            "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa",
+            "od", "as", "ne", "ur", "sd", "doi", "mai", "kok",
+        }
+        if language in indian_languages:
+            if self._bhashini_available:
+                return BHASHINI_VOICES["divine_female_hi"]
+            if self._sarvam_available:
+                return SARVAM_VOICES["divine_female"]
+
+        # For English / International, use ElevenLabs
+        if self._elevenlabs_available:
+            candidates = []
+            for voice_key, voice in ELEVENLABS_VOICES.items():
                 if voice.style == style:
-                    candidates.append((voice, voice.quality_score + 1.0))  # Bonus for style match
+                    candidates.append((voice, voice.quality_score + 1.0))
                 else:
                     candidates.append((voice, voice.quality_score))
 
-        if candidates:
-            # Sort by adjusted quality score
-            candidates.sort(key=lambda x: x[1], reverse=True)
-            return candidates[0][0]
+            if candidates:
+                candidates.sort(key=lambda x: x[1], reverse=True)
+                return candidates[0][0]
 
-        # Default fallback
-        return GOOGLE_VOICES["friendly_female_en"]
+        # Ultimate fallback: try Sarvam, then Bhashini
+        if self._sarvam_available:
+            return SARVAM_VOICES["divine_female"]
+        if self._bhashini_available:
+            return BHASHINI_VOICES["divine_female_hi"]
+
+        # No providers available - return ElevenLabs config (will fail gracefully)
+        return ELEVENLABS_VOICES["friendly_female_en"]
 
     async def synthesize(
         self,
@@ -302,8 +337,7 @@ class DivineVoiceOrchestrator:
         ssml: str = None,
         synthesis_id: str = None
     ) -> SynthesisResult:
-        """
-        Synthesize speech with automatic provider selection.
+        """Synthesize speech with automatic provider selection and fallback.
 
         Args:
             text: Text to synthesize
@@ -320,15 +354,12 @@ class DivineVoiceOrchestrator:
         import time
         start_time = time.time()
 
-        # Generate synthesis ID if not provided
         if synthesis_id is None:
             synthesis_id = hashlib.md5(f"{text}{time.time()}".encode()).hexdigest()[:8]
 
-        # Track active synthesis
         self._active_synthesis[synthesis_id] = True
 
         try:
-            # Get best voice configuration
             voice_config = self.get_best_voice_for_context(
                 language, style, gender, is_sanskrit
             )
@@ -337,11 +368,11 @@ class DivineVoiceOrchestrator:
             cache_key = self._get_cache_key(ssml or text, voice_config)
             cached_audio = self._get_from_cache(cache_key)
             if cached_audio:
-                logger.info(f"Using cached audio for synthesis")
+                logger.info("Using cached audio for synthesis")
                 return SynthesisResult(
                     success=True,
                     audio_data=cached_audio,
-                    audio_format="mp3",
+                    audio_format="wav",
                     provider_used=voice_config.provider,
                     quality_score=voice_config.quality_score,
                     latency_ms=0,
@@ -362,9 +393,7 @@ class DivineVoiceOrchestrator:
 
             # Try primary provider
             result = await self._synthesize_with_provider(
-                ssml or text,
-                voice_config,
-                use_ssml=ssml is not None
+                ssml or text, voice_config, use_ssml=ssml is not None
             )
 
             if result.success:
@@ -373,16 +402,14 @@ class DivineVoiceOrchestrator:
                 return result
 
             # Fallback chain
-            fallback_providers = self._get_fallback_chain(voice_config)
+            fallback_providers = self._get_fallback_chain(voice_config, language)
             for fallback_config in fallback_providers:
                 if not self._active_synthesis.get(synthesis_id, True):
                     break
 
                 logger.warning(f"Trying fallback provider: {fallback_config.provider}")
                 result = await self._synthesize_with_provider(
-                    ssml or text,
-                    fallback_config,
-                    use_ssml=ssml is not None
+                    ssml or text, fallback_config, use_ssml=ssml is not None
                 )
 
                 if result.success:
@@ -391,7 +418,6 @@ class DivineVoiceOrchestrator:
                     result.latency_ms = (time.time() - start_time) * 1000
                     return result
 
-            # All providers failed
             return SynthesisResult(
                 success=False,
                 audio_data=None,
@@ -403,7 +429,6 @@ class DivineVoiceOrchestrator:
             )
 
         finally:
-            # Clean up tracking
             self._active_synthesis.pop(synthesis_id, None)
 
     async def _synthesize_with_provider(
@@ -413,13 +438,12 @@ class DivineVoiceOrchestrator:
         use_ssml: bool = False
     ) -> SynthesisResult:
         """Synthesize with a specific provider"""
-
         if voice_config.provider == VoiceProvider.SARVAM_AI:
             return await self._synthesize_sarvam(text, voice_config, use_ssml)
-        elif voice_config.provider in [VoiceProvider.GOOGLE_NEURAL,
-                                       VoiceProvider.GOOGLE_STUDIO,
-                                       VoiceProvider.GOOGLE_STANDARD]:
-            return await self._synthesize_google(text, voice_config, use_ssml)
+        elif voice_config.provider == VoiceProvider.BHASHINI_AI:
+            return await self._synthesize_bhashini(text, voice_config)
+        elif voice_config.provider == VoiceProvider.ELEVENLABS:
+            return await self._synthesize_elevenlabs(text, voice_config)
         else:
             return SynthesisResult(
                 success=False,
@@ -437,192 +461,262 @@ class DivineVoiceOrchestrator:
         voice_config: VoiceConfig,
         use_ssml: bool = False
     ) -> SynthesisResult:
-        """Synthesize using Sarvam AI API"""
-        import aiohttp
-
-        api_key = os.getenv("SARVAM_API_KEY")
-        if not api_key:
-            return SynthesisResult(
-                success=False,
-                audio_data=None,
-                audio_format="",
-                provider_used=VoiceProvider.SARVAM_AI,
-                quality_score=0,
-                latency_ms=0,
-                error="Sarvam API key not configured"
-            )
-
+        """Synthesize using Sarvam AI Bulbul API"""
         try:
-            async with aiohttp.ClientSession() as session:
-                # Sarvam AI TTS endpoint
-                url = "https://api.sarvam.ai/v1/tts"
+            import httpx
 
-                payload = {
-                    "input": text,
-                    "model": "bulbul:v2",
-                    "voice": voice_config.voice_id,
-                    "language_code": voice_config.language,
-                    "pitch": voice_config.pitch,
-                    "pace": voice_config.speed,
-                    "loudness": 1.0,
-                    "speech_sample_rate": 24000,
-                    "enable_preprocessing": True,
-                }
+            api_key = os.getenv("SARVAM_API_KEY", "").strip()
+            if not api_key:
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.SARVAM_AI,
+                    quality_score=0, latency_ms=0,
+                    error="Sarvam API key not configured"
+                )
 
-                headers = {
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                }
+            payload = {
+                "input": text,
+                "model": "bulbul:v2",
+                "voice": voice_config.voice_id,
+                "language_code": voice_config.language,
+                "pitch": voice_config.pitch,
+                "pace": voice_config.speed,
+                "loudness": 1.0,
+                "speech_sample_rate": 24000,
+                "enable_preprocessing": True,
+            }
 
-                async with session.post(url, json=payload, headers=headers) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        # Sarvam returns base64 encoded audio
-                        audio_base64 = data.get("audio_content", "")
-                        audio_data = base64.b64decode(audio_base64)
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                response = await client.post(
+                    "https://api.sarvam.ai/v1/tts",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json=payload,
+                )
 
-                        return SynthesisResult(
-                            success=True,
-                            audio_data=audio_data,
-                            audio_format="wav",
-                            provider_used=VoiceProvider.SARVAM_AI,
-                            quality_score=voice_config.quality_score,
-                            latency_ms=0
-                        )
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Sarvam API error: {error_text}")
-                        return SynthesisResult(
-                            success=False,
-                            audio_data=None,
-                            audio_format="",
-                            provider_used=VoiceProvider.SARVAM_AI,
-                            quality_score=0,
-                            latency_ms=0,
-                            error=f"Sarvam API error: {response.status}"
-                        )
+                if response.status_code == 200:
+                    data = response.json()
+                    audio_base64 = data.get("audio_content", "")
+                    audio_data = base64.b64decode(audio_base64)
+
+                    return SynthesisResult(
+                        success=True,
+                        audio_data=audio_data,
+                        audio_format="wav",
+                        provider_used=VoiceProvider.SARVAM_AI,
+                        quality_score=voice_config.quality_score,
+                        latency_ms=0
+                    )
+                else:
+                    logger.error(f"Sarvam API error: status={response.status_code}")
+                    return SynthesisResult(
+                        success=False, audio_data=None, audio_format="",
+                        provider_used=VoiceProvider.SARVAM_AI,
+                        quality_score=0, latency_ms=0,
+                        error=f"Sarvam API error: {response.status_code}"
+                    )
 
         except Exception as e:
             logger.error(f"Sarvam synthesis error: {e}")
             return SynthesisResult(
-                success=False,
-                audio_data=None,
-                audio_format="",
+                success=False, audio_data=None, audio_format="",
                 provider_used=VoiceProvider.SARVAM_AI,
-                quality_score=0,
-                latency_ms=0,
+                quality_score=0, latency_ms=0,
                 error=str(e)
             )
 
-    async def _synthesize_google(
+    async def _synthesize_bhashini(
         self,
         text: str,
         voice_config: VoiceConfig,
-        use_ssml: bool = False
     ) -> SynthesisResult:
-        """Synthesize using Google Cloud TTS"""
+        """Synthesize using Bhashini AI (Government of India platform)"""
         try:
-            from google.cloud import texttospeech
+            from backend.services.bhashini_tts_service import (
+                synthesize_bhashini_tts,
+                is_bhashini_available,
+            )
 
-            client = texttospeech.TextToSpeechClient()
+            if not is_bhashini_available():
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.BHASHINI_AI,
+                    quality_score=0, latency_ms=0,
+                    error="Bhashini API not configured"
+                )
 
-            # Prepare input
-            if use_ssml:
-                synthesis_input = texttospeech.SynthesisInput(ssml=text)
+            # Map language code (hi-IN → hi)
+            lang = voice_config.language.split("-")[0]
+            gender_str = "female" if voice_config.gender == VoiceGender.FEMALE else "male"
+
+            audio_bytes = await synthesize_bhashini_tts(
+                text=text,
+                language=lang,
+                voice_id=voice_config.voice_id,
+                mood="neutral",
+            )
+
+            if audio_bytes and len(audio_bytes) > 100:
+                return SynthesisResult(
+                    success=True,
+                    audio_data=audio_bytes,
+                    audio_format="wav",
+                    provider_used=VoiceProvider.BHASHINI_AI,
+                    quality_score=voice_config.quality_score,
+                    latency_ms=0
+                )
             else:
-                synthesis_input = texttospeech.SynthesisInput(text=text)
-
-            # Voice configuration
-            voice = texttospeech.VoiceSelectionParams(
-                language_code=voice_config.language,
-                name=voice_config.voice_id
-            )
-
-            # Audio configuration
-            audio_config = texttospeech.AudioConfig(
-                audio_encoding=texttospeech.AudioEncoding.MP3,
-                speaking_rate=voice_config.speed,
-                pitch=voice_config.pitch
-            )
-
-            # Synthesize
-            response = client.synthesize_speech(
-                input=synthesis_input,
-                voice=voice,
-                audio_config=audio_config
-            )
-
-            return SynthesisResult(
-                success=True,
-                audio_data=response.audio_content,
-                audio_format="mp3",
-                provider_used=voice_config.provider,
-                quality_score=voice_config.quality_score,
-                latency_ms=0
-            )
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.BHASHINI_AI,
+                    quality_score=0, latency_ms=0,
+                    error="Bhashini returned empty audio"
+                )
 
         except Exception as e:
-            logger.error(f"Google TTS error: {e}")
+            logger.error(f"Bhashini synthesis error: {e}")
             return SynthesisResult(
-                success=False,
-                audio_data=None,
-                audio_format="",
-                provider_used=voice_config.provider,
-                quality_score=0,
-                latency_ms=0,
+                success=False, audio_data=None, audio_format="",
+                provider_used=VoiceProvider.BHASHINI_AI,
+                quality_score=0, latency_ms=0,
                 error=str(e)
             )
 
-    def _get_fallback_chain(self, primary_config: VoiceConfig) -> List[VoiceConfig]:
-        """Get ordered list of fallback providers"""
+    async def _synthesize_elevenlabs(
+        self,
+        text: str,
+        voice_config: VoiceConfig,
+    ) -> SynthesisResult:
+        """Synthesize using ElevenLabs API"""
+        try:
+            import httpx
+
+            api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+            if not api_key:
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.ELEVENLABS,
+                    quality_score=0, latency_ms=0,
+                    error="ElevenLabs API key not configured"
+                )
+
+            url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_config.voice_id}"
+
+            payload = {
+                "text": text,
+                "model_id": "eleven_multilingual_v2",
+                "voice_settings": {
+                    "stability": 0.7,
+                    "similarity_boost": 0.8,
+                    "style": 0.5,
+                    "use_speaker_boost": True,
+                },
+            }
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    url,
+                    headers={
+                        "xi-api-key": api_key,
+                        "Content-Type": "application/json",
+                        "Accept": "audio/mpeg",
+                    },
+                    json=payload,
+                )
+
+                if response.status_code == 200:
+                    audio_data = response.content
+                    if len(audio_data) > 100:
+                        return SynthesisResult(
+                            success=True,
+                            audio_data=audio_data,
+                            audio_format="mp3",
+                            provider_used=VoiceProvider.ELEVENLABS,
+                            quality_score=voice_config.quality_score,
+                            latency_ms=0
+                        )
+
+                logger.error(f"ElevenLabs API error: status={response.status_code}")
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.ELEVENLABS,
+                    quality_score=0, latency_ms=0,
+                    error=f"ElevenLabs API error: {response.status_code}"
+                )
+
+        except Exception as e:
+            logger.error(f"ElevenLabs synthesis error: {e}")
+            return SynthesisResult(
+                success=False, audio_data=None, audio_format="",
+                provider_used=VoiceProvider.ELEVENLABS,
+                quality_score=0, latency_ms=0,
+                error=str(e)
+            )
+
+    def _get_fallback_chain(
+        self,
+        primary_config: VoiceConfig,
+        language: str = "en",
+    ) -> List[VoiceConfig]:
+        """Get ordered list of fallback providers based on primary and language."""
         fallbacks = []
 
-        # If primary was Sarvam, try Google
-        if primary_config.provider == VoiceProvider.SARVAM_AI:
-            if self._google_available:
-                # Try to find matching style in Google voices
-                for voice in GOOGLE_VOICES.values():
-                    if voice.style == primary_config.style:
-                        fallbacks.append(voice)
-                        break
-                # Add default Google voice
-                fallbacks.append(GOOGLE_VOICES["friendly_female_en"])
+        indian_languages = {
+            "sa", "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa",
+            "od", "as", "ne", "ur",
+        }
+        is_indian = language in indian_languages or language.startswith("hi") or language.startswith("sa")
 
-        # If primary was Google, try Sarvam (for Hindi/Sanskrit)
-        elif primary_config.provider in [VoiceProvider.GOOGLE_NEURAL,
-                                         VoiceProvider.GOOGLE_STUDIO]:
-            if self._sarvam_available and primary_config.language.startswith("hi"):
+        if primary_config.provider == VoiceProvider.SARVAM_AI:
+            # Sarvam failed → try Bhashini → ElevenLabs
+            if self._bhashini_available:
+                fallbacks.append(BHASHINI_VOICES.get(
+                    "divine_female_hi",
+                    list(BHASHINI_VOICES.values())[0]
+                ))
+            if self._elevenlabs_available:
+                fallbacks.append(ELEVENLABS_VOICES.get(
+                    "friendly_female_en",
+                    list(ELEVENLABS_VOICES.values())[0]
+                ))
+
+        elif primary_config.provider == VoiceProvider.BHASHINI_AI:
+            # Bhashini failed → try Sarvam → ElevenLabs
+            if self._sarvam_available:
                 for voice in SARVAM_VOICES.values():
                     if voice.style == primary_config.style:
                         fallbacks.append(voice)
                         break
+                if not fallbacks:
+                    fallbacks.append(SARVAM_VOICES["divine_female"])
+            if self._elevenlabs_available:
+                fallbacks.append(ELEVENLABS_VOICES.get(
+                    "friendly_female_en",
+                    list(ELEVENLABS_VOICES.values())[0]
+                ))
 
-            # Add lower quality Google as last resort
-            fallbacks.append(VoiceConfig(
-                provider=VoiceProvider.GOOGLE_STANDARD,
-                voice_id="en-US-Standard-C",
-                language="en-US",
-                gender=VoiceGender.FEMALE,
-                style=VoiceStyle.FRIENDLY,
-                quality_score=7.0,
-                description="Standard fallback"
-            ))
+        elif primary_config.provider == VoiceProvider.ELEVENLABS:
+            # ElevenLabs failed → try Sarvam (for Indian) → Bhashini
+            if is_indian:
+                if self._sarvam_available:
+                    fallbacks.append(SARVAM_VOICES["divine_female"])
+                if self._bhashini_available:
+                    fallbacks.append(BHASHINI_VOICES["divine_female_hi"])
+            else:
+                if self._sarvam_available:
+                    fallbacks.append(SARVAM_VOICES["divine_female"])
 
         return fallbacks
 
     def stop_synthesis(self, synthesis_id: str = None):
-        """
-        Stop active synthesis.
-
-        If synthesis_id is provided, stops that specific synthesis.
-        If None, stops ALL active syntheses.
-        """
+        """Stop active synthesis. If synthesis_id is None, stops ALL."""
         if synthesis_id:
             self._active_synthesis[synthesis_id] = False
         else:
             for sid in self._active_synthesis:
                 self._active_synthesis[sid] = False
-
         logger.info(f"Stopped synthesis: {synthesis_id or 'ALL'}")
 
     def stop_all(self):
@@ -642,24 +736,24 @@ class DivineVoiceOrchestrator:
         with_meaning: bool = False,
         meaning_text: str = None
     ) -> SynthesisResult:
-        """
-        Synthesize a Sanskrit shloka with perfect pronunciation.
+        """Synthesize a Sanskrit shloka with perfect pronunciation.
 
         Uses Sanskrit phonology for IPA conversion and optimal
         voice settings for sacred recitation.
         """
-        from services.sanskrit_phonology import sanskrit_ssml, CHANDAS_PATTERNS
+        ssml = None
+        try:
+            from services.sanskrit_phonology import sanskrit_ssml, CHANDAS_PATTERNS
+            ssml = sanskrit_ssml.generate_shloka_ssml(
+                shloka,
+                chandas=chandas,
+                speed=0.85,
+                pitch="-2st",
+                with_vedic_accents=True
+            )
+        except ImportError:
+            logger.debug("Sanskrit phonology not available, using plain text")
 
-        # Generate SSML with proper pronunciation
-        ssml = sanskrit_ssml.generate_shloka_ssml(
-            shloka,
-            chandas=chandas,
-            speed=0.85,
-            pitch="-2st",
-            with_vedic_accents=True
-        )
-
-        # Synthesize with Sarvam AI (best for Sanskrit) or Google
         result = await self.synthesize(
             text=shloka,
             language="sa",
@@ -668,19 +762,14 @@ class DivineVoiceOrchestrator:
             ssml=ssml
         )
 
-        # If meaning requested, synthesize that too and concatenate
         if with_meaning and meaning_text and result.success:
-            # Add pause between shloka and meaning
             meaning_result = await self.synthesize(
                 text=meaning_text,
                 language="en",
                 style=VoiceStyle.WISDOM
             )
-
             if meaning_result.success:
-                # Concatenate audio (would need proper audio processing)
-                # For now, return just the shloka
-                pass
+                pass  # Audio concatenation would go here
 
         return result
 
@@ -690,26 +779,26 @@ class DivineVoiceOrchestrator:
         language: str = "en",
         include_sanskrit_words: List[str] = None
     ) -> SynthesisResult:
-        """
-        Synthesize KIAAN's divine response with proper pronunciation
-        for embedded Sanskrit words.
-        """
-        from services.sanskrit_phonology import (
-            sanskrit_ssml, detect_sanskrit_words, COMMON_SANSKRIT_WORDS
-        )
-
-        # Auto-detect Sanskrit words if not provided
-        if include_sanskrit_words is None:
-            include_sanskrit_words = detect_sanskrit_words(text)
-
-        # Generate SSML with proper Sanskrit pronunciation
-        if include_sanskrit_words:
-            ssml = sanskrit_ssml.generate_divine_response_ssml(
-                text,
-                include_sanskrit_words=include_sanskrit_words,
-                speed=0.92,
-                pitch="-1st"
+        """Synthesize KIAAN's divine response with proper Sanskrit pronunciation."""
+        ssml = None
+        try:
+            from services.sanskrit_phonology import (
+                sanskrit_ssml, detect_sanskrit_words, COMMON_SANSKRIT_WORDS
             )
+            if include_sanskrit_words is None:
+                include_sanskrit_words = detect_sanskrit_words(text)
+
+            if include_sanskrit_words:
+                ssml = sanskrit_ssml.generate_divine_response_ssml(
+                    text,
+                    include_sanskrit_words=include_sanskrit_words,
+                    speed=0.92,
+                    pitch="-1st"
+                )
+        except ImportError:
+            logger.debug("Sanskrit phonology not available, using plain text")
+
+        if ssml:
             return await self.synthesize(
                 text=text,
                 language=language,
@@ -728,7 +817,6 @@ class DivineVoiceOrchestrator:
 # GLOBAL INSTANCE
 # ============================================
 
-# Singleton instance
 divine_voice = DivineVoiceOrchestrator()
 
 

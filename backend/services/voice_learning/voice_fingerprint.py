@@ -25,10 +25,9 @@ logger = logging.getLogger(__name__)
 
 class VoiceProvider(str, Enum):
     """Available TTS providers."""
-    GOOGLE_STUDIO = "google_studio"
-    GOOGLE_NEURAL2 = "google_neural2"
-    EDGE_TTS = "edge_tts"
-    PYTTSX3 = "pyttsx3"
+    SARVAM = "sarvam"
+    BHASHINI = "bhashini"
+    ELEVENLABS = "elevenlabs"
 
 
 @dataclass
@@ -103,8 +102,8 @@ class VoiceFingerprint:
         return cls(
             user_id=data["user_id"],
             fingerprint_id=data.get("fingerprint_id", ""),
-            provider=VoiceProvider(data.get("provider", "google_neural2")),
-            voice_name=data.get("voice_name", "en-US-Neural2-F"),
+            provider=VoiceProvider(data.get("provider", "sarvam")),
+            voice_name=data.get("voice_name", "anushka"),
             language=data.get("language", "en"),
             voice_type=data.get("voice_type", "friendly"),
             speaking_rate=data.get("speaking_rate", 0.95),

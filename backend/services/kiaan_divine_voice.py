@@ -2296,7 +2296,7 @@ Speak soul to soul. Let the divine flow through your words."""
         - StyleTTS2 (Korea) - Expressive emotional synthesis
         - Piper (France) - Low-latency local TTS
         - Bark (USA) - Generative audio
-        - Plus fallbacks to edge-tts and pyttsx3
+        - Plus fallbacks to Bhashini AI and ElevenLabs
 
         Args:
             text: Text to synthesize

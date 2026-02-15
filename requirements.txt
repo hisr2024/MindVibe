@@ -66,12 +66,9 @@ psutil>=5.9.0,<8.0.0
 # HuggingFace Hub for model downloads
 huggingface-hub>=0.21.0
 
-# --- Local TTS (Text-to-Speech) ---
-# pyttsx3 for fully offline TTS
-pyttsx3>=2.90
-
-# edge-tts for Microsoft neural voices
-edge-tts>=6.1.0
+# --- TTS (Text-to-Speech) ---
+# Sarvam AI Bulbul + Bhashini AI + ElevenLabs (API-based, no local deps)
+# Audio processing deps below handle WAV/MP3 conversion
 
 # --- Local STT (Speech-to-Text) ---
 # faster-whisper for local Whisper inference (optional, requires build)

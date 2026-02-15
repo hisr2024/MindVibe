@@ -1,9 +1,9 @@
 """Companion Premium Voice Service - Best Natural Human Voices
 
 World-class voice synthesis for KIAAN best friend companion.
-Uses the most natural-sounding voices available.
+Uses only the best AI voice providers.
 
-Voice Provider Chain (highest quality → lowest):
+Voice Provider Chain (highest quality first):
 ┌──────────────────────────────────────────────────────────────┐
 │  1. ElevenLabs (10/10) - Most human-like voices ever         │
 │     → Requires ELEVENLABS_API_KEY                            │
@@ -11,13 +11,10 @@ Voice Provider Chain (highest quality → lowest):
 │  2. Sarvam AI Bulbul (9.5/10) - Best Indian language voices  │
 │     → Uses SARVAM_API_KEY, activated for Indian languages    │
 │     → Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, etc. │
-│  3. OpenAI TTS HD (9.5/10) - Nova, Shimmer, Alloy voices    │
-│     → Uses existing OPENAI_API_KEY                           │
-│  4. Google Cloud Neural2/Studio (9/10)                       │
-│     → Requires GOOGLE_APPLICATION_CREDENTIALS                │
-│  5. Edge TTS - Microsoft Neural (8.5/10)                     │
-│     → Free, no API key needed                                │
-│  6. Browser SpeechSynthesis (5/10) - ultimate fallback       │
+│  3. Bhashini AI (9/10) - Government of India, 22 languages   │
+│     → Uses BHASHINI_USER_ID and BHASHINI_API_KEY             │
+│     → Native pronunciation for all scheduled Indian langs    │
+│  4. Browser SpeechSynthesis (5/10) - ultimate fallback       │
 │                                                              │
 │  Pronunciation Engine:                                       │
 │  - Sanskrit/spiritual term IPA phoneme dictionary            │
@@ -64,6 +61,19 @@ except ImportError:
     ELEVENLABS_SERVICE_AVAILABLE = False
     logger.debug("ElevenLabs dedicated service not available (optional)")
 
+# Import Bhashini AI service for Indian language voice synthesis
+try:
+    from backend.services.bhashini_tts_service import (
+        is_bhashini_available as _bh_available,
+        synthesize_bhashini_tts,
+        get_bhashini_health_status,
+        is_bhashini_supported_language,
+    )
+    BHASHINI_SERVICE_AVAILABLE = True
+except ImportError:
+    BHASHINI_SERVICE_AVAILABLE = False
+    logger.debug("Bhashini AI service not available (optional)")
+
 
 # ─── Emotion-to-Prosody Mapping ──────────────────────────────────────────
 
@@ -76,7 +86,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.4,
         "breathing": True,
         "warmth": "high",
-        "openai_speed": 0.85,
         "description": "Slow, soft, grounding - like a warm blanket for anxiety",
     },
     "sad": {
@@ -87,7 +96,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.3,
         "breathing": False,
         "warmth": "very_high",
-        "openai_speed": 0.88,
         "description": "Gentle, warm, tender - sitting with you in the dark",
     },
     "angry": {
@@ -98,7 +106,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.2,
         "breathing": False,
         "warmth": "medium",
-        "openai_speed": 0.92,
         "description": "Measured, deep, steady - an anchor in the storm",
     },
     "confused": {
@@ -109,7 +116,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.1,
         "breathing": False,
         "warmth": "medium",
-        "openai_speed": 0.95,
         "description": "Clear, encouraging, patient - untangling with you",
     },
     "lonely": {
@@ -120,7 +126,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.3,
         "breathing": False,
         "warmth": "very_high",
-        "openai_speed": 0.87,
         "description": "Intimate, close, present - I'm right here",
     },
     "hopeful": {
@@ -131,7 +136,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.0,
         "breathing": False,
         "warmth": "high",
-        "openai_speed": 1.0,
         "description": "Bright, uplifting, energized - celebrating with you",
     },
     "peaceful": {
@@ -142,7 +146,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.5,
         "breathing": True,
         "warmth": "very_high",
-        "openai_speed": 0.82,
         "description": "Whisper-soft, serene, spacious - basking together",
     },
     "grateful": {
@@ -153,7 +156,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.1,
         "breathing": False,
         "warmth": "high",
-        "openai_speed": 0.95,
         "description": "Warm, genuine, heartfelt - sharing your joy",
     },
     "overwhelmed": {
@@ -164,7 +166,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.6,
         "breathing": True,
         "warmth": "very_high",
-        "openai_speed": 0.80,
         "description": "Ultra-slow, spacious, grounding - one breath at a time",
     },
     "excited": {
@@ -175,7 +176,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 0.9,
         "breathing": False,
         "warmth": "high",
-        "openai_speed": 1.05,
         "description": "Energetic, bright, matching your enthusiasm",
     },
     "neutral": {
@@ -186,7 +186,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.0,
         "breathing": False,
         "warmth": "medium",
-        "openai_speed": 0.95,
         "description": "Natural, conversational, warm default",
     },
     # ─── New mood profiles (Phase 1 mood expansion) ──────────────
@@ -198,7 +197,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.4,
         "breathing": False,
         "warmth": "very_high",
-        "openai_speed": 0.86,
         "description": "Tender, gentle, protective — wrapping you in care",
     },
     "jealous": {
@@ -209,7 +207,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.1,
         "breathing": False,
         "warmth": "medium",
-        "openai_speed": 0.90,
         "description": "Understanding, non-judgmental — sitting with the discomfort",
     },
     "guilty": {
@@ -220,7 +217,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.3,
         "breathing": False,
         "warmth": "high",
-        "openai_speed": 0.88,
         "description": "Compassionate, forgiving — guilt is heavy, let me help carry it",
     },
     "fearful": {
@@ -231,7 +227,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.5,
         "breathing": True,
         "warmth": "very_high",
-        "openai_speed": 0.82,
         "description": "Safe, grounding, steady — I am your anchor in the storm",
     },
     "frustrated": {
@@ -242,7 +237,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.2,
         "breathing": False,
         "warmth": "medium",
-        "openai_speed": 0.91,
         "description": "Patient, validating, steady — I hear you, this is real",
     },
     "stressed": {
@@ -253,7 +247,6 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "pause_multiplier": 1.5,
         "breathing": True,
         "warmth": "very_high",
-        "openai_speed": 0.80,
         "description": "Ultra-calm, spacious, decompressing — let the pressure go",
     },
 }
@@ -267,13 +260,9 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "name": "Aura",
         "gender": "female",
         "style": "nurturing",
-        "openai_voice": "shimmer",
-        "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "EXAVITQu4vr4xnSDxMaL",  # Sarah
         "elevenlabs_model": "eleven_multilingual_v2",
         "sarvam_speaker": "meera",
-        "google_voice": "en-IN-Neural2-A",
-        "edge_voice": "en-IN-NeerjaNeural",
         "description": "Primary Sarvam AI companion voice tuned for emotionally warm Indian conversations.",
         "default_speed": 0.94,
         "default_pitch": 0.5,
@@ -283,13 +272,9 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "name": "Rishi",
         "gender": "male",
         "style": "sacred",
-        "openai_voice": "onyx",
-        "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "pNInz6obpgDQGcFmaJgB",  # Adam
         "elevenlabs_model": "eleven_multilingual_v2",
         "sarvam_speaker": "arvind",
-        "google_voice": "hi-IN-Neural2-B",
-        "edge_voice": "hi-IN-PrabhatNeural",
         "description": "Grounded Sarvam AI narration voice for Sanskrit, Gita guidance, and deep reflective sessions.",
         "default_speed": 0.88,
         "default_pitch": -0.6,
@@ -299,13 +284,9 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "name": "Nova",
         "gender": "female",
         "style": "conversational",
-        "openai_voice": "nova",
-        "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "21m00Tcm4TlvDq8ikWAM",  # Rachel
         "elevenlabs_model": "eleven_multilingual_v2",
         "sarvam_speaker": "pavithra",
-        "google_voice": "en-US-Neural2-F",
-        "edge_voice": "en-US-JennyNeural",
         "description": "Ultra-natural ElevenLabs-inspired global companion voice for fluent daily support.",
         "default_speed": 0.95,
         "default_pitch": 0.3,
@@ -315,17 +296,37 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "name": "Orion",
         "gender": "male",
         "style": "narration",
-        "openai_voice": "onyx",
-        "openai_model": "tts-1-hd",
         "elevenlabs_voice_id": "pNInz6obpgDQGcFmaJgB",  # Adam
         "elevenlabs_model": "eleven_multilingual_v2",
         "sarvam_speaker": "arvind",
-        "google_voice": "en-IN-Neural2-B",
-        "edge_voice": "en-IN-PrabhatNeural",
         "description": "Studio-grade ElevenLabs-inspired mentor voice for storytelling and high-clarity guidance.",
         "default_speed": 0.92,
         "default_pitch": -1.0,
         "warmth_boost": 0.08,
+    },
+    "bhashini-devi": {
+        "name": "Devi",
+        "gender": "female",
+        "style": "warm",
+        "elevenlabs_voice_id": None,
+        "elevenlabs_model": None,
+        "sarvam_speaker": None,
+        "description": "Warm, nurturing voice from India's Bhashini AI platform. Authentic pronunciation across 22 Indian languages.",
+        "default_speed": 0.93,
+        "default_pitch": 0.3,
+        "warmth_boost": 0.1,
+    },
+    "bhashini-arya": {
+        "name": "Arya",
+        "gender": "male",
+        "style": "deep",
+        "elevenlabs_voice_id": None,
+        "elevenlabs_model": None,
+        "sarvam_speaker": None,
+        "description": "Deep, resonant male voice from Bhashini AI. Authority and wisdom with authentic Indian intonation.",
+        "default_speed": 0.88,
+        "default_pitch": -0.8,
+        "warmth_boost": 0.06,
     },
 }
 
@@ -369,45 +370,6 @@ BREATH_INSERTIONS = [
 ]
 
 
-# ─── Language-to-Edge-TTS Voice Mapping ──────────────────────────────────
-# When the user selects a non-English language, override the Edge TTS voice
-# with the best available neural voice for that language.
-LANGUAGE_EDGE_VOICES: dict[str, dict[str, str]] = {
-    "hi": {"female": "hi-IN-SwaraNeural", "male": "hi-IN-MadhurNeural"},
-    "sa": {"female": "hi-IN-SwaraNeural", "male": "hi-IN-MadhurNeural"},  # Sanskrit uses Hindi voice (closest)
-    "ta": {"female": "ta-IN-PallaviNeural", "male": "ta-IN-ValluvarNeural"},
-    "te": {"female": "te-IN-ShrutiNeural", "male": "te-IN-MohanNeural"},
-    "bn": {"female": "bn-IN-TanishaaNeural", "male": "bn-IN-BashkarNeural"},
-    "mr": {"female": "mr-IN-AarohiNeural", "male": "mr-IN-ManoharNeural"},
-    "gu": {"female": "gu-IN-DhwaniNeural", "male": "gu-IN-NiranjanNeural"},
-    "kn": {"female": "kn-IN-SapnaNeural", "male": "kn-IN-GaganNeural"},
-    "ml": {"female": "ml-IN-SobhanaNeural", "male": "ml-IN-MidhunNeural"},
-    "pa": {"female": "pa-IN-OjasNeural", "male": "pa-IN-OjasNeural"},  # Edge TTS has limited Punjabi
-    "es": {"female": "es-ES-ElviraNeural", "male": "es-ES-AlvaroNeural"},
-    "fr": {"female": "fr-FR-DeniseNeural", "male": "fr-FR-HenriNeural"},
-    "de": {"female": "de-DE-KatjaNeural", "male": "de-DE-ConradNeural"},
-    "pt": {"female": "pt-BR-FranciscaNeural", "male": "pt-BR-AntonioNeural"},
-    "ja": {"female": "ja-JP-NanamiNeural", "male": "ja-JP-KeitaNeural"},
-    "zh": {"female": "zh-CN-XiaoxiaoNeural", "male": "zh-CN-YunxiNeural"},
-}
-
-# Language-to-Google-TTS voice mapping for non-English languages
-LANGUAGE_GOOGLE_VOICES: dict[str, dict[str, str]] = {
-    "hi": {"female": "hi-IN-Neural2-A", "male": "hi-IN-Neural2-B"},
-    "ta": {"female": "ta-IN-Neural2-A", "male": "ta-IN-Neural2-B"},
-    "te": {"female": "te-IN-Neural2-A", "male": "te-IN-Neural2-B"},
-    "bn": {"female": "bn-IN-Neural2-A", "male": "bn-IN-Neural2-B"},
-    "mr": {"female": "mr-IN-Neural2-A", "male": "mr-IN-Neural2-B"},
-    "gu": {"female": "gu-IN-Neural2-A", "male": "gu-IN-Neural2-B"},
-    "kn": {"female": "kn-IN-Neural2-A", "male": "kn-IN-Neural2-B"},
-    "ml": {"female": "ml-IN-Neural2-A", "male": "ml-IN-Neural2-B"},
-    "es": {"female": "es-ES-Neural2-A", "male": "es-ES-Neural2-B"},
-    "fr": {"female": "fr-FR-Neural2-A", "male": "fr-FR-Neural2-B"},
-    "de": {"female": "de-DE-Neural2-A", "male": "de-DE-Neural2-B"},
-    "pt": {"female": "pt-BR-Neural2-A", "male": "pt-BR-Neural2-B"},
-    "ja": {"female": "ja-JP-Neural2-B", "male": "ja-JP-Neural2-C"},
-    "zh": {"female": "cmn-CN-Neural2-A", "male": "cmn-CN-Neural2-B"},
-}
 
 
 def build_companion_ssml(
@@ -416,29 +378,13 @@ def build_companion_ssml(
     voice_id: str = "sarvam-aura",
     language: str = "en",
 ) -> dict[str, Any]:
-    """Build SSML for companion voice synthesis with emotion-adaptive prosody.
-
-    When language != 'en', overrides voice selection with language-appropriate
-    neural voices from Edge TTS and Google Cloud TTS.
-    """
+    """Build SSML for companion voice synthesis with emotion-adaptive prosody."""
     profile = EMOTION_VOICE_PROFILES.get(mood, EMOTION_VOICE_PROFILES["neutral"])
     voice = COMPANION_VOICES.get(voice_id, COMPANION_VOICES["sarvam-aura"])
 
     speed = profile["rate_value"] * voice["default_speed"]
     pitch = float(profile["pitch"].replace("st", "")) + voice["default_pitch"]
     pause_mult = profile["pause_multiplier"]
-
-    # Override Edge TTS and Google voices when non-English language is selected
-    edge_voice = voice["edge_voice"]
-    google_voice = voice["google_voice"]
-    if language != "en" and language in LANGUAGE_EDGE_VOICES:
-        gender = voice.get("gender", "female")
-        lang_edges = LANGUAGE_EDGE_VOICES[language]
-        edge_voice = lang_edges.get(gender, lang_edges.get("female", edge_voice))
-        if language in LANGUAGE_GOOGLE_VOICES:
-            lang_google = LANGUAGE_GOOGLE_VOICES[language]
-            google_voice = lang_google.get(gender, lang_google.get("female", google_voice))
-        logger.info(f"Language override: {language} → Edge: {edge_voice}, Google: {google_voice}")
 
     ssml_text = _escape_ssml(text)
 
@@ -480,20 +426,16 @@ def build_companion_ssml(
 
     return {
         "ssml": ssml,
-        "voice_name": google_voice,
-        "edge_voice": edge_voice,
-        "openai_voice": voice["openai_voice"],
-        "openai_model": voice["openai_model"],
         "elevenlabs_voice_id": voice.get("elevenlabs_voice_id"),
         "elevenlabs_model": voice.get("elevenlabs_model"),
         "sarvam_speaker": voice.get("sarvam_speaker"),
         "speed": speed,
         "pitch": pitch,
-        "openai_speed": profile.get("openai_speed", 1.0),
         "mood_profile": profile,
         "voice_persona": voice["name"],
         "voice_id": voice_id,
         "language": language,
+        "gender": voice.get("gender", "female"),
     }
 
 
@@ -518,10 +460,8 @@ async def synthesize_companion_voice(
     Provider chain (tries in order, falls through on failure):
     1. ElevenLabs (dedicated service) - Most human-like voices
     2. Sarvam AI Bulbul - Best Indian language voices
-    3. OpenAI TTS HD - Extremely natural
-    4. Google Cloud Neural2 - High quality neural voices
-    5. Edge TTS (Microsoft Neural) - Free, decent quality
-    6. Browser fallback - Returns config for frontend SpeechSynthesis
+    3. Bhashini AI - Government of India, 22 Indian languages
+    4. Browser fallback - Returns config for frontend SpeechSynthesis
 
     Pronunciation Pipeline:
     - Sanskrit/spiritual terms receive IPA phoneme correction
@@ -587,7 +527,6 @@ async def synthesize_companion_voice(
         }
 
     # 2. Try Sarvam AI Bulbul (best Indian language voices)
-    #    Activated for Indian languages where Sarvam produces superior quality.
     audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
     if audio:
         return {
@@ -600,46 +539,20 @@ async def synthesize_companion_voice(
             "fallback_to_browser": False,
         }
 
-    # 3. Try OpenAI TTS HD (extremely natural, already have API key)
-    audio = await _try_openai_tts(plain_text, ssml_data)
+    # 3. Try Bhashini AI (Government of India, 22 Indian languages)
+    audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
     if audio:
         return {
             "audio": audio,
-            "content_type": "audio/mpeg",
+            "content_type": "audio/wav",
             "ssml": ssml_data["ssml"],
-            "provider": "openai_tts_hd",
-            "voice_persona": ssml_data["voice_persona"],
-            "quality_score": 9.5,
-            "fallback_to_browser": False,
-        }
-
-    # 4. Try Google Cloud TTS
-    audio = await _try_google_tts(ssml_data)
-    if audio:
-        return {
-            "audio": audio,
-            "content_type": "audio/mpeg",
-            "ssml": ssml_data["ssml"],
-            "provider": "google_cloud_neural2",
+            "provider": "bhashini_ai",
             "voice_persona": ssml_data["voice_persona"],
             "quality_score": 9.0,
             "fallback_to_browser": False,
         }
 
-    # 5. Try Edge TTS
-    audio = await _try_edge_tts(ssml_data)
-    if audio:
-        return {
-            "audio": audio,
-            "content_type": "audio/mpeg",
-            "ssml": ssml_data["ssml"],
-            "provider": "edge_tts_neural",
-            "voice_persona": ssml_data["voice_persona"],
-            "quality_score": 8.5,
-            "fallback_to_browser": False,
-        }
-
-    # 6. Return config for browser-side synthesis
+    # 4. Return config for browser-side synthesis
     return {
         "audio": None,
         "content_type": None,
@@ -674,8 +587,6 @@ async def _try_elevenlabs_tts(text: str, ssml_data: dict) -> bytes | None:
         import httpx
 
         model_id = ssml_data.get("elevenlabs_model", "eleven_multilingual_v2")
-        speed = ssml_data.get("openai_speed", 1.0)
-
         # Divine voice quality: tune stability/similarity per emotion
         mood_profile = ssml_data.get("mood_profile", {})
         warmth = mood_profile.get("warmth", "medium")
@@ -778,108 +689,45 @@ async def _try_sarvam_tts(
     return None
 
 
-async def _try_openai_tts(text: str, ssml_data: dict) -> bytes | None:
-    """Attempt synthesis via OpenAI TTS HD - extremely natural voices.
+async def _try_bhashini_tts(
+    text: str, ssml_data: dict, mood: str, voice_id: str
+) -> bytes | None:
+    """Attempt synthesis via Bhashini AI - Government of India platform.
 
-    OpenAI TTS voices (nova, shimmer, alloy, onyx, echo, fable) are among
-    the most natural-sounding synthetic voices available. Uses the existing
-    OPENAI_API_KEY already configured for the chat AI.
-
-    tts-1-hd model provides the highest quality output.
+    Bhashini provides high-quality TTS for all 22 scheduled Indian languages
+    with authentic native pronunciation. Free and open API.
     """
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key:
+    if not BHASHINI_SERVICE_AVAILABLE:
         return None
 
+    language = ssml_data.get("language", "en")
+
     try:
-        import openai
+        if not _bh_available():
+            return None
 
-        client = openai.AsyncOpenAI(api_key=api_key)
+        if not is_bhashini_supported_language(language):
+            logger.debug(f"Bhashini TTS: Skipping for unsupported language '{language}'")
+            return None
 
-        voice_name = ssml_data.get("openai_voice", "nova")
-        model = ssml_data.get("openai_model", "tts-1-hd")
-        speed = ssml_data.get("openai_speed", 1.0)
-
-        # Clamp speed to OpenAI's supported range (0.25 - 4.0)
-        speed = max(0.25, min(4.0, speed))
-
-        response = await client.audio.speech.create(
-            model=model,
-            voice=voice_name,
-            input=text,
-            speed=speed,
-            response_format="mp3",
+        audio = await synthesize_bhashini_tts(
+            text=text,
+            language=language,
+            voice_id=voice_id,
+            mood=mood,
         )
 
-        audio = response.content
         if audio and len(audio) > 100:
             logger.info(
-                f"OpenAI TTS success: voice={voice_name}, model={model}, "
-                f"speed={speed:.2f}, persona={ssml_data['voice_persona']}, "
-                f"size={len(audio)} bytes"
-            )
-            return audio
-
-    except ImportError:
-        logger.info("OpenAI TTS: openai package not available")
-    except Exception as e:
-        logger.warning(f"OpenAI TTS failed: {e}")
-    return None
-
-
-async def _try_google_tts(ssml_data: dict) -> bytes | None:
-    """Attempt synthesis via Google Cloud TTS (Neural2/Studio voices)."""
-    try:
-        from backend.services.tts_service import TTSService
-        tts = TTSService()
-
-        audio = await tts.synthesize_divine_ssml(
-            ssml_text=ssml_data["ssml"],
-            language=ssml_data["language"],
-            voice_type="friendly",
-            speed=ssml_data["speed"],
-            pitch=ssml_data["pitch"],
-        )
-        if audio:
-            logger.info(
-                f"Google TTS success: voice={ssml_data['voice_name']}, "
-                f"persona={ssml_data['voice_persona']}"
-            )
-            return audio
-    except Exception as e:
-        logger.warning(f"Google TTS failed: {e}")
-    return None
-
-
-async def _try_edge_tts(ssml_data: dict) -> bytes | None:
-    """Attempt synthesis via Edge TTS (Microsoft Neural voices)."""
-    try:
-        import edge_tts
-
-        voice_name = ssml_data["edge_voice"]
-        rate_str = f"{int((ssml_data['speed'] - 1.0) * 100):+d}%"
-
-        communicate = edge_tts.Communicate(
-            text=_strip_ssml_tags(ssml_data["ssml"]),
-            voice=voice_name,
-            rate=rate_str,
-        )
-
-        audio_chunks = []
-        async for chunk in communicate.stream():
-            if chunk["type"] == "audio":
-                audio_chunks.append(chunk["data"])
-
-        if audio_chunks:
-            audio = b"".join(audio_chunks)
-            logger.info(
-                f"Edge TTS success: voice={voice_name}, "
+                f"Bhashini TTS success: lang={language}, "
                 f"persona={ssml_data['voice_persona']}, "
                 f"size={len(audio)} bytes"
             )
             return audio
+
     except Exception as e:
-        logger.warning(f"Edge TTS failed: {e}")
+        logger.warning(f"Bhashini TTS failed: {e}")
+
     return None
 
 
@@ -951,11 +799,22 @@ def get_elevenlabs_voice_status() -> dict[str, Any]:
     return {"provider": "elevenlabs", "available": False}
 
 
+def get_bhashini_voice_status() -> dict[str, Any]:
+    """Get Bhashini AI TTS integration status for health checks."""
+    if BHASHINI_SERVICE_AVAILABLE:
+        try:
+            return get_bhashini_health_status()
+        except Exception:
+            pass
+    return {"provider": "bhashini_ai", "available": False}
+
+
 def get_all_voice_providers_status() -> dict[str, Any]:
     """Get combined health status for all voice providers."""
     return {
         "elevenlabs": get_elevenlabs_voice_status(),
         "sarvam_ai": get_sarvam_voice_status(),
+        "bhashini_ai": get_bhashini_voice_status(),
         "pronunciation_engine": {
             "available": PRONUNCIATION_ENGINE_AVAILABLE,
             "features": [

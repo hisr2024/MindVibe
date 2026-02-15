@@ -83,7 +83,11 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
       },
       onError: (err: string) => {
         setError(err)
-        setIsActive(false)
+        // Only mark inactive for fatal errors (permission denied, not supported).
+        // Recoverable errors are handled internally by the detector with auto-retry.
+        if (err.includes('permission') || err.includes('not supported') || err.includes('not found')) {
+          setIsActive(false)
+        }
         onErrorRef.current?.(err)
       },
       onListeningStateChange: (state: WakeWordListeningState) => {

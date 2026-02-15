@@ -905,9 +905,11 @@ async def companion_health():
     voice_providers = []
     if os.getenv("ELEVENLABS_API_KEY", "").strip():
         voice_providers.append("elevenlabs")
-    if os.getenv("OPENAI_API_KEY", "").strip():
-        voice_providers.append("openai_tts_hd")
-    voice_providers.extend(["google_neural2", "edge_tts", "browser_fallback"])
+    if os.getenv("SARVAM_API_KEY", "").strip():
+        voice_providers.append("sarvam_ai_bulbul")
+    if os.getenv("BHASHINI_API_KEY", "").strip():
+        voice_providers.append("bhashini_ai")
+    voice_providers.append("browser_fallback")
 
     # Phase 2: Report verse corpus status
     try:

@@ -1,18 +1,18 @@
 /**
  * Voice Catalog - Premium Named Speakers
  *
- * ElevenLabs-inspired voice catalog with named speakers, each with distinct
- * personality, language support, and TTS characteristics. Maps to both
- * backend (ElevenLabs / Sarvam AI Bulbul / OpenAI / Google Neural2) and
- * browser SpeechSynthesis fallback.
+ * Premium voice catalog with named speakers powered by the best AI voice
+ * providers. Each speaker has distinct personality, language support,
+ * and TTS characteristics.
  *
  * Provider Quality Chain:
- * 1. ElevenLabs (10/10) - Most human-like voices
+ * 1. ElevenLabs (10/10) - Most human-like international voices
  * 2. Sarvam AI Bulbul (9.5/10) - Best Indian language voices
- * 3. OpenAI TTS HD (9.5/10) - Nova, Shimmer, Alloy
- * 4. Google Cloud Neural2 (9/10) - Premium neural voices
- * 5. Edge TTS (8.5/10) - Microsoft Neural (free)
- * 6. Browser SpeechSynthesis (5/10) - Ultimate fallback
+ * 3. Bhashini AI (9/10) - Government of India, 22 scheduled languages
+ *
+ * Fallback:
+ * Indian Languages: Sarvam AI -> Bhashini AI -> ElevenLabs
+ * International: ElevenLabs -> Sarvam AI
  */
 
 import type { VoiceGender } from '@/utils/speech/synthesis'
@@ -30,7 +30,7 @@ export type VoiceLanguage =
 export type VoiceCategory = 'conversational' | 'meditation' | 'narration' | 'sacred' | 'energetic'
 
 /** TTS provider that powers this voice */
-export type VoiceProvider = 'elevenlabs' | 'sarvam' | 'openai' | 'google' | 'edge' | 'browser'
+export type VoiceProvider = 'elevenlabs' | 'sarvam' | 'bhashini'
 
 export interface VoiceSpeaker {
   id: string
@@ -43,13 +43,15 @@ export interface VoiceSpeaker {
   tags: string[]
   /** Preview text spoken when user taps preview */
   previewText: string
-  /** TTS settings for backend (divine voice service) */
+  /** TTS settings for backend */
   backendConfig: {
     voiceType: string
     speed: number
     language: string
     /** Sarvam AI speaker ID (for Indian language priority routing) */
     sarvamSpeaker?: string
+    /** Voice ID sent to the backend TTS service */
+    voiceId?: string
   }
   /** Browser SpeechSynthesis fallback settings */
   browserConfig: {
@@ -127,7 +129,7 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     category: 'conversational',
     tags: ['natural', 'warm', 'indian', 'sarvam', 'companion'],
     previewText: 'I am here with you. Let us slow down, breathe together, and take one clear step forward with calm confidence.',
-    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'en', sarvamSpeaker: 'meera' },
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'en', sarvamSpeaker: 'meera', voiceId: 'sarvam-aura' },
     browserConfig: {
       voicePatterns: [/Neerja/i, /Heera/i, /Google.*English.*India/i, /Google.*Hindi/i, /Jenny/i],
       rate: 0.93,
@@ -149,7 +151,7 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     category: 'sacred',
     tags: ['natural', 'sacred', 'deep', 'sarvam', 'gita'],
     previewText: 'You are not alone in this journey. The wisdom you seek is already within you, waiting for a quiet moment to be heard.',
-    backendConfig: { voiceType: 'chanting', speed: 0.86, language: 'hi', sarvamSpeaker: 'arvind' },
+    backendConfig: { voiceType: 'chanting', speed: 0.86, language: 'hi', sarvamSpeaker: 'arvind', voiceId: 'sarvam-rishi' },
     browserConfig: {
       voicePatterns: [/Prabhat/i, /Ravi/i, /Google.*Hindi/i, /Daniel/i],
       rate: 0.86,
@@ -171,7 +173,7 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     category: 'conversational',
     tags: ['natural', 'global', 'elevenlabs', 'empathetic'],
     previewText: 'Wherever you are in the world, this moment matters. We can move through it with clarity, kindness, and strength.',
-    backendConfig: { voiceType: 'friendly', speed: 0.95, language: 'en' },
+    backendConfig: { voiceType: 'friendly', speed: 0.95, language: 'en', voiceId: 'elevenlabs-nova' },
     browserConfig: {
       voicePatterns: [/Jenny/i, /Aria/i, /Google.*English/i, /Samantha/i],
       rate: 0.95,
@@ -193,7 +195,7 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     category: 'narration',
     tags: ['natural', 'mentor', 'elevenlabs', 'storytelling'],
     previewText: 'Take a steady breath. Every challenge can become direction when you respond from awareness instead of fear.',
-    backendConfig: { voiceType: 'wisdom', speed: 0.9, language: 'en' },
+    backendConfig: { voiceType: 'wisdom', speed: 0.9, language: 'en', voiceId: 'elevenlabs-orion' },
     browserConfig: {
       voicePatterns: [/Guy/i, /Daniel/i, /Google.*Male/i, /Ravi/i],
       rate: 0.9,
@@ -204,6 +206,50 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     warmth: 0.84,
     clarity: 0.97,
     poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'bhashini-devi',
+    name: 'Devi',
+    description: 'Warm, nurturing voice from India\'s national Bhashini AI platform. Authentic pronunciation across all 22 scheduled Indian languages.',
+    gender: 'female',
+    languages: ['hi', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa', 'sa', 'en-IN', 'en'],
+    primaryLanguage: 'hi',
+    category: 'conversational',
+    tags: ['natural', 'warm', 'indian', 'bhashini', 'government'],
+    previewText: 'Aap akele nahin hain. Main yahan hoon, aapke saath. Ek gehri saans lein aur shaanti mehsoos karein.',
+    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'hi', voiceId: 'bhashini-devi' },
+    browserConfig: {
+      voicePatterns: [/Neerja/i, /Heera/i, /Google.*Hindi/i, /Jenny/i],
+      rate: 0.93,
+      pitch: 1.02,
+    },
+    premium: false,
+    accent: 'Indian',
+    warmth: 0.95,
+    clarity: 0.90,
+    poweredBy: 'bhashini',
+  },
+  {
+    id: 'bhashini-arya',
+    name: 'Arya',
+    description: 'Deep, resonant male voice from Bhashini AI. Carries authority and wisdom with authentic Indian intonation for sacred texts.',
+    gender: 'male',
+    languages: ['hi', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa', 'sa', 'en-IN', 'en'],
+    primaryLanguage: 'hi',
+    category: 'sacred',
+    tags: ['natural', 'deep', 'indian', 'bhashini', 'wisdom'],
+    previewText: 'Karmanye vadhikaraste, Ma phaleshu kadachana. You have the right to action alone, never to its fruits.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.88, language: 'hi', voiceId: 'bhashini-arya' },
+    browserConfig: {
+      voicePatterns: [/Prabhat/i, /Ravi/i, /Google.*Hindi/i, /Daniel/i],
+      rate: 0.88,
+      pitch: 0.85,
+    },
+    premium: false,
+    accent: 'Indian',
+    warmth: 0.88,
+    clarity: 0.93,
+    poweredBy: 'bhashini',
   },
 ]
 
@@ -298,6 +344,20 @@ export function getElevenLabsVoices(): VoiceSpeaker[] {
   return VOICE_SPEAKERS.filter(v => v.poweredBy === 'elevenlabs')
 }
 
+/** Get voices powered by Bhashini AI for Indian language support */
+export function getBhashiniVoices(): VoiceSpeaker[] {
+  return VOICE_SPEAKERS.filter(v => v.poweredBy === 'bhashini')
+}
+
+/** Bhashini AI priority languages (Government of India platform) */
+export const BHASHINI_PRIORITY_LANGUAGES: VoiceLanguage[] = [
+  'hi', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa', 'sa',
+]
+
+export function isBhashiniPriorityLanguage(lang: VoiceLanguage): boolean {
+  return BHASHINI_PRIORITY_LANGUAGES.includes(lang)
+}
+
 /** ElevenLabs priority languages (best quality from ElevenLabs) */
 export const ELEVENLABS_PRIORITY_LANGUAGES: VoiceLanguage[] = [
   'en', 'es', 'fr', 'de', 'pt', 'ja', 'zh', 'ar',
@@ -313,10 +373,12 @@ export function getBestVoiceForLanguage(lang: VoiceLanguage): VoiceSpeaker {
 
   if (voicesForLang.length === 0) return VOICE_SPEAKERS[0]
 
-  // For Sarvam priority languages (Indian), prefer Sarvam-powered voices
+  // For Sarvam priority languages (Indian), prefer Sarvam -> Bhashini -> ElevenLabs
   if (isSarvamPriorityLanguage(lang)) {
     const sarvamVoice = voicesForLang.find(v => v.poweredBy === 'sarvam')
     if (sarvamVoice) return sarvamVoice
+    const bhashiniVoice = voicesForLang.find(v => v.poweredBy === 'bhashini')
+    if (bhashiniVoice) return bhashiniVoice
   }
 
   // For ElevenLabs priority languages (international), prefer ElevenLabs
@@ -339,14 +401,8 @@ export function getProviderDisplayInfo(provider?: VoiceProvider): {
       return { label: 'ElevenLabs HD', color: 'text-amber-400', quality: '10/10' }
     case 'sarvam':
       return { label: 'Sarvam AI', color: 'text-emerald-400', quality: '9.5/10' }
-    case 'openai':
-      return { label: 'OpenAI HD', color: 'text-sky-400', quality: '9.5/10' }
-    case 'google':
-      return { label: 'Google Neural', color: 'text-blue-400', quality: '9/10' }
-    case 'edge':
-      return { label: 'Neural', color: 'text-violet-400', quality: '8.5/10' }
-    case 'browser':
-      return { label: 'Local', color: 'text-gray-400', quality: '5/10' }
+    case 'bhashini':
+      return { label: 'Bhashini AI', color: 'text-sky-400', quality: '9/10' }
     default:
       return { label: 'Voice', color: 'text-white/40', quality: '' }
   }
