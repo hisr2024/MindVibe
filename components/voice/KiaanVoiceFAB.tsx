@@ -196,7 +196,7 @@ export default function KiaanVoiceFAB() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-24 right-4 z-[150] max-w-xs w-72"
+            className="fixed bottom-[calc(156px+env(safe-area-inset-bottom,0px))] md:bottom-24 right-4 z-[150] max-w-xs w-72"
           >
             <div className="rounded-2xl border border-orange-500/20 bg-slate-900/95 p-4 backdrop-blur-xl shadow-2xl">
               {/* Transcript */}
@@ -233,7 +233,7 @@ export default function KiaanVoiceFAB() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="fixed bottom-24 right-4 z-[150]"
+            className="fixed bottom-[calc(156px+env(safe-area-inset-bottom,0px))] md:bottom-24 right-4 z-[150]"
           >
             <div className="rounded-xl bg-slate-900/90 px-3 py-2 backdrop-blur-md border border-white/10 max-w-xs">
               <p className="text-xs text-orange-200/70 italic truncate">
@@ -250,7 +250,7 @@ export default function KiaanVoiceFAB() {
         onPointerDown={handleLongPressStart}
         onPointerUp={handleLongPressEnd}
         onPointerCancel={handleLongPressEnd}
-        className="fixed bottom-6 right-4 z-[140] flex items-center justify-center rounded-full shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+        className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-4 z-[140] md:bottom-8 flex items-center justify-center rounded-full shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
         style={{ width: 56, height: 56 }}
         whileTap={{ scale: 0.92 }}
         aria-label={
