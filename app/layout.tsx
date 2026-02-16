@@ -11,6 +11,7 @@ import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordLis
 import KiaanVoiceFAB from '@/components/voice/KiaanVoiceFAB'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
+import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -93,25 +94,26 @@ export default function RootLayout({
             <OverlayRoot />
             <ServiceWorkerRegistration />
             <OfflineStatusBanner />
-            {/* Fixed header navigation */}
-            <SiteNav />
-            {/* Main content with proper spacing for fixed header and mobile nav */}
-            <main
-              id="main-content"
-              className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-28 pt-20 sm:gap-8 sm:px-6 sm:pb-20 md:pb-10 lg:px-8 lg:pt-24 mobile-content-area"
-            >
+            {/* Desktop/standard navigation - hidden on /m/* mobile routes to avoid duplication */}
+            <MobileRouteGuard>
+              <SiteNav />
+            </MobileRouteGuard>
+            {/* Content wrapper: full-width for /m/* routes, constrained <main> for desktop */}
+            <MobileContentWrapper>
               {children}
-            </main>
-            {/* Footer - hidden on mobile due to MobileNav */}
-            <div className="hidden md:block">
-              <SiteFooter />
-            </div>
-            {/* Mobile bottom navigation */}
-            <MobileNav />
-            {/* OM floating chat widget - unified for mobile and desktop */}
-            <KiaanFooter />
-            {/* Global voice FAB - tap to talk to KIAAN from any page */}
-            <KiaanVoiceFAB />
+            </MobileContentWrapper>
+            {/* Footer, nav, FABs - hidden on /m/* routes where MobileAppShell handles these */}
+            <MobileRouteGuard>
+              <div className="hidden md:block">
+                <SiteFooter />
+              </div>
+              {/* Mobile bottom navigation (for standard non /m/* routes) */}
+              <MobileNav />
+              {/* OM floating chat widget */}
+              <KiaanFooter />
+              {/* Global voice FAB - tap to talk to KIAAN */}
+              <KiaanVoiceFAB />
+            </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}
             <GlobalWakeWordListener />
           </Providers>

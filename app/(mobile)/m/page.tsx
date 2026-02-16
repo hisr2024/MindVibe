@@ -8,15 +8,13 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
   Sparkles,
   Compass,
   PenLine,
-  Heart,
   Sun,
-  Moon,
   CloudRain,
   Smile,
   Frown,
@@ -25,9 +23,7 @@ import {
   ChevronRight,
   BookOpen,
   Star,
-  Target,
-  TrendingUp,
-  Calendar,
+  Grid3X3,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -81,6 +77,15 @@ const QUICK_ACTIONS = [
     href: '/m/wisdom',
     gradient: 'from-teal-500/20 to-green-500/20',
     iconColor: 'text-teal-400',
+  },
+  {
+    id: 'tools',
+    label: 'All Tools',
+    description: 'Spiritual toolkit',
+    icon: Grid3X3,
+    href: '/m/tools',
+    gradient: 'from-indigo-500/20 to-violet-500/20',
+    iconColor: 'text-indigo-400',
   },
 ]
 
@@ -352,7 +357,7 @@ export default function MobileHomePage() {
         >
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleQuickAction('/m/wisdom/daily')}
+            onClick={() => handleQuickAction('/m/wisdom')}
             className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-teal-500/20"
           >
             <div className="flex items-center gap-3">
