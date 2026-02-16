@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { BookOpen, Globe, ChevronRight, Search } from 'lucide-react'
+import { BookOpen, Globe, ChevronRight, Search, Volume2 } from 'lucide-react'
 import {
   GITA_CHAPTERS_META,
   SUPPORTED_LANGUAGES,
@@ -143,6 +143,25 @@ export default function GitaChaptersPage() {
           onClick={() => setShowLanguageSelector(false)}
         />
       )}
+
+      {/* Divine Voice CTA */}
+      <Link
+        href="/kiaan-vibe/gita/voice"
+        className="group flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20 hover:border-orange-500/40 transition-all"
+      >
+        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+          <Volume2 className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors">
+            Divine Voices
+          </h3>
+          <p className="text-sm text-white/50">
+            Listen to Gita verses with sacred voice in {currentLang.nativeName} and 10+ languages
+          </p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-orange-400 group-hover:translate-x-1 transition-all" />
+      </Link>
 
       {/* Chapters List */}
       <div className="space-y-3">

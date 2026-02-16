@@ -10,8 +10,10 @@ import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Copy, Check, BookOpen, ChevronRight } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronRight, Play, Volume2, Loader2, ListMusic } from 'lucide-react'
 import { getChapter, GITA_CHAPTERS_META, SUPPORTED_LANGUAGES } from '@/lib/kiaan-vibe/gita'
+import { usePlayerStore } from '@/lib/kiaan-vibe/store'
+import { createChapterTracks } from '@/lib/kiaan-vibe/gita-voice-tracks'
 import type { GitaChapter } from '@/lib/kiaan-vibe/types'
 
 interface PageProps {
@@ -27,9 +29,29 @@ export default function ChapterVersesPage({ params }: PageProps) {
   const [chapter, setChapter] = useState<GitaChapter | null>(null)
   const [loading, setLoading] = useState(true)
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null)
+  const [isLoadingChapter, setIsLoadingChapter] = useState(false)
+
+  const { play, setQueue, currentTrack, isPlaying: playerIsPlaying } = usePlayerStore()
 
   const chapterMeta = GITA_CHAPTERS_META.find((c) => c.number === chapterNumber)
   const langInfo = SUPPORTED_LANGUAGES[languageCode] || SUPPORTED_LANGUAGES['en']
+  const isCurrentChapter = currentTrack?.tags?.includes(`chapter-${chapterNumber}`)
+
+  /** Play entire chapter in the KIAAN Vibe Player */
+  const handlePlayChapter = async () => {
+    setIsLoadingChapter(true)
+    try {
+      const tracks = await createChapterTracks(chapterNumber, languageCode, 'divine')
+      if (tracks.length > 0) {
+        setQueue(tracks, 0)
+        await play(tracks[0])
+      }
+    } catch (error) {
+      console.error('[GitaChapter] Play chapter failed:', error)
+    } finally {
+      setIsLoadingChapter(false)
+    }
+  }
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -92,6 +114,47 @@ export default function ChapterVersesPage({ params }: PageProps) {
         <p className="text-white/60">
           {chapterMeta?.name} • {chapterMeta?.verseCount} verses
         </p>
+      </div>
+
+      {/* Play Chapter & Divine Voice Controls */}
+      <div className="flex gap-3">
+        <button
+          onClick={handlePlayChapter}
+          disabled={isLoadingChapter}
+          className={`
+            flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all
+            ${isCurrentChapter && playerIsPlaying
+              ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+              : 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-400 border border-orange-500/30 hover:from-orange-500/30 hover:to-amber-500/30'
+            }
+            ${isLoadingChapter ? 'opacity-80 cursor-wait' : ''}
+          `}
+        >
+          {isLoadingChapter ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Loading...
+            </>
+          ) : isCurrentChapter && playerIsPlaying ? (
+            <>
+              <Volume2 className="w-5 h-5" />
+              Playing in Vibe
+            </>
+          ) : (
+            <>
+              <Play className="w-5 h-5" />
+              Play Chapter
+            </>
+          )}
+        </button>
+
+        <Link
+          href={`/kiaan-vibe/gita/voice`}
+          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all"
+        >
+          <ListMusic className="w-5 h-5" />
+          <span className="hidden sm:inline">Divine Voice</span>
+        </Link>
       </div>
 
       {/* Verses */}
