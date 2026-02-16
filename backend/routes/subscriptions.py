@@ -3,12 +3,15 @@
 Endpoints:
 - GET /api/subscriptions/tiers - List available plans
 - GET /api/subscriptions/current - Get user's current subscription
-- POST /api/subscriptions/checkout - Create Stripe checkout session
+- POST /api/subscriptions/checkout - Create checkout session (Stripe or Razorpay)
 - POST /api/subscriptions/cancel - Cancel subscription
 - POST /api/subscriptions/webhook - Stripe webhook handler
+- POST /api/subscriptions/webhook/razorpay - Razorpay webhook handler
+- POST /api/subscriptions/verify-razorpay-payment - Verify Razorpay payment
 - GET /api/subscriptions/usage - Get usage statistics
 """
 
+import json
 import logging
 from typing import Any
 
@@ -27,6 +30,7 @@ from backend.schemas.subscription import (
     UsageStatsOut,
     CheckoutSessionCreate,
     CheckoutSessionOut,
+    RazorpayPaymentVerification,
     SubscriptionCancelRequest,
 )
 from backend.schemas.cost_calculator import (
@@ -128,40 +132,33 @@ async def create_checkout(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> CheckoutSessionOut:
-    """Create a Stripe checkout session for purchasing a subscription.
-    
+    """Create a checkout session for purchasing a subscription.
+
+    Routes to Stripe (card/paypal) or Razorpay (UPI) based on payment_method.
+
     Args:
-        payload: The checkout session configuration.
-        
+        payload: The checkout session configuration including payment method.
+
     Returns:
-        CheckoutSessionOut: The checkout session URL and ID.
-        
+        CheckoutSessionOut: Provider-agnostic checkout response.
+
     Raises:
-        HTTPException: If Stripe is not configured or checkout creation fails.
+        HTTPException: If payment provider is unavailable or checkout fails.
     """
-    if not is_stripe_configured():
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "error": "payment_unavailable",
-                "message": "Payment processing is not currently available. Please try again later.",
-            },
-        )
-    
     user_id = await get_current_user_id(request)
-    
+
     # Get user from database
     from sqlalchemy import select
     stmt = select(User).where(User.id == user_id)
     result = await db.execute(stmt)
     user = result.scalars().first()
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    
+
     # Cannot checkout for free tier
     if payload.plan_tier == SubscriptionTier.FREE:
         raise HTTPException(
@@ -171,7 +168,27 @@ async def create_checkout(
                 "message": "Cannot purchase the free tier. It is automatically assigned.",
             },
         )
-    
+
+    # Route to the appropriate payment provider
+    if payload.payment_method == "upi":
+        return await _create_razorpay_checkout(db, user, payload)
+    else:
+        return await _create_stripe_checkout(db, user, payload)
+
+
+async def _create_stripe_checkout(
+    db: AsyncSession, user: User, payload: CheckoutSessionCreate,
+) -> CheckoutSessionOut:
+    """Create Stripe checkout session (card or PayPal)."""
+    if not is_stripe_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "payment_unavailable",
+                "message": "Payment processing is not currently available. Please try again later.",
+            },
+        )
+
     try:
         result = await create_checkout_session(
             db,
@@ -180,29 +197,92 @@ async def create_checkout(
             payload.billing_period,
             payload.success_url,
             payload.cancel_url,
+            payment_method=payload.payment_method,
         )
-        
+
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to create checkout session",
             )
-        
+
         return CheckoutSessionOut(
+            provider="stripe",
             checkout_url=result["checkout_url"],
             session_id=result["session_id"],
         )
-        
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Checkout creation failed: {e}")
+        logger.error(f"Stripe checkout creation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create checkout session",
+        )
+
+
+async def _create_razorpay_checkout(
+    db: AsyncSession, user: User, payload: CheckoutSessionCreate,
+) -> CheckoutSessionOut:
+    """Create Razorpay checkout for UPI payments (India, INR only)."""
+    # UPI requires INR currency
+    if payload.currency != "inr":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "invalid_currency",
+                "message": "UPI is only available with INR currency.",
+            },
+        )
+
+    from backend.services.razorpay_service import (
+        create_razorpay_order,
+        is_razorpay_configured,
+    )
+
+    if not is_razorpay_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "upi_unavailable",
+                "message": "UPI payments are not currently available. Please try another payment method.",
+            },
+        )
+
+    try:
+        result = await create_razorpay_order(
+            db, user, payload.plan_tier, payload.billing_period,
+        )
+
+        return CheckoutSessionOut(
+            provider="razorpay",
+            order_id=result["order_id"],
+            razorpay_key_id=result["razorpay_key_id"],
+            amount=result["amount"],
+            currency=result["currency"],
+            name=result["name"],
+            description=result["description"],
+            user_email=result.get("user_email"),
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Razorpay checkout creation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create UPI checkout session",
         )
 
 
@@ -300,6 +380,118 @@ async def stripe_webhook(
         # Stripe will retry on errors, we don't want infinite retries
     
     return {"status": "received"}
+
+
+@router.post("/webhook/razorpay")
+async def razorpay_webhook(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """Handle Razorpay webhook events for UPI payments.
+
+    Razorpay sends webhook events when payment status changes. The signature
+    is verified using HMAC-SHA256 to ensure the request is authentic.
+
+    Returns:
+        dict: Acknowledgment of the webhook.
+    """
+    from backend.services.razorpay_service import (
+        verify_razorpay_webhook,
+        handle_razorpay_webhook_event,
+    )
+
+    payload = await request.body()
+    signature = request.headers.get("X-Razorpay-Signature", "")
+
+    if not signature:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing X-Razorpay-Signature header",
+        )
+
+    if not verify_razorpay_webhook(payload, signature):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid webhook signature",
+        )
+
+    event = json.loads(payload)
+
+    try:
+        await handle_razorpay_webhook_event(db, event)
+    except Exception as e:
+        logger.error(f"Razorpay webhook handling failed: {e}")
+        # Return 200 to acknowledge receipt and prevent infinite retries
+
+    return {"status": "received"}
+
+
+@router.post("/verify-razorpay-payment")
+async def verify_razorpay_payment_endpoint(
+    payload: RazorpayPaymentVerification,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Verify Razorpay payment after frontend UPI checkout.
+
+    The Razorpay JS SDK completes payment on the frontend, then sends
+    the payment details here for server-side signature verification.
+    On success, the subscription is activated immediately.
+
+    This endpoint is idempotent -- the webhook will also handle activation
+    as a fallback if the user closes the browser before this call completes.
+
+    Args:
+        payload: Razorpay payment details and signature.
+
+    Returns:
+        dict: Success confirmation with subscription status.
+    """
+    from backend.services.razorpay_service import (
+        verify_razorpay_payment,
+        activate_razorpay_subscription,
+    )
+
+    user_id = await get_current_user_id(request)
+
+    # Verify the payment signature (HMAC-SHA256)
+    is_valid = verify_razorpay_payment(
+        payload.razorpay_order_id,
+        payload.razorpay_payment_id,
+        payload.razorpay_signature,
+    )
+
+    if not is_valid:
+        logger.warning(f"Invalid Razorpay payment signature for user {user_id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "verification_failed",
+                "message": "Payment verification failed. Please contact support if you were charged.",
+            },
+        )
+
+    # Activate the subscription
+    success = await activate_razorpay_subscription(
+        db,
+        user_id,
+        payload.plan_tier,
+        payload.billing_period,
+        payload.razorpay_payment_id,
+        payload.razorpay_order_id,
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to activate subscription after payment verification",
+        )
+
+    return {
+        "success": True,
+        "message": "Payment verified and subscription activated successfully.",
+        "provider": "razorpay",
+    }
 
 
 @router.get("/usage", response_model=UsageStatsOut)
