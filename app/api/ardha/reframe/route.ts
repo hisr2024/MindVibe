@@ -55,13 +55,21 @@ export async function POST(request: NextRequest) {
       const timeoutMs = TIMEOUT_BY_DEPTH_MS[depth];
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+      // Forward the CSRF token header so the backend CSRF middleware
+      // can validate it against the csrf_token cookie we also forward.
+      const csrfToken = request.headers.get('x-csrf-token');
+      const proxyHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        cookie: request.headers.get('cookie') || '',
+      };
+      if (csrfToken) {
+        proxyHeaders['X-CSRF-Token'] = csrfToken;
+      }
+
       const response = await fetch(`${BACKEND_URL}/api/ardha/reframe`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders,
         body: JSON.stringify({
           thought: sanitizedThought,
           depth,
