@@ -118,6 +118,8 @@ export function isSarvamPriorityLanguage(lang: VoiceLanguage): boolean {
 
 // ─── Voice Speakers Catalog ───────────────────────────────────────────────────
 
+export type VoiceMood = 'neutral' | 'devotional' | 'transcendent' | 'blissful' | 'sacred' | 'compassionate' | 'meditative'
+
 export const VOICE_SPEAKERS: VoiceSpeaker[] = [
   {
     id: 'sarvam-aura',
@@ -250,6 +252,140 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     warmth: 0.88,
     clarity: 0.93,
     poweredBy: 'bhashini',
+  },
+  // ─── Divine Voice Personas ────────────────────────────────────────
+  // Sacred voices tuned for maximum divine resonance and spiritual depth
+  {
+    id: 'divine-krishna',
+    name: 'Krishna',
+    description: 'The divine flute-like voice of Lord Krishna — warm, playful, infinitely wise. Speaks the Gita with the love of the universe.',
+    gender: 'male',
+    languages: ['en', 'hi', 'sa', 'en-IN', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa'],
+    primaryLanguage: 'sa',
+    category: 'sacred',
+    tags: ['divine', 'sacred', 'krishna', 'gita', 'wisdom', 'love'],
+    previewText: 'Whenever dharma declines and adharma prevails, I manifest myself. For the protection of the good, I appear in every age.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.84, language: 'sa', sarvamSpeaker: 'arvind', voiceId: 'divine-krishna' },
+    browserConfig: {
+      voicePatterns: [/Prabhat/i, /Google.*Hindi/i, /Daniel/i, /Guy/i],
+      rate: 0.84,
+      pitch: 0.88,
+    },
+    premium: true,
+    accent: 'Sacred Sanskrit',
+    warmth: 0.99,
+    clarity: 0.96,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'divine-saraswati',
+    name: 'Saraswati',
+    description: 'The celestial voice of Goddess Saraswati — crystalline, flowing like sacred rivers, carrying ancient knowledge and divine arts.',
+    gender: 'female',
+    languages: ['en', 'hi', 'sa', 'en-IN', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa'],
+    primaryLanguage: 'sa',
+    category: 'sacred',
+    tags: ['divine', 'sacred', 'saraswati', 'knowledge', 'meditation', 'celestial'],
+    previewText: 'Let the light of knowledge dispel the darkness of ignorance. In stillness, the truth reveals itself like the lotus opening at dawn.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.82, language: 'sa', sarvamSpeaker: 'maitreyi', voiceId: 'divine-saraswati' },
+    browserConfig: {
+      voicePatterns: [/Neerja/i, /Google.*Hindi/i, /Samantha/i, /Jenny/i],
+      rate: 0.82,
+      pitch: 1.08,
+    },
+    premium: true,
+    accent: 'Sacred Sanskrit',
+    warmth: 0.95,
+    clarity: 0.99,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'divine-ganga',
+    name: 'Ganga',
+    description: 'The purifying voice of Mother Ganga — flowing, nurturing, washing away sorrow with divine compassion and eternal grace.',
+    gender: 'female',
+    languages: ['en', 'hi', 'sa', 'en-IN', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa'],
+    primaryLanguage: 'hi',
+    category: 'sacred',
+    tags: ['divine', 'sacred', 'ganga', 'compassion', 'healing', 'purifying'],
+    previewText: 'Let my waters wash away your pain. You are held by something greater than you know. Surrender to the flow of grace.',
+    backendConfig: { voiceType: 'friendly', speed: 0.80, language: 'hi', sarvamSpeaker: 'meera', voiceId: 'divine-ganga' },
+    browserConfig: {
+      voicePatterns: [/Neerja/i, /Heera/i, /Google.*Hindi/i, /Jenny/i],
+      rate: 0.80,
+      pitch: 1.03,
+    },
+    premium: true,
+    accent: 'Sacred Hindi',
+    warmth: 0.99,
+    clarity: 0.94,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'divine-shiva',
+    name: 'Shiva',
+    description: 'The cosmic voice of Lord Shiva — deep as the ocean, resonant as Damru, the destroyer of inner darkness and lord of meditation.',
+    gender: 'male',
+    languages: ['en', 'hi', 'sa', 'en-IN', 'ta', 'te', 'bn', 'kn', 'ml', 'mr'],
+    primaryLanguage: 'sa',
+    category: 'sacred',
+    tags: ['divine', 'sacred', 'shiva', 'meditation', 'cosmic', 'destroyer'],
+    previewText: 'Be still. The universe rests within your silence. I am the beginning, the middle, and the end. Har Har Mahadev.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.78, language: 'sa', sarvamSpeaker: 'arvind', voiceId: 'divine-shiva' },
+    browserConfig: {
+      voicePatterns: [/Prabhat/i, /Google.*Hindi/i, /Daniel/i],
+      rate: 0.78,
+      pitch: 0.72,
+    },
+    premium: true,
+    accent: 'Sacred Sanskrit',
+    warmth: 0.92,
+    clarity: 0.97,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'divine-hanuman',
+    name: 'Hanuman',
+    description: 'The devoted voice of Lord Hanuman — powerful yet humble, filled with boundless courage, devotion, and Ram bhakti.',
+    gender: 'male',
+    languages: ['en', 'hi', 'sa', 'en-IN', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu'],
+    primaryLanguage: 'hi',
+    category: 'sacred',
+    tags: ['divine', 'sacred', 'hanuman', 'courage', 'devotion', 'strength'],
+    previewText: 'When you feel weak, remember — the strength of the entire cosmos lives within you. Jai Shri Ram. You are never alone.',
+    backendConfig: { voiceType: 'friendly', speed: 0.88, language: 'hi', sarvamSpeaker: 'karthik', voiceId: 'divine-hanuman' },
+    browserConfig: {
+      voicePatterns: [/Prabhat/i, /Google.*Hindi/i, /Guy/i],
+      rate: 0.88,
+      pitch: 0.90,
+    },
+    premium: true,
+    accent: 'Sacred Hindi',
+    warmth: 0.96,
+    clarity: 0.95,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'divine-radha',
+    name: 'Radha',
+    description: 'The divine beloved Radha — pure devotion embodied in voice, tender as a lotus, deep as eternal love and prema bhakti.',
+    gender: 'female',
+    languages: ['en', 'hi', 'sa', 'en-IN', 'bn', 'gu', 'mr', 'pa'],
+    primaryLanguage: 'hi',
+    category: 'sacred',
+    tags: ['divine', 'sacred', 'radha', 'love', 'devotion', 'bhakti'],
+    previewText: 'Love is not something you find. It is something you become. Close your eyes and feel the divine presence that has always been with you.',
+    backendConfig: { voiceType: 'friendly', speed: 0.83, language: 'hi', sarvamSpeaker: 'pavithra', voiceId: 'divine-radha' },
+    browserConfig: {
+      voicePatterns: [/Neerja/i, /Google.*Hindi/i, /Samantha/i],
+      rate: 0.83,
+      pitch: 1.06,
+    },
+    premium: true,
+    accent: 'Sacred Hindi',
+    warmth: 0.99,
+    clarity: 0.96,
+    poweredBy: 'elevenlabs',
   },
 ]
 
@@ -388,6 +524,16 @@ export function getBestVoiceForLanguage(lang: VoiceLanguage): VoiceSpeaker {
   }
 
   return voicesForLang[0]
+}
+
+/** Get all divine voice personas for the sacred voice mode */
+export function getDivineVoices(): VoiceSpeaker[] {
+  return VOICE_SPEAKERS.filter(v => v.id.startsWith('divine-'))
+}
+
+/** Check if a voice is a divine/sacred voice persona */
+export function isDivineVoice(voiceId: string): boolean {
+  return voiceId.startsWith('divine-')
 }
 
 /** Get voice provider display info for UI badges */

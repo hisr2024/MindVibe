@@ -240,6 +240,14 @@ PERSONA_TO_ELEVENLABS: dict[str, str] = {
     "tara": "rachel",       # South Indian → Rachel (clear multilingual)
     "surya": "adam",        # South Indian male → Adam (deep resonant)
     "arunima": "dorothy",   # Bengali poetic → Dorothy (soft ethereal)
+
+    # Divine voice personas → premium ElevenLabs voices
+    "divine-krishna": "clyde",      # Storyteller gravitas for divine wisdom
+    "divine-saraswati": "dorothy",   # Ethereal, celestial quality
+    "divine-ganga": "sarah",         # Warm, nurturing, flowing
+    "divine-shiva": "arnold",        # Commanding, cosmic power
+    "divine-hanuman": "josh",        # Warm, devoted, courageous
+    "divine-radha": "rachel",        # Calm, pure devotion
 }
 
 
@@ -351,6 +359,44 @@ EMOTION_ELEVENLABS_SETTINGS: dict[str, dict[str, float]] = {
         "similarity_boost": 0.80,
         "style": 0.42,
         "speed": 0.90,
+    },
+    # ─── Divine / Sacred Emotion Presets ──────────────────────────────
+    # Tuned for maximum ethereal, transcendent voice quality
+    "devotional": {
+        "stability": 0.70,
+        "similarity_boost": 0.90,
+        "style": 0.25,
+        "speed": 0.78,
+    },
+    "transcendent": {
+        "stability": 0.75,
+        "similarity_boost": 0.92,
+        "style": 0.20,
+        "speed": 0.75,
+    },
+    "blissful": {
+        "stability": 0.55,
+        "similarity_boost": 0.85,
+        "style": 0.55,
+        "speed": 0.82,
+    },
+    "sacred": {
+        "stability": 0.80,
+        "similarity_boost": 0.95,
+        "style": 0.15,
+        "speed": 0.72,
+    },
+    "compassionate": {
+        "stability": 0.60,
+        "similarity_boost": 0.88,
+        "style": 0.40,
+        "speed": 0.80,
+    },
+    "meditative": {
+        "stability": 0.82,
+        "similarity_boost": 0.92,
+        "style": 0.12,
+        "speed": 0.70,
     },
 }
 

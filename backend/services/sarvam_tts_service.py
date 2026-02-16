@@ -248,6 +248,43 @@ SARVAM_EMOTION_PROFILES: dict[str, dict[str, Any]] = {
         "loudness": 1.3,
         "description": "Understanding, non-judgmental — sitting with discomfort",
     },
+    # ─── Divine / Sacred Emotion Profiles ────────────────────────────
+    "devotional": {
+        "pace": 0.78,
+        "pitch": -2,
+        "loudness": 1.0,
+        "description": "Reverent, sacred — the voice of bhakti",
+    },
+    "transcendent": {
+        "pace": 0.72,
+        "pitch": -3,
+        "loudness": 0.8,
+        "description": "Ethereal, vast — beyond the material",
+    },
+    "blissful": {
+        "pace": 0.82,
+        "pitch": 1,
+        "loudness": 1.2,
+        "description": "Radiant, divine joy — ananda",
+    },
+    "sacred": {
+        "pace": 0.70,
+        "pitch": -3,
+        "loudness": 0.8,
+        "description": "Ancient, primordial — the eternal sound",
+    },
+    "compassionate": {
+        "pace": 0.80,
+        "pitch": -1,
+        "loudness": 1.0,
+        "description": "Boundless karuna — divine mother energy",
+    },
+    "meditative": {
+        "pace": 0.68,
+        "pitch": -2,
+        "loudness": 0.7,
+        "description": "Deep stillness — dhyana, the silence between breaths",
+    },
 }
 
 
@@ -274,6 +311,14 @@ COMPANION_TO_SARVAM_SPEAKER: dict[str, str] = {
     "krishna": "arvind",    # Sacred → Arvind (deep gravitas)
     "sophia": "pavithra",   # International → Pavithra (clear multi)
     "ravi": "karthik",      # Scholarly → Karthik (natural teacher)
+
+    # Divine voice personas → Sarvam speakers (for Indian language fallback)
+    "divine-krishna": "arvind",    # Deep, wise, divine authority
+    "divine-saraswati": "maitreyi",  # Ethereal, meditative
+    "divine-ganga": "meera",       # Warm, flowing, nurturing
+    "divine-shiva": "arvind",      # Deep, cosmic resonance
+    "divine-hanuman": "karthik",   # Warm, devoted, powerful
+    "divine-radha": "pavithra",    # Clear, pure, devotional
 }
 
 
