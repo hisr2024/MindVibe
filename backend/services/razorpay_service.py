@@ -12,12 +12,11 @@ UPI is only available when currency is INR.
 
 import hashlib
 import hmac
-import json
 import logging
 import os
 from datetime import datetime, UTC
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,7 +33,6 @@ from backend.services.subscription_service import (
     get_user_subscription,
     get_plan_by_tier,
     upgrade_subscription,
-    update_subscription_status,
 )
 
 logger = logging.getLogger(__name__)
@@ -198,21 +196,31 @@ async def create_razorpay_order(
 
 
 def _get_inr_price(plan: SubscriptionPlan, billing_period: str) -> Decimal:
-    """Get INR price for a plan.
+    """Convert USD plan price to INR with 25% discount.
 
-    Uses the plan's stored price. MindVibe applies a 25% INR discount
-    relative to USD pricing, handled at the plan level.
+    Plan prices are stored in USD. This function converts to INR using the
+    same conversion logic as the frontend (useCurrency hook):
+      INR = USD * 83 * (1 - 0.25)
+
+    The result is rounded to the nearest whole rupee for clean Razorpay amounts.
 
     Args:
         plan: The subscription plan.
         billing_period: "monthly" or "yearly".
 
     Returns:
-        Decimal: Price in INR.
+        Decimal: Price in INR (rounded to whole rupees).
     """
+    INR_RATE = Decimal("83")
+    INR_DISCOUNT = Decimal("0.25")
+
+    usd_price = plan.price_monthly
     if billing_period == "yearly" and plan.price_yearly is not None:
-        return plan.price_yearly
-    return plan.price_monthly
+        usd_price = plan.price_yearly
+
+    inr_price = usd_price * INR_RATE * (Decimal("1") - INR_DISCOUNT)
+    # Round to nearest whole rupee (Razorpay amounts must be in paisa, integer)
+    return inr_price.quantize(Decimal("1"))
 
 
 # =============================================================================
@@ -266,6 +274,10 @@ async def activate_razorpay_subscription(
     Called after payment verification succeeds. Creates a payment record
     and upgrades the user's subscription.
 
+    This function is idempotent: if the payment has already been recorded
+    (e.g., both frontend verification and webhook fired), the duplicate
+    is detected and skipped gracefully.
+
     Args:
         db: Database session.
         user_id: The user's ID.
@@ -275,8 +287,22 @@ async def activate_razorpay_subscription(
         razorpay_order_id: Razorpay order ID.
 
     Returns:
-        bool: True if subscription was activated successfully.
+        bool: True if subscription was activated (or already active).
     """
+    # Idempotency check: skip if this payment was already recorded.
+    # Both the frontend /verify-razorpay-payment and the webhook can call
+    # this function; the second caller should succeed without error.
+    from sqlalchemy import select
+    existing = await db.execute(
+        select(Payment).where(Payment.razorpay_payment_id == razorpay_payment_id)
+    )
+    if existing.scalars().first():
+        logger.info(
+            f"Razorpay payment {razorpay_payment_id} already recorded for user {user_id}, "
+            f"skipping duplicate activation"
+        )
+        return True
+
     plan = await get_plan_by_tier(db, plan_tier)
     if not plan:
         logger.error(f"Plan not found for tier: {plan_tier}")
@@ -429,12 +455,15 @@ async def _handle_payment_failed(db: AsyncSession, payload: dict) -> bool:
 
     if user_id:
         # Record the failed payment for audit trail
+        # Convert paisa to rupees using Decimal to avoid float precision loss
+        amount_paisa = payment_entity.get("amount", 0)
+        amount_inr = Decimal(str(amount_paisa)) / Decimal("100")
         payment = Payment(
             user_id=user_id,
             payment_provider="razorpay_upi",
             razorpay_payment_id=razorpay_payment_id,
             razorpay_order_id=razorpay_order_id,
-            amount=Decimal(str(payment_entity.get("amount", 0) / 100)),
+            amount=amount_inr,
             currency="inr",
             status=PaymentStatus.FAILED,
             description="Failed UPI payment",
@@ -476,7 +505,8 @@ async def _handle_subscription_charged(db: AsyncSession, payload: dict) -> bool:
             logger.info(f"Razorpay recurring payment {razorpay_payment_id} already recorded")
             return True
 
-    amount = Decimal(str(payment_entity.get("amount", 0) / 100)) if payment_entity else Decimal("0")
+    amount_paisa = payment_entity.get("amount", 0) if payment_entity else 0
+    amount = Decimal(str(amount_paisa)) / Decimal("100")
 
     subscription = await get_user_subscription(db, user_id)
     if subscription:
