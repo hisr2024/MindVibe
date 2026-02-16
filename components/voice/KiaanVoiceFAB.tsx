@@ -32,12 +32,17 @@ export default function KiaanVoiceFAB() {
   const [fabState, setFabState] = useState<FABState>('idle')
   const [response, setResponse] = useState('')
   const [showResponse, setShowResponse] = useState(false)
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
 
   const { isListening: wakeWordListening, enabled: wakeWordEnabled } = useGlobalWakeWord()
   const friendEngineRef = useRef(new KiaanFriendEngine())
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Stable ref for processQuery to break circular dependency with useKiaanVoice
+  const processQueryRef = useRef<(query: string) => void>(() => {})
 
   const {
     speak,
@@ -52,7 +57,7 @@ export default function KiaanVoiceFAB() {
   } = useKiaanVoice({
     onTranscript: useCallback((text: string) => {
       setFabState('processing')
-      processQuery(text)
+      processQueryRef.current(text)
     }, []),
     onSpeakEnd: useCallback(() => {
       dismissTimerRef.current = setTimeout(() => {
@@ -63,11 +68,10 @@ export default function KiaanVoiceFAB() {
     }, []),
   })
 
-  // Accessibility: respect reduced motion
+  // Accessibility: subscribe to reduced motion preference changes
   useEffect(() => {
     if (typeof window === 'undefined') return
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mq.matches)
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
@@ -122,6 +126,11 @@ export default function KiaanVoiceFAB() {
       speak(fallback)
     }
   }, [speak])
+
+  // Keep processQueryRef in sync with latest processQuery
+  useEffect(() => {
+    processQueryRef.current = processQuery
+  }, [processQuery])
 
   const handleTap = useCallback(() => {
     if (dismissTimerRef.current) {

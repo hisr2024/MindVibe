@@ -67,7 +67,6 @@ export interface UseKiaanVoiceReturn {
 export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoiceReturn {
   const {
     mood = 'neutral',
-    preferDivine = false,
     onSpeakEnd,
     onTranscript,
     onError,
@@ -157,7 +156,6 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
           mood: speakMood || mood,
           voice_id: voiceId,
           language,
-          prefer_divine: preferDivine,
         }),
       })
 
@@ -192,7 +190,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
     // Fallback to browser TTS
     speakBrowser(text)
-  }, [mood, voiceId, language, preferDivine, speakBrowser, cancelBrowserSpeech, onSpeakEnd])
+  }, [mood, voiceId, language, speakBrowser, cancelBrowserSpeech, onSpeakEnd])
 
   const startListening = useCallback(() => {
     setError(null)

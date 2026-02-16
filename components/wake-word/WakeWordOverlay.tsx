@@ -260,12 +260,11 @@ export function WakeWordOverlay() {
     }
 
     // Show divine greeting first, then start listening
+    // setState calls are inside a setTimeout to avoid synchronous setState in effect
     const greeting = getRandomGreeting()
-    setKiaanResponse(greeting)
-    setPhase('greeting')
-
-    // Speak the greeting, then transition to listening
     const greetTimer = setTimeout(async () => {
+      setKiaanResponse(greeting)
+      setPhase('greeting')
       try {
         // Try to speak the greeting via backend TTS
         const res = await apiFetch('/api/companion/voice/synthesize', {
