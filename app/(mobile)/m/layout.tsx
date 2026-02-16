@@ -6,6 +6,7 @@
  */
 
 import { Metadata, Viewport } from 'next'
+import { MobileErrorBoundary } from '@/components/mobile/MobileErrorBoundary'
 
 export const metadata: Metadata = {
   title: {
@@ -40,7 +41,9 @@ export default function MobileLayout({
 }) {
   return (
     <div className="mobile-layout min-h-screen bg-[#0b0b0f]">
-      {children}
+      <MobileErrorBoundary>
+        {children}
+      </MobileErrorBoundary>
     </div>
   )
 }

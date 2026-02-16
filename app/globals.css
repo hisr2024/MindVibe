@@ -1933,6 +1933,15 @@ img {
   z-index: 1;
 }
 
+/* Dedicated mobile app root for /m/* routes - full viewport, no desktop constraints */
+.mobile-app-root {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
 @media (max-width: 768px) {
   .mobile-content-area {
     /* Ensure content is scrollable even with fixed elements */
