@@ -93,7 +93,7 @@ export default function AdminLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    placeholder="admin@mindvibe.app"
+                    placeholder="admin@mindvibe.life"
                   />
                 </div>
                 <div>

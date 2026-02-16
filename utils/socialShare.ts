@@ -44,7 +44,7 @@ export function sanitizeShareContent(text: string, anonymize: boolean = false): 
 export function formatShareContent(text: string, anonymize: boolean = false): string {
   const sanitized = sanitizeShareContent(text, anonymize);
   const prefix = 'Shared from MindVibe - KIAAN AI:\n\n';
-  const suffix = '\n\n💙 Discover mental wellness with KIAAN at mindvibe.app';
+  const suffix = '\n\n💙 Discover mental wellness with KIAAN at mindvibe.life';
 
   return `${prefix}${sanitized}${suffix}`;
 }
@@ -118,7 +118,7 @@ export function shareToFacebook(text: string, anonymize: boolean = false): void 
     const encoded = encodeURIComponent(limited);
 
     // Use a safe base URL instead of current origin
-    const baseUrl = 'https://mindvibe.app';
+    const baseUrl = 'https://mindvibe.life';
     
     // Facebook Share Dialog
     const url = `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=${encodeURIComponent(baseUrl)}`;

@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Viewport } from 'next'
+import { headers } from 'next/headers'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
@@ -26,7 +27,7 @@ export const viewport: Viewport = {
 export const metadata = {
   title: 'MindVibe - Your Spiritual Companion',
   description: 'A divine friend rooted in the Bhagavad Gita — 700+ verses, spiritual tools, guided wisdom journeys, and KIAAN, your AI companion for inner peace.',
-  metadataBase: new URL('https://mindvibe.app'),
+  metadataBase: new URL('https://mindvibe.life'),
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -35,9 +36,9 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/icons/icon.svg', type: 'image/svg+xml' }
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
     ],
-    shortcut: '/icons/icon.svg',
+    shortcut: '/favicon.ico',
     apple: '/icons/icon.svg'
   }
 }
@@ -55,11 +56,14 @@ const languageScript = `
 })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const headersList = await headers()
+  const nonce = headersList.get('x-nonce') ?? ''
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -78,7 +82,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
         />
         {/* Set language from localStorage before hydration to prevent flash */}
-        <script dangerouslySetInnerHTML={{ __html: languageScript }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
         <ClientLayout>

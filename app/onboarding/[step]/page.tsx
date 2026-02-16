@@ -170,7 +170,7 @@ export default function OnboardingStepPage() {
     // Save profile
     const profile = {
       displayName: state.name || 'MindVibe User',
-      email: 'user@mindvibe.app',
+      email: 'user@mindvibe.life',
       bio: state.bio,
       timezone: state.timezone,
       language: state.language,

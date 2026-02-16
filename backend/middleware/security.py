@@ -46,9 +46,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # X-Frame-Options: Prevents clickjacking by denying framing
         response.headers["X-Frame-Options"] = "DENY"
 
-        # Strict-Transport-Security: Enforces HTTPS for 1 year
+        # Strict-Transport-Security: Enforces HTTPS for 1 year with preload
         response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
+            "max-age=31536000; includeSubDomains; preload"
         )
 
         # Content-Security-Policy: Restricts resource loading

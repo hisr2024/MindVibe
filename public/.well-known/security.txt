@@ -1,0 +1,5 @@
+Contact: mailto:hisr2024@gmail.com
+Expires: 2027-02-16T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://mindvibe.life/.well-known/security.txt
+Policy: https://mindvibe.life/privacy

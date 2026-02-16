@@ -57,7 +57,7 @@ export default function OnboardingPage() {
     // Save profile
     const profile = {
       displayName: name || 'MindVibe User',
-      email: 'user@mindvibe.app',
+      email: 'user@mindvibe.life',
       bio,
       goals,
       plan: selectedPlan,

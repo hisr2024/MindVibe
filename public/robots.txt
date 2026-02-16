@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mindvibe.life/sitemap.xml
+
+Disallow: /api/
+Disallow: /admin/
+Disallow: /account/
+Disallow: /profile/
+Disallow: /onboarding/

@@ -13,7 +13,7 @@ export default function ContactPage() {
       </section>
 
       <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
-        <form className="space-y-4" action="mailto:care@mindvibe.app" method="post" encType="text/plain">
+        <form className="space-y-4" action="mailto:care@mindvibe.life" method="post" encType="text/plain">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm text-orange-100/80">
               <span className="font-semibold text-orange-50">Name</span>

@@ -126,7 +126,7 @@ export default function ProfilePage() {
         // Default profile
         const defaultProfile: ProfileData = {
           name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
-          email: user?.email || 'user@mindvibe.app',
+          email: user?.email || 'user@mindvibe.life',
           bio: '',
           createdAt: new Date().toISOString(),
         }
@@ -140,7 +140,7 @@ export default function ProfilePage() {
       // Set a minimal profile
       const fallbackProfile: ProfileData = {
         name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
-        email: user?.email || 'user@mindvibe.app',
+        email: user?.email || 'user@mindvibe.life',
         bio: '',
         createdAt: new Date().toISOString(),
       }
