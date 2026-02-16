@@ -101,8 +101,9 @@ const SENSITIVITY_THRESHOLDS: Record<WakeWordSensitivity, {
 }
 
 // Default wake words with phonetic variants for maximum coverage
+// Organized by priority: primary → spiritual → Hindi/Sanskrit → casual → assistant
 export const DEFAULT_WAKE_WORDS = [
-  // Primary wake words (highest priority)
+  // ─── Primary wake words (highest priority) ─────────────────────
   'hey kiaan',
   'hey kian',
   'hi kiaan',
@@ -111,27 +112,60 @@ export const DEFAULT_WAKE_WORDS = [
   'hello kian',
   'ok kiaan',
   'okay kiaan',
-  // Cultural/spiritual variations
-  'namaste kiaan',
-  'namaste kian',
-  'om kiaan',
-  'om kian',
-  // Wake up command
+  // ─── Wake up commands (Alexa/Siri style) ─────────────────────
   'wake up kiaan',
   'wake up kian',
-  // MindVibe variations
+  'kiaan wake up',
+  'kian wake up',
+  // ─── Cultural / Spiritual variations ─────────────────────────
+  'namaste kiaan',
+  'namaste kian',
+  'namaskar kiaan',
+  'namaskar kian',
+  'pranam kiaan',
+  'pranam kian',
+  'om kiaan',
+  'om kian',
+  'hari om kiaan',
+  'hari om kian',
+  'jai kiaan',
+  'jai kian',
+  'radhe kiaan',
+  'radhe kian',
+  'om namah kiaan',
+  // ─── Hindi wake phrases ──────────────────────────────────────
+  'bolo kiaan',
+  'bolo kian',
+  'sun kiaan',
+  'sun kian',
+  'suno kiaan',
+  'suno kian',
+  'bol kiaan',
+  'bol kian',
+  'batao kiaan',
+  'batao kian',
+  'acha kiaan',
+  'accha kiaan',
+  // ─── MindVibe variations ─────────────────────────────────────
   'hey mindvibe',
   'hi mindvibe',
   'ok mindvibe',
   'okay mindvibe',
-  // Casual variations
+  'namaste mindvibe',
+  'wake up mindvibe',
+  // ─── Casual variations ───────────────────────────────────────
   'yo kiaan',
   'yo kian',
-  // Assistant-style
+  'sup kiaan',
+  // ─── Assistant-style ─────────────────────────────────────────
   'kiaan help',
   'kian help',
   'ask kiaan',
   'ask kian',
+  'talk to kiaan',
+  'talk to kian',
+  'kiaan listen',
+  'kian listen',
 ]
 
 // Phonetic mapping for speech recognition error correction
@@ -143,6 +177,7 @@ const PHONETIC_VARIANTS: Record<string, string[]> = {
     'kirin', 'kieran', 'keane', 'caan', 'cyan', 'kaan', 'gian',
     'keenan', 'kenan', 'kyron', 'kaiyan', 'kien', 'kiene',
     'ki on', 'key on', 'key an', 'ki an', 'key in',
+    'kia', 'kiara', 'kia an', 'ki yan', 'kyian',
   ],
   'mindvibe': [
     'mind vibe', 'mind5', 'mindfive', 'mindfi', 'mine vibe',
@@ -151,7 +186,20 @@ const PHONETIC_VARIANTS: Record<string, string[]> = {
   ],
   'namaste': [
     'namastay', 'namasthe', 'namastey', 'namast', 'namasta',
-    'nomaste', 'namasday', 'namastee', 'namas day',
+    'nomaste', 'namasday', 'namastee', 'namas day', 'nam a stay',
+    'namaaste', 'numaste', 'namustay', 'namustey',
+  ],
+  'namaskar': [
+    'namascare', 'namas kar', 'namascarr', 'namascore', 'namaskaar',
+    'namas car', 'namuskar',
+  ],
+  'pranam': [
+    'pranum', 'pranom', 'pranaam', 'pronam', 'pronum',
+    'pra nam', 'pranaam', 'pranahm',
+  ],
+  'wake up': [
+    'wakeup', 'wake-up', 'wakey', 'waked up', 'woke up',
+    'wegup', 'weigh cup', 'wake cup',
   ],
   'hey': [
     'hay', 'he', 'a', 'ay', 'ei', 'hei', 'hae',
@@ -161,6 +209,21 @@ const PHONETIC_VARIANTS: Record<string, string[]> = {
   ],
   'okay': [
     'ok', 'o k', 'okey', 'oke', 'okei',
+  ],
+  'hari om': [
+    'hari aum', 'hariom', 'hari ohm', 'harry om', 'hari own',
+  ],
+  'bolo': [
+    'bolu', 'bola', 'balo', 'bolu',
+  ],
+  'suno': [
+    'sunno', 'soono', 'sun o', 'sun oh', 'sunoo',
+  ],
+  'jai': [
+    'jay', 'jey', 'jai', 'jaya', 'je',
+  ],
+  'radhe': [
+    'radhay', 'radha', 'radhi', 'radhey', 'rahde',
   ],
 }
 

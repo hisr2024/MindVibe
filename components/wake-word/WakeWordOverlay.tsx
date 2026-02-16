@@ -27,7 +27,23 @@ import { apiFetch } from '@/lib/api'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
 import { getSavedVoice, getSavedLanguage } from '@/utils/voice/voiceCatalog'
 
-type OverlayPhase = 'listening' | 'processing' | 'responding' | 'idle'
+type OverlayPhase = 'greeting' | 'listening' | 'processing' | 'responding' | 'idle'
+
+/** Sacred greeting messages KIAAN speaks upon wake word activation */
+const SACRED_GREETINGS = [
+  'Namaste. I am here.',
+  'Om Shanti. How may I guide you?',
+  'I am listening, dear friend.',
+  'Namaste. Your inner light called, and I am here.',
+  'Peace be with you. What weighs on your heart?',
+  'I am awake. Speak, and I shall listen with my whole being.',
+  'Hari Om. The universe conspires to guide you. How can I help?',
+  'Namaste. Like the Ganga, I flow toward you with love.',
+]
+
+function getRandomGreeting(): string {
+  return SACRED_GREETINGS[Math.floor(Math.random() * SACRED_GREETINGS.length)]
+}
 
 export function WakeWordOverlay() {
   const router = useRouter()
@@ -229,7 +245,7 @@ export function WakeWordOverlay() {
     processQueryRef.current = processQuery
   }, [processQuery])
 
-  // ─── Activation Flow ─────────────────────────────────────────────
+  // ─── Activation Flow with Divine Greeting ────────────────────────
 
   useEffect(() => {
     if (!isActivated) return
@@ -243,19 +259,73 @@ export function WakeWordOverlay() {
       window.speechSynthesis.cancel()
     }
 
-    // Start listening after a brief delay to let wake word recognition release mic
-    const timer = setTimeout(() => {
-      setPhase('listening')
-      startListening()
-    }, 400)
+    // Show divine greeting first, then start listening
+    const greeting = getRandomGreeting()
+    setKiaanResponse(greeting)
+    setPhase('greeting')
+
+    // Speak the greeting, then transition to listening
+    const greetTimer = setTimeout(async () => {
+      try {
+        // Try to speak the greeting via backend TTS
+        const res = await apiFetch('/api/companion/voice/synthesize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: greeting,
+            mood: 'peaceful',
+            voice_id: savedVoiceId,
+            language: savedLanguage,
+          }),
+        })
+
+        if (res.ok) {
+          const contentType = res.headers.get('content-type')
+          if (contentType?.includes('audio')) {
+            const blob = await res.blob()
+            const url = URL.createObjectURL(blob)
+            const audio = new Audio(url)
+            audioRef.current = audio
+
+            audio.onended = () => {
+              URL.revokeObjectURL(url)
+              audioRef.current = null
+              setKiaanResponse('')
+              setPhase('listening')
+              startListening()
+            }
+            audio.onerror = () => {
+              URL.revokeObjectURL(url)
+              audioRef.current = null
+              // Fallback: skip greeting audio, go to listening
+              setKiaanResponse('')
+              setPhase('listening')
+              startListening()
+            }
+
+            await audio.play()
+            return
+          }
+        }
+      } catch {
+        // Backend unavailable
+      }
+
+      // Fallback: show greeting briefly then listen
+      setTimeout(() => {
+        setKiaanResponse('')
+        setPhase('listening')
+        startListening()
+      }, 1500)
+    }, 300)
 
     return () => {
-      clearTimeout(timer)
+      clearTimeout(greetTimer)
       if (dismissTimerRef.current) {
         clearTimeout(dismissTimerRef.current)
       }
     }
-  }, [isActivated, pauseWakeWord, startListening])
+  }, [isActivated, pauseWakeWord, startListening, savedVoiceId, savedLanguage])
 
   // ─── Navigate to full voice companion ────────────────────────────
 
@@ -268,6 +338,8 @@ export function WakeWordOverlay() {
 
   const orbGradient = (() => {
     switch (phase) {
+      case 'greeting':
+        return 'from-rose-400 via-pink-400 to-fuchsia-400'
       case 'listening':
         return 'from-orange-400 via-amber-400 to-yellow-400'
       case 'processing':
@@ -281,6 +353,8 @@ export function WakeWordOverlay() {
 
   const orbGlow = (() => {
     switch (phase) {
+      case 'greeting':
+        return 'rgba(244,114,182,0.5)'
       case 'listening':
         return 'rgba(251,191,36,0.4)'
       case 'processing':
@@ -382,11 +456,24 @@ export function WakeWordOverlay() {
             transition={{ delay: 0.2 }}
           >
             <h2 className="text-xl font-semibold text-orange-50">
+              {phase === 'greeting' && 'KIAAN'}
               {phase === 'listening' && 'Listening...'}
               {phase === 'processing' && 'Understanding...'}
               {phase === 'responding' && 'KIAAN'}
               {phase === 'idle' && 'KIAAN'}
             </h2>
+
+            {/* Divine greeting message */}
+            {phase === 'greeting' && kiaanResponse && (
+              <motion.p
+                className="text-sm text-pink-200/80 italic"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                {kiaanResponse}
+              </motion.p>
+            )}
 
             {/* Interim transcript while listening */}
             {phase === 'listening' && (interimTranscript || transcript) && (
@@ -400,7 +487,7 @@ export function WakeWordOverlay() {
             )}
 
             {/* User query display */}
-            {userQuery && phase !== 'listening' && (
+            {userQuery && phase !== 'listening' && phase !== 'greeting' && (
               <motion.p
                 className="text-sm text-orange-200/60"
                 initial={{ opacity: 0 }}

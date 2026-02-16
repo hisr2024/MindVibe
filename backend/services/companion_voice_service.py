@@ -249,6 +249,67 @@ EMOTION_VOICE_PROFILES: dict[str, dict[str, Any]] = {
         "warmth": "very_high",
         "description": "Ultra-calm, spacious, decompressing — let the pressure go",
     },
+    # ─── Divine / Sacred emotion profiles ────────────────────────────
+    "devotional": {
+        "rate": "slow",
+        "rate_value": 0.82,
+        "pitch": "-2.0st",
+        "volume": "soft",
+        "pause_multiplier": 1.8,
+        "breathing": True,
+        "warmth": "very_high",
+        "description": "Reverent, sacred, transcendent — the voice of the divine within",
+    },
+    "transcendent": {
+        "rate": "x-slow",
+        "rate_value": 0.78,
+        "pitch": "-2.5st",
+        "volume": "soft",
+        "pause_multiplier": 2.0,
+        "breathing": True,
+        "warmth": "very_high",
+        "description": "Ethereal, vast, limitless — beyond time and space",
+    },
+    "blissful": {
+        "rate": "slow",
+        "rate_value": 0.86,
+        "pitch": "+0.5st",
+        "volume": "medium",
+        "pause_multiplier": 1.5,
+        "breathing": True,
+        "warmth": "very_high",
+        "description": "Radiant, joyous, divine — the ecstasy of inner awakening",
+    },
+    "sacred": {
+        "rate": "x-slow",
+        "rate_value": 0.80,
+        "pitch": "-3.0st",
+        "volume": "soft",
+        "pause_multiplier": 2.2,
+        "breathing": True,
+        "warmth": "very_high",
+        "description": "Ancient, primordial, chanting — the sound of Om itself",
+    },
+    "compassionate": {
+        "rate": "slow",
+        "rate_value": 0.85,
+        "pitch": "-0.5st",
+        "volume": "soft",
+        "pause_multiplier": 1.6,
+        "breathing": True,
+        "warmth": "very_high",
+        "description": "Boundless karuna, divine mother energy — all-embracing love",
+    },
+    "meditative": {
+        "rate": "x-slow",
+        "rate_value": 0.76,
+        "pitch": "-2.0st",
+        "volume": "x-soft",
+        "pause_multiplier": 2.5,
+        "breathing": True,
+        "warmth": "very_high",
+        "description": "Deep stillness, dhyana — the silence between breaths",
+    },
 }
 
 
@@ -328,6 +389,86 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "default_pitch": -0.8,
         "warmth_boost": 0.06,
     },
+    # ─── Divine Voice Personas ──────────────────────────────────────
+    # Sacred voices tuned for maximum divine resonance
+    "divine-krishna": {
+        "name": "Krishna",
+        "gender": "male",
+        "style": "divine",
+        "elevenlabs_voice_id": "2EiwWnXFnvU5JabPnv8n",  # Clyde (storyteller)
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "arvind",
+        "description": "The divine flute-like voice of Lord Krishna — warm, playful, "
+                       "infinitely wise. Speaks with the love of the universe.",
+        "default_speed": 0.84,
+        "default_pitch": -1.5,
+        "warmth_boost": 0.15,
+    },
+    "divine-saraswati": {
+        "name": "Saraswati",
+        "gender": "female",
+        "style": "divine",
+        "elevenlabs_voice_id": "ThT5KcBeYPX3keUQqHPh",  # Dorothy (ethereal)
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "maitreyi",
+        "description": "The celestial voice of Goddess Saraswati — crystalline, "
+                       "flowing like sacred rivers, carrying ancient knowledge.",
+        "default_speed": 0.82,
+        "default_pitch": 0.8,
+        "warmth_boost": 0.12,
+    },
+    "divine-ganga": {
+        "name": "Ganga",
+        "gender": "female",
+        "style": "divine",
+        "elevenlabs_voice_id": "EXAVITQu4vr4xnSDxMaL",  # Sarah (warm)
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "meera",
+        "description": "The purifying voice of Mother Ganga — flowing, nurturing, "
+                       "washing away sorrow with divine compassion.",
+        "default_speed": 0.80,
+        "default_pitch": 0.3,
+        "warmth_boost": 0.18,
+    },
+    "divine-shiva": {
+        "name": "Shiva",
+        "gender": "male",
+        "style": "divine",
+        "elevenlabs_voice_id": "VR6AewLTigWG4xSOukaG",  # Arnold (commanding)
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "arvind",
+        "description": "The cosmic voice of Lord Shiva — deep as the ocean, "
+                       "resonant as Damru, the destroyer of inner darkness.",
+        "default_speed": 0.78,
+        "default_pitch": -3.0,
+        "warmth_boost": 0.10,
+    },
+    "divine-hanuman": {
+        "name": "Hanuman",
+        "gender": "male",
+        "style": "divine",
+        "elevenlabs_voice_id": "TxGEqnHWrfWFTfGW9XjX",  # Josh (warm)
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "karthik",
+        "description": "The devoted voice of Lord Hanuman — powerful yet humble, "
+                       "filled with boundless courage and Ram bhakti.",
+        "default_speed": 0.88,
+        "default_pitch": -1.0,
+        "warmth_boost": 0.14,
+    },
+    "divine-radha": {
+        "name": "Radha",
+        "gender": "female",
+        "style": "divine",
+        "elevenlabs_voice_id": "21m00Tcm4TlvDq8ikWAM",  # Rachel (calm)
+        "elevenlabs_model": "eleven_multilingual_v2",
+        "sarvam_speaker": "pavithra",
+        "description": "The divine beloved Radha — pure devotion embodied in voice, "
+                       "tender as a lotus, deep as eternal love.",
+        "default_speed": 0.83,
+        "default_pitch": 0.5,
+        "warmth_boost": 0.16,
+    },
 }
 
 
@@ -369,7 +510,71 @@ BREATH_INSERTIONS = [
     (r"\b(But here's what)\b", r'<break time="250ms"/>\1'),
 ]
 
+# Sacred emphasis words for divine voice personas
+SACRED_EMPHASIS_WORDS = {
+    "om": "strong",
+    "shanti": "strong",
+    "namaste": "moderate",
+    "dharma": "strong",
+    "karma": "strong",
+    "atman": "strong",
+    "brahman": "strong",
+    "moksha": "strong",
+    "bhakti": "strong",
+    "prana": "moderate",
+    "yoga": "moderate",
+    "mantra": "moderate",
+    "shakti": "strong",
+    "guru": "moderate",
+    "deva": "moderate",
+    "divine": "strong",
+    "sacred": "strong",
+    "eternal": "strong",
+    "infinite": "strong",
+    "soul": "strong",
+    "spirit": "moderate",
+    "wisdom": "strong",
+    "truth": "strong",
+    "peace": "strong",
+    "light": "moderate",
+    "consciousness": "strong",
+    "awakening": "strong",
+    "liberation": "strong",
+    "devotion": "strong",
+    "surrender": "strong",
+}
 
+# Sacred pause patterns for divine speech (longer, more reverential)
+SACRED_PAUSE_PATTERNS = [
+    (r"\.{3,}", '<break time="1200ms"/>'),
+    (r"\.\s+", '<break time="700ms"/> '),
+    (r"\?\s+", '<break time="600ms"/> '),
+    (r"!\s+", '<break time="500ms"/> '),
+    (r",\s+", '<break time="300ms"/> '),
+    (r"—", '<break time="500ms"/>'),
+    (r"\s+-\s+", '<break time="400ms"/> '),
+    # Sacred text markers
+    (r"\|\|", '<break time="800ms"/>'),  # Verse boundary marker
+    (r"॥", '<break time="800ms"/>'),     # Devanagari verse end
+    (r"।", '<break time="500ms"/>'),     # Devanagari danda
+]
+
+# Sacred breath patterns for divine voice
+SACRED_BREATH_INSERTIONS = [
+    (r"\b(Om)\b", r'<break time="500ms"/>\1<break time="500ms"/>'),
+    (r"\b(Shanti)\b", r'<break time="300ms"/>\1<break time="400ms"/>'),
+    (r"\b(Namaste)\b", r'<break time="300ms"/>\1<break time="300ms"/>'),
+    (r"\b(Hari Om)\b", r'<break time="400ms"/>\1<break time="500ms"/>'),
+    (r"\b(Om Namah Shivaya)\b", r'<break time="500ms"/>\1<break time="600ms"/>'),
+    (r"\b(Om Shanti)\b", r'<break time="500ms"/>\1<break time="600ms"/>'),
+]
+
+
+
+
+def _is_divine_voice(voice_id: str) -> bool:
+    """Check if the voice persona is a divine/sacred voice."""
+    return voice_id.startswith("divine-")
 
 
 def build_companion_ssml(
@@ -378,17 +583,31 @@ def build_companion_ssml(
     voice_id: str = "sarvam-aura",
     language: str = "en",
 ) -> dict[str, Any]:
-    """Build SSML for companion voice synthesis with emotion-adaptive prosody."""
+    """Build SSML for companion voice synthesis with emotion-adaptive prosody.
+
+    When a divine voice persona is selected, applies sacred pause patterns,
+    mantric breathing, and reverential emphasis for a transcendent quality.
+    """
     profile = EMOTION_VOICE_PROFILES.get(mood, EMOTION_VOICE_PROFILES["neutral"])
     voice = COMPANION_VOICES.get(voice_id, COMPANION_VOICES["sarvam-aura"])
+    is_divine = _is_divine_voice(voice_id)
 
     speed = profile["rate_value"] * voice["default_speed"]
     pitch = float(profile["pitch"].replace("st", "")) + voice["default_pitch"]
     pause_mult = profile["pause_multiplier"]
 
+    # Divine voices get extra warmth boost applied to speed (slower = warmer)
+    if is_divine:
+        warmth_boost = voice.get("warmth_boost", 0.1)
+        speed = speed * (1.0 - warmth_boost)
+        pause_mult = pause_mult * 1.3  # Longer sacred pauses
+
     ssml_text = _escape_ssml(text)
 
-    for pattern, replacement in NATURAL_PAUSE_PATTERNS:
+    # Select pause patterns based on voice type
+    pause_patterns = SACRED_PAUSE_PATTERNS if is_divine else NATURAL_PAUSE_PATTERNS
+
+    for pattern, replacement in pause_patterns:
         if "time=" in replacement:
             import re as re_mod
 
@@ -400,18 +619,23 @@ def build_companion_ssml(
         else:
             ssml_text = re.sub(pattern, replacement, ssml_text)
 
-    for pattern, replacement in BREATH_INSERTIONS:
+    # Apply breath insertions (sacred for divine, natural for regular)
+    breath_patterns = SACRED_BREATH_INSERTIONS if is_divine else BREATH_INSERTIONS
+    for pattern, replacement in breath_patterns:
         ssml_text = re.sub(pattern, replacement, ssml_text, flags=re.IGNORECASE)
 
-    for word, level in EMPHASIS_WORDS.items():
+    # Apply emphasis words (sacred + regular for divine, regular only for others)
+    emphasis_words = {**EMPHASIS_WORDS, **SACRED_EMPHASIS_WORDS} if is_divine else EMPHASIS_WORDS
+    for word, level in emphasis_words.items():
         pattern = rf"\b({word})\b"
         replacement = f'<emphasis level="{level}">\\1</emphasis>'
         ssml_text = re.sub(pattern, replacement, ssml_text, flags=re.IGNORECASE, count=2)
 
     if profile.get("breathing"):
+        breath_time = "1200ms" if is_divine else "800ms"
         ssml_text = ssml_text.replace(
             "\n\n",
-            '\n<break time="800ms"/><mark name="breath"/>\n'
+            f'\n<break time="{breath_time}"/><mark name="breath"/>\n'
         )
 
     rate_pct = int((speed - 1.0) * 100)
@@ -436,6 +660,7 @@ def build_companion_ssml(
         "voice_id": voice_id,
         "language": language,
         "gender": voice.get("gender", "female"),
+        "is_divine": is_divine,
     }
 
 
@@ -756,8 +981,33 @@ def get_available_voices() -> list[dict[str, Any]]:
     ]
 
 
-def get_voice_for_mood(mood: str) -> str:
-    """Select the best voice persona for a given mood."""
+def get_voice_for_mood(mood: str, prefer_divine: bool = False) -> str:
+    """Select the best voice persona for a given mood.
+
+    When prefer_divine is True, sacred/divine moods use divine voice personas.
+    """
+    if prefer_divine:
+        divine_mood_to_voice = {
+            "devotional": "divine-radha",
+            "transcendent": "divine-shiva",
+            "blissful": "divine-krishna",
+            "sacred": "divine-shiva",
+            "compassionate": "divine-ganga",
+            "meditative": "divine-saraswati",
+            "peaceful": "divine-saraswati",
+            "grateful": "divine-krishna",
+            "hopeful": "divine-hanuman",
+            "anxious": "divine-ganga",
+            "sad": "divine-ganga",
+            "fearful": "divine-hanuman",
+            "lonely": "divine-radha",
+            "overwhelmed": "divine-shiva",
+            "neutral": "divine-krishna",
+        }
+        result = divine_mood_to_voice.get(mood)
+        if result:
+            return result
+
     mood_to_voice = {
         "anxious": "sarvam-aura",
         "sad": "sarvam-aura",
@@ -776,6 +1026,13 @@ def get_voice_for_mood(mood: str) -> str:
         "stressed": "sarvam-rishi",
         "guilty": "elevenlabs-nova",
         "jealous": "elevenlabs-nova",
+        # Divine moods fallback to appropriate non-divine voices
+        "devotional": "sarvam-rishi",
+        "transcendent": "sarvam-rishi",
+        "blissful": "elevenlabs-nova",
+        "sacred": "sarvam-rishi",
+        "compassionate": "sarvam-aura",
+        "meditative": "sarvam-rishi",
     }
     return mood_to_voice.get(mood, "elevenlabs-nova")
 
