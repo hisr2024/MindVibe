@@ -101,12 +101,16 @@ WISDOM INTEGRATION (CRITICAL)
 
 You will receive a [WISDOM_CORE_CONTEXT] block containing:
 1. RELATIONSHIP PRINCIPLES — curated, secular principles with philosophical roots
-2. SUPPORTING WISDOM — relevant wisdom from a 700+ verse philosophical corpus
-3. EXTENDED INSIGHTS — validated expert commentary and analysis
+2. CORE WISDOM — the most relevant verses from a 700+ verse philosophical corpus,
+   ranked by relevance to the user's specific situation, emotion, and mode
+3. DYNAMIC WISDOM — additional verse matches from database search
+4. EXTENDED INSIGHTS — validated expert commentary and analysis
 
 USE this context to:
 - Ground your response in time-tested wisdom (not just opinion)
 - Reference principles naturally (e.g., "There's a principle that applies here:")
+- Draw from CORE WISDOM verses to inform your deeper insight section
+- Synthesize multiple verse teachings into coherent modern guidance
 - Present insights in accessible modern language
 - Draw practical guidance from philosophical depth
 
@@ -462,10 +466,10 @@ class WisdomSynthesizer:
         mode: str,
         emotion: str,
     ) -> str:
-        """Build the wisdom insight section from principles.
+        """Build the wisdom insight section from principles and static corpus.
 
-        Selects the most relevant principle and presents it in
-        accessible, modern language.
+        Combines the most relevant curated principle with wisdom drawn
+        from the full 700+ verse corpus to create a richer insight.
 
         Args:
             wisdom_context: The gathered wisdom.
@@ -476,9 +480,9 @@ class WisdomSynthesizer:
             Wisdom insight paragraph.
         """
         principles = wisdom_context.principles
+        static_verses = wisdom_context.static_verses
 
-        if not principles:
-            # Generic insight
+        if not principles and not static_verses:
             return (
                 "There's a principle worth considering: the only behavior you "
                 "control in any relationship is your own. That's not a limitation "
@@ -487,18 +491,40 @@ class WisdomSynthesizer:
                 "integrity, you stop being at the mercy of their choices."
             )
 
-        # Pick the best principle for this situation
-        primary = principles[0]
+        parts: list[str] = []
 
-        # Build insight from principle + explanation
-        insight = f"{primary.principle}. {primary.explanation}"
+        # Primary principle
+        if principles:
+            primary = principles[0]
+            parts.append(f"{primary.principle}. {primary.explanation}")
 
-        # Add supporting principle if available
-        if len(principles) > 1:
+        # Enrich with the top-scoring static corpus verse
+        if static_verses:
+            top_verse = static_verses[0]
+            english = top_verse.get("english", "").strip()
+            if english and len(english) > 30:
+                # Extract the core teaching in secular framing
+                principle_text = top_verse.get("principle", "")
+                if principle_text and "Core teaching" not in principle_text:
+                    parts.append(
+                        f"A deeper insight applies here: {principle_text.lower()}. "
+                        f"This points to a fundamental truth about how we relate "
+                        f"to others and to ourselves."
+                    )
+                elif english:
+                    # Use a condensed version of the verse's wisdom
+                    condensed = english[:200].rsplit(" ", 1)[0] if len(english) > 200 else english
+                    parts.append(
+                        f"There's a deeper teaching that speaks to this: "
+                        f"the idea that {condensed.lower().lstrip()}"
+                    )
+
+        # Add secondary principle if we still have room
+        if len(principles) > 1 and len(" ".join(parts)) < 400:
             secondary = principles[1]
-            insight += f" And consider this: {secondary.explanation.lower()}"
+            parts.append(f"And consider this: {secondary.explanation.lower()}")
 
-        return insight
+        return " ".join(parts)
 
 
 # =============================================================================

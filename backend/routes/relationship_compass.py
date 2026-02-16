@@ -1361,8 +1361,11 @@ async def unified_clarity(
     if payload.include_wisdom_sources:
         response["wisdom_metadata"] = {
             "total_sources": wisdom_context.total_sources,
+            "total_corpus_verses": wisdom_context.total_corpus_verses,
+            "corpus_chapters": wisdom_context.corpus_chapters,
             "principles_used": len(wisdom_context.principles),
-            "gita_verses_found": len(wisdom_context.gita_verses),
+            "static_verses_matched": len(wisdom_context.static_verses),
+            "dynamic_verses_found": len(wisdom_context.gita_verses),
             "learned_wisdom_found": len(wisdom_context.learned_wisdom),
             "wisdom_confidence": wisdom_context.confidence,
             "principles": [
@@ -1372,6 +1375,15 @@ async def unified_clarity(
                     "explanation": p.explanation,
                 }
                 for p in wisdom_context.principles[:4]
+            ],
+            "top_verses": [
+                {
+                    "ref": v.get("verse_ref", ""),
+                    "theme": v.get("theme", ""),
+                    "chapter_name": v.get("chapter_name", ""),
+                    "score": v.get("score", 0),
+                }
+                for v in wisdom_context.static_verses[:4]
             ],
         }
 
@@ -1396,27 +1408,30 @@ async def unified_health() -> dict[str, Any]:
 
     # Check WisdomCore
     wisdom_core_ready = False
+    corpus_stats: dict[str, Any] = {}
     try:
         rwc = get_relationship_wisdom_core()
         test_principles = rwc.get_principles(mode="conflict", limit=1)
         wisdom_core_ready = len(test_principles) > 0
+        corpus_stats = rwc.get_corpus_stats()
     except Exception:
         pass
 
     return {
         "status": "ok",
         "service": "relationship-compass-unified",
-        "version": "4.0",
+        "version": "5.0",
         "ai_available": openai_key or provider_available,
         "provider_manager": provider_available,
         "wisdom_core_ready": wisdom_core_ready,
-        "static_principles": len(RELATIONSHIP_PRINCIPLES) if wisdom_core_ready else 0,
+        "corpus_stats": corpus_stats,
         "fallback": "wisdom_enhanced_rule_based",
         "capabilities": [
             "mode_detection",
             "emotion_precision",
             "mechanism_identification",
             "safety_detection",
+            "full_corpus_search",
             "wisdom_core_integration",
             "static_principles",
             "dynamic_gita_retrieval",

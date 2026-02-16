@@ -1,19 +1,30 @@
-"""Relationship Wisdom Core - Static + Dynamic wisdom for Relationship Compass.
+"""Relationship Wisdom Core - Full 700+ Verse Corpus + Dynamic Wisdom for Relationship Compass.
 
 This module is the relationship-specific wisdom layer that sits on top of
-the general WisdomCore. It provides curated relationship wisdom from the
-Bhagavad Gita mapped to universal human relationship principles, plus
-dynamic wisdom generation via OpenAI.
+the general WisdomCore. It provides:
+
+1. FULL STATIC CORPUS: All 700+ Bhagavad Gita verses loaded from JSON at startup,
+   indexed by theme, mental_health_application, chapter, and keywords for fast
+   relationship-relevant retrieval.
+2. CURATED PRINCIPLES: 20 hand-crafted relationship principles (Gita-derived,
+   secular framing) for the highest-quality targeted guidance.
+3. DYNAMIC WISDOM: WisdomCore integration for DB-stored Gita verses + learned
+   wisdom from the 24/7 daemon.
 
 Architecture:
     RelationshipWisdomCore
-    ├── Static Wisdom Layer
-    │   ├── 50 curated relationship principles (Gita-derived, secular framing)
+    ├── Full Static Corpus (700+ verses from JSON)
+    │   ├── In-memory index by mental_health_application
+    │   ├── In-memory index by theme
+    │   ├── In-memory index by chapter
+    │   ├── Relationship-relevance scoring engine
+    │   └── Keyword search across English translations
+    ├── Curated Principles Layer (20 relationship principles)
     │   ├── Emotion-to-principle mapping
     │   ├── Mode-to-wisdom routing (conflict, boundary, repair, etc.)
     │   └── Relationship-type specific guidance
     ├── Dynamic Wisdom Layer (WisdomCore integration)
-    │   ├── Gita verse search by emotion/theme
+    │   ├── DB Gita verse search by emotion/theme
     │   ├── Learned wisdom retrieval (validated)
     │   └── Shad Ripu enemy-based routing
     └── Synthesis Interface
@@ -34,8 +45,10 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,14 +84,17 @@ class RelationshipPrinciple:
 class WisdomContext:
     """Aggregated wisdom context for the synthesizer.
 
-    Combines static principles, dynamic Gita verses, and learned wisdom
-    into a single context block that the OpenAI synthesizer can use.
+    Combines curated principles, full-corpus verse matches, dynamic DB
+    verses, and learned wisdom into a single context block for synthesis.
     """
 
-    # Static curated principles
+    # Curated relationship principles
     principles: list[RelationshipPrinciple] = field(default_factory=list)
 
-    # Dynamic Gita verses (from WisdomCore)
+    # Static corpus matches (from 700+ JSON verses)
+    static_verses: list[dict[str, Any]] = field(default_factory=list)
+
+    # Dynamic Gita verses (from WisdomCore DB)
     gita_verses: list[dict[str, Any]] = field(default_factory=list)
 
     # Learned wisdom (from 24/7 daemon)
@@ -89,6 +105,10 @@ class WisdomContext:
     primary_emotion: str = ""
     relationship_type: str = "romantic"
     mechanism: str = ""
+
+    # Full corpus stats
+    total_corpus_verses: int = 0
+    corpus_chapters: int = 18
 
     # Metadata
     total_sources: int = 0
@@ -103,21 +123,41 @@ class WisdomContext:
         lines = ["[WISDOM_CORE_CONTEXT]"]
         lines.append(f"Mode: {self.mode} | Emotion: {self.primary_emotion}")
         lines.append(f"Relationship: {self.relationship_type} | Mechanism: {self.mechanism}")
+        lines.append(f"Corpus: {self.total_corpus_verses} verses across {self.corpus_chapters} chapters")
         lines.append("")
 
-        # Static principles
+        # Curated principles
         if self.principles:
             lines.append("--- RELATIONSHIP PRINCIPLES (curated, secular) ---")
-            for p in self.principles[:8]:
+            for p in self.principles[:6]:
                 lines.append(f"- [{p.id}] {p.principle}")
                 lines.append(f"  Insight: {p.explanation}")
                 lines.append(f"  Source wisdom: {p.gita_essence} ({p.gita_source})")
                 lines.append("")
 
-        # Dynamic Gita verses
+        # Static corpus matches (full 700+ verse corpus search results)
+        if self.static_verses:
+            lines.append(f"--- CORE WISDOM (from {self.total_corpus_verses}-verse corpus, ranked by relevance) ---")
+            for v in self.static_verses[:8]:
+                ref = v.get("verse_ref", "")
+                english = v.get("english", "")
+                theme = v.get("theme", "")
+                principle = v.get("principle", "")
+                score = v.get("score", 0)
+                lines.append(f"- {ref} [score={score:.1f}]: {english[:250]}")
+                if principle:
+                    lines.append(f"  Principle: {principle}")
+                if theme:
+                    lines.append(f"  Theme: {theme.replace('_', ' ').title()}")
+                mh_apps = v.get("mental_health_applications", [])
+                if mh_apps:
+                    lines.append(f"  Applications: {', '.join(mh_apps[:5])}")
+                lines.append("")
+
+        # Dynamic DB verses
         if self.gita_verses:
-            lines.append("--- SUPPORTING WISDOM (from 700+ verse corpus) ---")
-            for v in self.gita_verses[:6]:
+            lines.append("--- DYNAMIC WISDOM (from database search) ---")
+            for v in self.gita_verses[:4]:
                 ref = v.get("verse_ref", v.get("ref", ""))
                 content = v.get("content", v.get("english", ""))
                 theme = v.get("theme", "")
@@ -137,6 +177,153 @@ class WisdomContext:
 
         lines.append("[/WISDOM_CORE_CONTEXT]")
         return "\n".join(lines)
+
+
+# =============================================================================
+# FULL GITA CORPUS LOADING (700+ verses from static JSON)
+# =============================================================================
+
+_GITA_CORPUS: list[dict[str, Any]] = []
+_CORPUS_PATH = Path(__file__).parent.parent.parent / "data" / "gita" / "gita_verses_complete.json"
+
+# In-memory indices for fast lookup
+_INDEX_BY_MH_APP: dict[str, list[int]] = {}  # mental_health_application -> verse indices
+_INDEX_BY_THEME: dict[str, list[int]] = {}  # theme -> verse indices
+_INDEX_BY_CHAPTER: dict[int, list[int]] = {}  # chapter -> verse indices
+_INDEX_BY_KEYWORD: dict[str, list[int]] = {}  # keyword -> verse indices
+
+# Relationship-relevant mental health applications (mapped to modes/emotions)
+_MH_APP_TO_MODE: dict[str, list[str]] = {
+    "conflict_resolution": ["conflict", "repair"],
+    "emotional_regulation": ["conflict", "pattern", "courage"],
+    "self_awareness": ["pattern", "courage", "decision"],
+    "anxiety_management": ["conflict", "boundary", "decision"],
+    "anger_management": ["conflict", "boundary"],
+    "emotional_recognition": ["conflict", "pattern"],
+    "forgiveness": ["repair", "pattern"],
+    "communication": ["conflict", "repair", "boundary"],
+    "trust_building": ["repair", "decision"],
+    "self_compassion": ["courage", "pattern"],
+    "decision_making": ["decision", "courage"],
+    "boundary_setting": ["boundary", "courage"],
+    "stress_management": ["conflict", "pattern"],
+    "grief_processing": ["decision", "pattern"],
+    "acceptance": ["decision", "pattern", "repair"],
+    "detachment": ["boundary", "decision", "conflict"],
+    "equanimity": ["conflict", "decision", "pattern"],
+    "mindfulness": ["conflict", "pattern", "courage"],
+    "resilience": ["pattern", "courage", "decision"],
+    "self_worth": ["boundary", "courage", "decision"],
+    "patience": ["conflict", "repair", "pattern"],
+    "compassion": ["repair", "conflict", "pattern"],
+    "inner_peace": ["conflict", "decision", "pattern"],
+    "duty": ["boundary", "decision", "courage"],
+    "beginning": ["decision", "courage"],
+}
+
+_MH_APP_TO_EMOTION: dict[str, list[str]] = {
+    "conflict_resolution": ["angry", "frustrated", "resentful"],
+    "emotional_regulation": ["angry", "anxious", "hurt", "overwhelmed"],
+    "self_awareness": ["confused", "lost", "disconnected"],
+    "anxiety_management": ["anxious", "powerless", "afraid"],
+    "anger_management": ["angry", "furious", "resentful", "frustrated"],
+    "emotional_recognition": ["confused", "numb", "disconnected"],
+    "forgiveness": ["resentful", "hurt", "betrayed"],
+    "communication": ["frustrated", "dismissed", "unheard"],
+    "trust_building": ["betrayed", "suspicious", "insecure"],
+    "self_compassion": ["guilty", "inadequate", "exhausted"],
+    "decision_making": ["confused", "anxious", "powerless"],
+    "boundary_setting": ["suffocated", "exhausted", "resentful"],
+    "stress_management": ["exhausted", "overwhelmed", "anxious"],
+    "grief_processing": ["hurt", "abandoned", "lonely", "disappointed"],
+    "acceptance": ["disappointed", "hurt", "confused"],
+    "detachment": ["anxious", "powerless", "suffocated"],
+    "equanimity": ["angry", "anxious", "hurt", "confused"],
+    "mindfulness": ["anxious", "angry", "confused"],
+    "resilience": ["hurt", "exhausted", "disappointed"],
+    "self_worth": ["inadequate", "dismissed", "humiliated"],
+    "patience": ["frustrated", "anxious", "angry"],
+    "compassion": ["hurt", "resentful", "lonely"],
+    "inner_peace": ["anxious", "overwhelmed", "confused"],
+    "duty": ["confused", "guilty", "powerless"],
+    "beginning": ["confused", "anxious", "lost"],
+}
+
+# Relationship-important chapters with boost factors
+_CHAPTER_RELATIONSHIP_BOOST: dict[int, float] = {
+    2: 1.6,   # Sankhya Yoga - equanimity, grief, steady wisdom
+    3: 1.4,   # Karma Yoga - action, duty, selfless service
+    5: 1.2,   # Karma Sannyasa - renunciation, peace
+    6: 1.5,   # Dhyana Yoga - mind control, meditation, self-mastery
+    12: 1.5,  # Bhakti Yoga - devotion, compassion, divine qualities
+    13: 1.2,  # Kshetra Kshetrajna - knowledge, humility
+    14: 1.1,  # Gunatraya Vibhaga - three qualities (sattva/rajas/tamas)
+    16: 1.4,  # Daivasura Sampad - divine vs demonic qualities
+    17: 1.3,  # Shraddhatraya - faith, speech, austerity
+    18: 1.3,  # Moksha Sannyasa - liberation, surrender, conclusion
+}
+
+
+def _load_and_index_corpus() -> None:
+    """Load the full 700+ verse corpus from JSON and build in-memory indices.
+
+    Called once at module load. Builds fast-lookup indices for:
+    - mental_health_applications -> verse indices
+    - theme -> verse indices
+    - chapter -> verse indices
+    - English keywords -> verse indices
+    """
+    global _GITA_CORPUS
+    global _INDEX_BY_MH_APP, _INDEX_BY_THEME, _INDEX_BY_CHAPTER, _INDEX_BY_KEYWORD
+
+    try:
+        if not _CORPUS_PATH.exists():
+            logger.warning(f"Gita corpus not found at {_CORPUS_PATH}")
+            return
+
+        with open(_CORPUS_PATH, "r", encoding="utf-8") as f:
+            _GITA_CORPUS = json.load(f)
+
+        logger.info(f"RelationshipWisdomCore: Loaded {len(_GITA_CORPUS)} verses from corpus")
+
+        # Build indices
+        for idx, verse in enumerate(_GITA_CORPUS):
+            # Index by mental health applications
+            for app in verse.get("mental_health_applications", []):
+                app_lower = app.lower().strip()
+                _INDEX_BY_MH_APP.setdefault(app_lower, []).append(idx)
+
+            # Index by theme
+            theme = verse.get("theme", "").lower().strip()
+            if theme:
+                _INDEX_BY_THEME.setdefault(theme, []).append(idx)
+
+            # Index by chapter
+            chapter = verse.get("chapter", 0)
+            if chapter:
+                _INDEX_BY_CHAPTER.setdefault(chapter, []).append(idx)
+
+            # Index by significant English keywords (words > 4 chars)
+            english = verse.get("english", "").lower()
+            for word in english.split():
+                cleaned = word.strip(".,;:!?\"'()-—")
+                if len(cleaned) > 4 and cleaned.isalpha():
+                    _INDEX_BY_KEYWORD.setdefault(cleaned, []).append(idx)
+
+        logger.info(
+            f"RelationshipWisdomCore indices built: "
+            f"{len(_INDEX_BY_MH_APP)} mh_apps, "
+            f"{len(_INDEX_BY_THEME)} themes, "
+            f"{len(_INDEX_BY_CHAPTER)} chapters, "
+            f"{len(_INDEX_BY_KEYWORD)} keywords"
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to load Gita corpus: {e}")
+
+
+# Load corpus at module import time
+_load_and_index_corpus()
 
 
 # =============================================================================
@@ -372,7 +559,7 @@ RELATIONSHIP_PRINCIPLES: list[RelationshipPrinciple] = [
     ),
 ]
 
-# Build lookup indices for fast retrieval
+# Build lookup indices for fast principle retrieval
 _PRINCIPLES_BY_MODE: dict[str, list[RelationshipPrinciple]] = {}
 _PRINCIPLES_BY_EMOTION: dict[str, list[RelationshipPrinciple]] = {}
 _PRINCIPLES_BY_TYPE: dict[str, list[RelationshipPrinciple]] = {}
@@ -392,11 +579,19 @@ for _p in RELATIONSHIP_PRINCIPLES:
 
 
 class RelationshipWisdomCore:
-    """Relationship-specific wisdom layer on top of WisdomCore.
+    """Full-corpus relationship wisdom layer with 700+ verses + WisdomCore.
 
-    Provides curated static principles and integrates with the dynamic
-    WisdomCore for verse retrieval and learned wisdom.
+    Loads the entire Gita corpus at startup, builds in-memory indices,
+    and provides fast relationship-relevant verse retrieval alongside
+    curated principles and dynamic learned wisdom.
     """
+
+    # Scoring weights for corpus search
+    MH_APP_WEIGHT = 4.0    # Mental health application match
+    THEME_WEIGHT = 3.0      # Theme match
+    KEYWORD_WEIGHT = 1.5    # Keyword in English translation
+    PRINCIPLE_WEIGHT = 2.0  # Principle text match
+    CHAPTER_BOOST_MAX = 1.6 # Max chapter relevance boost
 
     def __init__(self) -> None:
         """Initialize the RelationshipWisdomCore."""
@@ -412,6 +607,10 @@ class RelationshipWisdomCore:
                 logger.warning(f"WisdomCore unavailable: {e}")
         return self._wisdom_core
 
+    # =========================================================================
+    # CURATED PRINCIPLES RETRIEVAL
+    # =========================================================================
+
     def get_principles(
         self,
         mode: str = "",
@@ -419,7 +618,7 @@ class RelationshipWisdomCore:
         relationship_type: str = "",
         limit: int = 6,
     ) -> list[RelationshipPrinciple]:
-        """Retrieve relevant static principles by mode, emotion, and type.
+        """Retrieve relevant curated principles by mode, emotion, and type.
 
         Scores principles by relevance across all three dimensions and
         returns the top matches.
@@ -435,27 +634,363 @@ class RelationshipWisdomCore:
         """
         scored: dict[str, float] = {}
 
-        # Score by mode (highest weight)
         for p in _PRINCIPLES_BY_MODE.get(mode, []):
             scored[p.id] = scored.get(p.id, 0) + 3.0
 
-        # Score by emotion
         for p in _PRINCIPLES_BY_EMOTION.get(emotion, []):
             scored[p.id] = scored.get(p.id, 0) + 2.0
 
-        # Score by relationship type
         for p in _PRINCIPLES_BY_TYPE.get(relationship_type, []):
             scored[p.id] = scored.get(p.id, 0) + 1.5
 
         if not scored:
-            # Return general principles if no specific match
             return RELATIONSHIP_PRINCIPLES[:limit]
 
-        # Sort by score descending
         sorted_ids = sorted(scored, key=lambda x: scored[x], reverse=True)
         id_lookup = {p.id: p for p in RELATIONSHIP_PRINCIPLES}
 
         return [id_lookup[pid] for pid in sorted_ids[:limit] if pid in id_lookup]
+
+    # =========================================================================
+    # FULL CORPUS SEARCH (700+ verses from static JSON)
+    # =========================================================================
+
+    def search_corpus(
+        self,
+        situation: str,
+        mode: str = "conflict",
+        emotion: str = "",
+        mechanism: str = "",
+        relationship_type: str = "romantic",
+        limit: int = 8,
+    ) -> list[dict[str, Any]]:
+        """Search the full 700+ verse corpus for relationship-relevant wisdom.
+
+        Uses multi-signal scoring across mental_health_applications, themes,
+        keywords, and chapter relevance to find the most applicable verses.
+
+        Args:
+            situation: The user's relationship situation text.
+            mode: Detected relationship mode.
+            emotion: Primary emotion.
+            mechanism: Detected psychological mechanism.
+            relationship_type: Type of relationship.
+            limit: Maximum verses to return.
+
+        Returns:
+            List of verse dicts with scores, sorted by relevance.
+        """
+        if not _GITA_CORPUS:
+            return []
+
+        situation_lower = situation.lower()
+        situation_words = {
+            w.strip(".,;:!?\"'()-—")
+            for w in situation_lower.split()
+            if len(w.strip(".,;:!?\"'()-—")) > 3
+        }
+
+        # Collect candidate verse indices from indices (avoid scoring all 700+)
+        candidate_indices: dict[int, float] = {}
+
+        # 1. Score by mental health application matches
+        relevant_apps = self._get_relevant_mh_apps(mode, emotion, mechanism, situation_words)
+        for app in relevant_apps:
+            app_lower = app.lower()
+            for idx in _INDEX_BY_MH_APP.get(app_lower, []):
+                candidate_indices[idx] = candidate_indices.get(idx, 0) + self.MH_APP_WEIGHT
+
+        # 2. Score by theme matches
+        relevant_themes = self._get_relevant_themes(mode, emotion, situation_words)
+        for theme in relevant_themes:
+            theme_lower = theme.lower()
+            for idx in _INDEX_BY_THEME.get(theme_lower, []):
+                candidate_indices[idx] = candidate_indices.get(idx, 0) + self.THEME_WEIGHT
+
+        # 3. Score by keyword matches in English text
+        for word in situation_words:
+            if len(word) > 4:
+                for idx in _INDEX_BY_KEYWORD.get(word, []):
+                    candidate_indices[idx] = candidate_indices.get(idx, 0) + self.KEYWORD_WEIGHT
+
+        # 4. If we have very few candidates, broaden search via chapter relevance
+        if len(candidate_indices) < limit * 2:
+            for chapter, boost in _CHAPTER_RELATIONSHIP_BOOST.items():
+                for idx in _INDEX_BY_CHAPTER.get(chapter, []):
+                    if idx not in candidate_indices:
+                        candidate_indices[idx] = boost * 0.5  # Lower base score
+
+        # Score and rank candidates
+        scored_results: list[tuple[float, int]] = []
+        for idx, base_score in candidate_indices.items():
+            verse = _GITA_CORPUS[idx]
+            final_score = self._score_verse_for_relationship(
+                verse, base_score, situation_lower, situation_words,
+                mode, emotion, mechanism, relationship_type,
+            )
+            if final_score > 0:
+                scored_results.append((final_score, idx))
+
+        scored_results.sort(key=lambda x: x[0], reverse=True)
+
+        # Build result dicts
+        results: list[dict[str, Any]] = []
+        seen_refs: set[str] = set()
+
+        for score, idx in scored_results[:limit * 2]:
+            verse = _GITA_CORPUS[idx]
+            chapter = verse.get("chapter", 0)
+            verse_num = verse.get("verse", 0)
+            ref = f"BG {chapter}.{verse_num}"
+
+            if ref in seen_refs:
+                continue
+            seen_refs.add(ref)
+
+            results.append({
+                "verse_ref": ref,
+                "chapter": chapter,
+                "verse": verse_num,
+                "english": verse.get("english", "").strip(),
+                "sanskrit": verse.get("sanskrit", ""),
+                "transliteration": verse.get("transliteration", ""),
+                "hindi": verse.get("hindi", ""),
+                "theme": verse.get("theme", ""),
+                "principle": verse.get("principle", ""),
+                "chapter_name": verse.get("chapter_name", ""),
+                "mental_health_applications": verse.get("mental_health_applications", []),
+                "score": round(score, 2),
+            })
+
+            if len(results) >= limit:
+                break
+
+        return results
+
+    def _score_verse_for_relationship(
+        self,
+        verse: dict[str, Any],
+        base_score: float,
+        situation_lower: str,
+        situation_words: set[str],
+        mode: str,
+        emotion: str,
+        mechanism: str,
+        relationship_type: str,
+    ) -> float:
+        """Fine-grained scoring of a verse for relationship relevance.
+
+        Args:
+            verse: The verse dict from the corpus.
+            base_score: Initial score from index lookups.
+            situation_lower: Lowercased user situation text.
+            situation_words: Set of significant words from situation.
+            mode: Detected relationship mode.
+            emotion: Primary emotion.
+            mechanism: Psychological mechanism.
+            relationship_type: Type of relationship.
+
+        Returns:
+            Final relevance score.
+        """
+        score = base_score
+
+        # Chapter relevance boost
+        chapter = verse.get("chapter", 0)
+        chapter_boost = _CHAPTER_RELATIONSHIP_BOOST.get(chapter, 1.0)
+        score *= chapter_boost
+
+        # Principle text relevance
+        principle = verse.get("principle", "").lower()
+        if principle:
+            for word in situation_words:
+                if word in principle:
+                    score += self.PRINCIPLE_WEIGHT
+                    break
+
+        # Mode-specific mental health app matching
+        mh_apps = verse.get("mental_health_applications", [])
+        mode_relevant_apps = set()
+        for app, modes in _MH_APP_TO_MODE.items():
+            if mode in modes:
+                mode_relevant_apps.add(app)
+
+        for app in mh_apps:
+            if app.lower() in mode_relevant_apps:
+                score += 1.5
+
+        # Emotion-specific mental health app matching
+        emotion_relevant_apps = set()
+        for app, emotions in _MH_APP_TO_EMOTION.items():
+            if emotion in emotions:
+                emotion_relevant_apps.add(app)
+
+        for app in mh_apps:
+            if app.lower() in emotion_relevant_apps:
+                score += 1.0
+
+        # Mechanism keyword boost
+        if mechanism:
+            mechanism_keywords = mechanism.lower().replace("_", " ").split()
+            english_lower = verse.get("english", "").lower()
+            for kw in mechanism_keywords:
+                if len(kw) > 3 and kw in english_lower:
+                    score += 1.0
+
+        return score
+
+    def _get_relevant_mh_apps(
+        self,
+        mode: str,
+        emotion: str,
+        mechanism: str,
+        situation_words: set[str],
+    ) -> list[str]:
+        """Determine which mental_health_applications are relevant for this query.
+
+        Args:
+            mode: Detected relationship mode.
+            emotion: Primary emotion.
+            mechanism: Psychological mechanism.
+            situation_words: Significant words from user's situation.
+
+        Returns:
+            List of relevant mental health application keys.
+        """
+        apps: set[str] = set()
+
+        # Mode-based apps
+        for app, modes in _MH_APP_TO_MODE.items():
+            if mode in modes:
+                apps.add(app)
+
+        # Emotion-based apps
+        for app, emotions in _MH_APP_TO_EMOTION.items():
+            if emotion in emotions:
+                apps.add(app)
+
+        # Mechanism-based apps
+        if mechanism:
+            mech_lower = mechanism.lower().replace("_", " ")
+            mech_words = mech_lower.split()
+            # Direct mappings
+            mechanism_app_map: dict[str, list[str]] = {
+                "attachment": ["emotional_regulation", "detachment", "self_awareness"],
+                "ego": ["self_awareness", "self_compassion", "equanimity"],
+                "control": ["detachment", "anxiety_management", "boundary_setting"],
+                "avoidance": ["courage", "communication", "self_awareness"],
+                "projection": ["self_awareness", "mindfulness", "compassion"],
+                "codependency": ["boundary_setting", "self_worth", "detachment"],
+                "trauma": ["self_compassion", "resilience", "anxiety_management"],
+                "unmet": ["communication", "self_awareness", "boundary_setting"],
+                "betrayal": ["trust_building", "forgiveness", "grief_processing"],
+                "abandonment": ["anxiety_management", "self_worth", "resilience"],
+            }
+            for word in mech_words:
+                for key, mapped_apps in mechanism_app_map.items():
+                    if key in word:
+                        apps.update(mapped_apps)
+
+        # Situation-word based apps
+        situation_app_map: dict[str, str] = {
+            "angry": "anger_management", "anger": "anger_management",
+            "frustrated": "emotional_regulation", "hurt": "emotional_regulation",
+            "forgive": "forgiveness", "sorry": "forgiveness",
+            "trust": "trust_building", "boundary": "boundary_setting",
+            "anxious": "anxiety_management", "worried": "anxiety_management",
+            "confused": "decision_making", "decide": "decision_making",
+            "talk": "communication", "communicate": "communication",
+            "guilty": "self_compassion", "shame": "self_compassion",
+            "grief": "grief_processing", "loss": "grief_processing",
+            "stress": "stress_management", "overwhelmed": "stress_management",
+            "peace": "inner_peace", "calm": "inner_peace",
+            "patience": "patience", "patient": "patience",
+            "compassion": "compassion", "empathy": "compassion",
+            "worth": "self_worth", "enough": "self_worth",
+            "accept": "acceptance", "letting": "acceptance",
+            "detach": "detachment", "release": "detachment",
+            "aware": "self_awareness", "realize": "self_awareness",
+            "mindful": "mindfulness", "present": "mindfulness",
+            "strong": "resilience", "resilient": "resilience",
+        }
+        for word in situation_words:
+            if word in situation_app_map:
+                apps.add(situation_app_map[word])
+
+        return list(apps)
+
+    def _get_relevant_themes(
+        self,
+        mode: str,
+        emotion: str,
+        situation_words: set[str],
+    ) -> list[str]:
+        """Determine which themes are relevant for this query.
+
+        Args:
+            mode: Detected relationship mode.
+            emotion: Primary emotion.
+            situation_words: Significant words from user's situation.
+
+        Returns:
+            List of relevant theme keys.
+        """
+        themes: set[str] = set()
+
+        mode_theme_map: dict[str, list[str]] = {
+            "conflict": [
+                "emotional_crisis_moral_conflict", "anger_management_inner_peace",
+                "self_mastery_discipline", "equanimity_balanced_living",
+                "duty_righteous_action",
+            ],
+            "boundary": [
+                "duty_righteous_action", "self_mastery_discipline",
+                "courage_determination", "divine_demonic_qualities",
+            ],
+            "repair": [
+                "forgiveness_compassion", "devotion_love",
+                "selfless_action_duty", "knowledge_wisdom",
+            ],
+            "decision": [
+                "wisdom_knowledge_discernment", "duty_righteous_action",
+                "renunciation_liberation", "surrender_trust",
+            ],
+            "pattern": [
+                "self_mastery_discipline", "three_gunas_nature",
+                "knowledge_wisdom", "liberation_freedom",
+            ],
+            "courage": [
+                "courage_determination", "duty_righteous_action",
+                "divine_demonic_qualities", "self_mastery_discipline",
+            ],
+        }
+        themes.update(mode_theme_map.get(mode, []))
+
+        # Add themes based on situation keywords
+        keyword_theme_map: dict[str, str] = {
+            "anger": "anger_management_inner_peace",
+            "peace": "equanimity_balanced_living",
+            "forgive": "forgiveness_compassion",
+            "love": "devotion_love",
+            "duty": "duty_righteous_action",
+            "wisdom": "wisdom_knowledge_discernment",
+            "knowledge": "knowledge_wisdom",
+            "discipline": "self_mastery_discipline",
+            "courage": "courage_determination",
+            "surrender": "surrender_trust",
+            "liberation": "liberation_freedom",
+            "nature": "three_gunas_nature",
+        }
+        for word in situation_words:
+            for key, theme in keyword_theme_map.items():
+                if key in word:
+                    themes.add(theme)
+
+        return list(themes)
+
+    # =========================================================================
+    # UNIFIED WISDOM GATHERING
+    # =========================================================================
 
     async def gather_wisdom(
         self,
@@ -465,14 +1000,15 @@ class RelationshipWisdomCore:
         emotion: str = "",
         mechanism: str = "",
         relationship_type: str = "romantic",
-        limit: int = 6,
+        limit: int = 8,
     ) -> WisdomContext:
         """Gather all wisdom sources for the synthesizer.
 
         Combines:
-        1. Static curated principles (matched by mode/emotion/type)
-        2. Dynamic Gita verses (from WisdomCore search)
-        3. Learned wisdom (validated, from 24/7 daemon)
+        1. Curated principles (matched by mode/emotion/type)
+        2. Full static corpus search (700+ verses, relationship-scored)
+        3. Dynamic DB Gita verses (from WisdomCore search)
+        4. Learned wisdom (validated, from 24/7 daemon)
 
         Args:
             db: Database session.
@@ -491,21 +1027,32 @@ class RelationshipWisdomCore:
             primary_emotion=emotion,
             relationship_type=relationship_type,
             mechanism=mechanism,
+            total_corpus_verses=len(_GITA_CORPUS),
+            corpus_chapters=len(_INDEX_BY_CHAPTER),
         )
 
-        # 1. Static principles
+        # 1. Curated principles
         context.principles = self.get_principles(
             mode=mode,
             emotion=emotion,
             relationship_type=relationship_type,
+            limit=min(limit, 6),
+        )
+
+        # 2. Full static corpus search (700+ verses)
+        context.static_verses = self.search_corpus(
+            situation=situation,
+            mode=mode,
+            emotion=emotion,
+            mechanism=mechanism,
+            relationship_type=relationship_type,
             limit=limit,
         )
 
-        # 2. Dynamic wisdom from WisdomCore
+        # 3. Dynamic wisdom from WisdomCore (DB verses + learned wisdom)
         wisdom_core = self._get_wisdom_core()
         if wisdom_core and db:
             try:
-                # Search by situation text
                 search_query = f"{situation} {emotion} {mode} {relationship_type}"
                 results = await wisdom_core.search(
                     db=db,
@@ -515,17 +1062,23 @@ class RelationshipWisdomCore:
                     validated_only=True,
                 )
 
+                # Collect verse refs already found in static search to avoid duplicates
+                static_refs = {v.get("verse_ref") for v in context.static_verses}
+
                 for r in results:
                     if r.source.value == "gita_verse":
-                        context.gita_verses.append({
-                            "verse_ref": r.verse_ref or f"BG {r.chapter}.{r.verse}",
-                            "content": r.content,
-                            "sanskrit": r.sanskrit,
-                            "theme": r.theme,
-                            "principle": r.principle,
-                            "primary_domain": r.primary_domain,
-                            "score": r.score,
-                        })
+                        vref = r.verse_ref or f"BG {r.chapter}.{r.verse}"
+                        if vref not in static_refs:
+                            context.gita_verses.append({
+                                "verse_ref": vref,
+                                "content": r.content,
+                                "sanskrit": r.sanskrit,
+                                "theme": r.theme,
+                                "principle": r.principle,
+                                "primary_domain": r.primary_domain,
+                                "score": r.score,
+                            })
+                            static_refs.add(vref)
                     elif r.source.value == "learned":
                         context.learned_wisdom.append({
                             "content": r.content,
@@ -535,8 +1088,8 @@ class RelationshipWisdomCore:
                             "quality_score": r.quality_score,
                         })
 
-                # Also search by emotion domain if we have few results
-                if emotion and len(context.gita_verses) < 3:
+                # Supplement with emotion domain search if we have few static results
+                if emotion and len(context.static_verses) < 4:
                     emotion_domain_map = {
                         "angry": "anger", "hurt": "grief", "betrayed": "grief",
                         "anxious": "anxiety", "confused": "confusion",
@@ -550,38 +1103,60 @@ class RelationshipWisdomCore:
                     domain = emotion_domain_map.get(emotion)
                     if domain:
                         domain_results = await wisdom_core.get_by_domain(
-                            db=db, domain=domain, limit=3, include_learned=True,
+                            db=db, domain=domain, limit=4, include_learned=True,
                         )
-                        existing_ids = {v.get("verse_ref") for v in context.gita_verses}
                         for r in domain_results:
                             vref = r.verse_ref or f"BG {r.chapter}.{r.verse}"
-                            if vref not in existing_ids and r.source.value == "gita_verse":
+                            if vref not in static_refs and r.source.value == "gita_verse":
                                 context.gita_verses.append({
                                     "verse_ref": vref,
                                     "content": r.content,
                                     "theme": r.theme,
                                     "score": r.score,
                                 })
+                                static_refs.add(vref)
 
             except Exception as e:
                 logger.warning(f"Dynamic wisdom retrieval failed (non-critical): {e}")
 
         context.total_sources = (
             len(context.principles)
+            + len(context.static_verses)
             + len(context.gita_verses)
             + len(context.learned_wisdom)
         )
-        context.confidence = min(1.0, context.total_sources / 10.0)
+        context.confidence = min(1.0, context.total_sources / 12.0)
 
         logger.info(
             f"RelationshipWisdomCore gathered: "
             f"{len(context.principles)} principles, "
-            f"{len(context.gita_verses)} verses, "
+            f"{len(context.static_verses)} static verses (from {len(_GITA_CORPUS)} corpus), "
+            f"{len(context.gita_verses)} dynamic verses, "
             f"{len(context.learned_wisdom)} learned, "
             f"confidence={context.confidence:.2f}"
         )
 
         return context
+
+    # =========================================================================
+    # CORPUS STATISTICS
+    # =========================================================================
+
+    def get_corpus_stats(self) -> dict[str, Any]:
+        """Get statistics about the loaded corpus.
+
+        Returns:
+            Dict with corpus size, index sizes, and coverage info.
+        """
+        return {
+            "total_verses": len(_GITA_CORPUS),
+            "chapters": len(_INDEX_BY_CHAPTER),
+            "mental_health_apps_indexed": len(_INDEX_BY_MH_APP),
+            "themes_indexed": len(_INDEX_BY_THEME),
+            "keywords_indexed": len(_INDEX_BY_KEYWORD),
+            "curated_principles": len(RELATIONSHIP_PRINCIPLES),
+            "corpus_loaded": len(_GITA_CORPUS) > 0,
+        }
 
 
 # =============================================================================

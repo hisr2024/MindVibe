@@ -63,8 +63,11 @@ Before your next interaction, take 90 seconds to let the cortisol surge pass. Th
   latency_ms: 0,
   wisdom_metadata: {
     total_sources: 2,
+    total_corpus_verses: 701,
+    corpus_chapters: 18,
     principles_used: 2,
-    gita_verses_found: 0,
+    static_verses_matched: 0,
+    dynamic_verses_found: 0,
     learned_wisdom_found: 0,
     wisdom_confidence: 0.2,
     principles: [
@@ -79,6 +82,7 @@ Before your next interaction, take 90 seconds to let the cortisol surge pass. Th
         explanation: 'Anger, hurt, fear: these flag that something important is at stake. But acting from the emotion itself usually makes things worse.',
       },
     ],
+    top_verses: [],
   },
 }
 
@@ -143,11 +147,13 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     service: 'relationship-compass-unified',
-    version: '4.0',
+    version: '5.0',
     features: [
+      'full_corpus_700_verses',
       'wisdom_core_integration',
       'static_principles',
       'dynamic_gita_retrieval',
+      'learned_wisdom',
       'openai_synthesis',
       'secular_framing',
       'mode_detection',

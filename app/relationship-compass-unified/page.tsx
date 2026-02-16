@@ -4,8 +4,8 @@
  * Relationship Compass - Unified Secular Edition with Wisdom Core.
  *
  * Modern, secular relationship clarity engine powered by:
- * - Static Wisdom: 20 curated relationship principles (Gita-derived, secular framing)
- * - Dynamic Wisdom: 700+ verse corpus search + validated learned wisdom
+ * - Static Wisdom: Full 700+ verse Gita corpus loaded at startup + 20 curated principles
+ * - Dynamic Wisdom: DB-powered Gita verse search + validated learned wisdom (24/7 daemon)
  * - OpenAI Synthesis: Personalized guidance grounded in philosophical depth
  *
  * Response structure:
@@ -128,13 +128,24 @@ type WisdomPrinciple = {
   explanation: string
 }
 
+type TopVerse = {
+  ref: string
+  theme: string
+  chapter_name: string
+  score: number
+}
+
 type WisdomMetadata = {
   total_sources: number
+  total_corpus_verses: number
+  corpus_chapters: number
   principles_used: number
-  gita_verses_found: number
+  static_verses_matched: number
+  dynamic_verses_found: number
   learned_wisdom_found: number
   wisdom_confidence: number
   principles: WisdomPrinciple[]
+  top_verses: TopVerse[]
 }
 
 type UnifiedResult = {
@@ -433,7 +444,7 @@ export default function RelationshipCompassUnifiedPage() {
                     )}
                     {result.wisdom_metadata && result.wisdom_metadata.total_sources > 0 && (
                       <span className="px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-400">
-                        {result.wisdom_metadata.total_sources} wisdom sources
+                        {result.wisdom_metadata.total_sources} sources from {result.wisdom_metadata.total_corpus_verses || 700}+ verses
                       </span>
                     )}
                   </div>
@@ -607,27 +618,58 @@ export default function RelationshipCompassUnifiedPage() {
             {/* Wisdom Core Stats */}
             {result?.wisdom_metadata && (
               <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.03] p-5">
-                <h3 className="text-sm font-semibold text-blue-200 mb-3">Wisdom Core</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <h3 className="text-sm font-semibold text-blue-200 mb-3">
+                  Wisdom Core
+                  <span className="ml-2 text-[10px] font-normal text-blue-400/60">
+                    {result.wisdom_metadata.total_corpus_verses || 700}+ verses across {result.wisdom_metadata.corpus_chapters || 18} chapters
+                  </span>
+                </h3>
+                <div className="grid grid-cols-3 gap-3">
                   <div className="p-2.5 rounded-lg bg-black/30">
                     <p className="text-lg font-bold text-slate-200">{result.wisdom_metadata.principles_used}</p>
-                    <p className="text-[10px] text-slate-500">Principles matched</p>
+                    <p className="text-[10px] text-slate-500">Principles</p>
                   </div>
                   <div className="p-2.5 rounded-lg bg-black/30">
-                    <p className="text-lg font-bold text-slate-200">{result.wisdom_metadata.gita_verses_found}</p>
-                    <p className="text-[10px] text-slate-500">Wisdom verses found</p>
+                    <p className="text-lg font-bold text-amber-300">{result.wisdom_metadata.static_verses_matched || 0}</p>
+                    <p className="text-[10px] text-slate-500">Static verses</p>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-black/30">
+                    <p className="text-lg font-bold text-slate-200">{result.wisdom_metadata.dynamic_verses_found || 0}</p>
+                    <p className="text-[10px] text-slate-500">Dynamic verses</p>
                   </div>
                   <div className="p-2.5 rounded-lg bg-black/30">
                     <p className="text-lg font-bold text-slate-200">{result.wisdom_metadata.learned_wisdom_found}</p>
-                    <p className="text-[10px] text-slate-500">Extended insights</p>
+                    <p className="text-[10px] text-slate-500">Learned wisdom</p>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-black/30">
+                    <p className="text-lg font-bold text-slate-200">{result.wisdom_metadata.total_sources}</p>
+                    <p className="text-[10px] text-slate-500">Total sources</p>
                   </div>
                   <div className="p-2.5 rounded-lg bg-black/30">
                     <p className="text-lg font-bold text-slate-200">
                       {Math.round(result.wisdom_metadata.wisdom_confidence * 100)}%
                     </p>
-                    <p className="text-[10px] text-slate-500">Wisdom confidence</p>
+                    <p className="text-[10px] text-slate-500">Confidence</p>
                   </div>
                 </div>
+
+                {/* Top matched verses */}
+                {result.wisdom_metadata.top_verses && result.wisdom_metadata.top_verses.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-blue-500/10">
+                    <p className="text-[10px] text-blue-400/50 mb-2 uppercase tracking-wider">Top Verse Matches</p>
+                    <div className="space-y-1">
+                      {result.wisdom_metadata.top_verses.map((v, i) => (
+                        <div key={i} className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-400 font-mono">{v.ref}</span>
+                          <span className="text-slate-500 truncate mx-2 flex-1 text-right">
+                            {v.chapter_name || v.theme?.replace(/_/g, ' ')}
+                          </span>
+                          <span className="text-amber-400/70 font-mono text-[10px]">{v.score?.toFixed(1)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
