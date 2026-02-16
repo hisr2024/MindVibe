@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback, useState, useEffect } from 'react'
 import { PathwayMap } from '@/components/navigation/PathwayMap'
+import { SubscriptionBanner } from '@/components/subscription'
 
 // Animation variants for staggered entrance
 const containerVariants = {
@@ -255,6 +256,15 @@ export default function DashboardClient() {
             >
               {getGreeting()}
             </motion.p>
+          </motion.div>
+
+          {/* ─── Subscription Upsell Banner (free users) ─── */}
+          <motion.div variants={itemVariants}>
+            <SubscriptionBanner
+              feature="encrypted_journal"
+              message="Unlock journals, voice synthesis, and 150 KIAAN questions — Plus starts at $4.99/mo"
+              ctaText="View Plans"
+            />
           </motion.div>
 
           {/* ─── Living Chakra Heartbeat (PRIMARY) ─── */}

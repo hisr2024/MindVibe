@@ -75,7 +75,7 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
               <Button onClick={onManage} variant="secondary" size="md" className="w-full sm:flex-1">
                 Manage Subscription
               </Button>
-              {subscription.tierId !== 'enterprise' && (
+              {subscription.tierId !== 'premium' && (
                 <Button onClick={onUpgrade} variant="outline" size="md" className="w-full sm:w-auto">
                   Upgrade
                 </Button>

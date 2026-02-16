@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { apiFetch } from '@/lib/api'
 import { useLanguage } from '@/hooks/useLanguage'
+import { SubscriptionGate } from '@/components/subscription'
 
 type EncryptedPayload = {
   ciphertext: string
@@ -333,6 +334,7 @@ export default function SacredReflectionsPage() {
   })()
 
   return (
+    <SubscriptionGate feature="encrypted_journal">
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-3 sm:p-4 md:p-8 pb-28 sm:pb-8">
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
@@ -563,5 +565,6 @@ export default function SacredReflectionsPage() {
         </section>
       </div>
     </main>
+    </SubscriptionGate>
   )
 }

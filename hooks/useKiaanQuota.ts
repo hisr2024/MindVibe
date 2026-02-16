@@ -27,10 +27,9 @@ interface UseKiaanQuotaResult {
 }
 
 const tierQuotas: Record<string, number> = {
-  free: 20,
-  basic: 50,
+  free: 15,
+  basic: 150,
   premium: 300,
-  enterprise: -1, // unlimited
 }
 
 export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {

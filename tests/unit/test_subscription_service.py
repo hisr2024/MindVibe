@@ -33,7 +33,7 @@ class TestFeatureConfig:
         from backend.config.feature_config import get_tier_features, TIER_FEATURES
 
         features = get_tier_features(SubscriptionTier.FREE)
-        assert features["kiaan_questions_monthly"] == 20
+        assert features["kiaan_questions_monthly"] == 15
         assert features["encrypted_journal"] is False
         assert features["mood_tracking"] is True
         assert features["wisdom_access"] is True
@@ -44,7 +44,7 @@ class TestFeatureConfig:
         from backend.config.feature_config import get_tier_features
 
         features = get_tier_features(SubscriptionTier.BASIC)
-        assert features["kiaan_questions_monthly"] == 50
+        assert features["kiaan_questions_monthly"] == 150
         assert features["encrypted_journal"] is True
         assert features["advanced_analytics"] is False
         assert features["data_retention_days"] == 365
@@ -86,10 +86,10 @@ class TestFeatureConfig:
         """Test get_kiaan_quota function."""
         from backend.config.feature_config import get_kiaan_quota
 
-        assert get_kiaan_quota(SubscriptionTier.FREE) == 20
-        assert get_kiaan_quota(SubscriptionTier.BASIC) == 50
+        assert get_kiaan_quota(SubscriptionTier.FREE) == 15
+        assert get_kiaan_quota(SubscriptionTier.BASIC) == 150
         assert get_kiaan_quota(SubscriptionTier.PREMIUM) == 300
-        assert get_kiaan_quota(SubscriptionTier.ENTERPRISE) == -1
+        assert get_kiaan_quota(SubscriptionTier.ENTERPRISE) == -1  # Legacy tier, still in DB enum
 
 
 class TestSubscriptionModels:

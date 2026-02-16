@@ -76,13 +76,13 @@ export function SubscriptionTierSelection({
         >
           Yearly
           <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">
-            Save 20%
+            2 months free
           </span>
         </span>
       </div>
 
       {/* Tiers grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tiers.map((tier) => {
           const isSelected = selectedTier === tier.id
           const price = getPrice(tier)

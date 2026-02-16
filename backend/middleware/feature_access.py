@@ -2,7 +2,7 @@
 
 Provides decorators and dependencies for enforcing subscription-based access control:
 - require_subscription() - Ensures user has active subscription
-- require_kiaan_quota() - Enforces 20 question limit for free tier
+- require_kiaan_quota() - Enforces 15 question limit for free tier
 - require_journal_access() - Blocks free tier from journal
 - require_feature(feature_name) - Generic feature guard
 - Developer bypass for app owners
@@ -208,7 +208,7 @@ class SubscriptionRequired:
 class KiaanQuotaRequired:
     """Dependency that enforces KIAAN question quota.
 
-    Free tier users are limited to 20 questions per month.
+    Free tier users are limited to 15 questions per month.
     """
 
     async def __call__(
@@ -319,9 +319,8 @@ class WisdomJourneysAccessRequired:
     Checks both feature access and journey limits based on subscription tier:
     - DEVELOPER: Full unlimited access (bypasses all restrictions)
     - FREE: Trial access - 1 journey, limited to 3 days
-    - BASIC: 1 active journey (full duration)
-    - PREMIUM: Up to 5 active journeys
-    - ENTERPRISE: Unlimited journeys
+    - BASIC: Up to 3 active journeys (full duration)
+    - PREMIUM: Up to 10 active journeys
     """
 
     def __init__(self, check_limit: bool = False, requested_count: int = 1):

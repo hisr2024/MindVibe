@@ -4,10 +4,9 @@ This script creates the initial subscription plans in the database.
 Run with: python -m backend.scripts.seed_subscription_plans
 
 Plans created:
-- FREE: 20 KIAAN questions/month, 1 trial wisdom journey (3-day limit)
-- BASIC: 50 questions/month, journal access, 1 wisdom journey ($9.99/month)
-- PREMIUM: 300 questions/month, all features, 5 wisdom journeys ($19.99/month)
-- ENTERPRISE: Unlimited questions, all features, unlimited journeys ($499/month)
+- FREE: 15 KIAAN questions/month, 1 trial wisdom journey (3-day limit)
+- PLUS (basic): 150 questions/month, journal access, 3 wisdom journeys ($4.99/month, $49.99/year)
+- PRO (premium): 300 questions/month, all features, 10 wisdom journeys ($9.99/month, $99.99/year)
 """
 
 import asyncio
@@ -98,7 +97,7 @@ SUBSCRIPTION_PLANS = [
         "stripe_price_id_monthly": None,
         "stripe_price_id_yearly": None,
         "features": {
-            "kiaan_questions_monthly": 20,
+            "kiaan_questions_monthly": 15,
             "encrypted_journal": False,
             "mood_tracking": True,
             "wisdom_access": True,
@@ -111,20 +110,20 @@ SUBSCRIPTION_PLANS = [
             "wisdom_journeys_trial": True,
             "wisdom_journeys_trial_days": 3,
         },
-        "kiaan_questions_monthly": 20,
+        "kiaan_questions_monthly": 15,
         "encrypted_journal": False,
         "data_retention_days": 30,
     },
     {
         "tier": SubscriptionTier.BASIC,
-        "name": "Basic",
-        "description": "Unlock journal access, Wisdom Journeys, and more KIAAN conversations",
-        "price_monthly": Decimal("9.99"),
-        "price_yearly": Decimal("99.99"),
+        "name": "Plus",
+        "description": "Unlock journal access, Wisdom Journeys, and 150 KIAAN conversations",
+        "price_monthly": Decimal("4.99"),
+        "price_yearly": Decimal("49.99"),
         "stripe_price_id_monthly": os.getenv("STRIPE_BASIC_MONTHLY_PRICE_ID"),
         "stripe_price_id_yearly": os.getenv("STRIPE_BASIC_YEARLY_PRICE_ID"),
         "features": {
-            "kiaan_questions_monthly": 50,
+            "kiaan_questions_monthly": 150,
             "encrypted_journal": True,
             "mood_tracking": True,
             "wisdom_access": True,
@@ -133,18 +132,18 @@ SUBSCRIPTION_PLANS = [
             "offline_access": False,
             "data_retention_days": 365,
             "wisdom_journeys": True,
-            "wisdom_journeys_limit": 1,
+            "wisdom_journeys_limit": 3,
         },
-        "kiaan_questions_monthly": 50,
+        "kiaan_questions_monthly": 150,
         "encrypted_journal": True,
         "data_retention_days": 365,
     },
     {
         "tier": SubscriptionTier.PREMIUM,
-        "name": "Premium",
-        "description": "Full access with priority support and multiple Wisdom Journeys",
-        "price_monthly": Decimal("19.99"),
-        "price_yearly": Decimal("199.99"),
+        "name": "Pro",
+        "description": "300 KIAAN questions with advanced analytics and all premium features",
+        "price_monthly": Decimal("9.99"),
+        "price_yearly": Decimal("99.99"),
         "stripe_price_id_monthly": os.getenv("STRIPE_PREMIUM_MONTHLY_PRICE_ID"),
         "stripe_price_id_yearly": os.getenv("STRIPE_PREMIUM_YEARLY_PRICE_ID"),
         "features": {
@@ -157,36 +156,9 @@ SUBSCRIPTION_PLANS = [
             "offline_access": True,
             "data_retention_days": -1,
             "wisdom_journeys": True,
-            "wisdom_journeys_limit": 5,
+            "wisdom_journeys_limit": 10,
         },
         "kiaan_questions_monthly": 300,
-        "encrypted_journal": True,
-        "data_retention_days": -1,  # Unlimited
-    },
-    {
-        "tier": SubscriptionTier.ENTERPRISE,
-        "name": "Enterprise",
-        "description": "Complete solution for organizations with unlimited everything",
-        "price_monthly": Decimal("499.00"),
-        "price_yearly": Decimal("4999.00"),
-        "stripe_price_id_monthly": os.getenv("STRIPE_ENTERPRISE_MONTHLY_PRICE_ID"),
-        "stripe_price_id_yearly": os.getenv("STRIPE_ENTERPRISE_YEARLY_PRICE_ID"),
-        "features": {
-            "kiaan_questions_monthly": -1,
-            "encrypted_journal": True,
-            "mood_tracking": True,
-            "wisdom_access": True,
-            "advanced_analytics": True,
-            "priority_support": True,
-            "offline_access": True,
-            "white_label": True,
-            "sso": True,
-            "dedicated_support": True,
-            "data_retention_days": -1,
-            "wisdom_journeys": True,
-            "wisdom_journeys_limit": -1,  # Unlimited
-        },
-        "kiaan_questions_monthly": -1,  # Unlimited
         "encrypted_journal": True,
         "data_retention_days": -1,  # Unlimited
     },

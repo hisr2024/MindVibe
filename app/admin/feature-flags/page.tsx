@@ -29,7 +29,7 @@ export default function AdminFeatureFlagsPage() {
           description: 'Redesigned dashboard with improved analytics',
           enabled: true,
           rolloutPercentage: 50,
-          targetTiers: ['premium', 'enterprise'],
+          targetTiers: ['premium'],
           createdAt: new Date().toISOString(),
         },
         {
