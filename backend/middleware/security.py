@@ -46,24 +46,32 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # X-Frame-Options: Prevents clickjacking by denying framing
         response.headers["X-Frame-Options"] = "DENY"
 
-        # Strict-Transport-Security: Enforces HTTPS for 1 year
+        # Strict-Transport-Security: Enforces HTTPS for 1 year with preload
         response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
+            "max-age=31536000; includeSubDomains; preload"
         )
 
         # Content-Security-Policy: Restricts resource loading
         # Uses nonce-based policy for scripts instead of 'unsafe-inline'
         # This ensures only scripts with the correct nonce can execute
+        # Aligned with frontend proxy.ts CSP for consistency
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             f"script-src 'self' 'nonce-{csp_nonce}'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "img-src 'self' data: https:; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            f"connect-src 'self' {_API_URL} {_FRONTEND_URL}; "
+            "font-src 'self' data: https://fonts.gstatic.com; "
+            "media-src 'self' https: blob:; "
+            f"connect-src 'self' {_API_URL} {_FRONTEND_URL} "
+            "https://mindvibe-api.onrender.com "
+            "https://*.firebaseio.com "
+            "https://*.googleapis.com "
+            "https://cdn.pixabay.com "
+            "https://*.freesound.org; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
-            "form-action 'self'"
+            "form-action 'self'; "
+            "object-src 'none'"
         )
 
         # Referrer-Policy: Controls referrer information sent

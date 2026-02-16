@@ -2,16 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Next.js Proxy (formerly Middleware)
- * 
- * This proxy handles request processing before pages are rendered.
- * Currently configured to pass through all requests, as locale handling
- * is done client-side via the LanguageProvider.
- * 
- * Future uses could include:
- * - Request authentication/authorization
- * - Request logging
- * - A/B testing routing
- * - Server-side locale detection
+ *
+ * Handles request processing before pages are rendered:
+ * - Generates a per-request cryptographic nonce for Content Security Policy
+ * - Sets CSP header with nonce-based script-src (no 'unsafe-inline')
+ * - Passes nonce to layout via x-nonce request header
  */
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -30,8 +25,35 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Pass through all other requests - locale handling is done client-side
-  return NextResponse.next();
+  // Generate a per-request nonce for CSP
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+
+  const cspHeader = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}'`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: https:",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "media-src 'self' https: blob:",
+    "connect-src 'self' https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join('; ');
+
+  // Pass the nonce to layout via request header
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+
+  // Set CSP header on the response
+  response.headers.set('Content-Security-Policy', cspHeader);
+
+  return response;
 }
 
 export const config = {

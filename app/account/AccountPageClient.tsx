@@ -301,7 +301,7 @@ export default function AccountPageClient() {
                     onChange={event => setCreateForm({ ...createForm, email: event.target.value })}
                     disabled={isSubmitting}
                     className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
-                    placeholder="you@mindvibe.app"
+                    placeholder="you@mindvibe.life"
                   />
                 </div>
                 <div className="space-y-2">
@@ -348,7 +348,7 @@ export default function AccountPageClient() {
                     onChange={event => setLoginForm({ ...loginForm, email: event.target.value.toLowerCase() })}
                     disabled={isSubmitting}
                     className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
-                    placeholder="you@mindvibe.app"
+                    placeholder="you@mindvibe.life"
                   />
                 </div>
                 <div className="space-y-1">
