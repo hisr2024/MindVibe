@@ -99,6 +99,13 @@ from backend.services.relationship_compass_analysis import (
     ConflictAnalysis,
 )
 from backend.services.wisdom_core import get_wisdom_core, WisdomResult
+from backend.services.relationship_wisdom_core import get_relationship_wisdom_core
+from backend.services.relationship_compass_synthesizer import get_wisdom_synthesizer
+from backend.services.relationship_compass_engine import (
+    EngineAnalysis,
+    ai_analysis as engine_ai_analysis,
+    extract_response_sections as engine_extract_sections,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +139,30 @@ class GitaGuidanceRequest(BaseModel):
     relationship_type: str = Field("other", alias="relationshipType")
     # Secular mode: modern, friendly responses without spiritual language (default: True)
     secular_mode: bool = Field(True, alias="secularMode")
+
+
+class UnifiedCompassRequest(BaseModel):
+    """Request schema for the unified secular Relationship Compass with Wisdom Core."""
+    model_config = ConfigDict(populate_by_name=True)
+    message: str = Field(
+        ..., min_length=10, max_length=3000,
+        description="Describe your relationship situation",
+    )
+    session_id: str = Field(
+        ..., min_length=1, max_length=128,
+        alias="sessionId",
+        description="Session identifier for conversation history",
+    )
+    relationship_type: str = Field(
+        "romantic",
+        alias="relationshipType",
+        description="Type: romantic, family, friendship, workplace, self, community",
+    )
+    include_wisdom_sources: bool = Field(
+        True,
+        alias="includeWisdomSources",
+        description="Include wisdom source metadata in response (for UI display)",
+    )
 
 
 # Relationship-specific Gita teachings mapping
@@ -1205,3 +1236,212 @@ def _get_gita_grounded_fallback(
         "cached": False,
         "latency_ms": 0.0,
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# UNIFIED SECULAR ENDPOINT - Wisdom Core + Engine + OpenAI Synthesis
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router.post("/unified-clarity")
+async def unified_clarity(
+    payload: UnifiedCompassRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Unified secular relationship clarity powered by Wisdom Core + OpenAI.
+
+    This endpoint combines the best of both engines:
+    1. Engine analysis (mode, emotion, mechanism detection)
+    2. Wisdom Core retrieval (static principles + dynamic Gita verses + learned wisdom)
+    3. OpenAI synthesis (generates secular, grounded guidance from wisdom context)
+
+    Response structure:
+    - mode: Detected relationship mode
+    - analysis: Full emotional/mechanism analysis
+    - sections: Structured guidance (6 sections including Deeper Insight)
+    - wisdom_metadata: Sources used (principles, verses, learned wisdom counts)
+
+    The response is fully secular — all wisdom is presented in modern language
+    without religious references, verse citations, or spiritual terminology.
+    """
+    import time
+
+    start_time = time.time()
+    message = payload.message.strip()
+    session_id = payload.session_id.strip()
+    relationship_type = (payload.relationship_type or "romantic").strip().lower()
+
+    if not message:
+        raise HTTPException(status_code=400, detail="Message is required")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Session ID is required")
+
+    # Store user message
+    ensure_session(session_id)
+    history = get_recent_messages(session_id, 20)
+    append_message(
+        CompassMessage(
+            session_id=session_id,
+            role="user",
+            content=message,
+            created_at=datetime.utcnow().isoformat(),
+        )
+    )
+
+    # Step 1: Run analysis (mode, emotion, mechanism detection)
+    analysis = await engine_ai_analysis(message, relationship_type)
+
+    logger.info(
+        f"Unified Compass analysis: mode={analysis.mode}, "
+        f"emotion={analysis.primary_emotion}, "
+        f"mechanism={analysis.mechanism}, "
+        f"safety={analysis.safety_concern}, "
+        f"confidence={analysis.confidence:.2f}"
+    )
+
+    # Step 2: Gather wisdom from RelationshipWisdomCore
+    rwc = get_relationship_wisdom_core()
+    wisdom_context = await rwc.gather_wisdom(
+        db=db,
+        situation=message,
+        mode=analysis.mode,
+        emotion=analysis.primary_emotion,
+        mechanism=analysis.mechanism,
+        relationship_type=relationship_type,
+        limit=6,
+    )
+
+    # Step 3: Synthesize guidance via OpenAI with wisdom context
+    synthesizer = get_wisdom_synthesizer()
+    result = await synthesizer.synthesize(
+        message=message,
+        wisdom_context=wisdom_context,
+        analysis=analysis,
+        session_history=history,
+        relationship_type=relationship_type,
+    )
+
+    # Store assistant response
+    append_message(
+        CompassMessage(
+            session_id=session_id,
+            role="assistant",
+            content=result.response_text,
+            created_at=datetime.utcnow().isoformat(),
+        )
+    )
+
+    latency_ms = (time.time() - start_time) * 1000
+
+    # Build response
+    response: dict[str, Any] = {
+        "response": result.response_text,
+        "sections": result.sections,
+        "analysis": {
+            "mode": analysis.mode,
+            "primary_emotion": analysis.primary_emotion,
+            "secondary_emotions": analysis.secondary_emotions,
+            "emotional_intensity": analysis.emotional_intensity,
+            "mechanism": analysis.mechanism,
+            "mechanism_detail": analysis.mechanism_detail,
+            "power_dynamic": analysis.power_dynamic,
+            "boundary_needed": analysis.boundary_needed,
+            "safety_concern": analysis.safety_concern,
+            "pattern_identified": analysis.pattern_identified,
+            "user_contribution": analysis.user_contribution,
+            "core_need": analysis.core_need,
+            "confidence": analysis.confidence,
+            "analysis_depth": analysis.analysis_depth,
+        },
+        "provider": result.provider,
+        "model": result.model,
+        "latency_ms": round(latency_ms, 1),
+    }
+
+    # Wisdom metadata (if requested)
+    if payload.include_wisdom_sources:
+        response["wisdom_metadata"] = {
+            "total_sources": wisdom_context.total_sources,
+            "total_corpus_verses": wisdom_context.total_corpus_verses,
+            "corpus_chapters": wisdom_context.corpus_chapters,
+            "principles_used": len(wisdom_context.principles),
+            "static_verses_matched": len(wisdom_context.static_verses),
+            "dynamic_verses_found": len(wisdom_context.gita_verses),
+            "learned_wisdom_found": len(wisdom_context.learned_wisdom),
+            "wisdom_confidence": wisdom_context.confidence,
+            "principles": [
+                {
+                    "id": p.id,
+                    "principle": p.principle,
+                    "explanation": p.explanation,
+                }
+                for p in wisdom_context.principles[:4]
+            ],
+            "top_verses": [
+                {
+                    "ref": v.get("verse_ref", ""),
+                    "theme": v.get("theme", ""),
+                    "chapter_name": v.get("chapter_name", ""),
+                    "score": v.get("score", 0),
+                }
+                for v in wisdom_context.static_verses[:4]
+            ],
+        }
+
+    return response
+
+
+@router.get("/unified-health")
+async def unified_health() -> dict[str, Any]:
+    """Health check for the unified secular Relationship Compass."""
+    import os
+
+    openai_key = bool(os.getenv("OPENAI_API_KEY", "").strip())
+
+    # Check provider manager
+    provider_available = False
+    try:
+        from backend.services.ai.providers.provider_manager import get_provider_manager
+        pm = get_provider_manager()
+        provider_available = pm is not None
+    except Exception:
+        pass
+
+    # Check WisdomCore
+    wisdom_core_ready = False
+    corpus_stats: dict[str, Any] = {}
+    try:
+        rwc = get_relationship_wisdom_core()
+        test_principles = rwc.get_principles(mode="conflict", limit=1)
+        wisdom_core_ready = len(test_principles) > 0
+        corpus_stats = rwc.get_corpus_stats()
+    except Exception:
+        pass
+
+    return {
+        "status": "ok",
+        "service": "relationship-compass-unified",
+        "version": "5.0",
+        "ai_available": openai_key or provider_available,
+        "provider_manager": provider_available,
+        "wisdom_core_ready": wisdom_core_ready,
+        "corpus_stats": corpus_stats,
+        "fallback": "wisdom_enhanced_rule_based",
+        "capabilities": [
+            "mode_detection",
+            "emotion_precision",
+            "mechanism_identification",
+            "safety_detection",
+            "full_corpus_search",
+            "wisdom_core_integration",
+            "static_principles",
+            "dynamic_gita_retrieval",
+            "learned_wisdom",
+            "openai_synthesis",
+            "secular_framing",
+            "conversation_history",
+        ],
+    }
+
+
+# Import for the health endpoint
+from backend.services.relationship_wisdom_core import RELATIONSHIP_PRINCIPLES
