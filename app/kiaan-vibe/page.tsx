@@ -26,6 +26,7 @@ import {
   Heart,
   TreePine,
   Brain,
+  Volume2,
 } from 'lucide-react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { getAllTracks, getTracksByCategory, formatDuration } from '@/lib/kiaan-vibe/meditation-library'
@@ -78,7 +79,7 @@ export default function KiaanVibePage() {
       </div>
 
       {/* Navigation Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <Link
           href="/kiaan-vibe/gita"
           className="group p-4 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/20 hover:border-orange-500/40 transition-all"
@@ -86,6 +87,18 @@ export default function KiaanVibePage() {
           <BookOpen className="w-8 h-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-white">Bhagavad Gita</h3>
           <p className="text-xs text-white/50">All languages</p>
+        </Link>
+
+        <Link
+          href="/kiaan-vibe/gita/voice"
+          className="group p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-600/10 border border-amber-500/20 hover:border-amber-500/40 transition-all relative overflow-hidden"
+        >
+          <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-orange-500/30 text-[10px] font-bold text-orange-300 uppercase tracking-wider">
+            New
+          </div>
+          <Volume2 className="w-8 h-8 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+          <h3 className="font-semibold text-white">Divine Voices</h3>
+          <p className="text-xs text-white/50">Sanskrit recitation</p>
         </Link>
 
         <Link

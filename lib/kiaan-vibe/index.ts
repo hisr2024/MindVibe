@@ -16,6 +16,9 @@ export { usePlayerStore } from './store'
 // Gita data
 export * from './gita'
 
+// Gita voice track system
+export * from './gita-voice-tracks'
+
 // Meditation library
 export * from './meditation-library'
 

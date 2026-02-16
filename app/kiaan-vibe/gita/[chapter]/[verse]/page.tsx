@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Copy, Check, Play, Pause, ChevronLeft, ChevronRight, Share2, Volume2, Loader2 } from 'lucide-react'
 import { getVerse, getVerseMultiLang, GITA_CHAPTERS_META, SUPPORTED_LANGUAGES, getAvailableLanguages } from '@/lib/kiaan-vibe/gita'
 import type { GitaVerse } from '@/lib/kiaan-vibe/types'
+import { GitaVoicePlayer } from '@/components/kiaan-vibe-player/GitaVoicePlayer'
 
 // Language code mapping for TTS (both API and browser fallback)
 const TTS_LANGUAGE_MAP: Record<string, string> = {
@@ -490,11 +491,27 @@ export default function VerseDetailPage({ params }: PageProps) {
         )}
       </motion.div>
 
-      {/* Play meditation CTA */}
+      {/* KIAAN Vibe Divine Voice Player */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
+      >
+        <GitaVoicePlayer
+          chapter={chapterNumber}
+          verseNumber={verseNumber}
+          sanskrit={verse.sanskrit || ''}
+          transliteration={verse.transliteration || ''}
+          translation={verse.translations[languageCode] || verse.translations['en'] || ''}
+          currentLanguage={languageCode}
+        />
+      </motion.div>
+
+      {/* Play meditation CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
       >
         <Link
           href="/kiaan-vibe/library?category=spiritual"
