@@ -30,6 +30,18 @@ const eslintConfig = [
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'error',
       'no-var': 'error',
+      // Downgrade setState-in-effect to warning: most instances are legitimate
+      // patterns (localStorage hydration, route change responses, etc.)
+      'react-hooks/set-state-in-effect': 'warn',
+    },
+  },
+
+  // Relaxed rules for test files
+  {
+    files: ['tests/**', '**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      '@next/next/no-assign-module-variable': 'off',
+      'react/display-name': 'off',
     },
   },
 
@@ -37,9 +49,11 @@ const eslintConfig = [
   {
     ignores: [
       'coverage/**',
+      'htmlcov/**',
       '*.config.js',
       '*.config.mjs',
       'vendor/**',
+      'scripts/**',
     ],
   },
 ]

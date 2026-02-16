@@ -19,12 +19,16 @@ const INITIAL_DISPLAY_COUNT = 3
 export function KarmaResetTestimonials() {
   const [showAll, setShowAll] = useState(false)
 
-  // Select a stable random subset for initial display
+  // Select a stable subset for initial display using date-based seed
+  // to vary by day without using Math.random() during render
   const initialTestimonials = useMemo(() => {
-    const shuffled = [...karmaResetTestimonials].sort(
-      () => 0.5 - Math.random()
-    )
-    return shuffled.slice(0, INITIAL_DISPLAY_COUNT)
+    const seed = new Date().getDate()
+    const startIndex = seed % karmaResetTestimonials.length
+    const result: typeof karmaResetTestimonials = []
+    for (let i = 0; i < INITIAL_DISPLAY_COUNT; i++) {
+      result.push(karmaResetTestimonials[(startIndex + i) % karmaResetTestimonials.length])
+    }
+    return result
   }, [])
 
   const displayedTestimonials = showAll

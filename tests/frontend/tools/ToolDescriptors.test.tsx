@@ -54,20 +54,31 @@ vi.mock('@/hooks/useHapticFeedback', () => ({
 }))
 
 // Mock framer-motion to simplify DOM
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLDivElement>) =>
-      React.createElement('div', { ...filterDomProps(props), ref }, children)
-    ),
-    span: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLSpanElement>) =>
-      React.createElement('span', { ...filterDomProps(props), ref }, children)
-    ),
-    button: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLButtonElement>) =>
-      React.createElement('button', { ...filterDomProps(props), ref }, children)
-    ),
-  },
-  AnimatePresence: ({ children }: React.PropsWithChildren) => React.createElement(React.Fragment, null, children),
-}))
+vi.mock('framer-motion', () => {
+  const MockDiv = React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLDivElement>) =>
+    React.createElement('div', { ...filterDomProps(props), ref }, children)
+  )
+  MockDiv.displayName = 'MockMotionDiv'
+
+  const MockSpan = React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLSpanElement>) =>
+    React.createElement('span', { ...filterDomProps(props), ref }, children)
+  )
+  MockSpan.displayName = 'MockMotionSpan'
+
+  const MockButton = React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLButtonElement>) =>
+    React.createElement('button', { ...filterDomProps(props), ref }, children)
+  )
+  MockButton.displayName = 'MockMotionButton'
+
+  return {
+    motion: {
+      div: MockDiv,
+      span: MockSpan,
+      button: MockButton,
+    },
+    AnimatePresence: ({ children }: React.PropsWithChildren) => React.createElement(React.Fragment, null, children),
+  }
+})
 
 function filterDomProps(props: Record<string, unknown>) {
   const filtered: Record<string, unknown> = {}
