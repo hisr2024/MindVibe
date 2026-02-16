@@ -480,7 +480,7 @@ function StatCard({
           {suffix && <span className="text-lg text-white/60">{suffix}</span>}
           {max !== undefined && <span className="text-lg text-white/30">/{max}</span>}
         </div>
-        <div className="text-[11px] text-white/45 mt-1">{label}</div>
+        <div className="text-[11px] text-white/55 mt-1">{label}</div>
       </div>
     </motion.div>
   )
@@ -626,7 +626,7 @@ export default function JourneysPageClient() {
           <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-600/8 rounded-full blur-[100px]" />
         </div>
 
-        <main className="relative z-10 mx-auto max-w-5xl space-y-8 px-4 pb-28 pt-6">
+        <main className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-6">
           <FadeIn>
             {/* Header */}
             <div className="text-center mb-2">
@@ -636,7 +636,7 @@ export default function JourneysPageClient() {
                   (Shadripu)
                 </span>
               </h1>
-              <p className="mt-3 text-white/50 max-w-xl mx-auto text-sm">
+              <p className="mt-3 text-white/55 max-w-xl mx-auto text-sm leading-relaxed">
                 According to the Bhagavad Gita, these six inner enemies prevent us from attaining peace.
                 Master them through guided journeys of wisdom and practice.
               </p>
@@ -684,7 +684,7 @@ export default function JourneysPageClient() {
                         {enemyEmoji(info.icon)}
                       </div>
                       <div className="text-sm font-semibold" style={{ color: info.color }}>{info.sanskrit}</div>
-                      <div className="text-[11px] text-white/40">{info.name}</div>
+                      <div className="text-[11px] text-white/50">{info.name}</div>
                     </motion.div>
                   )
                 })}
@@ -721,10 +721,10 @@ export default function JourneysPageClient() {
     return (
       <div className="min-h-screen relative">
         <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
-        <main className="relative z-10 mx-auto max-w-7xl px-4 pt-8">
+        <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white">Strengthen Steadiness Within</h1>
-            <p className="mt-2 text-white/40 text-sm">Loading your journey...</p>
+            <p className="mt-2 text-white/50 text-sm">Loading your journey...</p>
           </div>
           <div className="flex items-center justify-center py-20">
             <div className="relative">
@@ -752,7 +752,7 @@ export default function JourneysPageClient() {
         <div className="absolute top-[60%] left-[50%] w-[300px] h-[300px] bg-pink-600/[0.04] rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '10s' }} />
       </div>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-28 pt-4 sm:pt-6">
+      <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-4 sm:pt-6">
         <FadeIn>
           {/* ============================================================= */}
           {/* HERO HEADER                                                    */}
@@ -769,7 +769,7 @@ export default function JourneysPageClient() {
                   (Shadripu)
                 </span>
               </motion.h1>
-              <p className="mt-1.5 text-white/40 text-sm max-w-lg">
+              <p className="mt-1.5 text-white/50 text-sm max-w-lg">
                 Master the inner enemies through guided journeys of Gita wisdom and daily practice.
               </p>
               <p className="mt-1 text-[11px] tracking-wide text-purple-400/40" data-testid="mode-label">
@@ -811,8 +811,14 @@ export default function JourneysPageClient() {
                     </button>
                   )}
                   <button
+                    onClick={() => { setError(null); setIsStuckError(false); loadData() }}
+                    className="rounded-lg border border-white/10 bg-white/[0.05] px-4 py-1.5 text-xs font-medium text-white/70 hover:bg-white/[0.08] transition"
+                  >
+                    Retry
+                  </button>
+                  <button
                     onClick={() => { setError(null); setIsStuckError(false) }}
-                    className="text-xs underline hover:opacity-80"
+                    className="text-xs text-white/50 underline hover:text-white/70 transition"
                   >
                     Dismiss
                   </button>

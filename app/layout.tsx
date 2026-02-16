@@ -82,6 +82,13 @@ export default function RootLayout({
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
         <ClientLayout>
           <Providers>
+            {/* Skip to content link for keyboard accessibility */}
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-orange-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-950 focus:outline-none focus:ring-2 focus:ring-orange-300"
+            >
+              Skip to content
+            </a>
             {/* Overlay root for Portal-based modals/sheets - must be early in tree */}
             <OverlayRoot />
             <ServiceWorkerRegistration />
@@ -89,7 +96,10 @@ export default function RootLayout({
             {/* Fixed header navigation */}
             <SiteNav />
             {/* Main content with proper spacing for fixed header and mobile nav */}
-            <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-32 pt-20 sm:px-6 md:pb-8 lg:px-8 lg:pt-24 mobile-content-area">
+            <main
+              id="main-content"
+              className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-28 pt-20 sm:gap-8 sm:px-6 sm:pb-20 md:pb-10 lg:px-8 lg:pt-24 mobile-content-area"
+            >
               {children}
             </main>
             {/* Footer - hidden on mobile due to MobileNav */}
