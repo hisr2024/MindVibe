@@ -71,19 +71,55 @@ class UsageStatsOut(BaseModel):
 
 
 class CheckoutSessionCreate(BaseModel):
-    """Input schema for creating a Stripe checkout session."""
-    
+    """Input schema for creating a checkout session (Stripe or Razorpay)."""
+
     plan_tier: SubscriptionTier
     billing_period: str = Field(default="monthly", pattern="^(monthly|yearly)$")
+    payment_method: str = Field(
+        default="card",
+        pattern="^(card|paypal|upi)$",
+        description="Payment method: 'card' (Stripe), 'paypal' (Stripe), or 'upi' (Razorpay)",
+    )
+    currency: str = Field(
+        default="usd",
+        pattern="^(usd|eur|inr)$",
+        description="Currency for the checkout session",
+    )
     success_url: str | None = None
     cancel_url: str | None = None
 
 
 class CheckoutSessionOut(BaseModel):
-    """Output schema for a Stripe checkout session."""
-    
-    checkout_url: str
-    session_id: str
+    """Output schema for a checkout session (provider-agnostic).
+
+    When provider="stripe": checkout_url and session_id are populated.
+    When provider="razorpay": order_id, razorpay_key_id, amount, etc. are populated.
+    """
+
+    provider: str = "stripe"
+
+    # Stripe fields (present when provider="stripe")
+    checkout_url: str | None = None
+    session_id: str | None = None
+
+    # Razorpay fields (present when provider="razorpay")
+    order_id: str | None = None
+    razorpay_key_id: str | None = None
+    amount: int | None = None
+    currency: str | None = None
+    name: str | None = None
+    description: str | None = None
+    user_email: str | None = None
+
+
+class RazorpayPaymentVerification(BaseModel):
+    """Input schema for verifying a Razorpay payment after frontend checkout."""
+
+    razorpay_order_id: str = Field(..., min_length=1, max_length=128)
+    razorpay_payment_id: str = Field(..., min_length=1, max_length=128)
+    razorpay_signature: str = Field(..., min_length=1, max_length=256)
+    plan_tier: SubscriptionTier
+    billing_period: str = Field(default="monthly", pattern="^(monthly|yearly)$")
 
 
 class WebhookEvent(BaseModel):

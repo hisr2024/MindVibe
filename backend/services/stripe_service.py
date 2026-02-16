@@ -150,6 +150,7 @@ async def create_checkout_session(
     billing_period: str = "monthly",
     success_url: Optional[str] = None,
     cancel_url: Optional[str] = None,
+    payment_method: Optional[str] = None,
 ) -> Optional[dict[str, str]]:
     """Create a Stripe checkout session for subscription purchase.
     
@@ -201,10 +202,19 @@ async def create_checkout_session(
         if not cancel_url:
             cancel_url = f"{frontend_url}/subscription/cancel"
         
+        # Build payment method types based on preference
+        if payment_method == "paypal":
+            payment_method_types = ["paypal"]
+        elif payment_method == "card":
+            payment_method_types = ["card"]
+        else:
+            # Default: offer both card and PayPal
+            payment_method_types = ["card", "paypal"]
+
         # Create checkout session
         session_params: dict[str, Any] = {
             "mode": "subscription",
-            "payment_method_types": ["card"],
+            "payment_method_types": payment_method_types,
             "line_items": [{"price": price_id, "quantity": 1}],
             "success_url": success_url,
             "cancel_url": cancel_url,
@@ -261,8 +271,18 @@ async def cancel_subscription(
         logger.warning(f"No subscription found for user {user_id}")
         return False
     
+    # Cancel in Razorpay if subscription was created via Razorpay
+    if getattr(subscription, 'payment_provider', '') == 'razorpay' and getattr(subscription, 'razorpay_subscription_id', None):
+        try:
+            from backend.services.razorpay_service import cancel_razorpay_subscription, is_razorpay_configured
+            if is_razorpay_configured():
+                await cancel_razorpay_subscription(subscription.razorpay_subscription_id, cancel_immediately)
+                logger.info(f"Canceled Razorpay subscription {subscription.razorpay_subscription_id} for user {user_id}")
+        except Exception as e:
+            logger.error(f"Failed to cancel Razorpay subscription: {e}")
+
     # Cancel in Stripe if we have a subscription ID
-    if is_stripe_configured() and subscription.stripe_subscription_id:
+    elif is_stripe_configured() and subscription.stripe_subscription_id:
         try:
             _init_stripe()
             
@@ -477,10 +497,24 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
         logger.warning(f"No subscription found for customer {customer_id}")
         return True
     
+    # Determine payment provider (card vs PayPal) from Stripe data
+    detected_provider = "stripe_card"
+    if payment_intent:
+        try:
+            _init_stripe()
+            pi = stripe.PaymentIntent.retrieve(payment_intent)
+            if pi.payment_method:
+                pm = stripe.PaymentMethod.retrieve(pi.payment_method)
+                if pm.type == "paypal":
+                    detected_provider = "stripe_paypal"
+        except Exception:
+            pass  # Fall back to "stripe_card"
+
     # Record the payment
     payment = Payment(
         user_id=subscription.user_id,
         subscription_id=subscription.id,
+        payment_provider=detected_provider,
         stripe_payment_intent_id=payment_intent,
         stripe_invoice_id=invoice_id,
         amount=Decimal(str(amount_paid)),

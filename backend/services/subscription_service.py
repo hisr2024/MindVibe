@@ -571,6 +571,9 @@ async def upgrade_subscription(
     new_plan_id: int,
     stripe_subscription_id: Optional[str] = None,
     stripe_customer_id: Optional[str] = None,
+    razorpay_subscription_id: Optional[str] = None,
+    razorpay_customer_id: Optional[str] = None,
+    payment_provider: str = "stripe",
 ) -> UserSubscription:
     """Upgrade or change a user's subscription plan.
 
@@ -617,6 +620,11 @@ async def upgrade_subscription(
             subscription.stripe_subscription_id = stripe_subscription_id
         if stripe_customer_id:
             subscription.stripe_customer_id = stripe_customer_id
+        if razorpay_subscription_id:
+            subscription.razorpay_subscription_id = razorpay_subscription_id
+        if razorpay_customer_id:
+            subscription.razorpay_customer_id = razorpay_customer_id
+        subscription.payment_provider = payment_provider
         subscription.updated_at = now
     else:
         # Create new subscription
@@ -626,6 +634,9 @@ async def upgrade_subscription(
             status=SubscriptionStatus.ACTIVE,
             stripe_subscription_id=stripe_subscription_id,
             stripe_customer_id=stripe_customer_id,
+            razorpay_subscription_id=razorpay_subscription_id,
+            razorpay_customer_id=razorpay_customer_id,
+            payment_provider=payment_provider,
             current_period_start=now,
             current_period_end=now + timedelta(days=30),
         )

@@ -117,6 +117,7 @@ from backend.models.voice import (
 from backend.models.subscription import (
     SubscriptionStatus,
     PaymentStatus,
+    PaymentProvider,
     SubscriptionPlan,
     UserSubscription,
     UsageTracking,
@@ -201,6 +202,7 @@ __all__ = [
     "SubscriptionTier",
     "SubscriptionStatus",
     "PaymentStatus",
+    "PaymentProvider",
     "AchievementCategory",
     "AchievementRarity",
     "UnlockableType",

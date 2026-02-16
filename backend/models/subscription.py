@@ -42,6 +42,15 @@ class PaymentStatus(str, enum.Enum):
     REFUNDED = "refunded"
 
 
+class PaymentProvider(str, enum.Enum):
+    """Payment provider used for a transaction."""
+
+    STRIPE_CARD = "stripe_card"
+    STRIPE_PAYPAL = "stripe_paypal"
+    RAZORPAY_UPI = "razorpay_upi"
+    FREE = "free"
+
+
 class SubscriptionPlan(Base):
     """Defines available subscription plans/tiers."""
 
@@ -59,6 +68,12 @@ class SubscriptionPlan(Base):
         String(128), nullable=True
     )
     stripe_price_id_yearly: Mapped[str | None] = mapped_column(
+        String(128), nullable=True
+    )
+    razorpay_plan_id_monthly: Mapped[str | None] = mapped_column(
+        String(128), nullable=True
+    )
+    razorpay_plan_id_yearly: Mapped[str | None] = mapped_column(
         String(128), nullable=True
     )
     features: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -96,6 +111,15 @@ class UserSubscription(SoftDeleteMixin, Base):
     )
     stripe_subscription_id: Mapped[str | None] = mapped_column(
         String(128), nullable=True, index=True
+    )
+    razorpay_subscription_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    razorpay_customer_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    payment_provider: Mapped[str] = mapped_column(
+        String(32), default="stripe", index=True
     )
     current_period_start: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
@@ -159,10 +183,19 @@ class Payment(SoftDeleteMixin, Base):
         nullable=True,
         index=True,
     )
+    payment_provider: Mapped[str] = mapped_column(
+        String(32), default="stripe_card", index=True
+    )
     stripe_payment_intent_id: Mapped[str | None] = mapped_column(
         String(128), nullable=True, unique=True, index=True
     )
     stripe_invoice_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    razorpay_payment_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, unique=True, index=True
+    )
+    razorpay_order_id: Mapped[str | None] = mapped_column(
         String(128), nullable=True, index=True
     )
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))

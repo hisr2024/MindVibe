@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { BillingToggle, PricingCard, FeatureComparison, type PricingTier } from '@/components/pricing'
+import { BillingToggle, PricingCard, FeatureComparison, PaymentMethodSelector, type PricingTier, type PaymentMethod } from '@/components/pricing'
+import { loadRazorpayScript, openRazorpayCheckout, type RazorpayPaymentResponse } from '@/lib/razorpay'
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
@@ -229,6 +230,7 @@ export default function PricingPage() {
   const { subscription } = useSubscription()
   const { currency, setCurrency, formatPrice, getMonthlyPrice, getYearlyPrice } = useCurrency()
   const [isYearly, setIsYearly] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
   const [loading, setLoading] = useState<string | null>(null)
   const [centeredCardIndex, setCenteredCardIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
@@ -253,6 +255,13 @@ export default function PricingPage() {
       return () => mediaQuery.removeEventListener('change', handler)
     }
   }, [])
+
+  // Reset UPI selection when currency changes away from INR
+  useEffect(() => {
+    if (currency !== 'INR' && paymentMethod === 'upi') {
+      setPaymentMethod('card')
+    }
+  }, [currency, paymentMethod])
 
   // Scroll-related logic for detecting centered card
   const updateCenteredCard = useCallback(() => {
@@ -433,6 +442,61 @@ export default function PricingPage() {
     }
   }, [prefersReducedMotion])
 
+  const handleRazorpayCheckout = async (data: Record<string, any>, tierId: string) => {
+    const loaded = await loadRazorpayScript()
+    if (!loaded) {
+      console.error('Failed to load Razorpay SDK')
+      setLoading(null)
+      return
+    }
+
+    openRazorpayCheckout({
+      key: data.razorpay_key_id,
+      amount: data.amount,
+      currency: data.currency || 'INR',
+      name: data.name || 'MindVibe',
+      description: data.description || 'Subscription',
+      order_id: data.order_id,
+      prefill: {
+        email: data.user_email || undefined,
+      },
+      theme: {
+        color: '#f97316',
+      },
+      handler: async (response: RazorpayPaymentResponse) => {
+        try {
+          const verifyResponse = await fetch('/api/subscriptions/verify-razorpay-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              plan_tier: tierId,
+              billing_period: isYearly ? 'yearly' : 'monthly',
+            }),
+          })
+
+          if (verifyResponse.ok) {
+            router.push(`/subscription/success?tier=${tierId}&yearly=${isYearly}`)
+          } else {
+            console.error('Payment verification failed')
+          }
+        } catch (err) {
+          console.error('Payment verification error:', err)
+        } finally {
+          setLoading(null)
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          setLoading(null)
+        },
+      },
+    })
+  }
+
   const handleSelectTier = async (tierId: string) => {
     if (tierId === 'free') {
       router.push('/dashboard')
@@ -449,6 +513,8 @@ export default function PricingPage() {
         body: JSON.stringify({
           plan_tier: tierId,
           billing_period: isYearly ? 'yearly' : 'monthly',
+          payment_method: paymentMethod,
+          currency: currency.toLowerCase(),
           success_url: `${window.location.origin}/subscription/success?tier=${tierId}&yearly=${isYearly}`,
           cancel_url: `${window.location.origin}/pricing`,
         }),
@@ -460,7 +526,10 @@ export default function PricingPage() {
       }
 
       const data = await response.json()
-      if (data.checkout_url) {
+
+      if (data.provider === 'razorpay') {
+        await handleRazorpayCheckout(data, tierId)
+      } else if (data.checkout_url) {
         window.location.href = data.checkout_url
       }
     } catch (err) {
@@ -505,6 +574,12 @@ export default function PricingPage() {
           <p className="text-sm text-orange-100/70">
             INR pricing is always 25% less than USD/EUR. Save with yearly billing — get 2 months free.
           </p>
+          <PaymentMethodSelector
+            selected={paymentMethod}
+            onChange={setPaymentMethod}
+            currency={currency}
+            className="mt-4"
+          />
         </div>
       </div>
 
