@@ -12,7 +12,7 @@ export {
   useCurrency,
   CURRENCIES,
   BASE_PRICES_USD,
-  YEARLY_DISCOUNT,
+  YEARLY_PRICES_USD,
   type Currency,
   type CurrencyConfig,
 } from './useCurrency'

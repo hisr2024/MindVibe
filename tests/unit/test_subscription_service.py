@@ -76,8 +76,8 @@ class TestFeatureConfig:
 
         features = get_tier_features(SubscriptionTier.PREMIER)
         assert features["kiaan_questions_monthly"] == -1  # Unlimited
-        assert features["white_label"] is True
-        assert features["sso"] is True
+        assert features["white_label"] is False
+        assert features["sso"] is False
         assert features["dedicated_support"] is True
         assert features["wisdom_journeys_limit"] == -1  # Unlimited
 
