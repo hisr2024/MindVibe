@@ -32,6 +32,7 @@ import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { useGlobalWakeWord } from '@/contexts/WakeWordContext'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
+import { detectVoiceCommand, isBlockingCommand } from '@/utils/speech/voiceCommands'
 import type { CompanionVoiceRecorderHandle } from '@/components/companion/CompanionVoiceRecorder'
 
 // ─── Voice Config Type (extends VoiceCompanionConfig for page state) ──
@@ -359,6 +360,42 @@ export default function KiaanVoiceCompanionPage() {
     checkHealth()
   }, [])
 
+  // ─── End Session ────────────────────────────────────────────────────
+
+  const endSession = useCallback(async () => {
+    if (!session.sessionId || session.sessionId.startsWith('local_')) {
+      setSession(prev => ({ ...prev, isActive: false }))
+      return
+    }
+
+    try {
+      const response = await apiFetch('/api/voice-companion/session/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: session.sessionId }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `farewell-${Date.now()}`,
+            role: 'companion',
+            content: data.farewell,
+            mood: 'peaceful',
+            phase: 'empower',
+            timestamp: new Date(),
+          },
+        ])
+      }
+    } catch {
+      // Silent fail
+    }
+
+    setSession(prev => ({ ...prev, isActive: false }))
+  }, [session.sessionId])
+
   // ─── Message Sending ────────────────────────────────────────────────
 
   const sendMessage = useCallback(async (text: string) => {
@@ -371,6 +408,22 @@ export default function KiaanVoiceCompanionPage() {
     }
     setIsSpeaking(false)
     setIsRecordingFromWake(false)
+
+    // ─── Goodbye Detection (multilingual) ─────────────────────────
+    // Detects goodbye/bye/farewell in 20+ languages and ends session
+    const voiceCommand = detectVoiceCommand(text.trim())
+    if (voiceCommand && voiceCommand.type === 'goodbye' && isBlockingCommand(voiceCommand.type)) {
+      const goodbyeUserMsg: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text.trim(),
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, goodbyeUserMsg])
+      setInputText('')
+      await endSession()
+      return
+    }
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -436,7 +489,7 @@ export default function KiaanVoiceCompanionPage() {
       setIsLoading(false)
       setShowSuggestions(true)
     }
-  }, [isLoading, session.sessionId, voiceConfig.language, voiceConfig.speakerId, voiceConfig.voiceId, voiceConfig.emotion])
+  }, [isLoading, session.sessionId, voiceConfig.language, voiceConfig.speakerId, voiceConfig.voiceId, voiceConfig.emotion, endSession])
 
   const addLocalFallbackResponse = useCallback((userText: string) => {
     const result = friendEngineRef.current.processMessage(userText)
@@ -455,42 +508,6 @@ export default function KiaanVoiceCompanionPage() {
       },
     ])
   }, [])
-
-  // ─── End Session ────────────────────────────────────────────────────
-
-  const endSession = useCallback(async () => {
-    if (!session.sessionId || session.sessionId.startsWith('local_')) {
-      setSession(prev => ({ ...prev, isActive: false }))
-      return
-    }
-
-    try {
-      const response = await apiFetch('/api/voice-companion/session/end', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: session.sessionId }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `farewell-${Date.now()}`,
-            role: 'companion',
-            content: data.farewell,
-            mood: 'peaceful',
-            phase: 'empower',
-            timestamp: new Date(),
-          },
-        ])
-      }
-    } catch {
-      // Silent fail
-    }
-
-    setSession(prev => ({ ...prev, isActive: false }))
-  }, [session.sessionId])
 
   // ─── Voice Input ────────────────────────────────────────────────────
 

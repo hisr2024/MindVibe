@@ -186,9 +186,89 @@ const COMMAND_DEFINITIONS: CommandDefinition[] = [
   {
     type: 'goodbye',
     phrases: [
+      // ─── English ─────────────────────────────────────────
       'goodbye', 'bye', 'bye bye', 'see you', 'see you later',
       'good night', 'take care', 'talk later', 'gotta go',
-      'namaste', 'farewell',
+      'farewell', 'i have to go', 'catch you later',
+
+      // ─── Hindi (हिन्दी) ──────────────────────────────────
+      'namaste', 'नमस्ते', 'अलविदा', 'alvida',
+      'फिर मिलेंगे', 'phir milenge', 'चलता हूँ', 'chalta hoon',
+      'अच्छा चलता हूँ', 'accha chalta hoon',
+
+      // ─── Tamil (தமிழ்) ───────────────────────────────────
+      'போய் வருகிறேன்', 'poi varugiren', 'போய்வரேன்', 'poyvaren',
+      'வணக்கம்', 'vanakkam',
+
+      // ─── Telugu (తెలుగు) ──────────────────────────────────
+      'వెళ్ళొస్తాను', 'vellostanu', 'నమస్కారం', 'namaskaram',
+      'శెలవు', 'selavu', 'మళ్ళీ కలుద్దాం', 'malli kaluddaam',
+
+      // ─── Bengali (বাংলা) ──────────────────────────────────
+      'বিদায়', 'biday', 'আসি', 'aasi', 'নমস্কার', 'namaskar',
+      'আবার দেখা হবে', 'abar dekha hobe',
+
+      // ─── Marathi (मराठी) ──────────────────────────────────
+      'निरोप', 'nirop', 'येतो', 'yeto', 'पुन्हा भेटू', 'punha bhetu',
+
+      // ─── Gujarati (ગુજરાતી) ──────────────────────────────
+      'આવજો', 'aavjo', 'ફરી મળીશું', 'fari malishu',
+
+      // ─── Kannada (ಕನ್ನಡ) ──────────────────────────────────
+      'ಹೋಗಿ ಬರುತ್ತೇನೆ', 'hogi baruttene', 'ನಮಸ್ಕಾರ',
+      'ವಿದಾಯ', 'vidaaya',
+
+      // ─── Malayalam (മലയാളം) ────────────────────────────────
+      'പോയി വരാം', 'poyi varaam', 'നമസ്കാരം',
+      'വിട', 'vida', 'യാത്ര', 'yaathra',
+
+      // ─── Punjabi (ਪੰਜਾਬੀ) ─────────────────────────────────
+      'ਅਲਵਿਦਾ', 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', 'sat sri akal',
+      'ਫਿਰ ਮਿਲਾਂਗੇ', 'fir milange', 'rabb rakha',
+
+      // ─── Sanskrit (संस्कृतम्) ─────────────────────────────
+      'पुनर्मिलामः', 'punarmilaamah', 'शुभरात्रिः', 'shubhratri',
+
+      // ─── Spanish (Español) ────────────────────────────────
+      'adiós', 'adios', 'hasta luego', 'hasta la vista',
+      'nos vemos', 'chao', 'buenas noches',
+
+      // ─── French (Français) ────────────────────────────────
+      'au revoir', 'salut', 'à bientôt', 'a bientot',
+      'bonne nuit', 'adieu',
+
+      // ─── German (Deutsch) ─────────────────────────────────
+      'tschüss', 'tschuss', 'auf wiedersehen', 'gute nacht',
+      'bis bald', 'bis dann',
+
+      // ─── Portuguese (Português) ───────────────────────────
+      'tchau', 'adeus', 'até logo', 'ate logo',
+      'boa noite', 'até mais', 'ate mais',
+
+      // ─── Japanese (日本語) ─────────────────────────────────
+      'さようなら', 'sayounara', 'sayonara', 'じゃあね', 'jaa ne',
+      'またね', 'mata ne', 'おやすみ', 'oyasumi', 'バイバイ',
+
+      // ─── Chinese (中文) ───────────────────────────────────
+      '再见', 'zaijian', '拜拜', 'bai bai', '晚安', 'wan an',
+
+      // ─── Korean (한국어) ──────────────────────────────────
+      '안녕히 가세요', 'annyeonghi gaseyo', '안녕', 'annyeong',
+      '잘 가', 'jal ga',
+
+      // ─── Arabic (العربية) ─────────────────────────────────
+      'مع السلامة', 'maa salama', 'ma salama', 'وداعا', 'wadaan',
+      'تصبح على خير',
+
+      // ─── Russian (Русский) ────────────────────────────────
+      'до свидания', 'do svidaniya', 'пока', 'poka',
+      'до встречи', 'do vstrechi',
+
+      // ─── Urdu (اردو) ─────────────────────────────────────
+      'خدا حافظ', 'khuda hafiz',
+
+      // ─── Italian ──────────────────────────────────────────
+      'arrivederci', 'ciao', 'addio',
     ],
     minConfidence: 0.7,
   },
