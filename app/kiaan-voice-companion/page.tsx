@@ -360,6 +360,42 @@ export default function KiaanVoiceCompanionPage() {
     checkHealth()
   }, [])
 
+  // ─── End Session ────────────────────────────────────────────────────
+
+  const endSession = useCallback(async () => {
+    if (!session.sessionId || session.sessionId.startsWith('local_')) {
+      setSession(prev => ({ ...prev, isActive: false }))
+      return
+    }
+
+    try {
+      const response = await apiFetch('/api/voice-companion/session/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: session.sessionId }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `farewell-${Date.now()}`,
+            role: 'companion',
+            content: data.farewell,
+            mood: 'peaceful',
+            phase: 'empower',
+            timestamp: new Date(),
+          },
+        ])
+      }
+    } catch {
+      // Silent fail
+    }
+
+    setSession(prev => ({ ...prev, isActive: false }))
+  }, [session.sessionId])
+
   // ─── Message Sending ────────────────────────────────────────────────
 
   const sendMessage = useCallback(async (text: string) => {
@@ -472,42 +508,6 @@ export default function KiaanVoiceCompanionPage() {
       },
     ])
   }, [])
-
-  // ─── End Session ────────────────────────────────────────────────────
-
-  const endSession = useCallback(async () => {
-    if (!session.sessionId || session.sessionId.startsWith('local_')) {
-      setSession(prev => ({ ...prev, isActive: false }))
-      return
-    }
-
-    try {
-      const response = await apiFetch('/api/voice-companion/session/end', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: session.sessionId }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `farewell-${Date.now()}`,
-            role: 'companion',
-            content: data.farewell,
-            mood: 'peaceful',
-            phase: 'empower',
-            timestamp: new Date(),
-          },
-        ])
-      }
-    } catch {
-      // Silent fail
-    }
-
-    setSession(prev => ({ ...prev, isActive: false }))
-  }, [session.sessionId])
 
   // ─── Voice Input ────────────────────────────────────────────────────
 
