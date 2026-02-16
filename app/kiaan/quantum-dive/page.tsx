@@ -15,6 +15,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { SubscriptionGate } from '@/components/subscription'
 import { useLanguage } from '@/hooks/useLanguage'
 import { VoiceEnhancementsPanel, VoiceEnhancementsMobile } from '@/components/voice/enhancements'
 
@@ -385,6 +386,7 @@ export default function QuantumDivePage() {
   }
 
   return (
+    <SubscriptionGate feature="quantum_dive">
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900">
       {/* Background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -751,5 +753,6 @@ export default function QuantumDivePage() {
         }
       `}</style>
     </div>
+    </SubscriptionGate>
   )
 }

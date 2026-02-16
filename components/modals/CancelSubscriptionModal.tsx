@@ -126,7 +126,7 @@ export function CancelSubscriptionModal({
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
-              Your KIAAN question quota will drop to 10/month
+              Your KIAAN question quota will drop to 15/month
             </li>
             <li className="flex items-start gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400 shrink-0 mt-0.5">

@@ -16,20 +16,28 @@ export const CURRENCIES: Record<Currency, CurrencyConfig> = {
   INR: { symbol: '₹', code: 'INR', name: 'Indian Rupee' },
 }
 
+/** Monthly prices in USD */
 export const BASE_PRICES_USD: Record<string, number> = {
   free: 0,
-  basic: 9.99,
-  premium: 19.99,
-  enterprise: 499,
+  basic: 4.99,       // Plus
+  premium: 9.99,     // Pro
+  enterprise: 15.00, // Elite
+  premier: 25.00,    // Premier
+}
+
+/** Yearly prices in USD (2 months free) */
+export const YEARLY_PRICES_USD: Record<string, number> = {
+  free: 0,
+  basic: 49.99,      // Plus yearly
+  premium: 99.99,    // Pro yearly
+  enterprise: 150.00, // Elite yearly
+  premier: 250.00,   // Premier yearly
 }
 
 // Conversion + discount rules
 const EUR_RATE = 0.92
 const INR_RATE = 83
-const INR_DISCOUNT = 0.2 // 20% cheaper than USD/EUR equivalent
-
-// Yearly discount (15%)
-export const YEARLY_DISCOUNT = 0.15
+const INR_DISCOUNT = 0.25 // 25% cheaper than USD/EUR equivalent
 
 const STORAGE_KEY = 'mindvibe_currency'
 
@@ -116,10 +124,9 @@ export function useCurrency() {
 
   const getYearlyPrice = useCallback(
     (tierId: string): number => {
-      const usdPrice = BASE_PRICES_USD[tierId] ?? 0
-      const converted = convertFromUsd(usdPrice)
-      const yearly = converted * 12 * (1 - YEARLY_DISCOUNT)
-      return roundForCurrency(currency, yearly)
+      const usdYearly = YEARLY_PRICES_USD[tierId] ?? 0
+      const converted = convertFromUsd(usdYearly)
+      return roundForCurrency(currency, converted)
     },
     [convertFromUsd, currency]
   )

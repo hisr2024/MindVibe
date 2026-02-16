@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { AnalyticsDashboard } from '@/components/analytics'
 import { Card, CardContent } from '@/components/ui'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
+import { SubscriptionBanner } from '@/components/subscription'
 
 export default function AnalyticsPageClient() {
   const router = useRouter()
@@ -47,6 +48,12 @@ export default function AnalyticsPageClient() {
   return (
     <main className="min-h-screen px-4 py-8 md:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
+        <SubscriptionBanner
+          feature="advanced_analytics"
+          message="Upgrade to Premium for advanced mood forecasts, pattern analysis, and AI insights"
+          ctaText="Unlock Analytics"
+          className="mb-6"
+        />
         {/* Back link */}
         <button
           onClick={() => router.push('/dashboard')}

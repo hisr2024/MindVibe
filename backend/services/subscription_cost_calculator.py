@@ -63,7 +63,8 @@ INFRA_COST_PER_TIER: dict[str, float] = {
     "free":       0.00,   # Subsidized by paid tiers
     "basic":      1.50,   # Shared infra allocation
     "premium":    3.00,   # Higher resource allocation
-    "enterprise": 50.00,  # Dedicated resources, SLA, support
+    "enterprise": 5.00,   # Elite tier — higher usage allocation
+    "premier":    8.00,   # Premier tier — highest usage
 }
 
 # Default profit margin percentages by tier
@@ -71,19 +72,18 @@ DEFAULT_PROFIT_MARGINS: dict[str, float] = {
     "free":       0.0,    # 0% - loss leader / acquisition funnel
     "basic":      60.0,   # 60% margin target
     "premium":    65.0,   # 65% margin target
-    "enterprise": 70.0,   # 70% margin target
+    "enterprise": 65.0,   # 65% margin target (Elite)
+    "premier":    70.0,   # 70% margin target (Premier)
 }
 
 # Tier quota definitions (mirrors feature_config.py, kept here for standalone use)
 TIER_QUOTAS: dict[str, int] = {
-    "free":       20,
-    "basic":      50,
-    "premium":    300,
-    "enterprise": -1,  # unlimited – use estimate for costing
+    "free":       15,
+    "basic":      150,   # Plus tier
+    "premium":    300,   # Pro tier
+    "enterprise": 800,   # Elite tier
+    "premier":    2000,  # Premier tier — unlimited, estimate for costing
 }
-
-# For enterprise "unlimited", estimate a realistic monthly ceiling
-ENTERPRISE_ESTIMATED_QUESTIONS = 2000
 
 
 @dataclass
@@ -171,7 +171,7 @@ def calculate_tier_cost(
     """Calculate the full cost breakdown for a subscription tier.
 
     Args:
-        tier: Tier name (free, basic, premium, enterprise).
+        tier: Tier name (free, basic, premium, enterprise, premier).
         cost_per_question: OpenAI cost per single KIAAN question.
         monthly_questions: Expected monthly questions for the tier.
         infra_cost: Monthly infrastructure cost allocation.
@@ -229,7 +229,6 @@ def calculate_subscription_costs(
     current_prices: dict[str, float] | None = None,
     infra_costs: dict[str, float] | None = None,
     tier_quotas: dict[str, int] | None = None,
-    enterprise_estimated_questions: int = ENTERPRISE_ESTIMATED_QUESTIONS,
 ) -> CostCalculatorResult:
     """Calculate subscription costs across all tiers with profit margins.
 
@@ -245,7 +244,6 @@ def calculate_subscription_costs(
         current_prices: Current monthly subscription prices per tier.
         infra_costs: Monthly infrastructure cost per tier (overrides defaults).
         tier_quotas: Monthly question quotas per tier (overrides defaults).
-        enterprise_estimated_questions: Estimated monthly questions for enterprise.
 
     Returns:
         CostCalculatorResult with per-tier breakdowns and summary.
@@ -253,9 +251,10 @@ def calculate_subscription_costs(
     margins = {**DEFAULT_PROFIT_MARGINS, **(profit_margins or {})}
     prices = current_prices or {
         "free": 0.00,
-        "basic": 9.99,
-        "premium": 19.99,
-        "enterprise": 499.00,
+        "basic": 4.99,      # Plus tier
+        "premium": 9.99,    # Pro tier
+        "enterprise": 15.00,  # Elite tier
+        "premier": 25.00,    # Premier tier
     }
     infra = {**INFRA_COST_PER_TIER, **(infra_costs or {})}
     quotas = {**TIER_QUOTAS, **(tier_quotas or {})}
@@ -272,10 +271,8 @@ def calculate_subscription_costs(
     total_revenue = 0.0
     total_cost = 0.0
 
-    for tier_name in ["free", "basic", "premium", "enterprise"]:
+    for tier_name in ["free", "basic", "premium", "enterprise", "premier"]:
         monthly_q = quotas.get(tier_name, 0)
-        if monthly_q == -1:
-            monthly_q = enterprise_estimated_questions
 
         breakdown = calculate_tier_cost(
             tier=tier_name,

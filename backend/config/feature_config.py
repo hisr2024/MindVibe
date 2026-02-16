@@ -12,7 +12,7 @@ from backend.models import SubscriptionTier
 # kiaan_questions_monthly: -1 = unlimited
 TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
     SubscriptionTier.FREE: {
-        "kiaan_questions_monthly": 20,
+        "kiaan_questions_monthly": 15,
         "encrypted_journal": False,
         "mood_tracking": True,
         "wisdom_access": True,
@@ -38,7 +38,7 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "kiaan_quantum_dive": False,  # Quantum dive is Premium+
     },
     SubscriptionTier.BASIC: {
-        "kiaan_questions_monthly": 50,
+        "kiaan_questions_monthly": 150,
         "encrypted_journal": True,
         "mood_tracking": True,
         "wisdom_access": True,
@@ -49,9 +49,9 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "sso": False,
         "dedicated_support": False,
         "data_retention_days": 365,
-        # Wisdom Journeys - Limited access for Basic
+        # Wisdom Journeys - Access for Basic
         "wisdom_journeys": True,
-        "wisdom_journeys_limit": 1,  # Can have 1 active journey
+        "wisdom_journeys_limit": 3,  # Can have 3 active journeys
         # KIAAN Ecosystem
         "kiaan_divine_chat": True,
         "kiaan_friend_mode": True,
@@ -75,7 +75,7 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "data_retention_days": -1,  # Unlimited retention
         # Wisdom Journeys - Full access for Premium
         "wisdom_journeys": True,
-        "wisdom_journeys_limit": 5,  # Can have up to 5 active journeys
+        "wisdom_journeys_limit": 10,  # Can have up to 10 active journeys
         # KIAAN Ecosystem - Full access
         "kiaan_divine_chat": True,
         "kiaan_friend_mode": True,
@@ -85,7 +85,33 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "kiaan_voice_synthesis": True,
         "kiaan_quantum_dive": True,
     },
+    # Elite tier (uses ENTERPRISE enum in DB for backward compatibility)
     SubscriptionTier.ENTERPRISE: {
+        "kiaan_questions_monthly": 800,
+        "encrypted_journal": True,
+        "mood_tracking": True,
+        "wisdom_access": True,
+        "advanced_analytics": True,
+        "priority_support": True,
+        "offline_access": True,
+        "white_label": False,
+        "sso": False,
+        "dedicated_support": True,
+        "data_retention_days": -1,  # Unlimited retention
+        # Wisdom Journeys - Unlimited for Elite
+        "wisdom_journeys": True,
+        "wisdom_journeys_limit": -1,  # Unlimited active journeys
+        # KIAAN Ecosystem - Full access
+        "kiaan_divine_chat": True,
+        "kiaan_friend_mode": True,
+        "kiaan_voice_companion": True,
+        "kiaan_agent": True,
+        "kiaan_soul_reading": True,
+        "kiaan_voice_synthesis": True,
+        "kiaan_quantum_dive": True,
+    },
+    # Premier tier — unlimited everything
+    SubscriptionTier.PREMIER: {
         "kiaan_questions_monthly": -1,  # Unlimited
         "encrypted_journal": True,
         "mood_tracking": True,
@@ -93,14 +119,14 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "advanced_analytics": True,
         "priority_support": True,
         "offline_access": True,
-        "white_label": True,
-        "sso": True,
+        "white_label": False,
+        "sso": False,
         "dedicated_support": True,
         "data_retention_days": -1,  # Unlimited retention
-        # Wisdom Journeys - Unlimited for Enterprise
+        # Wisdom Journeys - Unlimited
         "wisdom_journeys": True,
         "wisdom_journeys_limit": -1,  # Unlimited active journeys
-        # KIAAN Ecosystem - Full unlimited access
+        # KIAAN Ecosystem - Full access
         "kiaan_divine_chat": True,
         "kiaan_friend_mode": True,
         "kiaan_voice_companion": True,

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
+import { SubscriptionBanner } from '@/components/subscription'
 
 const insightTools = [
   {
@@ -83,6 +84,11 @@ export default function DeepInsightsPage() {
       </div>
 
       <div className="relative mx-auto flex max-w-5xl flex-col gap-8">
+        <SubscriptionBanner
+          feature="advanced_analytics"
+          message="Unlock Relationship Compass, Soul Reading, and all deep insight tools with Premium"
+          ctaText="Go Premium"
+        />
         <header className="space-y-3 rounded-3xl border border-white/5 bg-[var(--brand-surface)]/80 p-6 md:p-10 shadow-[0_25px_120px_rgba(255,147,71,0.18)] backdrop-blur">
           <p className="text-sm text-white/70">Guided, high-focus tools</p>
           <h1 className="text-3xl font-semibold md:text-4xl">Deep Insights</h1>

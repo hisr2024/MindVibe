@@ -19,6 +19,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { SubscriptionGate } from '@/components/subscription'
 import CompanionChatBubble from '@/components/companion/CompanionChatBubble'
 import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
 import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorder'
@@ -564,6 +565,7 @@ export default function KiaanVoiceCompanionPage() {
   // ─── Render: Main Voice Companion UI ──────────────────────────────
 
   return (
+    <SubscriptionGate feature="voice_companion">
     <div
       className="min-h-screen flex flex-col relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #060610 0%, #0d0520 50%, #060610 100%)' }}
@@ -1023,5 +1025,6 @@ export default function KiaanVoiceCompanionPage() {
         }
       ` }} />
     </div>
+    </SubscriptionGate>
   )
 }
