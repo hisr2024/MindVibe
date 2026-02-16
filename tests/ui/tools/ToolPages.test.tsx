@@ -117,33 +117,33 @@ describe('Karma Footprint Page', () => {
 
 describe('Tool Redirect Pages', () => {
   it('viyog redirect page exists', async () => {
-    const module = await import('@/app/tools/viyog/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/tools/viyog/page')
+    expect(pageModule.default).toBeDefined()
   })
 
   it('ardha redirect page exists', async () => {
-    const module = await import('@/app/tools/ardha/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/tools/ardha/page')
+    expect(pageModule.default).toBeDefined()
   })
 
   it('relationship-compass redirect page exists', async () => {
-    const module = await import('@/app/tools/relationship-compass/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/tools/relationship-compass/page')
+    expect(pageModule.default).toBeDefined()
   })
 
   it('emotional-reset redirect page exists', async () => {
-    const module = await import('@/app/tools/emotional-reset/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/tools/emotional-reset/page')
+    expect(pageModule.default).toBeDefined()
   })
 
   it('karma-footprint redirect page exists', async () => {
-    const module = await import('@/app/tools/karma-footprint/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/tools/karma-footprint/page')
+    expect(pageModule.default).toBeDefined()
   })
 
   it('karmic-tree redirect page exists', async () => {
-    const module = await import('@/app/tools/karmic-tree/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/tools/karmic-tree/page')
+    expect(pageModule.default).toBeDefined()
   })
 })
 
@@ -172,7 +172,7 @@ describe('Existing Tool Pages Headers', () => {
   // Note: emotional-reset page uses useRouter which requires special mocking
   // The page exists and renders correctly in the actual app
   it('emotional-reset page module exists', async () => {
-    const module = await import('@/app/emotional-reset/page')
-    expect(module.default).toBeDefined()
+    const pageModule = await import('@/app/emotional-reset/page')
+    expect(pageModule.default).toBeDefined()
   })
 })
