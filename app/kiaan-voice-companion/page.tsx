@@ -32,6 +32,7 @@ import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { useGlobalWakeWord } from '@/contexts/WakeWordContext'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
+import { detectVoiceCommand, isBlockingCommand } from '@/utils/speech/voiceCommands'
 import type { CompanionVoiceRecorderHandle } from '@/components/companion/CompanionVoiceRecorder'
 
 // ─── Voice Config Type (extends VoiceCompanionConfig for page state) ──
@@ -372,6 +373,22 @@ export default function KiaanVoiceCompanionPage() {
     setIsSpeaking(false)
     setIsRecordingFromWake(false)
 
+    // ─── Goodbye Detection (multilingual) ─────────────────────────
+    // Detects goodbye/bye/farewell in 20+ languages and ends session
+    const voiceCommand = detectVoiceCommand(text.trim())
+    if (voiceCommand && voiceCommand.type === 'goodbye' && isBlockingCommand(voiceCommand.type)) {
+      const goodbyeUserMsg: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text.trim(),
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, goodbyeUserMsg])
+      setInputText('')
+      await endSession()
+      return
+    }
+
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -436,7 +453,7 @@ export default function KiaanVoiceCompanionPage() {
       setIsLoading(false)
       setShowSuggestions(true)
     }
-  }, [isLoading, session.sessionId, voiceConfig.language, voiceConfig.speakerId, voiceConfig.voiceId, voiceConfig.emotion])
+  }, [isLoading, session.sessionId, voiceConfig.language, voiceConfig.speakerId, voiceConfig.voiceId, voiceConfig.emotion, endSession])
 
   const addLocalFallbackResponse = useCallback((userText: string) => {
     const result = friendEngineRef.current.processMessage(userText)
